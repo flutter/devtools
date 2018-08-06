@@ -1,0 +1,13 @@
+language: dart
+dart:
+  - "dev/raw/latest"
+
+script: ./tool/travis.sh
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+  - $HOME/.pub-cache
