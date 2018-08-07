@@ -1,0 +1,17 @@
+name: devtools
+description: Performance tools for Flutter.
+version: 0.0.1
+homepage: https://github.com/flutter/devtools
+
+environment:
+  sdk: '>=2.0.0-dev <3.0.0'
+
+dependencies:
+  intl: ^0.15.0
+  logging: ^0.11.0
+  vm_service_lib: ^0.3.8
+
+dev_dependencies:
+  build_runner: any
+  build_web_compilers: any
+  test: ^1.0.0

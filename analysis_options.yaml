@@ -1,0 +1,19 @@
+analyzer:
+  errors:
+    unused_import: error
+
+#TODO: Normalize this with /flutter/flutter/blob/master/analysis_options.yaml.
+linter:
+  rules:
+    - avoid_init_to_null
+    - avoid_return_types_on_setters
+    - camel_case_types
+    - directives_ordering
+    - hash_and_equals
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - prefer_final_fields
+    - slash_for_doc_comments
+    - test_types_in_equals
+    - unrelated_type_equality_checks
+    - valid_regexps
