@@ -31,7 +31,7 @@ class ProgressElement extends CoreElement {
   }
 
   void _update() {
-    // TODO: don't hard-code the width
+    // TODO(devoncarew): don't hard-code the width
     completeElement.element.style.width = '${(200 * _value / _max).round()}px';
   }
 }

@@ -8,9 +8,9 @@ import 'dart:html';
 import 'ui/elements.dart';
 import 'utils.dart';
 
-// TODO: fixed position header
+// TODO(devoncarew): fixed position header
 
-// TODO: virtualize
+// TODO(devoncarew): virtualize
 
 class Table<T> {
   final CoreElement element;
@@ -242,42 +242,3 @@ enum SortOrder {
   ascending,
   descending,
 }
-
-//class SampleData {
-//  static SampleData random() {
-//    double d = _r.nextDouble();
-//    return new SampleData(
-//        getLoremFragment(), _r.nextInt(1200), d, d * _r.nextDouble());
-//  }
-//
-//  final String method;
-//  final int count;
-//  final double usage;
-//  final double self;
-//
-//  SampleData(this.method, this.count, this.usage, this.self);
-//}
-//
-//class SampleColumnMethodName extends Column<SampleData> {
-//  SampleColumnMethodName() : super('Name', wide: true);
-//
-//  dynamic getValue(SampleData row) => row.method;
-//}
-//
-//class SampleColumnCount extends Column<SampleData> {
-//  SampleColumnCount() : super('Count');
-//
-//  bool get numeric => true;
-//
-//  dynamic getValue(SampleData row) => row.count;
-//}
-//
-//class SampleColumnUsage extends Column<SampleData> {
-//  SampleColumnUsage() : super('Usage');
-//
-//  bool get numeric => true;
-//
-//  dynamic getValue(SampleData row) => row.usage;
-//
-//  String render(dynamic value) => percent(value);
-//}

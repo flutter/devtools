@@ -16,16 +16,15 @@ import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
 
-// TODO: expose _getAllocationProfile
+// TODO(devoncarew): expose _getAllocationProfile
 
-// TODO: have a 'show vm objects' checkbox
+// TODO(devoncarew): have a 'show vm objects' checkbox
 
 class MemoryScreen extends Screen {
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
 
   PButton loadSnapshotButton;
-  PButton gcButton;
   Table<ClassHeapStats> memoryTable;
   Framework framework;
 
@@ -63,9 +62,6 @@ class MemoryScreen extends Screen {
                 ..clazz('margin-left')
                 ..display = 'none',
               div()..flex(),
-//              gcButton = new PButton('Garbage collect')
-//                ..small()
-//                ..click(_doGC),
             ])
         ]),
       _createTableView()..clazz('section'),
@@ -73,7 +69,7 @@ class MemoryScreen extends Screen {
 
     _updateStatus(null);
 
-    // TODO: don't rebuild until the component is active
+    // TODO(devoncarew): don't rebuild until the component is active
     serviceInfo.isolateManager.onSelectedIsolateChanged.listen((_) {
       _handleIsolateChanged();
     });
@@ -85,22 +81,8 @@ class MemoryScreen extends Screen {
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
 
-  // ignore: unused_element
-  void _doGC() {
-    gcButton.disabled = true;
-
-    // TODO: collectAllGarbage only works when the VM is built for debug.
-    serviceInfo.service.collectAllGarbage(_isolateId).then((_) {
-      toast('Garbage collection performed.');
-    }).catchError((e) {
-      framework.showError('Error from GC', e);
-    }).whenComplete(() {
-      gcButton.disabled = false;
-    });
-  }
-
   void _handleIsolateChanged() {
-    // TODO: update buttons
+    // TODO(devoncarew): update buttons
   }
 
   String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
@@ -108,7 +90,7 @@ class MemoryScreen extends Screen {
   Future _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
 
-    // TODO: error handling
+    // TODO(devoncarew): error handling
 
     try {
       // 'reset': true to reset the object allocation accumulators
@@ -161,7 +143,7 @@ class MemoryScreen extends Screen {
 //    progressElement.value = 0;
 //    progressElement.display = 'initial';
 //
-//    // TODO: snapshot info comes in as multiple binary _Graph events
+//    // TODO(devoncarew): snapshot info comes in as multiple binary _Graph events
 //    serviceInfo.service
 //        .requestHeapSnapshot(_isolateId, 'VM', true)
 //        .catchError((e) {
@@ -223,7 +205,7 @@ class MemoryScreen extends Screen {
   }
 
   HelpInfo get helpInfo =>
-      new HelpInfo('memory view docs', 'http://www.cheese.com');
+      new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmService service) {
     memoryChart.disabled = false;
@@ -260,11 +242,6 @@ class MemoryScreen extends Screen {
 }
 
 class MemoryRow {
-//  static MemoryRow random() {
-//    return new MemoryRow(
-//        getLoremFragment(), r.nextInt(4 * 1024 * 1024), r.nextDouble());
-//  }
-
   final String name;
   final int bytes;
   final double percentage;
@@ -346,7 +323,7 @@ class MemoryChart extends LineChart<MemoryTracker> {
     int width = MemoryTracker.kMaxGraphTime.inMilliseconds;
     int right = tracker.samples.last.time;
 
-    // TODO: draw dots for GC events?
+    // TODO(devoncarew): draw dots for GC events?
 
     chartElement.setInnerHtml('''
 <svg viewBox="0 0 ${dim.x} ${dim.y}">
@@ -428,7 +405,7 @@ class MemoryTracker {
     _pollingTimer = new Timer(kUpdateDelay, _pollMemory);
   }
 
-  // TODO: add a way to pause polling
+  // TODO(devoncarew): add a way to pause polling
 
   void _update(VM vm, List<Isolate> isolates) {
     processRss = vm.json['_currentRSS'];
@@ -487,7 +464,7 @@ class MemoryTracker {
     _changeController.add(null);
   }
 
-  // TODO: fix HeapSpace.parse upstream
+  // TODO(devoncarew): fix HeapSpace.parse upstream
   static Iterable<HeapSpace> getHeaps(Isolate isolate) {
     final Map<String, dynamic> heaps = isolate.json['_heaps'];
     return heaps.values.map((dynamic json) => HeapSpace.parse(json));

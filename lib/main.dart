@@ -18,11 +18,11 @@ import 'ui/elements.dart';
 import 'ui/primer.dart';
 import 'utils.dart';
 
-// TODO: notification when the debug process goes away
+// TODO(devoncarew): notification when the debug process goes away
 
-// TODO: make the screens more robust through restarts
+// TODO(devoncarew): make the screens more robust through restarts
 
-// TODO: make the screens gather info when not the active screen, and refresh
+// TODO(devoncarew): make the screens gather info when not the active screen, and refresh
 //       the UI on re-activate
 
 class PerfToolFramework extends Framework {
@@ -65,7 +65,7 @@ class PerfToolFramework extends Framework {
       });
     }
 
-    // TODO: isolate selector should use the rich pulldown UI
+    // TODO(devoncarew): isolate selector should use the rich pulldown UI
     isolateSelectStatus = new StatusItem();
     globalStatus.add(isolateSelectStatus);
     isolateSelect = select()

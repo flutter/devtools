@@ -64,10 +64,7 @@ class ServiceConnectionManager {
 
   Stream get onConnectionClosed => _connectionClosedController.stream;
 
-  void vmServiceOpened(VmService _service, Future onClosed) {
-    //_service.onSend.listen((s) => print('==> $s'));
-    //_service.onReceive.listen((s) => print('<== $s'));
-
+  void vmServiceOpened(VmService _service, Future<void> onClosed) {
     _service.getVM().then((VM vm) {
       this.vm = vm;
       sdkVersion = vm.version;

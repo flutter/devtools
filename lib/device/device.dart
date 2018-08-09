@@ -11,16 +11,13 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 
-// TODO: set toggle values on a full restart (when we see a new isolate)
+// TODO(devoncarew): set toggle values on a full restart (when we see a new isolate)
 
 class DeviceScreen extends Screen {
   StatusItem deviceStatus;
 
   SetStateMixin framesChartStateMixin = new SetStateMixin();
   ExtensionTracker extensionTracker;
-
-//  PButton reloadButton;
-//  PButton restartButton;
 
   CoreElement togglesDiv;
   Map<String, bool> boolValues = {};
@@ -44,13 +41,6 @@ class DeviceScreen extends Screen {
             ..layoutHorizontal()
             ..add([
               div()..flex(),
-//              reloadButton = new PButton('Hot reload app')
-//                ..small()
-//                ..click(_performHotReload),
-//              restartButton = new PButton('Restart app')
-//                ..small()
-//                ..clazz('margin-left')
-//                ..click(_performRestart),
             ])
         ]),
       div(c: 'section')
@@ -130,16 +120,6 @@ class DeviceScreen extends Screen {
       extensionTracker.setBoolExtensionMethod(rpc, e.checked);
     });
   }
-
-//  void _performHotReload() {
-//    // TODO:
-//    print('_performHotReload');
-//  }
-//
-//  void _performRestart() {
-//    // TODO:
-//    print('_performRestart');
-//  }
 }
 
 class ExtensionTracker {
@@ -214,7 +194,7 @@ class ExtensionTracker {
     return service
         .callServiceExtension(rpc, isolateId: isolateRef.id)
         .then((Response response) {
-      return _cvtToBool(response.json['enabled']);
+      return _convertToBool(response.json['enabled']);
     });
   }
 
@@ -224,7 +204,7 @@ class ExtensionTracker {
         isolateId: isolateRef.id, args: {'enabled': checked});
   }
 
-  static bool _cvtToBool(val) {
+  static bool _convertToBool(val) {
     if (val is bool) return val;
     return val.toString() == 'true';
   }

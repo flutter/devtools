@@ -13,16 +13,16 @@ import '../ui/elements.dart';
 import '../ui/primer.dart';
 import 'fps.dart';
 
-// TODO: expose perf debugging toggles (ext.flutter.repaintRainbow,
+// TODO(devoncarew): expose perf debugging toggles (ext.flutter.repaintRainbow,
 //       ext.flutter.showPerformanceOverlay, others)
 
-// TODO: show the Skia picture (gpu drawing commands) for a frame
+// TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
-// TODO: show the list of widgets re-draw during a frame
+// TODO(devoncarew): show the list of widgets re-draw during a frame
 
-// TODO: display whether running in debug or profile
+// TODO(devoncarew): display whether running in debug or profile
 
-// TODO: use colors for the category
+// TODO(devoncarew): use colors for the category
 
 class TimelineScreen extends Screen {
   FramesChart framesChart;
@@ -38,7 +38,7 @@ class TimelineScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     FrameDetailsUI frameDetailsUI;
 
-    // TODO: pause and resume
+    // TODO(devoncarew): pause and resume
 
     PButton debugDrawButton = new PButton('Debug draw')..small();
     PButton perfOverlayButton = new PButton('Performance overlay')..small();
@@ -113,7 +113,7 @@ class TimelineScreen extends Screen {
     timelineFramesUI.onSelectedFrame.listen((frame) {
       frameDetailsUI.attribute('hidden', frame == null);
 
-      // TODO: allow frame selection while recording data
+      // TODO(devoncarew): allow frame selection while recording data
       if (frame != null && timelineFramesUI.timelineData != null) {
         TimelineFrameData data =
             timelineFramesUI.timelineData.getFrameData(frame);
@@ -208,7 +208,7 @@ class TimelineScreen extends Screen {
   }
 
   HelpInfo get helpInfo =>
-      new HelpInfo('timeline docs', 'http://www.cheese.com');
+      new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
 }
 
 class TimelineData {
@@ -723,7 +723,7 @@ class FrameDetailsUI extends CoreElement {
     layoutVertical();
     flex();
 
-    // TODO: listen to tab changes
+    // TODO(devoncarew): listen to tab changes
     content = div(c: 'frame-timeline')..flex();
 
     PTabNav tabNav = new PTabNav([

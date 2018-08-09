@@ -78,7 +78,7 @@ class PerformanceScreen extends Screen {
   }
 
   void _handleIsolateChanged() {
-    // TODO: update buttons
+    // TODO(devoncarew): update buttons
   }
 
   String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
@@ -163,7 +163,7 @@ class PerformanceScreen extends Screen {
   }
 
   HelpInfo get helpInfo =>
-      new HelpInfo('performance view docs', 'http://www.cheese.com');
+      new HelpInfo(title: 'performance view docs', url: 'http://www.cheese.com');
 
   void _process(CpuProfile profile) {
     perfTable.setRows(

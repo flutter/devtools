@@ -13,13 +13,13 @@ import '../timeline/fps.dart';
 import '../ui/elements.dart';
 import '../utils.dart';
 
-// TODO: inspect calls
+// TODO(devoncarew): inspect calls
 
-// TODO: filtering, and enabling additional logging
+// TODO(devoncarew): filtering, and enabling additional logging
 
-// TODO: a more efficient table; we need to virtualize it
+// TODO(devoncarew): a more efficient table; we need to virtualize it
 
-// TODO: don't update DOM when we're not active; update once we return
+// TODO(devoncarew): don't update DOM when we're not active; update once we return
 
 const int kMaxLogItemsLength = 40;
 
@@ -70,17 +70,17 @@ class LoggingScreen extends Screen {
   }
 
   HelpInfo get helpInfo =>
-      new HelpInfo('logs view docs', 'http://www.cheese.com');
+      new HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmService service) {
     if (ref == null) return;
 
-    // TODO: inspect, ...
+    // TODO(devoncarew): inspect, ...
 
     // Log stdout and stderr events.
     service.onStdoutEvent.listen((Event e) {
       String message = decodeBase64(e.bytes);
-      // TODO: Have the UI provide a way to show untruncated data.
+      // TODO(devoncarew): Have the UI provide a way to show untruncated data.
       if (message.length > 500) {
         message = message.substring(0, 500) + '…';
       }
@@ -108,10 +108,10 @@ class LoggingScreen extends Screen {
       if (loggerName == null || loggerName.isEmpty) {
         loggerName = 'log';
       }
-      // TODO: show level, with some indication of severity
+      // TODO(devoncarew): show level, with some indication of severity
       int level = logRecord['level'];
       String message = _valueAsString(logRecord['message']);
-      // TODO: The VM is not sending the error correctly.
+      // TODO(devoncarew): The VM is not sending the error correctly.
       var error = logRecord['error'];
       var stackTrace = logRecord['stackTrace'];
 
@@ -150,7 +150,7 @@ class LoggingScreen extends Screen {
   void _handleConnectionStop(dynamic event) {}
 
   void _log(LogData log) {
-    // TODO: make this much more efficient
+    // TODO(devoncarew): make this much more efficient
     List<LogData> data = [log];
     data.addAll(loggingTable.rows);
 
@@ -254,7 +254,7 @@ class LogMessageColumn extends Column<LogData> {
     if (log.extraHtml != null) {
       return '${log.message} ${log.extraHtml}';
     } else {
-      return log.message; // TODO: escape html
+      return log.message; // TODO(devoncarew): escape html
     }
   }
 }

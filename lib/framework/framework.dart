@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../main.dart';
@@ -81,9 +82,9 @@ class Framework {
       }
     }
 
-    port ??= 8100; //int.parse(window.location.port);
+    port ??= 8100;
 
-    Completer finishedCompleter = new Completer();
+    Completer<void> finishedCompleter = new Completer<void>();
 
     connect('localhost', port, finishedCompleter).then((VmService service) {
       serviceInfo.vmServiceOpened(service, finishedCompleter.future);
@@ -143,13 +144,14 @@ class Framework {
     if (helpInfo == null) {
       helpLink.hidden(true);
     } else {
-      helpLink.clear();
-      helpLink.add([
-        span(text: '${helpInfo.title} '),
-        span(c: 'octicon octicon-link-external small-octicon'),
-      ]);
-      helpLink.setAttribute('href', helpInfo.url);
-      helpLink.hidden(false);
+      helpLink
+        ..clear()
+        ..add([
+          span(text: '${helpInfo.title} '),
+          span(c: 'octicon octicon-link-external small-octicon'),
+        ])
+        ..setAttribute('href', helpInfo.url)
+        ..hidden(false);
     }
   }
 
@@ -231,6 +233,7 @@ abstract class Screen {
 
   final List<StatusItem> statusItems = [];
 
+  // TODO(devoncarew): Switch to using named args (and @required).
   Screen(this.name, this.id, [this.iconClass]);
 
   String get ref => id == '/' ? id : '/$id';
@@ -249,20 +252,20 @@ abstract class Screen {
 
   void exiting() {}
 
-  // TODO: generalize this - global and page status items
+  // TODO(devoncarew): generalize this - global and page status items
   void addStatusItem(StatusItem item) {
-    // TODO: If we're live, add to the screen
+    // TODO(devoncarew): If we're live, add to the screen
     statusItems.add(item);
   }
 
   void removeStatusItems(StatusItem item) {
-    // TODO: If we're live, remove from the screen
+    // TODO(devoncarew): If we're live, remove from the screen
     statusItems.remove(item);
   }
 
   HelpInfo get helpInfo => null;
 
-  String toString() => id;
+  String toString() => 'Screen($id)';
 }
 
 class SetStateMixin {
@@ -270,7 +273,7 @@ class SetStateMixin {
 
   void setState(Function rebuild) {
     timer?.cancel();
-    // TODO: listen for rAFs instead
+    // TODO(devoncarew): listen for rAFs instead
     timer = new Timer(Duration.zero, rebuild);
   }
 }
@@ -279,7 +282,10 @@ class HelpInfo {
   final String title;
   final String url;
 
-  HelpInfo(this.title, this.url);
+  HelpInfo({
+    @required this.title,
+    @required this.url,
+  });
 }
 
 class StatusItem {
