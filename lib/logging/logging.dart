@@ -29,7 +29,8 @@ class LoggingScreen extends Screen {
   StatusItem logCountStatus;
   SetStateMixin loggingStateMixin = new SetStateMixin();
 
-  LoggingScreen() : super('Logs', 'logs', 'octicon-clippy') {
+  LoggingScreen()
+      : super(name: 'Logs', id: 'logs', iconClass: 'octicon-clippy') {
     logCountStatus = new StatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);

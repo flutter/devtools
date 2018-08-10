@@ -32,7 +32,8 @@ class TimelineScreen extends Screen {
 
   TimelineFramesUI timelineFramesUI;
 
-  TimelineScreen() : super('Timeline', 'timeline', 'octicon-pulse');
+  TimelineScreen()
+      : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {

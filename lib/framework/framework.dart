@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
-import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../main.dart';
@@ -233,8 +233,11 @@ abstract class Screen {
 
   final List<StatusItem> statusItems = [];
 
-  // TODO(devoncarew): Switch to using named args (and @required).
-  Screen(this.name, this.id, [this.iconClass]);
+  Screen({
+    @required this.name,
+    @required this.id,
+    this.iconClass,
+  });
 
   String get ref => id == '/' ? id : '/$id';
 

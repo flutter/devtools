@@ -22,7 +22,9 @@ class DeviceScreen extends Screen {
   CoreElement togglesDiv;
   Map<String, bool> boolValues = {};
 
-  DeviceScreen() : super('Device', 'device', 'octicon-device-mobile') {
+  DeviceScreen()
+      : super(
+            name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
     visible = false;
 
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);

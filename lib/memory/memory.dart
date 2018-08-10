@@ -33,7 +33,8 @@ class MemoryScreen extends Screen {
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
 
-  MemoryScreen() : super('Memory', 'memory', 'octicon-package') {
+  MemoryScreen()
+      : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
     classCountStatus = new StatusItem();
     addStatusItem(classCountStatus);
 

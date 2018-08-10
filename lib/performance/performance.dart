@@ -30,7 +30,10 @@ class PerformanceScreen extends Screen {
   CpuTracker cpuTracker;
 
   PerformanceScreen()
-      : super('Performance', 'performance', 'octicon-dashboard') {
+      : super(
+            name: 'Performance',
+            id: 'performance',
+            iconClass: 'octicon-dashboard') {
     sampleCountStatus = new StatusItem();
     addStatusItem(sampleCountStatus);
 
@@ -162,8 +165,8 @@ class PerformanceScreen extends Screen {
     }
   }
 
-  HelpInfo get helpInfo =>
-      new HelpInfo(title: 'performance view docs', url: 'http://www.cheese.com');
+  HelpInfo get helpInfo => new HelpInfo(
+      title: 'performance view docs', url: 'http://www.cheese.com');
 
   void _process(CpuProfile profile) {
     perfTable.setRows(
