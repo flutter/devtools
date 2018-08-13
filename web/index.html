@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<!--
+  Copyright 2018 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Flutter DevTools</title>
+    <link rel="shortcut icon" href="favicon.png">
+
+    <link rel="stylesheet" href="packages/devtools/ui/primer_6.0.0.css">
+    <link rel="stylesheet" href="packages/devtools/ui/octicons_4.4.0.css">
+    <link rel="stylesheet" href="packages/devtools/ui/flex.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script defer src="main.dart.js"></script>
+</head>
+
+<body fullbleed layout vertical>
+
+<header flex none class="masthead">
+    <div>
+        <a class="masthead-logo" id="title">Flutter DevTools</a>
+
+        <nav class="masthead-nav" id="main-nav">
+            <!-- add the known pages -->
+            <a disabled><span class="octicon octicon-package"></span><span> Memory</span></a><a disabled><span class="octicon octicon-pulse"></span><span> Timeline</span></a><a disabled><span class="octicon octicon-dashboard"></span><span> Performance</span></a><a disabled><span class="octicon octicon-device-mobile"></span><span> Device</span></a><a disabled><span class="octicon octicon-clippy"></span><span> Logs</span></a>
+        </nav>
+    </div>
+</header>
+
+<div id="error-container" class="container"></div>
+
+<div id="content" class="container" flex layout vertical style="overflow: auto;">
+    <div class="blankslate">
+        <p>Loading…</p>
+    </div>
+</div>
+
+<footer flex layout horizontal none class="footer align-items-center">
+    <div class="footer-status" id="global-status">
+    </div>
+
+    <div class="footer-status" id="page-status" flex text-center horiz-padding>
+    </div>
+
+    <div class="footer-status text-right">
+        <a href="" hidden id="docsLink" target="_blank">Docs</a>
+    </div>
+</footer>
+
+</body>
+</html>

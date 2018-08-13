@@ -1,0 +1,483 @@
+/* Copyright 2018 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.lead, .page-title + .markdown-body > p:first-child {
+    margin-bottom: 30px;
+    font-size: 20px;
+    font-weight: 300;
+    color: #555;
+}
+
+body {
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.container {
+    width: initial;
+    margin-right: 30px;
+    margin-left: 30px;
+}
+
+.masthead {
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    background-color: #4078c0;
+}
+
+.masthead .masthead-logo {
+    display: inline-block;
+    font-size: 1.5rem;
+    color: #fff;
+    float: left;
+}
+
+.masthead-nav {
+    float: right;
+    margin-top: .5rem;
+}
+
+.masthead-nav a:not(:last-child) {
+    margin-right: 15px;
+}
+
+.masthead .mega-octicon {
+    font-size: 1.5rem;
+}
+
+.small-octicon {
+  font-size: 13px;
+}
+
+.masthead a {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+}
+
+.masthead a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.masthead-nav .active {
+    color: #fff;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 8px;
+    padding-bottom: 0;
+}
+
+td.left,
+th.left {
+    text-align: left;
+}
+
+td.right,
+th.right {
+    text-align: right;
+}
+
+td.pre {
+    white-space: pre;
+}
+
+td.pre-wrap {
+    white-space: pre-wrap;
+}
+
+td.monospace {
+    font-family: monospace;
+}
+
+span.label {
+    background-color: #616161;
+}
+
+table thead {
+    background-color: #f3f3f3;
+    border-bottom: 1px solid #dfe2e5;
+}
+
+table tbody {
+    vertical-align: top;
+}
+
+tbody.selectable tr {
+    cursor: default;
+}
+
+table th {
+  font-weight: 600;
+  color: #586069;
+  background-color: #f3f3f3;
+  white-space: nowrap;
+}
+
+table th.wide {
+    width: 80%;
+}
+
+table td,
+table th {
+  padding: 4px 8px;
+  /*border: 1px solid #dfe2e5;*/
+}
+
+tr th.right span.sortable:before {
+    content: "▼ ";
+    visibility: hidden;
+}
+
+tr th.left span.sortable:after {
+    content: " ▼";
+    visibility: hidden;
+}
+
+tr th.right span.sortable.down:before {
+    content: "▼ ";
+    visibility: visible;
+}
+
+tr th.right span.sortable.up:before {
+    content: "▲ ";
+    visibility: visible;
+}
+
+tr th.left span.sortable.down:after {
+    content: " ▼";
+    visibility: visible;
+}
+
+tr th.left span.sortable.up:after {
+    content: " ▲";
+    visibility: visible;
+}
+
+table tr:nth-child(2n) {
+    background-color: #f7f7f7;
+}
+
+table tr:hover {
+  background-color: #f2f4fa;
+}
+
+table tr.selected {
+    color: #fff;
+    background-color: #4078c0;
+}
+
+.table-border {
+   border: 1px solid #dfe2e5;
+}
+
+.frame-bar {
+    background: #4078c0;
+    height: 12px;
+    display: inline-block;
+    border-radius: 1px;
+}
+
+.frame-bar.over-budget {
+    background: #f97c7c;
+}
+
+form[horizontal] {
+    align-items: baseline;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.scroll-table {
+    max-height: 190px;
+    overflow-x: auto;
+}
+
+.overflow-auto {
+    overflow: auto;
+}
+
+.overflow-y {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.footer {
+    padding: 10px 30px;
+    margin-top: 20px;
+    color: #7a7a7a;
+    border-top: 1px solid #eee;
+}
+
+.footer a {
+    color: #7a7a7a;
+}
+
+.footer a:hover {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.footer .separator {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+[text-center] {
+    text-align: center;
+}
+
+[horiz-padding] {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.footer-status {
+    display: inline-block;
+    min-width: 100px;
+}
+
+.interactable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.footer strong {
+    color: #333;
+}
+
+.section + .section {
+  margin-top: 10px;
+}
+
+.section .title {
+    padding-top: 0.3em;
+    margin-bottom: 0.2em;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+.form-checkbox {
+    user-select: none;
+}
+
+.margin-left {
+    margin-left: 8px;
+}
+
+.margin-right {
+    margin-right: 20px;
+}
+
+.perf-chart {
+  height: 100px;
+
+  flex: none;
+}
+
+.perf-chart[disabled] {
+  background: #ddd;
+  opacity: 0.5;
+}
+
+.perf-chart .perf-label {
+    padding: 4px 8px;
+    position: absolute;
+    bottom: 0;
+    color: #7a7a7a;
+}
+
+/* .perf-table {
+
+} */
+
+span.function-kind {
+    background: #888;
+    color: #fff;
+    border-radius: 2px;
+    padding: 0 2px 1px 2px;
+}
+
+span.function-kind.Stub {
+    background: #888;
+}
+
+span.function-kind.Native {
+    background-color: #d73a3a;
+}
+
+span.function-kind.Tag {
+    background-color: cornflowerblue;
+}
+
+.flash {
+    margin-bottom: 20px;
+}
+
+a[disabled] {
+    cursor: default;
+}
+
+.masthead a[disabled]:hover {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.progress-element {
+    width: 200px;
+    height: 16px;
+    background: #ccc;
+    border-radius: 1px;
+    position: relative;
+    display: inline-block;
+}
+
+.progress-element .complete {
+    background: #4078c0;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+}
+
+form.align-items-center,
+footer.align-items-center {
+    align-items: center;
+}
+
+div.tabnav {
+    margin-bottom: 0;
+}
+
+.timeline-frames {
+    overflow-x: scroll;
+    white-space: nowrap;
+    border-top: 1px solid #dfe2e5;
+    border-bottom: 1px solid #dfe2e5;
+    padding: 10px 0;
+    min-height: 102px;
+    direction: rtl;
+}
+
+.timeline-frame {
+    width: 100px;
+    height: 80px;
+    border: 1px solid #dfe2e5;
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    white-space: normal;
+    display: inline-block;
+    position: relative;
+    direction: initial;
+    user-select: none;
+}
+
+.timeline-frame + .timeline-frame {
+    margin-right: 10px;
+}
+
+.timeline-frame.slow {
+    width: 150px;
+    background: #f8e2e2;
+    border-color: #ccc;
+}
+
+.timeline-frame .perf-label {
+    width: 100%;
+    display: inline-block;
+}
+
+.timeline-frame .perf-bar {
+    width: 12px;
+    position: absolute;
+    background: #4078c0;
+    bottom: 2px;
+    border-radius: 1px;
+}
+
+.timeline-frame.selected {
+    color: rgba(255, 255, 255, 0.5);
+    background-color: #4078c0;
+}
+
+.timeline-frame.selected .perf-bar {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.perf-bar.slow {
+    background: #f97c7c;
+}
+
+.timeline-frame.selected .perf-bar.slow {
+    background-color: #f97c7cb0;
+}
+
+.perf-bar.right {
+    right: 5px;
+}
+
+.perf-bar.left {
+    right: 25px;
+}
+
+.frame-timeline {
+    position: relative;
+    margin-top: 4px;
+}
+
+.frame-timeline .timeline-title {
+    border-radius: 2px;
+    background: #ddd;
+    padding: 0 2px;
+    position: absolute;
+    overflow-x: hidden;
+    cursor: default;
+}
+
+.frame-panel {
+
+}
+
+.frame-event {
+    border-radius: 2px;
+    background: #ddd;
+}
+
+div.tabnav-tab {
+    cursor: pointer;
+}
+
+[hidden] {
+    visibility: hidden;
+}
+
+.btn-group .btn:first-child:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.btn-group .btn:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+
+.btn-group .btn+.btn {
+    margin-left: -1px;
+}
+
+.btn-group .btn:last-child:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
