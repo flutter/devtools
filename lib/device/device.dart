@@ -20,7 +20,7 @@ class DeviceScreen extends Screen {
   ExtensionTracker extensionTracker;
 
   CoreElement togglesDiv;
-  Map<String, bool> boolValues = {};
+  Map<String, bool> boolValues = <String, bool>{};
 
   DeviceScreen()
       : super(
@@ -36,17 +36,17 @@ class DeviceScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
-    mainDiv.add([
+    mainDiv.add(<CoreElement>[
       div(c: 'section')
-        ..add([
+        ..add(<CoreElement>[
           form()
             ..layoutHorizontal()
-            ..add([
+            ..add(<CoreElement>[
               div()..flex(),
             ])
         ]),
       div(c: 'section')
-        ..add([
+        ..add(<CoreElement>[
           div(text: 'Framework toggles', c: 'title'),
           togglesDiv = div(),
         ])
@@ -79,10 +79,13 @@ class DeviceScreen extends Screen {
     deviceStatus.element.text = '';
   }
 
+  @override
   HelpInfo get helpInfo => null;
 
   void _rebuildTogglesDiv() {
-    if (togglesDiv == null || extensionTracker == null) return;
+    if (togglesDiv == null || extensionTracker == null) {
+      return;
+    }
 
     togglesDiv.clear();
 
@@ -102,7 +105,7 @@ class DeviceScreen extends Screen {
 
     togglesDiv.add(div(c: 'form-checkbox')
       ..add(new CoreElement('label')
-        ..add([
+        ..add(<CoreElement>[
           input = new CoreElement('input')..setAttribute('type', 'checkbox'),
           span(text: rpc),
         ])));
@@ -117,7 +120,7 @@ class DeviceScreen extends Screen {
     }
 
     input.element.onChange.listen((_) {
-      html.InputElement e = input.element;
+      final html.InputElement e = input.element;
       boolValues[rpc] = e.checked;
       extensionTracker.setBoolExtensionMethod(rpc, e.checked);
     });
@@ -125,11 +128,13 @@ class DeviceScreen extends Screen {
 }
 
 class ExtensionTracker {
-  final StreamController _changeController = new StreamController.broadcast();
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
 
   VmService service;
 
-  Map<String, Set<IsolateRef>> extensionToIsolatesMap = {};
+  Map<String, Set<IsolateRef>> extensionToIsolatesMap =
+      <String, Set<IsolateRef>>{};
 
   ExtensionTracker(this.service) {
     service.onIsolateEvent.listen((Event e) {
@@ -145,10 +150,10 @@ class ExtensionTracker {
 
   bool get hasConnection => service != null;
 
-  Stream get onChange => _changeController.stream;
+  Stream<Null> get onChange => _changeController.stream;
 
   bool get hasIsolateTargets {
-    for (Set set in extensionToIsolatesMap.values) {
+    for (Set<IsolateRef> set in extensionToIsolatesMap.values) {
       if (set.isNotEmpty) {
         return true;
       }
@@ -162,13 +167,13 @@ class ExtensionTracker {
   void stop() {}
 
   void _register(IsolateRef isolateRef) {
-    service.getIsolate(isolateRef.id).then((result) {
+    service.getIsolate(isolateRef.id).then((dynamic result) {
       if (result is Isolate) {
-        Isolate isolate = result;
+        final Isolate isolate = result;
 
         for (String rpc in isolate.extensionRPCs) {
           if (!extensionToIsolatesMap.containsKey(rpc)) {
-            extensionToIsolatesMap[rpc] = new Set();
+            extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
           }
           extensionToIsolatesMap[rpc].add(isolateRef);
         }
@@ -180,19 +185,19 @@ class ExtensionTracker {
 
   void _registerRpcForIsolate(String rpc, IsolateRef isolateRef) {
     if (!extensionToIsolatesMap.containsKey(rpc)) {
-      extensionToIsolatesMap[rpc] = new Set();
+      extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
     }
     extensionToIsolatesMap[rpc].add(isolateRef);
   }
 
   void _removeIsolate(IsolateRef isolateRef) {
-    for (Set set in extensionToIsolatesMap.values) {
+    for (Set<IsolateRef> set in extensionToIsolatesMap.values) {
       set.remove(isolateRef);
     }
   }
 
   Future<bool> callBoolExtensionMethod(String rpc) {
-    IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
+    final IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
     return service
         .callServiceExtension(rpc, isolateId: isolateRef.id)
         .then((Response response) {
@@ -200,14 +205,16 @@ class ExtensionTracker {
     });
   }
 
-  Future setBoolExtensionMethod(String rpc, bool checked) {
-    IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
+  Future<Response> setBoolExtensionMethod(String rpc, bool checked) {
+    final IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
     return service.callServiceExtension(rpc,
-        isolateId: isolateRef.id, args: {'enabled': checked});
+        isolateId: isolateRef.id, args: <String, bool>{'enabled': checked});
   }
 
-  static bool _convertToBool(val) {
-    if (val is bool) return val;
+  static bool _convertToBool(dynamic val) {
+    if (val is bool) {
+      return val;
+    }
     return val.toString() == 'true';
   }
 }

@@ -4,10 +4,10 @@
 
 import 'service.dart';
 
-final Map globals = {};
+final Map<Type, dynamic> globals = <Type, dynamic>{};
 
 ServiceConnectionManager get serviceInfo => globals[ServiceConnectionManager];
 
-void setGlobal(dynamic clazz, dynamic instance) {
+void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;
 }

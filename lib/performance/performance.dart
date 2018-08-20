@@ -45,15 +45,15 @@ class PerformanceScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     this.framework = framework;
 
-    mainDiv.add([
+    mainDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
-        ..add([
+        ..add(<CoreElement>[
           form()
             ..layoutHorizontal()
             ..clazz('align-items-center')
-            ..add([
+            ..add(<CoreElement>[
               loadSnapshotButton = new PButton('Load snapshot')
                 ..small()
                 ..primary()
@@ -97,11 +97,11 @@ class PerformanceScreen extends Screen {
       // TODO:
       print(profile);
 
-      _CalcProfile calc = new _CalcProfile(profile);
+      final _CalcProfile calc = new _CalcProfile(profile);
       await calc.calc();
 
       _updateStatus(profile);
-    }).catchError((e) {
+    }).catchError((dynamic e) {
       framework.showError('', e);
     }).whenComplete(() {
       loadSnapshotButton.disabled = false;
@@ -110,7 +110,7 @@ class PerformanceScreen extends Screen {
   }
 
   CoreElement createLiveChartArea() {
-    CoreElement container = div(c: 'section perf-chart table-border')
+    final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
     cpuChart = new CpuChart(container);
     cpuChart.disabled = true;
@@ -122,7 +122,7 @@ class PerformanceScreen extends Screen {
 
     serviceInfo.service.clearCpuProfile(_isolateId).then((_) {
       toast('VM counters reset.');
-    }).catchError((e) {
+    }).catchError((dynamic e) {
       framework.showError('Error resetting counters', e);
     }).whenComplete(() {
       resetButton.disabled = false;
@@ -138,7 +138,7 @@ class PerformanceScreen extends Screen {
 
     perfTable.setSortColumn(perfTable.columns.first);
 
-    perfTable.setRows(new List<PerfData>());
+    perfTable.setRows(<PerfData>[]);
 
     perfTable.onSelect.listen((PerfData data) {
       // TODO:
@@ -153,7 +153,7 @@ class PerformanceScreen extends Screen {
       sampleCountStatus.element.text = '';
       sampleFreqStatus.element.text = '';
     } else {
-      Duration timeSpan = new Duration(seconds: profile.timeSpan.round());
+      final Duration timeSpan = new Duration(seconds: profile.timeSpan.round());
       String s = timeSpan.toString();
       s = s.substring(0, s.length - 7);
       sampleCountStatus.element.text =
@@ -165,6 +165,7 @@ class PerformanceScreen extends Screen {
     }
   }
 
+  @override
   HelpInfo get helpInfo => new HelpInfo(
       title: 'performance view docs', url: 'http://www.cheese.com');
 
@@ -172,8 +173,8 @@ class PerformanceScreen extends Screen {
     perfTable.setRows(
         new List<PerfData>.from(profile.functions.where((ProfileFunction f) {
       return f.inclusiveTicks > 0 || f.exclusiveTicks > 0;
-    }).map((ProfileFunction f) {
-      int count = math.max(1, profile.sampleCount);
+    }).map<PerfData>((ProfileFunction f) {
+      final int count = math.max(1, profile.sampleCount);
       return new PerfData(
         f.kind,
         escape(funcRefName(f.function)),
@@ -189,7 +190,7 @@ class PerformanceScreen extends Screen {
     cpuTracker = new CpuTracker(service);
     cpuTracker.start();
 
-    cpuTracker.onChange.listen((_) {
+    cpuTracker.onChange.listen((Null _) {
       cpuChartStateMixin.setState(() {
         cpuChart.updateFrom(cpuTracker);
       });
@@ -211,14 +212,15 @@ class CpuChart extends LineChart<CpuTracker> {
     usageLabel.element.style.right = '0';
   }
 
-  void update(CpuTracker tracker) {
-    if (tracker.samples.isEmpty || dim == null) {
+  @override
+  void update(CpuTracker data) {
+    if (data.samples.isEmpty || dim == null) {
       // TODO:
       return;
     }
 
     // display the cpu usage
-    usageLabel.text = '${tracker._lastValue}%';
+    usageLabel.text = '${data._lastValue}%';
 
     // re-render the svg
     final int hRange = CpuTracker.kMaxGraphTime.inSeconds;
@@ -230,19 +232,19 @@ class CpuChart extends LineChart<CpuTracker> {
     fill="none"
     stroke="#0074d9"
     stroke-width="3"
-    points="${createPoints(tracker.samples, hRange, vRange)}"/>
+    points="${createPoints(data.samples, hRange, vRange)}"/>
 </svg>
 ''');
   }
 
   String createPoints(List<int> samples, int hRange, int vRange) {
     // 0,120 20,60 40,80 60,20
-    List<String> coords = [];
+    final List<String> coords = <String>[];
     int pos = 0;
     for (int i = samples.length - 1; i >= 0; i--) {
       final int x = dim.x - (pos * dim.x ~/ hRange);
       final int y = dim.y - (samples[i] * dim.y ~/ vRange);
-      coords.add('${x},${y}');
+      coords.add('$x,$y');
       pos++;
     }
     return coords.join(' ');
@@ -250,30 +252,34 @@ class CpuChart extends LineChart<CpuTracker> {
 }
 
 class CpuTracker {
-  static const Duration kMaxGraphTime = const Duration(minutes: 1);
-  static const Duration kUpdateDelay = const Duration(seconds: 1);
+  static const Duration kMaxGraphTime = Duration(minutes: 1);
+  static const Duration kUpdateDelay = Duration(seconds: 1);
 
   static final math.Random rnd = new math.Random();
 
   VmService service;
   Timer _pollingTimer;
-  final StreamController _changeController = new StreamController.broadcast();
-  List<int> samples = [];
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
+  List<int> samples = <int>[];
 
   CpuTracker(this.service);
 
   bool get hasConnection => service != null;
 
-  Stream get onChange => _changeController.stream;
+  Stream<Null> get onChange => _changeController.stream;
 
   void start() {
     _pollingTimer = new Timer(const Duration(milliseconds: 100), _pollCpu);
   }
 
   void _pollCpu() {
-    if (!hasConnection) return;
+    if (!hasConnection) {
+      return;
+    }
 
-    _addSample(clamp((_lastValue ?? 50) + rnd.nextInt(20) - 10, 0, 100));
+    final int sample = (_lastValue ?? 50) + rnd.nextInt(20) - 10;
+    _addSample(sample.clamp(0, 100));
 
     _pollingTimer = new Timer(kUpdateDelay, _pollCpu);
   }
@@ -304,43 +310,48 @@ class PerfData {
 
   PerfData(this.kind, this.name, this.self, this.inclusive);
 
+  @override
   String toString() => '[$kind] $name';
 }
 
 class PerfColumnInclusive extends Column<PerfData> {
   PerfColumnInclusive() : super('Total');
 
+  @override
   bool get numeric => true;
 
-  //String get cssClass => 'monospace';
+  @override
+  dynamic getValue(PerfData item) => item.inclusive;
 
-  dynamic getValue(PerfData row) => row.inclusive;
-
+  @override
   String render(dynamic value) => percent2(value);
 }
 
 class PerfColumnSelf extends Column<PerfData> {
   PerfColumnSelf() : super('Self');
 
+  @override
   bool get numeric => true;
 
-  //String get cssClass => 'monospace';
+  @override
+  dynamic getValue(PerfData item) => item.self;
 
-  dynamic getValue(PerfData row) => row.self;
-
+  @override
   String render(dynamic value) => percent2(value);
 }
 
 class PerfColumnMethodName extends Column<PerfData> {
   PerfColumnMethodName() : super('Method', wide: true);
 
+  @override
   bool get usesHtml => true;
 
-  dynamic getValue(PerfData row) {
-    if (row.kind == 'Dart') {
-      return row.name;
+  @override
+  dynamic getValue(PerfData item) {
+    if (item.kind == 'Dart') {
+      return item.name;
     }
-    return '${row.name} <span class="function-kind ${row.kind}">${row.kind}</span>';
+    return '${item.name} <span class="function-kind ${item.kind}">${item.kind}</span>';
   }
 }
 
@@ -349,9 +360,9 @@ class _CalcProfile {
 
   _CalcProfile(this.profile);
 
-  Future calc() async {
+  Future<void> calc() async {
     // TODO:
-    profile.exclusiveCodeTrie;
+    //profile.exclusiveCodeTrie;
 
 //    tries['exclusiveCodeTrie'] =
 //      new Uint32List.fromList(profile['exclusiveCodeTrie']);
@@ -395,9 +406,3 @@ tries['inclusiveFunctionTrie'] =
     new Uint32List.fromList(profile['inclusiveFunctionTrie']);
 
 */
-
-int clamp(int value, int min, int max) {
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}

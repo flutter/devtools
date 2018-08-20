@@ -15,17 +15,22 @@ class PSelect extends CoreElement {
   void small() => clazz('select-sm');
 
   void option(String name, {String value}) {
-    CoreElement e = new CoreElement('option', text: name);
+    final CoreElement e = new CoreElement('option', text: name);
     if (value != null) {
-      (e.element as OptionElement).value = value;
+      final OptionElement optionElement = e.element;
+      optionElement.value = value;
     }
     add(e);
   }
 
-  String get value => (element as SelectElement).value;
+  String get value {
+    final SelectElement selectElement = element;
+    return selectElement.value;
+  }
 
   set selectedIndex(int index) {
-    (element as SelectElement).selectedIndex = index;
+    final SelectElement selectedElement = element;
+    selectedElement.selectedIndex = index;
   }
 
   Stream<Event> get onChange => element.onChange.where((_) => !disabled);
@@ -40,13 +45,13 @@ class PSelect extends CoreElement {
 }
 
 class PTooltip {
-  static add(CoreElement element, String text) {
+  static void add(CoreElement element, String text) {
     element.toggleClass('tooltipped', true);
     element.toggleClass('tooltipped-nw', true);
     element.setAttribute('aria-label', text);
   }
 
-  static remove(CoreElement element) {
+  static void remove(CoreElement element) {
     element.toggleClass('tooltipped', false);
     element.toggleClass('tooltipped-nw', false);
     element.toggleAttribute('aria-label', false);
@@ -75,7 +80,7 @@ class PTabNav extends CoreElement {
   PTabNavTab selectedTab;
 
   PTabNav(List<PTabNavTab> tabs) : super('div', classes: 'tabnav') {
-    CoreElement nav = add(new CoreElement('nav', classes: 'tabnav-tabs'));
+    final CoreElement nav = add(new CoreElement('nav', classes: 'tabnav-tabs'));
     nav.add(tabs);
 
     if (tabs.isNotEmpty) {

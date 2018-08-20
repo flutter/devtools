@@ -8,22 +8,29 @@ import 'dart:typed_data';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-Future<VmService> connect(String host, int port, Completer finishedCompleter) {
-  WebSocket ws = new WebSocket('ws://${host}:${port}/ws');
+Future<VmService> connect(
+    String host, int port, Completer<Null> finishedCompleter) {
+  final WebSocket ws = new WebSocket('ws://$host:$port/ws');
 
-  Completer<VmService> connectedCompleter = new Completer();
+  final Completer<VmService> connectedCompleter = new Completer<VmService>();
 
   ws.onOpen.listen((_) {
-    VmService service = new VmService(
-      ws.onMessage.asyncMap((MessageEvent e) {
-        if (e.data is String) return e.data as String;
-
+    final Stream<dynamic> inStream =
+        ws.onMessage.asyncMap<dynamic>((MessageEvent e) {
+      if (e.data is String) {
+        return e.data;
+      } else {
         final FileReader fileReader = new FileReader();
-        fileReader.readAsArrayBuffer(e.data as Blob);
-        return fileReader.onLoadEnd.first.then((_) {
-          return new ByteData.view((fileReader.result as Uint8List).buffer);
+        fileReader.readAsArrayBuffer(e.data);
+        return fileReader.onLoadEnd.first.then<ByteData>((ProgressEvent _) {
+          final Uint8List list = fileReader.result;
+          return new ByteData.view(list.buffer);
         });
-      }),
+      }
+    });
+
+    final VmService service = new VmService(
+      inStream,
       (String message) => ws.send(message),
     );
 
@@ -35,20 +42,23 @@ Future<VmService> connect(String host, int port, Completer finishedCompleter) {
     connectedCompleter.complete(service);
   });
 
-  ws.onError.listen((e) {
+  ws.onError.listen((dynamic e) {
     //_logger.fine('Unable to connect to observatory, port ${port}', e);
-    if (!connectedCompleter.isCompleted) connectedCompleter.completeError(e);
+    if (!connectedCompleter.isCompleted) {
+      connectedCompleter.completeError(e);
+    }
   });
 
   return connectedCompleter.future;
 }
 
 class ServiceConnectionManager {
-  final StreamController _stateController = new StreamController.broadcast();
+  final StreamController<Null> _stateController =
+      new StreamController<Null>.broadcast();
   final StreamController<VmService> _connectionAvailableController =
-      new StreamController.broadcast();
-  final StreamController _connectionClosedController =
-      new StreamController.broadcast();
+      new StreamController<VmService>.broadcast();
+  final StreamController<Null> _connectionClosedController =
+      new StreamController<Null>.broadcast();
   final IsolateManager isolateManager = new IsolateManager();
 
   VmService service;
@@ -57,12 +67,12 @@ class ServiceConnectionManager {
 
   bool get hasConnection => service != null;
 
-  Stream get onStateChange => _stateController.stream;
+  Stream<Null> get onStateChange => _stateController.stream;
 
   Stream<VmService> get onConnectionAvailable =>
       _connectionAvailableController.stream;
 
-  Stream get onConnectionClosed => _connectionClosedController.stream;
+  Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
   void vmServiceOpened(VmService _service, Future<void> onClosed) {
     _service.getVM().then((VM vm) {
@@ -72,7 +82,7 @@ class ServiceConnectionManager {
         sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
       }
 
-      this.service = _service;
+      service = _service;
 
       _stateController.add(null);
       _connectionAvailableController.add(service);
@@ -96,7 +106,7 @@ class ServiceConnectionManager {
       isolateManager.onIsolateCreated.listen(print);
       isolateManager.onSelectedIsolateChanged.listen(print);
       isolateManager.onIsolateExited.listen(print);
-    }).catchError((e) {
+    }).catchError((dynamic e) {
       // TODO:
       print(e);
     });
@@ -113,24 +123,25 @@ class ServiceConnectionManager {
 }
 
 class IsolateManager {
-  List<IsolateRef> _isolates = [];
+  List<IsolateRef> _isolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
 
   final StreamController<IsolateRef> _isolateCreatedController =
-      new StreamController.broadcast();
+      new StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _isolateExitedController =
-      new StreamController.broadcast();
+      new StreamController<IsolateRef>.broadcast();
 
   final StreamController<IsolateRef> _selectedIsolateController =
-      new StreamController.broadcast();
+      new StreamController<IsolateRef>.broadcast();
 
-  List<IsolateRef> get isolates => new List.unmodifiable(_isolates);
+  List<IsolateRef> get isolates => new List<IsolateRef>.unmodifiable(_isolates);
 
   IsolateRef get selectedIsolate => _selectedIsolate;
 
   void selectIsolate(String isolateRefId) {
-    IsolateRef ref =
-        _isolates.firstWhere((r) => r.id == isolateRefId, orElse: () => null);
+    final IsolateRef ref = _isolates.firstWhere(
+        (IsolateRef ref) => ref.id == isolateRefId,
+        orElse: () => null);
     if (ref != _selectedIsolate) {
       _selectedIsolate = ref;
       _selectedIsolateController.add(_selectedIsolate);
