@@ -18,17 +18,8 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # TODO: https://github.com/flutter/flutter/issues/20114
     # treat missing returns as a warning (not a hint)
-    missing_return: ignore
-    # allow having TODOs in the code
-    todo: ignore
-  exclude:
-    - 'bin/cache/**'
-    # the following two are relative to the stocks example and the flutter package respectively
-    # see https://github.com/dart-lang/sdk/issues/28463
-    - 'lib/i18n/stock_messages_*.dart'
-    - 'lib/src/http/**'
+    missing_return: warning
 
 linter:
   rules:
