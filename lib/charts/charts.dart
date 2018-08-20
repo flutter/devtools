@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' show Element, window, Rectangle;
+import 'dart:html' show Element, window, Rectangle, Event;
 import 'dart:math' as math;
 
 import '../framework/framework.dart';
@@ -20,7 +20,7 @@ abstract class LineChart<T> {
   LineChart(this.parent) {
     parent.element.style.position = 'relative';
 
-    window.onResize.listen((e) => _updateSize());
+    window.onResize.listen((Event e) => _updateSize());
     Timer.run(_updateSize);
 
     chartElement = parent.add(div()
@@ -35,14 +35,16 @@ abstract class LineChart<T> {
   }
 
   void _updateSize() {
-    if (!isMounted) return;
+    if (!isMounted) {
+      return;
+    }
 
-    Rectangle rect = chartElement.element.getBoundingClientRect();
+    final Rectangle<num> rect = chartElement.element.getBoundingClientRect();
     if (rect.width == 0 || rect.height == 0) {
       return;
     }
 
-    Element svgChild = chartElement.element.children.first;
+    final Element svgChild = chartElement.element.children.first;
     svgChild.setAttribute('viewBox', '0 0 ${rect.width} ${rect.height}');
     dim = new math.Point<int>(rect.width.toInt(), rect.height.toInt());
 

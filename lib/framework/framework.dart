@@ -16,7 +16,7 @@ import '../ui/primer.dart';
 import '../utils.dart';
 
 class Framework {
-  final List<Screen> screens = [];
+  final List<Screen> screens = <Screen>[];
   Screen current;
   StatusLine globalStatus;
   StatusLine pageStatus;
@@ -34,11 +34,11 @@ class Framework {
   }
 
   void navigateTo(String id) {
-    Screen screen = getScreen(id);
+    final Screen screen = getScreen(id);
     assert(screen != null);
 
-    String search = window.location.search;
-    String ref = search == null ? screen.ref : '${screen.ref}$search';
+    final String search = window.location.search;
+    final String ref = search == null ? screen.ref : '${screen.ref}$search';
     window.history.pushState(null, screen.name, ref);
 
     load(screen);
@@ -58,7 +58,7 @@ class Framework {
       path = '/';
     }
 
-    String first =
+    final String first =
         (path.startsWith('/') ? path.substring(1) : path).split('/').first;
     Screen screen = getScreen(first.isEmpty ? path : first);
     if (screen == null && path == '/') {
@@ -75,8 +75,8 @@ class Framework {
     int port;
 
     if (window.location.search.isNotEmpty) {
-      Uri uri = Uri.parse(window.location.toString());
-      String portStr = uri.queryParameters['port'];
+      final Uri uri = Uri.parse(window.location.toString());
+      final String portStr = uri.queryParameters['port'];
       if (portStr != null) {
         port = int.tryParse(portStr);
       }
@@ -84,17 +84,18 @@ class Framework {
 
     port ??= 8100;
 
-    Completer<void> finishedCompleter = new Completer<void>();
+    final Completer<Null> finishedCompleter = new Completer<Null>();
 
     connect('localhost', port, finishedCompleter).then((VmService service) {
       serviceInfo.vmServiceOpened(service, finishedCompleter.future);
-    }).catchError((e) {
+    }).catchError((dynamic e) {
       showError('Unable to connect to service on port $port');
     });
   }
 
   Screen getScreen(String id) {
-    return screens.firstWhere((s) => s.id == id, orElse: () => null);
+    return screens.firstWhere((Screen screen) => screen.id == id,
+        orElse: () => null);
   }
 
   void handlePopState(PopStateEvent event) {
@@ -104,7 +105,7 @@ class Framework {
   CoreElement get mainElement =>
       new CoreElement.from(querySelector('#content'));
 
-  final Map<Screen, List<Element>> _contents = {};
+  final Map<Screen, List<Element>> _contents = <Screen, List<Element>>{};
 
   void load(Screen screen) {
     if (current != null) {
@@ -133,20 +134,21 @@ class Framework {
   void updatePage() {
     // nav
     for (Element element in querySelectorAll('#main-nav a')) {
-      CoreElement e = new CoreElement.from(element);
-      bool isCurrent = current.ref == element.attributes['href'];
+      final CoreElement e = new CoreElement.from(element);
+      final bool isCurrent = current.ref == element.attributes['href'];
       e.toggleClass('active', isCurrent);
     }
 
     // status
-    CoreElement helpLink = new CoreElement.from(querySelector('#docsLink'));
-    HelpInfo helpInfo = current.helpInfo;
+    final CoreElement helpLink =
+        new CoreElement.from(querySelector('#docsLink'));
+    final HelpInfo helpInfo = current.helpInfo;
     if (helpInfo == null) {
       helpLink.hidden(true);
     } else {
       helpLink
         ..clear()
-        ..add([
+        ..add(<CoreElement>[
           span(text: '${helpInfo.title} '),
           span(c: 'octicon octicon-link-external small-octicon'),
         ])
@@ -156,7 +158,7 @@ class Framework {
   }
 
   void showError(String title, [dynamic error]) {
-    PFlash flash = new PFlash();
+    final PFlash flash = new PFlash();
     flash.addClose().click(clearError);
     flash.add(span(text: title));
     if (error != null) {
@@ -164,7 +166,7 @@ class Framework {
       flash.add(span(text: '$error'));
     }
 
-    CoreElement errorContainer =
+    final CoreElement errorContainer =
         new CoreElement.from(querySelector('#error-container'));
     errorContainer.add(flash);
   }
@@ -176,7 +178,7 @@ class Framework {
 
 class StatusLine {
   final CoreElement element;
-  final List<StatusItem> _items = [];
+  final List<StatusItem> _items = <StatusItem>[];
 
   StatusLine(this.element);
 
@@ -229,9 +231,9 @@ abstract class Screen {
   final String id;
   final String iconClass;
 
-  final Property<bool> _visible = new Property(true);
+  final Property<bool> _visible = new Property<bool>(true);
 
-  final List<StatusItem> statusItems = [];
+  final List<StatusItem> statusItems = <StatusItem>[];
 
   Screen({
     @required this.name,
@@ -268,6 +270,7 @@ abstract class Screen {
 
   HelpInfo get helpInfo => null;
 
+  @override
   String toString() => 'Screen($id)';
 }
 

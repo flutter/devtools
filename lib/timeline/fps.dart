@@ -27,13 +27,14 @@ class FramesChart extends LineChart<FramesTracker> {
     lastFrameLabel.element.style.textAlign = '-webkit-right';
   }
 
-  void update(FramesTracker tracker) {
+  @override
+  void update(FramesTracker data) {
     if (dim == null) {
       return;
     }
 
-    fpsLabel.text = '${tracker.calcRecentFPS().round()} FPS';
-    FrameInfo lastFrame = tracker.lastSample;
+    fpsLabel.text = '${data.calcRecentFPS().round()} FPS';
+    final FrameInfo lastFrame = data.lastSample;
     lastFrameLabel.setInnerHtml('frame ${lastFrame.number} • '
         '${lastFrame.elapsedMs.toStringAsFixed(1)}ms');
 
@@ -43,12 +44,12 @@ class FramesChart extends LineChart<FramesTracker> {
     final num pixPerMs = dim.y / msHeight;
     final double units = dim.x / (3 * FramesTracker.kMaxFrames);
 
-    List<String> svgElements = [];
-    List<FrameInfo> samples = tracker.samples;
+    final List<String> svgElements = <String>[];
+    final List<FrameInfo> samples = data.samples;
 
     for (int i = 3; i > 0; i--) {
-      num y = i * halfFrameHeight * pixPerMs;
-      String dashed = i == 2 ? '' : 'stroke-dasharray="10 5" ';
+      final num y = i * halfFrameHeight * pixPerMs;
+      final String dashed = i == 2 ? '' : 'stroke-dasharray="10 5" ';
       svgElements.add('<line x1="0" y1="$y" x2="${dim.x}" y2="$y" '
           'stroke-width="0.5" stroke="#ddd" $dashed/>');
     }
@@ -56,11 +57,11 @@ class FramesChart extends LineChart<FramesTracker> {
     double x = dim.x.toDouble();
 
     for (int i = samples.length - 1; i >= 0; i--) {
-      FrameInfo frame = samples[i];
-      num height = math.min(dim.y, frame.elapsedMs * pixPerMs);
+      final FrameInfo frame = samples[i];
+      final num height = math.min(dim.y, frame.elapsedMs * pixPerMs);
       x -= 3 * units;
 
-      String color = frame.elapsedMs > FrameInfo.kTargetMaxFrameTimeMs
+      final String color = frame.elapsedMs > FrameInfo.kTargetMaxFrameTimeMs
           ? '#f97c7c'
           : '#4078c0';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '
@@ -68,7 +69,7 @@ class FramesChart extends LineChart<FramesTracker> {
           'style="fill:$color"><title>${frame.elapsedMs}ms</title></rect>');
 
       if (frame.frameGroupStart) {
-        double lineX = x - (units / 2);
+        final double lineX = x - (units / 2);
         svgElements.add('<line x1="$lineX" y1="0" x2="$lineX" y2="${dim.y}" '
             'stroke-width="0.5" stroke-dasharray="4 4" stroke="#ddd"/>');
       }
@@ -83,16 +84,17 @@ class FramesChart extends LineChart<FramesTracker> {
 }
 
 class FramesTracker {
-  static const kMaxFrames = 60;
+  static const int kMaxFrames = 60;
 
   VmService service;
-  final StreamController _changeController = new StreamController.broadcast();
-  List<FrameInfo> samples = [];
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
+  List<FrameInfo> samples = <FrameInfo>[];
 
   FramesTracker(this.service) {
     service.onExtensionEvent.listen((Event e) {
       if (e.extensionKind == 'Flutter.Frame') {
-        ExtensionData data = e.extensionData;
+        final ExtensionData data = e.extensionData;
         addSample(FrameInfo.from(data.data));
       }
     });
@@ -100,7 +102,7 @@ class FramesTracker {
 
   bool get hasConnection => service != null;
 
-  Stream get onChange => _changeController.stream;
+  Stream<Null> get onChange => _changeController.stream;
 
   void start() {}
 
@@ -126,7 +128,7 @@ class FramesTracker {
     int usedFrames = 0;
 
     for (int i = samples.length - 1; i >= 0; i--) {
-      FrameInfo frame = samples[i];
+      final FrameInfo frame = samples[i];
 
       frameCount++;
 
@@ -151,7 +153,9 @@ class FramesTracker {
 class FrameInfo {
   static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
-  static FrameInfo from(Map data) {
+  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
+
+  static FrameInfo from(Map<dynamic, dynamic> data) {
     return new FrameInfo(
         data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
   }
@@ -162,8 +166,6 @@ class FrameInfo {
 
   bool frameGroupStart = false;
 
-  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
-
   num get endTimeMs => startTimeMs + elapsedMs;
 
   void calcFrameGroupStart(FrameInfo previousFrame) {
@@ -172,5 +174,6 @@ class FrameInfo {
     }
   }
 
+  @override
   String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
 }

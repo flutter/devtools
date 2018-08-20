@@ -5,6 +5,6 @@
 import 'package:devtools/main.dart';
 
 void main() {
-  PerfToolFramework framework = new PerfToolFramework();
+  final PerfToolFramework framework = new PerfToolFramework();
   framework.performInitialLoad();
 }

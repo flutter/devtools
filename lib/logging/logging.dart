@@ -40,7 +40,7 @@ class LoggingScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     this.framework = framework;
 
-    mainDiv.add([
+    mainDiv.add(<CoreElement>[
       _createTableView()..clazz('section'),
     ]);
 
@@ -58,7 +58,7 @@ class LoggingScreen extends Screen {
     loggingTable.addColumn(new LogKindColumn());
     loggingTable.addColumn(new LogMessageColumn());
 
-    loggingTable.setRows([]);
+    loggingTable.setRows(<LogData>[]);
 
     _updateStatus();
 
@@ -66,15 +66,18 @@ class LoggingScreen extends Screen {
   }
 
   void _updateStatus() {
-    int count = loggingTable.rows.length;
+    final int count = loggingTable.rows.length;
     logCountStatus.element.text = '${nf.format(count)} events';
   }
 
+  @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmService service) {
-    if (ref == null) return;
+    if (ref == null) {
+      return;
+    }
 
     // TODO(devoncarew): inspect, ...
 
@@ -88,14 +91,14 @@ class LoggingScreen extends Screen {
       _log(new LogData('stdout', message, e.timestamp));
     });
     service.onStderrEvent.listen((Event e) {
-      String message = decodeBase64(e.bytes);
+      final String message = decodeBase64(e.bytes);
       _log(new LogData('stderr', message, e.timestamp, error: true));
     });
 
     // Log GC events.
     service.onGCEvent.listen((Event e) {
-      dynamic json = e.json;
-      String message = 'gc reason: ${json['reason']}\n'
+      final dynamic json = e.json;
+      final String message = 'gc reason: ${json['reason']}\n'
           'new: ${json['new']}\n'
           'old: ${json['old']}\n';
       _log(new LogData('gc', message, e.timestamp));
@@ -103,18 +106,18 @@ class LoggingScreen extends Screen {
 
     // Log `dart:developer` `log` events.
     service.onEvent('_Logging').listen((Event e) {
-      dynamic logRecord = e.json['logRecord'];
+      final dynamic logRecord = e.json['logRecord'];
 
       String loggerName = _valueAsString(logRecord['loggerName']);
       if (loggerName == null || loggerName.isEmpty) {
         loggerName = 'log';
       }
       // TODO(devoncarew): show level, with some indication of severity
-      int level = logRecord['level'];
+      final int level = logRecord['level'];
       String message = _valueAsString(logRecord['message']);
       // TODO(devoncarew): The VM is not sending the error correctly.
-      var error = logRecord['error'];
-      var stackTrace = logRecord['stackTrace'];
+      final dynamic error = logRecord['error'];
+      final dynamic stackTrace = logRecord['stackTrace'];
 
       if (_isNotNull(error)) {
         message = message + '\nerror: ${_valueAsString(error)}';
@@ -123,7 +126,7 @@ class LoggingScreen extends Screen {
         message = message + '\n${_valueAsString(stackTrace)}';
       }
 
-      bool isError =
+      final bool isError =
           level != null && level >= Level.SEVERE.value ? true : false;
       _log(new LogData(loggerName, message, e.timestamp, error: isError));
     });
@@ -131,9 +134,9 @@ class LoggingScreen extends Screen {
     // Log Flutter frame events.
     service.onExtensionEvent.listen((Event e) {
       if (e.extensionKind == 'Flutter.Frame') {
-        FrameInfo frame = FrameInfo.from(e.extensionData.data);
+        final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
-        String div = createFrameDivHtml(frame);
+        final String div = createFrameDivHtml(frame);
 
         _log(new LogData(
           '${e.extensionKind.toLowerCase()}',
@@ -152,7 +155,7 @@ class LoggingScreen extends Screen {
 
   void _log(LogData log) {
     // TODO(devoncarew): make this much more efficient
-    List<LogData> data = [log];
+    final List<LogData> data = <LogData>[log];
     data.addAll(loggingTable.rows);
 
     if (data.length > kMaxLogItemsLength) {
@@ -166,11 +169,11 @@ class LoggingScreen extends Screen {
   }
 
   String createFrameDivHtml(FrameInfo frame) {
-    String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs)
+    final String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs)
         ? 'frame-bar over-budget'
         : 'frame-bar';
 
-    int pixelWidth = (frame.elapsedMs * 3).round();
+    final int pixelWidth = (frame.elapsedMs * 3).round();
     return '<div class="$classes" style="width: ${pixelWidth}px"/>';
   }
 }
@@ -191,48 +194,57 @@ class LogData {
   final String extraHtml;
 
   LogData(this.kind, this.message, this.timestamp,
-      {this.error: false, this.extraHtml});
+      {this.error = false, this.extraHtml});
 }
 
 class LogKindColumn extends Column<LogData> {
   LogKindColumn() : super('Kind');
 
+  @override
   bool get supportsSorting => false;
 
+  @override
   bool get usesHtml => true;
 
+  @override
   String get cssClass => 'right';
 
-  dynamic getValue(LogData log) {
+  @override
+  dynamic getValue(LogData item) {
     String color = '';
 
-    if (log.kind == 'stderr' || log.error) {
+    if (item.kind == 'stderr' || item.error) {
       color = 'style="background-color: #F44336"';
-    } else if (log.kind == 'stdout') {
+    } else if (item.kind == 'stdout') {
       color = 'style="background-color: #78909C"';
-    } else if (log.kind.startsWith('flutter')) {
+    } else if (item.kind.startsWith('flutter')) {
       color = 'style="background-color: #0091ea"';
-    } else if (log.kind == 'gc') {
+    } else if (item.kind == 'gc') {
       color = 'style="background-color: #424242"';
     }
 
-    return '<span class="label" $color>${log.kind}</span>';
+    return '<span class="label" $color>${item.kind}</span>';
   }
 
+  @override
   String render(dynamic value) => value;
 }
 
 class LogWhenColumn extends Column<LogData> {
-  static DateFormat timeFormat = new DateFormat("HH:mm:ss.SSS");
+  static DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
   LogWhenColumn() : super('When');
 
+  @override
   String get cssClass => 'pre monospace';
 
+  @override
   bool get supportsSorting => false;
 
-  dynamic getValue(LogData log) => log.timestamp;
+  @override
+  dynamic getValue(LogData item) => item.timestamp;
 
+  @override
   String render(dynamic value) {
     return timeFormat.format(new DateTime.fromMillisecondsSinceEpoch(value));
   }
@@ -241,14 +253,19 @@ class LogWhenColumn extends Column<LogData> {
 class LogMessageColumn extends Column<LogData> {
   LogMessageColumn() : super('Message', wide: true);
 
+  @override
   String get cssClass => 'pre-wrap monospace';
 
+  @override
   bool get usesHtml => true;
 
+  @override
   bool get supportsSorting => false;
 
-  dynamic getValue(LogData log) => log;
+  @override
+  dynamic getValue(LogData item) => item;
 
+  @override
   String render(dynamic value) {
     final LogData log = value;
 

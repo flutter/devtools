@@ -15,7 +15,7 @@ import 'utils.dart';
 class Table<T> {
   final CoreElement element;
 
-  List<Column<T>> columns = [];
+  List<Column<T>> columns = <Column<T>>[];
   List<T> rows;
 
   Column<T> _sortColumn;
@@ -25,10 +25,10 @@ class Table<T> {
   CoreElement _thead;
   CoreElement _tbody;
 
-  Map<Column, CoreElement> spanForColumn = {};
+  Map<Column<T>, CoreElement> spanForColumn = <Column<T>, CoreElement>{};
 
   final StreamController<T> _selectController =
-      new StreamController.broadcast();
+      new StreamController<T>.broadcast();
 
   Table() : element = div(a: 'flex', c: 'overflow-y table-border') {
     _table = new CoreElement('table')..clazz('full-width');
@@ -47,15 +47,17 @@ class Table<T> {
     if (_thead == null) {
       _thead = new CoreElement('thead')
         ..add(tr()
-          ..add(columns.map((Column column) {
-            CoreElement s = span(
+          ..add(columns.map((Column<T> column) {
+            final CoreElement s = span(
                 text: column.title,
                 c: 'interactable${column.supportsSorting ? ' sortable' : ''}');
             s.click(() => _columnClicked(column));
             spanForColumn[column] = s;
-            CoreElement header = th(c: column.numeric ? 'right' : 'left')
+            final CoreElement header = th(c: column.numeric ? 'right' : 'left')
               ..add(s);
-            if (column.wide) header.clazz('wide');
+            if (column.wide) {
+              header.clazz('wide');
+            }
             return header;
           })));
 
@@ -68,8 +70,8 @@ class Table<T> {
     }
 
     if (_sortColumn == null) {
-      Column column =
-          columns.firstWhere((c) => c.supportsSorting, orElse: () => null);
+      final Column<T> column = columns
+          .firstWhere((Column<T> c) => c.supportsSorting, orElse: () => null);
       if (column != null) {
         setSortColumn(column);
       }
@@ -83,13 +85,13 @@ class Table<T> {
   }
 
   void _doSort() {
-    Column<T> column = _sortColumn;
-    bool numeric = column.numeric;
-    int direction = _sortDirection == SortOrder.ascending ? 1 : -1;
+    final Column<T> column = _sortColumn;
+    final bool numeric = column.numeric;
+    final int direction = _sortDirection == SortOrder.ascending ? 1 : -1;
 
     // update the sort arrows
-    for (Column c in columns) {
-      CoreElement s = spanForColumn[c];
+    for (Column<T> c in columns) {
+      final CoreElement s = spanForColumn[c];
       if (c == _sortColumn) {
         s.toggleClass('up', _sortDirection == SortOrder.ascending);
         s.toggleClass('down', _sortDirection != SortOrder.ascending);
@@ -101,17 +103,19 @@ class Table<T> {
 
     rows.sort((T a, T b) {
       if (numeric) {
-        num one = column.getValue(a);
-        num two = column.getValue(b);
-        if (one == two) return 0;
+        final num one = column.getValue(a);
+        final num two = column.getValue(b);
+        if (one == two) {
+          return 0;
+        }
         if (_sortDirection == SortOrder.ascending) {
           return one > two ? 1 : -1;
         } else {
           return one > two ? -1 : 1;
         }
       } else {
-        String one = column.render(column.getValue(a));
-        String two = column.render(column.getValue(b));
+        final String one = column.render(column.getValue(a));
+        final String two = column.render(column.getValue(b));
         return one.compareTo(two) * direction;
       }
     });
@@ -121,12 +125,12 @@ class Table<T> {
     _clearSelection();
 
     // Re-build the table.
-    List<Element> rowElements = [];
+    final List<Element> rowElements = <Element>[];
 
     for (T row in rows) {
-      CoreElement tableRow = tr();
+      final CoreElement tableRow = tr();
 
-      for (Column column in columns) {
+      for (Column<T> column in columns) {
         String cssClass = column.cssClass;
 
         if (cssClass != null && column.numeric) {
@@ -161,7 +165,9 @@ class Table<T> {
   T _selectedObject;
 
   void _select(CoreElement elementRow, T object) {
-    if (_selectedObject == object) return;
+    if (_selectedObject == object) {
+      return;
+    }
 
     if (_selectedElement != null) {
       _selectedElement.toggleClass('selected', false);
@@ -187,7 +193,9 @@ class Table<T> {
   }
 
   void _columnClicked(Column<T> column) {
-    if (!column.supportsSorting) return;
+    if (!column.supportsSorting) {
+      return;
+    }
 
     if (_sortColumn == column) {
       _sortDirection = _sortDirection == SortOrder.ascending
@@ -206,7 +214,7 @@ abstract class Column<T> {
   final String title;
   final bool wide;
 
-  Column(this.title, {this.wide: false});
+  Column(this.title, {this.wide = false});
 
   String get cssClass => null;
 
@@ -216,8 +224,8 @@ abstract class Column<T> {
 
   bool get usesHtml => false;
 
-  /// Get the cell's value from the given [row].
-  dynamic getValue(T row);
+  /// Get the cell's value from the given [item].
+  dynamic getValue(T item);
 
   /// Given a value from [getValue], render it to a String.
   String render(dynamic value) {
@@ -235,6 +243,7 @@ abstract class Column<T> {
     }
   }
 
+  @override
   String toString() => title;
 }
 

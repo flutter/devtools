@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:html' hide Point;
 
 /// Finds the first descendant element of this document with the given id.
-Element queryId(String id) => querySelector('#${id}');
+Element queryId(String id) => querySelector('#$id');
 
 /// Finds the first descendant element of this document with the given id.
-Element $(String id) => querySelector('#${id}');
+Element $(String id) => querySelector('#$id');
 
 CoreElement button({String text, String c, String a}) =>
     new CoreElement('button', text: text, classes: c, attributes: a);
@@ -62,14 +62,20 @@ CoreElement form() => new CoreElement('form');
 class CoreElement {
   final Element element;
 
-  CoreElement.from(this.element);
-
   CoreElement(String tag, {String text, String classes, String attributes})
       : element = new Element.tag(tag) {
-    if (text != null) element.text = text;
-    if (classes != null) element.classes.addAll(classes.split(' '));
-    if (attributes != null) attributes.split(' ').forEach(attribute);
+    if (text != null) {
+      element.text = text;
+    }
+    if (classes != null) {
+      element.classes.addAll(classes.split(' '));
+    }
+    if (attributes != null) {
+      attributes.split(' ').forEach(attribute);
+    }
   }
+
+  CoreElement.from(this.element);
 
   String get tag => element.tagName;
 
@@ -84,7 +90,7 @@ class CoreElement {
   bool hasAttribute(String name) => element.attributes.containsKey(name);
 
   void attribute(String name, [bool value]) {
-    if (value == null) value = !element.attributes.containsKey(name);
+    value ??= !element.attributes.containsKey(name);
 
     if (value) {
       element.setAttribute(name, '');
@@ -103,7 +109,7 @@ class CoreElement {
   String clearAttribute(String name) => element.attributes.remove(name);
 
   void icon(String iconName) =>
-      element.classes.addAll(['icon', 'icon-${iconName}']);
+      element.classes.addAll(<String>['icon', 'icon-$iconName']);
 
   void clazz(String _class) {
     if (_class.contains(' ')) {
@@ -126,7 +132,7 @@ class CoreElement {
   /// either a `CoreElement` or an `Element`.
   dynamic add(dynamic child) {
     if (child is Iterable) {
-      return child.map((c) => add(c)).toList();
+      return child.map<dynamic>((dynamic c) => add(c)).toList();
     } else if (child is CoreElement) {
       element.children.add(child.element);
     } else if (child is Element) {
@@ -185,7 +191,9 @@ class CoreElement {
         attribute('three', true);
       else if (flexAmount == 4)
         attribute('four', true);
-      else if (flexAmount == 5) attribute('five', true);
+      else if (flexAmount == 5) {
+        attribute('five', true);
+      }
     }
   }
 
@@ -217,15 +225,15 @@ class CoreElement {
 
   /// Subscribe to the [onDoubleClick] event stream with a no-arg handler.
   StreamSubscription<Event> dblclick(void handle()) {
-    return element.onDoubleClick.listen((e) {
-      e.stopImmediatePropagation();
+    return element.onDoubleClick.listen((Event event) {
+      event.stopImmediatePropagation();
       handle();
     });
   }
 
   void clear() => element.children.clear();
 
-  void scrollIntoView({bool bottom: false}) {
+  void scrollIntoView({bool bottom = false}) {
     if (bottom) {
       element.scrollIntoView(ScrollAlignment.BOTTOM);
     } else {
@@ -234,7 +242,7 @@ class CoreElement {
   }
 
   void setInnerHtml(String str) {
-    element.setInnerHtml(str, treeSanitizer: new TrustedHtmlTreeSanitizer());
+    element.setInnerHtml(str, treeSanitizer: const TrustedHtmlTreeSanitizer());
   }
 
   // /// Listen for a user copy event (ctrl-c / cmd-c) and copy the selected DOM
@@ -254,15 +262,20 @@ class CoreElement {
   // }
 
   void dispose() {
-    if (element.parent == null) return;
+    if (element.parent == null) {
+      return;
+    }
 
     if (element.parent.children.contains(element)) {
       try {
         element.parent.children.remove(element);
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
+  @override
   String toString() => element.toString();
 }
 
@@ -273,5 +286,6 @@ class CloseButton extends CoreElement {
 class TrustedHtmlTreeSanitizer implements NodeTreeSanitizer {
   const TrustedHtmlTreeSanitizer();
 
+  @override
   void sanitizeTree(Node node) {}
 }

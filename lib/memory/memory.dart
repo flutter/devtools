@@ -46,15 +46,15 @@ class MemoryScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     this.framework = framework;
 
-    mainDiv.add([
+    mainDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
-        ..add([
+        ..add(<CoreElement>[
           form()
             ..layoutHorizontal()
             ..clazz('align-items-center')
-            ..add([
+            ..add(<CoreElement>[
               loadSnapshotButton = new PButton('Load heap snapshot')
                 ..small()
                 ..primary()
@@ -88,18 +88,19 @@ class MemoryScreen extends Screen {
 
   String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
 
-  Future _loadAllocationProfile() async {
+  Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
 
     // TODO(devoncarew): error handling
 
     try {
       // 'reset': true to reset the object allocation accumulators
-      Response response = await serviceInfo.service
+      final Response response = await serviceInfo.service
           .callMethod('_getAllocationProfile', isolateId: _isolateId);
-      List members = response.json['members'];
-      List<ClassHeapStats> heapStats = members
-          .map((d) => new ClassHeapStats(d))
+      final List<dynamic> members = response.json['members'];
+      final List<ClassHeapStats> heapStats = members
+          .cast<Map<String, dynamic>>()
+          .map((Map<String, dynamic> d) => new ClassHeapStats(d))
           .where((ClassHeapStats stats) {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
@@ -169,7 +170,7 @@ class MemoryScreen extends Screen {
 //  }
 
   CoreElement createLiveChartArea() {
-    CoreElement container = div(c: 'section perf-chart table-border')
+    final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
     memoryChart = new MemoryChart(container);
     memoryChart.disabled = true;
@@ -186,7 +187,7 @@ class MemoryScreen extends Screen {
     memoryTable.setSortColumn(memoryTable.columns.first);
 
     // new List<MemoryRow>.generate(100, (_) => MemoryRow.random()
-    memoryTable.setRows([]);
+    memoryTable.setRows(<ClassHeapStats>[]);
 
     memoryTable.onSelect.listen((ClassHeapStats row) {
       // TODO:
@@ -205,6 +206,7 @@ class MemoryScreen extends Screen {
     return memoryTable.element;
   }
 
+  @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
@@ -214,7 +216,7 @@ class MemoryScreen extends Screen {
     memoryTracker = new MemoryTracker(service);
     memoryTracker.start();
 
-    memoryTracker.onChange.listen((_) {
+    memoryTracker.onChange.listen((Null _) {
       memoryChartStateMixin.setState(() {
         memoryChart.updateFrom(memoryTracker);
       });
@@ -249,24 +251,29 @@ class MemoryRow {
 
   MemoryRow(this.name, this.bytes, this.percentage);
 
+  @override
   String toString() => name;
 }
 
 class MemoryColumnClassName extends Column<ClassHeapStats> {
   MemoryColumnClassName() : super('Class', wide: true);
 
-  dynamic getValue(ClassHeapStats row) => row.classRef.name;
+  @override
+  dynamic getValue(ClassHeapStats item) => item.classRef.name;
 }
 
 class MemoryColumnSize extends Column<ClassHeapStats> {
   MemoryColumnSize() : super('Size');
 
+  @override
   bool get numeric => true;
 
   //String get cssClass => 'monospace';
 
-  dynamic getValue(ClassHeapStats row) => row.bytesCurrent;
+  @override
+  dynamic getValue(ClassHeapStats item) => item.bytesCurrent;
 
+  @override
   String render(dynamic value) {
     if (value < 1024) {
       return ' ${Column.fastIntl(value)}';
@@ -279,12 +286,13 @@ class MemoryColumnSize extends Column<ClassHeapStats> {
 class MemoryColumnInstanceCount extends Column<ClassHeapStats> {
   MemoryColumnInstanceCount() : super('Count');
 
+  @override
   bool get numeric => true;
 
-  //String get cssClass => 'monospace';
+  @override
+  dynamic getValue(ClassHeapStats item) => item.instancesCurrent;
 
-  dynamic getValue(ClassHeapStats row) => row.instancesCurrent;
-
+  @override
   String render(dynamic value) => Column.fastIntl(value);
 }
 
@@ -300,29 +308,30 @@ class MemoryChart extends LineChart<MemoryTracker> {
     heapLabel.element.style.right = '0';
   }
 
-  void update(MemoryTracker tracker) {
-    if (tracker.samples.isEmpty || dim == null) {
+  @override
+  void update(MemoryTracker data) {
+    if (data.samples.isEmpty || dim == null) {
       // TODO:
       return;
     }
 
     // display the process usage
-    String rss = '${_printMb(tracker.processRss, 0)} MB RSS';
+    final String rss = '${_printMb(data.processRss, 0)} MB RSS';
     processLabel.text = rss;
 
     // display the dart heap usage
-    String used =
-        '${_printMb(tracker.currentHeap, 1)} of ${_printMb(tracker.heapMax, 1)} MB';
+    final String used =
+        '${_printMb(data.currentHeap, 1)} of ${_printMb(data.heapMax, 1)} MB';
     heapLabel.text = used;
 
     // re-render the svg
 
     // Make the y height large enough for the largest sample,
     const int tenMB = 1024 * 1024 * 10;
-    int top = (tracker.maxHeapData ~/ tenMB) * tenMB + tenMB;
+    final int top = (data.maxHeapData ~/ tenMB) * tenMB + tenMB;
 
-    int width = MemoryTracker.kMaxGraphTime.inMilliseconds;
-    int right = tracker.samples.last.time;
+    final int width = MemoryTracker.kMaxGraphTime.inMilliseconds;
+    final int right = data.samples.last.time;
 
     // TODO(devoncarew): draw dots for GC events?
 
@@ -332,7 +341,7 @@ class MemoryChart extends LineChart<MemoryTracker> {
     fill="none"
     stroke="#0074d9"
     stroke-width="3"
-    points="${createPoints(tracker.samples, top, width, right)}"/>
+    points="${createPoints(data.samples, top, width, right)}"/>
 </svg>
 ''');
   }
@@ -342,18 +351,19 @@ class MemoryChart extends LineChart<MemoryTracker> {
     return samples.map((HeapSample sample) {
       final int x = dim.x - ((right - sample.time) * dim.x ~/ width);
       final int y = dim.y - (sample.bytes * dim.y ~/ top);
-      return '${x},${y}';
+      return '$x,$y';
     }).join(' ');
   }
 }
 
 class MemoryTracker {
-  static const Duration kMaxGraphTime = const Duration(minutes: 1);
-  static const Duration kUpdateDelay = const Duration(seconds: 1);
+  static const Duration kMaxGraphTime = Duration(minutes: 1);
+  static const Duration kUpdateDelay = Duration(seconds: 1);
 
   VmService service;
   Timer _pollingTimer;
-  final StreamController _changeController = new StreamController.broadcast();
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
 
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
@@ -364,7 +374,7 @@ class MemoryTracker {
 
   bool get hasConnection => service != null;
 
-  Stream get onChange => _changeController.stream;
+  Stream<Null> get onChange => _changeController.stream;
 
   int get currentHeap => samples.last.bytes;
 
@@ -393,10 +403,12 @@ class MemoryTracker {
     _updateGCEvent(event.isolate.id, heaps);
   }
 
-  Future _pollMemory() async {
-    if (!hasConnection) return;
+  Future<Null> _pollMemory() async {
+    if (!hasConnection) {
+      return;
+    }
 
-    VM vm = await service.getVM();
+    final VM vm = await service.getVM();
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
       return await service.getIsolate(ref.id);
@@ -414,7 +426,7 @@ class MemoryTracker {
     isolateHeaps.clear();
 
     for (Isolate isolate in isolates) {
-      List<HeapSpace> heaps = getHeaps(isolate).toList();
+      final List<HeapSpace> heaps = getHeaps(isolate).toList();
       isolateHeaps[isolate.id] = heaps;
     }
 
@@ -492,16 +504,16 @@ String _printMb(num bytes, int fractionDigits) =>
 //   promotedBytes: 0
 // }
 class ClassHeapStats {
-  static const ALLOCATED_BEFORE_GC = 0;
-  static const ALLOCATED_BEFORE_GC_SIZE = 1;
-  static const LIVE_AFTER_GC = 2;
-  static const LIVE_AFTER_GC_SIZE = 3;
-  static const ALLOCATED_SINCE_GC = 4;
-  static const ALLOCATED_SINCE_GC_SIZE = 5;
-  static const ACCUMULATED = 6;
-  static const ACCUMULATED_SIZE = 7;
+  static const int ALLOCATED_BEFORE_GC = 0;
+  static const int ALLOCATED_BEFORE_GC_SIZE = 1;
+  static const int LIVE_AFTER_GC = 2;
+  static const int LIVE_AFTER_GC_SIZE = 3;
+  static const int ALLOCATED_SINCE_GC = 4;
+  static const int ALLOCATED_SINCE_GC_SIZE = 5;
+  static const int ACCUMULATED = 6;
+  static const int ACCUMULATED_SIZE = 7;
 
-  final Map json;
+  final Map<String, dynamic> json;
 
   int instancesCurrent = 0;
   int instancesAccumulated = 0;
@@ -518,13 +530,14 @@ class ClassHeapStats {
 
   String get type => json['type'];
 
-  void _update(List stats) {
+  void _update(List<dynamic> stats) {
     instancesAccumulated += stats[ACCUMULATED];
     bytesAccumulated += stats[ACCUMULATED_SIZE];
     instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC];
     bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
   }
 
+  @override
   String toString() =>
-      '[ClassHeapStats type: ${type}, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
+      '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
 }

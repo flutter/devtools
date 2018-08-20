@@ -9,7 +9,7 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-final String loremIpsum = '''
+const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet
 libero vel vestibulum vulputate. Aliquam consequat, lectus nec euismod commodo, turpis massa volutpat ex, a
 elementum tellus turpis nec arcu. Suspendisse erat nisl, rhoncus ut nisi in, lacinia pretium dui. Donec at erat
@@ -30,16 +30,15 @@ final Random r = new Random();
 final List<String> _words = loremIpsum
     .replaceAll('\n', ' ')
     .split(' ')
-    .map((w) => w.toLowerCase())
-    .map((w) => w.endsWith('.') ? w.substring(0, w.length - 1) : w)
-    .map((w) => w.endsWith(',') ? w.substring(0, w.length - 1) : w)
+    .map((String w) => w.toLowerCase())
+    .map((String w) => w.endsWith('.') ? w.substring(0, w.length - 1) : w)
+    .map((String w) => w.endsWith(',') ? w.substring(0, w.length - 1) : w)
     .toList();
 
 String getLoremFragment([int wordCount]) {
-  if (wordCount == null) wordCount = r.nextInt(8) + 1;
-  return toBeginningOfSentenceCase(
-      new List.generate(wordCount, (_) => _words[r.nextInt(_words.length)])
-          .join(' '));
+  wordCount ??= r.nextInt(8) + 1;
+  return toBeginningOfSentenceCase(new List<String>.generate(
+      wordCount, (_) => _words[r.nextInt(_words.length)]).join(' '));
 }
 
 String escape(String text) => text == null ? '' : htmlEscape.convert(text);
@@ -75,7 +74,7 @@ String funcRefName(FuncRef ref) {
 
 class Property<T> {
   final StreamController<T> _changeController =
-      new StreamController.broadcast();
+      new StreamController<T>.broadcast();
   T _value;
 
   Property(this._value);

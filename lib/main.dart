@@ -42,17 +42,18 @@ class PerfToolFramework extends Framework {
   }
 
   void initGlobalUI() {
-    CoreElement mainNav = new CoreElement.from(querySelector('#main-nav'));
+    final CoreElement mainNav =
+        new CoreElement.from(querySelector('#main-nav'));
     mainNav.clear();
 
     for (Screen screen in screens) {
-      CoreElement link = new CoreElement('a')
+      final CoreElement link = new CoreElement('a')
         ..attributes['href'] = screen.ref
         ..onClick.listen((MouseEvent e) {
           e.preventDefault();
           navigateTo(screen.id);
         })
-        ..add([
+        ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}')
         ]);
@@ -85,7 +86,7 @@ class PerfToolFramework extends Framework {
     serviceInfo.isolateManager.selectIsolate(isolateSelect.value);
   }
 
-  void _rebuildIsolateSelect([_]) {
+  void _rebuildIsolateSelect([IsolateRef _]) {
     isolateSelect.clear();
     for (IsolateRef ref in serviceInfo.isolateManager.isolates) {
       isolateSelect.option(isolateName(ref), value: ref.id);
@@ -101,6 +102,7 @@ class PerfToolFramework extends Framework {
 class NotFoundScreen extends Screen {
   NotFoundScreen() : super(name: 'Not Found', id: 'notfound');
 
+  @override
   void createContent(Framework framework, CoreElement mainDiv) {
     mainDiv.add(p(text: 'Page not found: ${window.location.pathname}'));
   }

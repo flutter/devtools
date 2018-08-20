@@ -41,18 +41,19 @@ class TimelineScreen extends Screen {
 
     // TODO(devoncarew): pause and resume
 
-    PButton debugDrawButton = new PButton('Debug draw')..small();
-    PButton perfOverlayButton = new PButton('Performance overlay')..small();
-    PButton debugBannerButton = new PButton('Debug banner')
+    final PButton debugDrawButton = new PButton('Debug draw')..small();
+    final PButton perfOverlayButton = new PButton('Performance overlay')
+      ..small();
+    final PButton debugBannerButton = new PButton('Debug banner')
       ..small()
       ..clazz('selected');
 
-    mainDiv.add([
+    mainDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
-        ..add([
+        ..add(<CoreElement>[
           new PButton('Start timeline recording')
             ..small()
             ..primary()
@@ -63,14 +64,16 @@ class TimelineScreen extends Screen {
             ..click(_stopTimeline),
           div()..flex(),
           div(c: 'btn-group')
-            ..add([
+            ..add(<CoreElement>[
               debugDrawButton,
               perfOverlayButton,
               debugBannerButton,
             ]),
         ]),
       div(c: 'section')
-        ..add([timelineFramesUI = new TimelineFramesUI(timelineFramesBuilder)]),
+        ..add(<CoreElement>[
+          timelineFramesUI = new TimelineFramesUI(timelineFramesBuilder)
+        ]),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
@@ -83,7 +86,7 @@ class TimelineScreen extends Screen {
       debugDrawButton.toggleClass('selected');
       serviceInfo.service.callServiceExtension('ext.flutter.debugPaint',
           isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: {'enabled': !wasSelected});
+          args: <String, bool>{'enabled': !wasSelected});
     });
 
     perfOverlayButton.click(() {
@@ -93,7 +96,7 @@ class TimelineScreen extends Screen {
       serviceInfo.service.callServiceExtension(
           'ext.flutter.showPerformanceOverlay',
           isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: {'enabled': !wasSelected});
+          args: <String, bool>{'enabled': !wasSelected});
     });
 
     debugBannerButton.click(() {
@@ -102,7 +105,7 @@ class TimelineScreen extends Screen {
       debugBannerButton.toggleClass('selected');
       serviceInfo.service.callServiceExtension('ext.flutter.debugAllowBanner',
           isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: {'enabled': !wasSelected});
+          args: <String, bool>{'enabled': !wasSelected});
     });
 
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
@@ -111,12 +114,12 @@ class TimelineScreen extends Screen {
     }
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
 
-    timelineFramesUI.onSelectedFrame.listen((frame) {
+    timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
       frameDetailsUI.attribute('hidden', frame == null);
 
       // TODO(devoncarew): allow frame selection while recording data
       if (frame != null && timelineFramesUI.timelineData != null) {
-        TimelineFrameData data =
+        final TimelineFrameData data =
             timelineFramesUI.timelineData.getFrameData(frame);
         frameDetailsUI.updateData(data);
       }
@@ -124,17 +127,19 @@ class TimelineScreen extends Screen {
   }
 
   CoreElement createLiveChartArea() {
-    CoreElement container = div(c: 'section perf-chart table-border')
+    final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
     framesChart = new FramesChart(container);
     framesChart.disabled = true;
     return container;
   }
 
+  @override
   void entering() {
     //print('entering $name');
   }
 
+  @override
   void exiting() {
     //print('exiting $name');
   }
@@ -145,15 +150,16 @@ class TimelineScreen extends Screen {
     framesTracker = new FramesTracker(service);
     framesTracker.start();
 
-    framesTracker.onChange.listen((_) {
+    framesTracker.onChange.listen((Null _) {
       framesChartStateMixin.setState(() {
         framesChart.updateFrom(framesTracker);
       });
     });
 
     serviceInfo.service.onEvent('Timeline').listen((Event event) {
+      final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
-          (event.json['timelineEvents'] as List).cast<Map<String, dynamic>>();
+          list.cast<Map<String, dynamic>>();
 
       for (Map<String, dynamic> json in events) {
         final TimelineEvent e = new TimelineEvent(json);
@@ -178,21 +184,24 @@ class TimelineScreen extends Screen {
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     await serviceInfo.service.clearVMTimeline();
 
-    Response response = await serviceInfo.service.getVMTimeline();
+    final Response response = await serviceInfo.service.getVMTimeline();
+    final List<dynamic> list = response.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
-        (response.json['traceEvents'] as List).cast<Map<String, dynamic>>();
+        list.cast<Map<String, dynamic>>();
 
-    List<TimelineEvent> events = traceEvents
-        .map((event) => new TimelineEvent(event))
+    final List<TimelineEvent> events = traceEvents
+        .map((Map<String, dynamic> event) => new TimelineEvent(event))
         .where((TimelineEvent event) {
       return event.name == 'thread_name';
     }).toList();
 
     List<TimelineThread> threads = events
-        .map((event) => new TimelineThread(event.args['name'], event.threadId))
+        .map((TimelineEvent event) =>
+            new TimelineThread(event.args['name'], event.threadId))
         .toList();
 
-    threads = threads.where((t) => t.isVisible).toList();
+    threads =
+        threads.where((TimelineThread thread) => thread.isVisible).toList();
     threads.sort();
 
     timelineFramesUI.timelineData = new TimelineData(threads);
@@ -208,15 +217,16 @@ class TimelineScreen extends Screen {
     await serviceInfo.service.setVMTimelineFlags(<String>[]);
   }
 
+  @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
 }
 
 class TimelineData {
   final List<TimelineThread> threads;
-  final Map<int, TimelineThread> threadMap = {};
+  final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
 
-  final Map<int, TimelineThreadData> threadData = {};
+  final Map<int, TimelineThreadData> threadData = <int, TimelineThreadData>{};
 
   TimelineData(this.threads) {
     for (TimelineThread thread in threads) {
@@ -226,12 +236,12 @@ class TimelineData {
   }
 
   void processTimelineEvent(TimelineEvent event) {
-    TimelineThread thread = threadMap[event.threadId];
+    final TimelineThread thread = threadMap[event.threadId];
     if (thread == null) {
       return;
     }
 
-    TimelineThreadData data = threadData[event.threadId];
+    final TimelineThreadData data = threadData[event.threadId];
 
     switch (event.phase) {
       case 'B':
@@ -252,9 +262,11 @@ class TimelineData {
   }
 
   TimelineFrameData getFrameData(TimelineFrame frame) {
-    if (frame == null) return null;
+    if (frame == null) {
+      return null;
+    }
 
-    List<TEvent> events = [];
+    final List<TEvent> events = <TEvent>[];
 
     for (TimelineThreadData data in threadData.values) {
       for (TEvent event in data.events) {
@@ -274,8 +286,8 @@ class TimelineData {
   void printData() {
     for (TimelineThread thread in threads) {
       print('${thread.name}:');
-      StringBuffer buf = new StringBuffer();
-      TimelineThreadData data = threadData[thread.threadId];
+      final StringBuffer buf = new StringBuffer();
+      final TimelineThreadData data = threadData[thread.threadId];
 
       for (TEvent event in data.events) {
         event.format(buf, '  ');
@@ -298,7 +310,7 @@ class TimelineFrameData {
   void printData() {
     for (TimelineThread thread in threads) {
       print('${thread.name}:');
-      StringBuffer buf = new StringBuffer();
+      final StringBuffer buf = new StringBuffer();
 
       for (TEvent event in events) {
         if (event.threadId == thread.threadId) {
@@ -311,17 +323,17 @@ class TimelineFrameData {
   }
 
   Iterable<TEvent> eventsForThread(TimelineThread thread) {
-    return events.where((e) => e.threadId == thread.threadId);
+    return events.where((TEvent event) => event.threadId == thread.threadId);
   }
 }
 
 class TimelineThreadData {
   final TimelineData parent;
-  final List<TEvent> events = [];
+  final List<TEvent> events = <TEvent>[];
 
   TimelineThreadData(this.parent);
 
-  List<TEvent> durationStack = [];
+  List<TEvent> durationStack = <TEvent>[];
 
   void handleDurationBeginEvent(TimelineEvent event) {
     final TEvent e = new TEvent(event.threadId, event.name);
@@ -338,13 +350,13 @@ class TimelineThreadData {
 
   void handleDurationEndEvent(TimelineEvent event) {
     if (durationStack.isNotEmpty) {
-      TEvent e = durationStack.removeLast();
+      final TEvent e = durationStack.removeLast();
       e.setEnd(event.timestampMicros);
     }
   }
 
   void handleCompleteEvent(TimelineEvent event) {
-    TEvent e = new TEvent(event.threadId, event.name);
+    final TEvent e = new TEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
     e.durationMicros = event.duration;
 
@@ -360,7 +372,7 @@ class TEvent {
   final int threadId;
   final String name;
 
-  List<TEvent> children = [];
+  List<TEvent> children = <TEvent>[];
 
   int startMicros;
   int durationMicros;
@@ -386,6 +398,7 @@ class TEvent {
     }
   }
 
+  @override
   String toString() => '$name, start=$startMicros duration=$durationMicros';
 }
 
@@ -406,21 +419,30 @@ class TimelineThread implements Comparable<TimelineThread> {
   bool get isVisible => name.startsWith('io.flutter.');
 
   int get category {
-    if (name.endsWith('.ui')) return 1;
-    if (name.endsWith('.gpu')) return 2;
-    if (name.startsWith('io.flutter.')) return 3;
+    if (name.endsWith('.ui')) {
+      return 1;
+    }
+    if (name.endsWith('.gpu')) {
+      return 2;
+    }
+    if (name.startsWith('io.flutter.')) {
+      return 3;
+    }
     return 4;
   }
 
   String get name => _name;
 
+  @override
   String toString() => name;
 
   @override
   int compareTo(TimelineThread other) {
-    int c1 = category;
-    int c2 = other.category;
-    if (c1 != c2) return c1 - c2;
+    final int c1 = category;
+    final int c2 = other.category;
+    if (c1 != c2) {
+      return c1 - c2;
+    }
     return name.compareTo(other.name);
   }
 }
@@ -487,6 +509,7 @@ class TimelineEvent {
   /// Arbitrary data attached to the event.
   final Map<String, dynamic> args;
 
+  @override
   String toString() => '[$category] [$phase] $name';
 }
 
@@ -495,12 +518,12 @@ class TimelineFramesUI extends CoreElement {
   TimelineData timelineData;
 
   final StreamController<TimelineFrame> _selectedFrameController =
-      new StreamController.broadcast();
+      new StreamController<TimelineFrame>.broadcast();
 
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
-      CoreElement frameUI = new TimelineFrameUI(this, frame);
+      final CoreElement frameUI = new TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
       } else {
@@ -508,7 +531,7 @@ class TimelineFramesUI extends CoreElement {
       }
     });
 
-    timelineFramesBuilder.onCleared.listen((_) {
+    timelineFramesBuilder.onCleared.listen((Null _) {
       clear();
 
       setSelected(null);
@@ -538,18 +561,18 @@ class TimelineFrameUI extends CoreElement {
 
   TimelineFrameUI(this.framesUI, this.frame)
       : super('div', classes: 'timeline-frame') {
-    add([
+    add(<CoreElement>[
       span(text: 'dart ${frame.renderAsMs}', c: 'perf-label'),
       new CoreElement('br'),
       span(text: 'gpu ${frame.gpuAsMs}', c: 'perf-label'),
     ]);
 
-    final double pixelsPerMs =
+    const double pixelsPerMs =
         (80.0 - 6) / (FrameInfo.kTargetMaxFrameTimeMs * 2);
 
     bool isSlow = false;
 
-    CoreElement dartBar = div(c: 'perf-bar left');
+    final CoreElement dartBar = div(c: 'perf-bar left');
     if (frame.renderDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       dartBar.clazz('slow');
       isSlow = true;
@@ -559,7 +582,7 @@ class TimelineFrameUI extends CoreElement {
     dartBar.element.style.height = '${height}px';
     add(dartBar);
 
-    CoreElement gpuBar = div(c: 'perf-bar right');
+    final CoreElement gpuBar = div(c: 'perf-bar right');
     if (frame.rastereizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       gpuBar.clazz('slow');
       isSlow = true;
@@ -584,16 +607,17 @@ class TimelineFrameUI extends CoreElement {
 }
 
 class TimelineFramesBuilder {
-  List<TimelineFrame> frames = [];
+  List<TimelineFrame> frames = <TimelineFrame>[];
 
   final StreamController<TimelineFrame> _frameAddedController =
-      new StreamController.broadcast();
+      new StreamController<TimelineFrame>.broadcast();
 
-  final StreamController _clearedController = new StreamController.broadcast();
+  final StreamController<Null> _clearedController =
+      new StreamController<Null>.broadcast();
 
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
 
-  Stream get onCleared => _clearedController.stream;
+  Stream<Null> get onCleared => _clearedController.stream;
 
   void processTimelineEvent(TimelineEvent event) {
     if (event.category != 'Embedder') {
@@ -610,7 +634,7 @@ class TimelineFramesBuilder {
         }
         frame.setRenderStart(event.timestampMicros);
       } else if (event.phase == 'E') {
-        TimelineFrame frame = findFrameBefore(event.timestampMicros);
+        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
         frame?.setRenderEnd(event.timestampMicros);
 
         if (frame != null && frame.isComplete) {
@@ -629,7 +653,7 @@ class TimelineFramesBuilder {
         }
         frame.setRastereizeStart(event.timestampMicros);
       } else if (event.phase == 'E') {
-        TimelineFrame frame = findFrameBefore(event.timestampMicros);
+        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
         frame?.setRastereizeEnd(event.timestampMicros);
 
         if (frame != null && frame.isComplete) {
@@ -697,7 +721,9 @@ class TimelineFrame {
   }
 
   void setRastereizeEnd(int micros) {
-    if (rastereizeStart != null) rastereizeDuration = micros - rastereizeStart;
+    if (rastereizeStart != null) {
+      rastereizeDuration = micros - rastereizeStart;
+    }
   }
 
   bool get isComplete => renderDuration != null && rastereizeDuration != null;
@@ -710,6 +736,7 @@ class TimelineFrame {
     return '${(rastereizeDuration / 1000.0).toStringAsFixed(1)}ms';
   }
 
+  @override
   String toString() {
     return 'frame render: $renderDuration rasterize: $rastereizeDuration';
   }
@@ -727,13 +754,13 @@ class FrameDetailsUI extends CoreElement {
     // TODO(devoncarew): listen to tab changes
     content = div(c: 'frame-timeline')..flex();
 
-    PTabNav tabNav = new PTabNav([
+    final PTabNav tabNav = new PTabNav(<PTabNavTab>[
       new PTabNavTab('Frame timeline'),
       new PTabNavTab('Widget build info'),
       new PTabNavTab('Skia picture'),
     ]);
 
-    add([
+    add(<CoreElement>[
       tabNav,
       content,
     ]);
@@ -769,19 +796,19 @@ class FrameDetailsUI extends CoreElement {
   }
 
   void _render(TimelineFrameData data) {
-    final int leftIndent = 130;
-    final int rowHeight = 25;
+    const int leftIndent = 130;
+    const int rowHeight = 25;
 
-    final double microsPerFrame = 1000 * 1000 / 60.0;
-    final double pxPerMicro = microsPerFrame / 1200.0;
+    const double microsPerFrame = 1000 * 1000 / 60.0;
+    const double pxPerMicro = microsPerFrame / 1200.0;
 
     int row = 0;
 
-    int microsAdjust = data.frame.start;
+    final int microsAdjust = data.frame.start;
 
     int maxRow = 0;
 
-    var drawRecursively;
+    Function drawRecursively;
 
     drawRecursively = (TEvent event, int row) {
       if (!event.wellFormed) {
@@ -790,9 +817,10 @@ class FrameDetailsUI extends CoreElement {
         return;
       }
 
-      double start = (event.startMicros - microsAdjust) / pxPerMicro;
-      double end = (event.startMicros - microsAdjust + event.durationMicros) /
-          pxPerMicro;
+      final double start = (event.startMicros - microsAdjust) / pxPerMicro;
+      final double end =
+          (event.startMicros - microsAdjust + event.durationMicros) /
+              pxPerMicro;
 
       _createPosition(event.name, leftIndent + start.round(),
           (end - start).round(), row * rowHeight);
@@ -827,7 +855,7 @@ class FrameDetailsUI extends CoreElement {
   }
 
   void _createPosition(String name, int left, int width, int top) {
-    CoreElement item = div(text: name, c: 'timeline-title');
+    final CoreElement item = div(text: name, c: 'timeline-title');
     item.element.style.left = '${left}px';
     if (width != null) {
       item.element.style.width = '${width}px';
