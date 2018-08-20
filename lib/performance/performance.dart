@@ -278,7 +278,8 @@ class CpuTracker {
       return;
     }
 
-    _addSample(clamp((_lastValue ?? 50) + rnd.nextInt(20) - 10, 0, 100));
+    final int sample = (_lastValue ?? 50) + rnd.nextInt(20) - 10;
+    _addSample(sample.clamp(0, 100));
 
     _pollingTimer = new Timer(kUpdateDelay, _pollCpu);
   }
@@ -405,13 +406,3 @@ tries['inclusiveFunctionTrie'] =
     new Uint32List.fromList(profile['inclusiveFunctionTrie']);
 
 */
-
-int clamp(int value, int min, int max) {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
-  return value;
-}
