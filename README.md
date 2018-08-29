@@ -27,6 +27,7 @@ repo](https://github.com/flutter/flutter/issues/new).
 
 From a separate terminal:
 - cd <path/to/flutter-sdk>/examples/flutter_gallery
+- ensure the iOS Simulator is open (or a physical device is connected)
 - flutter run
 
 From the devtools directory:
