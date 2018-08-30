@@ -4,9 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 const String loremIpsum = '''
@@ -90,3 +92,19 @@ class Property<T> {
 
   Stream<T> get onValueChange => _changeController.stream;
 }
+
+/// The directory used to store per-user settings for Dart tooling.
+Directory getDartPrefsDirectory() {
+  return new Directory(path.join(getUserHomeDir(), '.dart'));
+}
+
+/// Return the user's home directory.
+String getUserHomeDir() {
+  final String envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  final String value = Platform.environment[envKey];
+  return value == null ? '.' : value;
+}
+
+/// A typedef to represent a function taking no arguments and with no return
+/// value.
+typedef void VoidFunction();

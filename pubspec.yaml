@@ -10,9 +10,16 @@ dependencies:
   intl: ^0.15.0
   logging: ^0.11.0
   meta: ^1.1.0
+  path: ^1.6.0
   vm_service_lib: ^0.3.9
 
 dev_dependencies:
   build_runner: any
   build_web_compilers: any
   test: ^1.0.0
+  webdev: 0.2.4
+  webkit_inspection_protocol: ^0.3.1
+
+dependency_overrides:
+  webkit_inspection_protocol:
+    path: /Users/devoncarew/projects/google/webkit_inspection_protocol.dart

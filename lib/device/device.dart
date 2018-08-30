@@ -171,11 +171,13 @@ class ExtensionTracker {
       if (result is Isolate) {
         final Isolate isolate = result;
 
-        for (String rpc in isolate.extensionRPCs) {
-          if (!extensionToIsolatesMap.containsKey(rpc)) {
-            extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
+        if (isolate.extensionRPCs != null) {
+          for (String rpc in isolate.extensionRPCs) {
+            if (!extensionToIsolatesMap.containsKey(rpc)) {
+              extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
+            }
+            extensionToIsolatesMap[rpc].add(isolateRef);
           }
-          extensionToIsolatesMap[rpc].add(isolateRef);
         }
       }
 
