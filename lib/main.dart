@@ -11,6 +11,7 @@ import 'framework/framework.dart';
 import 'globals.dart';
 import 'logging/logging.dart';
 import 'memory/memory.dart';
+import 'model/model.dart';
 import 'performance/performance.dart';
 import 'service.dart';
 import 'timeline/timeline.dart';
@@ -39,6 +40,8 @@ class PerfToolFramework extends Framework {
     addScreen(new LoggingScreen());
 
     initGlobalUI();
+
+    initTestingModel();
   }
 
   void initGlobalUI() {
@@ -78,6 +81,10 @@ class PerfToolFramework extends Framework {
     serviceInfo.isolateManager.onIsolateExited.listen(_rebuildIsolateSelect);
     serviceInfo.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
+  }
+
+  void initTestingModel() {
+    App.register(this);
   }
 
   IsolateRef get currentIsolate => serviceInfo.isolateManager.selectedIsolate;

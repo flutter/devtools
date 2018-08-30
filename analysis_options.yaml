@@ -20,6 +20,8 @@ analyzer:
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
+  exclude:
+  - build/**
 
 linter:
   rules:
