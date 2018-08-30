@@ -10,8 +10,8 @@ import 'dart:io';
 final Controller controller = new Controller();
 
 void main() {
-  log('starting app');
   print('starting app');
+  log('starting app');
 
   // Don't exit until it's indicated we should by the controller.
   new Timer(const Duration(days: 1), () {});
@@ -24,13 +24,12 @@ class Controller {
     count++;
 
     print('emitLog called');
-
     log('emit log $count', name: 'logging');
   }
 
   void shutdown() {
-    log('stopping app');
     print('stopping app');
+    log('stopping app');
 
     exit(0);
   }

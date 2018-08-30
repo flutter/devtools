@@ -152,7 +152,7 @@ class BrowserManager {
     final ChromeProcess chromeProcess = await chrome.start();
     final ChromeTab tab = await chromeProcess.getFirstTab();
 
-    await tab.connect(new StdoutLogger('tab'));
+    await tab.connect();
 
     return new BrowserManager._(chromeProcess, tab);
   }
@@ -165,7 +165,7 @@ class BrowserManager {
 
     final ChromeTab tab =
         await chromeProcess.connectToTabId('localhost', targetId);
-    await tab.connect(new StdoutLogger('tab'));
+    await tab.connect();
 
     await tab.wipConnection.target.activateTarget(targetId);
 
@@ -453,18 +453,5 @@ class CliAppFixture {
   Future<void> teardown() async {
     serviceConnection.dispose();
     process.kill();
-  }
-}
-
-class StdoutLogger extends Logger {
-  final String name;
-
-  StdoutLogger(this.name);
-
-  @override
-  void trace(String message) {
-    if (isVerbose) {
-      print('[$name] $message');
-    }
   }
 }

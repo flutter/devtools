@@ -23,12 +23,8 @@ class Chrome {
 
   static Chrome locate() {
     if (Platform.isMacOS) {
-      // /Applications/Google\ Chrome\ Canary.app/
-
-      //const String defaultPath = '/Applications/Google Chrome.app';
-      const String defaultPath = '/Applications/Google Chrome Canary.app';
-      //const String bundlePath = 'Contents/MacOS/Google Chrome';
-      const String bundlePath = 'Contents/MacOS/Google Chrome Canary';
+      const String defaultPath = '/Applications/Google Chrome.app';
+      const String bundlePath = 'Contents/MacOS/Google Chrome';
 
       if (FileSystemEntity.isDirectorySync(defaultPath)) {
         return new Chrome.from(path.join(defaultPath, bundlePath));
@@ -159,7 +155,7 @@ class ChromeTab {
 
   ChromeTab(this.wipTab);
 
-  Future<WipConnection> connect(Logger log) async {
+  Future<WipConnection> connect() async {
     _wip = await wipTab.connect();
 
     _wip.log.enable();
@@ -182,11 +178,9 @@ class ChromeTab {
 
     _wip.page.enable();
 
-    if (log.isVerbose) {
-      _wip.onNotification.listen((WipEvent e) {
-        log.trace(e.toString());
-      });
-    }
+    //_wip.onNotification.listen((WipEvent e) {
+    //  print(e.toString());
+    //});
 
     _wip.onClose.listen((_) {
       _wip = null;
@@ -218,11 +212,4 @@ class ChromeTab {
   Future<dynamic> navigate(String url) => _wip.page.navigate(url);
 
   WipConnection get wipConnection => _wip;
-}
-
-// TODO(devoncarew): I'm not sure this class is necessary.
-abstract class Logger {
-  bool isVerbose = false;
-
-  void trace(String message);
 }
