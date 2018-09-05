@@ -21,7 +21,7 @@ import '../utils.dart';
 
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
-const int kMaxLogItemsLength = 40;
+const int kMaxLogItemsLength = 5000;
 
 class LoggingScreen extends Screen {
   Framework framework;
