@@ -275,12 +275,8 @@ abstract class Screen {
 }
 
 class SetStateMixin {
-  Timer timer;
-
   void setState(Function rebuild) {
-    timer?.cancel();
-    // TODO(devoncarew): listen for rAFs instead
-    timer = new Timer(Duration.zero, rebuild);
+    window.requestAnimationFrame((_) => rebuild());
   }
 }
 

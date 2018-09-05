@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:devtools/framework/framework.dart';
+
 import 'ui/elements.dart';
 import 'utils.dart';
 
@@ -12,7 +14,7 @@ import 'utils.dart';
 
 // TODO(devoncarew): virtualize
 
-class Table<T> {
+class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   bool isVirtual = false;
   double rowHeight;
@@ -28,7 +30,6 @@ class Table<T> {
   CoreElement _tbody;
   CoreElement _beforeRowsSpacer;
   CoreElement _afterRowsSpacer;
-  Timer _scrollRebuildTimer;
 
   Map<Column<T>, CoreElement> spanForColumn = <Column<T>, CoreElement>{};
 
@@ -48,14 +49,7 @@ class Table<T> {
     _beforeRowsSpacer = new CoreElement('tr');
     _afterRowsSpacer = new CoreElement('tr');
 
-    element.onScroll.listen((_) {
-      // When scrolling, wait for a break of 100ms before we start rebuilding
-      if (_scrollRebuildTimer != null && _scrollRebuildTimer.isActive) {
-        _scrollRebuildTimer.cancel();
-      }
-      _scrollRebuildTimer =
-          new Timer(Duration(milliseconds: 100), _rebuildTable);
-    });
+    element.onScroll.listen((_) => setState(_rebuildTable));
   }
 
   Stream<T> get onSelect => _selectController.stream;
