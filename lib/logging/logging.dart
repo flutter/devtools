@@ -52,7 +52,7 @@ class LoggingScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    loggingTable = new Table<LogData>();
+    loggingTable = new Table<LogData>.virtual();
 
     loggingTable.addColumn(new LogWhenColumn());
     loggingTable.addColumn(new LogKindColumn());

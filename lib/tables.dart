@@ -14,6 +14,8 @@ import 'utils.dart';
 
 class Table<T> {
   final CoreElement element;
+  bool isVirtual = false;
+  double rowHeight;
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> rows;
@@ -24,6 +26,9 @@ class Table<T> {
   CoreElement _table;
   CoreElement _thead;
   CoreElement _tbody;
+  CoreElement _beforeRowsSpacer;
+  CoreElement _afterRowsSpacer;
+  Timer _scrollRebuildTimer;
 
   Map<Column<T>, CoreElement> spanForColumn = <Column<T>, CoreElement>{};
 
@@ -33,6 +38,24 @@ class Table<T> {
   Table() : element = div(a: 'flex', c: 'overflow-y table-border') {
     _table = new CoreElement('table')..clazz('full-width');
     element.add(_table);
+  }
+
+  Table.virtual({this.rowHeight = 29.0})
+      : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
+        isVirtual = true {
+    _table = new CoreElement('table')..clazz('full-width');
+    element.add(_table);
+    _beforeRowsSpacer = new CoreElement('tr');
+    _afterRowsSpacer = new CoreElement('tr');
+
+    element.onScroll.listen((_) {
+      // When scrolling, wait for a break of 100ms before we start rebuilding
+      if (_scrollRebuildTimer != null && _scrollRebuildTimer.isActive) {
+        _scrollRebuildTimer.cancel();
+      }
+      _scrollRebuildTimer =
+          new Timer(Duration(milliseconds: 100), _rebuildTable);
+    });
   }
 
   Stream<T> get onSelect => _selectController.stream;
@@ -127,8 +150,39 @@ class Table<T> {
     // Re-build the table.
     final List<Element> rowElements = <Element>[];
 
-    for (T row in rows) {
+    int firstRenderedRowInc = 0;
+    int lastRenderedRowExc = rows?.length ?? 0;
+
+    // If we're a virtual table, calculate the rows to render based on scroll
+    // position. We'll include a "screens worth" of rows above/below to reduce
+    // blank rendering as we scroll.
+    if (isVirtual) {
+      int firstVisibleRow =
+          ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
+      // Snap to an even number to avoid the alternating background swapping
+      // as you scroll down.
+      if (firstVisibleRow % 2 != 0) {
+        firstVisibleRow--;
+      }
+      final int numVisibleRows = (element.offsetHeight / rowHeight).ceil();
+      firstRenderedRowInc =
+          (firstVisibleRow - numVisibleRows).clamp(0, rows?.length ?? 0);
+      lastRenderedRowExc =
+          (firstVisibleRow + numVisibleRows * 2).clamp(0, rows?.length ?? 0);
+    }
+
+    if (firstRenderedRowInc > 0) {
+      // Add a spacer row to fill up the content off-screen
+      final double height = firstRenderedRowInc * rowHeight;
+      _beforeRowsSpacer.height = '${height}px';
+      rowElements.add(_beforeRowsSpacer.element);
+    }
+    for (T row in rows.sublist(firstRenderedRowInc, lastRenderedRowExc)) {
       final CoreElement tableRow = tr();
+      if (rowHeight != null) {
+        tableRow.height = '${rowHeight}px';
+        tableRow.clazz('overflow-y');
+      }
 
       for (Column<T> column in columns) {
         String cssClass = column.cssClass;
@@ -155,6 +209,12 @@ class Table<T> {
       });
 
       rowElements.add(tableRow.element);
+    }
+    if (lastRenderedRowExc < rows.length) {
+      // Add spacer row
+      final double height = (rows.length - lastRenderedRowExc - 1) * rowHeight;
+      _afterRowsSpacer.height = '${height}px';
+      rowElements.add(_afterRowsSpacer.element);
     }
 
     _tbody.clear();

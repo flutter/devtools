@@ -209,7 +209,18 @@ class CoreElement {
     element.style.display = value;
   }
 
+  int get scrollTop => element.scrollTop;
+
+  int get offsetHeight => element.offsetHeight;
+
+  String get height => element.style.height;
+
+  set height(String value) {
+    element.style.height = value;
+  }
+
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
+  Stream<Event> get onScroll => element.onScroll;
 
   /// Subscribe to the [onClick] event stream with a no-arg handler.
   StreamSubscription<Event> click(void handle(), [void shiftHandle()]) {
