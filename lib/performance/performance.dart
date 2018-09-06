@@ -23,7 +23,6 @@ class PerformanceScreen extends Screen {
   PButton resetButton;
   CoreElement progressElement;
   Table<PerfData> perfTable;
-  Framework framework;
 
   CpuChart cpuChart;
   SetStateMixin cpuChartStateMixin = new SetStateMixin();
@@ -43,8 +42,6 @@ class PerformanceScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
-    this.framework = framework;
-
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),

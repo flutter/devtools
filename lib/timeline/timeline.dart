@@ -13,18 +13,18 @@ import '../ui/elements.dart';
 import '../ui/primer.dart';
 import 'fps.dart';
 
-// TODO(devoncarew): expose perf debugging toggles (ext.flutter.repaintRainbow,
-//       ext.flutter.showPerformanceOverlay, others)
-
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
-// TODO(devoncarew): show the list of widgets re-draw during a frame
+// TODO(devoncarew): show the list of widgets re-drawn during a frame
 
 // TODO(devoncarew): display whether running in debug or profile
 
 // TODO(devoncarew): use colors for the category
 
 class TimelineScreen extends Screen {
+  TimelineScreen()
+      : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
+
   FramesChart framesChart;
   SetStateMixin framesChartStateMixin = new SetStateMixin();
   FramesTracker framesTracker;
@@ -32,21 +32,33 @@ class TimelineScreen extends Screen {
 
   TimelineFramesUI timelineFramesUI;
 
-  TimelineScreen()
-      : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
+  bool paused = false;
+
+  PButton pauseButton;
+  PButton resumeButton;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     FrameDetailsUI frameDetailsUI;
 
-    // TODO(devoncarew): pause and resume
+    pauseButton = new PButton('Pause recording')
+      ..small()
+      ..primary()
+      ..click(_pauseRecording);
 
-    final PButton debugDrawButton = new PButton('Debug draw')..small();
+    resumeButton = new PButton('Resume recording')
+      ..small()
+      ..clazz('margin-left')
+      ..disabled = true
+      ..click(_resumeRecording);
+
+    final PButton trackWidgetBuildsButton = new PButton('Track widget builds')
+      ..small();
     final PButton perfOverlayButton = new PButton('Performance overlay')
       ..small();
-    final PButton debugBannerButton = new PButton('Debug banner')
-      ..small()
-      ..clazz('selected');
+    final PButton repaintRainbowButton = new PButton('Repaint rainbow')
+      ..small();
+    final PButton debugDrawButton = new PButton('Debug draw')..small();
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -54,20 +66,15 @@ class TimelineScreen extends Screen {
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
-          new PButton('Start timeline recording')
-            ..small()
-            ..primary()
-            ..click(_startTimeline),
-          new PButton('Stop recording')
-            ..small()
-            ..clazz('margin-left')
-            ..click(_stopTimeline),
+          pauseButton,
+          resumeButton,
           div()..flex(),
           div(c: 'btn-group')
             ..add(<CoreElement>[
-              debugDrawButton,
+              trackWidgetBuildsButton,
               perfOverlayButton,
-              debugBannerButton,
+              repaintRainbowButton,
+              debugDrawButton,
             ]),
         ]),
       div(c: 'section')
@@ -80,13 +87,15 @@ class TimelineScreen extends Screen {
         ..add(frameDetailsUI = new FrameDetailsUI()..attribute('hidden')),
     ]);
 
-    debugDrawButton.click(() {
+    trackWidgetBuildsButton.click(() {
       final bool wasSelected =
-          debugDrawButton.element.classes.contains('selected');
-      debugDrawButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension('ext.flutter.debugPaint',
-          isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: <String, bool>{'enabled': !wasSelected});
+          trackWidgetBuildsButton.element.classes.contains('selected');
+      trackWidgetBuildsButton.toggleClass('selected');
+      serviceInfo.service.callServiceExtension(
+        'ext.flutter.debugProfileBuilds',
+        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+        args: <String, bool>{'enabled': !wasSelected},
+      );
     });
 
     perfOverlayButton.click(() {
@@ -94,18 +103,32 @@ class TimelineScreen extends Screen {
           perfOverlayButton.element.classes.contains('selected');
       perfOverlayButton.toggleClass('selected');
       serviceInfo.service.callServiceExtension(
-          'ext.flutter.showPerformanceOverlay',
-          isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: <String, bool>{'enabled': !wasSelected});
+        'ext.flutter.showPerformanceOverlay',
+        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+        args: <String, bool>{'enabled': !wasSelected},
+      );
     });
 
-    debugBannerButton.click(() {
+    repaintRainbowButton.click(() {
       final bool wasSelected =
-          debugBannerButton.element.classes.contains('selected');
-      debugBannerButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension('ext.flutter.debugAllowBanner',
-          isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-          args: <String, bool>{'enabled': !wasSelected});
+          repaintRainbowButton.element.classes.contains('selected');
+      repaintRainbowButton.toggleClass('selected');
+      serviceInfo.service.callServiceExtension(
+        'ext.flutter.repaintRainbow',
+        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+        args: <String, bool>{'enabled': !wasSelected},
+      );
+    });
+
+    debugDrawButton.click(() {
+      final bool wasSelected =
+          debugDrawButton.element.classes.contains('selected');
+      debugDrawButton.toggleClass('selected');
+      serviceInfo.service.callServiceExtension(
+        'ext.flutter.debugPaint',
+        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+        args: <String, bool>{'enabled': !wasSelected},
+      );
     });
 
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
@@ -117,8 +140,7 @@ class TimelineScreen extends Screen {
     timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
       frameDetailsUI.attribute('hidden', frame == null);
 
-      // TODO(devoncarew): allow frame selection while recording data
-      if (frame != null && timelineFramesUI.timelineData != null) {
+      if (frame != null && timelineFramesUI.hasStarted()) {
         final TimelineFrameData data =
             timelineFramesUI.timelineData.getFrameData(frame);
         frameDetailsUI.updateData(data);
@@ -136,12 +158,12 @@ class TimelineScreen extends Screen {
 
   @override
   void entering() {
-    //print('entering $name');
+    _updateListeningState();
   }
 
   @override
   void exiting() {
-    //print('exiting $name');
+    _updateListeningState();
   }
 
   void _handleConnectionStart(VmService service) {
@@ -176,10 +198,46 @@ class TimelineScreen extends Screen {
     framesTracker?.stop();
   }
 
-  void _startTimeline() async {
-    timelineFramesBuilder.clear();
-    timelineFramesUI.timelineData = null;
+  void _pauseRecording() {
+    pauseButton.disabled = true;
+    resumeButton.disabled = false;
 
+    paused = true;
+
+    _updateListeningState();
+  }
+
+  void _resumeRecording() {
+    pauseButton.disabled = false;
+    resumeButton.disabled = true;
+
+    paused = false;
+
+    _updateListeningState();
+  }
+
+  void _updateListeningState() async {
+    final bool shouldBeRunning = !paused && isCurrentScreen;
+    final bool isRunning = !timelineFramesBuilder.isPaused;
+
+    if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
+      _startTimeline();
+    }
+
+    if (shouldBeRunning && !isRunning) {
+      timelineFramesBuilder.resume();
+
+      await serviceInfo.service
+          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
+    } else if (!shouldBeRunning && isRunning) {
+      // TODO: turn off the events
+      await serviceInfo.service.setVMTimelineFlags(<String>[]);
+
+      timelineFramesBuilder.pause();
+    }
+  }
+
+  void _startTimeline() async {
     await serviceInfo.service
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     await serviceInfo.service.clearVMTimeline();
@@ -205,16 +263,6 @@ class TimelineScreen extends Screen {
     threads.sort();
 
     timelineFramesUI.timelineData = new TimelineData(threads);
-  }
-
-  void _stopTimeline() async {
-    // http://127.0.0.1:8100/_getCpuProfileTimeline?tags=None&
-    //   isolateId=isolates/140204549&timeOriginMicros=225679584415&
-    //   timeExtentMicros=35716620
-
-    //timelineData.printData();
-
-    await serviceInfo.service.setVMTimelineFlags(<String>[]);
   }
 
   @override
@@ -538,6 +586,8 @@ class TimelineFramesUI extends CoreElement {
     });
   }
 
+  bool hasStarted() => timelineData != null;
+
   Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
 
   void setSelected(TimelineFrameUI frameUI) {
@@ -607,7 +657,11 @@ class TimelineFrameUI extends CoreElement {
 }
 
 class TimelineFramesBuilder {
+  static const int maxFrames = 120;
+
   List<TimelineFrame> frames = <TimelineFrame>[];
+
+  bool isPaused = false;
 
   final StreamController<TimelineFrame> _frameAddedController =
       new StreamController<TimelineFrame>.broadcast();
@@ -618,6 +672,18 @@ class TimelineFramesBuilder {
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
 
   Stream<Null> get onCleared => _clearedController.stream;
+
+  void pause() {
+    isPaused = true;
+
+    if (frames.isNotEmpty && !frames.last.isComplete) {
+      frames.removeLast();
+    }
+  }
+
+  void resume() {
+    isPaused = false;
+  }
 
   void processTimelineEvent(TimelineEvent event) {
     if (event.category != 'Embedder') {
@@ -650,6 +716,9 @@ class TimelineFramesBuilder {
         if (frame == null) {
           frame = new TimelineFrame();
           frames.add(frame);
+          if (frames.length > maxFrames) {
+            frames.removeAt(0);
+          }
         }
         frame.setRastereizeStart(event.timestampMicros);
       } else if (event.phase == 'E') {

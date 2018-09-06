@@ -26,7 +26,6 @@ class MemoryScreen extends Screen {
 
   PButton loadSnapshotButton;
   Table<ClassHeapStats> memoryTable;
-  Framework framework;
 
   MemoryChart memoryChart;
   SetStateMixin memoryChartStateMixin = new SetStateMixin();
@@ -44,8 +43,6 @@ class MemoryScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
-    this.framework = framework;
-
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
