@@ -87,49 +87,23 @@ class TimelineScreen extends Screen {
         ..add(frameDetailsUI = new FrameDetailsUI()..attribute('hidden')),
     ]);
 
-    trackWidgetBuildsButton.click(() {
-      final bool wasSelected =
-          trackWidgetBuildsButton.element.classes.contains('selected');
-      trackWidgetBuildsButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension(
-        'ext.flutter.debugProfileBuilds',
-        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-        args: <String, bool>{'enabled': !wasSelected},
-      );
-    });
+    void handleToggleButton(PButton button, String serviceCallName) {
+      button.click(() {
+        final bool wasSelected = button.element.classes.contains('selected');
+        button.toggleClass('selected');
+        serviceInfo.service.callServiceExtension(
+          serviceCallName,
+          isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+          args: <String, bool>{'enabled': !wasSelected},
+        );
+      });
+    }
 
-    perfOverlayButton.click(() {
-      final bool wasSelected =
-          perfOverlayButton.element.classes.contains('selected');
-      perfOverlayButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension(
-        'ext.flutter.showPerformanceOverlay',
-        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-        args: <String, bool>{'enabled': !wasSelected},
-      );
-    });
-
-    repaintRainbowButton.click(() {
-      final bool wasSelected =
-          repaintRainbowButton.element.classes.contains('selected');
-      repaintRainbowButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension(
-        'ext.flutter.repaintRainbow',
-        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-        args: <String, bool>{'enabled': !wasSelected},
-      );
-    });
-
-    debugDrawButton.click(() {
-      final bool wasSelected =
-          debugDrawButton.element.classes.contains('selected');
-      debugDrawButton.toggleClass('selected');
-      serviceInfo.service.callServiceExtension(
-        'ext.flutter.debugPaint',
-        isolateId: serviceInfo.isolateManager.selectedIsolate.id,
-        args: <String, bool>{'enabled': !wasSelected},
-      );
-    });
+    handleToggleButton(
+        trackWidgetBuildsButton, 'ext.flutter.debugProfileBuilds');
+    handleToggleButton(perfOverlayButton, 'ext.flutter.showPerformanceOverlay');
+    handleToggleButton(repaintRainbowButton, 'ext.flutter.repaintRainbow');
+    handleToggleButton(debugDrawButton, 'ext.flutter.debugPaint');
 
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceInfo.hasConnection) {
