@@ -24,7 +24,6 @@ import '../utils.dart';
 const int kMaxLogItemsLength = 40;
 
 class LoggingScreen extends Screen {
-  Framework framework;
   Table<LogData> loggingTable;
   StatusItem logCountStatus;
   SetStateMixin loggingStateMixin = new SetStateMixin();
@@ -44,8 +43,6 @@ class LoggingScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
-    this.framework = framework;
-
     mainDiv.add(<CoreElement>[
       _createTableView()..clazz('section'),
     ]);
