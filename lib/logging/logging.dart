@@ -163,7 +163,7 @@ class LoggingScreen extends Screen {
     }
 
     loggingStateMixin.setState(() {
-      loggingTable.setRows(data);
+      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
       _updateStatus();
     });
   }

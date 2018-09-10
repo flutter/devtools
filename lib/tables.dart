@@ -16,6 +16,7 @@ import 'utils.dart';
 class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   bool isVirtual = false;
+  bool offsetRowColor = false;
   double rowHeight;
 
   List<Column<T>> columns = <Column<T>>[];
@@ -29,6 +30,8 @@ class Table<T> extends Object with SetStateMixin {
   CoreElement _tbody;
   CoreElement _beforeRowsSpacer;
   CoreElement _afterRowsSpacer;
+  final CoreElement rowColorCompensator = new CoreElement('tr')
+    ..display = 'none';
 
   Map<Column<T>, CoreElement> spanForColumn = <Column<T>, CoreElement>{};
 
@@ -57,7 +60,18 @@ class Table<T> extends Object with SetStateMixin {
     columns.add(column);
   }
 
-  void setRows(List<T> rows) {
+  void setRows(List<T> rows, {bool anchorAlternatingRowsToBottom = false}) {
+    // For tables that insert rows at the top, we'd like to preserve the background
+    // color for each (eg. when we insert one row, the previous-top row should
+    // have the same background color even though it's gone from odd to even).
+    // To achieve this, we have a boolean that dictates whether we insert a dummy row
+    // at the top, and will reverse it when the number of rows being inserted into
+    // the table is odd.
+    final int differenceInRowCount =
+        (rows?.length ?? 0) - (this.rows?.length ?? 0);
+    if (anchorAlternatingRowsToBottom && differenceInRowCount % 2 == 1) {
+      offsetRowColor = !offsetRowColor;
+    }
     this.rows = rows.toList();
 
     if (_thead == null) {
@@ -149,9 +163,12 @@ class Table<T> extends Object with SetStateMixin {
     int firstRenderedRowInc = 0;
     int lastRenderedRowExc = rows?.length ?? 0;
 
-    // If we're a virtual table, calculate the subset of rows to render based on
-    // scroll position.
+    // Keep track of the table row we're inserting so that we can re-use rows
+    // if they already exist in the DOM.
+    int currentRowIndex = 0;
+
     if (isVirtual) {
+      // Calculate the subset of rows to render based on scroll position.
       final int firstVisibleRow =
           ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
       final int numVisibleRows = (element.offsetHeight / rowHeight).ceil();
@@ -161,24 +178,19 @@ class Table<T> extends Object with SetStateMixin {
       //   2) because we need to render the extra partially-visible row
       lastRenderedRowExc = (firstRenderedRowInc + numVisibleRows + 2)
           .clamp(0, rows?.length ?? 0);
-    }
 
-    // Keep track of the table row we're inserting so that we can re-use rows
-    // if they already exist in the DOM.
-    int currentRowIndex = 0;
-    if (isVirtual) {
-      if (firstRenderedRowInc > 0) {
-        // Add a spacer row to fill up the content off-screen.
-        final double height = firstRenderedRowInc * rowHeight;
-        _beforeRowsSpacer.height = '${height}px';
-        _beforeRowsSpacer.display = height == 0 ? 'none' : null;
-        // If the spacer row isn't already at the start of the list, add it.
-        if (_tbody.element.children.isEmpty ||
-            _tbody.element.children.first != _beforeRowsSpacer.element) {
-          _tbody.element.children.insert(0, _beforeRowsSpacer.element);
-        }
-        currentRowIndex++;
+      // Add a spacer row to fill up the content off-screen.
+      final double height = firstRenderedRowInc * rowHeight;
+      _beforeRowsSpacer.height = '${height}px';
+      _beforeRowsSpacer.display = height == 0 ? 'none' : null;
+
+      // If the spacer row isn't already at the start of the list, add it.
+      if (_tbody.element.children.isEmpty ||
+          _tbody.element.children.first != _beforeRowsSpacer.element) {
+        _tbody.element.children.insert(0, _beforeRowsSpacer.element);
       }
+      currentRowIndex++;
+
       // Remove the last row if it's the spacer - we'll re-add it later if required
       // but it simplifies things if we can just append any new rows we need to create
       // to the end.
@@ -186,6 +198,18 @@ class Table<T> extends Object with SetStateMixin {
           _tbody.element.children.last == _afterRowsSpacer.element) {
         _tbody.element.children.removeLast();
       }
+    }
+
+    _tbody.element.children.remove(rowColorCompensator.element);
+    bool shouldOffsetRowColor = offsetRowColor;
+    // If we're skipping an odd number or rows, we need to invert whether to include
+    // the row color compensator.
+    if (firstRenderedRowInc % 2 == 1) {
+      shouldOffsetRowColor = !shouldOffsetRowColor;
+    }
+    if (shouldOffsetRowColor) {
+      _tbody.element.children.insert(0, rowColorCompensator.element);
+      currentRowIndex++;
     }
 
     for (T row in rows.sublist(firstRenderedRowInc, lastRenderedRowExc)) {
