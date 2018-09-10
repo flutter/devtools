@@ -154,18 +154,19 @@ class LoggingScreen extends Screen {
   void _handleConnectionStop(dynamic event) {}
 
   void _log(LogData log) {
-    loggingStateMixin.setState(() {
-      // TODO(devoncarew): make this much more efficient
-      final List<LogData> data = <LogData>[log];
-      data.addAll(loggingTable.rows);
+    // TODO(devoncarew): make this much more efficient
+    // TODO(dantup): Maybe add to a small buffer and then after xms insert
+    // that full buffer into the list here to avoid a list rebuild on every single
+    // insert.
+    final List<LogData> data = List<LogData>.from(loggingTable.rows)
+      ..insert(0, log);
 
-      if (data.length > kMaxLogItemsLength) {
-        data.removeRange(kMaxLogItemsLength, data.length);
-      }
+    if (data.length > kMaxLogItemsLength) {
+      data.removeRange(kMaxLogItemsLength, data.length);
+    }
 
-      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
-      _updateStatus();
-    });
+    loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
+    _updateStatus();
   }
 
   String createFrameDivHtml(FrameInfo frame) {
