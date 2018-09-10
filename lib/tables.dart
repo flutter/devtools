@@ -18,6 +18,7 @@ class Table<T> extends Object with SetStateMixin {
   bool isVirtual = false;
   bool offsetRowColor = false;
   double rowHeight;
+  bool hasPendingRebuild = false;
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> rows;
@@ -111,7 +112,15 @@ class Table<T> extends Object with SetStateMixin {
       _doSort();
     }
 
-    _rebuildTable();
+    if (!hasPendingRebuild) {
+      // Set a flag to ensure we don't schedule rebuilds if there's already one
+      // in the queue.
+      hasPendingRebuild = true;
+      setState(() {
+        hasPendingRebuild = false;
+        _rebuildTable();
+      });
+    }
   }
 
   void _doSort() {
