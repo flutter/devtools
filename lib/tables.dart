@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
 
 import 'package:devtools/framework/framework.dart';
 
@@ -19,6 +20,7 @@ class Table<T> extends Object with SetStateMixin {
   bool offsetRowColor = false;
   double rowHeight;
   bool hasPendingRebuild = false;
+  Map<Element, T> dataForRow = <Element, T>{};
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> rows;
@@ -52,7 +54,7 @@ class Table<T> extends Object with SetStateMixin {
     _beforeRowsSpacer = new CoreElement('tr');
     _afterRowsSpacer = new CoreElement('tr');
 
-    element.onScroll.listen((_) => setState(_rebuildTable));
+    element.onScroll.listen((_) => _scheduleRebuild());
   }
 
   Stream<T> get onSelect => _selectController.stream;
@@ -62,6 +64,11 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void setRows(List<T> rows, {bool anchorAlternatingRowsToBottom = false}) {
+    // If the selected object is no longer valid, clear the selection.
+    if (!rows.contains(_selectedObject)) {
+      _clearSelection();
+    }
+
     // For tables that insert rows at the top, we'd like to preserve the background
     // color for each (eg. when we insert one row, the previous-top row should
     // have the same background color even though it's gone from odd to even).
@@ -112,6 +119,10 @@ class Table<T> extends Object with SetStateMixin {
       _doSort();
     }
 
+    _scheduleRebuild();
+  }
+
+  void _scheduleRebuild() {
     if (!hasPendingRebuild) {
       // Set a flag to ensure we don't schedule rebuilds if there's already one
       // in the queue.
@@ -161,7 +172,6 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildTable() {
-    _clearSelection();
     // When we modify the height of the spacer above the viewport, Chrome automatically
     // adjusts the scrollTop to compensate because it's trying to keep the same content
     // visible to the user. However, since we're overwriting the rows contents (shifting
@@ -228,6 +238,20 @@ class Table<T> extends Object with SetStateMixin {
       final CoreElement tableRow = isReusableRow
           ? new CoreElement.from(_tbody.element.children[currentRowIndex++])
           : tr();
+
+      // Keep the data for each row in a map so we can look it up when the
+      // user clicks the row to select it. This lets us reuse a single
+      // click handler attached when we created the row instead of rebinding
+      // it when rows are reused as we scroll.
+      dataForRow[tableRow.element] = row;
+      void selectRow(Element row) {
+        _select(row, dataForRow[row]);
+      }
+
+      if (!isReusableRow) {
+        tableRow.click(() => selectRow(tableRow.element));
+      }
+
       if (rowHeight != null) {
         tableRow.height = '${rowHeight}px';
         tableRow.clazz('overflow-y');
@@ -265,9 +289,14 @@ class Table<T> extends Object with SetStateMixin {
         }
       }
 
-      tableRow.click(() {
-        _select(tableRow, row);
-      });
+      // If this row represents our selected object, highlight it.
+      if (row == _selectedObject) {
+        _select(tableRow.element, _selectedObject);
+      } else {
+        // Otherwise, ensure it's not marked as selected (the previous data
+        // shown in this row may have been selected).
+        tableRow.element.classes.remove('selected');
+      }
 
       if (!isReusableRow) {
         _tbody.element.children.add(tableRow.element);
@@ -296,27 +325,24 @@ class Table<T> extends Object with SetStateMixin {
     }
   }
 
-  CoreElement _selectedElement;
   T _selectedObject;
 
-  void _select(CoreElement elementRow, T object) {
-    if (_selectedObject == object) {
-      return;
+  void _select(Element row, T object) {
+    if (_tbody != null) {
+      for (Element row in _tbody.element.querySelectorAll('.selected')) {
+        row.classes.remove('selected');
+      }
     }
 
-    if (_selectedElement != null) {
-      _selectedElement.toggleClass('selected', false);
-      _selectedElement = null;
-    }
-
-    _selectedElement = elementRow;
     _selectedObject = object;
 
-    if (_selectedElement != null) {
-      _selectedElement.toggleClass('selected', true);
+    if (row != null) {
+      row.classes.add('selected');
     }
 
-    _selectController.add(object);
+    if (object != null && _selectedObject != object) {
+      _selectController.add(object);
+    }
   }
 
   void _clearSelection() => _select(null, null);
@@ -341,7 +367,7 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     _doSort();
-    _rebuildTable();
+    _scheduleRebuild();
   }
 }
 
