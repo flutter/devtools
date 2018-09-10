@@ -210,7 +210,9 @@ class Table<T> extends Object with SetStateMixin {
                 tableRow.element.children[currentColumnIndex++])
             : td();
 
-        // TODO: Remove/replace old classes
+        // TODO(dantup): Should we make CoreElement expose ClassList instead
+        // of having flat strings?
+        tableCell.element.classes.clear();
         column.cssClass.split(' ').forEach(tableCell.clazz);
 
         if (column.numeric) {
