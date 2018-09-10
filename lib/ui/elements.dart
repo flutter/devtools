@@ -211,6 +211,8 @@ class CoreElement {
 
   int get scrollTop => element.scrollTop;
 
+  set scrollTop(int value) => element.scrollTop = value;
+
   int get offsetHeight => element.offsetHeight;
 
   String get height => element.style.height;

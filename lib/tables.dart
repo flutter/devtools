@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
 
 import 'package:devtools/framework/framework.dart';
 
@@ -140,61 +139,92 @@ class Table<T> extends Object with SetStateMixin {
 
   void _rebuildTable() {
     _clearSelection();
-
-    // Re-build the table.
-    final List<Element> rowElements = <Element>[];
+    // When we modify the height of the spacer above the viewport, Chrome automatically
+    // adjusts the scrollTop to compensate because it's trying to keep the same content
+    // visible to the user. However, since we're overwriting the rows contents (shifting
+    // the data in the rows) we want to retain the original scroll position so must stash
+    // it and reset it later.
+    final int originalScrollTop = element.scrollTop;
 
     int firstRenderedRowInc = 0;
     int lastRenderedRowExc = rows?.length ?? 0;
 
-    // If we're a virtual table, calculate the rows to render based on scroll
-    // position. We'll include a "screens worth" of rows above/below to reduce
-    // blank rendering as we scroll.
+    // If we're a virtual table, calculate the subset of rows to render based on
+    // scroll position.
     if (isVirtual) {
-      int firstVisibleRow =
+      final int firstVisibleRow =
           ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
-      // Snap to an even number to avoid the alternating background swapping
-      // as you scroll down.
-      if (firstVisibleRow % 2 != 0) {
-        firstVisibleRow--;
-      }
       final int numVisibleRows = (element.offsetHeight / rowHeight).ceil();
-      firstRenderedRowInc =
-          (firstVisibleRow - numVisibleRows).clamp(0, rows?.length ?? 0);
-      lastRenderedRowExc =
-          (firstVisibleRow + numVisibleRows * 2).clamp(0, rows?.length ?? 0);
+      firstRenderedRowInc = firstVisibleRow.clamp(0, rows?.length ?? 0);
+      // Calculate the last rendered row. +2 is for:
+      //   1) because it's exclusive so needs to be one higher
+      //   2) because we need to render the extra partially-visible row
+      lastRenderedRowExc = (firstRenderedRowInc + numVisibleRows + 2)
+          .clamp(0, rows?.length ?? 0);
     }
 
-    if (firstRenderedRowInc > 0) {
-      // Add a spacer row to fill up the content off-screen
-      final double height = firstRenderedRowInc * rowHeight;
-      _beforeRowsSpacer.height = '${height}px';
-      rowElements.add(_beforeRowsSpacer.element);
+    // Keep track of the table row we're inserting so that we can re-use rows
+    // if they already exist in the DOM.
+    int currentRowIndex = 0;
+    if (isVirtual) {
+      if (firstRenderedRowInc > 0) {
+        // Add a spacer row to fill up the content off-screen.
+        final double height = firstRenderedRowInc * rowHeight;
+        _beforeRowsSpacer.height = '${height}px';
+        _beforeRowsSpacer.display = height == 0 ? 'none' : null;
+        // If the spacer row isn't already at the start of the list, add it.
+        if (_tbody.element.children.isEmpty ||
+            _tbody.element.children.first != _beforeRowsSpacer.element) {
+          _tbody.element.children.insert(0, _beforeRowsSpacer.element);
+        }
+        currentRowIndex++;
+      }
+      // Remove the last row if it's the spacer - we'll re-add it later if required
+      // but it simplifies things if we can just append any new rows we need to create
+      // to the end.
+      if (_tbody.element.children.isNotEmpty &&
+          _tbody.element.children.last == _afterRowsSpacer.element) {
+        _tbody.element.children.removeLast();
+      }
     }
+
     for (T row in rows.sublist(firstRenderedRowInc, lastRenderedRowExc)) {
-      final CoreElement tableRow = tr();
+      final bool isReusableRow =
+          currentRowIndex < _tbody.element.children.length;
+      // Reuse a row if one already exists in the table.
+      final CoreElement tableRow = isReusableRow
+          ? new CoreElement.from(_tbody.element.children[currentRowIndex++])
+          : tr();
       if (rowHeight != null) {
         tableRow.height = '${rowHeight}px';
         tableRow.clazz('overflow-y');
       }
 
+      int currentColumnIndex = 0;
       for (Column<T> column in columns) {
-        String cssClass = column.cssClass;
+        final bool isReusableColumn =
+            currentColumnIndex < tableRow.element.children.length;
+        // Reuse or create a row.
+        final CoreElement tableCell = isReusableColumn
+            ? new CoreElement.from(
+                tableRow.element.children[currentColumnIndex++])
+            : td();
 
-        if (cssClass != null && column.numeric) {
-          cssClass = '$cssClass right';
-        } else if (column.numeric) {
-          cssClass = 'right';
+        // TODO: Remove/replace old classes
+        column.cssClass.split(' ').forEach(tableCell.clazz);
+
+        if (column.numeric) {
+          tableCell.clazz('right');
         }
 
         if (column.usesHtml) {
-          tableRow.add(
-            td(c: cssClass)..setInnerHtml(column.render(column.getValue(row))),
-          );
+          tableCell..setInnerHtml(column.render(column.getValue(row)));
         } else {
-          tableRow.add(
-            td(text: column.render(column.getValue(row)), c: cssClass),
-          );
+          tableCell.text = column.render(column.getValue(row));
+        }
+
+        if (!isReusableColumn) {
+          tableRow.add(tableCell);
         }
       }
 
@@ -202,17 +232,31 @@ class Table<T> extends Object with SetStateMixin {
         _select(tableRow, row);
       });
 
-      rowElements.add(tableRow.element);
-    }
-    if (lastRenderedRowExc < rows.length) {
-      // Add spacer row
-      final double height = (rows.length - lastRenderedRowExc - 1) * rowHeight;
-      _afterRowsSpacer.height = '${height}px';
-      rowElements.add(_afterRowsSpacer.element);
+      if (!isReusableRow) {
+        _tbody.element.children.add(tableRow.element);
+      }
     }
 
-    _tbody.clear();
-    _tbody.element.children.addAll(rowElements);
+    if (isVirtual) {
+      // Remove any additional rows that we had left that we didn't reuse above.
+      if (currentRowIndex > 0 &&
+          currentRowIndex < _tbody.element.children.length) {
+        // TODO: Why does removeAt(i) work, but not removeRange (UnimplementedError)?
+        // _tbody.element.children
+        //     .removeRange(currentRowIndex, _tbody.element.children.length);
+        for (int i = currentRowIndex; i < _tbody.element.children.length; i++)
+          _tbody.element.children.removeAt(i);
+      }
+      // Set the "after" spacer to the correct height to keep the scroll size
+      // correct for the number or rows to come after.
+      final double height = (rows.length - lastRenderedRowExc) * rowHeight;
+      _afterRowsSpacer.height = '${height}px';
+      _tbody.element.children.add(_afterRowsSpacer.element);
+
+      // Restore the scroll position the user had scrolled to since Chrome may
+      // have modified it after we changed the height of the "before" spacer.
+      element.scrollTop = originalScrollTop;
+    }
   }
 
   CoreElement _selectedElement;
