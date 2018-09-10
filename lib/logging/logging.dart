@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -154,15 +156,15 @@ class LoggingScreen extends Screen {
   void _handleConnectionStop(dynamic event) {}
 
   void _log(LogData log) {
-    // TODO(devoncarew): make this much more efficient
-    final List<LogData> data = <LogData>[log];
-    data.addAll(loggingTable.rows);
-
-    if (data.length > kMaxLogItemsLength) {
-      data.removeRange(kMaxLogItemsLength, data.length);
-    }
-
     loggingStateMixin.setState(() {
+      // TODO(devoncarew): make this much more efficient
+      final List<LogData> data = <LogData>[log];
+      data.addAll(loggingTable.rows);
+
+      if (data.length > kMaxLogItemsLength) {
+        data.removeRange(kMaxLogItemsLength, data.length);
+      }
+
       loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
       _updateStatus();
     });
