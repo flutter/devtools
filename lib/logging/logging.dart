@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
