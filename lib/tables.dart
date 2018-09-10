@@ -237,7 +237,9 @@ class Table<T> extends Object with SetStateMixin {
         // TODO(dantup): Should we make CoreElement expose ClassList instead
         // of having flat strings?
         tableCell.element.classes.clear();
-        column.cssClass.split(' ').forEach(tableCell.clazz);
+        if (column.cssClass != null) {
+          column.cssClass.split(' ').forEach(tableCell.clazz);
+        }
 
         if (column.numeric) {
           tableCell.clazz('right');
