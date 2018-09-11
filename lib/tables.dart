@@ -17,10 +17,10 @@ import 'utils.dart';
 class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   bool isVirtual = false;
-  bool offsetRowColor = false;
+  bool _offsetRowColor = false;
   double rowHeight;
-  bool hasPendingRebuild = false;
-  Map<Element, T> dataForRow = <Element, T>{};
+  bool _hasPendingRebuild = false;
+  final Map<Element, T> _dataForRow = <Element, T>{};
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> rows;
@@ -78,7 +78,7 @@ class Table<T> extends Object with SetStateMixin {
     final int differenceInRowCount =
         (rows?.length ?? 0) - (this.rows?.length ?? 0);
     if (anchorAlternatingRowsToBottom && differenceInRowCount % 2 == 1) {
-      offsetRowColor = !offsetRowColor;
+      _offsetRowColor = !_offsetRowColor;
     }
     this.rows = rows.toList();
 
@@ -126,12 +126,12 @@ class Table<T> extends Object with SetStateMixin {
     // TODO(dantup): It'd be good to push this logic up into setState, but we may need to be
     // able to distinguish functions that must be called on the next RAF versus those
     // where calls are allowed to be skipped (for ex in this case).
-    if (!hasPendingRebuild) {
+    if (!_hasPendingRebuild) {
       // Set a flag to ensure we don't schedule rebuilds if there's already one
       // in the queue.
-      hasPendingRebuild = true;
+      _hasPendingRebuild = true;
       setState(() {
-        hasPendingRebuild = false;
+        _hasPendingRebuild = false;
         _rebuildTable();
       });
     }
@@ -223,7 +223,7 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     _tbody.element.children.remove(rowColorCompensator.element);
-    bool shouldOffsetRowColor = offsetRowColor;
+    bool shouldOffsetRowColor = _offsetRowColor;
     // If we're skipping an odd number or rows, we need to invert whether to include
     // the row color compensator.
     if (firstRenderedRowInc % 2 == 1) {
@@ -246,9 +246,9 @@ class Table<T> extends Object with SetStateMixin {
       // user clicks the row to select it. This lets us reuse a single
       // click handler attached when we created the row instead of rebinding
       // it when rows are reused as we scroll.
-      dataForRow[tableRow.element] = row;
+      _dataForRow[tableRow.element] = row;
       void selectRow(Element row) {
-        _select(row, dataForRow[row]);
+        _select(row, _dataForRow[row]);
       }
 
       if (!isReusableRow) {
@@ -337,15 +337,15 @@ class Table<T> extends Object with SetStateMixin {
       }
     }
 
-    _selectedObject = object;
-
     if (row != null) {
       row.classes.add('selected');
     }
 
-    if (object != null && _selectedObject != object) {
+    if (_selectedObject != object) {
       _selectController.add(object);
     }
+
+    _selectedObject = object;
   }
 
   void _clearSelection() => _select(null, null);
