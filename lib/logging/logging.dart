@@ -25,7 +25,6 @@ const int kMaxLogItemsLength = 5000;
 DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
-  Framework framework;
   Table<LogData> loggingTable;
   StatusItem logCountStatus;
   SetStateMixin loggingStateMixin = new SetStateMixin();
@@ -35,6 +34,12 @@ class LoggingScreen extends Screen {
     logCountStatus = new StatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
+
+    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceInfo.hasConnection) {
+      _handleConnectionStart(serviceInfo.service);
+    }
+    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   @override
@@ -72,7 +77,7 @@ class LoggingScreen extends Screen {
     loggingTable.addColumn(new LogKindColumn());
     loggingTable.addColumn(new LogMessageColumn());
 
-    loggingTable.setRows(<LogData>[]);
+    loggingTable.setRows(data);
 
     _updateStatus();
 
@@ -167,21 +172,26 @@ class LoggingScreen extends Screen {
 
   void _handleConnectionStop(dynamic event) {}
 
+  List<LogData> data = <LogData>[];
   void _log(LogData log) {
     // TODO(devoncarew): make this much more efficient
     // TODO(dantup): Maybe add to a small buffer and then after xms insert
     // that full buffer into the list here to avoid a list rebuild on every single
     // insert.
     // Or maybe append to the end of the list and reverse index-based operations?
-    final List<LogData> data = <LogData>[log];
-    data.addAll(loggingTable.rows);
 
-    if (data.length > kMaxLogItemsLength) {
-      data.removeRange(kMaxLogItemsLength, data.length);
+    // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
+    // and insert this new item at the start, followed by the required number
+    // of items from the old data.
+    final int totalItems = (data.length + 1).clamp(0, kMaxLogItemsLength);
+    data = List<LogData>(totalItems)
+      ..[0] = log
+      ..setRange(1, totalItems, data);
+
+    if (visible && loggingTable != null) {
+      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
+      _updateStatus();
     }
-
-    loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
-    _updateStatus();
   }
 
   String createFrameDivHtml(FrameInfo frame) {

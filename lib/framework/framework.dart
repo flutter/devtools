@@ -109,9 +109,12 @@ class Framework {
 
   void load(Screen screen) {
     if (current != null) {
-      current.exiting();
+      final Screen oldScreen = current;
+      current = null;
+      oldScreen.exiting();
+
       pageStatus.removeAll();
-      _contents[current] = mainElement.element.children.toList();
+      _contents[oldScreen] = mainElement.element.children.toList();
       mainElement.element.children.clear();
     } else {
       mainElement.element.children.clear();
@@ -122,6 +125,7 @@ class Framework {
     if (_contents.containsKey(current)) {
       mainElement.element.children.addAll(_contents[current]);
     } else {
+      current.framework = this;
       current.createContent(this, mainElement);
     }
 
@@ -231,6 +235,8 @@ abstract class Screen {
   final String id;
   final String iconClass;
 
+  Framework framework;
+
   final Property<bool> _visible = new Property<bool>(true);
 
   final List<StatusItem> statusItems = <StatusItem>[];
@@ -254,6 +260,8 @@ abstract class Screen {
   void createContent(Framework framework, CoreElement mainDiv) {}
 
   void entering() {}
+
+  bool get isCurrentScreen => framework != null && framework.current == this;
 
   void exiting() {}
 
