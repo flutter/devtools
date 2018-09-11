@@ -172,8 +172,8 @@ class LoggingScreen extends Screen {
     // TODO(dantup): Maybe add to a small buffer and then after xms insert
     // that full buffer into the list here to avoid a list rebuild on every single
     // insert.
-    final List<LogData> data = List<LogData>.from(loggingTable.rows)
-      ..insert(0, log);
+    final List<LogData> data = <LogData>[log];
+    data.addAll(loggingTable.rows);
 
     if (data.length > kMaxLogItemsLength) {
       data.removeRange(kMaxLogItemsLength, data.length);
