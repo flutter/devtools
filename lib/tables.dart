@@ -127,9 +127,6 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _scheduleRebuild() {
-    // TODO(dantup): It'd be good to push this logic up into setState, but we may need to be
-    // able to distinguish functions that must be called on the next RAF versus those
-    // where calls are allowed to be skipped (for ex in this case).
     if (!_hasPendingRebuild) {
       // Set a flag to ensure we don't schedule rebuilds if there's already one
       // in the queue.
