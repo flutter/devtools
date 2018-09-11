@@ -22,6 +22,7 @@ import '../utils.dart';
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
 const int kMaxLogItemsLength = 5000;
+DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
   Framework framework;
@@ -40,9 +41,22 @@ class LoggingScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     this.framework = framework;
 
+    LogDetailsUI logDetailsUI;
+
     mainDiv.add(<CoreElement>[
-      _createTableView()..clazz('section'),
+      _createTableView()
+        ..clazz('section')
+        ..flex(4),
+      div(c: 'section')
+        ..layoutVertical()
+        ..flex()
+        ..add(logDetailsUI = new LogDetailsUI()),
     ]);
+
+    // TODO(dantup): Can we (should we?) detect when the content is overflowed
+    // in the table, and only show the defailts
+    loggingTable.onSelect
+        .listen((LogData selection) => logDetailsUI.data = selection);
 
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceInfo.hasConnection) {
@@ -212,19 +226,9 @@ class LogKindColumn extends Column<LogData> {
 
   @override
   dynamic getValue(LogData item) {
-    String color = '';
+    final String cssClass = getCssClassForEventKind(item);
 
-    if (item.kind == 'stderr' || item.error) {
-      color = 'style="background-color: #F44336"';
-    } else if (item.kind == 'stdout') {
-      color = 'style="background-color: #78909C"';
-    } else if (item.kind.startsWith('flutter')) {
-      color = 'style="background-color: #0091ea"';
-    } else if (item.kind == 'gc') {
-      color = 'style="background-color: #424242"';
-    }
-
-    return '<span class="label" $color>${item.kind}</span>';
+    return '<span class="label $cssClass">${item.kind}</span>';
   }
 
   @override
@@ -232,8 +236,6 @@ class LogKindColumn extends Column<LogData> {
 }
 
 class LogWhenColumn extends Column<LogData> {
-  static DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
-
   LogWhenColumn() : super('When');
 
   @override
@@ -275,5 +277,57 @@ class LogMessageColumn extends Column<LogData> {
     } else {
       return log.message; // TODO(devoncarew): escape html
     }
+  }
+}
+
+String getCssClassForEventKind(LogData item) {
+  String cssClass = '';
+
+  if (item.kind == 'stderr' || item.error) {
+    cssClass = 'stderr';
+  } else if (item.kind == 'stdout') {
+    cssClass = 'stdout';
+  } else if (item.kind.startsWith('flutter')) {
+    cssClass = 'flutter';
+  } else if (item.kind == 'gc') {
+    cssClass = 'gc';
+  }
+  return cssClass;
+}
+
+class LogDetailsUI extends CoreElement {
+  LogData _data;
+
+  CoreElement content, timestamp, kind, message;
+
+  LogDetailsUI() : super('div') {
+    attribute('hidden');
+    layoutVertical();
+    flex();
+
+    add(<CoreElement>[
+      content = div(c: 'log-details')
+        ..flex()
+        ..add(kind = span())
+        ..add(timestamp = span())
+        ..add(message = div(c: 'pre-wrap monospace')),
+    ]);
+  }
+
+  LogData get data => _data;
+  set data(LogData value) {
+    _data = value;
+
+    if (_data != null) {
+      timestamp.text = timeFormat
+          .format(new DateTime.fromMillisecondsSinceEpoch(_data.timestamp));
+      kind
+        ..text = _data.kind
+        ..clazz('label', removeOthers: true)
+        ..clazz(getCssClassForEventKind(data));
+      // TODO: Can we format the JSON better?
+      message.text = _data.message;
+    }
+    attribute('hidden', _data == null);
   }
 }

@@ -83,20 +83,33 @@ th.right {
     text-align: right;
 }
 
-td.pre {
+.pre {
     white-space: pre;
 }
 
-td.pre-wrap {
+.pre-wrap {
     white-space: pre-wrap;
 }
 
-td.monospace {
+.monospace {
     font-family: monospace;
 }
 
 span.label {
     background-color: #616161;
+}
+
+span.label.stderr {
+    background-color: #F44336;
+}
+span.label.stdout {
+    background-color: #78909C;
+}
+span.label.flutter {
+    background-color: #0091ea;
+}
+span.label.gc {
+    background-color: #424242;
 }
 
 .table-virtual td {
@@ -452,6 +465,10 @@ div.tabnav {
     position: absolute;
     overflow-x: hidden;
     cursor: default;
+}
+
+.log-details .label {
+    margin-right: 5px;
 }
 
 .frame-panel {
