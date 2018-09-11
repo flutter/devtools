@@ -282,8 +282,10 @@ class Table<T> extends Object with SetStateMixin {
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
       final CoreElement tableRow = isReusableRow
-          ? new CoreElement.from(_tbody.element.children[currentRowIndex++])
+          ? new CoreElement.from(_tbody.element.children[currentRowIndex])
           : tr();
+
+      currentRowIndex++;
 
       // Keep the data for each row in a map so we can look it up when the
       // user clicks the row to select it. This lets us reuse a single
