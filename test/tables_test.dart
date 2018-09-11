@@ -1,0 +1,112 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+@TestOn('browser')
+import 'dart:html';
+
+import 'package:devtools/tables.dart';
+import 'package:test/test.dart';
+
+void main() {
+  final List<TestData> oneThousandRows =
+      List<TestData>.generate(1000, (int i) => new TestData('Test Data $i'));
+
+  group('static tables', () {
+    Table<TestData> table;
+    setUp(() async {
+      table = new Table<TestData>();
+      // About 10 rows of data visible.
+      table.element.element.style
+        ..height = '300px'
+        ..overflow = 'scroll';
+      document.body.append(table.element.element);
+
+      table.addColumn(new TestColumn('Col One'));
+      table.addColumn(new TestColumn('Col Two'));
+      table.setRows(oneThousandRows);
+
+      await window.animationFrame;
+    });
+    tearDown(() => table?.element?.element?.remove());
+
+    test('render all rows even when only a subset is visible', () async {
+      // Expect 1001 due to spacer row.
+      expect(table.element.element.querySelectorAll('tr').length, equals(1001));
+    });
+  });
+
+  group('virtual tables', () {
+    Table<TestData> table;
+    setUp(() async {
+      table = new Table<TestData>.virtual();
+      // About 10 rows of data visible.
+      table.element.element.style
+        ..height = '300px'
+        ..overflow = 'scroll';
+      document.body.append(table.element.element);
+
+      table.addColumn(new TestColumn('Col One'));
+      table.addColumn(new TestColumn('Col Two'));
+      table.setRows(oneThousandRows);
+
+      await window.animationFrame;
+    });
+    tearDown(() => table?.element?.element?.remove());
+
+    test('render only a small number of rows', () async {
+      expect(
+          table.element.element.querySelectorAll('tr').length, lessThan(1100));
+    });
+
+    test('render rows starting around 0 when not scrolled', () async {
+      final int rowNumber = getApproximatelyFirstRenderedDataIndex(table);
+      expect(rowNumber, lessThan(5));
+    });
+
+    test('render rows starting around 500 when scrolled down the page',
+        () async {
+      // Scroll to approx row 500.
+      table.element.scrollTop = 29 * 500;
+
+      // Wait for two frames, to ensure that the onScroll fired and then we
+      // definitely rebuilt the table.
+      await window.animationFrame;
+      await window.animationFrame;
+
+      final int rowNumber = getApproximatelyFirstRenderedDataIndex(table);
+      expect(rowNumber, greaterThan(450));
+      expect(rowNumber, lessThan(550));
+    });
+  });
+}
+
+int getApproximatelyFirstRenderedDataIndex(Table<TestData> table) {
+  // It's possible we have a spacer row and a dummy row to force the alternating
+  // colour to line up, so look at the third row (index: 2) to ensure it's
+  // approximately what we'd expect.
+  final Element dataRow =
+      table.element.element.querySelector('tbody').children[2];
+  final Element cell = dataRow.querySelector('td');
+  expect(cell.text, contains('Test Data '));
+  final int rowNumber = int.tryParse(cell.text.replaceAll('Test Data ', ''));
+  return rowNumber;
+}
+
+class TestData {
+  String message;
+  TestData(this.message);
+}
+
+class TestColumn extends Column<TestData> {
+  TestColumn(String name) : super(name);
+
+  @override
+  dynamic getValue(TestData item) => item.message;
+
+  @override
+  String render(dynamic value) {
+    return value;
+  }
+}
