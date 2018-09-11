@@ -309,11 +309,13 @@ class Table<T> extends Object with SetStateMixin {
       for (Column<T> column in columns) {
         final bool isReusableColumn =
             currentColumnIndex < tableRow.element.children.length;
-        // Reuse or create a row.
+        // Reuse or create a cell.
         final CoreElement tableCell = isReusableColumn
             ? new CoreElement.from(
-                tableRow.element.children[currentColumnIndex++])
+                tableRow.element.children[currentColumnIndex])
             : td();
+
+        currentColumnIndex++;
 
         // TODO(dantup): Should we make CoreElement expose ClassList instead
         // of having flat strings?
