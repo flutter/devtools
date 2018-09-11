@@ -172,6 +172,7 @@ class LoggingScreen extends Screen {
     // TODO(dantup): Maybe add to a small buffer and then after xms insert
     // that full buffer into the list here to avoid a list rebuild on every single
     // insert.
+    // Or maybe append to the end of the list and reverse index-based operations?
     final List<LogData> data = <LogData>[log];
     data.addAll(loggingTable.rows);
 
