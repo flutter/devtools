@@ -193,8 +193,8 @@ class Table<T> extends Object with SetStateMixin {
     // it and reset it later.
     final int originalScrollTop = element.scrollTop;
 
-    int firstRenderedRowInc = 0;
-    int lastRenderedRowExc = rows?.length ?? 0;
+    int firstRenderedRowInclusive = 0;
+    int lastRenderedRowExclusive = rows?.length ?? 0;
 
     // Keep track of the table row we're inserting so that we can re-use rows
     // if they already exist in the DOM.
@@ -204,15 +204,15 @@ class Table<T> extends Object with SetStateMixin {
     final int firstVisibleRow =
         ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
     final int numVisibleRows = (element.offsetHeight / rowHeight).ceil();
-    firstRenderedRowInc = firstVisibleRow.clamp(0, rows?.length ?? 0);
+    firstRenderedRowInclusive = firstVisibleRow.clamp(0, rows?.length ?? 0);
     // Calculate the last rendered row. +2 is for:
     //   1) because it's exclusive so needs to be one higher
     //   2) because we need to render the extra partially-visible row
-    lastRenderedRowExc =
-        (firstRenderedRowInc + numVisibleRows + 2).clamp(0, rows?.length ?? 0);
+    lastRenderedRowExclusive = (firstRenderedRowInclusive + numVisibleRows + 2)
+        .clamp(0, rows?.length ?? 0);
 
     // Add a spacer row to fill up the content off-screen.
-    final double spacerBeforeHeight = firstRenderedRowInc * rowHeight;
+    final double spacerBeforeHeight = firstRenderedRowInclusive * rowHeight;
     _spacerBeforeVisibleRows.height = '${spacerBeforeHeight}px';
     _spacerBeforeVisibleRows.display = spacerBeforeHeight == 0 ? 'none' : null;
 
@@ -232,8 +232,8 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     currentRowIndex = _buildTableRows(
-        firstRenderedRowInc: firstRenderedRowInc,
-        lastRenderedRowExc: lastRenderedRowExc,
+        firstRenderedRowInclusive: firstRenderedRowInclusive,
+        lastRenderedRowExclusive: lastRenderedRowExclusive,
         currentRowIndex: currentRowIndex);
 
     // Remove any additional rows that we had left that we didn't reuse above.
@@ -248,7 +248,7 @@ class Table<T> extends Object with SetStateMixin {
     // Set the "after" spacer to the correct height to keep the scroll size
     // correct for the number or rows to come after.
     final double spacerAfterHeight =
-        (rows.length - lastRenderedRowExc) * rowHeight;
+        (rows.length - lastRenderedRowExclusive) * rowHeight;
     _spacerAfterVisibleRows.height = '${spacerAfterHeight}px';
     _tbody.element.children.add(_spacerAfterVisibleRows.element);
 
@@ -258,18 +258,19 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildStaticTable() => _buildTableRows(
-      firstRenderedRowInc: 0, lastRenderedRowExc: rows?.length ?? 0);
+      firstRenderedRowInclusive: 0,
+      lastRenderedRowExclusive: rows?.length ?? 0);
 
   int _buildTableRows({
-    @required int firstRenderedRowInc,
-    @required int lastRenderedRowExc,
+    @required int firstRenderedRowInclusive,
+    @required int lastRenderedRowExclusive,
     int currentRowIndex = 0,
   }) {
     _tbody.element.children.remove(_dummyRowToForceAlternatingColor.element);
     bool shouldOffsetRowColor = _offsetRowColor;
     // If we're skipping an odd number or rows, we need to invert whether to include
     // the row color compensator.
-    if (firstRenderedRowInc % 2 == 1) {
+    if (firstRenderedRowInclusive % 2 == 1) {
       shouldOffsetRowColor = !shouldOffsetRowColor;
     }
     if (shouldOffsetRowColor) {
@@ -278,7 +279,8 @@ class Table<T> extends Object with SetStateMixin {
       currentRowIndex++;
     }
 
-    for (T row in rows.sublist(firstRenderedRowInc, lastRenderedRowExc)) {
+    for (T row
+        in rows.sublist(firstRenderedRowInclusive, lastRenderedRowExclusive)) {
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
