@@ -236,11 +236,10 @@ class Table<T> extends Object with SetStateMixin {
     // Remove any additional rows that we had left that we didn't reuse above.
     if (currentRowIndex > 0 &&
         currentRowIndex < _tbody.element.children.length) {
-      // TODO: Why does removeAt(i) work, but not removeRange (UnimplementedError)?
-      // _tbody.element.children
-      //     .removeRange(currentRowIndex, _tbody.element.children.length);
-      for (int i = currentRowIndex; i < _tbody.element.children.length; i++)
-        _tbody.element.children.removeAt(i);
+      // removeRange doesn't work in dart:html (UnimplementedError) so we have
+      // to remove them one at a time.
+      while (_tbody.element.children.length >= currentRowIndex)
+        _tbody.element.children.removeLast();
     }
     // Set the "after" spacer to the correct height to keep the scroll size
     // correct for the number or rows to come after.
