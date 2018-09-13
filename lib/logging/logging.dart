@@ -336,7 +336,7 @@ class LogDetailsUI extends CoreElement {
         ..text = _data.kind
         ..clazz('label', removeOthers: true)
         ..clazz(getCssClassForEventKind(data));
-      // TODO: Can we format the JSON better?
+      // TODO(dantup): Can we format the JSON better?
       message.text = _data.message;
     }
     attribute('hidden', _data == null);
