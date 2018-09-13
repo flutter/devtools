@@ -59,7 +59,7 @@ class LoggingScreen extends Screen {
     ]);
 
     // TODO(dantup): Can we (should we?) detect when the content is overflowed
-    // in the table, and only show the defailts
+    // in the table, and only show the defaults?
     loggingTable.onSelect
         .listen((LogData selection) => logDetailsUI.data = selection);
 
