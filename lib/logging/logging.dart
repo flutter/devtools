@@ -21,7 +21,8 @@ import '../utils.dart';
 
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
-const int kMaxLogItemsLength = 40;
+const int kMaxLogItemsLength = 5000;
+DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
   Table<LogData> loggingTable;
@@ -43,13 +44,34 @@ class LoggingScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
+    this.framework = framework;
+
+    LogDetailsUI logDetailsUI;
+
     mainDiv.add(<CoreElement>[
-      _createTableView()..clazz('section'),
+      _createTableView()
+        ..clazz('section')
+        ..flex(4),
+      div(c: 'section')
+        ..layoutVertical()
+        ..flex()
+        ..add(logDetailsUI = new LogDetailsUI()),
     ]);
+
+    // TODO(dantup): Can we (should we?) detect when the content is overflowed
+    // in the table, and only show the defaults?
+    loggingTable.onSelect
+        .listen((LogData selection) => logDetailsUI.data = selection);
+
+    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceInfo.hasConnection) {
+      _handleConnectionStart(serviceInfo.service);
+    }
+    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   CoreElement _createTableView() {
-    loggingTable = new Table<LogData>();
+    loggingTable = new Table<LogData>.virtual();
 
     loggingTable.addColumn(new LogWhenColumn());
     loggingTable.addColumn(new LogKindColumn());
@@ -153,6 +175,10 @@ class LoggingScreen extends Screen {
   List<LogData> data = <LogData>[];
   void _log(LogData log) {
     // TODO(devoncarew): make this much more efficient
+    // TODO(dantup): Maybe add to a small buffer and then after xms insert
+    // that full buffer into the list here to avoid a list rebuild on every single
+    // insert.
+    // Or maybe append to the end of the list and reverse index-based operations?
 
     // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
     // and insert this new item at the start, followed by the required number
@@ -163,10 +189,8 @@ class LoggingScreen extends Screen {
       ..setRange(1, totalItems, data);
 
     if (visible && loggingTable != null) {
-      loggingStateMixin.setState(() {
-        loggingTable.setRows(data);
-        _updateStatus();
-      });
+      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
+      _updateStatus();
     }
   }
 
@@ -213,19 +237,9 @@ class LogKindColumn extends Column<LogData> {
 
   @override
   dynamic getValue(LogData item) {
-    String color = '';
+    final String cssClass = getCssClassForEventKind(item);
 
-    if (item.kind == 'stderr' || item.error) {
-      color = 'style="background-color: #F44336"';
-    } else if (item.kind == 'stdout') {
-      color = 'style="background-color: #78909C"';
-    } else if (item.kind.startsWith('flutter')) {
-      color = 'style="background-color: #0091ea"';
-    } else if (item.kind == 'gc') {
-      color = 'style="background-color: #424242"';
-    }
-
-    return '<span class="label" $color>${item.kind}</span>';
+    return '<span class="label $cssClass">${item.kind}</span>';
   }
 
   @override
@@ -233,8 +247,6 @@ class LogKindColumn extends Column<LogData> {
 }
 
 class LogWhenColumn extends Column<LogData> {
-  static DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
-
   LogWhenColumn() : super('When');
 
   @override
@@ -276,5 +288,57 @@ class LogMessageColumn extends Column<LogData> {
     } else {
       return log.message; // TODO(devoncarew): escape html
     }
+  }
+}
+
+String getCssClassForEventKind(LogData item) {
+  String cssClass = '';
+
+  if (item.kind == 'stderr' || item.error) {
+    cssClass = 'stderr';
+  } else if (item.kind == 'stdout') {
+    cssClass = 'stdout';
+  } else if (item.kind.startsWith('flutter')) {
+    cssClass = 'flutter';
+  } else if (item.kind == 'gc') {
+    cssClass = 'gc';
+  }
+  return cssClass;
+}
+
+class LogDetailsUI extends CoreElement {
+  LogData _data;
+
+  CoreElement content, timestamp, kind, message;
+
+  LogDetailsUI() : super('div') {
+    attribute('hidden');
+    layoutVertical();
+    flex();
+
+    add(<CoreElement>[
+      content = div(c: 'log-details')
+        ..flex()
+        ..add(kind = span())
+        ..add(timestamp = span())
+        ..add(message = div(c: 'pre-wrap monospace')),
+    ]);
+  }
+
+  LogData get data => _data;
+  set data(LogData value) {
+    _data = value;
+
+    if (_data != null) {
+      timestamp.text = timeFormat
+          .format(new DateTime.fromMillisecondsSinceEpoch(_data.timestamp));
+      kind
+        ..text = _data.kind
+        ..clazz('label', removeOthers: true)
+        ..clazz(getCssClassForEventKind(data));
+      // TODO(dantup): Can we format the JSON better?
+      message.text = _data.message;
+    }
+    attribute('hidden', _data == null);
   }
 }
