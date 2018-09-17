@@ -200,8 +200,11 @@ class Table<T> extends Object with SetStateMixin {
     // Calculate the subset of rows to render based on scroll position.
     final int firstVisibleRow =
         ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
-    final int numVisibleRows = (element.offsetHeight / rowHeight).ceil();
-    firstRenderedRowInclusive = firstVisibleRow.clamp(0, rows?.length ?? 0);
+    final int numVisibleRows = (element.offsetHeight / rowHeight).ceil() + 1;
+    final int highestPossibleFirstRenderedRow =
+        rows == null ? 0 : rows.length - (numVisibleRows + 1);
+    firstRenderedRowInclusive =
+        firstVisibleRow.clamp(0, highestPossibleFirstRenderedRow);
     // Calculate the last rendered row. +2 is for:
     //   1) because it's exclusive so needs to be one higher
     //   2) because we need to render the extra partially-visible row
