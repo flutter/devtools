@@ -29,6 +29,12 @@ class Chrome {
       if (FileSystemEntity.isDirectorySync(defaultPath)) {
         return new Chrome.from(path.join(defaultPath, bundlePath));
       }
+    } else if (Platform.isLinux) {
+      const String defaultPath = '/usr/bin/google-chrome';
+
+      if (FileSystemEntity.isDirectorySync(defaultPath)) {
+        return new Chrome.from(defaultPath);
+      }
     }
 
     // TODO(devoncarew): check default install locations for linux

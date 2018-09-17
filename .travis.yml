@@ -1,6 +1,12 @@
+os:
+  - linux
+  - osx
+
 language: dart
 dart:
   - "dev/raw/latest"
+addons:
+  chrome: stable
 
 script: ./tool/travis.sh
 
