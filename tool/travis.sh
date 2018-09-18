@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 # Fast fail the script on failures.
-#set -e
+set -e
 
 # Print out the Dart version in use.
 dart --version
