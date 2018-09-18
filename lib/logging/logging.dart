@@ -62,12 +62,6 @@ class LoggingScreen extends Screen {
     // in the table, and only show the defaults?
     loggingTable.onSelect
         .listen((LogData selection) => logDetailsUI.data = selection);
-
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
-    }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   CoreElement _createTableView() {
