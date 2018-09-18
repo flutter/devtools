@@ -174,15 +174,13 @@ class LoggingScreen extends Screen {
 
   List<LogData> data = <LogData>[];
   void _log(LogData log) {
-    // TODO(devoncarew): make this much more efficient
-    // TODO(dantup): Maybe add to a small buffer and then after xms insert
-    // that full buffer into the list here to avoid a list rebuild on every single
-    // insert.
-    // Or maybe append to the end of the list and reverse index-based operations?
-
     // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
     // and insert this new item at the start, followed by the required number
-    // of items from the old data.
+    // of items from the old data. This is faster than insert(0, log).
+    //
+    // If this turns out to be too slow, we can make it faster (saving around
+    // 30-40% of the time) by just .add()ing to the list and having a flag on
+    // the table to reverse data for rendering ([length-index] when reading data).
     final int totalItems = (data.length + 1).clamp(0, kMaxLogItemsLength);
     data = List<LogData>(totalItems)
       ..[0] = log
