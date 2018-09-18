@@ -32,7 +32,7 @@ class Chrome {
     } else if (Platform.isLinux) {
       const String defaultPath = '/usr/bin/google-chrome';
 
-      if (FileSystemEntity.isDirectorySync(defaultPath)) {
+      if (FileSystemEntity.isFileSync(defaultPath)) {
         return new Chrome.from(defaultPath);
       }
     }
