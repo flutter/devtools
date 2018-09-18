@@ -175,7 +175,7 @@ class MemoryScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    memoryTable = new Table<ClassHeapStats>();
+    memoryTable = new Table<ClassHeapStats>.virtual();
 
     memoryTable.addColumn(new MemoryColumnSize());
     memoryTable.addColumn(new MemoryColumnInstanceCount());
