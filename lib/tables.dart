@@ -84,7 +84,7 @@ class Table<T> extends Object with SetStateMixin {
     if (anchorAlternatingRowsToBottom && differenceInRowCount % 2 == 1) {
       _offsetRowColor = !_offsetRowColor;
     }
-    this.rows = rows.toList();
+    this.rows = rows;
 
     if (_thead == null) {
       _thead = new CoreElement('thead')
