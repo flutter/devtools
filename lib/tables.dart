@@ -13,8 +13,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): fixed position header
 
-// TODO(devoncarew): virtualize
-
 class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   final bool _isVirtual;
