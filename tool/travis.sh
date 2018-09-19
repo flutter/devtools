@@ -20,3 +20,7 @@ tuneup check --ignore-infos
 # Ensure we can build the app.
 pub global activate webdev
 webdev build
+
+# Run the tests.
+pub run test
+pub run test -pchrome-no-sandbox
