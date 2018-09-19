@@ -155,13 +155,15 @@ class LoggingScreen extends Screen {
       if (e.extensionKind == 'Flutter.Frame') {
         final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
+        final String frameInfo =
+            '<span class="pre">frame ${frame.number} ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
         final String div = createFrameDivHtml(frame);
 
         _log(new LogData(
           '${e.extensionKind.toLowerCase()}',
-          'frame ${frame.number} ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms',
+          '',
           e.timestamp,
-          extraHtml: div,
+          extraHtml: '$frameInfo$div',
         ));
       } else {
         _log(new LogData('${e.extensionKind.toLowerCase()}', e.json.toString(),
