@@ -127,7 +127,7 @@ class PerformanceScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    perfTable = new Table<PerfData>();
+    perfTable = new Table<PerfData>.virtual();
 
     perfTable.addColumn(new PerfColumnInclusive());
     perfTable.addColumn(new PerfColumnSelf());
