@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -26,6 +27,8 @@ class MemoryScreen extends Screen {
 
   PButton loadSnapshotButton;
   Table<ClassHeapStats> memoryTable;
+  Table<InstanceSummary> instancesTable;
+  Table<InstanceData> instanceDetailsTable;
 
   MemoryChart memoryChart;
   SetStateMixin memoryChartStateMixin = new SetStateMixin();
@@ -55,6 +58,7 @@ class MemoryScreen extends Screen {
               loadSnapshotButton = new PButton('Load heap snapshot')
                 ..small()
                 ..primary()
+                ..disabled = true
                 ..click(_loadAllocationProfile),
               progressElement = new ProgressElement()
                 ..clazz('margin-left')
@@ -62,7 +66,17 @@ class MemoryScreen extends Screen {
               div()..flex(),
             ])
         ]),
-      _createTableView()..clazz('section'),
+      div(c: 'section')
+        ..layoutHorizontal()
+        ..add(<CoreElement>[
+          _createTableView(),
+          _createInstancesTableView()
+            ..clazz('margin-left')
+            ..display = 'none',
+          _createInstanceDetailsTableView()
+            ..clazz('margin-left')
+            ..display = 'none',
+        ]),
     ]);
 
     _updateStatus(null);
@@ -186,21 +200,75 @@ class MemoryScreen extends Screen {
     // new List<MemoryRow>.generate(100, (_) => MemoryRow.random()
     memoryTable.setRows(<ClassHeapStats>[]);
 
-    memoryTable.onSelect.listen((ClassHeapStats row) {
-      // TODO:
-      print(row);
+    memoryTable.onSelect.listen((ClassHeapStats row) async {
+      if (row == null) {
+        instancesTable.element.display = 'none';
+        return;
+      }
 
-//      serviceInfo.service.getObject(_isolateId, row.classRef.id).then((result) {
-//        Class c = result;
-//        if (c.library.type =='@Library') {
-//          // user class
-//        } else {
-//          // vm class (Code, Instructions, ...)
-//        }
-//      });
+      // Set the rows blank so old data is removed while this request is in-flight.
+      // TODO(dantup): Should table support showing a spinner?
+      // instancesTable.setRows(<InstanceSummary>[]);
+
+      // final Class c =
+      //     await serviceInfo.service.getObject(_isolateId, row.classRef.id);
+
+      // // TODO(dantup): Find out what we should actually be displaying here.
+      // if (c.library.type == '@Library') {
+      //   // user class
+      // } else {
+      //   // vm class (Code, Instructions, ...)
+      // }
+
+      final List<InstanceSummary> instanceRows = InstanceSummary.randomList(c);
+      instancesTable.setRows(instanceRows);
+      instancesTable.element.display = null;
     });
 
     return memoryTable.element;
+  }
+
+  /// Creates the instances (middle) table to show a list of instances in the
+  /// snapshot.
+  CoreElement _createInstancesTableView() {
+    instancesTable = new Table<InstanceSummary>.virtual();
+    instancesTable.addColumn(new MemoryColumnSimple<InstanceSummary>(
+        'Instance ID', (InstanceSummary row) => row.id));
+    instancesTable.setRows(<InstanceSummary>[]);
+
+    instancesTable.onSelect.listen((InstanceSummary row) async {
+      if (row == null) {
+        instanceDetailsTable.element.display = 'none';
+        return;
+      }
+
+      // Set the rows blank so old data is removed while this request is in-flight.
+      // TODO(dantup): Should table support showing a spinner?
+      // instanceDetailsTable.setRows(<InstanceData>[]);
+
+      final List<InstanceData> instanceData = InstanceData.randomList();
+      instanceDetailsTable.setRows(instanceData);
+      instanceDetailsTable.element.display = null;
+    });
+
+    return instancesTable.element;
+  }
+
+  /// Creates the instances (right-most) table to show information about the selected
+  /// instance.
+  CoreElement _createInstanceDetailsTableView() {
+    instanceDetailsTable = new Table<InstanceData>.virtual();
+    instanceDetailsTable.addColumn(new MemoryColumnSimple<InstanceData>(
+        'Name', (InstanceData row) => row.name));
+    instanceDetailsTable.addColumn(new MemoryColumnSimple<InstanceData>(
+        'Value', (InstanceData row) => row.value.toString()));
+    instanceDetailsTable.setRows(<InstanceData>[]);
+
+    // TODO(dantup): There should probably be a button/column to jump to an instance
+    // where the value is another live instance (which should update the selection
+    // of the class/instance in the other two tables).
+
+    return instanceDetailsTable.element;
   }
 
   @override
@@ -208,6 +276,7 @@ class MemoryScreen extends Screen {
       new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmService service) {
+    loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
 
     memoryTracker = new MemoryTracker(service);
@@ -221,6 +290,7 @@ class MemoryScreen extends Screen {
   }
 
   void _handleConnectionStop(dynamic event) {
+    loadSnapshotButton.disabled = true;
     memoryChart.disabled = true;
 
     memoryTracker?.stop();
@@ -293,6 +363,15 @@ class MemoryColumnInstanceCount extends Column<ClassHeapStats> {
   String render(dynamic value) => Column.fastIntl(value);
 }
 
+class MemoryColumnSimple<T> extends Column<T> {
+  String Function(T) getter;
+  MemoryColumnSimple(String name, this.getter, {bool wide = false})
+      : super(name, wide: wide);
+
+  @override
+  String getValue(T item) => getter(item);
+}
+
 class MemoryChart extends LineChart<MemoryTracker> {
   CoreElement processLabel;
   CoreElement heapLabel;
@@ -333,14 +412,14 @@ class MemoryChart extends LineChart<MemoryTracker> {
     // TODO(devoncarew): draw dots for GC events?
 
     chartElement.setInnerHtml('''
-<svg viewBox="0 0 ${dim.x} ${dim.y}">
-<polyline
-    fill="none"
-    stroke="#0074d9"
-    stroke-width="3"
-    points="${createPoints(data.samples, top, width, right)}"/>
-</svg>
-''');
+            <svg viewBox="0 0 ${dim.x} ${dim.y}">
+            <polyline
+                fill="none"
+                stroke="#0074d9"
+                stroke-width="3"
+                points="${createPoints(data.samples, top, width, right)}"/>
+            </svg>
+            ''');
   }
 
   String createPoints(List<HeapSample> samples, int top, int width, int right) {
@@ -537,4 +616,38 @@ class ClassHeapStats {
   @override
   String toString() =>
       '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
+}
+
+class InstanceSummary {
+  Class clazz;
+  String id;
+
+  InstanceSummary(this.clazz, this.id);
+  @override
+  String toString() => '[InstanceSummary id: $id, class: ${clazz.name}]';
+
+  static List<InstanceSummary> randomList(Class clazz) {
+    return new List<InstanceSummary>.generate(
+        1000, (int i) => new InstanceSummary(clazz, 'objects/$i'));
+  }
+}
+
+class InstanceData {
+  String name;
+  dynamic value;
+
+  InstanceData(this.name, this.value);
+
+  @override
+  String toString() => '[InstanceData name: $name, value: $value]';
+
+  static List<InstanceData> randomList() {
+    return <InstanceData>[
+      new InstanceData('name', 'Joe Bloggs'),
+      new InstanceData('email', 'something@example.org'),
+      new InstanceData('company', 'Bloggs Corp'),
+      new InstanceData('telephone', '01234 567 890'),
+      new InstanceData('shoeSize', 11),
+    ];
+  }
 }
