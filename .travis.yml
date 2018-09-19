@@ -1,6 +1,15 @@
+os:
+# TODO(dantup): Tests fail on Linux
+# 00:58+0 -1: test/integration_test.dart: integration (setUpAll)[E]
+# SocketException: OS Error: Connection refused, errno = 111, address = localhost, port = 45924
+# - linux
+  - osx
+
 language: dart
 dart:
   - "dev/raw/latest"
+addons:
+  chrome: stable
 
 script: ./tool/travis.sh
 
