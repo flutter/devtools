@@ -4,17 +4,21 @@
 
 // TODO: tests
 
+// TODO: support additional phases (s, t, f)
+
+// For documentation, see the Chrome "Trace Event Format" document:
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+
 class TimelineData {
-  final List<TimelineThread> threads;
+  final List<TimelineThread> threads = <TimelineThread>[];
   final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
 
-  final Map<int, TimelineThreadData> threadData = <int, TimelineThreadData>{};
+  TimelineData();
 
-  TimelineData(this.threads) {
-    for (TimelineThread thread in threads) {
-      threadMap[thread.threadId] = thread;
-      threadData[thread.threadId] = new TimelineThreadData(this);
-    }
+  void addThread(TimelineThread thread) {
+    threads.add(thread);
+    threadMap[thread.threadId] = thread;
+    threads.sort();
   }
 
   void processTimelineEvent(TimelineEvent event) {
@@ -23,22 +27,30 @@ class TimelineData {
       return;
     }
 
-    final TimelineThreadData data = threadData[event.threadId];
-
     switch (event.phase) {
       case 'B':
-        data.handleDurationBeginEvent(event);
+        thread._handleDurationBeginEvent(event);
         break;
       case 'E':
-        data.handleDurationEndEvent(event);
+        thread._handleDurationEndEvent(event);
         break;
       case 'X':
-        data.handleCompleteEvent(event);
+        thread._handleDurationCompleteEvent(event);
+        break;
+
+      case 'b':
+        thread._handleAsyncBeginEvent(event);
+        break;
+      case 'n':
+        thread._handleAsyncInstantEvent(event);
+        break;
+      case 'e':
+        thread._handleAsyncEndEvent(event);
         break;
 
       default:
         // TODO(devoncarew): Support additional phases.
-        print('unhandled phase: ${event.phase}');
+        print('unhandled: ${event.json}');
         break;
     }
   }
@@ -48,10 +60,10 @@ class TimelineData {
       return null;
     }
 
-    final List<TEvent> events = <TEvent>[];
+    final List<TimelineThreadEvent> events = <TimelineThreadEvent>[];
 
-    for (TimelineThreadData data in threadData.values) {
-      for (TEvent event in data.events) {
+    for (TimelineThread thread in threads) {
+      for (TimelineThreadEvent event in thread.events) {
         if (!event.wellFormed) {
           continue;
         }
@@ -69,9 +81,8 @@ class TimelineData {
     for (TimelineThread thread in threads) {
       print('${thread.name}:');
       final StringBuffer buf = new StringBuffer();
-      final TimelineThreadData data = threadData[thread.threadId];
 
-      for (TEvent event in data.events) {
+      for (TimelineThreadEvent event in thread.events) {
         event.format(buf, '  ');
         print(buf.toString().trimRight());
         buf.clear();
@@ -83,11 +94,19 @@ class TimelineData {
 }
 
 class TimelineThread implements Comparable<TimelineThread> {
+  final TimelineData parent;
   final int threadId;
+
+  final List<TimelineThreadEvent> events = <TimelineThreadEvent>[];
+
+  TimelineThreadEvent durationStack;
+
+  final Map<String, TimelineThreadEvent> _asyncEvents =
+      <String, TimelineThreadEvent>{};
 
   String _name;
 
-  TimelineThread(String name, this.threadId) {
+  TimelineThread(this.parent, String name, this.threadId) {
     _name = name;
 
     // "name":"io.flutter.1.ui (42499)",
@@ -125,60 +144,99 @@ class TimelineThread implements Comparable<TimelineThread> {
     }
     return name.compareTo(other.name);
   }
-}
 
-class TimelineThreadData {
-  final TimelineData parent;
-  final List<TEvent> events = <TEvent>[];
-
-  TimelineThreadData(this.parent);
-
-  List<TEvent> durationStack = <TEvent>[];
-
-  void handleDurationBeginEvent(TimelineEvent event) {
-    final TEvent e = new TEvent(event.threadId, event.name);
+  void _handleDurationBeginEvent(TimelineEvent event) {
+    final TimelineThreadEvent e =
+        new TimelineThreadEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
 
-    if (durationStack.isEmpty) {
+    if (durationStack == null) {
       events.add(e);
+      durationStack = e;
     } else {
-      durationStack.last.children.add(e);
-    }
-
-    durationStack.add(e);
-  }
-
-  void handleDurationEndEvent(TimelineEvent event) {
-    if (durationStack.isNotEmpty) {
-      final TEvent e = durationStack.removeLast();
-      e.setEnd(event.timestampMicros);
+      durationStack.children.add(e);
+      e.parent = durationStack;
+      durationStack = e;
     }
   }
 
-  void handleCompleteEvent(TimelineEvent event) {
-    final TEvent e = new TEvent(event.threadId, event.name);
+  void _handleDurationEndEvent(TimelineEvent event) {
+    if (durationStack != null) {
+      durationStack.setEnd(event.timestampMicros);
+      durationStack = durationStack.parent;
+    }
+  }
+
+  void _handleDurationCompleteEvent(TimelineEvent event) {
+    final TimelineThreadEvent e =
+        new TimelineThreadEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
     e.durationMicros = event.duration;
 
-    if (durationStack.isEmpty) {
+    if (durationStack == null) {
       events.add(e);
     } else {
-      durationStack.last.children.add(e);
+      durationStack.children.add(e);
+    }
+  }
+
+  void _handleAsyncBeginEvent(TimelineEvent event) {
+    final String asyncUID = event.asyncUID;
+
+    final TimelineThreadEvent parentEvent = _asyncEvents[asyncUID];
+    if (parentEvent == null) {
+      final TimelineThreadEvent e =
+          new TimelineThreadEvent(event.threadId, event.name);
+      e.setStart(event.timestampMicros);
+      _asyncEvents[asyncUID] = e;
+      events.add(e);
+    } else {
+      final TimelineThreadEvent e =
+          new TimelineThreadEvent(event.threadId, event.name);
+      e.setStart(event.timestampMicros);
+      e.parent = parentEvent;
+      _asyncEvents[asyncUID] = e;
+    }
+  }
+
+  void _handleAsyncInstantEvent(TimelineEvent event) {
+    final String asyncUID = event.asyncUID;
+
+    final TimelineThreadEvent e =
+        new TimelineThreadEvent(event.threadId, event.name);
+    e.setStart(event.timestampMicros);
+    e.durationMicros = event.duration;
+
+    final TimelineThreadEvent parent = _asyncEvents[asyncUID];
+    if (parent != null) {
+      e.parent = parent;
+    } else {
+      events.add(e);
+    }
+  }
+
+  void _handleAsyncEndEvent(TimelineEvent event) {
+    final String asyncUID = event.asyncUID;
+
+    final TimelineThreadEvent e = _asyncEvents[asyncUID];
+    if (e != null) {
+      e.setEnd(event.timestampMicros);
+      _asyncEvents[asyncUID] = e.parent;
     }
   }
 }
 
-// TODO: rename to timelinethreadevent
-class TEvent {
+class TimelineThreadEvent {
   final int threadId;
   final String name;
 
-  List<TEvent> children = <TEvent>[];
+  TimelineThreadEvent parent;
+  List<TimelineThreadEvent> children = <TimelineThreadEvent>[];
 
   int startMicros;
   int durationMicros;
 
-  TEvent(this.threadId, this.name);
+  TimelineThreadEvent(this.threadId, this.name);
 
   void setStart(int micros) {
     startMicros = micros;
@@ -194,7 +252,7 @@ class TEvent {
 
   void format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name');
-    for (TEvent child in children) {
+    for (TimelineThreadEvent child in children) {
       child.format(buf, '  $indent');
     }
   }
@@ -259,7 +317,7 @@ class TimelineFrame {
 class TimelineFrameData {
   final TimelineFrame frame;
   final List<TimelineThread> threads;
-  final List<TEvent> events;
+  final List<TimelineThreadEvent> events;
 
   TimelineFrameData(this.frame, this.threads, this.events);
 
@@ -268,7 +326,7 @@ class TimelineFrameData {
       print('${thread.name}:');
       final StringBuffer buf = new StringBuffer();
 
-      for (TEvent event in events) {
+      for (TimelineThreadEvent event in events) {
         if (event.threadId == thread.threadId) {
           event.format(buf, '  ');
           print(buf.toString().trimRight());
@@ -278,10 +336,13 @@ class TimelineFrameData {
     }
   }
 
-  Iterable<TEvent> eventsForThread(TimelineThread thread) {
-    return events.where((TEvent event) => event.threadId == thread.threadId);
+  Iterable<TimelineThreadEvent> eventsForThread(TimelineThread thread) {
+    return events.where(
+        (TimelineThreadEvent event) => event.threadId == thread.threadId);
   }
 }
+
+// TODO(devoncarew): Upstream this class to the service protocol library.
 
 /// A single timeline event.
 class TimelineEvent {
@@ -332,6 +393,15 @@ class TimelineEvent {
   /// Corresponds to the "tid" field in the JSON event.
   final int threadId;
 
+  /// Each async event has an additional required parameter id. We consider the
+  /// events with the same category and id as events from the same event tree.
+  dynamic get id => json['id'];
+
+  /// An optional scope string can be specified to avoid id conflicts, in which
+  /// case we consider events with the same category, scope, and id as events
+  /// from the same event tree.
+  String get scope => json['scope'];
+
   /// The duration of the event, in microseconds.
   ///
   /// Note, some events are reported with duration. Others are reported as a
@@ -345,6 +415,14 @@ class TimelineEvent {
 
   /// Arbitrary data attached to the event.
   final Map<String, dynamic> args;
+
+  String get asyncUID {
+    if (scope == null) {
+      return '$category:$id';
+    } else {
+      return '$category:$scope:$id';
+    }
+  }
 
   @override
   String toString() => '[$category] [$phase] $name';

@@ -228,16 +228,17 @@ class TimelineScreen extends Screen {
       return event.name == 'thread_name';
     }).toList();
 
-    List<TimelineThread> threads = events
-        .map((TimelineEvent event) =>
-            new TimelineThread(event.args['name'], event.threadId))
-        .toList();
+    final TimelineData timelineData = new TimelineData();
 
-    threads =
-        threads.where((TimelineThread thread) => thread.isVisible).toList();
-    threads.sort();
+    for (TimelineEvent event in events) {
+      final TimelineThread thread =
+          new TimelineThread(timelineData, event.args['name'], event.threadId);
+      if (thread.isVisible) {
+        timelineData.addThread(thread);
+      }
+    }
 
-    timelineFramesUI.timelineData = new TimelineData(threads);
+    timelineFramesUI.timelineData = timelineData;
   }
 
   @override
@@ -510,7 +511,7 @@ class FrameDetailsUI extends CoreElement {
 
     Function drawRecursively;
 
-    drawRecursively = (TEvent event, int row) {
+    drawRecursively = (TimelineThreadEvent event, int row) {
       if (!event.wellFormed) {
         print('event not well formed');
         print(event);
@@ -529,7 +530,7 @@ class FrameDetailsUI extends CoreElement {
         maxRow = row;
       }
 
-      for (TEvent child in event.children) {
+      for (TimelineThreadEvent child in event.children) {
         drawRecursively(child, row + 1);
       }
     };
@@ -540,7 +541,7 @@ class FrameDetailsUI extends CoreElement {
 
         maxRow = row;
 
-        for (TEvent event in data.eventsForThread(thread)) {
+        for (TimelineThreadEvent event in data.eventsForThread(thread)) {
           drawRecursively(event, row);
         }
 
