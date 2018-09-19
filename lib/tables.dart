@@ -18,7 +18,10 @@ import 'utils.dart';
 class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   final bool _isVirtual;
-  bool _offsetRowColor = false;
+  // Whether to reverse the display of data. This is to allow appending data
+  // to this.rows quickly (using .add()) while still supporting new data being
+  // inserted at the top.
+  final bool isReversed;
   double rowHeight;
   bool _hasPendingRebuild = false;
 
@@ -45,12 +48,13 @@ class Table<T> extends Object with SetStateMixin {
 
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
-        _isVirtual = false {
+        _isVirtual = false,
+        isReversed = false {
     _table = new CoreElement('table')..clazz('full-width');
     element.add(_table);
   }
 
-  Table.virtual({this.rowHeight = 29.0})
+  Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
     _table = new CoreElement('table')..clazz('full-width');
@@ -67,23 +71,12 @@ class Table<T> extends Object with SetStateMixin {
     columns.add(column);
   }
 
-  void setRows(List<T> rows, {bool anchorAlternatingRowsToBottom = false}) {
+  void setRows(List<T> rows) {
     // If the selected object is no longer valid, clear the selection.
     if (!rows.contains(_selectedObject)) {
       _clearSelection();
     }
 
-    // For tables that insert rows at the top, we'd like to preserve the background
-    // color for each (eg. when we insert one row, the previous-top row should
-    // have the same background color even though it's gone from odd to even).
-    // To achieve this, we have a boolean that dictates whether we insert a dummy row
-    // at the top, and will reverse it when the number of rows being inserted into
-    // the table is odd.
-    final int differenceInRowCount =
-        (rows?.length ?? 0) - (this.rows?.length ?? 0);
-    if (anchorAlternatingRowsToBottom && differenceInRowCount % 2 == 1) {
-      _offsetRowColor = !_offsetRowColor;
-    }
     this.rows = rows;
 
     if (_thead == null) {
@@ -267,20 +260,24 @@ class Table<T> extends Object with SetStateMixin {
     int currentRowIndex = 0,
   }) {
     _tbody.element.children.remove(_dummyRowToForceAlternatingColor.element);
-    bool shouldOffsetRowColor = _offsetRowColor;
-    // If we're skipping an odd number or rows, we need to invert whether to include
-    // the row color compensator.
-    if (firstRenderedRowInclusive % 2 == 1) {
-      shouldOffsetRowColor = !shouldOffsetRowColor;
-    }
+
+    int translateRowIndex(int index) =>
+        !isReversed ? index : (rows?.length ?? 0) - 1 - index;
+
+    // Enable the dummy row to fix alternating backgrounds when the first rendered
+    // row (taking into account if we're reversing) index is an odd.
+    final bool shouldOffsetRowColor =
+        translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
     if (shouldOffsetRowColor) {
       _tbody.element.children
           .insert(0, _dummyRowToForceAlternatingColor.element);
       currentRowIndex++;
     }
 
-    for (T row
-        in rows.sublist(firstRenderedRowInclusive, lastRenderedRowExclusive)) {
+    for (int index = firstRenderedRowInclusive;
+        index < lastRenderedRowExclusive;
+        index++) {
+      final T row = rows[translateRowIndex(index)];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
