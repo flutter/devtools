@@ -467,8 +467,10 @@ div.tabnav {
     cursor: default;
 }
 
-.log-details .label {
-    margin-right: 5px;
+
+.log-details {
+    height: 120px;
+    overflow: scroll;
 }
 
 .frame-panel {
