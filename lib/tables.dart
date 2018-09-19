@@ -84,7 +84,7 @@ class Table<T> extends Object with SetStateMixin {
     if (anchorAlternatingRowsToBottom && differenceInRowCount % 2 == 1) {
       _offsetRowColor = !_offsetRowColor;
     }
-    this.rows = rows.toList();
+    this.rows = rows;
 
     if (_thead == null) {
       _thead = new CoreElement('thead')
@@ -198,18 +198,19 @@ class Table<T> extends Object with SetStateMixin {
     int currentRowIndex = 0;
 
     // Calculate the subset of rows to render based on scroll position.
+    final int totalRows = rows?.length ?? 0;
     final int firstVisibleRow =
         ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
     final int numVisibleRows = (element.offsetHeight / rowHeight).ceil() + 1;
     final int highestPossibleFirstRenderedRow =
-        rows == null ? 0 : rows.length - (numVisibleRows + 1);
+        (totalRows - (numVisibleRows + 1)).clamp(0, totalRows);
     firstRenderedRowInclusive =
         firstVisibleRow.clamp(0, highestPossibleFirstRenderedRow);
     // Calculate the last rendered row. +2 is for:
     //   1) because it's exclusive so needs to be one higher
     //   2) because we need to render the extra partially-visible row
-    lastRenderedRowExclusive = (firstRenderedRowInclusive + numVisibleRows + 2)
-        .clamp(0, rows?.length ?? 0);
+    lastRenderedRowExclusive =
+        (firstRenderedRowInclusive + numVisibleRows + 2).clamp(0, totalRows);
 
     // Add a spacer row to fill up the content off-screen.
     final double spacerBeforeHeight = firstRenderedRowInclusive * rowHeight;
