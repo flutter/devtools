@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -208,10 +207,10 @@ class MemoryScreen extends Screen {
 
       // Set the rows blank so old data is removed while this request is in-flight.
       // TODO(dantup): Should table support showing a spinner?
-      // instancesTable.setRows(<InstanceSummary>[]);
+      instancesTable.setRows(<InstanceSummary>[]);
 
-      // final Class c =
-      //     await serviceInfo.service.getObject(_isolateId, row.classRef.id);
+      final Class c =
+          await serviceInfo.service.getObject(_isolateId, row.classRef.id);
 
       // // TODO(dantup): Find out what we should actually be displaying here.
       // if (c.library.type == '@Library') {
