@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
 class TimelineData {
   final List<TimelineThread> threads = <TimelineThread>[];
   final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
+
+  final StreamController<TimelineThreadEvent> _timelineEventsController =
+      new StreamController<TimelineThreadEvent>.broadcast();
 
   TimelineData();
 
@@ -17,7 +22,8 @@ class TimelineData {
     threads.sort();
   }
 
-  // TODO: fire events for TimelineThreadEvent creation
+  Stream<TimelineThreadEvent> get onTimelineThreadEvent =>
+      _timelineEventsController.stream;
 
   void processTimelineEvent(TimelineEvent event) {
     final TimelineThread thread = threadMap[event.threadId];
@@ -52,6 +58,8 @@ class TimelineData {
         break;
     }
   }
+
+  TimelineThread getThread(int threadId) => threadMap[threadId];
 
   TimelineFrameData getFrameData(TimelineFrame frame) {
     if (frame == null) {
@@ -161,8 +169,15 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   void _handleDurationEndEvent(TimelineEvent event) {
     if (durationStack != null) {
+      final TimelineThreadEvent current = durationStack;
+
       durationStack.setEnd(event.timestampMicros);
       durationStack = durationStack.parent;
+
+      // Fire an event for a completed timeline event.
+      if (durationStack == null) {
+        parent._timelineEventsController.add(current);
+      }
     }
   }
 
@@ -217,10 +232,15 @@ class TimelineThread implements Comparable<TimelineThread> {
   void _handleAsyncEndEvent(TimelineEvent event) {
     final String asyncUID = event.asyncUID;
 
-    final TimelineThreadEvent e = _asyncEvents[asyncUID];
-    if (e != null) {
-      e.setEnd(event.timestampMicros);
-      _asyncEvents[asyncUID] = e.parent;
+    final TimelineThreadEvent current = _asyncEvents[asyncUID];
+    if (current != null) {
+      current.setEnd(event.timestampMicros);
+      _asyncEvents[asyncUID] = current.parent;
+
+      // Fire an event for a completed timeline event.
+      if (_asyncEvents[asyncUID] == null) {
+        parent._timelineEventsController.add(current);
+      }
     }
   }
 }

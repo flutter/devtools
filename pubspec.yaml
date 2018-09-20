@@ -17,5 +17,5 @@ dev_dependencies:
   build_runner: any
   build_web_compilers: any
   test: ^1.0.0
-  webdev: 0.2.4
+  webdev: 0.2.4+1
   webkit_inspection_protocol: ^0.3.6

@@ -125,7 +125,6 @@ class TimelineScreen extends Screen {
       if (frame != null && timelineFramesUI.hasStarted()) {
         final TimelineFrameData data =
             timelineFramesUI.timelineData.getFrameData(frame);
-        data.printData();
         frameDetailsUI.updateData(data);
       }
     });
@@ -168,8 +167,6 @@ class TimelineScreen extends Screen {
 
       for (Map<String, dynamic> json in events) {
         final TimelineEvent e = new TimelineEvent(json);
-
-        timelineFramesBuilder.processTimelineEvent(e);
         timelineFramesUI.timelineData?.processTimelineEvent(e);
       }
     });
@@ -246,6 +243,11 @@ class TimelineScreen extends Screen {
       }
     }
 
+    timelineData.onTimelineThreadEvent.listen((TimelineThreadEvent event) {
+      timelineFramesBuilder.processTimelineEvent(
+          timelineData.getThread(event.threadId), event);
+    });
+
     timelineFramesUI.timelineData = timelineData;
   }
 
@@ -264,7 +266,6 @@ class TimelineFramesUI extends CoreElement {
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
-      print('frame: ${frame.renderAsMs} ${frame.gpuAsMs}');
       final CoreElement frameUI = new TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
@@ -357,8 +358,8 @@ class TimelineFramesBuilder {
 
   bool isPaused = false;
 
-  List<Sample> dartSamples = <Sample>[];
-  List<Sample> gpuSamples = <Sample>[];
+  List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
+  List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
 
   final StreamController<TimelineFrame> _frameAddedController =
       new StreamController<TimelineFrame>.broadcast();
@@ -373,109 +374,84 @@ class TimelineFramesBuilder {
   void pause() {
     isPaused = true;
 
-    dartSamples.clear();
-    gpuSamples.clear();
+    dartEvents.clear();
+    gpuEvents.clear();
   }
 
   void resume() {
     isPaused = false;
   }
 
-  void processTimelineEvent(TimelineEvent event) {
-    // TODO: change from listening to events to listening to timeline item
-    // creation.
-    if (event.category != 'Embedder') {
+  void processTimelineEvent(TimelineThread thread, TimelineThreadEvent event) {
+    if (thread == null) {
       return;
     }
 
-    // [Embedder] [b/e] PipelineProduce
-    if (event.name == 'PipelineProduce') {
-      if (event.phase == 'b') {
-        final int start = event.timestampMicros;
-        if (dartSamples.isNotEmpty) {
-          if (!dartSamples.last.wellFormed) {
-            dartSamples.clear();
-          }
-        }
-        dartSamples.add(new Sample(start: start));
-      } else if (event.phase == 'e') {
-        final int end = event.timestampMicros;
-        if (dartSamples.isNotEmpty) {
-          dartSamples.last.end = end;
-        }
-      }
-    }
+    // io.flutter.1.ui, io.flutter.1.gpu
+    if (thread.name.endsWith('.ui')) {
+      // PipelineProduce
+      if (event.name == 'PipelineProduce' && event.wellFormed) {
+        dartEvents.add(event);
 
-    // [Embedder] [B/E] MessageLoop::RunExpiredTasks
-    if (event.name == 'MessageLoop::RunExpiredTasks') {
-      if (event.phase == 'B') {
-        final int start = event.timestampMicros;
-        if (gpuSamples.isNotEmpty && !gpuSamples.last.wellFormed) {
-          gpuSamples.clear();
-        }
-        gpuSamples.add(new Sample(start: start));
-      } else if (event.phase == 'E') {
-        final int end = event.timestampMicros;
-        // TODO: fix this
-        if (gpuSamples.isNotEmpty && gpuSamples.last.start < end) {
-          gpuSamples.last.end = end;
-        }
+        _processSamplesData();
       }
+    } else if (thread.name.endsWith('.gpu')) {
+      // MessageLoop::RunExpiredTasks
+      if (event.name == 'MessageLoop::RunExpiredTasks' && event.wellFormed) {
+        gpuEvents.add(event);
 
-      _processSamplesData();
+        _processSamplesData();
+      }
     }
   }
 
   void _processSamplesData() {
-    while (dartSamples.isNotEmpty && gpuSamples.isNotEmpty) {
-      int dartStart = dartSamples.first.start;
+    while (dartEvents.isNotEmpty && gpuEvents.isNotEmpty) {
+      int dartStart = dartEvents.first.startMicros;
 
       // Throw away any gpu samples that start before dart ones.
-      while (gpuSamples.isNotEmpty && gpuSamples.first.start < dartStart) {
-        gpuSamples.removeAt(0);
+      while (gpuEvents.isNotEmpty && gpuEvents.first.startMicros < dartStart) {
+        gpuEvents.removeAt(0);
       }
 
-      if (gpuSamples.isEmpty || !gpuSamples.first.wellFormed) {
+      if (gpuEvents.isEmpty) {
         break;
       }
 
       // Find the newest dart sample that starts before a gpu one.
-      final int gpuStart = gpuSamples.first.start;
+      final int gpuStart = gpuEvents.first.startMicros;
 
-      while (dartSamples.length > 1 && dartSamples.first.start < gpuStart) {
-        if (dartSamples[1].start < gpuStart) {
-          dartSamples.removeAt(0);
-        }
+      while (dartEvents.length > 1 &&
+          (dartEvents[0].startMicros < gpuStart &&
+              dartEvents[1].startMicros < gpuStart)) {
+        dartEvents.removeAt(0);
       }
 
-      if (dartSamples.isEmpty || !dartSamples.first.wellFormed) {
+      if (dartEvents.isEmpty) {
         break;
       }
 
       // Return the pair.
-      if (dartSamples.isNotEmpty && gpuSamples.isNotEmpty) {
-        dartStart = dartSamples.first.start;
-        if (dartStart > gpuStart) {
-          break;
-        }
-
-        final Sample dartSample = dartSamples.removeAt(0);
-        final Sample gpuSample = gpuSamples.removeAt(0);
-
-        print('$dartSample $gpuSample');
-
-        final TimelineFrame frame = new TimelineFrame(
-            renderStart: dartSample.start, rasterizeStart: gpuSample.start);
-        frame.setRenderEnd(dartSample.end);
-        frame.setRasterizeEnd(gpuSample.end);
-
-        frames.add(frame);
-        if (frames.length > maxFrames) {
-          frames.removeAt(0);
-        }
-
-        _frameAddedController.add(frame);
+      dartStart = dartEvents.first.startMicros;
+      if (dartStart > gpuStart) {
+        break;
       }
+
+      final TimelineThreadEvent dartEvent = dartEvents.removeAt(0);
+      final TimelineThreadEvent gpuEvent = gpuEvents.removeAt(0);
+
+      final TimelineFrame frame = new TimelineFrame(
+          renderStart: dartEvent.startMicros,
+          rasterizeStart: gpuEvent.startMicros);
+      frame.renderDuration = dartEvent.durationMicros;
+      frame.rasterizeDuration = gpuEvent.durationMicros;
+
+      frames.add(frame);
+      if (frames.length > maxFrames) {
+        frames.removeAt(0);
+      }
+
+      _frameAddedController.add(frame);
     }
   }
 
@@ -483,18 +459,6 @@ class TimelineFramesBuilder {
     frames.clear();
     _clearedController.add(null);
   }
-}
-
-class Sample {
-  int start;
-  int end;
-
-  Sample({this.start, this.end});
-
-  bool get wellFormed => start != null && end != null;
-
-  @override
-  String toString() => '[$start ${end - start}]';
 }
 
 class FrameDetailsUI extends CoreElement {
@@ -555,7 +519,7 @@ class FrameDetailsUI extends CoreElement {
     const int rowHeight = 25;
 
     const double microsPerFrame = 1000 * 1000 / 60.0;
-    const double pxPerMicro = microsPerFrame / 1200.0;
+    const double pxPerMicro = microsPerFrame / 1000.0;
 
     int row = 0;
 
@@ -567,8 +531,7 @@ class FrameDetailsUI extends CoreElement {
 
     drawRecursively = (TimelineThreadEvent event, int row) {
       if (!event.wellFormed) {
-        print('event not well formed');
-        print(event);
+        print('event not well formed: $event');
         return;
       }
 
@@ -604,8 +567,7 @@ class FrameDetailsUI extends CoreElement {
         row++;
       }
     } catch (e, st) {
-      print(e);
-      print(st);
+      print('$e\n$st');
     }
   }
 
