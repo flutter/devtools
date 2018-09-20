@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -97,10 +99,13 @@ class LoggingScreen extends Screen {
     // Log stdout and stderr events.
     service.onStdoutEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      String summary;
+      String summary = message;
       if (message.length > 200) {
         summary = message.substring(0, 200) + '…';
       }
+      summary = summary.replaceAll('\t', r'\t');
+      summary = summary.replaceAll('\r', r'\r');
+      summary = summary.replaceAll('\n', r'\n');
       _log(new LogData('stdout', message, e.timestamp, summary: summary));
     });
     service.onStderrEvent.listen((Event e) {
@@ -110,11 +115,16 @@ class LoggingScreen extends Screen {
 
     // Log GC events.
     service.onGCEvent.listen((Event e) {
-      final dynamic json = e.json;
-      final String message = 'gc reason: ${json['reason']}\n'
-          'new: ${json['new']}\n'
-          'old: ${json['old']}\n';
-      _log(new LogData('gc', message, e.timestamp));
+      final String summary =
+          '${e.json['reason']} collection, ${e.json['isolate']['name']}';
+      final Map<String, dynamic> event = <String, dynamic>{
+        'reason': e.json['reason'],
+        'new': e.json['new'],
+        'old': e.json['old'],
+        'isolate': e.json['isolate'],
+      };
+      final String message = jsonEncode(event);
+      _log(new LogData('gc', message, e.timestamp, summary: summary));
     });
 
     // Log `dart:developer` `log` events.
@@ -315,6 +325,8 @@ String getCssClassForEventKind(LogData item) {
 }
 
 class LogDetailsUI extends CoreElement {
+  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
+
   LogData _data;
 
   CoreElement content, message;
@@ -331,11 +343,24 @@ class LogDetailsUI extends CoreElement {
   LogData get data => _data;
 
   set data(LogData value) {
+    // TODO(devoncarew): Reset the vertical scroll value if any.
+
     _data = value;
 
     if (_data != null) {
-      // TODO(dantup): Can we format the JSON better?
-      message.text = _data.message;
+      final String str = _data.message;
+
+      if (str.startsWith('{') && str.endsWith('}')) {
+        try {
+          // If the string decodes properly, than format the json.
+          final dynamic result = jsonDecode(str);
+          message.text = jsonEncoder.convert(result);
+        } catch (e) {
+          message.text = _data.message;
+        }
+      } else {
+        message.text = _data.message;
+      }
     } else {
       message.text = '';
     }

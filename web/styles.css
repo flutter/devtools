@@ -470,7 +470,8 @@ div.tabnav {
 
 .log-details {
     height: 120px;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-wrap: break-word;
 }
 
 .frame-panel {
