@@ -19,7 +19,10 @@ import '../utils.dart';
 
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
-const int kMaxLogItemsLength = 5000;
+// For performance reasons, we drop old logs in batches, so the log will grow
+// to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
+const int kMaxLogItemsLowerBound = 5000;
+const int kMaxLogItemsUpperBound = 5500;
 DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
@@ -62,7 +65,7 @@ class LoggingScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    loggingTable = new Table<LogData>.virtual();
+    loggingTable = new Table<LogData>.virtual(isReversed: true);
 
     loggingTable.addColumn(new LogWhenColumn());
     loggingTable.addColumn(new LogKindColumn());
@@ -168,20 +171,25 @@ class LoggingScreen extends Screen {
   List<LogData> data = <LogData>[];
 
   void _log(LogData log) {
-    // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
-    // and insert this new item at the start, followed by the required number
-    // of items from the old data. This is faster than insert(0, log).
-    //
-    // If this turns out to be too slow, we can make it faster (saving around
-    // 30-40% of the time) by just .add()ing to the list and having a flag on
-    // the table to reverse data for rendering ([length-index] when reading data).
-    final int totalItems = (data.length + 1).clamp(0, kMaxLogItemsLength);
-    data = List<LogData>(totalItems)
-      ..[0] = log
-      ..setRange(1, totalItems, data);
+    // Insert the new item and clamped the list to kMaxLogItemsLength. The table
+    // is rendered reversed so new items are at the top but we can use .add() here
+    // which is must faster than inserting at the start of the list.
+    data.add(log);
+    // Note: We need to drop rows from the start because we want to drop old rows
+    // but because that's expensive, we only do it periodically (eg. when the list
+    // is 500 rows more).
+    if (data.length > kMaxLogItemsUpperBound) {
+      int itemsToRemove = data.length - kMaxLogItemsLowerBound;
+      // Ensure we remove an even number of rows to keep the alternating background
+      // in-sync.
+      if (itemsToRemove % 2 == 1) {
+        itemsToRemove--;
+      }
+      data = data.sublist(itemsToRemove);
+    }
 
     if (visible && loggingTable != null) {
-      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
+      loggingTable.setRows(data);
       _updateStatus();
     }
   }
