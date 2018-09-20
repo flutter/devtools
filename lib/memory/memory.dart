@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:html';
 import 'dart:math' as math;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
