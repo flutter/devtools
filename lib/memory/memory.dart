@@ -257,9 +257,15 @@ class MemoryScreen extends Screen {
       // TODO(dantup): Push the relevant table.
       // For literlals, do nothing?
       // For other objects, push an InstanceDetails table?
-      // final Table<InstanceData> newTable =
-      //     row == null ? null : _createInstanceDetailsTableView(row);
-      // _pushNextTable(table, newTable);
+
+      // For testing purposes, the first row (id) will just push
+      // another table with another instance in (this is how references out may
+      // work?).
+      if (row.name == 'id') {
+        final Table<InstanceData> newTable =
+            row == null ? null : _createInstanceDetailsTableView(row.instance);
+        _pushNextTable(table, newTable);
+      }
     });
 
     // Kick off population of data for the table.
@@ -637,21 +643,22 @@ class InstanceSummary {
     // TODO(dantup): Replace with real implementation.
     await Future<void>.delayed(const Duration(milliseconds: 500));
     return <InstanceData>[
-      new InstanceData('id', id),
-      new InstanceData('name', 'Joe Bloggs'),
-      new InstanceData('email', 'something@example.org'),
-      new InstanceData('company', 'Bloggs Corp'),
-      new InstanceData('telephone', '01234 567 890'),
-      new InstanceData('shoeSize', 11),
+      new InstanceData(this, 'id', id),
+      new InstanceData(this, 'name', 'Joe Bloggs'),
+      new InstanceData(this, 'email', 'something@example.org'),
+      new InstanceData(this, 'company', 'Bloggs Corp'),
+      new InstanceData(this, 'telephone', '01234 567 890'),
+      new InstanceData(this, 'shoeSize', 11),
     ];
   }
 }
 
 class InstanceData {
+  InstanceSummary instance;
   String name;
   dynamic value;
 
-  InstanceData(this.name, this.value);
+  InstanceData(this.instance, this.name, this.value);
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';
