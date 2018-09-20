@@ -17,11 +17,12 @@ import '../utils.dart';
 
 // TODO(devoncarew): filtering, and enabling additional logging
 
-// TODO(devoncarew): a more efficient table; we need to virtualize it
-
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
-const int kMaxLogItemsLength = 5000;
+// For performance reasons, we drop old logs in batches, so the log will grow
+// to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
+const int kMaxLogItemsLowerBound = 5000;
+const int kMaxLogItemsUpperBound = 5500;
 DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
@@ -51,10 +52,9 @@ class LoggingScreen extends Screen {
     mainDiv.add(<CoreElement>[
       _createTableView()
         ..clazz('section')
-        ..flex(4),
+        ..flex(),
       div(c: 'section')
         ..layoutVertical()
-        ..flex()
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
 
@@ -65,7 +65,7 @@ class LoggingScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    loggingTable = new Table<LogData>.virtual();
+    loggingTable = new Table<LogData>.virtual(isReversed: true);
 
     loggingTable.addColumn(new LogWhenColumn());
     loggingTable.addColumn(new LogKindColumn());
@@ -96,16 +96,16 @@ class LoggingScreen extends Screen {
 
     // Log stdout and stderr events.
     service.onStdoutEvent.listen((Event e) {
-      String message = decodeBase64(e.bytes);
-      // TODO(devoncarew): Have the UI provide a way to show untruncated data.
-      if (message.length > 500) {
-        message = message.substring(0, 500) + '…';
+      final String message = decodeBase64(e.bytes);
+      String summary;
+      if (message.length > 200) {
+        summary = message.substring(0, 200) + '…';
       }
-      _log(new LogData('stdout', message, e.timestamp));
+      _log(new LogData('stdout', message, e.timestamp, summary: summary));
     });
     service.onStderrEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      _log(new LogData('stderr', message, e.timestamp, error: true));
+      _log(new LogData('stderr', message, e.timestamp, isError: true));
     });
 
     // Log GC events.
@@ -141,7 +141,7 @@ class LoggingScreen extends Screen {
 
       final bool isError =
           level != null && level >= Level.SEVERE.value ? true : false;
-      _log(new LogData(loggerName, message, e.timestamp, error: isError));
+      _log(new LogData(loggerName, message, e.timestamp, isError: isError));
     });
 
     // Log Flutter frame events.
@@ -169,21 +169,27 @@ class LoggingScreen extends Screen {
   void _handleConnectionStop(dynamic event) {}
 
   List<LogData> data = <LogData>[];
+
   void _log(LogData log) {
-    // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
-    // and insert this new item at the start, followed by the required number
-    // of items from the old data. This is faster than insert(0, log).
-    //
-    // If this turns out to be too slow, we can make it faster (saving around
-    // 30-40% of the time) by just .add()ing to the list and having a flag on
-    // the table to reverse data for rendering ([length-index] when reading data).
-    final int totalItems = (data.length + 1).clamp(0, kMaxLogItemsLength);
-    data = List<LogData>(totalItems)
-      ..[0] = log
-      ..setRange(1, totalItems, data);
+    // Insert the new item and clamped the list to kMaxLogItemsLength. The table
+    // is rendered reversed so new items are at the top but we can use .add() here
+    // which is must faster than inserting at the start of the list.
+    data.add(log);
+    // Note: We need to drop rows from the start because we want to drop old rows
+    // but because that's expensive, we only do it periodically (eg. when the list
+    // is 500 rows more).
+    if (data.length > kMaxLogItemsUpperBound) {
+      int itemsToRemove = data.length - kMaxLogItemsLowerBound;
+      // Ensure we remove an even number of rows to keep the alternating background
+      // in-sync.
+      if (itemsToRemove % 2 == 1) {
+        itemsToRemove--;
+      }
+      data = data.sublist(itemsToRemove);
+    }
 
     if (visible && loggingTable != null) {
-      loggingTable.setRows(data, anchorAlternatingRowsToBottom: true);
+      loggingTable.setRows(data);
       _updateStatus();
     }
   }
@@ -210,11 +216,18 @@ class LogData {
   final String kind;
   final String message;
   final int timestamp;
-  final bool error;
+  final bool isError;
   final String extraHtml;
+  final String summary;
 
-  LogData(this.kind, this.message, this.timestamp,
-      {this.error = false, this.extraHtml});
+  LogData(
+    this.kind,
+    this.message,
+    this.timestamp, {
+    this.isError = false,
+    this.extraHtml,
+    this.summary,
+  });
 }
 
 class LogKindColumn extends Column<LogData> {
@@ -278,9 +291,10 @@ class LogMessageColumn extends Column<LogData> {
     final LogData log = value;
 
     if (log.extraHtml != null) {
-      return '${log.message} ${log.extraHtml}';
+      return '${log.summary ?? log.message} ${log.extraHtml}';
     } else {
-      return log.message; // TODO(devoncarew): escape html
+      // TODO(devoncarew): escape html
+      return log.summary ?? log.message;
     }
   }
 }
@@ -288,7 +302,7 @@ class LogMessageColumn extends Column<LogData> {
 String getCssClassForEventKind(LogData item) {
   String cssClass = '';
 
-  if (item.kind == 'stderr' || item.error) {
+  if (item.kind == 'stderr' || item.isError) {
     cssClass = 'stderr';
   } else if (item.kind == 'stdout') {
     cssClass = 'stdout';
@@ -303,36 +317,27 @@ String getCssClassForEventKind(LogData item) {
 class LogDetailsUI extends CoreElement {
   LogData _data;
 
-  CoreElement content, timestamp, kind, message;
+  CoreElement content, message;
 
   LogDetailsUI() : super('div') {
-    attribute('hidden');
     layoutVertical();
-    flex();
 
     add(<CoreElement>[
       content = div(c: 'log-details')
-        ..flex()
-        ..add(kind = span())
-        ..add(timestamp = span())
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
   }
 
   LogData get data => _data;
+
   set data(LogData value) {
     _data = value;
 
     if (_data != null) {
-      timestamp.text = timeFormat
-          .format(new DateTime.fromMillisecondsSinceEpoch(_data.timestamp));
-      kind
-        ..text = _data.kind
-        ..clazz('label', removeOthers: true)
-        ..clazz(getCssClassForEventKind(data));
       // TODO(dantup): Can we format the JSON better?
       message.text = _data.message;
+    } else {
+      message.text = '';
     }
-    attribute('hidden', _data == null);
   }
 }

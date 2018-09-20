@@ -91,7 +91,7 @@ class PerformanceScreen extends Screen {
     serviceInfo.service
         .getCpuProfile(_isolateId, 'UserVM')
         .then((CpuProfile profile) async {
-      // TODO:
+      // TODO(devoncarew):
       print(profile);
 
       final _CalcProfile calc = new _CalcProfile(profile);
@@ -138,7 +138,7 @@ class PerformanceScreen extends Screen {
     perfTable.setRows(<PerfData>[]);
 
     perfTable.onSelect.listen((PerfData data) {
-      // TODO:
+      // TODO(devoncarew):
       print(data);
     });
 
@@ -252,8 +252,6 @@ class CpuTracker {
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
-  static final math.Random rnd = new math.Random();
-
   VmService service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
@@ -275,8 +273,7 @@ class CpuTracker {
       return;
     }
 
-    final int sample = (_lastValue ?? 50) + rnd.nextInt(20) - 10;
-    _addSample(sample.clamp(0, 100));
+    // TODO(devoncarew): Poll the VM for the CPU load.
 
     _pollingTimer = new Timer(kUpdateDelay, _pollCpu);
   }
@@ -288,6 +285,7 @@ class CpuTracker {
 
   int get _lastValue => samples.isEmpty ? null : samples.last;
 
+  // ignore: unused_element
   void _addSample(int sample) {
     samples.add(sample);
 

@@ -313,7 +313,7 @@ class MemoryChart extends LineChart<MemoryTracker> {
     }
 
     // display the process usage
-    final String rss = '${_printMb(data.processRss, 0)} MB RSS';
+    final String rss = '${_printMb(data.processRss ?? 0, 0)} MB RSS';
     processLabel.text = rss;
 
     // display the dart heap usage
