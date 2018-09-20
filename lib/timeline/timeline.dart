@@ -22,6 +22,13 @@ import 'timeline_protocol.dart';
 
 // TODO(devoncarew): use colors for the category
 
+// TODO:(devoncarew): show the total frame count
+
+// TODO(devoncarew): Have a timeline view thumbnail overview.
+
+// TODO(devoncarew): Switch to showing all timeline events, but highlighting the
+// area associated with the selected frame.
+
 class TimelineScreen extends Screen {
   TimelineScreen()
       : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
@@ -118,6 +125,7 @@ class TimelineScreen extends Screen {
       if (frame != null && timelineFramesUI.hasStarted()) {
         final TimelineFrameData data =
             timelineFramesUI.timelineData.getFrameData(frame);
+        data.printData();
         frameDetailsUI.updateData(data);
       }
     });
@@ -205,7 +213,7 @@ class TimelineScreen extends Screen {
       await serviceInfo.service
           .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     } else if (!shouldBeRunning && isRunning) {
-      // TODO: turn off the events
+      // TODO(devoncarew): turn off the events
       await serviceInfo.service.setVMTimelineFlags(<String>[]);
 
       timelineFramesBuilder.pause();
@@ -256,6 +264,7 @@ class TimelineFramesUI extends CoreElement {
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
+      print('frame: ${frame.renderAsMs} ${frame.gpuAsMs}');
       final CoreElement frameUI = new TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
@@ -318,11 +327,11 @@ class TimelineFrameUI extends CoreElement {
     add(dartBar);
 
     final CoreElement gpuBar = div(c: 'perf-bar right');
-    if (frame.rastereizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
+    if (frame.rasterizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       gpuBar.clazz('slow');
       isSlow = true;
     }
-    height = (frame.rastereizeDuration * pixelsPerMs / 1000.0).round();
+    height = (frame.rasterizeDuration * pixelsPerMs / 1000.0).round();
     height = math.min(height, 80 - 6);
     gpuBar.element.style.height = '${height}px';
     add(gpuBar);
@@ -348,6 +357,9 @@ class TimelineFramesBuilder {
 
   bool isPaused = false;
 
+  List<Sample> dartSamples = <Sample>[];
+  List<Sample> gpuSamples = <Sample>[];
+
   final StreamController<TimelineFrame> _frameAddedController =
       new StreamController<TimelineFrame>.broadcast();
 
@@ -361,9 +373,8 @@ class TimelineFramesBuilder {
   void pause() {
     isPaused = true;
 
-    if (frames.isNotEmpty && !frames.last.isComplete) {
-      frames.removeLast();
-    }
+    dartSamples.clear();
+    gpuSamples.clear();
   }
 
   void resume() {
@@ -371,76 +382,119 @@ class TimelineFramesBuilder {
   }
 
   void processTimelineEvent(TimelineEvent event) {
+    // TODO: change from listening to events to listening to timeline item
+    // creation.
     if (event.category != 'Embedder') {
       return;
     }
 
-    // [Embedder] [B] VSYNC
-    if (event.name == 'VSYNC') {
-      if (event.phase == 'B') {
-        TimelineFrame frame = findFrameAfter(event.timestampMicros);
-        if (frame == null) {
-          frame = new TimelineFrame();
-          frames.add(frame);
-        }
-        frame.setRenderStart(event.timestampMicros);
-      } else if (event.phase == 'E') {
-        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        frame?.setRenderEnd(event.timestampMicros);
-
-        if (frame != null && frame.isComplete) {
-          _frameAddedController.add(frame);
-        }
-      }
-    }
-
-    // [Embedder] [B] GPURasterizer::Draw
-    if (event.name == 'GPURasterizer::Draw') {
-      if (event.phase == 'B') {
-        TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        if (frame == null) {
-          frame = new TimelineFrame();
-          frames.add(frame);
-          if (frames.length > maxFrames) {
-            frames.removeAt(0);
+    // [Embedder] [b/e] PipelineProduce
+    if (event.name == 'PipelineProduce') {
+      if (event.phase == 'b') {
+        final int start = event.timestampMicros;
+        if (dartSamples.isNotEmpty) {
+          if (!dartSamples.last.wellFormed) {
+            dartSamples.clear();
           }
         }
-        frame.setRastereizeStart(event.timestampMicros);
-      } else if (event.phase == 'E') {
-        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        frame?.setRastereizeEnd(event.timestampMicros);
-
-        if (frame != null && frame.isComplete) {
-          _frameAddedController.add(frame);
+        dartSamples.add(new Sample(start: start));
+      } else if (event.phase == 'e') {
+        final int end = event.timestampMicros;
+        if (dartSamples.isNotEmpty) {
+          dartSamples.last.end = end;
         }
       }
     }
+
+    // [Embedder] [B/E] MessageLoop::RunExpiredTasks
+    if (event.name == 'MessageLoop::RunExpiredTasks') {
+      if (event.phase == 'B') {
+        final int start = event.timestampMicros;
+        if (gpuSamples.isNotEmpty && !gpuSamples.last.wellFormed) {
+          gpuSamples.clear();
+        }
+        gpuSamples.add(new Sample(start: start));
+      } else if (event.phase == 'E') {
+        final int end = event.timestampMicros;
+        // TODO: fix this
+        if (gpuSamples.isNotEmpty && gpuSamples.last.start < end) {
+          gpuSamples.last.end = end;
+        }
+      }
+
+      _processSamplesData();
+    }
   }
 
-  TimelineFrame findFrameAfter(int micros) {
-    for (TimelineFrame frame in frames) {
-      if (frame.start > micros) {
-        return frame;
+  void _processSamplesData() {
+    while (dartSamples.isNotEmpty && gpuSamples.isNotEmpty) {
+      int dartStart = dartSamples.first.start;
+
+      // Throw away any gpu samples that start before dart ones.
+      while (gpuSamples.isNotEmpty && gpuSamples.first.start < dartStart) {
+        gpuSamples.removeAt(0);
+      }
+
+      if (gpuSamples.isEmpty || !gpuSamples.first.wellFormed) {
+        break;
+      }
+
+      // Find the newest dart sample that starts before a gpu one.
+      final int gpuStart = gpuSamples.first.start;
+
+      while (dartSamples.length > 1 && dartSamples.first.start < gpuStart) {
+        if (dartSamples[1].start < gpuStart) {
+          dartSamples.removeAt(0);
+        }
+      }
+
+      if (dartSamples.isEmpty || !dartSamples.first.wellFormed) {
+        break;
+      }
+
+      // Return the pair.
+      if (dartSamples.isNotEmpty && gpuSamples.isNotEmpty) {
+        dartStart = dartSamples.first.start;
+        if (dartStart > gpuStart) {
+          break;
+        }
+
+        final Sample dartSample = dartSamples.removeAt(0);
+        final Sample gpuSample = gpuSamples.removeAt(0);
+
+        print('$dartSample $gpuSample');
+
+        final TimelineFrame frame = new TimelineFrame(
+            renderStart: dartSample.start, rasterizeStart: gpuSample.start);
+        frame.setRenderEnd(dartSample.end);
+        frame.setRasterizeEnd(gpuSample.end);
+
+        frames.add(frame);
+        if (frames.length > maxFrames) {
+          frames.removeAt(0);
+        }
+
+        _frameAddedController.add(frame);
       }
     }
-
-    return null;
-  }
-
-  TimelineFrame findFrameBefore(int micros) {
-    for (TimelineFrame frame in frames.reversed) {
-      if (frame.start <= micros) {
-        return frame;
-      }
-    }
-
-    return null;
   }
 
   void clear() {
     frames.clear();
     _clearedController.add(null);
   }
+}
+
+class Sample {
+  int start;
+  int end;
+
+  Sample({this.start, this.end});
+
+  bool get wellFormed => start != null && end != null;
+
+  @override
+  String toString() => '[$start ${end - start}]';
 }
 
 class FrameDetailsUI extends CoreElement {
@@ -505,7 +559,7 @@ class FrameDetailsUI extends CoreElement {
 
     int row = 0;
 
-    final int microsAdjust = data.frame.start;
+    final int microsAdjust = data.frame.startMicros;
 
     int maxRow = 0;
 

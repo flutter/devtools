@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO: tests
-
-// TODO: support additional phases (s, t, f)
-
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
@@ -20,6 +16,8 @@ class TimelineData {
     threadMap[thread.threadId] = thread;
     threads.sort();
   }
+
+  // TODO: fire events for TimelineThreadEvent creation
 
   void processTimelineEvent(TimelineEvent event) {
     final TimelineThread thread = threadMap[event.threadId];
@@ -49,8 +47,8 @@ class TimelineData {
         break;
 
       default:
-        // TODO(devoncarew): Support additional phases.
-        print('unhandled: ${event.json}');
+        // TODO(devoncarew): Support additional phases (s, t, f).
+        //print('unhandled: ${event.json}');
         break;
     }
   }
@@ -68,7 +66,8 @@ class TimelineData {
           continue;
         }
 
-        if (event.endMicros >= frame.start && event.startMicros < frame.end) {
+        if (event.endMicros >= frame.startMicros &&
+            event.startMicros < frame.endMicros) {
           events.add(event);
         }
       }
@@ -251,7 +250,7 @@ class TimelineThreadEvent {
   bool get wellFormed => startMicros != null && durationMicros != null;
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name');
+    buf.writeln('$indent$name [${startMicros}u]');
     for (TimelineThreadEvent child in children) {
       child.format(buf, '  $indent');
     }
@@ -265,16 +264,16 @@ class TimelineFrame {
   int renderStart;
   int renderDuration;
 
-  int rastereizeStart;
-  int rastereizeDuration;
+  int rasterizeStart;
+  int rasterizeDuration;
 
-  TimelineFrame();
+  TimelineFrame({this.renderStart, this.rasterizeStart});
 
-  int get start => renderStart ?? rastereizeStart;
+  int get startMicros => renderStart ?? rasterizeStart;
 
-  int get end {
-    if (rastereizeStart != null) {
-      return rastereizeStart + rastereizeDuration;
+  int get endMicros {
+    if (rasterizeStart != null) {
+      return rasterizeStart + rasterizeDuration;
     } else {
       return renderStart + renderDuration;
     }
@@ -288,29 +287,29 @@ class TimelineFrame {
     renderDuration = micros - renderStart;
   }
 
-  void setRastereizeStart(int micros) {
-    rastereizeStart = micros;
+  void setRasterizeStart(int micros) {
+    rasterizeStart = micros;
   }
 
-  void setRastereizeEnd(int micros) {
-    if (rastereizeStart != null) {
-      rastereizeDuration = micros - rastereizeStart;
+  void setRasterizeEnd(int micros) {
+    if (rasterizeStart != null) {
+      rasterizeDuration = micros - rasterizeStart;
     }
   }
 
-  bool get isComplete => renderDuration != null && rastereizeDuration != null;
+  bool get isComplete => renderDuration != null && rasterizeDuration != null;
 
   String get renderAsMs {
     return '${(renderDuration / 1000.0).toStringAsFixed(1)}ms';
   }
 
   String get gpuAsMs {
-    return '${(rastereizeDuration / 1000.0).toStringAsFixed(1)}ms';
+    return '${(rasterizeDuration / 1000.0).toStringAsFixed(1)}ms';
   }
 
   @override
   String toString() {
-    return 'frame render: $renderDuration rasterize: $rastereizeDuration';
+    return 'frame render: $renderDuration rasterize: $rasterizeDuration';
   }
 }
 
@@ -322,15 +321,18 @@ class TimelineFrameData {
   TimelineFrameData(this.frame, this.threads, this.events);
 
   void printData() {
+    print(frame.startMicros);
+    print('${frame.renderDuration}u');
+    print('${frame.rasterizeDuration}u');
+
     for (TimelineThread thread in threads) {
-      print('${thread.name}:');
+      print('${thread.name}');
       final StringBuffer buf = new StringBuffer();
 
       for (TimelineThreadEvent event in events) {
         if (event.threadId == thread.threadId) {
           event.format(buf, '  ');
-          print(buf.toString().trimRight());
-          buf.clear();
+          print('  [${event.name}]');
         }
       }
     }
