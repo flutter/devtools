@@ -17,8 +17,6 @@ import '../utils.dart';
 
 // TODO(devoncarew): filtering, and enabling additional logging
 
-// TODO(devoncarew): a more efficient table; we need to virtualize it
-
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
 const int kMaxLogItemsLength = 5000;
@@ -51,10 +49,9 @@ class LoggingScreen extends Screen {
     mainDiv.add(<CoreElement>[
       _createTableView()
         ..clazz('section')
-        ..flex(4),
+        ..flex(),
       div(c: 'section')
         ..layoutVertical()
-        ..flex()
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
 
@@ -96,16 +93,16 @@ class LoggingScreen extends Screen {
 
     // Log stdout and stderr events.
     service.onStdoutEvent.listen((Event e) {
-      String message = decodeBase64(e.bytes);
-      // TODO(devoncarew): Have the UI provide a way to show untruncated data.
-      if (message.length > 500) {
-        message = message.substring(0, 500) + '…';
+      final String message = decodeBase64(e.bytes);
+      String summary;
+      if (message.length > 200) {
+        summary = message.substring(0, 200) + '…';
       }
-      _log(new LogData('stdout', message, e.timestamp));
+      _log(new LogData('stdout', message, e.timestamp, summary: summary));
     });
     service.onStderrEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      _log(new LogData('stderr', message, e.timestamp, error: true));
+      _log(new LogData('stderr', message, e.timestamp, isError: true));
     });
 
     // Log GC events.
@@ -141,7 +138,7 @@ class LoggingScreen extends Screen {
 
       final bool isError =
           level != null && level >= Level.SEVERE.value ? true : false;
-      _log(new LogData(loggerName, message, e.timestamp, error: isError));
+      _log(new LogData(loggerName, message, e.timestamp, isError: isError));
     });
 
     // Log Flutter frame events.
@@ -169,6 +166,7 @@ class LoggingScreen extends Screen {
   void _handleConnectionStop(dynamic event) {}
 
   List<LogData> data = <LogData>[];
+
   void _log(LogData log) {
     // Build a new list that has 1 item more (clamped at kMaxLogItemsLength)
     // and insert this new item at the start, followed by the required number
@@ -210,11 +208,18 @@ class LogData {
   final String kind;
   final String message;
   final int timestamp;
-  final bool error;
+  final bool isError;
   final String extraHtml;
+  final String summary;
 
-  LogData(this.kind, this.message, this.timestamp,
-      {this.error = false, this.extraHtml});
+  LogData(
+    this.kind,
+    this.message,
+    this.timestamp, {
+    this.isError = false,
+    this.extraHtml,
+    this.summary,
+  });
 }
 
 class LogKindColumn extends Column<LogData> {
@@ -278,9 +283,10 @@ class LogMessageColumn extends Column<LogData> {
     final LogData log = value;
 
     if (log.extraHtml != null) {
-      return '${log.message} ${log.extraHtml}';
+      return '${log.summary ?? log.message} ${log.extraHtml}';
     } else {
-      return log.message; // TODO(devoncarew): escape html
+      // TODO(devoncarew): escape html
+      return log.summary ?? log.message;
     }
   }
 }
@@ -288,7 +294,7 @@ class LogMessageColumn extends Column<LogData> {
 String getCssClassForEventKind(LogData item) {
   String cssClass = '';
 
-  if (item.kind == 'stderr' || item.error) {
+  if (item.kind == 'stderr' || item.isError) {
     cssClass = 'stderr';
   } else if (item.kind == 'stdout') {
     cssClass = 'stdout';
@@ -303,36 +309,27 @@ String getCssClassForEventKind(LogData item) {
 class LogDetailsUI extends CoreElement {
   LogData _data;
 
-  CoreElement content, timestamp, kind, message;
+  CoreElement content, message;
 
   LogDetailsUI() : super('div') {
-    attribute('hidden');
     layoutVertical();
-    flex();
 
     add(<CoreElement>[
       content = div(c: 'log-details')
-        ..flex()
-        ..add(kind = span())
-        ..add(timestamp = span())
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
   }
 
   LogData get data => _data;
+
   set data(LogData value) {
     _data = value;
 
     if (_data != null) {
-      timestamp.text = timeFormat
-          .format(new DateTime.fromMillisecondsSinceEpoch(_data.timestamp));
-      kind
-        ..text = _data.kind
-        ..clazz('label', removeOthers: true)
-        ..clazz(getCssClassForEventKind(data));
       // TODO(dantup): Can we format the JSON better?
       message.text = _data.message;
+    } else {
+      message.text = '';
     }
-    attribute('hidden', _data == null);
   }
 }
