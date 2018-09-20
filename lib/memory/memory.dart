@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -25,9 +26,10 @@ class MemoryScreen extends Screen {
   StatusItem objectCountStatus;
 
   PButton loadSnapshotButton;
-  Table<ClassHeapStats> memoryTable;
-  Table<InstanceSummary> instancesTable;
-  Table<InstanceData> instanceDetailsTable;
+
+  // TODO(dantup): Is it reasonable to put dynamic here?
+  ListQueue<Table<dynamic>> tableStack = ListQueue<Table<dynamic>>();
+  CoreElement tableContainer;
 
   MemoryChart memoryChart;
   SetStateMixin memoryChartStateMixin = new SetStateMixin();
@@ -65,18 +67,10 @@ class MemoryScreen extends Screen {
               div()..flex(),
             ])
         ]),
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          _createTableView(),
-          _createInstancesTableView()
-            ..clazz('margin-left')
-            ..display = 'none',
-          _createInstanceDetailsTableView()
-            ..clazz('margin-left')
-            ..display = 'none',
-        ]),
+      tableContainer = div(c: 'section')..layoutHorizontal()
     ]);
+
+    _pushNextTable(null, _createHeapStatsTableView());
 
     _updateStatus(null);
 
@@ -90,6 +84,19 @@ class MemoryScreen extends Screen {
       _handleConnectionStart(serviceInfo.service);
     }
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+  }
+
+  void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
+    // Remove any tables to the right of current from the DOM and the stack.
+    while (tableStack.length > 1 && tableStack.last != current) {
+      tableStack.removeLast().element.element.remove();
+    }
+
+    // Push the new table on to the stack and to the right of current.
+    if (next != null) {
+      tableStack.addLast(next);
+      tableContainer.add(next.element..clazz('margin-left'));
+    }
   }
 
   void _handleIsolateChanged() {
@@ -115,7 +122,7 @@ class MemoryScreen extends Screen {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
 
-      memoryTable.setRows(heapStats);
+      tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
     } finally {
       loadSnapshotButton.disabled = false;
@@ -187,31 +194,40 @@ class MemoryScreen extends Screen {
     return container;
   }
 
-  CoreElement _createTableView() {
-    memoryTable = new Table<ClassHeapStats>.virtual();
+  Table<ClassHeapStats> _createHeapStatsTableView() {
+    final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual();
 
-    memoryTable.addColumn(new MemoryColumnSize());
-    memoryTable.addColumn(new MemoryColumnInstanceCount());
-    memoryTable.addColumn(new MemoryColumnClassName());
+    table.addColumn(new MemoryColumnSize());
+    table.addColumn(new MemoryColumnInstanceCount());
+    table.addColumn(new MemoryColumnClassName());
 
-    memoryTable.setSortColumn(memoryTable.columns.first);
+    table.setSortColumn(table.columns.first);
 
-    // new List<MemoryRow>.generate(100, (_) => MemoryRow.random()
-    memoryTable.setRows(<ClassHeapStats>[]);
+    table.onSelect.listen((ClassHeapStats row) async {
+      final Table<InstanceSummary> newTable =
+          row == null ? null : _createInstanceListTableView(row);
+      _pushNextTable(table, newTable);
+    });
 
-    memoryTable.onSelect.listen((ClassHeapStats row) async {
-      if (row == null) {
-        instancesTable.element.display = 'none';
-        return;
-      }
+    return table;
+  }
 
-      // Set the rows blank so old data is removed while this request is in-flight.
-      // TODO(dantup): Should table support showing a spinner?
-      instancesTable.setRows(<InstanceSummary>[]);
+  Table<InstanceSummary> _createInstanceListTableView(ClassHeapStats row) {
+    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual();
+    table.addColumn(new MemoryColumnSimple<InstanceSummary>(
+        'Instance ID', (InstanceSummary row) => row.id));
 
-      final Class c =
-          await serviceInfo.service.getObject(_isolateId, row.classRef.id);
+    table.onSelect.listen((InstanceSummary row) async {
+      final Table<InstanceData> newTable =
+          row == null ? null : _createInstanceDetailsTableView(row);
+      _pushNextTable(table, newTable);
+    });
 
+    // Kick off population of data for the table.
+    serviceInfo.service
+        .getObject(_isolateId, row.classRef.id)
+        .then((dynamic result) {
+      final Class c = result;
       // // TODO(dantup): Find out what we should actually be displaying here.
       // if (c.library.type == '@Library') {
       //   // user class
@@ -220,54 +236,32 @@ class MemoryScreen extends Screen {
       // }
 
       final List<InstanceSummary> instanceRows = InstanceSummary.randomList(c);
-      instancesTable.setRows(instanceRows);
-      instancesTable.element.display = null;
+      table.setRows(instanceRows);
     });
 
-    return memoryTable.element;
+    return table;
   }
 
-  /// Creates the instances (middle) table to show a list of instances in the
-  /// snapshot.
-  CoreElement _createInstancesTableView() {
-    instancesTable = new Table<InstanceSummary>.virtual();
-    instancesTable.addColumn(new MemoryColumnSimple<InstanceSummary>(
-        'Instance ID', (InstanceSummary row) => row.id));
-    instancesTable.setRows(<InstanceSummary>[]);
-
-    instancesTable.onSelect.listen((InstanceSummary row) async {
-      if (row == null) {
-        instanceDetailsTable.element.display = 'none';
-        return;
-      }
-
-      // Set the rows blank so old data is removed while this request is in-flight.
-      // TODO(dantup): Should table support showing a spinner?
-      // instanceDetailsTable.setRows(<InstanceData>[]);
-
-      final List<InstanceData> instanceData = InstanceData.randomList();
-      instanceDetailsTable.setRows(instanceData);
-      instanceDetailsTable.element.display = null;
-    });
-
-    return instancesTable.element;
-  }
-
-  /// Creates the instances (right-most) table to show information about the selected
-  /// instance.
-  CoreElement _createInstanceDetailsTableView() {
-    instanceDetailsTable = new Table<InstanceData>.virtual();
-    instanceDetailsTable.addColumn(new MemoryColumnSimple<InstanceData>(
+  Table<InstanceData> _createInstanceDetailsTableView(InstanceSummary row) {
+    final Table<InstanceData> table = new Table<InstanceData>.virtual();
+    table.addColumn(new MemoryColumnSimple<InstanceData>(
         'Name', (InstanceData row) => row.name));
-    instanceDetailsTable.addColumn(new MemoryColumnSimple<InstanceData>(
+    table.addColumn(new MemoryColumnSimple<InstanceData>(
         'Value', (InstanceData row) => row.value.toString()));
-    instanceDetailsTable.setRows(<InstanceData>[]);
 
-    // TODO(dantup): There should probably be a button/column to jump to an instance
-    // where the value is another live instance (which should update the selection
-    // of the class/instance in the other two tables).
+    table.onSelect.listen((InstanceData row) async {
+      // TODO(dantup): Push the relevant table.
+      // For literlals, do nothing?
+      // For other objects, push an InstanceDetails table?
+      // final Table<InstanceData> newTable =
+      //     row == null ? null : _createInstanceDetailsTableView(row);
+      // _pushNextTable(table, newTable);
+    });
 
-    return instanceDetailsTable.element;
+    // Kick off population of data for the table.
+    row.getData().then(table.setRows);
+
+    return table;
   }
 
   @override
@@ -625,9 +619,23 @@ class InstanceSummary {
   @override
   String toString() => '[InstanceSummary id: $id, class: ${clazz.name}]';
 
+  // TODO(dantup): Remove this once we have real data.
   static List<InstanceSummary> randomList(Class clazz) {
     return new List<InstanceSummary>.generate(
         1000, (int i) => new InstanceSummary(clazz, 'objects/$i'));
+  }
+
+  Future<List<InstanceData>> getData() async {
+    // TODO(dantup): Replace with real implementation.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    return <InstanceData>[
+      new InstanceData('id', id),
+      new InstanceData('name', 'Joe Bloggs'),
+      new InstanceData('email', 'something@example.org'),
+      new InstanceData('company', 'Bloggs Corp'),
+      new InstanceData('telephone', '01234 567 890'),
+      new InstanceData('shoeSize', 11),
+    ];
   }
 }
 
@@ -639,14 +647,4 @@ class InstanceData {
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';
-
-  static List<InstanceData> randomList() {
-    return <InstanceData>[
-      new InstanceData('name', 'Joe Bloggs'),
-      new InstanceData('email', 'something@example.org'),
-      new InstanceData('company', 'Bloggs Corp'),
-      new InstanceData('telephone', '01234 567 890'),
-      new InstanceData('shoeSize', 11),
-    ];
-  }
 }
