@@ -107,6 +107,8 @@ class MemoryScreen extends Screen {
 
   Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
+    final Spinner spinner =
+        tableStack.first.element.add(new Spinner()..clazz('padded'));
 
     // TODO(devoncarew): error handling
 
@@ -124,6 +126,7 @@ class MemoryScreen extends Screen {
 
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
+      spinner.element.remove();
     } finally {
       loadSnapshotButton.disabled = false;
     }
@@ -244,6 +247,7 @@ class MemoryScreen extends Screen {
 
   Table<InstanceData> _createInstanceDetailsTableView(InstanceSummary row) {
     final Table<InstanceData> table = new Table<InstanceData>.virtual();
+    final Spinner spinner = table.element.add(new Spinner()..clazz('padded'));
     table.addColumn(new MemoryColumnSimple<InstanceData>(
         'Name', (InstanceData row) => row.name));
     table.addColumn(new MemoryColumnSimple<InstanceData>(
@@ -259,7 +263,11 @@ class MemoryScreen extends Screen {
     });
 
     // Kick off population of data for the table.
-    row.getData().then(table.setRows);
+    // TODO: If it turns out not to be async work, remove the spinner.
+    row.getData().then((List<InstanceData> data) {
+      table.setRows(data);
+      spinner.element.remove();
+    });
 
     return table;
   }

@@ -35,3 +35,9 @@ class ProgressElement extends CoreElement {
     completeElement.element.style.width = '${(200 * _value / _max).round()}px';
   }
 }
+
+class Spinner extends CoreElement {
+  Spinner() : super('div') {
+    clazz('spinner');
+  }
+}
