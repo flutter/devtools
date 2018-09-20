@@ -113,6 +113,7 @@ class MemoryScreen extends Screen {
 
   Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
+    tableStack.first.element.display = null;
     final Spinner spinner =
         tableStack.first.element.add(new Spinner()..clazz('padded'));
 
@@ -130,7 +131,7 @@ class MemoryScreen extends Screen {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
 
-      tableStack.first.setRows(heapStats);
+      tableStack.first..setRows(heapStats);
       _updateStatus(heapStats);
       spinner.element.remove();
     } finally {
@@ -205,6 +206,7 @@ class MemoryScreen extends Screen {
 
   Table<ClassHeapStats> _createHeapStatsTableView() {
     final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual()
+      ..element.display = 'none'
       ..element.clazz('memory-table');
 
     table.addColumn(new MemoryColumnSize());
