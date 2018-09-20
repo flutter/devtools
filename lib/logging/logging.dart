@@ -21,7 +21,10 @@ import '../utils.dart';
 
 // TODO(devoncarew): don't update DOM when we're not active; update once we return
 
-const int kMaxLogItemsLength = 5000;
+// For performance reasons, we drop old logs in batches, so the log will grow
+// to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
+const int kMaxLogItemsLowerBound = 5000;
+const int kMaxLogItemsUpperBound = 5500;
 DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
@@ -174,7 +177,18 @@ class LoggingScreen extends Screen {
     // is rendered reversed so new items are at the top but we can use .add() here
     // which is must faster than inserting at the start of the list.
     data.add(log);
-    data.length = data.length.clamp(0, kMaxLogItemsLength);
+    // Note: We need to drop rows from the start because we want to drop old rows
+    // but because that's expensive, we only do it periodically (eg. when the list
+    // is 500 rows more).
+    if (data.length > kMaxLogItemsUpperBound) {
+      int itemsToRemove = data.length - kMaxLogItemsLowerBound;
+      // Ensure we remove an even number of rows to keep the alternating background
+      // in-sync.
+      if (itemsToRemove % 2 == 1) {
+        itemsToRemove--;
+      }
+      data = data.sublist(itemsToRemove);
+    }
 
     if (visible && loggingTable != null) {
       loggingTable.setRows(data);
