@@ -157,7 +157,7 @@ class IsolateManager {
 
   void _initIsolates(List<IsolateRef> isolates) {
     _isolates = isolates;
-    _selectedIsolate = isolates.isNotEmpty ? isolates.first : null;
+    _selectedIsolate = _selectBestFirstIsolate(isolates);
 
     if (_selectedIsolate != null) {
       _isolateCreatedController.add(_selectedIsolate);
@@ -181,5 +181,18 @@ class IsolateManager {
         _selectedIsolateController.add(_selectedIsolate);
       }
     }
+  }
+
+  IsolateRef _selectBestFirstIsolate(List<IsolateRef> isolates) {
+    final IsolateRef ref = isolates.firstWhere((IsolateRef ref) {
+      // 'foo.dart:main()'
+      return ref.name.contains(':main(');
+    }, orElse: () => null);
+
+    if (ref != null) {
+      return ref;
+    }
+
+    return isolates.isEmpty ? null : isolates.first;
   }
 }
