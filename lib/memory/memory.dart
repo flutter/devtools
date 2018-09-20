@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:html';
 import 'dart:math' as math;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -67,7 +68,7 @@ class MemoryScreen extends Screen {
               div()..flex(),
             ])
         ]),
-      tableContainer = div(c: 'section')..layoutHorizontal()
+      tableContainer = div(c: 'section overflow-auto')..layoutHorizontal()
     ]);
 
     _pushNextTable(null, _createHeapStatsTableView());
@@ -96,6 +97,11 @@ class MemoryScreen extends Screen {
     if (next != null) {
       tableStack.addLast(next);
       tableContainer.add(next.element..clazz('margin-left'));
+      tableContainer.element.scrollTo(<String, dynamic>{
+        'left': tableContainer.element.scrollWidth,
+        'top': 0,
+        'behavior': 'smooth'
+      });
     }
   }
 
@@ -198,7 +204,8 @@ class MemoryScreen extends Screen {
   }
 
   Table<ClassHeapStats> _createHeapStatsTableView() {
-    final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual();
+    final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual()
+      ..element.clazz('memory-table');
 
     table.addColumn(new MemoryColumnSize());
     table.addColumn(new MemoryColumnInstanceCount());
@@ -216,7 +223,8 @@ class MemoryScreen extends Screen {
   }
 
   Table<InstanceSummary> _createInstanceListTableView(ClassHeapStats row) {
-    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual();
+    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
+      ..element.clazz('memory-table');
     table.addColumn(new MemoryColumnSimple<InstanceSummary>(
         'Instance ID', (InstanceSummary row) => row.id));
 
@@ -246,7 +254,8 @@ class MemoryScreen extends Screen {
   }
 
   Table<InstanceData> _createInstanceDetailsTableView(InstanceSummary row) {
-    final Table<InstanceData> table = new Table<InstanceData>.virtual();
+    final Table<InstanceData> table = new Table<InstanceData>.virtual()
+      ..element.clazz('memory-table');
     final Spinner spinner = table.element.add(new Spinner()..clazz('padded'));
     table.addColumn(new MemoryColumnSimple<InstanceData>(
         'Name', (InstanceData row) => row.name));
@@ -265,6 +274,8 @@ class MemoryScreen extends Screen {
         final Table<InstanceData> newTable =
             row == null ? null : _createInstanceDetailsTableView(row.instance);
         _pushNextTable(table, newTable);
+      } else {
+        _pushNextTable(table, null);
       }
     });
 

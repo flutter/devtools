@@ -381,6 +381,12 @@ div.tabnav {
     margin-bottom: 0;
 }
 
+.memory-table {
+    /* Just width doesn't work? */
+    max-width: 500px;
+    min-width: 500px;
+}
+
 .timeline-frames {
     overflow-x: scroll;
     white-space: nowrap;
