@@ -60,10 +60,9 @@ class LoggingScreen extends Screen {
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
 
-    // TODO(dantup): Can we (should we?) detect when the content is overflowed
-    // in the table, and only show the defaults?
-    loggingTable.onSelect
-        .listen((LogData selection) => logDetailsUI.data = selection);
+    loggingTable.onSelect.listen((LogData selection) {
+      logDetailsUI.setData(selection);
+    });
   }
 
   CoreElement _createTableView() {
@@ -94,9 +93,9 @@ class LoggingScreen extends Screen {
       return;
     }
 
-    // TODO(devoncarew): inspect, ...
+    // TODO(devoncarew): Add support for additional events, like 'inspect', ...
 
-    // Log stdout and stderr events.
+    // Log stdout events.
     service.onStdoutEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
       String summary = message;
@@ -108,9 +107,24 @@ class LoggingScreen extends Screen {
       summary = summary.replaceAll('\n', r'\n');
       _log(new LogData('stdout', message, e.timestamp, summary: summary));
     });
+
+    // Log stderr events.
     service.onStderrEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      _log(new LogData('stderr', message, e.timestamp, isError: true));
+      String summary = message;
+      if (message.length > 200) {
+        summary = message.substring(0, 200) + '…';
+      }
+      summary = summary.replaceAll('\t', r'\t');
+      summary = summary.replaceAll('\r', r'\r');
+      summary = summary.replaceAll('\n', r'\n');
+      _log(new LogData(
+        'stderr',
+        message,
+        e.timestamp,
+        summary: summary,
+        isError: true,
+      ));
     });
 
     // Log GC events.
@@ -327,8 +341,6 @@ String getCssClassForEventKind(LogData item) {
 class LogDetailsUI extends CoreElement {
   static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
 
-  LogData _data;
-
   CoreElement content, message;
 
   LogDetailsUI() : super('div') {
@@ -340,26 +352,21 @@ class LogDetailsUI extends CoreElement {
     ]);
   }
 
-  LogData get data => _data;
+  void setData(LogData data) {
+    // Reset the vertical scroll value if any.
+    content.element.scrollTop = 0;
 
-  set data(LogData value) {
-    // TODO(devoncarew): Reset the vertical scroll value if any.
-
-    _data = value;
-
-    if (_data != null) {
-      final String str = _data.message;
-
-      if (str.startsWith('{') && str.endsWith('}')) {
+    if (data != null) {
+      if (data.message.startsWith('{') && data.message.endsWith('}')) {
         try {
           // If the string decodes properly, than format the json.
-          final dynamic result = jsonDecode(str);
+          final dynamic result = jsonDecode(data.message);
           message.text = jsonEncoder.convert(result);
         } catch (e) {
-          message.text = _data.message;
+          message.text = data.message;
         }
       } else {
-        message.text = _data.message;
+        message.text = data.message;
       }
     } else {
       message.text = '';
