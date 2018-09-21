@@ -100,7 +100,7 @@ class TimelineScreen extends Screen {
     }
 
     handleToggleButton(
-        trackWidgetBuildsButton, 'ext.flutter.debugProfileBuilds');
+        trackWidgetBuildsButton, 'ext.flutter.profileWidgetBuilds');
     handleToggleButton(perfOverlayButton, 'ext.flutter.showPerformanceOverlay');
     handleToggleButton(repaintRainbowButton, 'ext.flutter.repaintRainbow');
     handleToggleButton(debugDrawButton, 'ext.flutter.debugPaint');
