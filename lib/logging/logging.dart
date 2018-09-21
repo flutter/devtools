@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -58,10 +60,9 @@ class LoggingScreen extends Screen {
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
 
-    // TODO(dantup): Can we (should we?) detect when the content is overflowed
-    // in the table, and only show the defaults?
-    loggingTable.onSelect
-        .listen((LogData selection) => logDetailsUI.data = selection);
+    loggingTable.onSelect.listen((LogData selection) {
+      logDetailsUI.setData(selection);
+    });
   }
 
   CoreElement _createTableView() {
@@ -92,29 +93,52 @@ class LoggingScreen extends Screen {
       return;
     }
 
-    // TODO(devoncarew): inspect, ...
+    // TODO(devoncarew): Add support for additional events, like 'inspect', ...
 
-    // Log stdout and stderr events.
+    // Log stdout events.
     service.onStdoutEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      String summary;
+      String summary = message;
       if (message.length > 200) {
         summary = message.substring(0, 200) + '…';
       }
+      summary = summary.replaceAll('\t', r'\t');
+      summary = summary.replaceAll('\r', r'\r');
+      summary = summary.replaceAll('\n', r'\n');
       _log(new LogData('stdout', message, e.timestamp, summary: summary));
     });
+
+    // Log stderr events.
     service.onStderrEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      _log(new LogData('stderr', message, e.timestamp, isError: true));
+      String summary = message;
+      if (message.length > 200) {
+        summary = message.substring(0, 200) + '…';
+      }
+      summary = summary.replaceAll('\t', r'\t');
+      summary = summary.replaceAll('\r', r'\r');
+      summary = summary.replaceAll('\n', r'\n');
+      _log(new LogData(
+        'stderr',
+        message,
+        e.timestamp,
+        summary: summary,
+        isError: true,
+      ));
     });
 
     // Log GC events.
     service.onGCEvent.listen((Event e) {
-      final dynamic json = e.json;
-      final String message = 'gc reason: ${json['reason']}\n'
-          'new: ${json['new']}\n'
-          'old: ${json['old']}\n';
-      _log(new LogData('gc', message, e.timestamp));
+      final String summary =
+          '${e.json['reason']} collection, ${e.json['isolate']['name']}';
+      final Map<String, dynamic> event = <String, dynamic>{
+        'reason': e.json['reason'],
+        'new': e.json['new'],
+        'old': e.json['old'],
+        'isolate': e.json['isolate'],
+      };
+      final String message = jsonEncode(event);
+      _log(new LogData('gc', message, e.timestamp, summary: summary));
     });
 
     // Log `dart:developer` `log` events.
@@ -315,7 +339,7 @@ String getCssClassForEventKind(LogData item) {
 }
 
 class LogDetailsUI extends CoreElement {
-  LogData _data;
+  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
 
   CoreElement content, message;
 
@@ -328,14 +352,22 @@ class LogDetailsUI extends CoreElement {
     ]);
   }
 
-  LogData get data => _data;
+  void setData(LogData data) {
+    // Reset the vertical scroll value if any.
+    content.element.scrollTop = 0;
 
-  set data(LogData value) {
-    _data = value;
-
-    if (_data != null) {
-      // TODO(dantup): Can we format the JSON better?
-      message.text = _data.message;
+    if (data != null) {
+      if (data.message.startsWith('{') && data.message.endsWith('}')) {
+        try {
+          // If the string decodes properly, than format the json.
+          final dynamic result = jsonDecode(data.message);
+          message.text = jsonEncoder.convert(result);
+        } catch (e) {
+          message.text = data.message;
+        }
+      } else {
+        message.text = data.message;
+      }
     } else {
       message.text = '';
     }
