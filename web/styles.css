@@ -203,6 +203,10 @@ table tr.selected {
     border-radius: 1px;
 }
 
+tr.selected .frame-bar {
+    background: #fff;
+}
+
 .frame-bar.over-budget {
     background: #f97c7c;
 }
@@ -469,7 +473,7 @@ div.tabnav {
 
 
 .log-details {
-    height: 120px;
+    height: 126px;
     overflow-y: scroll;
     overflow-wrap: break-word;
 }

@@ -129,13 +129,21 @@ class LoggingScreen extends Screen {
 
     // Log GC events.
     service.onGCEvent.listen((Event e) {
-      final String summary =
-          '${e.json['reason']} collection, ${e.json['isolate']['name']}';
+      final Map<dynamic, dynamic> newSpace = e.json['new'];
+      final Map<dynamic, dynamic> oldSpace = e.json['old'];
+      final Map<dynamic, dynamic> isolateRef = e.json['isolate'];
+
+      final int usedBytes = newSpace['used'] + oldSpace['used'];
+      final int capacityBytes = newSpace['capacity'] + oldSpace['capacity'];
+
+      final String summary = '${isolateRef['name']} • '
+          '${e.json['reason']} collection • '
+          '${printMb(usedBytes)} MB used of ${printMb(capacityBytes)} MB';
       final Map<String, dynamic> event = <String, dynamic>{
         'reason': e.json['reason'],
-        'new': e.json['new'],
-        'old': e.json['old'],
-        'isolate': e.json['isolate'],
+        'new': newSpace,
+        'old': oldSpace,
+        'isolate': isolateRef,
       };
       final String message = jsonEncode(event);
       _log(new LogData('gc', message, e.timestamp, summary: summary));
@@ -165,7 +173,14 @@ class LoggingScreen extends Screen {
 
       final bool isError =
           level != null && level >= Level.SEVERE.value ? true : false;
-      _log(new LogData(loggerName, message, e.timestamp, isError: isError));
+
+      _log(new LogData(
+        loggerName,
+        jsonEncode(logRecord),
+        e.timestamp,
+        isError: isError,
+        summary: message,
+      ));
     });
 
     // Log Flutter frame events.
@@ -174,18 +189,19 @@ class LoggingScreen extends Screen {
         final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
         final String frameInfo =
-            '<span class="pre">frame ${frame.number} ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
+            '<span class="pre">${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
         final String div = createFrameDivHtml(frame);
 
+        _log(new LogData('${e.extensionKind.toLowerCase()}',
+            jsonEncode(e.extensionData.data), e.timestamp,
+            summaryHtml: '$frameInfo$div'));
+      } else {
         _log(new LogData(
           '${e.extensionKind.toLowerCase()}',
-          '',
+          jsonEncode(e.json),
           e.timestamp,
-          extraHtml: '$frameInfo$div',
+          summary: e.json.toString(),
         ));
-      } else {
-        _log(new LogData('${e.extensionKind.toLowerCase()}', e.json.toString(),
-            e.timestamp));
       }
     });
   }
@@ -241,16 +257,16 @@ class LogData {
   final String message;
   final int timestamp;
   final bool isError;
-  final String extraHtml;
   final String summary;
+  final String summaryHtml;
 
   LogData(
     this.kind,
     this.message,
     this.timestamp, {
     this.isError = false,
-    this.extraHtml,
     this.summary,
+    this.summaryHtml,
   });
 }
 
@@ -314,8 +330,8 @@ class LogMessageColumn extends Column<LogData> {
   String render(dynamic value) {
     final LogData log = value;
 
-    if (log.extraHtml != null) {
-      return '${log.summary ?? log.message} ${log.extraHtml}';
+    if (log.summaryHtml != null) {
+      return log.summaryHtml;
     } else {
       // TODO(devoncarew): escape html
       return log.summary ?? log.message;
@@ -335,6 +351,7 @@ String getCssClassForEventKind(LogData item) {
   } else if (item.kind == 'gc') {
     cssClass = 'gc';
   }
+
   return cssClass;
 }
 
