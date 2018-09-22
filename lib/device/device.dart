@@ -94,7 +94,7 @@ class DeviceScreen extends Screen {
     _createBoolToggle('ext.flutter.repaintRainbow');
     _createBoolToggle('ext.flutter.showPerformanceOverlay');
     _createBoolToggle('ext.flutter.debugAllowBanner');
-    _createBoolToggle('ext.flutter.debugProfileBuilds');
+    _createBoolToggle('ext.flutter.profileWidgetBuilds');
   }
 
   void _createBoolToggle(String rpc) {
