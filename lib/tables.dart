@@ -327,7 +327,7 @@ class Table<T> extends Object with SetStateMixin {
         }
 
         if (column.usesHtml) {
-          tableCell..setInnerHtml(column.render(column.getValue(row)));
+          tableCell.setInnerHtml(column.render(column.getValue(row)));
         } else {
           tableCell.text = column.render(column.getValue(row));
         }

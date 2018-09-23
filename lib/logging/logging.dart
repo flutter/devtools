@@ -333,8 +333,7 @@ class LogMessageColumn extends Column<LogData> {
     if (log.summaryHtml != null) {
       return log.summaryHtml;
     } else {
-      // TODO(devoncarew): escape html
-      return log.summary ?? log.message;
+      return escape(log.summary ?? log.message);
     }
   }
 }
