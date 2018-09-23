@@ -54,7 +54,7 @@ class TimelineData {
 
       default:
         // TODO(devoncarew): Support additional phases (s, t, f).
-        //print('unhandled: ${event.json}');
+        //print(jsonEncode(event.json));
         break;
     }
   }
