@@ -22,6 +22,15 @@ import '../utils.dart';
 // TODO(devoncarew): have a 'show vm objects' checkbox
 
 class MemoryScreen extends Screen {
+  MemoryScreen()
+      : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
+    classCountStatus = new StatusItem();
+    addStatusItem(classCountStatus);
+
+    objectCountStatus = new StatusItem();
+    addStatusItem(objectCountStatus);
+  }
+
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
 
@@ -35,15 +44,6 @@ class MemoryScreen extends Screen {
   SetStateMixin memoryChartStateMixin = new SetStateMixin();
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
-
-  MemoryScreen()
-      : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
-    classCountStatus = new StatusItem();
-    addStatusItem(classCountStatus);
-
-    objectCountStatus = new StatusItem();
-    addStatusItem(objectCountStatus);
-  }
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -331,11 +331,11 @@ class MemoryScreen extends Screen {
 }
 
 class MemoryRow {
+  MemoryRow(this.name, this.bytes, this.percentage);
+
   final String name;
   final int bytes;
   final double percentage;
-
-  MemoryRow(this.name, this.bytes, this.percentage);
 
   @override
   String toString() => name;
@@ -383,18 +383,16 @@ class MemoryColumnInstanceCount extends Column<ClassHeapStats> {
 }
 
 class MemoryColumnSimple<T> extends Column<T> {
-  String Function(T) getter;
   MemoryColumnSimple(String name, this.getter, {bool wide = false})
       : super(name, wide: wide);
+
+  String Function(T) getter;
 
   @override
   String getValue(T item) => getter(item);
 }
 
 class MemoryChart extends LineChart<MemoryTracker> {
-  CoreElement processLabel;
-  CoreElement heapLabel;
-
   MemoryChart(CoreElement parent) : super(parent) {
     processLabel = parent.add(div(c: 'perf-label'));
     processLabel.element.style.left = '0';
@@ -402,6 +400,9 @@ class MemoryChart extends LineChart<MemoryTracker> {
     heapLabel = parent.add(div(c: 'perf-label'));
     heapLabel.element.style.right = '0';
   }
+
+  CoreElement processLabel;
+  CoreElement heapLabel;
 
   @override
   void update(MemoryTracker data) {
@@ -452,6 +453,8 @@ class MemoryChart extends LineChart<MemoryTracker> {
 }
 
 class MemoryTracker {
+  MemoryTracker(this.service);
+
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
@@ -464,8 +467,6 @@ class MemoryTracker {
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
   int heapMax;
   int processRss;
-
-  MemoryTracker(this.service);
 
   bool get hasConnection => service != null;
 
@@ -580,11 +581,11 @@ class MemoryTracker {
 }
 
 class HeapSample {
+  HeapSample(this.bytes, this.time, this.isGC);
+
   final int bytes;
   final int time;
   final bool isGC;
-
-  HeapSample(this.bytes, this.time, this.isGC);
 }
 
 String _printMb(num bytes, int fractionDigits) =>
@@ -599,6 +600,12 @@ String _printMb(num bytes, int fractionDigits) =>
 //   promotedBytes: 0
 // }
 class ClassHeapStats {
+  ClassHeapStats(this.json) {
+    classRef = ClassRef.parse(json['class']);
+    _update(json['new']);
+    _update(json['old']);
+  }
+
   static const int ALLOCATED_BEFORE_GC = 0;
   static const int ALLOCATED_BEFORE_GC_SIZE = 1;
   static const int LIVE_AFTER_GC = 2;
@@ -617,12 +624,6 @@ class ClassHeapStats {
 
   ClassRef classRef;
 
-  ClassHeapStats(this.json) {
-    classRef = ClassRef.parse(json['class']);
-    _update(json['new']);
-    _update(json['old']);
-  }
-
   String get type => json['type'];
 
   void _update(List<dynamic> stats) {
@@ -638,10 +639,11 @@ class ClassHeapStats {
 }
 
 class InstanceSummary {
+  InstanceSummary(this.clazz, this.id);
+
   Class clazz;
   String id;
 
-  InstanceSummary(this.clazz, this.id);
   @override
   String toString() => '[InstanceSummary id: $id, class: ${clazz.name}]';
 
@@ -666,11 +668,11 @@ class InstanceSummary {
 }
 
 class InstanceData {
+  InstanceData(this.instance, this.name, this.value);
+
   InstanceSummary instance;
   String name;
   dynamic value;
-
-  InstanceData(this.instance, this.name, this.value);
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';
