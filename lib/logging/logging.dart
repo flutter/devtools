@@ -81,7 +81,10 @@ class LoggingScreen extends Screen {
 
   void _updateStatus() {
     final int count = loggingTable.rows.length;
-    logCountStatus.element.text = '${nf.format(count)} events';
+    final String label = count >= kMaxLogItemsLowerBound
+        ? '${nf.format(kMaxLogItemsLowerBound)}+'
+        : nf.format(count);
+    logCountStatus.element.text = '$label events';
   }
 
   @override
