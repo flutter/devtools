@@ -251,6 +251,7 @@ class TimelineScreen extends Screen {
     timelineFramesUI.timelineData = timelineData;
   }
 
+  // TODO(devoncarew): Update this url.
   @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
@@ -266,6 +267,7 @@ class TimelineFramesUI extends CoreElement {
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
+      // TODO(devoncarew): Make sure we respect TimelineFramesBuilder.maxFrames.
       final CoreElement frameUI = new TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
@@ -420,7 +422,6 @@ class TimelineFramesBuilder {
 
       // Find the newest dart sample that starts before a gpu one.
       final int gpuStart = gpuEvents.first.startMicros;
-
       while (dartEvents.length > 1 &&
           (dartEvents[0].startMicros < gpuStart &&
               dartEvents[1].startMicros < gpuStart)) {
@@ -447,6 +448,7 @@ class TimelineFramesBuilder {
       frame.rasterizeDuration = gpuEvent.durationMicros;
 
       frames.add(frame);
+
       if (frames.length > maxFrames) {
         frames.removeAt(0);
       }

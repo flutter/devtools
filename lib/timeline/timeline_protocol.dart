@@ -124,7 +124,7 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   bool get isVisible => name.startsWith('io.flutter.');
 
-  int get category {
+  int get sortPriority {
     if (name.endsWith('.ui')) {
       return 1;
     }
@@ -144,10 +144,10 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   @override
   int compareTo(TimelineThread other) {
-    final int c1 = category;
-    final int c2 = other.category;
-    if (c1 != c2) {
-      return c1 - c2;
+    final int sortPriority1 = sortPriority;
+    final int sortPriority2 = other.sortPriority;
+    if (sortPriority1 != sortPriority2) {
+      return sortPriority1 - sortPriority2;
     }
     return name.compareTo(other.name);
   }
