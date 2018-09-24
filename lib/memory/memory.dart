@@ -281,7 +281,7 @@ class MemoryScreen extends Screen {
     });
 
     // Kick off population of data for the table.
-    // TODO: If it turns out not to be async work, remove the spinner.
+    // TODO(dantup): If it turns out not to be async work, remove the spinner.
     row.getData().then((List<InstanceData> data) {
       table.setRows(data);
       spinner.element.remove();
