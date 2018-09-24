@@ -87,6 +87,7 @@ class LoggingScreen extends Screen {
     logCountStatus.element.text = '$label events';
   }
 
+  // TODO(devoncarew): Update this url.
   @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');

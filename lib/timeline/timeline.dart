@@ -5,13 +5,14 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import 'fps.dart';
+import 'timeline_protocol.dart';
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -20,6 +21,13 @@ import 'fps.dart';
 // TODO(devoncarew): display whether running in debug or profile
 
 // TODO(devoncarew): use colors for the category
+
+// TODO:(devoncarew): show the total frame count
+
+// TODO(devoncarew): Have a timeline view thumbnail overview.
+
+// TODO(devoncarew): Switch to showing all timeline events, but highlighting the
+// area associated with the selected frame.
 
 class TimelineScreen extends Screen {
   TimelineScreen()
@@ -159,8 +167,6 @@ class TimelineScreen extends Screen {
 
       for (Map<String, dynamic> json in events) {
         final TimelineEvent e = new TimelineEvent(json);
-
-        timelineFramesBuilder.processTimelineEvent(e);
         timelineFramesUI.timelineData?.processTimelineEvent(e);
       }
     });
@@ -204,7 +210,7 @@ class TimelineScreen extends Screen {
       await serviceInfo.service
           .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     } else if (!shouldBeRunning && isRunning) {
-      // TODO: turn off the events
+      // TODO(devoncarew): turn off the events
       await serviceInfo.service.setVMTimelineFlags(<String>[]);
 
       timelineFramesBuilder.pause();
@@ -227,312 +233,28 @@ class TimelineScreen extends Screen {
       return event.name == 'thread_name';
     }).toList();
 
-    List<TimelineThread> threads = events
-        .map((TimelineEvent event) =>
-            new TimelineThread(event.args['name'], event.threadId))
-        .toList();
+    final TimelineData timelineData = new TimelineData();
 
-    threads =
-        threads.where((TimelineThread thread) => thread.isVisible).toList();
-    threads.sort();
+    for (TimelineEvent event in events) {
+      final TimelineThread thread =
+          new TimelineThread(timelineData, event.args['name'], event.threadId);
+      if (thread.isVisible) {
+        timelineData.addThread(thread);
+      }
+    }
 
-    timelineFramesUI.timelineData = new TimelineData(threads);
+    timelineData.onTimelineThreadEvent.listen((TimelineThreadEvent event) {
+      timelineFramesBuilder.processTimelineEvent(
+          timelineData.getThread(event.threadId), event);
+    });
+
+    timelineFramesUI.timelineData = timelineData;
   }
 
+  // TODO(devoncarew): Update this url.
   @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
-}
-
-class TimelineData {
-  final List<TimelineThread> threads;
-  final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
-
-  final Map<int, TimelineThreadData> threadData = <int, TimelineThreadData>{};
-
-  TimelineData(this.threads) {
-    for (TimelineThread thread in threads) {
-      threadMap[thread.threadId] = thread;
-      threadData[thread.threadId] = new TimelineThreadData(this);
-    }
-  }
-
-  void processTimelineEvent(TimelineEvent event) {
-    final TimelineThread thread = threadMap[event.threadId];
-    if (thread == null) {
-      return;
-    }
-
-    final TimelineThreadData data = threadData[event.threadId];
-
-    switch (event.phase) {
-      case 'B':
-        data.handleDurationBeginEvent(event);
-        break;
-      case 'E':
-        data.handleDurationEndEvent(event);
-        break;
-      case 'X':
-        data.handleCompleteEvent(event);
-        break;
-
-      default:
-        // TODO:
-        print('unhandled phase: ${event.phase}');
-        break;
-    }
-  }
-
-  TimelineFrameData getFrameData(TimelineFrame frame) {
-    if (frame == null) {
-      return null;
-    }
-
-    final List<TEvent> events = <TEvent>[];
-
-    for (TimelineThreadData data in threadData.values) {
-      for (TEvent event in data.events) {
-        if (!event.wellFormed) {
-          continue;
-        }
-
-        if (event.endMicros >= frame.start && event.startMicros < frame.end) {
-          events.add(event);
-        }
-      }
-    }
-
-    return TimelineFrameData(frame, threads, events);
-  }
-
-  void printData() {
-    for (TimelineThread thread in threads) {
-      print('${thread.name}:');
-      final StringBuffer buf = new StringBuffer();
-      final TimelineThreadData data = threadData[thread.threadId];
-
-      for (TEvent event in data.events) {
-        event.format(buf, '  ');
-        print(buf.toString().trimRight());
-        buf.clear();
-      }
-
-      print('');
-    }
-  }
-}
-
-class TimelineFrameData {
-  final TimelineFrame frame;
-  final List<TimelineThread> threads;
-  final List<TEvent> events;
-
-  TimelineFrameData(this.frame, this.threads, this.events);
-
-  void printData() {
-    for (TimelineThread thread in threads) {
-      print('${thread.name}:');
-      final StringBuffer buf = new StringBuffer();
-
-      for (TEvent event in events) {
-        if (event.threadId == thread.threadId) {
-          event.format(buf, '  ');
-          print(buf.toString().trimRight());
-          buf.clear();
-        }
-      }
-    }
-  }
-
-  Iterable<TEvent> eventsForThread(TimelineThread thread) {
-    return events.where((TEvent event) => event.threadId == thread.threadId);
-  }
-}
-
-class TimelineThreadData {
-  final TimelineData parent;
-  final List<TEvent> events = <TEvent>[];
-
-  TimelineThreadData(this.parent);
-
-  List<TEvent> durationStack = <TEvent>[];
-
-  void handleDurationBeginEvent(TimelineEvent event) {
-    final TEvent e = new TEvent(event.threadId, event.name);
-    e.setStart(event.timestampMicros);
-
-    if (durationStack.isEmpty) {
-      events.add(e);
-    } else {
-      durationStack.last.children.add(e);
-    }
-
-    durationStack.add(e);
-  }
-
-  void handleDurationEndEvent(TimelineEvent event) {
-    if (durationStack.isNotEmpty) {
-      final TEvent e = durationStack.removeLast();
-      e.setEnd(event.timestampMicros);
-    }
-  }
-
-  void handleCompleteEvent(TimelineEvent event) {
-    final TEvent e = new TEvent(event.threadId, event.name);
-    e.setStart(event.timestampMicros);
-    e.durationMicros = event.duration;
-
-    if (durationStack.isEmpty) {
-      events.add(e);
-    } else {
-      durationStack.last.children.add(e);
-    }
-  }
-}
-
-class TEvent {
-  final int threadId;
-  final String name;
-
-  List<TEvent> children = <TEvent>[];
-
-  int startMicros;
-  int durationMicros;
-
-  TEvent(this.threadId, this.name);
-
-  void setStart(int micros) {
-    startMicros = micros;
-  }
-
-  void setEnd(int micros) {
-    durationMicros = micros - startMicros;
-  }
-
-  int get endMicros => startMicros + (durationMicros ?? 0);
-
-  bool get wellFormed => startMicros != null && durationMicros != null;
-
-  void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name');
-    for (TEvent child in children) {
-      child.format(buf, '  $indent');
-    }
-  }
-
-  @override
-  String toString() => '$name, start=$startMicros duration=$durationMicros';
-}
-
-class TimelineThread implements Comparable<TimelineThread> {
-  final int threadId;
-
-  String _name;
-
-  TimelineThread(String name, this.threadId) {
-    _name = name;
-
-    // "name":"io.flutter.1.ui (42499)",
-    if (name.contains(' (') && name.endsWith(')')) {
-      _name = name.substring(0, _name.lastIndexOf(' ('));
-    }
-  }
-
-  bool get isVisible => name.startsWith('io.flutter.');
-
-  int get category {
-    if (name.endsWith('.ui')) {
-      return 1;
-    }
-    if (name.endsWith('.gpu')) {
-      return 2;
-    }
-    if (name.startsWith('io.flutter.')) {
-      return 3;
-    }
-    return 4;
-  }
-
-  String get name => _name;
-
-  @override
-  String toString() => name;
-
-  @override
-  int compareTo(TimelineThread other) {
-    final int c1 = category;
-    final int c2 = other.category;
-    if (c1 != c2) {
-      return c1 - c2;
-    }
-    return name.compareTo(other.name);
-  }
-}
-
-/// A single timeline event.
-class TimelineEvent {
-  /// Creates a timeline event given JSON-encoded event data.
-  factory TimelineEvent(Map<String, dynamic> json) {
-    return new TimelineEvent._(json, json['name'], json['cat'], json['ph'],
-        json['pid'], json['tid'], json['dur'], json['ts'], json['args']);
-  }
-
-  TimelineEvent._(
-      this.json,
-      this.name,
-      this.category,
-      this.phase,
-      this.processId,
-      this.threadId,
-      this.duration,
-      this.timestampMicros,
-      this.args);
-
-  /// The original event JSON.
-  final Map<String, dynamic> json;
-
-  /// The name of the event.
-  ///
-  /// Corresponds to the "name" field in the JSON event.
-  final String name;
-
-  /// Event category. Events with different names may share the same category.
-  ///
-  /// Corresponds to the "cat" field in the JSON event.
-  final String category;
-
-  /// For a given long lasting event, denotes the phase of the event, such as
-  /// "B" for "event began", and "E" for "event ended".
-  ///
-  /// Corresponds to the "ph" field in the JSON event.
-  final String phase;
-
-  /// ID of process that emitted the event.
-  ///
-  /// Corresponds to the "pid" field in the JSON event.
-  final int processId;
-
-  /// ID of thread that issues the event.
-  ///
-  /// Corresponds to the "tid" field in the JSON event.
-  final int threadId;
-
-  /// The duration of the event, in microseconds.
-  ///
-  /// Note, some events are reported with duration. Others are reported as a
-  /// pair of begin/end events.
-  ///
-  /// Corresponds to the "dur" field in the JSON event.
-  final int duration;
-
-  /// Time passed since tracing was enabled, in microseconds.
-  final int timestampMicros;
-
-  /// Arbitrary data attached to the event.
-  final Map<String, dynamic> args;
-
-  @override
-  String toString() => '[$category] [$phase] $name';
 }
 
 class TimelineFramesUI extends CoreElement {
@@ -545,6 +267,7 @@ class TimelineFramesUI extends CoreElement {
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
+      // TODO(devoncarew): Make sure we respect TimelineFramesBuilder.maxFrames.
       final CoreElement frameUI = new TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
@@ -607,11 +330,11 @@ class TimelineFrameUI extends CoreElement {
     add(dartBar);
 
     final CoreElement gpuBar = div(c: 'perf-bar right');
-    if (frame.rastereizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
+    if (frame.rasterizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       gpuBar.clazz('slow');
       isSlow = true;
     }
-    height = (frame.rastereizeDuration * pixelsPerMs / 1000.0).round();
+    height = (frame.rasterizeDuration * pixelsPerMs / 1000.0).round();
     height = math.min(height, 80 - 6);
     gpuBar.element.style.height = '${height}px';
     add(gpuBar);
@@ -637,6 +360,9 @@ class TimelineFramesBuilder {
 
   bool isPaused = false;
 
+  List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
+  List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
+
   final StreamController<TimelineFrame> _frameAddedController =
       new StreamController<TimelineFrame>.broadcast();
 
@@ -650,138 +376,90 @@ class TimelineFramesBuilder {
   void pause() {
     isPaused = true;
 
-    if (frames.isNotEmpty && !frames.last.isComplete) {
-      frames.removeLast();
-    }
+    dartEvents.clear();
+    gpuEvents.clear();
   }
 
   void resume() {
     isPaused = false;
   }
 
-  void processTimelineEvent(TimelineEvent event) {
-    if (event.category != 'Embedder') {
+  void processTimelineEvent(TimelineThread thread, TimelineThreadEvent event) {
+    if (thread == null) {
       return;
     }
 
-    // [Embedder] [B] VSYNC
-    if (event.name == 'VSYNC') {
-      if (event.phase == 'B') {
-        TimelineFrame frame = findFrameAfter(event.timestampMicros);
-        if (frame == null) {
-          frame = new TimelineFrame();
-          frames.add(frame);
-        }
-        frame.setRenderStart(event.timestampMicros);
-      } else if (event.phase == 'E') {
-        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        frame?.setRenderEnd(event.timestampMicros);
+    // io.flutter.1.ui, io.flutter.1.gpu
+    if (thread.name.endsWith('.ui')) {
+      // PipelineProduce
+      if (event.name == 'PipelineProduce' && event.wellFormed) {
+        dartEvents.add(event);
 
-        if (frame != null && frame.isComplete) {
-          _frameAddedController.add(frame);
-        }
+        _processSamplesData();
       }
-    }
+    } else if (thread.name.endsWith('.gpu')) {
+      // MessageLoop::RunExpiredTasks
+      if (event.name == 'MessageLoop::RunExpiredTasks' && event.wellFormed) {
+        gpuEvents.add(event);
 
-    // [Embedder] [B] GPURasterizer::Draw
-    if (event.name == 'GPURasterizer::Draw') {
-      if (event.phase == 'B') {
-        TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        if (frame == null) {
-          frame = new TimelineFrame();
-          frames.add(frame);
-          if (frames.length > maxFrames) {
-            frames.removeAt(0);
-          }
-        }
-        frame.setRastereizeStart(event.timestampMicros);
-      } else if (event.phase == 'E') {
-        final TimelineFrame frame = findFrameBefore(event.timestampMicros);
-        frame?.setRastereizeEnd(event.timestampMicros);
-
-        if (frame != null && frame.isComplete) {
-          _frameAddedController.add(frame);
-        }
+        _processSamplesData();
       }
     }
   }
 
-  TimelineFrame findFrameAfter(int micros) {
-    for (TimelineFrame frame in frames) {
-      if (frame.start > micros) {
-        return frame;
+  void _processSamplesData() {
+    while (dartEvents.isNotEmpty && gpuEvents.isNotEmpty) {
+      int dartStart = dartEvents.first.startMicros;
+
+      // Throw away any gpu samples that start before dart ones.
+      while (gpuEvents.isNotEmpty && gpuEvents.first.startMicros < dartStart) {
+        gpuEvents.removeAt(0);
       }
-    }
 
-    return null;
-  }
-
-  TimelineFrame findFrameBefore(int micros) {
-    for (TimelineFrame frame in frames.reversed) {
-      if (frame.start <= micros) {
-        return frame;
+      if (gpuEvents.isEmpty) {
+        break;
       }
-    }
 
-    return null;
+      // Find the newest dart sample that starts before a gpu one.
+      final int gpuStart = gpuEvents.first.startMicros;
+      while (dartEvents.length > 1 &&
+          (dartEvents[0].startMicros < gpuStart &&
+              dartEvents[1].startMicros < gpuStart)) {
+        dartEvents.removeAt(0);
+      }
+
+      if (dartEvents.isEmpty) {
+        break;
+      }
+
+      // Return the pair.
+      dartStart = dartEvents.first.startMicros;
+      if (dartStart > gpuStart) {
+        break;
+      }
+
+      final TimelineThreadEvent dartEvent = dartEvents.removeAt(0);
+      final TimelineThreadEvent gpuEvent = gpuEvents.removeAt(0);
+
+      final TimelineFrame frame = new TimelineFrame(
+          renderStart: dartEvent.startMicros,
+          rasterizeStart: gpuEvent.startMicros);
+      frame.renderDuration = dartEvent.durationMicros;
+      frame.rasterizeDuration = gpuEvent.durationMicros;
+
+      frames.add(frame);
+
+      if (frames.length > maxFrames) {
+        frames.removeAt(0);
+      }
+
+      _frameAddedController.add(frame);
+    }
   }
 
   void clear() {
     frames.clear();
     _clearedController.add(null);
-  }
-}
-
-class TimelineFrame {
-  int renderStart;
-  int renderDuration;
-
-  int rastereizeStart;
-  int rastereizeDuration;
-
-  TimelineFrame();
-
-  int get start => renderStart ?? rastereizeStart;
-
-  int get end {
-    if (rastereizeStart != null) {
-      return rastereizeStart + rastereizeDuration;
-    } else {
-      return renderStart + renderDuration;
-    }
-  }
-
-  void setRenderStart(int micros) {
-    renderStart = micros;
-  }
-
-  void setRenderEnd(int micros) {
-    renderDuration = micros - renderStart;
-  }
-
-  void setRastereizeStart(int micros) {
-    rastereizeStart = micros;
-  }
-
-  void setRastereizeEnd(int micros) {
-    if (rastereizeStart != null) {
-      rastereizeDuration = micros - rastereizeStart;
-    }
-  }
-
-  bool get isComplete => renderDuration != null && rastereizeDuration != null;
-
-  String get renderAsMs {
-    return '${(renderDuration / 1000.0).toStringAsFixed(1)}ms';
-  }
-
-  String get gpuAsMs {
-    return '${(rastereizeDuration / 1000.0).toStringAsFixed(1)}ms';
-  }
-
-  @override
-  String toString() {
-    return 'frame render: $renderDuration rasterize: $rastereizeDuration';
   }
 }
 
@@ -843,20 +521,19 @@ class FrameDetailsUI extends CoreElement {
     const int rowHeight = 25;
 
     const double microsPerFrame = 1000 * 1000 / 60.0;
-    const double pxPerMicro = microsPerFrame / 1200.0;
+    const double pxPerMicro = microsPerFrame / 1000.0;
 
     int row = 0;
 
-    final int microsAdjust = data.frame.start;
+    final int microsAdjust = data.frame.startMicros;
 
     int maxRow = 0;
 
     Function drawRecursively;
 
-    drawRecursively = (TEvent event, int row) {
+    drawRecursively = (TimelineThreadEvent event, int row) {
       if (!event.wellFormed) {
-        print('event not well formed');
-        print(event);
+        print('event not well formed: $event');
         return;
       }
 
@@ -872,7 +549,7 @@ class FrameDetailsUI extends CoreElement {
         maxRow = row;
       }
 
-      for (TEvent child in event.children) {
+      for (TimelineThreadEvent child in event.children) {
         drawRecursively(child, row + 1);
       }
     };
@@ -883,7 +560,7 @@ class FrameDetailsUI extends CoreElement {
 
         maxRow = row;
 
-        for (TEvent event in data.eventsForThread(thread)) {
+        for (TimelineThreadEvent event in data.eventsForThread(thread)) {
           drawRecursively(event, row);
         }
 
@@ -892,8 +569,7 @@ class FrameDetailsUI extends CoreElement {
         row++;
       }
     } catch (e, st) {
-      print(e);
-      print(st);
+      print('$e\n$st');
     }
   }
 
