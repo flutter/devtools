@@ -36,8 +36,7 @@ class MemoryScreen extends Screen {
 
   PButton loadSnapshotButton;
 
-  // TODO(dantup): Is it reasonable to put dynamic here?
-  ListQueue<Table<dynamic>> tableStack = ListQueue<Table<dynamic>>();
+  ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
   CoreElement tableContainer;
 
   MemoryChart memoryChart;
