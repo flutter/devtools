@@ -99,7 +99,7 @@ class MemoryScreen extends Screen {
       tableContainer.element.scrollTo(<String, dynamic>{
         'left': tableContainer.element.scrollWidth,
         'top': 0,
-        'behavior': 'smooth'
+        'behavior': 'smooth',
       });
     }
   }
