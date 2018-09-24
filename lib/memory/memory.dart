@@ -313,12 +313,12 @@ class MemoryChart extends LineChart<MemoryTracker> {
     }
 
     // display the process usage
-    final String rss = '${_printMb(data.processRss ?? 0, 0)} MB RSS';
+    final String rss = '${printMb(data.processRss ?? 0, 0)} MB RSS';
     processLabel.text = rss;
 
     // display the dart heap usage
     final String used =
-        '${_printMb(data.currentHeap, 1)} of ${_printMb(data.heapMax, 1)} MB';
+        '${printMb(data.currentHeap, 1)} of ${printMb(data.heapMax, 1)} MB';
     heapLabel.text = used;
 
     // re-render the svg
@@ -488,9 +488,6 @@ class HeapSample {
 
   HeapSample(this.bytes, this.time, this.isGC);
 }
-
-String _printMb(num bytes, int fractionDigits) =>
-    (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
 
 // {
 //   type: ClassHeapStats,

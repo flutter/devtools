@@ -51,6 +51,10 @@ String percent(double d) => '${(d * 100).toStringAsFixed(1)}%';
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
+String printMb(num bytes, [int fractionDigits = 1]) {
+  return (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
+}
+
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
   String name = ref.name;
@@ -100,7 +104,8 @@ Directory getDartPrefsDirectory() {
 
 /// Return the user's home directory.
 String getUserHomeDir() {
-  final String envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  final String envKey =
+      Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
   final String value = Platform.environment[envKey];
   return value == null ? '.' : value;
 }

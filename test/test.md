@@ -1,4 +1,3 @@
-
 ## plan for integration tests
 
 Integration tests are expected to be heavyweight and test broad areas of a
