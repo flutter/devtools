@@ -130,7 +130,7 @@ class MemoryScreen extends Screen {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
 
-      tableStack.first..setRows(heapStats);
+      tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
       spinner.element.remove();
     } finally {
