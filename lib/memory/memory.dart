@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -21,17 +22,6 @@ import '../utils.dart';
 // TODO(devoncarew): have a 'show vm objects' checkbox
 
 class MemoryScreen extends Screen {
-  StatusItem classCountStatus;
-  StatusItem objectCountStatus;
-
-  PButton loadSnapshotButton;
-  Table<ClassHeapStats> memoryTable;
-
-  MemoryChart memoryChart;
-  SetStateMixin memoryChartStateMixin = new SetStateMixin();
-  MemoryTracker memoryTracker;
-  ProgressElement progressElement;
-
   MemoryScreen()
       : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
     classCountStatus = new StatusItem();
@@ -40,6 +30,19 @@ class MemoryScreen extends Screen {
     objectCountStatus = new StatusItem();
     addStatusItem(objectCountStatus);
   }
+
+  StatusItem classCountStatus;
+  StatusItem objectCountStatus;
+
+  PButton loadSnapshotButton;
+
+  ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+  CoreElement tableContainer;
+
+  MemoryChart memoryChart;
+  SetStateMixin memoryChartStateMixin = new SetStateMixin();
+  MemoryTracker memoryTracker;
+  ProgressElement progressElement;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -55,6 +58,7 @@ class MemoryScreen extends Screen {
               loadSnapshotButton = new PButton('Load heap snapshot')
                 ..small()
                 ..primary()
+                ..disabled = true
                 ..click(_loadAllocationProfile),
               progressElement = new ProgressElement()
                 ..clazz('margin-left')
@@ -62,8 +66,10 @@ class MemoryScreen extends Screen {
               div()..flex(),
             ])
         ]),
-      _createTableView()..clazz('section'),
+      tableContainer = div(c: 'section overflow-auto')..layoutHorizontal()
     ]);
+
+    _pushNextTable(null, _createHeapStatsTableView());
 
     _updateStatus(null);
 
@@ -79,6 +85,24 @@ class MemoryScreen extends Screen {
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
 
+  void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
+    // Remove any tables to the right of current from the DOM and the stack.
+    while (tableStack.length > 1 && tableStack.last != current) {
+      tableStack.removeLast().element.element.remove();
+    }
+
+    // Push the new table on to the stack and to the right of current.
+    if (next != null) {
+      tableStack.addLast(next);
+      tableContainer.add(next.element..clazz('margin-left'));
+      tableContainer.element.scrollTo(<String, dynamic>{
+        'left': tableContainer.element.scrollWidth,
+        'top': 0,
+        'behavior': 'smooth',
+      });
+    }
+  }
+
   void _handleIsolateChanged() {
     // TODO(devoncarew): update buttons
   }
@@ -87,6 +111,9 @@ class MemoryScreen extends Screen {
 
   Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
+    tableStack.first.element.display = null;
+    final Spinner spinner =
+        tableStack.first.element.add(new Spinner()..clazz('padded'));
 
     // TODO(devoncarew): error handling
 
@@ -102,8 +129,9 @@ class MemoryScreen extends Screen {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
 
-      memoryTable.setRows(heapStats);
+      tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
+      spinner.element.remove();
     } finally {
       loadSnapshotButton.disabled = false;
     }
@@ -174,33 +202,91 @@ class MemoryScreen extends Screen {
     return container;
   }
 
-  CoreElement _createTableView() {
-    memoryTable = new Table<ClassHeapStats>.virtual();
+  Table<ClassHeapStats> _createHeapStatsTableView() {
+    final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual()
+      ..element.display = 'none'
+      ..element.clazz('memory-table');
 
-    memoryTable.addColumn(new MemoryColumnSize());
-    memoryTable.addColumn(new MemoryColumnInstanceCount());
-    memoryTable.addColumn(new MemoryColumnClassName());
+    table.addColumn(new MemoryColumnSize());
+    table.addColumn(new MemoryColumnInstanceCount());
+    table.addColumn(new MemoryColumnClassName());
 
-    memoryTable.setSortColumn(memoryTable.columns.first);
+    table.setSortColumn(table.columns.first);
 
-    // new List<MemoryRow>.generate(100, (_) => MemoryRow.random()
-    memoryTable.setRows(<ClassHeapStats>[]);
-
-    memoryTable.onSelect.listen((ClassHeapStats row) {
-      // TODO:
-      print(row);
-
-//      serviceInfo.service.getObject(_isolateId, row.classRef.id).then((result) {
-//        Class c = result;
-//        if (c.library.type =='@Library') {
-//          // user class
-//        } else {
-//          // vm class (Code, Instructions, ...)
-//        }
-//      });
+    table.onSelect.listen((ClassHeapStats row) async {
+      final Table<InstanceSummary> newTable =
+          row == null ? null : _createInstanceListTableView(row);
+      _pushNextTable(table, newTable);
     });
 
-    return memoryTable.element;
+    return table;
+  }
+
+  Table<InstanceSummary> _createInstanceListTableView(ClassHeapStats row) {
+    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
+      ..element.clazz('memory-table');
+    table.addColumn(new MemoryColumnSimple<InstanceSummary>(
+        'Instance ID', (InstanceSummary row) => row.id));
+
+    table.onSelect.listen((InstanceSummary row) async {
+      final Table<InstanceData> newTable =
+          row == null ? null : _createInstanceDetailsTableView(row);
+      _pushNextTable(table, newTable);
+    });
+
+    // Kick off population of data for the table.
+    serviceInfo.service
+        .getObject(_isolateId, row.classRef.id)
+        .then((dynamic result) {
+      final Class c = result;
+      // // TODO(dantup): Find out what we should actually be displaying here.
+      // if (c.library.type == '@Library') {
+      //   // user class
+      // } else {
+      //   // vm class (Code, Instructions, ...)
+      // }
+
+      final List<InstanceSummary> instanceRows = InstanceSummary.randomList(c);
+      table.setRows(instanceRows);
+    });
+
+    return table;
+  }
+
+  Table<InstanceData> _createInstanceDetailsTableView(InstanceSummary row) {
+    final Table<InstanceData> table = new Table<InstanceData>.virtual()
+      ..element.clazz('memory-table');
+    final Spinner spinner = table.element.add(new Spinner()..clazz('padded'));
+    table.addColumn(new MemoryColumnSimple<InstanceData>(
+        'Name', (InstanceData row) => row.name));
+    table.addColumn(new MemoryColumnSimple<InstanceData>(
+        'Value', (InstanceData row) => row.value.toString()));
+
+    table.onSelect.listen((InstanceData row) async {
+      // TODO(dantup): Push the relevant table.
+      // For literlals, do nothing?
+      // For other objects, push an InstanceDetails table?
+
+      // For testing purposes, the first row (id) will just push
+      // another table with another instance in (this is how references out may
+      // work?).
+      if (row.name == 'id') {
+        final Table<InstanceData> newTable =
+            row == null ? null : _createInstanceDetailsTableView(row.instance);
+        _pushNextTable(table, newTable);
+      } else {
+        _pushNextTable(table, null);
+      }
+    });
+
+    // Kick off population of data for the table.
+    // TODO(dantup): If it turns out not to be async work, remove the spinner.
+    row.getData().then((List<InstanceData> data) {
+      table.setRows(data);
+      spinner.element.remove();
+    });
+
+    return table;
   }
 
   // TODO(devoncarew): Update this url.
@@ -209,6 +295,7 @@ class MemoryScreen extends Screen {
       new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmService service) {
+    loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
 
     memoryTracker = new MemoryTracker(service);
@@ -222,6 +309,7 @@ class MemoryScreen extends Screen {
   }
 
   void _handleConnectionStop(dynamic event) {
+    loadSnapshotButton.disabled = true;
     memoryChart.disabled = true;
 
     memoryTracker?.stop();
@@ -243,11 +331,11 @@ class MemoryScreen extends Screen {
 }
 
 class MemoryRow {
+  MemoryRow(this.name, this.bytes, this.percentage);
+
   final String name;
   final int bytes;
   final double percentage;
-
-  MemoryRow(this.name, this.bytes, this.percentage);
 
   @override
   String toString() => name;
@@ -294,10 +382,17 @@ class MemoryColumnInstanceCount extends Column<ClassHeapStats> {
   String render(dynamic value) => Column.fastIntl(value);
 }
 
-class MemoryChart extends LineChart<MemoryTracker> {
-  CoreElement processLabel;
-  CoreElement heapLabel;
+class MemoryColumnSimple<T> extends Column<T> {
+  MemoryColumnSimple(String name, this.getter, {bool wide = false})
+      : super(name, wide: wide);
 
+  String Function(T) getter;
+
+  @override
+  String getValue(T item) => getter(item);
+}
+
+class MemoryChart extends LineChart<MemoryTracker> {
   MemoryChart(CoreElement parent) : super(parent) {
     processLabel = parent.add(div(c: 'perf-label'));
     processLabel.element.style.left = '0';
@@ -305,6 +400,9 @@ class MemoryChart extends LineChart<MemoryTracker> {
     heapLabel = parent.add(div(c: 'perf-label'));
     heapLabel.element.style.right = '0';
   }
+
+  CoreElement processLabel;
+  CoreElement heapLabel;
 
   @override
   void update(MemoryTracker data) {
@@ -334,14 +432,14 @@ class MemoryChart extends LineChart<MemoryTracker> {
     // TODO(devoncarew): draw dots for GC events?
 
     chartElement.setInnerHtml('''
-<svg viewBox="0 0 ${dim.x} ${dim.y}">
-<polyline
-    fill="none"
-    stroke="#0074d9"
-    stroke-width="3"
-    points="${createPoints(data.samples, top, width, right)}"/>
-</svg>
-''');
+            <svg viewBox="0 0 ${dim.x} ${dim.y}">
+            <polyline
+                fill="none"
+                stroke="#0074d9"
+                stroke-width="3"
+                points="${createPoints(data.samples, top, width, right)}"/>
+            </svg>
+            ''');
   }
 
   String createPoints(List<HeapSample> samples, int top, int width, int right) {
@@ -355,6 +453,8 @@ class MemoryChart extends LineChart<MemoryTracker> {
 }
 
 class MemoryTracker {
+  MemoryTracker(this.service);
+
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
@@ -367,8 +467,6 @@ class MemoryTracker {
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
   int heapMax;
   int processRss;
-
-  MemoryTracker(this.service);
 
   bool get hasConnection => service != null;
 
@@ -483,11 +581,11 @@ class MemoryTracker {
 }
 
 class HeapSample {
+  HeapSample(this.bytes, this.time, this.isGC);
+
   final int bytes;
   final int time;
   final bool isGC;
-
-  HeapSample(this.bytes, this.time, this.isGC);
 }
 
 // {
@@ -499,6 +597,12 @@ class HeapSample {
 //   promotedBytes: 0
 // }
 class ClassHeapStats {
+  ClassHeapStats(this.json) {
+    classRef = ClassRef.parse(json['class']);
+    _update(json['new']);
+    _update(json['old']);
+  }
+
   static const int ALLOCATED_BEFORE_GC = 0;
   static const int ALLOCATED_BEFORE_GC_SIZE = 1;
   static const int LIVE_AFTER_GC = 2;
@@ -517,12 +621,6 @@ class ClassHeapStats {
 
   ClassRef classRef;
 
-  ClassHeapStats(this.json) {
-    classRef = ClassRef.parse(json['class']);
-    _update(json['new']);
-    _update(json['old']);
-  }
-
   String get type => json['type'];
 
   void _update(List<dynamic> stats) {
@@ -535,4 +633,44 @@ class ClassHeapStats {
   @override
   String toString() =>
       '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
+}
+
+class InstanceSummary {
+  InstanceSummary(this.clazz, this.id);
+
+  Class clazz;
+  String id;
+
+  @override
+  String toString() => '[InstanceSummary id: $id, class: ${clazz.name}]';
+
+  // TODO(dantup): Remove this once we have real data.
+  static List<InstanceSummary> randomList(Class clazz) {
+    return new List<InstanceSummary>.generate(
+        1000, (int i) => new InstanceSummary(clazz, 'objects/$i'));
+  }
+
+  Future<List<InstanceData>> getData() async {
+    // TODO(dantup): Replace with real implementation.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    return <InstanceData>[
+      new InstanceData(this, 'id', id),
+      new InstanceData(this, 'name', 'Joe Bloggs'),
+      new InstanceData(this, 'email', 'something@example.org'),
+      new InstanceData(this, 'company', 'Bloggs Corp'),
+      new InstanceData(this, 'telephone', '01234 567 890'),
+      new InstanceData(this, 'shoeSize', 11),
+    ];
+  }
+}
+
+class InstanceData {
+  InstanceData(this.instance, this.name, this.value);
+
+  InstanceSummary instance;
+  String name;
+  dynamic value;
+
+  @override
+  String toString() => '[InstanceData name: $name, value: $value]';
 }

@@ -385,6 +385,12 @@ div.tabnav {
     margin-bottom: 0;
 }
 
+.memory-table {
+    /* Just width doesn't work? */
+    max-width: 500px;
+    min-width: 500px;
+}
+
 .timeline-frames {
     overflow-x: scroll;
     white-space: nowrap;
@@ -512,3 +518,33 @@ div.tabnav-tab {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+
+.spinner.padded {
+    margin: 5px;
+}
+
+.spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+}
+.spinner:after {
+    content: " ";
+    display: block;
+    width: 23px;
+    height: 23px;
+    margin: 1px;
+    border-radius: 50%;
+    border: 3px solid #4078c0;
+    border-color: #4078c0 transparent #4078c0 transparent;
+    animation: spin 1.2s linear infinite;
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+  
