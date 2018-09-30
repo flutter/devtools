@@ -219,14 +219,14 @@ class LoggingScreen extends Screen {
         });
       }
 
-      final bool logLevelError =
-          (level != null && level >= Level.SEVERE.value) ? true : false;
+      final bool isError =
+          level != null && level >= Level.SEVERE.value ? true : false;
 
       _log(new LogData(
         loggerName,
         details,
         e.timestamp,
-        isError: logLevelError,
+        isError: isError,
         summary: summary,
         detailsComputer: detailsComputer,
       ));
