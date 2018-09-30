@@ -237,7 +237,7 @@ class Table<T> extends Object with SetStateMixin {
         _tbody.element.children.removeLast();
     }
     // Set the "after" spacer to the correct height to keep the scroll size
-    // correct for the number or rows to come after.
+    // correct for the number of rows to come after.
     final double spacerAfterHeight =
         (rows.length - lastRenderedRowExclusive) * rowHeight;
     _spacerAfterVisibleRows.height = '${spacerAfterHeight}px';
