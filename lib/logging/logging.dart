@@ -341,9 +341,9 @@ class _StdoutEventHandler {
       if (message == '\n') {
         loggingScreen._log(new LogData(
           buffer.kind,
-          buffer.details + message.replaceAll('\n', r'\n'),
+          buffer.details + message,
           buffer.timestamp,
-          summary: buffer.summary + message.replaceAll('\n', r'\n'),
+          summary: buffer.summary + message,
           isError: buffer.isError,
         ));
         buffer = null;
@@ -358,9 +358,6 @@ class _StdoutEventHandler {
     if (message.length > 200) {
       summary = message.substring(0, 200) + '…';
     }
-    summary = summary.replaceAll('\t', r'\t');
-    summary = summary.replaceAll('\r', r'\r');
-    summary = summary.replaceAll('\n', r'\n');
 
     final LogData data = new LogData(
       name,
