@@ -478,6 +478,11 @@ div.tabnav {
 }
 
 
+td.log-label-column {
+    text-align: right;
+    max-width: 148px;
+}
+
 .log-details {
     height: 126px;
     overflow-y: scroll;
@@ -528,6 +533,7 @@ div.tabnav-tab {
     width: 32px;
     height: 32px;
 }
+
 .spinner:after {
     content: " ";
     display: block;
@@ -539,6 +545,7 @@ div.tabnav-tab {
     border-color: #4078c0 transparent #4078c0 transparent;
     animation: spin 1.2s linear infinite;
 }
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -547,4 +554,3 @@ div.tabnav-tab {
         transform: rotate(360deg);
     }
 }
-  
