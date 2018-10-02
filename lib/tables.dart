@@ -29,7 +29,8 @@ class Table<T> extends Object with SetStateMixin {
   Column<T> _sortColumn;
   SortOrder _sortDirection;
 
-  CoreElement _table;
+  final CoreElement _table = new CoreElement('table')
+    ..clazz('full-width')
   CoreElement _thead;
   CoreElement _tbody;
 
@@ -48,19 +49,21 @@ class Table<T> extends Object with SetStateMixin {
       : element = div(a: 'flex', c: 'overflow-y table-border'),
         _isVirtual = false,
         isReversed = false {
-    _table = new CoreElement('table')..clazz('full-width');
-    element.add(_table);
+    _init();
   }
 
   Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
-    _table = new CoreElement('table')..clazz('full-width');
-    element.add(_table);
+    _init();
     _spacerBeforeVisibleRows = new CoreElement('tr');
     _spacerAfterVisibleRows = new CoreElement('tr');
 
     element.onScroll.listen((_) => _scheduleRebuild());
+  }
+
+  void _init() {
+    element.add(_table);
   }
 
   Stream<T> get onSelect => _selectController.stream;
