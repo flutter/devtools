@@ -133,20 +133,22 @@ class LoggingScreen extends Screen {
 
     // Log GC events.
     service.onGCEvent.listen((Event e) {
-      final Map<dynamic, dynamic> newSpace = e.json['new'];
-      final Map<dynamic, dynamic> oldSpace = e.json['old'];
+      final HeapSpace newSpace = HeapSpace.parse(e.json['new']);
+      final HeapSpace oldSpace = HeapSpace.parse(e.json['old']);
       final Map<dynamic, dynamic> isolateRef = e.json['isolate'];
 
-      final int usedBytes = newSpace['used'] + oldSpace['used'];
-      final int capacityBytes = newSpace['capacity'] + oldSpace['capacity'];
+      final int usedBytes = newSpace.used + oldSpace.used;
+      final int capacityBytes = newSpace.capacity + oldSpace.capacity;
+
+      final int time = ((newSpace.time + oldSpace.time) * 1000).round();
 
       final String summary = '${isolateRef['name']} • '
-          '${e.json['reason']} collection • '
+          '${e.json['reason']} collection $time ms • '
           '${printMb(usedBytes)} MB used of ${printMb(capacityBytes)} MB';
       final Map<String, dynamic> event = <String, dynamic>{
         'reason': e.json['reason'],
-        'new': newSpace,
-        'old': oldSpace,
+        'new': newSpace.json,
+        'old': oldSpace.json,
         'isolate': isolateRef,
       };
       final String message = jsonEncode(event);
