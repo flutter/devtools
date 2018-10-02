@@ -64,6 +64,34 @@ void main() {
       expect(rowNumber, lessThan(5));
     });
 
+    test('can selected by index', () async {
+      final Element tbody = table.element.element.querySelector('tbody');
+
+      table.selectByIndex(0);
+      // Ensure a single visible row is marked as selected.
+      expect(tbody.querySelectorAll('tr.selected'), hasLength(1));
+    });
+
+    test('can select an offscreen row then scroll it into view', () async {
+      final Element tbody = table.element.element.querySelector('tbody');
+
+      // Select a row that will be offscreen.
+      table.selectByIndex(500);
+      // Ensure there are no selected rows.
+      expect(tbody.querySelectorAll('tr.selected'), isEmpty);
+
+      // Scroll to approx row 500.
+      table.element.scrollTop = 29 * 500;
+
+      // Wait for two frames, to ensure that the onScroll fired and then we
+      // definitely rebuilt the table.
+      await window.animationFrame;
+      await window.animationFrame;
+
+      // Ensure there is now a single visible row marked as selected.
+      expect(tbody.querySelectorAll('tr.selected'), hasLength(1));
+    });
+
     test('render rows starting around 500 when scrolled down the page',
         () async {
       // Scroll to approx row 500.
