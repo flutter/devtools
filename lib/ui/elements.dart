@@ -226,6 +226,7 @@ class CoreElement {
 
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
   Stream<Event> get onScroll => element.onScroll;
+  Stream<KeyboardEvent> get onKeyDown => element.onKeyDown;
 
   /// Subscribe to the [onClick] event stream with a no-arg handler.
   StreamSubscription<Event> click(void handle(), [void shiftHandle()]) {
