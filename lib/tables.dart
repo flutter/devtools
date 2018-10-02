@@ -255,6 +255,9 @@ class Table<T> extends Object with SetStateMixin {
       firstRenderedRowInclusive: 0,
       lastRenderedRowExclusive: rows?.length ?? 0);
 
+  int _translateRowIndex(int index) =>
+      !isReversed ? index : (rows?.length ?? 0) - 1 - index;
+
   int _buildTableRows({
     @required int firstRenderedRowInclusive,
     @required int lastRenderedRowExclusive,
@@ -262,13 +265,10 @@ class Table<T> extends Object with SetStateMixin {
   }) {
     _tbody.element.children.remove(_dummyRowToForceAlternatingColor.element);
 
-    int translateRowIndex(int index) =>
-        !isReversed ? index : (rows?.length ?? 0) - 1 - index;
-
     // Enable the dummy row to fix alternating backgrounds when the first rendered
     // row (taking into account if we're reversing) index is an odd.
     final bool shouldOffsetRowColor =
-        translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
+        _translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
     if (shouldOffsetRowColor) {
       _tbody.element.children
           .insert(0, _dummyRowToForceAlternatingColor.element);
@@ -278,7 +278,7 @@ class Table<T> extends Object with SetStateMixin {
     for (int index = firstRenderedRowInclusive;
         index < lastRenderedRowExclusive;
         index++) {
-      final T row = rows[translateRowIndex(index)];
+      final T row = rows[_translateRowIndex(index)];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
