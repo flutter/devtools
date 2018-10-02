@@ -29,6 +29,7 @@ class Table<T> extends Object with SetStateMixin {
     _spacerAfterVisibleRows = new CoreElement('tr');
 
     element.onScroll.listen((_) => _scheduleRebuild());
+    window.onResize.listen((_) => _scheduleRebuild());
   }
 
   final CoreElement element;
