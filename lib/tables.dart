@@ -14,6 +14,23 @@ import 'utils.dart';
 // TODO(devoncarew): fixed position header
 
 class Table<T> extends Object with SetStateMixin {
+  Table()
+      : element = div(a: 'flex', c: 'overflow-y table-border'),
+        _isVirtual = false,
+        isReversed = false {
+    _init();
+  }
+
+  Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
+      : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
+        _isVirtual = true {
+    _init();
+    _spacerBeforeVisibleRows = new CoreElement('tr');
+    _spacerAfterVisibleRows = new CoreElement('tr');
+
+    element.onScroll.listen((_) => _scheduleRebuild());
+  }
+
   final CoreElement element;
   final bool _isVirtual;
   // Whether to reverse the display of data. This is to allow appending data
@@ -47,23 +64,6 @@ class Table<T> extends Object with SetStateMixin {
 
   final StreamController<T> _selectController =
       new StreamController<T>.broadcast();
-
-  Table()
-      : element = div(a: 'flex', c: 'overflow-y table-border'),
-        _isVirtual = false,
-        isReversed = false {
-    _init();
-  }
-
-  Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
-      : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
-        _isVirtual = true {
-    _init();
-    _spacerBeforeVisibleRows = new CoreElement('tr');
-    _spacerAfterVisibleRows = new CoreElement('tr');
-
-    element.onScroll.listen((_) => _scheduleRebuild());
-  }
 
   void _init() {
     element.add(_table);
