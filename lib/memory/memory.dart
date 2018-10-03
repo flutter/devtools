@@ -88,7 +88,9 @@ class MemoryScreen extends Screen {
   void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
     // Remove any tables to the right of current from the DOM and the stack.
     while (tableStack.length > 1 && tableStack.last != current) {
-      tableStack.removeLast().element.element.remove();
+      tableStack.removeLast()
+        ..element.element.remove()
+        ..dispose();
     }
 
     // Push the new table on to the stack and to the right of current.

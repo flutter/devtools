@@ -306,3 +306,37 @@ class TrustedHtmlTreeSanitizer implements NodeTreeSanitizer {
   @override
   void sanitizeTree(Node node) {}
 }
+
+abstract class HasCoreElement {
+  CoreElement get element;
+}
+
+abstract class OnAddedToDomMixin implements HasCoreElement {
+  bool isInDom = false;
+  MutationObserver observer;
+  final StreamController<void> _addedToDomController =
+      new StreamController<void>.broadcast();
+
+  Stream<void> get onAddedToDom {
+    // Set up an observer that can detect when this element is added to the DOM.
+    // TODO(dantup): Can mixins have anything like constructors?
+    if (observer == null) {
+      observer = new MutationObserver(
+          (List<dynamic> mutations, MutationObserver observer) {
+        if (document.body.contains(element.element) && !isInDom) {
+          isInDom = true;
+          _addedToDomController.add(null);
+        } else if (!document.body.contains(element.element) && isInDom) {
+          isInDom = false;
+        }
+      });
+
+      // Enable/disable the observer based on whether anyone is listening.
+      _addedToDomController.onListen =
+          () => observer.observe(document.body, childList: true, subtree: true);
+      _addedToDomController.onCancel = () => observer.disconnect();
+    }
+
+    return _addedToDomController.stream;
+  }
+}
