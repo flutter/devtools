@@ -212,6 +212,8 @@ class CoreElement {
     element.style.display = value;
   }
 
+  int get scrollHeight => element.scrollHeight;
+
   int get scrollTop => element.scrollTop;
 
   set scrollTop(int value) => element.scrollTop = value;

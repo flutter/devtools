@@ -409,10 +409,25 @@ class Table<T> extends Object with SetStateMixin {
   /// and not necessarily for rows[] since it may be being rendered in reverse.
   /// This way, +1 will always move down the visible table.
   @visibleForTesting
-  void selectByIndex(int newIndex) {
+  void selectByIndex(int newIndex,
+      {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
     final CoreElement row = _rowForIndex[newIndex];
     final T dataObject = data[_translateRowIndex(newIndex)];
     _select(row?.element, dataObject, newIndex);
+
+    if (keepVisible) {
+      final double rowOffsetPixels = newIndex * rowHeight;
+      final double halfTableHeight = element.offsetHeight / 2;
+      final int newScrollTop = (rowOffsetPixels - halfTableHeight)
+          .round()
+          .clamp(0, element.scrollHeight);
+
+      element.element.scrollTo(<String, dynamic>{
+        'left': 0,
+        'top': newScrollTop,
+        'behavior': scrollBehavior,
+      });
+    }
   }
 
   void _clearSelection() => _select(null, null, null);

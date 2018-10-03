@@ -76,7 +76,7 @@ void main() {
       final Element tbody = table.element.element.querySelector('tbody');
 
       // Select a row that will be offscreen.
-      table.selectByIndex(500);
+      table.selectByIndex(500, keepVisible: false);
       // Ensure there are no selected rows.
       expect(tbody.querySelectorAll('tr.selected'), isEmpty);
 
@@ -90,6 +90,24 @@ void main() {
 
       // Ensure there is now a single visible row marked as selected.
       expect(tbody.querySelectorAll('tr.selected'), hasLength(1));
+    });
+
+    test('scrolls to the selection automatically', () async {
+      final Element tbody = table.element.element.querySelector('tbody');
+
+      // Select a row that is offscreen.
+      table.selectByIndex(500, scrollBehavior: 'instant');
+
+      // Wait for two frames, to ensure that the onScroll fired and then we
+      // definitely rebuilt the table.
+      await window.animationFrame;
+      await window.animationFrame;
+
+      // Ensure there is now a single visible row marked as selected.
+      expect(tbody.querySelectorAll('tr.selected'), hasLength(1));
+      final int rowNumber = getApproximatelyFirstRenderedDataIndex(table);
+      expect(rowNumber, greaterThan(450));
+      expect(rowNumber, lessThan(550));
     });
 
     test('render rows starting around 500 when scrolled down the page',
