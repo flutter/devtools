@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
-import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
@@ -143,7 +142,7 @@ class LoggingScreen extends Screen {
       final int time = ((newSpace.time + oldSpace.time) * 1000).round();
 
       final String summary = '${isolateRef['name']} • '
-          '${e.json['reason']} collection $time ms • '
+          '${e.json['reason']} collection in $time ms • '
           '${printMb(usedBytes)} MB used of ${printMb(capacityBytes)} MB';
       final Map<String, dynamic> event = <String, dynamic>{
         'reason': e.json['reason'],
@@ -221,8 +220,8 @@ class LoggingScreen extends Screen {
         });
       }
 
-      final bool isError =
-          level != null && level >= Level.SEVERE.value ? true : false;
+      const int severeIssue = 1000;
+      final bool isError = level != null && level >= severeIssue ? true : false;
 
       _log(new LogData(
         loggerName,
