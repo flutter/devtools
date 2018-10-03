@@ -24,7 +24,7 @@ class Table<T> extends Object with SetStateMixin {
   bool _hasPendingRebuild = false;
 
   List<Column<T>> columns = <Column<T>>[];
-  List<T> rows;
+  List<T> data;
 
   Column<T> _sortColumn;
   SortOrder _sortDirection;
@@ -40,9 +40,6 @@ class Table<T> extends Object with SetStateMixin {
   final CoreElement _dummyRowToForceAlternatingColor = new CoreElement('tr')
     ..display = 'none';
 
-  // TODO(dantup): Make the naming consistent within this class. There is
-  // inconsistent use of row, data, object (data and object are usually the same
-  // but sometimes row is a table row/element and sometimes it's the data (T)).
   final Map<Column<T>, CoreElement> _spanForColumn = <Column<T>, CoreElement>{};
   final Map<Element, T> _dataForRow = <Element, T>{};
   final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
@@ -87,7 +84,7 @@ class Table<T> extends Object with SetStateMixin {
       // Offset it, or select index 0 if there was no prior selection.
       int newIndex = currentIndex == null ? 0 : (currentIndex + indexOffset);
       // Clamp to the first/last row.
-      final int maxRowIndex = (rows?.length ?? 1) - 1;
+      final int maxRowIndex = (data?.length ?? 1) - 1;
       newIndex = newIndex.clamp(0, maxRowIndex);
 
       selectByIndex(newIndex);
@@ -100,13 +97,13 @@ class Table<T> extends Object with SetStateMixin {
     columns.add(column);
   }
 
-  void setRows(List<T> rows) {
+  void setRows(List<T> data) {
     // If the selected object is no longer valid, clear the selection.
-    if (!rows.contains(_selectedObject)) {
+    if (!data.contains(_selectedObject)) {
       _clearSelection();
     }
 
-    this.rows = rows;
+    this.data = data;
 
     if (_thead == null) {
       _thead = new CoreElement('thead')
@@ -177,7 +174,7 @@ class Table<T> extends Object with SetStateMixin {
       }
     }
 
-    rows.sort((T a, T b) {
+    data.sort((T a, T b) {
       if (numeric) {
         final num one = column.getValue(a);
         final num two = column.getValue(b);
@@ -213,14 +210,14 @@ class Table<T> extends Object with SetStateMixin {
     final int originalScrollTop = element.scrollTop;
 
     int firstRenderedRowInclusive = 0;
-    int lastRenderedRowExclusive = rows?.length ?? 0;
+    int lastRenderedRowExclusive = data?.length ?? 0;
 
     // Keep track of the table row we're inserting so that we can re-use rows
     // if they already exist in the DOM.
     int currentRowIndex = 0;
 
     // Calculate the subset of rows to render based on scroll position.
-    final int totalRows = rows?.length ?? 0;
+    final int totalRows = data?.length ?? 0;
     final int firstVisibleRow =
         ((element.scrollTop - _thead.offsetHeight) / rowHeight).floor();
     final int numVisibleRows = (element.offsetHeight / rowHeight).ceil() + 1;
@@ -270,7 +267,7 @@ class Table<T> extends Object with SetStateMixin {
     // Set the "after" spacer to the correct height to keep the scroll size
     // correct for the number of rows to come after.
     final double spacerAfterHeight =
-        (rows.length - lastRenderedRowExclusive) * rowHeight;
+        (data.length - lastRenderedRowExclusive) * rowHeight;
     _spacerAfterVisibleRows.height = '${spacerAfterHeight}px';
     _tbody.element.children.add(_spacerAfterVisibleRows.element);
 
@@ -281,10 +278,10 @@ class Table<T> extends Object with SetStateMixin {
 
   void _rebuildStaticTable() => _buildTableRows(
       firstRenderedRowInclusive: 0,
-      lastRenderedRowExclusive: rows?.length ?? 0);
+      lastRenderedRowExclusive: data?.length ?? 0);
 
   int _translateRowIndex(int index) =>
-      !isReversed ? index : (rows?.length ?? 0) - 1 - index;
+      !isReversed ? index : (data?.length ?? 0) - 1 - index;
 
   int _buildTableRows({
     @required int firstRenderedRowInclusive,
@@ -310,7 +307,7 @@ class Table<T> extends Object with SetStateMixin {
     for (int index = firstRenderedRowInclusive;
         index < lastRenderedRowExclusive;
         index++) {
-      final T row = rows[_translateRowIndex(index)];
+      final T dataObject = data[_translateRowIndex(index)];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
@@ -324,7 +321,7 @@ class Table<T> extends Object with SetStateMixin {
       // user clicks the row to select it. This lets us reuse a single
       // click handler attached when we created the row instead of rebinding
       // it when rows are reused as we scroll.
-      _dataForRow[tableRow.element] = row;
+      _dataForRow[tableRow.element] = dataObject;
       void selectRow(Element row, int index) {
         _select(row, _dataForRow[row], index);
       }
@@ -367,9 +364,9 @@ class Table<T> extends Object with SetStateMixin {
         }
 
         if (column.usesHtml) {
-          tableCell.setInnerHtml(column.render(column.getValue(row)));
+          tableCell.setInnerHtml(column.render(column.getValue(dataObject)));
         } else {
-          tableCell.text = column.render(column.getValue(row));
+          tableCell.text = column.render(column.getValue(dataObject));
         }
 
         if (!isReusableColumn) {
@@ -378,7 +375,7 @@ class Table<T> extends Object with SetStateMixin {
       }
 
       // If this row represents our selected object, highlight it.
-      if (row == _selectedObject) {
+      if (dataObject == _selectedObject) {
         _select(tableRow.element, _selectedObject, index);
       } else {
         // Otherwise, ensure it's not marked as selected (the previous data
@@ -422,8 +419,8 @@ class Table<T> extends Object with SetStateMixin {
   @visibleForTesting
   void selectByIndex(int newIndex) {
     final CoreElement row = _rowForIndex[newIndex];
-    final T data = rows[_translateRowIndex(newIndex)];
-    _select(row?.element, data, newIndex);
+    final T dataObject = data[_translateRowIndex(newIndex)];
+    _select(row?.element, dataObject, newIndex);
   }
 
   void _clearSelection() => _select(null, null, null);
