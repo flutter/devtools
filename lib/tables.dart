@@ -25,6 +25,7 @@ class Table<T> extends Object with SetStateMixin {
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> data;
+  int get rowCount => data?.length ?? 0;
 
   Column<T> _sortColumn;
   SortOrder _sortDirection;

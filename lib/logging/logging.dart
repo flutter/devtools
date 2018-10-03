@@ -92,7 +92,7 @@ class LoggingScreen extends Screen {
   }
 
   void _updateStatus() {
-    final int count = loggingTable.data.length;
+    final int count = loggingTable.rowCount;
     final String label = count >= kMaxLogItemsLowerBound
         ? '${nf.format(kMaxLogItemsLowerBound)}+'
         : nf.format(count);

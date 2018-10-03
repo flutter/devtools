@@ -82,7 +82,7 @@ class App {
 
   Future<int> logsLogCount([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logs');
-    return screen.loggingTable.rows.length;
+    return screen.loggingTable.rowCount;
   }
 
   void _sendNotification(String event, [dynamic params]) {
