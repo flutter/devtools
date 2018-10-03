@@ -40,7 +40,7 @@ class Table<T> extends Object with SetStateMixin {
   final CoreElement _dummyRowToForceAlternatingColor = new CoreElement('tr')
     ..display = 'none';
 
-  // TODO(dantup): Make the naming consistent withing this class. There is
+  // TODO(dantup): Make the naming consistent within this class. There is
   // inconsistent use of row, data, object (data and object are usually the same
   // but sometimes row is a table row/element and sometimes it's the data (T)).
   final Map<Column<T>, CoreElement> _spanForColumn = <Column<T>, CoreElement>{};
