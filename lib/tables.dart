@@ -29,7 +29,9 @@ class Table<T> extends Object with SetStateMixin {
   Column<T> _sortColumn;
   SortOrder _sortDirection;
 
-  CoreElement _table;
+  final CoreElement _table = new CoreElement('table')
+    ..clazz('full-width')
+    ..setAttribute('tabIndex', '0');
   CoreElement _thead;
   CoreElement _tbody;
 
@@ -38,8 +40,12 @@ class Table<T> extends Object with SetStateMixin {
   final CoreElement _dummyRowToForceAlternatingColor = new CoreElement('tr')
     ..display = 'none';
 
+  // TODO(dantup): Make the naming consistent within this class. There is
+  // inconsistent use of row, data, object (data and object are usually the same
+  // but sometimes row is a table row/element and sometimes it's the data (T)).
   final Map<Column<T>, CoreElement> _spanForColumn = <Column<T>, CoreElement>{};
   final Map<Element, T> _dataForRow = <Element, T>{};
+  final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
 
   final StreamController<T> _selectController =
       new StreamController<T>.broadcast();
@@ -48,19 +54,44 @@ class Table<T> extends Object with SetStateMixin {
       : element = div(a: 'flex', c: 'overflow-y table-border'),
         _isVirtual = false,
         isReversed = false {
-    _table = new CoreElement('table')..clazz('full-width');
-    element.add(_table);
+    _init();
   }
 
   Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
-    _table = new CoreElement('table')..clazz('full-width');
-    element.add(_table);
+    _init();
     _spacerBeforeVisibleRows = new CoreElement('tr');
     _spacerAfterVisibleRows = new CoreElement('tr');
 
     element.onScroll.listen((_) => _scheduleRebuild());
+  }
+
+  void _init() {
+    element.add(_table);
+    _table.onKeyDown.listen((KeyboardEvent e) {
+      int indexOffset;
+      if (e.keyCode == KeyCode.UP) {
+        indexOffset = -1;
+      } else if (e.keyCode == KeyCode.DOWN) {
+        indexOffset = 1;
+        // TODO(dantup): PgUp/PgDown/Home/End?
+      } else {
+        return;
+      }
+
+      e.preventDefault();
+
+      // Get the index of the currently selected row.
+      final int currentIndex = _selectedObjectIndex;
+      // Offset it, or select index 0 if there was no prior selection.
+      int newIndex = currentIndex == null ? 0 : (currentIndex + indexOffset);
+      // Clamp to the first/last row.
+      final int maxRowIndex = (rows?.length ?? 1) - 1;
+      newIndex = newIndex.clamp(0, maxRowIndex);
+
+      selectByIndex(newIndex);
+    });
   }
 
   Stream<T> get onSelect => _selectController.stream;
@@ -252,6 +283,9 @@ class Table<T> extends Object with SetStateMixin {
       firstRenderedRowInclusive: 0,
       lastRenderedRowExclusive: rows?.length ?? 0);
 
+  int _translateRowIndex(int index) =>
+      !isReversed ? index : (rows?.length ?? 0) - 1 - index;
+
   int _buildTableRows({
     @required int firstRenderedRowInclusive,
     @required int lastRenderedRowExclusive,
@@ -259,23 +293,24 @@ class Table<T> extends Object with SetStateMixin {
   }) {
     _tbody.element.children.remove(_dummyRowToForceAlternatingColor.element);
 
-    int translateRowIndex(int index) =>
-        !isReversed ? index : (rows?.length ?? 0) - 1 - index;
-
     // Enable the dummy row to fix alternating backgrounds when the first rendered
     // row (taking into account if we're reversing) index is an odd.
     final bool shouldOffsetRowColor =
-        translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
+        _translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
     if (shouldOffsetRowColor) {
       _tbody.element.children
           .insert(0, _dummyRowToForceAlternatingColor.element);
       currentRowIndex++;
     }
 
+    // Our current indexes might not all be reused, so clear out the old data
+    // so we don't have invalid pointers left here.
+    _rowForIndex.clear();
+
     for (int index = firstRenderedRowInclusive;
         index < lastRenderedRowExclusive;
         index++) {
-      final T row = rows[translateRowIndex(index)];
+      final T row = rows[_translateRowIndex(index)];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
@@ -290,12 +325,17 @@ class Table<T> extends Object with SetStateMixin {
       // click handler attached when we created the row instead of rebinding
       // it when rows are reused as we scroll.
       _dataForRow[tableRow.element] = row;
-      void selectRow(Element row) {
-        _select(row, _dataForRow[row]);
+      void selectRow(Element row, int index) {
+        _select(row, _dataForRow[row], index);
       }
 
+      // We also keep a lookup to get the row for the index of index to allow
+      // easy changing of the selected row with keyboard (which needs to offset
+      // the selected index).
+      _rowForIndex[index] = tableRow;
+
       if (!isReusableRow) {
-        tableRow.click(() => selectRow(tableRow.element));
+        tableRow.click(() => selectRow(tableRow.element, index));
       }
 
       if (rowHeight != null) {
@@ -339,7 +379,7 @@ class Table<T> extends Object with SetStateMixin {
 
       // If this row represents our selected object, highlight it.
       if (row == _selectedObject) {
-        _select(tableRow.element, _selectedObject);
+        _select(tableRow.element, _selectedObject, index);
       } else {
         // Otherwise, ensure it's not marked as selected (the previous data
         // shown in this row may have been selected).
@@ -355,7 +395,9 @@ class Table<T> extends Object with SetStateMixin {
 
   T _selectedObject;
 
-  void _select(Element row, T object) {
+  int _selectedObjectIndex;
+
+  void _select(Element row, T object, int index) {
     if (_tbody != null) {
       for (Element row in _tbody.element.querySelectorAll('.selected')) {
         row.classes.remove('selected');
@@ -371,9 +413,20 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     _selectedObject = object;
+    _selectedObjectIndex = index;
   }
 
-  void _clearSelection() => _select(null, null);
+  /// Selects by index. Note: This is index of the row as it's rendered
+  /// and not necessarily for rows[] since it may be being rendered in reverse.
+  /// This way, +1 will always move down the visible table.
+  @visibleForTesting
+  void selectByIndex(int newIndex) {
+    final CoreElement row = _rowForIndex[newIndex];
+    final T data = rows[_translateRowIndex(newIndex)];
+    _select(row?.element, data, newIndex);
+  }
+
+  void _clearSelection() => _select(null, null, null);
 
   void setSortColumn(Column<T> column) {
     _sortColumn = column;
