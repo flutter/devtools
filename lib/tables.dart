@@ -199,6 +199,11 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildTable() {
+    // If we've never had any data set, we don't need to (and can't - since
+    // all the elements aren't created) rebuild.
+    if (rows == null) {
+      return;
+    }
     if (_isVirtual)
       _rebuildVirtualTable();
     else
