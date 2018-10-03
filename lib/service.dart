@@ -16,7 +16,8 @@ Future<VmService> connect(
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
-        wrapStream(ws.onMessage).asyncMap<dynamic>((MessageEvent e) {
+        convertBroadcastToSingleSubscriber(ws.onMessage)
+            .asyncMap<dynamic>((MessageEvent e) {
       if (e.data is String) {
         return e.data;
       } else {
@@ -198,10 +199,10 @@ class IsolateManager {
 }
 
 /// Wraps a broadcast stream as a single-subscription stream to workaround
-/// events being dropped for DOM/WebSocker broadcast streams when paused
+/// events being dropped for DOM/WebSocket broadcast streams when paused
 /// (such as in an asyncMap).
 /// https://github.com/dart-lang/sdk/issues/34656
-Stream<T> wrapStream<T>(Stream<T> stream) {
+Stream<T> convertBroadcastToSingleSubscriber<T>(Stream<T> stream) {
   final StreamController<T> controller = new StreamController<T>();
   StreamSubscription<T> subscription;
   controller.onListen =
