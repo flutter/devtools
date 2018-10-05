@@ -11,9 +11,6 @@ import '../charts/charts.dart';
 import '../ui/elements.dart';
 
 class FramesChart extends LineChart<FramesTracker> {
-  CoreElement fpsLabel;
-  CoreElement lastFrameLabel;
-
   FramesChart(CoreElement parent) : super(parent) {
     fpsLabel = parent.add(div(c: 'perf-label'));
     fpsLabel.element.style.left = '0';
@@ -26,6 +23,9 @@ class FramesChart extends LineChart<FramesTracker> {
     lastFrameLabel.element.style.bottom = null;
     lastFrameLabel.element.style.textAlign = '-webkit-right';
   }
+
+  CoreElement fpsLabel;
+  CoreElement lastFrameLabel;
 
   @override
   void update(FramesTracker data) {
@@ -84,13 +84,6 @@ class FramesChart extends LineChart<FramesTracker> {
 }
 
 class FramesTracker {
-  static const int kMaxFrames = 60;
-
-  VmService service;
-  final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
-  List<FrameInfo> samples = <FrameInfo>[];
-
   FramesTracker(this.service) {
     service.onExtensionEvent.listen((Event e) {
       if (e.extensionKind == 'Flutter.Frame') {
@@ -99,6 +92,13 @@ class FramesTracker {
       }
     });
   }
+
+  static const int kMaxFrames = 60;
+
+  VmService service;
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
+  List<FrameInfo> samples = <FrameInfo>[];
 
   bool get hasConnection => service != null;
 
@@ -151,9 +151,9 @@ class FramesTracker {
 }
 
 class FrameInfo {
-  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
-
   FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
+
+  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
   static FrameInfo from(Map<dynamic, dynamic> data) {
     return new FrameInfo(
