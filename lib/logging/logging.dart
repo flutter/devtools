@@ -27,10 +27,6 @@ const int kMaxLogItemsUpperBound = 5500;
 DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
-  Table<LogData> loggingTable;
-  StatusItem logCountStatus;
-  SetStateMixin loggingStateMixin = new SetStateMixin();
-
   LoggingScreen()
       : super(name: 'Logs', id: 'logs', iconClass: 'octicon-clippy') {
     logCountStatus = new StatusItem();
@@ -43,6 +39,10 @@ class LoggingScreen extends Screen {
     }
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
   }
+
+  Table<LogData> loggingTable;
+  StatusItem logCountStatus;
+  SetStateMixin loggingStateMixin = new SetStateMixin();
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -324,14 +324,14 @@ class LoggingScreen extends Screen {
 /// we wait for up to 1ms when we get the `foo` event, to see if the next event
 /// is a single newline. If so, we add the newline to the previous log message.
 class _StdoutEventHandler {
+  _StdoutEventHandler(this.loggingScreen, this.name, {this.isError = false});
+
   final LoggingScreen loggingScreen;
   final String name;
   final bool isError;
 
   LogData buffer;
   Timer timer;
-
-  _StdoutEventHandler(this.loggingScreen, this.name, {this.isError = false});
 
   void handle(Event e) {
     final String message = decodeBase64(e.bytes);
@@ -409,15 +409,6 @@ String _valueAsString(InstanceRef ref) {
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
 class LogData {
-  final String kind;
-  final int timestamp;
-  final bool isError;
-  final String summary;
-  final String summaryHtml;
-
-  String _details;
-  Future<String> detailsComputer;
-
   LogData(
     this.kind,
     this._details,
@@ -427,6 +418,15 @@ class LogData {
     this.isError = false,
     this.detailsComputer,
   });
+
+  final String kind;
+  final int timestamp;
+  final bool isError;
+  final String summary;
+  final String summaryHtml;
+
+  String _details;
+  Future<String> detailsComputer;
 
   String get details => _details;
 
@@ -523,13 +523,6 @@ String getCssClassForEventKind(LogData item) {
 }
 
 class LogDetailsUI extends CoreElement {
-  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
-
-  LogData data;
-
-  CoreElement content;
-  CoreElement message;
-
   LogDetailsUI() : super('div') {
     layoutVertical();
 
@@ -538,6 +531,13 @@ class LogDetailsUI extends CoreElement {
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
   }
+
+  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
+
+  LogData data;
+
+  CoreElement content;
+  CoreElement message;
 
   void setData(LogData data) {
     // Reset the vertical scroll value if any.

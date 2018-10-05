@@ -14,14 +14,6 @@ import '../ui/elements.dart';
 // TODO(devoncarew): set toggle values on a full restart (when we see a new isolate)
 
 class DeviceScreen extends Screen {
-  StatusItem deviceStatus;
-
-  SetStateMixin framesChartStateMixin = new SetStateMixin();
-  ExtensionTracker extensionTracker;
-
-  CoreElement togglesDiv;
-  Map<String, bool> boolValues = <String, bool>{};
-
   DeviceScreen()
       : super(
             name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
@@ -33,6 +25,14 @@ class DeviceScreen extends Screen {
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
   }
+
+  StatusItem deviceStatus;
+
+  SetStateMixin framesChartStateMixin = new SetStateMixin();
+  ExtensionTracker extensionTracker;
+
+  CoreElement togglesDiv;
+  Map<String, bool> boolValues = <String, bool>{};
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -129,14 +129,6 @@ class DeviceScreen extends Screen {
 }
 
 class ExtensionTracker {
-  final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
-
-  VmService service;
-
-  Map<String, Set<IsolateRef>> extensionToIsolatesMap =
-      <String, Set<IsolateRef>>{};
-
   ExtensionTracker(this.service) {
     service.onIsolateEvent.listen((Event e) {
       if (e.kind == 'ServiceExtensionAdded') {
@@ -148,6 +140,14 @@ class ExtensionTracker {
     serviceInfo.isolateManager.onIsolateCreated.listen(_register);
     serviceInfo.isolateManager.onIsolateExited.listen(_removeIsolate);
   }
+
+  final StreamController<Null> _changeController =
+      new StreamController<Null>.broadcast();
+
+  VmService service;
+
+  Map<String, Set<IsolateRef>> extensionToIsolatesMap =
+      <String, Set<IsolateRef>>{};
 
   bool get hasConnection => service != null;
 

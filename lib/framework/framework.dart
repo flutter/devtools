@@ -16,11 +16,6 @@ import '../ui/primer.dart';
 import '../utils.dart';
 
 class Framework {
-  final List<Screen> screens = <Screen>[];
-  Screen current;
-  StatusLine globalStatus;
-  StatusLine pageStatus;
-
   Framework() {
     window.onPopState.listen(handlePopState);
     globalStatus =
@@ -28,6 +23,12 @@ class Framework {
     pageStatus =
         new StatusLine(new CoreElement.from(querySelector('#page-status')));
   }
+
+  final List<Screen> screens = <Screen>[];
+
+  Screen current;
+  StatusLine globalStatus;
+  StatusLine pageStatus;
 
   void addScreen(Screen screen) {
     screens.add(screen);
@@ -181,10 +182,10 @@ class Framework {
 }
 
 class StatusLine {
+  StatusLine(this.element);
+
   final CoreElement element;
   final List<StatusItem> _items = <StatusItem>[];
-
-  StatusLine(this.element);
 
   void add(StatusItem item) {
     _items.add(item);
@@ -231,6 +232,12 @@ void toast(String message) {
 }
 
 abstract class Screen {
+  Screen({
+    @required this.name,
+    @required this.id,
+    this.iconClass,
+  });
+
   final String name;
   final String id;
   final String iconClass;
@@ -240,12 +247,6 @@ abstract class Screen {
   final Property<bool> _visible = new Property<bool>(true);
 
   final List<StatusItem> statusItems = <StatusItem>[];
-
-  Screen({
-    @required this.name,
-    @required this.id,
-    this.iconClass,
-  });
 
   String get ref => id == '/' ? id : '/$id';
 
@@ -289,17 +290,17 @@ class SetStateMixin {
 }
 
 class HelpInfo {
-  final String title;
-  final String url;
-
   HelpInfo({
     @required this.title,
     @required this.url,
   });
+
+  final String title;
+  final String url;
 }
 
 class StatusItem {
-  final CoreElement element;
-
   StatusItem() : element = span();
+
+  final CoreElement element;
 }
