@@ -258,12 +258,6 @@ class TimelineScreen extends Screen {
 }
 
 class TimelineFramesUI extends CoreElement {
-  TimelineFrameUI selectedFrame;
-  TimelineData timelineData;
-
-  final StreamController<TimelineFrame> _selectedFrameController =
-      new StreamController<TimelineFrame>.broadcast();
-
   TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
@@ -282,6 +276,12 @@ class TimelineFramesUI extends CoreElement {
       setSelected(null);
     });
   }
+
+  TimelineFrameUI selectedFrame;
+  TimelineData timelineData;
+
+  final StreamController<TimelineFrame> _selectedFrameController =
+      new StreamController<TimelineFrame>.broadcast();
 
   bool hasStarted() => timelineData != null;
 
@@ -303,9 +303,6 @@ class TimelineFramesUI extends CoreElement {
 }
 
 class TimelineFrameUI extends CoreElement {
-  final TimelineFramesUI framesUI;
-  final TimelineFrame frame;
-
   TimelineFrameUI(this.framesUI, this.frame)
       : super('div', classes: 'timeline-frame') {
     add(<CoreElement>[
@@ -347,6 +344,9 @@ class TimelineFrameUI extends CoreElement {
       framesUI.setSelected(this);
     });
   }
+
+  final TimelineFramesUI framesUI;
+  final TimelineFrame frame;
 
   void setSelected(bool selected) {
     toggleClass('selected', selected);
@@ -464,10 +464,6 @@ class TimelineFramesBuilder {
 }
 
 class FrameDetailsUI extends CoreElement {
-  TimelineFrameData data;
-
-  CoreElement content;
-
   FrameDetailsUI() : super('div') {
     layoutVertical();
     flex();
@@ -489,6 +485,9 @@ class FrameDetailsUI extends CoreElement {
     content.element.style.whiteSpace = 'pre';
     content.element.style.overflow = 'scroll';
   }
+
+  TimelineFrameData data;
+  CoreElement content;
 
   void updateData(TimelineFrameData data) {
     this.data = data;

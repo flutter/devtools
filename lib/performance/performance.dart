@@ -16,18 +16,6 @@ import '../ui/primer.dart';
 import '../utils.dart';
 
 class PerformanceScreen extends Screen {
-  StatusItem sampleCountStatus;
-  StatusItem sampleFreqStatus;
-
-  PButton loadSnapshotButton;
-  PButton resetButton;
-  CoreElement progressElement;
-  Table<PerfData> perfTable;
-
-  CpuChart cpuChart;
-  SetStateMixin cpuChartStateMixin = new SetStateMixin();
-  CpuTracker cpuTracker;
-
   PerformanceScreen()
       : super(
             name: 'Performance',
@@ -39,6 +27,18 @@ class PerformanceScreen extends Screen {
     sampleFreqStatus = new StatusItem();
     addStatusItem(sampleFreqStatus);
   }
+
+  StatusItem sampleCountStatus;
+  StatusItem sampleFreqStatus;
+
+  PButton loadSnapshotButton;
+  PButton resetButton;
+  CoreElement progressElement;
+  Table<PerfData> perfTable;
+
+  CpuChart cpuChart;
+  SetStateMixin cpuChartStateMixin = new SetStateMixin();
+  CpuTracker cpuTracker;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -250,6 +250,8 @@ class CpuChart extends LineChart<CpuTracker> {
 }
 
 class CpuTracker {
+  CpuTracker(this.service);
+
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
@@ -258,8 +260,6 @@ class CpuTracker {
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();
   List<int> samples = <int>[];
-
-  CpuTracker(this.service);
 
   bool get hasConnection => service != null;
 
@@ -299,12 +299,12 @@ class CpuTracker {
 }
 
 class PerfData {
+  PerfData(this.kind, this.name, this.self, this.inclusive);
+
   final String kind;
   final String name;
   final double self;
   final double inclusive;
-
-  PerfData(this.kind, this.name, this.self, this.inclusive);
 
   @override
   String toString() => '[$kind] $name';
@@ -352,9 +352,9 @@ class PerfColumnMethodName extends Column<PerfData> {
 }
 
 class _CalcProfile {
-  final CpuProfile profile;
-
   _CalcProfile(this.profile);
+
+  final CpuProfile profile;
 
   Future<void> calc() async {
     // TODO:
