@@ -203,12 +203,12 @@ class PerformanceScreen extends Screen {
 }
 
 class CpuChart extends LineChart<CpuTracker> {
-  CoreElement usageLabel;
-
   CpuChart(CoreElement parent) : super(parent) {
     usageLabel = parent.add(div(c: 'perf-label'));
     usageLabel.element.style.right = '0';
   }
+
+  CoreElement usageLabel;
 
   @override
   void update(CpuTracker data) {

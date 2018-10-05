@@ -10,17 +10,11 @@ import '../framework/framework.dart';
 import '../ui/elements.dart';
 
 abstract class LineChart<T> {
-  final CoreElement parent;
-  CoreElement chartElement;
-  math.Point<int> dim;
-
-  final SetStateMixin _state = new SetStateMixin();
-  T data;
-
   LineChart(this.parent) {
     parent.element.style.position = 'relative';
 
-    window.onResize.listen((Event e) => _updateSize());
+    _windowResizeSubscription =
+        window.onResize.listen((Event e) => _updateSize());
     Timer.run(_updateSize);
 
     chartElement = parent.add(div()
@@ -28,11 +22,24 @@ abstract class LineChart<T> {
       ..flex());
 
     chartElement.setInnerHtml('''
-<svg viewBox="0 0 500 100">
+<svg viewBox="0 0 500 $fixedHeight">
 <polyline fill="none" stroke="#0074d9" stroke-width="2" points=""/>
 </svg>
 ''');
   }
+
+  // These charts are currently fixed at 98px high (100px less a top and bottom
+  // 1px border).
+  static const int fixedHeight = 98;
+
+  StreamSubscription<Event> _windowResizeSubscription;
+
+  final CoreElement parent;
+  CoreElement chartElement;
+  math.Point<int> dim;
+
+  final SetStateMixin _state = new SetStateMixin();
+  T data;
 
   void _updateSize() {
     if (!isMounted) {
@@ -45,7 +52,7 @@ abstract class LineChart<T> {
     }
 
     final Element svgChild = chartElement.element.children.first;
-    svgChild.setAttribute('viewBox', '0 0 ${rect.width} ${rect.height}');
+    svgChild.setAttribute('viewBox', '0 0 ${rect.width} $fixedHeight');
     dim = new math.Point<int>(rect.width.toInt(), rect.height.toInt());
 
     if (data != null) {
@@ -68,5 +75,9 @@ abstract class LineChart<T> {
 
   bool get isMounted {
     return chartElement.element.parent != null;
+  }
+
+  void dispose() {
+    _windowResizeSubscription?.cancel();
   }
 }

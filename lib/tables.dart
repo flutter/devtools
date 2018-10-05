@@ -33,6 +33,7 @@ class Table<T> extends Object with SetStateMixin {
 
   final CoreElement element;
   final bool _isVirtual;
+
   // Whether to reverse the display of data. This is to allow appending data
   // to this.rows quickly (using .add()) while still supporting new data being
   // inserted at the top.
@@ -42,6 +43,7 @@ class Table<T> extends Object with SetStateMixin {
 
   List<Column<T>> columns = <Column<T>>[];
   List<T> data;
+
   int get rowCount => data?.length ?? 0;
 
   Column<T> _sortColumn;
@@ -451,10 +453,10 @@ class Table<T> extends Object with SetStateMixin {
 }
 
 abstract class Column<T> {
+  Column(this.title, {this.wide = false});
+
   final String title;
   final bool wide;
-
-  Column(this.title, {this.wide = false});
 
   String get cssClass => null;
 

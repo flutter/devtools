@@ -27,9 +27,6 @@ import 'utils.dart';
 //       the UI on re-activate
 
 class PerfToolFramework extends Framework {
-  StatusItem isolateSelectStatus;
-  PSelect isolateSelect;
-
   PerfToolFramework() {
     setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
 
@@ -43,6 +40,9 @@ class PerfToolFramework extends Framework {
 
     initTestingModel();
   }
+
+  StatusItem isolateSelectStatus;
+  PSelect isolateSelect;
 
   void initGlobalUI() {
     final CoreElement mainNav =

@@ -122,8 +122,9 @@ int getApproximatelyFirstRenderedDataIndex(Table<TestData> table) {
 }
 
 class TestData {
-  String message;
   TestData(this.message);
+
+  final String message;
 }
 
 class TestColumn extends Column<TestData> {
