@@ -13,7 +13,7 @@ import 'utils.dart';
 
 // TODO(devoncarew): fixed position header
 
-class Table<T> extends Object with SetStateMixin {
+class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
         _isVirtual = false,
@@ -31,6 +31,7 @@ class Table<T> extends Object with SetStateMixin {
     element.onScroll.listen((_) => _scheduleRebuild());
   }
 
+  @override
   final CoreElement element;
   final bool _isVirtual;
 
@@ -68,6 +69,9 @@ class Table<T> extends Object with SetStateMixin {
       new StreamController<T>.broadcast();
 
   void _init() {
+    _monitorWindowResizes();
+    _rebuildWhenAddedToDom();
+
     element.add(_table);
     _table.onKeyDown.listen((KeyboardEvent e) {
       int indexOffset;
@@ -92,6 +96,31 @@ class Table<T> extends Object with SetStateMixin {
 
       selectByIndex(newIndex);
     });
+  }
+
+  StreamSubscription<Event> _windowResizeSubscription;
+  void _monitorWindowResizes() {
+    // Monitor Window resizes but don't rebuild if we're not in the DOM.
+    _windowResizeSubscription = window.onResize.listen((_) {
+      if (!isInDom) {
+        return;
+      }
+      _scheduleRebuild();
+    });
+  }
+
+  StreamSubscription<void> _addToDomSubscription;
+  void _rebuildWhenAddedToDom() {
+    // When we're added to the DOM, force a rebuild since we may have
+    // resized the window while we were not in the DOM.
+    _addToDomSubscription = onAddedToDom.listen((_) => _scheduleRebuild());
+  }
+
+  void dispose() {
+    _windowResizeSubscription?.cancel();
+    _windowResizeSubscription = null;
+    _addToDomSubscription?.cancel();
+    _addToDomSubscription = null;
   }
 
   Stream<T> get onSelect => _selectController.stream;
@@ -198,6 +227,11 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildTable() {
+    // If we've never had any data set, we don't need to (and can't - since
+    // all the elements aren't created) rebuild.
+    if (data == null) {
+      return;
+    }
     if (_isVirtual)
       _rebuildVirtualTable();
     else
