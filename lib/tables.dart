@@ -408,6 +408,9 @@ class Table<T> extends Object with SetStateMixin {
   /// Selects by index. Note: This is index of the row as it's rendered
   /// and not necessarily for rows[] since it may be being rendered in reverse.
   /// This way, +1 will always move down the visible table.
+  /// scrollBehaviour is a string as defined for the HTML scrollTo() method
+  /// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo (eg.
+  /// `smooth`, `instance`, `auto`).
   @visibleForTesting
   void selectByIndex(int newIndex,
       {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
