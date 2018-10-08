@@ -419,7 +419,22 @@ class Table<T> extends Object with SetStateMixin {
     _select(row?.element, dataObject, newIndex);
 
     if (keepVisible) {
-      final double rowOffsetPixels = newIndex * rowHeight;
+      final double rowOffsetPixels =
+          (newIndex * rowHeight) + _thead.offsetHeight;
+      final int visibleStartOffsetPixels = element.scrollTop;
+      final int visibleEndOffsetPixels =
+          element.scrollTop + element.offsetHeight;
+      // If the row Offset is at least 1 row within the visible area, we don't need
+      // to scroll. We subtract an extra rowHeight from the end to allow for the height
+      // of the row itself.
+      final double allowedViewportStart = visibleStartOffsetPixels + rowHeight;
+      final double allowedViewportEnd = visibleEndOffsetPixels - rowHeight * 2;
+
+      if (rowOffsetPixels >= allowedViewportStart &&
+          rowOffsetPixels <= allowedViewportEnd) {
+        return;
+      }
+
       final double halfTableHeight = element.offsetHeight / 2;
       final int newScrollTop = (rowOffsetPixels - halfTableHeight)
           .round()
