@@ -311,6 +311,8 @@ abstract class HasCoreElement {
   CoreElement get element;
 }
 
+// TODO(dantup): Remove this (plus HasCoreElement above) when we methods on
+// CoreElement to handle add/remove from DOM.
 abstract class OnAddedToDomMixin implements HasCoreElement {
   bool isInDom = false;
   MutationObserver observer;
