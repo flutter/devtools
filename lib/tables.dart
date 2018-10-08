@@ -109,18 +109,18 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
     });
   }
 
-  StreamSubscription<void> addRemoveDomSubscription;
+  StreamSubscription<void> _addToDomSubscription;
   void _rebuildWhenAddedToDom() {
     // When we're added to the DOM, force a rebuild since we may have
     // resized the window while we were not in the DOM.
-    addRemoveDomSubscription = onAddedToDom.listen((_) => _scheduleRebuild());
+    _addToDomSubscription = onAddedToDom.listen((_) => _scheduleRebuild());
   }
 
   void dispose() {
     _windowResizeSubscription?.cancel();
     _windowResizeSubscription = null;
-    addRemoveDomSubscription?.cancel();
-    addRemoveDomSubscription = null;
+    _addToDomSubscription?.cancel();
+    _addToDomSubscription = null;
   }
 
   Stream<T> get onSelect => _selectController.stream;
