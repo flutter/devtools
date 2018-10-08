@@ -205,13 +205,6 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildVirtualTable() {
-    // When we modify the height of the spacer above the viewport, Chrome automatically
-    // adjusts the scrollTop to compensate because it's trying to keep the same content
-    // visible to the user. However, since we're overwriting the rows contents (shifting
-    // the data in the rows) we want to retain the original scroll position so must stash
-    // it and reset it later.
-    final int originalScrollTop = element.scrollTop;
-
     int firstRenderedRowInclusive = 0;
     int lastRenderedRowExclusive = rows?.length ?? 0;
 
@@ -273,10 +266,6 @@ class Table<T> extends Object with SetStateMixin {
         (rows.length - lastRenderedRowExclusive) * rowHeight;
     _spacerAfterVisibleRows.height = '${spacerAfterHeight}px';
     _tbody.element.children.add(_spacerAfterVisibleRows.element);
-
-    // Restore the scroll position the user had scrolled to since Chrome may
-    // have modified it after we changed the height of the "before" spacer.
-    element.scrollTop = originalScrollTop;
   }
 
   void _rebuildStaticTable() => _buildTableRows(

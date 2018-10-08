@@ -112,6 +112,10 @@ span.label.gc {
     background-color: #424242;
 }
 
+.table-virtual {
+    overflow-anchor: none;
+}
+
 .table-virtual td {
     max-width: 500px; /* required for text-overflow to work? */
     overflow: hidden;
