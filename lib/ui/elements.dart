@@ -307,13 +307,13 @@ class TrustedHtmlTreeSanitizer implements NodeTreeSanitizer {
   void sanitizeTree(Node node) {}
 }
 
-abstract class HasCoreElement {
+abstract class CoreElementOwner {
   CoreElement get element;
 }
 
 // TODO(dantup): Remove this (plus HasCoreElement above) when we methods on
 // CoreElement to handle add/remove from DOM.
-abstract class OnAddedToDomMixin implements HasCoreElement {
+abstract class OnAddedToDomMixin implements CoreElementOwner {
   bool isInDom = false;
   MutationObserver observer;
   final StreamController<void> _addedToDomController =
