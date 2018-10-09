@@ -442,11 +442,44 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
   /// Selects by index. Note: This is index of the row as it's rendered
   /// and not necessarily for rows[] since it may be being rendered in reverse.
   /// This way, +1 will always move down the visible table.
+  /// scrollBehaviour is a string as defined for the HTML scrollTo() method
+  /// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo (eg.
+  /// `smooth`, `instance`, `auto`).
   @visibleForTesting
-  void selectByIndex(int newIndex) {
+  void selectByIndex(int newIndex,
+      {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
     final CoreElement row = _rowForIndex[newIndex];
     final T dataObject = data[_translateRowIndex(newIndex)];
     _select(row?.element, dataObject, newIndex);
+
+    if (keepVisible) {
+      final double rowOffsetPixels =
+          (newIndex * rowHeight) + _thead.offsetHeight;
+      final int visibleStartOffsetPixels = element.scrollTop;
+      final int visibleEndOffsetPixels =
+          element.scrollTop + element.offsetHeight;
+      // If the row Offset is at least 1 row within the visible area, we don't need
+      // to scroll. We subtract an extra rowHeight from the end to allow for the height
+      // of the row itself.
+      final double allowedViewportStart = visibleStartOffsetPixels + rowHeight;
+      final double allowedViewportEnd = visibleEndOffsetPixels - rowHeight * 2;
+
+      if (rowOffsetPixels >= allowedViewportStart &&
+          rowOffsetPixels <= allowedViewportEnd) {
+        return;
+      }
+
+      final double halfTableHeight = element.offsetHeight / 2;
+      final int newScrollTop = (rowOffsetPixels - halfTableHeight)
+          .round()
+          .clamp(0, element.scrollHeight);
+
+      element.element.scrollTo(<String, dynamic>{
+        'left': 0,
+        'top': newScrollTop,
+        'behavior': scrollBehavior,
+      });
+    }
   }
 
   void _clearSelection() => _select(null, null, null);
