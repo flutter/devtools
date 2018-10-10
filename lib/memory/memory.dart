@@ -215,78 +215,11 @@ class MemoryScreen extends Screen {
 
     table.setSortColumn(table.columns.first);
 
-    table.onSelect.listen((ClassHeapStats row) async {
-      final Table<InstanceSummary> newTable =
-          row == null ? null : _createInstanceListTableView(row);
-      _pushNextTable(table, newTable);
-    });
-
-    return table;
-  }
-
-  Table<InstanceSummary> _createInstanceListTableView(ClassHeapStats row) {
-    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
-      ..element.clazz('memory-table');
-    table.addColumn(new MemoryColumnSimple<InstanceSummary>(
-        'Instance ID', (InstanceSummary row) => row.id));
-
-    table.onSelect.listen((InstanceSummary row) async {
-      final Table<InstanceData> newTable =
-          row == null ? null : _createInstanceDetailsTableView(row);
-      _pushNextTable(table, newTable);
-    });
-
-    // Kick off population of data for the table.
-    serviceInfo.service
-        .getObject(_isolateId, row.classRef.id)
-        .then((dynamic result) {
-      final Class c = result;
-      // // TODO(dantup): Find out what we should actually be displaying here.
-      // if (c.library.type == '@Library') {
-      //   // user class
-      // } else {
-      //   // vm class (Code, Instructions, ...)
-      // }
-
-      final List<InstanceSummary> instanceRows = InstanceSummary.randomList(c);
-      table.setRows(instanceRows);
-    });
-
-    return table;
-  }
-
-  Table<InstanceData> _createInstanceDetailsTableView(InstanceSummary row) {
-    final Table<InstanceData> table = new Table<InstanceData>.virtual()
-      ..element.clazz('memory-table');
-    final Spinner spinner = table.element.add(new Spinner()..clazz('padded'));
-    table.addColumn(new MemoryColumnSimple<InstanceData>(
-        'Name', (InstanceData row) => row.name));
-    table.addColumn(new MemoryColumnSimple<InstanceData>(
-        'Value', (InstanceData row) => row.value.toString()));
-
-    table.onSelect.listen((InstanceData row) async {
-      // TODO(dantup): Push the relevant table.
-      // For literlals, do nothing?
-      // For other objects, push an InstanceDetails table?
-
-      // For testing purposes, the first row (id) will just push
-      // another table with another instance in (this is how references out may
-      // work?).
-      if (row.name == 'id') {
-        final Table<InstanceData> newTable =
-            row == null ? null : _createInstanceDetailsTableView(row.instance);
-        _pushNextTable(table, newTable);
-      } else {
-        _pushNextTable(table, null);
-      }
-    });
-
-    // Kick off population of data for the table.
-    // TODO(dantup): If it turns out not to be async work, remove the spinner.
-    row.getData().then((List<InstanceData> data) {
-      table.setRows(data);
-      spinner.element.remove();
-    });
+    // table.onSelect.listen((ClassHeapStats row) async {
+    //   final Table<InstanceSummary> newTable =
+    //       row == null ? null : _createInstanceListTableView(row);
+    //   _pushNextTable(table, newTable);
+    // });
 
     return table;
   }
@@ -635,44 +568,4 @@ class ClassHeapStats {
   @override
   String toString() =>
       '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
-}
-
-class InstanceSummary {
-  InstanceSummary(this.clazz, this.id);
-
-  Class clazz;
-  String id;
-
-  @override
-  String toString() => '[InstanceSummary id: $id, class: ${clazz.name}]';
-
-  // TODO(dantup): Remove this once we have real data.
-  static List<InstanceSummary> randomList(Class clazz) {
-    return new List<InstanceSummary>.generate(
-        1000, (int i) => new InstanceSummary(clazz, 'objects/$i'));
-  }
-
-  Future<List<InstanceData>> getData() async {
-    // TODO(dantup): Replace with real implementation.
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    return <InstanceData>[
-      new InstanceData(this, 'id', id),
-      new InstanceData(this, 'name', 'Joe Bloggs'),
-      new InstanceData(this, 'email', 'something@example.org'),
-      new InstanceData(this, 'company', 'Bloggs Corp'),
-      new InstanceData(this, 'telephone', '01234 567 890'),
-      new InstanceData(this, 'shoeSize', 11),
-    ];
-  }
-}
-
-class InstanceData {
-  InstanceData(this.instance, this.name, this.value);
-
-  InstanceSummary instance;
-  String name;
-  dynamic value;
-
-  @override
-  String toString() => '[InstanceData name: $name, value: $value]';
 }
