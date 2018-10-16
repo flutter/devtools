@@ -6,6 +6,7 @@ import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import 'debugger/debugger.dart';
 import 'device/device.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
@@ -30,6 +31,7 @@ class PerfToolFramework extends Framework {
   PerfToolFramework() {
     setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
 
+    addScreen(new DebuggerScreen());
     addScreen(new MemoryScreen());
     addScreen(new TimelineScreen());
     addScreen(new PerformanceScreen());
