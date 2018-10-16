@@ -60,8 +60,6 @@ CoreElement td({String text, String c}) =>
 CoreElement form() => new CoreElement('form');
 
 class CoreElement {
-  final Element element;
-
   CoreElement(String tag, {String text, String classes, String attributes})
       : element = new Element.tag(tag) {
     if (text != null) {
@@ -76,6 +74,8 @@ class CoreElement {
   }
 
   CoreElement.from(this.element);
+
+  final Element element;
 
   String get tag => element.tagName;
 
@@ -227,7 +227,9 @@ class CoreElement {
   }
 
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
+
   Stream<Event> get onScroll => element.onScroll;
+
   Stream<KeyboardEvent> get onKeyDown => element.onKeyDown;
 
   /// Subscribe to the [onClick] event stream with a no-arg handler.

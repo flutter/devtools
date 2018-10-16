@@ -8,13 +8,13 @@ import 'dart:async';
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
 class TimelineData {
+  TimelineData();
+
   final List<TimelineThread> threads = <TimelineThread>[];
   final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
 
   final StreamController<TimelineThreadEvent> _timelineEventsController =
       new StreamController<TimelineThreadEvent>.broadcast();
-
-  TimelineData();
 
   void addThread(TimelineThread thread) {
     threads.add(thread);
@@ -101,6 +101,15 @@ class TimelineData {
 }
 
 class TimelineThread implements Comparable<TimelineThread> {
+  TimelineThread(this.parent, String name, this.threadId) {
+    _name = name;
+
+    // "name":"io.flutter.1.ui (42499)",
+    if (name.contains(' (') && name.endsWith(')')) {
+      _name = name.substring(0, _name.lastIndexOf(' ('));
+    }
+  }
+
   final TimelineData parent;
   final int threadId;
 
@@ -112,15 +121,6 @@ class TimelineThread implements Comparable<TimelineThread> {
       <String, TimelineThreadEvent>{};
 
   String _name;
-
-  TimelineThread(this.parent, String name, this.threadId) {
-    _name = name;
-
-    // "name":"io.flutter.1.ui (42499)",
-    if (name.contains(' (') && name.endsWith(')')) {
-      _name = name.substring(0, _name.lastIndexOf(' ('));
-    }
-  }
 
   bool get isVisible => name.startsWith('io.flutter.');
 
@@ -246,6 +246,8 @@ class TimelineThread implements Comparable<TimelineThread> {
 }
 
 class TimelineThreadEvent {
+  TimelineThreadEvent(this.threadId, this.name);
+
   final int threadId;
   final String name;
 
@@ -254,8 +256,6 @@ class TimelineThreadEvent {
 
   int startMicros;
   int durationMicros;
-
-  TimelineThreadEvent(this.threadId, this.name);
 
   void setStart(int micros) {
     startMicros = micros;
@@ -281,13 +281,13 @@ class TimelineThreadEvent {
 }
 
 class TimelineFrame {
+  TimelineFrame({this.renderStart, this.rasterizeStart});
+
   int renderStart;
   int renderDuration;
 
   int rasterizeStart;
   int rasterizeDuration;
-
-  TimelineFrame({this.renderStart, this.rasterizeStart});
 
   int get startMicros => renderStart ?? rasterizeStart;
 
@@ -334,11 +334,11 @@ class TimelineFrame {
 }
 
 class TimelineFrameData {
+  TimelineFrameData(this.frame, this.threads, this.events);
+
   final TimelineFrame frame;
   final List<TimelineThread> threads;
   final List<TimelineThreadEvent> events;
-
-  TimelineFrameData(this.frame, this.threads, this.events);
 
   void printData() {
     print(frame.startMicros);

@@ -24,7 +24,7 @@ import '../utils.dart';
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
 const int kMaxLogItemsLowerBound = 5000;
 const int kMaxLogItemsUpperBound = 5500;
-DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
+final DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
   LoggingScreen()
@@ -527,7 +527,7 @@ class LogDetailsUI extends CoreElement {
     layoutVertical();
 
     add(<CoreElement>[
-      content = div(c: 'log-details')
+      content = div(c: 'log-details secondary-area')
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
   }

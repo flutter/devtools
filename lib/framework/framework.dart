@@ -258,7 +258,7 @@ abstract class Screen {
 
   Stream<bool> get onVisibleChange => _visible.onValueChange;
 
-  void createContent(Framework framework, CoreElement mainDiv) {}
+  void createContent(Framework framework, CoreElement mainDiv);
 
   void entering() {}
 

@@ -127,9 +127,9 @@ class DevtoolsManager {
 }
 
 class LoggingManager {
-  final DevtoolsManager tools;
-
   LoggingManager(this.tools);
+
+  final DevtoolsManager tools;
 
   Future<void> clearLogs() async {
     await tools.tabInstance.send('logs.clearLogs');
@@ -289,9 +289,9 @@ class BrowserTabInstance {
 }
 
 class AppEvent {
-  final Map<dynamic, dynamic> json;
-
   AppEvent(this.json);
+
+  final Map<dynamic, dynamic> json;
 
   String get event => json['event'];
 
@@ -302,9 +302,9 @@ class AppEvent {
 }
 
 class AppResponse {
-  final Map<dynamic, dynamic> json;
-
   AppResponse(this.json);
+
+  final Map<dynamic, dynamic> json;
 
   int get id => json['id'];
 
@@ -321,9 +321,9 @@ class AppResponse {
 }
 
 class AppError {
-  final Map<dynamic, dynamic> json;
-
   AppError(this.json);
+
+  final Map<dynamic, dynamic> json;
 
   String get message => json['message'];
 

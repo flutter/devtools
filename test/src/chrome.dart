@@ -75,11 +75,11 @@ class Chrome {
 }
 
 class ChromeProcess {
+  ChromeProcess(this.process, this.debugPort);
+
   final Process process;
   final int debugPort;
   bool _processAlive = true;
-
-  ChromeProcess(this.process, this.debugPort);
 
   Future<ChromeTab> connectToTab(
     String url, {
@@ -145,6 +145,8 @@ class ChromeProcess {
 }
 
 class ChromeTab {
+  ChromeTab(this.wipTab);
+
   final wip.ChromeTab wipTab;
   WipConnection _wip;
 
@@ -158,8 +160,6 @@ class ChromeTab {
       new StreamController<ExceptionThrownEvent>.broadcast();
 
   num _lostConnectionTime;
-
-  ChromeTab(this.wipTab);
 
   Future<WipConnection> connect() async {
     _wip = await wipTab.connect();
