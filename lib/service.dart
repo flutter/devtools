@@ -103,10 +103,6 @@ class ServiceConnectionManager {
       service.streamListen('Extension');
       service.streamListen('_Graph');
       service.streamListen('_Logging');
-
-      isolateManager.onIsolateCreated.listen(print);
-      isolateManager.onSelectedIsolateChanged.listen(print);
-      isolateManager.onIsolateExited.listen(print);
     }).catchError((dynamic e) {
       // TODO:
       print(e);

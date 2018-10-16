@@ -40,7 +40,7 @@ final List<String> _words = loremIpsum
 String getLoremFragment([int wordCount]) {
   wordCount ??= r.nextInt(8) + 1;
   return toBeginningOfSentenceCase(new List<String>.generate(
-      wordCount, (_) => _words[r.nextInt(_words.length)]).join(' '));
+      wordCount, (_) => _words[r.nextInt(_words.length)]).join(' ').trim());
 }
 
 String escape(String text) => text == null ? '' : htmlEscape.convert(text);
@@ -79,11 +79,11 @@ String funcRefName(FuncRef ref) {
 }
 
 class Property<T> {
+  Property(this._value);
+
   final StreamController<T> _changeController =
       new StreamController<T>.broadcast();
   T _value;
-
-  Property(this._value);
 
   T get value => _value;
 

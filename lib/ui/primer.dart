@@ -76,9 +76,8 @@ class PFlash extends CoreElement {
   }
 }
 
+/// A tabbed container (ala Chrome tabs).
 class PTabNav extends CoreElement {
-  PTabNavTab selectedTab;
-
   PTabNav(List<PTabNavTab> tabs) : super('div', classes: 'tabnav') {
     final CoreElement nav = add(new CoreElement('nav', classes: 'tabnav-tabs'));
     nav.add(tabs);
@@ -88,11 +87,11 @@ class PTabNav extends CoreElement {
     }
 
     for (PTabNavTab tab in tabs) {
-      tab.click(() {
-        selectTab(tab);
-      });
+      tab.click(() => selectTab(tab));
     }
   }
+
+  PTabNavTab selectedTab;
 
   void selectTab(PTabNavTab tab) {
     selectedTab?.toggleClass('selected', false);
@@ -103,4 +102,36 @@ class PTabNav extends CoreElement {
 
 class PTabNavTab extends CoreElement {
   PTabNavTab(String name) : super('div', classes: 'tabnav-tab', text: name);
+}
+
+/// A menu navigation element - a vertically oriented list of items.
+class PNavMenu extends CoreElement {
+  PNavMenu(
+    List<PNavMenuItem> items, {
+    bool supportsSelection = true,
+  }) : super('nav', classes: 'menu') {
+    add(items);
+
+    if (supportsSelection) {
+      if (items.isNotEmpty) {
+        selectItem(items.first);
+      }
+
+      for (PNavMenuItem item in items) {
+        item.click(() => selectItem(item));
+      }
+    }
+  }
+
+  PNavMenuItem selectedItem;
+
+  void selectItem(PNavMenuItem item) {
+    selectedItem?.toggleClass('selected', false);
+    selectedItem = item;
+    selectedItem?.toggleClass('selected', true);
+  }
+}
+
+class PNavMenuItem extends CoreElement {
+  PNavMenuItem(String name) : super('a', classes: 'menu-item', text: name);
 }
