@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'elements.dart';
 
 class ProgressElement extends CoreElement {
-  int _value = 0;
-  int _max = 100;
-  CoreElement completeElement;
-
   ProgressElement() : super('div') {
     clazz('progress-element');
     add(completeElement = div(c: 'complete'));
   }
+
+  int _value = 0;
+  int _max = 100;
+  CoreElement completeElement;
 
   int get value => _value;
 
@@ -39,5 +41,52 @@ class ProgressElement extends CoreElement {
 class Spinner extends CoreElement {
   Spinner() : super('div') {
     clazz('spinner');
+  }
+}
+
+typedef ListRenderer<T> = CoreElement Function(T item);
+
+class SelectableList<T> extends CoreElement {
+  SelectableList() : super('div');
+
+  List<T> items = <T>[];
+  ListRenderer<T> renderer;
+  CoreElement _selectedElement;
+
+  final StreamController<T> _selectionController = new StreamController<T>.broadcast();
+
+  Stream<T> get onSelectionChanged => _selectionController.stream;
+
+  void setRenderer(ListRenderer<T> renderer) {
+    this.renderer = renderer;
+  }
+
+  void setItems(List<T> items) {
+    this.items = items;
+
+    _selectedElement = null;
+
+    final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
+
+    clear();
+
+    add(items.map((T item) {
+      final CoreElement element = renderer(item);
+      element.click(() {
+        _selectedElement?.toggleClass('selected', false);
+        _selectedElement = element;
+        element.toggleClass('selected', true);
+        _selectionController.add(item);
+      });
+      return element;
+    }).toList());
+  }
+
+  void clearItems() {
+    setItems(<T>[]);
+  }
+
+  CoreElement _defaultRenderer(T item) {
+    return li(text: item.toString(), c: 'list-item');
   }
 }

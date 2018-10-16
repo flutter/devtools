@@ -17,8 +17,6 @@ class DeviceScreen extends Screen {
   DeviceScreen()
       : super(
             name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
-    visible = false;
-
     serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
     serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
 
