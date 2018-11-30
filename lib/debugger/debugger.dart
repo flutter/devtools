@@ -39,7 +39,7 @@ class DebuggerScreen extends Screen {
 
   StatusItem deviceStatus;
 
-  SelectableList<LibraryRef> _scriptItems;
+  SelectableList<ScriptRef> _scriptItems;
   CoreElement _scriptCountDiv;
   CoreElement _sourcePathDiv;
 
@@ -158,7 +158,7 @@ class DebuggerScreen extends Screen {
     codeMirror.setReadOnly(true);
     // ignore: always_specify_types
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
-    codeMirrorElement.style.height = '100%';
+    codeMirrorElement.setAttribute('flex', '');
 
     sourceEditor = new SourceEditor(codeMirror, debuggerState);
 
@@ -205,31 +205,24 @@ class DebuggerScreen extends Screen {
 
     // TODO: handle selection changes
 
-    _scriptItems = menu.add(new SelectableList<LibraryRef>()
+    _scriptItems = menu.add(new SelectableList<ScriptRef>()
       ..flex()
       ..element.style.overflowY = 'scroll');
 
-    _scriptItems.onSelectionChanged.listen((LibraryRef libraryRef) async {
+    _scriptItems.onSelectionChanged.listen((ScriptRef scriptRef) async {
+      if (scriptRef == null) {
+        _displaySource(null);
+        return;
+      }
+
       final IsolateRef isolateRef = serviceInfo.isolateManager.selectedIsolate;
-      dynamic result =
-          await serviceInfo.service.getObject(isolateRef.id, libraryRef.id);
+      final dynamic result =
+          await serviceInfo.service.getObject(isolateRef.id, scriptRef.id);
 
-      if (result is Library) {
-        final Library library = result;
-        if (library.scripts.isNotEmpty) {
-          final ScriptRef scriptRef =
-              library.scripts.firstWhere((ScriptRef ref) {
-            return library.uri == ref.uri;
-          }, orElse: () => library.scripts.first);
-          result =
-              await serviceInfo.service.getObject(isolateRef.id, scriptRef.id);
-
-          if (result is Script) {
-            _displaySource(result);
-          }
-        } else {
-          _displaySource(null);
-        }
+      if (result is Script) {
+        _displaySource(result);
+      } else {
+        _displaySource(null);
       }
     });
 
@@ -294,10 +287,10 @@ class DebuggerScreen extends Screen {
   @override
   HelpInfo get helpInfo => null;
 
-  void _populateFromIsolate(Isolate isolate) {
-    // TODO: populate the scripts by querying each library
-
-    final List<LibraryRef> libraryRefs = isolate.libraries.toList();
+  void _populateFromIsolate(Isolate isolate) async {
+    final ScriptList scriptList =
+        await serviceInfo.service.getScripts(isolate.id);
+    final List<ScriptRef> scripts = scriptList.scripts.toList();
 
     String prefix = isolate.rootLib.uri;
     if (prefix.contains('/lib/')) {
@@ -314,9 +307,16 @@ class DebuggerScreen extends Screen {
       prefix = null;
     }
 
-    libraryRefs.sort((LibraryRef ref1, LibraryRef ref2) {
-      final String uri1 = ref1.uri;
-      final String uri2 = ref2.uri;
+    scripts.sort((ScriptRef ref1, ScriptRef ref2) {
+      String uri1 = ref1.uri;
+      String uri2 = ref2.uri;
+
+      if (uri1.startsWith('dart:_')) {
+        uri1 = uri1.replaceAll('dart:_', 'dart:');
+      }
+      if (uri2.startsWith('dart:_')) {
+        uri2 = uri2.replaceAll('dart:_', 'dart:');
+      }
 
       if (uri1.startsWith('dart:') && !uri2.startsWith('dart:')) {
         return 1;
@@ -335,8 +335,8 @@ class DebuggerScreen extends Screen {
       return uri1.compareTo(uri2);
     });
 
-    _scriptItems.setRenderer((LibraryRef libraryRef) {
-      final String uri = libraryRef.uri;
+    _scriptItems.setRenderer((ScriptRef scriptRef) {
+      final String uri = scriptRef.uri;
       String name = uri;
       if (prefix != null && name.startsWith(prefix)) {
         name = uri.substring(prefix.length);
@@ -349,9 +349,8 @@ class DebuggerScreen extends Screen {
       return element;
     });
 
-    _scriptItems.setItems(libraryRefs);
-
-    _scriptCountDiv.text = libraryRefs.length.toString();
+    _scriptItems.setItems(scripts);
+    _scriptCountDiv.text = scripts.length.toString();
   }
 
   void _displaySource(Script script) {
