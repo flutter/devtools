@@ -33,7 +33,7 @@ the `flutter run` output.
 
 For more productive development, launch your flutter application specifying
 `--observatory-port` so the observatory is available on a fixed port. This
-lets you avoid manually entering the observatory port paremeter each time
+lets you avoid manually entering the observatory port parameter each time
 you launch the application.
 
 - flutter run --observatory-port=8888
