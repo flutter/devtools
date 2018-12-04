@@ -46,8 +46,28 @@ class TimelineScreen extends Screen {
   PButton resumeButton;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  void createContent(Framework framework, CoreElement mainDiv) async {
     FrameDetailsUI frameDetailsUI;
+
+    final Isolate isolate = await serviceInfo.service
+        .getIsolate(serviceInfo.isolateManager.selectedIsolate.id);
+
+    bool isProfileMode;
+
+    // Determine whether we are in profile mode. If evaluate successfully returns
+    // an InstanceRef, we are in debug mode. If evaluate throws an error, we are
+    // in profile mode. Expression '1+1' is arbitrary.
+    // TODO(kenzieschmoll): The VMService should expose the build mode (debug/profile).
+    try {
+      final dynamic evaluate = await serviceInfo.service.evaluate(
+        serviceInfo.isolateManager.selectedIsolate.id,
+        isolate.rootLib.id,
+        '1+1',
+      );
+      isProfileMode = !(evaluate is InstanceRef);
+    } catch (e) {
+      isProfileMode = true;
+    }
 
     pauseButton = new PButton('Pause recording')
       ..small()
@@ -60,13 +80,17 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final PButton trackWidgetBuildsButton = new PButton('Track widget builds')
-      ..small();
-    final PButton perfOverlayButton = new PButton('Performance overlay')
-      ..small();
-    final PButton repaintRainbowButton = new PButton('Repaint rainbow')
-      ..small();
-    final PButton debugDrawButton = new PButton('Debug draw')..small();
+    PButton createButton(String text, bool shouldDisableForProfileMode) {
+      return new PButton(text)
+        ..small()
+        ..disabled = shouldDisableForProfileMode && isProfileMode
+        ..tooltip = isProfileMode ? 'Unavailable on a profile build.' : '';
+    }
+
+    final PButton trackWidgetBuildsButton = createButton('Track widget builds', true);
+    final PButton perfOverlayButton = createButton('Performance overlay', false);
+    final PButton repaintRainbowButton = createButton('Repaint rainbow', true);
+    final PButton debugDrawButton = createButton('Debug draw', true);
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -200,7 +224,10 @@ class TimelineScreen extends Screen {
     final bool shouldBeRunning = !paused && isCurrentScreen;
     final bool isRunning = !timelineFramesBuilder.isPaused;
 
-    if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
+    if (shouldBeRunning &&
+        isRunning &&
+        timelineFramesUI != null &&
+        !timelineFramesUI.hasStarted()) {
       _startTimeline();
     }
 
