@@ -47,9 +47,10 @@ class EvalOnDartLibrary {
     _libraryRef.future.then((LibraryRef ref) {
       _service
           .evaluate(_isolateId, ref.id, expression)
-          .then<dynamic>((dynamic response) => future.complete(response))
+          .then((dynamic response) => future.complete(response))
           .catchError((RPCError e) => print('RPCError ${e.code}: ${e.details}'))
-          .catchError((Error e) => print('${e.kind}: ${e.message}'));
+          .catchError((Error e) => print('${e.kind}: ${e.message}'))
+          .catchError((dynamic e) => print('Unrecognized error: $e'));
     });
     return future;
   }
