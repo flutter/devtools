@@ -27,15 +27,14 @@ class EvalOnDartLibrary {
   void _initialize(String isolateId) async {
     _isolateId = isolateId;
 
-    service.getIsolate(_isolateId).then<dynamic>((dynamic value) {
-      for (LibraryRef library in value.libraries) {
-        if (library.uri == libraryName) {
-          _libraryRef.complete(library);
-          return;
-        }
+    final Isolate isolate = await service.getIsolate(_isolateId)
+        .catchError((RPCError e) => print('RPCError ${e.code}: ${e.details}'));
+    for (LibraryRef library in isolate.libraries) {
+      if (library.uri == libraryName) {
+        _libraryRef.complete(library);
+        return;
       }
-      _libraryRef.completeError('Library $libraryName not found.');
-    }).catchError((RPCError e) => print('RPCError ${e.code}: ${e.details}'));
+    }
   }
 
   Future<InstanceRef> eval(String expression) async {
