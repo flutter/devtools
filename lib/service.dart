@@ -93,17 +93,17 @@ class ServiceConnectionManager {
 
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
-  void vmServiceOpened(VmService _service, Future<void> onClosed) {
-    _service.getVM().then((VM vm) {
+  void vmServiceOpened(VmService service, Future<void> onClosed) {
+    service.getVM().then((VM vm) {
       this.vm = vm;
       sdkVersion = vm.version;
       if (sdkVersion.contains(' ')) {
         sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
       }
 
-      service = _service;
-      _isolateManager._service = _service;
-      _serviceExtensionManager._service = _service;
+      this.service = service;
+      _isolateManager._service = service;
+      _serviceExtensionManager._service = service;
 
       _stateController.add(null);
       _connectionAvailableController.add(service);
@@ -142,20 +142,24 @@ class ServiceConnectionManager {
 }
 
 class IsolateManager {
+  IsolateManager() {
+    _flutterIsolateController = new StreamController<IsolateRef>.broadcast();
+    _flutterIsolateController.onListen =
+        () => _flutterIsolateController.add(_flutterIsolate);
+  }
+
   List<IsolateRef> _isolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
   IsolateRef _flutterIsolate;
   VmService _service;
   ServiceExtensionManager _serviceExtensionManager;
 
+  StreamController<IsolateRef> _flutterIsolateController;
   final StreamController<IsolateRef> _isolateCreatedController =
       new StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _isolateExitedController =
       new StreamController<IsolateRef>.broadcast();
-
   final StreamController<IsolateRef> _selectedIsolateController =
-      new StreamController<IsolateRef>.broadcast();
-  final StreamController<IsolateRef> _flutterIsolateController =
       new StreamController<IsolateRef>.broadcast();
 
   List<IsolateRef> get isolates => new List<IsolateRef>.unmodifiable(_isolates);
@@ -202,7 +206,7 @@ class IsolateManager {
 
       // Check to see if there is a new flutter isolate.
       if (_flutterIsolate == null) {
-        if (event.extensionRPC.startsWith('ext.flutter.')) {
+        if (_isFlutterExtension(event.extensionRPC)) {
           _setFlutterIsolate(event.isolate);
         }
       }
@@ -233,6 +237,10 @@ class IsolateManager {
     return isolates.isEmpty ? null : isolates.first;
   }
 
+  bool _isFlutterExtension(String extensionName) {
+    return extensionName.startsWith('ext.flutter.');
+  }
+
   void _initFlutterIsolate(List<IsolateRef> isolates) async {
     for (IsolateRef ref in isolates) {
       // Populate flutter isolate info.
@@ -240,7 +248,7 @@ class IsolateManager {
         final Isolate isolate = await _service.getIsolate(ref.id);
         if (isolate.extensionRPCs != null) {
           for (String extensionName in isolate.extensionRPCs) {
-            if (extensionName.startsWith('ext.flutter.')) {
+            if (_isFlutterExtension(extensionName)) {
               _setFlutterIsolate(ref);
               break;
             }
@@ -258,8 +266,6 @@ class IsolateManager {
     }
     _flutterIsolate = ref;
     _flutterIsolateController.add(ref);
-    _flutterIsolateController.onListen =
-        () => _flutterIsolateController.add(_flutterIsolate);
   }
 
   StreamSubscription<IsolateRef> getCurrentFlutterIsolate(Function onData) {
@@ -292,8 +298,9 @@ class ServiceExtensionManager {
 
   void _handleExtensionEvent(Event event) {
     final String extensionKind = event.extensionKind;
-    if (event.kind == 'Extension' && extensionKind == 'Flutter.FirstFrame' ||
-        extensionKind == 'Flutter.Frame') {
+    if (event.kind == 'Extension' &&
+        (extensionKind == 'Flutter.FirstFrame' ||
+            extensionKind == 'Flutter.Frame')) {
       _onFrameEventReceived();
     }
   }
@@ -322,15 +329,13 @@ class ServiceExtensionManager {
           'package:flutter/src/widgets/binding.dart',
           _service,
         );
-        flutterLibrary
-            .eval('WidgetsBinding.instance.debugDidSendFirstFrameEvent')
-            .future
-            .then((InstanceRef value) {
-          final bool didSendFirstFrameEvent = value.valueAsString == 'true';
-          if (didSendFirstFrameEvent) {
-            _onFrameEventReceived();
-          }
-        });
+
+        final InstanceRef value = await flutterLibrary
+            .eval('WidgetsBinding.instance.debugDidSendFirstFrameEvent');
+        final bool didSendFirstFrameEvent = value.valueAsString == 'true';
+        if (didSendFirstFrameEvent) {
+          _onFrameEventReceived();
+        }
       }
     }
   }
@@ -362,27 +367,26 @@ class ServiceExtensionManager {
       return;
     }
 
+    assert(value != null);
     if (value is bool) {
       _service.callServiceExtension(
         name,
         isolateId: _isolateManager.selectedIsolate.id,
-        args: <String, bool>{'enabled': value},
+        args: {'enabled': value},
       );
     } else if (value is String) {
       _service.callServiceExtension(
         name,
         isolateId: _isolateManager.selectedIsolate.id,
-        args: <String, String>{'value': value},
+        args: {'value': value},
       );
     } else if (value is double) {
       _service.callServiceExtension(
         name,
         isolateId: _isolateManager.selectedIsolate.id,
-        // The param name for a numeric service extension will be the last part of the extension name
-        // (ext.flutter.extensionName => extensionName).
-        args: <String, double>{
-          name.substring(name.lastIndexOf('.') + 1): value
-        },
+        // The param name for a numeric service extension will be the last part
+        // of the extension name (ext.flutter.extensionName => extensionName).
+        args: {name.substring(name.lastIndexOf('.') + 1): value},
       );
     }
   }
@@ -458,13 +462,20 @@ class ServiceExtensionManager {
   StreamController<T> _getStream<T>(
       String name, Map<String, StreamController<T>> streams,
       {@required Function onFirstListenerSubscribed}) {
-    return streams[name] ??=
-        StreamController<T>.broadcast(onListen: onFirstListenerSubscribed);
+    streams.putIfAbsent(
+        name,
+        () =>
+            StreamController<T>.broadcast(onListen: onFirstListenerSubscribed));
+    return streams[name];
   }
 }
 
 class ServiceExtensionState {
-  ServiceExtensionState(this.enabled, this.value);
+  ServiceExtensionState(this.enabled, this.value) {
+    if (value is bool) {
+      assert(enabled == value);
+    }
+  }
 
   // For boolean service extensions, [enabled] should equal [value].
   final bool enabled;
