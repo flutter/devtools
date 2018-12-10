@@ -27,24 +27,39 @@ class EvalOnDartLibrary {
   void _initialize(String isolateId) async {
     _isolateId = isolateId;
 
-    final Isolate isolate = await service.getIsolate(_isolateId)
-        .catchError((RPCError e) => print('RPCError ${e.code}: ${e.details}'));
-    for (LibraryRef library in isolate.libraries) {
-      if (library.uri == libraryName) {
-        _libraryRef.complete(library);
-        return;
+    try {
+      final Isolate isolate = await service.getIsolate(_isolateId);
+      for (LibraryRef library in isolate.libraries) {
+        if (library.uri == libraryName) {
+          _libraryRef.complete(library);
+          return;
+        }
       }
+    } catch (e) {
+      _handleError(e);
     }
   }
 
   Future<InstanceRef> eval(String expression) async {
-    final LibraryRef libraryRef = await _libraryRef.future;
-    final InstanceRef instanceRef = await service
-        .evaluate(_isolateId, libraryRef.id, expression)
-        .then<InstanceRef>((dynamic response) => response)
-        .catchError((RPCError e) => print('RPCError ${e.code}: ${e.details}'))
-        .catchError((Error e) => print('${e.kind}: ${e.message}'))
-        .catchError((dynamic e) => print('Unrecognized error: $e'));
-    return instanceRef;
+    try {
+      final LibraryRef libraryRef = await _libraryRef.future;
+      final InstanceRef instanceRef = await service.evaluate(_isolateId, libraryRef.id, expression);
+      return instanceRef;
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  void _handleError(dynamic e) {
+    switch (e.runtimeType) {
+      case RPCError:
+        print('RPCError ${e.code}: ${e.details}');
+        break;
+      case Error:
+        print('${e.kind}: ${e.message}');
+        break;
+      default:
+        print('Unrecognized error: $e');
+    }
   }
 }
