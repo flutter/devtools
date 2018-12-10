@@ -53,16 +53,23 @@ class SelectableList<T> extends CoreElement {
   ListRenderer<T> renderer;
   CoreElement _selectedElement;
 
-  final StreamController<T> _selectionController = new StreamController<T>.broadcast();
+  final StreamController<T> _selectionController =
+      new StreamController<T>.broadcast();
+  final StreamController<T> _doubleClickController =
+      new StreamController<T>.broadcast();
 
   Stream<T> get onSelectionChanged => _selectionController.stream;
+
+  Stream<T> get onDoubleClick => _doubleClickController.stream;
 
   void setRenderer(ListRenderer<T> renderer) {
     this.renderer = renderer;
   }
 
-  void setItems(List<T> items) {
+  void setItems(List<T> items, {T selection}) {
     this.items = items;
+
+    final bool hadSelection = _selectedElement != null;
 
     _selectedElement = null;
 
@@ -73,13 +80,20 @@ class SelectableList<T> extends CoreElement {
     add(items.map((T item) {
       final CoreElement element = renderer(item);
       element.click(() {
-        _selectedElement?.toggleClass('selected', false);
-        _selectedElement = element;
-        element.toggleClass('selected', true);
-        _selectionController.add(item);
+        _select(element, item);
       });
+      element.dblclick(() {
+        _doubleClickController.add(item);
+      });
+      if (selection == item) {
+        _select(element, item);
+      }
       return element;
     }).toList());
+
+    if (hadSelection && _selectedElement == null) {
+      _selectionController.add(null);
+    }
   }
 
   void clearItems() {
@@ -88,5 +102,12 @@ class SelectableList<T> extends CoreElement {
 
   CoreElement _defaultRenderer(T item) {
     return li(text: item.toString(), c: 'list-item');
+  }
+
+  void _select(CoreElement element, T item) {
+    _selectedElement?.toggleClass('selected', false);
+    _selectedElement = element;
+    element.toggleClass('selected', true);
+    _selectionController.add(item);
   }
 }

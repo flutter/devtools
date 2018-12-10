@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js' show JsObject;
 
 import 'package:codemirror/codemirror.dart';
 import 'package:rxdart/rxdart.dart';
@@ -14,13 +15,15 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 
-// TODO: console output area
+// TODO: if a value is selected, show the toString result somewhere
 
-// TODO: add an API around the editor area
+// TODO: allow browsing object fields
 
-// TODO: add a breakpoints manager and area
+// TODO: improve selection in the nav area
 
-// TODO: improve the look of the current execution line
+// TODO: handle double click on breakpoints
+
+// TODO: handle break on exceptions
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
@@ -40,11 +43,15 @@ class DebuggerScreen extends Screen {
   StatusItem deviceStatus;
 
   SelectableList<ScriptRef> _scriptItems;
+  CoreElement _breakpointsCountDiv;
   CoreElement _scriptCountDiv;
   CoreElement _sourcePathDiv;
 
   SourceEditor sourceEditor;
   DebuggerState debuggerState;
+  CallStackView callStackView;
+  VariablesView variablesView;
+  BreakpointsView breakpointsView;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -52,32 +59,23 @@ class DebuggerScreen extends Screen {
 
     debuggerState = new DebuggerState();
 
-    final PButton pauseButton = new PButton(null)
+    final PButton resumeButton = new PButton(null)
       ..primary()
       ..small()
-      ..element.style.minWidth = '90px';
+      ..element.style.minWidth = '90px'
+      ..add(<CoreElement>[
+        span(c: 'octicon octicon-triangle-right'),
+        span(text: 'Resume'),
+      ]);
 
-    pauseButton.click(() async {
-      pauseButton.disabled = true;
-
-      if (debuggerState.isPaused) {
-        await debuggerState.resume();
-      } else {
-        await debuggerState.pause();
-      }
-
-      pauseButton.disabled = false;
+    resumeButton.click(() async {
+      resumeButton.disabled = true;
+      await debuggerState.resume();
+      resumeButton.disabled = false;
     });
 
     debuggerState.onPausedChanged.listen((bool isPaused) {
-      pauseButton.clear();
-
-      final String icon =
-          isPaused ? 'octicon-triangle-right' : 'octicon-primitive-dot';
-      pauseButton.add(<CoreElement>[
-        span(c: 'octicon $icon'),
-        span(text: isPaused ? 'Resume' : 'Pause'),
-      ]);
+      resumeButton.disabled = !isPaused;
     });
 
     PButton stepOver, stepIn, stepOut;
@@ -100,19 +98,19 @@ class DebuggerScreen extends Screen {
               div(c: 'section')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  pauseButton,
+                  resumeButton,
                   div(c: 'btn-group margin-left')
                     ..add(<CoreElement>[
-                      stepOver = new PButton(null)
-                        ..add(<CoreElement>[
-                          span(c: 'octicon octicon-chevron-right'),
-                          span(text: 'Step over'),
-                        ])
-                        ..small(),
                       stepIn = new PButton(null)
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-down'),
                           span(text: 'Step in'),
+                        ])
+                        ..small(),
+                      stepOver = new PButton(null)
+                        ..add(<CoreElement>[
+                          span(c: 'octicon octicon-chevron-right'),
+                          span(text: 'Step over'),
                         ])
                         ..small(),
                       stepOut = new PButton(null)
@@ -123,7 +121,7 @@ class DebuggerScreen extends Screen {
                         ..small(),
                     ]),
                   div()..flex(),
-                  new PButton('Foo bar')..small(),
+                  //new PButton('Foo bar')..small(),
                 ]),
               sourceArea = div(c: 'section table-border')
                 ..flex()
@@ -168,46 +166,81 @@ class DebuggerScreen extends Screen {
     });
 
     debuggerState.onPausedChanged.listen((bool paused) async {
-      if (!paused) {
+      if (paused) {
+        // todo: use async frames
+        final Stack stack = await debuggerState.getStack();
+        callStackView.showFrames(stack, selectTop: true);
+      } else {
+        callStackView.clearFrames();
         sourceEditor.clearExecutionPoint();
-        return;
       }
+    });
 
-      // todo: use async frames
-      final Stack stack = await debuggerState.getStack();
-
-      if (stack.frames.isNotEmpty) {
-        final Frame frame = stack.frames.first;
+    callStackView.onSelectionChanged.listen((Frame frame) async {
+      if (frame == null) {
+        callStackView.clearFrames();
+        variablesView.clearVariables();
+        sourceEditor.clearExecutionPoint();
+      } else {
         final SourceLocation location = frame.location;
         final ScriptRef scriptRef = location.script;
         final Script script = await debuggerState.getScript(scriptRef);
         final Pos position =
             debuggerState.calculatePosition(script, location.tokenPos);
-        sourceEditor.setExecutionPoint(position);
+
+        _sourcePathDiv.text = script.uri;
+        sourceEditor.displayExecutionPoint(script, position);
+
+        variablesView.showVariables(frame);
       }
     });
   }
 
   CoreElement _buildMenuNav() {
-    // TODO: expand / collapse
+    callStackView = new CallStackView();
+    variablesView = new VariablesView();
 
-    final PNavMenu menu = new PNavMenu(<PNavMenuItem>[
-      new PNavMenuItem('Call stack'),
-      new PNavMenuItem('Variables'),
-      new PNavMenuItem('Breakpoints'),
+    _breakpointsCountDiv = span(text: '0', c: 'counter');
+    breakpointsView = new BreakpointsView(debuggerState, _breakpointsCountDiv);
+    breakpointsView.onDoubleClick.listen((Breakpoint breakpoint) async {
+      final dynamic location = breakpoint.location;
+      if (location is SourceLocation) {
+        final Script script = await debuggerState.getScript(location.script);
+        final Pos pos =
+            debuggerState.calculatePosition(script, location.tokenPos);
+        sourceEditor.displayScript(script, scrollTo: new Pos(pos.line - 1));
+      } else if (location is UnresolvedSourceLocation) {
+        final Script script = await debuggerState.getScript(location.script);
+        sourceEditor.displayScript(script,
+            scrollTo: new Pos(location.line - 1));
+      }
+    });
+
+    _scriptItems = new SelectableList<ScriptRef>()
+      ..flex()
+      ..hidden(true)
+      ..element.style.overflowY = 'scroll';
+
+    final PNavMenu menu = new PNavMenu(<CoreElement>[
+      new PNavMenuItem('Call stack')
+        ..click(() => callStackView.element.toggleAttribute('hidden')),
+      callStackView.element,
+      new PNavMenuItem('Variables')
+        ..click(() => variablesView.element.toggleAttribute('hidden')),
+      variablesView.element,
+      new PNavMenuItem('Breakpoints')
+        ..add(_breakpointsCountDiv)
+        ..click(() => breakpointsView.element.toggleAttribute('hidden')),
+      breakpointsView.element,
       new PNavMenuItem('Scripts')
         ..add(
           _scriptCountDiv = span(text: '0', c: 'counter'),
-        ),
+        )
+        ..click(() => _scriptItems.toggleAttribute('hidden')),
+      _scriptItems,
     ], supportsSelection: false)
       ..flex()
       ..layoutVertical();
-
-    // TODO: handle selection changes
-
-    _scriptItems = menu.add(new SelectableList<ScriptRef>()
-      ..flex()
-      ..element.style.overflowY = 'scroll');
 
     _scriptItems.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptRef == null) {
@@ -224,6 +257,11 @@ class DebuggerScreen extends Screen {
       } else {
         _displaySource(null);
       }
+    });
+
+    // TODO: listen to selection changes, jump to the source location
+    debuggerState.onBreakpointsChanged.listen((List<Breakpoint> breakpoints) {
+      breakpointsView.showBreakpoints(breakpoints);
     });
 
     return menu;
@@ -292,20 +330,34 @@ class DebuggerScreen extends Screen {
         await serviceInfo.service.getScripts(isolate.id);
     final List<ScriptRef> scripts = scriptList.scripts.toList();
 
-    String prefix = isolate.rootLib.uri;
-    if (prefix.contains('/lib/')) {
-      prefix = prefix.substring(0, prefix.lastIndexOf('/lib/'));
-      if (prefix.contains('/')) {
-        prefix = prefix.substring(0, prefix.lastIndexOf('/'));
+    String scriptPrefix = isolate.rootLib.uri;
+    if (scriptPrefix.contains('/lib/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
       }
-    } else if (prefix.contains('/bin/')) {
-      prefix = prefix.substring(0, prefix.lastIndexOf('/bin/'));
-      if (prefix.contains('/')) {
-        prefix = prefix.substring(0, prefix.lastIndexOf('/'));
+    } else if (scriptPrefix.contains('/bin/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else if (scriptPrefix.contains('/example/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/example/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
       }
     } else {
-      prefix = null;
+      scriptPrefix = null;
     }
+
+    debuggerState.setCommonPrefix(scriptPrefix);
+    debuggerState.updateFrom(isolate);
 
     scripts.sort((ScriptRef ref1, ScriptRef ref2) {
       String uri1 = ref1.uri;
@@ -337,10 +389,7 @@ class DebuggerScreen extends Screen {
 
     _scriptItems.setRenderer((ScriptRef scriptRef) {
       final String uri = scriptRef.uri;
-      String name = uri;
-      if (prefix != null && name.startsWith(prefix)) {
-        name = uri.substring(prefix.length);
-      }
+      final String name = debuggerState.getShortScriptName(uri);
       final CoreElement element = li(text: name, c: 'list-item');
       if (name != uri) {
         element.add(span(text: ' $uri', c: 'subtle'));
@@ -354,24 +403,20 @@ class DebuggerScreen extends Screen {
   }
 
   void _displaySource(Script script) {
-    debuggerState.lastScriptId = script?.id;
-
     if (script == null) {
       _sourcePathDiv.setInnerHtml('&nbsp;');
       sourceEditor.displayScript(script);
-      return;
+    } else {
+      _sourcePathDiv.text = script.uri;
+      sourceEditor.displayScript(script);
     }
-
-    _sourcePathDiv.text = script.uri;
-
-    sourceEditor.displayScript(script);
   }
 }
 
 class DebuggerState {
   DebuggerState();
 
-  // handle EventKind.kIsolateReload
+  // TODO: handle EventKind.kIsolateReload
 
   VmService service;
 
@@ -412,9 +457,7 @@ class DebuggerState {
     _clearCaches();
 
     if (ref == null) {
-      // TODO:
       _breakpoints.add(<Breakpoint>[]);
-
       return;
     }
 
@@ -427,8 +470,7 @@ class DebuggerState {
         _updatePaused(true);
       }
 
-      // TODO: sort
-      _breakpoints.add(isolate.breakpoints.toList());
+      _breakpoints.add(isolate.breakpoints);
     }
   }
 
@@ -446,11 +488,12 @@ class DebuggerState {
   Future<void> stepOut() =>
       service.resume(isolateRef.id, step: StepOption.kOut);
 
-  // TODO: temp
-  String lastScriptId;
+  Future<void> addBreakpoint(String scriptId, int line) {
+    return service.addBreakpoint(isolateRef.id, scriptId, line);
+  }
 
-  Future<void> addBreakpoint(int line) {
-    return service.addBreakpoint(isolateRef.id, lastScriptId, line);
+  Future<void> removeBreakpoint(Breakpoint breakpoint) {
+    return service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
   Future<Stack> getStack() {
@@ -463,6 +506,8 @@ class DebuggerState {
     }
 
     _stepping.add(event.topFrame != null);
+
+    print(event.kind);
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -478,24 +523,21 @@ class DebuggerState {
         break;
       case EventKind.kBreakpointAdded:
         _breakpoints.value.add(event.breakpoint);
-        // TODO: sort
-        _breakpoints.add(_breakpoints.value.toList());
+        _breakpoints.add(_breakpoints.value);
         break;
       case EventKind.kBreakpointResolved:
         _breakpoints.value.remove(event.breakpoint);
         _breakpoints.value.add(event.breakpoint);
-        // TODO: sort
-        _breakpoints.add(_breakpoints.value.toList());
+        _breakpoints.add(_breakpoints.value);
         break;
       case EventKind.kBreakpointRemoved:
         _breakpoints.value.remove(event.breakpoint);
-        _breakpoints.add(_breakpoints.value.toList());
+        _breakpoints.add(_breakpoints.value);
         break;
     }
   }
 
   void _clearCaches() {
-    // TODO:
     _scriptCache.clear();
   }
 
@@ -541,10 +583,28 @@ class DebuggerState {
 
     return null;
   }
+
+  String commonScriptPrefix;
+
+  void setCommonPrefix(String commonScriptPrefix) {
+    this.commonScriptPrefix = commonScriptPrefix;
+  }
+
+  String getShortScriptName(String uri) {
+    if (commonScriptPrefix != null && uri.startsWith(commonScriptPrefix)) {
+      return uri.substring(commonScriptPrefix.length);
+    } else {
+      return uri;
+    }
+  }
+
+  void updateFrom(Isolate isolate) {
+    _breakpoints.add(isolate.breakpoints);
+  }
 }
 
 class Pos {
-  Pos(this.line, this.column);
+  Pos(this.line, [this.column]);
 
   final int line;
   final int column;
@@ -555,39 +615,27 @@ class Pos {
 
 class SourceEditor {
   SourceEditor(this.codeMirror, this.debuggerState) {
-    // TODO:
-
     codeMirror.onEvent('gutterClick', true).listen((dynamic line) {
       if (line is int) {
-        final dynamic info = codeMirror.callArg('getLineHandle', line);
-        final bool addingBreakpoint = info['gutterMarkers'] == null;
+        final List<Breakpoint> lineBps = linesToBreakpoints[line];
 
-        // TODO: add or remove a breakpoint
-        codeMirror.setGutterMarker(
-          line,
-          'breakpoints',
-          addingBreakpoint
-              ? span(c: 'octicon octicon-primitive-dot').element
-              : null,
-        );
-
-        //sourceEditor.addLineClass(line, '', '');
-
-        if (addingBreakpoint) {
-          debuggerState.addBreakpoint(line + 1);
+        if (lineBps == null || lineBps.isEmpty) {
+          debuggerState.addBreakpoint(currentScript.id, line + 1);
+        } else {
+          final Breakpoint bp = lineBps.removeAt(0);
+          debuggerState.removeBreakpoint(bp);
         }
       }
     });
   }
 
   final CodeMirror codeMirror;
-
-  // TODO: move debuggerState out of this class
   final DebuggerState debuggerState;
 
-  Script script;
-  int executionLine;
+  Script currentScript;
+  ScriptAndPos executionPoint;
   List<Breakpoint> breakpoints = <Breakpoint>[];
+  Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
 
   void setBreakpoints(List<Breakpoint> breakpoints) {
     this.breakpoints = breakpoints;
@@ -597,8 +645,10 @@ class SourceEditor {
 
   void _refreshMarkers() {
     codeMirror.clearGutter('breakpoints');
+    //_clearLineClass();
+    linesToBreakpoints.clear();
 
-    if (script == null) {
+    if (currentScript == null) {
       return;
     }
 
@@ -606,67 +656,319 @@ class SourceEditor {
       if (breakpoint.location is SourceLocation) {
         final SourceLocation loc = breakpoint.location;
 
-        if (loc.script.id != script.id) {
+        if (loc.script.id != currentScript.id) {
           continue;
         }
 
-        final Pos pos = debuggerState.calculatePosition(script, loc.tokenPos);
+        final Pos pos =
+            debuggerState.calculatePosition(currentScript, loc.tokenPos);
+        final int line = pos.line - 1;
+        final List<Breakpoint> lineBps =
+            linesToBreakpoints.putIfAbsent(line, () => <Breakpoint>[]);
+
+        lineBps.add(breakpoint);
 
         codeMirror.setGutterMarker(
-          pos.line - 1,
+          line,
           'breakpoints',
           span(c: 'octicon octicon-primitive-dot').element,
         );
       } else if (breakpoint.location is UnresolvedSourceLocation) {
         final UnresolvedSourceLocation loc = breakpoint.location;
 
-        if (loc.script.id != script.id) {
+        if (loc.script.id != currentScript.id) {
           continue;
         }
 
+        final int line = loc.line - 1;
+        final List<Breakpoint> lineBps =
+            linesToBreakpoints.putIfAbsent(line, () => <Breakpoint>[]);
+
+        lineBps.add(breakpoint);
+
         codeMirror.setGutterMarker(
-          loc.line - 1,
+          line,
           'breakpoints',
           span(c: 'octicon octicon-primitive-dot').element,
         );
       }
     }
 
-    if (executionLine != null) {
-      codeMirror.setGutterMarker(
-        executionLine,
-        'breakpoints',
-        span(c: 'octicon octicon-arrow-right').element,
+    if (executionPoint != null && executionPoint.matches(currentScript)) {
+      _showLineClass(executionPoint.position.line - 1);
+    }
+  }
+
+  int _currentLineClass;
+  CoreElement _executionPointElement;
+
+  void _clearLineClass() {
+    if (_currentLineClass != null) {
+      codeMirror.removeLineClass(
+          _currentLineClass, 'background', 'executionLine');
+    }
+    _currentLineClass = null;
+
+    _executionPointElement?.dispose();
+    _executionPointElement = null;
+  }
+
+  void _showLineClass(int line) {
+    if (_currentLineClass != null) {
+      _clearLineClass();
+    }
+    _currentLineClass = line;
+    codeMirror.addLineClass(_currentLineClass, 'background', 'executionLine');
+  }
+
+  void displayExecutionPoint(Script script, Pos position) {
+    executionPoint = new ScriptAndPos(script.uri, position);
+
+    // This also calls _refreshMarkers().
+    displayScript(script, scrollTo: position);
+
+    _executionPointElement?.dispose();
+
+    if (script.source != null) {
+      _executionPointElement =
+          span(c: 'octicon octicon-arrow-up execution-marker');
+
+      codeMirror.addWidget(
+        new Position(position.line - 1, position.column - 1),
+        _executionPointElement.element,
       );
     }
   }
 
   void clearExecutionPoint() {
-    if (executionLine == null) {
-      return;
+    executionPoint = null;
+    _refreshMarkers();
+  }
+
+  final Map<String, int> _lastScrollPositions = <String, int>{};
+
+  void displayScript(Script newScript, {Pos scrollTo}) {
+    if (currentScript != null) {
+      final dynamic scrollInfo = codeMirror.call('getScrollInfo');
+      _lastScrollPositions[currentScript.uri] = scrollInfo['top'];
     }
 
-    executionLine = null;
-    _refreshMarkers();
-  }
+    final bool sameScript = currentScript?.uri == newScript?.uri;
 
-  void setExecutionPoint(Pos position) {
-    // todo: show column position
-    executionLine = position.line - 1;
-    _refreshMarkers();
-  }
+    currentScript = newScript;
 
-  void displayScript(Script script) {
-    this.script = script;
-
-    if (script == null) {
+    if (newScript == null) {
       codeMirror.getDoc().setValue('');
     } else {
-      final String source = script?.source ?? '<source not available>';
-      codeMirror.getDoc().setValue(source);
-      codeMirror.scrollTo(0, 0);
+      // set the mode to either dart or javascript
+      // codeMirror.setMode(mode);
+
+      final String source = newScript?.source ?? '<source not available>';
+      if (!sameScript) {
+        codeMirror.getDoc().setValue(source);
+      }
+
+      if (scrollTo != null) {
+        codeMirror.callArgs('scrollIntoView', <dynamic>[
+          new JsObject.jsify(<String, int>{'line': scrollTo.line - 1, 'ch': 0}),
+          150,
+        ]);
+      } else {
+        final int top = _lastScrollPositions[newScript.uri] ?? 0;
+        codeMirror.scrollTo(0, top);
+      }
     }
 
     _refreshMarkers();
   }
+}
+
+class BreakpointsView {
+  BreakpointsView(this._debuggerState, this._breakpointsCountDiv) {
+    _items = new SelectableList<Breakpoint>()
+      ..flex()
+      ..clazz('menu-item-bottom-border')
+      ..element.style.overflowY = 'scroll';
+
+    _items.setRenderer((Breakpoint breakpoint) {
+      final dynamic location = breakpoint.location;
+
+      final CoreElement element = li(text: '', c: 'list-item');
+
+      if (location is UnresolvedSourceLocation) {
+        element.text = _debuggerState.getShortScriptName(location.script.uri);
+        element.add(span(text: ' line ${location.line}', c: 'subtle'));
+      } else if (location is SourceLocation) {
+        element.text = _debuggerState.getShortScriptName(location.script.uri);
+
+        // Modify the rendering slightly asynchronously.
+        _debuggerState.getScript(location.script).then((Script script) {
+          final Pos pos =
+              _debuggerState.calculatePosition(script, location.tokenPos);
+          element.add(span(text: ' line ${pos.line}', c: 'subtle'));
+        });
+      }
+
+      if (!breakpoint.resolved) {
+        element.add(span(text: ' (unresolved)', c: 'subtle'));
+      }
+
+      return element;
+    });
+  }
+
+  Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
+
+  final DebuggerState _debuggerState;
+  final CoreElement _breakpointsCountDiv;
+
+  SelectableList<Breakpoint> _items;
+
+  CoreElement get element => _items;
+
+  Stream<Breakpoint> get onSelectionChanged => _items.onSelectionChanged;
+
+  void showBreakpoints(List<Breakpoint> breakpoints) {
+    breakpoints = breakpoints.toList();
+    breakpoints.sort(_breakpointComparator);
+
+    _items.setItems(breakpoints);
+    _breakpointsCountDiv.text = breakpoints.length.toString();
+  }
+}
+
+class CallStackView {
+  CallStackView() {
+    _items = new SelectableList<Frame>()
+      ..flex()
+      ..clazz('menu-item-bottom-border')
+      ..element.style.overflowY = 'scroll';
+
+    _items.setRenderer((Frame frame) {
+      String name = frame.code?.name ?? '<none>';
+      if (name.startsWith('[Unoptimized] ')) {
+        name = name.substring('[Unoptimized] '.length);
+      }
+
+      String location = frame.location.script.uri;
+      if (location.contains('/')) {
+        location = location.substring(location.lastIndexOf('/') + 1);
+      }
+
+      final CoreElement element = li(
+        text: name,
+        c: 'list-item',
+      )..add(span(text: ' $location', c: 'subtle'));
+      return element;
+    });
+  }
+
+  SelectableList<Frame> _items;
+
+  CoreElement get element => _items;
+
+  Stream<Frame> get onSelectionChanged => _items.onSelectionChanged;
+
+  void showFrames(Stack stack, {bool selectTop = false}) {
+    final List<Frame> frames = stack.frames;
+    _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
+  }
+
+  void clearFrames() {
+    _items.setItems(<Frame>[]);
+  }
+}
+
+class VariablesView {
+  VariablesView() {
+    _items = new SelectableList<BoundVariable>()
+      ..flex()
+      ..clazz('menu-item-bottom-border')
+      ..element.style.overflowY = 'scroll';
+
+    _items.setRenderer((BoundVariable variable) {
+      final String name = variable.name;
+      final dynamic value = variable.value;
+      String valueStr;
+      if (value is InstanceRef) {
+        if (value.valueAsString == null) {
+          // TODO: also show an expandable toggle
+          valueStr = value.classRef.name;
+        } else {
+          valueStr = value.valueAsString;
+          if (value.valueAsStringIsTruncated) {
+            valueStr += '...';
+          }
+          if (value.kind == InstanceKind.kString) {
+            valueStr = "'$valueStr'";
+          }
+        }
+      } else if (value is Sentinel) {
+        valueStr = value.valueAsString;
+      } else {
+        valueStr = value.toString();
+      }
+
+      final CoreElement element = li(
+        text: name,
+        c: 'list-item',
+      )..add(span(text: ' $valueStr', c: 'subtle'));
+      return element;
+    });
+  }
+
+  SelectableList<BoundVariable> _items;
+
+  CoreElement get element => _items;
+
+  void showVariables(Frame frame) {
+    final List<BoundVariable> vars = frame.vars;
+    _items.setItems(vars);
+  }
+
+  void clearVariables() {
+    _items.setItems(<BoundVariable>[]);
+  }
+}
+
+class ScriptAndPos {
+  ScriptAndPos(this.uri, this.position);
+
+  final String uri;
+  final Pos position;
+
+  bool matches(Script script) => uri == script.uri;
+}
+
+int _breakpointComparator(Breakpoint a, Breakpoint b) {
+  ScriptRef getRef(dynamic location) {
+    if (location is SourceLocation) {
+      return location.script;
+    } else if (location is UnresolvedSourceLocation) {
+      return location.script;
+    } else {
+      return null;
+    }
+  }
+
+  int getPos(dynamic location) {
+    if (location is SourceLocation) {
+      return location.tokenPos ?? 0;
+    } else if (location is UnresolvedSourceLocation) {
+      return location.line ?? 0;
+    } else {
+      return 0;
+    }
+  }
+
+  // sort by script
+  final ScriptRef aRef = getRef(a.location);
+  final ScriptRef bRef = getRef(b.location);
+  final int compare = aRef.uri.compareTo(bRef.uri);
+  if (compare != 0) {
+    return compare;
+  }
+
+  // then sort by location
+  return getPos(a.location) - getPos(b.location);
 }

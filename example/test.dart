@@ -10,15 +10,28 @@ import 'package:path/path.dart' as path;
 import 'test_foo.dart';
 
 void main() {
-  int count = foo(9);
+  const Duration delay = Duration(seconds: 4);
+  Function work;
 
-  Timer.periodic(new Duration(seconds: 4), (Timer timer) {
-    bar(count--);
+  int count = 0;
 
-    if (count == 0) {
-      count = foo(9);
+  work = () {
+    bar(count++);
+
+    if (count % 2 == 0) {
+      Timer.run(() {
+        //throw new StateError('sdfsdf');
+      });
     }
-  });
+
+    if (count == foo(9)) {
+      count = 0;
+    }
+
+    new Timer(delay, work);
+  };
+
+  new Timer(delay, work);
 }
 
 void bar(int count) {
