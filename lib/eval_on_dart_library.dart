@@ -41,14 +41,13 @@ class EvalOnDartLibrary {
   }
 
   Future<InstanceRef> eval(String expression) async {
-    InstanceRef ref;
     try {
       final LibraryRef libraryRef = await _libraryRef.future;
-      ref = await service.evaluate(_isolateId, libraryRef.id, expression);
+      return await service.evaluate(_isolateId, libraryRef.id, expression);
     } catch (e) {
       _handleError(e);
     }
-    return ref;
+    return null;
   }
 
   void _handleError(dynamic e) {
