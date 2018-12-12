@@ -8,11 +8,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
-import 'package:vm_service_lib/vm_service_lib_io.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show RemoteObject, ConsoleAPIEvent;
 
+import 'app_fixture.dart';
 import 'src/chrome.dart';
 
 WebdevFixture webdevFixture;
@@ -53,7 +52,7 @@ void appTests() {
 
   test('can switch pages', () async {
     final DevtoolsManager tools = new DevtoolsManager(tabInstance);
-    await tools.startApp(appFixture);
+    await tools.start(appFixture);
     await tools.switchPage('logs');
 
     final String currentPageId = await tools.currentPageId();
@@ -77,7 +76,7 @@ void loggingTests() {
 
   test('displays log data', () async {
     final DevtoolsManager tools = new DevtoolsManager(tabInstance);
-    await tools.startApp(appFixture);
+    await tools.start(appFixture);
     await tools.switchPage('logs');
 
     final String currentPageId = await tools.currentPageId();
@@ -104,7 +103,7 @@ class DevtoolsManager {
 
   LoggingManager _loggingManager;
 
-  Future<void> startApp(CliAppFixture appFixture) async {
+  Future<void> start(AppFixture appFixture) async {
     final Uri baseAppUri = webdevFixture.baseUri
         .resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
@@ -368,91 +367,6 @@ class WebdevFixture {
   Uri get baseUri => Uri.parse(url);
 
   Future<void> teardown() async {
-    process.kill();
-  }
-}
-
-// This is the fixture for Dart CLI applications.
-class CliAppFixture {
-  CliAppFixture._(
-    this.process,
-    this.lines,
-    this.servicePort,
-    this.serviceConnection,
-    this.isolates,
-  ) {
-    // "starting app"
-    _onAppStarted = lines.first;
-
-    serviceConnection.streamListen('Isolate');
-    serviceConnection.onIsolateEvent.listen((Event event) {
-      if (event.kind == EventKind.kIsolateExit) {
-        isolates.remove(event.isolate);
-      } else {
-        if (!isolates.contains(event.isolate)) {
-          isolates.add(event.isolate);
-        }
-      }
-    });
-  }
-
-  static Future<CliAppFixture> create(String appScriptPath) async {
-    final Process process = await Process.start(
-      Platform.resolvedExecutable,
-      <String>['--observe=0', appScriptPath],
-    );
-
-    final Stream<String> lines =
-        process.stdout.transform(utf8.decoder).transform(const LineSplitter());
-    final StreamController<String> lineController =
-        new StreamController<String>.broadcast();
-    final Completer<String> completer = new Completer<String>();
-
-    lines.listen((String line) {
-      if (completer.isCompleted) {
-        lineController.add(line);
-      } else {
-        completer.complete(line);
-      }
-    });
-
-    // Observatory listening on http://127.0.0.1:9595/
-    String observatoryText = await completer.future;
-    observatoryText =
-        observatoryText.substring(observatoryText.lastIndexOf(':') + 1);
-    observatoryText = observatoryText.substring(0, observatoryText.length - 1);
-    final int port = int.parse(observatoryText);
-
-    final VmService serviceConnection =
-        await vmServiceConnect('localhost', port);
-
-    final VM vm = await serviceConnection.getVM();
-
-    return new CliAppFixture._(
-        process, lineController.stream, port, serviceConnection, vm.isolates);
-  }
-
-  final Process process;
-  final Stream<String> lines;
-  final int servicePort;
-  final VmService serviceConnection;
-  final List<IsolateRef> isolates;
-  Future<void> _onAppStarted;
-
-  Future<void> get onAppStarted => _onAppStarted;
-
-  IsolateRef get mainIsolate => isolates.isEmpty ? null : isolates.first;
-
-  Future<dynamic> invoke(String expression) async {
-    final IsolateRef isolateRef = mainIsolate;
-    final Isolate isolate = await serviceConnection.getIsolate(isolateRef.id);
-
-    return await serviceConnection.evaluate(
-        isolateRef.id, isolate.rootLib.id, expression);
-  }
-
-  Future<void> teardown() async {
-    serviceConnection.dispose();
     process.kill();
   }
 }
