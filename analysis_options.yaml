@@ -20,6 +20,7 @@ analyzer:
     missing_return: warning
   exclude:
   - build/**
+  - test/fixtures/flutter_app
 
 linter:
   rules:
