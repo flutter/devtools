@@ -202,6 +202,7 @@ class IsolateManager {
         _selectedIsolateController.add(event.isolate);
       }
     } else if (event.kind == 'ServiceExtensionAdded') {
+      // On hot restart, service extensions are added from here.
       _serviceExtensionManager._maybeAddServiceExtension(event.extensionRPC);
 
       // Check to see if there is a new flutter isolate.
@@ -255,6 +256,8 @@ class IsolateManager {
           }
         }
       }
+      // On initial connection to running app, service extensions are added from
+      // here.
       _serviceExtensionManager._addRegisteredExtensionRPCs(ref);
     }
   }
