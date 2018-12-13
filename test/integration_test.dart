@@ -341,7 +341,7 @@ class WebdevFixture {
 
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
-    // 'DART_VM_OPTIONS: --enable-vm-service:63990' was pass in.
+    // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
     final Map<String, String> environment =
         new Map<String, String>.from(Platform.environment);
     if (environment.containsKey('DART_VM_OPTIONS')) {
