@@ -338,9 +338,20 @@ class WebdevFixture {
 
   static Future<WebdevFixture> create() async {
     // 'pub run webdev serve web'
+
+    // Remove the DART_VM_OPTIONS env variable from the child process, so the
+    // Dart VM doesn't try and open a service protocol port if
+    // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
+    final Map<String, String> environment =
+        new Map<String, String>.from(Platform.environment);
+    if (environment.containsKey('DART_VM_OPTIONS')) {
+      environment['DART_VM_OPTIONS'] = '';
+    }
+
     final Process process = await Process.start(
       'pub',
       <String>['run', 'webdev', 'serve', 'web'],
+      environment: environment,
     );
 
     final Stream<String> lines =
