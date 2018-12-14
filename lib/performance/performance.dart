@@ -66,29 +66,29 @@ class PerformanceScreen extends Screen {
 
     _updateStatus(null);
 
-    serviceInfo.isolateManager.onSelectedIsolateChanged.listen((_) {
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       _handleIsolateChanged();
     });
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   void _handleIsolateChanged() {
     // TODO(devoncarew): update buttons
   }
 
-  String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
+  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   void _loadSnapshot() {
     loadSnapshotButton.disabled = true;
 
     progressElement.text = 'Loading snapshot…';
 
-    serviceInfo.service
+    serviceManager.service
         .getCpuProfile(_isolateId, 'UserVM')
         .then((CpuProfile profile) async {
       // TODO(devoncarew):
@@ -117,7 +117,7 @@ class PerformanceScreen extends Screen {
   void _reset() {
     resetButton.disabled = true;
 
-    serviceInfo.service.clearCpuProfile(_isolateId).then((_) {
+    serviceManager.service.clearCpuProfile(_isolateId).then((_) {
       toast('VM counters reset.');
     }).catchError((dynamic e) {
       framework.showError('Error resetting counters', e);

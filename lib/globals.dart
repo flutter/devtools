@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'service.dart';
+import 'service_manager.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
-ServiceConnectionManager get serviceInfo => globals[ServiceConnectionManager];
+ServiceConnectionManager get serviceManager => globals[ServiceConnectionManager];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

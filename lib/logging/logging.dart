@@ -33,11 +33,11 @@ class LoggingScreen extends Screen {
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   Table<LogData> loggingTable;

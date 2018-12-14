@@ -3,8 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:devtools/main.dart';
+import 'package:devtools/framework/framework_core.dart';
 
 void main() {
+  // Initialize the core framework.
+  FrameworkCore.init();
+
+  // Load the web app framework.
   final PerfToolFramework framework = new PerfToolFramework();
-  framework.performInitialLoad();
+  framework.loadScreenFromLocation();
 }
