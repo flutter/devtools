@@ -74,7 +74,8 @@ class PerfToolFramework extends Framework {
       ..change(_handleIsolateSelect);
     isolateSelectStatus.element.add(isolateSelect);
     _rebuildIsolateSelect();
-    serviceManager.isolateManager.onIsolateCreated.listen(_rebuildIsolateSelect);
+    serviceManager.isolateManager.onIsolateCreated
+        .listen(_rebuildIsolateSelect);
     serviceManager.isolateManager.onIsolateExited.listen(_rebuildIsolateSelect);
     serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
@@ -84,7 +85,8 @@ class PerfToolFramework extends Framework {
     App.register(this);
   }
 
-  IsolateRef get currentIsolate => serviceManager.isolateManager.selectedIsolate;
+  IsolateRef get currentIsolate =>
+      serviceManager.isolateManager.selectedIsolate;
 
   void _handleIsolateSelect() {
     serviceManager.isolateManager.selectIsolate(isolateSelect.value);

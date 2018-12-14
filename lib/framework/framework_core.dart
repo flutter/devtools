@@ -30,7 +30,8 @@ class FrameworkCore {
     final Completer<Null> finishedCompleter = new Completer<Null>();
 
     try {
-      final VmService service = await connect('localhost', port, finishedCompleter);
+      final VmService service =
+          await connect('localhost', port, finishedCompleter);
       if (serviceManager != null) {
         serviceManager.vmServiceOpened(service, finishedCompleter.future);
       }

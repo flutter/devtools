@@ -8,7 +8,8 @@ class EvalOnDartLibrary {
     _libraryRef = new Completer<LibraryRef>();
 
     // TODO: do we need to dispose this subscription at some point? Where?
-    serviceManager.isolateManager.getCurrentFlutterIsolate((IsolateRef isolate) {
+    serviceManager.isolateManager
+        .getCurrentFlutterIsolate((IsolateRef isolate) {
       if (_libraryRef.isCompleted) {
         _libraryRef = new Completer<LibraryRef>();
       }
