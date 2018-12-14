@@ -13,7 +13,6 @@ import 'logging/logging.dart';
 import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance.dart';
-import 'service.dart';
 import 'timeline/timeline.dart';
 import 'ui/elements.dart';
 import 'ui/primer.dart';
@@ -28,8 +27,6 @@ import 'utils.dart';
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
-    setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
-
     addScreen(new MemoryScreen());
     addScreen(new TimelineScreen());
     addScreen(new PerformanceScreen());
@@ -77,9 +74,10 @@ class PerfToolFramework extends Framework {
       ..change(_handleIsolateSelect);
     isolateSelectStatus.element.add(isolateSelect);
     _rebuildIsolateSelect();
-    serviceInfo.isolateManager.onIsolateCreated.listen(_rebuildIsolateSelect);
-    serviceInfo.isolateManager.onIsolateExited.listen(_rebuildIsolateSelect);
-    serviceInfo.isolateManager.onSelectedIsolateChanged
+    serviceManager.isolateManager.onIsolateCreated
+        .listen(_rebuildIsolateSelect);
+    serviceManager.isolateManager.onIsolateExited.listen(_rebuildIsolateSelect);
+    serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
   }
 
@@ -87,21 +85,22 @@ class PerfToolFramework extends Framework {
     App.register(this);
   }
 
-  IsolateRef get currentIsolate => serviceInfo.isolateManager.selectedIsolate;
+  IsolateRef get currentIsolate =>
+      serviceManager.isolateManager.selectedIsolate;
 
   void _handleIsolateSelect() {
-    serviceInfo.isolateManager.selectIsolate(isolateSelect.value);
+    serviceManager.isolateManager.selectIsolate(isolateSelect.value);
   }
 
   void _rebuildIsolateSelect([IsolateRef _]) {
     isolateSelect.clear();
-    for (IsolateRef ref in serviceInfo.isolateManager.isolates) {
+    for (IsolateRef ref in serviceManager.isolateManager.isolates) {
       isolateSelect.option(isolateName(ref), value: ref.id);
     }
-    isolateSelect.disabled = serviceInfo.isolateManager.isolates.isEmpty;
-    if (serviceInfo.isolateManager.selectedIsolate != null) {
-      isolateSelect.selectedIndex = serviceInfo.isolateManager.isolates
-          .indexOf(serviceInfo.isolateManager.selectedIsolate);
+    isolateSelect.disabled = serviceManager.isolateManager.isolates.isEmpty;
+    if (serviceManager.isolateManager.selectedIsolate != null) {
+      isolateSelect.selectedIndex = serviceManager.isolateManager.isolates
+          .indexOf(serviceManager.isolateManager.selectedIsolate);
     }
   }
 }

@@ -53,7 +53,8 @@ class SelectableList<T> extends CoreElement {
   ListRenderer<T> renderer;
   CoreElement _selectedElement;
 
-  final StreamController<T> _selectionController = new StreamController<T>.broadcast();
+  final StreamController<T> _selectionController =
+      new StreamController<T>.broadcast();
 
   Stream<T> get onSelectionChanged => _selectionController.stream;
 

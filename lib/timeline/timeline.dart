@@ -99,9 +99,9 @@ class TimelineScreen extends Screen {
       button.click(() {
         final bool wasSelected = button.element.classes.contains('selected');
         button.toggleClass('selected');
-        serviceInfo.service.callServiceExtension(
+        serviceManager.service.callServiceExtension(
           serviceCallName,
-          isolateId: serviceInfo.isolateManager.selectedIsolate.id,
+          isolateId: serviceManager.isolateManager.selectedIsolate.id,
           args: <String, bool>{'enabled': !wasSelected},
         );
       });
@@ -113,11 +113,11 @@ class TimelineScreen extends Screen {
     handleToggleButton(repaintRainbowButton, 'ext.flutter.repaintRainbow');
     handleToggleButton(debugDrawButton, 'ext.flutter.debugPaint');
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
       frameDetailsUI.attribute('hidden', frame == null);
@@ -160,7 +160,7 @@ class TimelineScreen extends Screen {
       });
     });
 
-    serviceInfo.service.onEvent('Timeline').listen((Event event) {
+    serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
@@ -207,22 +207,22 @@ class TimelineScreen extends Screen {
     if (shouldBeRunning && !isRunning) {
       timelineFramesBuilder.resume();
 
-      await serviceInfo.service
+      await serviceManager.service
           .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
-      await serviceInfo.service.setVMTimelineFlags(<String>[]);
+      await serviceManager.service.setVMTimelineFlags(<String>[]);
 
       timelineFramesBuilder.pause();
     }
   }
 
   void _startTimeline() async {
-    await serviceInfo.service
+    await serviceManager.service
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
-    await serviceInfo.service.clearVMTimeline();
+    await serviceManager.service.clearVMTimeline();
 
-    final Response response = await serviceInfo.service.getVMTimeline();
+    final Response response = await serviceManager.service.getVMTimeline();
     final List<dynamic> list = response.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
         list.cast<Map<String, dynamic>>();

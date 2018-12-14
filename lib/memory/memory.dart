@@ -74,15 +74,15 @@ class MemoryScreen extends Screen {
     _updateStatus(null);
 
     // TODO(devoncarew): don't rebuild until the component is active
-    serviceInfo.isolateManager.onSelectedIsolateChanged.listen((_) {
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       _handleIsolateChanged();
     });
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
@@ -109,7 +109,7 @@ class MemoryScreen extends Screen {
     // TODO(devoncarew): update buttons
   }
 
-  String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
+  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
@@ -121,7 +121,7 @@ class MemoryScreen extends Screen {
 
     try {
       // 'reset': true to reset the object allocation accumulators
-      final Response response = await serviceInfo.service
+      final Response response = await serviceManager.service
           .callMethod('_getAllocationProfile', isolateId: _isolateId);
       final List<dynamic> members = response.json['members'];
       final List<ClassHeapStats> heapStats = members

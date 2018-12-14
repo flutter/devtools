@@ -17,8 +17,8 @@ class DeviceScreen extends Screen {
   DeviceScreen()
       : super(
             name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
@@ -68,7 +68,7 @@ class DeviceScreen extends Screen {
     });
 
     deviceStatus.element.text =
-        '${serviceInfo.vm.targetCPU} ${serviceInfo.vm.architectureBits}-bit';
+        '${serviceManager.vm.targetCPU} ${serviceManager.vm.architectureBits}-bit';
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -134,9 +134,9 @@ class ExtensionTracker {
       }
     });
 
-    serviceInfo.isolateManager.isolates.forEach(_register);
-    serviceInfo.isolateManager.onIsolateCreated.listen(_register);
-    serviceInfo.isolateManager.onIsolateExited.listen(_removeIsolate);
+    serviceManager.isolateManager.isolates.forEach(_register);
+    serviceManager.isolateManager.onIsolateCreated.listen(_register);
+    serviceManager.isolateManager.onIsolateExited.listen(_removeIsolate);
   }
 
   final StreamController<Null> _changeController =
