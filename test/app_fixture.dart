@@ -93,7 +93,7 @@ class CliAppFixture extends AppFixture {
     final int port = int.parse(observatoryText);
 
     final VmServiceWrapper serviceConnection =
-        await vmServiceConnect('localhost', port);
+        VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
     return new CliAppFixture._(
@@ -139,7 +139,7 @@ class FlutterAppFixture extends AppFixture {
     final int port = params['port'];
 
     final VmServiceWrapper serviceConnection =
-        await vmServiceConnect('localhost', port);
+        VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
 
