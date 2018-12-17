@@ -116,23 +116,23 @@ class EvalOnDartLibrary {
     return await getObjHelper(await instanceRefFuture, isAlive);
   }
 
-  /// Public so that other related classes such as InspectorService can ensure their
-  /// requests are in a consistent order with requests which eliminates otherwise
-  /// surprising timing bugs such as if a request to dispose an
-  /// InspectorService.ObjectGroup was issued after a request to read properties
-  /// from an object in a group but the request to dispose the object group
-  /// occurred first.
-  /// <p>
-  /// The design is we have at most 1 pending request at a time. This sacrifices
-  /// some throughput with the advantage of predictable semantics and the benefit
-  /// that we are able to skip large numbers of requests if they happen to be
-  /// from groups of objects that should no longer be kept alive.
-  /// <p>
-  /// The optional ObjectGroup specified by isAlive, indicates whether the
+  /// Public so that other related classes such as InspectorService can ensure
+  /// their requests are in a consistent order with existing requests. This
+  /// eliminates otherwise surprising timing bugs, such as if a request to
+  /// dispose an InspectorService.ObjectGroup was issued after a request to read
+  /// properties from an object in a group, but the request to dispose the
+  /// object group occurred first.
+  ///
+  /// With this design, we have at most 1 pending request at a time. This
+  /// sacrifices some throughput, but we gain the advantage of predictable
+  /// semantics and the ability to skip large numbers of requests from object
+  /// groups that should no longer be kept alive.
+  ///
+  /// The optional ObjectGroup specified by [isAlive] indicates whether the
   /// request is still relevant or should be cancelled. This is an optimization
-  /// for the Inspector to avoid overloading the service with stale requests if
-  /// the user is quickly navigating through the UI generating lots of stale
-  /// requests to view specific details subtrees.
+  /// for the Inspector so that it does not overload the service with stale requests.
+  /// Stale requests will be generated if the user is quickly navigating through the
+  /// UI to view specific details subtrees.
   Future<T> addRequest<T>(ObjectGroup isAlive, Future<T> request()) async {
     if (isAlive != null && isAlive.disposed) return null;
 
