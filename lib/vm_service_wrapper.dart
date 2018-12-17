@@ -52,7 +52,8 @@ class VmServiceWrapper implements VmService {
       _trackFuture(_vmService.clearCpuProfile(isolateId));
 
   @override
-  Future<Success> clearVMTimeline() => _trackFuture(_vmService.clearVMTimeline());
+  Future<Success> clearVMTimeline() =>
+      _trackFuture(_vmService.clearVMTimeline());
 
   @override
   Future<Success> collectAllGarbage(String isolateId) =>
@@ -131,7 +132,8 @@ class VmServiceWrapper implements VmService {
   @override
   Future invoke(String isolateId, String targetId, String selector,
           List<String> argumentIds) =>
-      _trackFuture(_vmService.invoke(isolateId, targetId, selector, argumentIds));
+      _trackFuture(
+          _vmService.invoke(isolateId, targetId, selector, argumentIds));
 
   @override
   Future<Success> kill(String isolateId) =>
@@ -174,7 +176,8 @@ class VmServiceWrapper implements VmService {
   Stream<Event> get onVMEvent => _vmService.onVMEvent;
 
   @override
-  Future<Success> pause(String isolateId) => _trackFuture(_vmService.pause(isolateId));
+  Future<Success> pause(String isolateId) =>
+      _trackFuture(_vmService.pause(isolateId));
 
   @override
   Future<Success> registerService(String service, String alias) =>
