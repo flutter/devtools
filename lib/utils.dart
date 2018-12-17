@@ -113,3 +113,34 @@ String getUserHomeDir() {
 /// A typedef to represent a function taking no arguments and with no return
 /// value.
 typedef void VoidFunction();
+
+/// These utilities are ported from the Flutter IntelliJ plugin.
+///
+/// With Dart's terser JSON support, these methods don't provide much value so
+/// we should consider removing them.
+class JsonUtils {
+  JsonUtils._();
+
+  static String getStringMember(Map<String, Object> json, String memberName) {
+    // TODO(jacobr): should we handle non-string values with a reasonable
+    // toString differently?
+    return json[memberName];
+  }
+
+  static int getIntMember(Map<String, Object> json, String memberName) {
+    return json[memberName] ?? -1;
+  }
+
+  static List<String> getValues(Map<String, Object> json, String member) {
+    final List<Object> values = json[member];
+    if (values == null || values.isEmpty) {
+      return const [];
+    }
+
+    return values.toList();
+  }
+
+  static bool hasJsonData(String data) {
+    return data != null && data.isNotEmpty && data != 'null';
+  }
+}
