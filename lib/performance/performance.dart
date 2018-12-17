@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -182,7 +183,7 @@ class PerformanceScreen extends Screen {
     })));
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     cpuChart.disabled = false;
 
     cpuTracker = new CpuTracker(service);
@@ -255,7 +256,7 @@ class CpuTracker {
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
-  VmService service;
+  VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();

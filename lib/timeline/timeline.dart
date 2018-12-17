@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
@@ -148,7 +149,7 @@ class TimelineScreen extends Screen {
     _updateListeningState();
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     framesChart.disabled = false;
 
     framesTracker = new FramesTracker(service);
