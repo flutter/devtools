@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
+import 'package:devtools/vm_service_wrapper.dart';
 
 class AppFixture {
   AppFixture._(
@@ -31,7 +32,7 @@ class AppFixture {
   final Process process;
   final Stream<String> lines;
   final int servicePort;
-  final VmService serviceConnection;
+  final VmServiceWrapper serviceConnection;
   final List<IsolateRef> isolates;
   Future<void> _onAppStarted;
 
@@ -59,7 +60,7 @@ class CliAppFixture extends AppFixture {
     Process process,
     Stream<String> lines,
     int servicePort,
-    VmService serviceConnection,
+    VmServiceWrapper serviceConnection,
     List<IsolateRef> isolates,
   ) : super._(process, lines, servicePort, serviceConnection, isolates);
 
@@ -91,8 +92,8 @@ class CliAppFixture extends AppFixture {
     observatoryText = observatoryText.substring(0, observatoryText.length - 1);
     final int port = int.parse(observatoryText);
 
-    final VmService serviceConnection =
-        await vmServiceConnect('localhost', port);
+    final VmServiceWrapper serviceConnection =
+        VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
     return new CliAppFixture._(
@@ -103,12 +104,12 @@ class CliAppFixture extends AppFixture {
 // This is the fixture for Flutter applications.
 class FlutterAppFixture extends AppFixture {
   FlutterAppFixture._(
-      Process process,
-      Stream<String> lines,
-      int servicePort,
-      VmService serviceConnection,
-      List<IsolateRef> isolates,
-      ) : super._(process, lines, servicePort, serviceConnection, isolates);
+    Process process,
+    Stream<String> lines,
+    int servicePort,
+    VmServiceWrapper serviceConnection,
+    List<IsolateRef> isolates,
+  ) : super._(process, lines, servicePort, serviceConnection, isolates);
 
   static Future<FlutterAppFixture> create() async {
     final Process process = await Process.start(
@@ -116,9 +117,9 @@ class FlutterAppFixture extends AppFixture {
         workingDirectory: 'test/fixtures/flutter_app');
 
     final Stream<String> lines =
-    process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+        process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final StreamController<String> lineController =
-    new StreamController<String>.broadcast();
+        new StreamController<String>.broadcast();
     final Completer<String> completer = new Completer<String>();
 
     lines.listen((String line) {
@@ -137,8 +138,8 @@ class FlutterAppFixture extends AppFixture {
     final Map<String, Object> params = jsonMap['params'];
     final int port = params['port'];
 
-    final VmService serviceConnection =
-    await vmServiceConnect('localhost', port);
+    final VmServiceWrapper serviceConnection =
+        VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
 

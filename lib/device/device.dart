@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
@@ -53,7 +54,7 @@ class DeviceScreen extends Screen {
     _rebuildTogglesDiv();
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     extensionTracker = new ExtensionTracker(service);
     extensionTracker.start();
 
@@ -142,7 +143,7 @@ class ExtensionTracker {
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();
 
-  VmService service;
+  VmServiceWrapper service;
 
   Map<String, Set<IsolateRef>> extensionToIsolatesMap =
       <String, Set<IsolateRef>>{};

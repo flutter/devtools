@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'eval_on_dart_library.dart';
+import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
@@ -21,8 +22,8 @@ class ServiceConnectionManager {
   }
   final StreamController<Null> _stateController =
       new StreamController<Null>.broadcast();
-  final StreamController<VmService> _connectionAvailableController =
-      new StreamController<VmService>.broadcast();
+  final StreamController<VmServiceWrapper> _connectionAvailableController =
+      new StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
       new StreamController<Null>.broadcast();
 
@@ -33,7 +34,7 @@ class ServiceConnectionManager {
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
 
-  VmService service;
+  VmServiceWrapper service;
   VM vm;
   String sdkVersion;
 
@@ -41,13 +42,15 @@ class ServiceConnectionManager {
 
   Stream<Null> get onStateChange => _stateController.stream;
 
-  Stream<VmService> get onConnectionAvailable =>
+  Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
 
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
-  void vmServiceOpened(VmService service, Future<void> onClosed) {
-    service.getVM().then((VM vm) {
+  Future<void> vmServiceOpened(
+      VmServiceWrapper service, Future<void> onClosed) async {
+    try {
+      final vm = await service.getVM();
       this.vm = vm;
       sdkVersion = vm.version;
       if (sdkVersion.contains(' ')) {
@@ -78,10 +81,10 @@ class ServiceConnectionManager {
       service.streamListen('Extension');
       service.streamListen('_Graph');
       service.streamListen('_Logging');
-    }).catchError((dynamic e) {
+    } catch (e) {
       // TODO:
       print(e);
-    });
+    }
   }
 
   void vmServiceClosed() {
@@ -104,7 +107,7 @@ class IsolateManager {
   List<IsolateRef> _isolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
   IsolateRef _flutterIsolate;
-  VmService _service;
+  VmServiceWrapper _service;
   ServiceExtensionManager _serviceExtensionManager;
 
   StreamController<IsolateRef> _flutterIsolateController;
@@ -230,7 +233,7 @@ class IsolateManager {
 }
 
 class ServiceExtensionManager {
-  VmService _service;
+  VmServiceWrapper _service;
   IsolateManager _isolateManager;
 
   bool firstFrameEventReceived = false;

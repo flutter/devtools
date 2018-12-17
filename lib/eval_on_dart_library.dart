@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'globals.dart';
+import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
   EvalOnDartLibrary(this.libraryName, this.service) {
@@ -21,7 +22,7 @@ class EvalOnDartLibrary {
   }
 
   final String libraryName;
-  final VmService service;
+  final VmServiceWrapper service;
   Completer<LibraryRef> _libraryRef;
   String _isolateId;
 

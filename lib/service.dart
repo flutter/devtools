@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:html' hide Event;
 import 'dart:typed_data';
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'vm_service_wrapper.dart';
 
-Future<VmService> connect(
+Future<VmServiceWrapper> connect(
     String host, int port, Completer<Null> finishedCompleter) {
   final WebSocket ws = new WebSocket('ws://$host:$port/ws');
 
-  final Completer<VmService> connectedCompleter = new Completer<VmService>();
+  final Completer<VmServiceWrapper> connectedCompleter =
+      new Completer<VmServiceWrapper>();
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
@@ -26,7 +27,7 @@ Future<VmService> connect(
       }
     });
 
-    final VmService service = new VmService(
+    final VmServiceWrapper service = new VmServiceWrapper.fromNewVmService(
       inStream,
       (String message) => ws.send(message),
     );

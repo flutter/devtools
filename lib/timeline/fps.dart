@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -95,7 +96,7 @@ class FramesTracker {
 
   static const int kMaxFrames = 60;
 
-  VmService service;
+  VmServiceWrapper service;
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();
   List<FrameInfo> samples = <FrameInfo>[];

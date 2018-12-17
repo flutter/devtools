@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -229,7 +230,7 @@ class MemoryScreen extends Screen {
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
 
@@ -393,7 +394,7 @@ class MemoryTracker {
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
-  VmService service;
+  VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();

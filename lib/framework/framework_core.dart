@@ -3,7 +3,7 @@ import 'dart:html' hide Screen;
 import 'package:devtools/globals.dart';
 import 'package:devtools/service.dart';
 import 'package:devtools/service_manager.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:devtools/vm_service_wrapper.dart';
 
 class FrameworkCore {
   static void init() {
@@ -30,7 +30,7 @@ class FrameworkCore {
     final Completer<Null> finishedCompleter = new Completer<Null>();
 
     try {
-      final VmService service =
+      final VmServiceWrapper service =
           await connect('localhost', port, finishedCompleter);
       if (serviceManager != null) {
         serviceManager.vmServiceOpened(service, finishedCompleter.future);
