@@ -33,7 +33,7 @@ class FrameworkCore {
       final VmServiceWrapper service =
           await connect('localhost', port, finishedCompleter);
       if (serviceManager != null) {
-        serviceManager.vmServiceOpened(service, finishedCompleter.future);
+        await serviceManager.vmServiceOpened(service, finishedCompleter.future);
       }
     } catch (e) {
       print('Unable to connect to service on port $port');
