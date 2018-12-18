@@ -178,65 +178,6 @@ void main() {
       });
     });
 
-    test('service extensions restored on hot restart', () async {
-      final EvalOnDartLibrary library = new EvalOnDartLibrary(
-        'package:flutter/src/widgets/app.dart',
-        service,
-      );
-
-      StreamSubscription<ServiceExtensionState> stream;
-
-      // Initial value on the test device should be 1.0.
-      final before = await library
-          .eval('WidgetsApp.showPerformanceOverlayOverride', isAlive: null);
-      if (before is InstanceRef) {
-        expect(before.valueAsString, 'false');
-      }
-      // Initial state in ServiceExtensionManager should be disabled with value
-      // null.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.showPerformanceOverlay', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, false);
-        expect(state.value, null);
-        stream.cancel();
-      });
-
-      // Enable the service extension via ServiceExtensionManager.
-      await serviceManager.serviceExtensionManager.setServiceExtensionState(
-          'ext.flutter.showPerformanceOverlay', true, true);
-
-      // Verify the test device is aware of the newly-enabled state.
-      final after = await library
-          .eval('WidgetsApp.showPerformanceOverlayOverride', isAlive: null);
-      if (after is InstanceRef) {
-        expect(after.valueAsString, 'true');
-      }
-      // Verify ServiceExtensionManager is aware of the newly-enabled state.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.showPerformanceOverlay', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, true);
-        expect(state.value, true);
-        stream.cancel();
-      });
-
-      await _flutter.hotRestart();
-
-      // Verify the test device remembers the enabled state.
-      final afterRestart = await library
-          .eval('WidgetsApp.showPerformanceOverlayOverride', isAlive: null);
-      if (afterRestart is InstanceRef) {
-        expect(afterRestart.valueAsString, 'true');
-      }
-      // Verify ServiceExtensionManager remembers enabled state.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.showPerformanceOverlay', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, true);
-        expect(state.value, true);
-        stream.cancel();
-      });
-    });
+    //TODO(kenzie): add hot restart test case
   });
 }
