@@ -77,7 +77,7 @@ class EvalOnDartLibrary {
 
     try {
       final LibraryRef libraryRef = await _libraryRef.future;
-      final result =  await service.evaluate(
+      final result = await service.evaluate(
         _isolateId,
         libraryRef.id,
         expression,

@@ -184,7 +184,8 @@ class IsolateManager {
         _selectedIsolateController.add(_selectedIsolate);
       }
       if (_flutterIsolate == event.isolate) {
-        _setFlutterIsolate(_flutterIsolates.isEmpty ? null : _flutterIsolates.first);
+        _setFlutterIsolate(
+            _flutterIsolates.isEmpty ? null : _flutterIsolates.first);
         _serviceExtensionManager.resetAvailableExtensions();
       }
     }
@@ -296,7 +297,7 @@ class ServiceExtensionManager {
     if (isolate.extensionRPCs != null) {
       for (String extension in isolate.extensionRPCs) {
         await _maybeAddServiceExtension(extension);
-      };
+      }
 
       if (!_firstFrameEventReceived) {
         final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
