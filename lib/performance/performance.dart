@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -66,29 +67,29 @@ class PerformanceScreen extends Screen {
 
     _updateStatus(null);
 
-    serviceInfo.isolateManager.onSelectedIsolateChanged.listen((_) {
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       _handleIsolateChanged();
     });
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   void _handleIsolateChanged() {
     // TODO(devoncarew): update buttons
   }
 
-  String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
+  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   void _loadSnapshot() {
     loadSnapshotButton.disabled = true;
 
     progressElement.text = 'Loading snapshot…';
 
-    serviceInfo.service
+    serviceManager.service
         .getCpuProfile(_isolateId, 'UserVM')
         .then((CpuProfile profile) async {
       // TODO(devoncarew):
@@ -117,7 +118,7 @@ class PerformanceScreen extends Screen {
   void _reset() {
     resetButton.disabled = true;
 
-    serviceInfo.service.clearCpuProfile(_isolateId).then((_) {
+    serviceManager.service.clearCpuProfile(_isolateId).then((_) {
       toast('VM counters reset.');
     }).catchError((dynamic e) {
       framework.showError('Error resetting counters', e);
@@ -182,7 +183,7 @@ class PerformanceScreen extends Screen {
     })));
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     cpuChart.disabled = false;
 
     cpuTracker = new CpuTracker(service);
@@ -255,7 +256,7 @@ class CpuTracker {
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
-  VmService service;
+  VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -33,11 +34,11 @@ class LoggingScreen extends Screen {
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   Table<LogData> loggingTable;
@@ -109,7 +110,7 @@ class LoggingScreen extends Screen {
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     if (ref == null) {
       return;
     }
@@ -261,7 +262,7 @@ class LoggingScreen extends Screen {
   }
 
   Future<String> _retrieveFullStringValue(
-    VmService service,
+    VmServiceWrapper service,
     IsolateRef isolateRef,
     InstanceRef stringRef,
   ) async {

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -74,15 +75,15 @@ class MemoryScreen extends Screen {
     _updateStatus(null);
 
     // TODO(devoncarew): don't rebuild until the component is active
-    serviceInfo.isolateManager.onSelectedIsolateChanged.listen((_) {
+    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
       _handleIsolateChanged();
     });
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
@@ -109,7 +110,7 @@ class MemoryScreen extends Screen {
     // TODO(devoncarew): update buttons
   }
 
-  String get _isolateId => serviceInfo.isolateManager.selectedIsolate.id;
+  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   Future<Null> _loadAllocationProfile() async {
     loadSnapshotButton.disabled = true;
@@ -121,7 +122,7 @@ class MemoryScreen extends Screen {
 
     try {
       // 'reset': true to reset the object allocation accumulators
-      final Response response = await serviceInfo.service
+      final Response response = await serviceManager.service
           .callMethod('_getAllocationProfile', isolateId: _isolateId);
       final List<dynamic> members = response.json['members'];
       final List<ClassHeapStats> heapStats = members
@@ -229,7 +230,7 @@ class MemoryScreen extends Screen {
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmServiceWrapper service) {
     loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
 
@@ -393,7 +394,7 @@ class MemoryTracker {
   static const Duration kMaxGraphTime = Duration(minutes: 1);
   static const Duration kUpdateDelay = Duration(seconds: 1);
 
-  VmService service;
+  VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
       new StreamController<Null>.broadcast();

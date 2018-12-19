@@ -31,13 +31,13 @@ class DebuggerScreen extends Screen {
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
 
-    serviceInfo.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceInfo.hasConnection) {
-      _handleConnectionStart(serviceInfo.service);
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
     }
-    serviceInfo.isolateManager.onSelectedIsolateChanged
+    serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_handleIsolateChanged);
-    serviceInfo.onConnectionClosed.listen(_handleConnectionStop);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
   StatusItem deviceStatus;
@@ -248,9 +248,10 @@ class DebuggerScreen extends Screen {
         return;
       }
 
-      final IsolateRef isolateRef = serviceInfo.isolateManager.selectedIsolate;
+      final IsolateRef isolateRef =
+          serviceManager.isolateManager.selectedIsolate;
       final dynamic result =
-          await serviceInfo.service.getObject(isolateRef.id, scriptRef.id);
+          await serviceManager.service.getObject(isolateRef.id, scriptRef.id);
 
       if (result is Script) {
         _displaySource(result);
@@ -282,10 +283,10 @@ class DebuggerScreen extends Screen {
 //    });
 
     // TODO: add listeners
-    debuggerState.setVmService(serviceInfo.service);
+    debuggerState.setVmService(serviceManager.service);
 
     deviceStatus.element.text =
-        '${serviceInfo.vm.targetCPU} ${serviceInfo.vm.architectureBits}-bit';
+        '${serviceManager.vm.targetCPU} ${serviceManager.vm.architectureBits}-bit';
   }
 
   void _handleIsolateChanged(IsolateRef isolateRef) {
@@ -300,7 +301,7 @@ class DebuggerScreen extends Screen {
 
     debuggerState.switchToIsolate(isolateRef);
 
-    serviceInfo.service.getIsolate(isolateRef.id).then((dynamic result) {
+    serviceManager.service.getIsolate(isolateRef.id).then((dynamic result) {
       if (result is Isolate) {
         _populateFromIsolate(result);
       } else {
@@ -327,7 +328,7 @@ class DebuggerScreen extends Screen {
 
   void _populateFromIsolate(Isolate isolate) async {
     final ScriptList scriptList =
-        await serviceInfo.service.getScripts(isolate.id);
+        await serviceManager.service.getScripts(isolate.id);
     final List<ScriptRef> scripts = scriptList.scripts.toList();
 
     String scriptPrefix = isolate.rootLib.uri;

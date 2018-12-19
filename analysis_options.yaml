@@ -11,8 +11,8 @@
 # Android Studio, and the `flutter analyze` command.
 
 analyzer:
-  strong-mode:
-    implicit-dynamic: false
+  # strong-mode:
+  #   implicit-dynamic: false
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
@@ -20,6 +20,7 @@ analyzer:
     missing_return: warning
   exclude:
   - build/**
+  - test/fixtures/flutter_app
 
 linter:
   rules:
@@ -27,10 +28,10 @@ linter:
     # the Dart Lint rules page to make maintenance easier
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     - always_declare_return_types
-    - always_put_control_body_on_new_line
+    # - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
     - always_require_non_null_named_parameters
-    - always_specify_types
+    # - always_specify_types
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_as
@@ -92,7 +93,6 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors

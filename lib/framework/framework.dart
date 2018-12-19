@@ -6,11 +6,8 @@ import 'dart:async';
 import 'dart:html' hide Screen;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
 
-import '../globals.dart';
 import '../main.dart';
-import '../service.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
@@ -45,11 +42,6 @@ class Framework {
     load(screen);
   }
 
-  void performInitialLoad() {
-    loadScreenFromLocation();
-    _initService();
-  }
-
   void loadScreenFromLocation() {
     // Look for an explicit path, otherwise re-direct to '/'
     String path = window.location.pathname;
@@ -70,28 +62,6 @@ class Framework {
     } else {
       load(new NotFoundScreen());
     }
-  }
-
-  void _initService() {
-    int port;
-
-    if (window.location.search.isNotEmpty) {
-      final Uri uri = Uri.parse(window.location.toString());
-      final String portStr = uri.queryParameters['port'];
-      if (portStr != null) {
-        port = int.tryParse(portStr);
-      }
-    }
-
-    port ??= 8100;
-
-    final Completer<Null> finishedCompleter = new Completer<Null>();
-
-    connect('localhost', port, finishedCompleter).then((VmService service) {
-      serviceInfo.vmServiceOpened(service, finishedCompleter.future);
-    }).catchError((dynamic e) {
-      showError('Unable to connect to service on port $port');
-    });
   }
 
   Screen getScreen(String id) {

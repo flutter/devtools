@@ -1,18 +1,15 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
 import 'dart:html' hide Event;
 import 'dart:typed_data';
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'vm_service_wrapper.dart';
 
-Future<VmService> connect(
+Future<VmServiceWrapper> connect(
     String host, int port, Completer<Null> finishedCompleter) {
   final WebSocket ws = new WebSocket('ws://$host:$port/ws');
 
-  final Completer<VmService> connectedCompleter = new Completer<VmService>();
+  final Completer<VmServiceWrapper> connectedCompleter =
+      new Completer<VmServiceWrapper>();
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
@@ -30,7 +27,7 @@ Future<VmService> connect(
       }
     });
 
-    final VmService service = new VmService(
+    final VmServiceWrapper service = new VmServiceWrapper.fromNewVmService(
       inStream,
       (String message) => ws.send(message),
     );
@@ -51,147 +48,6 @@ Future<VmService> connect(
   });
 
   return connectedCompleter.future;
-}
-
-class ServiceConnectionManager {
-  final StreamController<Null> _stateController =
-      new StreamController<Null>.broadcast();
-  final StreamController<VmService> _connectionAvailableController =
-      new StreamController<VmService>.broadcast();
-  final StreamController<Null> _connectionClosedController =
-      new StreamController<Null>.broadcast();
-  final IsolateManager isolateManager = new IsolateManager();
-
-  VmService service;
-  VM vm;
-  String sdkVersion;
-
-  bool get hasConnection => service != null;
-
-  Stream<Null> get onStateChange => _stateController.stream;
-
-  Stream<VmService> get onConnectionAvailable =>
-      _connectionAvailableController.stream;
-
-  Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
-
-  void vmServiceOpened(VmService _service, Future<void> onClosed) {
-    _service.getVM().then((VM vm) {
-      this.vm = vm;
-      sdkVersion = vm.version;
-      if (sdkVersion.contains(' ')) {
-        sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
-      }
-
-      service = _service;
-
-      _stateController.add(null);
-      _connectionAvailableController.add(service);
-
-      isolateManager._initIsolates(vm.isolates);
-      service.onIsolateEvent.listen(isolateManager._handleIsolateEvent);
-
-      onClosed.then((_) => vmServiceClosed());
-
-      service.streamListen('Stdout');
-      service.streamListen('Stderr');
-      service.streamListen('VM');
-      service.streamListen('Isolate');
-      service.streamListen('Debug');
-      service.streamListen('GC');
-      service.streamListen('Timeline');
-      service.streamListen('Extension');
-      service.streamListen('_Graph');
-      service.streamListen('_Logging');
-    }).catchError((dynamic e) {
-      // TODO:
-      print(e);
-    });
-  }
-
-  void vmServiceClosed() {
-    service = null;
-    vm = null;
-    sdkVersion = null;
-
-    _stateController.add(null);
-    _connectionClosedController.add(null);
-  }
-}
-
-class IsolateManager {
-  List<IsolateRef> _isolates = <IsolateRef>[];
-  IsolateRef _selectedIsolate;
-
-  final StreamController<IsolateRef> _isolateCreatedController =
-      new StreamController<IsolateRef>.broadcast();
-  final StreamController<IsolateRef> _isolateExitedController =
-      new StreamController<IsolateRef>.broadcast();
-
-  final StreamController<IsolateRef> _selectedIsolateController =
-      new StreamController<IsolateRef>.broadcast();
-
-  List<IsolateRef> get isolates => new List<IsolateRef>.unmodifiable(_isolates);
-
-  IsolateRef get selectedIsolate => _selectedIsolate;
-
-  void selectIsolate(String isolateRefId) {
-    final IsolateRef ref = _isolates.firstWhere(
-        (IsolateRef ref) => ref.id == isolateRefId,
-        orElse: () => null);
-    if (ref != _selectedIsolate) {
-      _selectedIsolate = ref;
-      _selectedIsolateController.add(_selectedIsolate);
-    }
-  }
-
-  Stream<IsolateRef> get onIsolateCreated => _isolateCreatedController.stream;
-
-  Stream<IsolateRef> get onSelectedIsolateChanged =>
-      _selectedIsolateController.stream;
-
-  Stream<IsolateRef> get onIsolateExited => _isolateExitedController.stream;
-
-  void _initIsolates(List<IsolateRef> isolates) {
-    _isolates = isolates;
-    _selectedIsolate = _selectBestFirstIsolate(isolates);
-
-    if (_selectedIsolate != null) {
-      _isolateCreatedController.add(_selectedIsolate);
-      _selectedIsolateController.add(_selectedIsolate);
-    }
-  }
-
-  void _handleIsolateEvent(Event event) {
-    if (event.kind == 'IsolateStart') {
-      _isolates.add(event.isolate);
-      _isolateCreatedController.add(event.isolate);
-      if (_selectedIsolate == null) {
-        _selectedIsolate = event.isolate;
-        _selectedIsolateController.add(event.isolate);
-      }
-    } else if (event.kind == 'IsolateExit') {
-      _isolates.remove(event.isolate);
-      _isolateExitedController.add(event.isolate);
-      if (_selectedIsolate == event.isolate) {
-        _selectedIsolate = _isolates.isEmpty ? null : _isolates.first;
-        _selectedIsolateController.add(_selectedIsolate);
-      }
-    }
-  }
-
-  IsolateRef _selectBestFirstIsolate(List<IsolateRef> isolates) {
-    final IsolateRef ref = isolates.firstWhere((IsolateRef ref) {
-      // 'foo.dart:main()'
-      return ref.name.contains(':main(');
-    }, orElse: () => null);
-
-    if (ref != null) {
-      return ref;
-    }
-
-    return isolates.isEmpty ? null : isolates.first;
-  }
 }
 
 /// Wraps a broadcast stream as a single-subscription stream to workaround
