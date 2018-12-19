@@ -15,15 +15,20 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 
-// TODO: if a value is selected, show the toString result somewhere
+// TODO(devoncarew): if a value is selected, show the toString result somewhere
 
-// TODO: allow browsing object fields
+// TODO(devoncarew): allow browsing object fields
 
-// TODO: improve selection in the nav area
+// TODO(devoncarew): improve selection in the nav area
 
-// TODO: handle double click on breakpoints
+// TODO(devoncarew): handle double click on breakpoints
 
-// TODO: handle break on exceptions
+// TODO(devoncarew): Add the ability to adjust the break on exceptions behavior.
+
+// TODO(devoncarew): handle breaking on exceptions
+
+// TODO(devoncarew): start a testing strategy
+//   breakpoints, stepping, frame selection
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
@@ -167,9 +172,11 @@ class DebuggerScreen extends Screen {
 
     debuggerState.onPausedChanged.listen((bool paused) async {
       if (paused) {
-        // todo: use async frames
+        // Check for async causal frames; fall back to using regular sync frames.
         final Stack stack = await debuggerState.getStack();
-        callStackView.showFrames(stack, selectTop: true);
+        final List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
+
+        callStackView.showFrames(frames, selectTop: true);
       } else {
         callStackView.clearFrames();
         sourceEditor.clearExecutionPoint();
@@ -183,13 +190,15 @@ class DebuggerScreen extends Screen {
         sourceEditor.clearExecutionPoint();
       } else {
         final SourceLocation location = frame.location;
-        final ScriptRef scriptRef = location.script;
-        final Script script = await debuggerState.getScript(scriptRef);
-        final Pos position =
-            debuggerState.calculatePosition(script, location.tokenPos);
 
-        _sourcePathDiv.text = script.uri;
-        sourceEditor.displayExecutionPoint(script, position);
+        if (location != null) {
+          final ScriptRef scriptRef = location.script;
+          final Script script = await debuggerState.getScript(scriptRef);
+          final Pos position =
+              debuggerState.calculatePosition(script, location.tokenPos);
+          _sourcePathDiv.text = script.uri;
+          sourceEditor.displayExecutionPoint(script, position: position);
+        }
 
         variablesView.showVariables(frame);
       }
@@ -260,7 +269,7 @@ class DebuggerScreen extends Screen {
       }
     });
 
-    // TODO: listen to selection changes, jump to the source location
+    // TODO(devoncarew): listen to selection changes, jump to the source location
     debuggerState.onBreakpointsChanged.listen((List<Breakpoint> breakpoints) {
       breakpointsView.showBreakpoints(breakpoints);
     });
@@ -282,7 +291,7 @@ class DebuggerScreen extends Screen {
 //      });
 //    });
 
-    // TODO: add listeners
+    // TODO(devoncarew): add listeners
     debuggerState.setVmService(serviceManager.service);
 
     deviceStatus.element.text =
@@ -417,7 +426,7 @@ class DebuggerScreen extends Screen {
 class DebuggerState {
   DebuggerState();
 
-  // TODO: handle EventKind.kIsolateReload
+  // TODO(devoncarew): handle EventKind.kIsolateReload
 
   VmService service;
 
@@ -429,8 +438,10 @@ class DebuggerState {
 
   final BehaviorSubject<bool> _paused =
       new BehaviorSubject<bool>(seedValue: false);
-  final BehaviorSubject<bool> _stepping =
+  final BehaviorSubject<bool> _supportsStepping =
       new BehaviorSubject<bool>(seedValue: false);
+
+  Event _lastEvent;
 
   final BehaviorSubject<List<Breakpoint>> _breakpoints =
       new BehaviorSubject<List<Breakpoint>>(seedValue: <Breakpoint>[]);
@@ -440,7 +451,7 @@ class DebuggerState {
   Stream<bool> get onPausedChanged => _paused;
 
   Stream<bool> get onSupportsStepping =>
-      new Observable<bool>.concat(<Stream<bool>>[_paused, _stepping]);
+      new Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
 
   Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
 
@@ -468,6 +479,7 @@ class DebuggerState {
 
       if (isolate.pauseEvent != null &&
           isolate.pauseEvent.kind != EventKind.kResume) {
+        _lastEvent = isolate.pauseEvent;
         _updatePaused(true);
       }
 
@@ -479,9 +491,14 @@ class DebuggerState {
 
   Future<void> resume() => service.resume(isolateRef.id);
 
-  // TODO: handle async suspensions
-  Future<void> stepOver() =>
-      service.resume(isolateRef.id, step: StepOption.kOver);
+  Future<void> stepOver() {
+    // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
+    final bool useAsyncStepping = _lastEvent?.atAsyncSuspension == true;
+    return service.resume(isolateRef.id,
+        step: useAsyncStepping
+            ? StepOption.kOverAsyncSuspension
+            : StepOption.kOver);
+  }
 
   Future<void> stepIn() =>
       service.resume(isolateRef.id, step: StepOption.kInto);
@@ -506,9 +523,8 @@ class DebuggerState {
       return;
     }
 
-    _stepping.add(event.topFrame != null);
-
-    print(event.kind);
+    _supportsStepping.add(event.topFrame != null);
+    _lastEvent = event;
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -540,6 +556,7 @@ class DebuggerState {
 
   void _clearCaches() {
     _scriptCache.clear();
+    _lastEvent = null;
   }
 
   void dispose() {
@@ -696,7 +713,9 @@ class SourceEditor {
     }
 
     if (executionPoint != null && executionPoint.matches(currentScript)) {
-      _showLineClass(executionPoint.position.line - 1);
+      if (executionPoint.position != null) {
+        _showLineClass(executionPoint.position.line - 1);
+      }
     }
   }
 
@@ -722,8 +741,8 @@ class SourceEditor {
     codeMirror.addLineClass(_currentLineClass, 'background', 'executionLine');
   }
 
-  void displayExecutionPoint(Script script, Pos position) {
-    executionPoint = new ScriptAndPos(script.uri, position);
+  void displayExecutionPoint(Script script, {Pos position}) {
+    executionPoint = new ScriptAndPos(script.uri, position: position);
 
     // This also calls _refreshMarkers().
     displayScript(script, scrollTo: position);
@@ -851,15 +870,25 @@ class CallStackView {
         name = name.substring('[Unoptimized] '.length);
       }
 
-      String location = frame.location.script.uri;
-      if (location.contains('/')) {
-        location = location.substring(location.lastIndexOf('/') + 1);
+      String locationDescription;
+      if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+        name = '<async break>';
+      } else {
+        locationDescription = frame.location.script.uri;
+
+        if (locationDescription.contains('/')) {
+          locationDescription = locationDescription
+              .substring(locationDescription.lastIndexOf('/') + 1);
+        }
       }
 
-      final CoreElement element = li(
-        text: name,
-        c: 'list-item',
-      )..add(span(text: ' $location', c: 'subtle'));
+      final CoreElement element = li(text: name, c: 'list-item');
+      if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+        element.toggleClass('subtle');
+      }
+      if (locationDescription != null) {
+        element.add(span(text: ' $locationDescription', c: 'subtle'));
+      }
       return element;
     });
   }
@@ -870,8 +899,7 @@ class CallStackView {
 
   Stream<Frame> get onSelectionChanged => _items.onSelectionChanged;
 
-  void showFrames(Stack stack, {bool selectTop = false}) {
-    final List<Frame> frames = stack.frames;
+  void showFrames(List<Frame> frames, {bool selectTop = false}) {
     _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
   }
 
@@ -893,7 +921,7 @@ class VariablesView {
       String valueStr;
       if (value is InstanceRef) {
         if (value.valueAsString == null) {
-          // TODO: also show an expandable toggle
+          // TODO(devoncarew): also show an expandable toggle
           valueStr = value.classRef.name;
         } else {
           valueStr = value.valueAsString;
@@ -923,7 +951,8 @@ class VariablesView {
   CoreElement get element => _items;
 
   void showVariables(Frame frame) {
-    final List<BoundVariable> vars = frame.vars;
+    // AsyncCausal frames don't have local vars.
+    final List<BoundVariable> vars = frame.vars ?? [];
     _items.setItems(vars);
   }
 
@@ -933,7 +962,7 @@ class VariablesView {
 }
 
 class ScriptAndPos {
-  ScriptAndPos(this.uri, this.position);
+  ScriptAndPos(this.uri, {this.position});
 
   final String uri;
   final Pos position;

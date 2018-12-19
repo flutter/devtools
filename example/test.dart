@@ -15,8 +15,8 @@ void main() {
 
   int count = 0;
 
-  work = () {
-    bar(count++);
+  work = () async {
+    await bar(count++);
 
     if (count % 2 == 0) {
       Timer.run(() {
@@ -34,10 +34,14 @@ void main() {
   new Timer(delay, work);
 }
 
-void bar(int count) {
+Future bar(int count) async {
   final Directory dir = new Directory('.');
 
+  await Future.delayed(const Duration(milliseconds: 4));
+
   print('$count:00');
+
+  await Future.delayed(const Duration(milliseconds: 4));
 
   for (FileSystemEntity entity in dir.listSync()) {
     final String name = path.basename(entity.path);

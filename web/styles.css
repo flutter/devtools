@@ -567,11 +567,6 @@ nav.menu {
     margin-bottom: 0;
 }
 
-.debugger-menu {
-    width: 280px;
-    margin-right: 18px;
-}
-
 .counter {
   display: inline-block;
   padding: 2px 5px;
@@ -605,6 +600,7 @@ nav.menu li {
     white-space: nowrap;
 }
 
+.list-item.subtle,
 .list-item .subtle {
     font-size: 90%;
     color: #777;
@@ -617,32 +613,4 @@ nav.menu li {
 
 .list-item.selected .subtle {
     color: #ccc;
-}
-
-.source-head {
-    font-weight: 600;
-    color: #586069;
-    background-color: #f3f3f3;
-    border-bottom: 1px solid #dfe2e5;
-    padding: 4px 8px;
-}
-
-.breakpoints {
-    width: 1em;
-}
-
-.CodeMirror-gutter-elt .octicon {
-    margin-left: 4px;
-    color: #4078c0;
-}
-
-.CodeMirror-linebackground.executionLine {
-    background: #c4daf7;
-}
-
-.execution-marker {
-    color: #4078c0;
-    margin-left: -2px;
-    margin-top: -2px;
-    z-index: 10;
 }
