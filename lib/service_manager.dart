@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'eval_on_dart_library.dart';
@@ -69,18 +70,18 @@ class ServiceConnectionManager {
       service.onExtensionEvent
           .listen(_serviceExtensionManager._handleExtensionEvent);
 
-      await onClosed.then((_) => vmServiceClosed());
+      unawaited(onClosed.then((_) => vmServiceClosed()));
 
-      await service.streamListen('Stdout');
-      await service.streamListen('Stderr');
-      await service.streamListen('VM');
-      await service.streamListen('Isolate');
-      await service.streamListen('Debug');
-      await service.streamListen('GC');
-      await service.streamListen('Timeline');
-      await service.streamListen('Extension');
-      await service.streamListen('_Graph');
-      await service.streamListen('_Logging');
+      unawaited(service.streamListen('Stdout'));
+      unawaited(service.streamListen('Stderr'));
+      unawaited(service.streamListen('VM'));
+      unawaited(service.streamListen('Isolate'));
+      unawaited(service.streamListen('Debug'));
+      unawaited(service.streamListen('GC'));
+      unawaited(service.streamListen('Timeline'));
+      unawaited(service.streamListen('Extension'));
+      unawaited(service.streamListen('_Graph'));
+      unawaited(service.streamListen('_Logging'));
     } catch (e) {
       // TODO:
       print(e);
