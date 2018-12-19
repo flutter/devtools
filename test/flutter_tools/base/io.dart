@@ -40,45 +40,45 @@ import 'process.dart';
 
 export 'dart:io'
     show
-    BytesBuilder,
-    // Directory         NO! Use `file_system.dart`
-    exitCode,
-    // File              NO! Use `file_system.dart`
-    // FileSystemEntity  NO! Use `file_system.dart`
-    gzip,
-    HandshakeException,
-    HttpClient,
-    HttpClientRequest,
-    HttpClientResponse,
-    HttpHeaders,
-    HttpRequest,
-    HttpServer,
-    HttpStatus,
-    InternetAddress,
-    InternetAddressType,
-    IOException,
-    IOSink,
-    // Link              NO! Use `file_system.dart`
-    pid,
-    // Platform          NO! use `platform.dart`
-    Process,
-    ProcessException,
-    ProcessResult,
-    // ProcessSignal     NO! Use [ProcessSignal] below.
-    ProcessStartMode,
-    // RandomAccessFile  NO! Use `file_system.dart`
-    ServerSocket,
-    // stderr,           NO! Use `io.dart`
-    // stdin,            NO! Use `io.dart`
-    Stdin,
-    StdinException,
-    // stdout,           NO! Use `io.dart`
-    Socket,
-    SocketException,
-    systemEncoding,
-    WebSocket,
-    WebSocketException,
-    WebSocketTransformer;
+        BytesBuilder,
+        // Directory         NO! Use `file_system.dart`
+        exitCode,
+        // File              NO! Use `file_system.dart`
+        // FileSystemEntity  NO! Use `file_system.dart`
+        gzip,
+        HandshakeException,
+        HttpClient,
+        HttpClientRequest,
+        HttpClientResponse,
+        HttpHeaders,
+        HttpRequest,
+        HttpServer,
+        HttpStatus,
+        InternetAddress,
+        InternetAddressType,
+        IOException,
+        IOSink,
+        // Link              NO! Use `file_system.dart`
+        pid,
+        // Platform          NO! use `platform.dart`
+        Process,
+        ProcessException,
+        ProcessResult,
+        // ProcessSignal     NO! Use [ProcessSignal] below.
+        ProcessStartMode,
+        // RandomAccessFile  NO! Use `file_system.dart`
+        ServerSocket,
+        // stderr,           NO! Use `io.dart`
+        // stdin,            NO! Use `io.dart`
+        Stdin,
+        StdinException,
+        // stdout,           NO! Use `io.dart`
+        Socket,
+        SocketException,
+        systemEncoding,
+        WebSocket,
+        WebSocketException,
+        WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);
@@ -100,9 +100,10 @@ ExitFunction get exit => _exitFunction;
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
-  _exitFunction = exitFunction ?? (int exitCode) {
-    throw ProcessExit(exitCode, immediate: true);
-  };
+  _exitFunction = exitFunction ??
+      (int exitCode) {
+        throw ProcessExit(exitCode, immediate: true);
+      };
 }
 
 /// Restores the [exit] function to the `dart:io` implementation.
@@ -120,18 +121,24 @@ class ProcessSignal implements io.ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
-  static const ProcessSignal SIGWINCH = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
-  static const ProcessSignal SIGTERM = _PosixProcessSignal._(io.ProcessSignal.sigterm);
-  static const ProcessSignal SIGUSR1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
-  static const ProcessSignal SIGUSR2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
-  static const ProcessSignal SIGINT =  ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal SIGKILL =  ProcessSignal(io.ProcessSignal.sigkill);
+  static const ProcessSignal SIGWINCH =
+      _PosixProcessSignal._(io.ProcessSignal.sigwinch);
+  static const ProcessSignal SIGTERM =
+      _PosixProcessSignal._(io.ProcessSignal.sigterm);
+  static const ProcessSignal SIGUSR1 =
+      _PosixProcessSignal._(io.ProcessSignal.sigusr1);
+  static const ProcessSignal SIGUSR2 =
+      _PosixProcessSignal._(io.ProcessSignal.sigusr2);
+  static const ProcessSignal SIGINT = ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal SIGKILL = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
 
   @override
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
+    return _delegate
+        .watch()
+        .map<ProcessSignal>((io.ProcessSignal signal) => this);
   }
 
   @override
@@ -142,13 +149,12 @@ class ProcessSignal implements io.ProcessSignal {
 ///
 /// Listening to a [_PosixProcessSignal] is a no-op on Windows.
 class _PosixProcessSignal extends ProcessSignal {
-
-  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal)
+      : super(wrappedSignal);
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows)
-      return const Stream<ProcessSignal>.empty();
+    if (platform.isWindows) return const Stream<ProcessSignal>.empty();
     return super.watch();
   }
 }
@@ -163,7 +169,8 @@ class Stdio {
   bool get hasTerminal => io.stdout.hasTerminal;
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
-  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
+  bool get supportsAnsiEscapes =>
+      hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
 io.IOSink get stderr => context[Stdio].stderr;

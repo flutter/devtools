@@ -50,11 +50,11 @@ AppContext get context => Zone.current[_Key.key] ?? AppContext._root;
 /// zones work, see https://www.dartlang.org/articles/libraries/zones.
 class AppContext {
   AppContext._(
-      this._parent,
-      this.name, [
-        this._overrides = const <Type, Generator>{},
-        this._fallbacks = const <Type, Generator>{},
-      ]);
+    this._parent,
+    this.name, [
+    this._overrides = const <Type, Generator>{},
+    this._fallbacks = const <Type, Generator>{},
+  ]);
 
   final String name;
   final AppContext _parent;
@@ -69,7 +69,8 @@ class AppContext {
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
-  dynamic _unboxNull(dynamic value) => value == _BoxedNull.instance ? null : value;
+  dynamic _unboxNull(dynamic value) =>
+      value == _BoxedNull.instance ? null : value;
 
   /// Returns the generated value for [type] if such a generator exists.
   ///
@@ -85,8 +86,7 @@ class AppContext {
   /// If the generator ends up triggering a reentrant call, it signals a
   /// dependency cycle, and a [ContextDependencyCycleException] will be thrown.
   dynamic _generateIfNecessary(Type type, Map<Type, Generator> generators) {
-    if (!generators.containsKey(type))
-      return null;
+    if (!generators.containsKey(type)) return null;
 
     return _values.putIfAbsent(type, () {
       _reentrantChecks ??= <Type>[];
@@ -103,8 +103,7 @@ class AppContext {
         return _boxNull(generators[type]());
       } finally {
         _reentrantChecks.removeLast();
-        if (_reentrantChecks.isEmpty)
-          _reentrantChecks = null;
+        if (_reentrantChecks.isEmpty) _reentrantChecks = null;
       }
     });
   }
@@ -113,8 +112,7 @@ class AppContext {
   /// such value has been associated.
   dynamic operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null)
-      value = _parent[type];
+    if (value == null && _parent != null) value = _parent[type];
     return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
@@ -143,7 +141,7 @@ class AppContext {
       Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
     return await runZoned<Future<V>>(
-          () async => await body(),
+      () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
     );
   }
@@ -155,14 +153,12 @@ class AppContext {
     AppContext ctx = this;
     while (ctx != null) {
       buf.write('AppContext');
-      if (ctx.name != null)
-        buf.write('[${ctx.name}]');
+      if (ctx.name != null) buf.write('[${ctx.name}]');
       if (ctx._overrides.isNotEmpty)
         buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
       if (ctx._fallbacks.isNotEmpty)
         buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
-      if (ctx._parent != null)
-        buf.write('\n$indent  parent: ');
+      if (ctx._parent != null) buf.write('\n$indent  parent: ');
       ctx = ctx._parent;
       indent += '  ';
     }

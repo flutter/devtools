@@ -15,18 +15,18 @@ String get homeDirPath {
     _homeDirPath = platform.isWindows
         ? platform.environment['USERPROFILE']
         : platform.environment['HOME'];
-    if (_homeDirPath != null)
-      _homeDirPath = fs.path.absolute(_homeDirPath);
+    if (_homeDirPath != null) _homeDirPath = fs.path.absolute(_homeDirPath);
   }
   return _homeDirPath;
 }
+
 String _homeDirPath;
 
 /// Throw a specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
-void throwToolExit(String message, { int exitCode }) {
+void throwToolExit(String message, {int exitCode}) {
   throw ToolExit(message, exitCode: exitCode);
 }
 
@@ -35,7 +35,7 @@ void throwToolExit(String message, { int exitCode }) {
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
 class ToolExit implements Exception {
-  ToolExit(this.message, { this.exitCode });
+  ToolExit(this.message, {this.exitCode});
 
   final String message;
   final int exitCode;

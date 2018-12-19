@@ -35,8 +35,7 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty)
-      return null;
+    if (result == null || result.isEmpty) return null;
     return result.first;
   }
 
@@ -89,38 +88,50 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, {bool all = false}) {
     final List<String> command = <String>['which'];
-    if (all)
-      command.add('-a');
+    if (all) command.add('-a');
     command.add(execName);
     final ProcessResult result = processManager.runSync(command);
-    if (result.exitCode != 0)
-      return const <File>[];
+    if (result.exitCode != 0) return const <File>[];
     final String stdout = result.stdout;
-    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
+    return stdout
+        .trim()
+        .split('\n')
+        .map<File>((String path) => fs.file(path.trim()))
+        .toList();
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
+    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'],
+        workingDirectory: data.path);
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+    runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
   }
 
   @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+  bool verifyZip(File zipFile) =>
+      exitsHappy(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+    runSync(<String>[
+      'tar',
+      '-xzf',
+      gzippedTarFile.path,
+      '-C',
+      targetDirectory.path
+    ]);
   }
 
   @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
+  bool verifyGzip(File gzippedFile) =>
+      exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -140,8 +151,8 @@ class _PosixUtils extends OperatingSystemUtils {
           processManager.runSync(<String>['sw_vers', '-buildVersion']),
         ];
         if (results.every((ProcessResult result) => result.exitCode == 0)) {
-          _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
+          _name =
+              '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}';
         }
       }
       _name ??= super.name;
@@ -165,9 +176,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, {bool all = false}) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = processManager.runSync(<String>['where', execName]);
-    if (result.exitCode != 0)
-      return const <File>[];
+    final ProcessResult result =
+        processManager.runSync(<String>['where', execName]);
+    if (result.exitCode != 0) return const <File>[];
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
@@ -182,7 +193,8 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
       final File file = entity;
-      final String path = file.fileSystem.path.relative(file.path, from: data.path);
+      final String path =
+          file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile(path, bytes.length, bytes));
     }
@@ -230,10 +242,10 @@ class _WindowsUtils extends OperatingSystemUtils {
   void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
-        continue;
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) continue;
 
-      final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
+      final File destFile =
+          fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
@@ -250,8 +262,8 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      final ProcessResult result = processManager.runSync(
-          <String>['ver'], runInShell: true);
+      final ProcessResult result =
+          processManager.runSync(<String>['ver'], runInShell: true);
       if (result.exitCode == 0)
         _name = result.stdout.trim();
       else
@@ -275,8 +287,7 @@ String findProjectRoot([String directory]) {
     if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
       return directory;
     final String parent = fs.path.dirname(directory);
-    if (directory == parent)
-      return null;
+    if (directory == parent) return null;
     directory = parent;
   }
 }

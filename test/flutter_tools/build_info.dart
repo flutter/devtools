@@ -14,7 +14,9 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {
+  const BuildInfo(
+    this.mode,
+    this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
     this.buildHotUpdate,
@@ -78,8 +80,10 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
+  static const BuildInfo dynamicProfile =
+      BuildInfo(BuildMode.dynamicProfile, null);
+  static const BuildInfo dynamicRelease =
+      BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -89,12 +93,14 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  bool get isProfile =>
+      mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
+  bool get isRelease =>
+      mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -113,13 +119,7 @@ class BuildInfo {
 }
 
 /// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-  dynamicProfile,
-  dynamicRelease
-}
+enum BuildMode { debug, profile, release, dynamicProfile, dynamicRelease }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
@@ -247,12 +247,9 @@ TargetPlatform getTargetPlatformForName(String platform) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
-    return HostPlatform.darwin_x64;
-  if (platform.isLinux)
-    return HostPlatform.linux_x64;
-  if (platform.isWindows)
-    return HostPlatform.windows_x64;
+  if (platform.isMacOS) return HostPlatform.darwin_x64;
+  if (platform.isLinux) return HostPlatform.linux_x64;
+  if (platform.isWindows) return HostPlatform.windows_x64;
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -263,8 +260,7 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
-    return 'build';
+  if (context == null || config == null) return 'build';
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

@@ -47,14 +47,14 @@ abstract class Logger {
   /// If [wrap] is specified, then it overrides the
   /// [outputPreferences.wrapText] setting.
   void printError(
-      String message, {
-        StackTrace stackTrace,
-        bool emphasis,
-        TerminalColor color,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      });
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  });
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
@@ -78,14 +78,14 @@ abstract class Logger {
   /// If [wrap] is specified, then it overrides the
   /// [outputPreferences.wrapText] setting.
   void printStatus(
-      String message, {
-        bool emphasis,
-        TerminalColor color,
-        bool newline,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      });
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    bool newline,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
@@ -99,12 +99,12 @@ abstract class Logger {
   /// [progressIndicatorPadding] can optionally be used to specify spacing
   /// between the [message] and the progress indicator.
   Status startProgress(
-      String message, {
-        String progressId,
-        bool expectSlowOperation,
-        bool multilineOutput,
-        int progressIndicatorPadding,
-      });
+    String message, {
+    String progressId,
+    bool expectSlowOperation,
+    bool multilineOutput,
+    int progressIndicatorPadding,
+  });
 }
 
 class StdoutLogger extends Logger {
@@ -115,20 +115,20 @@ class StdoutLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-        StackTrace stackTrace,
-        bool emphasis,
-        TerminalColor color,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
+    message = wrapText(message,
+        indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     _status?.cancel();
     _status = null;
-    if (emphasis == true)
-      message = terminal.bolden(message);
+    if (emphasis == true) message = terminal.bolden(message);
     message = terminal.color(message, color ?? TerminalColor.red);
     stderr.writeln(message);
     if (stackTrace != null) {
@@ -138,24 +138,22 @@ class StdoutLogger extends Logger {
 
   @override
   void printStatus(
-      String message, {
-        bool emphasis,
-        TerminalColor color,
-        bool newline,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    bool newline,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     message ??= '';
-    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
+    message = wrapText(message,
+        indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     _status?.cancel();
     _status = null;
-    if (emphasis == true)
-      message = terminal.bolden(message);
-    if (color != null)
-      message = terminal.color(message, color);
-    if (newline != false)
-      message = '$message\n';
+    if (emphasis == true) message = terminal.bolden(message);
+    if (color != null) message = terminal.color(message, color);
+    if (newline != false) message = '$message\n';
     writeToStdOut(message);
   }
 
@@ -169,12 +167,12 @@ class StdoutLogger extends Logger {
 
   @override
   Status startProgress(
-      String message, {
-        String progressId,
-        bool expectSlowOperation,
-        bool multilineOutput,
-        int progressIndicatorPadding,
-      }) {
+    String message, {
+    String progressId,
+    bool expectSlowOperation,
+    bool multilineOutput,
+    int progressIndicatorPadding,
+  }) {
     expectSlowOperation ??= false;
     progressIndicatorPadding ??= kDefaultStatusPadding;
     if (_status != null) {
@@ -217,10 +215,7 @@ class WindowsStdoutLogger extends StdoutLogger {
   @override
   void writeToStdOut(String message) {
     // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
-    stdout.write(message
-        .replaceAll('✗', 'X')
-        .replaceAll('✓', '√')
-    );
+    stdout.write(message.replaceAll('✗', 'X').replaceAll('✓', '√'));
   }
 }
 
@@ -238,34 +233,37 @@ class BufferLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-        StackTrace stackTrace,
-        bool emphasis,
-        TerminalColor color,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _error.writeln(terminal.color(
-      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
+      wrapText(message,
+          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       color ?? TerminalColor.red,
     ));
   }
 
   @override
   void printStatus(
-      String message, {
-        bool emphasis,
-        TerminalColor color,
-        bool newline,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    bool newline,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     if (newline != false)
-      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status.writeln(wrapText(message,
+          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
     else
-      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status.write(wrapText(message,
+          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -273,12 +271,12 @@ class BufferLogger extends Logger {
 
   @override
   Status startProgress(
-      String message, {
-        String progressId,
-        bool expectSlowOperation,
-        bool multilineOutput,
-        int progressIndicatorPadding,
-      }) {
+    String message, {
+    String progressId,
+    bool expectSlowOperation,
+    bool multilineOutput,
+    int progressIndicatorPadding,
+  }) {
     printStatus(message);
     return Status()..start();
   }
@@ -305,32 +303,36 @@ class VerboseLogger extends Logger {
 
   @override
   void printError(
-      String message, {
-        StackTrace stackTrace,
-        bool emphasis,
-        TerminalColor color,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
     _emit(
       _LogType.error,
-      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
+      wrapText(message,
+          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       stackTrace,
     );
   }
 
   @override
   void printStatus(
-      String message, {
-        bool emphasis,
-        TerminalColor color,
-        bool newline,
-        int indent,
-        int hangingIndent,
-        bool wrap,
-      }) {
-    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    bool newline,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _emit(
+        _LogType.status,
+        wrapText(message,
+            indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -340,21 +342,21 @@ class VerboseLogger extends Logger {
 
   @override
   Status startProgress(
-      String message, {
-        String progressId,
-        bool expectSlowOperation,
-        bool multilineOutput,
-        int progressIndicatorPadding,
-      }) {
+    String message, {
+    String progressId,
+    bool expectSlowOperation,
+    bool multilineOutput,
+    int progressIndicatorPadding,
+  }) {
     printStatus(message);
     return Status(onFinish: () {
       printTrace('$message (completed)');
-    })..start();
+    })
+      ..start();
   }
 
   void _emit(_LogType type, String message, [StackTrace stackTrace]) {
-    if (message.trim().isEmpty)
-      return;
+    if (message.trim().isEmpty) return;
 
     final int millis = stopwatch.elapsedMilliseconds;
     stopwatch.reset();
@@ -365,8 +367,7 @@ class VerboseLogger extends Logger {
       prefix = ''.padLeft(prefixWidth);
     } else {
       prefix = '+$millis ms'.padLeft(prefixWidth);
-      if (millis >= 100)
-        prefix = terminal.bolden(prefix);
+      if (millis >= 100) prefix = terminal.bolden(prefix);
     }
     prefix = '[$prefix] ';
 
@@ -376,7 +377,8 @@ class VerboseLogger extends Logger {
     if (type == _LogType.error) {
       parent.printError(prefix + terminal.bolden(indentMessage));
       if (stackTrace != null)
-        parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+        parent.printError(
+            indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
       parent.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
@@ -406,9 +408,8 @@ class Status {
 
   /// A straight [Status] or an [AnsiSpinner] (depending on whether the
   /// terminal is fancy enough), already started.
-  factory Status.withSpinner({ VoidCallback onFinish }) {
-    if (terminal.supportsColor)
-      return AnsiSpinner(onFinish: onFinish)..start();
+  factory Status.withSpinner({VoidCallback onFinish}) {
+    if (terminal.supportsColor) return AnsiSpinner(onFinish: onFinish)..start();
     return Status(onFinish: onFinish)..start();
   }
 
@@ -426,16 +427,14 @@ class Status {
   void stop() {
     assert(_isStarted);
     _isStarted = false;
-    if (onFinish != null)
-      onFinish();
+    if (onFinish != null) onFinish();
   }
 
   /// Call to cancel the spinner after failure or cancellation.
   void cancel() {
     assert(_isStarted);
     _isStarted = false;
-    if (onFinish != null)
-      onFinish();
+    if (onFinish != null) onFinish();
   }
 }
 
@@ -454,7 +453,7 @@ class AnsiSpinner extends Status {
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   String get _backspace => '\b' * _animation[0].length;
-  String get _clear => ' ' *  _animation[0].length;
+  String get _clear => ' ' * _animation[0].length;
 
   void _callback(Timer timer) {
     stdout.write('$_backspace${_animation[ticks++ % _animation.length]}');
@@ -547,9 +546,11 @@ class AnsiStatus extends AnsiSpinner {
         ? '\n${'$message Done'.padRight(padding - 4)}$_margin'
         : '\b\b\b\b';
     if (expectSlowOperation) {
-      stdout.write('$prefix${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
+      stdout
+          .write('$prefix${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
-      stdout.write('$prefix${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.write(
+          '$prefix${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
   }
 }

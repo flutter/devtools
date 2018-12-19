@@ -24,12 +24,11 @@ Future<List<int>> fetchUrl(Uri url) async {
   while (true) {
     attempts += 1;
     final List<int> result = await _attempt(url);
-    if (result != null)
-      return result;
-    printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+    if (result != null) return result;
+    printStatus(
+        'Download failed -- attempting retry $attempts in $duration second${duration == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: duration));
-    if (duration < 64)
-      duration *= 2;
+    if (duration < 64) duration *= 2;
   }
 }
 
@@ -80,7 +79,8 @@ Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
       );
     }
     // 5xx errors are server errors and we can try again
-    printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
+    printTrace(
+        'Download error: ${response.statusCode} ${response.reasonPhrase}');
     return null;
   }
   printTrace('Received response from server, collecting bytes...');
