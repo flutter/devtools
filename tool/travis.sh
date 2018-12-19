@@ -10,6 +10,9 @@ set -e
 # Print out the Dart version in use.
 dart --version
 
+# Print out the flutter version before install.
+flutter --version
+
 # Install Flutter.
 git clone https://github.com/flutter/flutter.git -b beta
 ./flutter/bin/flutter doctor
