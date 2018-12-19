@@ -10,6 +10,10 @@ set -e
 # Print out the Dart version in use.
 dart --version
 
+# Install Flutter.
+git clone https://github.com/flutter/flutter.git -b beta
+./flutter/bin/flutter doctor
+
 # Add globally activated packages to the path.
 export PATH="$PATH":"~/.pub-cache/bin"
 

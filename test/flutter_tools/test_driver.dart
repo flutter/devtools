@@ -74,7 +74,6 @@ abstract class FlutterTestDriver {
       args.addAll(<String>['--pid-file', pidFile.path]);
     }
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
-    //  const ProcessManager _processManager = LocalProcessManager();
 
     _proc = await Process.start('flutter', args.toList(),
         workingDirectory: _projectFolder.path,
