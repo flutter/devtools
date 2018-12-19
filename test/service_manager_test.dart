@@ -127,10 +127,17 @@ Future<void> _verifyInitialExtensionStateInServiceManager(
 
 Future<void> _verifyExtensionStateInServiceManager(
     String extensionName, bool enabled, dynamic value) async {
-  final ServiceExtensionState state = await serviceManager
+  final StreamSubscription<ServiceExtensionState> stream = serviceManager
       .serviceExtensionManager
-      .getServiceExtensionState(extensionName, null)
-      .asFuture();
+      .getServiceExtensionState(extensionName, null);
+
+  final Completer<ServiceExtensionState> stateCompleter = new Completer();
+  stream.onData((ServiceExtensionState state) {
+    stateCompleter.complete(state);
+    stream.cancel();
+  });
+
+  final ServiceExtensionState state = await stateCompleter.future;
   expect(state.enabled, equals(enabled));
   expect(state.value, equals(value));
 }

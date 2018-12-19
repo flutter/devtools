@@ -398,6 +398,9 @@ class ServiceExtensionManager {
 
   StreamSubscription<bool> hasServiceExtension(
       String name, void onData(bool value)) {
+    if (_serviceExtensions.contains(name) && onData != null) {
+      onData(true);
+    }
     final StreamController<bool> streamController =
         _getServiceExtensionController(name);
     return streamController.stream.listen(onData);
@@ -405,6 +408,9 @@ class ServiceExtensionManager {
 
   StreamSubscription<ServiceExtensionState> getServiceExtensionState(
       String name, void onData(ServiceExtensionState state)) {
+    if (_enabledServiceExtensions.containsKey(name) && onData != null) {
+      onData(_enabledServiceExtensions[name]);
+    }
     final StreamController<ServiceExtensionState> streamController =
         _getServiceExtensionStateController(name);
     return streamController.stream.listen(onData);
