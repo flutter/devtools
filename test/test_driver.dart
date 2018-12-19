@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 import 'package:devtools/vm_service_wrapper.dart';
@@ -79,11 +80,10 @@ abstract class FlutterTestDriver {
         });
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
-    _proc.exitCode.then((int code) {
-      // ignore: unawaited_futures
+    unawaited(_proc.exitCode.then((int code) {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
-    });
+    }));
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 

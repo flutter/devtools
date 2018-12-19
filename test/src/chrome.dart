@@ -92,7 +92,7 @@ class ChromeProcess {
       return tab.url == url;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    await process.exitCode.then((_) {
       _processAlive = false;
     });
 
@@ -110,7 +110,7 @@ class ChromeProcess {
       return tab.id == id;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    await process.exitCode.then((_) {
       _processAlive = false;
     });
 
@@ -127,7 +127,7 @@ class ChromeProcess {
       return !tab.isBackgroundPage && !tab.isChromeExtension;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    await process.exitCode.then((_) {
       _processAlive = false;
     });
 
@@ -164,7 +164,7 @@ class ChromeTab {
   Future<WipConnection> connect() async {
     _wip = await wipTab.connect();
 
-    _wip.log.enable();
+    await _wip.log.enable();
     _wip.log.onEntryAdded.listen((LogEntry entry) {
       if (_lostConnectionTime == null ||
           entry.timestamp > _lostConnectionTime) {
@@ -172,7 +172,7 @@ class ChromeTab {
       }
     });
 
-    _wip.runtime.enable();
+    await _wip.runtime.enable();
     _wip.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
       if (_lostConnectionTime == null ||
           event.timestamp > _lostConnectionTime) {
@@ -180,9 +180,9 @@ class ChromeTab {
       }
     });
 
-    _exceptionThrownController.addStream(_wip.runtime.onExceptionThrown);
+    await _exceptionThrownController.addStream(_wip.runtime.onExceptionThrown);
 
-    _wip.page.enable();
+    await _wip.page.enable();
 
     //_wip.onNotification.listen((WipEvent e) {
     //  print(e.toString());

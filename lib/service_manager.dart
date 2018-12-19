@@ -69,18 +69,18 @@ class ServiceConnectionManager {
       service.onExtensionEvent
           .listen(_serviceExtensionManager._handleExtensionEvent);
 
-      onClosed.then((_) => vmServiceClosed());
+      await onClosed.then((_) => vmServiceClosed());
 
-      service.streamListen('Stdout');
-      service.streamListen('Stderr');
-      service.streamListen('VM');
-      service.streamListen('Isolate');
-      service.streamListen('Debug');
-      service.streamListen('GC');
-      service.streamListen('Timeline');
-      service.streamListen('Extension');
-      service.streamListen('_Graph');
-      service.streamListen('_Logging');
+      await service.streamListen('Stdout');
+      await service.streamListen('Stderr');
+      await service.streamListen('VM');
+      await service.streamListen('Isolate');
+      await service.streamListen('Debug');
+      await service.streamListen('GC');
+      await service.streamListen('Timeline');
+      await service.streamListen('Extension');
+      await service.streamListen('_Graph');
+      await service.streamListen('_Logging');
     } catch (e) {
       // TODO:
       print(e);
