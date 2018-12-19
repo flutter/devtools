@@ -23,13 +23,12 @@ void main() {
 
       setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
 
-      final completer = new Completer<Null>();
-      await serviceManager.vmServiceOpened(service, completer.future);
+      await serviceManager.vmServiceOpened(service, new Completer().future);
     });
 
     tearDown(() async {
       await service.allFuturesCompleted.future;
-      _flutter.stop();
+      await _flutter.stop();
     });
 
     test('vmServiceOpened', () async {
@@ -38,8 +37,6 @@ void main() {
       expect(serviceManager.serviceExtensionManager, isNotNull);
       expect(serviceManager.isolateManager.isolates, isNotEmpty);
 
-      // Test should time out and fail if the following await statements do not
-      // finish with a value.
       if (serviceManager.isolateManager.selectedIsolate == null) {
         await serviceManager.isolateManager.onSelectedIsolateChanged
             .firstWhere((ref) => ref != null);
@@ -51,133 +48,89 @@ void main() {
     });
 
     test('toggle boolean service extension', () async {
-      final EvalOnDartLibrary library = new EvalOnDartLibrary(
+      const extensionName = 'ext.flutter.debugPaint';
+      const evalExpression = 'debugPaintSizeEnabled';
+      final library = new EvalOnDartLibrary(
         'package:flutter/src/rendering/debug.dart',
         service,
       );
 
-      StreamSubscription<ServiceExtensionState> stream;
-
-      // Initial value on the test device should be false.
-      final before = await library.eval('debugPaintSizeEnabled', isAlive: null);
-      if (before is InstanceRef) {
-        expect(before.valueAsString, 'false');
-      }
-      // Initial state in ServiceExtensionManager should be disabled with value
-      // null.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.debugPaint', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, false);
-        expect(state.value, null);
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(evalExpression, 'false', library);
+      await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager
           .setServiceExtensionState('ext.flutter.debugPaint', true, true);
 
-      // Verify the test device is aware of the newly-enabled state.
-      final after = await library.eval('debugPaintSizeEnabled', isAlive: null);
-      if (after is InstanceRef) {
-        expect(after.valueAsString, 'true');
-      }
-      // Verify ServiceExtensionManager is aware of the newly-enabled state.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.debugPaint', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, true);
-        expect(state.value, true);
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(evalExpression, 'true', library);
+      await _verifyExtensionStateInServiceManager(extensionName, true, true);
     });
 
     test('toggle String service extension', () async {
-      final EvalOnDartLibrary library = new EvalOnDartLibrary(
+      const extensionName = 'ext.flutter.platformOverride';
+      const evalExpression = 'defaultTargetPlatform.toString()';
+      final library = new EvalOnDartLibrary(
         'package:flutter/src/foundation/platform.dart',
         service,
       );
 
-      StreamSubscription<ServiceExtensionState> stream;
-
-      // Initial value on the test device should be TargetPlatform.android.
-      final before =
-          await library.eval('defaultTargetPlatform.toString()', isAlive: null);
-      if (before is InstanceRef) {
-        expect(before.valueAsString, 'TargetPlatform.android');
-      }
-      // Initial state in ServiceExtensionManager should be disabled with value
-      // null.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.platformOverride', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, false);
-        expect(state.value, null);
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(
+          evalExpression, 'TargetPlatform.android', library);
+      await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
           'ext.flutter.platformOverride', true, 'iOS');
 
-      // Verify the test device is aware of the newly-enabled state.
-      final after =
-          await library.eval('defaultTargetPlatform.toString()', isAlive: null);
-      if (after is InstanceRef) {
-        expect(after.valueAsString, 'TargetPlatform.iOS');
-      }
-      // Verify ServiceExtensionManager is aware of the newly-enabled state.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.platformOverride', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, true);
-        expect(state.value, 'iOS');
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(
+          evalExpression, 'TargetPlatform.iOS', library);
+      await _verifyExtensionStateInServiceManager(extensionName, true, 'iOS');
     });
 
     test('toggle numeric service extension', () async {
-      final EvalOnDartLibrary library = new EvalOnDartLibrary(
+      const extensionName = 'ext.flutter.timeDilation';
+      const evalExpression = 'timeDilation';
+      final library = new EvalOnDartLibrary(
         'package:flutter/src/scheduler/binding.dart',
         service,
       );
 
-      StreamSubscription<ServiceExtensionState> stream;
-
-      // Initial value on the test device should be 1.0.
-      final before = await library.eval('timeDilation', isAlive: null);
-      if (before is InstanceRef) {
-        expect(before.valueAsString, '1.0');
-      }
-      // Initial state in ServiceExtensionManager should be disabled with value
-      // null.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.timeDilation', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, false);
-        expect(state.value, null);
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(evalExpression, '1.0', library);
+      await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager
-          .setServiceExtensionState('ext.flutter.timeDilation', true, 0.5);
+          .setServiceExtensionState(extensionName, true, 0.5);
 
-      // Verify the test device is aware of the newly-enabled state.
-      final after = await library.eval('timeDilation', isAlive: null);
-      if (after is InstanceRef) {
-        expect(after.valueAsString, '0.5');
-      }
-      // Verify ServiceExtensionManager is aware of the newly-enabled state.
-      stream = serviceManager.serviceExtensionManager
-          .getServiceExtensionState('ext.flutter.timeDilation', null);
-      stream.onData((ServiceExtensionState state) {
-        expect(state.enabled, true);
-        expect(state.value, 0.5);
-        stream.cancel();
-      });
+      await _verifyExtensionStateOnTestDevice(evalExpression, '0.5', library);
+      await _verifyExtensionStateInServiceManager(extensionName, true, 0.5);
     });
 
-    //TODO(kenzie): add hot restart test case
+    // TODO(kenzie): add hot restart test case.
   });
+}
+
+Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,
+    String expectedResult, EvalOnDartLibrary library) async {
+  final result = await library.eval(evalExpression, isAlive: null);
+  if (result is InstanceRef) {
+    expect(result.valueAsString, equals(expectedResult));
+  }
+}
+
+Future<void> _verifyInitialExtensionStateInServiceManager(
+    String extensionName) async {
+  // For all service extensions, the initial state in ServiceExtensionManager
+  // should be disabled with value null.
+  await _verifyExtensionStateInServiceManager(extensionName, false, null);
+}
+
+Future<void> _verifyExtensionStateInServiceManager(
+    String extensionName, bool enabled, dynamic value) async {
+  final ServiceExtensionState state = await serviceManager
+      .serviceExtensionManager
+      .getServiceExtensionState(extensionName, null)
+      .asFuture();
+  expect(state.enabled, equals(enabled));
+  expect(state.value, equals(value));
 }
