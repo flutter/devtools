@@ -7,15 +7,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 import 'package:devtools/vm_service_wrapper.dart';
 
+import 'base/file_system.dart';
+import 'base/io.dart';
+
 /// This class was copied from
-/// flutter/packages/flutter_tools/test/integration/test_driver.dart.
+/// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
+/// supporting classes were also copied from flutter/packages/flutter_tools.
+/// Those files are marked as such and live in the parent directory of this file
+/// (flutter_tools/).
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;

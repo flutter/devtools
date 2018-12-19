@@ -3,11 +3,11 @@ import 'package:devtools/eval_on_dart_library.dart';
 import 'package:devtools/globals.dart';
 import 'package:devtools/service_manager.dart';
 import 'package:devtools/vm_service_wrapper.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'test_driver.dart';
+import 'flutter_tools/base/file_system.dart';
+import 'flutter_tools/test_driver.dart';
 
 void main() {
   group('serviceManagerTests', () {
