@@ -8,7 +8,7 @@
 set -e
 
 # Print out the Dart version in use.
-dart --version
+# dart --version
 
 # Get Flutter.
 curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o flutter.zip
