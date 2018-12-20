@@ -11,9 +11,8 @@ set -e
 dart --version
 
 # Get Flutter.
-curl https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.0.0-stable.tar.xz -o flutter.tar.xz
-tar -xzf flutter.tar.xz
-ls -l flutter/bin/cache/dart-sdk/bin/dart
+curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o flutter.zip
+unzip flutter.zip
 ./flutter/bin/flutter config --no-analytics
 ./flutter/bin/flutter doctor
 export FLUTTER_SDK=`pwd`/flutter
