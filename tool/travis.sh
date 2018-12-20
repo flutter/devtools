@@ -43,7 +43,7 @@ else
     # Add globally activated packages to the path.
     export PATH="$PATH":~/.pub-cache/bin
 
-    echo `which dart`
+    which dart
 
     # Analyze the source.
     pub global activate tuneup
