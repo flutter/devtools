@@ -10,6 +10,8 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
+import 'globals.dart';
+import 'ui/primer.dart';
 
 const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet
@@ -143,4 +145,16 @@ class JsonUtils {
   static bool hasJsonData(String data) {
     return data != null && data.isNotEmpty && data != 'null';
   }
+}
+
+// TODO(kenzie): perhaps add same icons we use in IntelliJ to these buttons.
+// This would help to build icon familiarity.
+PButton createExtensionButton(String text, String extensionName) {
+  final PButton button = new PButton(text)..small();
+  button.click(() {
+    final bool wasSelected = button.element.classes.contains('selected');
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
+        extensionName, !wasSelected, !wasSelected);
+  });
+  return button;
 }

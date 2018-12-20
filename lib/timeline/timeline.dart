@@ -5,14 +5,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_extensions.dart';
 import '../service_manager.dart' show ServiceExtensionState;
 import '../ui/elements.dart';
 import '../ui/primer.dart';
+import '../utils.dart';
+import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
 
@@ -51,13 +53,6 @@ class TimelineScreen extends Screen {
   PButton repaintRainbowButton;
   PButton debugPaintButton;
 
-  final String trackWidgetBuildsServiceExtension =
-      'ext.flutter.profileWidgetBuilds';
-  final String perfOverlayServiceExtension =
-      'ext.flutter.showPerformanceOverlay';
-  final String repaintRainbowServiceExtension = 'ext.flutter.repaintRainbow';
-  final String debugPaintServiceExtension = 'ext.flutter.debugPaint';
-
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     FrameDetailsUI frameDetailsUI;
@@ -73,25 +68,13 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    // TODO(kenzie): perhaps add same icons we use in IntelliJ to these buttons.
-    // This would help to build icon familiarity.
-    PButton createButton(String text, String extensionName) {
-      final PButton button = new PButton(text)..small();
-      button.click(() {
-        final bool wasSelected = button.element.classes.contains('selected');
-        serviceManager.serviceExtensionManager.setServiceExtensionState(
-            extensionName, !wasSelected, !wasSelected);
-      });
-      return button;
-    }
-
     trackWidgetBuildsButton =
-        createButton('Track widget builds', trackWidgetBuildsServiceExtension);
+        createExtensionButton('Track widget builds', profileWidgetBuildsExtName);
     perfOverlayButton =
-        createButton('Performance overlay', perfOverlayServiceExtension);
+        createExtensionButton('Performance overlay', performanceOverlayExtName);
     repaintRainbowButton =
-        createButton('Repaint rainbow', repaintRainbowServiceExtension);
-    debugPaintButton = createButton('Debug paint', debugPaintServiceExtension);
+        createExtensionButton('Repaint rainbow', repaintRainbowExtName);
+    debugPaintButton = createExtensionButton('Debug paint', debugPaintExtName);
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -186,37 +169,37 @@ class TimelineScreen extends Screen {
   void _updateButtonStates() {
     // Disable buttons for unavailable service extensions.
     serviceManager.serviceExtensionManager.hasServiceExtension(
-        trackWidgetBuildsServiceExtension, (bool available) {
+        profileWidgetBuildsExtName, (bool available) {
       trackWidgetBuildsButton.disabled = !available;
     });
     serviceManager.serviceExtensionManager
-        .hasServiceExtension(perfOverlayServiceExtension, (bool available) {
+        .hasServiceExtension(performanceOverlayExtName, (bool available) {
       perfOverlayButton.disabled = !available;
     });
     serviceManager.serviceExtensionManager
-        .hasServiceExtension(repaintRainbowServiceExtension, (bool available) {
+        .hasServiceExtension(repaintRainbowExtName, (bool available) {
       repaintRainbowButton.disabled = !available;
     });
     serviceManager.serviceExtensionManager
-        .hasServiceExtension(debugPaintServiceExtension, (bool available) {
+        .hasServiceExtension(debugPaintExtName, (bool available) {
       debugPaintButton.disabled = !available;
     });
 
     // Select buttons whose state is already enabled.
     serviceManager.serviceExtensionManager.getServiceExtensionState(
-        trackWidgetBuildsServiceExtension, (ServiceExtensionState state) {
+        profileWidgetBuildsExtName, (ServiceExtensionState state) {
       trackWidgetBuildsButton.toggleClass('selected', state.enabled);
     });
     serviceManager.serviceExtensionManager.getServiceExtensionState(
-        perfOverlayServiceExtension, (ServiceExtensionState state) {
+        performanceOverlayExtName, (ServiceExtensionState state) {
       perfOverlayButton.toggleClass('selected', state.enabled);
     });
     serviceManager.serviceExtensionManager.getServiceExtensionState(
-        repaintRainbowServiceExtension, (ServiceExtensionState state) {
+        repaintRainbowExtName, (ServiceExtensionState state) {
       repaintRainbowButton.toggleClass('selected', state.enabled);
     });
     serviceManager.serviceExtensionManager.getServiceExtensionState(
-        debugPaintServiceExtension, (ServiceExtensionState state) {
+        debugPaintExtName, (ServiceExtensionState state) {
       debugPaintButton.toggleClass('selected', state.enabled);
     });
   }
