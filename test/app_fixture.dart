@@ -77,7 +77,6 @@ class CliAppFixture extends AppFixture {
     final Completer<String> completer = new Completer<String>();
 
     lines.listen((String line) {
-      print('in CliAppFixture line listen - line: $line');
       if (completer.isCompleted) {
         lineController.add(line);
       } else {
