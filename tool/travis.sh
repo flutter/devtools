@@ -11,16 +11,16 @@ set -e
 dart --version
 
 # Get Flutter.
-curl https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.0.0-stable.tar.xz -o ../flutter.tar.xz
-tar -xzf ../flutter.tar.xz
-export PATH="$PATH":`pwd`/../flutter/bin:`pwd`/../flutter/bin/cache/dart-sdk/bin
-flutter config --no-analytics
-flutter doctor
-export FLUTTER_SDK=`pwd`/../flutter
+curl https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.0.0-stable.tar.xz -o flutter.tar.xz
+tar -xzf flutter.tar.xz
+export PATH="$PATH":`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin
+./flutter/bin/flutter config --no-analytics
+./flutter/bin/flutter doctor
+export FLUTTER_SDK=`pwd`/flutter
 
 # Echo build info.
 echo $FLUTTER_SDK
-flutter --version
+./flutter/bin/flutter --version
 
 # Add globally activated packages to the path.
 export PATH="$PATH":"~/.pub-cache/bin"
