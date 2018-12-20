@@ -22,7 +22,7 @@ echo $FLUTTER_SDK
 ./flutter/bin/flutter --version
 
 # Add globally activated packages to the path.
-export PATH="$PATH":"~/.pub-cache/bin"
+export PATH="$PATH":./flutter/bin:./flutter/bin/cache/dart-sdk/bin:~/.pub-cache/bin
 
 # Analyze the source.
 ./flutter/bin/cache/dart-sdk/bin/pub global activate tuneup
