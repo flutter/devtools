@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../service_manager.dart' show ServiceExtensionState;
 import '../ui/elements.dart';
 import '../ui/primer.dart';
-import '../utils.dart';
+import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
