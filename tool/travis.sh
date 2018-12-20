@@ -25,6 +25,7 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
 
     export PATH=./flutter/bin:./flutter/bin/cache/dart-sdk/bin:$PATH:~/.pub-cache/bin
 
+    # Should be using dart from ./flutter/bin/cache/dart-sdk/bin/dart
     which dart
 
     # Analyze the source.
@@ -43,6 +44,7 @@ else
     # Add globally activated packages to the path.
     export PATH="$PATH":~/.pub-cache/bin
 
+    # Should be using dart from /Users/travis/dart-sdk/bin/dart
     which dart
 
     # Analyze the source.
