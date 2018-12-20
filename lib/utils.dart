@@ -153,8 +153,8 @@ PButton createExtensionButton(String text, String extensionName) {
   final PButton button = new PButton(text)..small();
   button.click(() {
     final bool wasSelected = button.element.classes.contains('selected');
-    serviceManager.serviceExtensionManager.setServiceExtensionState(
-        extensionName, !wasSelected, !wasSelected);
+    serviceManager.serviceExtensionManager
+        .setServiceExtensionState(extensionName, !wasSelected, !wasSelected);
   });
   return button;
 }
