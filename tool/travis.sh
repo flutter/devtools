@@ -8,30 +8,52 @@
 set -e
 
 # Print out the Dart version in use.
-# dart --version
+dart --version
 
-# Get Flutter.
-curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o flutter.zip
-unzip flutter.zip
-./flutter/bin/flutter config --no-analytics
-./flutter/bin/flutter doctor
-export FLUTTER_SDK=`pwd`/flutter
+if [ "$USE_FLUTTER_SDK" = true ] ; then
 
-# Echo build info.
-echo $FLUTTER_SDK
-./flutter/bin/flutter --version
+    # Get Flutter.
+    curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o flutter.zip
+    unzip -qq flutter.zip
+    ./flutter/bin/flutter config --no-analytics
+    ./flutter/bin/flutter doctor
+    export FLUTTER_SDK=`pwd`/flutter
 
-# Add globally activated packages to the path.
-export PATH="$PATH":./flutter/bin:./flutter/bin/cache/dart-sdk/bin:~/.pub-cache/bin
+    # Echo build info.
+    echo $FLUTTER_SDK
+    ./flutter/bin/flutter --version
 
-# Analyze the source.
-./flutter/bin/cache/dart-sdk/bin/pub global activate tuneup
-tuneup check --ignore-infos
+    export PATH=./flutter/bin:./flutter/bin/cache/dart-sdk/bin:$PATH:~/.pub-cache/bin
 
-# Ensure we can build the app.
-./flutter/bin/cache/dart-sdk/bin/pub global activate webdev
-webdev build
+    which dart
 
-# Run the tests.
-./flutter/bin/cache/dart-sdk/bin/pub run test
-./flutter/bin/cache/dart-sdk/bin/pub run test -pchrome-no-sandbox
+    # Analyze the source.
+    pub global activate tuneup
+    tuneup check --ignore-infos
+
+    # Ensure we can build the app.
+    pub global activate webdev
+    webdev build
+
+    # Run the tests.
+    pub run test -t "useFlutterSdk"
+    pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+
+else
+    # Add globally activated packages to the path.
+    export PATH="$PATH":~/.pub-cache/bin
+
+    echo `which dart`
+
+    # Analyze the source.
+    pub global activate tuneup
+    tuneup check --ignore-infos
+
+    # Ensure we can build the app.
+    pub global activate webdev
+    webdev build
+
+    # Run the tests.
+    pub run test -x "useFlutterSdk"
+    pub run test -x "useFlutterSdk" -pchrome-no-sandbox
+fi

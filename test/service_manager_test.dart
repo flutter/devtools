@@ -107,7 +107,7 @@ void main() {
     });
 
     // TODO(kenzie): add hot restart test case.
-  });
+  }, tags: 'useFlutterSdk');
 }
 
 Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,

@@ -5,9 +5,9 @@ os:
 # - linux
   - osx
 
-language: generic
-#dart:
-#  - "dev/raw/latest"
+language: dart
+dart:
+  - "dev/raw/latest"
 addons:
   chrome: stable
 
@@ -20,3 +20,7 @@ branches:
 cache:
   directories:
   - $HOME/.pub-cache
+
+env:
+  - USE_FLUTTER_SDK=false
+  - USE_FLUTTER_SDK=true
