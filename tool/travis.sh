@@ -30,11 +30,15 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
 
     # Analyze the source.
     pub global activate tuneup
+    echo "after activate tuneup"
     tuneup check --ignore-infos
+    echo "after tuneup check"
 
     # Ensure we can build the app.
     pub global activate webdev
+    echo "after activate webdev"
     webdev build
+    echo "after webdev build"
 
     # Run the tests.
     pub run test -t "useFlutterSdk"
