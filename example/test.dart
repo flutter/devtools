@@ -20,7 +20,12 @@ void main() {
 
     if (count % 2 == 0) {
       Timer.run(() {
-        //throw new StateError('sdfsdf');
+        int sampleLocal = 123;
+        try {
+          throw new StateError('sdfsdf');
+        } catch (e) {
+          print(e);
+        }
       });
     }
 

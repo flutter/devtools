@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js' show JsObject;
+import 'dart:html' as html;
 
 import 'package:codemirror/codemirror.dart';
 import 'package:rxdart/rxdart.dart';
@@ -23,12 +23,10 @@ import '../ui/primer.dart';
 
 // TODO(devoncarew): handle double click on breakpoints
 
-// TODO(devoncarew): Add the ability to adjust the break on exceptions behavior.
-
-// TODO(devoncarew): handle breaking on exceptions
-
 // TODO(devoncarew): start a testing strategy
 //   breakpoints, stepping, frame selection
+
+// TODO(devoncarew): Show the pending message queue?
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
@@ -85,6 +83,15 @@ class DebuggerScreen extends Screen {
 
     PButton stepOver, stepIn, stepOut;
 
+    final BreakOnExceptionControl breakOnExceptionControl =
+        new BreakOnExceptionControl();
+    breakOnExceptionControl.onPauseModeChanged.listen((String mode) {
+      debuggerState.setExceptionPauseMode(mode);
+    });
+    debuggerState.onExceptionPauseModeChanged.listen((String mode) {
+      breakOnExceptionControl.exceptionPauseMode = mode;
+    });
+
     mainDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
@@ -126,7 +133,7 @@ class DebuggerScreen extends Screen {
                         ..small(),
                     ]),
                   div()..flex(),
-                  //new PButton('Foo bar')..small(),
+                  breakOnExceptionControl,
                 ]),
               sourceArea = div(c: 'section table-border')
                 ..flex()
@@ -174,7 +181,30 @@ class DebuggerScreen extends Screen {
       if (paused) {
         // Check for async causal frames; fall back to using regular sync frames.
         final Stack stack = await debuggerState.getStack();
-        final List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
+        List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
+
+        // Handle breaking-on-exceptions.
+        final InstanceRef reportedException = debuggerState.reportedException;
+        if (reportedException != null && frames.isNotEmpty) {
+          final Frame frame = frames.first;
+
+          final Frame newFrame = new Frame();
+          newFrame.type = frame.type;
+          newFrame.index = frame.index;
+          newFrame.function = frame.function;
+          newFrame.code = frame.code;
+          newFrame.location = frame.location;
+          newFrame.kind = frame.kind;
+
+          final List<BoundVariable> newVars = <BoundVariable>[];
+          newVars.add(new BoundVariable()
+            ..name = '<exception>'
+            ..value = reportedException);
+          newVars.addAll(frame.vars ?? []);
+          newFrame.vars = newVars;
+
+          frames = <Frame>[newFrame]..addAll(frames.sublist(1));
+        }
 
         callStackView.showFrames(frames, selectTop: true);
       } else {
@@ -446,6 +476,10 @@ class DebuggerState {
   final BehaviorSubject<List<Breakpoint>> _breakpoints =
       new BehaviorSubject<List<Breakpoint>>(seedValue: <Breakpoint>[]);
 
+  final BehaviorSubject<String> _exceptionPauseMode = new BehaviorSubject();
+
+  InstanceRef _reportedException;
+
   bool get isPaused => _paused.value;
 
   Stream<bool> get onPausedChanged => _paused;
@@ -454,6 +488,8 @@ class DebuggerState {
       new Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
 
   Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
+
+  Stream<String> get onExceptionPauseModeChanged => _exceptionPauseMode;
 
   void setVmService(VmService service) {
     this.service = service;
@@ -480,10 +516,13 @@ class DebuggerState {
       if (isolate.pauseEvent != null &&
           isolate.pauseEvent.kind != EventKind.kResume) {
         _lastEvent = isolate.pauseEvent;
+        _reportedException = isolate.pauseEvent.exception;
         _updatePaused(true);
       }
 
       _breakpoints.add(isolate.breakpoints);
+
+      _exceptionPauseMode.add(isolate.exceptionPauseMode);
     }
   }
 
@@ -514,9 +553,15 @@ class DebuggerState {
     return service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
+  Future<void> setExceptionPauseMode(String mode) {
+    return service.setExceptionPauseMode(isolateRef.id, mode);
+  }
+
   Future<Stack> getStack() {
     return service.getStack(isolateRef.id);
   }
+
+  InstanceRef get reportedException => _reportedException;
 
   void _handleIsolateEvent(Event event) {
     if (event.isolate.id != isolateRef.id) {
@@ -529,6 +574,7 @@ class DebuggerState {
     switch (event.kind) {
       case EventKind.kResume:
         _updatePaused(false);
+        _reportedException = null;
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -536,6 +582,7 @@ class DebuggerState {
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
+        _reportedException = event.exception;
         _updatePaused(true);
         break;
       case EventKind.kBreakpointAdded:
@@ -557,6 +604,7 @@ class DebuggerState {
   void _clearCaches() {
     _scriptCache.clear();
     _lastEvent = null;
+    _reportedException = null;
   }
 
   void dispose() {
@@ -633,16 +681,14 @@ class Pos {
 
 class SourceEditor {
   SourceEditor(this.codeMirror, this.debuggerState) {
-    codeMirror.onEvent('gutterClick', true).listen((dynamic line) {
-      if (line is int) {
-        final List<Breakpoint> lineBps = linesToBreakpoints[line];
+    codeMirror.onGutterClick.listen((int line) {
+      final List<Breakpoint> lineBps = linesToBreakpoints[line];
 
-        if (lineBps == null || lineBps.isEmpty) {
-          debuggerState.addBreakpoint(currentScript.id, line + 1);
-        } else {
-          final Breakpoint bp = lineBps.removeAt(0);
-          debuggerState.removeBreakpoint(bp);
-        }
+      if (lineBps == null || lineBps.isEmpty) {
+        debuggerState.addBreakpoint(currentScript.id, line + 1);
+      } else {
+        final Breakpoint bp = lineBps.removeAt(0);
+        debuggerState.removeBreakpoint(bp);
       }
     });
   }
@@ -762,6 +808,7 @@ class SourceEditor {
 
   void clearExecutionPoint() {
     executionPoint = null;
+    _clearLineClass();
     _refreshMarkers();
   }
 
@@ -769,8 +816,8 @@ class SourceEditor {
 
   void displayScript(Script newScript, {Pos scrollTo}) {
     if (currentScript != null) {
-      final dynamic scrollInfo = codeMirror.call('getScrollInfo');
-      _lastScrollPositions[currentScript.uri] = scrollInfo['top'];
+      final ScrollInfo scrollInfo = codeMirror.getScrollInfo();
+      _lastScrollPositions[currentScript.uri] = scrollInfo.top;
     }
 
     final bool sameScript = currentScript?.uri == newScript?.uri;
@@ -780,19 +827,16 @@ class SourceEditor {
     if (newScript == null) {
       codeMirror.getDoc().setValue('');
     } else {
-      // set the mode to either dart or javascript
+      // TODO(devoncarew): set the mode to either dart or javascript
       // codeMirror.setMode(mode);
 
-      final String source = newScript?.source ?? '<source not available>';
       if (!sameScript) {
+        final String source = newScript?.source ?? '<source not available>';
         codeMirror.getDoc().setValue(source);
       }
 
       if (scrollTo != null) {
-        codeMirror.callArgs('scrollIntoView', <dynamic>[
-          new JsObject.jsify(<String, int>{'line': scrollTo.line - 1, 'ch': 0}),
-          150,
-        ]);
+        codeMirror.scrollIntoView(scrollTo.line - 1, 0, margin: 150);
       } else {
         final int top = _lastScrollPositions[newScript.uri] ?? 0;
         codeMirror.scrollTo(0, top);
@@ -958,6 +1002,75 @@ class VariablesView {
 
   void clearVariables() {
     _items.setItems(<BoundVariable>[]);
+  }
+}
+
+class BreakOnExceptionControl extends CoreElement {
+  BreakOnExceptionControl() : super('div', classes: 'break-on-exceptions') {
+    final CoreElement unhandled = new CoreElement('input')
+      ..setAttribute('type', 'checkbox');
+    _unhandledElement = unhandled.element;
+
+    final CoreElement all = new CoreElement('input')
+      ..setAttribute('type', 'checkbox');
+    _allElement = all.element;
+
+    add([
+      span(text: 'Break on: '),
+      new CoreElement('label')
+        ..add(<CoreElement>[unhandled, span(text: ' Unhandled exceptions')]),
+      new CoreElement('label')
+        ..add(<CoreElement>[all, span(text: ' All exceptions')]),
+    ]);
+
+    unhandled.element.onChange.listen((_) {
+      _pauseModeController.add(exceptionPauseMode);
+    });
+
+    all.element.onChange.listen((_) {
+      if (_allElement.checked) {
+        unhandled.enabled = false;
+        _unhandledElement.checked = true;
+      } else {
+        unhandled.enabled = true;
+      }
+      _pauseModeController.add(exceptionPauseMode);
+    });
+  }
+
+  html.InputElement _unhandledElement;
+  html.InputElement _allElement;
+
+  final StreamController<String> _pauseModeController =
+      new StreamController.broadcast();
+
+  /// See the string values for [ExceptionPauseMode].
+  Stream<String> get onPauseModeChanged => _pauseModeController.stream;
+
+  String get exceptionPauseMode {
+    if (_allElement.checked) {
+      return ExceptionPauseMode.kAll;
+    } else if (_unhandledElement.checked) {
+      return ExceptionPauseMode.kUnhandled;
+    } else {
+      return ExceptionPauseMode.kNone;
+    }
+  }
+
+  set exceptionPauseMode(final String value) {
+    if (value == ExceptionPauseMode.kAll) {
+      _allElement.checked = true;
+      _unhandledElement.checked = true;
+      _unhandledElement.setAttribute('disabled', '');
+    } else if (value == ExceptionPauseMode.kUnhandled) {
+      _allElement.checked = false;
+      _unhandledElement.checked = true;
+      _unhandledElement.attributes.remove('disabled');
+    } else {
+      _allElement.checked = false;
+      _unhandledElement.checked = false;
+      _unhandledElement.attributes.remove('disabled');
+    }
   }
 }
 

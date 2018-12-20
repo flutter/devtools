@@ -35,3 +35,10 @@
     z-index: 10;
 }
 
+.break-on-exceptions {
+    line-height: 28px;
+}
+
+.break-on-exceptions label {
+    margin-left: 6px;
+}
