@@ -25,13 +25,13 @@ echo $FLUTTER_SDK
 export PATH="$PATH":"~/.pub-cache/bin"
 
 # Analyze the source.
-pub global activate tuneup
+./flutter/bin/cache/dart-sdk/bin/pub global activate tuneup
 tuneup check --ignore-infos
 
 # Ensure we can build the app.
-pub global activate webdev
+./flutter/bin/cache/dart-sdk/bin/pub global activate webdev
 webdev build
 
 # Run the tests.
-pub run test
-pub run test -pchrome-no-sandbox
+./flutter/bin/cache/dart-sdk/bin/pub run test
+./flutter/bin/cache/dart-sdk/bin/pub run test -pchrome-no-sandbox
