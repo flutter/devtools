@@ -12,7 +12,8 @@ dart --version
 
 # Get Flutter.
 curl https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.0.0-stable.tar.xz -o ../flutter.tar.xz
-tar -xf flutter.tar.xz
+ls -la | grep flutter.tar.xz
+tar -xzf flutter.tar.xz
 export PATH="$PATH":`pwd`/../flutter/bin:`pwd`/../flutter/bin/cache/dart-sdk/bin
 flutter config --no-analytics
 flutter doctor
