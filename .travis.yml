@@ -5,9 +5,9 @@ os:
 # - linux
   - osx
 
-language: dart
-dart:
-  - "dev/raw/latest"
+language: generic
+#dart:
+#  - "dev/raw/latest"
 addons:
   chrome: stable
 
