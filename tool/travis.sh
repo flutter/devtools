@@ -10,12 +10,17 @@ set -e
 # Print out the Dart version in use.
 dart --version
 
-# Print out the flutter version before install.
-flutter --version
+# Get Flutter.
+curl https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.0.0-stable.tar.xz -o ./flutter.tar.xz
+tar -xf flutter.tar.xz
+export PATH="$PATH":`pwd`/../flutter/bin:`pwd`/../flutter/bin/cache/dart-sdk/bin
+flutter config --no-analytics
+flutter doctor
+export FLUTTER_SDK=`pwd`/../flutter
 
-# Install Flutter.
-git clone https://github.com/flutter/flutter.git -b beta
-./flutter/bin/flutter doctor
+# Echo build info.
+echo $FLUTTER_SDK
+flutter --version
 
 # Add globally activated packages to the path.
 export PATH="$PATH":"~/.pub-cache/bin"
