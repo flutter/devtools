@@ -7,6 +7,7 @@ library flutter_widget;
 import 'dart:convert';
 
 import 'package:http/http.dart';
+import 'package:meta/meta.dart';
 
 import '../ui/icons.dart';
 import '../utils.dart';
@@ -99,11 +100,26 @@ class Catalog {
 
   final Map<String, FlutterWidget> widgets;
 
-  static Future<Catalog> load() async {
-    final Map<String, FlutterWidget> widgets = {};
+  static Future<Catalog> _cachedCatalog;
+
+  static Future<Catalog> load() {
+    return _cachedCatalog ??= _loadHelper();
+  }
+
+  static Future<Catalog> _loadHelper() async {
     // Local copy of: https\://github.com/flutter/website/tree/master/_data/catalog/widget.json
     final Response response = await get('widgets.json');
-    final List<Object> json = jsonDecode(response.body);
+    return decode(response.body);
+  }
+
+  @visibleForTesting
+  static void setCatalog(Catalog catalog) {
+    _cachedCatalog = Future.value(catalog);
+  }
+
+  static Catalog decode(String source) {
+    final List<Object> json = jsonDecode(source);
+    final Map<String, FlutterWidget> widgets = {};
 
     for (Map<String, Object> element in json) {
       final FlutterWidget widget = FlutterWidget(element);

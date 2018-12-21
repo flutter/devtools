@@ -26,7 +26,12 @@ abstract class HtmlIconRenderer<T extends Icon> {
   CanvasImageSource get image;
   bool get loaded => image != null;
 
-  CoreElement createElement() {
+  CoreElement createCoreElement() {
+    final element = createElement();
+    return CoreElement.from(element);
+  }
+
+  Element createElement() {
     // All CanvasImageSource types are elements but until Dart has Union types
     // that is hard to express.
     final Object canvasSource = createCanvasSource();
@@ -36,7 +41,7 @@ abstract class HtmlIconRenderer<T extends Icon> {
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px';
     element.classes.add('flutter-icon');
-    return CoreElement.from(element);
+    return element;
   }
 
   @protected
@@ -78,11 +83,12 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
   ImageElement createCanvasSource() => ImageElement(src: src);
 
   @override
-  CoreElement createElement() {
+  Element createElement() {
     // We use a div rather than an ImageElement to display the image directly
     // in the DOM as backgroundImage styling is more flexible.
-    final element = div(c: 'flutter-icon');
-    element.element.style
+    final element = Element.div();
+    element.classes.add('flutter-icon');
+    element.style
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px'
       ..backgroundImage = 'url($src)';
@@ -100,7 +106,7 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
       _image = imageElement;
       completer.complete(imageElement);
     });
-    document.head.append(imageElement); // XXX is this needed?
+    document.head.append(imageElement);
     _imageFuture = completer.future;
     return _imageFuture;
   }
@@ -183,7 +189,9 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   @override
   CanvasImageSource createCanvasSource() {
     final baseImage = baseIconRenderer.image;
-    if (baseImage == null) return null;
+    if (baseImage == null) {
+      return _buildImageAsync();
+    }
 
     return _buildImage(baseImage);
   }
@@ -206,7 +214,15 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
     return _buildImage(source);
   }
 
-  CanvasElement _buildImage(CanvasImageSource source) {
+  CanvasElement _buildImageAsync() {
+    CanvasElement canvas = _createCanvas();
+    baseIconRenderer.loadImage().then((CanvasImageSource source) {
+      _drawIcon(canvas, source);
+    });
+    return canvas;
+  }
+
+  CanvasElement _createCanvas() {
     final num devicePixelRatio = window.devicePixelRatio;
     final canvas = CanvasElement(
       width: iconWidth * devicePixelRatio,
@@ -215,6 +231,17 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
     canvas.style
       ..width = '${iconWidth}px'
       ..height = '${iconHeight}px';
+    return canvas;
+  }
+
+  CanvasElement _buildImage(CanvasImageSource source) {
+    CanvasElement canvas = _createCanvas();
+    _drawIcon(canvas, source);
+    return canvas;
+  }
+
+  void _drawIcon(CanvasElement canvas, CanvasImageSource source) {
+    final num devicePixelRatio = window.devicePixelRatio;
 
     // TODO(jacobr): define this color in terms of Color objects.
     const String normalColor = '#231F20';
@@ -229,8 +256,6 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
       ..textBaseline = 'middle'
       ..textAlign = 'center'
       ..fillText(icon.text, iconWidth / 2, iconHeight / 2, iconWidth);
-
-    return canvas;
   }
 }
 
@@ -271,7 +296,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
 }
 
 CoreElement createIconElement(Icon icon) {
-  return getIconRenderer(icon).createElement();
+  return getIconRenderer(icon).createCoreElement();
 }
 
 HtmlIconRenderer getIconRenderer(Icon icon) {

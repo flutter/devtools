@@ -258,17 +258,23 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> run({
     bool withDebugger = false,
     bool pauseOnExceptions = false,
+    bool trackWidgetCreation = true,
     File pidFile,
   }) async {
-    await _setupProcess(<String>[
+    final args = <String>[
       'run',
       '--machine',
-      '-d',
-      'flutter-tester',
-    ],
-        withDebugger: withDebugger,
-        pauseOnExceptions: pauseOnExceptions,
-        pidFile: pidFile);
+    ];
+    if (trackWidgetCreation) {
+      args.add('--track-widget-creation');
+    }
+    args.addAll(['-d', 'flutter-tester']);
+    await _setupProcess(
+      args,
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      pidFile: pidFile,
+    );
   }
 
   Future<void> attach(

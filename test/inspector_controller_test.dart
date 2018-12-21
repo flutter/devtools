@@ -1,0 +1,525 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+@TestOn('vm')
+import 'dart:async';
+import 'dart:io';
+
+import 'package:devtools/inspector/flutter_widget.dart';
+import 'package:devtools/inspector/inspector_tree.dart';
+import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools/ui/icons.dart';
+import 'package:devtools/ui/flutter_html_shim.dart' as shim;
+import 'package:devtools/ui/material_icons.dart';
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
+
+import 'package:devtools/globals.dart';
+import 'package:devtools/service_manager.dart';
+import 'package:devtools/vm_service_wrapper.dart';
+import 'package:devtools/inspector/inspector_controller.dart';
+import 'package:devtools/inspector/inspector_service.dart';
+
+import 'matchers/fake_flutter_matchers.dart';
+
+import 'support/flutter_test_driver.dart';
+
+/// Switch this flag to false if you are having issues with tests not running
+/// atomically.
+bool reuseTestEnvironment = true;
+
+class FakePaintEntry extends PaintEntry {
+  FakePaintEntry({this.icon, this.text, this.textStyle, @required this.x});
+
+  @override
+  final Icon icon;
+  final String text;
+  final TextStyle textStyle;
+  final double x;
+
+  @override
+  double get right {
+    double right = x;
+    if (icon != null) {
+      right += icon.iconWidth;
+    }
+    if (text != null) {
+      right += text.length * 10;
+    }
+    return right;
+  }
+}
+
+class FakeInspectorTreeNodeRender
+    extends InspectorTreeNodeRender<FakePaintEntry> {
+  FakeInspectorTreeNodeRender(List<FakePaintEntry> entries, Size size)
+      : super(entries, size);
+
+  @override
+  Icon hitTest(Offset location) {
+    location = location - offset;
+    if (location.dy < 0 || location.dy >= size.height) {
+      return null;
+    }
+    // There is no need to optimize this but we could perform a binary search.
+    for (var entry in entries) {
+      if (entry.x <= location.dx && entry.right > location.dx) {
+        return entry.icon;
+      }
+    }
+    return null;
+  }
+}
+
+class FakeInspectorTreeNodeRenderBuilder
+    extends InspectorTreeNodeRenderBuilder {
+  final List<FakePaintEntry> entries = [];
+  double x = 0;
+
+  @override
+  void addIcon(Icon icon) {
+    x += 20;
+    entries.add(FakePaintEntry(icon: icon, x: x));
+  }
+
+  @override
+  void appendText(String text, TextStyle textStyle) {
+    x += text.length * 10;
+    entries.add(FakePaintEntry(text: text, textStyle: textStyle, x: x));
+  }
+
+  @override
+  InspectorTreeNodeRender build() {
+    double rowWidth = entries.isEmpty ? 0 : entries.last.right;
+    return FakeInspectorTreeNodeRender(entries, Size(rowWidth, rowHeight));
+  }
+}
+
+class FakeInspectorTreeNode extends InspectorTreeNode {
+  @override
+  InspectorTreeNodeRenderBuilder createRenderBuilder() {
+    return FakeInspectorTreeNodeRenderBuilder();
+  }
+}
+
+const double fakeRowWidth = 200.0;
+
+class FakeInspectorTree extends InspectorTreeFixedRowHeight {
+  FakeInspectorTree({
+    @required bool summaryTree,
+    @required FlutterTreeType treeType,
+    VoidCallback onSelectionChange,
+    TreeEventCallback onExpand,
+    TreeEventCallback onHover,
+  }) : super(
+          summaryTree: summaryTree,
+          treeType: treeType,
+          onSelectionChange: onSelectionChange,
+          onExpand: onExpand,
+          onHover: onHover,
+        );
+
+  final List<Rect> scrollToRequests = [];
+
+  @override
+  InspectorTreeNode createNode() {
+    return FakeInspectorTreeNode();
+  }
+
+  @override
+  Rect getBoundingBox(InspectorTreeRow row) {
+    return Rect.fromLTWH(
+      getDepthIndent(row.depth),
+      getRowY(row.index),
+      fakeRowWidth,
+      rowHeight,
+    );
+  }
+
+  @override
+  void scrollToRect(Rect targetRect) {
+    scrollToRequests.add(targetRect);
+  }
+
+  Completer<void> setStateCalled = null;
+
+  /// Hack to allow tests to wait until the next time this UI is updated.
+  Future<void> get nextUiFrame {
+    setStateCalled ??= Completer();
+
+    return setStateCalled.future;
+  }
+
+  @override
+  void setState(VoidCallback modifyState) {
+    // Execute async calls synchronously for faster test execution.
+    modifyState();
+
+    setStateCalled?.complete(null);
+    setStateCalled = null;
+
+    for (int i = 0; i < numRows; i++) {
+      final row = root.getRow(i, selection: selection);
+      row?.node?.renderObject?.attach(
+        this,
+        Offset(row.depth * columnWidth, i * rowHeight),
+      );
+    }
+  }
+
+  // Debugging string to make it easy to write integration tests.
+  String toStringDeep({bool hidePropertyLines = false}) {
+    if (root == null) return '<empty>\n';
+    // Visualize the ticks computed for this node so that bugs in the tick
+    // computation code will result in rendering artifacts in the text output.
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < numRows; i++) {
+      final row = root.getRow(i, selection: selection);
+      if (hidePropertyLines && row?.node?.diagnostic?.isProperty) {
+        continue;
+      }
+      int last = 0;
+      for (int tick in row.ticks) {
+        // Visualize the line to parent if there is one.
+        if (tick - last > 0) {
+          sb.write('  ' * (tick - last));
+        }
+        if (tick == (row.depth - 1) && row.lineToParent) {
+          sb.write('├─');
+        } else {
+          sb.write('│ ');
+        }
+        last = tick;
+      }
+      int delta = row.depth - last;
+      if (delta > 0) {
+        if (row.lineToParent) {
+          if (delta > 1 || last == 0) {
+            sb.write('  ' * (delta - 1));
+            sb.write('└─');
+          } else {
+            sb.write('──');
+          }
+        } else {
+          sb.write('  ' * delta);
+        }
+      }
+      final renderObject = row.node.renderObject;
+      if (renderObject == null) {
+        sb.write('<empty>\n');
+        continue;
+      }
+      final entries = renderObject.entries;
+      for (FakePaintEntry entry in entries) {
+        if (entry.icon != null) {
+          // Visualize icons
+          final Icon icon = entry.icon;
+          if (icon == collapseArrow) {
+            sb.write('▼');
+          } else if (icon == expandArrow) {
+            sb.write('▶');
+          } else if (icon is UrlIcon) {
+            sb.write('[${icon.src}]');
+          } else if (icon is ColorIcon) {
+            sb.write('[${shim.colorToCss(icon.color)}]');
+          } else if (icon is CustomIcon) {
+            sb.write('[${icon.text}]');
+          } else if (icon is MaterialIcon) {
+            sb.write('[${icon.text}]');
+          }
+        }
+        // TODO(jacobr): optionally visualize colors as well.
+        if (entry.text != null) {
+          sb.write(entry.text);
+        }
+      }
+      if (row.isSelected) {
+        sb.write(' <-- selected');
+      }
+      sb.write('\n');
+    }
+    return sb.toString();
+  }
+}
+
+void main() async {
+  Catalog.setCatalog(
+      Catalog.decode(await File('web/widgets.json').readAsString()));
+  bool widgetCreationTracked;
+  FlutterRunTestDriver _flutter;
+  VmServiceWrapper service;
+  InspectorService inspectorService;
+  InspectorController inspectorController;
+
+  FakeInspectorTree tree;
+  FakeInspectorTree detailsTree;
+
+  void setupEnvironment(bool trackWidgetCreation) async {
+    if (trackWidgetCreation != widgetCreationTracked || !reuseTestEnvironment) {
+      widgetCreationTracked = trackWidgetCreation;
+
+      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+
+      await _flutter.run(
+        withDebugger: true,
+        trackWidgetCreation: trackWidgetCreation,
+      );
+      service = _flutter.vmService;
+
+      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+
+      await serviceManager.vmServiceOpened(service, Completer().future);
+    }
+    inspectorService = await InspectorService.create(service);
+    if (reuseTestEnvironment) {
+      // Ensure the previous test did not set the selection on the device.
+      // TODO(jacobr): add a proper method to WidgetInspectorService that does
+      // this. setSelection currently ignores null selection requests which is
+      // a misfeature.
+      await inspectorService.inspectorLibrary.eval(
+        'WidgetInspectorService.instance.selection.clear()',
+        isAlive: null,
+      );
+    }
+
+    await inspectorService.inferPubRootDirectoryIfNeeded();
+
+    inspectorController = InspectorController(
+      inspectorTreeFactory: ({
+        summaryTree,
+        treeType,
+        onSelectionChange,
+        onExpand,
+        onHover,
+      }) {
+        return FakeInspectorTree(
+          summaryTree: summaryTree,
+          treeType: treeType,
+          onSelectionChange: onSelectionChange,
+          onExpand: onExpand,
+          onHover: onHover,
+        );
+      },
+      inspectorService: inspectorService,
+      treeType: FlutterTreeType.widget,
+    );
+    inspectorController.setVisibleToUser(true);
+    inspectorController.setActivate(true);
+
+    tree = inspectorController.inspectorTree;
+    detailsTree = inspectorController.details.inspectorTree;
+
+    // This is a bit fragile. It is somewhat arbitrary that the tree is updated
+    // twice after being initialized.
+    await tree.nextUiFrame;
+    await tree.nextUiFrame;
+  }
+
+  Future<void> tearDownEnvironment({bool force = false}) async {
+    if (!force && reuseTestEnvironment) {
+      // Skip actually tearing down for better test performance.
+      return;
+    }
+    inspectorService.dispose();
+    inspectorService = null;
+
+    await service.allFuturesCompleted.future;
+    await _flutter.stop();
+  }
+
+  group('inspector controller tests', () {
+    test('initial state', () async {
+      await setupEnvironment(true);
+
+      expect(
+          tree.toStringDeep(),
+          equalsIgnoringHashCodes(
+            '▼[[] root ]\n'
+                '└─▼[M] MyApp \n'
+                '  └─▼[M] MaterialApp \n'
+                '    └─▼[S] Scaffold \n'
+                '      ├───▼[C] Center \n'
+                '      │   └─▼[/icons/inspector/textArea.png] Text \n'
+                '      └─▼[A] AppBar \n'
+                '        └─▼[/icons/inspector/textArea.png] Text \n',
+          ));
+
+      expect(detailsTree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
+
+      await tearDownEnvironment();
+    });
+
+    test('select widget', () async {
+      await setupEnvironment(true);
+
+      // select row index 5.
+      tree.onTap(const Offset(0, rowHeight * 5.5));
+      const textSelected = // Comment to make dartfmt behave.
+          '▼[[] root ]\n'
+          '└─▼[M] MyApp \n'
+          '  └─▼[M] MaterialApp \n'
+          '    └─▼[S] Scaffold \n'
+          '      ├───▼[C] Center \n'
+          '      │   └─▼[/icons/inspector/textArea.png] Text  <-- selected\n'
+          '      └─▼[A] AppBar \n'
+          '        └─▼[/icons/inspector/textArea.png] Text \n';
+
+      expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
+      await detailsTree.nextUiFrame;
+      expect(
+        detailsTree.toStringDeep(),
+        equalsIgnoringHashCodes(
+            '▼[/icons/inspector/textArea.png] Text  <-- selected\n'
+            '│   "Hello, World!"\n'
+            '│   textAlign: null [D]\n'
+            '│   textDirection: null [D]\n'
+            '│   locale: null [D]\n'
+            '│   softWrap: null [D]\n'
+            '│   overflow: null [D]\n'
+            '│   textScaleFactor: null [D]\n'
+            '│   maxLines: null [D]\n'
+            '└─▼[/icons/inspector/textArea.png] RichText \n'
+            '    softWrap: wrapping at box width\n'
+            '    maxLines: unlimited\n'
+            '    text: "Hello, World!"\n'
+            '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
+            '      parentData: offset=Offset(360.5, 264.0) (can use size)\n'
+            '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
+            '      size: Size(79.0, 16.0)\n'
+            '      textAlign: start\n'
+            '      textDirection: ltr\n'
+            '      softWrap: wrapping at box width\n'
+            '      overflow: clip\n'
+            '      locale: en_US\n'
+            '      maxLines: unlimited\n'),
+      );
+
+      // Select row nine (right text)
+      detailsTree.onTap(const Offset(0, rowHeight * 9.5));
+      expect(
+        detailsTree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[/icons/inspector/textArea.png] Text \n'
+              '│   "Hello, World!"\n'
+              '│   textAlign: null [D]\n'
+              '│   textDirection: null [D]\n'
+              '│   locale: null [D]\n'
+              '│   softWrap: null [D]\n'
+              '│   overflow: null [D]\n'
+              '│   textScaleFactor: null [D]\n'
+              '│   maxLines: null [D]\n'
+              '└─▼[/icons/inspector/textArea.png] RichText  <-- selected\n'
+              '    softWrap: wrapping at box width\n'
+              '    maxLines: unlimited\n'
+              '    text: "Hello, World!"\n'
+              '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
+              '      parentData: offset=Offset(360.5, 264.0) (can use size)\n'
+              '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
+              '      size: Size(79.0, 16.0)\n'
+              '      textAlign: start\n'
+              '      textDirection: ltr\n'
+              '      softWrap: wrapping at box width\n'
+              '      overflow: clip\n'
+              '      locale: en_US\n'
+              '      maxLines: unlimited\n',
+        ),
+      );
+
+      // make sure the main tree didn't change.
+      expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
+
+      // select row index 3.
+      tree.onTap(const Offset(0, rowHeight * 3.5));
+      expect(
+          tree.toStringDeep(),
+          equalsIgnoringHashCodes(
+            '▼[[] root ]\n'
+                '└─▼[M] MyApp \n'
+                '  └─▼[M] MaterialApp \n'
+                '    └─▼[S] Scaffold  <-- selected\n'
+                '      ├───▼[C] Center \n'
+                '      │   └─▼[/icons/inspector/textArea.png] Text \n'
+                '      └─▼[A] AppBar \n'
+                '        └─▼[/icons/inspector/textArea.png] Text \n',
+          ));
+
+      await detailsTree.nextUiFrame;
+      // This tree is huge. If there is a change to package:flutter it may
+      // change. If this happens don't panic and rebaseline the content.
+      expect(
+        detailsTree.toStringDeep(hidePropertyLines: true),
+        equalsIgnoringHashCodes(
+          '▼[S] Scaffold  <-- selected\n'
+        ),
+      );
+
+      // Select row index 4.
+      // The important thing about this is that the details tree should scroll
+      // instead of re-rooting as the selected row is already visible in the
+      // details tree.
+      tree.onTap(const Offset(0, rowHeight * 4.5));
+      expect(
+          tree.toStringDeep(),
+          equalsIgnoringHashCodes(
+            '▼[[] root ]\n'
+                '└─▼[M] MyApp \n'
+                '  └─▼[M] MaterialApp \n'
+                '    └─▼[S] Scaffold \n'
+                '      ├───▼[C] Center  <-- selected\n'
+                '      │   └─▼[/icons/inspector/textArea.png] Text \n'
+                '      └─▼[A] AppBar \n'
+                '        └─▼[/icons/inspector/textArea.png] Text \n',
+          ));
+
+      await detailsTree.nextUiFrame;
+      expect(
+        detailsTree.toStringDeep(),
+        equalsIgnoringHashCodes(''),
+      );
+
+      // Selecting the root node of the details tree should change selection
+      // in the main tree.
+      detailsTree.onTap(const Offset(0, 0));
+      expect(
+          tree.toStringDeep(),
+          equalsIgnoringHashCodes(
+            '▼[[] root ]\n'
+                '└─▼[M] MyApp \n'
+                '  └─▼[M] MaterialApp \n'
+                '    └─▼[S] Scaffold  <-- selected\n'
+                '      ├───▼[C] Center \n'
+                '      │   └─▼[/icons/inspector/textArea.png] Text \n'
+                '      └─▼[A] AppBar \n'
+                '        └─▼[/icons/inspector/textArea.png] Text \n',
+          ));
+
+      // TODO(jacobr): add tests that verified that we scrolled the view to the
+      // correct points on selection.
+
+      await tearDownEnvironment();
+    });
+
+    test('hotReload', () async {
+      await setupEnvironment(true);
+
+      await serviceManager.performHotReload();
+      // make sure the inspector does not fall over and die after a hot reload.
+      expect(
+          tree.toStringDeep(),
+          equalsIgnoringHashCodes('▼[[] root ]\n'
+              '└─▼[M] MyApp \n'
+              '  └─▼[M] MaterialApp \n'
+              '    └─▼[S] Scaffold \n'
+              '      ├───▼[C] Center \n'
+              '      │   └─▼[/icons/inspector/textArea.png] Text \n'
+              '      └─▼[A] AppBar \n'
+              '        └─▼[/icons/inspector/textArea.png] Text \n'));
+
+      // TODO(jacobr): would be nice to have some tests that trigger a hot
+      // reload that actually changes app state in a meaningful way.
+
+      await tearDownEnvironment();
+    });
+  }, tags: 'useFlutterSdk');
+}

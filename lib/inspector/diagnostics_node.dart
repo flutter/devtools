@@ -8,71 +8,11 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
-
-/// The various priority levels used to filter which diagnostics are shown and
-/// omitted.
-///
-/// Trees of Flutter diagnostics can be very large so filtering the diagnostics
-/// shown matters. Typically filtering to only show diagnostics with at least
-/// level debug is appropriate.
-///
-/// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/foundation/diagnostics.dart
-/// for the corresponding Dart enum.
-enum DiagnosticLevel {
-  /// Diagnostics that should not be shown.
-  ///
-  /// If a user chooses to display [hidden] diagnostics, they should not expect
-  /// the diagnostics to be formatted consistently with other diagnostics and
-  /// they should expect them to sometimes be be misleading. For example,
-  /// [FlagProperty] and [ObjectFlagProperty] have uglier formatting when the
-  /// property `value` does does not match a value with a custom flag
-  /// description. An example of a misleading diagnostic is a diagnostic for
-  /// a property that has no effect because some other property of the object is
-  /// set in a way that causes the hidden property to have no effect.
-  hidden,
-
-  /// A diagnostic that is likely to be low value but where the diagnostic
-  /// display is just as high quality as a diagnostic with a higher level.
-  ///
-  /// Use this level for diagnostic properties that match their default value
-  /// and other cases where showing a diagnostic would not add much value such
-  /// as an [IterableProperty] where the value is empty.
-  fine,
-
-  /// Diagnostics that should only be shown when performing fine grained
-  /// debugging of an object.
-  ///
-  /// Unlike a [fine] diagnostic, these diagnostics provide important
-  /// information about the object that is likely to be needed to debug. Used by
-  /// properties that are important but where the property value is too verbose
-  /// (e.g. 300+ characters long) to show with a higher diagnostic level.
-  debug,
-
-  /// Interesting diagnostics that should be typically shown.
-  info,
-
-  /// Very important diagnostics that indicate problematic property values.
-  ///
-  /// For example, use if you would write the property description
-  /// message in ALL CAPS.
-  warning,
-
-  /// Diagnostics that indicate errors or unexpected conditions.
-  ///
-  /// For example, use for property values where computing the value throws an
-  /// exception.
-  error,
-
-  /// Special level indicating that no diagnostics should be shown.
-  ///
-  /// Do not specify this level for diagnostics. This level is only used to
-  /// filter which diagnostics are shown.
-  off,
-}
 
 const Map<String, DiagnosticLevel> diagnosticLevelNames = {
   'hidden': DiagnosticLevel.hidden,
@@ -80,46 +20,12 @@ const Map<String, DiagnosticLevel> diagnosticLevelNames = {
   'debug': DiagnosticLevel.debug,
   'info': DiagnosticLevel.info,
   'warning': DiagnosticLevel.warning,
+  'hint': DiagnosticLevel.hint,
+  'fix': DiagnosticLevel.fix,
+  'contract': DiagnosticLevel.contract,
   'error': DiagnosticLevel.error,
   'off': DiagnosticLevel.off,
 };
-
-/// Styles for displaying a node in a [DiagnosticsNode] tree.
-///
-/// Generally these styles are more important for ASCII art rendering than IDE
-/// rendering with the exception of DiagnosticsTreeStyle.offstage which should
-/// be used to trigger custom rendering for offstage children perhaps using dashed
-/// lines or by graying out offstage children.
-///
-/// See also: [DiagnosticsNode.toStringDeep] from https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/foundation/diagnostics.dart
-/// which dumps text art trees for these  styles.
-enum DiagnosticsTreeStyle {
-  /// Sparse style for displaying trees.
-  sparse,
-
-  /// Connects a node to its parent typically with a dashed line.
-  offstage,
-
-  /// Slightly more compact version of the [sparse] style.
-  ///
-  /// Differences between dense and spare are typically only relevant for ASCII
-  /// art display of trees and not for IDE display of trees.
-  dense,
-
-  /// Style that enables transitioning from nodes of one style to children of
-  /// another.
-  ///
-  /// Typically doesn't matter for IDE support as all styles are typically
-  /// all styles are compatible as far as IDE display is concerned.
-  transition,
-
-  /// Suggestion to render the tree just using whitespace without connecting
-  /// parents to children using lines.
-  whitespace,
-
-  /// Render the tree on a single line without showing children.
-  singleLine,
-}
 
 const Map<String, DiagnosticsTreeStyle> treeStyleValues = {
   'sparse': DiagnosticsTreeStyle.sparse,
@@ -127,12 +33,16 @@ const Map<String, DiagnosticsTreeStyle> treeStyleValues = {
   'dense': DiagnosticsTreeStyle.dense,
   'transition': DiagnosticsTreeStyle.transition,
   'whitespace': DiagnosticsTreeStyle.whitespace,
+  'error': DiagnosticsTreeStyle.error,
   'singleLine': DiagnosticsTreeStyle.singleLine,
+  'indentedSingleLine': DiagnosticsTreeStyle.indentedSingleLine,
+  'shallow': DiagnosticsTreeStyle.shallow,
+  'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
 };
 
 /// Defines diagnostics data for a [value].
 ///
-/// [DiagnosticsNode] provides a high quality multi-line string dump via
+/// [RemoteDiagnosticsNode] provides a high quality multi-line string dump via
 /// [toStringDeep]. The core members are the [name], [toDescription],
 /// [getProperties], [value], and [getChildren]. All other members exist
 /// typically to provide hints for how [toStringDeep] and debugging tools should
@@ -147,9 +57,8 @@ const Map<String, DiagnosticsTreeStyle> treeStyleValues = {
 /// important. If you need to determine the exact Diagnostic class on the
 /// Dart side you can use the value of type. The raw Dart object value is
 /// also available via the getValue() method.
-
-class DiagnosticsNode {
-  DiagnosticsNode(
+class RemoteDiagnosticsNode extends DiagnosticableTree {
+  RemoteDiagnosticsNode(
     this.json,
     this.inspectorService,
     this.isProperty,
@@ -159,11 +68,11 @@ class DiagnosticsNode {
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
   /// This node's parent (if it's been set).
-  DiagnosticsNode parent;
+  RemoteDiagnosticsNode parent;
 
   Future<String> propertyDocFuture;
 
-  List<DiagnosticsNode> cachedProperties;
+  List<RemoteDiagnosticsNode> cachedProperties;
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
@@ -178,28 +87,19 @@ class DiagnosticsNode {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! DiagnosticsNode) return false;
-    return getDartDiagnosticRef() == other.getDartDiagnosticRef();
+    if (other is! RemoteDiagnosticsNode) return false;
+    return dartDiagnosticRef == other.dartDiagnosticRef;
   }
 
   @override
-  int get hashCode => getDartDiagnosticRef().hashCode;
-
-  @override
-  String toString() {
-    if (name == null || name.isEmpty || !showName) {
-      return description;
-    }
-
-    return '$name$separator $description';
-  }
+  int get hashCode => dartDiagnosticRef.hashCode;
 
   /// Separator text to show between property names and values.
   String get separator {
     return showSeparator ? ':' : '';
   }
 
-  /// Label describing the [DiagnosticsNode], typically shown before a separator
+  /// Label describing the [RemoteDiagnosticsNode], typically shown before a separator
   /// (see [showSeparator]).
   ///
   /// The name should be omitted if the [showName] property is false.
@@ -538,12 +438,12 @@ class DiagnosticsNode {
     return json.containsKey('children') || _children != null || !hasChildren;
   }
 
-  Future<List<DiagnosticsNode>> get children {
+  Future<List<RemoteDiagnosticsNode>> get children {
     _computeChildren();
     return _childrenFuture;
   }
 
-  List<DiagnosticsNode> get childrenNow {
+  List<RemoteDiagnosticsNode> get childrenNow {
     _maybePopulateChildren();
     return _children;
   }
@@ -553,8 +453,8 @@ class DiagnosticsNode {
     if (!hasChildren || _children != null) {
       return;
     }
-    _childrenFuture = inspectorService.getChildren(
-        getDartDiagnosticRef(), isSummaryTree, this);
+    _childrenFuture =
+        inspectorService.getChildren(dartDiagnosticRef, isSummaryTree, this);
     try {
       _children = await _childrenFuture;
     } finally {
@@ -569,9 +469,10 @@ class DiagnosticsNode {
 
     final List<Object> jsonArray = json['children'];
     if (jsonArray?.isNotEmpty == true) {
-      final List<DiagnosticsNode> nodes = [];
+      final List<RemoteDiagnosticsNode> nodes = [];
       for (Map<String, Object> element in jsonArray) {
-        final child = DiagnosticsNode(element, inspectorService, false, parent);
+        final child =
+            RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;
         nodes.add(child);
       }
@@ -579,23 +480,23 @@ class DiagnosticsNode {
     }
   }
 
-  Future<List<DiagnosticsNode>> _childrenFuture;
-  List<DiagnosticsNode> _children;
+  Future<List<RemoteDiagnosticsNode>> _childrenFuture;
+  List<RemoteDiagnosticsNode> _children;
 
   /// Reference the actual Dart DiagnosticsNode object this object is referencing.
-  InspectorInstanceRef getDartDiagnosticRef() {
+  InspectorInstanceRef get dartDiagnosticRef {
     return InspectorInstanceRef(json['objectId']);
   }
 
   /// Properties to show inline in the widget tree.
-  List<DiagnosticsNode> get inlineProperties {
+  List<RemoteDiagnosticsNode> get inlineProperties {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
         final List<Object> jsonArray = json['properties'];
         for (Map<String, Object> element in jsonArray) {
-          cachedProperties
-              .add(DiagnosticsNode(element, inspectorService, true, parent));
+          cachedProperties.add(
+              RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
         trackPropertiesMatchingParameters(cachedProperties);
       }
@@ -603,13 +504,14 @@ class DiagnosticsNode {
     return cachedProperties;
   }
 
-  Future<List<DiagnosticsNode>> getProperties(ObjectGroup objectGroup) async {
+  Future<List<RemoteDiagnosticsNode>> getProperties(
+      ObjectGroup objectGroup) async {
     return trackPropertiesMatchingParameters(
-        await objectGroup.getProperties(getDartDiagnosticRef()));
+        await objectGroup.getProperties(dartDiagnosticRef));
   }
 
-  List<DiagnosticsNode> trackPropertiesMatchingParameters(
-      List<DiagnosticsNode> nodes) {
+  List<RemoteDiagnosticsNode> trackPropertiesMatchingParameters(
+      List<RemoteDiagnosticsNode> nodes) {
     // Map locations to property nodes where available.
     final List<InspectorSourceLocation> parameterLocations =
         creationLocation?.getParameterLocations();
@@ -621,7 +523,7 @@ class DiagnosticsNode {
           names[name] = location;
         }
       }
-      for (DiagnosticsNode node in nodes) {
+      for (RemoteDiagnosticsNode node in nodes) {
         node.parent = this;
         final String name = node.name;
         if (name != null) {
@@ -691,7 +593,7 @@ class DiagnosticsNode {
   /// field may change even for properties that have not changed because in
   /// some cases such as the 'created' property for an element, the property
   /// value is created dynamically each time 'getProperties' is called.
-  bool identicalDisplay(DiagnosticsNode node) {
+  bool identicalDisplay(RemoteDiagnosticsNode node) {
     if (node == null) {
       return false;
     }
@@ -710,6 +612,38 @@ class DiagnosticsNode {
     }
     return true;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    for (var property in inlineProperties) {
+      properties.add(DiagnosticsProperty(property.name, property));
+    }
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final children = childrenNow;
+    if (children == null || children.isEmpty) return const <DiagnosticsNode>[];
+    final regularChildren = <DiagnosticsNode>[];
+    for (var child in children) {
+      regularChildren.add(child.toDiagnosticsNode());
+    }
+    return regularChildren;
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
+    return super.toDiagnosticsNode(
+      name: name ?? this.name,
+      style: style ?? DiagnosticsTreeStyle.sparse,
+    );
+  }
+
+  @override
+  String toStringShort() {
+    return description;
+  }
 }
 
 Future<T> bindFutureToCompleter<T>(Future<T> future, Completer<T> completer) {
@@ -725,12 +659,10 @@ class InspectorSourceLocation {
   final Map<String, Object> json;
   final InspectorSourceLocation parent;
 
-  String getPath() {
-    return JsonUtils.getStringMember(json, 'file');
-  }
+  String get path => JsonUtils.getStringMember(json, 'file');
 
   String getFile() {
-    final fileName = getPath();
+    final fileName = path;
     if (fileName == null) {
       return parent != null ? parent.getFile() : null;
     }
@@ -744,17 +676,11 @@ class InspectorSourceLocation {
     return fromSourceLocationUri(fileName);
   }
 
-  int getLine() {
-    return JsonUtils.getIntMember(json, 'line');
-  }
+  int getLine() => JsonUtils.getIntMember(json, 'line');
 
-  String getName() {
-    return JsonUtils.getStringMember(json, 'name');
-  }
+  String getName() => JsonUtils.getStringMember(json, 'name');
 
-  int getColumn() {
-    return JsonUtils.getIntMember(json, 'column');
-  }
+  int getColumn() => JsonUtils.getIntMember(json, 'column');
 
   SourcePosition getXSourcePosition() {
     final file = getFile();

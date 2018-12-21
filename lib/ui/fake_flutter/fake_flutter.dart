@@ -13,6 +13,9 @@
 /// dart:html.
 library fake_flutter;
 
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'collections.dart';
@@ -23,6 +26,8 @@ export 'collections.dart';
 export 'dart_ui/dart_ui.dart' hide TextStyle;
 
 part 'assertions.dart';
-part 'foundation.dart';
+part 'diagnosticable.dart';
 part 'text.dart';
 part 'text_span.dart';
+part 'foundation.dart';
+part 'print.dart';
