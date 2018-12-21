@@ -13,7 +13,7 @@ import 'utils.dart';
 
 // TODO(devoncarew): fixed position header
 
-class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
+class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
         _isVirtual = false,
@@ -28,10 +28,14 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
     _spacerBeforeVisibleRows = new CoreElement('tr');
     _spacerAfterVisibleRows = new CoreElement('tr');
 
-    element.onScroll.listen((_) => _scheduleRebuild());
+    _visibilityObserver = new IntersectionObserver(_visibilityChange);
+    _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
+    _visibilityObserver.observe(_spacerAfterVisibleRows.element);
+    element.onScroll.listen((_) => _rebuildTable());
   }
 
-  @override
+  IntersectionObserver _visibilityObserver;
+
   final CoreElement element;
   final bool _isVirtual;
 
@@ -69,9 +73,6 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
       new StreamController<T>.broadcast();
 
   void _init() {
-    _monitorWindowResizes();
-    _rebuildWhenAddedToDom();
-
     element.add(_table);
     _table.onKeyDown.listen((KeyboardEvent e) {
       int indexOffset;
@@ -98,29 +99,8 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
     });
   }
 
-  StreamSubscription<Event> _windowResizeSubscription;
-  void _monitorWindowResizes() {
-    // Monitor Window resizes but don't rebuild if we're not in the DOM.
-    _windowResizeSubscription = window.onResize.listen((_) {
-      if (!isInDom) {
-        return;
-      }
-      _scheduleRebuild();
-    });
-  }
-
-  StreamSubscription<void> _addToDomSubscription;
-  void _rebuildWhenAddedToDom() {
-    // When we're added to the DOM, force a rebuild since we may have
-    // resized the window while we were not in the DOM.
-    _addToDomSubscription = onAddedToDom.listen((_) => _scheduleRebuild());
-  }
-
   void dispose() {
-    _windowResizeSubscription?.cancel();
-    _windowResizeSubscription = null;
-    _addToDomSubscription?.cancel();
-    _addToDomSubscription = null;
+    _visibilityObserver.disconnect();
   }
 
   Stream<T> get onSelect => _selectController.stream;
@@ -504,6 +484,10 @@ class Table<T> extends Object with SetStateMixin, OnAddedToDomMixin {
     }
 
     _doSort();
+    _scheduleRebuild();
+  }
+
+  void _visibilityChange(List entries, IntersectionObserver observer) {
     _scheduleRebuild();
   }
 }
