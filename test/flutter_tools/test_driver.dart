@@ -13,7 +13,6 @@ import 'package:vm_service_lib/vm_service_lib_io.dart';
 import 'package:devtools/vm_service_wrapper.dart';
 
 import 'base/file_system.dart';
-import 'base/io.dart';
 
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
@@ -98,8 +97,6 @@ abstract class FlutterTestDriver {
     _stderr.stream.listen(_debugPrint);
   }
 
-  Future<int> quit() => _killGracefully();
-
   Future<int> _killGracefully() async {
     if (_procPid == null) {
       return -1;
@@ -111,7 +108,7 @@ abstract class FlutterTestDriver {
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $_procPid..');
-    Process.killPid(_procPid, ProcessSignal.SIGKILL);
+    Process.killPid(_procPid, ProcessSignal.sigkill);
     return _proc.exitCode;
   }
 
@@ -130,12 +127,6 @@ abstract class FlutterTestDriver {
     final Isolate isolate =
         await vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
-  }
-
-  Future<void> addBreakpoint(Uri uri, int line) async {
-    _debugPrint('Sending breakpoint for $uri:$line');
-    await vmService.addBreakpointWithScriptUri(
-        await _getFlutterIsolateId(), uri.toString(), line);
   }
 
   Future<Isolate> waitForPause() async {
@@ -170,79 +161,12 @@ abstract class FlutterTestDriver {
         message: 'Isolate did not pause');
   }
 
-  Future<bool> isAtAsyncSuspension() async {
-    final Isolate isolate = await _getFlutterIsolate();
-    return isolate.pauseEvent.atAsyncSuspension == true;
-  }
-
-  Future<Isolate> resume({bool wait = true}) => _resume(wait: wait);
-  Future<Isolate> stepOver({bool wait = true}) =>
-      _resume(step: StepOption.kOver, wait: wait);
-  Future<Isolate> stepOverAsync({bool wait = true}) =>
-      _resume(step: StepOption.kOverAsyncSuspension, wait: wait);
-  Future<Isolate> stepOverOrOverAsyncSuspension({bool wait = true}) async {
-    return (await isAtAsyncSuspension())
-        ? stepOverAsync(wait: wait)
-        : stepOver(wait: wait);
-  }
-
-  Future<Isolate> stepInto({bool wait = true}) =>
-      _resume(step: StepOption.kInto, wait: wait);
-  Future<Isolate> stepOut({bool wait = true}) =>
-      _resume(step: StepOption.kOut, wait: wait);
-
   Future<Isolate> _resume({String step, bool wait = true}) async {
     _debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
         () async => vmService.resume(await _getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
-  }
-
-  Future<InstanceRef> evaluateInFrame(String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-        () async => await vmService.evaluateInFrame(
-            await _getFlutterIsolateId(), 0, expression),
-        message: 'Timed out evaluating expression ($expression)');
-  }
-
-  Future<InstanceRef> evaluate(String targetId, String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-        () async => await vmService.evaluate(
-            await _getFlutterIsolateId(), targetId, expression),
-        message: 'Timed out evaluating expression ($expression for $targetId)');
-  }
-
-  Future<Frame> getTopStackFrame() async {
-    final String flutterIsolateId = await _getFlutterIsolateId();
-    final Stack stack = await vmService.getStack(flutterIsolateId);
-    if (stack.frames.isEmpty) {
-      throw Exception('Stack is empty');
-    }
-    return stack.frames.first;
-  }
-
-  Future<SourcePosition> getSourceLocation() async {
-    final String flutterIsolateId = await _getFlutterIsolateId();
-    final Frame frame = await getTopStackFrame();
-    final Script script =
-        await vmService.getObject(flutterIsolateId, frame.location.script.id);
-    return _lookupTokenPos(script.tokenPosTable, frame.location.tokenPos);
-  }
-
-  SourcePosition _lookupTokenPos(List<List<int>> table, int tokenPos) {
-    for (List<int> row in table) {
-      final int lineNumber = row[0];
-      int index = 1;
-
-      for (index = 1; index < row.length - 1; index += 2) {
-        if (row[index] == tokenPos) {
-          return SourcePosition(lineNumber, row[index + 1]);
-        }
-      }
-    }
-
-    return null;
   }
 
   Future<Map<String, dynamic>> _waitFor({
@@ -421,7 +345,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         await vmService.setExceptionPauseMode(
             await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
       }
-      await resume(wait: false);
+      await _resume(wait: false);
     }
 
     // Now await the started event; if it had already happened the future will
@@ -504,20 +428,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return 0;
   }
 
-  Future<Isolate> breakAt(Uri uri, int line, {bool restart = false}) async {
-    if (restart) {
-      // For a hot restart, we need to send the breakpoints after the restart
-      // so we need to pause during the restart to avoid races.
-      await hotRestart(pause: true);
-      await addBreakpoint(uri, line);
-      return resume();
-    } else {
-      await addBreakpoint(uri, line);
-      await hotReload();
-      return waitForPause();
-    }
-  }
-
   int id = 1;
   Future<dynamic> _sendRequest(String method, dynamic params) async {
     final int requestId = id++;
@@ -554,11 +464,4 @@ Stream<String> _transformToLines(Stream<List<int>> byteStream) {
   return byteStream
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter());
-}
-
-class SourcePosition {
-  SourcePosition(this.line, this.column);
-
-  final int line;
-  final int column;
 }

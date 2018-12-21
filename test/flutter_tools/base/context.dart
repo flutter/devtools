@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
-
 /// This class was copied from
 /// flutter/packages/flutter_tools/lib/src/base/context.dart. It supports the
 /// use of [FlutterTestDriver].
@@ -114,55 +112,6 @@ class AppContext {
     dynamic value = _generateIfNecessary(type, _overrides);
     if (value == null && _parent != null) value = _parent[type];
     return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
-  }
-
-  /// Runs [body] in a child context and returns the value returned by [body].
-  ///
-  /// If [overrides] is specified, the child context will return corresponding
-  /// values when consulted via [operator[]].
-  ///
-  /// If [fallbacks] is specified, the child context will return corresponding
-  /// values when consulted via [operator[]] only if its parent context didn't
-  /// return such a value.
-  ///
-  /// If [name] is specified, the child context will be assigned the given
-  /// name. This is useful for debugging purposes and is analogous to naming a
-  /// thread in Java.
-  Future<V> run<V>({
-    @required FutureOr<V> body(),
-    String name,
-    Map<Type, Generator> overrides,
-    Map<Type, Generator> fallbacks,
-  }) async {
-    final AppContext child = AppContext._(
-      this,
-      name,
-      Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
-      Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
-    );
-    return await runZoned<Future<V>>(
-      () async => await body(),
-      zoneValues: <_Key, AppContext>{_Key.key: child},
-    );
-  }
-
-  @override
-  String toString() {
-    final StringBuffer buf = StringBuffer();
-    String indent = '';
-    AppContext ctx = this;
-    while (ctx != null) {
-      buf.write('AppContext');
-      if (ctx.name != null) buf.write('[${ctx.name}]');
-      if (ctx._overrides.isNotEmpty)
-        buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
-      if (ctx._fallbacks.isNotEmpty)
-        buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
-      if (ctx._parent != null) buf.write('\n$indent  parent: ');
-      ctx = ctx._parent;
-      indent += '  ';
-    }
-    return buf.toString();
   }
 }
 
