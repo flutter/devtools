@@ -26,8 +26,6 @@ import '../ui/primer.dart';
 // TODO(devoncarew): start a testing strategy
 //   breakpoints, stepping, frame selection
 
-// TODO(devoncarew): Show the pending message queue?
-
 class DebuggerScreen extends Screen {
   DebuggerScreen()
       : super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
@@ -45,7 +43,7 @@ class DebuggerScreen extends Screen {
 
   StatusItem deviceStatus;
 
-  SelectableList<ScriptRef> _scriptItems;
+  SelectableList<ScriptRef> _scriptsView;
   CoreElement _breakpointsCountDiv;
   CoreElement _scriptCountDiv;
   CoreElement _sourcePathDiv;
@@ -255,7 +253,7 @@ class DebuggerScreen extends Screen {
       }
     });
 
-    _scriptItems = new SelectableList<ScriptRef>()
+    _scriptsView = new SelectableList<ScriptRef>()
       ..flex()
       ..hidden(true)
       ..element.style.overflowY = 'scroll';
@@ -275,13 +273,13 @@ class DebuggerScreen extends Screen {
         ..add(
           _scriptCountDiv = span(text: '0', c: 'counter'),
         )
-        ..click(() => _scriptItems.toggleAttribute('hidden')),
-      _scriptItems,
+        ..click(() => _scriptsView.toggleAttribute('hidden')),
+      _scriptsView,
     ], supportsSelection: false)
       ..flex()
       ..layoutVertical();
 
-    _scriptItems.onSelectionChanged.listen((ScriptRef scriptRef) async {
+    _scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptRef == null) {
         _displaySource(null);
         return;
@@ -330,7 +328,7 @@ class DebuggerScreen extends Screen {
 
   void _handleIsolateChanged(IsolateRef isolateRef) {
     if (isolateRef == null) {
-      _scriptItems.clearItems();
+      _scriptsView.clearItems();
       _scriptCountDiv.text = '0';
 
       debuggerState.switchToIsolate(isolateRef);
@@ -344,7 +342,7 @@ class DebuggerScreen extends Screen {
       if (result is Isolate) {
         _populateFromIsolate(result);
       } else {
-        _scriptItems.clearItems();
+        _scriptsView.clearItems();
         _scriptCountDiv.text = '0';
       }
     }).catchError((dynamic e) {
@@ -355,7 +353,7 @@ class DebuggerScreen extends Screen {
   void _handleConnectionStop(dynamic event) {
     deviceStatus.element.text = '';
 
-    _scriptItems.clearItems();
+    _scriptsView.clearItems();
     _scriptCountDiv.text = '0';
 
     debuggerState.switchToIsolate(null);
@@ -427,7 +425,7 @@ class DebuggerScreen extends Screen {
       return uri1.compareTo(uri2);
     });
 
-    _scriptItems.setRenderer((ScriptRef scriptRef) {
+    _scriptsView.setRenderer((ScriptRef scriptRef) {
       final String uri = scriptRef.uri;
       final String name = debuggerState.getShortScriptName(uri);
       final CoreElement element = li(text: name, c: 'list-item');
@@ -438,7 +436,7 @@ class DebuggerScreen extends Screen {
       return element;
     });
 
-    _scriptItems.setItems(scripts);
+    _scriptsView.setItems(scripts);
     _scriptCountDiv.text = scripts.length.toString();
   }
 

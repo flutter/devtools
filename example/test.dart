@@ -20,9 +20,9 @@ void main() {
 
     if (count % 2 == 0) {
       Timer.run(() {
-        int sampleLocal = 123;
+        const int sampleLocal = 123;
         try {
-          throw new StateError('sdfsdf');
+          throw new StateError('sdfsdf: $sampleLocal, $count');
         } catch (e) {
           print(e);
         }
