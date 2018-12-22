@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:html';
+import 'dart:js';
 
 import 'package:devtools/framework/framework.dart';
 import 'package:meta/meta.dart';
@@ -28,7 +29,8 @@ class Table<T> extends Object with SetStateMixin {
     _spacerBeforeVisibleRows = new CoreElement('tr');
     _spacerAfterVisibleRows = new CoreElement('tr');
 
-    _visibilityObserver = new IntersectionObserver(_visibilityChange);
+    // TODO(jacobr): remove call to allowInterop once bug in dart:html is fixed.
+    _visibilityObserver = new IntersectionObserver(allowInterop(_visibilityChange));
     _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
     _visibilityObserver.observe(_spacerAfterVisibleRows.element);
     element.onScroll.listen((_) => _rebuildTable());
