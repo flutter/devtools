@@ -5,33 +5,26 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:devtools/vm_service_wrapper.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:devtools/service_extensions.dart' as extensions;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_manager.dart' show ServiceExtensionState;
 import '../ui/elements.dart';
-
-// TODO(devoncarew): set toggle values on a full restart (when we see a new isolate)
 
 class DeviceScreen extends Screen {
   DeviceScreen()
       : super(
             name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
-
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
   }
 
   StatusItem deviceStatus;
-
-  SetStateMixin framesChartStateMixin = new SetStateMixin();
-  ExtensionTracker extensionTracker;
-
   CoreElement togglesDiv;
-  Map<String, bool> boolValues = <String, bool>{};
+
+  // All the service extensions for which we are showing checkboxes.
+  Map<String, CoreElement> serviceExtensionCheckboxes = {};
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -51,172 +44,53 @@ class DeviceScreen extends Screen {
         ])
     ]);
 
-    _rebuildTogglesDiv();
-  }
-
-  void _handleConnectionStart(VmServiceWrapper service) {
-    extensionTracker = new ExtensionTracker(service);
-    extensionTracker.start();
-
-    extensionTracker.onChange.listen((_) {
-      framesChartStateMixin.setState(() {
-        if (extensionTracker.hasIsolateTargets && !visible) {
-          visible = true;
-        }
-
-        _rebuildTogglesDiv();
-      });
-    });
-
-    deviceStatus.element.text =
-        '${serviceManager.vm.targetCPU} ${serviceManager.vm.architectureBits}-bit';
-  }
-
-  void _handleConnectionStop(dynamic event) {
-    extensionTracker?.stop();
-
-    deviceStatus.element.text = '';
+    _buildTogglesDiv();
   }
 
   @override
   HelpInfo get helpInfo => null;
 
-  void _rebuildTogglesDiv() {
-    if (togglesDiv == null || extensionTracker == null) {
+  void _buildTogglesDiv() {
+    if (togglesDiv == null) {
       return;
     }
 
-    togglesDiv.clear();
-
-    _createBoolToggle('ext.flutter.debugPaint');
-    _createBoolToggle('ext.flutter.debugPaintBaselinesEnabled');
-    _createBoolToggle('ext.flutter.repaintRainbow');
-    _createBoolToggle('ext.flutter.showPerformanceOverlay');
-    _createBoolToggle('ext.flutter.debugAllowBanner');
-    _createBoolToggle('ext.flutter.profileWidgetBuilds');
+    _createBoolToggle(extensions.debugPaint);
+    _createBoolToggle(extensions.debugPaintBaselines);
+    _createBoolToggle(extensions.repaintRainbow);
+    _createBoolToggle(extensions.performanceOverlay);
+    _createBoolToggle(extensions.debugAllowBanner);
+    _createBoolToggle(extensions.profileWidgetBuilds);
   }
 
   void _createBoolToggle(String rpc) {
-    if (!extensionTracker.extensionToIsolatesMap.containsKey(rpc)) {
-      return;
-    }
+    serviceManager.serviceExtensionManager.hasServiceExtension(rpc,
+        (bool available) {
+      if (!available || serviceExtensionCheckboxes.containsKey(rpc)) {
+        return;
+      }
 
-    CoreElement input;
+      CoreElement input;
 
-    togglesDiv.add(div(c: 'form-checkbox')
-      ..add(new CoreElement('label')
-        ..add(<CoreElement>[
-          input = new CoreElement('input')..setAttribute('type', 'checkbox'),
-          span(text: rpc),
-        ])));
+      togglesDiv.add(div(c: 'form-checkbox')
+        ..add(new CoreElement('label')
+          ..add(<CoreElement>[
+            input = new CoreElement('input')..setAttribute('type', 'checkbox'),
+            span(text: rpc),
+          ])));
+      serviceExtensionCheckboxes[rpc] = input;
 
-    if (boolValues.containsKey(rpc)) {
-      input.toggleAttribute('checked', boolValues[rpc]);
-    } else {
-      extensionTracker.callBoolExtensionMethod(rpc).then((bool value) {
+      serviceManager.serviceExtensionManager.getServiceExtensionState(rpc,
+          (ServiceExtensionState state) {
+        final bool value = state.value ?? false;
         input.toggleAttribute('checked', value);
-        boolValues[rpc] = value;
       });
-    }
 
-    input.element.onChange.listen((_) {
-      final html.InputElement e = input.element;
-      boolValues[rpc] = e.checked;
-      extensionTracker.setBoolExtensionMethod(rpc, e.checked);
+      input.element.onChange.listen((_) {
+        final html.InputElement e = input.element;
+        serviceManager.serviceExtensionManager
+            .setServiceExtensionState(rpc, e.checked, e.checked);
+      });
     });
-  }
-}
-
-class ExtensionTracker {
-  ExtensionTracker(this.service) {
-    service.onIsolateEvent.listen((Event e) {
-      if (e.kind == 'ServiceExtensionAdded') {
-        _registerRpcForIsolate(e.extensionRPC, e.isolate);
-      }
-    });
-
-    serviceManager.isolateManager.isolates.forEach(_register);
-    serviceManager.isolateManager.onIsolateCreated.listen(_register);
-    serviceManager.isolateManager.onIsolateExited.listen(_removeIsolate);
-  }
-
-  final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
-
-  VmServiceWrapper service;
-
-  Map<String, Set<IsolateRef>> extensionToIsolatesMap =
-      <String, Set<IsolateRef>>{};
-
-  bool get hasConnection => service != null;
-
-  Stream<Null> get onChange => _changeController.stream;
-
-  bool get hasIsolateTargets {
-    for (Set<IsolateRef> set in extensionToIsolatesMap.values) {
-      if (set.isNotEmpty) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  void start() {}
-
-  void stop() {}
-
-  void _register(IsolateRef isolateRef) {
-    service.getIsolate(isolateRef.id).then((dynamic result) {
-      if (result is Isolate) {
-        final Isolate isolate = result;
-
-        if (isolate.extensionRPCs != null) {
-          for (String rpc in isolate.extensionRPCs) {
-            if (!extensionToIsolatesMap.containsKey(rpc)) {
-              extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
-            }
-            extensionToIsolatesMap[rpc].add(isolateRef);
-          }
-        }
-      }
-
-      _changeController.add(null);
-    });
-  }
-
-  void _registerRpcForIsolate(String rpc, IsolateRef isolateRef) {
-    if (!extensionToIsolatesMap.containsKey(rpc)) {
-      extensionToIsolatesMap[rpc] = new Set<IsolateRef>();
-    }
-    extensionToIsolatesMap[rpc].add(isolateRef);
-  }
-
-  void _removeIsolate(IsolateRef isolateRef) {
-    for (Set<IsolateRef> set in extensionToIsolatesMap.values) {
-      set.remove(isolateRef);
-    }
-  }
-
-  Future<bool> callBoolExtensionMethod(String rpc) {
-    final IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
-    return service
-        .callServiceExtension(rpc, isolateId: isolateRef.id)
-        .then((Response response) {
-      return _convertToBool(response.json['enabled']);
-    });
-  }
-
-  Future<Response> setBoolExtensionMethod(String rpc, bool checked) {
-    final IsolateRef isolateRef = extensionToIsolatesMap[rpc].first;
-    return service.callServiceExtension(rpc,
-        isolateId: isolateRef.id, args: <String, bool>{'enabled': checked});
-  }
-
-  static bool _convertToBool(dynamic val) {
-    if (val is bool) {
-      return val;
-    }
-    return val.toString() == 'true';
   }
 }
