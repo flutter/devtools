@@ -165,7 +165,7 @@ class ChromeTab {
   Future<WipConnection> connect() async {
     _wip = await wipTab.connect();
 
-    unawaited(_wip.log.enable());
+    await _wip.log.enable();
     _wip.log.onEntryAdded.listen((LogEntry entry) {
       if (_lostConnectionTime == null ||
           entry.timestamp > _lostConnectionTime) {
