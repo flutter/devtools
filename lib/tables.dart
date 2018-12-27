@@ -31,7 +31,8 @@ class Table<T> extends Object with SetStateMixin {
 
     // TODO(jacobr): remove call to allowInterop once
     // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver = new IntersectionObserver(allowInterop(_visibilityChange));
+    _visibilityObserver =
+        new IntersectionObserver(allowInterop(_visibilityChange));
     _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
     _visibilityObserver.observe(_spacerAfterVisibleRows.element);
     element.onScroll.listen((_) => _rebuildTable());

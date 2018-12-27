@@ -181,7 +181,8 @@ class ChromeTab {
       }
     });
 
-    unawaited(_exceptionThrownController.addStream(_wip.runtime.onExceptionThrown));
+    unawaited(
+        _exceptionThrownController.addStream(_wip.runtime.onExceptionThrown));
 
     unawaited(_wip.page.enable());
 
