@@ -43,9 +43,11 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
     # Return to the devtools directory
     cd devtools
 
+    echo `pwd`
+
     # Run the tests that require the Flutter SDK.
     pub run test -t "useFlutterSdk"
-    pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+    # pub run test -t "useFlutterSdk" -pchrome-no-sandbox
 else
     # Run the tests that do not require the Flutter SDK.
     pub run test -x "useFlutterSdk"
