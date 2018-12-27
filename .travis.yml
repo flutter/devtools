@@ -22,5 +22,4 @@ cache:
   - $HOME/.pub-cache
 
 env:
-  - USE_FLUTTER_SDK=false
   - USE_FLUTTER_SDK=true

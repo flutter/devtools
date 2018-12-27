@@ -72,16 +72,21 @@ class ServiceConnectionManager {
 
       unawaited(onClosed.then((_) => vmServiceClosed()));
 
-      unawaited(service.streamListen('Stdout'));
-      unawaited(service.streamListen('Stderr'));
-      unawaited(service.streamListen('VM'));
-      unawaited(service.streamListen('Isolate'));
-      unawaited(service.streamListen('Debug'));
-      unawaited(service.streamListen('GC'));
-      unawaited(service.streamListen('Timeline'));
-      unawaited(service.streamListen('Extension'));
-      unawaited(service.streamListen('_Graph'));
-      unawaited(service.streamListen('_Logging'));
+      final streamIds = [
+        'Stdout',
+        'Stderr',
+        'VM',
+        'Isolate',
+        'Debug',
+        'GC',
+        'Timeline',
+        'Extension',
+        '_Graph',
+        '_Logging'
+      ];
+      for (String id in streamIds) {
+        await service.streamListen(id);
+      }
     } catch (e) {
       // TODO:
       print(e);

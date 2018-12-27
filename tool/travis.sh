@@ -24,6 +24,10 @@ tuneup check --ignore-infos
 pub global activate webdev
 webdev build
 
+# Run the tests that do not require the Flutter SDK.
+pub run test -x "useFlutterSdk"
+pub run test -x "useFlutterSdk" -pchrome-no-sandbox
+
 if [ "$USE_FLUTTER_SDK" = true ] ; then
     # Get Flutter.
     curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o ../flutter.zip
@@ -46,8 +50,4 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
     # https://travis-ci.org/flutter/devtools/jobs/472755560.
     # TODO: investigate if we have a need to run tests requiring the Flutter SDK on Chrome.
     # pub run test -t "useFlutterSdk" -pchrome-no-sandbox
-else
-    # Run the tests that do not require the Flutter SDK.
-    pub run test -x "useFlutterSdk"
-    pub run test -x "useFlutterSdk" -pchrome-no-sandbox
 fi
