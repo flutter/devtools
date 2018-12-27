@@ -25,8 +25,8 @@ pub global activate webdev
 webdev build
 
 # Run tests that do not require the Flutter SDK.
-pub run test -x "useFlutterSdk"
-pub run test -x "useFlutterSdk" -pchrome-no-sandbox
+pub run test -x useFlutterSdk
+pub run test -x useFlutterSdk -pchrome-no-sandbox
 
 # Get Flutter.
 curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o ../flutter.zip
@@ -43,7 +43,7 @@ echo "which dart: " `which dart`
 cd devtools
 
 # Run tests that require the Flutter SDK.
-pub run test -t "useFlutterSdk"
+pub run test -t useFlutterSdk
 
 # Chrome test passes locally but fails on Travis. See example failure:
 # https://travis-ci.org/flutter/devtools/jobs/472755560.
