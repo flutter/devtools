@@ -1,3 +1,4 @@
+@TestOn('vm')
 import 'dart:async';
 import 'dart:io';
 import 'package:devtools/eval_on_dart_library.dart';

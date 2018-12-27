@@ -14,7 +14,7 @@ dart --version
 export PATH=$PATH:~/.pub-cache/bin
 
 # Should be using dart from /Users/travis/dart-sdk/bin/dart
-which dart
+echo "which dart: " `which dart`
 
 # Analyze the source.
 pub global activate tuneup
@@ -32,22 +32,16 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
     export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
     flutter config --no-analytics
     flutter doctor
-    export FLUTTER_SDK=`pwd`/flutter
-
-    # Echo build info.
-    echo $FLUTTER_SDK
 
     # Should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart
-    which dart
+    echo "which dart: " `which dart`
 
     # Return to the devtools directory
     cd devtools
 
-    echo `pwd`
-
     # Run the tests that require the Flutter SDK.
     pub run test -t "useFlutterSdk"
-    # pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+    pub run test -t "useFlutterSdk" -pchrome-no-sandbox
 else
     # Run the tests that do not require the Flutter SDK.
     pub run test -x "useFlutterSdk"
