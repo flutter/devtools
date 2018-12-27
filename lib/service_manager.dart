@@ -84,9 +84,7 @@ class ServiceConnectionManager {
         '_Graph',
         '_Logging'
       ];
-      for (String id in streamIds) {
-        await service.streamListen(id);
-      }
+      await Future.wait(streamIds.map((id) => service.streamListen(id)));
     } catch (e) {
       // TODO:
       print(e);
