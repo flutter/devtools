@@ -13,24 +13,27 @@ dart --version
 if [ "$USE_FLUTTER_SDK" = true ] ; then
 
     # Get Flutter.
-    curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o flutter.zip
-    unzip -qq flutter.zip
-    ./flutter/bin/flutter config --no-analytics
-    ./flutter/bin/flutter doctor
-    export FLUTTER_SDK=`pwd`/flutter
+    curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o ../flutter.zip
+    unzip -qq ../flutter.zip
+    export PATH=`pwd`/../flutter/bin:`pwd`/../flutter/bin/cache/dart-sdk/bin:$PATH
+    flutter config --no-analytics
+    flutter doctor
+    export FLUTTER_SDK=`pwd`/../flutter
 
     # Echo build info.
     echo $FLUTTER_SDK
-    ./flutter/bin/flutter --version
+    flutter --version
 
-    export PATH=./flutter/bin:./flutter/bin/cache/dart-sdk/bin:$PATH:~/.pub-cache/bin
+    # Add globally activated packages to the path.
+    export PATH=$PATH:~/.pub-cache/bin
 
-    # Should be using dart from ./flutter/bin/cache/dart-sdk/bin/dart
+    # Should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart
     which dart
 
     # Analyze the source.
     pub global activate tuneup
     echo "after activate tuneup"
+
     tuneup check --ignore-infos
     echo "after tuneup check"
 
@@ -46,22 +49,18 @@ if [ "$USE_FLUTTER_SDK" = true ] ; then
 
 else
     # Add globally activated packages to the path.
-    export PATH="$PATH":~/.pub-cache/bin
+    export PATH=$PATH:~/.pub-cache/bin
 
     # Should be using dart from /Users/travis/dart-sdk/bin/dart
     which dart
 
     # Analyze the source.
     pub global activate tuneup
-    echo "after activate tuneup"
     tuneup check --ignore-infos
-    echo "after tuneup check"
 
     # Ensure we can build the app.
     pub global activate webdev
-    echo "after activate webdev"
     webdev build
-    echo "after webdev build"
 
     # Run the tests.
     pub run test -x "useFlutterSdk"
