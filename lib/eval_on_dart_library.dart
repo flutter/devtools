@@ -16,13 +16,15 @@ class EvalOnDartLibrary {
 
     // TODO: do we need to dispose this subscription at some point? Where?
     serviceManager.isolateManager
-        .getCurrentFlutterIsolate((IsolateRef isolate) {
+        .getCurrentFlutterIsolate((IsolateRef isolate) async {
+      await _initializeComplete;
+
       if (_libraryRef.isCompleted) {
         _libraryRef = new Completer<LibraryRef>();
       }
 
       if (isolate != null) {
-        _initialize(isolate.id);
+        _initializeComplete = _initialize(isolate.id);
       }
     });
   }
@@ -36,6 +38,7 @@ class EvalOnDartLibrary {
   final String libraryName;
   final VmServiceWrapper service;
   Completer<LibraryRef> _libraryRef;
+  Future<void> _initializeComplete;
 
   String get isolateId => _isolateId;
   String _isolateId;
@@ -43,17 +46,20 @@ class EvalOnDartLibrary {
   Future<LibraryRef> get libraryRef => _libraryRef.future;
   Completer allPendingRequestsDone;
 
-  void _initialize(String isolateId) async {
+  Future<void> _initialize(String isolateId) async {
     _isolateId = isolateId;
 
     try {
       final Isolate isolate = await service.getIsolate(_isolateId);
       for (LibraryRef library in isolate.libraries) {
         if (library.uri == libraryName) {
+          assert(!_libraryRef.isCompleted);
           _libraryRef.complete(library);
           return;
         }
       }
+      assert(!_libraryRef.isCompleted);
+      _libraryRef.completeError('Library $libraryName not found');
     } catch (e) {
       _handleError(e);
     }
@@ -75,12 +81,16 @@ class EvalOnDartLibrary {
 
     try {
       final LibraryRef libraryRef = await _libraryRef.future;
-      return await service.evaluate(
+      final result = await service.evaluate(
         _isolateId,
         libraryRef.id,
         expression,
         scope: scope,
       );
+      if (result is ErrorRef) {
+        throw result;
+      }
+      return result;
     } catch (e) {
       _handleError(e);
     }
