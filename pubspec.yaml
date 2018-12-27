@@ -15,8 +15,6 @@ dependencies:
 dev_dependencies:
   build_runner: 1.0.0
   build_web_compilers: any
-  file: ^5.0.6
-  process: ^3.0.9
   test: ^1.0.0
   webdev: 1.0.1
   webkit_inspection_protocol: ^0.3.6

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:devtools/eval_on_dart_library.dart';
 import 'package:devtools/globals.dart';
 import 'package:devtools/service_manager.dart';
@@ -6,8 +7,7 @@ import 'package:devtools/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'flutter_tools/base/file_system.dart';
-import 'flutter_tools/test_driver.dart';
+import 'flutter_test_driver.dart';
 
 void main() {
   group('serviceManagerTests', () {
@@ -16,7 +16,7 @@ void main() {
 
     setUp(() async {
       _flutter =
-          FlutterRunTestDriver(fs.directory('test/fixtures/flutter_app'));
+          FlutterRunTestDriver(new Directory('test/fixtures/flutter_app'));
 
       await _flutter.run(withDebugger: true);
       service = _flutter.vmService;

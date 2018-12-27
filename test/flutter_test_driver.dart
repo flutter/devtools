@@ -6,13 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:file/file.dart';
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
-import 'package:devtools/vm_service_wrapper.dart';
-
-import 'base/file_system.dart';
 
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
