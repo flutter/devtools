@@ -55,15 +55,7 @@ class FontWeight {
 
   /// A list of all the font weights.
   static const List<FontWeight> values = <FontWeight>[
-    w100,
-    w200,
-    w300,
-    w400,
-    w500,
-    w600,
-    w700,
-    w800,
-    w900
+    w100, w200, w300, w400, w500, w600, w700, w800, w900
   ];
 
   /// Linearly interpolates between two font weights.
@@ -88,10 +80,7 @@ class FontWeight {
   /// an [AnimationController].
   static FontWeight lerp(FontWeight a, FontWeight b, double t) {
     assert(t != null);
-    return values[
-        lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t)
-            .round()
-            .clamp(0, 8)];
+    return values[lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t).round().clamp(0, 8)];
   }
 
   @override
@@ -159,7 +148,8 @@ class TextDecoration {
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
-    for (TextDecoration decoration in decorations) mask |= decoration._mask;
+    for (TextDecoration decoration in decorations)
+      mask |= decoration._mask;
     return new TextDecoration._(mask);
   }
 
@@ -184,7 +174,8 @@ class TextDecoration {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TextDecoration) return false;
+    if (other is! TextDecoration)
+      return false;
     final TextDecoration typedOther = other;
     return _mask == typedOther._mask;
   }
@@ -194,12 +185,17 @@ class TextDecoration {
 
   @override
   String toString() {
-    if (_mask == 0) return 'TextDecoration.none';
+    if (_mask == 0)
+      return 'TextDecoration.none';
     final List<String> values = <String>[];
-    if (_mask & underline._mask != 0) values.add('underline');
-    if (_mask & overline._mask != 0) values.add('overline');
-    if (_mask & lineThrough._mask != 0) values.add('lineThrough');
-    if (values.length == 1) return 'TextDecoration.${values[0]}';
+    if (_mask & underline._mask != 0)
+      values.add('underline');
+    if (_mask & overline._mask != 0)
+      values.add('overline');
+    if (_mask & lineThrough._mask != 0)
+      values.add('lineThrough');
+    if (values.length == 1)
+      return 'TextDecoration.${values[0]}';
     return 'TextDecoration.combine([${values.join(", ")}])';
   }
 }
@@ -252,7 +248,8 @@ class TextStyle {
     double letterSpacing,
     double wordSpacing,
     double height,
-  })  : _fontFamily = fontFamily ?? '',
+  }) :
+        _fontFamily = fontFamily ?? '',
         _fontSize = fontSize,
         _letterSpacing = letterSpacing,
         _wordSpacing = wordSpacing,
@@ -279,41 +276,45 @@ class TextStyle {
   final double _wordSpacing;
   final double _height;
 
+
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! TextStyle) return false;
+    if (identical(this, other))
+      return true;
+    if (other is! TextStyle)
+      return false;
     final TextStyle typedOther = other;
     if (_fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
         _letterSpacing != typedOther._letterSpacing ||
         _wordSpacing != typedOther._wordSpacing ||
-        _height != typedOther._height) return false;
+        _height != typedOther._height)
+      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
-      if (_encoded[index] != typedOther._encoded[index]) return false;
+      if (_encoded[index] != typedOther._encoded[index])
+        return false;
     }
     return true;
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize,
-      _letterSpacing, _wordSpacing, _height);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height);
 
   @override
   String toString() {
     return 'UITextStyle('
-        'color: ${_encoded[0] & 0x00002 == 0x00002 ? new Color(_encoded[1]) : "unspecified"}, '
-        'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? new TextDecoration._(_encoded[2]) : "unspecified"}, '
-        'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? new Color(_encoded[3]) : "unspecified"}, '
+        'color: ${          _encoded[0] & 0x00002 == 0x00002 ? new Color(_encoded[1])                  : "unspecified"}, '
+        'decoration: ${     _encoded[0] & 0x00004 == 0x00004 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
+        'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? new Color(_encoded[3])                  : "unspecified"}, '
         'decorationStyle: ${_encoded[0] & 0x00010 == 0x00010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight.values[_encoded[5]] : "unspecified"}, '
-        'fontStyle: ${_encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]] : "unspecified"}, '
-        'textBaseline: ${_encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]] : "unspecified"}, '
-        'fontFamily: ${_encoded[0] & 0x00100 == 0x00100 ? _fontFamily : "unspecified"}, '
-        'fontSize: ${_encoded[0] & 0x00200 == 0x00200 ? _fontSize : "unspecified"}, '
-        'letterSpacing: ${_encoded[0] & 0x00400 == 0x00400 ? "${_letterSpacing}x" : "unspecified"}, '
-        'wordSpacing: ${_encoded[0] & 0x00800 == 0x00800 ? "${_wordSpacing}x" : "unspecified"}, '
-        'height: ${_encoded[0] & 0x01000 == 0x01000 ? "${_height}x" : "unspecified"}, '
+        'fontWeight: ${     _encoded[0] & 0x00020 == 0x00020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+        'fontStyle: ${      _encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+        'textBaseline: ${   _encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
+        'fontFamily: ${     _encoded[0] & 0x00100 == 0x00100 ? _fontFamily                             : "unspecified"}, '
+        'fontSize: ${       _encoded[0] & 0x00200 == 0x00200 ? _fontSize                               : "unspecified"}, '
+        'letterSpacing: ${  _encoded[0] & 0x00400 == 0x00400 ? "${_letterSpacing}x"                    : "unspecified"}, '
+        'wordSpacing: ${    _encoded[0] & 0x00800 == 0x00800 ? "${_wordSpacing}x"                      : "unspecified"}, '
+        'height: ${         _encoded[0] & 0x01000 == 0x01000 ? "${_height}x"                           : "unspecified"}, '
         ')';
   }
 }
@@ -336,16 +337,16 @@ class TextStyle {
 //  - Element 4: The value of |maxLines|.
 //
 Int32List _encodeParagraphStyle(
-  TextAlign textAlign,
-  TextDirection textDirection,
-  FontWeight fontWeight,
-  FontStyle fontStyle,
-  int maxLines,
-  String fontFamily,
-  double fontSize,
-  double lineHeight,
-  String ellipsis,
-) {
+    TextAlign textAlign,
+    TextDirection textDirection,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    int maxLines,
+    String fontFamily,
+    double fontSize,
+    double lineHeight,
+    String ellipsis,
+    ) {
   final Int32List result = new Int32List(6); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
@@ -444,17 +445,17 @@ class ParagraphStyle {
     double fontSize,
     double lineHeight,
     String ellipsis,
-  })  : _encoded = _encodeParagraphStyle(
-          textAlign,
-          textDirection,
-          fontWeight,
-          fontStyle,
-          maxLines,
-          fontFamily,
-          fontSize,
-          lineHeight,
-          ellipsis,
-        ),
+  }) : _encoded = _encodeParagraphStyle(
+    textAlign,
+    textDirection,
+    fontWeight,
+    fontStyle,
+    maxLines,
+    fontFamily,
+    fontSize,
+    lineHeight,
+    ellipsis,
+  ),
         _fontFamily = fontFamily,
         _fontSize = fontSize,
         _lineHeight = lineHeight,
@@ -468,35 +469,38 @@ class ParagraphStyle {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     final ParagraphStyle typedOther = other;
     if (_fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
         _lineHeight != typedOther._lineHeight ||
-        _ellipsis != typedOther._ellipsis) return false;
+        _ellipsis != typedOther._ellipsis)
+      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
-      if (_encoded[index] != typedOther._encoded[index]) return false;
+      if (_encoded[index] != typedOther._encoded[index])
+        return false;
     }
     return true;
   }
 
   @override
-  int get hashCode => hashValues(
-      hashList(_encoded), _fontFamily, _fontSize, _lineHeight, _ellipsis);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _lineHeight, _ellipsis);
 
   @override
   String toString() {
     return '$runtimeType('
-        'textAlign: ${_encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]] : "unspecified"}, '
-        'textDirection: ${_encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]] : "unspecified"}, '
-        'fontStyle: ${_encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]] : "unspecified"}, '
-        'maxLines: ${_encoded[0] & 0x020 == 0x020 ? _encoded[5] : "unspecified"}, '
-        'fontFamily: ${_encoded[0] & 0x040 == 0x040 ? _fontFamily : "unspecified"}, '
-        'fontSize: ${_encoded[0] & 0x080 == 0x080 ? _fontSize : "unspecified"}, '
-        'lineHeight: ${_encoded[0] & 0x100 == 0x100 ? "${_lineHeight}x" : "unspecified"}, '
-        'ellipsis: ${_encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\"" : "unspecified"}, '
+        'textAlign: ${     _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]     : "unspecified"}, '
+        'textDirection: ${ _encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
+        'fontWeight: ${    _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]    : "unspecified"}, '
+        'fontStyle: ${     _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]]     : "unspecified"}, '
+        'maxLines: ${      _encoded[0] & 0x020 == 0x020 ? _encoded[5]                       : "unspecified"}, '
+        'fontFamily: ${    _encoded[0] & 0x040 == 0x040 ? _fontFamily                       : "unspecified"}, '
+        'fontSize: ${      _encoded[0] & 0x080 == 0x080 ? _fontSize                         : "unspecified"}, '
+        'lineHeight: ${    _encoded[0] & 0x100 == 0x100 ? "${_lineHeight}x"                 : "unspecified"}, '
+        'ellipsis: ${      _encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\""                  : "unspecified"}, '
         ')';
   }
 }
@@ -623,7 +627,7 @@ class TextPosition {
   const TextPosition({
     @required this.offset,
     this.affinity = TextAffinity.downstream,
-  })  : assert(offset != null),
+  }) : assert(offset != null),
         assert(affinity != null);
 
   /// The index of the character that immediately follows the position.
@@ -645,9 +649,11 @@ class TextPosition {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType)
+      return false;
     final TextPosition typedOther = other;
-    return typedOther.offset == offset && typedOther.affinity == affinity;
+    return typedOther.offset == offset
+        && typedOther.affinity == affinity;
   }
 
   @override
@@ -694,7 +700,8 @@ class ParagraphConstraints {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType)
+      return false;
     final ParagraphConstraints typedOther = other;
     return typedOther.width == width;
   }
@@ -793,19 +800,19 @@ enum BoxWidthStyle {
 //  - Element 7: The enum index of the |textBaseline|.
 //
 Int32List _encodeTextStyle(
-  Color color,
-  TextDecoration decoration,
-  Color decorationColor,
-  TextDecorationStyle decorationStyle,
-  FontWeight fontWeight,
-  FontStyle fontStyle,
-  TextBaseline textBaseline,
-  String fontFamily,
-  double fontSize,
-  double letterSpacing,
-  double wordSpacing,
-  double height,
-) {
+    Color color,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    TextBaseline textBaseline,
+    String fontFamily,
+    double fontSize,
+    double letterSpacing,
+    double wordSpacing,
+    double height,
+    ) {
   final Int32List result = new Int32List(8);
   if (color != null) {
     result[0] |= 1 << 1;
@@ -857,3 +864,4 @@ Int32List _encodeTextStyle(
   }
   return result;
 }
+

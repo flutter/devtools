@@ -4,6 +4,7 @@
 
 part of 'fake_flutter.dart';
 
+
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property.
@@ -179,11 +180,13 @@ class TextSpan {
   /// for each span that has text.
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
-      if (!visitor(this)) return false;
+      if (!visitor(this))
+        return false;
     }
     if (children != null) {
       for (TextSpan child in children) {
-        if (!child.visitTextSpan(visitor)) return false;
+        if (!child.visitTextSpan(visitor))
+          return false;
       }
     }
     return true;
@@ -228,7 +231,8 @@ class TextSpan {
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index) {
-    if (index < 0) return null;
+    if (index < 0)
+      return null;
     int offset = 0;
     int result;
     visitTextSpan((TextSpan span) {
@@ -255,13 +259,16 @@ class TextSpan {
       if (!visitTextSpan((TextSpan span) {
         if (span.children != null) {
           for (TextSpan child in span.children) {
-            if (child == null) return false;
+            if (child == null)
+              return false;
           }
         }
         return true;
       })) {
-        throw FlutterError('TextSpan contains a null child.\n'
-            'A TextSpan object with a non-null child list should not have any nulls in its child list.\n');
+        throw FlutterError(
+            'TextSpan contains a null child.\n'
+            'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
+        );
       }
       return true;
     }());
@@ -305,19 +312,20 @@ class TextSpan {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     final TextSpan typedOther = other;
-    return typedOther.text == text &&
-        typedOther.style == style
-        //   && typedOther.recognizer == recognizer
-        &&
-        listEquals<TextSpan>(typedOther.children, children);
+    return typedOther.text == text
+        && typedOther.style == style
+     //   && typedOther.recognizer == recognizer
+        && listEquals<TextSpan>(typedOther.children, children);
   }
 
   @override
-  int get hashCode =>
-      hashValues(style, text, /* recognizer, */ hashList(children));
+  int get hashCode => hashValues(style, text, /* recognizer, */ hashList(children));
 
   String toStringShort() => '$runtimeType';
+
 }
