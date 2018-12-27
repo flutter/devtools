@@ -5,13 +5,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools/vm_service_wrapper.dart';
+import 'package:devtools/service_extensions.dart' as extensions;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_manager.dart' show ServiceExtensionState;
 import '../ui/elements.dart';
 import '../ui/primer.dart';
+import '../ui/ui_utils.dart';
+import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
 
@@ -45,6 +48,10 @@ class TimelineScreen extends Screen {
 
   PButton pauseButton;
   PButton resumeButton;
+  PButton trackWidgetBuildsButton;
+  PButton perfOverlayButton;
+  PButton repaintRainbowButton;
+  PButton debugPaintButton;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -61,13 +68,14 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final PButton trackWidgetBuildsButton = new PButton('Track widget builds')
-      ..small();
-    final PButton perfOverlayButton = new PButton('Performance overlay')
-      ..small();
-    final PButton repaintRainbowButton = new PButton('Repaint rainbow')
-      ..small();
-    final PButton debugDrawButton = new PButton('Debug draw')..small();
+    trackWidgetBuildsButton = createExtensionButton(
+        'Track widget builds', extensions.profileWidgetBuilds);
+    perfOverlayButton = createExtensionButton(
+        'Performance overlay', extensions.performanceOverlay);
+    repaintRainbowButton =
+        createExtensionButton('Repaint rainbow', extensions.repaintRainbow);
+    debugPaintButton =
+        createExtensionButton('Debug paint', extensions.debugPaint);
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -83,7 +91,7 @@ class TimelineScreen extends Screen {
               trackWidgetBuildsButton,
               perfOverlayButton,
               repaintRainbowButton,
-              debugDrawButton,
+              debugPaintButton,
             ]),
         ]),
       div(c: 'section')
@@ -95,24 +103,6 @@ class TimelineScreen extends Screen {
         ..flex()
         ..add(frameDetailsUI = new FrameDetailsUI()..attribute('hidden')),
     ]);
-
-    void handleToggleButton(PButton button, String serviceCallName) {
-      button.click(() {
-        final bool wasSelected = button.element.classes.contains('selected');
-        button.toggleClass('selected');
-        serviceManager.service.callServiceExtension(
-          serviceCallName,
-          isolateId: serviceManager.isolateManager.selectedIsolate.id,
-          args: <String, bool>{'enabled': !wasSelected},
-        );
-      });
-    }
-
-    handleToggleButton(
-        trackWidgetBuildsButton, 'ext.flutter.profileWidgetBuilds');
-    handleToggleButton(perfOverlayButton, 'ext.flutter.showPerformanceOverlay');
-    handleToggleButton(repaintRainbowButton, 'ext.flutter.repaintRainbow');
-    handleToggleButton(debugDrawButton, 'ext.flutter.debugPaint');
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceManager.hasConnection) {
@@ -150,6 +140,10 @@ class TimelineScreen extends Screen {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
+    // Disables or selects buttons as needed based on the state of their service
+    // extensions.
+    _updateButtonStates();
+
     framesChart.disabled = false;
 
     framesTracker = new FramesTracker(service);
@@ -170,6 +164,44 @@ class TimelineScreen extends Screen {
         final TimelineEvent e = new TimelineEvent(json);
         timelineFramesUI.timelineData?.processTimelineEvent(e);
       }
+    });
+  }
+
+  void _updateButtonStates() {
+    // Disable buttons for unavailable service extensions.
+    serviceManager.serviceExtensionManager
+        .hasServiceExtension(extensions.profileWidgetBuilds, (bool available) {
+      trackWidgetBuildsButton.disabled = !available;
+    });
+    serviceManager.serviceExtensionManager
+        .hasServiceExtension(extensions.performanceOverlay, (bool available) {
+      perfOverlayButton.disabled = !available;
+    });
+    serviceManager.serviceExtensionManager
+        .hasServiceExtension(extensions.repaintRainbow, (bool available) {
+      repaintRainbowButton.disabled = !available;
+    });
+    serviceManager.serviceExtensionManager
+        .hasServiceExtension(extensions.debugPaint, (bool available) {
+      debugPaintButton.disabled = !available;
+    });
+
+    // Select buttons whose state is already enabled.
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensions.profileWidgetBuilds, (ServiceExtensionState state) {
+      trackWidgetBuildsButton.toggleClass('selected', state.enabled);
+    });
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensions.performanceOverlay, (ServiceExtensionState state) {
+      perfOverlayButton.toggleClass('selected', state.enabled);
+    });
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensions.repaintRainbow, (ServiceExtensionState state) {
+      repaintRainbowButton.toggleClass('selected', state.enabled);
+    });
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensions.debugPaint, (ServiceExtensionState state) {
+      debugPaintButton.toggleClass('selected', state.enabled);
     });
   }
 

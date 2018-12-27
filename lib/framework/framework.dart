@@ -36,27 +36,22 @@ class Framework {
     assert(screen != null);
 
     final String search = window.location.search;
-    final String ref = search == null ? screen.ref : '${screen.ref}$search';
+    final String ref = search == null ? screen.ref : '$search${screen.ref}';
     window.history.pushState(null, screen.name, ref);
 
     load(screen);
   }
 
   void loadScreenFromLocation() {
-    // Look for an explicit path, otherwise re-direct to '/'
-    String path = window.location.pathname;
-
-    // Special case the development path.
-    if (path == '/devtools/web/index.html' || path == '/index.html') {
-      path = '/';
+    // Screens are identified by the hash as that works better with the webdev
+    // server.
+    String id = window.location.hash;
+    if (id.isNotEmpty) {
+      assert(id[0] == '#');
+      id = id.substring(1);
     }
-
-    final String first =
-        (path.startsWith('/') ? path.substring(1) : path).split('/').first;
-    Screen screen = getScreen(first.isEmpty ? path : first);
-    if (screen == null && path == '/') {
-      screen = screens.first;
-    }
+    Screen screen = getScreen(id);
+    screen ??= screens.first;
     if (screen != null) {
       load(screen);
     } else {
@@ -218,7 +213,7 @@ abstract class Screen {
 
   final List<StatusItem> statusItems = <StatusItem>[];
 
-  String get ref => id == '/' ? id : '/$id';
+  String get ref => id.isEmpty ? id : '#$id';
 
   bool get visible => _visible.value;
 
