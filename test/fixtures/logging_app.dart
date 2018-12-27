@@ -10,8 +10,8 @@ import 'dart:io';
 final Controller controller = new Controller();
 
 void main() {
-  print('starting app');
-  log('starting app');
+  print('starting logging app');
+  log('starting logging app');
 
   // Don't exit until it's indicated we should by the controller.
   new Timer(const Duration(days: 1), () {});

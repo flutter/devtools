@@ -33,6 +33,7 @@ void main() {
 
     group('app', appTests);
     group('logging', loggingTests);
+    group('debugging', debuggingTests);
   }, timeout: const Timeout.factor(2));
 }
 
@@ -93,6 +94,43 @@ void loggingTests() {
     // a predicate value.
     await new Future<dynamic>.delayed(const Duration(milliseconds: 200));
     expect(await logs.logCount(), greaterThan(0));
+  });
+}
+
+void debuggingTests() {
+  CliAppFixture appFixture;
+  BrowserTabInstance tabInstance;
+
+  setUp(() async {
+    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+    tabInstance = await browserManager.createNewTab();
+  });
+
+  tearDown(() async {
+    await tabInstance?.close();
+    await appFixture?.teardown();
+  });
+
+  // TODO: create initial debugging test
+  test('pauses at breakpoints', () async {
+    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    // TODO: Set a breakpoint; verify that the app stops there; verify UI information.
+//    final LoggingManager logs = tools.loggingManager;
+//    await logs.clearLogs();
+//    expect(await logs.logCount(), 0);
+//    await appFixture.invoke('controller.emitLog()');
+//
+//    // Verify the log data shows up in the UI.
+//    // TODO(devoncarew): Instead of a fixed delay, poll some amount of time for
+//    // a predicate value.
+//    await new Future<dynamic>.delayed(const Duration(milliseconds: 200));
+//    expect(await logs.logCount(), greaterThan(0));
   });
 }
 
