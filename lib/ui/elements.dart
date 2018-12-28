@@ -14,6 +14,10 @@ Element $(String id) => querySelector('#$id');
 CoreElement button({String text, String c, String a}) =>
     new CoreElement('button', text: text, classes: c, attributes: a);
 
+CoreElement checkbox({String text, String c, String a}) =>
+    new CoreElement('input', text: text, classes: c, attributes: a)
+      ..setAttribute('type', 'checkbox');
+
 CoreElement div({String text, String c, String a}) =>
     new CoreElement('div', text: text, classes: c, attributes: a);
 
