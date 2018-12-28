@@ -37,7 +37,10 @@ CoreElement createExtensionCheckBox(String extensionName) {
       extensionName, (available) => input.disabled = !available);
 
   serviceManager.serviceExtensionManager.getServiceExtensionState(extensionName,
-      (state) => input.toggleAttribute('checked', state.value ?? false));
+      (state) {
+    final html.InputElement e = input.element;
+    e.checked = state.value;
+  });
 
   input.element.onChange.listen((_) {
     final html.InputElement e = input.element;
