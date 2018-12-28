@@ -16,7 +16,7 @@ class EvalOnDartLibrary {
 
     // TODO: do we need to dispose this subscription at some point? Where?
     serviceManager.isolateManager
-        .getCurrentFlutterIsolate((IsolateRef isolate) async {
+        .getSelectedIsolate((IsolateRef isolate) async {
       await _initializeComplete;
 
       if (_libraryRef.isCompleted) {

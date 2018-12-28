@@ -102,16 +102,11 @@ class ServiceConnectionManager {
 }
 
 class IsolateManager {
-  // TODO(kenzie): de-dupe logic between _selectedIsolate and _flutterIsolate.
   List<IsolateRef> _isolates = <IsolateRef>[];
-  List<IsolateRef> _flutterIsolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
-  IsolateRef _flutterIsolate;
   VmServiceWrapper _service;
   ServiceExtensionManager _serviceExtensionManager;
 
-  final StreamController<IsolateRef> _flutterIsolateController =
-      new StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _isolateCreatedController =
       new StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _isolateExitedController =
@@ -121,14 +116,9 @@ class IsolateManager {
 
   List<IsolateRef> get isolates => new List<IsolateRef>.unmodifiable(_isolates);
 
-  IsolateRef get flutterIsolate => _flutterIsolate;
-
   IsolateRef get selectedIsolate => _selectedIsolate;
 
   Stream<IsolateRef> get onIsolateCreated => _isolateCreatedController.stream;
-
-  Stream<IsolateRef> get onFlutterIsolateChanged =>
-      _flutterIsolateController.stream;
 
   Stream<IsolateRef> get onSelectedIsolateChanged =>
       _selectedIsolateController.stream;
@@ -139,114 +129,83 @@ class IsolateManager {
     final IsolateRef ref = _isolates.firstWhere(
         (IsolateRef ref) => ref.id == isolateRefId,
         orElse: () => null);
-    if (ref != _selectedIsolate) {
-      _selectedIsolate = ref;
-      _selectedIsolateController.add(_selectedIsolate);
-    }
+    _setSelectedIsolate(ref);
   }
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
-    _flutterIsolates = isolates;
-    await _initFlutterIsolate(isolates);
-    if (_flutterIsolate != null) {
-      _flutterIsolateController.add(_flutterIsolate);
-    }
-    _selectedIsolate = _selectBestFirstIsolate(isolates);
+    await _initSelectedIsolate(isolates);
     if (_selectedIsolate != null) {
       _isolateCreatedController.add(_selectedIsolate);
       _selectedIsolateController.add(_selectedIsolate);
+      // On initial connection to running app, service extensions are added from
+      // here.
+      await _serviceExtensionManager
+          ._addRegisteredExtensionRPCs(_selectedIsolate);
     }
   }
 
   void _handleIsolateEvent(Event event) async {
     if (event.kind == 'IsolateStart') {
       _isolates.add(event.isolate);
-      _flutterIsolates.add(event.isolate);
       _isolateCreatedController.add(event.isolate);
       if (_selectedIsolate == null) {
-        _selectedIsolate = event.isolate;
-        _selectedIsolateController.add(event.isolate);
+        _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == 'ServiceExtensionAdded') {
       // On hot restart, service extensions are added from here.
       await _serviceExtensionManager
           ._maybeAddServiceExtension(event.extensionRPC);
 
-      // Check to see if there is a new flutter isolate.
-      if (_flutterIsolate == null) {
-        if (_isFlutterExtension(event.extensionRPC)) {
-          _setFlutterIsolate(event.isolate);
-        }
+      // Check to see if there is a new isolate.
+      if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
+        _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == 'IsolateExit') {
       _isolates.remove(event.isolate);
-      _flutterIsolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
       if (_selectedIsolate == event.isolate) {
         _selectedIsolate = _isolates.isEmpty ? null : _isolates.first;
         _selectedIsolateController.add(_selectedIsolate);
-      }
-      if (_flutterIsolate == event.isolate) {
-        _setFlutterIsolate(
-            _flutterIsolates.isEmpty ? null : _flutterIsolates.first);
         _serviceExtensionManager.resetAvailableExtensions();
       }
     }
-  }
-
-  IsolateRef _selectBestFirstIsolate(List<IsolateRef> isolates) {
-    final IsolateRef ref = isolates.firstWhere((IsolateRef ref) {
-      // 'foo.dart:main()'
-      return ref.name.contains(':main(');
-    }, orElse: () => null);
-
-    if (ref != null) {
-      return ref;
-    }
-
-    return isolates.isEmpty ? null : isolates.first;
   }
 
   bool _isFlutterExtension(String extensionName) {
     return extensionName.startsWith('ext.flutter.');
   }
 
-  Future<void> _initFlutterIsolate(List<IsolateRef> isolates) async {
+  Future<void> _initSelectedIsolate(List<IsolateRef> isolates) async {
     for (IsolateRef ref in isolates) {
-      // Populate flutter isolate info.
-      if (_flutterIsolate == null) {
+      if (_selectedIsolate == null) {
         final Isolate isolate = await _service.getIsolate(ref.id);
         if (isolate.extensionRPCs != null) {
           for (String extensionName in isolate.extensionRPCs) {
             if (_isFlutterExtension(extensionName)) {
-              _setFlutterIsolate(ref);
+              _setSelectedIsolate(ref);
               break;
             }
           }
         }
       }
-      // On initial connection to running app, service extensions are added from
-      // here.
-      await _serviceExtensionManager._addRegisteredExtensionRPCs(ref);
     }
   }
 
-  void _setFlutterIsolate(IsolateRef ref) {
-    if (_flutterIsolate == ref) {
-      // Isolate didn't change. Do nothing.
+  void _setSelectedIsolate(IsolateRef ref) {
+    if (_selectedIsolate == ref) {
       return;
     }
-    _flutterIsolate = ref;
-    _flutterIsolateController.add(ref);
+    _selectedIsolate = ref;
+    _selectedIsolateController.add(ref);
   }
 
-  StreamSubscription<IsolateRef> getCurrentFlutterIsolate(
+  StreamSubscription<IsolateRef> getSelectedIsolate(
       void onData(IsolateRef ref)) {
-    if (_flutterIsolate != null) {
-      onData(_flutterIsolate);
+    if (_selectedIsolate != null) {
+      onData(_selectedIsolate);
     }
-    return _flutterIsolateController.stream.listen(onData);
+    return _selectedIsolateController.stream.listen(onData);
   }
 }
 
