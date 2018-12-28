@@ -134,7 +134,7 @@ class IsolateManager {
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
-    await _selectBestFirstIsolate(isolates);
+    await _initSelectedIsolate(isolates);
     if (_selectedIsolate != null) {
       _isolateCreatedController.add(_selectedIsolate);
       _selectedIsolateController.add(_selectedIsolate);
@@ -158,7 +158,7 @@ class IsolateManager {
           ._maybeAddServiceExtension(event.extensionRPC);
 
       // Check to see if there is a new isolate.
-      if (_selectedIsolate == null) {
+      if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
         _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == 'IsolateExit') {
@@ -172,16 +172,24 @@ class IsolateManager {
     }
   }
 
-  Future<void> _selectBestFirstIsolate(List<IsolateRef> isolates) async {
+  bool _isFlutterExtension(String extensionName) {
+    return extensionName.startsWith('ext.flutter.');
+  }
+
+  Future<void> _initSelectedIsolate(List<IsolateRef> isolates) async {
     for (IsolateRef ref in isolates) {
       if (_selectedIsolate == null) {
-        if (ref.name.contains(':main(')) {
-          _selectedIsolate = ref;
-          break;
+        final Isolate isolate = await _service.getIsolate(ref.id);
+        if (isolate.extensionRPCs != null) {
+          for (String extensionName in isolate.extensionRPCs) {
+            if (_isFlutterExtension(extensionName)) {
+              _setSelectedIsolate(ref);
+              break;
+            }
+          }
         }
       }
     }
-    _selectedIsolate ??= isolates.isNotEmpty ? isolates.first : null;
   }
 
   void _setSelectedIsolate(IsolateRef ref) {
