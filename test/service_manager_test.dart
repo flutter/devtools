@@ -43,10 +43,6 @@ void main() {
         await serviceManager.isolateManager.onSelectedIsolateChanged
             .firstWhere((ref) => ref != null);
       }
-      if (serviceManager.isolateManager.flutterIsolate == null) {
-        await serviceManager.isolateManager.onFlutterIsolateChanged
-            .firstWhere((ref) => ref != null);
-      }
     });
 
     test('toggle boolean service extension', () async {
