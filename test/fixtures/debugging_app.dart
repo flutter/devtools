@@ -9,9 +9,15 @@ void main() {
 
   final Cat cat = new Cat('Fluffy');
 
-  new Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
-    cat.performAction();
-  });
+  void run() {
+    new Timer(const Duration(milliseconds: 100), () {
+      cat.performAction();
+
+      run();
+    });
+  }
+
+  run();
 }
 
 class Cat {
@@ -24,6 +30,9 @@ class Cat {
   int actionCount = 0;
 
   void performAction() {
-    actionCount++; //bp1
+    String actionStr = 'catAction';
+    actionStr = actionStr + '!';
+
+    actionCount++; // breakpoint
   }
 }

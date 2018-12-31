@@ -23,9 +23,6 @@ import '../ui/primer.dart';
 
 // TODO(devoncarew): handle double click on breakpoints
 
-// TODO(devoncarew): start a testing strategy
-//   breakpoints, stepping, frame selection
-
 class DebuggerScreen extends Screen {
   DebuggerScreen()
       : super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
@@ -53,6 +50,8 @@ class DebuggerScreen extends Screen {
   CallStackView callStackView;
   VariablesView variablesView;
   BreakpointsView breakpointsView;
+
+  SelectableList<ScriptRef> get scriptsView => _scriptsView;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -368,6 +367,8 @@ class DebuggerScreen extends Screen {
         await serviceManager.service.getScripts(isolate.id);
     final List<ScriptRef> scripts = scriptList.scripts.toList();
 
+    debuggerState.scripts = scripts;
+
     String scriptPrefix = isolate.rootLib.uri;
     if (scriptPrefix.contains('/lib/')) {
       scriptPrefix =
@@ -451,16 +452,17 @@ class DebuggerScreen extends Screen {
   }
 }
 
+// TODO(devoncarew): handle EventKind.kIsolateReload
+
 class DebuggerState {
   DebuggerState();
-
-  // TODO(devoncarew): handle EventKind.kIsolateReload
 
   VmService service;
 
   StreamSubscription<Event> _debugSubscription;
 
   IsolateRef isolateRef;
+  List<ScriptRef> scripts;
 
   final Map<String, Script> _scriptCache = <String, Script>{};
 
@@ -488,6 +490,8 @@ class DebuggerState {
   Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
 
   Stream<String> get onExceptionPauseModeChanged => _exceptionPauseMode;
+
+  List<Breakpoint> get breakpoints => _breakpoints.value;
 
   void setVmService(VmService service) {
     this.service = service;
@@ -524,11 +528,11 @@ class DebuggerState {
     }
   }
 
-  Future<void> pause() => service.pause(isolateRef.id);
+  Future<Success> pause() => service.pause(isolateRef.id);
 
-  Future<void> resume() => service.resume(isolateRef.id);
+  Future<Success> resume() => service.resume(isolateRef.id);
 
-  Future<void> stepOver() {
+  Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final bool useAsyncStepping = _lastEvent?.atAsyncSuspension == true;
     return service.resume(isolateRef.id,
@@ -537,14 +541,31 @@ class DebuggerState {
             : StepOption.kOver);
   }
 
-  Future<void> stepIn() =>
+  Future<Success> stepIn() =>
       service.resume(isolateRef.id, step: StepOption.kInto);
 
-  Future<void> stepOut() =>
+  Future<Success> stepOut() =>
       service.resume(isolateRef.id, step: StepOption.kOut);
+
+  // Used for testing.
+  Future<void> clearBreakpoints() async {
+    final List<Breakpoint> breakpoints = _breakpoints.value.toList();
+    await Future.forEach(breakpoints, (Breakpoint breakpoint) {
+      return removeBreakpoint(breakpoint);
+    });
+  }
 
   Future<void> addBreakpoint(String scriptId, int line) {
     return service.addBreakpoint(isolateRef.id, scriptId, line);
+  }
+
+  // Used for testing.
+  Future<void> addBreakpointByPathFragment(String path, int line) async {
+    final ScriptRef ref =
+        scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
+    if (ref != null) {
+      return service.addBreakpoint(isolateRef.id, ref.id, line);
+    }
   }
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) {
@@ -937,6 +958,8 @@ class CallStackView {
 
   SelectableList<Frame> _items;
 
+  List<Frame> get items => _items.items;
+
   CoreElement get element => _items;
 
   Stream<Frame> get onSelectionChanged => _items.onSelectionChanged;
@@ -989,6 +1012,8 @@ class VariablesView {
   }
 
   SelectableList<BoundVariable> _items;
+
+  List<BoundVariable> get items => _items.items;
 
   CoreElement get element => _items;
 

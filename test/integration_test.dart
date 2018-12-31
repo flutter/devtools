@@ -90,19 +90,20 @@ void loggingTests() {
     await appFixture.invoke('controller.emitLog()');
 
     // Verify the log data shows up in the UI.
-    // TODO(devoncarew): Instead of a fixed delay, poll some amount of time for
-    // a predicate value.
-    await new Future<dynamic>.delayed(const Duration(milliseconds: 200));
+    await waitFor(() async => await logs.logCount() > 0);
     expect(await logs.logCount(), greaterThan(0));
   });
 }
+
+// TODO(devoncarew): Split the debugger tests out to a separate file.
+
+// TODO(devoncarew): test exception handling
 
 void debuggingTests() {
   CliAppFixture appFixture;
   BrowserTabInstance tabInstance;
 
   setUp(() async {
-    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
     tabInstance = await browserManager.createNewTab();
   });
 
@@ -111,8 +112,9 @@ void debuggingTests() {
     await appFixture?.teardown();
   });
 
-  // TODO: create initial debugging test
-  test('pauses at breakpoints', () async {
+  test('lists scripts', () async {
+    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+
     final DevtoolsManager tools = new DevtoolsManager(tabInstance);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
@@ -120,18 +122,217 @@ void debuggingTests() {
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    // TODO: Set a breakpoint; verify that the app stops there; verify UI information.
-//    final LoggingManager logs = tools.loggingManager;
-//    await logs.clearLogs();
-//    expect(await logs.logCount(), 0);
-//    await appFixture.invoke('controller.emitLog()');
-//
-//    // Verify the log data shows up in the UI.
-//    // TODO(devoncarew): Instead of a fixed delay, poll some amount of time for
-//    // a predicate value.
-//    await new Future<dynamic>.delayed(const Duration(milliseconds: 200));
-//    expect(await logs.logCount(), greaterThan(0));
+    final DebuggingManager debuggingManager = tools.debuggingManager;
+
+    // Get the list of scripts.
+    final List<String> scripts = await debuggingManager.getScripts();
+    expect(scripts, isNotEmpty);
+    expect(scripts, anyElement(endsWith(appFixture.appScriptPath)));
   });
+
+  test('breakpoints, variables, resume', () async {
+    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+
+    final String source = appFixture.scriptSource;
+    final List<int> breakpointLines =
+        CliAppFixture.parseBreakpointLines(source);
+
+    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    final DebuggingManager debuggingManager = tools.debuggingManager;
+
+    // clear and verify breakpoints
+    List<String> breakpoints = await debuggingManager.getBreakpoints();
+    expect(breakpoints, isEmpty);
+
+    // set and verify breakpoints
+    for (int line in breakpointLines) {
+      await debuggingManager.addBreakpoint(appFixture.appScriptPath, line);
+    }
+
+    breakpoints = await debuggingManager.getBreakpoints();
+    expect(breakpoints, isNotEmpty);
+
+    // wait for paused state
+    await waitFor(() async => await debuggingManager.getState() == 'paused');
+
+    await shortDelay();
+
+    // verify location
+    expect(
+      await debuggingManager.getLocation(),
+      endsWith('${appFixture.appScriptPath}:${breakpointLines.first}'),
+    );
+
+    // verify stack frame
+    final List<String> frames = await debuggingManager.getCallStackFrames();
+    expect(frames.length, greaterThan(2));
+    expect(frames.sublist(0, 2), [
+      'Cat.performAction:debugging_app.dart',
+      'main.run.<anonymous closure>:debugging_app.dart',
+    ]);
+
+    // verify variables
+    expect(
+      await debuggingManager.getVariables(),
+      unorderedEquals(['this:Cat', 'actionStr:catAction!']),
+    );
+
+    // resume
+    await debuggingManager.clearBreakpoints();
+    await debuggingManager.resume();
+
+    // verify state resumed
+    expect(await debuggingManager.getState(), 'running');
+  });
+
+  test('stepping, async step, async frames', () async {
+    appFixture =
+        await CliAppFixture.create('test/fixtures/debugging_app_async.dart');
+
+    final String source = appFixture.scriptSource;
+    final int breakpointLine =
+        CliAppFixture.parseBreakpointLines(source).single;
+    final List<int> steppingLines = CliAppFixture.parseSteppingLines(source);
+
+    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    final DebuggingManager debuggingManager = tools.debuggingManager;
+
+    // clear and verify breakpoints
+    List<String> breakpoints = await debuggingManager.getBreakpoints();
+    expect(breakpoints, isEmpty);
+
+    // set and verify breakpoint
+    await debuggingManager.addBreakpoint(
+        appFixture.appScriptPath, breakpointLine);
+
+    breakpoints = await debuggingManager.getBreakpoints();
+    expect(breakpoints, hasLength(1));
+
+    // wait for paused state
+    await waitFor(() async => await debuggingManager.getState() == 'paused');
+
+    await shortDelay();
+
+    // verify location
+    expect(
+      await debuggingManager.getLocation(),
+      endsWith('${appFixture.appScriptPath}:$breakpointLine'),
+    );
+
+    // test stepping
+    for (int stepLine in steppingLines) {
+      // step
+      await debuggingManager.step();
+
+      // wait for paused state
+      await waitFor(() async => await debuggingManager.getState() == 'paused');
+
+      await shortDelay();
+
+      // verify location
+      expect(
+        await debuggingManager.getLocation(),
+        endsWith('${appFixture.appScriptPath}:$stepLine'),
+      );
+    }
+
+    // verify an async stack frame
+    final List<String> frames = await debuggingManager.getCallStackFrames();
+    expect(frames.length, greaterThan(4));
+    expect(frames.sublist(0, 4), [
+      'performAction:debugging_app_async.dart',
+      '<async break>',
+      'main.run.<anonymous closure>:debugging_app_async.dart',
+      '<async break>',
+    ]);
+
+    // resume
+    await debuggingManager.clearBreakpoints();
+    await debuggingManager.resume();
+
+    // verify state resumed
+    expect(await debuggingManager.getState(), 'running');
+  });
+
+  test('break on exceptions', () async {
+    appFixture = await CliAppFixture.create(
+        'test/fixtures/debugging_app_exception.dart');
+
+    final String source = appFixture.scriptSource;
+    final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
+
+    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    final DebuggingManager debuggingManager = tools.debuggingManager;
+
+    // verify running state
+    expect(await debuggingManager.getState(), 'running');
+
+    // set break on exceptions mode
+    await debuggingManager.setExceptionPauseMode('All');
+
+    // wait for paused state
+    await waitFor(() async => await debuggingManager.getState() == 'paused');
+
+    await shortDelay();
+
+    // verify location
+    expect(
+      await debuggingManager.getLocation(),
+      endsWith('${appFixture.appScriptPath}:$exceptionLine'),
+    );
+
+    // verify locals, including the exception object
+    expect(await debuggingManager.getVariables(), [
+      '<exception>:StateError',
+      'foo:2',
+    ]);
+
+    // resume
+    await debuggingManager.setExceptionPauseMode('Unhandled');
+    await debuggingManager.resume();
+
+    // verify state resumed
+    expect(await debuggingManager.getState(), 'running');
+  });
+}
+
+Future<void> waitFor(
+  Future<bool> condition(), {
+  Duration timeout = const Duration(seconds: 4),
+}) async {
+  final DateTime end = new DateTime.now().add(timeout);
+
+  while (!end.isBefore(new DateTime.now())) {
+    if (await condition()) {
+      return;
+    }
+
+    await shortDelay();
+  }
+
+  throw 'condition not satisfied';
+}
+
+Future shortDelay() {
+  return new Future.delayed(const Duration(milliseconds: 100));
 }
 
 class DevtoolsManager {
@@ -140,6 +341,7 @@ class DevtoolsManager {
   final BrowserTabInstance tabInstance;
 
   LoggingManager _loggingManager;
+  DebuggingManager _debuggingManager;
 
   Future<void> start(AppFixture appFixture) async {
     final Uri baseAppUri = webdevFixture.baseUri
@@ -152,6 +354,9 @@ class DevtoolsManager {
 
   LoggingManager get loggingManager =>
       _loggingManager ??= new LoggingManager(this);
+
+  DebuggingManager get debuggingManager =>
+      _debuggingManager ??= new DebuggingManager(this);
 
   Future<void> switchPage(String page) async {
     await tabInstance.send('switchPage', page);
@@ -175,6 +380,72 @@ class LoggingManager {
   Future<int> logCount() async {
     final AppResponse response = await tools.tabInstance.send('logs.logCount');
     return response.result;
+  }
+}
+
+class DebuggingManager {
+  DebuggingManager(this.tools);
+
+  final DevtoolsManager tools;
+
+  Future<void> resume() async {
+    await tools.tabInstance.send('debugger.resume');
+  }
+
+  Future<void> step() async {
+    await tools.tabInstance.send('debugger.step');
+  }
+
+  Future<String> getLocation() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getLocation');
+    return response.result;
+  }
+
+  Future<List<String>> getVariables() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getVariables');
+    final List<dynamic> result = response.result;
+    return result.cast<String>();
+  }
+
+  Future<String> getState() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getState');
+    return response.result;
+  }
+
+  Future<void> clearBreakpoints() async {
+    await tools.tabInstance.send('debugger.clearBreakpoints');
+  }
+
+  Future<void> addBreakpoint(String path, int line) async {
+    await tools.tabInstance.send('debugger.addBreakpoint', [path, line]);
+  }
+
+  Future<void> setExceptionPauseMode(String mode) async {
+    await tools.tabInstance.send('debugger.setExceptionPauseMode', mode);
+  }
+
+  Future<List<String>> getBreakpoints() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getBreakpoints');
+    final List<dynamic> result = response.result;
+    return result.cast<String>();
+  }
+
+  Future<List<String>> getScripts() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getScripts');
+    final List<dynamic> result = response.result;
+    return result.cast<String>();
+  }
+
+  Future<List<String>> getCallStackFrames() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getCallStackFrames');
+    final List<dynamic> result = response.result;
+    return result.cast<String>();
   }
 }
 
