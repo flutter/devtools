@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:devtools/utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide ChromeTab;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -92,9 +93,9 @@ class ChromeProcess {
       return tab.url == url;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    unawaited(process.exitCode.then((_) {
       _processAlive = false;
-    });
+    }));
 
     return wipTab == null ? null : new ChromeTab(wipTab);
   }
@@ -110,9 +111,9 @@ class ChromeProcess {
       return tab.id == id;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    unawaited(process.exitCode.then((_) {
       _processAlive = false;
-    });
+    }));
 
     return wipTab == null ? null : new ChromeTab(wipTab);
   }
@@ -127,9 +128,9 @@ class ChromeProcess {
       return !tab.isBackgroundPage && !tab.isChromeExtension;
     }, retryFor: timeout);
 
-    process.exitCode.then((_) {
+    unawaited(process.exitCode.then((_) {
       _processAlive = false;
-    });
+    }));
 
     return wipTab == null ? null : new ChromeTab(wipTab);
   }
@@ -164,7 +165,7 @@ class ChromeTab {
   Future<WipConnection> connect() async {
     _wip = await wipTab.connect();
 
-    _wip.log.enable();
+    await _wip.log.enable();
     _wip.log.onEntryAdded.listen((LogEntry entry) {
       if (_lostConnectionTime == null ||
           entry.timestamp > _lostConnectionTime) {
@@ -172,7 +173,7 @@ class ChromeTab {
       }
     });
 
-    _wip.runtime.enable();
+    await _wip.runtime.enable();
     _wip.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
       if (_lostConnectionTime == null ||
           event.timestamp > _lostConnectionTime) {
@@ -180,9 +181,10 @@ class ChromeTab {
       }
     });
 
-    _exceptionThrownController.addStream(_wip.runtime.onExceptionThrown);
+    unawaited(
+        _exceptionThrownController.addStream(_wip.runtime.onExceptionThrown));
 
-    _wip.page.enable();
+    unawaited(_wip.page.enable());
 
     //_wip.onNotification.listen((WipEvent e) {
     //  print(e.toString());
