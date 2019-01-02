@@ -4,7 +4,7 @@ version: 0.0.1
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.0.0-dev <3.0.0'
 
 dependencies:
   codemirror: ^0.4.7
