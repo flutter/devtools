@@ -21,31 +21,40 @@ pub global activate tuneup
 tuneup check --ignore-infos
 
 # Ensure we can build the app.
-pub global activate webdev
-webdev build
+pub run webdev build
 
-# Run tests that do not require the Flutter SDK.
-pub run test -x useFlutterSdk
-pub run test -x useFlutterSdk -pchrome-no-sandbox
+if [ "$BOT" = "main" ]; then
 
-# Get Flutter.
-curl https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_v1.0.0-stable.zip -o ../flutter.zip
-cd ..
-unzip -qq flutter.zip
-export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
-flutter config --no-analytics
-flutter doctor
+    # Run tests that do not require the Flutter SDK.
+    pub run test -x useFlutterSdk
+    pub run test -x useFlutterSdk -pchrome-no-sandbox
 
-# Should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart
-echo "which dart: " `which dart`
+elif [ "$BOT" = "flutter" ]; then
 
-# Return to the devtools directory
-cd devtools
+    # Get Flutter.
+    git clone https://github.com/flutter/flutter.git ../flutter
+    cd ..
+    export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+    flutter config --no-analytics
+    flutter doctor
 
-# Run tests that require the Flutter SDK.
-pub run test -t useFlutterSdk
+    # Should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart
+    echo "which dart: " `which dart`
 
-# Chrome test passes locally but fails on Travis. See example failure:
-# https://travis-ci.org/flutter/devtools/jobs/472755560.
-# TODO: investigate if we have a need to run tests requiring the Flutter SDK on Chrome.
-# pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+    # Return to the devtools directory
+    cd devtools
+
+    # Run tests that require the Flutter SDK.
+    pub run test -t useFlutterSdk
+
+    # Chrome test passes locally but fails on Travis. See example failure:
+    # https://travis-ci.org/flutter/devtools/jobs/472755560.
+    # TODO: investigate if we have a need to run tests requiring the Flutter SDK on Chrome.
+    # pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+
+else
+
+    echo "unknown bot configuration"
+    exit 1
+
+fi
