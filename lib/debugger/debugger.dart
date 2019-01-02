@@ -173,7 +173,6 @@ class DebuggerScreen extends Screen {
     final CodeMirror codeMirror =
         new CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
-    // ignore: always_specify_types
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');
 
