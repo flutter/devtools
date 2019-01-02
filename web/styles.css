@@ -489,7 +489,7 @@ td.log-label-column {
 }
 
 .secondary-area {
-    height: 126px;
+    height: 170px;
 }
 
 .log-details {
@@ -600,7 +600,10 @@ nav.menu li {
     white-space: nowrap;
 }
 
-.list-item.subtle,
+.list-item.subtle {
+    color: #777;
+}
+
 .list-item .subtle {
     font-size: 90%;
     color: #777;

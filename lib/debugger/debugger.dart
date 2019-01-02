@@ -15,13 +15,20 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 
-// TODO(devoncarew): if a value is selected, show the toString result somewhere
-
 // TODO(devoncarew): allow browsing object fields
 
-// TODO(devoncarew): improve selection in the nav area
+// TODO(devoncarew): improve selection behavior in the left nav area
 
-// TODO(devoncarew): handle double click on breakpoints
+// TODO(devoncarew): have the console area be collapsible
+
+// TODO(devoncarew): handle cases of isolates terminating and new isolates
+// replacing them (flutter hot restart)
+
+// TODO(devoncarew): show toasts for some events (new isolate creation)
+
+// TODO(devoncarew): handle displaying lists and maps in the variables view
+
+// TODO(devoncarew): handle displaying large lists, maps, in the variable view
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
@@ -40,7 +47,6 @@ class DebuggerScreen extends Screen {
 
   StatusItem deviceStatus;
 
-  SelectableList<ScriptRef> _scriptsView;
   CoreElement _breakpointsCountDiv;
   CoreElement _scriptCountDiv;
   CoreElement _sourcePathDiv;
@@ -50,8 +56,8 @@ class DebuggerScreen extends Screen {
   CallStackView callStackView;
   VariablesView variablesView;
   BreakpointsView breakpointsView;
-
-  SelectableList<ScriptRef> get scriptsView => _scriptsView;
+  ScriptsView scriptsView;
+  ConsoleArea consoleArea;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -88,6 +94,8 @@ class DebuggerScreen extends Screen {
     debuggerState.onExceptionPauseModeChanged.listen((String mode) {
       breakOnExceptionControl.exceptionPauseMode = mode;
     });
+
+    consoleArea = new ConsoleArea();
 
     mainDiv.add(<CoreElement>[
       div(c: 'section')
@@ -138,7 +146,9 @@ class DebuggerScreen extends Screen {
                 ..add(<CoreElement>[
                   _sourcePathDiv = div(c: 'source-head'),
                 ]),
-              //div(c: 'section secondary-area', text: 'Console output'),
+              div(c: 'section table-border secondary-area')
+                ..layoutVertical()
+                ..add(consoleArea.element),
             ]),
         ]),
     ]);
@@ -230,14 +240,46 @@ class DebuggerScreen extends Screen {
         variablesView.showVariables(frame);
       }
     });
+
+    consoleArea.refresh();
   }
 
   CoreElement _buildMenuNav() {
     callStackView = new CallStackView();
-    variablesView = new VariablesView();
+
+    final VariableDescriber describer = (BoundVariable variable) async {
+      if (variable == null) {
+        return null;
+      }
+
+      final dynamic value = variable.value;
+
+      if (value is Sentinel) {
+        return value.valueAsString;
+      } else if (value is TypeArgumentsRef) {
+        return value.name;
+      } else {
+        final InstanceRef ref = value;
+
+        if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
+          return ref.valueAsString;
+        } else {
+          final dynamic result = await serviceManager.service.invoke(
+              debuggerState.isolateRef.id, ref.id, 'toString', <String>[]);
+          if (result is ErrorRef) {
+            return '${result.kind} ${result.message}';
+          } else if (result is InstanceRef) {
+            final String str = await _retrieveFullStringValue(result);
+            return str;
+          }
+        }
+      }
+    };
+    variablesView = new VariablesView(describer);
 
     _breakpointsCountDiv = span(text: '0', c: 'counter');
-    breakpointsView = new BreakpointsView(debuggerState, _breakpointsCountDiv);
+    breakpointsView = new BreakpointsView(
+        _breakpointsCountDiv, debuggerState, debuggerState.getShortScriptName);
     breakpointsView.onDoubleClick.listen((Breakpoint breakpoint) async {
       final dynamic location = breakpoint.location;
       if (location is SourceLocation) {
@@ -252,33 +294,8 @@ class DebuggerScreen extends Screen {
       }
     });
 
-    _scriptsView = new SelectableList<ScriptRef>()
-      ..flex()
-      ..hidden(true)
-      ..element.style.overflowY = 'scroll';
-
-    final PNavMenu menu = new PNavMenu(<CoreElement>[
-      new PNavMenuItem('Call stack')
-        ..click(() => callStackView.element.toggleAttribute('hidden')),
-      callStackView.element,
-      new PNavMenuItem('Variables')
-        ..click(() => variablesView.element.toggleAttribute('hidden')),
-      variablesView.element,
-      new PNavMenuItem('Breakpoints')
-        ..add(_breakpointsCountDiv)
-        ..click(() => breakpointsView.element.toggleAttribute('hidden')),
-      breakpointsView.element,
-      new PNavMenuItem('Scripts')
-        ..add(
-          _scriptCountDiv = span(text: '0', c: 'counter'),
-        )
-        ..click(() => _scriptsView.toggleAttribute('hidden')),
-      _scriptsView,
-    ], supportsSelection: false)
-      ..flex()
-      ..layoutVertical();
-
-    _scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
+    scriptsView = new ScriptsView(debuggerState.getShortScriptName);
+    scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptRef == null) {
         _displaySource(null);
         return;
@@ -296,7 +313,27 @@ class DebuggerScreen extends Screen {
       }
     });
 
-    // TODO(devoncarew): listen to selection changes, jump to the source location
+    final PNavMenu menu = new PNavMenu(<CoreElement>[
+      new PNavMenuItem('Call stack')
+        ..click(() => callStackView.element.toggleAttribute('hidden')),
+      callStackView.element,
+      new PNavMenuItem('Variables')
+        ..click(() => variablesView.element.toggleAttribute('hidden')),
+      variablesView.element,
+      new PNavMenuItem('Breakpoints')
+        ..add(_breakpointsCountDiv)
+        ..click(() => breakpointsView.element.toggleAttribute('hidden')),
+      breakpointsView.element,
+      new PNavMenuItem('Scripts')
+        ..add(
+          _scriptCountDiv = span(text: '0', c: 'counter'),
+        )
+        ..click(() => scriptsView.element.toggleAttribute('hidden')),
+      scriptsView.element,
+    ], supportsSelection: false)
+      ..flex()
+      ..layoutVertical();
+
     debuggerState.onBreakpointsChanged.listen((List<Breakpoint> breakpoints) {
       breakpointsView.showBreakpoints(breakpoints);
     });
@@ -305,29 +342,25 @@ class DebuggerScreen extends Screen {
   }
 
   void _handleConnectionStart(VmService service) {
-//    extensionTracker = new ExtensionTracker(service);
-//    extensionTracker.start();
-//
-//    extensionTracker.onChange.listen((_) {
-//      framesChartStateMixin.setState(() {
-//        if (extensionTracker.hasIsolateTargets && !visible) {
-//          visible = true;
-//        }
-//
-//        _rebuildTogglesDiv();
-//      });
-//    });
-
-    // TODO(devoncarew): add listeners
     debuggerState.setVmService(serviceManager.service);
 
     deviceStatus.element.text =
         '${serviceManager.vm.targetCPU} ${serviceManager.vm.architectureBits}-bit';
+
+    service.onStdoutEvent.listen((Event e) {
+      final String message = decodeBase64(e.bytes);
+      consoleArea.append(message);
+    });
+
+    service.onStderrEvent.listen((Event e) {
+      final String message = decodeBase64(e.bytes);
+      consoleArea.append(message, isError: true);
+    });
   }
 
   void _handleIsolateChanged(IsolateRef isolateRef) {
     if (isolateRef == null) {
-      _scriptsView.clearItems();
+      scriptsView.clearScripts();
       _scriptCountDiv.text = '0';
 
       debuggerState.switchToIsolate(isolateRef);
@@ -341,7 +374,7 @@ class DebuggerScreen extends Screen {
       if (result is Isolate) {
         _populateFromIsolate(result);
       } else {
-        _scriptsView.clearItems();
+        scriptsView.clearScripts();
         _scriptCountDiv.text = '0';
       }
     }).catchError((dynamic e) {
@@ -352,7 +385,7 @@ class DebuggerScreen extends Screen {
   void _handleConnectionStop(dynamic event) {
     deviceStatus.element.text = '';
 
-    _scriptsView.clearItems();
+    scriptsView.clearScripts();
     _scriptCountDiv.text = '0';
 
     debuggerState.switchToIsolate(null);
@@ -369,75 +402,18 @@ class DebuggerScreen extends Screen {
 
     debuggerState.scripts = scripts;
 
-    String scriptPrefix = isolate.rootLib.uri;
-    if (scriptPrefix.contains('/lib/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/bin/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else if (scriptPrefix.contains('/example/')) {
-      scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/example/'));
-      if (scriptPrefix.contains('/')) {
-        scriptPrefix =
-            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
-      }
-    } else {
-      scriptPrefix = null;
-    }
-
-    debuggerState.setCommonPrefix(scriptPrefix);
+    debuggerState.setRootLib(isolate.rootLib);
     debuggerState.updateFrom(isolate);
 
-    scripts.sort((ScriptRef ref1, ScriptRef ref2) {
-      String uri1 = ref1.uri;
-      String uri2 = ref2.uri;
+    final bool isRunning = isolate.pauseEvent == null ||
+        isolate.pauseEvent.kind == EventKind.kResume;
 
-      if (uri1.startsWith('dart:_')) {
-        uri1 = uri1.replaceAll('dart:_', 'dart:');
-      }
-      if (uri2.startsWith('dart:_')) {
-        uri2 = uri2.replaceAll('dart:_', 'dart:');
-      }
-
-      if (uri1.startsWith('dart:') && !uri2.startsWith('dart:')) {
-        return 1;
-      }
-      if (!uri1.startsWith('dart:') && uri2.startsWith('dart:')) {
-        return -1;
-      }
-
-      if (uri1.startsWith('package:') && !uri2.startsWith('package:')) {
-        return 1;
-      }
-      if (!uri1.startsWith('package:') && uri2.startsWith('package:')) {
-        return -1;
-      }
-
-      return uri1.compareTo(uri2);
-    });
-
-    _scriptsView.setRenderer((ScriptRef scriptRef) {
-      final String uri = scriptRef.uri;
-      final String name = debuggerState.getShortScriptName(uri);
-      final CoreElement element = li(text: name, c: 'list-item');
-      if (name != uri) {
-        element.add(span(text: ' $uri', c: 'subtle'));
-      }
-      element.tooltip = uri;
-      return element;
-    });
-
-    _scriptsView.setItems(scripts);
+    scriptsView.showScripts(
+      scripts,
+      debuggerState.rootLib.uri,
+      debuggerState.commonScriptPrefix,
+      selectRootScript: isRunning,
+    );
     _scriptCountDiv.text = scripts.length.toString();
   }
 
@@ -450,9 +426,23 @@ class DebuggerScreen extends Screen {
       sourceEditor.displayScript(script);
     }
   }
-}
 
-// TODO(devoncarew): handle EventKind.kIsolateReload
+  Future<String> _retrieveFullStringValue(InstanceRef stringRef) async {
+    if (stringRef.valueAsStringIsTruncated != true) {
+      return stringRef.valueAsString;
+    }
+
+    final dynamic result = await serviceManager.service.getObject(
+        debuggerState.isolateRef.id, stringRef.id,
+        offset: 0, count: stringRef.length);
+    if (result is Instance) {
+      final Instance obj = result;
+      return obj.valueAsString;
+    } else {
+      return '${stringRef.valueAsString}...';
+    }
+  }
+}
 
 class DebuggerState {
   DebuggerState();
@@ -670,16 +660,55 @@ class DebuggerState {
   }
 
   String commonScriptPrefix;
+  LibraryRef rootLib;
 
-  void setCommonPrefix(String commonScriptPrefix) {
-    this.commonScriptPrefix = commonScriptPrefix;
+  void setRootLib(LibraryRef rootLib) {
+    this.rootLib = rootLib;
+
+    String scriptPrefix = rootLib.uri;
+    if (scriptPrefix.startsWith('package:')) {
+      scriptPrefix = scriptPrefix.substring(0, scriptPrefix.indexOf('/') + 1);
+    } else if (scriptPrefix.contains('/lib/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/lib/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else if (scriptPrefix.contains('/bin/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/bin/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else if (scriptPrefix.contains('/example/')) {
+      scriptPrefix =
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/example/'));
+      if (scriptPrefix.contains('/')) {
+        scriptPrefix =
+            scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
+      }
+    } else {
+      scriptPrefix = null;
+    }
+
+    commonScriptPrefix = scriptPrefix;
   }
 
   String getShortScriptName(String uri) {
-    if (commonScriptPrefix != null && uri.startsWith(commonScriptPrefix)) {
-      return uri.substring(commonScriptPrefix.length);
-    } else {
+    if (commonScriptPrefix == null) {
       return uri;
+    }
+
+    if (!uri.startsWith(commonScriptPrefix)) {
+      return uri;
+    }
+
+    if (commonScriptPrefix.startsWith('package:')) {
+      return uri.substring('package:'.length);
+    } else {
+      return uri.substring(commonScriptPrefix.length);
     }
   }
 
@@ -719,6 +748,8 @@ class SourceEditor {
   ScriptAndPos executionPoint;
   List<Breakpoint> breakpoints = <Breakpoint>[];
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
+  int _currentLineClass;
+  CoreElement _executionPointElement;
 
   void setBreakpoints(List<Breakpoint> breakpoints) {
     this.breakpoints = breakpoints;
@@ -784,9 +815,6 @@ class SourceEditor {
     }
   }
 
-  int _currentLineClass;
-  CoreElement _executionPointElement;
-
   void _clearLineClass() {
     if (_currentLineClass != null) {
       codeMirror.removeLineClass(
@@ -813,8 +841,9 @@ class SourceEditor {
     displayScript(script, scrollTo: position);
 
     _executionPointElement?.dispose();
+    _executionPointElement = null;
 
-    if (script.source != null) {
+    if (script.source != null && position != null) {
       _executionPointElement =
           span(c: 'octicon octicon-arrow-up execution-marker');
 
@@ -862,12 +891,18 @@ class SourceEditor {
       }
     }
 
+    _executionPointElement?.dispose();
+    _executionPointElement = null;
+
     _refreshMarkers();
   }
 }
 
+typedef URIDescriber = String Function(String uri);
+
 class BreakpointsView {
-  BreakpointsView(this._debuggerState, this._breakpointsCountDiv) {
+  BreakpointsView(this._breakpointsCountDiv, DebuggerState debuggerState,
+      URIDescriber uriDescriber) {
     _items = new SelectableList<Breakpoint>()
       ..flex()
       ..clazz('menu-item-bottom-border')
@@ -879,15 +914,15 @@ class BreakpointsView {
       final CoreElement element = li(text: '', c: 'list-item');
 
       if (location is UnresolvedSourceLocation) {
-        element.text = _debuggerState.getShortScriptName(location.script.uri);
+        element.text = uriDescriber(location.script.uri);
         element.add(span(text: ' line ${location.line}', c: 'subtle'));
       } else if (location is SourceLocation) {
-        element.text = _debuggerState.getShortScriptName(location.script.uri);
+        element.text = uriDescriber(location.script.uri);
 
         // Modify the rendering slightly asynchronously.
-        _debuggerState.getScript(location.script).then((Script script) {
+        debuggerState.getScript(location.script).then((Script script) {
           final Pos pos =
-              _debuggerState.calculatePosition(script, location.tokenPos);
+              debuggerState.calculatePosition(script, location.tokenPos);
           element.add(span(text: ' line ${pos.line}', c: 'subtle'));
         });
       }
@@ -902,7 +937,6 @@ class BreakpointsView {
 
   Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
 
-  final DebuggerState _debuggerState;
   final CoreElement _breakpointsCountDiv;
 
   SelectableList<Breakpoint> _items;
@@ -920,6 +954,81 @@ class BreakpointsView {
   }
 }
 
+class ScriptsView {
+  ScriptsView(URIDescriber uriDescriber) {
+    _items = new SelectableList<ScriptRef>()
+      ..flex()
+      ..element.style.overflowY = 'scroll';
+    _items.setRenderer((ScriptRef scriptRef) {
+      final String uri = scriptRef.uri;
+      final String name = uriDescriber(uri);
+      final CoreElement element = li(text: name, c: 'list-item');
+      if (name != uri) {
+        element.add(span(text: ' $uri', c: 'subtle'));
+      }
+      element.tooltip = uri;
+      return element;
+    });
+  }
+
+  SelectableList<ScriptRef> _items;
+
+  String rootLib;
+
+  List<ScriptRef> get items => _items.items;
+
+  CoreElement get element => _items;
+
+  Stream<ScriptRef> get onSelectionChanged => _items.onSelectionChanged;
+
+  void showScripts(
+    List<ScriptRef> scripts,
+    String rootLib,
+    String commonPrefix, {
+    bool selectRootScript = false,
+  }) {
+    this.rootLib = rootLib;
+
+    scripts.sort((ScriptRef ref1, ScriptRef ref2) {
+      String uri1 = ref1.uri;
+      String uri2 = ref2.uri;
+
+      if (uri1.startsWith('dart:_')) {
+        uri1 = uri1.replaceAll('dart:_', 'dart:');
+      }
+      if (uri2.startsWith('dart:_')) {
+        uri2 = uri2.replaceAll('dart:_', 'dart:');
+      }
+
+      if (commonPrefix != null) {
+        if (uri1.startsWith(commonPrefix) && !uri2.startsWith(commonPrefix)) {
+          return -1;
+        } else if (!uri1.startsWith(commonPrefix) &&
+            uri2.startsWith(commonPrefix)) {
+          return 1;
+        }
+      }
+
+      if (uri1.startsWith('dart:') && !uri2.startsWith('dart:')) {
+        return 1;
+      } else if (!uri1.startsWith('dart:') && uri2.startsWith('dart:')) {
+        return -1;
+      }
+
+      return uri1.compareTo(uri2);
+    });
+
+    ScriptRef selection;
+    if (selectRootScript) {
+      selection = scripts.firstWhere((script) => script.uri == rootLib,
+          orElse: () => null);
+    }
+    _items.setItems(scripts, selection: selection);
+  }
+
+  void clearScripts() => _items.clearItems();
+}
+
 class CallStackView {
   CallStackView() {
     _items = new SelectableList<Frame>()
@@ -932,6 +1041,7 @@ class CallStackView {
       if (name.startsWith('[Unoptimized] ')) {
         name = name.substring('[Unoptimized] '.length);
       }
+      name = name.replaceAll('<anonymous closure>', '<closure>');
 
       String locationDescription;
       if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
@@ -973,12 +1083,15 @@ class CallStackView {
   }
 }
 
+typedef VariableDescriber = Future<String> Function(BoundVariable variable);
+
 class VariablesView {
-  VariablesView() {
+  VariablesView(VariableDescriber variableDescriber) {
     _items = new SelectableList<BoundVariable>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..element.style.overflowY = 'scroll';
+    _items.canDeselect = true;
 
     _items.setRenderer((BoundVariable variable) {
       final String name = variable.name;
@@ -999,6 +1112,8 @@ class VariablesView {
         }
       } else if (value is Sentinel) {
         valueStr = value.valueAsString;
+      } else if (value is TypeArgumentsRef) {
+        valueStr = value.name;
       } else {
         valueStr = value.toString();
       }
@@ -1007,6 +1122,17 @@ class VariablesView {
         text: name,
         c: 'list-item',
       )..add(span(text: ' $valueStr', c: 'subtle'));
+
+      StreamSubscription sub;
+
+      sub = element.element.onMouseOver.listen((e) {
+        // TODO(devoncarew): Call toString() only after a short dwell.
+        sub.cancel();
+        variableDescriber(variable).then((String desc) {
+          element.tooltip = desc;
+        });
+      });
+
       return element;
     });
   }
@@ -1019,8 +1145,7 @@ class VariablesView {
 
   void showVariables(Frame frame) {
     // AsyncCausal frames don't have local vars.
-    final List<BoundVariable> vars = frame.vars ?? [];
-    _items.setItems(vars);
+    _items.setItems(frame.vars ?? <BoundVariable>[]);
   }
 
   void clearVariables() {
@@ -1137,4 +1262,48 @@ int _breakpointComparator(Breakpoint a, Breakpoint b) {
 
   // then sort by location
   return getPos(a.location) - getPos(b.location);
+}
+
+class ConsoleArea {
+  ConsoleArea() {
+    final Map<String, dynamic> options = <String, dynamic>{
+      'mode': 'text/plain',
+      //'lineNumbers': true,
+    };
+
+    _container = div()
+      ..layoutVertical()
+      ..flex();
+    _editor = new CodeMirror.fromElement(_container.element, options: options);
+    _editor.setReadOnly(true);
+
+    final codeMirrorElement = _container.element.children[0];
+    codeMirrorElement.setAttribute('flex', '');
+  }
+
+  CoreElement _container;
+  CodeMirror _editor;
+
+  CoreElement get element => _container;
+
+  void refresh() => _editor.refresh();
+
+  void append(String text, {bool isError = false}) {
+    // append text
+    _editor
+        .getDoc()
+        .replaceRange(text, Position(_editor.getDoc().lastLine() + 1, 0));
+
+    // TODO(devoncarew): Display stderr text (isError) with a different style.
+
+    // scroll to end
+    final int lastLineIndex = _editor.getDoc().lastLine();
+    final String lastLine = _editor.getDoc().getLine(lastLineIndex);
+    _editor.scrollIntoView(lastLineIndex, lastLine.length);
+  }
+
+  // for testing
+  String getContents() {
+    return _editor.getDoc().getValue();
+  }
 }

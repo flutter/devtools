@@ -97,8 +97,6 @@ void loggingTests() {
 
 // TODO(devoncarew): Split the debugger tests out to a separate file.
 
-// TODO(devoncarew): test exception handling
-
 void debuggingTests() {
   CliAppFixture appFixture;
   BrowserTabInstance tabInstance;
@@ -312,6 +310,33 @@ void debuggingTests() {
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
   });
+
+  test('console output', () async {
+    appFixture = await CliAppFixture.create(
+        'test/fixtures/debugging_app_exception.dart');
+
+    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    final DebuggingManager debuggingManager = tools.debuggingManager;
+
+    // verify running state
+    expect(await debuggingManager.getState(), 'running');
+
+    // wait until there's console output
+    await waitFor(
+        () async => (await debuggingManager.getConsoleContents()).isNotEmpty);
+
+    // verify the console contents
+    expect(
+      await debuggingManager.getConsoleContents(),
+      contains('1\n'),
+    );
+  });
 }
 
 Future<void> waitFor(
@@ -412,6 +437,12 @@ class DebuggingManager {
   Future<String> getState() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getState');
+    return response.result;
+  }
+
+  Future<String> getConsoleContents() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.getConsoleContents');
     return response.result;
   }
 

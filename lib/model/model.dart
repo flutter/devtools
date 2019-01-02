@@ -45,6 +45,7 @@ class App {
     _register<List<String>>(
         'debugger.getCallStackFrames', debuggerGetCallStackFrames);
     _register<List<String>>('debugger.getVariables', debuggerGetVariables);
+    _register<String>('debugger.getConsoleContents', debuggerGetConsoleContents);
   }
 
   static void register(PerfToolFramework framework) {
@@ -105,6 +106,11 @@ class App {
   Future<String> debuggerGetState([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
     return screen.debuggerState.isPaused ? 'paused' : 'running';
+  }
+
+  Future<String> debuggerGetConsoleContents([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.consoleArea.getContents();
   }
 
   Future<String> debuggerGetLocation([dynamic _]) async {

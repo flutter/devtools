@@ -111,6 +111,8 @@ class CoreElement {
   void icon(String iconName) =>
       element.classes.addAll(<String>['icon', 'icon-$iconName']);
 
+  bool hasClass(String name) => element.classes.contains(name);
+
   void clazz(String _class, {bool removeOthers = false}) {
     if (_class.contains(' ')) {
       throw new ArgumentError('spaces not allowed in class names');

@@ -58,6 +58,8 @@ class SelectableList<T> extends CoreElement {
   final StreamController<T> _doubleClickController =
       new StreamController<T>.broadcast();
 
+  bool canDeselect = false;
+
   Stream<T> get onSelectionChanged => _selectionController.stream;
 
   Stream<T> get onDoubleClick => _doubleClickController.stream;
@@ -80,7 +82,8 @@ class SelectableList<T> extends CoreElement {
     add(items.map((T item) {
       final CoreElement element = renderer(item);
       element.click(() {
-        _select(element, item);
+        _select(element, item,
+            clear: canDeselect && element.hasClass('selected'));
       });
       element.dblclick(() {
         _doubleClickController.add(item);
@@ -104,10 +107,16 @@ class SelectableList<T> extends CoreElement {
     return li(text: item.toString(), c: 'list-item');
   }
 
-  void _select(CoreElement element, T item) {
+  void _select(CoreElement element, T item, {bool clear = false}) {
     _selectedElement?.toggleClass('selected', false);
+
+    if (clear) {
+      element = null;
+      item = null;
+    }
+
     _selectedElement = element;
-    element.toggleClass('selected', true);
+    element?.toggleClass('selected', true);
     _selectionController.add(item);
   }
 }
