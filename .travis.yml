@@ -11,6 +11,9 @@ dart:
 addons:
   chrome: stable
 
+env:
+  - BOT=main
+  - BOT=flutter
 script: ./tool/travis.sh
 
 branches:
