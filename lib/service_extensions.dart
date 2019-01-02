@@ -10,3 +10,4 @@ const String repaintRainbow = 'ext.flutter.repaintRainbow';
 const String performanceOverlay = 'ext.flutter.showPerformanceOverlay';
 const String debugAllowBanner = 'ext.flutter.debugAllowBanner';
 const String profileWidgetBuilds = 'ext.flutter.profileWidgetBuilds';
+const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';

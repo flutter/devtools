@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'eval_on_dart_library.dart';
+import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
@@ -263,16 +263,12 @@ class ServiceExtensionManager {
       }
 
       if (!_firstFrameEventReceived) {
-        final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
-          'package:flutter/src/widgets/binding.dart',
-          _service,
-        );
-
-        final InstanceRef value = await flutterLibrary.eval(
-            'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
-            isAlive: null);
+        final value = await _service
+            .callServiceExtension(extensions.didSendFirstFrameEvent,
+          isolateId: _isolateManager.selectedIsolate.id);
         final bool didSendFirstFrameEvent =
-            value != null && value.valueAsString == 'true';
+            value != null && value.json['enabled'] == 'true';
+
         if (didSendFirstFrameEvent) {
           _onFrameEventReceived();
         }
