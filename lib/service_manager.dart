@@ -265,13 +265,15 @@ class ServiceExtensionManager {
 
       if (!_firstFrameEventReceived) {
         bool didSendFirstFrameEvent = false;
-        try {
+        if (_serviceExtensions.contains(extensions.didSendFirstFrameEvent) ||
+            _pendingServiceExtensions
+                .contains(extensions.didSendFirstFrameEvent)) {
           final value = await _service.callServiceExtension(
               extensions.didSendFirstFrameEvent,
               isolateId: _isolateManager.selectedIsolate.id);
           didSendFirstFrameEvent =
               value != null && value.json['enabled'] == 'true';
-        } catch (e) {
+        } else {
           final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
             'package:flutter/src/widgets/binding.dart',
             _service,
