@@ -14,10 +14,6 @@ body {
     font-size: 14px;
 }
 
-.disabled-text {
-    color: rgba(0, 0, 0, 0.3);
-}
-
 .container {
     width: initial;
     margin-right: 30px;

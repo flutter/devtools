@@ -33,6 +33,7 @@ PButton createExtensionButton(String text, String extensionName) {
 }
 
 CoreElement createExtensionCheckBox(String extensionName) {
+  const String disabledTextColor = 'rgba(0, 0, 0, 0.3)';
   final CoreElement input = checkbox();
   final CoreElement text = span(text: extensionName);
 
@@ -40,12 +41,12 @@ CoreElement createExtensionCheckBox(String extensionName) {
   if (!serviceManager.serviceExtensionManager
       .isServiceExtensionAvailable(extensionName)) {
     input.disabled = true;
-    text.clazz('disabled-text');
+    text.element.style.color = disabledTextColor;
   }
   serviceManager.serviceExtensionManager.hasServiceExtension(extensionName,
       (available) {
     input.disabled = !available;
-    text.toggleClass('disabled-text', !available);
+    text.element.style.color = available ? 'black' : disabledTextColor;
   });
 
   // Check box whose state is already enabled.
