@@ -34,13 +34,19 @@ PButton createExtensionButton(String text, String extensionName) {
 
 CoreElement createExtensionCheckBox(String extensionName) {
   final CoreElement input = checkbox();
+  final CoreElement text = span(text: extensionName);
 
   // Disable checkbox for unavailable service extensions.
-  // TODO: grey out text so that the option is more obviously disabled.
-  input.disabled = !serviceManager.serviceExtensionManager
-      .isServiceExtensionAvailable(extensionName);
-  serviceManager.serviceExtensionManager.hasServiceExtension(
-      extensionName, (available) => input.disabled = !available);
+  if (!serviceManager.serviceExtensionManager
+      .isServiceExtensionAvailable(extensionName)) {
+    input.disabled = true;
+    text.clazz('disabled-text');
+  }
+  serviceManager.serviceExtensionManager.hasServiceExtension(extensionName,
+      (available) {
+    input.disabled = !available;
+    text.toggleClass('disabled-text', !available);
+  });
 
   // Check box whose state is already enabled.
   serviceManager.serviceExtensionManager.getServiceExtensionState(extensionName,
@@ -59,6 +65,6 @@ CoreElement createExtensionCheckBox(String extensionName) {
     ..add(new CoreElement('label')
       ..add(<CoreElement>[
         input,
-        span(text: extensionName),
+        text,
       ]));
 }
