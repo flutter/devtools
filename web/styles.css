@@ -482,19 +482,8 @@ div.tabnav {
     cursor: default;
 }
 
-
-td.log-label-column {
-    text-align: right;
-    max-width: 148px;
-}
-
 .secondary-area {
     height: 170px;
-}
-
-.log-details {
-    overflow-y: scroll;
-    overflow-wrap: break-word;
 }
 
 .frame-panel {

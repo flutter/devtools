@@ -67,7 +67,7 @@ class LoggingScreen extends Screen {
       _createTableView()
         ..clazz('section')
         ..flex(),
-      div(c: 'section')
+      div(c: 'section table-border')
         ..layoutVertical()
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
