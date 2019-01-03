@@ -23,6 +23,9 @@ class FramesChart extends LineChart<FramesTracker> {
     lastFrameLabel.element.style.top = '0';
     lastFrameLabel.element.style.bottom = null;
     lastFrameLabel.element.style.textAlign = '-webkit-right';
+    // Explicitly set height so tooltip does not overlap with frame tooltip.
+    lastFrameLabel.element.style.height = '30px';
+    lastFrameLabel.tooltip = 'Rendering time of latest frame.';
   }
 
   CoreElement fpsLabel;
@@ -30,11 +33,13 @@ class FramesChart extends LineChart<FramesTracker> {
 
   @override
   void update(FramesTracker data) {
+    const slowFrameColor = '#f97c7c';
+    const normalFrameColor = '#4078c0';
     if (dim == null) {
       return;
     }
 
-    fpsLabel.text = '${data.calcRecentFPS().round()} FPS';
+    fpsLabel.text = '${data.calcRecentFPS().round()} frames per second';
     final FrameInfo lastFrame = data.lastSample;
     lastFrameLabel.setInnerHtml('frame ${lastFrame.number} • '
         '${lastFrame.elapsedMs.toStringAsFixed(1)}ms');
@@ -62,12 +67,15 @@ class FramesChart extends LineChart<FramesTracker> {
       final num height = math.min(dim.y, frame.elapsedMs * pixPerMs);
       x -= 3 * units;
 
-      final String color = frame.elapsedMs > FrameInfo.kTargetMaxFrameTimeMs
-          ? '#f97c7c'
-          : '#4078c0';
+      final String color =
+          _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
+      final String tooltip = _isSlowFrame(frame)
+          ? 'This frame took ${frame.elapsedMs}ms to render, which\ncan cause ' +
+              'frame rate to drop below 60 FPS.'
+          : 'This frame took ${frame.elapsedMs}ms to render.';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '
           'width="${2 * units}" height="$height" '
-          'style="fill:$color"><title>${frame.elapsedMs}ms</title></rect>');
+          'style="fill:$color"><title>$tooltip</title></rect>');
 
       if (frame.frameGroupStart) {
         final double lineX = x - (units / 2);
@@ -81,6 +89,10 @@ class FramesChart extends LineChart<FramesTracker> {
      ${svgElements.join('\n')}
      </svg>
      ''');
+  }
+
+  bool _isSlowFrame(FrameInfo frame) {
+    return frame.elapsedMs > FrameInfo.kTargetMaxFrameTimeMs;
   }
 }
 
