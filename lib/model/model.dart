@@ -13,7 +13,9 @@ import 'dart:convert';
 import 'dart:js' as js;
 
 import 'package:devtools/main.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../debugger/debugger.dart';
 import '../framework/framework.dart';
 import '../logging/logging.dart';
 
@@ -28,6 +30,22 @@ class App {
     // LoggingScreen
     _register<void>('logs.clearLogs', logsClearLogs);
     _register<int>('logs.logCount', logsLogCount);
+
+    // DebuggerScreen
+    _register<String>('debugger.getState', debuggerGetState);
+    _register<String>('debugger.getLocation', debuggerGetLocation);
+    _register<void>('debugger.resume', debuggerResume);
+    _register<void>('debugger.step', debuggerStep);
+    _register<void>('debugger.clearBreakpoints', debuggerClearBreakpoints);
+    _register<void>('debugger.addBreakpoint', debuggerAddBreakpoint);
+    _register<void>(
+        'debugger.setExceptionPauseMode', debuggerSetExceptionPauseMode);
+    _register<List<String>>('debugger.getBreakpoints', debuggerGetBreakpoints);
+    _register<List<String>>('debugger.getScripts', debuggerGetScripts);
+    _register<List<String>>(
+        'debugger.getCallStackFrames', debuggerGetCallStackFrames);
+    _register<List<String>>('debugger.getVariables', debuggerGetVariables);
+    _register<String>('debugger.getConsoleContents', debuggerGetConsoleContents);
   }
 
   static void register(PerfToolFramework framework) {
@@ -83,6 +101,120 @@ class App {
   Future<int> logsLogCount([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logs');
     return screen.loggingTable.rowCount;
+  }
+
+  Future<String> debuggerGetState([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.debuggerState.isPaused ? 'paused' : 'running';
+  }
+
+  Future<String> debuggerGetConsoleContents([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
+    return screen.consoleArea.getContents();
+  }
+
+  Future<String> debuggerGetLocation([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    final scriptAndPos = screen.sourceEditor.executionPoint;
+
+    if (scriptAndPos == null) {
+      return null;
+    }
+
+    return '${scriptAndPos.uri}:${scriptAndPos.position.line - 1}';
+  }
+
+  Future<void> debuggerResume([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    await screen.debuggerState.resume();
+  }
+
+  Future<void> debuggerStep([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    await screen.debuggerState.stepOver();
+  }
+
+  Future<void> debuggerClearBreakpoints([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
+    await screen.debuggerState.clearBreakpoints();
+  }
+
+  Future<List<String>> debuggerGetBreakpoints([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.debuggerState.breakpoints.map((Breakpoint breakpoint) {
+      return breakpoint.id;
+    }).toList();
+  }
+
+  Future<List<String>> debuggerGetScripts([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.scriptsView.items.map((ScriptRef script) {
+      return script.uri;
+    }).toList();
+  }
+
+  Future<List<String>> debuggerGetCallStackFrames([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.callStackView.items.map((Frame frame) {
+      String name = frame.code?.name ?? '<none>';
+      if (name.startsWith('[Unoptimized] ')) {
+        name = name.substring('[Unoptimized] '.length);
+      }
+
+      String desc = '';
+
+      if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+        name = '<async break>';
+      } else {
+        desc = '${frame.location.script.uri}';
+
+        if (desc.contains('/')) {
+          desc = desc.substring(desc.lastIndexOf('/') + 1);
+        }
+
+        desc = ':$desc';
+      }
+
+      return '$name$desc';
+    }).toList();
+  }
+
+  Future<List<String>> debuggerGetVariables([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    return screen.variablesView.items.map((BoundVariable variable) {
+      final dynamic value = variable.value;
+      String valueStr;
+      if (value is InstanceRef) {
+        if (value.valueAsString == null) {
+          valueStr = value.classRef.name;
+        } else {
+          valueStr = value.valueAsString;
+        }
+      } else if (value is Sentinel) {
+        valueStr = value.valueAsString;
+      } else {
+        valueStr = value.toString();
+      }
+      return '${variable.name}:$valueStr';
+    }).toList();
+  }
+
+  Future<void> debuggerAddBreakpoint([dynamic params]) async {
+    final String path = params[0];
+    final int line = params[1] + 1;
+
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
+    await screen.debuggerState.addBreakpointByPathFragment(path, line);
+  }
+
+  Future<void> debuggerSetExceptionPauseMode([dynamic params]) async {
+    final String mode = params;
+
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    await screen.debuggerState.setExceptionPauseMode(mode);
   }
 
   void _sendNotification(String event, [dynamic params]) {

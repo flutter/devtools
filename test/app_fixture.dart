@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
-import 'package:devtools/vm_service_wrapper.dart';
 
 class AppFixture {
   AppFixture._(
@@ -57,12 +57,15 @@ class AppFixture {
 // This is the fixture for Dart CLI applications.
 class CliAppFixture extends AppFixture {
   CliAppFixture._(
+    this.appScriptPath,
     Process process,
     Stream<String> lines,
     int servicePort,
     VmServiceWrapper serviceConnection,
     List<IsolateRef> isolates,
   ) : super._(process, lines, servicePort, serviceConnection, isolates);
+
+  final String appScriptPath;
 
   static Future<CliAppFixture> create(String appScriptPath) async {
     final Process process = await Process.start(
@@ -95,8 +98,44 @@ class CliAppFixture extends AppFixture {
         VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
+
     return new CliAppFixture._(
-        process, lineController.stream, port, serviceConnection, vm.isolates);
+      appScriptPath,
+      process,
+      lineController.stream,
+      port,
+      serviceConnection,
+      vm.isolates,
+    );
+  }
+
+  String get scriptSource {
+    return new File(appScriptPath).readAsStringSync();
+  }
+
+  static List<int> parseBreakpointLines(String source) {
+    return _parseLines(source, 'breakpoint');
+  }
+
+  static List<int> parseSteppingLines(String source) {
+    return _parseLines(source, 'step');
+  }
+
+  static List<int> parseExceptionLines(String source) {
+    return _parseLines(source, 'exception');
+  }
+
+  static List<int> _parseLines(String source, String keyword) {
+    final List<String> lines = source.split('\n');
+    final List<int> matches = [];
+
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].endsWith('// $keyword')) {
+        matches.add(i);
+      }
+    }
+
+    return matches;
   }
 }
 

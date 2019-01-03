@@ -1,0 +1,52 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.debugger-menu {
+    width: 280px;
+    margin-right: 18px;
+}
+
+.source-head {
+    font-weight: 600;
+    color: #586069;
+    background-color: #f3f3f3;
+    border-bottom: 1px solid #dfe2e5;
+    padding: 4px 8px;
+}
+
+.breakpoints {
+    width: 1em;
+}
+
+.CodeMirror-gutter-elt .octicon {
+    margin-left: 4px;
+    color: #4078c0;
+}
+
+.CodeMirror-linebackground.executionLine {
+    background: #c4daf7;
+}
+
+.execution-marker {
+    color: #4078c0;
+    margin-left: -2px;
+    margin-top: -2px;
+    z-index: 10;
+}
+
+.break-on-exceptions {
+    line-height: 28px;
+}
+
+.break-on-exceptions label {
+    margin-left: 6px;
+}
+
+#resume-button {
+    min-width: 90px
+}
+
+.debugger-items-list {
+    overflow-y: scroll;
+}
