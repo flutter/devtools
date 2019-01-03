@@ -265,14 +265,19 @@ class ServiceExtensionManager {
 
       if (!_firstFrameEventReceived) {
         bool didSendFirstFrameEvent = false;
-        if (_serviceExtensions.contains(extensions.didSendFirstFrameEvent) ||
-            _pendingServiceExtensions
-                .contains(extensions.didSendFirstFrameEvent)) {
-          final value = await _service.callServiceExtension(
-              extensions.didSendFirstFrameEvent,
-              isolateId: _isolateManager.selectedIsolate.id);
-          didSendFirstFrameEvent =
-              value != null && value.json['enabled'] == 'true';
+        if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
+          try {
+            final value = await _service.callServiceExtension(
+                extensions.didSendFirstFrameEvent,
+                isolateId: _isolateManager.selectedIsolate.id);
+            didSendFirstFrameEvent =
+                value != null && value.json['enabled'] == 'true';
+          } catch (e) {
+            // Catching this error for backwards compatibility. Should not be
+            // thrown if the didSendFirstFrameEvent service extension is
+            // registered.
+            print(e);
+          }
         } else {
           final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
             'package:flutter/src/widgets/binding.dart',
@@ -368,6 +373,11 @@ class ServiceExtensionManager {
     } else {
       _enabledServiceExtensions.remove(name);
     }
+  }
+
+  bool isServiceExtensionAvailable(String name) {
+    return _serviceExtensions.contains(name) ||
+        _pendingServiceExtensions.contains(name);
   }
 
   StreamSubscription<bool> hasServiceExtension(
