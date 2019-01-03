@@ -183,6 +183,11 @@ class TimelineScreen extends Screen {
   }
 
   void _updateListeningState() async {
+    // Wait for service to be non-null before updating listening state.
+    while (serviceManager.service == null) {
+      await new Future.delayed(Duration(milliseconds: 100));
+    }
+
     final bool shouldBeRunning = !paused && isCurrentScreen;
     final bool isRunning = !timelineFramesBuilder.isPaused;
 
