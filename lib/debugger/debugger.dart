@@ -34,17 +34,13 @@ import '../ui/primer.dart';
 class DebuggerScreen extends Screen {
   DebuggerScreen()
       : super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
+    debuggerState = new DebuggerState();
+
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
-
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceManager.hasConnection) {
-      _handleConnectionStart(serviceManager.service);
-    }
-    serviceManager.isolateManager.onSelectedIsolateChanged
-        .listen(_handleIsolateChanged);
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
+
+  bool _inited = false;
 
   StatusItem deviceStatus;
 
@@ -62,8 +58,6 @@ class DebuggerScreen extends Screen {
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     CoreElement sourceArea;
-
-    debuggerState = new DebuggerState();
 
     final PButton resumeButton = new PButton(null)
       ..primary()
@@ -243,6 +237,25 @@ class DebuggerScreen extends Screen {
     consoleArea.refresh();
   }
 
+  @override
+  void entering() {
+    if (!_inited) {
+      _init();
+    }
+  }
+
+  void _init() {
+    _inited = true;
+
+    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
+    }
+    serviceManager.isolateManager.onSelectedIsolateChanged
+        .listen(_handleIsolateChanged);
+    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+  }
+
   CoreElement _buildMenuNav() {
     callStackView = new CallStackView();
 
@@ -362,6 +375,10 @@ class DebuggerScreen extends Screen {
       final String message = decodeBase64(e.bytes);
       consoleArea.append(message, isError: true);
     });
+
+    if (serviceManager.isolateManager.selectedIsolate != null) {
+      _handleIsolateChanged(serviceManager.isolateManager.selectedIsolate);
+    }
   }
 
   void _handleIsolateChanged(IsolateRef isolateRef) {
@@ -370,6 +387,10 @@ class DebuggerScreen extends Screen {
 
       debuggerState.switchToIsolate(isolateRef);
 
+      return;
+    }
+
+    if (isolateRef == debuggerState.isolateRef) {
       return;
     }
 
