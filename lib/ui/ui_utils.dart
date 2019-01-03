@@ -20,6 +20,8 @@ PButton createExtensionButton(String text, String extensionName) {
   });
 
   // Disable button for unavailable service extensions.
+  button.disabled = !serviceManager.serviceExtensionManager
+      .isServiceExtensionAvailable(extensionName);
   serviceManager.serviceExtensionManager.hasServiceExtension(
       extensionName, (available) => button.disabled = !available);
 
@@ -31,11 +33,23 @@ PButton createExtensionButton(String text, String extensionName) {
 }
 
 CoreElement createExtensionCheckBox(String extensionName) {
+  const String disabledTextColor = 'rgba(0, 0, 0, 0.3)';
   final CoreElement input = checkbox();
+  final CoreElement text = span(text: extensionName);
 
-  serviceManager.serviceExtensionManager.hasServiceExtension(
-      extensionName, (available) => input.disabled = !available);
+  // Disable checkbox for unavailable service extensions.
+  if (!serviceManager.serviceExtensionManager
+      .isServiceExtensionAvailable(extensionName)) {
+    input.disabled = true;
+    text.element.style.color = disabledTextColor;
+  }
+  serviceManager.serviceExtensionManager.hasServiceExtension(extensionName,
+      (available) {
+    input.disabled = !available;
+    text.element.style.color = available ? 'black' : disabledTextColor;
+  });
 
+  // Check box whose state is already enabled.
   serviceManager.serviceExtensionManager.getServiceExtensionState(extensionName,
       (state) {
     final html.InputElement e = input.element;
@@ -52,6 +66,6 @@ CoreElement createExtensionCheckBox(String extensionName) {
     ..add(new CoreElement('label')
       ..add(<CoreElement>[
         input,
-        span(text: extensionName),
+        text,
       ]));
 }

@@ -9,6 +9,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'eval_on_dart_library.dart';
+import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
@@ -263,16 +264,25 @@ class ServiceExtensionManager {
       }
 
       if (!_firstFrameEventReceived) {
-        final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
-          'package:flutter/src/widgets/binding.dart',
-          _service,
-        );
+        bool didSendFirstFrameEvent = false;
+        if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
+          final value = await _service.callServiceExtension(
+              extensions.didSendFirstFrameEvent,
+              isolateId: _isolateManager.selectedIsolate.id);
+          didSendFirstFrameEvent =
+              value != null && value.json['enabled'] == 'true';
+        } else {
+          final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
+            'package:flutter/src/widgets/binding.dart',
+            _service,
+          );
+          final InstanceRef value = await flutterLibrary.eval(
+              'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
+              isAlive: null);
+          didSendFirstFrameEvent =
+              value != null && value.valueAsString == 'true';
+        }
 
-        final InstanceRef value = await flutterLibrary.eval(
-            'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
-            isAlive: null);
-        final bool didSendFirstFrameEvent =
-            value != null && value.valueAsString == 'true';
         if (didSendFirstFrameEvent) {
           _onFrameEventReceived();
         }
@@ -356,6 +366,11 @@ class ServiceExtensionManager {
     } else {
       _enabledServiceExtensions.remove(name);
     }
+  }
+
+  bool isServiceExtensionAvailable(String name) {
+    return _serviceExtensions.contains(name) ||
+        _pendingServiceExtensions.contains(name);
   }
 
   StreamSubscription<bool> hasServiceExtension(
