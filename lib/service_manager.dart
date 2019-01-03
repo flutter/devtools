@@ -266,18 +266,11 @@ class ServiceExtensionManager {
       if (!_firstFrameEventReceived) {
         bool didSendFirstFrameEvent = false;
         if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
-          try {
-            final value = await _service.callServiceExtension(
-                extensions.didSendFirstFrameEvent,
-                isolateId: _isolateManager.selectedIsolate.id);
-            didSendFirstFrameEvent =
-                value != null && value.json['enabled'] == 'true';
-          } catch (e) {
-            // Catching this error for backwards compatibility. Should not be
-            // thrown if the didSendFirstFrameEvent service extension is
-            // registered.
-            print(e);
-          }
+          final value = await _service.callServiceExtension(
+              extensions.didSendFirstFrameEvent,
+              isolateId: _isolateManager.selectedIsolate.id);
+          didSendFirstFrameEvent =
+              value != null && value.json['enabled'] == 'true';
         } else {
           final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
             'package:flutter/src/widgets/binding.dart',
