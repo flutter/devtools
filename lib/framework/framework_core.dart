@@ -1,9 +1,14 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:html' hide Screen;
-import 'package:devtools/globals.dart';
-import 'package:devtools/service.dart';
-import 'package:devtools/service_manager.dart';
-import 'package:devtools/vm_service_wrapper.dart';
+
+import '../globals.dart';
+import '../service.dart';
+import '../service_manager.dart';
+import '../vm_service_wrapper.dart';
 
 class FrameworkCore {
   static void init() {

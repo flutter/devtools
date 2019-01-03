@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 class VmServiceWrapper implements VmService {
