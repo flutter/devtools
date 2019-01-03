@@ -10,14 +10,14 @@ import '../framework/framework.dart';
 import '../ui/elements.dart';
 
 abstract class LineChart<T> {
-  LineChart(this.parent) {
+  LineChart(this.parent, {String classes}) {
     parent.element.style.position = 'relative';
 
     _windowResizeSubscription =
         window.onResize.listen((Event e) => _updateSize());
     Timer.run(_updateSize);
 
-    chartElement = parent.add(div()
+    chartElement = parent.add(div(c: classes)
       ..layoutVertical()
       ..flex());
 

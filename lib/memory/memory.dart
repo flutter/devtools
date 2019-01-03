@@ -329,7 +329,7 @@ class MemoryColumnSimple<T> extends Column<T> {
 }
 
 class MemoryChart extends LineChart<MemoryTracker> {
-  MemoryChart(CoreElement parent) : super(parent) {
+  MemoryChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
     processLabel = parent.add(div(c: 'perf-label'));
     processLabel.element.style.left = '0';
 

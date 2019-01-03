@@ -204,7 +204,7 @@ class PerformanceScreen extends Screen {
 }
 
 class CpuChart extends LineChart<CpuTracker> {
-  CpuChart(CoreElement parent) : super(parent) {
+  CpuChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
     usageLabel = parent.add(div(c: 'perf-label'));
     usageLabel.element.style.right = '0';
   }
