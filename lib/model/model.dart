@@ -110,6 +110,7 @@ class App {
 
   Future<String> debuggerGetConsoleContents([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
     return screen.consoleArea.getContents();
   }
 
@@ -136,6 +137,7 @@ class App {
 
   Future<void> debuggerClearBreakpoints([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
     await screen.debuggerState.clearBreakpoints();
   }
 
@@ -204,6 +206,7 @@ class App {
     final int line = params[1] + 1;
 
     final DebuggerScreen screen = framework.getScreen('debugger');
+    // ignore: invalid_use_of_visible_for_testing_member
     await screen.debuggerState.addBreakpointByPathFragment(path, line);
   }
 

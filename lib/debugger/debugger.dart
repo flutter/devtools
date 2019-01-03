@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:codemirror/codemirror.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -48,7 +49,6 @@ class DebuggerScreen extends Screen {
   StatusItem deviceStatus;
 
   CoreElement _breakpointsCountDiv;
-  CoreElement _scriptCountDiv;
   CoreElement _sourcePathDiv;
 
   SourceEditor sourceEditor;
@@ -68,7 +68,7 @@ class DebuggerScreen extends Screen {
     final PButton resumeButton = new PButton(null)
       ..primary()
       ..small()
-      ..element.style.minWidth = '90px'
+      ..id = 'resume-button'
       ..add(<CoreElement>[
         span(c: 'octicon octicon-triangle-right'),
         span(text: 'Resume'),
@@ -194,13 +194,13 @@ class DebuggerScreen extends Screen {
         if (reportedException != null && frames.isNotEmpty) {
           final Frame frame = frames.first;
 
-          final Frame newFrame = new Frame();
-          newFrame.type = frame.type;
-          newFrame.index = frame.index;
-          newFrame.function = frame.function;
-          newFrame.code = frame.code;
-          newFrame.location = frame.location;
-          newFrame.kind = frame.kind;
+          final Frame newFrame = new Frame()
+            ..type = frame.type
+            ..index = frame.index
+            ..function = frame.function
+            ..code = frame.code
+            ..location = frame.location
+            ..kind = frame.kind;
 
           final List<BoundVariable> newVars = <BoundVariable>[];
           newVars.add(new BoundVariable()
@@ -230,7 +230,7 @@ class DebuggerScreen extends Screen {
         if (location != null) {
           final ScriptRef scriptRef = location.script;
           final Script script = await debuggerState.getScript(scriptRef);
-          final Pos position =
+          final SourcePosition position =
               debuggerState.calculatePosition(script, location.tokenPos);
           _sourcePathDiv.text = script.uri;
           sourceEditor.displayExecutionPoint(script, position: position);
@@ -255,22 +255,24 @@ class DebuggerScreen extends Screen {
 
       if (value is Sentinel) {
         return value.valueAsString;
-      } else if (value is TypeArgumentsRef) {
-        return value.name;
-      } else {
-        final InstanceRef ref = value;
+      }
 
-        if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
-          return ref.valueAsString;
-        } else {
-          final dynamic result = await serviceManager.service.invoke(
-              debuggerState.isolateRef.id, ref.id, 'toString', <String>[]);
-          if (result is ErrorRef) {
-            return '${result.kind} ${result.message}';
-          } else if (result is InstanceRef) {
-            final String str = await _retrieveFullStringValue(result);
-            return str;
-          }
+      if (value is TypeArgumentsRef) {
+        return value.name;
+      }
+
+      final InstanceRef ref = value;
+
+      if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
+        return ref.valueAsString;
+      } else {
+        final dynamic result = await serviceManager.service.invoke(
+            debuggerState.isolateRef.id, ref.id, 'toString', <String>[]);
+        if (result is ErrorRef) {
+          return '${result.kind} ${result.message}';
+        } else if (result is InstanceRef) {
+          final String str = await _retrieveFullStringValue(result);
+          return str;
         }
       }
     };
@@ -283,16 +285,18 @@ class DebuggerScreen extends Screen {
       final dynamic location = breakpoint.location;
       if (location is SourceLocation) {
         final Script script = await debuggerState.getScript(location.script);
-        final Pos pos =
+        final SourcePosition pos =
             debuggerState.calculatePosition(script, location.tokenPos);
-        sourceEditor.displayScript(script, scrollTo: new Pos(pos.line - 1));
+        sourceEditor.displayScript(script,
+            scrollTo: new SourcePosition(pos.line - 1));
       } else if (location is UnresolvedSourceLocation) {
         final Script script = await debuggerState.getScript(location.script);
         sourceEditor.displayScript(script,
-            scrollTo: new Pos(location.line - 1));
+            scrollTo: new SourcePosition(location.line - 1));
       }
     });
 
+    CoreElement scriptCountDiv;
     scriptsView = new ScriptsView(debuggerState.getShortScriptName);
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptRef == null) {
@@ -311,6 +315,9 @@ class DebuggerScreen extends Screen {
         _displaySource(null);
       }
     });
+    scriptsView.onScriptsChanged.listen((_) {
+      scriptCountDiv.text = scriptsView.items.length.toString();
+    });
 
     final PNavMenu menu = new PNavMenu(<CoreElement>[
       new PNavMenuItem('Call stack')
@@ -325,7 +332,7 @@ class DebuggerScreen extends Screen {
       breakpointsView.element,
       new PNavMenuItem('Scripts')
         ..add(
-          _scriptCountDiv = span(text: '0', c: 'counter'),
+          scriptCountDiv = span(text: '0', c: 'counter'),
         )
         ..click(() => scriptsView.element.toggleAttribute('hidden')),
       scriptsView.element,
@@ -360,7 +367,6 @@ class DebuggerScreen extends Screen {
   void _handleIsolateChanged(IsolateRef isolateRef) {
     if (isolateRef == null) {
       scriptsView.clearScripts();
-      _scriptCountDiv.text = '0';
 
       debuggerState.switchToIsolate(isolateRef);
 
@@ -374,7 +380,6 @@ class DebuggerScreen extends Screen {
         _populateFromIsolate(result);
       } else {
         scriptsView.clearScripts();
-        _scriptCountDiv.text = '0';
       }
     }).catchError((dynamic e) {
       framework.showError('Error retrieving isolate information', e);
@@ -385,7 +390,6 @@ class DebuggerScreen extends Screen {
     deviceStatus.element.text = '';
 
     scriptsView.clearScripts();
-    _scriptCountDiv.text = '0';
 
     debuggerState.switchToIsolate(null);
     debuggerState.dispose();
@@ -413,7 +417,6 @@ class DebuggerScreen extends Screen {
       debuggerState.commonScriptPrefix,
       selectRootScript: isRunning,
     );
-    _scriptCountDiv.text = scripts.length.toString();
   }
 
   void _displaySource(Script script) {
@@ -444,9 +447,7 @@ class DebuggerScreen extends Screen {
 }
 
 class DebuggerState {
-  DebuggerState();
-
-  VmService service;
+  VmService _service;
 
   StreamSubscription<Event> _debugSubscription;
 
@@ -483,9 +484,9 @@ class DebuggerState {
   List<Breakpoint> get breakpoints => _breakpoints.value;
 
   void setVmService(VmService service) {
-    this.service = service;
+    _service = service;
 
-    _debugSubscription = service.onDebugEvent.listen(_handleIsolateEvent);
+    _debugSubscription = _service.onDebugEvent.listen(_handleIsolateEvent);
   }
 
   void switchToIsolate(IsolateRef ref) async {
@@ -500,7 +501,7 @@ class DebuggerState {
       return;
     }
 
-    final dynamic result = await service.getIsolate(isolateRef.id);
+    final dynamic result = await _service.getIsolate(isolateRef.id);
     if (result is Isolate) {
       final Isolate isolate = result;
 
@@ -517,26 +518,26 @@ class DebuggerState {
     }
   }
 
-  Future<Success> pause() => service.pause(isolateRef.id);
+  Future<Success> pause() => _service.pause(isolateRef.id);
 
-  Future<Success> resume() => service.resume(isolateRef.id);
+  Future<Success> resume() => _service.resume(isolateRef.id);
 
   Future<Success> stepOver() {
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final bool useAsyncStepping = _lastEvent?.atAsyncSuspension == true;
-    return service.resume(isolateRef.id,
+    return _service.resume(isolateRef.id,
         step: useAsyncStepping
             ? StepOption.kOverAsyncSuspension
             : StepOption.kOver);
   }
 
   Future<Success> stepIn() =>
-      service.resume(isolateRef.id, step: StepOption.kInto);
+      _service.resume(isolateRef.id, step: StepOption.kInto);
 
   Future<Success> stepOut() =>
-      service.resume(isolateRef.id, step: StepOption.kOut);
+      _service.resume(isolateRef.id, step: StepOption.kOut);
 
-  // Used for testing.
+  @visibleForTesting
   Future<void> clearBreakpoints() async {
     final List<Breakpoint> breakpoints = _breakpoints.value.toList();
     await Future.forEach(breakpoints, (Breakpoint breakpoint) {
@@ -545,28 +546,28 @@ class DebuggerState {
   }
 
   Future<void> addBreakpoint(String scriptId, int line) {
-    return service.addBreakpoint(isolateRef.id, scriptId, line);
+    return _service.addBreakpoint(isolateRef.id, scriptId, line);
   }
 
-  // Used for testing.
+  @visibleForTesting
   Future<void> addBreakpointByPathFragment(String path, int line) async {
     final ScriptRef ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
     if (ref != null) {
-      return service.addBreakpoint(isolateRef.id, ref.id, line);
+      return _service.addBreakpoint(isolateRef.id, ref.id, line);
     }
   }
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) {
-    return service.removeBreakpoint(isolateRef.id, breakpoint.id);
+    return _service.removeBreakpoint(isolateRef.id, breakpoint.id);
   }
 
   Future<void> setExceptionPauseMode(String mode) {
-    return service.setExceptionPauseMode(isolateRef.id, mode);
+    return _service.setExceptionPauseMode(isolateRef.id, mode);
   }
 
   Future<Stack> getStack() {
-    return service.getStack(isolateRef.id);
+    return _service.getStack(isolateRef.id);
   }
 
   InstanceRef get reportedException => _reportedException;
@@ -628,13 +629,13 @@ class DebuggerState {
   Future<Script> getScript(ScriptRef scriptRef) async {
     if (!_scriptCache.containsKey(scriptRef.id)) {
       _scriptCache[scriptRef.id] =
-          await service.getObject(isolateRef.id, scriptRef.id);
+          await _service.getObject(isolateRef.id, scriptRef.id);
     }
 
     return _scriptCache[scriptRef.id];
   }
 
-  Pos calculatePosition(Script script, int tokenPos) {
+  SourcePosition calculatePosition(Script script, int tokenPos) {
     final List<List<int>> table = script.tokenPosTable;
     if (table == null) {
       return null;
@@ -649,7 +650,7 @@ class DebuggerState {
 
       while (index < row.length - 1) {
         if (row.elementAt(index) == tokenPos) {
-          return new Pos(line, row.elementAt(index + 1));
+          return new SourcePosition(line, row.elementAt(index + 1));
         }
         index += 2;
       }
@@ -681,9 +682,9 @@ class DebuggerState {
         scriptPrefix =
             scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
       }
-    } else if (scriptPrefix.contains('/example/')) {
+    } else if (scriptPrefix.contains('/test/')) {
       scriptPrefix =
-          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/example/'));
+          scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/test/'));
       if (scriptPrefix.contains('/')) {
         scriptPrefix =
             scriptPrefix.substring(0, scriptPrefix.lastIndexOf('/') + 1);
@@ -716,8 +717,8 @@ class DebuggerState {
   }
 }
 
-class Pos {
-  Pos(this.line, [this.column]);
+class SourcePosition {
+  SourcePosition(this.line, [this.column]);
 
   final int line;
   final int column;
@@ -744,7 +745,7 @@ class SourceEditor {
   final DebuggerState debuggerState;
 
   Script currentScript;
-  ScriptAndPos executionPoint;
+  ScriptAndPosition executionPoint;
   List<Breakpoint> breakpoints = <Breakpoint>[];
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
   int _currentLineClass;
@@ -773,7 +774,7 @@ class SourceEditor {
           continue;
         }
 
-        final Pos pos =
+        final SourcePosition pos =
             debuggerState.calculatePosition(currentScript, loc.tokenPos);
         final int line = pos.line - 1;
         final List<Breakpoint> lineBps =
@@ -833,8 +834,8 @@ class SourceEditor {
     codeMirror.addLineClass(_currentLineClass, 'background', 'executionLine');
   }
 
-  void displayExecutionPoint(Script script, {Pos position}) {
-    executionPoint = new ScriptAndPos(script.uri, position: position);
+  void displayExecutionPoint(Script script, {SourcePosition position}) {
+    executionPoint = new ScriptAndPosition(script.uri, position: position);
 
     // This also calls _refreshMarkers().
     displayScript(script, scrollTo: position);
@@ -861,7 +862,7 @@ class SourceEditor {
 
   final Map<String, int> _lastScrollPositions = <String, int>{};
 
-  void displayScript(Script newScript, {Pos scrollTo}) {
+  void displayScript(Script newScript, {SourcePosition scrollTo}) {
     if (currentScript != null) {
       final ScrollInfo scrollInfo = codeMirror.getScrollInfo();
       _lastScrollPositions[currentScript.uri] = scrollInfo.top;
@@ -905,12 +906,12 @@ class BreakpointsView {
     _items = new SelectableList<Breakpoint>()
       ..flex()
       ..clazz('menu-item-bottom-border')
-      ..element.style.overflowY = 'scroll';
+      ..clazz('debugger-items-list');
 
     _items.setRenderer((Breakpoint breakpoint) {
       final dynamic location = breakpoint.location;
 
-      final CoreElement element = li(text: '', c: 'list-item');
+      final CoreElement element = li(c: 'list-item');
 
       if (location is UnresolvedSourceLocation) {
         element.text = uriDescriber(location.script.uri);
@@ -920,7 +921,7 @@ class BreakpointsView {
 
         // Modify the rendering slightly asynchronously.
         debuggerState.getScript(location.script).then((Script script) {
-          final Pos pos =
+          final SourcePosition pos =
               debuggerState.calculatePosition(script, location.tokenPos);
           element.add(span(text: ' line ${pos.line}', c: 'subtle'));
         });
@@ -934,11 +935,11 @@ class BreakpointsView {
     });
   }
 
-  Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
-
   final CoreElement _breakpointsCountDiv;
 
   SelectableList<Breakpoint> _items;
+
+  Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
 
   CoreElement get element => _items;
 
@@ -957,7 +958,7 @@ class ScriptsView {
   ScriptsView(URIDescriber uriDescriber) {
     _items = new SelectableList<ScriptRef>()
       ..flex()
-      ..element.style.overflowY = 'scroll';
+      ..clazz('debugger-items-list');
     _items.setRenderer((ScriptRef scriptRef) {
       final String uri = scriptRef.uri;
       final String name = uriDescriber(uri);
@@ -980,6 +981,8 @@ class ScriptsView {
 
   Stream<ScriptRef> get onSelectionChanged => _items.onSelectionChanged;
 
+  Stream<void> get onScriptsChanged => _items.onItemsChanged;
+
   void showScripts(
     List<ScriptRef> scripts,
     String rootLib,
@@ -992,12 +995,8 @@ class ScriptsView {
       String uri1 = ref1.uri;
       String uri2 = ref2.uri;
 
-      if (uri1.startsWith('dart:_')) {
-        uri1 = uri1.replaceAll('dart:_', 'dart:');
-      }
-      if (uri2.startsWith('dart:_')) {
-        uri2 = uri2.replaceAll('dart:_', 'dart:');
-      }
+      uri1 = _convertDartInternalUris(uri1);
+      uri2 = _convertDartInternalUris(uri2);
 
       if (commonPrefix != null) {
         if (uri1.startsWith(commonPrefix) && !uri2.startsWith(commonPrefix)) {
@@ -1025,6 +1024,14 @@ class ScriptsView {
     _items.setItems(scripts, selection: selection);
   }
 
+  String _convertDartInternalUris(String uri) {
+    if (uri.startsWith('dart:_')) {
+      return uri.replaceAll('dart:_', 'dart:');
+    } else {
+      return uri;
+    }
+  }
+
   void clearScripts() => _items.clearItems();
 }
 
@@ -1033,7 +1040,7 @@ class CallStackView {
     _items = new SelectableList<Frame>()
       ..flex()
       ..clazz('menu-item-bottom-border')
-      ..element.style.overflowY = 'scroll';
+      ..clazz('debugger-items-list');
 
     _items.setRenderer((Frame frame) {
       String name = frame.code?.name ?? '<none>';
@@ -1089,7 +1096,7 @@ class VariablesView {
     _items = new SelectableList<BoundVariable>()
       ..flex()
       ..clazz('menu-item-bottom-border')
-      ..element.style.overflowY = 'scroll';
+      ..clazz('debugger-items-list');
     _items.canDeselect = true;
 
     _items.setRenderer((BoundVariable variable) {
@@ -1221,11 +1228,11 @@ class BreakOnExceptionControl extends CoreElement {
   }
 }
 
-class ScriptAndPos {
-  ScriptAndPos(this.uri, {this.position});
+class ScriptAndPosition {
+  ScriptAndPosition(this.uri, {@required this.position});
 
   final String uri;
-  final Pos position;
+  final SourcePosition position;
 
   bool matches(Script script) => uri == script.uri;
 }
@@ -1267,7 +1274,6 @@ class ConsoleArea {
   ConsoleArea() {
     final Map<String, dynamic> options = <String, dynamic>{
       'mode': 'text/plain',
-      //'lineNumbers': true,
     };
 
     _container = div()
@@ -1301,7 +1307,7 @@ class ConsoleArea {
     _editor.scrollIntoView(lastLineIndex, lastLine.length);
   }
 
-  // for testing
+  @visibleForTesting
   String getContents() {
     return _editor.getDoc().getValue();
   }

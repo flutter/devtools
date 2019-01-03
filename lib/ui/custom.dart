@@ -57,12 +57,16 @@ class SelectableList<T> extends CoreElement {
       new StreamController<T>.broadcast();
   final StreamController<T> _doubleClickController =
       new StreamController<T>.broadcast();
+  final StreamController<void> _itemsChangedController =
+    new StreamController<void>.broadcast();
 
   bool canDeselect = false;
 
   Stream<T> get onSelectionChanged => _selectionController.stream;
 
   Stream<T> get onDoubleClick => _doubleClickController.stream;
+
+  Stream<void> get onItemsChanged => _itemsChangedController.stream;
 
   void setRenderer(ListRenderer<T> renderer) {
     this.renderer = renderer;
@@ -97,6 +101,8 @@ class SelectableList<T> extends CoreElement {
     if (hadSelection && _selectedElement == null) {
       _selectionController.add(null);
     }
+
+    _itemsChangedController.add(null);
   }
 
   void clearItems() {

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,14 +10,18 @@ import 'package:path/path.dart' as path;
 import 'test_foo.dart';
 
 void main() {
-  const Duration delay = Duration(seconds: 4);
-  Function work;
+  final Test test = new Test();
+
+  new Timer(Test.delay, test.doWork);
+}
+
+class Test {
+  static const Duration delay = Duration(seconds: 4);
 
   int count = 0;
-  String description;
 
-  work = () async {
-    description = 'items: $count';
+  void doWork() async {
+    final String description = 'items: $count';
 
     final List<int> numbers = new List.generate(10, (index) => index * index);
     // ignore: unused_local_variable
@@ -41,10 +45,8 @@ void main() {
       count = 0;
     }
 
-    new Timer(delay, work);
-  };
-
-  new Timer(delay, work);
+    new Timer(delay, doWork);
+  }
 }
 
 String _toWord(int key) {
@@ -74,8 +76,14 @@ Future bar(int count) async {
 
   await Future.delayed(const Duration(milliseconds: 4));
 
-  for (FileSystemEntity entity in dir.listSync()) {
-    final String name = path.basename(entity.path);
+  final List<FileSystemEntity> entries = dir.listSync();
+  entries.sort((a, b) {
+    return path.basename(a.path).compareTo(path.basename(b.path));
+  });
+
+  for (FileSystemEntity entity in entries) {
+    String name = path.basename(entity.path);
+    if (entity is Directory) name = name + '/';
     print('  $name');
   }
 
