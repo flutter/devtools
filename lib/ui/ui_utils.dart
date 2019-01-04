@@ -75,8 +75,14 @@ CoreElement createExtensionCheckBox(String extensionName) {
 CoreElement createHotReloadButton() {
   final PButton button = new PButton('Hot Reload')..small();
   button.click(() async {
-    await serviceManager.callMulticastService('reloadSources',
-        isolateId: serviceManager.isolateManager.selectedIsolate.id);
+    button.disabled = true;
+    try {
+      await serviceManager.callMulticastService('reloadSource',
+          isolateId: serviceManager.isolateManager.selectedIsolate.id);
+    } catch (e) {
+      print('Error during hot reload: "$e."');
+    }
+    button.disabled = false;
   });
   return button;
 }

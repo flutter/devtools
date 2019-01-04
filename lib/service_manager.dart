@@ -52,6 +52,7 @@ class ServiceConnectionManager {
 
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
+  /// Call a service that is registered by exactly one client.
   Future<Response> callService(String name, {Map args}) {
     final registered = methodsForService[name] ?? const [];
     if (registered.length != 1) {
@@ -72,7 +73,7 @@ class ServiceConnectionManager {
         return service.callMethod(method, isolateId: isolateId, args: args);
       }));
     } else {
-      return Future.value(const []);
+      throw Exception('There are no registered methods for service $name');
     }
   }
 
