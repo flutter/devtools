@@ -29,6 +29,7 @@ class ServiceConnectionManager {
       new StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
       new StreamController<Null>.broadcast();
+  final Map<String, List<String>> methodsForService = {};
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -51,6 +52,30 @@ class ServiceConnectionManager {
 
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
+  Future<Response> callService(String name, {Map args}) {
+    final registered = methodsForService[name] ?? const [];
+    if (registered.length != 1) {
+      throw Exception('Expected one registered service for $name but found '
+          '${registered.length}');
+    }
+    return service.callMethod(registered.first, args: args);
+  }
+
+  /// Call a service that may have been registered by multiple clients.
+  ///
+  /// For example, a service to navigate a code editor to a specific line and
+  /// column might be registered by multiple code editors.
+  Future<List<Response>> callMulticastService(String name, {String isolateId, Map args}) {
+    final registered = methodsForService[name] ?? const [];
+    if (registered.isNotEmpty) {
+      return Future.wait(registered.map((String method) {
+        return service.callMethod(method, isolateId: isolateId, args: args);
+      }));
+    } else {
+      return Future.value(const []);
+    }
+  }
+
   Future<void> vmServiceOpened(
       VmServiceWrapper service, Future<void> onClosed) async {
     try {
@@ -62,6 +87,14 @@ class ServiceConnectionManager {
       }
 
       this.service = service;
+
+      service.onServiceEvent.listen((e) {
+        if (e.kind == EventKind.kServiceRegistered) {
+          methodsForService.putIfAbsent(e.service, () => []).add(e.method);
+          print(e);
+        }
+      });
+
       _isolateManager._service = service;
       _serviceExtensionManager._service = service;
 
@@ -85,7 +118,8 @@ class ServiceConnectionManager {
         'Timeline',
         'Extension',
         '_Graph',
-        '_Logging'
+        '_Logging',
+        '_Service',
       ];
       await Future.wait(streamIds.map((id) => service.streamListen(id)));
     } catch (e) {
