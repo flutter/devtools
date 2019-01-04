@@ -21,7 +21,7 @@ class InspectorService {
     this.inspectorLibrary,
     this.supportedServiceMethods,
     this.widgetCatalog,
-  ) : clients = new Set() {
+  ) : clients = Set() {
     vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
     vmService.onDebugEvent.listen(onDebugVmServiceReceived);
 
@@ -58,11 +58,10 @@ class InspectorService {
   final Set<String> supportedServiceMethods;
   final Catalog widgetCatalog;
 
-  static Future<InspectorService> create() async {
+  static Future<InspectorService> create(VmService vmService) async {
     assert(serviceManager.hasConnection);
     assert(serviceManager.service != null);
-    final vmService = serviceManager.service;
-    final inspectorLibrary = new EvalOnDartLibrary(
+    final inspectorLibrary = EvalOnDartLibrary(
       'package:flutter/src/widgets/widget_inspector.dart',
       vmService,
     );
@@ -76,18 +75,18 @@ class InspectorService {
       for (ClassRef classRef in library.classes) {
         if ('WidgetInspectorService' == classRef.name) {
           final classObj = await inspectorLibrary.getClass(classRef, null);
-          final Set<String> functionNames = new Set();
+          final Set<String> functionNames = Set();
           for (FuncRef funcRef in classObj.functions) {
             functionNames.add(funcRef.name);
           }
           return functionNames;
         }
       }
-      throw new Exception('WidgetInspectorService class not found');
+      throw Exception('WidgetInspectorService class not found');
     }
 
     final supportedServiceMethods = await lookupFunctionNames();
-    return new InspectorService(
+    return InspectorService(
       vmService,
       inspectorLibrary,
       supportedServiceMethods,
@@ -118,7 +117,7 @@ class InspectorService {
   }
 
   ObjectGroup createObjectGroup(String debugName) {
-    return new ObjectGroup(debugName, this);
+    return ObjectGroup(debugName, this);
   }
 
   void dispose() {
@@ -190,8 +189,10 @@ class InspectorService {
   Future<Object> invokeServiceMethodDaemonNoGroupArgs(String methodName,
       [List<String> args]) {
     final Map<String, Object> params = {};
-    for (int i = 0; i < args.length; ++i) {
-      params['arg$i'] = args[i];
+    if (args != null) {
+      for (int i = 0; i < args.length; ++i) {
+        params['arg$i'] = args[i];
+      }
     }
     return invokeServiceMethodDaemonNoGroup(methodName, params);
   }
@@ -217,9 +218,8 @@ class InspectorService {
     );
     final json = r.json;
     if (json['errorMessage'] != null) {
-      throw new Exception('$methodName -- ${json['errorMessage']}');
+      throw Exception('$methodName -- ${json['errorMessage']}');
     }
-    print('XXX FIGURE OUT WHAT THE schema IS: $json');
     return json['result'];
   }
 }
@@ -240,7 +240,7 @@ class ObjectGroup {
   /// Object group all objects in this arena are allocated with.
   final String groupName;
   final InspectorService inspectorService;
-  bool disposed;
+  bool disposed = false;
 
   EvalOnDartLibrary get inspectorLibrary => inspectorService.inspectorLibrary;
 
@@ -319,7 +319,7 @@ class ObjectGroup {
       case FlutterTreeType.renderObject:
         return getRootRenderObject();
     }
-    throw new Exception('Unexpected FlutterTreeType');
+    throw Exception('Unexpected FlutterTreeType');
   }
 
   /// Invokes a static method on the WidgetInspectorService class passing in the specified
@@ -348,10 +348,11 @@ class ObjectGroup {
 
   Future<Object> invokeServiceMethodDaemonArg(
       String methodName, String arg, String objectGroup) {
-    return invokeServiceMethodDaemonParams(
-      methodName,
-      {'arg': arg, 'objectGroup': objectGroup},
-    );
+    final args = {'objectGroup': objectGroup};
+    if (arg != null) {
+      args['arg'] = arg;
+    }
+    return invokeServiceMethodDaemonParams(methodName, args);
   }
 
   Future<Object> _callServiceExtension(
@@ -365,9 +366,8 @@ class ObjectGroup {
       if (disposed) return null;
       final json = r.json;
       if (json['errorMessage'] != null) {
-        throw new Exception('$extension -- ${json['errorMessage']}');
+        throw Exception('$extension -- ${json['errorMessage']}');
       }
-      print('XXX FIGURE OUT WHAT THE schema IS: $json');
       return json['result'];
     });
   }
@@ -376,23 +376,11 @@ class ObjectGroup {
   Future<Object> invokeServiceMethodDaemonParams(
     String methodName,
     Map<String, Object> params,
-  ) async {
-    final Map<String, Object> json =
-        await inspectorService.inspectorLibrary.addRequest(this, () {
-      return _callServiceExtension(
-        'ext.flutter.inspector.$methodName',
-        params,
-      );
-    });
-    if (json == null) return null;
-    if (json.containsKey('errorMessage')) {
-      final message = json['errorMessage'];
-      throw new Exception('$methodName -- $message');
-    }
-    return json['result'];
+  ) {
+    return _callServiceExtension('ext.flutter.inspector.$methodName', params);
   }
 
-  Future<Map<String, Object>> invokeServiceMethodDaemonInspectorRef(
+  Future<Object> invokeServiceMethodDaemonInspectorRef(
       String methodName, InspectorInstanceRef arg) {
     return invokeServiceMethodDaemonArg(methodName, arg?.id, groupName);
   }
@@ -495,7 +483,7 @@ class ObjectGroup {
   DiagnosticsNode parseDiagnosticsNodeHelper(Map<String, Object> jsonElement) {
     if (disposed) return null;
     if (jsonElement == null) return null;
-    return new DiagnosticsNode(jsonElement, this, false, null);
+    return DiagnosticsNode(jsonElement, this, false, null);
   }
 
   /// Requires that the InstanceRef is really referring to a String that is valid JSON.
@@ -524,7 +512,7 @@ class ObjectGroup {
     if (disposed || jsonObject == null) return const [];
     final List<DiagnosticsNode> nodes = [];
     for (Map<String, Object> element in jsonObject) {
-      nodes.add(new DiagnosticsNode(element, this, false, parent));
+      nodes.add(DiagnosticsNode(element, this, false, parent));
     }
     return nodes;
   }
@@ -538,14 +526,11 @@ class ObjectGroup {
 
   Future<List<DiagnosticsNode>> getChildren(InspectorInstanceRef instanceRef,
       bool summaryTree, DiagnosticsNode parent) {
-    if (inspectorService.isDetailsSummaryViewSupported) {
-      return getListHelper(
-          instanceRef,
-          summaryTree ? 'getChildrenSummaryTree' : 'getChildrenDetailsSubtree',
-          parent);
-    } else {
-      return getListHelper(instanceRef, 'getChildren', parent);
-    }
+    return getListHelper(
+      instanceRef,
+      summaryTree ? 'getChildrenSummaryTree' : 'getChildrenDetailsSubtree',
+      parent,
+    );
   }
 
   Future<List<DiagnosticsNode>> getProperties(
@@ -846,4 +831,91 @@ class InspectorInstanceRef {
   String toString() => 'instance-$id';
 
   final String id;
+}
+
+/// Manager that simplifies preventing memory leaks when using the
+/// InspectorService.
+///
+/// This class is designed for the use case where you want to manage
+/// object references associated with the current displayed UI and object
+/// references associated with the candidate next frame of UI to display. Once
+/// the next frame is ready, you determine whether you want to display it and
+/// discard the current frame and promote the next frame to the the current
+/// frame if you want to display the next frame otherwise you discard the next
+/// frame.
+///
+/// To use this class load all data you want for the next frame by using
+/// the object group specified by [next] and then if you decide to switch
+/// to display that frame, call promoteNext() otherwise call clearNext().
+class InspectorObjectGroupManager {
+  InspectorObjectGroupManager(this.inspectorService, this.debugName);
+
+  final InspectorService inspectorService;
+  final String debugName;
+  ObjectGroup _current;
+  ObjectGroup _next;
+
+  Completer<void> _pendingNext;
+
+  Future<void> get pendingUpdateDone {
+    if (_pendingNext != null) {
+      return _pendingNext.future;
+    }
+    if (_next == null) {
+      // There is no pending update.
+      return Future.value(null);
+    }
+
+    _pendingNext = Completer();
+    return _pendingNext.future;
+  }
+
+  ObjectGroup get current {
+    _current ??= inspectorService.createObjectGroup(debugName);
+    return _current;
+  }
+
+  ObjectGroup get next {
+    _next ??= inspectorService.createObjectGroup(debugName);
+    return _next;
+  }
+
+  void clear(bool isolateStopped) {
+    if (isolateStopped) {
+      // The Dart VM will handle GCing the underlying memory.
+      _current = null;
+      _setNextNull();
+    } else {
+      clearCurrent();
+      cancelNext();
+    }
+  }
+
+  void promoteNext() {
+    clearCurrent();
+    _current = _next;
+    _setNextNull();
+  }
+
+  void clearCurrent() {
+    if (_current != null) {
+      _current.dispose();
+      _current = null;
+    }
+  }
+
+  void cancelNext() {
+    if (_next != null) {
+      _next.dispose();
+      _setNextNull();
+    }
+  }
+
+  void _setNextNull() {
+    _next = null;
+    if (_pendingNext != null) {
+      _pendingNext.complete(null);
+      _pendingNext = null;
+    }
+  }
 }
