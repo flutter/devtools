@@ -91,7 +91,6 @@ class ServiceConnectionManager {
       service.onServiceEvent.listen((e) {
         if (e.kind == EventKind.kServiceRegistered) {
           methodsForService.putIfAbsent(e.service, () => []).add(e.method);
-          print(e);
         }
       });
 
