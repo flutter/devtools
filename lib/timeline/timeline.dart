@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools/service_extensions.dart' as extensions;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_extensions.dart' as extensions;
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';

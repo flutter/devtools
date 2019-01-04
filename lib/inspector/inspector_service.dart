@@ -1,13 +1,17 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:devtools/inspector/diagnostics_node.dart';
-import 'package:devtools/inspector/flutter_widget.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
+import 'diagnostics_node.dart';
+import 'flutter_widget.dart';
 
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
@@ -239,6 +243,7 @@ class ObjectGroup {
   bool disposed;
 
   EvalOnDartLibrary get inspectorLibrary => inspectorService.inspectorLibrary;
+
   bool get useDaemonApi => inspectorService.useDaemonApi;
 
   /// Once an ObjectGroup has been disposed, all methods returning

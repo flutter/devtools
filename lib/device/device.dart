@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools/service_extensions.dart' as extensions;
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_extensions.dart' as extensions;
 import '../ui/elements.dart';
 import '../ui/ui_utils.dart';
 

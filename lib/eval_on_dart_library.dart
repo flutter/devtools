@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:devtools/inspector/inspector_service.dart';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'globals.dart';
+import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
