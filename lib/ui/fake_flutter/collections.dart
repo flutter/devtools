@@ -16,13 +16,10 @@ library collections;
 ///
 ///   * [listEquals], which does something similar for lists.
 bool setEquals<T>(Set<T> a, Set<T> b) {
-  if (a == null)
-    return b == null;
-  if (b == null || a.length != b.length)
-    return false;
+  if (a == null) return b == null;
+  if (b == null || a.length != b.length) return false;
   for (T value in a) {
-    if (!b.contains(value))
-      return false;
+    if (!b.contains(value)) return false;
   }
   return true;
 }
@@ -37,13 +34,10 @@ bool setEquals<T>(Set<T> a, Set<T> b) {
 ///
 ///   * [setEquals], which does something similar for sets.
 bool listEquals<T>(List<T> a, List<T> b) {
-  if (a == null)
-    return b == null;
-  if (b == null || a.length != b.length)
-    return false;
+  if (a == null) return b == null;
+  if (b == null || a.length != b.length) return false;
   for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index])
-      return false;
+    if (a[index] != b[index]) return false;
   }
   return true;
 }
