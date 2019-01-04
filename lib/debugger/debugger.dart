@@ -33,14 +33,15 @@ import '../ui/primer.dart';
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
-      : super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
-    debuggerState = new DebuggerState();
-
+      : debuggerState = new DebuggerState(),
+        super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
     deviceStatus = new StatusItem();
     addStatusItem(deviceStatus);
   }
 
-  bool _inited = false;
+  final DebuggerState debuggerState;
+
+  bool _initialized = false;
 
   StatusItem deviceStatus;
 
@@ -48,7 +49,6 @@ class DebuggerScreen extends Screen {
   CoreElement _sourcePathDiv;
 
   SourceEditor sourceEditor;
-  DebuggerState debuggerState;
   CallStackView callStackView;
   VariablesView variablesView;
   BreakpointsView breakpointsView;
@@ -239,13 +239,13 @@ class DebuggerScreen extends Screen {
 
   @override
   void entering() {
-    if (!_inited) {
-      _init();
+    if (!_initialized) {
+      _initialize();
     }
   }
 
-  void _init() {
-    _inited = true;
+  void _initialize() {
+    _initialized = true;
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceManager.hasConnection) {
