@@ -6,11 +6,12 @@ library diagnostics_node;
 
 import 'dart:async';
 
-import 'package:devtools/inspector/flutter_widget.dart';
-import 'package:devtools/inspector/inspector_service.dart';
-import 'package:devtools/ui/icons.dart';
-import 'package:devtools/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
+
+import '../ui/icons.dart';
+import '../utils.dart';
+import 'flutter_widget.dart';
+import 'inspector_service.dart';
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -380,6 +381,7 @@ class DiagnosticsNode {
   }
 
   InspectorSourceLocation _creationLocation;
+
   InspectorSourceLocation get creationLocation {
     if (_creationLocation != null) {
       return _creationLocation;

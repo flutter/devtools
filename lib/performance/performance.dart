@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -15,6 +14,7 @@ import '../tables.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
+import '../vm_service_wrapper.dart';
 
 class PerformanceScreen extends Screen {
   PerformanceScreen()
@@ -204,7 +204,7 @@ class PerformanceScreen extends Screen {
 }
 
 class CpuChart extends LineChart<CpuTracker> {
-  CpuChart(CoreElement parent) : super(parent) {
+  CpuChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
     usageLabel = parent.add(div(c: 'perf-label'));
     usageLabel.element.style.right = '0';
   }

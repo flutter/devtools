@@ -5,14 +5,14 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
 import '../ui/elements.dart';
+import '../vm_service_wrapper.dart';
 
 class FramesChart extends LineChart<FramesTracker> {
-  FramesChart(CoreElement parent) : super(parent) {
+  FramesChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
     fpsLabel = parent.add(div(c: 'perf-label'));
     fpsLabel.element.style.left = '0';
     fpsLabel.element.style.top = '0';

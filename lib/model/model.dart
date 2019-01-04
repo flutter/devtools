@@ -12,12 +12,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js' as js;
 
-import 'package:devtools/main.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../debugger/debugger.dart';
 import '../framework/framework.dart';
 import '../logging/logging.dart';
+import '../main.dart';
 
 // TODO(devoncarew): Only enable logging after enabled by the client.
 
@@ -45,7 +45,8 @@ class App {
     _register<List<String>>(
         'debugger.getCallStackFrames', debuggerGetCallStackFrames);
     _register<List<String>>('debugger.getVariables', debuggerGetVariables);
-    _register<String>('debugger.getConsoleContents', debuggerGetConsoleContents);
+    _register<String>(
+        'debugger.getConsoleContents', debuggerGetConsoleContents);
   }
 
   static void register(PerfToolFramework framework) {
