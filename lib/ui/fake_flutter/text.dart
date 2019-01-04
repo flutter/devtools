@@ -242,9 +242,9 @@ class TextStyle {
     this.debugLabel,
     String fontFamily,
     String package,
-  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+  })  : fontFamily =
+            package == null ? fontFamily : 'packages/$package/$fontFamily',
         assert(inherit != null);
-
 
   /// Whether null values are replaced with their value in an ancestor text
   /// style (e.g., in a [TextSpan] tree).
@@ -354,25 +354,25 @@ class TextStyle {
   }) {
     String newDebugLabel;
     assert(() {
-    if (this.debugLabel != null)
-    newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
-    return true;
+      if (this.debugLabel != null)
+        newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      return true;
     }());
     return TextStyle(
-    inherit: inherit,
-    color: color ?? this.color,
-    fontFamily: fontFamily ?? this.fontFamily,
-    fontSize: fontSize ?? this.fontSize,
-    fontWeight: fontWeight ?? this.fontWeight,
-    fontStyle: fontStyle ?? this.fontStyle,
-    letterSpacing: letterSpacing ?? this.letterSpacing,
-    wordSpacing: wordSpacing ?? this.wordSpacing,
-    textBaseline: textBaseline ?? this.textBaseline,
-    height: height ?? this.height,
-    decoration: decoration ?? this.decoration,
-    decorationColor: decorationColor ?? this.decorationColor,
-    decorationStyle: decorationStyle ?? this.decorationStyle,
-    debugLabel: newDebugLabel,
+      inherit: inherit,
+      color: color ?? this.color,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      textBaseline: textBaseline ?? this.textBaseline,
+      height: height ?? this.height,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      debugLabel: newDebugLabel,
     );
   }
 
@@ -425,18 +425,19 @@ class TextStyle {
     assert(fontWeight != null || fontWeightDelta == 0.0);
     assert(letterSpacingFactor != null);
     assert(letterSpacingDelta != null);
-    assert(letterSpacing != null || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
+    assert(letterSpacing != null ||
+        (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
     assert(wordSpacingFactor != null);
     assert(wordSpacingDelta != null);
-    assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
+    assert(wordSpacing != null ||
+        (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
     assert(heightFactor != null);
     assert(heightDelta != null);
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
 
     String modifiedDebugLabel;
     assert(() {
-      if (debugLabel != null)
-        modifiedDebugLabel = '($debugLabel).apply';
+      if (debugLabel != null) modifiedDebugLabel = '($debugLabel).apply';
       return true;
     }());
 
@@ -444,11 +445,19 @@ class TextStyle {
       inherit: inherit,
       color: color ?? this.color,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontSize:
+          fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
+      fontWeight: fontWeight == null
+          ? null
+          : FontWeight.values[(fontWeight.index + fontWeightDelta)
+              .clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle,
-      letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
-      wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
+      letterSpacing: letterSpacing == null
+          ? null
+          : letterSpacing * letterSpacingFactor + letterSpacingDelta,
+      wordSpacing: wordSpacing == null
+          ? null
+          : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
       decoration: decoration ?? this.decoration,
@@ -476,15 +485,14 @@ class TextStyle {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   TextStyle merge(TextStyle other) {
-    if (other == null)
-      return this;
-    if (!other.inherit)
-      return other;
+    if (other == null) return this;
+    if (!other.inherit) return other;
 
     String mergedDebugLabel;
     assert(() {
       if (other.debugLabel != null || debugLabel != null)
-        mergedDebugLabel = '(${debugLabel ?? _kDefaultDebugLabel}).merge(${other.debugLabel ?? _kDefaultDebugLabel})';
+        mergedDebugLabel =
+            '(${debugLabel ?? _kDefaultDebugLabel}).merge(${other.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
 
@@ -523,7 +531,8 @@ class TextStyle {
 
     String lerpDebugLabel;
     assert(() {
-      lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
+      lerpDebugLabel =
+          'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
 
@@ -569,11 +578,14 @@ class TextStyle {
       inherit: b.inherit,
       color: Color.lerp(a.color, b.color, t),
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
-      fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
+      fontSize:
+          ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t),
       fontStyle: t < 0.5 ? a.fontStyle : b.fontStyle,
-      letterSpacing: ui.lerpDouble(a.letterSpacing ?? b.letterSpacing, b.letterSpacing ?? a.letterSpacing, t),
-      wordSpacing: ui.lerpDouble(a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
+      letterSpacing: ui.lerpDouble(a.letterSpacing ?? b.letterSpacing,
+          b.letterSpacing ?? a.letterSpacing, t),
+      wordSpacing: ui.lerpDouble(
+          a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
       decoration: t < 0.5 ? a.decoration : b.decoration,
@@ -584,7 +596,7 @@ class TextStyle {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) {
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -633,10 +645,8 @@ class TextStyle {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     final TextStyle typedOther = other;
     return inherit == typedOther.inherit &&
         color == typedOther.color &&
@@ -656,19 +666,19 @@ class TextStyle {
   @override
   int get hashCode {
     return hashValues(
-        inherit,
-        color,
-        fontFamily,
-        fontSize,
-        fontWeight,
-        fontStyle,
-        letterSpacing,
-        wordSpacing,
-        textBaseline,
-        height,
-        decoration,
-        decorationColor,
-        decorationStyle,
+      inherit,
+      color,
+      fontFamily,
+      fontSize,
+      fontWeight,
+      fontStyle,
+      letterSpacing,
+      wordSpacing,
+      textBaseline,
+      height,
+      decoration,
+      decorationColor,
+      decorationStyle,
     );
   }
 
