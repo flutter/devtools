@@ -53,20 +53,22 @@ class ServiceConnectionManager {
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
   /// Call a service that is registered by exactly one client.
-  Future<Response> callService(String name, {Map args}) {
+  Future<Response> callService(String name, {String isolateId, Map args}) {
     final registered = methodsForService[name] ?? const [];
     if (registered.length != 1) {
       throw Exception('Expected one registered service for $name but found '
           '${registered.length}');
     }
-    return service.callMethod(registered.first, args: args);
+    return service.callMethod(registered.first,
+        isolateId: isolateId, args: args);
   }
 
   /// Call a service that may have been registered by multiple clients.
   ///
   /// For example, a service to navigate a code editor to a specific line and
   /// column might be registered by multiple code editors.
-  Future<List<Response>> callMulticastService(String name, {String isolateId, Map args}) {
+  Future<List<Response>> callMulticastService(String name,
+      {String isolateId, Map args}) {
     final registered = methodsForService[name] ?? const [];
     if (registered.isNotEmpty) {
       return Future.wait(registered.map((String method) {

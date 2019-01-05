@@ -108,6 +108,101 @@ void main() {
       await _verifyExtensionStateInServiceManager(extensionName, true, 0.5);
     });
 
+    test('callService', () async {
+      dynamic _e;
+
+      final registeredService =
+          serviceManager.methodsForService['reloadSources'] ?? const [];
+      expect(registeredService, isNotEmpty);
+
+      try {
+        await serviceManager.callService('reloadSources',
+            isolateId: serviceManager.isolateManager.selectedIsolate.id);
+      } catch (e) {
+        _e = e;
+      }
+
+      expect(_e, isNull);
+    });
+
+    test('callService throws exception', () async {
+      // Service with less than 1 registration.
+      Exception exception;
+      Exception expectedException =
+          Exception('Expected one registered service for fakeMethod'
+              ' but found 0');
+
+      try {
+        await serviceManager.callService('fakeMethod');
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception, isNotNull);
+      expect(exception.toString(), equals(expectedException.toString()));
+
+      // Service with more than 1 registration.
+      serviceManager.methodsForService.putIfAbsent('fakeMethod',
+          () => ['registration1.fakeMethod', 'registration2.fakeMethod']);
+      exception = null;
+      expectedException =
+          Exception('Expected one registered service for fakeMethod'
+              ' but found 2');
+
+      try {
+        await serviceManager.callService('fakeMethod');
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception, isNotNull);
+      expect(exception.toString(), equals(expectedException.toString()));
+    });
+
+    test('callMulticastService', () async {
+      dynamic _e;
+
+      final registeredService =
+          serviceManager.methodsForService['reloadSources'] ?? const [];
+      expect(registeredService, isNotEmpty);
+
+      try {
+        await serviceManager.callMulticastService('reloadSources',
+            isolateId: serviceManager.isolateManager.selectedIsolate.id);
+      } catch (e) {
+        _e = e;
+      }
+
+      expect(_e, isNull);
+    });
+
+    test('callMulticastService throws exception', () async {
+      Exception exception;
+      final Exception expectedException =
+          Exception('There are no registered methods for service fakeMethod');
+
+      try {
+        await serviceManager.callMulticastService('fakeMethod');
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception, isNotNull);
+      expect(exception.toString(), equals(expectedException.toString()));
+    });
+
+    test('hotReload', () async {
+      dynamic _e;
+
+      try {
+        await serviceManager.performHotReload();
+      } catch (e) {
+        _e = e;
+      }
+
+      expect(_e, isNull);
+    });
+
     // TODO(kenzie): add hot restart test case.
   }, tags: 'useFlutterSdk');
 }
