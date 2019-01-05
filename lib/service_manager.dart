@@ -136,6 +136,17 @@ class ServiceConnectionManager {
     _stateController.add(null);
     _connectionClosedController.add(null);
   }
+
+  // TODO(kenzie): add hot restart method, register method in flutter_tools.
+
+  Future<void> performHotReload() async {
+    try {
+      await callMulticastService('reloadSources',
+          isolateId: _isolateManager.selectedIsolate.id);
+    } catch (e) {
+      print('Error during hot reload: "$e."');
+    }
+  }
 }
 
 class IsolateManager {

@@ -70,18 +70,13 @@ CoreElement createExtensionCheckBox(String extensionName) {
       ]));
 }
 
-// TODO(kenzieschmoll): add hotRestart button, register method in flutter_tools.
+// TODO(kenzie): add hotRestart button.
 
 CoreElement createHotReloadButton() {
   final PButton button = new PButton('Hot Reload')..small();
   button.click(() async {
     button.disabled = true;
-    try {
-      await serviceManager.callMulticastService('reloadSource',
-          isolateId: serviceManager.isolateManager.selectedIsolate.id);
-    } catch (e) {
-      print('Error during hot reload: "$e."');
-    }
+    await serviceManager.performHotReload();
     button.disabled = false;
   });
   return button;
