@@ -55,15 +55,27 @@ class SelectableList<T> extends CoreElement {
 
   final StreamController<T> _selectionController =
       new StreamController<T>.broadcast();
+  final StreamController<T> _doubleClickController =
+      new StreamController<T>.broadcast();
+  final StreamController<void> _itemsChangedController =
+    new StreamController<void>.broadcast();
+
+  bool canDeselect = false;
 
   Stream<T> get onSelectionChanged => _selectionController.stream;
+
+  Stream<T> get onDoubleClick => _doubleClickController.stream;
+
+  Stream<void> get onItemsChanged => _itemsChangedController.stream;
 
   void setRenderer(ListRenderer<T> renderer) {
     this.renderer = renderer;
   }
 
-  void setItems(List<T> items) {
+  void setItems(List<T> items, {T selection}) {
     this.items = items;
+
+    final bool hadSelection = _selectedElement != null;
 
     _selectedElement = null;
 
@@ -74,13 +86,23 @@ class SelectableList<T> extends CoreElement {
     add(items.map((T item) {
       final CoreElement element = renderer(item);
       element.click(() {
-        _selectedElement?.toggleClass('selected', false);
-        _selectedElement = element;
-        element.toggleClass('selected', true);
-        _selectionController.add(item);
+        _select(element, item,
+            clear: canDeselect && element.hasClass('selected'));
       });
+      element.dblclick(() {
+        _doubleClickController.add(item);
+      });
+      if (selection == item) {
+        _select(element, item);
+      }
       return element;
     }).toList());
+
+    if (hadSelection && _selectedElement == null) {
+      _selectionController.add(null);
+    }
+
+    _itemsChangedController.add(null);
   }
 
   void clearItems() {
@@ -89,5 +111,18 @@ class SelectableList<T> extends CoreElement {
 
   CoreElement _defaultRenderer(T item) {
     return li(text: item.toString(), c: 'list-item');
+  }
+
+  void _select(CoreElement element, T item, {bool clear = false}) {
+    _selectedElement?.toggleClass('selected', false);
+
+    if (clear) {
+      element = null;
+      item = null;
+    }
+
+    _selectedElement = element;
+    element?.toggleClass('selected', true);
+    _selectionController.add(item);
   }
 }

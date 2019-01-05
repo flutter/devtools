@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:devtools/inspector/inspector_service.dart';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'globals.dart';
+import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
@@ -205,9 +206,14 @@ class EvalOnDartLibrary {
     int offset,
     int count,
   }) {
-    return addRequest(
-        isAlive,
-        () => service.getObject(_isolateId, instance.id,
-            offset: offset, count: count));
+    return addRequest<T>(isAlive, () async {
+      final T value = await service.getObject(
+        _isolateId,
+        instance.id,
+        offset: offset,
+        count: count,
+      );
+      return value;
+    });
   }
 }

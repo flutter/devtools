@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
@@ -17,6 +16,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
+import '../vm_service_wrapper.dart';
 
 // TODO(devoncarew): expose _getAllocationProfile
 
@@ -329,7 +329,7 @@ class MemoryColumnSimple<T> extends Column<T> {
 }
 
 class MemoryChart extends LineChart<MemoryTracker> {
-  MemoryChart(CoreElement parent) : super(parent) {
+  MemoryChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
     processLabel = parent.add(div(c: 'perf-label'));
     processLabel.element.style.left = '0';
 

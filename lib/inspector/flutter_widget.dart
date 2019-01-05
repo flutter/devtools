@@ -1,47 +1,52 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 library flutter_widget;
 
 import 'dart:convert';
 
-import 'package:devtools/ui/icons.dart';
-import 'package:devtools/utils.dart';
 import 'package:http/http.dart';
+
+import '../ui/icons.dart';
+import '../utils.dart';
 
 class Category {
   const Category(this.label, this.icon);
 
-  static const Category ACCESSIBILITY =
-      Category('Accessibility', FlutterIcons.Accessibility);
-  static const Category ANIMATION_AND_MOTION =
-      Category('Animation and Motion', FlutterIcons.Animation);
-  static const Category ASSETS_IMAGES_AND_ICONS =
-      Category('Assets, Images, and Icons', FlutterIcons.Assets);
-  static const Category ASYNC = Category('Async', FlutterIcons.Async);
-  static const Category BASICS =
+  static const Category accessibility =
+      Category('Accessibility', FlutterIcons.accessibility);
+  static const Category animationAndMotion =
+      Category('Animation and Motion', FlutterIcons.animation);
+  static const Category assetsImagesAndIcons =
+      Category('Assets, Images, and Icons', FlutterIcons.assets);
+  static const Category async = Category('Async', FlutterIcons.async);
+  static const Category basics =
       Category('Basics', null); // TODO(jacobr): add an icon.
-  static const Category CUPERTINO = Category(
+  static const Category cupertino = Category(
       'Cupertino (iOS-style widgets)', null); // TODO(jacobr): add an icon.
-  static const Category INPUT = Category('Input', FlutterIcons.Input);
-  static const Category PAINTING_AND_EFFECTS =
-      Category('Painting and effects', FlutterIcons.Painting);
-  static const Category SCROLLING =
-      Category('Scrolling', FlutterIcons.Scrollbar);
-  static const Category STACK = Category('Stack', FlutterIcons.Stack);
-  static const Category STYLING = Category('Styling', FlutterIcons.Styling);
-  static const Category TEXT = Category('Text', FlutterIcons.Text);
+  static const Category input = Category('Input', FlutterIcons.input);
+  static const Category paintingAndEffects =
+      Category('Painting and effects', FlutterIcons.painting);
+  static const Category scrolling =
+      Category('Scrolling', FlutterIcons.scrollbar);
+  static const Category stack = Category('Stack', FlutterIcons.stack);
+  static const Category styling = Category('Styling', FlutterIcons.styling);
+  static const Category text = Category('Text', FlutterIcons.text);
 
   static const List<Category> values = [
-    ACCESSIBILITY,
-    ANIMATION_AND_MOTION,
-    ASSETS_IMAGES_AND_ICONS,
-    ASYNC,
-    BASICS,
-    CUPERTINO,
-    INPUT,
-    PAINTING_AND_EFFECTS,
-    SCROLLING,
-    STACK,
-    STYLING,
-    TEXT,
+    accessibility,
+    animationAndMotion,
+    assetsImagesAndIcons,
+    async,
+    basics,
+    cupertino,
+    input,
+    paintingAndEffects,
+    scrolling,
+    stack,
+    styling,
+    text,
   ];
 
   final String label;
@@ -101,13 +106,13 @@ class Catalog {
     final List<Object> json = jsonDecode(response.body);
 
     for (Map<String, Object> element in json) {
-      final FlutterWidget widget = new FlutterWidget(element);
+      final FlutterWidget widget = FlutterWidget(element);
       final String name = widget.name;
       // TODO(pq): add validation once json is repaired (https://github.com/flutter/flutter/issues/12930).
       // if (widgets.containsKey(name)) throw new IllegalStateException('Unexpected contents: widget `${name}` is duplicated');
       widgets[name] = widget;
     }
-    return new Catalog._(widgets);
+    return Catalog._(widgets);
   }
 
   List<FlutterWidget> get allWidgets {

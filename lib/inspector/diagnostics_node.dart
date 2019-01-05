@@ -1,10 +1,17 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+library diagnostics_node;
+
 import 'dart:async';
 
-import 'package:devtools/inspector/flutter_widget.dart';
-import 'package:devtools/inspector/inspector_service.dart';
-import 'package:devtools/ui/icons.dart';
-import 'package:devtools/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
+
+import '../ui/icons.dart';
+import '../utils.dart';
+import 'flutter_widget.dart';
+import 'inspector_service.dart';
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -149,7 +156,7 @@ class DiagnosticsNode {
     this.parent,
   );
 
-  static final CustomIconMaker iconMaker = new CustomIconMaker();
+  static final CustomIconMaker iconMaker = CustomIconMaker();
 
   /// This node's parent (if it's been set).
   DiagnosticsNode parent;
@@ -171,7 +178,7 @@ class DiagnosticsNode {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! DiagnosticsNode) return null;
+    if (other is! DiagnosticsNode) return false;
     return getDartDiagnosticRef() == other.getDartDiagnosticRef();
   }
 
@@ -374,6 +381,7 @@ class DiagnosticsNode {
   }
 
   InspectorSourceLocation _creationLocation;
+
   InspectorSourceLocation get creationLocation {
     if (_creationLocation != null) {
       return _creationLocation;
@@ -381,8 +389,7 @@ class DiagnosticsNode {
     if (!hasCreationLocation) {
       return null;
     }
-    _creationLocation =
-        new InspectorSourceLocation(json['creationLocation'], null);
+    _creationLocation = InspectorSourceLocation(json['creationLocation'], null);
     return _creationLocation;
   }
 
@@ -426,10 +433,10 @@ class DiagnosticsNode {
   }
 
   bool getBooleanMember(String memberName, bool defaultValue) {
-    if (!json.containsKey(memberName)) {
+    if (json[memberName] == null) {
       return defaultValue;
     }
-    return json[memberName] ?? defaultValue;
+    return json[memberName];
   }
 
   DiagnosticLevel getLevelMember(
@@ -495,7 +502,7 @@ class DiagnosticsNode {
           propertyNames = ['codePoint'];
           break;
         default:
-          _valueProperties = new Future.value(null);
+          _valueProperties = Future.value(null);
           return _valueProperties;
       }
       _valueProperties =
@@ -506,7 +513,13 @@ class DiagnosticsNode {
 
   Map<String, Object> get valuePropertiesJson => json['valueProperties'];
 
-  bool get hasChildren => getBooleanMember('hasChildren', false);
+  bool get hasChildren {
+    if (getBooleanMember('hasChildren', false)) {
+      return true;
+    }
+    final List children = json['children'];
+    return children?.isNotEmpty == true;
+  }
 
   bool get isCreatedByLocalProject {
     return getBooleanMember('createdByLocalProject', false);
@@ -522,41 +535,56 @@ class DiagnosticsNode {
 
   /// Check whether children are already available.
   bool get childrenReady {
-    return json.containsKey('children') ||
-        (_children != null && _children.isCompleted);
+    return json.containsKey('children') || _children != null || !hasChildren;
   }
 
   Future<List<DiagnosticsNode>> get children {
-    if (_children == null) {
-      _children = new Completer();
-      if (json.containsKey('children')) {
-        final List<Object> jsonArray = json['children'];
-        final List<DiagnosticsNode> nodes = [];
-        for (Map<String, Object> element in jsonArray) {
-          final child =
-              new DiagnosticsNode(element, inspectorService, false, parent);
-          child.parent = this;
-          nodes.add(child);
-        }
-        _children.complete(nodes);
-      } else if (hasChildren) {
-        bindFutureToCompleter(
-            inspectorService.getChildren(
-                getDartDiagnosticRef(), isSummaryTree, this),
-            _children);
-      } else {
-        // Known to have no children so we can provide the children immediately.
-        _children.complete([]);
-      }
-    }
-    return _children.future;
+    _computeChildren();
+    return _childrenFuture;
   }
 
-  Completer<List<DiagnosticsNode>> _children;
+  List<DiagnosticsNode> get childrenNow {
+    _maybePopulateChildren();
+    return _children;
+  }
+
+  Future<void> _computeChildren() async {
+    _maybePopulateChildren();
+    if (!hasChildren || _children != null) {
+      return;
+    }
+    _childrenFuture = inspectorService.getChildren(
+        getDartDiagnosticRef(), isSummaryTree, this);
+    try {
+      _children = await _childrenFuture;
+    } finally {
+      _children ??= [];
+    }
+  }
+
+  void _maybePopulateChildren() {
+    if (!hasChildren || _children != null) {
+      return;
+    }
+
+    final List<Object> jsonArray = json['children'];
+    if (jsonArray?.isNotEmpty == true) {
+      final List<DiagnosticsNode> nodes = [];
+      for (Map<String, Object> element in jsonArray) {
+        final child = DiagnosticsNode(element, inspectorService, false, parent);
+        child.parent = this;
+        nodes.add(child);
+      }
+      _children = nodes;
+    }
+  }
+
+  Future<List<DiagnosticsNode>> _childrenFuture;
+  List<DiagnosticsNode> _children;
 
   /// Reference the actual Dart DiagnosticsNode object this object is referencing.
   InspectorInstanceRef getDartDiagnosticRef() {
-    return new InspectorInstanceRef(json['objectId']);
+    return InspectorInstanceRef(json['objectId']);
   }
 
   /// Properties to show inline in the widget tree.
@@ -566,8 +594,8 @@ class DiagnosticsNode {
       if (json.containsKey('properties')) {
         final List<Object> jsonArray = json['properties'];
         for (Map<String, Object> element in jsonArray) {
-          cachedProperties.add(
-              new DiagnosticsNode(element, inspectorService, true, parent));
+          cachedProperties
+              .add(DiagnosticsNode(element, inspectorService, true, parent));
         }
         trackPropertiesMatchingParameters(cachedProperties);
       }
@@ -649,6 +677,7 @@ class DiagnosticsNode {
   }
 
   Icon get icon {
+    if (isProperty) return null;
     Icon icon = widget?.icon;
     icon ??= iconMaker.fromWidgetName(description);
     return icon;
@@ -745,7 +774,7 @@ class InspectorSourceLocation {
       final List<Object> parametersJson = json['parameterLocations'];
       final List<InspectorSourceLocation> ret = [];
       for (int i = 0; i < parametersJson.length; ++i) {
-        ret.add(new InspectorSourceLocation(parametersJson[i], this));
+        ret.add(InspectorSourceLocation(parametersJson[i], this));
       }
       return ret;
     }

@@ -4,183 +4,161 @@
  * found in the LICENSE file.
  */
 
+/// Platform independent definition of icons.
+///
+/// See [HtmlIconRenderer] for a browser specific implementation of icon
+/// rendering. If you add an Icon class you also need to add a renderer class
+/// to handle the actual platform specific icon rendering.
+/// The benefit of this approach is that icons can be const objects and tests
+/// of code that uses icons can run on the Dart VM.
 library icons;
 
-class Icon {
-  const Icon(this.url);
+import 'package:meta/meta.dart';
 
-  final String url;
+import 'fake_flutter/fake_flutter.dart';
+
+abstract class Icon {
+  const Icon();
+
+  int get iconWidth => 18;
+  int get iconHeight => 18;
+}
+
+class UrlIcon extends Icon {
+  const UrlIcon(this.src);
+
+  final String src;
 }
 
 class FlutterIcons {
-  static const Icon Flutter_13 = Icon('/icons/flutter_13.png');
-  static const Icon Flutter_13_2x = Icon('/icons/flutter_13@2x.png');
-  static const Icon Flutter_64 = Icon('/icons/flutter_64.png');
-  static const Icon Flutter_64_2x = Icon('/icons/flutter_64@2x.png');
-  static const Icon Flutter = Icon('/icons/flutter.png');
-  static const Icon Flutter_2x = Icon('/icons/flutter@2x.png');
-  static const Icon Flutter_inspect = Icon('/icons/flutter_inspect.png');
-  static const Icon Flutter_test = Icon('/icons/flutter_test.png');
-  static const Icon Flutter_badge = Icon('/icons/flutter_badge.png');
+  FlutterIcons._();
 
-  static const Icon Phone = Icon('/icons/phone.png');
-  static const Icon Feedback = Icon('/icons/feedback.png');
+  static const Icon flutter13 = UrlIcon('/icons/flutter_13.png');
+  static const Icon flutter13_2x = UrlIcon('/icons/flutter_13@2x.png');
+  static const Icon flutter64 = UrlIcon('/icons/flutter_64.png');
+  static const Icon flutter64_2x = UrlIcon('/icons/flutter_64@2x.png');
+  static const Icon flutter = UrlIcon('/icons/flutter.png');
+  static const Icon flutter2x = UrlIcon('/icons/flutter@2x.png');
+  static const Icon flutterInspect = UrlIcon('/icons/flutter_inspect.png');
+  static const Icon flutterTest = UrlIcon('/icons/flutter_test.png');
+  static const Icon flutterBadge = UrlIcon('/icons/flutter_badge.png');
 
-  static const Icon OpenObservatory = Icon('/icons/observatory.png');
-  static const Icon OpenObservatoryGroup =
-      Icon('/icons/observatory_overflow.png');
+  static const Icon phone = UrlIcon('/icons/phone.png');
+  static const Icon feedback = UrlIcon('/icons/feedback.png');
 
-  static const Icon OpenTimeline = Icon('/icons/timeline.png');
+  static const Icon openObservatory = UrlIcon('/icons/observatory.png');
+  static const Icon openObservatoryGroup =
+      UrlIcon('/icons/observatory_overflow.png');
 
-  static const Icon HotReconst = Icon('/icons/hot-reconst Icon.png');
-  static const Icon HotRestart = Icon('/icons/hot-restart.png');
+  static const Icon openTimeline = UrlIcon('/icons/timeline.png');
 
-  static const Icon IconRun = Icon('/icons/reconst Icon_run.png');
-  static const Icon IconDebug = Icon('/icons/reconst Icon_debug.png');
+  static const Icon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
+  static const Icon hotRestart = UrlIcon('/icons/hot-restart.png');
 
-  static const Icon BazelRun = Icon('/icons/bazel_run.png');
+  static const Icon iconRun = UrlIcon('/icons/refinal Icon_run.png');
+  static const Icon iconDebug = UrlIcon('/icons/refinal Icon_debug.png');
 
-  static const Icon CustomClass = Icon('/icons/custom/class.png');
-  static const Icon CustomClassAbstract =
-      Icon('/icons/custom/class_abstract.png');
-  static const Icon CustomFields = Icon('/icons/custom/fields.png');
-  static const Icon CustomInterface = Icon('/icons/custom/interface.png');
-  static const Icon CustomMethod = Icon('/icons/custom/method.png');
-  static const Icon CustomMethodAbstract =
-      Icon('/icons/custom/method_abstract.png');
-  static const Icon CustomProperty = Icon('/icons/custom/property.png');
-  static const Icon CustomInfo = Icon('/icons/custom/info.png');
+  static const Icon bazelRun = UrlIcon('/icons/bazel_run.png');
 
-  static const Icon AndroidStudioNewProject =
-      Icon('/icons/template_new_project.png');
-  static const Icon AndroidStudioNewPackage =
-      Icon('/icons/template_new_package.png');
-  static const Icon AndroidStudioNewPlugin =
-      Icon('/icons/template_new_plugin.png');
-  static const Icon AndroidStudioNewModule =
-      Icon('/icons/template_new_module.png');
+  static const Icon customClass = UrlIcon('/icons/custom/class.png');
+  static const Icon customClassAbstract =
+      UrlIcon('/icons/custom/class_abstract.png');
+  static const Icon customFields = UrlIcon('/icons/custom/fields.png');
+  static const Icon customInterface = UrlIcon('/icons/custom/interface.png');
+  static const Icon customMethod = UrlIcon('/icons/custom/method.png');
+  static const Icon customMethodAbstract =
+      UrlIcon('/icons/custom/method_abstract.png');
+  static const Icon customProperty = UrlIcon('/icons/custom/property.png');
+  static const Icon customInfo = UrlIcon('/icons/custom/info.png');
 
-  static const Icon AttachDebugger = Icon('/icons/attachDebugger.png');
+  static const Icon androidStudioNewProject =
+      UrlIcon('/icons/template_new_project.png');
+  static const Icon androidStudioNewPackage =
+      UrlIcon('/icons/template_new_package.png');
+  static const Icon androidStudioNewPlugin =
+      UrlIcon('/icons/template_new_plugin.png');
+  static const Icon androidStudioNewModule =
+      UrlIcon('/icons/template_new_module.png');
+
+  static const Icon attachDebugger = UrlIcon('/icons/attachDebugger.png');
 
   // Flutter Inspector Widget Icons.
-  static const Icon Accessibility =
-      Icon('/icons/inspector/balloonInformation.png');
-  static const Icon Animation = Icon('/icons/inspector/resume.png');
-  static const Icon Assets = Icon('/icons/inspector/any_type.png');
-  static const Icon Async = Icon('/icons/inspector/threads.png');
-  static const Icon Diagram = Icon('/icons/inspector/diagram.png');
-  static const Icon Input = Icon('/icons/inspector/renderer.png');
-  static const Icon Painting = Icon('/icons/inspector/colors.png');
-  static const Icon Scrollbar = Icon('/icons/inspector/scrollbar.png');
-  static const Icon Stack = Icon('/icons/inspector/value.png');
-  static const Icon Styling = Icon('/icons/inspector/atrule.png');
-  static const Icon Text = Icon('/icons/inspector/textArea.png');
+  static const Icon accessibility =
+      UrlIcon('/icons/inspector/balloonInformation.png');
+  static const Icon animation = UrlIcon('/icons/inspector/resume.png');
+  static const Icon assets = UrlIcon('/icons/inspector/any_type.png');
+  static const Icon async = UrlIcon('/icons/inspector/threads.png');
+  static const Icon diagram = UrlIcon('/icons/inspector/diagram.png');
+  static const Icon input = UrlIcon('/icons/inspector/renderer.png');
+  static const Icon painting = UrlIcon('/icons/inspector/colors.png');
+  static const Icon scrollbar = UrlIcon('/icons/inspector/scrollbar.png');
+  static const Icon stack = UrlIcon('/icons/inspector/value.png');
+  static const Icon styling = UrlIcon('/icons/inspector/atrule.png');
+  static const Icon text = UrlIcon('/icons/inspector/textArea.png');
 
-  static const Icon ExpandProperty =
-      Icon('/icons/inspector/expand_property.png');
-  static const Icon CollapseProperty =
-      Icon('/icons/inspector/collapse_property.png');
+  static const Icon expandProperty =
+      UrlIcon('/icons/inspector/expand_property.png');
+  static const Icon collapseProperty =
+      UrlIcon('/icons/inspector/collapse_property.png');
 
   // Flutter Outline Widget Icons.
-  static const Icon Column = Icon('/icons/preview/column.png');
-  static const Icon Padding = Icon('/icons/preview/padding.png');
-  static const Icon RemoveWidget = Icon('/icons/preview/remove_widget.png');
-  static const Icon Row = Icon('/icons/preview/row.png');
-  static const Icon Center = Icon('/icons/preview/center.png');
-  static const Icon Container = Icon('/icons/preview/container.png');
-  static const Icon Up = Icon('/icons/preview/up.png');
-  static const Icon Down = Icon('/icons/preview/down.png');
-  static const Icon ExtractMethod = Icon('/icons/preview/extract_method.png');
+  static const Icon column = UrlIcon('/icons/preview/column.png');
+  static const Icon padding = UrlIcon('/icons/preview/padding.png');
+  static const Icon removeWidget = UrlIcon('/icons/preview/remove_widget.png');
+  static const Icon row = UrlIcon('/icons/preview/row.png');
+  static const Icon center = UrlIcon('/icons/preview/center.png');
+  static const Icon container = UrlIcon('/icons/preview/container.png');
+  static const Icon up = UrlIcon('/icons/preview/up.png');
+  static const Icon down = UrlIcon('/icons/preview/down.png');
+  static const Icon extractMethod =
+      UrlIcon('/icons/preview/extract_method.png');
+
+  static const Icon greyProgress = UrlIcon('/icons/perf/grey_progress.gif');
+  static const Icon redProgress = UrlIcon('/icons/perf/red_progress.gif');
+  static const Icon yellowProgress = UrlIcon('/icons/perf/yellow_progress.gif');
+
+  // Icons matching IntelliJ core icons.
+  static const Icon locate = UrlIcon('/icons/general/locate.png');
+  static const Icon forceRefresh = UrlIcon('/icons/actions/forceRefresh.svg');
+  static const Icon performanceOverlay =
+      UrlIcon('/icons/general/performance_overlay.svg');
+  static const Icon debugPaint = UrlIcon('/icons/debug_paint.png');
+  static const Icon repaintRainbow = UrlIcon('/icons/repaint_rainbow.png');
+  static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
 }
 
-class FlutterIconsState {
-  static const Icon RedProgr = Icon('/icons/perf/RedProgr.png'); // 16x16
-  static const Icon RedProgr_1 = Icon('/icons/perf/RedProgr_1.png'); // 16x16
-  static const Icon RedProgr_2 = Icon('/icons/perf/RedProgr_2.png'); // 16x16
-  static const Icon RedProgr_3 = Icon('/icons/perf/RedProgr_3.png'); // 16x16
-  static const Icon RedProgr_4 = Icon('/icons/perf/RedProgr_4.png'); // 16x16
-  static const Icon RedProgr_5 = Icon('/icons/perf/RedProgr_5.png'); // 16x16
-  static const Icon RedProgr_6 = Icon('/icons/perf/RedProgr_6.png'); // 16x16
-  static const Icon RedProgr_7 = Icon('/icons/perf/RedProgr_7.png'); // 16x16
-  static const Icon RedProgr_8 = Icon('/icons/perf/RedProgr_8.png'); // 16x16
+class CustomIcon extends Icon {
+  const CustomIcon(
+      {@required this.kind, @required this.text, this.isAbstract = false});
 
-  static const Icon YellowProgr = Icon('/icons/perf/YellowProgr.png'); // 16x16
-  static const Icon YellowProgr_1 =
-      Icon('/icons/perf/YellowProgr_1.png'); // 16x16
-  static const Icon YellowProgr_2 =
-      Icon('/icons/perf/YellowProgr_2.png'); // 16x16
-  static const Icon YellowProgr_3 =
-      Icon('/icons/perf/YellowProgr_3.png'); // 16x16
-  static const Icon YellowProgr_4 =
-      Icon('/icons/perf/YellowProgr_4.png'); // 16x16
-  static const Icon YellowProgr_5 =
-      Icon('/icons/perf/YellowProgr_5.png'); // 16x16
-  static const Icon YellowProgr_6 =
-      Icon('/icons/perf/YellowProgr_6.png'); // 16x16
-  static const Icon YellowProgr_7 =
-      Icon('/icons/perf/YellowProgr_7.png'); // 16x16
-  static const Icon YellowProgr_8 =
-      Icon('/icons/perf/YellowProgr_8.png'); // 16x16
+  final IconKind kind;
+  final String text;
+  final bool isAbstract;
+
+  Icon get baseIcon => isAbstract ? kind.abstractIcon : kind.icon;
+
+  @override
+  int get iconWidth => baseIcon.iconWidth;
+  @override
+  int get iconHeight => baseIcon.iconHeight;
 }
 
 class CustomIconMaker {
-  static const String normalColor = '231F20';
-
-  final Map<String, Icon> iconCache = {};
+  final Map<String, CustomIcon> iconCache = {};
 
   Icon getCustomIcon(String fromText,
-      [IconKind kind = IconKind.kClass, bool isAbstract = false]) {
-    return null;
-    // TODO(jacobr): use canvas and base64 encoded images for this.
-    /*
-    if (StringUtil.isEmpty(fromText)) {
+      {IconKind kind, bool isAbstract = false}) {
+    kind ??= IconKind.classIcon;
+    if (fromText?.isEmpty != false) {
       return null;
     }
 
-    final String text = fromText.toUpperCase().substring(0, 1);
-    final String mapKey = text + '_' + kind.name + '_' + isAbstract;
+    final String text = fromText[0].toUpperCase();
+    final String mapKey = '${text}_${kind.name}_$isAbstract';
 
-    if (!iconCache.containsKey(mapKey)) {
-      final Icon baseIcon = isAbstract ? kind.abstractIcon : kind.icon;
-
-      final Icon icon = new LayeredIcon(baseIcon, new Icon() {
-      void paintIcon(Component c, Graphics g, int x, int y) {
-      final Graphics2D g2 = (Graphics2D)g.create();
-
-      try {
-      GraphicsUtil.setupAAPainting(g2);
-      g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-      g2.setColor(normalColor);
-
-      final Font font = UIUtil.getFont(UIUtil.FontSize.MINI, UIUtil.getTreeFont());
-      g2.setFont(font);
-
-      final Rectangle2D bounds = g2.getFontMetrics().getStringBounds(text, g2);
-      final float offsetX = (getIconWidth() - (float)bounds.getWidth()) / 2.0f;
-      // Some black magic here for vertical centering.
-      final float offsetY = getIconHeight() - ((getIconHeight() - (float)bounds.getHeight()) / 2.0f) - 2.0f;
-
-      g2.drawString(text, x + offsetX, y + offsetY);
-      }
-      finally {
-      g2.dispose();
-      }
-      }
-
-      int getIconWidth() {
-      return baseIcon != null ? baseIcon.getIconWidth() : 13;
-      }
-
-      int getIconHeight() {
-      return baseIcon != null ? baseIcon.getIconHeight() : 13;
-      }
-      });
-
-      iconCache.put(mapKey, icon);
-    }
-
-    return iconCache.get(mapKey);
-    */
+    return iconCache.putIfAbsent(mapKey, () {
+      return new CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
+    });
   }
 
   Icon fromWidgetName(String name) {
@@ -197,7 +175,8 @@ class CustomIconMaker {
       return null;
     }
 
-    return getCustomIcon(name, isPrivate ? IconKind.kMethod : IconKind.kClass);
+    return getCustomIcon(name,
+        kind: isPrivate ? IconKind.method : IconKind.classIcon);
   }
 
   Icon fromInfo(String name) {
@@ -209,7 +188,7 @@ class CustomIconMaker {
       return null;
     }
 
-    return getCustomIcon(name, IconKind.kInfo);
+    return getCustomIcon(name, kind: IconKind.info);
   }
 
   bool isAlphabetic(int char) {
@@ -224,18 +203,32 @@ class IconKind {
   const IconKind(this.name, this.icon, [abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
-  static const IconKind kClass = IconKind(
-      'class', FlutterIcons.CustomClass, FlutterIcons.CustomClassAbstract);
-  static const IconKind kField = IconKind('fields', FlutterIcons.CustomFields);
-  static const IconKind kInterface =
-      IconKind('interface', FlutterIcons.CustomInterface);
-  static const IconKind kMethod = IconKind(
-      'method', FlutterIcons.CustomMethod, FlutterIcons.CustomMethodAbstract);
-  static const IconKind kProperty =
-      IconKind('property', FlutterIcons.CustomProperty);
-  static const IconKind kInfo = IconKind('info', FlutterIcons.CustomInfo);
+  static const IconKind classIcon = IconKind(
+      'class', FlutterIcons.customClass, FlutterIcons.customClassAbstract);
+  static const IconKind field = IconKind('fields', FlutterIcons.customFields);
+  static const IconKind interface =
+      IconKind('interface', FlutterIcons.customInterface);
+  static const IconKind method = IconKind(
+      'method', FlutterIcons.customMethod, FlutterIcons.customMethodAbstract);
+  static const IconKind property =
+      IconKind('property', FlutterIcons.customProperty);
+  static const IconKind info = IconKind('info', FlutterIcons.customInfo);
 
   final String name;
   final Icon icon;
   final Icon abstractIcon;
+}
+
+class ColorIcon extends Icon {
+  const ColorIcon(this.color);
+
+  final Color color;
+}
+
+class ColorIconMaker {
+  final Map<Color, Icon> iconCache = {};
+
+  Icon getCustomIcon(Color color) {
+    return iconCache.putIfAbsent(color, () => new ColorIcon(color));
+  }
 }

@@ -22,6 +22,7 @@ class ServiceConnectionManager {
     _isolateManager = isolateManager;
     _serviceExtensionManager = serviceExtensionManager;
   }
+
   final StreamController<Null> _stateController =
       new StreamController<Null>.broadcast();
   final StreamController<VmServiceWrapper> _connectionAvailableController =
@@ -33,6 +34,7 @@ class ServiceConnectionManager {
   ServiceExtensionManager _serviceExtensionManager;
 
   IsolateManager get isolateManager => _isolateManager;
+
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
 
@@ -135,7 +137,9 @@ class IsolateManager {
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _isolates = isolates;
+
     await _initSelectedIsolate(isolates);
+
     if (_selectedIsolate != null) {
       _isolateCreatedController.add(_selectedIsolate);
       _selectedIsolateController.add(_selectedIsolate);
@@ -178,6 +182,10 @@ class IsolateManager {
   }
 
   Future<void> _initSelectedIsolate(List<IsolateRef> isolates) async {
+    if (isolates.isEmpty) {
+      return;
+    }
+
     for (IsolateRef ref in isolates) {
       if (_selectedIsolate == null) {
         final Isolate isolate = await _service.getIsolate(ref.id);
@@ -185,12 +193,19 @@ class IsolateManager {
           for (String extensionName in isolate.extensionRPCs) {
             if (_isFlutterExtension(extensionName)) {
               _setSelectedIsolate(ref);
-              break;
+              return;
             }
           }
         }
       }
     }
+
+    final IsolateRef ref = isolates.firstWhere((IsolateRef ref) {
+      // 'foo.dart:main()'
+      return ref.name.contains(':main(');
+    }, orElse: () => null);
+
+    _setSelectedIsolate(ref ?? isolates.first);
   }
 
   void _setSelectedIsolate(IsolateRef ref) {

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -16,6 +15,7 @@ import '../timeline/fps.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
+import '../vm_service_wrapper.dart';
 
 // TODO(devoncarew): filtering, and enabling additional logging
 
@@ -67,7 +67,7 @@ class LoggingScreen extends Screen {
       _createTableView()
         ..clazz('section')
         ..flex(),
-      div(c: 'section')
+      div(c: 'section table-border')
         ..layoutVertical()
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);

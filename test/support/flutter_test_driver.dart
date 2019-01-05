@@ -41,9 +41,13 @@ abstract class FlutterTestDriver {
   bool _hasExited = false;
 
   VmServiceWrapper vmService;
+
   String get lastErrorInfo => _errorBuffer.toString();
+
   Stream<String> get stdout => _stdout.stream;
+
   int get vmServicePort => _vmServiceWsUri.port;
+
   bool get hasExited => _hasExited;
 
   String _debugPrint(String msg) {
@@ -110,6 +114,7 @@ abstract class FlutterTestDriver {
   }
 
   String _flutterIsolateId;
+
   Future<String> _getFlutterIsolateId() async {
     // Currently these tests only have a single isolate. If this
     // ceases to be the case, this code will need changing.
@@ -352,6 +357,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   Future<void> hotRestart({bool pause = false}) =>
       _restart(fullRestart: true, pause: pause);
+
   Future<void> hotReload() => _restart(fullRestart: false);
 
   Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
@@ -426,6 +432,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   int id = 1;
+
   Future<dynamic> _sendRequest(String method, dynamic params) async {
     final int requestId = id++;
     final Map<String, dynamic> request = <String, dynamic>{

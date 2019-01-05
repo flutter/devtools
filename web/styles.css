@@ -482,19 +482,8 @@ div.tabnav {
     cursor: default;
 }
 
-
-td.log-label-column {
-    text-align: right;
-    max-width: 148px;
-}
-
 .secondary-area {
-    height: 126px;
-}
-
-.log-details {
-    overflow-y: scroll;
-    overflow-wrap: break-word;
+    height: 170px;
 }
 
 .frame-panel {
@@ -561,4 +550,59 @@ div.tabnav-tab {
     100% {
         transform: rotate(360deg);
     }
+}
+
+nav.menu {
+    margin-bottom: 0;
+}
+
+.counter {
+  display: inline-block;
+  padding: 2px 5px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+  background-color: #eee;
+  border-radius: 10px;
+}
+
+.menu-item .counter {
+  float: right;
+  margin-left: 5px;
+}
+
+nav.menu .menu-item {
+    user-select: none;
+    cursor: pointer;
+}
+
+nav.menu li {
+    cursor: pointer;
+    padding: 4px 10px;
+}
+
+.menu-item-bottom-border {
+    border-bottom: 1px solid #e1e4e8;
+}
+
+.list-item {
+    white-space: nowrap;
+}
+
+.list-item.subtle {
+    color: #777;
+}
+
+.list-item .subtle {
+    font-size: 90%;
+    color: #777;
+}
+
+.list-item.selected {
+    color: #fff;
+    background-color: #4078c0;
+}
+
+.list-item.selected .subtle {
+    color: #ccc;
 }

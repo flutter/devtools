@@ -11,109 +11,49 @@ import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show RemoteObject, ConsoleAPIEvent;
 
-import 'app_fixture.dart';
-import 'src/chrome.dart';
+import '../support/chrome.dart';
+import '../support/cli_test_driver.dart';
+
+const bool verboseTesting = false;
 
 WebdevFixture webdevFixture;
 BrowserManager browserManager;
 
-const bool verboseTesting = false;
+Future<void> waitFor(
+  Future<bool> condition(), {
+  Duration timeout = const Duration(seconds: 4),
+}) async {
+  final DateTime end = new DateTime.now().add(timeout);
 
-void main() {
-  group('integration', () {
-    setUpAll(() async {
-      webdevFixture = await WebdevFixture.create();
-      browserManager = await BrowserManager.create();
-    });
+  while (!end.isBefore(new DateTime.now())) {
+    if (await condition()) {
+      return;
+    }
 
-    tearDownAll(() async {
-      await browserManager?.teardown();
-      await webdevFixture?.teardown();
-    });
+    await shortDelay();
+  }
 
-    group('app', appTests);
-    group('logging', loggingTests);
-  }, timeout: const Timeout.factor(2));
+  throw 'condition not satisfied';
 }
 
-void appTests() {
-  CliAppFixture appFixture;
-  BrowserTabInstance tabInstance;
-
-  setUp(() async {
-    appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');
-    tabInstance = await browserManager.createNewTab();
-  });
-
-  tearDown(() async {
-    await tabInstance?.close();
-    await appFixture?.teardown();
-  });
-
-  test('can switch pages', () async {
-    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
-    await tools.start(appFixture);
-    await tools.switchPage('logs');
-
-    final String currentPageId = await tools.currentPageId();
-    expect(currentPageId, 'logs');
-  });
-}
-
-void loggingTests() {
-  CliAppFixture appFixture;
-  BrowserTabInstance tabInstance;
-
-  setUp(() async {
-    appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');
-    tabInstance = await browserManager.createNewTab();
-  });
-
-  tearDown(() async {
-    await tabInstance?.close();
-    await appFixture?.teardown();
-  });
-
-  test('displays log data', () async {
-    final DevtoolsManager tools = new DevtoolsManager(tabInstance);
-    await tools.start(appFixture);
-    await tools.switchPage('logs');
-
-    final String currentPageId = await tools.currentPageId();
-    expect(currentPageId, 'logs');
-
-    // Cause app to log.
-    final LoggingManager logs = tools.loggingManager;
-    await logs.clearLogs();
-    expect(await logs.logCount(), 0);
-    await appFixture.invoke('controller.emitLog()');
-
-    // Verify the log data shows up in the UI.
-    // TODO(devoncarew): Instead of a fixed delay, poll some amount of time for
-    // a predicate value.
-    await new Future<dynamic>.delayed(const Duration(milliseconds: 200));
-    expect(await logs.logCount(), greaterThan(0));
-  });
+Future shortDelay() {
+  return new Future.delayed(const Duration(milliseconds: 100));
 }
 
 class DevtoolsManager {
-  DevtoolsManager(this.tabInstance);
+  DevtoolsManager(this.tabInstance, this.baseUri);
 
   final BrowserTabInstance tabInstance;
-
-  LoggingManager _loggingManager;
+  final Uri baseUri;
 
   Future<void> start(AppFixture appFixture) async {
-    final Uri baseAppUri = webdevFixture.baseUri
-        .resolve('index.html?port=${appFixture.servicePort}');
+    final Uri baseAppUri =
+        baseUri.resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
 
     // wait for app initialization
     await tabInstance.getBrowserChannel();
   }
-
-  LoggingManager get loggingManager =>
-      _loggingManager ??= new LoggingManager(this);
 
   Future<void> switchPage(String page) async {
     await tabInstance.send('switchPage', page);
@@ -121,21 +61,6 @@ class DevtoolsManager {
 
   Future<String> currentPageId() async {
     final AppResponse response = await tabInstance.send('currentPageId');
-    return response.result;
-  }
-}
-
-class LoggingManager {
-  LoggingManager(this.tools);
-
-  final DevtoolsManager tools;
-
-  Future<void> clearLogs() async {
-    await tools.tabInstance.send('logs.clearLogs');
-  }
-
-  Future<int> logCount() async {
-    final AppResponse response = await tools.tabInstance.send('logs.logCount');
     return response.result;
   }
 }

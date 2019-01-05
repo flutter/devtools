@@ -12,8 +12,7 @@ Color _scaleAlpha(Color a, double factor) {
 
 /// Linearly interpolate between two numbers.
 double lerpDouble(num a, num b, double t) {
-  if (a == null && b == null)
-    return null;
+  if (a == null && b == null) return null;
   a ??= 0.0;
   b ??= 0.0;
   return a + (b - a) * t;
@@ -81,11 +80,12 @@ class Color {
   ///
   /// See also [fromRGBO], which takes the alpha value as a floating point
   /// value.
-  const Color.fromARGB(int a, int r, int g, int b) :
-        value = (((a & 0xff) << 24) |
-        ((r & 0xff) << 16) |
-        ((g & 0xff) << 8)  |
-        ((b & 0xff) << 0)) & 0xFFFFFFFF;
+  const Color.fromARGB(int a, int r, int g, int b)
+      : value = (((a & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) &
+            0xFFFFFFFF;
 
   /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
   ///
@@ -98,11 +98,12 @@ class Color {
   /// Out of range values are brought into range using modulo 255.
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
-  const Color.fromRGBO(int r, int g, int b, double opacity) :
-        value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
-        ((r                    & 0xff) << 16) |
-        ((g                    & 0xff) << 8)  |
-        ((b                    & 0xff) << 0)) & 0xFFFFFFFF;
+  const Color.fromRGBO(int r, int g, int b, double opacity)
+      : value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) &
+            0xFFFFFFFF;
 
   /// A 32 bit value representing this color.
   ///
@@ -178,8 +179,7 @@ class Color {
 
   // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
   static double _linearizeColorComponent(double component) {
-    if (component <= 0.03928)
-      return component / 12.92;
+    if (component <= 0.03928) return component / 12.92;
     return math.pow((component + 0.055) / 1.055, 2.4);
   }
 
@@ -221,12 +221,9 @@ class Color {
   /// an [AnimationController].
   static Color lerp(Color a, Color b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return _scaleAlpha(b, t);
-    if (b == null)
-      return _scaleAlpha(a, 1.0 - t);
+    if (a == null && b == null) return null;
+    if (a == null) return _scaleAlpha(b, t);
+    if (b == null) return _scaleAlpha(a, 1.0 - t);
     return new Color.fromARGB(
       lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
       lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
@@ -245,19 +242,22 @@ class Color {
   /// overlay each other: instead, just paint one with the combined color.
   static Color alphaBlend(Color foreground, Color background) {
     final int alpha = foreground.alpha;
-    if (alpha == 0x00) { // Foreground completely transparent.
+    if (alpha == 0x00) {
+      // Foreground completely transparent.
       return background;
     }
     final int invAlpha = 0xff - alpha;
     int backAlpha = background.alpha;
-    if (backAlpha == 0xff) { // Opaque background case
+    if (backAlpha == 0xff) {
+      // Opaque background case
       return new Color.fromARGB(
         0xff,
         (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
         (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
         (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff,
       );
-    } else { // General case
+    } else {
+      // General case
       backAlpha = (backAlpha * invAlpha) ~/ 0xff;
       final int outAlpha = alpha + backAlpha;
       assert(outAlpha != 0x00);
@@ -272,10 +272,8 @@ class Color {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     final Color typedOther = other;
     return value == typedOther.value;
   }
@@ -305,7 +303,8 @@ class MaterialColor extends ColorSwatch<int> {
   /// values in the swatch, as would be passed to the [new Color] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
-  const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialColor(int primary, Map<int, Color> swatch)
+      : super(primary, swatch);
 
   /// The lightest shade.
   Color get shade50 => this[50];
@@ -353,7 +352,8 @@ class MaterialColor extends ColorSwatch<int> {
 class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
   /// colors.
-  const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialAccentColor(int primary, Map<int, Color> swatch)
+      : super(primary, swatch);
 
   /// The lightest shade.
   Color get shade50 => this[50];
@@ -2077,7 +2077,8 @@ class Colors {
       100: Color(0xFFF5F5F5),
       200: Color(0xFFEEEEEE),
       300: Color(0xFFE0E0E0),
-      350: Color(0xFFD6D6D6), // only for raised button while pressed in light theme
+      350: Color(
+          0xFFD6D6D6), // only for raised button while pressed in light theme
       400: Color(0xFFBDBDBD),
       500: Color(_greyPrimaryValue),
       600: Color(0xFF757575),
@@ -2179,8 +2180,8 @@ class Colors {
   ];
 }
 
-
-double _getHue(double red, double green, double blue, double max, double delta) {
+double _getHue(
+    double red, double green, double blue, double max, double delta) {
   double hue;
   if (max == 0.0) {
     hue = 0.0;
@@ -2198,12 +2199,12 @@ double _getHue(double red, double green, double blue, double max, double delta) 
 }
 
 Color _colorFromHue(
-    double alpha,
-    double hue,
-    double chroma,
-    double secondary,
-    double match,
-    ) {
+  double alpha,
+  double hue,
+  double chroma,
+  double secondary,
+  double match,
+) {
   double red;
   double green;
   double blue;
@@ -2232,7 +2233,8 @@ Color _colorFromHue(
     green = 0.0;
     blue = secondary;
   }
-  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
+  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(),
+      ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [value].
@@ -2344,7 +2346,8 @@ class HSVColor {
   /// Returns this color in RGB.
   Color toColor() {
     final double chroma = saturation * value;
-    final double secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final double secondary =
+        chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
     final double match = value - chroma;
 
     return _colorFromHue(alpha, hue, chroma, secondary, match);
@@ -2372,12 +2375,9 @@ class HSVColor {
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor lerp(HSVColor a, HSVColor b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b._scaleAlpha(t);
-    if (b == null)
-      return a._scaleAlpha(1.0 - t);
+    if (a == null && b == null) return null;
+    if (a == null) return b._scaleAlpha(t);
+    if (b == null) return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
       lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t) % 360.0,
@@ -2388,15 +2388,13 @@ class HSVColor {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! HSVColor)
-      return false;
+    if (identical(this, other)) return true;
+    if (other is! HSVColor) return false;
     final HSVColor typedOther = other;
-    return typedOther.alpha == alpha
-        && typedOther.hue == hue
-        && typedOther.saturation == saturation
-        && typedOther.value == value;
+    return typedOther.alpha == alpha &&
+        typedOther.hue == hue &&
+        typedOther.saturation == saturation &&
+        typedOther.value == value;
   }
 
   @override
@@ -2520,7 +2518,8 @@ class HSLColor {
   /// Returns this HSL color in RGB.
   Color toColor() {
     final double chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
-    final double secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final double secondary =
+        chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
     final double match = lightness - chroma / 2.0;
 
     return _colorFromHue(alpha, hue, chroma, secondary, match);
@@ -2558,12 +2557,9 @@ class HSLColor {
   /// an [AnimationController].
   static HSLColor lerp(HSLColor a, HSLColor b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b._scaleAlpha(t);
-    if (b == null)
-      return a._scaleAlpha(1.0 - t);
+    if (a == null && b == null) return null;
+    if (a == null) return b._scaleAlpha(t);
+    if (b == null) return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
       lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t) % 360.0,
@@ -2574,15 +2570,13 @@ class HSLColor {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! HSLColor)
-      return false;
+    if (identical(this, other)) return true;
+    if (other is! HSLColor) return false;
     final HSLColor typedOther = other;
-    return typedOther.alpha == alpha
-        && typedOther.hue == hue
-        && typedOther.saturation == saturation
-        && typedOther.lightness == lightness;
+    return typedOther.alpha == alpha &&
+        typedOther.hue == hue &&
+        typedOther.saturation == saturation &&
+        typedOther.lightness == lightness;
   }
 
   @override
@@ -2619,10 +2613,8 @@ class ColorSwatch<T> extends Color {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     final ColorSwatch<T> typedOther = other;
     return super == other && _swatch == typedOther._swatch;
   }

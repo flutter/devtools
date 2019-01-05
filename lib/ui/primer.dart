@@ -107,18 +107,20 @@ class PTabNavTab extends CoreElement {
 /// A menu navigation element - a vertically oriented list of items.
 class PNavMenu extends CoreElement {
   PNavMenu(
-    List<PNavMenuItem> items, {
+    List<CoreElement> items, {
     bool supportsSelection = true,
   }) : super('nav', classes: 'menu') {
     add(items);
 
     if (supportsSelection) {
-      if (items.isNotEmpty) {
+      if (items.isNotEmpty && items.first is PNavMenuItem) {
         selectItem(items.first);
       }
 
-      for (PNavMenuItem item in items) {
-        item.click(() => selectItem(item));
+      for (CoreElement item in items) {
+        if (item is PNavMenuItem) {
+          item.click(() => selectItem(item));
+        }
       }
     }
   }
