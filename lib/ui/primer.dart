@@ -5,6 +5,9 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:devtools/ui/html_icon_renderer.dart';
+import 'package:devtools/ui/icons.dart';
+
 import 'elements.dart';
 
 PSelect select() => new PSelect();
@@ -61,6 +64,20 @@ class PTooltip {
 class PButton extends CoreElement {
   PButton(String text) : super('button', text: text, classes: 'btn') {
     setAttribute('type', 'button');
+  }
+
+  PButton.icon(String text, Icon icon, {String title})
+      : super('button', classes: 'btn optional-text') {
+    setAttribute('type', 'button');
+    setAttribute('title', title ?? text);
+    if (icon != null) {
+      add(createIconElement(icon));
+      if (text != null) {
+        add(span(text: text));
+      }
+    } else {
+      element.text = text;
+    }
   }
 
   void primary() => clazz('btn-primary');

@@ -15,6 +15,7 @@ import '../globals.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
+import '../ui/split.dart' as split;
 
 // TODO(devoncarew): allow browsing object fields
 
@@ -90,12 +91,13 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea = new ConsoleArea();
+    List<CoreElement> panels;
 
     mainDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
-        ..add(<CoreElement>[
+        ..add(panels = <CoreElement>[
           div(c: 'debugger-menu')
             ..layoutVertical()
             ..add(<CoreElement>[
@@ -148,6 +150,13 @@ class DebuggerScreen extends Screen {
     ]);
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
+
+    split.flexSplit(
+      panels,
+      gutterSize: 12,
+      sizes: [25, 75],
+      minSize: [150, 200],
+    );
 
     debuggerState.onSupportsStepping.listen((bool value) {
       stepOver.enabled = value;

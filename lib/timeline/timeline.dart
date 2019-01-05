@@ -63,14 +63,12 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final trackWidgetBuildsButton = createExtensionButton(
-        'Track widget builds', extensions.profileWidgetBuilds);
-    final perfOverlayButton = createExtensionButton(
-        'Performance overlay', extensions.performanceOverlay);
+    final trackWidgetBuildsButton = createExtensionButton(extensions.profileWidgetBuilds);
+    final perfOverlayButton = createExtensionButton(extensions.performanceOverlay);
     final repaintRainbowButton =
-        createExtensionButton('Repaint rainbow', extensions.repaintRainbow);
+        createExtensionButton(extensions.repaintRainbow);
     final debugPaintButton =
-        createExtensionButton('Debug paint', extensions.debugPaint);
+        createExtensionButton( extensions.debugPaint);
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
