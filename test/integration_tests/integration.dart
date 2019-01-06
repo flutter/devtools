@@ -129,23 +129,23 @@ class BrowserTabInstance {
 
   RemoteObject _remote;
 
-  Future<RemoteObject> getBrowserChannel({
-    Duration retryFor = const Duration(seconds: 20),
-  }) async {
+  Future<RemoteObject> getBrowserChannel() async {
     final DateTime start = new DateTime.now();
-    DateTime end = start;
-    if (retryFor != null) {
-      end = start.add(retryFor);
-    }
+    final DateTime end = start.add(const Duration(seconds: 30));
 
     while (true) {
       try {
         return await _getAppChannelObject();
       } catch (e) {
         if (end.isBefore(new DateTime.now())) {
+          final Duration duration = new DateTime.now().difference(start);
+          print('timeout $duration getting the browser channel object');
+          print(e.runtimeType);
+          print('[$e]');
           rethrow;
         }
       }
+
       await new Future<void>.delayed(const Duration(milliseconds: 25));
     }
   }
