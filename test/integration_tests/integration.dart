@@ -36,6 +36,10 @@ Future<void> waitFor(
   throw 'condition not satisfied';
 }
 
+Future delay() {
+  return new Future.delayed(const Duration(milliseconds: 500));
+}
+
 Future shortDelay() {
   return new Future.delayed(const Duration(milliseconds: 100));
 }
@@ -50,6 +54,8 @@ class DevtoolsManager {
     final Uri baseAppUri =
         baseUri.resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
+
+    await delay();
 
     // wait for app initialization
     await tabInstance.getBrowserChannel();
@@ -88,9 +94,13 @@ class BrowserManager {
   Future<BrowserTabInstance> createNewTab() async {
     final String targetId = await this.tab.createNewTarget();
 
+    await delay();
+
     final ChromeTab tab =
         await chromeProcess.connectToTabId('localhost', targetId);
     await tab.connect(verbose: true);
+
+    await delay();
 
     await tab.wipConnection.target.activateTarget(targetId);
 
