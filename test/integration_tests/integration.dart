@@ -9,7 +9,7 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
-    show RemoteObject, ConsoleAPIEvent;
+    show ConsoleAPIEvent, ExceptionDetails, RemoteObject;
 
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
@@ -90,7 +90,7 @@ class BrowserManager {
 
     final ChromeTab tab =
         await chromeProcess.connectToTabId('localhost', targetId);
-    await tab.connect();
+    await tab.connect(verbose: true);
 
     await tab.wipConnection.target.activateTarget(targetId);
 
@@ -139,9 +139,12 @@ class BrowserTabInstance {
       } catch (e) {
         if (end.isBefore(new DateTime.now())) {
           final Duration duration = new DateTime.now().difference(start);
-          print('timeout $duration getting the browser channel object');
+          print('timeout getting the browser channel object ($duration)');
           print(e.runtimeType);
           print('[$e]');
+          if (e is ExceptionDetails) {
+            print(e.stackTrace);
+          }
           rethrow;
         }
       }
