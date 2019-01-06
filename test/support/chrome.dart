@@ -194,11 +194,11 @@ class ChromeTab {
 
     if (verbose) {
       onLogEntryAdded.listen((entry) {
-        print('[chrome] ${entry.text}');
+        print('chrome • ${entry.text}');
       });
 
       onConsoleAPICalled.listen((entry) {
-        print('[chrome:${entry.type} ${entry.args}');
+        print('chrome:${entry.type} • ${entry.args}');
       });
     }
 
