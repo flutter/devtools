@@ -307,6 +307,12 @@ class WebdevFixture {
 
     final String url = await hasUrl.future;
 
+    // todo: improve this
+    await delay();
+    await delay();
+    await delay();
+    await delay();
+
     return new WebdevFixture._(process, url);
   }
 
