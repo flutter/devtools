@@ -78,7 +78,6 @@ class DebuggerScreen extends Screen {
     final PButton pauseButton = new PButton()
       ..small()
       ..clazz('control-buttons')
-      ..clazz('margin-left')
       ..add(<CoreElement>[
         span(c: 'octicon octicon-primitive-dot'),
         span(text: 'Pause'),
@@ -125,8 +124,11 @@ class DebuggerScreen extends Screen {
               div(c: 'section')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  resumeButton,
-                  pauseButton,
+                  div(c: 'btn-group')
+                    ..add([
+                      pauseButton,
+                      resumeButton,
+                    ]),
                   div(c: 'btn-group margin-left')
                     ..add(<CoreElement>[
                       stepIn = new PButton()
