@@ -9,6 +9,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../vm_service_wrapper.dart';
 import 'timeline.dart';
@@ -58,16 +59,15 @@ class FramesChart extends LineChart<FramesTracker> {
       final num height = math.min(dim.y, frame.elapsedMs * pixPerMs);
       x -= 3 * units;
 
-      final String color = _isSlowFrame(frame)
-          ? colorToCss(slowFrameColor)
-          : colorToCss(normalFrameColor);
+      final Color color =
+          _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
       final String tooltip = _isSlowFrame(frame)
           ? 'This frame took ${frame.elapsedMs}ms to render, which can cause '
               'frame rate to drop below 60 FPS.'
           : 'This frame took ${frame.elapsedMs}ms to render.';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '
           'width="${2 * units}" height="$height" '
-          'style="fill:$color"><title>$tooltip</title></rect>');
+          'style="fill:${colorToCss(color)}"><title>$tooltip</title></rect>');
 
       if (frame.frameGroupStart) {
         final double lineX = x - (units / 2);
