@@ -4,14 +4,21 @@
 
 import 'dart:html' as html;
 
+
 import '../globals.dart';
+import '../service_extensions.dart';
 import 'elements.dart';
+import 'html_icon_renderer.dart';
 import 'primer.dart';
 
-// TODO(kenzie): perhaps add same icons we use in IntelliJ to these buttons.
-// This would help to build icon familiarity.
-PButton createExtensionButton(String text, String extensionName) {
-  final PButton button = new PButton(text)..small();
+PButton createExtensionButton(
+    ServiceExtensionDescription extensionDescription) {
+  final PButton button = new PButton.icon(
+      extensionDescription.description, extensionDescription.icon,
+      title: extensionDescription.tooltip)
+    ..small();
+
+  final extensionName = extensionDescription.extension;
 
   button.click(() {
     final bool wasSelected = button.element.classes.contains('selected');
@@ -32,40 +39,35 @@ PButton createExtensionButton(String text, String extensionName) {
   return button;
 }
 
-CoreElement createExtensionCheckBox(String extensionName) {
-  const String disabledTextColor = 'rgba(0, 0, 0, 0.3)';
+CoreElement createExtensionCheckBox(
+    ServiceExtensionDescription extensionDescription) {
+  final extensionName = extensionDescription.extension;
   final CoreElement input = checkbox();
-  final CoreElement text = span(text: extensionName);
 
-  // Disable checkbox for unavailable service extensions.
-  if (!serviceManager.serviceExtensionManager
-      .isServiceExtensionAvailable(extensionName)) {
-    input.disabled = true;
-    text.element.style.color = disabledTextColor;
-  }
-  serviceManager.serviceExtensionManager.hasServiceExtension(extensionName,
-      (available) {
-    input.disabled = !available;
-    text.element.style.color = available ? 'black' : disabledTextColor;
-  });
+  serviceManager.serviceExtensionManager.hasServiceExtension(
+      extensionName, (available) => input.disabled = !available);
 
-  // Check box whose state is already enabled.
-  serviceManager.serviceExtensionManager.getServiceExtensionState(extensionName,
-      (state) {
-    final html.InputElement e = input.element;
-    e.checked = state.value;
-  });
+  serviceManager.serviceExtensionManager.getServiceExtensionState(
+    extensionName,
+    (state) {
+      final html.InputElement e = input.element;
+      e.checked = state.value;
+    },
+  );
 
   input.element.onChange.listen((_) {
     final html.InputElement e = input.element;
     serviceManager.serviceExtensionManager
         .setServiceExtensionState(extensionName, e.checked, e.checked);
   });
+  final inputLabel = label();
+  if (extensionDescription.icon != null) {
+    inputLabel.add(createIconElement(extensionDescription.icon));
+  }
+  inputLabel.add(span(text: extensionName));
 
-  return div(c: 'form-checkbox')
-    ..add(new CoreElement('label')
-      ..add(<CoreElement>[
-        input,
-        text,
-      ]));
+  final outerDiv = div(c: 'form-checkbox')
+    ..add(new CoreElement('label')..add([input, inputLabel]));
+  input.setAttribute('title', extensionDescription.tooltip);
+  return outerDiv;
 }
