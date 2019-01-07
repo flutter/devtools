@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, ExceptionDetails, RemoteObject;
@@ -53,6 +52,8 @@ class DevtoolsManager {
   final Uri baseUri;
 
   Future<void> start(AppFixture appFixture) async {
+    await delay();
+
     final Uri baseAppUri =
         baseUri.resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
@@ -308,18 +309,18 @@ class WebdevFixture {
 
     await delay();
 
-    // Ensure we can load http://localhost:8080/packages/codemirror/codemirror.js w/ an http 200.
-    final Uri localResourceUri =
-        Uri.parse(url).resolve('packages/codemirror/codemirror.js');
-
-    await waitFor(
-      () async {
-        final http.Response response = await http.get(localResourceUri);
-        return response.statusCode == 200;
-      },
-      timeout: const Duration(seconds: 10),
-      timeoutMessage: 'unable to load $localResourceUri from webdev server',
-    );
+//    // Ensure we can load http://localhost:8080/packages/codemirror/codemirror.js w/ an http 200.
+//    final Uri localResourceUri =
+//        Uri.parse(url).resolve('packages/codemirror/codemirror.js');
+//
+//    await waitFor(
+//      () async {
+//        final http.Response response = await http.get(localResourceUri);
+//        return response.statusCode == 200;
+//      },
+//      timeout: const Duration(seconds: 10),
+//      timeoutMessage: 'unable to load $localResourceUri from webdev server',
+//    );
 
     return new WebdevFixture._(process, url);
   }
