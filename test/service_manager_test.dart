@@ -61,8 +61,11 @@ void main() {
       await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
-      await serviceManager.serviceExtensionManager
-          .setServiceExtensionState('ext.flutter.debugPaint', true, true);
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        'ext.flutter.debugPaint',
+        true,
+        true,
+      );
 
       await _verifyExtensionStateOnTestDevice(evalExpression, 'true', library);
       await _verifyExtensionStateInServiceManager(extensionName, true, true);
@@ -77,15 +80,24 @@ void main() {
       );
 
       await _verifyExtensionStateOnTestDevice(
-          evalExpression, 'TargetPlatform.android', library);
+        evalExpression,
+        'TargetPlatform.android',
+        library,
+      );
       await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
-          'ext.flutter.platformOverride', true, 'iOS');
+        'ext.flutter.platformOverride',
+        true,
+        'iOS',
+      );
 
       await _verifyExtensionStateOnTestDevice(
-          evalExpression, 'TargetPlatform.iOS', library);
+        evalExpression,
+        'TargetPlatform.iOS',
+        library,
+      );
       await _verifyExtensionStateInServiceManager(extensionName, true, 'iOS');
     });
 
@@ -101,8 +113,11 @@ void main() {
       await _verifyInitialExtensionStateInServiceManager(extensionName);
 
       // Enable the service extension via ServiceExtensionManager.
-      await serviceManager.serviceExtensionManager
-          .setServiceExtensionState(extensionName, true, 0.5);
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        extensionName,
+        true,
+        0.5,
+      );
 
       await _verifyExtensionStateOnTestDevice(evalExpression, '0.5', library);
       await _verifyExtensionStateInServiceManager(extensionName, true, 0.5);
@@ -113,8 +128,10 @@ void main() {
           serviceManager.methodsForService['reloadSources'] ?? const [];
       expect(registeredService, isNotEmpty);
 
-      await serviceManager.callService('reloadSources',
-          isolateId: serviceManager.isolateManager.selectedIsolate.id);
+      await serviceManager.callService(
+        'reloadSources',
+        isolateId: serviceManager.isolateManager.selectedIsolate.id,
+      );
     });
 
     test('callService throws exception', () async {
@@ -132,8 +149,10 @@ void main() {
           serviceManager.methodsForService['reloadSources'] ?? const [];
       expect(registeredService, isNotEmpty);
 
-      await serviceManager.callMulticastService('reloadSources',
-          isolateId: serviceManager.isolateManager.selectedIsolate.id);
+      await serviceManager.callMulticastService(
+        'reloadSources',
+        isolateId: serviceManager.isolateManager.selectedIsolate.id,
+      );
     });
 
     test('callMulticastService throws exception', () async {
