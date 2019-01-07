@@ -59,7 +59,7 @@ class PTooltip {
 }
 
 class PButton extends CoreElement {
-  PButton(String text) : super('button', text: text, classes: 'btn') {
+  PButton([String text]) : super('button', text: text, classes: 'btn') {
     setAttribute('type', 'button');
   }
 
