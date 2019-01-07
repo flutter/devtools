@@ -359,6 +359,19 @@ form[horizontal] {
     color: #7a7a7a;
 }
 
+.perf-chart .perf-label.top-right {
+    top: 0;
+    right: 0;
+    text-align: right;
+    height: 30px;
+}
+
+.perf-chart .perf-label.top-left {
+    top: 0;
+    left: 0;
+    height: 30px;
+}
+
 /* .perf-table {
 
 } */

@@ -29,6 +29,7 @@ class ServiceConnectionManager {
       new StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
       new StreamController<Null>.broadcast();
+  final Completer<Null> serviceAvailable = Completer();
   final Map<String, List<String>> methodsForService = {};
 
   IsolateManager _isolateManager;
@@ -90,6 +91,7 @@ class ServiceConnectionManager {
       }
 
       this.service = service;
+      serviceAvailable.complete();
 
       service.onServiceEvent.listen((e) {
         if (e.kind == EventKind.kServiceRegistered) {

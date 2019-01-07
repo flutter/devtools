@@ -122,8 +122,6 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   String _name;
 
-  bool get isVisible => name.startsWith('io.flutter.');
-
   int get sortPriority {
     if (name.endsWith('.ui')) {
       return 1;
