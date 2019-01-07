@@ -53,10 +53,10 @@ class ServiceConnectionManager {
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
   /// Call a service that is registered by exactly one client.
-  Future<Response> callService(String name, {String isolateId, Map args}) {
+  Future<Response> callService(String name, {String isolateId, Map args}) async {
     final registered = methodsForService[name] ?? const [];
     if (registered.length != 1) {
-      throw Exception('Expected one registered service for $name but found '
+      throw Exception('Expected one registered service for "$name" but found '
           '${registered.length}');
     }
     return service.callMethod(registered.first,
@@ -68,14 +68,14 @@ class ServiceConnectionManager {
   /// For example, a service to navigate a code editor to a specific line and
   /// column might be registered by multiple code editors.
   Future<List<Response>> callMulticastService(String name,
-      {String isolateId, Map args}) {
+      {String isolateId, Map args}) async {
     final registered = methodsForService[name] ?? const [];
     if (registered.isNotEmpty) {
       return Future.wait(registered.map((String method) {
         return service.callMethod(method, isolateId: isolateId, args: args);
       }));
     } else {
-      throw Exception('There are no registered methods for service $name');
+      throw Exception('There are no registered methods for service "$name"');
     }
   }
 
@@ -146,7 +146,9 @@ class ServiceConnectionManager {
       await callMulticastService('reloadSources',
           isolateId: _isolateManager.selectedIsolate.id);
     } catch (e) {
+      // TODO: improve general error handling.
       print('Error during hot reload: "$e."');
+      rethrow;
     }
   }
 }

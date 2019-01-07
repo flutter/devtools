@@ -72,6 +72,7 @@ CoreElement createExtensionCheckBox(String extensionName) {
 
 // TODO(kenzie): add hotRestart button.
 
+// TODO(kenzie): move method to more specific library.
 CoreElement createHotReloadButton() {
   final PButton button = new PButton('Hot Reload')..small();
   button.click(() async {
