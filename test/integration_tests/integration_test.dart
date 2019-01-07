@@ -13,7 +13,7 @@ import 'logging.dart';
 void main() {
   group('integration', () {
     setUpAll(() async {
-      webdevFixture = await WebdevFixture.create();
+      webdevFixture = await WebdevFixture.create(verbose: true);
       browserManager = await BrowserManager.create();
     });
 

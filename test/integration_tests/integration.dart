@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, ExceptionDetails, RemoteObject;
@@ -22,6 +23,7 @@ BrowserManager browserManager;
 Future<void> waitFor(
   Future<bool> condition(), {
   Duration timeout = const Duration(seconds: 4),
+  String timeoutMessage = 'condition not satisfied',
 }) async {
   final DateTime end = new DateTime.now().add(timeout);
 
@@ -33,7 +35,7 @@ Future<void> waitFor(
     await shortDelay();
   }
 
-  throw 'condition not satisfied';
+  throw timeoutMessage;
 }
 
 Future delay() {
@@ -150,11 +152,6 @@ class BrowserTabInstance {
         if (end.isBefore(new DateTime.now())) {
           final Duration duration = new DateTime.now().difference(start);
           print('timeout getting the browser channel object ($duration)');
-          print(e.runtimeType);
-          print('[$e]');
-          if (e is ExceptionDetails) {
-            print(e.stackTrace);
-          }
           rethrow;
         }
       }
@@ -273,7 +270,7 @@ class AppError {
 class WebdevFixture {
   WebdevFixture._(this.process, this.url);
 
-  static Future<WebdevFixture> create() async {
+  static Future<WebdevFixture> create({bool verbose = false}) async {
     // 'pub run webdev serve web'
 
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
@@ -296,7 +293,9 @@ class WebdevFixture {
     final Completer<String> hasUrl = new Completer<String>();
 
     lines.listen((String line) {
-      print(line.trim());
+      if (verbose) {
+        print('webdev • ${line.trim()}');
+      }
 
       // Serving `web` on http://localhost:8080
       if (line.startsWith(r'Serving `web`')) {
@@ -307,8 +306,20 @@ class WebdevFixture {
 
     final String url = await hasUrl.future;
 
-    // todo: improve this
-    await new Future.delayed(const Duration(seconds: 4));
+    await delay();
+
+    // Ensure we can load http://localhost:8080/lib/codemirror.js w/ an http 200.
+    final Uri localResourceUri = Uri.parse(url).resolve('lib/codemirror.js');
+
+    await waitFor(
+      () async {
+        final http.Response response = await http.get(localResourceUri);
+        return response.statusCode == 200;
+      },
+      timeout: const Duration(seconds: 10),
+      timeoutMessage:
+          'unable to load ${localResourceUri.path} from webdev server',
+    );
 
     return new WebdevFixture._(process, url);
   }
