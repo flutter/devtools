@@ -225,6 +225,11 @@ table tr.selected {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    display: inline-block;
+}
+
+input:disabled+label {
+    opacity: 0.5;
 }
 
 .frame-bar {

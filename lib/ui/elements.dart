@@ -18,6 +18,9 @@ CoreElement checkbox({String text, String c, String a}) =>
     new CoreElement('input', text: text, classes: c, attributes: a)
       ..setAttribute('type', 'checkbox');
 
+CoreElement label({String text, String c, String a}) =>
+    new CoreElement('label', text: text, classes: c, attributes: a);
+
 CoreElement div({String text, String c, String a}) =>
     new CoreElement('div', text: text, classes: c, attributes: a);
 

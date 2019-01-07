@@ -4,11 +4,11 @@
 
 import 'dart:html' as html;
 
-import 'package:devtools/service_extensions.dart';
-import 'package:devtools/ui/html_icon_renderer.dart';
 
 import '../globals.dart';
+import '../service_extensions.dart';
 import 'elements.dart';
+import 'html_icon_renderer.dart';
 import 'primer.dart';
 
 PButton createExtensionButton(
@@ -60,15 +60,14 @@ CoreElement createExtensionCheckBox(
     serviceManager.serviceExtensionManager
         .setServiceExtensionState(extensionName, e.checked, e.checked);
   });
-
-  final List<CoreElement> children = [input];
+  final inputLabel = label();
   if (extensionDescription.icon != null) {
-    children.add(createIconElement(extensionDescription.icon));
+    inputLabel.add(createIconElement(extensionDescription.icon));
   }
-  children.add(span(text: extensionName));
+  inputLabel.add(span(text: extensionName));
 
   final outerDiv = div(c: 'form-checkbox')
-    ..add(new CoreElement('label')..add(children));
+    ..add(new CoreElement('label')..add([input, inputLabel]));
   input.setAttribute('title', extensionDescription.tooltip);
   return outerDiv;
 }

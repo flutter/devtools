@@ -4,7 +4,7 @@
 
 library service_extensions;
 
-import 'package:devtools/ui/icons.dart';
+import 'ui/icons.dart';
 
 class ServiceExtensionDescription {
   const ServiceExtensionDescription({

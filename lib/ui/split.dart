@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,9 +9,10 @@ library splitter;
 import 'dart:async';
 import 'dart:html';
 
-import 'package:devtools/ui/elements.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
+
+import 'elements.dart';
 
 typedef _ElementStyleCallback = Function(
     Object dimension, Object size, num gutterSize);

@@ -5,10 +5,9 @@
 import 'dart:async';
 import 'dart:html';
 
-import 'package:devtools/ui/html_icon_renderer.dart';
-import 'package:devtools/ui/icons.dart';
-
 import 'elements.dart';
+import 'html_icon_renderer.dart';
+import 'icons.dart';
 
 PSelect select() => new PSelect();
 
