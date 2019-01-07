@@ -11,11 +11,15 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
+
+const Color slowFrameColor = Color(0xFFf97c7c);
+const Color normalFrameColor = Color(0xFF4078c0);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -63,14 +67,12 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final trackWidgetBuildsButton = createExtensionButton(
-        'Track widget builds', extensions.profileWidgetBuilds);
-    final perfOverlayButton = createExtensionButton(
-        'Performance overlay', extensions.performanceOverlay);
+    final trackWidgetBuildsButton = createExtensionButton(extensions.profileWidgetBuilds);
+    final perfOverlayButton = createExtensionButton(extensions.performanceOverlay);
     final repaintRainbowButton =
-        createExtensionButton('Repaint rainbow', extensions.repaintRainbow);
+        createExtensionButton(extensions.repaintRainbow);
     final debugPaintButton =
-        createExtensionButton('Debug paint', extensions.debugPaint);
+        createExtensionButton( extensions.debugPaint);
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -183,6 +185,8 @@ class TimelineScreen extends Screen {
   }
 
   void _updateListeningState() async {
+    await serviceManager.serviceAvailable.future;
+
     final bool shouldBeRunning = !paused && isCurrentScreen;
     final bool isRunning = !timelineFramesBuilder.isPaused;
 
@@ -224,9 +228,9 @@ class TimelineScreen extends Screen {
     for (TimelineEvent event in events) {
       final TimelineThread thread =
           new TimelineThread(timelineData, event.args['name'], event.threadId);
-      if (thread.isVisible) {
-        timelineData.addThread(thread);
-      }
+      // TODO: consider pruning which threads we add based on which ones are
+      // relevant to the user.
+      timelineData.addThread(thread);
     }
 
     timelineData.onTimelineThreadEvent.listen((TimelineThreadEvent event) {

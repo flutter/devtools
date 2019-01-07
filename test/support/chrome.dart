@@ -162,7 +162,7 @@ class ChromeTab {
 
   num _lostConnectionTime;
 
-  Future<WipConnection> connect() async {
+  Future<WipConnection> connect({bool verbose = false}) async {
     _wip = await wipTab.connect();
 
     await _wip.log.enable();
@@ -186,15 +186,22 @@ class ChromeTab {
 
     unawaited(_wip.page.enable());
 
-    //_wip.onNotification.listen((WipEvent e) {
-    //  print(e.toString());
-    //});
-
     _wip.onClose.listen((_) {
       _wip = null;
       _disconnectStream.add(null);
       _lostConnectionTime = new DateTime.now().millisecondsSinceEpoch;
     });
+
+    if (verbose) {
+      onLogEntryAdded.listen((entry) {
+        print('chrome • log:${entry.source} • ${entry.text} ${entry.url}');
+      });
+
+      onConsoleAPICalled.listen((entry) {
+        print('chrome • console:${entry.type} • '
+            '${entry.args.map((a) => a.value).join(', ')}');
+      });
+    }
 
     return _wip;
   }
