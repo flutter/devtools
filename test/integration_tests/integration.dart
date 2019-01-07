@@ -308,8 +308,9 @@ class WebdevFixture {
 
     await delay();
 
-    // Ensure we can load http://localhost:8080/lib/codemirror.js w/ an http 200.
-    final Uri localResourceUri = Uri.parse(url).resolve('lib/codemirror.js');
+    // Ensure we can load http://localhost:8080/packages/codemirror/codemirror.js w/ an http 200.
+    final Uri localResourceUri =
+        Uri.parse(url).resolve('packages/codemirror/codemirror.js');
 
     await waitFor(
       () async {
@@ -317,8 +318,7 @@ class WebdevFixture {
         return response.statusCode == 200;
       },
       timeout: const Duration(seconds: 10),
-      timeoutMessage:
-          'unable to load ${localResourceUri.path} from webdev server',
+      timeoutMessage: 'unable to load $localResourceUri from webdev server',
     );
 
     return new WebdevFixture._(process, url);
