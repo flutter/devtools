@@ -9,23 +9,16 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
 import '../ui/elements.dart';
+import '../ui/flutter_html_shim.dart';
 import '../vm_service_wrapper.dart';
+import 'timeline.dart';
 
 class FramesChart extends LineChart<FramesTracker> {
   FramesChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
-    fpsLabel = parent.add(div(c: 'perf-label'));
-    fpsLabel.element.style.left = '0';
-    fpsLabel.element.style.top = '0';
-    fpsLabel.element.style.bottom = null;
+    fpsLabel = parent.add(div(c: 'perf-label top-left'));
 
-    lastFrameLabel = parent.add(div(c: 'perf-label'));
-    lastFrameLabel.element.style.right = '0';
-    lastFrameLabel.element.style.top = '0';
-    lastFrameLabel.element.style.bottom = null;
-    lastFrameLabel.element.style.textAlign = '-webkit-right';
-    // Explicitly set height so tooltip does not overlap with frame tooltip.
-    lastFrameLabel.element.style.height = '30px';
-    lastFrameLabel.tooltip = 'Rendering time of latest frame.';
+    lastFrameLabel = parent.add(div(c: 'perf-label top-right')
+      ..tooltip = 'Rendering time of latest frame.');
   }
 
   CoreElement fpsLabel;
@@ -33,8 +26,6 @@ class FramesChart extends LineChart<FramesTracker> {
 
   @override
   void update(FramesTracker data) {
-    const slowFrameColor = '#f97c7c';
-    const normalFrameColor = '#4078c0';
     if (dim == null) {
       return;
     }
@@ -67,10 +58,11 @@ class FramesChart extends LineChart<FramesTracker> {
       final num height = math.min(dim.y, frame.elapsedMs * pixPerMs);
       x -= 3 * units;
 
-      final String color =
-          _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
+      final String color = _isSlowFrame(frame)
+          ? colorToCss(slowFrameColor)
+          : colorToCss(normalFrameColor);
       final String tooltip = _isSlowFrame(frame)
-          ? 'This frame took ${frame.elapsedMs}ms to render, which\ncan cause ' +
+          ? 'This frame took ${frame.elapsedMs}ms to render, which can cause '
               'frame rate to drop below 60 FPS.'
           : 'This frame took ${frame.elapsedMs}ms to render.';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '

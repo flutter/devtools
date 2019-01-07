@@ -11,11 +11,15 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
+
+const Color slowFrameColor = Color(0xFFf97c7c);
+const Color normalFrameColor = Color(0xFF4078c0);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -183,10 +187,7 @@ class TimelineScreen extends Screen {
   }
 
   void _updateListeningState() async {
-    // Wait for service to be non-null before updating listening state.
-    while (serviceManager.service == null) {
-      await new Future.delayed(Duration(milliseconds: 100));
-    }
+    await serviceManager.serviceAvailable.future;
 
     final bool shouldBeRunning = !paused && isCurrentScreen;
     final bool isRunning = !timelineFramesBuilder.isPaused;

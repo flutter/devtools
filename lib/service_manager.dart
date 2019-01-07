@@ -29,6 +29,7 @@ class ServiceConnectionManager {
       new StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
       new StreamController<Null>.broadcast();
+  final Completer<Null> serviceAvailable = Completer();
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -62,6 +63,8 @@ class ServiceConnectionManager {
       }
 
       this.service = service;
+      serviceAvailable.complete();
+
       _isolateManager._service = service;
       _serviceExtensionManager._service = service;
 
