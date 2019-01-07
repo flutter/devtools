@@ -201,6 +201,37 @@ table tr.selected {
    border-radius: 3px;
 }
 
+.gutter {
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
+    height: 100%;
+}
+
+.gutter.gutter-vertical {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+    cursor: row-resize;
+    width: 100%;
+}
+
+.flutter-icon {
+    box-sizing: content-box;
+    margin: 2px 3px 2px 2px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+}
+
+input:disabled+label {
+    opacity: 0.5;
+}
+
 .frame-bar {
     background: #4078c0;
     height: 12px;
@@ -618,4 +649,15 @@ nav.menu li {
 
 .list-item.selected .subtle {
     color: #ccc;
+}
+
+/* Make sure content inside buttons is vertically centered. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Increase line height so standard sized icons look ok in buttons. */
+.btn-sm {
+    line-height: 22px;
 }
