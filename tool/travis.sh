@@ -26,8 +26,8 @@ pub run webdev build
 if [ "$BOT" = "main" ]; then
 
     # Run tests that do not require the Flutter SDK.
-    pub run test -x useFlutterSdk
-    pub run test -x useFlutterSdk -pchrome-no-sandbox
+    pub run test --reporter expanded --exclude-tags useFlutterSdk
+    pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter" ]; then
 
@@ -45,12 +45,12 @@ elif [ "$BOT" = "flutter" ]; then
     cd devtools
 
     # Run tests that require the Flutter SDK.
-    pub run test -t useFlutterSdk
+    pub run test --reporter expanded --tags useFlutterSdk
 
     # Chrome test passes locally but fails on Travis. See example failure:
     # https://travis-ci.org/flutter/devtools/jobs/472755560.
     # TODO: investigate if we have a need to run tests requiring the Flutter SDK on Chrome.
-    # pub run test -t "useFlutterSdk" -pchrome-no-sandbox
+    # pub run test --reporter expanded --tags useFlutterSdk --platform chrome-no-sandbox
 
 else
 
