@@ -30,6 +30,7 @@ class ServiceConnectionManager {
   final StreamController<Null> _connectionClosedController =
       new StreamController<Null>.broadcast();
   final Completer<Null> serviceAvailable = Completer();
+  final Map<String, List<String>> methodsForService = {};
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -52,6 +53,33 @@ class ServiceConnectionManager {
 
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
+  /// Call a service that is registered by exactly one client.
+  Future<Response> callService(String name, {String isolateId, Map args}) async {
+    final registered = methodsForService[name] ?? const [];
+    if (registered.length != 1) {
+      throw Exception('Expected one registered service for "$name" but found '
+          '${registered.length}');
+    }
+    return service.callMethod(registered.first,
+        isolateId: isolateId, args: args);
+  }
+
+  /// Call a service that may have been registered by multiple clients.
+  ///
+  /// For example, a service to navigate a code editor to a specific line and
+  /// column might be registered by multiple code editors.
+  Future<List<Response>> callMulticastService(String name,
+      {String isolateId, Map args}) async {
+    final registered = methodsForService[name] ?? const [];
+    if (registered.isNotEmpty) {
+      return Future.wait(registered.map((String method) {
+        return service.callMethod(method, isolateId: isolateId, args: args);
+      }));
+    } else {
+      throw Exception('There are no registered methods for service "$name"');
+    }
+  }
+
   Future<void> vmServiceOpened(
       VmServiceWrapper service, Future<void> onClosed) async {
     try {
@@ -64,6 +92,12 @@ class ServiceConnectionManager {
 
       this.service = service;
       serviceAvailable.complete();
+
+      service.onServiceEvent.listen((e) {
+        if (e.kind == EventKind.kServiceRegistered) {
+          methodsForService.putIfAbsent(e.service, () => []).add(e.method);
+        }
+      });
 
       _isolateManager._service = service;
       _serviceExtensionManager._service = service;
@@ -88,7 +122,8 @@ class ServiceConnectionManager {
         'Timeline',
         'Extension',
         '_Graph',
-        '_Logging'
+        '_Logging',
+        '_Service',
       ];
       await Future.wait(streamIds.map((id) => service.streamListen(id)));
     } catch (e) {
@@ -104,6 +139,19 @@ class ServiceConnectionManager {
 
     _stateController.add(null);
     _connectionClosedController.add(null);
+  }
+
+  // TODO(kenzie): add hot restart method, register method in flutter_tools.
+
+  Future<void> performHotReload() async {
+    try {
+      await callMulticastService('reloadSources',
+          isolateId: _isolateManager.selectedIsolate.id);
+    } catch (e) {
+      // TODO: improve general error handling.
+      print('Error during hot reload: "$e."');
+      rethrow;
+    }
   }
 }
 
