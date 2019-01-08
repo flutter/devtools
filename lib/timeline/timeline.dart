@@ -67,12 +67,17 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final trackWidgetBuildsButton = createExtensionButton(extensions.profileWidgetBuilds);
-    final perfOverlayButton = createExtensionButton(extensions.performanceOverlay);
+    final trackWidgetBuildsButton =
+        ServiceExtensionButton(extensions.profileWidgetBuilds).button;
+    final perfOverlayButton =
+        ServiceExtensionButton(extensions.performanceOverlay).button;
     final repaintRainbowButton =
-        createExtensionButton(extensions.repaintRainbow);
+        ServiceExtensionButton(extensions.repaintRainbow).button;
     final debugPaintButton =
-        createExtensionButton( extensions.debugPaint);
+        ServiceExtensionButton(extensions.debugPaint).button;
+    final slowAnimationsButton =
+        ServiceExtensionButton(extensions.slowAnimations).button;
+    final togglePlatformButton = TogglePlatformButton().button;
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),
@@ -89,6 +94,8 @@ class TimelineScreen extends Screen {
               perfOverlayButton,
               repaintRainbowButton,
               debugPaintButton,
+              slowAnimationsButton,
+              togglePlatformButton,
             ]),
         ]),
       div(c: 'section')

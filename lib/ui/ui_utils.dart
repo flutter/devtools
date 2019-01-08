@@ -4,40 +4,11 @@
 
 import 'dart:html' as html;
 
-
 import '../globals.dart';
 import '../service_extensions.dart';
 import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'primer.dart';
-
-PButton createExtensionButton(
-    ServiceExtensionDescription extensionDescription) {
-  final PButton button = new PButton.icon(
-      extensionDescription.description, extensionDescription.icon,
-      title: extensionDescription.tooltip)
-    ..small();
-
-  final extensionName = extensionDescription.extension;
-
-  button.click(() {
-    final bool wasSelected = button.element.classes.contains('selected');
-    serviceManager.serviceExtensionManager
-        .setServiceExtensionState(extensionName, !wasSelected, !wasSelected);
-  });
-
-  // Disable button for unavailable service extensions.
-  button.disabled = !serviceManager.serviceExtensionManager
-      .isServiceExtensionAvailable(extensionName);
-  serviceManager.serviceExtensionManager.hasServiceExtension(
-      extensionName, (available) => button.disabled = !available);
-
-  // Select button whose state is already enabled.
-  serviceManager.serviceExtensionManager.getServiceExtensionState(
-      extensionName, (state) => button.toggleClass('selected', state.enabled));
-
-  return button;
-}
 
 CoreElement createExtensionCheckBox(
     ServiceExtensionDescription extensionDescription) {
@@ -83,4 +54,83 @@ CoreElement createHotReloadButton() {
     button.disabled = false;
   });
   return button;
+}
+
+class ServiceExtensionButton {
+  ServiceExtensionButton(this.extensionDescription) {
+    button = new PButton.icon(
+        extensionDescription.description, extensionDescription.icon,
+        title: extensionDescription.tooltip)
+      ..small();
+
+    final extensionName = extensionDescription.extension;
+
+    // Disable button for unavailable service extensions.
+    button.disabled = !serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(extensionName);
+    serviceManager.serviceExtensionManager.hasServiceExtension(
+        extensionName, (available) => button.disabled = !available);
+
+    button.click(() => click());
+
+    manageState();
+  }
+
+  final ServiceExtensionDescription extensionDescription;
+  PButton button;
+
+  void click() {
+    final bool wasSelected = button.element.classes.contains('selected');
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
+      extensionDescription.extension,
+      !wasSelected,
+      wasSelected
+          ? extensionDescription.disabledValue
+          : extensionDescription.enabledValue,
+    );
+  }
+
+  void manageState() {
+    // Select button whose state is already enabled.
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensionDescription.extension,
+        (state) => button.toggleClass('selected', state.enabled));
+  }
+}
+
+class TogglePlatformButton extends ServiceExtensionButton {
+  TogglePlatformButton() : super(togglePlatformMode);
+
+  bool isCurrentlyAndroid;
+
+  @override
+  void click() async {
+    await serviceManager.serviceExtensionManager.setServiceExtensionState(
+      extensionDescription.extension,
+      true,
+      isCurrentlyAndroid ? 'iOS' : 'android',
+    );
+  }
+
+  @override
+  void manageState() {
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensionDescription.extension, (state) async {
+      if (state.value == null) {
+        // We need both the [service] and the [selectedIsolate] to be available
+        // before we can call the service extension.
+        await serviceManager.serviceAvailable.future;
+        serviceManager.isolateManager.onSelectedIsolateChanged
+            .listen((_) async {
+          final value = await serviceManager.service.callServiceExtension(
+            extensionDescription.extension,
+            isolateId: serviceManager.isolateManager.selectedIsolate.id,
+          );
+          isCurrentlyAndroid = value.json['value'] == 'android';
+        });
+      } else {
+        isCurrentlyAndroid = state.value == 'android';
+      }
+    });
+  }
 }

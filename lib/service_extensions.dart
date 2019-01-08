@@ -11,12 +11,16 @@ class ServiceExtensionDescription {
     this.extension,
     this.description,
     this.icon,
+    this.enabledValue = true,
+    this.disabledValue = false,
     String tooltip,
   }) : tooltip = tooltip ?? description;
 
   final String extension;
   final String description;
   final Icon icon;
+  final dynamic enabledValue;
+  final dynamic disabledValue;
   final String tooltip;
 }
 
@@ -66,6 +70,20 @@ const toggleSelectWidgetMode = ServiceExtensionDescription(
   extension: 'ext.flutter.inspector.show',
   description: 'Toggle Select Mode',
   icon: FlutterIcons.locate,
+);
+
+const togglePlatformMode = ServiceExtensionDescription(
+  extension: 'ext.flutter.platformOverride',
+  description: 'Toggle Platform',
+  icon: FlutterIcons.phone,
+);
+
+const slowAnimations = ServiceExtensionDescription(
+  extension: 'ext.flutter.timeDilation',
+  description: 'Enable Slow Animations',
+  icon: FlutterIcons.history,
+  enabledValue: 5.0,
+  disabledValue: 1.0,
 );
 
 // This extension should never be displayed as a button so does not need a

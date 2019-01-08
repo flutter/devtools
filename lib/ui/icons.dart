@@ -125,6 +125,7 @@ class FlutterIcons {
   static const Icon debugPaint = UrlIcon('/icons/debug_paint.png');
   static const Icon repaintRainbow = UrlIcon('/icons/repaint_rainbow.png');
   static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
+  static const Icon history = UrlIcon('/icons/history.svg');
 }
 
 class CustomIcon extends Icon {
