@@ -86,12 +86,12 @@ const toggleSelectWidgetMode = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-// We do not need to specify enabledValue/disabledValue for this extension.
-// [enabledValue] and [disabledValue] depend on the device platform.
 const togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
-  description: 'Toggle Platform',
+  description: 'iOS',
   icon: FlutterIcons.phone,
+  enabledValue: 'iOS',
+  disabledValue: 'android',
 );
 
 const slowAnimations = ServiceExtensionDescription<num>(

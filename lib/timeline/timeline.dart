@@ -77,7 +77,8 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.debugPaint).button;
     final slowAnimationsButton =
         ServiceExtensionButton(extensions.slowAnimations).button;
-    final togglePlatformButton = TogglePlatformButton().button;
+    final togglePlatformButton =
+        ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
       createLiveChartArea(),

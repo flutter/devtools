@@ -96,43 +96,7 @@ class ServiceExtensionButton {
     // Select button whose state is already enabled.
     serviceManager.serviceExtensionManager.getServiceExtensionState(
         extensionDescription.extension,
-        (state) => button.toggleClass('selected', state.enabled));
-  }
-}
-
-class TogglePlatformButton extends ServiceExtensionButton {
-  TogglePlatformButton() : super(togglePlatformMode);
-
-  bool isCurrentlyAndroid;
-
-  @override
-  void click() async {
-    await serviceManager.serviceExtensionManager.setServiceExtensionState(
-      extensionDescription.extension,
-      true,
-      isCurrentlyAndroid ? 'iOS' : 'android',
-    );
-  }
-
-  @override
-  void _updateState() {
-    serviceManager.serviceExtensionManager.getServiceExtensionState(
-        extensionDescription.extension, (state) async {
-      if (state.value == null) {
-        // We need both the [service] and the [selectedIsolate] to be available
-        // before we can call the service extension.
-        await serviceManager.serviceAvailable.future;
-        serviceManager.isolateManager.onSelectedIsolateChanged
-            .listen((_) async {
-          final value = await serviceManager.service.callServiceExtension(
-            extensionDescription.extension,
-            isolateId: serviceManager.isolateManager.selectedIsolate.id,
-          );
-          isCurrentlyAndroid = value.json['value'] == 'android';
-        });
-      } else {
-        isCurrentlyAndroid = state.value == 'android';
-      }
-    });
+        (state) => button.toggleClass(
+            'selected', state.value == extensionDescription.enabledValue));
   }
 }
