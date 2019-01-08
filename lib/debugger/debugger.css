@@ -3,7 +3,7 @@
 /* found in the LICENSE file. */
 
 .debugger-menu {
-    width: 280px;
+    width: 200px;
 }
 
 .source-head {
@@ -42,10 +42,11 @@
     margin-left: 6px;
 }
 
-#resume-button {
-    min-width: 90px
-}
-
 .debugger-items-list {
     overflow-y: scroll;
+}
+
+.flex-no-wrap {
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }

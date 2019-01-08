@@ -35,6 +35,7 @@ class App {
     _register<String>('debugger.getState', debuggerGetState);
     _register<String>('debugger.getLocation', debuggerGetLocation);
     _register<void>('debugger.resume', debuggerResume);
+    _register<void>('debugger.pause', debuggerPause);
     _register<void>('debugger.step', debuggerStep);
     _register<void>('debugger.clearBreakpoints', debuggerClearBreakpoints);
     _register<void>('debugger.addBreakpoint', debuggerAddBreakpoint);
@@ -129,6 +130,11 @@ class App {
   Future<void> debuggerResume([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.resume();
+  }
+
+  Future<void> debuggerPause([dynamic _]) async {
+    final DebuggerScreen screen = framework.getScreen('debugger');
+    await screen.debuggerState.pause();
   }
 
   Future<void> debuggerStep([dynamic _]) async {

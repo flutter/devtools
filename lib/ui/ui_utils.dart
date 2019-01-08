@@ -10,6 +10,8 @@ import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'primer.dart';
 
+const int defaultSplitterWidth = 12;
+
 CoreElement createExtensionCheckBox(
     ServiceExtensionDescription extensionDescription) {
   final extensionName = extensionDescription.extension;

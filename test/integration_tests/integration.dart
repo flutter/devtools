@@ -9,7 +9,7 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
-    show RemoteObject, ConsoleAPIEvent;
+    show ConsoleAPIEvent, RemoteObject;
 
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
@@ -22,6 +22,7 @@ BrowserManager browserManager;
 Future<void> waitFor(
   Future<bool> condition(), {
   Duration timeout = const Duration(seconds: 4),
+  String timeoutMessage = 'condition not satisfied',
 }) async {
   final DateTime end = new DateTime.now().add(timeout);
 
@@ -33,7 +34,11 @@ Future<void> waitFor(
     await shortDelay();
   }
 
-  throw 'condition not satisfied';
+  throw timeoutMessage;
+}
+
+Future delay() {
+  return new Future.delayed(const Duration(milliseconds: 500));
 }
 
 Future shortDelay() {
@@ -50,6 +55,8 @@ class DevtoolsManager {
     final Uri baseAppUri =
         baseUri.resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
+
+    await delay();
 
     // wait for app initialization
     await tabInstance.getBrowserChannel();
@@ -88,11 +95,17 @@ class BrowserManager {
   Future<BrowserTabInstance> createNewTab() async {
     final String targetId = await this.tab.createNewTarget();
 
+    await delay();
+
     final ChromeTab tab =
         await chromeProcess.connectToTabId('localhost', targetId);
-    await tab.connect();
+    await tab.connect(verbose: true);
+
+    await delay();
 
     await tab.wipConnection.target.activateTarget(targetId);
+
+    await delay();
 
     return new BrowserTabInstance(tab);
   }
@@ -129,23 +142,21 @@ class BrowserTabInstance {
 
   RemoteObject _remote;
 
-  Future<RemoteObject> getBrowserChannel({
-    Duration retryFor = const Duration(seconds: 20),
-  }) async {
+  Future<RemoteObject> getBrowserChannel() async {
     final DateTime start = new DateTime.now();
-    DateTime end = start;
-    if (retryFor != null) {
-      end = start.add(retryFor);
-    }
+    final DateTime end = start.add(const Duration(seconds: 30));
 
     while (true) {
       try {
         return await _getAppChannelObject();
       } catch (e) {
         if (end.isBefore(new DateTime.now())) {
+          final Duration duration = new DateTime.now().difference(start);
+          print('timeout getting the browser channel object ($duration)');
           rethrow;
         }
       }
+
       await new Future<void>.delayed(const Duration(milliseconds: 25));
     }
   }
@@ -260,7 +271,7 @@ class AppError {
 class WebdevFixture {
   WebdevFixture._(this.process, this.url);
 
-  static Future<WebdevFixture> create() async {
+  static Future<WebdevFixture> create({bool verbose = false}) async {
     // 'pub run webdev serve web'
 
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
@@ -283,7 +294,9 @@ class WebdevFixture {
     final Completer<String> hasUrl = new Completer<String>();
 
     lines.listen((String line) {
-      print(line.trim());
+      if (verbose) {
+        print('webdev • ${line.trim()}');
+      }
 
       // Serving `web` on http://localhost:8080
       if (line.startsWith(r'Serving `web`')) {
@@ -293,6 +306,8 @@ class WebdevFixture {
     });
 
     final String url = await hasUrl.future;
+
+    await delay();
 
     return new WebdevFixture._(process, url);
   }

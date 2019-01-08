@@ -16,6 +16,8 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
+import '../ui/ui_utils.dart';
+import '../utils.dart';
 
 // TODO(devoncarew): allow browsing object fields
 
@@ -30,7 +32,7 @@ import '../ui/split.dart' as split;
 
 // TODO(devoncarew): handle displaying lists and maps in the variables view
 
-// TODO(devoncarew): handle displaying large lists, maps, in the variable view
+// TODO(devoncarew): handle displaying large lists, maps, in the variables view
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
@@ -59,24 +61,37 @@ class DebuggerScreen extends Screen {
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     CoreElement sourceArea;
+    CoreElement consoleDiv;
 
-    final PButton resumeButton = new PButton(null)
+    final PButton resumeButton = new PButton()
       ..primary()
       ..small()
-      ..id = 'resume-button'
+      ..disabled = true
       ..add(<CoreElement>[
         span(c: 'octicon octicon-triangle-right'),
         span(text: 'Resume'),
       ]);
-
     resumeButton.click(() async {
       resumeButton.disabled = true;
       await debuggerState.resume();
       resumeButton.disabled = false;
     });
 
+    final PButton pauseButton = new PButton()
+      ..small()
+      ..add(<CoreElement>[
+        span(c: 'octicon octicon-primitive-dot'),
+        span(text: 'Pause'),
+      ]);
+    pauseButton.click(() async {
+      pauseButton.disabled = true;
+      await debuggerState.pause();
+      pauseButton.disabled = false;
+    });
+
     debuggerState.onPausedChanged.listen((bool isPaused) {
       resumeButton.disabled = !isPaused;
+      pauseButton.disabled = isPaused;
     });
 
     PButton stepOver, stepIn, stepOut;
@@ -91,13 +106,13 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea = new ConsoleArea();
-    List<CoreElement> panels;
+    List<CoreElement> navEditorPanels;
 
     mainDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
-        ..add(panels = <CoreElement>[
+        ..add(navEditorPanels = <CoreElement>[
           div(c: 'debugger-menu')
             ..layoutVertical()
             ..add(<CoreElement>[
@@ -106,27 +121,30 @@ class DebuggerScreen extends Screen {
           div()
             ..element.style.overflowX = 'hidden'
             ..layoutVertical()
-            ..flex()
             ..add(<CoreElement>[
               div(c: 'section')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  resumeButton,
-                  div(c: 'btn-group margin-left')
+                  div(c: 'btn-group flex-no-wrap')
+                    ..add([
+                      pauseButton,
+                      resumeButton,
+                    ]),
+                  div(c: 'btn-group flex-no-wrap margin-left')
                     ..add(<CoreElement>[
-                      stepIn = new PButton(null)
+                      stepIn = new PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-down'),
                           span(text: 'Step in'),
                         ])
                         ..small(),
-                      stepOver = new PButton(null)
+                      stepOver = new PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-right'),
                           span(text: 'Step over'),
                         ])
                         ..small(),
-                      stepOut = new PButton(null)
+                      stepOut = new PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-up'),
                           span(text: 'Step out'),
@@ -137,12 +155,11 @@ class DebuggerScreen extends Screen {
                   breakOnExceptionControl,
                 ]),
               sourceArea = div(c: 'section table-border')
-                ..flex()
                 ..layoutVertical()
                 ..add(<CoreElement>[
                   _sourcePathDiv = div(c: 'source-head'),
                 ]),
-              div(c: 'section table-border secondary-area')
+              consoleDiv = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(consoleArea.element),
             ]),
@@ -151,11 +168,21 @@ class DebuggerScreen extends Screen {
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
 
+    // configure the navigation / editor splitter
     split.flexSplit(
-      panels,
-      gutterSize: 12,
-      sizes: [25, 75],
-      minSize: [150, 200],
+      navEditorPanels,
+      gutterSize: defaultSplitterWidth,
+      sizes: [22, 78],
+      minSize: [200, 600],
+    );
+
+    // configure the editor / console splitter
+    split.flexSplit(
+      [sourceArea, consoleDiv],
+      horizontal: false,
+      gutterSize: defaultSplitterWidth,
+      sizes: [80, 20],
+      minSize: [200, 60],
     );
 
     debuggerState.onSupportsStepping.listen((bool value) {
@@ -377,12 +404,12 @@ class DebuggerScreen extends Screen {
 
     service.onStdoutEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      consoleArea.append(message);
+      consoleArea.appendText(message);
     });
 
     service.onStderrEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
-      consoleArea.append(message, isError: true);
+      consoleArea.appendText(message);
     });
 
     if (serviceManager.isolateManager.selectedIsolate != null) {
@@ -788,8 +815,9 @@ class SourceEditor {
   }
 
   void _refreshMarkers() {
+    // TODO(devoncarew): only change these if the breakpoints changed or the
+    //  script did
     codeMirror.clearGutter('breakpoints');
-    //_clearLineClass();
     linesToBreakpoints.clear();
 
     if (currentScript == null) {
@@ -849,17 +877,19 @@ class SourceEditor {
     if (_currentLineClass != null) {
       codeMirror.removeLineClass(
           _currentLineClass, 'background', 'executionLine');
+      _currentLineClass = null;
     }
-    _currentLineClass = null;
 
     _executionPointElement?.dispose();
     _executionPointElement = null;
   }
 
   void _showLineClass(int line) {
-    if (_currentLineClass != null) {
-      _clearLineClass();
+    if (_currentLineClass == line) {
+      return;
     }
+
+    _clearLineClass();
     _currentLineClass = line;
     codeMirror.addLineClass(_currentLineClass, 'background', 'executionLine');
   }
@@ -1082,7 +1112,7 @@ class CallStackView {
       String locationDescription;
       if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
         name = '<async break>';
-      } else {
+      } else if (frame.kind != emptyStackMarker) {
         locationDescription = frame.location.script.uri;
 
         if (locationDescription.contains('/')) {
@@ -1092,7 +1122,8 @@ class CallStackView {
       }
 
       final CoreElement element = li(text: name, c: 'list-item');
-      if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+      if (frame.kind == FrameKind.kAsyncSuspensionMarker ||
+          frame.kind == emptyStackMarker) {
         element.toggleClass('subtle');
       }
       if (locationDescription != null) {
@@ -1101,6 +1132,8 @@ class CallStackView {
       return element;
     });
   }
+
+  static const String emptyStackMarker = 'EmptyStackMarker';
 
   SelectableList<Frame> _items;
 
@@ -1111,7 +1144,15 @@ class CallStackView {
   Stream<Frame> get onSelectionChanged => _items.onSelectionChanged;
 
   void showFrames(List<Frame> frames, {bool selectTop = false}) {
-    _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
+    if (frames.isEmpty) {
+      // Create a marker frame for 'no call frames'.
+      final Frame frame = new Frame()
+        ..kind = emptyStackMarker
+        ..code = (new CodeRef()..name = '<no call frames>');
+      _items.setItems([frame]);
+    } else {
+      _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
+    }
   }
 
   void clearFrames() {
@@ -1190,7 +1231,8 @@ class VariablesView {
 }
 
 class BreakOnExceptionControl extends CoreElement {
-  BreakOnExceptionControl() : super('div', classes: 'break-on-exceptions') {
+  BreakOnExceptionControl()
+      : super('div', classes: 'break-on-exceptions margin-left flex-no-wrap') {
     final CoreElement unhandled = new CoreElement('input')
       ..setAttribute('type', 'checkbox');
     _unhandledElement = unhandled.element;
@@ -1200,11 +1242,16 @@ class BreakOnExceptionControl extends CoreElement {
     _allElement = all.element;
 
     add([
-      span(text: 'Break on: '),
       new CoreElement('label')
-        ..add(<CoreElement>[unhandled, span(text: ' Unhandled exceptions')]),
+        ..add(<CoreElement>[
+          unhandled,
+          span(text: ' Break on unhandled exceptions')
+        ]),
       new CoreElement('label')
-        ..add(<CoreElement>[all, span(text: ' All exceptions')]),
+        ..add(<CoreElement>[
+          all,
+          span(text: ' Break on all exceptions'),
+        ]),
     ]);
 
     unhandled.element.onChange.listen((_) {
@@ -1316,6 +1363,10 @@ class ConsoleArea {
     codeMirrorElement.setAttribute('flex', '');
   }
 
+  final DelayedTimer _timer = new DelayedTimer(
+      const Duration(milliseconds: 100), const Duration(seconds: 1));
+  final StringBuffer _bufferedText = new StringBuffer();
+
   CoreElement _container;
   CodeMirror _editor;
 
@@ -1323,13 +1374,22 @@ class ConsoleArea {
 
   void refresh() => _editor.refresh();
 
-  void append(String text, {bool isError = false}) {
+  void appendText(String text) {
+    // We delay writes here to batch up calls to editor.replaceRange().
+    _bufferedText.write(text);
+
+    _timer.invoke(() {
+      final String string = _bufferedText.toString();
+      _bufferedText.clear();
+      _append(string);
+    });
+  }
+
+  void _append(String text) {
     // append text
     _editor
         .getDoc()
         .replaceRange(text, Position(_editor.getDoc().lastLine() + 1, 0));
-
-    // TODO(devoncarew): Display stderr text (isError) with a different style.
 
     // scroll to end
     final int lastLineIndex = _editor.getDoc().lastLine();

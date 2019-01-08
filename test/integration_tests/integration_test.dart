@@ -13,7 +13,7 @@ import 'logging.dart';
 void main() {
   group('integration', () {
     setUpAll(() async {
-      webdevFixture = await WebdevFixture.create();
+      webdevFixture = await WebdevFixture.create(verbose: true);
       browserManager = await BrowserManager.create();
     });
 
@@ -25,5 +25,5 @@ void main() {
     group('app', appTests);
     group('logging', loggingTests);
     group('debugging', debuggingTests);
-  });
+  }, timeout: const Timeout.factor(2));
 }

@@ -114,6 +114,44 @@ String getUserHomeDir() {
 /// value.
 typedef void VoidFunction();
 
+/// Batch up calls to the given closure. Repeated calls to [invoke] will
+/// overwrite the closure to be called. We'll delay at least [minDelay] before
+/// calling the closure, but will not delay more than [maxDelay].
+class DelayedTimer {
+  DelayedTimer(this.minDelay, this.maxDelay);
+
+  final Duration minDelay;
+  final Duration maxDelay;
+
+  VoidFunction _closure;
+
+  Timer _minTimer;
+  Timer _maxTimer;
+
+  void invoke(VoidFunction closure) {
+    _closure = closure;
+
+    if (_minTimer == null) {
+      _minTimer = new Timer(minDelay, _fire);
+      _maxTimer = new Timer(maxDelay, _fire);
+    } else {
+      _minTimer.cancel();
+      _minTimer = new Timer(minDelay, _fire);
+    }
+  }
+
+  void _fire() {
+    _minTimer?.cancel();
+    _minTimer = null;
+
+    _maxTimer?.cancel();
+    _maxTimer = null;
+
+    _closure();
+    _closure = null;
+  }
+}
+
 /// These utilities are ported from the Flutter IntelliJ plugin.
 ///
 /// With Dart's terser JSON support, these methods don't provide much value so

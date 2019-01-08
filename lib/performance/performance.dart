@@ -226,7 +226,7 @@ class CpuChart extends LineChart<CpuTracker> {
     const int vRange = 100;
 
     chartElement.setInnerHtml('''
-<svg viewBox="0 0 0 0 ${dim.x} ${dim.y}">
+<svg viewBox="0 0 0 0 ${dim.x} ${LineChart.fixedHeight}">
 <polyline
     fill="none"
     stroke="#0074d9"
