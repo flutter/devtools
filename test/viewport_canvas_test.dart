@@ -216,7 +216,7 @@ void main() {
         final imageData =
             context.getImageData(0, 0, canvas.width, canvas.height);
         // Verify outer margin is transparent.
-        // This ensures the logic transofrming to chunk coordinates worked
+        // This ensures the logic transforming to chunk coordinates worked
         // correctly. We indent more than 1 pixel from the margin so that the
         // devicePixelRatio does not impact the results.
         expect(imageData.data[0], equals(0));

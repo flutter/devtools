@@ -56,18 +56,8 @@ class _CanvasChunk {
   int _lastFrameRendered = -1;
   Rect rect;
 
-  void markNeedsPaint() {
-    _dirty = true;
-  }
-
-  void markPainted() {
-    _dirty = false;
-    _empty = false;
-  }
-
   _ChunkPosition get position => _position;
   _ChunkPosition _position;
-
   set position(_ChunkPosition p) {
     if (_position == p) return;
     _position = p;
@@ -89,6 +79,15 @@ class _CanvasChunk {
 
     _debugPaint();
     markNeedsPaint();
+  }
+
+  void markNeedsPaint() {
+    _dirty = true;
+  }
+
+  void markPainted() {
+    _dirty = false;
+    _empty = false;
   }
 
   void clear() {
@@ -238,17 +237,6 @@ class ViewportCanvas extends Object with SetStateMixin {
     });
   }
 
-  void _dispatchMouseMoveEvent() {
-    if (_onMouseMove != null) {
-      _onMouseMove(_clientToGlobal(_currentMouseHover));
-    }
-  }
-
-  Offset _clientToGlobal(Point client) {
-    final elementRect = _content.element.getBoundingClientRect();
-    return Offset(client.x - elementRect.left, client.y - elementRect.top);
-  }
-
   Point _currentMouseHover;
 
   /// Id used to help debug what was rendered as part of the current frame.
@@ -262,7 +250,8 @@ class ViewportCanvas extends Object with SetStateMixin {
 
   static const int maxChunks = 50;
 
-  /// Intersection observer used to detect when
+  /// Intersection observer used to detect when the viewport needs to be
+  /// recomputed.
   IntersectionObserver _visibilityObserver;
 
   CoreElement get element => _element;
@@ -271,8 +260,8 @@ class ViewportCanvas extends Object with SetStateMixin {
   /// Element containing all content that scrolls within the viewport.
   final CoreElement _content;
 
-  // Fixed sized divs placed around the the content that is currently rendered
-  // serving no purpose other than to ensure that [_visibilityObserver] will
+  // Fixed sized divs placed around the the content that is currently rendered.
+  // These divs only exist to ensure that [_visibilityObserver] fires
   // fire when content that was outside the viewport moves inside the viewport.
   final CoreElement _spaceTop;
   final CoreElement _spaceBottom;
@@ -296,6 +285,18 @@ class ViewportCanvas extends Object with SetStateMixin {
   /// scrollwheel events which may trigger scrolling.
   Rect _renderedViewport;
   Rect _viewport = Rect.zero;
+
+
+  void _dispatchMouseMoveEvent() {
+    if (_onMouseMove != null) {
+      _onMouseMove(_clientToGlobal(_currentMouseHover));
+    }
+  }
+
+  Offset _clientToGlobal(Point client) {
+    final elementRect = _content.element.getBoundingClientRect();
+    return Offset(client.x - elementRect.left, client.y - elementRect.top);
+  }
 
   void dispose() {
     _visibilityObserver.disconnect();
