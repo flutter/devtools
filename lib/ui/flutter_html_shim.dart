@@ -2,7 +2,7 @@ import 'fake_flutter/fake_flutter.dart';
 
 String fontStyleToCss(TextStyle textStyle) {
   // We could support more features but this is all we need for the inspector.
-  final sb = new StringBuffer();
+  final sb = StringBuffer();
   if (textStyle.fontStyle == FontStyle.italic) {
     sb.write('italic ');
   }

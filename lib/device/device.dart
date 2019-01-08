@@ -14,7 +14,7 @@ class DeviceScreen extends Screen {
             name: 'Device', id: 'device', iconClass: 'octicon-device-mobile') {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
-    deviceStatus = new StatusItem();
+    deviceStatus = StatusItem();
     addStatusItem(deviceStatus);
   }
 

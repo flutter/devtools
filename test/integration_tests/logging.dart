@@ -23,7 +23,7 @@ void loggingTests() {
 
   test('displays log data', () async {
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logs');
 
@@ -31,7 +31,7 @@ void loggingTests() {
     expect(currentPageId, 'logs');
 
     // Cause app to log.
-    final LoggingManager logs = new LoggingManager(tools);
+    final LoggingManager logs = LoggingManager(tools);
     await logs.clearLogs();
     expect(await logs.logCount(), 0);
     await appFixture.invoke('controller.emitLog()');

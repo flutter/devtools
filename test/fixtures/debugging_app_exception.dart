@@ -8,7 +8,7 @@ void main() {
   print('starting debugging app (exception)');
 
   void run() {
-    new Timer(const Duration(milliseconds: 200), () async {
+    Timer(const Duration(milliseconds: 200), () async {
       performAction();
 
       run();
@@ -23,7 +23,7 @@ void performAction() {
   print(foo++);
 
   try {
-    throw new StateError('bad state'); // exception
+    throw StateError('bad state'); // exception
   } catch (e) {
     // ignore
   }

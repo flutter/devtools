@@ -24,9 +24,9 @@ Future<void> waitFor(
   Duration timeout = const Duration(seconds: 4),
   String timeoutMessage = 'condition not satisfied',
 }) async {
-  final DateTime end = new DateTime.now().add(timeout);
+  final DateTime end = DateTime.now().add(timeout);
 
-  while (!end.isBefore(new DateTime.now())) {
+  while (!end.isBefore(DateTime.now())) {
     if (await condition()) {
       return;
     }
@@ -38,11 +38,11 @@ Future<void> waitFor(
 }
 
 Future delay() {
-  return new Future.delayed(const Duration(milliseconds: 500));
+  return Future.delayed(const Duration(milliseconds: 500));
 }
 
 Future shortDelay() {
-  return new Future.delayed(const Duration(milliseconds: 100));
+  return Future.delayed(const Duration(milliseconds: 100));
 }
 
 class DevtoolsManager {
@@ -86,7 +86,7 @@ class BrowserManager {
 
     await tab.connect();
 
-    return new BrowserManager._(chromeProcess, tab);
+    return BrowserManager._(chromeProcess, tab);
   }
 
   final ChromeProcess chromeProcess;
@@ -107,7 +107,7 @@ class BrowserManager {
 
     await delay();
 
-    return new BrowserTabInstance(tab);
+    return BrowserTabInstance(tab);
   }
 
   Future<void> teardown() async {
@@ -143,21 +143,21 @@ class BrowserTabInstance {
   RemoteObject _remote;
 
   Future<RemoteObject> getBrowserChannel() async {
-    final DateTime start = new DateTime.now();
+    final DateTime start = DateTime.now();
     final DateTime end = start.add(const Duration(seconds: 30));
 
     while (true) {
       try {
         return await _getAppChannelObject();
       } catch (e) {
-        if (end.isBefore(new DateTime.now())) {
-          final Duration duration = new DateTime.now().difference(start);
+        if (end.isBefore(DateTime.now())) {
+          final Duration duration = DateTime.now().difference(start);
           print('timeout getting the browser channel object ($duration)');
           rethrow;
         }
       }
 
-      await new Future<void>.delayed(const Duration(milliseconds: 25));
+      await Future<void>.delayed(const Duration(milliseconds: 25));
     }
   }
 
@@ -171,7 +171,7 @@ class BrowserTabInstance {
       <int, Completer<AppResponse>>{};
 
   final StreamController<AppEvent> _eventStream =
-      new StreamController<AppEvent>.broadcast();
+      StreamController<AppEvent>.broadcast();
 
   Stream<AppEvent> get onEvent => _eventStream.stream;
 
@@ -180,7 +180,7 @@ class BrowserTabInstance {
 
     final int id = _nextId++;
 
-    final Completer<AppResponse> completer = new Completer<AppResponse>();
+    final Completer<AppResponse> completer = Completer<AppResponse>();
     _completers[id] = completer;
 
     try {
@@ -209,7 +209,7 @@ class BrowserTabInstance {
 
     if (message.containsKey('id')) {
       // handle a response: {id: 1}
-      final AppResponse response = new AppResponse(message);
+      final AppResponse response = AppResponse(message);
       final Completer<AppResponse> completer = _completers.remove(response.id);
       if (response.hasError) {
         completer.completeError(response.error);
@@ -218,7 +218,7 @@ class BrowserTabInstance {
       }
     } else {
       // handle an event: {event: app.echo, params: foo}
-      _eventStream.add(new AppEvent(message));
+      _eventStream.add(AppEvent(message));
     }
   }
 }
@@ -247,7 +247,7 @@ class AppResponse {
 
   bool get hasError => json.containsKey('error');
 
-  AppError get error => new AppError(json['error']);
+  AppError get error => AppError(json['error']);
 
   @override
   String toString() {
@@ -278,7 +278,7 @@ class WebdevFixture {
     // Dart VM doesn't try and open a service protocol port if
     // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
     final Map<String, String> environment =
-        new Map<String, String>.from(Platform.environment);
+        Map<String, String>.from(Platform.environment);
     if (environment.containsKey('DART_VM_OPTIONS')) {
       environment['DART_VM_OPTIONS'] = '';
     }
@@ -291,7 +291,7 @@ class WebdevFixture {
 
     final Stream<String> lines =
         process.stdout.transform(utf8.decoder).transform(const LineSplitter());
-    final Completer<String> hasUrl = new Completer<String>();
+    final Completer<String> hasUrl = Completer<String>();
 
     lines.listen((String line) {
       if (verbose) {
@@ -309,7 +309,7 @@ class WebdevFixture {
 
     await delay();
 
-    return new WebdevFixture._(process, url);
+    return WebdevFixture._(process, url);
   }
 
   final Process process;

@@ -7,14 +7,14 @@ import 'dart:developer';
 import 'dart:io';
 
 // Allow a test driver to communicate with this app through the controller.
-final Controller controller = new Controller();
+final Controller controller = Controller();
 
 void main() {
   print('starting logging app');
   log('starting logging app');
 
   // Don't exit until it's indicated we should by the controller.
-  new Timer(const Duration(days: 1), () {});
+  Timer(const Duration(days: 1), () {});
 }
 
 class Controller {

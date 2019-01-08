@@ -12,63 +12,63 @@ Element queryId(String id) => querySelector('#$id');
 Element $(String id) => querySelector('#$id');
 
 CoreElement button({String text, String c, String a}) =>
-    new CoreElement('button', text: text, classes: c, attributes: a);
+    CoreElement('button', text: text, classes: c, attributes: a);
 
 CoreElement checkbox({String text, String c, String a}) =>
-    new CoreElement('input', text: text, classes: c, attributes: a)
+    CoreElement('input', text: text, classes: c, attributes: a)
       ..setAttribute('type', 'checkbox');
 
 CoreElement label({String text, String c, String a}) =>
-    new CoreElement('label', text: text, classes: c, attributes: a);
+    CoreElement('label', text: text, classes: c, attributes: a);
 
 CoreElement div({String text, String c, String a}) =>
-    new CoreElement('div', text: text, classes: c, attributes: a);
+    CoreElement('div', text: text, classes: c, attributes: a);
 
 CoreElement span({String text, String c, String a}) =>
-    new CoreElement('span', text: text, classes: c, attributes: a);
+    CoreElement('span', text: text, classes: c, attributes: a);
 
 CoreElement h2({String text, String c, String a}) =>
-    new CoreElement('h2', text: text, classes: c, attributes: a);
+    CoreElement('h2', text: text, classes: c, attributes: a);
 
 CoreElement p({String text, String c, String a}) =>
-    new CoreElement('p', text: text, classes: c, attributes: a);
+    CoreElement('p', text: text, classes: c, attributes: a);
 
 CoreElement italic({String text, String c, String a}) =>
-    new CoreElement('i', text: text, classes: c, attributes: a);
+    CoreElement('i', text: text, classes: c, attributes: a);
 
 CoreElement em({String text, String c, String a}) =>
-    new CoreElement('em', text: text, classes: c, attributes: a);
+    CoreElement('em', text: text, classes: c, attributes: a);
 
 CoreElement img({String text, String c, String a}) =>
-    new CoreElement('img', text: text, classes: c, attributes: a);
+    CoreElement('img', text: text, classes: c, attributes: a);
 
 CoreElement ol({String text, String c, String a}) =>
-    new CoreElement('ol', text: text, classes: c, attributes: a);
+    CoreElement('ol', text: text, classes: c, attributes: a);
 
 CoreElement ul({String text, String c, String a}) =>
-    new CoreElement('ul', text: text, classes: c, attributes: a);
+    CoreElement('ul', text: text, classes: c, attributes: a);
 
 CoreElement li({String text, String c, String a}) =>
-    new CoreElement('li', text: text, classes: c, attributes: a);
+    CoreElement('li', text: text, classes: c, attributes: a);
 
 CoreElement para({String text, String c, String a}) =>
-    new CoreElement('p', text: text, classes: c, attributes: a);
+    CoreElement('p', text: text, classes: c, attributes: a);
 
-CoreElement table() => new CoreElement('table');
+CoreElement table() => CoreElement('table');
 
-CoreElement tr() => new CoreElement('tr');
+CoreElement tr() => CoreElement('tr');
 
 CoreElement th({String text, String c}) =>
-    new CoreElement('th', text: text, classes: c);
+    CoreElement('th', text: text, classes: c);
 
 CoreElement td({String text, String c}) =>
-    new CoreElement('td', text: text, classes: c);
+    CoreElement('td', text: text, classes: c);
 
-CoreElement form() => new CoreElement('form');
+CoreElement form() => CoreElement('form');
 
 class CoreElement {
   CoreElement(String tag, {String text, String classes, String attributes})
-      : element = new Element.tag(tag) {
+      : element = Element.tag(tag) {
     if (text != null) {
       element.text = text;
     }
@@ -122,7 +122,7 @@ class CoreElement {
 
   void clazz(String _class, {bool removeOthers = false}) {
     if (_class.contains(' ')) {
-      throw new ArgumentError('spaces not allowed in class names');
+      throw ArgumentError('spaces not allowed in class names');
     }
     if (removeOthers) {
       element.classes.clear();
@@ -150,7 +150,7 @@ class CoreElement {
     } else if (child is Element) {
       element.children.add(child);
     } else {
-      throw new ArgumentError('argument type not supported');
+      throw ArgumentError('argument type not supported');
     }
     return child;
   }

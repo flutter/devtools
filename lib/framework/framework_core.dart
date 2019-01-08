@@ -17,7 +17,7 @@ class FrameworkCore {
   }
 
   static void _setServiceConnectionManager() {
-    setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
+    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
   }
 
   static void _initVmService() async {
@@ -32,7 +32,7 @@ class FrameworkCore {
     }
     port ??= 8100;
 
-    final Completer<Null> finishedCompleter = new Completer<Null>();
+    final Completer<Null> finishedCompleter = Completer<Null>();
 
     try {
       final VmServiceWrapper service =

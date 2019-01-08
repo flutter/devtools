@@ -16,7 +16,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 class Chrome {
   factory Chrome.from(String executable) {
     return FileSystemEntity.isFileSync(executable)
-        ? new Chrome._(executable)
+        ? Chrome._(executable)
         : null;
   }
 
@@ -28,13 +28,13 @@ class Chrome {
       const String bundlePath = 'Contents/MacOS/Google Chrome';
 
       if (FileSystemEntity.isDirectorySync(defaultPath)) {
-        return new Chrome.from(path.join(defaultPath, bundlePath));
+        return Chrome.from(path.join(defaultPath, bundlePath));
       }
     } else if (Platform.isLinux) {
       const String defaultPath = '/usr/bin/google-chrome';
 
       if (FileSystemEntity.isFileSync(defaultPath)) {
-        return new Chrome.from(defaultPath);
+        return Chrome.from(defaultPath);
       }
     }
 
@@ -50,7 +50,7 @@ class Chrome {
   static String getCreateChromeDataDir() {
     final Directory prefsDir = getDartPrefsDirectory();
     final Directory chromeDataDir =
-        new Directory(path.join(prefsDir.path, 'chrome'));
+        Directory(path.join(prefsDir.path, 'chrome'));
     if (!chromeDataDir.existsSync()) {
       chromeDataDir.createSync(recursive: true);
     }
@@ -70,7 +70,7 @@ class Chrome {
       args.add(url);
     }
     return Process.start(executable, args).then((Process process) {
-      return new ChromeProcess(process, debugPort);
+      return ChromeProcess(process, debugPort);
     });
   }
 }
@@ -87,7 +87,7 @@ class ChromeProcess {
     Duration timeout = const Duration(seconds: 20),
   }) async {
     final ChromeConnection connection =
-        new ChromeConnection(Uri.parse(url).host, debugPort);
+        ChromeConnection(Uri.parse(url).host, debugPort);
 
     final wip.ChromeTab wipTab = await connection.getTab((wip.ChromeTab tab) {
       return tab.url == url;
@@ -97,7 +97,7 @@ class ChromeProcess {
       _processAlive = false;
     }));
 
-    return wipTab == null ? null : new ChromeTab(wipTab);
+    return wipTab == null ? null : ChromeTab(wipTab);
   }
 
   Future<ChromeTab> connectToTabId(
@@ -105,7 +105,7 @@ class ChromeProcess {
     String id, {
     Duration timeout = const Duration(seconds: 20),
   }) async {
-    final ChromeConnection connection = new ChromeConnection(host, debugPort);
+    final ChromeConnection connection = ChromeConnection(host, debugPort);
 
     final wip.ChromeTab wipTab = await connection.getTab((wip.ChromeTab tab) {
       return tab.id == id;
@@ -115,14 +115,14 @@ class ChromeProcess {
       _processAlive = false;
     }));
 
-    return wipTab == null ? null : new ChromeTab(wipTab);
+    return wipTab == null ? null : ChromeTab(wipTab);
   }
 
   Future<ChromeTab> getFirstTab({
     Duration timeout = const Duration(seconds: 20),
   }) async {
     final ChromeConnection connection =
-        new ChromeConnection('localhost', debugPort);
+        ChromeConnection('localhost', debugPort);
 
     final wip.ChromeTab wipTab = await connection.getTab((wip.ChromeTab tab) {
       return !tab.isBackgroundPage && !tab.isChromeExtension;
@@ -132,7 +132,7 @@ class ChromeProcess {
       _processAlive = false;
     }));
 
-    return wipTab == null ? null : new ChromeTab(wipTab);
+    return wipTab == null ? null : ChromeTab(wipTab);
   }
 
   bool get isAlive => _processAlive;
@@ -152,13 +152,13 @@ class ChromeTab {
   WipConnection _wip;
 
   final StreamController<Null> _disconnectStream =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
   final StreamController<LogEntry> _entryAddedController =
-      new StreamController<LogEntry>.broadcast();
+      StreamController<LogEntry>.broadcast();
   final StreamController<ConsoleAPIEvent> _consoleAPICalledController =
-      new StreamController<ConsoleAPIEvent>.broadcast();
+      StreamController<ConsoleAPIEvent>.broadcast();
   final StreamController<ExceptionThrownEvent> _exceptionThrownController =
-      new StreamController<ExceptionThrownEvent>.broadcast();
+      StreamController<ExceptionThrownEvent>.broadcast();
 
   num _lostConnectionTime;
 
@@ -189,7 +189,7 @@ class ChromeTab {
     _wip.onClose.listen((_) {
       _wip = null;
       _disconnectStream.add(null);
-      _lostConnectionTime = new DateTime.now().millisecondsSinceEpoch;
+      _lostConnectionTime = DateTime.now().millisecondsSinceEpoch;
     });
 
     if (verbose) {

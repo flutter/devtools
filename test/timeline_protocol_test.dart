@@ -14,11 +14,11 @@ void main() {
       final Iterable<TimelineEvent> events = durationData
           .trim()
           .split('\n')
-          .map((String str) => new TimelineEvent(jsonDecode(str)));
+          .map((String str) => TimelineEvent(jsonDecode(str)));
 
-      final TimelineData timelineData = new TimelineData();
+      final TimelineData timelineData = TimelineData();
       final TimelineThread thread =
-          new TimelineThread(timelineData, 'engine', 41219);
+          TimelineThread(timelineData, 'engine', 41219);
       timelineData.addThread(thread);
 
       final Future<TimelineThreadEvent> resultFuture =
@@ -45,11 +45,10 @@ void main() {
       final Iterable<TimelineEvent> events = asyncData
           .trim()
           .split('\n')
-          .map((String str) => new TimelineEvent(jsonDecode(str)));
+          .map((String str) => TimelineEvent(jsonDecode(str)));
 
-      final TimelineData timelineData = new TimelineData();
-      final TimelineThread thread =
-          new TimelineThread(timelineData, 'dart', 41219);
+      final TimelineData timelineData = TimelineData();
+      final TimelineThread thread = TimelineThread(timelineData, 'dart', 41219);
       timelineData.addThread(thread);
 
       final Future<List<TimelineThreadEvent>> resultFuture =
