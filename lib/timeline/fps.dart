@@ -77,7 +77,7 @@ class FramesChart extends LineChart<FramesTracker> {
     }
 
     chartElement.setInnerHtml('''
-     <svg viewBox="0 0 ${dim.x} ${dim.y}">
+     <svg viewBox="0 0 ${dim.x} ${LineChart.fixedHeight}">
      ${svgElements.join('\n')}
      </svg>
      ''');
