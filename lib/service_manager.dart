@@ -309,14 +309,16 @@ class ServiceExtensionManager {
     }
   }
 
-  void _onFrameEventReceived() {
+  void _onFrameEventReceived() async {
     if (_firstFrameEventReceived) {
       // The first frame event was already received.
       return;
     }
     _firstFrameEventReceived = true;
 
-    _pendingServiceExtensions.forEach(_addServiceExtension);
+    for (String extension in _pendingServiceExtensions) {
+      await _addServiceExtension(extension);
+    }
     _pendingServiceExtensions.clear();
   }
 
@@ -373,13 +375,34 @@ class ServiceExtensionManager {
     _serviceExtensions.add(name);
     streamController.add(true);
 
-    // TODO(kenzie): query the device for service extension states. This will
-    // restore extension states in DevTools on page refresh or initial start.
+    // Set any extensions that are already enabled on the device. This will
+    // enable extension states in DevTools on page refresh or initial start.
+    await _restoreExtensionFromDevice(name);
 
     // Restore any previously enabled states by calling their service extension.
     // This will restore extension states on the device after a hot restart.
     if (_enabledServiceExtensions.containsKey(name)) {
       await _callServiceExtension(name, _enabledServiceExtensions[name].value);
+    }
+  }
+
+  Future<void> _restoreExtensionFromDevice(String name) async {
+    final response = await _service.callServiceExtension(
+      name,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+    if (response.json.containsKey('enabled')) {
+      final bool enabled = response.json['enabled'] == 'true' ? true : false;
+      await setServiceExtensionState(name, enabled, enabled,
+          callExtension: false);
+    } else if (response.json.containsKey('value')) {
+      final String value = response.json['value'];
+      await setServiceExtensionState(name, true, value, callExtension: false);
+    } else if (response.json
+        .containsKey(name.substring(name.lastIndexOf('.') + 1))) {
+      final num value =
+          num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
+      await setServiceExtensionState(name, true, value, callExtension: false);
     }
   }
 
@@ -423,8 +446,11 @@ class ServiceExtensionManager {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-      String name, bool enabled, dynamic value) async {
-    await _callServiceExtension(name, value);
+      String name, bool enabled, dynamic value,
+      {bool callExtension = true}) async {
+    if (callExtension) {
+      await _callServiceExtension(name, value);
+    }
 
     final StreamController<ServiceExtensionState> streamController =
         _getServiceExtensionStateController(name);

@@ -67,6 +67,8 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
+    // TODO(kenzie): is this right extension for this button? Doesn't match the
+    // IntelliJ 'Show widget rebuild information' checkbox.
     final trackWidgetBuildsButton =
         ServiceExtensionButton(extensions.profileWidgetBuilds).button;
     final perfOverlayButton =
