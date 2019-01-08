@@ -1232,11 +1232,16 @@ class BreakOnExceptionControl extends CoreElement {
     _allElement = all.element;
 
     add([
-      span(text: 'Break on: '),
       new CoreElement('label')
-        ..add(<CoreElement>[unhandled, span(text: ' Unhandled exceptions')]),
+        ..add(<CoreElement>[
+          unhandled,
+          span(text: ' Break on unhandled exceptions')
+        ]),
       new CoreElement('label')
-        ..add(<CoreElement>[all, span(text: ' All exceptions')]),
+        ..add(<CoreElement>[
+          all,
+          span(text: ' Break on all exceptions'),
+        ]),
     ]);
 
     unhandled.element.onChange.listen((_) {
