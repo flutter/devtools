@@ -12,34 +12,6 @@ import 'primer.dart';
 
 const int defaultSplitterWidth = 12;
 
-PButton createExtensionButton(
-    ServiceExtensionDescription extensionDescription) {
-  final PButton button = new PButton.icon(
-      extensionDescription.description, extensionDescription.icon,
-      title: extensionDescription.tooltip)
-    ..small();
-
-  final extensionName = extensionDescription.extension;
-
-  button.click(() {
-    final bool wasSelected = button.element.classes.contains('selected');
-    serviceManager.serviceExtensionManager
-        .setServiceExtensionState(extensionName, !wasSelected, !wasSelected);
-  });
-
-  // Disable button for unavailable service extensions.
-  button.disabled = !serviceManager.serviceExtensionManager
-      .isServiceExtensionAvailable(extensionName);
-  serviceManager.serviceExtensionManager.hasServiceExtension(
-      extensionName, (available) => button.disabled = !available);
-
-  // Select button whose state is already enabled.
-  serviceManager.serviceExtensionManager.getServiceExtensionState(
-      extensionName, (state) => button.toggleClass('selected', state.enabled));
-
-  return button;
-}
-
 CoreElement createExtensionCheckBox(
     ServiceExtensionDescription extensionDescription) {
   final extensionName = extensionDescription.extension;
@@ -84,4 +56,47 @@ CoreElement createHotReloadButton() {
     button.disabled = false;
   });
   return button;
+}
+
+class ServiceExtensionButton {
+  ServiceExtensionButton(this.extensionDescription) {
+    button = new PButton.icon(
+        extensionDescription.description, extensionDescription.icon,
+        title: extensionDescription.tooltip)
+      ..small();
+
+    final extensionName = extensionDescription.extension;
+
+    // Disable button for unavailable service extensions.
+    button.disabled = !serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(extensionName);
+    serviceManager.serviceExtensionManager.hasServiceExtension(
+        extensionName, (available) => button.disabled = !available);
+
+    button.click(() => click());
+
+    _updateState();
+  }
+
+  final ServiceExtensionDescription extensionDescription;
+  PButton button;
+
+  void click() {
+    final bool wasSelected = button.element.classes.contains('selected');
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
+      extensionDescription.extension,
+      !wasSelected,
+      wasSelected
+          ? extensionDescription.disabledValue
+          : extensionDescription.enabledValue,
+    );
+  }
+
+  void _updateState() {
+    // Select button whose state is already enabled.
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensionDescription.extension,
+        (state) => button.toggleClass(
+            'selected', state.value == extensionDescription.enabledValue));
+  }
 }

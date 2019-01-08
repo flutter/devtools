@@ -54,7 +54,8 @@ class ServiceConnectionManager {
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
   /// Call a service that is registered by exactly one client.
-  Future<Response> callService(String name, {String isolateId, Map args}) async {
+  Future<Response> callService(String name,
+      {String isolateId, Map args}) async {
     final registered = methodsForService[name] ?? const [];
     if (registered.length != 1) {
       throw Exception('Expected one registered service for "$name" but found '
@@ -372,7 +373,11 @@ class ServiceExtensionManager {
     _serviceExtensions.add(name);
     streamController.add(true);
 
-    // Restore any previously enabled states by calling their service extensions.
+    // TODO(kenzie): query the device for service extension states. This will
+    // restore extension states in DevTools on page refresh or initial start.
+
+    // Restore any previously enabled states by calling their service extension.
+    // This will restore extension states on the device after a hot restart.
     if (_enabledServiceExtensions.containsKey(name)) {
       await _callServiceExtension(name, _enabledServiceExtensions[name].value);
     }
