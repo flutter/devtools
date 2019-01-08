@@ -75,7 +75,7 @@ class ServiceExtensionButton {
 
     button.click(() => click());
 
-    manageState();
+    _updateState();
   }
 
   final ServiceExtensionDescription extensionDescription;
@@ -92,7 +92,7 @@ class ServiceExtensionButton {
     );
   }
 
-  void manageState() {
+  void _updateState() {
     // Select button whose state is already enabled.
     serviceManager.serviceExtensionManager.getServiceExtensionState(
         extensionDescription.extension,
@@ -115,7 +115,7 @@ class TogglePlatformButton extends ServiceExtensionButton {
   }
 
   @override
-  void manageState() {
+  void _updateState() {
     serviceManager.serviceExtensionManager.getServiceExtensionState(
         extensionDescription.extension, (state) async {
       if (state.value == null) {
