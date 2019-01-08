@@ -14,6 +14,8 @@ import '../tables.dart';
 import '../timeline/fps.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
+import '../ui/split.dart' as split;
+import '../ui/ui_utils.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
@@ -50,6 +52,7 @@ class LoggingScreen extends Screen {
     this.framework = framework;
 
     LogDetailsUI logDetailsUI;
+    CoreElement detailsDiv;
 
     mainDiv.add(<CoreElement>[
       div(c: 'section')
@@ -67,10 +70,19 @@ class LoggingScreen extends Screen {
       _createTableView()
         ..clazz('section')
         ..flex(),
-      div(c: 'section table-border')
+      detailsDiv = div(c: 'section table-border')
         ..layoutVertical()
         ..add(logDetailsUI = new LogDetailsUI()),
     ]);
+
+    // configure the table / details splitter
+    split.flexSplit(
+      [loggingTable.element, detailsDiv],
+      horizontal: false,
+      gutterSize: defaultSplitterWidth,
+      sizes: [80, 20],
+      minSize: [200, 60],
+    );
 
     loggingTable.onSelect.listen((LogData selection) {
       logDetailsUI.setData(selection);
@@ -526,9 +538,11 @@ String getCssClassForEventKind(LogData item) {
 class LogDetailsUI extends CoreElement {
   LogDetailsUI() : super('div') {
     layoutVertical();
+    flex();
 
     add(<CoreElement>[
-      content = div(c: 'log-details secondary-area')
+      content = div(c: 'log-details')
+        ..flex()
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
   }

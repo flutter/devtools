@@ -132,7 +132,6 @@ class Framework {
     flash.addClose().click(clearError);
     flash.add(span(text: title));
     if (error != null) {
-      flash.add(new CoreElement('br'));
       flash.add(span(text: '$error'));
     }
 

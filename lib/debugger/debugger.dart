@@ -16,6 +16,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
+import '../ui/ui_utils.dart';
 import '../utils.dart';
 
 // TODO(devoncarew): allow browsing object fields
@@ -60,12 +61,12 @@ class DebuggerScreen extends Screen {
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     CoreElement sourceArea;
+    CoreElement consoleDiv;
 
     final PButton resumeButton = new PButton()
       ..primary()
       ..small()
       ..disabled = true
-      ..clazz('control-buttons')
       ..add(<CoreElement>[
         span(c: 'octicon octicon-triangle-right'),
         span(text: 'Resume'),
@@ -78,7 +79,6 @@ class DebuggerScreen extends Screen {
 
     final PButton pauseButton = new PButton()
       ..small()
-      ..clazz('control-buttons')
       ..add(<CoreElement>[
         span(c: 'octicon octicon-primitive-dot'),
         span(text: 'Pause'),
@@ -106,13 +106,13 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea = new ConsoleArea();
-    List<CoreElement> panels;
+    List<CoreElement> navEditorPanels;
 
     mainDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
-        ..add(panels = <CoreElement>[
+        ..add(navEditorPanels = <CoreElement>[
           div(c: 'debugger-menu')
             ..layoutVertical()
             ..add(<CoreElement>[
@@ -121,17 +121,16 @@ class DebuggerScreen extends Screen {
           div()
             ..element.style.overflowX = 'hidden'
             ..layoutVertical()
-            ..flex()
             ..add(<CoreElement>[
               div(c: 'section')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  div(c: 'btn-group')
+                  div(c: 'btn-group flex-no-wrap')
                     ..add([
                       pauseButton,
                       resumeButton,
                     ]),
-                  div(c: 'btn-group margin-left')
+                  div(c: 'btn-group flex-no-wrap margin-left')
                     ..add(<CoreElement>[
                       stepIn = new PButton()
                         ..add(<CoreElement>[
@@ -156,12 +155,11 @@ class DebuggerScreen extends Screen {
                   breakOnExceptionControl,
                 ]),
               sourceArea = div(c: 'section table-border')
-                ..flex()
                 ..layoutVertical()
                 ..add(<CoreElement>[
                   _sourcePathDiv = div(c: 'source-head'),
                 ]),
-              div(c: 'section table-border secondary-area')
+              consoleDiv = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(consoleArea.element),
             ]),
@@ -170,11 +168,21 @@ class DebuggerScreen extends Screen {
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
 
+    // configure the navigation / editor splitter
     split.flexSplit(
-      panels,
-      gutterSize: 12,
-      sizes: [25, 75],
-      minSize: [150, 200],
+      navEditorPanels,
+      gutterSize: defaultSplitterWidth,
+      sizes: [22, 78],
+      minSize: [200, 600],
+    );
+
+    // configure the editor / console splitter
+    split.flexSplit(
+      [sourceArea, consoleDiv],
+      horizontal: false,
+      gutterSize: defaultSplitterWidth,
+      sizes: [80, 20],
+      minSize: [200, 60],
     );
 
     debuggerState.onSupportsStepping.listen((bool value) {
@@ -807,7 +815,8 @@ class SourceEditor {
   }
 
   void _refreshMarkers() {
-    // todo: only change these if the breakpoints changed or the script did
+    // TODO(devoncarew): only change these if the breakpoints changed or the
+    //  script did
     codeMirror.clearGutter('breakpoints');
     linesToBreakpoints.clear();
 
@@ -1222,7 +1231,8 @@ class VariablesView {
 }
 
 class BreakOnExceptionControl extends CoreElement {
-  BreakOnExceptionControl() : super('div', classes: 'break-on-exceptions') {
+  BreakOnExceptionControl()
+      : super('div', classes: 'break-on-exceptions margin-left flex-no-wrap') {
     final CoreElement unhandled = new CoreElement('input')
       ..setAttribute('type', 'checkbox');
     _unhandledElement = unhandled.element;

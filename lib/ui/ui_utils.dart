@@ -4,12 +4,13 @@
 
 import 'dart:html' as html;
 
-
 import '../globals.dart';
 import '../service_extensions.dart';
 import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'primer.dart';
+
+const int defaultSplitterWidth = 12;
 
 PButton createExtensionButton(
     ServiceExtensionDescription extensionDescription) {
