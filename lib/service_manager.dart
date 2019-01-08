@@ -14,9 +14,9 @@ import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    final IsolateManager isolateManager = new IsolateManager();
+    final IsolateManager isolateManager = IsolateManager();
     final ServiceExtensionManager serviceExtensionManager =
-        new ServiceExtensionManager();
+        ServiceExtensionManager();
     isolateManager._serviceExtensionManager = serviceExtensionManager;
     serviceExtensionManager._isolateManager = isolateManager;
     _isolateManager = isolateManager;
@@ -24,11 +24,11 @@ class ServiceConnectionManager {
   }
 
   final StreamController<Null> _stateController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
   final StreamController<VmServiceWrapper> _connectionAvailableController =
-      new StreamController<VmServiceWrapper>.broadcast();
+      StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
   final Completer<Null> serviceAvailable = Completer();
   final Map<String, List<String>> methodsForService = {};
 
@@ -163,13 +163,13 @@ class IsolateManager {
   ServiceExtensionManager _serviceExtensionManager;
 
   final StreamController<IsolateRef> _isolateCreatedController =
-      new StreamController<IsolateRef>.broadcast();
+      StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _isolateExitedController =
-      new StreamController<IsolateRef>.broadcast();
+      StreamController<IsolateRef>.broadcast();
   final StreamController<IsolateRef> _selectedIsolateController =
-      new StreamController<IsolateRef>.broadcast();
+      StreamController<IsolateRef>.broadcast();
 
-  List<IsolateRef> get isolates => new List<IsolateRef>.unmodifiable(_isolates);
+  List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
 
   IsolateRef get selectedIsolate => _selectedIsolate;
 
@@ -339,7 +339,7 @@ class ServiceExtensionManager {
           didSendFirstFrameEvent =
               value != null && value.json['enabled'] == 'true';
         } else {
-          final EvalOnDartLibrary flutterLibrary = new EvalOnDartLibrary(
+          final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
             'package:flutter/src/widgets/binding.dart',
             _service,
           );
@@ -428,12 +428,11 @@ class ServiceExtensionManager {
 
     final StreamController<ServiceExtensionState> streamController =
         _getServiceExtensionStateController(name);
-    streamController.add(new ServiceExtensionState(enabled, value));
+    streamController.add(ServiceExtensionState(enabled, value));
 
     // Add or remove service extension from [enabledServiceExtensions].
     if (enabled) {
-      _enabledServiceExtensions[name] =
-          new ServiceExtensionState(enabled, value);
+      _enabledServiceExtensions[name] = ServiceExtensionState(enabled, value);
     } else {
       _enabledServiceExtensions.remove(name);
     }
@@ -486,7 +485,7 @@ class ServiceExtensionManager {
             .add(_enabledServiceExtensions[name]);
       } else {
         _serviceExtensionStateController[name]
-            .add(new ServiceExtensionState(false, null));
+            .add(ServiceExtensionState(false, null));
       }
     });
   }

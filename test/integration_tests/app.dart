@@ -23,7 +23,7 @@ void appTests() {
 
   test('can switch pages', () async {
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logs');
 

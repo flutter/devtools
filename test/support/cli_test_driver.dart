@@ -80,8 +80,8 @@ class CliAppFixture extends AppFixture {
     final Stream<String> lines =
         process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final StreamController<String> lineController =
-        new StreamController<String>.broadcast();
-    final Completer<String> completer = new Completer<String>();
+        StreamController<String>.broadcast();
+    final Completer<String> completer = Completer<String>();
 
     lines.listen((String line) {
       if (completer.isCompleted) {
@@ -103,7 +103,7 @@ class CliAppFixture extends AppFixture {
 
     final VM vm = await serviceConnection.getVM();
 
-    return new CliAppFixture._(
+    return CliAppFixture._(
       appScriptPath,
       process,
       lineController.stream,
@@ -114,7 +114,7 @@ class CliAppFixture extends AppFixture {
   }
 
   String get scriptSource {
-    return new File(appScriptPath).readAsStringSync();
+    return File(appScriptPath).readAsStringSync();
   }
 
   static List<int> parseBreakpointLines(String source) {
@@ -161,8 +161,8 @@ class FlutterAppFixture extends AppFixture {
     final Stream<String> lines =
         process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final StreamController<String> lineController =
-        new StreamController<String>.broadcast();
-    final Completer<String> completer = new Completer<String>();
+        StreamController<String>.broadcast();
+    final Completer<String> completer = Completer<String>();
 
     lines.listen((String line) {
       if (line.contains('"port":')) {
@@ -185,7 +185,7 @@ class FlutterAppFixture extends AppFixture {
 
     final VM vm = await serviceConnection.getVM();
 
-    return new FlutterAppFixture._(
+    return FlutterAppFixture._(
         process, lineController.stream, port, serviceConnection, vm.isolates);
   }
 }

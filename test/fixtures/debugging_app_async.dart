@@ -8,7 +8,7 @@ void main() {
   print('starting debugging app (async)');
 
   void run() {
-    new Timer(const Duration(milliseconds: 100), () async {
+    Timer(const Duration(milliseconds: 100), () async {
       await performAction();
 
       run();
@@ -37,5 +37,5 @@ void inc() {
 }
 
 Future delay() {
-  return new Future.delayed(const Duration(milliseconds: 100));
+  return Future.delayed(const Duration(milliseconds: 100));
 }

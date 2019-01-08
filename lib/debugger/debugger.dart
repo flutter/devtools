@@ -36,9 +36,9 @@ import '../utils.dart';
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
-      : debuggerState = new DebuggerState(),
+      : debuggerState = DebuggerState(),
         super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
-    deviceStatus = new StatusItem();
+    deviceStatus = StatusItem();
     addStatusItem(deviceStatus);
   }
 
@@ -63,7 +63,7 @@ class DebuggerScreen extends Screen {
     CoreElement sourceArea;
     CoreElement consoleDiv;
 
-    final PButton resumeButton = new PButton()
+    final PButton resumeButton = PButton()
       ..primary()
       ..small()
       ..disabled = true
@@ -77,7 +77,7 @@ class DebuggerScreen extends Screen {
       resumeButton.disabled = false;
     });
 
-    final PButton pauseButton = new PButton()
+    final PButton pauseButton = PButton()
       ..small()
       ..add(<CoreElement>[
         span(c: 'octicon octicon-primitive-dot'),
@@ -97,7 +97,7 @@ class DebuggerScreen extends Screen {
     PButton stepOver, stepIn, stepOut;
 
     final BreakOnExceptionControl breakOnExceptionControl =
-        new BreakOnExceptionControl();
+        BreakOnExceptionControl();
     breakOnExceptionControl.onPauseModeChanged.listen((String mode) {
       debuggerState.setExceptionPauseMode(mode);
     });
@@ -105,7 +105,7 @@ class DebuggerScreen extends Screen {
       breakOnExceptionControl.exceptionPauseMode = mode;
     });
 
-    consoleArea = new ConsoleArea();
+    consoleArea = ConsoleArea();
     List<CoreElement> navEditorPanels;
 
     mainDiv.add(<CoreElement>[
@@ -132,19 +132,19 @@ class DebuggerScreen extends Screen {
                     ]),
                   div(c: 'btn-group flex-no-wrap margin-left')
                     ..add(<CoreElement>[
-                      stepIn = new PButton()
+                      stepIn = PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-down'),
                           span(text: 'Step in'),
                         ])
                         ..small(),
-                      stepOver = new PButton()
+                      stepOver = PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-right'),
                           span(text: 'Step over'),
                         ])
                         ..small(),
-                      stepOut = new PButton()
+                      stepOut = PButton()
                         ..add(<CoreElement>[
                           span(c: 'octicon octicon-chevron-up'),
                           span(text: 'Step out'),
@@ -201,12 +201,12 @@ class DebuggerScreen extends Screen {
       'gutters': <String>['breakpoints'],
     };
     final CodeMirror codeMirror =
-        new CodeMirror.fromElement(sourceArea.element, options: options);
+        CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');
 
-    sourceEditor = new SourceEditor(codeMirror, debuggerState);
+    sourceEditor = SourceEditor(codeMirror, debuggerState);
 
     debuggerState.onBreakpointsChanged
         .listen((List<Breakpoint> breakpoints) async {
@@ -224,7 +224,7 @@ class DebuggerScreen extends Screen {
         if (reportedException != null && frames.isNotEmpty) {
           final Frame frame = frames.first;
 
-          final Frame newFrame = new Frame()
+          final Frame newFrame = Frame()
             ..type = frame.type
             ..index = frame.index
             ..function = frame.function
@@ -233,7 +233,7 @@ class DebuggerScreen extends Screen {
             ..kind = frame.kind;
 
           final List<BoundVariable> newVars = <BoundVariable>[];
-          newVars.add(new BoundVariable()
+          newVars.add(BoundVariable()
             ..name = '<exception>'
             ..value = reportedException);
           newVars.addAll(frame.vars ?? []);
@@ -293,7 +293,7 @@ class DebuggerScreen extends Screen {
   }
 
   CoreElement _buildMenuNav() {
-    callStackView = new CallStackView();
+    callStackView = CallStackView();
 
     final VariableDescriber describer = (BoundVariable variable) async {
       if (variable == null) {
@@ -325,10 +325,10 @@ class DebuggerScreen extends Screen {
         }
       }
     };
-    variablesView = new VariablesView(describer);
+    variablesView = VariablesView(describer);
 
     _breakpointsCountDiv = span(text: '0', c: 'counter');
-    breakpointsView = new BreakpointsView(
+    breakpointsView = BreakpointsView(
         _breakpointsCountDiv, debuggerState, debuggerState.getShortScriptName);
     breakpointsView.onDoubleClick.listen((Breakpoint breakpoint) async {
       final dynamic location = breakpoint.location;
@@ -337,16 +337,16 @@ class DebuggerScreen extends Screen {
         final SourcePosition pos =
             debuggerState.calculatePosition(script, location.tokenPos);
         sourceEditor.displayScript(script,
-            scrollTo: new SourcePosition(pos.line - 1));
+            scrollTo: SourcePosition(pos.line - 1));
       } else if (location is UnresolvedSourceLocation) {
         final Script script = await debuggerState.getScript(location.script);
         sourceEditor.displayScript(script,
-            scrollTo: new SourcePosition(location.line - 1));
+            scrollTo: SourcePosition(location.line - 1));
       }
     });
 
     CoreElement scriptCountDiv;
-    scriptsView = new ScriptsView(debuggerState.getShortScriptName);
+    scriptsView = ScriptsView(debuggerState.getShortScriptName);
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptRef == null) {
         _displaySource(null);
@@ -368,18 +368,18 @@ class DebuggerScreen extends Screen {
       scriptCountDiv.text = scriptsView.items.length.toString();
     });
 
-    final PNavMenu menu = new PNavMenu(<CoreElement>[
-      new PNavMenuItem('Call stack')
+    final PNavMenu menu = PNavMenu(<CoreElement>[
+      PNavMenuItem('Call stack')
         ..click(() => callStackView.element.toggleAttribute('hidden')),
       callStackView.element,
-      new PNavMenuItem('Variables')
+      PNavMenuItem('Variables')
         ..click(() => variablesView.element.toggleAttribute('hidden')),
       variablesView.element,
-      new PNavMenuItem('Breakpoints')
+      PNavMenuItem('Breakpoints')
         ..add(_breakpointsCountDiv)
         ..click(() => breakpointsView.element.toggleAttribute('hidden')),
       breakpointsView.element,
-      new PNavMenuItem('Scripts')
+      PNavMenuItem('Scripts')
         ..add(
           scriptCountDiv = span(text: '0', c: 'counter'),
         )
@@ -513,17 +513,16 @@ class DebuggerState {
 
   final Map<String, Script> _scriptCache = <String, Script>{};
 
-  final BehaviorSubject<bool> _paused =
-      new BehaviorSubject<bool>(seedValue: false);
+  final BehaviorSubject<bool> _paused = BehaviorSubject<bool>(seedValue: false);
   final BehaviorSubject<bool> _supportsStepping =
-      new BehaviorSubject<bool>(seedValue: false);
+      BehaviorSubject<bool>(seedValue: false);
 
   Event _lastEvent;
 
   final BehaviorSubject<List<Breakpoint>> _breakpoints =
-      new BehaviorSubject<List<Breakpoint>>(seedValue: <Breakpoint>[]);
+      BehaviorSubject<List<Breakpoint>>(seedValue: <Breakpoint>[]);
 
-  final BehaviorSubject<String> _exceptionPauseMode = new BehaviorSubject();
+  final BehaviorSubject<String> _exceptionPauseMode = BehaviorSubject();
 
   InstanceRef _reportedException;
 
@@ -532,7 +531,7 @@ class DebuggerState {
   Stream<bool> get onPausedChanged => _paused;
 
   Stream<bool> get onSupportsStepping =>
-      new Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
+      Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
 
   Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
 
@@ -707,7 +706,7 @@ class DebuggerState {
 
       while (index < row.length - 1) {
         if (row.elementAt(index) == tokenPos) {
-          return new SourcePosition(line, row.elementAt(index + 1));
+          return SourcePosition(line, row.elementAt(index + 1));
         }
         index += 2;
       }
@@ -895,7 +894,7 @@ class SourceEditor {
   }
 
   void displayExecutionPoint(Script script, {SourcePosition position}) {
-    executionPoint = new ScriptAndPosition(script.uri, position: position);
+    executionPoint = ScriptAndPosition(script.uri, position: position);
 
     // This also calls _refreshMarkers().
     displayScript(script, scrollTo: position);
@@ -908,7 +907,7 @@ class SourceEditor {
           span(c: 'octicon octicon-arrow-up execution-marker');
 
       codeMirror.addWidget(
-        new Position(position.line - 1, position.column - 1),
+        Position(position.line - 1, position.column - 1),
         _executionPointElement.element,
       );
     }
@@ -963,7 +962,7 @@ typedef URIDescriber = String Function(String uri);
 class BreakpointsView {
   BreakpointsView(this._breakpointsCountDiv, DebuggerState debuggerState,
       URIDescriber uriDescriber) {
-    _items = new SelectableList<Breakpoint>()
+    _items = SelectableList<Breakpoint>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -1016,7 +1015,7 @@ class BreakpointsView {
 
 class ScriptsView {
   ScriptsView(URIDescriber uriDescriber) {
-    _items = new SelectableList<ScriptRef>()
+    _items = SelectableList<ScriptRef>()
       ..flex()
       ..clazz('debugger-items-list');
     _items.setRenderer((ScriptRef scriptRef) {
@@ -1097,7 +1096,7 @@ class ScriptsView {
 
 class CallStackView {
   CallStackView() {
-    _items = new SelectableList<Frame>()
+    _items = SelectableList<Frame>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -1146,9 +1145,9 @@ class CallStackView {
   void showFrames(List<Frame> frames, {bool selectTop = false}) {
     if (frames.isEmpty) {
       // Create a marker frame for 'no call frames'.
-      final Frame frame = new Frame()
+      final Frame frame = Frame()
         ..kind = emptyStackMarker
-        ..code = (new CodeRef()..name = '<no call frames>');
+        ..code = (CodeRef()..name = '<no call frames>');
       _items.setItems([frame]);
     } else {
       _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
@@ -1164,7 +1163,7 @@ typedef VariableDescriber = Future<String> Function(BoundVariable variable);
 
 class VariablesView {
   VariablesView(VariableDescriber variableDescriber) {
-    _items = new SelectableList<BoundVariable>()
+    _items = SelectableList<BoundVariable>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -1233,21 +1232,21 @@ class VariablesView {
 class BreakOnExceptionControl extends CoreElement {
   BreakOnExceptionControl()
       : super('div', classes: 'break-on-exceptions margin-left flex-no-wrap') {
-    final CoreElement unhandled = new CoreElement('input')
+    final CoreElement unhandled = CoreElement('input')
       ..setAttribute('type', 'checkbox');
     _unhandledElement = unhandled.element;
 
-    final CoreElement all = new CoreElement('input')
+    final CoreElement all = CoreElement('input')
       ..setAttribute('type', 'checkbox');
     _allElement = all.element;
 
     add([
-      new CoreElement('label')
+      CoreElement('label')
         ..add(<CoreElement>[
           unhandled,
           span(text: ' Break on unhandled exceptions')
         ]),
-      new CoreElement('label')
+      CoreElement('label')
         ..add(<CoreElement>[
           all,
           span(text: ' Break on all exceptions'),
@@ -1273,7 +1272,7 @@ class BreakOnExceptionControl extends CoreElement {
   html.InputElement _allElement;
 
   final StreamController<String> _pauseModeController =
-      new StreamController.broadcast();
+      StreamController.broadcast();
 
   /// See the string values for [ExceptionPauseMode].
   Stream<String> get onPauseModeChanged => _pauseModeController.stream;
@@ -1356,16 +1355,16 @@ class ConsoleArea {
     _container = div()
       ..layoutVertical()
       ..flex();
-    _editor = new CodeMirror.fromElement(_container.element, options: options);
+    _editor = CodeMirror.fromElement(_container.element, options: options);
     _editor.setReadOnly(true);
 
     final codeMirrorElement = _container.element.children[0];
     codeMirrorElement.setAttribute('flex', '');
   }
 
-  final DelayedTimer _timer = new DelayedTimer(
+  final DelayedTimer _timer = DelayedTimer(
       const Duration(milliseconds: 100), const Duration(seconds: 1));
-  final StringBuffer _bufferedText = new StringBuffer();
+  final StringBuffer _bufferedText = StringBuffer();
 
   CoreElement _container;
   CodeMirror _editor;

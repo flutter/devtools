@@ -51,14 +51,14 @@ class App {
   }
 
   static void register(PerfToolFramework framework) {
-    final App app = new App(framework);
+    final App app = App(framework);
     app._bind();
   }
 
   final PerfToolFramework framework;
 
   void _bind() {
-    final js.JsObject binding = new js.JsObject.jsify(<dynamic, dynamic>{});
+    final js.JsObject binding = js.JsObject.jsify(<dynamic, dynamic>{});
     binding['send'] = (String method, int id, dynamic arg) {
       try {
         final dynamic result = _dispatch(method, id, arg);

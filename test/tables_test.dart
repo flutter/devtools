@@ -10,20 +10,20 @@ import 'package:test/test.dart';
 
 void main() {
   final List<TestData> oneThousandRows =
-      List<TestData>.generate(1000, (int i) => new TestData('Test Data $i'));
+      List<TestData>.generate(1000, (int i) => TestData('Test Data $i'));
 
   group('static tables', () {
     Table<TestData> table;
     setUp(() async {
-      table = new Table<TestData>();
+      table = Table<TestData>();
       // About 10 rows of data visible.
       table.element.element.style
         ..height = '300px'
         ..overflow = 'scroll';
       document.body.append(table.element.element);
 
-      table.addColumn(new TestColumn('Col One'));
-      table.addColumn(new TestColumn('Col Two'));
+      table.addColumn(TestColumn('Col One'));
+      table.addColumn(TestColumn('Col Two'));
       table.setRows(oneThousandRows);
 
       await window.animationFrame;
@@ -39,15 +39,15 @@ void main() {
   group('virtual tables', () {
     Table<TestData> table;
     setUp(() async {
-      table = new Table<TestData>.virtual();
+      table = Table<TestData>.virtual();
       // About 10 rows of data visible.
       table.element.element.style
         ..height = '300px'
         ..overflow = 'scroll';
       document.body.append(table.element.element);
 
-      table.addColumn(new TestColumn('Col One'));
-      table.addColumn(new TestColumn('Col Two'));
+      table.addColumn(TestColumn('Col One'));
+      table.addColumn(TestColumn('Col Two'));
       table.setRows(oneThousandRows);
 
       await window.animationFrame;

@@ -40,7 +40,7 @@ CoreElement createExtensionCheckBox(
   inputLabel.add(span(text: extensionName));
 
   final outerDiv = div(c: 'form-checkbox')
-    ..add(new CoreElement('label')..add([input, inputLabel]));
+    ..add(CoreElement('label')..add([input, inputLabel]));
   input.setAttribute('title', extensionDescription.tooltip);
   return outerDiv;
 }
@@ -49,7 +49,7 @@ CoreElement createExtensionCheckBox(
 
 // TODO(kenzie): move method to more specific library.
 CoreElement createHotReloadButton() {
-  final PButton button = new PButton('Hot Reload')..small();
+  final PButton button = PButton('Hot Reload')..small();
   button.click(() async {
     button.disabled = true;
     await serviceManager.performHotReload();
@@ -60,7 +60,7 @@ CoreElement createHotReloadButton() {
 
 class ServiceExtensionButton {
   ServiceExtensionButton(this.extensionDescription) {
-    button = new PButton.icon(
+    button = PButton.icon(
         extensionDescription.description, extensionDescription.icon,
         title: extensionDescription.tooltip)
       ..small();

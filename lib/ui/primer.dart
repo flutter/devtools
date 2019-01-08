@@ -9,7 +9,7 @@ import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'icons.dart';
 
-PSelect select() => new PSelect();
+PSelect select() => PSelect();
 
 class PSelect extends CoreElement {
   PSelect() : super('select', classes: 'form-select');
@@ -17,7 +17,7 @@ class PSelect extends CoreElement {
   void small() => clazz('select-sm');
 
   void option(String name, {String value}) {
-    final CoreElement e = new CoreElement('option', text: name);
+    final CoreElement e = CoreElement('option', text: name);
     if (value != null) {
       final OptionElement optionElement = e.element;
       optionElement.value = value;
@@ -95,7 +95,7 @@ class PFlash extends CoreElement {
 /// A tabbed container (ala Chrome tabs).
 class PTabNav extends CoreElement {
   PTabNav(List<PTabNavTab> tabs) : super('div', classes: 'tabnav') {
-    final CoreElement nav = add(new CoreElement('nav', classes: 'tabnav-tabs'));
+    final CoreElement nav = add(CoreElement('nav', classes: 'tabnav-tabs'));
     nav.add(tabs);
 
     if (tabs.isNotEmpty) {

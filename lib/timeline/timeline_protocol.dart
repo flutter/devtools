@@ -14,7 +14,7 @@ class TimelineData {
   final Map<int, TimelineThread> threadMap = <int, TimelineThread>{};
 
   final StreamController<TimelineThreadEvent> _timelineEventsController =
-      new StreamController<TimelineThreadEvent>.broadcast();
+      StreamController<TimelineThreadEvent>.broadcast();
 
   void addThread(TimelineThread thread) {
     threads.add(thread);
@@ -87,7 +87,7 @@ class TimelineData {
   void printData() {
     for (TimelineThread thread in threads) {
       print('${thread.name}:');
-      final StringBuffer buf = new StringBuffer();
+      final StringBuffer buf = StringBuffer();
 
       for (TimelineThreadEvent event in thread.events) {
         event.format(buf, '  ');
@@ -152,7 +152,7 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   void _handleDurationBeginEvent(TimelineEvent event) {
     final TimelineThreadEvent e =
-        new TimelineThreadEvent(event.threadId, event.name);
+        TimelineThreadEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
 
     if (durationStack == null) {
@@ -181,7 +181,7 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   void _handleDurationCompleteEvent(TimelineEvent event) {
     final TimelineThreadEvent e =
-        new TimelineThreadEvent(event.threadId, event.name);
+        TimelineThreadEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
     e.durationMicros = event.duration;
 
@@ -198,13 +198,13 @@ class TimelineThread implements Comparable<TimelineThread> {
     final TimelineThreadEvent parentEvent = _asyncEvents[asyncUID];
     if (parentEvent == null) {
       final TimelineThreadEvent e =
-          new TimelineThreadEvent(event.threadId, event.name);
+          TimelineThreadEvent(event.threadId, event.name);
       e.setStart(event.timestampMicros);
       _asyncEvents[asyncUID] = e;
       events.add(e);
     } else {
       final TimelineThreadEvent e =
-          new TimelineThreadEvent(event.threadId, event.name);
+          TimelineThreadEvent(event.threadId, event.name);
       e.setStart(event.timestampMicros);
       e.parent = parentEvent;
       _asyncEvents[asyncUID] = e;
@@ -215,7 +215,7 @@ class TimelineThread implements Comparable<TimelineThread> {
     final String asyncUID = event.asyncUID;
 
     final TimelineThreadEvent e =
-        new TimelineThreadEvent(event.threadId, event.name);
+        TimelineThreadEvent(event.threadId, event.name);
     e.setStart(event.timestampMicros);
     e.durationMicros = event.duration;
 
@@ -345,7 +345,7 @@ class TimelineFrameData {
 
     for (TimelineThread thread in threads) {
       print('${thread.name}');
-      final StringBuffer buf = new StringBuffer();
+      final StringBuffer buf = StringBuffer();
 
       for (TimelineThreadEvent event in events) {
         if (event.threadId == thread.threadId) {
@@ -368,7 +368,7 @@ class TimelineFrameData {
 class TimelineEvent {
   /// Creates a timeline event given JSON-encoded event data.
   factory TimelineEvent(Map<String, dynamic> json) {
-    return new TimelineEvent._(json, json['name'], json['cat'], json['ph'],
+    return TimelineEvent._(json, json['name'], json['cat'], json['ph'],
         json['pid'], json['tid'], json['dur'], json['ts'], json['args']);
   }
 

@@ -158,7 +158,7 @@ class CustomIconMaker {
     final String mapKey = '${text}_${kind.name}_$isAbstract';
 
     return iconCache.putIfAbsent(mapKey, () {
-      return new CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
+      return CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
     });
   }
 
@@ -230,6 +230,6 @@ class ColorIconMaker {
   final Map<Color, Icon> iconCache = {};
 
   Icon getCustomIcon(Color color) {
-    return iconCache.putIfAbsent(color, () => new ColorIcon(color));
+    return iconCache.putIfAbsent(color, () => ColorIcon(color));
   }
 }

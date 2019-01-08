@@ -15,14 +15,14 @@ class VmServiceWrapper implements VmService {
     Log log,
     DisposeHandler disposeHandler,
   }) {
-    _vmService = new VmService(inStream, writeMessage,
+    _vmService = VmService(inStream, writeMessage,
         log: log, disposeHandler: disposeHandler);
   }
 
   VmService _vmService;
   final Map<String, Future<Success>> _activeStreams = {};
   final Set<Future<Object>> _activeFutures = Set();
-  Completer<bool> allFuturesCompleted = new Completer<bool>();
+  Completer<bool> allFuturesCompleted = Completer<bool>();
 
   @override
   Future<Breakpoint> addBreakpoint(
@@ -352,7 +352,7 @@ class VmServiceWrapper implements VmService {
 
   Future<T> _trackFuture<T>(Future<T> future) {
     if (allFuturesCompleted.isCompleted) {
-      allFuturesCompleted = new Completer<bool>();
+      allFuturesCompleted = Completer<bool>();
     }
     _activeFutures.add(future);
     future.whenComplete(() {
