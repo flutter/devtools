@@ -252,6 +252,36 @@ void debuggingTests() {
       contains('1\n'),
     );
   });
+
+  test('pause', () async {
+    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+
+    final DevtoolsManager tools =
+        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    await tools.start(appFixture);
+    await tools.switchPage('debugger');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'debugger');
+
+    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+
+    // verify running state
+    expect(await debuggingManager.getState(), 'running');
+
+    // pause
+    await debuggingManager.pause();
+
+    // wait for paused state
+    await waitFor(() async => await debuggingManager.getState() == 'paused');
+    expect(await debuggingManager.getState(), 'paused');
+
+    // resume
+    await debuggingManager.resume();
+
+    // verify state resumed
+    expect(await debuggingManager.getState(), 'running');
+  });
 }
 
 class DebuggingManager {
@@ -261,6 +291,10 @@ class DebuggingManager {
 
   Future<void> resume() async {
     await tools.tabInstance.send('debugger.resume');
+  }
+
+  Future<void> pause() async {
+    await tools.tabInstance.send('debugger.pause');
   }
 
   Future<void> step() async {
