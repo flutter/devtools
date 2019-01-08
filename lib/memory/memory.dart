@@ -368,7 +368,7 @@ class MemoryChart extends LineChart<MemoryTracker> {
     // TODO(devoncarew): draw dots for GC events?
 
     chartElement.setInnerHtml('''
-            <svg viewBox="0 0 ${dim.x} ${dim.y}">
+            <svg viewBox="0 0 ${dim.x} ${LineChart.fixedHeight}">
             <polyline
                 fill="none"
                 stroke="#0074d9"
