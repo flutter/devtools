@@ -89,6 +89,7 @@ const toggleSelectWidgetMode = ServiceExtensionDescription<bool>(
 const togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
   description: 'iOS',
+  tooltip: 'Toggle iOS platform',
   icon: FlutterIcons.phone,
   enabledValue: 'iOS',
   disabledValue: 'android',
@@ -96,7 +97,8 @@ const togglePlatformMode = ServiceExtensionDescription<String>(
 
 const slowAnimations = ServiceExtensionDescription<num>(
   extension: 'ext.flutter.timeDilation',
-  description: 'Enable Slow Animations',
+  description: 'Slow Animations',
+  tooltip: 'Toggle slow animations',
   icon: FlutterIcons.history,
   enabledValue: 5.0,
   disabledValue: 1.0,
