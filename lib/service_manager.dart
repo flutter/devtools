@@ -387,6 +387,10 @@ class ServiceExtensionManager {
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
+    if (!extensions.statefulExtensionsWhitelist.contains(name)) {
+      return;
+    }
+
     final response = await _service.callServiceExtension(
       name,
       isolateId: _isolateManager.selectedIsolate.id,

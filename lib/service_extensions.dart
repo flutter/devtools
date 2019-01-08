@@ -107,3 +107,17 @@ const slowAnimations = ServiceExtensionDescription<num>(
 // This extension should never be displayed as a button so does not need a
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
+
+// If you add a service extension to this file whose state should be restored on
+// page refresh/initial startup, add the extension to this list.
+const List<String> statefulExtensionsWhitelist = [
+  'ext.flutter.debugAllowBanner',
+  'ext.flutter.debugPaint',
+  'ext.flutter.debugPaintBaselinesEnabled',
+  'ext.flutter.inspector.show',
+  'ext.flutter.platformOverride',
+  'ext.flutter.profileWidgetBuilds',
+  'ext.flutter.repaintRainbow',
+  'ext.flutter.showPerformanceOverlay',
+  'ext.flutter.timeDilation',
+];
