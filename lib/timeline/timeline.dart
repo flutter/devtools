@@ -82,7 +82,6 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
-      div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
@@ -98,6 +97,7 @@ class TimelineScreen extends Screen {
               togglePlatformButton,
             ]),
         ]),
+      div(c: 'section'),
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
