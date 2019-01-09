@@ -6,15 +6,17 @@ library service_extensions;
 
 import 'ui/icons.dart';
 
-class ServiceExtensionDescription<T> {
-  const ServiceExtensionDescription({
+class ToggleableServiceExtensionDescription<T> {
+  ToggleableServiceExtensionDescription({
     this.extension,
     this.description,
     this.icon,
     this.enabledValue,
     this.disabledValue,
     String tooltip,
-  }) : tooltip = tooltip ?? description;
+  }) : tooltip = tooltip ?? description {
+    toggleableExtensionsWhitelist[extension] = this;
+  }
 
   final String extension;
   final String description;
@@ -24,7 +26,10 @@ class ServiceExtensionDescription<T> {
   final String tooltip;
 }
 
-const debugPaint = ServiceExtensionDescription<bool>(
+final Map<String, ToggleableServiceExtensionDescription>
+    toggleableExtensionsWhitelist = {};
+
+final debugPaint = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug paint',
   tooltip: 'Toggle debug paint',
@@ -33,7 +38,7 @@ const debugPaint = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const debugPaintBaselines = ServiceExtensionDescription<bool>(
+final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint baselines',
   tooltip: 'Show paint baselines',
@@ -42,7 +47,7 @@ const debugPaintBaselines = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const repaintRainbow = ServiceExtensionDescription<bool>(
+final repaintRainbow = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Repaint rainbow',
   tooltip: 'Toogle Repaint rainbow',
@@ -51,7 +56,7 @@ const repaintRainbow = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const performanceOverlay = ServiceExtensionDescription<bool>(
+final performanceOverlay = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance overlay',
   tooltip: 'Toggle performance overlay',
@@ -60,7 +65,7 @@ const performanceOverlay = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const debugAllowBanner = ServiceExtensionDescription<bool>(
+final debugAllowBanner = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Hide debug banner',
   tooltip: 'Hide debug mode banner',
@@ -69,7 +74,7 @@ const debugAllowBanner = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const profileWidgetBuilds = ServiceExtensionDescription<bool>(
+final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track widget rebuilds',
   tooltip: 'Visualize widget rebuilds',
@@ -78,7 +83,7 @@ const profileWidgetBuilds = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const toggleSelectWidgetMode = ServiceExtensionDescription<bool>(
+final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>(
   extension: 'ext.flutter.inspector.show',
   description: 'Toggle Select Mode',
   icon: FlutterIcons.locate,
@@ -86,7 +91,7 @@ const toggleSelectWidgetMode = ServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-const togglePlatformMode = ServiceExtensionDescription<String>(
+final togglePlatformMode = ToggleableServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
   description: 'iOS',
   tooltip: 'Toggle iOS platform',
@@ -95,7 +100,7 @@ const togglePlatformMode = ServiceExtensionDescription<String>(
   disabledValue: 'android',
 );
 
-const slowAnimations = ServiceExtensionDescription<num>(
+final slowAnimations = ToggleableServiceExtensionDescription<num>(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
   tooltip: 'Toggle slow animations',
@@ -107,17 +112,3 @@ const slowAnimations = ServiceExtensionDescription<num>(
 // This extension should never be displayed as a button so does not need a
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
-
-// If you add a service extension to this file whose state should be restored on
-// page refresh/initial startup, add the extension to this whitelist.
-final Map<String, ServiceExtensionDescription> toggleableExtensionsWhitelist = {
-  debugAllowBanner.extension: debugAllowBanner,
-  debugPaint.extension: debugPaint,
-  debugPaintBaselines.extension: debugPaintBaselines,
-  toggleSelectWidgetMode.extension: toggleSelectWidgetMode,
-  togglePlatformMode.extension: togglePlatformMode,
-  profileWidgetBuilds.extension: profileWidgetBuilds,
-  repaintRainbow.extension: repaintRainbow,
-  performanceOverlay.extension: performanceOverlay,
-  slowAnimations.extension: slowAnimations,
-};
