@@ -116,11 +116,11 @@ void main() {
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         extensionName,
         true,
-        0.5,
+        5.0,
       );
 
-      await _verifyExtensionStateOnTestDevice(evalExpression, '0.5', library);
-      await _verifyExtensionStateInServiceManager(extensionName, true, 0.5);
+      await _verifyExtensionStateOnTestDevice(evalExpression, '5.0', library);
+      await _verifyExtensionStateInServiceManager(extensionName, true, 5.0);
     });
 
     test('callService', () async {
