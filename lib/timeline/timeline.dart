@@ -10,8 +10,10 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
+import '../service_registrations.dart' as registrations;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -81,13 +83,10 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
-      createLiveChartArea(),
-      div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
-          pauseButton,
-          resumeButton,
+          createHotReloadButton(),
           div()..flex(),
           div(c: 'btn-group')
             ..add(<CoreElement>[
@@ -98,6 +97,16 @@ class TimelineScreen extends Screen {
               slowAnimationsButton,
               togglePlatformButton,
             ]),
+        ]),
+      div(c: 'section'),
+      createLiveChartArea(),
+      div(c: 'section'),
+      div(c: 'section')
+        ..layoutHorizontal()
+        ..add(<CoreElement>[
+          pauseButton,
+          resumeButton,
+          div()..flex(),
         ]),
       div(c: 'section')
         ..add(<CoreElement>[
@@ -253,6 +262,31 @@ class TimelineScreen extends Screen {
   @override
   HelpInfo get helpInfo =>
       HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
+
+  // TODO(kenzie): add hotRestart button.
+
+  CoreElement createHotReloadButton() {
+    final PButton button = new PButton.icon(
+      'Hot Reload',
+      FlutterIcons.hotReload,
+    )..small();
+
+    button.click(() async {
+      button.disabled = true;
+      await serviceManager.performHotReload();
+      button.disabled = false;
+    });
+
+    // Hide the button if the connected device does not support hot reload.
+    serviceManager.hasRegisteredService(
+      registrations.reloadSources,
+      (registered) {
+        button.hidden(!registered);
+      },
+    );
+
+    return button;
+  }
 }
 
 class TimelineFramesUI extends CoreElement {

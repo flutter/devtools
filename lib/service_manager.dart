@@ -10,6 +10,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
+import 'service_registrations.dart' as registrations;
 import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
@@ -29,8 +30,12 @@ class ServiceConnectionManager {
       StreamController<VmServiceWrapper>.broadcast();
   final StreamController<Null> _connectionClosedController =
       StreamController<Null>.broadcast();
+
   final Completer<Null> serviceAvailable = Completer();
-  final Map<String, List<String>> methodsForService = {};
+
+  final Map<String, StreamController<bool>> _serviceRegistrationController =
+      <String, StreamController<bool>>{};
+  final Map<String, List<String>> registeredMethodsForService = {};
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -54,9 +59,12 @@ class ServiceConnectionManager {
   Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
 
   /// Call a service that is registered by exactly one client.
-  Future<Response> callService(String name,
-      {String isolateId, Map args}) async {
-    final registered = methodsForService[name] ?? const [];
+  Future<Response> callService(
+    String name, {
+    String isolateId,
+    Map args,
+  }) async {
+    final registered = registeredMethodsForService[name] ?? const [];
     if (registered.length != 1) {
       throw Exception('Expected one registered service for "$name" but found '
           '${registered.length}');
@@ -69,9 +77,12 @@ class ServiceConnectionManager {
   ///
   /// For example, a service to navigate a code editor to a specific line and
   /// column might be registered by multiple code editors.
-  Future<List<Response>> callMulticastService(String name,
-      {String isolateId, Map args}) async {
-    final registered = methodsForService[name] ?? const [];
+  Future<List<Response>> callMulticastService(
+    String name, {
+    String isolateId,
+    Map args,
+  }) async {
+    final registered = registeredMethodsForService[name] ?? const [];
     if (registered.isNotEmpty) {
       return Future.wait(registered.map((String method) {
         return service.callMethod(method, isolateId: isolateId, args: args);
@@ -79,6 +90,29 @@ class ServiceConnectionManager {
     } else {
       throw Exception('There are no registered methods for service "$name"');
     }
+  }
+
+  StreamSubscription<bool> hasRegisteredService(
+    String name,
+    void onData(bool value),
+  ) {
+    if (registeredMethodsForService.containsKey(name) && onData != null) {
+      onData(true);
+    }
+    final StreamController<bool> streamController =
+        _getServiceRegistrationController(name);
+    return streamController.stream.listen(onData);
+  }
+
+  StreamController<bool> _getServiceRegistrationController(String name) {
+    return _getStream(
+      name,
+      _serviceRegistrationController,
+      onFirstListenerSubscribed: () {
+        _serviceRegistrationController[name]
+            .add(registeredMethodsForService.containsKey(name));
+      },
+    );
   }
 
   Future<void> vmServiceOpened(
@@ -96,7 +130,12 @@ class ServiceConnectionManager {
 
       service.onServiceEvent.listen((e) {
         if (e.kind == EventKind.kServiceRegistered) {
-          methodsForService.putIfAbsent(e.service, () => []).add(e.method);
+          registeredMethodsForService
+              .putIfAbsent(e.service, () => [])
+              .add(e.method);
+          final StreamController<bool> streamController =
+              _getServiceRegistrationController(e.service);
+          streamController.add(true);
         }
       });
 
@@ -146,8 +185,10 @@ class ServiceConnectionManager {
 
   Future<void> performHotReload() async {
     try {
-      await callMulticastService('reloadSources',
-          isolateId: _isolateManager.selectedIsolate.id);
+      await callMulticastService(
+        registrations.reloadSources,
+        isolateId: _isolateManager.selectedIsolate.id,
+      );
     } catch (e) {
       // TODO: improve general error handling.
       print('Error during hot reload: "$e."');
@@ -334,8 +375,9 @@ class ServiceExtensionManager {
         bool didSendFirstFrameEvent = false;
         if (isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
           final value = await _service.callServiceExtension(
-              extensions.didSendFirstFrameEvent,
-              isolateId: _isolateManager.selectedIsolate.id);
+            extensions.didSendFirstFrameEvent,
+            isolateId: _isolateManager.selectedIsolate.id,
+          );
           didSendFirstFrameEvent =
               value != null && value.json['enabled'] == 'true';
         } else {
@@ -344,8 +386,9 @@ class ServiceExtensionManager {
             _service,
           );
           final InstanceRef value = await flutterLibrary.eval(
-              'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
-              isAlive: null);
+            'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
+            isAlive: null,
+          );
           didSendFirstFrameEvent =
               value != null && value.valueAsString == 'true';
         }
@@ -423,7 +466,10 @@ class ServiceExtensionManager {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-      String name, bool enabled, dynamic value) async {
+    String name,
+    bool enabled,
+    dynamic value,
+  ) async {
     await _callServiceExtension(name, value);
 
     final StreamController<ServiceExtensionState> streamController =
@@ -444,7 +490,9 @@ class ServiceExtensionManager {
   }
 
   StreamSubscription<bool> hasServiceExtension(
-      String name, void onData(bool value)) {
+    String name,
+    void onData(bool value),
+  ) {
     if (_serviceExtensions.contains(name) && onData != null) {
       onData(true);
     }
@@ -454,7 +502,9 @@ class ServiceExtensionManager {
   }
 
   StreamSubscription<ServiceExtensionState> getServiceExtensionState(
-      String name, void onData(ServiceExtensionState state)) {
+    String name,
+    void onData(ServiceExtensionState state),
+  ) {
     if (_enabledServiceExtensions.containsKey(name) && onData != null) {
       onData(_enabledServiceExtensions[name]);
     }
@@ -464,43 +514,51 @@ class ServiceExtensionManager {
   }
 
   StreamController<bool> _getServiceExtensionController(String name) {
-    return _getStream(name, _serviceExtensionController,
-        onFirstListenerSubscribed: () {
-      // If the service extension is in [_serviceExtensions], then we have been
-      // waiting for a listener to add the initial true event. Otherwise, the
-      // service extension is not available, so we should add a false event.
-      _serviceExtensionController[name].add(_serviceExtensions.contains(name));
-    });
+    return _getStream(
+      name,
+      _serviceExtensionController,
+      onFirstListenerSubscribed: () {
+        // If the service extension is in [_serviceExtensions], then we have been
+        // waiting for a listener to add the initial true event. Otherwise, the
+        // service extension is not available, so we should add a false event.
+        _serviceExtensionController[name]
+            .add(_serviceExtensions.contains(name));
+      },
+    );
   }
 
   StreamController<ServiceExtensionState> _getServiceExtensionStateController(
       String name) {
-    return _getStream(name, _serviceExtensionStateController,
-        onFirstListenerSubscribed: () {
-      // If the service extension is enabled, add the current state as the first
-      // event. Otherwise, add a disabled state as the first event.
-      if (_enabledServiceExtensions.containsKey(name)) {
-        assert(_enabledServiceExtensions[name].enabled);
-        _serviceExtensionStateController[name]
-            .add(_enabledServiceExtensions[name]);
-      } else {
-        _serviceExtensionStateController[name]
-            .add(ServiceExtensionState(false, null));
-      }
-    });
+    return _getStream(
+      name,
+      _serviceExtensionStateController,
+      onFirstListenerSubscribed: () {
+        // If the service extension is enabled, add the current state as the first
+        // event. Otherwise, add a disabled state as the first event.
+        if (_enabledServiceExtensions.containsKey(name)) {
+          assert(_enabledServiceExtensions[name].enabled);
+          _serviceExtensionStateController[name]
+              .add(_enabledServiceExtensions[name]);
+        } else {
+          _serviceExtensionStateController[name]
+              .add(ServiceExtensionState(false, null));
+        }
+      },
+    );
   }
+}
 
-  /// Initializes a generic stream if it does not already exist for the given
-  /// extension name.
-  StreamController<T> _getStream<T>(
-      String name, Map<String, StreamController<T>> streams,
-      {@required void onFirstListenerSubscribed()}) {
-    streams.putIfAbsent(
-        name,
-        () =>
-            StreamController<T>.broadcast(onListen: onFirstListenerSubscribed));
-    return streams[name];
-  }
+/// Given a map of Strings to StreamControllers [streams], get the stream for
+/// the given name. If it does not exist, initialize a generic stream and map it
+/// to the name.
+StreamController<T> _getStream<T>(
+    String name, Map<String, StreamController<T>> streams,
+    {@required void onFirstListenerSubscribed()}) {
+  streams.putIfAbsent(
+    name,
+    () => StreamController<T>.broadcast(onListen: onFirstListenerSubscribed),
+  );
+  return streams[name];
 }
 
 class ServiceExtensionState {
