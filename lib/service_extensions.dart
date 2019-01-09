@@ -109,15 +109,15 @@ const slowAnimations = ServiceExtensionDescription<num>(
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
 
 // If you add a service extension to this file whose state should be restored on
-// page refresh/initial startup, add the extension to this list.
-const List<String> statefulExtensionsWhitelist = [
-  'ext.flutter.debugAllowBanner',
-  'ext.flutter.debugPaint',
-  'ext.flutter.debugPaintBaselinesEnabled',
-  'ext.flutter.inspector.show',
-  'ext.flutter.platformOverride',
-  'ext.flutter.profileWidgetBuilds',
-  'ext.flutter.repaintRainbow',
-  'ext.flutter.showPerformanceOverlay',
-  'ext.flutter.timeDilation',
-];
+// page refresh/initial startup, add the extension to this whitelist.
+final Map<String, ServiceExtensionDescription> toggleableExtensionsWhitelist = {
+  debugAllowBanner.extension: debugAllowBanner,
+  debugPaint.extension: debugPaint,
+  debugPaintBaselines.extension: debugPaintBaselines,
+  toggleSelectWidgetMode.extension: toggleSelectWidgetMode,
+  togglePlatformMode.extension: togglePlatformMode,
+  profileWidgetBuilds.extension: profileWidgetBuilds,
+  repaintRainbow.extension: repaintRainbow,
+  performanceOverlay.extension: performanceOverlay,
+  slowAnimations.extension: slowAnimations,
+};

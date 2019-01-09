@@ -387,26 +387,34 @@ class ServiceExtensionManager {
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.statefulExtensionsWhitelist.contains(name)) {
+    if (!extensions.toggleableExtensionsWhitelist.containsKey(name)) {
       return;
     }
+    final expectedValueType =
+        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
 
     final response = await _service.callServiceExtension(
       name,
       isolateId: _isolateManager.selectedIsolate.id,
     );
-    if (response.json.containsKey('enabled')) {
-      final bool enabled = response.json['enabled'] == 'true' ? true : false;
-      await setServiceExtensionState(name, enabled, enabled,
-          callExtension: false);
-    } else if (response.json.containsKey('value')) {
-      final String value = response.json['value'];
-      await setServiceExtensionState(name, true, value, callExtension: false);
-    } else if (response.json
-        .containsKey(name.substring(name.lastIndexOf('.') + 1))) {
-      final num value =
-          num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
-      await setServiceExtensionState(name, true, value, callExtension: false);
+    switch (expectedValueType) {
+      case bool:
+        final bool enabled = response.json['enabled'] == 'true' ? true : false;
+        await setServiceExtensionState(name, enabled, enabled,
+            callExtension: false);
+        return;
+      case String:
+        final String value = response.json['value'];
+        await setServiceExtensionState(name, true, value, callExtension: false);
+        return;
+      case int:
+      case num:
+        final num value =
+        num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
+        await setServiceExtensionState(name, true, value, callExtension: false);
+        return;
+      default:
+        return;
     }
   }
 
@@ -450,8 +458,11 @@ class ServiceExtensionManager {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-      String name, bool enabled, dynamic value,
-      {bool callExtension = true}) async {
+    String name,
+    bool enabled,
+    dynamic value, {
+    bool callExtension = true,
+  }) async {
     if (callExtension) {
       await _callServiceExtension(name, value);
     }
