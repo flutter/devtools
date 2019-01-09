@@ -12,6 +12,7 @@ import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -81,13 +82,10 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
-      createLiveChartArea(),
-      div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
-          pauseButton,
-          resumeButton,
+          createHotReloadButton(),
           div()..flex(),
           div(c: 'btn-group')
             ..add(<CoreElement>[
@@ -98,6 +96,15 @@ class TimelineScreen extends Screen {
               slowAnimationsButton,
               togglePlatformButton,
             ]),
+        ]),
+      createLiveChartArea(),
+      div(c: 'section'),
+      div(c: 'section')
+        ..layoutHorizontal()
+        ..add(<CoreElement>[
+          pauseButton,
+          resumeButton,
+          div()..flex(),
         ]),
       div(c: 'section')
         ..add(<CoreElement>[
@@ -253,6 +260,22 @@ class TimelineScreen extends Screen {
   @override
   HelpInfo get helpInfo =>
       new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
+
+  // TODO(kenzie): add hotRestart button.
+
+  // TODO(kenzie): move method to more specific library.
+  CoreElement createHotReloadButton() {
+    final PButton button = new PButton.icon(
+        'Hot Reload',
+         FlutterIcons.hotReload,
+    )..small();
+    button.click(() async {
+      button.disabled = true;
+      await serviceManager.performHotReload();
+      button.disabled = false;
+    });
+    return button;
+  }
 }
 
 class TimelineFramesUI extends CoreElement {

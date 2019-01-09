@@ -45,19 +45,6 @@ CoreElement createExtensionCheckBox(
   return outerDiv;
 }
 
-// TODO(kenzie): add hotRestart button.
-
-// TODO(kenzie): move method to more specific library.
-CoreElement createHotReloadButton() {
-  final PButton button = new PButton('Hot Reload')..small();
-  button.click(() async {
-    button.disabled = true;
-    await serviceManager.performHotReload();
-    button.disabled = false;
-  });
-  return button;
-}
-
 class ServiceExtensionButton {
   ServiceExtensionButton(this.extensionDescription) {
     button = new PButton.icon(
