@@ -82,6 +82,7 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
+      div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
@@ -266,8 +267,8 @@ class TimelineScreen extends Screen {
   // TODO(kenzie): move method to more specific library.
   CoreElement createHotReloadButton() {
     final PButton button = new PButton.icon(
-        'Hot Reload',
-         FlutterIcons.hotReload,
+      'Hot Reload',
+      FlutterIcons.hotReload,
     )..small();
     button.click(() async {
       button.disabled = true;
