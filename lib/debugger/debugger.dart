@@ -66,6 +66,7 @@ class DebuggerScreen extends Screen {
     final PButton resumeButton = PButton()
       ..primary()
       ..small()
+      ..clazz('margin-left')
       ..disabled = true
       ..add(<CoreElement>[
         span(c: 'octicon octicon-triangle-right'),
@@ -125,11 +126,8 @@ class DebuggerScreen extends Screen {
               div(c: 'section')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  div(c: 'btn-group flex-no-wrap')
-                    ..add([
-                      pauseButton,
-                      resumeButton,
-                    ]),
+                  pauseButton,
+                  resumeButton,
                   div(c: 'btn-group flex-no-wrap margin-left')
                     ..add(<CoreElement>[
                       stepIn = PButton()
@@ -246,6 +244,24 @@ class DebuggerScreen extends Screen {
       } else {
         callStackView.clearFrames();
         sourceEditor.clearExecutionPoint();
+      }
+    });
+
+    // Update the status line.
+    debuggerState.onPausedChanged.listen((bool paused) async {
+      if (paused && debuggerState._lastEvent.topFrame != null) {
+        final Frame topFrame = debuggerState._lastEvent.topFrame;
+
+        final ScriptRef scriptRef = topFrame.location.script;
+        final Script script = await debuggerState.getScript(scriptRef);
+        final SourcePosition position =
+            debuggerState.calculatePosition(script, topFrame.location.tokenPos);
+
+        final String file =
+            scriptRef.uri.substring(scriptRef.uri.lastIndexOf('/') + 1);
+        deviceStatus.element.text = '$file:${position.line}:${position.column}';
+      } else {
+        deviceStatus.element.text = '';
       }
     });
 
@@ -399,9 +415,6 @@ class DebuggerScreen extends Screen {
   void _handleConnectionStart(VmService service) {
     debuggerState.setVmService(serviceManager.service);
 
-    deviceStatus.element.text =
-        '${serviceManager.vm.targetCPU} ${serviceManager.vm.architectureBits}-bit';
-
     service.onStdoutEvent.listen((Event e) {
       final String message = decodeBase64(e.bytes);
       consoleArea.appendText(message);
@@ -451,9 +464,6 @@ class DebuggerScreen extends Screen {
     debuggerState.switchToIsolate(null);
     debuggerState.dispose();
   }
-
-  @override
-  HelpInfo get helpInfo => null;
 
   void _populateFromIsolate(Isolate isolate) async {
     final ScriptList scriptList =

@@ -258,11 +258,6 @@ class TimelineScreen extends Screen {
     timelineFramesUI.timelineData = timelineData;
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
-
   // TODO(kenzie): add hotRestart button.
 
   CoreElement createHotReloadButton() {

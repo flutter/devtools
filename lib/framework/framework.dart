@@ -15,16 +15,21 @@ import '../utils.dart';
 class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
+
     globalStatus =
         StatusLine(CoreElement.from(querySelector('#global-status')));
     pageStatus = StatusLine(CoreElement.from(querySelector('#page-status')));
+    auxiliaryStatus =
+        StatusLine(CoreElement.from(querySelector('#auxiliary-status')));
   }
 
   final List<Screen> screens = <Screen>[];
 
   Screen current;
+
   StatusLine globalStatus;
   StatusLine pageStatus;
+  StatusLine auxiliaryStatus;
 
   void addScreen(Screen screen) {
     screens.add(screen);
@@ -106,22 +111,6 @@ class Framework {
       final bool isCurrent = current.ref == element.attributes['href'];
       e.toggleClass('active', isCurrent);
     }
-
-    // status
-    final CoreElement helpLink = CoreElement.from(querySelector('#docsLink'));
-    final HelpInfo helpInfo = current.helpInfo;
-    if (helpInfo == null) {
-      helpLink.hidden(true);
-    } else {
-      helpLink
-        ..clear()
-        ..add(<CoreElement>[
-          span(text: '${helpInfo.title} '),
-          span(c: 'octicon octicon-link-external small-octicon'),
-        ])
-        ..setAttribute('href', helpInfo.url)
-        ..hidden(false);
-    }
   }
 
   void showError(String title, [dynamic error]) {
@@ -188,7 +177,7 @@ class StatusLine {
 }
 
 void toast(String message) {
-  // TODO:
+  // TODO(devoncarew): Display this message in the UI.
   print(message);
 }
 
@@ -227,18 +216,13 @@ abstract class Screen {
 
   void exiting() {}
 
-  // TODO(devoncarew): generalize this - global and page status items
   void addStatusItem(StatusItem item) {
-    // TODO(devoncarew): If we're live, add to the screen
     statusItems.add(item);
   }
 
   void removeStatusItems(StatusItem item) {
-    // TODO(devoncarew): If we're live, remove from the screen
     statusItems.remove(item);
   }
-
-  HelpInfo get helpInfo => null;
 
   @override
   String toString() => 'Screen($id)';
