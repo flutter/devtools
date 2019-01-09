@@ -163,11 +163,6 @@ class PerformanceScreen extends Screen {
     }
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      HelpInfo(title: 'performance view docs', url: 'http://www.cheese.com');
-
   void _process(CpuProfile profile) {
     perfTable.setRows(
         List<PerfData>.from(profile.functions.where((ProfileFunction f) {

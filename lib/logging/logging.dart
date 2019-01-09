@@ -117,11 +117,6 @@ class LoggingScreen extends Screen {
     _updateStatus();
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
-
   void _handleConnectionStart(VmServiceWrapper service) {
     if (ref == null) {
       return;

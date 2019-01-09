@@ -49,9 +49,6 @@ class DeviceScreen extends Screen {
     deviceStatus.element.text = '';
   }
 
-  @override
-  HelpInfo get helpInfo => null;
-
   void _buildTogglesDiv() {
     if (togglesDiv == null) {
       return;

@@ -225,11 +225,6 @@ class MemoryScreen extends Screen {
     return table;
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
-
   void _handleConnectionStart(VmServiceWrapper service) {
     loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
