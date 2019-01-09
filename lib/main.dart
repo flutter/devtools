@@ -28,12 +28,12 @@ import 'utils.dart';
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
-    addScreen(new DebuggerScreen());
-    addScreen(new MemoryScreen());
-    addScreen(new TimelineScreen());
-    addScreen(new PerformanceScreen());
-    addScreen(new DeviceScreen());
-    addScreen(new LoggingScreen());
+    addScreen(DebuggerScreen());
+    addScreen(MemoryScreen());
+    addScreen(TimelineScreen());
+    addScreen(PerformanceScreen());
+    addScreen(DeviceScreen());
+    addScreen(LoggingScreen());
 
     initGlobalUI();
 
@@ -44,12 +44,11 @@ class PerfToolFramework extends Framework {
   PSelect isolateSelect;
 
   void initGlobalUI() {
-    final CoreElement mainNav =
-        new CoreElement.from(querySelector('#main-nav'));
+    final CoreElement mainNav = CoreElement.from(querySelector('#main-nav'));
     mainNav.clear();
 
     for (Screen screen in screens) {
-      final CoreElement link = new CoreElement('a')
+      final CoreElement link = CoreElement('a')
         ..attributes['href'] = screen.ref
         ..onClick.listen((MouseEvent e) {
           e.preventDefault();
@@ -69,7 +68,7 @@ class PerfToolFramework extends Framework {
     }
 
     // TODO(devoncarew): isolate selector should use the rich pulldown UI
-    isolateSelectStatus = new StatusItem();
+    isolateSelectStatus = StatusItem();
     globalStatus.add(isolateSelectStatus);
     isolateSelect = select()
       ..small()

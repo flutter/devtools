@@ -160,7 +160,7 @@ class TextDecoration {
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
     for (TextDecoration decoration in decorations) mask |= decoration._mask;
-    return new TextDecoration._(mask);
+    return TextDecoration._(mask);
   }
 
   final int _mask;
@@ -302,9 +302,9 @@ class TextStyle {
   @override
   String toString() {
     return 'UITextStyle('
-        'color: ${_encoded[0] & 0x00002 == 0x00002 ? new Color(_encoded[1]) : "unspecified"}, '
-        'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? new TextDecoration._(_encoded[2]) : "unspecified"}, '
-        'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? new Color(_encoded[3]) : "unspecified"}, '
+        'color: ${_encoded[0] & 0x00002 == 0x00002 ? Color(_encoded[1]) : "unspecified"}, '
+        'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? TextDecoration._(_encoded[2]) : "unspecified"}, '
+        'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? Color(_encoded[3]) : "unspecified"}, '
         'decorationStyle: ${_encoded[0] & 0x00010 == 0x00010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
         'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight.values[_encoded[5]] : "unspecified"}, '
         'fontStyle: ${_encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]] : "unspecified"}, '
@@ -346,7 +346,7 @@ Int32List _encodeParagraphStyle(
   double lineHeight,
   String ellipsis,
 ) {
-  final Int32List result = new Int32List(6); // also update paragraph_builder.cc
+  final Int32List result = Int32List(6); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -806,7 +806,7 @@ Int32List _encodeTextStyle(
   double wordSpacing,
   double height,
 ) {
-  final Int32List result = new Int32List(8);
+  final Int32List result = Int32List(8);
   if (color != null) {
     result[0] |= 1 << 1;
     result[1] = color.value;

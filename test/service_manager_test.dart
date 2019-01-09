@@ -21,15 +21,14 @@ void main() {
     VmServiceWrapper service;
 
     setUp(() async {
-      _flutter =
-          FlutterRunTestDriver(new Directory('test/fixtures/flutter_app'));
+      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
 
       await _flutter.run(withDebugger: true);
       service = _flutter.vmService;
 
-      setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
+      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
 
-      await serviceManager.vmServiceOpened(service, new Completer().future);
+      await serviceManager.vmServiceOpened(service, Completer().future);
     });
 
     tearDown(() async {
@@ -52,7 +51,7 @@ void main() {
     test('toggle boolean service extension', () async {
       const extensionName = 'ext.flutter.debugPaint';
       const evalExpression = 'debugPaintSizeEnabled';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/rendering/debug.dart',
         service,
       );
@@ -74,7 +73,7 @@ void main() {
     test('toggle String service extension', () async {
       const extensionName = 'ext.flutter.platformOverride';
       const evalExpression = 'defaultTargetPlatform.toString()';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/foundation/platform.dart',
         service,
       );
@@ -104,7 +103,7 @@ void main() {
     test('toggle numeric service extension', () async {
       const extensionName = 'ext.flutter.timeDilation';
       const evalExpression = 'timeDilation';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/scheduler/binding.dart',
         service,
       );
@@ -188,7 +187,7 @@ Future<void> _verifyExtensionStateInServiceManager(
       .serviceExtensionManager
       .getServiceExtensionState(extensionName, null);
 
-  final Completer<ServiceExtensionState> stateCompleter = new Completer();
+  final Completer<ServiceExtensionState> stateCompleter = Completer();
   stream.onData((ServiceExtensionState state) {
     stateCompleter.complete(state);
     stream.cancel();

@@ -7,10 +7,10 @@ import 'dart:async';
 void main() {
   print('starting debugging app');
 
-  final Cat cat = new Cat('Fluffy');
+  final Cat cat = Cat('Fluffy');
 
   void run() {
-    new Timer(const Duration(milliseconds: 100), () {
+    Timer(const Duration(milliseconds: 100), () {
       cat.performAction();
 
       run();

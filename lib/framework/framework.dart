@@ -16,9 +16,8 @@ class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
     globalStatus =
-        new StatusLine(new CoreElement.from(querySelector('#global-status')));
-    pageStatus =
-        new StatusLine(new CoreElement.from(querySelector('#page-status')));
+        StatusLine(CoreElement.from(querySelector('#global-status')));
+    pageStatus = StatusLine(CoreElement.from(querySelector('#page-status')));
   }
 
   final List<Screen> screens = <Screen>[];
@@ -55,7 +54,7 @@ class Framework {
     if (screen != null) {
       load(screen);
     } else {
-      load(new NotFoundScreen());
+      load(NotFoundScreen());
     }
   }
 
@@ -68,8 +67,7 @@ class Framework {
     loadScreenFromLocation();
   }
 
-  CoreElement get mainElement =>
-      new CoreElement.from(querySelector('#content'));
+  CoreElement get mainElement => CoreElement.from(querySelector('#content'));
 
   final Map<Screen, List<Element>> _contents = <Screen, List<Element>>{};
 
@@ -104,14 +102,13 @@ class Framework {
   void updatePage() {
     // nav
     for (Element element in querySelectorAll('#main-nav a')) {
-      final CoreElement e = new CoreElement.from(element);
+      final CoreElement e = CoreElement.from(element);
       final bool isCurrent = current.ref == element.attributes['href'];
       e.toggleClass('active', isCurrent);
     }
 
     // status
-    final CoreElement helpLink =
-        new CoreElement.from(querySelector('#docsLink'));
+    final CoreElement helpLink = CoreElement.from(querySelector('#docsLink'));
     final HelpInfo helpInfo = current.helpInfo;
     if (helpInfo == null) {
       helpLink.hidden(true);
@@ -128,7 +125,7 @@ class Framework {
   }
 
   void showError(String title, [dynamic error]) {
-    final PFlash flash = new PFlash();
+    final PFlash flash = PFlash();
     flash.addClose().click(clearError);
     flash.add(span(text: title));
     if (error != null) {
@@ -136,7 +133,7 @@ class Framework {
     }
 
     final CoreElement errorContainer =
-        new CoreElement.from(querySelector('#error-container'));
+        CoreElement.from(querySelector('#error-container'));
     errorContainer.add(flash);
   }
 
@@ -164,7 +161,7 @@ class StatusLine {
       element.add(_items.first.element);
 
       for (StatusItem item in _items.sublist(1)) {
-        element.add(new SpanElement()
+        element.add(SpanElement()
           ..text = '•'
           ..classes.add('separator'));
         element.add(item.element);
@@ -208,7 +205,7 @@ abstract class Screen {
 
   Framework framework;
 
-  final Property<bool> _visible = new Property<bool>(true);
+  final Property<bool> _visible = Property<bool>(true);
 
   final List<StatusItem> statusItems = <StatusItem>[];
 

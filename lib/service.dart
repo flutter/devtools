@@ -10,10 +10,10 @@ import 'vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> connect(
     String host, int port, Completer<Null> finishedCompleter) {
-  final WebSocket ws = new WebSocket('ws://$host:$port/ws');
+  final WebSocket ws = WebSocket('ws://$host:$port/ws');
 
   final Completer<VmServiceWrapper> connectedCompleter =
-      new Completer<VmServiceWrapper>();
+      Completer<VmServiceWrapper>();
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
@@ -22,16 +22,16 @@ Future<VmServiceWrapper> connect(
       if (e.data is String) {
         return e.data;
       } else {
-        final FileReader fileReader = new FileReader();
+        final FileReader fileReader = FileReader();
         fileReader.readAsArrayBuffer(e.data);
         return fileReader.onLoadEnd.first.then<ByteData>((ProgressEvent _) {
           final Uint8List list = fileReader.result;
-          return new ByteData.view(list.buffer);
+          return ByteData.view(list.buffer);
         });
       }
     });
 
-    final VmServiceWrapper service = new VmServiceWrapper.fromNewVmService(
+    final VmServiceWrapper service = VmServiceWrapper.fromNewVmService(
       inStream,
       (String message) => ws.send(message),
     );
@@ -59,7 +59,7 @@ Future<VmServiceWrapper> connect(
 /// (such as in an asyncMap).
 /// https://github.com/dart-lang/sdk/issues/34656
 Stream<T> convertBroadcastToSingleSubscriber<T>(Stream<T> stream) {
-  final StreamController<T> controller = new StreamController<T>();
+  final StreamController<T> controller = StreamController<T>();
   StreamSubscription<T> subscription;
   controller.onListen =
       () => subscription = stream.listen((T e) => controller.add(e));

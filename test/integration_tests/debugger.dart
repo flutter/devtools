@@ -24,14 +24,14 @@ void debuggingTests() {
     appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // Get the list of scripts.
     final List<String> scripts = await debuggingManager.getScripts();
@@ -47,14 +47,14 @@ void debuggingTests() {
         CliAppFixture.parseBreakpointLines(source);
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
@@ -111,14 +111,14 @@ void debuggingTests() {
     final List<int> steppingLines = CliAppFixture.parseSteppingLines(source);
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
@@ -185,14 +185,14 @@ void debuggingTests() {
     final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // verify running state
     expect(await debuggingManager.getState(), 'running');
@@ -230,14 +230,14 @@ void debuggingTests() {
         'test/fixtures/debugging_app_exception.dart');
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // verify running state
     expect(await debuggingManager.getState(), 'running');
@@ -257,14 +257,14 @@ void debuggingTests() {
     appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
-        new DevtoolsManager(tabInstance, webdevFixture.baseUri);
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = new DebuggingManager(tools);
+    final DebuggingManager debuggingManager = DebuggingManager(tools);
 
     // verify running state
     expect(await debuggingManager.getState(), 'running');

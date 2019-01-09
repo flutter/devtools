@@ -27,12 +27,12 @@ import '../vm_service_wrapper.dart';
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
 const int kMaxLogItemsLowerBound = 5000;
 const int kMaxLogItemsUpperBound = 5500;
-final DateFormat timeFormat = new DateFormat('HH:mm:ss.SSS');
+final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
   LoggingScreen()
       : super(name: 'Logs', id: 'logs', iconClass: 'octicon-clippy') {
-    logCountStatus = new StatusItem();
+    logCountStatus = StatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
 
@@ -45,7 +45,7 @@ class LoggingScreen extends Screen {
 
   Table<LogData> loggingTable;
   StatusItem logCountStatus;
-  SetStateMixin loggingStateMixin = new SetStateMixin();
+  SetStateMixin loggingStateMixin = SetStateMixin();
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -62,7 +62,7 @@ class LoggingScreen extends Screen {
             ..clazz('align-items-center')
             ..add(<CoreElement>[
               span()..flex(),
-              new PButton('Clear logs')
+              PButton('Clear logs')
                 ..small()
                 ..click(_clear),
             ])
@@ -72,7 +72,7 @@ class LoggingScreen extends Screen {
         ..flex(),
       detailsDiv = div(c: 'section table-border')
         ..layoutVertical()
-        ..add(logDetailsUI = new LogDetailsUI()),
+        ..add(logDetailsUI = LogDetailsUI()),
     ]);
 
     // configure the table / details splitter
@@ -90,11 +90,11 @@ class LoggingScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    loggingTable = new Table<LogData>.virtual(isReversed: true);
+    loggingTable = Table<LogData>.virtual(isReversed: true);
 
-    loggingTable.addColumn(new LogWhenColumn());
-    loggingTable.addColumn(new LogKindColumn());
-    loggingTable.addColumn(new LogMessageColumn());
+    loggingTable.addColumn(LogWhenColumn());
+    loggingTable.addColumn(LogKindColumn());
+    loggingTable.addColumn(LogMessageColumn());
 
     loggingTable.setRows(data);
 
@@ -120,7 +120,7 @@ class LoggingScreen extends Screen {
   // TODO(devoncarew): Update this url.
   @override
   HelpInfo get helpInfo =>
-      new HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
+      HelpInfo(title: 'logs view docs', url: 'http://www.cheese.com');
 
   void _handleConnectionStart(VmServiceWrapper service) {
     if (ref == null) {
@@ -131,14 +131,14 @@ class LoggingScreen extends Screen {
 
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
-        new _StdoutEventHandler(this, 'stdout');
+        _StdoutEventHandler(this, 'stdout');
     service.onStdoutEvent.listen((Event e) {
       stdoutHandler.handle(e);
     });
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
-        new _StdoutEventHandler(this, 'stderr', isError: true);
+        _StdoutEventHandler(this, 'stderr', isError: true);
     service.onStderrEvent.listen((Event e) {
       stderrHandler.handle(e);
     });
@@ -164,7 +164,7 @@ class LoggingScreen extends Screen {
         'isolate': isolateRef,
       };
       final String message = jsonEncode(event);
-      _log(new LogData('gc', message, e.timestamp, summary: summary));
+      _log(LogData('gc', message, e.timestamp, summary: summary));
     });
 
     // Log `dart:developer` `log` events.
@@ -195,7 +195,7 @@ class LoggingScreen extends Screen {
       if (messageRef.valueAsStringIsTruncated == true ||
           _isNotNull(error) ||
           _isNotNull(stackTrace)) {
-        detailsComputer = new Future<String>(() async {
+        detailsComputer = Future<String>(() async {
           // Get the full string value of the message.
           String result =
               await _retrieveFullStringValue(service, e.isolate, messageRef);
@@ -236,7 +236,7 @@ class LoggingScreen extends Screen {
       const int severeIssue = 1000;
       final bool isError = level != null && level >= severeIssue ? true : false;
 
-      _log(new LogData(
+      _log(LogData(
         loggerName,
         details,
         e.timestamp,
@@ -256,14 +256,14 @@ class LoggingScreen extends Screen {
             '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
         final String div = createFrameDivHtml(frame);
 
-        _log(new LogData(
+        _log(LogData(
           '${e.extensionKind.toLowerCase()}',
           jsonEncode(e.extensionData.data),
           e.timestamp,
           summaryHtml: '$frameInfo$div',
         ));
       } else {
-        _log(new LogData(
+        _log(LogData(
           '${e.extensionKind.toLowerCase()}',
           jsonEncode(e.json),
           e.timestamp,
@@ -353,7 +353,7 @@ class _StdoutEventHandler {
       timer?.cancel();
 
       if (message == '\n') {
-        loggingScreen._log(new LogData(
+        loggingScreen._log(LogData(
           buffer.kind,
           buffer.details + message,
           buffer.timestamp,
@@ -373,7 +373,7 @@ class _StdoutEventHandler {
       summary = message.substring(0, 200) + '…';
     }
 
-    final LogData data = new LogData(
+    final LogData data = LogData(
       name,
       message,
       e.timestamp,
@@ -385,7 +385,7 @@ class _StdoutEventHandler {
       loggingScreen._log(data);
     } else {
       buffer = data;
-      timer = new Timer(const Duration(milliseconds: 1), () {
+      timer = Timer(const Duration(milliseconds: 1), () {
         loggingScreen._log(buffer);
         buffer = null;
       });
@@ -488,7 +488,7 @@ class LogWhenColumn extends Column<LogData> {
 
   @override
   String render(dynamic value) {
-    return timeFormat.format(new DateTime.fromMillisecondsSinceEpoch(value));
+    return timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
   }
 }
 

@@ -10,9 +10,9 @@ import 'package:path/path.dart' as path;
 import 'test_foo.dart';
 
 void main() {
-  final Test test = new Test();
+  final Test test = Test();
 
-  new Timer(Test.delay, test.doWork);
+  Timer(Test.delay, test.doWork);
 }
 
 class Test {
@@ -23,10 +23,10 @@ class Test {
   void doWork() async {
     final String description = 'items: $count';
 
-    final List<int> numbers = new List.generate(10, (index) => index * index);
+    final List<int> numbers = List.generate(10, (index) => index * index);
     // ignore: unused_local_variable
     final Map<int, String> numberDescriptions =
-        new Map.fromIterable(numbers, value: (key) => _toWord(key));
+        Map.fromIterable(numbers, value: (key) => _toWord(key));
 
     await bar(count++);
 
@@ -34,7 +34,7 @@ class Test {
       Timer.run(() {
         const int sampleLocal = 123;
         try {
-          throw new StateError('sdfsdf: $sampleLocal, $description');
+          throw StateError('sdfsdf: $sampleLocal, $description');
         } catch (e) {
           print(e);
         }
@@ -45,7 +45,7 @@ class Test {
       count = 0;
     }
 
-    new Timer(delay, doWork);
+    Timer(delay, doWork);
   }
 }
 
@@ -68,7 +68,7 @@ String _toWord(int key) {
 }
 
 Future bar(int count) async {
-  final Directory dir = new Directory('.');
+  final Directory dir = Directory('.');
 
   await Future.delayed(const Duration(milliseconds: 4));
 
