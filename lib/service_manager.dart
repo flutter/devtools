@@ -400,22 +400,34 @@ class ServiceExtensionManager {
     switch (expectedValueType) {
       case bool:
         final bool enabled = response.json['enabled'] == 'true' ? true : false;
-        await setServiceExtensionState(name, enabled, enabled,
-            callExtension: false);
+        if (_extensionEnabledOnDevice(name, enabled)) {
+          await setServiceExtensionState(name, enabled, enabled,
+              callExtension: false);
+        }
         return;
       case String:
         final String value = response.json['value'];
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        if (_extensionEnabledOnDevice(name, value)) {
+          await setServiceExtensionState(name, true, value,
+              callExtension: false);
+        }
         return;
       case int:
-      case num:
+      case double:
         final num value =
-        num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
-        await setServiceExtensionState(name, true, value, callExtension: false);
+            num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
+        if (_extensionEnabledOnDevice(name, value)) {
+          await setServiceExtensionState(name, true, value,
+              callExtension: false);
+        }
         return;
       default:
         return;
     }
+  }
+
+  bool _extensionEnabledOnDevice(String name, dynamic value) {
+    return value == extensions.toggleableExtensionsWhitelist[name].enabledValue;
   }
 
   Future<void> _callServiceExtension(String name, dynamic value) async {
