@@ -1,4 +1,8 @@
-import 'dart:html';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:html' hide VoidCallback;
 import 'dart:js';
 
 import 'package:meta/meta.dart';
@@ -58,6 +62,7 @@ class _CanvasChunk {
 
   _ChunkPosition get position => _position;
   _ChunkPosition _position;
+
   set position(_ChunkPosition p) {
     if (_position == p) return;
     _position = p;
@@ -285,7 +290,6 @@ class ViewportCanvas extends Object with SetStateMixin {
   /// scrollwheel events which may trigger scrolling.
   Rect _renderedViewport;
   Rect _viewport = Rect.zero;
-
 
   void _dispatchMouseMoveEvent() {
     if (_onMouseMove != null) {
