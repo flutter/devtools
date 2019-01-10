@@ -105,7 +105,7 @@ class ServiceConnectionManager {
   }
 
   StreamController<bool> _getServiceRegistrationController(String name) {
-    return _getStream(
+    return _getStreamController(
       name,
       _serviceRegistrationController,
       onFirstListenerSubscribed: () {
@@ -130,12 +130,14 @@ class ServiceConnectionManager {
 
       service.onServiceEvent.listen((e) {
         if (e.kind == EventKind.kServiceRegistered) {
-          registeredMethodsForService
-              .putIfAbsent(e.service, () => [])
-              .add(e.method);
-          final StreamController<bool> streamController =
-              _getServiceRegistrationController(e.service);
-          streamController.add(true);
+          if (!registeredMethodsForService.containsKey(e.service)) {
+            registeredMethodsForService[e.service] = [e.method];
+            final StreamController<bool> streamController =
+                _getServiceRegistrationController(e.service);
+            streamController.add(true);
+          } else {
+            registeredMethodsForService[e.service] = [e.method];
+          }
         }
       });
 
@@ -564,7 +566,7 @@ class ServiceExtensionManager {
   }
 
   StreamController<bool> _getServiceExtensionController(String name) {
-    return _getStream(
+    return _getStreamController(
       name,
       _serviceExtensionController,
       onFirstListenerSubscribed: () {
@@ -579,7 +581,7 @@ class ServiceExtensionManager {
 
   StreamController<ServiceExtensionState> _getServiceExtensionStateController(
       String name) {
-    return _getStream(
+    return _getStreamController(
       name,
       _serviceExtensionStateController,
       onFirstListenerSubscribed: () {
@@ -598,17 +600,17 @@ class ServiceExtensionManager {
   }
 }
 
-/// Given a map of Strings to StreamControllers [streams], get the stream for
-/// the given name. If it does not exist, initialize a generic stream and map it
-/// to the name.
-StreamController<T> _getStream<T>(
-    String name, Map<String, StreamController<T>> streams,
+/// Given a map of Strings to StreamControllers [streamControllers], get the
+/// stream controller for the given name. If it does not exist, initialize a
+/// generic stream controller and map it to the name.
+StreamController<T> _getStreamController<T>(
+    String name, Map<String, StreamController<T>> streamControllers,
     {@required void onFirstListenerSubscribed()}) {
-  streams.putIfAbsent(
+  streamControllers.putIfAbsent(
     name,
     () => StreamController<T>.broadcast(onListen: onFirstListenerSubscribed),
   );
-  return streams[name];
+  return streamControllers[name];
 }
 
 class ServiceExtensionState {

@@ -272,7 +272,7 @@ class TimelineScreen extends Screen {
       button.disabled = false;
     });
 
-    // Hide the button if the connected device does not support hot reload.
+    // Only show the button if the device supports hot reload.
     serviceManager.hasRegisteredService(
       registrations.reloadSources,
       (registered) {
