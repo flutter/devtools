@@ -13,7 +13,7 @@ import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
   EvalOnDartLibrary(this.libraryName, this.service, {String isolateId}) {
-    _libraryRef = new Completer<LibraryRef>();
+    _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
     if (isolateId != null) {
