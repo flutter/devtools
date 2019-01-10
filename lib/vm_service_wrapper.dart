@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-// todo: implement a onConnected reactive getter?
-
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(this._vmService);
 
