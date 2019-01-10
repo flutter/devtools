@@ -300,16 +300,18 @@ class ServiceExtensionManager {
   /// extensions until the first frame event has been received [_firstFrameEventReceived].
   final Set<String> _pendingServiceExtensions = Set<String>();
 
-  void _handleExtensionEvent(Event event) {
+  final Completer<Null> extensionStatesUpdated = Completer();
+
+  Future<void> _handleExtensionEvent(Event event) async {
     final String extensionKind = event.extensionKind;
     if (event.kind == 'Extension' &&
         (extensionKind == 'Flutter.FirstFrame' ||
             extensionKind == 'Flutter.Frame')) {
-      _onFrameEventReceived();
+      await _onFrameEventReceived();
     }
   }
 
-  void _onFrameEventReceived() async {
+  Future<void> _onFrameEventReceived() async {
     if (_firstFrameEventReceived) {
       // The first frame event was already received.
       return;
@@ -319,6 +321,7 @@ class ServiceExtensionManager {
     for (String extension in _pendingServiceExtensions) {
       await _addServiceExtension(extension);
     }
+    extensionStatesUpdated.complete();
     _pendingServiceExtensions.clear();
   }
 
@@ -330,6 +333,10 @@ class ServiceExtensionManager {
     if (isolate.extensionRPCs != null) {
       for (String extension in isolate.extensionRPCs) {
         await _maybeAddServiceExtension(extension);
+      }
+
+      if (_pendingServiceExtensions.isEmpty) {
+        extensionStatesUpdated.complete();
       }
 
       if (!_firstFrameEventReceived) {
@@ -353,7 +360,7 @@ class ServiceExtensionManager {
         }
 
         if (didSendFirstFrameEvent) {
-          _onFrameEventReceived();
+          await _onFrameEventReceived();
         }
       }
     }
@@ -400,34 +407,27 @@ class ServiceExtensionManager {
     switch (expectedValueType) {
       case bool:
         final bool enabled = response.json['enabled'] == 'true' ? true : false;
-        if (_extensionEnabledOnDevice(name, enabled)) {
-          await setServiceExtensionState(name, enabled, enabled,
-              callExtension: false);
-        }
+        await _maybeRestoreExtension(name, enabled);
         return;
       case String:
         final String value = response.json['value'];
-        if (_extensionEnabledOnDevice(name, value)) {
-          await setServiceExtensionState(name, true, value,
-              callExtension: false);
-        }
+        await _maybeRestoreExtension(name, value);
         return;
       case int:
       case double:
         final num value =
             num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
-        if (_extensionEnabledOnDevice(name, value)) {
-          await setServiceExtensionState(name, true, value,
-              callExtension: false);
-        }
+        await _maybeRestoreExtension(name, value);
         return;
       default:
         return;
     }
   }
 
-  bool _extensionEnabledOnDevice(String name, dynamic value) {
-    return value == extensions.toggleableExtensionsWhitelist[name].enabledValue;
+  Future<void> _maybeRestoreExtension(String name, dynamic value) async {
+    if (value == extensions.toggleableExtensionsWhitelist[name].enabledValue) {
+      await setServiceExtensionState(name, true, value, callExtension: false);
+    }
   }
 
   Future<void> _callServiceExtension(String name, dynamic value) async {

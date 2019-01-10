@@ -19,8 +19,7 @@ class EvalOnDartLibrary {
     if (isolateId != null) {
       _init(isolateId, false);
     } else {
-      // TODO: do we need to dispose this subscription at some point? Where?
-      serviceManager.isolateManager
+      selectedIsolateStreamSubscription = serviceManager.isolateManager
           .getSelectedIsolate((IsolateRef isolate) {
         final String id = isolate != null ? isolate.id : null;
         _init(id, isolate == null);
@@ -43,6 +42,7 @@ class EvalOnDartLibrary {
   bool _disposed = false;
 
   void dispose() {
+    selectedIsolateStreamSubscription.cancel();
     _disposed = true;
   }
 
@@ -50,6 +50,7 @@ class EvalOnDartLibrary {
   final VmServiceWrapper service;
   Completer<LibraryRef> _libraryRef;
   Future<void> _initializeComplete;
+  StreamSubscription selectedIsolateStreamSubscription;
 
   String get isolateId => _isolateId;
   String _isolateId;

@@ -431,18 +431,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return 0;
   }
 
-  Future<dynamic> callServiceExtension(
-      String extensionName, dynamic params) async {
-    return await _sendRequest(
-      'app.callServiceExtension',
-      <String, dynamic>{
-        'appId': _currentRunningAppId,
-        'methodName': extensionName,
-        'params': params,
-      },
-    );
-  }
-
   int id = 1;
 
   Future<dynamic> _sendRequest(String method, dynamic params) async {

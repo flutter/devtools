@@ -192,7 +192,7 @@ void main() {
     /// the device reflects the new extension state.
     Future<void> _enableExtensionOnTestDevice(
       extensions.ToggleableServiceExtensionDescription extensionDescription,
-      Map<String, dynamic> params,
+      Map<String, dynamic> args,
       String evalExpression,
       EvalOnDartLibrary library, {
       String enabledValue,
@@ -209,9 +209,10 @@ void main() {
       );
 
       // Enable service extension on test device.
-      await _flutter.callServiceExtension(
+      await _flutter.vmService.callServiceExtension(
         extensionDescription.extension,
-        params,
+        isolateId: _flutterIsolateId,
+        args: args,
       );
 
       // Verify extension state after calling the service extension.
@@ -227,7 +228,7 @@ void main() {
     /// [ServiceExtensionManager].
     Future<void> _enableExtensionAndOpenVmService(
       extensions.ToggleableServiceExtensionDescription extensionDescription,
-      Map<String, dynamic> params,
+      Map<String, dynamic> args,
       String evalExpression,
       EvalOnDartLibrary library, {
       String enabledValue,
@@ -235,7 +236,7 @@ void main() {
     }) async {
       await _enableExtensionOnTestDevice(
         extensionDescription,
-        params,
+        args,
         evalExpression,
         library,
         enabledValue: enabledValue,
@@ -244,8 +245,8 @@ void main() {
 
       await serviceManager.vmServiceOpened(service, new Completer().future);
 
-      // Short delay for vmService to update extension states.
-      await Future.delayed(Duration(milliseconds: 500));
+      await serviceManager
+          .serviceExtensionManager.extensionStatesUpdated.future;
 
       await _verifyExtensionStateInServiceManager(
         extensionDescription.extension,
@@ -256,7 +257,7 @@ void main() {
 
     test('bool extension', () async {
       final extensionDescription = extensions.debugPaint;
-      final params = {'enabled': true};
+      final args = {'enabled': true};
       const evalExpression = 'debugPaintSizeEnabled';
       final library = new EvalOnDartLibrary(
         'package:flutter/src/rendering/debug.dart',
@@ -266,7 +267,7 @@ void main() {
 
       await _enableExtensionAndOpenVmService(
         extensionDescription,
-        params,
+        args,
         evalExpression,
         library,
       );
@@ -274,7 +275,7 @@ void main() {
 
     test('String extension', () async {
       final extensionDescription = extensions.togglePlatformMode;
-      final params = {'value': 'iOS'};
+      final args = {'value': 'iOS'};
       const evalExpression = 'defaultTargetPlatform.toString()';
       final library = new EvalOnDartLibrary(
         'package:flutter/src/foundation/platform.dart',
@@ -284,7 +285,7 @@ void main() {
 
       await _enableExtensionAndOpenVmService(
         extensionDescription,
-        params,
+        args,
         evalExpression,
         library,
         enabledValue: 'TargetPlatform.iOS',
@@ -294,7 +295,7 @@ void main() {
 
     test('numeric extension', () async {
       final extensionDescription = extensions.slowAnimations;
-      final params = {
+      final args = {
         extensionDescription.extension
                 .substring(extensionDescription.extension.lastIndexOf('.') + 1):
             extensionDescription.enabledValue
@@ -308,7 +309,7 @@ void main() {
 
       await _enableExtensionAndOpenVmService(
         extensionDescription,
-        params,
+        args,
         evalExpression,
         library,
       );
