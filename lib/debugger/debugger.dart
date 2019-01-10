@@ -184,9 +184,14 @@ class DebuggerScreen extends Screen {
     );
 
     debuggerState.onSupportsStepping.listen((bool value) {
-      stepOver.enabled = value;
       stepIn.enabled = value;
-      stepOut.enabled = value;
+
+      // Only enable step over and step out if we're paused at a frame. When
+      // paused w/o a frame (in the message loop), step over and out aren't
+      // meaningful (and also crash the vm:
+      // https://github.com/dart-lang/sdk/issues/35601).
+      stepOver.enabled = value && (debuggerState._lastEvent.topFrame != null);
+      stepOut.enabled = value && (debuggerState._lastEvent.topFrame != null);
     });
 
     stepOver.click(() => debuggerState.stepOver());
