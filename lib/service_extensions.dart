@@ -7,7 +7,7 @@ library service_extensions;
 import 'ui/icons.dart';
 
 class ToggleableServiceExtensionDescription<T> {
-  ToggleableServiceExtensionDescription({
+  ToggleableServiceExtensionDescription._({
     this.extension,
     this.description,
     this.icon,
@@ -29,7 +29,7 @@ class ToggleableServiceExtensionDescription<T> {
 final Map<String, ToggleableServiceExtensionDescription>
     toggleableExtensionsWhitelist = {};
 
-final debugPaint = ToggleableServiceExtensionDescription<bool>(
+final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug paint',
   tooltip: 'Toggle debug paint',
@@ -38,7 +38,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>(
+final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint baselines',
   tooltip: 'Show paint baselines',
@@ -47,7 +47,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final repaintRainbow = ToggleableServiceExtensionDescription<bool>(
+final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Repaint rainbow',
   tooltip: 'Toogle Repaint rainbow',
@@ -56,7 +56,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final performanceOverlay = ToggleableServiceExtensionDescription<bool>(
+final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance overlay',
   tooltip: 'Toggle performance overlay',
@@ -65,7 +65,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final debugAllowBanner = ToggleableServiceExtensionDescription<bool>(
+final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Hide debug banner',
   tooltip: 'Hide debug mode banner',
@@ -74,7 +74,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>(
+final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track widget rebuilds',
   tooltip: 'Visualize widget rebuilds',
@@ -83,7 +83,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>(
+final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.show',
   description: 'Toggle Select Mode',
   icon: FlutterIcons.locate,
@@ -91,7 +91,7 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>(
   disabledValue: false,
 );
 
-final togglePlatformMode = ToggleableServiceExtensionDescription<String>(
+final togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
   extension: 'ext.flutter.platformOverride',
   description: 'iOS',
   tooltip: 'Toggle iOS platform',
@@ -100,7 +100,7 @@ final togglePlatformMode = ToggleableServiceExtensionDescription<String>(
   disabledValue: 'android',
 );
 
-final slowAnimations = ToggleableServiceExtensionDescription<num>(
+final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
   tooltip: 'Toggle slow animations',
