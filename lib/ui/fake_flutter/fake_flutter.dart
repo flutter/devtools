@@ -23,6 +23,6 @@ export 'collections.dart';
 export 'dart_ui/dart_ui.dart' hide TextStyle;
 
 part 'assertions.dart';
+part 'foundation.dart';
 part 'text.dart';
 part 'text_span.dart';
-part 'foundation.dart';

@@ -9,5 +9,5 @@ import 'package:meta/meta.dart';
 
 part 'color.dart';
 part 'geometry.dart';
-part 'text.dart';
 part 'hashcodes.dart';
+part 'text.dart';
