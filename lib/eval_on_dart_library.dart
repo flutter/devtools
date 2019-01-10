@@ -12,27 +12,37 @@ import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
-  EvalOnDartLibrary(this.libraryName, this.service) {
+  EvalOnDartLibrary(this.libraryName, this.service, {String isolateId}) {
     _libraryRef = Completer<LibraryRef>();
 
-    // TODO: do we need to dispose this subscription at some point? Where?
-    serviceManager.isolateManager
-        .getSelectedIsolate((IsolateRef isolate) async {
-      await _initializeComplete;
+    // For evals in tests, we will pass the isolateId into the constructor.
+    if (isolateId != null) {
+      _init(isolateId, false);
+    } else {
+      selectedIsolateStreamSubscription = serviceManager.isolateManager
+          .getSelectedIsolate((IsolateRef isolate) {
+        final String id = isolate != null ? isolate.id : null;
+        _init(id, isolate == null);
+      });
+    }
+  }
 
-      if (_libraryRef.isCompleted) {
-        _libraryRef = Completer<LibraryRef>();
-      }
+  Future<void> _init(String isolateId, bool isIsolateNull) async {
+    await _initializeComplete;
 
-      if (isolate != null) {
-        _initializeComplete = _initialize(isolate.id);
-      }
-    });
+    if (_libraryRef.isCompleted) {
+      _libraryRef = new Completer<LibraryRef>();
+    }
+
+    if (!isIsolateNull) {
+      _initializeComplete = _initialize(isolateId);
+    }
   }
 
   bool _disposed = false;
 
   void dispose() {
+    selectedIsolateStreamSubscription.cancel();
     _disposed = true;
   }
 
@@ -40,6 +50,7 @@ class EvalOnDartLibrary {
   final VmServiceWrapper service;
   Completer<LibraryRef> _libraryRef;
   Future<void> _initializeComplete;
+  StreamSubscription selectedIsolateStreamSubscription;
 
   String get isolateId => _isolateId;
   String _isolateId;

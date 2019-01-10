@@ -341,23 +341,28 @@ class ServiceExtensionManager {
   /// extensions until the first frame event has been received [_firstFrameEventReceived].
   final Set<String> _pendingServiceExtensions = Set<String>();
 
-  void _handleExtensionEvent(Event event) {
+  final Completer<Null> extensionStatesUpdated = Completer();
+
+  Future<void> _handleExtensionEvent(Event event) async {
     final String extensionKind = event.extensionKind;
     if (event.kind == 'Extension' &&
         (extensionKind == 'Flutter.FirstFrame' ||
             extensionKind == 'Flutter.Frame')) {
-      _onFrameEventReceived();
+      await _onFrameEventReceived();
     }
   }
 
-  void _onFrameEventReceived() {
+  Future<void> _onFrameEventReceived() async {
     if (_firstFrameEventReceived) {
       // The first frame event was already received.
       return;
     }
     _firstFrameEventReceived = true;
 
-    _pendingServiceExtensions.forEach(_addServiceExtension);
+    for (String extension in _pendingServiceExtensions) {
+      await _addServiceExtension(extension);
+    }
+    extensionStatesUpdated.complete();
     _pendingServiceExtensions.clear();
   }
 
@@ -369,6 +374,10 @@ class ServiceExtensionManager {
     if (isolate.extensionRPCs != null) {
       for (String extension in isolate.extensionRPCs) {
         await _maybeAddServiceExtension(extension);
+      }
+
+      if (_pendingServiceExtensions.isEmpty) {
+        extensionStatesUpdated.complete();
       }
 
       if (!_firstFrameEventReceived) {
@@ -394,7 +403,7 @@ class ServiceExtensionManager {
         }
 
         if (didSendFirstFrameEvent) {
-          _onFrameEventReceived();
+          await _onFrameEventReceived();
         }
       }
     }
@@ -416,13 +425,51 @@ class ServiceExtensionManager {
     _serviceExtensions.add(name);
     streamController.add(true);
 
-    // TODO(kenzie): query the device for service extension states. This will
-    // restore extension states in DevTools on page refresh or initial start.
+    // Set any extensions that are already enabled on the device. This will
+    // enable extension states in DevTools on page refresh or initial start.
+    await _restoreExtensionFromDevice(name);
 
     // Restore any previously enabled states by calling their service extension.
     // This will restore extension states on the device after a hot restart.
     if (_enabledServiceExtensions.containsKey(name)) {
       await _callServiceExtension(name, _enabledServiceExtensions[name].value);
+    }
+  }
+
+  Future<void> _restoreExtensionFromDevice(String name) async {
+    if (!extensions.toggleableExtensionsWhitelist.containsKey(name)) {
+      return;
+    }
+    final expectedValueType =
+        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
+
+    final response = await _service.callServiceExtension(
+      name,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+    switch (expectedValueType) {
+      case bool:
+        final bool enabled = response.json['enabled'] == 'true' ? true : false;
+        await _maybeRestoreExtension(name, enabled);
+        return;
+      case String:
+        final String value = response.json['value'];
+        await _maybeRestoreExtension(name, value);
+        return;
+      case int:
+      case double:
+        final num value =
+            num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
+        await _maybeRestoreExtension(name, value);
+        return;
+      default:
+        return;
+    }
+  }
+
+  Future<void> _maybeRestoreExtension(String name, dynamic value) async {
+    if (value == extensions.toggleableExtensionsWhitelist[name].enabledValue) {
+      await setServiceExtensionState(name, true, value, callExtension: false);
     }
   }
 
@@ -468,9 +515,12 @@ class ServiceExtensionManager {
   Future<void> setServiceExtensionState(
     String name,
     bool enabled,
-    dynamic value,
-  ) async {
-    await _callServiceExtension(name, value);
+    dynamic value, {
+    bool callExtension = true,
+  }) async {
+    if (callExtension) {
+      await _callServiceExtension(name, value);
+    }
 
     final StreamController<ServiceExtensionState> streamController =
         _getServiceExtensionStateController(name);

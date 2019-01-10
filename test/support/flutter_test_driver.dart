@@ -115,7 +115,7 @@ abstract class FlutterTestDriver {
 
   String _flutterIsolateId;
 
-  Future<String> _getFlutterIsolateId() async {
+  Future<String> getFlutterIsolateId() async {
     // Currently these tests only have a single isolate. If this
     // ceases to be the case, this code will need changing.
     if (_flutterIsolateId == null) {
@@ -127,13 +127,13 @@ abstract class FlutterTestDriver {
 
   Future<Isolate> _getFlutterIsolate() async {
     final Isolate isolate =
-        await vmService.getIsolate(await _getFlutterIsolateId());
+        await vmService.getIsolate(await getFlutterIsolateId());
     return isolate;
   }
 
   Future<Isolate> waitForPause() async {
     _debugPrint('Waiting for isolate to pause');
-    final String flutterIsolate = await _getFlutterIsolateId();
+    final String flutterIsolate = await getFlutterIsolateId();
 
     Future<Isolate> waitForPause() async {
       final Completer<Event> pauseEvent = Completer<Event>();
@@ -166,7 +166,7 @@ abstract class FlutterTestDriver {
   Future<Isolate> _resume({String step, bool wait = true}) async {
     _debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
-        () async => vmService.resume(await _getFlutterIsolateId(), step: step),
+        () async => vmService.resume(await getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
   }
@@ -345,7 +345,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       await waitForPause();
       if (pauseOnExceptions) {
         await vmService.setExceptionPauseMode(
-            await _getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
+            await getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
       }
       await _resume(wait: false);
     }

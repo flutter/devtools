@@ -117,11 +117,11 @@ void main() {
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         extensionName,
         true,
-        0.5,
+        5.0,
       );
 
-      await _verifyExtensionStateOnTestDevice(evalExpression, '0.5', library);
-      await _verifyExtensionStateInServiceManager(extensionName, true, 0.5);
+      await _verifyExtensionStateOnTestDevice(evalExpression, '5.0', library);
+      await _verifyExtensionStateInServiceManager(extensionName, true, 5.0);
     });
 
     test('callService', () async {
@@ -167,6 +167,155 @@ void main() {
     });
 
     // TODO(kenzie): add hot restart test case.
+  }, tags: 'useFlutterSdk');
+
+  group('serviceManagerTests - restoring device-enabled extension:', () {
+    FlutterRunTestDriver _flutter;
+    String _flutterIsolateId;
+    VmServiceWrapper service;
+
+    setUp(() async {
+      setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
+
+      _flutter =
+          FlutterRunTestDriver(new Directory('test/fixtures/flutter_app'));
+      await _flutter.run(withDebugger: true);
+      _flutterIsolateId = await _flutter.getFlutterIsolateId();
+
+      service = _flutter.vmService;
+    });
+
+    tearDown(() async {
+      await service.allFuturesCompleted.future;
+      await _flutter.stop();
+    });
+
+    /// Helper method to call an extension on the test device and verify that
+    /// the device reflects the new extension state.
+    Future<void> _enableExtensionOnTestDevice(
+      extensions.ToggleableServiceExtensionDescription extensionDescription,
+      Map<String, dynamic> args,
+      String evalExpression,
+      EvalOnDartLibrary library, {
+      String enabledValue,
+      String disabledValue,
+    }) async {
+      enabledValue ??= extensionDescription.enabledValue.toString();
+      disabledValue ??= extensionDescription.disabledValue.toString();
+
+      // Verify initial extension state on test device.
+      await _verifyExtensionStateOnTestDevice(
+        evalExpression,
+        disabledValue,
+        library,
+      );
+
+      // Enable service extension on test device.
+      await _flutter.vmService.callServiceExtension(
+        extensionDescription.extension,
+        isolateId: _flutterIsolateId,
+        args: args,
+      );
+
+      // Verify extension state after calling the service extension.
+      await _verifyExtensionStateOnTestDevice(
+        evalExpression,
+        enabledValue,
+        library,
+      );
+    }
+
+    /// Helper method to enable an extension on the test device, open the
+    /// vmService, and verify the enabled extension state is reflected by
+    /// [ServiceExtensionManager].
+    Future<void> _enableExtensionAndOpenVmService(
+      extensions.ToggleableServiceExtensionDescription extensionDescription,
+      Map<String, dynamic> args,
+      String evalExpression,
+      EvalOnDartLibrary library, {
+      String enabledValue,
+      String disabledValue,
+    }) async {
+      await _enableExtensionOnTestDevice(
+        extensionDescription,
+        args,
+        evalExpression,
+        library,
+        enabledValue: enabledValue,
+        disabledValue: disabledValue,
+      );
+
+      await serviceManager.vmServiceOpened(service, new Completer().future);
+
+      await serviceManager
+          .serviceExtensionManager.extensionStatesUpdated.future;
+
+      await _verifyExtensionStateInServiceManager(
+        extensionDescription.extension,
+        true,
+        extensionDescription.enabledValue,
+      );
+    }
+
+    test('bool extension', () async {
+      final extensionDescription = extensions.debugPaint;
+      final args = {'enabled': true};
+      const evalExpression = 'debugPaintSizeEnabled';
+      final library = new EvalOnDartLibrary(
+        'package:flutter/src/rendering/debug.dart',
+        service,
+        isolateId: _flutterIsolateId,
+      );
+
+      await _enableExtensionAndOpenVmService(
+        extensionDescription,
+        args,
+        evalExpression,
+        library,
+      );
+    });
+
+    test('String extension', () async {
+      final extensionDescription = extensions.togglePlatformMode;
+      final args = {'value': 'iOS'};
+      const evalExpression = 'defaultTargetPlatform.toString()';
+      final library = new EvalOnDartLibrary(
+        'package:flutter/src/foundation/platform.dart',
+        service,
+        isolateId: _flutterIsolateId,
+      );
+
+      await _enableExtensionAndOpenVmService(
+        extensionDescription,
+        args,
+        evalExpression,
+        library,
+        enabledValue: 'TargetPlatform.iOS',
+        disabledValue: 'TargetPlatform.android',
+      );
+    });
+
+    test('numeric extension', () async {
+      final extensionDescription = extensions.slowAnimations;
+      final args = {
+        extensionDescription.extension
+                .substring(extensionDescription.extension.lastIndexOf('.') + 1):
+            extensionDescription.enabledValue
+      };
+      const evalExpression = 'timeDilation';
+      final library = new EvalOnDartLibrary(
+        'package:flutter/src/scheduler/binding.dart',
+        service,
+        isolateId: _flutterIsolateId,
+      );
+
+      await _enableExtensionAndOpenVmService(
+        extensionDescription,
+        args,
+        evalExpression,
+        library,
+      );
+    });
   }, tags: 'useFlutterSdk');
 }
 

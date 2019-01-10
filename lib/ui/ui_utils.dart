@@ -13,7 +13,7 @@ import 'primer.dart';
 const int defaultSplitterWidth = 12;
 
 CoreElement createExtensionCheckBox(
-    ServiceExtensionDescription extensionDescription) {
+    ToggleableServiceExtensionDescription extensionDescription) {
   final extensionName = extensionDescription.extension;
   final CoreElement input = checkbox();
 
@@ -65,7 +65,7 @@ class ServiceExtensionButton {
     _updateState();
   }
 
-  final ServiceExtensionDescription extensionDescription;
+  final ToggleableServiceExtensionDescription extensionDescription;
   PButton button;
 
   void click() {
