@@ -35,7 +35,10 @@ class ServiceConnectionManager {
 
   final Map<String, StreamController<bool>> _serviceRegistrationController =
       <String, StreamController<bool>>{};
-  final Map<String, List<String>> registeredMethodsForService = {};
+  final Map<String, List<String>> _registeredMethodsForService = {};
+
+  Map<String, List<String>> get registeredMethodsForService =>
+      _registeredMethodsForService;
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -64,7 +67,7 @@ class ServiceConnectionManager {
     String isolateId,
     Map args,
   }) async {
-    final registered = registeredMethodsForService[name] ?? const [];
+    final registered = _registeredMethodsForService[name] ?? const [];
     if (registered.length != 1) {
       throw Exception('Expected one registered service for "$name" but found '
           '${registered.length}');
@@ -82,7 +85,7 @@ class ServiceConnectionManager {
     String isolateId,
     Map args,
   }) async {
-    final registered = registeredMethodsForService[name] ?? const [];
+    final registered = _registeredMethodsForService[name] ?? const [];
     if (registered.isNotEmpty) {
       return Future.wait(registered.map((String method) {
         return service.callMethod(method, isolateId: isolateId, args: args);
@@ -96,7 +99,7 @@ class ServiceConnectionManager {
     String name,
     void onData(bool value),
   ) {
-    if (registeredMethodsForService.containsKey(name) && onData != null) {
+    if (_registeredMethodsForService.containsKey(name) && onData != null) {
       onData(true);
     }
     final StreamController<bool> streamController =
@@ -110,7 +113,7 @@ class ServiceConnectionManager {
       _serviceRegistrationController,
       onFirstListenerSubscribed: () {
         _serviceRegistrationController[name]
-            .add(registeredMethodsForService.containsKey(name));
+            .add(_registeredMethodsForService.containsKey(name));
       },
     );
   }
@@ -130,13 +133,13 @@ class ServiceConnectionManager {
 
       service.onServiceEvent.listen((e) {
         if (e.kind == EventKind.kServiceRegistered) {
-          if (!registeredMethodsForService.containsKey(e.service)) {
-            registeredMethodsForService[e.service] = [e.method];
+          if (!_registeredMethodsForService.containsKey(e.service)) {
+            _registeredMethodsForService[e.service] = [e.method];
             final StreamController<bool> streamController =
                 _getServiceRegistrationController(e.service);
             streamController.add(true);
           } else {
-            registeredMethodsForService[e.service] = [e.method];
+            _registeredMethodsForService[e.service].add(e.method);
           }
         }
       });
