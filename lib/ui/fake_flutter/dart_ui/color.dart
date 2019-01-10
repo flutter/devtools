@@ -141,7 +141,7 @@ class Color {
   ///
   /// Out of range values will have unexpected effects.
   Color withAlpha(int a) {
-    return new Color.fromARGB(a, red, green, blue);
+    return Color.fromARGB(a, red, green, blue);
   }
 
   /// Returns a new color that matches this color with the alpha channel
@@ -158,7 +158,7 @@ class Color {
   ///
   /// Out of range values will have unexpected effects.
   Color withRed(int r) {
-    return new Color.fromARGB(alpha, r, green, blue);
+    return Color.fromARGB(alpha, r, green, blue);
   }
 
   /// Returns a new color that matches this color with the green channel
@@ -166,7 +166,7 @@ class Color {
   ///
   /// Out of range values will have unexpected effects.
   Color withGreen(int g) {
-    return new Color.fromARGB(alpha, red, g, blue);
+    return Color.fromARGB(alpha, red, g, blue);
   }
 
   /// Returns a new color that matches this color with the blue channel replaced
@@ -174,7 +174,7 @@ class Color {
   ///
   /// Out of range values will have unexpected effects.
   Color withBlue(int b) {
-    return new Color.fromARGB(alpha, red, green, b);
+    return Color.fromARGB(alpha, red, green, b);
   }
 
   // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
@@ -224,7 +224,7 @@ class Color {
     if (a == null && b == null) return null;
     if (a == null) return _scaleAlpha(b, t);
     if (b == null) return _scaleAlpha(a, 1.0 - t);
-    return new Color.fromARGB(
+    return Color.fromARGB(
       lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
       lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
       lerpDouble(a.green, b.green, t).toInt().clamp(0, 255),
@@ -250,7 +250,7 @@ class Color {
     int backAlpha = background.alpha;
     if (backAlpha == 0xff) {
       // Opaque background case
-      return new Color.fromARGB(
+      return Color.fromARGB(
         0xff,
         (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
         (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
@@ -261,7 +261,7 @@ class Color {
       backAlpha = (backAlpha * invAlpha) ~/ 0xff;
       final int outAlpha = alpha + backAlpha;
       assert(outAlpha != 0x00);
-      return new Color.fromARGB(
+      return Color.fromARGB(
         outAlpha,
         (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
         (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,

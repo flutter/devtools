@@ -10,6 +10,6 @@ void main() {
   FrameworkCore.init();
 
   // Load the web app framework.
-  final PerfToolFramework framework = new PerfToolFramework();
+  final PerfToolFramework framework = PerfToolFramework();
   framework.loadScreenFromLocation();
 }

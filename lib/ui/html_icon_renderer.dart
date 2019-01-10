@@ -36,7 +36,7 @@ abstract class HtmlIconRenderer<T extends Icon> {
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px';
     element.classes.add('flutter-icon');
-    return new CoreElement.from(element);
+    return CoreElement.from(element);
   }
 
   @protected
@@ -75,7 +75,7 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
   Future<CanvasImageSource> _imageFuture;
 
   @override
-  ImageElement createCanvasSource() => new ImageElement(src: src);
+  ImageElement createCanvasSource() => ImageElement(src: src);
 
   @override
   CoreElement createElement() {
@@ -94,7 +94,7 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
     if (_imageFuture != null) {
       return _imageFuture;
     }
-    final Completer<CanvasImageSource> completer = new Completer();
+    final Completer<CanvasImageSource> completer = Completer();
     final imageElement = createCanvasSource();
     imageElement.onLoad.listen((e) {
       _image = imageElement;
@@ -116,7 +116,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
   @override
   CanvasElement createCanvasSource() {
     final devicePixelRatio = window.devicePixelRatio;
-    final canvas = new CanvasElement(
+    final canvas = CanvasElement(
       width: iconWidth * devicePixelRatio,
       height: iconHeight * devicePixelRatio,
     );
@@ -208,7 +208,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
 
   CanvasElement _buildImage(CanvasImageSource source) {
     final num devicePixelRatio = window.devicePixelRatio;
-    final canvas = new CanvasElement(
+    final canvas = CanvasElement(
       width: iconWidth * devicePixelRatio,
       height: iconHeight * devicePixelRatio,
     );
@@ -255,7 +255,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
 
   @override
   CanvasImageSource createCanvasSource() {
-    final canvas = new CanvasElement(
+    final canvas = CanvasElement(
       width: iconWidth * window.devicePixelRatio,
       height: iconHeight * window.devicePixelRatio,
     );

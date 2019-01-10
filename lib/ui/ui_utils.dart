@@ -40,27 +40,14 @@ CoreElement createExtensionCheckBox(
   inputLabel.add(span(text: extensionName));
 
   final outerDiv = div(c: 'form-checkbox')
-    ..add(new CoreElement('label')..add([input, inputLabel]));
+    ..add(CoreElement('label')..add([input, inputLabel]));
   input.setAttribute('title', extensionDescription.tooltip);
   return outerDiv;
 }
 
-// TODO(kenzie): add hotRestart button.
-
-// TODO(kenzie): move method to more specific library.
-CoreElement createHotReloadButton() {
-  final PButton button = new PButton('Hot Reload')..small();
-  button.click(() async {
-    button.disabled = true;
-    await serviceManager.performHotReload();
-    button.disabled = false;
-  });
-  return button;
-}
-
 class ServiceExtensionButton {
   ServiceExtensionButton(this.extensionDescription) {
-    button = new PButton.icon(
+    button = PButton.icon(
         extensionDescription.description, extensionDescription.icon,
         title: extensionDescription.tooltip)
       ..small();

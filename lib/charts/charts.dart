@@ -38,7 +38,7 @@ abstract class LineChart<T> {
   CoreElement chartElement;
   math.Point<int> dim;
 
-  final SetStateMixin _state = new SetStateMixin();
+  final SetStateMixin _state = SetStateMixin();
   T data;
 
   void _updateSize() {
@@ -53,7 +53,7 @@ abstract class LineChart<T> {
 
     final Element svgChild = chartElement.element.children.first;
     svgChild.setAttribute('viewBox', '0 0 ${rect.width} $fixedHeight');
-    dim = new math.Point<int>(rect.width.toInt(), rect.height.toInt());
+    dim = math.Point<int>(rect.width.toInt(), rect.height.toInt());
 
     if (data != null) {
       _state.setState(() {

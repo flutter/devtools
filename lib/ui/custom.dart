@@ -54,11 +54,11 @@ class SelectableList<T> extends CoreElement {
   CoreElement _selectedElement;
 
   final StreamController<T> _selectionController =
-      new StreamController<T>.broadcast();
+      StreamController<T>.broadcast();
   final StreamController<T> _doubleClickController =
-      new StreamController<T>.broadcast();
+      StreamController<T>.broadcast();
   final StreamController<void> _itemsChangedController =
-    new StreamController<void>.broadcast();
+      StreamController<void>.broadcast();
 
   bool canDeselect = false;
 

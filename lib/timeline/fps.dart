@@ -102,7 +102,7 @@ class FramesTracker {
 
   VmServiceWrapper service;
   final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
   List<FrameInfo> samples = <FrameInfo>[];
 
   bool get hasConnection => service != null;
@@ -161,7 +161,7 @@ class FrameInfo {
   static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
   static FrameInfo from(Map<dynamic, dynamic> data) {
-    return new FrameInfo(
+    return FrameInfo(
         data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
   }
 

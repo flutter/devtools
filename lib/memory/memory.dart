@@ -25,10 +25,10 @@ import '../vm_service_wrapper.dart';
 class MemoryScreen extends Screen {
   MemoryScreen()
       : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
-    classCountStatus = new StatusItem();
+    classCountStatus = StatusItem();
     addStatusItem(classCountStatus);
 
-    objectCountStatus = new StatusItem();
+    objectCountStatus = StatusItem();
     addStatusItem(objectCountStatus);
   }
 
@@ -41,7 +41,7 @@ class MemoryScreen extends Screen {
   CoreElement tableContainer;
 
   MemoryChart memoryChart;
-  SetStateMixin memoryChartStateMixin = new SetStateMixin();
+  SetStateMixin memoryChartStateMixin = SetStateMixin();
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
 
@@ -56,12 +56,12 @@ class MemoryScreen extends Screen {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              loadSnapshotButton = new PButton('Load heap snapshot')
+              loadSnapshotButton = PButton('Load heap snapshot')
                 ..small()
                 ..primary()
                 ..disabled = true
                 ..click(_loadAllocationProfile),
-              progressElement = new ProgressElement()
+              progressElement = ProgressElement()
                 ..clazz('margin-left')
                 ..display = 'none',
               div()..flex(),
@@ -116,7 +116,7 @@ class MemoryScreen extends Screen {
     loadSnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-        tableStack.first.element.add(new Spinner()..clazz('padded'));
+        tableStack.first.element.add(Spinner()..clazz('padded'));
 
     // TODO(devoncarew): error handling
 
@@ -127,7 +127,7 @@ class MemoryScreen extends Screen {
       final List<dynamic> members = response.json['members'];
       final List<ClassHeapStats> heapStats = members
           .cast<Map<String, dynamic>>()
-          .map((Map<String, dynamic> d) => new ClassHeapStats(d))
+          .map((Map<String, dynamic> d) => ClassHeapStats(d))
           .where((ClassHeapStats stats) {
         return stats.instancesCurrent > 0; //|| stats.instancesAccumulated > 0;
       }).toList();
@@ -200,19 +200,19 @@ class MemoryScreen extends Screen {
   CoreElement createLiveChartArea() {
     final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
-    memoryChart = new MemoryChart(container);
+    memoryChart = MemoryChart(container);
     memoryChart.disabled = true;
     return container;
   }
 
   Table<ClassHeapStats> _createHeapStatsTableView() {
-    final Table<ClassHeapStats> table = new Table<ClassHeapStats>.virtual()
+    final Table<ClassHeapStats> table = Table<ClassHeapStats>.virtual()
       ..element.display = 'none'
       ..element.clazz('memory-table');
 
-    table.addColumn(new MemoryColumnSize());
-    table.addColumn(new MemoryColumnInstanceCount());
-    table.addColumn(new MemoryColumnClassName());
+    table.addColumn(MemoryColumnSize());
+    table.addColumn(MemoryColumnInstanceCount());
+    table.addColumn(MemoryColumnClassName());
 
     table.setSortColumn(table.columns.first);
 
@@ -225,16 +225,11 @@ class MemoryScreen extends Screen {
     return table;
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      new HelpInfo(title: 'memory view docs', url: 'http://www.cheese.com');
-
   void _handleConnectionStart(VmServiceWrapper service) {
     loadSnapshotButton.disabled = false;
     memoryChart.disabled = false;
 
-    memoryTracker = new MemoryTracker(service);
+    memoryTracker = MemoryTracker(service);
     memoryTracker.start();
 
     memoryTracker.onChange.listen((Null _) {
@@ -397,7 +392,7 @@ class MemoryTracker {
   VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
 
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
@@ -416,7 +411,7 @@ class MemoryTracker {
   }
 
   void start() {
-    _pollingTimer = new Timer(const Duration(milliseconds: 100), _pollMemory);
+    _pollingTimer = Timer(const Duration(milliseconds: 100), _pollMemory);
     service.onGCEvent.listen(_handleGCEvent);
   }
 
@@ -447,7 +442,7 @@ class MemoryTracker {
     }));
     _update(vm, isolates);
 
-    _pollingTimer = new Timer(kUpdateDelay, _pollMemory);
+    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
   }
 
   // TODO(devoncarew): add a way to pause polling
@@ -483,18 +478,18 @@ class MemoryTracker {
 
     heapMax = total;
 
-    int time = new DateTime.now().millisecondsSinceEpoch;
+    int time = DateTime.now().millisecondsSinceEpoch;
     if (samples.isNotEmpty) {
       time = math.max(time, samples.last.time);
     }
 
-    _addSample(new HeapSample(current, time, fromGC));
+    _addSample(HeapSample(current, time, fromGC));
   }
 
   void _addSample(HeapSample sample) {
     if (samples.isEmpty) {
       // Add an initial synthetic sample so the first version of the graph draws some data.
-      samples.add(new HeapSample(
+      samples.add(HeapSample(
           sample.bytes, sample.time - kUpdateDelay.inMilliseconds ~/ 4, false));
     }
 
@@ -502,7 +497,7 @@ class MemoryTracker {
 
     // delete old samples
     final int oldestTime =
-        (new DateTime.now().subtract(kMaxGraphTime).subtract(kUpdateDelay * 2))
+        (DateTime.now().subtract(kMaxGraphTime).subtract(kUpdateDelay * 2))
             .millisecondsSinceEpoch;
     samples.retainWhere((HeapSample sample) => sample.time >= oldestTime);
 

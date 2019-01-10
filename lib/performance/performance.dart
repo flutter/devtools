@@ -22,10 +22,10 @@ class PerformanceScreen extends Screen {
             name: 'Performance',
             id: 'performance',
             iconClass: 'octicon-dashboard') {
-    sampleCountStatus = new StatusItem();
+    sampleCountStatus = StatusItem();
     addStatusItem(sampleCountStatus);
 
-    sampleFreqStatus = new StatusItem();
+    sampleFreqStatus = StatusItem();
     addStatusItem(sampleFreqStatus);
   }
 
@@ -38,7 +38,7 @@ class PerformanceScreen extends Screen {
   Table<PerfData> perfTable;
 
   CpuChart cpuChart;
-  SetStateMixin cpuChartStateMixin = new SetStateMixin();
+  SetStateMixin cpuChartStateMixin = SetStateMixin();
   CpuTracker cpuTracker;
 
   @override
@@ -52,12 +52,12 @@ class PerformanceScreen extends Screen {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              loadSnapshotButton = new PButton('Load snapshot')
+              loadSnapshotButton = PButton('Load snapshot')
                 ..small()
                 ..primary()
                 ..click(_loadSnapshot),
               progressElement = span(c: 'margin-left text-gray')..flex(),
-              resetButton = new PButton('Reset VM counters')
+              resetButton = PButton('Reset VM counters')
                 ..small()
                 ..click(_reset),
             ])
@@ -95,7 +95,7 @@ class PerformanceScreen extends Screen {
       // TODO(devoncarew):
       print(profile);
 
-      final _CalcProfile calc = new _CalcProfile(profile);
+      final _CalcProfile calc = _CalcProfile(profile);
       await calc.calc();
 
       _updateStatus(profile);
@@ -110,7 +110,7 @@ class PerformanceScreen extends Screen {
   CoreElement createLiveChartArea() {
     final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
-    cpuChart = new CpuChart(container);
+    cpuChart = CpuChart(container);
     cpuChart.disabled = true;
     return container;
   }
@@ -128,11 +128,11 @@ class PerformanceScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    perfTable = new Table<PerfData>.virtual();
+    perfTable = Table<PerfData>.virtual();
 
-    perfTable.addColumn(new PerfColumnInclusive());
-    perfTable.addColumn(new PerfColumnSelf());
-    perfTable.addColumn(new PerfColumnMethodName());
+    perfTable.addColumn(PerfColumnInclusive());
+    perfTable.addColumn(PerfColumnSelf());
+    perfTable.addColumn(PerfColumnMethodName());
 
     perfTable.setSortColumn(perfTable.columns.first);
 
@@ -151,7 +151,7 @@ class PerformanceScreen extends Screen {
       sampleCountStatus.element.text = '';
       sampleFreqStatus.element.text = '';
     } else {
-      final Duration timeSpan = new Duration(seconds: profile.timeSpan.round());
+      final Duration timeSpan = Duration(seconds: profile.timeSpan.round());
       String s = timeSpan.toString();
       s = s.substring(0, s.length - 7);
       sampleCountStatus.element.text =
@@ -163,18 +163,13 @@ class PerformanceScreen extends Screen {
     }
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo => new HelpInfo(
-      title: 'performance view docs', url: 'http://www.cheese.com');
-
   void _process(CpuProfile profile) {
     perfTable.setRows(
-        new List<PerfData>.from(profile.functions.where((ProfileFunction f) {
+        List<PerfData>.from(profile.functions.where((ProfileFunction f) {
       return f.inclusiveTicks > 0 || f.exclusiveTicks > 0;
     }).map<PerfData>((ProfileFunction f) {
       final int count = math.max(1, profile.sampleCount);
-      return new PerfData(
+      return PerfData(
         f.kind,
         escape(funcRefName(f.function)),
         f.exclusiveTicks / count,
@@ -186,7 +181,7 @@ class PerformanceScreen extends Screen {
   void _handleConnectionStart(VmServiceWrapper service) {
     cpuChart.disabled = false;
 
-    cpuTracker = new CpuTracker(service);
+    cpuTracker = CpuTracker(service);
     cpuTracker.start();
 
     cpuTracker.onChange.listen((Null _) {
@@ -259,7 +254,7 @@ class CpuTracker {
   VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
   List<int> samples = <int>[];
 
   bool get hasConnection => service != null;
@@ -267,7 +262,7 @@ class CpuTracker {
   Stream<Null> get onChange => _changeController.stream;
 
   void start() {
-    _pollingTimer = new Timer(const Duration(milliseconds: 100), _pollCpu);
+    _pollingTimer = Timer(const Duration(milliseconds: 100), _pollCpu);
   }
 
   void _pollCpu() {
@@ -277,7 +272,7 @@ class CpuTracker {
 
     // TODO(devoncarew): Poll the VM for the CPU load.
 
-    _pollingTimer = new Timer(kUpdateDelay, _pollCpu);
+    _pollingTimer = Timer(kUpdateDelay, _pollCpu);
   }
 
   void stop() {

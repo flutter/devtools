@@ -53,6 +53,7 @@ class FlutterIcons {
   static const Icon openTimeline = UrlIcon('/icons/timeline.png');
 
   static const Icon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
+  static const Icon hotReload = UrlIcon('/icons/hot-reload.png');
   static const Icon hotRestart = UrlIcon('/icons/hot-restart.png');
 
   static const Icon iconRun = UrlIcon('/icons/refinal Icon_run.png');
@@ -158,7 +159,7 @@ class CustomIconMaker {
     final String mapKey = '${text}_${kind.name}_$isAbstract';
 
     return iconCache.putIfAbsent(mapKey, () {
-      return new CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
+      return CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
     });
   }
 
@@ -230,6 +231,6 @@ class ColorIconMaker {
   final Map<Color, Icon> iconCache = {};
 
   Icon getCustomIcon(Color color) {
-    return iconCache.putIfAbsent(color, () => new ColorIcon(color));
+    return iconCache.putIfAbsent(color, () => ColorIcon(color));
   }
 }

@@ -27,7 +27,7 @@ String getLoremText([int paragraphCount = 1]) {
   return str.trim();
 }
 
-final Random r = new Random();
+final Random r = Random();
 
 final List<String> _words = loremIpsum
     .replaceAll('\n', ' ')
@@ -39,13 +39,15 @@ final List<String> _words = loremIpsum
 
 String getLoremFragment([int wordCount]) {
   wordCount ??= r.nextInt(8) + 1;
-  return toBeginningOfSentenceCase(new List<String>.generate(
-      wordCount, (_) => _words[r.nextInt(_words.length)]).join(' ').trim());
+  return toBeginningOfSentenceCase(
+      List<String>.generate(wordCount, (_) => _words[r.nextInt(_words.length)])
+          .join(' ')
+          .trim());
 }
 
 String escape(String text) => text == null ? '' : htmlEscape.convert(text);
 
-final NumberFormat nf = new NumberFormat.decimalPattern();
+final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent(double d) => '${(d * 100).toStringAsFixed(1)}%';
 
@@ -81,8 +83,7 @@ String funcRefName(FuncRef ref) {
 class Property<T> {
   Property(this._value);
 
-  final StreamController<T> _changeController =
-      new StreamController<T>.broadcast();
+  final StreamController<T> _changeController = StreamController<T>.broadcast();
   T _value;
 
   T get value => _value;
@@ -99,7 +100,7 @@ class Property<T> {
 
 /// The directory used to store per-user settings for Dart tooling.
 Directory getDartPrefsDirectory() {
-  return new Directory(path.join(getUserHomeDir(), '.dart'));
+  return Directory(path.join(getUserHomeDir(), '.dart'));
 }
 
 /// Return the user's home directory.
@@ -132,11 +133,11 @@ class DelayedTimer {
     _closure = closure;
 
     if (_minTimer == null) {
-      _minTimer = new Timer(minDelay, _fire);
-      _maxTimer = new Timer(maxDelay, _fire);
+      _minTimer = Timer(minDelay, _fire);
+      _maxTimer = Timer(maxDelay, _fire);
     } else {
       _minTimer.cancel();
-      _minTimer = new Timer(minDelay, _fire);
+      _minTimer = Timer(minDelay, _fire);
     }
   }
 

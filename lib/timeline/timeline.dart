@@ -10,8 +10,10 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
+import '../service_registrations.dart' as registrations;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -41,9 +43,9 @@ class TimelineScreen extends Screen {
       : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
 
   FramesChart framesChart;
-  SetStateMixin framesChartStateMixin = new SetStateMixin();
+  SetStateMixin framesChartStateMixin = SetStateMixin();
   FramesTracker framesTracker;
-  TimelineFramesBuilder timelineFramesBuilder = new TimelineFramesBuilder();
+  TimelineFramesBuilder timelineFramesBuilder = TimelineFramesBuilder();
 
   TimelineFramesUI timelineFramesUI;
 
@@ -56,12 +58,12 @@ class TimelineScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     FrameDetailsUI frameDetailsUI;
 
-    pauseButton = new PButton('Pause recording')
+    pauseButton = PButton('Pause recording')
       ..small()
       ..primary()
       ..click(_pauseRecording);
 
-    resumeButton = new PButton('Resume recording')
+    resumeButton = PButton('Resume recording')
       ..small()
       ..clazz('margin-left')
       ..disabled = true
@@ -81,13 +83,10 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.togglePlatformMode).button;
 
     mainDiv.add(<CoreElement>[
-      createLiveChartArea(),
-      div(c: 'section'),
       div(c: 'section')
         ..layoutHorizontal()
         ..add(<CoreElement>[
-          pauseButton,
-          resumeButton,
+          createHotReloadButton(),
           div()..flex(),
           div(c: 'btn-group')
             ..add(<CoreElement>[
@@ -99,14 +98,24 @@ class TimelineScreen extends Screen {
               togglePlatformButton,
             ]),
         ]),
+      div(c: 'section'),
+      createLiveChartArea(),
+      div(c: 'section'),
+      div(c: 'section')
+        ..layoutHorizontal()
+        ..add(<CoreElement>[
+          pauseButton,
+          resumeButton,
+          div()..flex(),
+        ]),
       div(c: 'section')
         ..add(<CoreElement>[
-          timelineFramesUI = new TimelineFramesUI(timelineFramesBuilder)
+          timelineFramesUI = TimelineFramesUI(timelineFramesBuilder)
         ]),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
-        ..add(frameDetailsUI = new FrameDetailsUI()..attribute('hidden')),
+        ..add(frameDetailsUI = FrameDetailsUI()..attribute('hidden')),
     ]);
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
@@ -129,7 +138,7 @@ class TimelineScreen extends Screen {
   CoreElement createLiveChartArea() {
     final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
-    framesChart = new FramesChart(container);
+    framesChart = FramesChart(container);
     framesChart.disabled = true;
     return container;
   }
@@ -147,7 +156,7 @@ class TimelineScreen extends Screen {
   void _handleConnectionStart(VmServiceWrapper service) {
     framesChart.disabled = false;
 
-    framesTracker = new FramesTracker(service);
+    framesTracker = FramesTracker(service);
     framesTracker.start();
 
     framesTracker.onChange.listen((Null _) {
@@ -162,7 +171,7 @@ class TimelineScreen extends Screen {
           list.cast<Map<String, dynamic>>();
 
       for (Map<String, dynamic> json in events) {
-        final TimelineEvent e = new TimelineEvent(json);
+        final TimelineEvent e = TimelineEvent(json);
         timelineFramesUI.timelineData?.processTimelineEvent(e);
       }
     });
@@ -226,16 +235,16 @@ class TimelineScreen extends Screen {
         list.cast<Map<String, dynamic>>();
 
     final List<TimelineEvent> events = traceEvents
-        .map((Map<String, dynamic> event) => new TimelineEvent(event))
+        .map((Map<String, dynamic> event) => TimelineEvent(event))
         .where((TimelineEvent event) {
       return event.name == 'thread_name';
     }).toList();
 
-    final TimelineData timelineData = new TimelineData();
+    final TimelineData timelineData = TimelineData();
 
     for (TimelineEvent event in events) {
       final TimelineThread thread =
-          new TimelineThread(timelineData, event.args['name'], event.threadId);
+          TimelineThread(timelineData, event.args['name'], event.threadId);
       // TODO: consider pruning which threads we add based on which ones are
       // relevant to the user.
       timelineData.addThread(thread);
@@ -249,10 +258,30 @@ class TimelineScreen extends Screen {
     timelineFramesUI.timelineData = timelineData;
   }
 
-  // TODO(devoncarew): Update this url.
-  @override
-  HelpInfo get helpInfo =>
-      new HelpInfo(title: 'timeline docs', url: 'http://www.cheese.com');
+  // TODO(kenzie): add hotRestart button.
+
+  CoreElement createHotReloadButton() {
+    final PButton button = new PButton.icon(
+      'Hot Reload',
+      FlutterIcons.hotReload,
+    )..small();
+
+    button.click(() async {
+      button.disabled = true;
+      await serviceManager.performHotReload();
+      button.disabled = false;
+    });
+
+    // Hide the button if the connected device does not support hot reload.
+    serviceManager.hasRegisteredService(
+      registrations.reloadSources,
+      (registered) {
+        button.hidden(!registered);
+      },
+    );
+
+    return button;
+  }
 }
 
 class TimelineFramesUI extends CoreElement {
@@ -260,7 +289,7 @@ class TimelineFramesUI extends CoreElement {
       : super('div', classes: 'timeline-frames') {
     timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
       // TODO(devoncarew): Make sure we respect TimelineFramesBuilder.maxFrames.
-      final CoreElement frameUI = new TimelineFrameUI(this, frame);
+      final CoreElement frameUI = TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
       } else {
@@ -279,7 +308,7 @@ class TimelineFramesUI extends CoreElement {
   TimelineData timelineData;
 
   final StreamController<TimelineFrame> _selectedFrameController =
-      new StreamController<TimelineFrame>.broadcast();
+      StreamController<TimelineFrame>.broadcast();
 
   bool hasStarted() => timelineData != null;
 
@@ -305,7 +334,7 @@ class TimelineFrameUI extends CoreElement {
       : super('div', classes: 'timeline-frame') {
     add(<CoreElement>[
       span(text: 'dart ${frame.renderAsMs}', c: 'perf-label'),
-      new CoreElement('br'),
+      CoreElement('br'),
       span(text: 'gpu ${frame.gpuAsMs}', c: 'perf-label'),
     ]);
 
@@ -362,10 +391,10 @@ class TimelineFramesBuilder {
   List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
 
   final StreamController<TimelineFrame> _frameAddedController =
-      new StreamController<TimelineFrame>.broadcast();
+      StreamController<TimelineFrame>.broadcast();
 
   final StreamController<Null> _clearedController =
-      new StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
 
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
 
@@ -439,7 +468,7 @@ class TimelineFramesBuilder {
       final TimelineThreadEvent dartEvent = dartEvents.removeAt(0);
       final TimelineThreadEvent gpuEvent = gpuEvents.removeAt(0);
 
-      final TimelineFrame frame = new TimelineFrame(
+      final TimelineFrame frame = TimelineFrame(
           renderStart: dartEvent.startMicros,
           rasterizeStart: gpuEvent.startMicros);
       frame.renderDuration = dartEvent.durationMicros;
@@ -469,10 +498,10 @@ class FrameDetailsUI extends CoreElement {
     // TODO(devoncarew): listen to tab changes
     content = div(c: 'frame-timeline')..flex();
 
-    final PTabNav tabNav = new PTabNav(<PTabNavTab>[
-      new PTabNavTab('Frame timeline'),
-      new PTabNavTab('Widget build info'),
-      new PTabNavTab('Skia picture'),
+    final PTabNav tabNav = PTabNav(<PTabNavTab>[
+      PTabNavTab('Frame timeline'),
+      PTabNavTab('Widget build info'),
+      PTabNavTab('Skia picture'),
     ]);
 
     add(<CoreElement>[

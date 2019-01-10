@@ -23,17 +23,17 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-// TODO(devoncarew): make the screens gather info when not the active screen, and refresh
-//       the UI on re-activate
+// TODO(devoncarew): make the screens gather info when not the active screen,
+// and refresh the UI on re-activate
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
-    addScreen(new DebuggerScreen());
-    addScreen(new MemoryScreen());
-    addScreen(new TimelineScreen());
-    addScreen(new PerformanceScreen());
-    addScreen(new DeviceScreen());
-    addScreen(new LoggingScreen());
+    addScreen(DebuggerScreen());
+    addScreen(MemoryScreen());
+    addScreen(TimelineScreen());
+    addScreen(PerformanceScreen());
+    addScreen(DeviceScreen());
+    addScreen(LoggingScreen());
 
     initGlobalUI();
 
@@ -43,13 +43,14 @@ class PerfToolFramework extends Framework {
   StatusItem isolateSelectStatus;
   PSelect isolateSelect;
 
+  StatusItem connectionStatus;
+
   void initGlobalUI() {
-    final CoreElement mainNav =
-        new CoreElement.from(querySelector('#main-nav'));
+    final CoreElement mainNav = CoreElement.from(querySelector('#main-nav'));
     mainNav.clear();
 
     for (Screen screen in screens) {
-      final CoreElement link = new CoreElement('a')
+      final CoreElement link = CoreElement('a')
         ..attributes['href'] = screen.ref
         ..onClick.listen((MouseEvent e) {
           e.preventDefault();
@@ -68,19 +69,26 @@ class PerfToolFramework extends Framework {
       });
     }
 
-    // TODO(devoncarew): isolate selector should use the rich pulldown UI
-    isolateSelectStatus = new StatusItem();
+    isolateSelectStatus = StatusItem();
     globalStatus.add(isolateSelectStatus);
     isolateSelect = select()
       ..small()
       ..change(_handleIsolateSelect);
     isolateSelectStatus.element.add(isolateSelect);
     _rebuildIsolateSelect();
+
     serviceManager.isolateManager.onIsolateCreated
         .listen(_rebuildIsolateSelect);
     serviceManager.isolateManager.onIsolateExited.listen(_rebuildIsolateSelect);
     serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
+
+    connectionStatus = StatusItem();
+    auxiliaryStatus.add(connectionStatus);
+
+    serviceManager.onStateChange.listen((_) {
+      _rebuildConnectionStatus();
+    });
   }
 
   void initTestingModel() {
@@ -103,6 +111,16 @@ class PerfToolFramework extends Framework {
     if (serviceManager.isolateManager.selectedIsolate != null) {
       isolateSelect.selectedIndex = serviceManager.isolateManager.isolates
           .indexOf(serviceManager.isolateManager.selectedIsolate);
+    }
+  }
+
+  void _rebuildConnectionStatus() {
+    if (serviceManager.hasConnection) {
+      final String description = '${serviceManager.vm.targetCPU}, '
+          '${serviceManager.vm.architectureBits}-bit';
+      connectionStatus.element.text = 'connected to device ($description)';
+    } else {
+      connectionStatus.element.text = 'no device connected';
     }
   }
 }

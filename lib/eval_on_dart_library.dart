@@ -164,7 +164,7 @@ class EvalOnDartLibrary {
     if (isAlive != null && isAlive.disposed) return null;
 
     // Future that completes when the request has finished.
-    final Completer<T> response = new Completer();
+    final Completer<T> response = Completer();
     // This is an optimization to avoid sending stale requests across the wire.
     void wrappedRequest() async {
       if (isAlive != null && isAlive.disposed || _disposed) {

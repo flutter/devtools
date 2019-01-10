@@ -26,13 +26,12 @@ class Table<T> extends Object with SetStateMixin {
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
     _init();
-    _spacerBeforeVisibleRows = new CoreElement('tr');
-    _spacerAfterVisibleRows = new CoreElement('tr');
+    _spacerBeforeVisibleRows = CoreElement('tr');
+    _spacerAfterVisibleRows = CoreElement('tr');
 
     // TODO(jacobr): remove call to allowInterop once
     // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver =
-        new IntersectionObserver(allowInterop(_visibilityChange));
+    _visibilityObserver = IntersectionObserver(allowInterop(_visibilityChange));
     _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
     _visibilityObserver.observe(_spacerAfterVisibleRows.element);
     element.onScroll.listen((_) => _rebuildTable());
@@ -58,7 +57,7 @@ class Table<T> extends Object with SetStateMixin {
   Column<T> _sortColumn;
   SortOrder _sortDirection;
 
-  final CoreElement _table = new CoreElement('table')
+  final CoreElement _table = CoreElement('table')
     ..clazz('full-width')
     ..setAttribute('tabIndex', '0');
   CoreElement _thead;
@@ -66,15 +65,14 @@ class Table<T> extends Object with SetStateMixin {
 
   CoreElement _spacerBeforeVisibleRows;
   CoreElement _spacerAfterVisibleRows;
-  final CoreElement _dummyRowToForceAlternatingColor = new CoreElement('tr')
+  final CoreElement _dummyRowToForceAlternatingColor = CoreElement('tr')
     ..display = 'none';
 
   final Map<Column<T>, CoreElement> _spanForColumn = <Column<T>, CoreElement>{};
   final Map<Element, T> _dataForRow = <Element, T>{};
   final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
 
-  final StreamController<T> _selectController =
-      new StreamController<T>.broadcast();
+  final StreamController<T> _selectController = StreamController<T>.broadcast();
 
   void _init() {
     element.add(_table);
@@ -122,7 +120,7 @@ class Table<T> extends Object with SetStateMixin {
     this.data = data;
 
     if (_thead == null) {
-      _thead = new CoreElement('thead')
+      _thead = CoreElement('thead')
         ..add(tr()
           ..add(columns.map((Column<T> column) {
             final CoreElement s = span(
@@ -142,7 +140,7 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     if (_tbody == null) {
-      _tbody = new CoreElement('tbody', classes: 'selectable');
+      _tbody = CoreElement('tbody', classes: 'selectable');
       _table.add(_tbody);
     }
 
@@ -322,7 +320,7 @@ class Table<T> extends Object with SetStateMixin {
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
       final CoreElement tableRow = isReusableRow
-          ? new CoreElement.from(_tbody.element.children[currentRowIndex])
+          ? CoreElement.from(_tbody.element.children[currentRowIndex])
           : tr();
 
       currentRowIndex++;
@@ -356,8 +354,7 @@ class Table<T> extends Object with SetStateMixin {
             currentColumnIndex < tableRow.element.children.length;
         // Reuse or create a cell.
         final CoreElement tableCell = isReusableColumn
-            ? new CoreElement.from(
-                tableRow.element.children[currentColumnIndex])
+            ? CoreElement.from(tableRow.element.children[currentColumnIndex])
             : td();
 
         currentColumnIndex++;

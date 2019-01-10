@@ -8,8 +8,9 @@ import 'dart:io';
 
 import 'package:devtools/eval_on_dart_library.dart';
 import 'package:devtools/globals.dart';
-import 'package:devtools/service_manager.dart';
 import 'package:devtools/service_extensions.dart' as extensions;
+import 'package:devtools/service_manager.dart';
+import 'package:devtools/service_registrations.dart' as registrations;
 import 'package:devtools/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -22,15 +23,14 @@ void main() {
     VmServiceWrapper service;
 
     setUp(() async {
-      _flutter =
-          FlutterRunTestDriver(new Directory('test/fixtures/flutter_app'));
+      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
 
       await _flutter.run(withDebugger: true);
       service = _flutter.vmService;
 
-      setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
+      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
 
-      await serviceManager.vmServiceOpened(service, new Completer().future);
+      await serviceManager.vmServiceOpened(service, Completer().future);
     });
 
     tearDown(() async {
@@ -51,9 +51,9 @@ void main() {
     });
 
     test('toggle boolean service extension', () async {
-      const extensionName = 'ext.flutter.debugPaint';
+      final extensionName = extensions.debugPaint.extension;
       const evalExpression = 'debugPaintSizeEnabled';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/rendering/debug.dart',
         service,
       );
@@ -63,7 +63,7 @@ void main() {
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
-        'ext.flutter.debugPaint',
+        extensionName,
         true,
         true,
       );
@@ -73,9 +73,9 @@ void main() {
     });
 
     test('toggle String service extension', () async {
-      const extensionName = 'ext.flutter.platformOverride';
+      final extensionName = extensions.togglePlatformMode.extension;
       const evalExpression = 'defaultTargetPlatform.toString()';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/foundation/platform.dart',
         service,
       );
@@ -89,7 +89,7 @@ void main() {
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
-        'ext.flutter.platformOverride',
+        extensionName,
         true,
         'iOS',
       );
@@ -103,9 +103,9 @@ void main() {
     });
 
     test('toggle numeric service extension', () async {
-      const extensionName = 'ext.flutter.timeDilation';
+      final extensionName = extensions.slowAnimations.extension;
       const evalExpression = 'timeDilation';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/scheduler/binding.dart',
         service,
       );
@@ -125,12 +125,13 @@ void main() {
     });
 
     test('callService', () async {
-      final registeredService =
-          serviceManager.methodsForService['reloadSources'] ?? const [];
+      final registeredService = serviceManager
+              .registeredMethodsForService[registrations.reloadSources] ??
+          const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callService(
-        'reloadSources',
+        registrations.reloadSources,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });
@@ -140,18 +141,19 @@ void main() {
       expect(serviceManager.callService('fakeMethod'), throwsException);
 
       // Service with more than 1 registration.
-      serviceManager.methodsForService.putIfAbsent('fakeMethod',
+      serviceManager.registeredMethodsForService.putIfAbsent('fakeMethod',
           () => ['registration1.fakeMethod', 'registration2.fakeMethod']);
       expect(serviceManager.callService('fakeMethod'), throwsException);
     });
 
     test('callMulticastService', () async {
-      final registeredService =
-          serviceManager.methodsForService['reloadSources'] ?? const [];
+      final registeredService = serviceManager
+              .registeredMethodsForService[registrations.reloadSources] ??
+          const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callMulticastService(
-        'reloadSources',
+        registrations.reloadSources,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });
@@ -338,7 +340,7 @@ Future<void> _verifyExtensionStateInServiceManager(
       .serviceExtensionManager
       .getServiceExtensionState(extensionName, null);
 
-  final Completer<ServiceExtensionState> stateCompleter = new Completer();
+  final Completer<ServiceExtensionState> stateCompleter = Completer();
   stream.onData((ServiceExtensionState state) {
     stateCompleter.complete(state);
     stream.cancel();
