@@ -77,6 +77,8 @@ class TimelineScreen extends Screen {
         ServiceExtensionButton(extensions.repaintRainbow).button;
     final debugPaintButton =
         ServiceExtensionButton(extensions.debugPaint).button;
+    final debugPaintBaselinesButton =
+        ServiceExtensionButton(extensions.debugPaintBaselines).button;
     final slowAnimationsButton =
         ServiceExtensionButton(extensions.slowAnimations).button;
     final togglePlatformButton =
@@ -92,8 +94,9 @@ class TimelineScreen extends Screen {
             ..add(<CoreElement>[
               trackWidgetBuildsButton,
               perfOverlayButton,
-              repaintRainbowButton,
               debugPaintButton,
+              debugPaintBaselinesButton,
+              repaintRainbowButton,
               slowAnimationsButton,
               togglePlatformButton,
             ]),
