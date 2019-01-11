@@ -349,11 +349,40 @@ class ServiceExtensionManager {
   final Completer<Null> extensionStatesUpdated = Completer();
 
   Future<void> _handleExtensionEvent(Event event) async {
-    final String extensionKind = event.extensionKind;
-    if (event.kind == 'Extension' &&
-        (extensionKind == 'Flutter.FirstFrame' ||
-            extensionKind == 'Flutter.Frame')) {
-      await _onFrameEventReceived();
+    switch (event.extensionKind) {
+      case 'Flutter.FirstFrame':
+      case 'Flutter.Frame':
+        await _onFrameEventReceived();
+        break;
+      case 'Flutter.ServiceExtensionChanged':
+        final String name =
+            'ext.flutter.${event.json['extensionData']['extension']}';
+        final String valueFromJson = event.json['extensionData']['value'];
+
+        final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
+        final bool enabled = value ==
+            extensions.toggleableExtensionsWhitelist[name].enabledValue;
+
+        await setServiceExtensionState(
+          name,
+          enabled,
+          value,
+          callExtension: false,
+        );
+    }
+  }
+
+  dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
+    final expectedValueType =
+        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
+    switch (expectedValueType) {
+      case bool:
+        return valueFromJson == 'true' ? true : false;
+      case int:
+      case double:
+        return num.parse(valueFromJson);
+      default:
+        return valueFromJson;
     }
   }
 
