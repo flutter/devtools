@@ -379,8 +379,8 @@ class ServiceExtensionManager {
       case bool:
         return valueFromJson == 'true' ? true : false;
       case int:
-      case num:
-        return double.parse(valueFromJson);
+      case double:
+        return num.parse(valueFromJson);
       default:
         return valueFromJson;
     }
