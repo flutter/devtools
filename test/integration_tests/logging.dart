@@ -40,6 +40,41 @@ void loggingTests() {
     await waitFor(() async => await logs.logCount() > 0);
     expect(await logs.logCount(), greaterThan(0));
   });
+
+  test('log screen postpones write when offscreen', () async {
+    final DevtoolsManager tools =
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    await tools.start(appFixture);
+    await tools.switchPage('logs');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'logs');
+
+    final LoggingManager logs = LoggingManager(tools);
+
+    // Verify that the log is empty.
+    expect(await logs.logCount(), 0);
+
+    // Switch to a different page.
+    await tools.switchPage('memory');
+
+    await delay();
+
+    // Cause app to log.
+    await appFixture.invoke('controller.emitLog()');
+
+    await delay();
+
+    // Verify that the log is empty.
+    expect(await logs.logCount(), 0);
+
+    // Switch to the logs page.
+    await tools.switchPage('logs');
+
+    // Verify the log data shows up in the UI.
+    await waitFor(() async => await logs.logCount() > 0);
+    expect(await logs.logCount(), greaterThan(0));
+  });
 }
 
 class LoggingManager {

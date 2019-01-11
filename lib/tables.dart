@@ -73,6 +73,7 @@ class Table<T> extends Object with SetStateMixin {
   final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
 
   final StreamController<T> _selectController = StreamController<T>.broadcast();
+  final StreamController<Null> _rowsChangedController = StreamController.broadcast();
 
   void _init() {
     element.add(_table);
@@ -107,6 +108,8 @@ class Table<T> extends Object with SetStateMixin {
 
   Stream<T> get onSelect => _selectController.stream;
 
+  Stream<Null> get onRowsChanged => _rowsChangedController.stream;
+
   void addColumn(Column<T> column) {
     columns.add(column);
   }
@@ -117,7 +120,10 @@ class Table<T> extends Object with SetStateMixin {
       _clearSelection();
     }
 
-    this.data = data;
+    // Copy the list, so that changes to it don't affect us.
+    this.data = data.toList();
+
+    _rowsChangedController.add(null);
 
     if (_thead == null) {
       _thead = CoreElement('thead')

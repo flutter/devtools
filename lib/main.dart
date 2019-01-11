@@ -61,12 +61,6 @@ class PerfToolFramework extends Framework {
           span(text: ' ${screen.name}')
         ]);
       mainNav.add(link);
-      if (!screen.visible) {
-        link.disabled = true;
-      }
-      screen.onVisibleChange.listen((_) {
-        link.disabled = !screen.visible;
-      });
     }
 
     isolateSelectStatus = StatusItem();
