@@ -239,7 +239,7 @@ class LoggingScreen extends Screen {
 
         // Get information about the error object. Some users of the
         // dart:developer log call may pass a data payload in the `error`
-        // field, encoded as a json encoded string, so handle that case..
+        // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
           if (error.valueAsString != null) {
             final String errorString =

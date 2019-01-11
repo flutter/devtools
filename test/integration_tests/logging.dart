@@ -58,12 +58,8 @@ void loggingTests() {
     // Switch to a different page.
     await tools.switchPage('memory');
 
-    await delay();
-
     // Cause app to log.
     await appFixture.invoke('controller.emitLog()');
-
-    await delay();
 
     // Verify that the log is empty.
     expect(await logs.logCount(), 0);
