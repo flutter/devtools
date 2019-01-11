@@ -357,7 +357,9 @@ class ServiceExtensionManager {
       case 'Flutter.ServiceExtensionChanged':
         final String name =
             'ext.flutter.${event.json['extensionData']['extension']}';
-        final dynamic value = event.json['extensionData']['value'];
+        final String valueFromJson = event.json['extensionData']['value'];
+
+        final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
         final bool enabled = value ==
             extensions.toggleableExtensionsWhitelist[name].enabledValue;
 
@@ -367,6 +369,20 @@ class ServiceExtensionManager {
           value,
           callExtension: false,
         );
+    }
+  }
+
+  dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
+    final expectedValueType =
+        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
+    switch (expectedValueType) {
+      case bool:
+        return valueFromJson == 'true' ? true : false;
+      case int:
+      case num:
+        return double.parse(valueFromJson);
+      default:
+        return valueFromJson;
     }
   }
 
