@@ -6,8 +6,8 @@ library service_extensions;
 
 import 'ui/icons.dart';
 
-// Each service extension should be added to [toggleableExtensionsWhitelist] so
-// that, on start up, we know which extensions are whitelisted and available.
+// Each service extension needs to be added to [toggleableExtensionsWhitelist]
+// so that, on start up, we know which extensions are whitelisted and available.
 class ToggleableServiceExtensionDescription<T> {
   const ToggleableServiceExtensionDescription._({
     this.extension,
