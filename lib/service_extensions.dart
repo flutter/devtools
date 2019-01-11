@@ -6,17 +6,17 @@ library service_extensions;
 
 import 'ui/icons.dart';
 
+// Each service extension should be added to [toggleableExtensionsWhitelist] so
+// that, on start up, we know which extensions are whitelisted and available.
 class ToggleableServiceExtensionDescription<T> {
-  ToggleableServiceExtensionDescription._({
+  const ToggleableServiceExtensionDescription._({
     this.extension,
     this.description,
     this.icon,
     this.enabledValue,
     this.disabledValue,
     String tooltip,
-  }) : tooltip = tooltip ?? description {
-    toggleableExtensionsWhitelist[extension] = this;
-  }
+  }) : tooltip = tooltip ?? description;
 
   final String extension;
   final String description;
@@ -26,10 +26,7 @@ class ToggleableServiceExtensionDescription<T> {
   final String tooltip;
 }
 
-final Map<String, ToggleableServiceExtensionDescription>
-    toggleableExtensionsWhitelist = {};
-
-final debugPaint = ToggleableServiceExtensionDescription<bool>._(
+const debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug paint',
   tooltip: 'Toggle debug paint',
@@ -38,7 +35,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
+const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint baselines',
   tooltip: 'Show paint baselines',
@@ -47,7 +44,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
+const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Repaint rainbow',
   tooltip: 'Toogle Repaint rainbow',
@@ -56,7 +53,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
+const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance overlay',
   tooltip: 'Toggle performance overlay',
@@ -65,7 +62,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
+const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Hide debug banner',
   tooltip: 'Hide debug mode banner',
@@ -74,7 +71,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
+const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track widget rebuilds',
   tooltip: 'Visualize widget rebuilds',
@@ -83,7 +80,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
+const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.show',
   description: 'Toggle Select Mode',
   icon: FlutterIcons.locate,
@@ -91,7 +88,7 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
 );
 
-final togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
+const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
   extension: 'ext.flutter.platformOverride',
   description: 'iOS',
   tooltip: 'Toggle iOS platform',
@@ -100,7 +97,7 @@ final togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
   disabledValue: 'android',
 );
 
-final slowAnimations = ToggleableServiceExtensionDescription<num>._(
+const slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
   tooltip: 'Toggle slow animations',
@@ -112,3 +109,16 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
 // This extension should never be displayed as a button so does not need a
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
+
+final Map<String, ToggleableServiceExtensionDescription>
+    toggleableExtensionsWhitelist = {
+  debugPaint.extension: debugPaint,
+  debugPaintBaselines.extension: debugPaintBaselines,
+  repaintRainbow.extension: repaintRainbow,
+  performanceOverlay.extension: performanceOverlay,
+  debugAllowBanner.extension: debugAllowBanner,
+  profileWidgetBuilds.extension: profileWidgetBuilds,
+  toggleSelectWidgetMode.extension: toggleSelectWidgetMode,
+  togglePlatformMode.extension: togglePlatformMode,
+  slowAnimations.extension: slowAnimations,
+};
