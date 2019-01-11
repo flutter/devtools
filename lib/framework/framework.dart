@@ -81,6 +81,7 @@ class Framework {
       final Screen oldScreen = current;
       current = null;
       oldScreen.exiting();
+      oldScreen.visible = false;
 
       pageStatus.removeAll();
       _contents[oldScreen] = mainElement.element.children.toList();
@@ -98,6 +99,7 @@ class Framework {
       current.createContent(this, mainElement);
     }
 
+    current.visible = true;
     current.entering();
     pageStatus.addAll(current.statusItems);
 
@@ -194,7 +196,7 @@ abstract class Screen {
 
   Framework framework;
 
-  final Property<bool> _visible = Property<bool>(true);
+  final Property<bool> _visible = Property<bool>(false);
 
   final List<StatusItem> statusItems = <StatusItem>[];
 

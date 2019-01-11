@@ -19,10 +19,6 @@ import '../ui/ui_utils.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
-// TODO(devoncarew): filtering, and enabling additional logging
-
-// TODO(devoncarew): don't update DOM when we're not active; update once we return
-
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
 const int kMaxLogItemsLowerBound = 5000;
@@ -47,9 +43,13 @@ class LoggingScreen extends Screen {
   StatusItem logCountStatus;
   SetStateMixin loggingStateMixin = SetStateMixin();
 
+  bool hasPendingDomUpdates = false;
+
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
     this.framework = framework;
+
+    // TODO(devoncarew): Add checkbox toggles to enable specific logging channels.
 
     LogDetailsUI logDetailsUI;
     CoreElement detailsDiv;
@@ -61,10 +61,10 @@ class LoggingScreen extends Screen {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              span()..flex(),
               PButton('Clear logs')
                 ..small()
                 ..click(_clear),
+              span()..flex(),
             ])
         ]),
       _createTableView()
@@ -87,6 +87,20 @@ class LoggingScreen extends Screen {
     loggingTable.onSelect.listen((LogData selection) {
       logDetailsUI.setData(selection);
     });
+
+    _updateStatus();
+    loggingTable.onRowsChanged.listen((_) {
+      _updateStatus();
+    });
+  }
+
+  @override
+  void entering() {
+    if (hasPendingDomUpdates) {
+      loggingTable.setRows(data);
+
+      hasPendingDomUpdates = false;
+    }
   }
 
   CoreElement _createTableView() {
@@ -97,8 +111,6 @@ class LoggingScreen extends Screen {
     loggingTable.addColumn(LogMessageColumn());
 
     loggingTable.setRows(data);
-
-    _updateStatus();
 
     return loggingTable.element;
   }
@@ -114,7 +126,6 @@ class LoggingScreen extends Screen {
   void _clear() {
     data.clear();
     loggingTable.setRows(data);
-    _updateStatus();
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -122,150 +133,154 @@ class LoggingScreen extends Screen {
       return;
     }
 
-    // TODO(devoncarew): Add support for additional events, like 'inspect', ...
-
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
-    service.onStdoutEvent.listen((Event e) {
-      stdoutHandler.handle(e);
-    });
+    service.onStdoutEvent.listen(stdoutHandler.handle);
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
-    service.onStderrEvent.listen((Event e) {
-      stderrHandler.handle(e);
-    });
+    service.onStderrEvent.listen(stderrHandler.handle);
 
     // Log GC events.
-    service.onGCEvent.listen((Event e) {
-      final HeapSpace newSpace = HeapSpace.parse(e.json['new']);
-      final HeapSpace oldSpace = HeapSpace.parse(e.json['old']);
-      final Map<dynamic, dynamic> isolateRef = e.json['isolate'];
-
-      final int usedBytes = newSpace.used + oldSpace.used;
-      final int capacityBytes = newSpace.capacity + oldSpace.capacity;
-
-      final int time = ((newSpace.time + oldSpace.time) * 1000).round();
-
-      final String summary = '${isolateRef['name']} • '
-          '${e.json['reason']} collection in $time ms • '
-          '${printMb(usedBytes)} MB used of ${printMb(capacityBytes)} MB';
-      final Map<String, dynamic> event = <String, dynamic>{
-        'reason': e.json['reason'],
-        'new': newSpace.json,
-        'old': oldSpace.json,
-        'isolate': isolateRef,
-      };
-      final String message = jsonEncode(event);
-      _log(LogData('gc', message, e.timestamp, summary: summary));
-    });
+    service.onGCEvent.listen(_handleGCEvent);
 
     // Log `dart:developer` `log` events.
-    service.onEvent('_Logging').listen((Event e) {
-      final dynamic logRecord = e.json['logRecord'];
-
-      String loggerName =
-          _valueAsString(InstanceRef.parse(logRecord['loggerName']));
-      if (loggerName == null || loggerName.isEmpty) {
-        loggerName = 'log';
-      }
-      final int level = logRecord['level'];
-      final InstanceRef messageRef = InstanceRef.parse(logRecord['message']);
-      String summary = _valueAsString(messageRef);
-      if (messageRef.valueAsStringIsTruncated == true) {
-        summary += '...';
-      }
-      final InstanceRef error = InstanceRef.parse(logRecord['error']);
-      final InstanceRef stackTrace = InstanceRef.parse(logRecord['stackTrace']);
-
-      final String details = summary;
-      Future<String> detailsComputer;
-
-      // If the message string was truncated by the VM, or the error object or
-      // stackTrace objects were non-null, we need to ask the VM for more
-      // information in order to render the log entry. We do this asynchronously
-      // on-demand using the `detailsComputer` Future.
-      if (messageRef.valueAsStringIsTruncated == true ||
-          _isNotNull(error) ||
-          _isNotNull(stackTrace)) {
-        detailsComputer = Future<String>(() async {
-          // Get the full string value of the message.
-          String result =
-              await _retrieveFullStringValue(service, e.isolate, messageRef);
-
-          // Get information about the error object. Some users of the
-          // dart:developer log call may pass a data payload in the `error`
-          // field, encoded as a json encoded string, so handle that case..
-          if (_isNotNull(error)) {
-            if (error.valueAsString != null) {
-              final String errorString =
-                  await _retrieveFullStringValue(service, e.isolate, error);
-              result += '\n\n$errorString';
-            } else {
-              // Call `toString()` on the error object and display that.
-              final dynamic toStringResult = await service
-                  .invoke(e.isolate.id, error.id, 'toString', <String>[]);
-
-              if (toStringResult is ErrorRef) {
-                final String errorString = _valueAsString(error);
-                result += '\n\n$errorString';
-              } else if (toStringResult is InstanceRef) {
-                final String str = await _retrieveFullStringValue(
-                    service, e.isolate, toStringResult);
-                result += '\n\n$str';
-              }
-            }
-          }
-
-          // Get info about the stackTrace object.
-          if (_isNotNull(stackTrace)) {
-            result += '\n\n${_valueAsString(stackTrace)}';
-          }
-
-          return result;
-        });
-      }
-
-      const int severeIssue = 1000;
-      final bool isError = level != null && level >= severeIssue ? true : false;
-
-      _log(LogData(
-        loggerName,
-        details,
-        e.timestamp,
-        isError: isError,
-        summary: summary,
-        detailsComputer: detailsComputer,
-      ));
-    });
+    service.onEvent('_Logging').listen(_handleDeveloperLogEvent);
 
     // Log Flutter frame events.
-    service.onExtensionEvent.listen((Event e) {
-      if (e.extensionKind == 'Flutter.Frame') {
-        final FrameInfo frame = FrameInfo.from(e.extensionData.data);
+    service.onExtensionEvent.listen(_handleFlutterFrameEvent);
+  }
 
-        final String frameId = '#${frame.number}';
-        final String frameInfo =
-            '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
-        final String div = createFrameDivHtml(frame);
+  void _handleFlutterFrameEvent(Event e) {
+    if (e.extensionKind == 'Flutter.Frame') {
+      final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
-        _log(LogData(
-          '${e.extensionKind.toLowerCase()}',
-          jsonEncode(e.extensionData.data),
-          e.timestamp,
-          summaryHtml: '$frameInfo$div',
-        ));
-      } else {
-        _log(LogData(
-          '${e.extensionKind.toLowerCase()}',
-          jsonEncode(e.json),
-          e.timestamp,
-          summary: e.json.toString(),
-        ));
-      }
-    });
+      final String frameId = '#${frame.number}';
+      final String frameInfo =
+          '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
+      final String div = createFrameDivHtml(frame);
+
+      _log(LogData(
+        '${e.extensionKind.toLowerCase()}',
+        jsonEncode(e.extensionData.data),
+        e.timestamp,
+        summaryHtml: '$frameInfo$div',
+      ));
+    } else {
+      _log(LogData(
+        '${e.extensionKind.toLowerCase()}',
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: e.json.toString(),
+      ));
+    }
+  }
+
+  void _handleGCEvent(Event e) {
+    final HeapSpace newSpace = HeapSpace.parse(e.json['new']);
+    final HeapSpace oldSpace = HeapSpace.parse(e.json['old']);
+    final Map<dynamic, dynamic> isolateRef = e.json['isolate'];
+
+    final int usedBytes = newSpace.used + oldSpace.used;
+    final int capacityBytes = newSpace.capacity + oldSpace.capacity;
+
+    final int time = ((newSpace.time + oldSpace.time) * 1000).round();
+
+    final String summary = '${isolateRef['name']} • '
+        '${e.json['reason']} collection in $time ms • '
+        '${printMb(usedBytes)} MB used of ${printMb(capacityBytes)} MB';
+
+    final Map<String, dynamic> event = <String, dynamic>{
+      'reason': e.json['reason'],
+      'new': newSpace.json,
+      'old': oldSpace.json,
+      'isolate': isolateRef,
+    };
+
+    final String message = jsonEncode(event);
+    _log(LogData('gc', message, e.timestamp, summary: summary));
+  }
+
+  void _handleDeveloperLogEvent(Event e) {
+    final VmServiceWrapper service = serviceManager.service;
+
+    final dynamic logRecord = e.json['logRecord'];
+
+    String loggerName =
+        _valueAsString(InstanceRef.parse(logRecord['loggerName']));
+    if (loggerName == null || loggerName.isEmpty) {
+      loggerName = 'log';
+    }
+    final int level = logRecord['level'];
+    final InstanceRef messageRef = InstanceRef.parse(logRecord['message']);
+    String summary = _valueAsString(messageRef);
+    if (messageRef.valueAsStringIsTruncated == true) {
+      summary += '...';
+    }
+    final InstanceRef error = InstanceRef.parse(logRecord['error']);
+    final InstanceRef stackTrace = InstanceRef.parse(logRecord['stackTrace']);
+
+    final String details = summary;
+    Future<String> detailsComputer;
+
+    // If the message string was truncated by the VM, or the error object or
+    // stackTrace objects were non-null, we need to ask the VM for more
+    // information in order to render the log entry. We do this asynchronously
+    // on-demand using the `detailsComputer` Future.
+    if (messageRef.valueAsStringIsTruncated == true ||
+        _isNotNull(error) ||
+        _isNotNull(stackTrace)) {
+      detailsComputer = Future<String>(() async {
+        // Get the full string value of the message.
+        String result =
+            await _retrieveFullStringValue(service, e.isolate, messageRef);
+
+        // Get information about the error object. Some users of the
+        // dart:developer log call may pass a data payload in the `error`
+        // field, encoded as a json encoded string, so handle that case.
+        if (_isNotNull(error)) {
+          if (error.valueAsString != null) {
+            final String errorString =
+                await _retrieveFullStringValue(service, e.isolate, error);
+            result += '\n\n$errorString';
+          } else {
+            // Call `toString()` on the error object and display that.
+            final dynamic toStringResult = await service
+                .invoke(e.isolate.id, error.id, 'toString', <String>[]);
+
+            if (toStringResult is ErrorRef) {
+              final String errorString = _valueAsString(error);
+              result += '\n\n$errorString';
+            } else if (toStringResult is InstanceRef) {
+              final String str = await _retrieveFullStringValue(
+                  service, e.isolate, toStringResult);
+              result += '\n\n$str';
+            }
+          }
+        }
+
+        // Get info about the stackTrace object.
+        if (_isNotNull(stackTrace)) {
+          result += '\n\n${_valueAsString(stackTrace)}';
+        }
+
+        return result;
+      });
+    }
+
+    const int severeIssue = 1000;
+    final bool isError = level != null && level >= severeIssue ? true : false;
+
+    _log(LogData(
+      loggerName,
+      details,
+      e.timestamp,
+      isError: isError,
+      summary: summary,
+      detailsComputer: detailsComputer,
+    ));
   }
 
   Future<String> _retrieveFullStringValue(
@@ -311,7 +326,8 @@ class LoggingScreen extends Screen {
 
     if (visible && loggingTable != null) {
       loggingTable.setRows(data);
-      _updateStatus();
+    } else {
+      hasPendingDomUpdates = true;
     }
   }
 
