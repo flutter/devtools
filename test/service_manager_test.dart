@@ -258,7 +258,7 @@ void main() {
     }
 
     test('bool extension', () async {
-      final extensionDescription = extensions.debugPaint;
+      const extensionDescription = extensions.debugPaint;
       final args = {'enabled': true};
       const evalExpression = 'debugPaintSizeEnabled';
       final library = new EvalOnDartLibrary(
@@ -276,7 +276,7 @@ void main() {
     });
 
     test('String extension', () async {
-      final extensionDescription = extensions.togglePlatformMode;
+      const extensionDescription = extensions.togglePlatformMode;
       final args = {'value': 'iOS'};
       const evalExpression = 'defaultTargetPlatform.toString()';
       final library = new EvalOnDartLibrary(
@@ -296,7 +296,7 @@ void main() {
     });
 
     test('numeric extension', () async {
-      final extensionDescription = extensions.slowAnimations;
+      const extensionDescription = extensions.slowAnimations;
       final args = {
         extensionDescription.extension
                 .substring(extensionDescription.extension.lastIndexOf('.') + 1):
