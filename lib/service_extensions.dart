@@ -6,8 +6,7 @@ library service_extensions;
 
 import 'ui/icons.dart';
 
-// Each service extension needs to be added to [toggleableExtensionsWhitelist]
-// so that, on start up, we know which extensions are whitelisted and available.
+// Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T> {
   const ToggleableServiceExtensionDescription._({
     this.extension,
@@ -110,15 +109,21 @@ const slowAnimations = ToggleableServiceExtensionDescription<num>._(
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
 
+const List<ToggleableServiceExtensionDescription> _extensionDescriptions = [
+  debugPaint,
+  debugPaintBaselines,
+  repaintRainbow,
+  performanceOverlay,
+  debugAllowBanner,
+  profileWidgetBuilds,
+  toggleSelectWidgetMode,
+  togglePlatformMode,
+  slowAnimations,
+];
+
 final Map<String, ToggleableServiceExtensionDescription>
-    toggleableExtensionsWhitelist = {
-  debugPaint.extension: debugPaint,
-  debugPaintBaselines.extension: debugPaintBaselines,
-  repaintRainbow.extension: repaintRainbow,
-  performanceOverlay.extension: performanceOverlay,
-  debugAllowBanner.extension: debugAllowBanner,
-  profileWidgetBuilds.extension: profileWidgetBuilds,
-  toggleSelectWidgetMode.extension: toggleSelectWidgetMode,
-  togglePlatformMode.extension: togglePlatformMode,
-  slowAnimations.extension: slowAnimations,
-};
+    toggleableExtensionsWhitelist = Map.fromIterable(
+  _extensionDescriptions,
+  key: (extension) => extension.extension,
+  value: (extension) => extension,
+);
