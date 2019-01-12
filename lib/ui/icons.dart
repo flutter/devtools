@@ -114,6 +114,8 @@ class FlutterIcons {
   static const Icon extractMethod =
       UrlIcon('/icons/preview/extract_method.png');
 
+
+  static const Icon greyProgr = UrlIcon('/icons/perf/GreyProgr@2x.png');
   static const Icon greyProgress = UrlIcon('/icons/perf/grey_progress.gif');
   static const Icon redProgress = UrlIcon('/icons/perf/red_progress.gif');
   static const Icon yellowProgress = UrlIcon('/icons/perf/yellow_progress.gif');
