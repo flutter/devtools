@@ -299,6 +299,20 @@ class DebuggerScreen extends Screen {
     if (!_initialized) {
       _initialize();
     }
+
+    // TODO(devoncarew): On restoring the page, the execution point marker can
+    // get out of position
+
+    sourceEditor.restoreScrollPosition();
+    consoleArea.restoreScrollPosition();
+  }
+
+  @override
+  void exiting() {
+    // Codemirror can loose the scroll position when being hidden and shown.
+    // We record and restore it here manually.
+    sourceEditor.saveScrollPosition();
+    consoleArea.saveScrollPosition();
   }
 
   void _initialize() {
@@ -821,6 +835,7 @@ class SourceEditor {
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
   int _currentLineClass;
   CoreElement _executionPointElement;
+  ScrollInfo _savedScrollInfo;
 
   void setBreakpoints(List<Breakpoint> breakpoints) {
     this.breakpoints = breakpoints;
@@ -830,7 +845,7 @@ class SourceEditor {
 
   void _refreshMarkers() {
     // TODO(devoncarew): only change these if the breakpoints changed or the
-    //  script did
+    // script did
     codeMirror.clearGutter('breakpoints');
     linesToBreakpoints.clear();
 
@@ -909,7 +924,7 @@ class SourceEditor {
   }
 
   void displayExecutionPoint(Script script, {SourcePosition position}) {
-    executionPoint = ScriptAndPosition(script.uri, position: position);
+    executionPoint = ScriptAndPosition(script, position: position);
 
     // This also calls _refreshMarkers().
     displayScript(script, scrollTo: position);
@@ -969,6 +984,17 @@ class SourceEditor {
     _executionPointElement = null;
 
     _refreshMarkers();
+  }
+
+  void saveScrollPosition() {
+    _savedScrollInfo = codeMirror.getScrollInfo();
+  }
+
+  void restoreScrollPosition() {
+    if (_savedScrollInfo != null) {
+      codeMirror.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
+      _savedScrollInfo = null;
+    }
   }
 }
 
@@ -1320,10 +1346,12 @@ class BreakOnExceptionControl extends CoreElement {
 }
 
 class ScriptAndPosition {
-  ScriptAndPosition(this.uri, {@required this.position});
+  ScriptAndPosition(this.script, {@required this.position});
 
-  final String uri;
+  final Script script;
   final SourcePosition position;
+
+  String get uri => script.uri;
 
   bool matches(Script script) => uri == script.uri;
 }
@@ -1383,6 +1411,7 @@ class ConsoleArea {
 
   CoreElement _container;
   CodeMirror _editor;
+  ScrollInfo _savedScrollInfo;
 
   CoreElement get element => _container;
 
@@ -1414,5 +1443,16 @@ class ConsoleArea {
   @visibleForTesting
   String getContents() {
     return _editor.getDoc().getValue();
+  }
+
+  void saveScrollPosition() {
+    _savedScrollInfo = _editor.getScrollInfo();
+  }
+
+  void restoreScrollPosition() {
+    if (_savedScrollInfo != null) {
+      _editor.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
+      _savedScrollInfo = null;
+    }
   }
 }
