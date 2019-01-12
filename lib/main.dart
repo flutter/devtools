@@ -23,9 +23,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-// TODO(devoncarew): make the screens gather info when not the active screen,
-// and refresh the UI on re-activate
-
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
     addScreen(DebuggerScreen());
