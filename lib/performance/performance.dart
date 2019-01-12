@@ -79,7 +79,7 @@ class PerformanceScreen extends Screen {
   }
 
   void _handleIsolateChanged() {
-    // TODO(devoncarew): update buttons
+    // TODO(devoncarew): Reset UI
   }
 
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
@@ -92,12 +92,8 @@ class PerformanceScreen extends Screen {
     serviceManager.service
         .getCpuProfile(_isolateId, 'UserVM')
         .then((CpuProfile profile) async {
-      // TODO(devoncarew):
-      print(profile);
-
       final _CalcProfile calc = _CalcProfile(profile);
       await calc.calc();
-
       _updateStatus(profile);
     }).catchError((dynamic e) {
       framework.showError('', e);
@@ -139,7 +135,7 @@ class PerformanceScreen extends Screen {
     perfTable.setRows(<PerfData>[]);
 
     perfTable.onSelect.listen((PerfData data) {
-      // TODO(devoncarew):
+      // TODO(devoncarew): Handle item selection
       print(data);
     });
 
@@ -209,7 +205,6 @@ class CpuChart extends LineChart<CpuTracker> {
   @override
   void update(CpuTracker data) {
     if (data.samples.isEmpty || dim == null) {
-      // TODO:
       return;
     }
 
@@ -353,7 +348,7 @@ class _CalcProfile {
   final CpuProfile profile;
 
   Future<void> calc() async {
-    // TODO:
+    // TODO(devoncarew): Implement code to parse trie graph
     //profile.exclusiveCodeTrie;
 
 //    tries['exclusiveCodeTrie'] =
