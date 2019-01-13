@@ -74,7 +74,7 @@ const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track widget rebuilds',
   tooltip: 'Visualize widget rebuilds',
-  icon: FlutterIcons.greyProgress,
+  icon: FlutterIcons.greyProgr,
   enabledValue: true,
   disabledValue: false,
 );
