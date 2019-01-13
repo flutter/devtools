@@ -27,7 +27,7 @@ final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 
 class LoggingScreen extends Screen {
   LoggingScreen()
-      : super(name: 'Logs', id: 'logs', iconClass: 'octicon-clippy') {
+      : super(name: 'Logging', id: 'logs', iconClass: 'octicon-clippy') {
     logCountStatus = StatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
@@ -129,10 +129,6 @@ class LoggingScreen extends Screen {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    if (ref == null) {
-      return;
-    }
-
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
