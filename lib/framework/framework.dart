@@ -133,11 +133,11 @@ class Framework {
   }
 
   void toast(String message, {String title}) {
-    final Toast t = new Toast(title: title, message: message);
+    final Toast toast = Toast(title: title, message: message);
     final CoreElement toastContainer =
         CoreElement.from(querySelector('#toast-container'));
-    toastContainer.add(t);
-    t.show();
+    toastContainer.add(toast);
+    toast.show();
   }
 }
 
