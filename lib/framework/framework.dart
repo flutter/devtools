@@ -116,11 +116,11 @@ class Framework {
   }
 
   void showError(String title, [dynamic error]) {
-    final PFlash flash = PFlash();
+    final PFlash flash = PFlash()..warn();
     flash.addClose().click(clearError);
-    flash.add(span(text: title));
+    flash.add(label(text: title));
     if (error != null) {
-      flash.add(span(text: '$error'));
+      flash.add(div(text: '$error'));
     }
 
     final CoreElement errorContainer =
@@ -130,6 +130,14 @@ class Framework {
 
   void clearError() {
     querySelector('#error-container').children.clear();
+  }
+
+  void toast(String message, {String title}) {
+    final Toast t = new Toast(title: title, message: message);
+    final CoreElement toastContainer =
+        CoreElement.from(querySelector('#toast-container'));
+    toastContainer.add(t);
+    t.show();
   }
 }
 
@@ -176,11 +184,6 @@ class StatusLine {
     _items.clear();
     _rebuild();
   }
-}
-
-void toast(String message) {
-  // TODO(devoncarew): Display this message in the UI.
-  print(message);
 }
 
 abstract class Screen {
@@ -250,4 +253,39 @@ class StatusItem {
   StatusItem() : element = span();
 
   final CoreElement element;
+}
+
+class Toast extends CoreElement {
+  Toast({this.title, this.message}) : super('div', classes: 'toast') {
+    if (title != null) {
+      add(label(text: title));
+    }
+    add(div(text: message));
+  }
+
+  static const Duration animationDelay = Duration(milliseconds: 500);
+  static const Duration hideDelay = Duration(seconds: 4);
+
+  final String title;
+  @required
+  final String message;
+
+  void show() async {
+    await window.animationFrame;
+
+    element.style.left = '0px';
+
+    new Timer(animationDelay, () {
+      new Timer(hideDelay, _hide);
+    });
+  }
+
+  void _hide() {
+    element.style.left = '400px';
+
+    new Timer(animationDelay, dispose);
+  }
+
+  @override
+  String toString() => '$title $message';
 }

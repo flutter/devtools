@@ -13,14 +13,14 @@ import '../vm_service_wrapper.dart';
 class FrameworkCore {
   static void init() {
     _setServiceConnectionManager();
-    _initVmService();
   }
 
   static void _setServiceConnectionManager() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
   }
 
-  static void _initVmService() async {
+  static void initVmService(
+      void errorReporter(String title, dynamic error)) async {
     // Identify port so that we can connect the VmService.
     int port;
     if (window.location.search.isNotEmpty) {
@@ -41,7 +41,7 @@ class FrameworkCore {
         await serviceManager.vmServiceOpened(service, finishedCompleter.future);
       }
     } catch (e) {
-      print('Unable to connect to service on port $port');
+      errorReporter('Unable to connect to service on port $port', e);
     }
   }
 }

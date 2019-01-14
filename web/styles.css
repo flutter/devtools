@@ -321,6 +321,10 @@ form[horizontal] {
   margin-top: 10px;
 }
 
+form + form {
+  margin-top: 10px;
+}
+
 .section .title {
     padding-top: 0.3em;
     margin-bottom: 0.2em;
@@ -656,4 +660,29 @@ nav.menu li {
 /* Increase line height so standard sized icons look ok in buttons. */
 .btn-sm {
     line-height: 22px;
+}
+
+.toast {
+    border: 1px solid #d8dee2;
+    border-radius: 3px;
+    background: #f9f9f9;
+    padding: 10px;
+    box-shadow: 1px 1px 2px 0px #ddd;
+
+    transition-property: left;
+    transition-duration: 0.5s;
+    position: relative;
+    left: 400px;
+}
+
+.toast + .toast {
+  margin-top: 10px;
+}
+
+#toast-container {
+    width: 360px;
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    z-index: 10;
 }

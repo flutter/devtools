@@ -120,61 +120,56 @@ class ServiceConnectionManager {
 
   Future<void> vmServiceOpened(
       VmServiceWrapper service, Future<void> onClosed) async {
-    try {
-      final vm = await service.getVM();
-      this.vm = vm;
-      sdkVersion = vm.version;
-      if (sdkVersion.contains(' ')) {
-        sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
-      }
-
-      this.service = service;
-      serviceAvailable.complete();
-
-      service.onServiceEvent.listen((e) {
-        if (e.kind == EventKind.kServiceRegistered) {
-          if (!_registeredMethodsForService.containsKey(e.service)) {
-            _registeredMethodsForService[e.service] = [e.method];
-            final StreamController<bool> streamController =
-                _getServiceRegistrationController(e.service);
-            streamController.add(true);
-          } else {
-            _registeredMethodsForService[e.service].add(e.method);
-          }
-        }
-      });
-
-      _isolateManager._service = service;
-      _serviceExtensionManager._service = service;
-
-      _stateController.add(null);
-      _connectionAvailableController.add(service);
-
-      await _isolateManager._initIsolates(vm.isolates);
-      service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
-      service.onExtensionEvent
-          .listen(_serviceExtensionManager._handleExtensionEvent);
-
-      unawaited(onClosed.then((_) => vmServiceClosed()));
-
-      final streamIds = [
-        'Stdout',
-        'Stderr',
-        'VM',
-        'Isolate',
-        'Debug',
-        'GC',
-        'Timeline',
-        'Extension',
-        '_Graph',
-        '_Logging',
-        '_Service',
-      ];
-      await Future.wait(streamIds.map((id) => service.streamListen(id)));
-    } catch (e) {
-      // TODO:
-      print(e);
+    final vm = await service.getVM();
+    this.vm = vm;
+    sdkVersion = vm.version;
+    if (sdkVersion.contains(' ')) {
+      sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));
     }
+
+    this.service = service;
+    serviceAvailable.complete();
+
+    service.onServiceEvent.listen((e) {
+      if (e.kind == EventKind.kServiceRegistered) {
+        if (!_registeredMethodsForService.containsKey(e.service)) {
+          _registeredMethodsForService[e.service] = [e.method];
+          final StreamController<bool> streamController =
+              _getServiceRegistrationController(e.service);
+          streamController.add(true);
+        } else {
+          _registeredMethodsForService[e.service].add(e.method);
+        }
+      }
+    });
+
+    _isolateManager._service = service;
+    _serviceExtensionManager._service = service;
+
+    _stateController.add(null);
+    _connectionAvailableController.add(service);
+
+    await _isolateManager._initIsolates(vm.isolates);
+    service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
+    service.onExtensionEvent
+        .listen(_serviceExtensionManager._handleExtensionEvent);
+
+    unawaited(onClosed.then((_) => vmServiceClosed()));
+
+    final streamIds = [
+      'Stdout',
+      'Stderr',
+      'VM',
+      'Isolate',
+      'Debug',
+      'GC',
+      'Timeline',
+      'Extension',
+      '_Graph',
+      '_Logging',
+      '_Service',
+    ];
+    await Future.wait(streamIds.map((id) => service.streamListen(id)));
   }
 
   void vmServiceClosed() {
@@ -189,16 +184,10 @@ class ServiceConnectionManager {
   // TODO(kenzie): add hot restart method, register method in flutter_tools.
 
   Future<void> performHotReload() async {
-    try {
-      await callMulticastService(
-        registrations.reloadSources,
-        isolateId: _isolateManager.selectedIsolate.id,
-      );
-    } catch (e) {
-      // TODO: improve general error handling.
-      print('Error during hot reload: "$e."');
-      rethrow;
-    }
+    await callMulticastService(
+      registrations.reloadSources,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
   }
 }
 

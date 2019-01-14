@@ -96,7 +96,7 @@ class PerformanceScreen extends Screen {
       await calc.calc();
       _updateStatus(profile);
     }).catchError((dynamic e) {
-      framework.showError('', e);
+      framework.showError('Error loading snapshot', e);
     }).whenComplete(() {
       loadSnapshotButton.disabled = false;
       progressElement.text = '';
@@ -115,7 +115,7 @@ class PerformanceScreen extends Screen {
     resetButton.disabled = true;
 
     serviceManager.service.clearCpuProfile(_isolateId).then((_) {
-      toast('VM counters reset.');
+      framework.toast('VM counters reset.');
     }).catchError((dynamic e) {
       framework.showError('Error resetting counters', e);
     }).whenComplete(() {

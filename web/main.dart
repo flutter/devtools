@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools/main.dart';
 import 'package:devtools/framework/framework_core.dart';
+import 'package:devtools/main.dart';
 
 void main() {
   // Initialize the core framework.
@@ -11,5 +11,10 @@ void main() {
 
   // Load the web app framework.
   final PerfToolFramework framework = PerfToolFramework();
+
+  FrameworkCore.initVmService((String title, dynamic error) {
+    framework.showError(title, error);
+  });
+
   framework.loadScreenFromLocation();
 }
