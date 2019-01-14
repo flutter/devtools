@@ -9,8 +9,6 @@ import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'icons.dart';
 
-PSelect select() => PSelect();
-
 class PSelect extends CoreElement {
   PSelect() : super('select', classes: 'form-select');
 
@@ -85,7 +83,11 @@ class PButton extends CoreElement {
 }
 
 class PFlash extends CoreElement {
-  PFlash({String text}) : super('div', classes: 'flash flash-warn', text: text);
+  PFlash({String text}) : super('div', classes: 'flash', text: text);
+
+  void warn() {
+    clazz('flash-warn');
+  }
 
   CoreElement addClose() {
     return add(span(c: 'octicon octicon-x flash-close js-flash-close'));

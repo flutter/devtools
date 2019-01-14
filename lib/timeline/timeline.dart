@@ -270,9 +270,14 @@ class TimelineScreen extends Screen {
     )..small();
 
     button.click(() async {
-      button.disabled = true;
-      await serviceManager.performHotReload();
-      button.disabled = false;
+      try {
+        button.disabled = true;
+        await serviceManager.performHotReload();
+      } catch (e) {
+        framework.showError('Error performing hot reload', e);
+      } finally {
+        button.disabled = false;
+      }
     });
 
     // Only show the button if the device supports hot reload.

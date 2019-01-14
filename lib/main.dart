@@ -19,8 +19,6 @@ import 'ui/elements.dart';
 import 'ui/primer.dart';
 import 'utils.dart';
 
-// TODO(devoncarew): notification when the debug process goes away
-
 // TODO(devoncarew): make the screens more robust through restarts
 
 class PerfToolFramework extends Framework {
@@ -62,7 +60,7 @@ class PerfToolFramework extends Framework {
 
     isolateSelectStatus = StatusItem();
     globalStatus.add(isolateSelectStatus);
-    isolateSelect = select()
+    isolateSelect = PSelect()
       ..small()
       ..change(_handleIsolateSelect);
     isolateSelectStatus.element.add(isolateSelect);
@@ -79,6 +77,10 @@ class PerfToolFramework extends Framework {
 
     serviceManager.onStateChange.listen((_) {
       _rebuildConnectionStatus();
+
+      if (!serviceManager.hasConnection) {
+        toast('Device connection lost.');
+      }
     });
   }
 

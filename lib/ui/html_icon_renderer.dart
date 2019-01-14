@@ -216,7 +216,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
       ..width = '${iconWidth}px'
       ..height = '${iconHeight}px';
 
-    // TODO(JACOBR): define this color in terms of Color objects.
+    // TODO(jacobr): define this color in terms of Color objects.
     const String normalColor = '#231F20';
 
     canvas.context2D
