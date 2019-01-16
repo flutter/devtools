@@ -72,7 +72,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   static bool get updateGoldens {
     _updateGoldens ??=
-        String.fromEnvironment("UPDATE_GOLDENS", defaultValue: "false") ==
+        const String.fromEnvironment('UPDATE_GOLDENS', defaultValue: 'false') ==
             'true';
     return _updateGoldens;
   }
@@ -123,5 +123,6 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
           .add('pub run test test/\n')
           .add('unset DART_VM_OPTIONS\n');
     }
+    return null;
   }
 }
