@@ -24,6 +24,7 @@ abstract class HtmlIconRenderer<T extends Icon> {
   HtmlIconRenderer(this.icon);
 
   CanvasImageSource get image;
+
   bool get loaded => image != null;
 
   CoreElement createCoreElement() {
@@ -52,6 +53,7 @@ abstract class HtmlIconRenderer<T extends Icon> {
   final T icon;
 
   int get iconWidth => icon.iconWidth;
+
   int get iconHeight => icon.iconHeight;
 }
 
@@ -175,6 +177,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
 
   @override
   int get iconWidth => 18;
+
   @override
   int get iconHeight => 18;
 }
@@ -259,24 +262,54 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 }
 
-// TODO(jacobr): this renderer assumes the material design font is already
-// loaded. Fix this code to listen for when the font to be loaded and only
-// provide the image at that point.
 class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
   _MaterialIconRenderer(MaterialIcon icon) : super(icon);
 
   @override
   CanvasImageSource get image {
     if (_image != null) return _image;
+    if (!_fontLoaded) return null;
 
     _image = createCanvasSource();
     return _image;
   }
 
   CanvasElement _image;
+  Future<CanvasElement> _imageFuture;
+
+  static FontFace _iconsFont;
+  static Future<FontFace> _iconsFontFuture;
+  static bool _fontLoaded = false;
 
   @override
-  Future<CanvasImageSource> loadImage() async => image;
+  Future<CanvasImageSource> loadImage() {
+    if (_imageFuture != null) {
+      return _imageFuture;
+    }
+    if (_fontLoaded) {
+      return Future.value(image);
+    }
+    Completer<CanvasElement> imageCompleter = Completer();
+    if (!_fontLoaded) {
+      if (_iconsFont == null) {
+        _iconsFont = new FontFace(
+          'Material Icons',
+          'url(packages/devtools/ui/MaterialIcons-Regular.woff2)',
+        );
+        document.fonts.add(_iconsFont);
+        _iconsFontFuture = _iconsFont.load();
+        _iconsFontFuture.then((_) {
+          _fontLoaded = true;
+        });
+      }
+
+      _iconsFontFuture.then((_) {
+        _image = createCanvasSource();
+        imageCompleter.complete(_image);
+      });
+    }
+    return imageCompleter.future;
+  }
 
   @override
   CanvasImageSource createCanvasSource() {
@@ -284,13 +317,18 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
       width: iconWidth * window.devicePixelRatio,
       height: iconHeight * window.devicePixelRatio,
     );
-    canvas.context2D
+    final context2D = canvas.context2D
       ..scale(window.devicePixelRatio, window.devicePixelRatio)
+      ..translate(iconWidth / 2, iconHeight / 2);
+    if (icon.angle != 0) {
+      context2D.rotate(icon.angle);
+    }
+    context2D
       ..font = '${icon.fontSize}px Material Icons'
       ..fillStyle = colorToCss(icon.color)
       ..textBaseline = 'middle'
       ..textAlign = 'center'
-      ..fillText(icon.text, iconWidth / 2, iconHeight / 2, iconWidth + 10);
+      ..fillText(icon.text, 0, 0, iconWidth + 10);
     return canvas;
   }
 }

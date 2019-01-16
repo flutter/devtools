@@ -11,6 +11,7 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
+import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import '../ui/fake_flutter/fake_flutter.dart';
@@ -57,9 +58,10 @@ final Icon collapseArrow = MaterialIcon(
 );
 
 final Icon expandArrow = MaterialIcon(
-  'arrow_right',
+  'arrow_drop_down',
   arrowColor,
   fontSize: 32,
+  angle: -math.pi / 2, // -90 degrees
   iconWidth: (columnWidth - iconPadding).toInt(),
 );
 
