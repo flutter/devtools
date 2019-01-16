@@ -347,16 +347,18 @@ class ServiceExtensionManager {
         final String name = event.json['extensionData']['extension'];
         final String valueFromJson = event.json['extensionData']['value'];
 
-        final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
-        final bool enabled = value ==
-            extensions.toggleableExtensionsWhitelist[name].enabledValue;
+        final extension = extensions.toggleableExtensionsWhitelist[name];
+        if (extension != null) {
+          final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
+          final bool enabled = value == extension.enabledValue;
 
-        await setServiceExtensionState(
-          name,
-          enabled,
-          value,
-          callExtension: false,
-        );
+          await setServiceExtensionState(
+            name,
+            enabled,
+            value,
+            callExtension: false,
+          );
+        }
     }
   }
 
