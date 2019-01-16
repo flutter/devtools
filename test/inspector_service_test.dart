@@ -208,8 +208,10 @@ void main() {
         expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
         expect(
           treeToDebugString(selection),
-          equalsIgnoringHashCodes('Text\n'
-              ' └─RichText\n'),
+          equalsIgnoringHashCodes(
+            'Text\n'
+                ' └─RichText\n',
+          ),
         );
 
         // Get selection in the render tree.
@@ -217,8 +219,10 @@ void main() {
             await group.getSelection(null, FlutterTreeType.renderObject, false);
         expect(
           treeToDebugString(selection),
-          equalsIgnoringHashCodes('RenderParagraph#00000 relayoutBoundary=up2\n'
-              ' └─text: TextSpan\n'),
+          equalsIgnoringHashCodes(
+            'RenderParagraph#00000 relayoutBoundary=up2\n'
+                ' └─text: TextSpan\n',
+          ),
         );
 
         await group.dispose();

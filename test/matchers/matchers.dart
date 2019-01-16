@@ -36,7 +36,7 @@ String treeToDebugString(RemoteDiagnosticsNode node) {
 ///
 /// Paths are assumed to reference files within the `test/goldens` directory.
 ///
-/// To rebaseline all golden files run tests with
+/// To rebaseline all golden files run tests with:
 /// ```
 /// export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
 /// pub run test test/your_vm_test.dart
@@ -120,7 +120,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
           .add('\nTo update golden files:\n')
           .add('\nTo update golden files run:\n')
           .add('export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"\n')
-          .add('pub run test test/your_vm_test.dart\n')
+          .add('pub run test test/\n')
           .add('unset DART_VM_OPTIONS\n');
     }
   }

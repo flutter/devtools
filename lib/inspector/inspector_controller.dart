@@ -36,14 +36,13 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
   switch (level) {
     case DiagnosticLevel.hidden:
       return inspector_text_styles.grayed;
-    case DiagnosticLevel.fine:
-      return inspector_text_styles.regular;
     case DiagnosticLevel.warning:
       return inspector_text_styles.warning;
     case DiagnosticLevel.error:
       return inspector_text_styles.error;
     case DiagnosticLevel.debug:
     case DiagnosticLevel.info:
+    case DiagnosticLevel.fine:
     default:
       return inspector_text_styles.regular;
   }
@@ -95,7 +94,7 @@ class InspectorController implements InspectorServiceClient {
   }
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
-  /// physical device with too many requests recompute properties and trees.
+  /// physical device with too many requests to recompute properties and trees.
   ///
   /// A value up to around 30 frames per second could be reasonable for
   /// debugging highly interactive cases particularly when the user is on a
@@ -105,7 +104,7 @@ class InspectorController implements InspectorServiceClient {
 
   final bool isSummaryTree;
 
-  /// Parent InspectorController if this is a details subtree
+  /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
   InspectorController details;
   InspectorTree inspectorTree;
@@ -128,11 +127,8 @@ class InspectorController implements InspectorServiceClient {
   final InspectorObjectGroupManager selectionGroups;
 
   /// Node being highlighted due to the current hover.
-  set currentShowNode(InspectorTreeNode node) {
-    inspectorTree.hover = node;
-  }
-
   InspectorTreeNode get currentShowNode => inspectorTree.hover;
+  set currentShowNode(InspectorTreeNode node) => inspectorTree.hover = node;
 
   bool flutterAppFrameReady = false;
   bool treeLoadStarted = false;

@@ -175,11 +175,9 @@ class InspectorScreen extends Screen {
   void _handleConnectionStop(dynamic event) {
     refreshTreeButton.disabled = true;
 
-    if (inspectorController != null) {
-      inspectorController.setActivate(false);
-      inspectorController.dispose();
-      inspectorController = null;
-    }
+    inspectorController?.setActivate(false);
+    inspectorController?.dispose();
+    inspectorController = null;
 
     splitterSubscription?.cancel();
     splitterSubscription = null;

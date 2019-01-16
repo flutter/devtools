@@ -344,7 +344,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       currentX += columnWidth;
     }
     if (renderObject == null) {
-      // Short circut as nothing can be drawn within the view.
+      // Short circuit as nothing can be drawn within the view.
       canvas.restore();
       return;
     }

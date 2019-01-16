@@ -397,29 +397,30 @@ void main() async {
       expect(
         detailsTree.toStringDeep(),
         equalsIgnoringHashCodes(
-            '▼[/icons/inspector/textArea.png] Text <-- selected\n'
-            '│   "Hello, World!"\n'
-            '│   textAlign: null [D]\n'
-            '│   textDirection: null [D]\n'
-            '│   locale: null [D]\n'
-            '│   softWrap: null [D]\n'
-            '│   overflow: null [D]\n'
-            '│   textScaleFactor: null [D]\n'
-            '│   maxLines: null [D]\n'
-            '└─▼[/icons/inspector/textArea.png] RichText\n'
-            '    softWrap: wrapping at box width\n'
-            '    maxLines: unlimited\n'
-            '    text: "Hello, World!"\n'
-            '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-            '      parentData: offset=Offset(360.5, 264.0) (can use size)\n'
-            '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
-            '      size: Size(79.0, 16.0)\n'
-            '      textAlign: start\n'
-            '      textDirection: ltr\n'
-            '      softWrap: wrapping at box width\n'
-            '      overflow: clip\n'
-            '      locale: en_US\n'
-            '      maxLines: unlimited\n'),
+          '▼[/icons/inspector/textArea.png] Text <-- selected\n'
+              '│   "Hello, World!"\n'
+              '│   textAlign: null [D]\n'
+              '│   textDirection: null [D]\n'
+              '│   locale: null [D]\n'
+              '│   softWrap: null [D]\n'
+              '│   overflow: null [D]\n'
+              '│   textScaleFactor: null [D]\n'
+              '│   maxLines: null [D]\n'
+              '└─▼[/icons/inspector/textArea.png] RichText\n'
+              '    softWrap: wrapping at box width\n'
+              '    maxLines: unlimited\n'
+              '    text: "Hello, World!"\n'
+              '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
+              '      parentData: offset=Offset(360.5, 264.0) (can use size)\n'
+              '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
+              '      size: Size(79.0, 16.0)\n'
+              '      textAlign: start\n'
+              '      textDirection: ltr\n'
+              '      softWrap: wrapping at box width\n'
+              '      overflow: clip\n'
+              '      locale: en_US\n'
+              '      maxLines: unlimited\n',
+        ),
       );
 
       expect(
@@ -553,14 +554,16 @@ void main() async {
       // make sure the inspector does not fall over and die after a hot reload.
       expect(
           tree.toStringDeep(),
-          equalsIgnoringHashCodes('▼[[] root ]\n'
-              '└─▼[M] MyApp\n'
-              '  └─▼[M] MaterialApp\n'
-              '    └─▼[S] Scaffold\n'
-              '      ├───▼[C] Center\n'
-              '      │   └─▼[/icons/inspector/textArea.png] Text\n'
-              '      └─▼[A] AppBar\n'
-              '        └─▼[/icons/inspector/textArea.png] Text\n'));
+          equalsIgnoringHashCodes(
+            '▼[[] root ]\n'
+                '└─▼[M] MyApp\n'
+                '  └─▼[M] MaterialApp\n'
+                '    └─▼[S] Scaffold\n'
+                '      ├───▼[C] Center\n'
+                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      └─▼[A] AppBar\n'
+                '        └─▼[/icons/inspector/textArea.png] Text\n',
+          ));
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.

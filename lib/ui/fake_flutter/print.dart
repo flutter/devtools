@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is a copy of packages/flutter/lib/src/foundation/print.dart
+// with functionality that can't run without a full flutter runtime stripped
+// out.
 part of 'fake_flutter.dart';
 
 /// Signature for [debugPrint] implementations.
