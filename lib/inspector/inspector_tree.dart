@@ -236,8 +236,10 @@ abstract class InspectorTreeNode {
       if (match != null) {
         builder.appendText(' ', inspector_text_styles.grayed);
         builder.appendText(match.group(1), textStyle);
-        builder.appendText(' ', textStyle);
-        builder.appendText(match.group(2), inspector_text_styles.grayed);
+        if (match.group(2).isNotEmpty) {
+          builder.appendText(' ', textStyle);
+          builder.appendText(match.group(2), inspector_text_styles.grayed);
+        }
       } else if (diagnostic.description?.isNotEmpty == true) {
         builder.appendText(' ', inspector_text_styles.grayed);
         builder.appendText(diagnostic.description, textStyle);

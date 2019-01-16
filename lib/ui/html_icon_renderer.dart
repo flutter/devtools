@@ -53,7 +53,6 @@ abstract class HtmlIconRenderer<T extends Icon> {
   final T icon;
 
   int get iconWidth => icon.iconWidth;
-
   int get iconHeight => icon.iconHeight;
 }
 

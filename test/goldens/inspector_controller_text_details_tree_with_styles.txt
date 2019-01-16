@@ -1,0 +1,23 @@
+▼[/icons/inspector/textArea.png]<grayed> </grayed><bold>Text</bold> <-- selected
+│   "Hello, World!"
+│   textAlign: null [D]
+│   textDirection: null [D]
+│   locale: null [D]
+│   softWrap: null [D]
+│   overflow: null [D]
+│   textScaleFactor: null [D]
+│   maxLines: null [D]
+└─▼[/icons/inspector/textArea.png]<grayed> </grayed>RichText
+    softWrap: wrapping at box width
+    maxLines: unlimited
+    text: "Hello, World!"
+    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2
+      parentData: offset=Offset(360.5, 264.0) (can use size)
+      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)
+      size: Size(79.0, 16.0)
+      textAlign: start
+      textDirection: ltr
+      softWrap: wrapping at box width
+      overflow: clip
+      locale: en_US
+      maxLines: unlimited
