@@ -181,7 +181,12 @@ class ServiceConnectionManager {
     _connectionClosedController.add(null);
   }
 
-  // TODO(kenzie): add hot restart method, register method in flutter_tools.
+  Future<void> performHotRestart() async {
+    await callMulticastService(
+      registrations.hotRestart,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+  }
 
   Future<void> performHotReload() async {
     await callMulticastService(
@@ -335,7 +340,7 @@ class ServiceExtensionManager {
   /// extensions until the first frame event has been received [_firstFrameEventReceived].
   final Set<String> _pendingServiceExtensions = Set<String>();
 
-  final Completer<Null> extensionStatesUpdated = Completer();
+  Completer<Null> extensionStatesUpdated = Completer();
 
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
@@ -344,8 +349,8 @@ class ServiceExtensionManager {
         await _onFrameEventReceived();
         break;
       case 'Flutter.ServiceExtensionStateChanged':
-        final String name = event.json['extensionData']['extension'];
-        final String valueFromJson = event.json['extensionData']['value'];
+        final String name = event.json['extensionData']['extension'].toString();
+        final String valueFromJson = event.json['extensionData']['value'].toString();
 
         final extension = extensions.toggleableExtensionsWhitelist[name];
         if (extension != null) {
@@ -527,6 +532,7 @@ class ServiceExtensionManager {
   }
 
   void resetAvailableExtensions() {
+    extensionStatesUpdated = Completer();
     _firstFrameEventReceived = false;
     _serviceExtensions.clear();
     _serviceExtensionController

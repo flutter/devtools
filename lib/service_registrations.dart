@@ -5,3 +5,7 @@
 // Service registered by Flutter Tools. We call this service to perform hot
 // reload.
 const String reloadSources = 'reloadSources';
+
+// Service registered by Flutter Tools. We call this service to perform hot
+// restart.
+const String hotRestart = 'hotRestart';

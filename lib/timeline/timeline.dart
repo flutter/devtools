@@ -89,6 +89,7 @@ class TimelineScreen extends Screen {
         ..layoutHorizontal()
         ..add(<CoreElement>[
           createHotReloadButton(),
+          createHotRestartButton(),
           div()..flex(),
           div(c: 'btn-group')
             ..add(<CoreElement>[
@@ -261,13 +262,14 @@ class TimelineScreen extends Screen {
     timelineFramesUI.timelineData = timelineData;
   }
 
-  // TODO(kenzie): add hotRestart button.
-
+  // TODO: move this button out of timeline if we decide to make a global button bar.
   CoreElement createHotReloadButton() {
     final PButton button = new PButton.icon(
       'Hot Reload',
       FlutterIcons.hotReload,
-    )..small();
+    )
+      ..small()
+      ..hidden(true);
 
     button.click(() async {
       try {
@@ -283,6 +285,37 @@ class TimelineScreen extends Screen {
     // Only show the button if the device supports hot reload.
     serviceManager.hasRegisteredService(
       registrations.reloadSources,
+      (registered) {
+        button.hidden(!registered);
+      },
+    );
+
+    return button;
+  }
+
+  // TODO: move this button out of timeline if we decide to make a global button bar.
+  CoreElement createHotRestartButton() {
+    final PButton button = new PButton.icon(
+      'Hot Restart',
+      FlutterIcons.hotRestart,
+    )
+      ..small()
+      ..hidden(true);
+
+    button.click(() async {
+      try {
+        button.disabled = true;
+        await serviceManager.performHotRestart();
+      } catch (e) {
+        framework.showError('Error performing hot restart', e);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // Only show the button if the device supports hot restart.
+    serviceManager.hasRegisteredService(
+      registrations.hotRestart,
       (registered) {
         button.hidden(!registered);
       },

@@ -166,7 +166,9 @@ void main() {
       await serviceManager.performHotReload();
     });
 
-    // TODO(kenzie): add hot restart test case.
+    test('hotRestart', () async {
+      await serviceManager.performHotRestart();
+    });
   }, tags: 'useFlutterSdk');
 
   group('serviceManagerTests - restoring device-enabled extension:', () {
