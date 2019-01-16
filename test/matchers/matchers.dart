@@ -4,7 +4,10 @@
 
 library matchers;
 
+import 'dart:io' as io;
+
 import 'package:devtools/inspector/diagnostics_node.dart';
+import 'package:matcher/matcher.dart';
 
 RemoteDiagnosticsNode findNodeMatching(
     RemoteDiagnosticsNode node, String text) {
@@ -16,7 +19,7 @@ RemoteDiagnosticsNode findNodeMatching(
     return null;
   }
   for (var child in node.childrenNow) {
-    var match = findNodeMatching(child, text);
+    final match = findNodeMatching(child, text);
     if (match != null) {
       return match;
     }
@@ -26,4 +29,99 @@ RemoteDiagnosticsNode findNodeMatching(
 
 String treeToDebugString(RemoteDiagnosticsNode node) {
   return node.toDiagnosticsNode().toStringDeep();
+}
+
+/// Asserts that a [path] matches a golden file after normalizing likely hash
+/// codes.
+///
+/// Paths are assumed to reference files within the `test/goldens` directory.
+///
+/// To rebaseline all golden files run tests with
+/// ```
+/// export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+/// pub run test test/your_vm_test.dart
+/// unset DART_VM_OPTIONS
+/// ```
+///
+/// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
+/// and is normalized to #00000.
+///
+/// See Also:
+///
+///  * [equalsIgnoringHashCodes], which does the same thing without the golden
+///    file functionality.
+Matcher equalsGoldenIgnoringHashCodes(String path) {
+  return _EqualsGoldenIgnoringHashCodes(path);
+}
+
+class _EqualsGoldenIgnoringHashCodes extends Matcher {
+  _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
+    path = 'test/goldens/$pathWithinGoldenDirectory';
+    try {
+      _value = io.File(path).readAsStringSync();
+    } catch (e) {
+      _value = 'Error reading $path: $e';
+    }
+  }
+  String path;
+  String _value;
+
+  static final Object _mismatchedValueKey = Object();
+
+  static bool _updateGoldens;
+
+  static bool get updateGoldens {
+    _updateGoldens ??=
+        String.fromEnvironment("UPDATE_GOLDENS", defaultValue: "false") ==
+            'true';
+    return _updateGoldens;
+  }
+
+  static String _normalize(String s) {
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
+  }
+
+  @override
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+    final String description = _normalize(object);
+    if (_value != description) {
+      if (updateGoldens) {
+        io.File(path).writeAsStringSync(description);
+        print('Updated golden file $path\nto\n$description');
+        // Act like the match succeeded so all goldens are updated instead of
+        // just the first failure.
+        return true;
+      }
+
+      matchState[_mismatchedValueKey] = description;
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('multi line description equals $_value');
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription,
+      Map<dynamic, dynamic> matchState, bool verbose) {
+    if (matchState.containsKey(_mismatchedValueKey)) {
+      final String actualValue = matchState[_mismatchedValueKey];
+      // Leading whitespace is added so that lines in the multi-line
+      // description returned by addDescriptionOf are all indented equally
+      // which makes the output easier to read for this case.
+      return mismatchDescription
+          .add('expected normalized value\n  ')
+          .addDescriptionOf(_value)
+          .add('\nbut got\n  ')
+          .addDescriptionOf(actualValue)
+          .add('\nTo update golden files:\n')
+          .add('\nTo update golden files run:\n')
+          .add('export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"\n')
+          .add('pub run test test/your_vm_test.dart\n')
+          .add('unset DART_VM_OPTIONS\n');
+    }
+  }
 }

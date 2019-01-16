@@ -6,6 +6,12 @@
 ///
 /// This allows tests of the complicated logic in this class to run on the VM
 /// and will help simplify porting this code to work with Hummingbird.
+///
+/// This code is directly based on
+/// src/io/flutter/view/InspectorPanel.java
+/// with some refactors to make the code more of a controller than a combination
+/// of view and controller. View specific portions of InspectorPanel.java have
+/// been moved to inspector.dart.
 library inspector_controller;
 
 import 'dart:async';

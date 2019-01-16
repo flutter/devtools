@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This is a subset of matchers from package:flutter_test filtered to only
-// include matches that work with our restricted subset of classes from flutter.
+/// This is a subset of matchers from package:flutter_test filtered to only
+/// include matches that work with our restricted subset of classes from flutter.
 library fake_flutter_matchers;
 
 import 'dart:math' as math;

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This code is directly based on
+// src/io/flutter/InspectorService.java
+// If you add methods to this class you should also add them to
+// InspectorService.java
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -100,7 +104,7 @@ class InspectorService {
   /// tree.
   Future<String> inferPubRootDirectoryIfNeeded() async {
     final group = createObjectGroup('temp');
-    RemoteDiagnosticsNode root = await group.getRoot(FlutterTreeType.widget);
+    final root = await group.getRoot(FlutterTreeType.widget);
 
     if (root == null) {
       // No need to do anything as there isn't a valid tree (yet?).
@@ -113,8 +117,6 @@ class InspectorService {
       // no need to guess the pub root directory.
       return null;
     }
-
-    final VmService service = inspectorLibrary.service;
 
     final List<RemoteDiagnosticsNode> allChildren =
         await group.getChildren(root.dartDiagnosticRef, false, null);
@@ -136,7 +138,7 @@ class InspectorService {
     final parts = path.split('/');
     String pubRootDirectory;
     for (int i = parts.length - 1; i >= 0; i--) {
-      var part;
+      String part;
       if (part == 'lib' || part == 'web') {
         pubRootDirectory = parts.sublist(0, i).join('/');
         break;
@@ -319,7 +321,7 @@ class ObjectGroup {
   /// and it is simpler return an empty result that will be ignored anyway than to
   /// attempt carefully cancel futures.
   Future<void> dispose() {
-    var disposeComplete = invokeVoidServiceMethod('disposeGroup', groupName);
+    final disposeComplete = invokeVoidServiceMethod('disposeGroup', groupName);
     disposed = true;
     return disposeComplete;
   }
@@ -755,17 +757,17 @@ class ObjectGroup {
     }
   }
 
-  void setSelectionInspector(
+  Future<void> setSelectionInspector(
       InspectorInstanceRef selection, bool uiAlreadyUpdated) {
     if (disposed) {
-      return;
+      return Future.value(null);
     }
     if (useDaemonApi) {
-      handleSetSelectionDaemon(
+      return handleSetSelectionDaemon(
           invokeServiceMethodDaemonInspectorRef('setSelectionById', selection),
           uiAlreadyUpdated);
     } else {
-      handleSetSelectionObservatory(
+      return handleSetSelectionObservatory(
           invokeServiceMethodObservatoryInspectorRef(
               'setSelectionById', selection),
           uiAlreadyUpdated);
@@ -783,7 +785,7 @@ class ObjectGroup {
         uiAlreadyUpdated);
   }
 
-  void handleSetSelectionObservatory(
+  Future<void> handleSetSelectionObservatory(
       Future<InstanceRef> setSelectionResult, bool uiAlreadyUpdated) async {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     if (disposed) return;
@@ -799,7 +801,7 @@ class ObjectGroup {
     }
   }
 
-  void handleSetSelectionDaemon(
+  Future<void> handleSetSelectionDaemon(
       Future<Object> setSelectionResult, bool uiAlreadyUpdated) async {
     if (disposed) return;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.

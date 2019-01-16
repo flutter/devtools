@@ -108,10 +108,9 @@ StreamSubscription<Object> flexSplitBidirectional(
   List<num> minSize,
 }) {
   final mediaQueryList = window.matchMedia('(min-aspect-ratio: 1/1)');
-  bool first = true;
   Splitter splitter;
   // TODO(jacobr): cache the vertical or horizontal split and restore the value
-  // if the aspect ratio changes back.
+  // when the aspect ratio changes back.
   void createSplitter() {
     final bool horizontal = mediaQueryList.matches;
     splitter = flexSplit(
@@ -121,7 +120,6 @@ StreamSubscription<Object> flexSplitBidirectional(
       minSize: minSize,
       sizes: horizontal ? horizontalSizes : verticalSizes
     );
-    first = false;
   }
 
   createSplitter();

@@ -218,7 +218,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 
   CanvasElement _buildImageAsync() {
-    CanvasElement canvas = _createCanvas();
+    final CanvasElement canvas = _createCanvas();
     baseIconRenderer.loadImage().then((CanvasImageSource source) {
       _drawIcon(canvas, source);
     });
@@ -238,7 +238,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 
   CanvasElement _buildImage(CanvasImageSource source) {
-    CanvasElement canvas = _createCanvas();
+    final CanvasElement canvas = _createCanvas();
     _drawIcon(canvas, source);
     return canvas;
   }
@@ -289,7 +289,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
     if (_fontLoaded) {
       return Future.value(image);
     }
-    Completer<CanvasElement> imageCompleter = Completer();
+    final Completer<CanvasElement> imageCompleter = Completer();
     if (!_fontLoaded) {
       if (_iconsFont == null) {
         _iconsFont = new FontFace(

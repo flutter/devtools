@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This is a direct copy of
+// /packages/flutter/lib/src/foundation/diagnostics.dart
+// with a couple of tweaks to support error levels that haven't yet landed in
+// the core Flutter repo but should land soon.
 part of 'fake_flutter.dart';
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
@@ -863,7 +867,7 @@ class TextRenderer {
       }
 
       visitor(node);
-      StringBuffer information = StringBuffer(prefixLineOne);
+      final StringBuffer information = StringBuffer(prefixLineOne);
       if (lines > 1) {
         information.writeln(
             'This ${node.name} had the following descendants (showing up to depth $maxDepth):');
@@ -906,7 +910,7 @@ class TextRenderer {
       builder.write(description);
     }
     if (config.suffixLineOne.isNotEmpty) {
-      int extraSuffixLength = builder.prefixOtherLines.length +
+      final int extraSuffixLength = builder.prefixOtherLines.length +
           config.footer.length -
           builder.prefixLineOne.length -
           config.suffixLineOne.length;
@@ -1194,7 +1198,7 @@ abstract class DiagnosticsNode {
     if (style != DiagnosticsTreeStyle.sparse)
       data['style'] = describeEnum(style);
 
-    bool hasChildren = getChildren().isNotEmpty;
+    final bool hasChildren = getChildren().isNotEmpty;
     if (hasChildren) data['hasChildren'] = hasChildren;
 
     if (linePrefix?.isNotEmpty == true) data['linePrefix'] = linePrefix;
@@ -2283,7 +2287,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   List<DiagnosticsNode> getProperties() {
     if (expandableValue) {
-      T object = value;
+      final object = value;
       if (object is DiagnosticsNode) {
         return object.getProperties();
       }
@@ -2297,7 +2301,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   List<DiagnosticsNode> getChildren() {
     if (expandableValue) {
-      T object = value;
+      final object = value;
       if (object is DiagnosticsNode) {
         return object.getChildren();
       }
@@ -2927,6 +2931,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
   @override
   final DiagnosticLevel level;
   final String _description;
+  @override
   final Object value;
 
   @override

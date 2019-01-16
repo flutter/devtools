@@ -124,6 +124,13 @@ abstract class InspectorTreeNode {
   /// appropriate for a specific platform.
   InspectorTreeNodeRenderBuilder createRenderBuilder();
 
+  /// This method defines the logic of how a RenderObject is converted to
+  /// a list of styled text and icons. If you want to change how tree content
+  /// is styled modify this message as it is the robust way for style changes
+  /// to apply to all ways inspector trees are rendered (html, canvas, Flutter
+  /// in the future).
+  /// If you change this rendering also change the matching logic in
+  /// src/io/flutter/view/DiagnosticsTreeCellRenderer.java
   InspectorTreeNodeRender get renderObject {
     if (_renderObject != null || diagnostic == null) {
       return _renderObject;

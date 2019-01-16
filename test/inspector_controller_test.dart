@@ -6,27 +6,26 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/inspector/flutter_widget.dart';
-import 'package:devtools/inspector/inspector_tree.dart';
-import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools/ui/icons.dart';
-import 'package:devtools/ui/flutter_html_shim.dart' as shim;
-import 'package:devtools/ui/material_icons.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'package:devtools/globals.dart';
-import 'package:devtools/service_manager.dart';
-import 'package:devtools/vm_service_wrapper.dart';
+import 'package:devtools/inspector/flutter_widget.dart';
+import 'package:devtools/inspector/inspector_tree.dart';
 import 'package:devtools/inspector/inspector_controller.dart';
 import 'package:devtools/inspector/inspector_service.dart';
+import 'package:devtools/service_manager.dart';
+import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools/ui/flutter_html_shim.dart' as shim;
+import 'package:devtools/ui/icons.dart';
+import 'package:devtools/ui/material_icons.dart';
+import 'package:devtools/vm_service_wrapper.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
-
+import 'matchers/matchers.dart';
 import 'support/flutter_test_driver.dart';
 
-/// Switch this flag to false if you are having issues with tests not running
-/// atomically.
+/// Switch this flag to false to debug issues with non-atomic test behavior.
 bool reuseTestEnvironment = true;
 
 class FakePaintEntry extends PaintEntry {
@@ -38,7 +37,6 @@ class FakePaintEntry extends PaintEntry {
   final TextStyle textStyle;
   final double x;
 
-  @override
   double get right {
     double right = x;
     if (icon != null) {
@@ -91,7 +89,7 @@ class FakeInspectorTreeNodeRenderBuilder
 
   @override
   InspectorTreeNodeRender build() {
-    double rowWidth = entries.isEmpty ? 0 : entries.last.right;
+    final double rowWidth = entries.isEmpty ? 0 : entries.last.right;
     return FakeInspectorTreeNodeRender(entries, Size(rowWidth, rowHeight));
   }
 }
@@ -142,7 +140,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     scrollToRequests.add(targetRect);
   }
 
-  Completer<void> setStateCalled = null;
+  Completer<void> setStateCalled;
 
   /// Hack to allow tests to wait until the next time this UI is updated.
   Future<void> get nextUiFrame {
@@ -173,10 +171,10 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.
-    StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = new StringBuffer();
     for (int i = 0; i < numRows; i++) {
       final row = root.getRow(i, selection: selection);
-      if (hidePropertyLines && row?.node?.diagnostic?.isProperty) {
+      if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
         continue;
       }
       int last = 0;
@@ -192,7 +190,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
         }
         last = tick;
       }
-      int delta = row.depth - last;
+      final int delta = row.depth - last;
       if (delta > 0) {
         if (row.lineToParent) {
           if (delta > 1 || last == 0) {
@@ -255,7 +253,7 @@ void main() async {
   FakeInspectorTree tree;
   FakeInspectorTree detailsTree;
 
-  void setupEnvironment(bool trackWidgetCreation) async {
+  Future<void> setupEnvironment(bool trackWidgetCreation) async {
     if (trackWidgetCreation != widgetCreationTracked || !reuseTestEnvironment) {
       widgetCreationTracked = trackWidgetCreation;
 
@@ -449,9 +447,7 @@ void main() async {
       // change. If this happens don't panic and rebaseline the content.
       expect(
         detailsTree.toStringDeep(hidePropertyLines: true),
-        equalsIgnoringHashCodes(
-          '▼[S] Scaffold  <-- selected\n'
-        ),
+        equalsGoldenIgnoringHashCodes('inspector_controller_details_tree_scaffold.txt'),
       );
 
       // Select row index 4.
@@ -474,8 +470,8 @@ void main() async {
 
       await detailsTree.nextUiFrame;
       expect(
-        detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes(''),
+        detailsTree.toStringDeep(hidePropertyLines: true),
+        equalsGoldenIgnoringHashCodes('inspector_controller_details_tree_scrolled_to_center.txt'),
       );
 
       // Selecting the root node of the details tree should change selection
@@ -493,6 +489,12 @@ void main() async {
                 '      └─▼[A] AppBar \n'
                 '        └─▼[/icons/inspector/textArea.png] Text \n',
           ));
+
+      // Verify that the details tree scrolled back as well.
+      expect(
+        detailsTree.toStringDeep(hidePropertyLines: true),
+        equalsGoldenIgnoringHashCodes('inspector_controller_details_tree_scaffold.txt'),
+      );
 
       // TODO(jacobr): add tests that verified that we scrolled the view to the
       // correct points on selection.

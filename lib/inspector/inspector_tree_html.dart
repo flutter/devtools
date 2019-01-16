@@ -127,9 +127,10 @@ class InspectorTreeNodeHtmlRender
 
   Element element;
 
+  @override
   Icon hitTest(Offset location) {
-    throw 'Not supported by HTML tree';
-    return null;
+    // TODO(jacobr): consider removing this method from the base class.
+    throw 'Not yet supported by HTML tree';
   }
 }
 
@@ -167,12 +168,12 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
     if (e == null) {
       return null;
     }
-    var parent = e.parent;
-    int index = parent.children.indexOf(e);
+    final parent = e.parent;
+    final int index = parent.children.indexOf(e);
     assert(index >= 0 && index < numRows);
     final row = root.getRow(index, selection: selection);
-    final InspectorTreeNodeHtmlRender render = row.node.renderObject;
     // TODO(jacobr): figure out why this assert is sometimes failing.
+    // final InspectorTreeNodeHtmlRender render = row.node.renderObject;
     // assert(render.element.parent == e);
     return row;
   }
@@ -222,7 +223,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
         return;
       }
 
-      int rowCount = numRows;
+      final int rowCount = numRows;
       // TODO(jacobr): make this rebuild more incremental.
       _container.clear();
       for (int i = 0; i < rowCount; i++) {
@@ -269,7 +270,6 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
       container.classes.add('inspector-tree-row');
       // Variables incremented as part of painting.
       double currentX = 0;
-      Color currentColor;
 
       final InspectorTreeRow row = root?.getRow(index, selection: selection);
       if (row == null) {
@@ -285,7 +285,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
           diagnostic.description != null) {
         container.classes.add('property-value');
       }
-      final bool showExpandCollapse = node.showExpandCollapse;
+      // final bool showExpandCollapse = node.showExpandCollapse;
       final InspectorTreeNodeHtmlRender renderObject = node.renderObject;
 
       // TODO(jacobr): port this code to work for the html renderer to support
