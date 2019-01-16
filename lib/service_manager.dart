@@ -343,9 +343,8 @@ class ServiceExtensionManager {
       case 'Flutter.Frame':
         await _onFrameEventReceived();
         break;
-      case 'Flutter.ServiceExtensionChanged':
-        final String name =
-            'ext.flutter.${event.json['extensionData']['extension']}';
+      case 'Flutter.ServiceExtensionStateChanged':
+        final String name = event.json['extensionData']['extension'];
         final String valueFromJson = event.json['extensionData']['value'];
 
         final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
