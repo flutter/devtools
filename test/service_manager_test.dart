@@ -126,12 +126,12 @@ void main() {
 
     test('callService', () async {
       final registeredService = serviceManager
-              .registeredMethodsForService[registrations.reloadSources] ??
+              .registeredMethodsForService[registrations.hotReload.service] ??
           const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callService(
-        registrations.reloadSources,
+        registrations.hotReload.service,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });
@@ -148,12 +148,12 @@ void main() {
 
     test('callMulticastService', () async {
       final registeredService = serviceManager
-              .registeredMethodsForService[registrations.reloadSources] ??
+              .registeredMethodsForService[registrations.hotReload.service] ??
           const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callMulticastService(
-        registrations.reloadSources,
+        registrations.hotReload.service,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });
@@ -166,7 +166,34 @@ void main() {
       await serviceManager.performHotReload();
     });
 
-    // TODO(kenzie): add hot restart test case.
+    test('hotRestart', () async {
+      const evalExpression = 'topLevelFieldForTest';
+      final library = EvalOnDartLibrary(
+        'package:flutter_app/main.dart',
+        service,
+      );
+
+      // Verify topLevelFieldForTest is false initially.
+      final initialResult = await library.eval(evalExpression, isAlive: null);
+      expect(initialResult.runtimeType, equals(InstanceRef));
+      expect(initialResult.valueAsString, equals('false'));
+
+      // Set field to true by calling the service extension.
+      await library.eval('$evalExpression = true', isAlive: null);
+
+      // Verify topLevelFieldForTest is now true.
+      final intermediateResult =
+          await library.eval(evalExpression, isAlive: null);
+      expect(intermediateResult.runtimeType, equals(InstanceRef));
+      expect(intermediateResult.valueAsString, equals('true'));
+
+      await serviceManager.performHotRestart();
+
+      // Verify topLevelFieldForTest is false again after hot restart.
+      final finalResult = await library.eval(evalExpression, isAlive: null);
+      expect(finalResult.runtimeType, equals(InstanceRef));
+      expect(finalResult.valueAsString, equals('false'));
+    });
   }, tags: 'useFlutterSdk');
 
   group('serviceManagerTests - restoring device-enabled extension:', () {
