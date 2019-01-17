@@ -82,7 +82,7 @@
                       │       │   widthFactor: null [D]
                       │       │   heightFactor: null [D]
                       │       │   ▼renderObject: RenderPositionedBox#00000 relayoutBoundary=up1
-                      │       │     parentData: offset=Offset(0.0, 56.0); id=_ScaffoldSlot.body (can use size)
+                      │       │     parentData: offset=Offset(000, 000); id=_ScaffoldSlot.body (can use size)
                       │       │     constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)
                       │       │     size: Size(800.0, 544.0)
                       │       │     alignment: center
@@ -97,7 +97,7 @@
                       │     └─▼[C]<grayed> </grayed>ConstrainedBox
                       │       │   BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)
                       │       │   ▼renderObject: RenderConstrainedBox#00000 relayoutBoundary=up1
-                      │       │     parentData: offset=Offset(0.0, 0.0); id=_ScaffoldSlot.appBar (can use size)
+                      │       │     parentData: offset=Offset(000, 000); id=_ScaffoldSlot.appBar (can use size)
                       │       │     constraints: BoxConstraints(w=800.0, 0.0<=h<=600.0)
                       │       │     size: Size(800.0, 56.0)
                       │       │     additionalConstraints: BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)
@@ -115,7 +115,7 @@
                               │   fit: loose
                               │   overflow: clip
                               │   ▼renderObject: RenderStack#00000 relayoutBoundary=up1
-                              │     parentData: offset=Offset(784.0, 584.0); id=_ScaffoldSlot.floatingActionButton (can use size)
+                              │     parentData: offset=Offset(000, 000); id=_ScaffoldSlot.floatingActionButton (can use size)
                               │     constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)
                               │     size: Size(0.0, 0.0)
                               │     alignment: centerRight
@@ -127,7 +127,7 @@
                                 │   state: _AnimatedState#00000
                                 └─▼[/icons/inspector/colors.png]<grayed> </grayed>Transform
                                   │   ▼renderObject: RenderTransform#00000 relayoutBoundary=up2
-                                  │     parentData: not positioned; offset=Offset(0.0, 0.0) (can use size)
+                                  │     parentData: not positioned; offset=Offset(000, 000) (can use size)
                                   │     constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)
                                   │     size: Size(0.0, 0.0)
                                   │     transform matrix: [0] 0.0,0.0,0.0,0.0

@@ -205,11 +205,12 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
           onHover: onHover,
         ) {
     _viewportCanvas = ViewportCanvas(
-        paintCallback: _paintCallback,
-        onTap: onTap,
-        onMouseMove: onMouseMove,
-        onMouseLeave: onMouseLeave,
-        classes: 'inspector-tree');
+      paintCallback: _paintCallback,
+      onTap: onTap,
+      onMouseMove: onMouseMove,
+      onMouseLeave: onMouseLeave,
+      classes: 'inspector-tree',
+    );
   }
 
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {

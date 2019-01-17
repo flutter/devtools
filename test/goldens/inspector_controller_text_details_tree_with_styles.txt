@@ -12,7 +12,7 @@
     maxLines: unlimited
     text: "Hello, World!"
     ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2
-      parentData: offset=Offset(360.5, 264.0) (can use size)
+      parentData: offset=Offset(000, 000) (can use size)
       constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)
       size: Size(79.0, 16.0)
       textAlign: start

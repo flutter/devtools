@@ -159,10 +159,8 @@ class InspectorController implements InspectorServiceClient {
       return;
     }
     visibleToUser = visible;
+    details?.setVisibleToUser(visible);
 
-    if (details != null) {
-      details.setVisibleToUser(visible);
-    }
     if (visibleToUser) {
       if (parent == null) {
         maybeLoadUI();
@@ -348,13 +346,11 @@ class InspectorController implements InspectorServiceClient {
     RemoteDiagnosticsNode subtreeSelection,
   ) {
     this.subtreeRoot = subtreeRoot;
-    if (details != null) {
-      details.setSubtreeRoot(subtreeRoot, subtreeSelection);
-    }
+    details?.setSubtreeRoot(subtreeRoot, subtreeSelection);
   }
 
   InspectorInstanceRef getSubtreeRootValue() {
-    return subtreeRoot != null ? subtreeRoot.valueRef : null;
+    return subtreeRoot?.valueRef;
   }
 
   void setSubtreeRoot(
@@ -389,7 +385,7 @@ class InspectorController implements InspectorServiceClient {
 
   void refreshSelection(RemoteDiagnosticsNode newSelection,
       RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) {
-    newSelection ??= getSelectedDiagnostic();
+    newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
     syncSelectionHelper(setSubtreeRoot, detailsSelection);
 
@@ -449,9 +445,7 @@ class InspectorController implements InspectorServiceClient {
     if (valueRef.id != null && !diagnosticsNode.isProperty) {
       valueToInspectorTreeNode[valueRef] = node;
     }
-    if (parent != null) {
-      parent.maybeUpdateValueUI(valueRef);
-    }
+    parent?.maybeUpdateValueUI(valueRef);
     if (diagnosticsNode.hasChildren ||
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
@@ -465,8 +459,12 @@ class InspectorController implements InspectorServiceClient {
     return node;
   }
 
-  void setupChildren(RemoteDiagnosticsNode parent, InspectorTreeNode treeNode,
-      List<RemoteDiagnosticsNode> children, bool expandChildren) {
+  void setupChildren(
+    RemoteDiagnosticsNode parent,
+    InspectorTreeNode treeNode,
+    List<RemoteDiagnosticsNode> children,
+    bool expandChildren,
+  ) {
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
       assert(treeNode.children.length == 1);
@@ -477,17 +475,25 @@ class InspectorController implements InspectorServiceClient {
     if (inlineProperties != null) {
       for (RemoteDiagnosticsNode property in inlineProperties) {
         inspectorTree.appendChild(
-            treeNode,
-            setupInspectorTreeNode(
-                inspectorTree.createNode(), property, false));
+          treeNode,
+          setupInspectorTreeNode(
+            inspectorTree.createNode(),
+            property,
+            false,
+          ),
+        );
       }
     }
     if (children != null) {
       for (RemoteDiagnosticsNode child in children) {
         inspectorTree.appendChild(
-            treeNode,
-            setupInspectorTreeNode(
-                inspectorTree.createNode(), child, expandChildren));
+          treeNode,
+          setupInspectorTreeNode(
+            inspectorTree.createNode(),
+            child,
+            expandChildren,
+          ),
+        );
       }
     }
   }
@@ -563,10 +569,10 @@ class InspectorController implements InspectorServiceClient {
 
     final group = selectionGroups.next;
     final pendingSelectionFuture =
-        group.getSelection(getSelectedDiagnostic(), treeType, isSummaryTree);
+        group.getSelection(selectedDiagnostic, treeType, isSummaryTree);
 
     final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(getSelectedDiagnostic(), treeType, false)
+        ? group.getSelection(selectedDiagnostic, treeType, false)
         : null;
 
     try {
@@ -592,8 +598,11 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
-  void applyNewSelection(RemoteDiagnosticsNode newSelection,
-      RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) {
+  void applyNewSelection(
+    RemoteDiagnosticsNode newSelection,
+    RemoteDiagnosticsNode detailsSelection,
+    bool setSubtreeRoot,
+  ) {
     final InspectorTreeNode nodeInTree =
         findMatchingInspectorTreeNode(newSelection);
 
@@ -605,8 +614,6 @@ class InspectorController implements InspectorServiceClient {
 
     refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
   }
-
-  RemoteDiagnosticsNode getSelectedDiagnostic() => selectedNode?.diagnostic;
 
   void animateTo(InspectorTreeNode node) {
     if (node == null) {
@@ -702,7 +709,6 @@ class InspectorController implements InspectorServiceClient {
     if (node != null) {
       setSelectedNode(node);
 
-      final RemoteDiagnosticsNode selectedDiagnostic = getSelectedDiagnostic();
       // Don't reroot if the selected value is already visible in the details tree.
       final bool maybeReroot = isSummaryTree &&
           details != null &&
@@ -739,7 +745,7 @@ class InspectorController implements InspectorServiceClient {
     if (!detailsSubtree && selectedNode != null) {
       inspectorTree.nodeChanged(selectedNode.parent);
     }
-    final RemoteDiagnosticsNode diagnostic = getSelectedDiagnostic();
+    final RemoteDiagnosticsNode diagnostic = selectedDiagnostic;
     if (diagnostic != null) {
       if (diagnostic.isCreatedByLocalProject) {
         _navigateTo(diagnostic);
@@ -792,8 +798,9 @@ class InspectorController implements InspectorServiceClient {
         return 'Widget';
       case FlutterTreeType.renderObject:
         return 'Render Objects';
+      default:
+        return null;
     }
-    return null;
   }
 
   bool hasPlaceholderChildren(InspectorTreeNode node) {

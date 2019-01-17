@@ -98,7 +98,8 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
     }
   }
 
-  /// Offset can be updated once the
+  /// Offset can be updated after the object is created by calling attach
+  /// with a new offset.
   Offset get offset => _offset;
   Offset _offset;
 
@@ -185,8 +186,6 @@ abstract class InspectorTreeNode {
               final int codePoint =
                   JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
-                // final Icon icon = FlutterMaterialIcons.getIconForHex(
-                //    codePoint.toRadixString(16).padLeft(4, '0'));
                 final Icon icon =
                     FlutterMaterialIcons.getIconForCodePoint(codePoint);
                 if (icon != null) {
