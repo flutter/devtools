@@ -1,0 +1,14 @@
+▼[/icons/inspector/textArea.png]<grayed> </grayed><bold>Text</bold> <-- selected
+│   "Hello, World!"
+│   textAlign: null [D]
+│   textDirection: null [D]
+│   locale: null [D]
+│   softWrap: null [D]
+│   overflow: null [D]
+│   textScaleFactor: null [D]
+│   maxLines: null [D]
+└─▼[/icons/inspector/textArea.png]<grayed> </grayed>RichText
+    softWrap: wrapping at box width
+    maxLines: unlimited
+    text: "Hello, World!"
+    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2

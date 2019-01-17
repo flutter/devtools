@@ -11,3 +11,15 @@ const TextStyle regularBold =
     TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
 const TextStyle regularItalic =
     TextStyle(color: Colors.black, fontStyle: FontStyle.italic);
+
+/// Pretty sames for common text styles to make it easier to debug output
+/// containing these names.
+final Map<TextStyle, String> debugStyleNames = {
+  grayed: 'grayed',
+  regular: '',
+  warning: 'warning',
+  error: 'error',
+  link: 'link',
+  regularBold: 'bold',
+  regularItalic: 'italic',
+};

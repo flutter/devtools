@@ -15,12 +15,13 @@ class MaterialIcon extends Icon {
     this.color, {
     this.fontSize = 18,
     this.iconWidth = 18,
+    this.angle = 0,
   });
 
   final String text;
   final Color color;
   final int fontSize;
-
+  final double angle;
   @override
   final int iconWidth;
 }
