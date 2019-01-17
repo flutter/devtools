@@ -465,6 +465,7 @@ class InspectorController implements InspectorServiceClient {
     List<RemoteDiagnosticsNode> children,
     bool expandChildren,
   ) {
+    treeNode.expanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
       assert(treeNode.children.length == 1);

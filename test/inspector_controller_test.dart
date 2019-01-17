@@ -408,29 +408,20 @@ void main() async {
       expect(
         zeroOffsets(detailsTree.toStringDeep()),
         equalsIgnoringHashCodes(
-          '▼[/icons/inspector/textArea.png] Text <-- selected\n'
-              '│   "Hello, World!"\n'
-              '│   textAlign: null [D]\n'
-              '│   textDirection: null [D]\n'
-              '│   locale: null [D]\n'
-              '│   softWrap: null [D]\n'
-              '│   overflow: null [D]\n'
-              '│   textScaleFactor: null [D]\n'
-              '│   maxLines: null [D]\n'
-              '└─▼[/icons/inspector/textArea.png] RichText\n'
-              '    softWrap: wrapping at box width\n'
-              '    maxLines: unlimited\n'
-              '    text: "Hello, World!"\n'
-              '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-              '      parentData: offset=Offset(000, 000) (can use size)\n'
-              '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
-              '      size: Size(79.0, 16.0)\n'
-              '      textAlign: start\n'
-              '      textDirection: ltr\n'
-              '      softWrap: wrapping at box width\n'
-              '      overflow: clip\n'
-              '      locale: en_US\n'
-              '      maxLines: unlimited\n',
+            '▼[/icons/inspector/textArea.png] Text <-- selected\n'
+                '│   "Hello, World!"\n'
+                '│   textAlign: null [D]\n'
+                '│   textDirection: null [D]\n'
+                '│   locale: null [D]\n'
+                '│   softWrap: null [D]\n'
+                '│   overflow: null [D]\n'
+                '│   textScaleFactor: null [D]\n'
+                '│   maxLines: null [D]\n'
+                '└─▼[/icons/inspector/textArea.png] RichText\n'
+                '    softWrap: wrapping at box width\n'
+                '    maxLines: unlimited\n'
+                '    text: "Hello, World!"\n'
+                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
         ),
       );
 
@@ -446,29 +437,21 @@ void main() async {
       expect(
         zeroOffsets(detailsTree.toStringDeep()),
         equalsIgnoringHashCodes(
-          '▼[/icons/inspector/textArea.png] Text\n'
-              '│   "Hello, World!"\n'
-              '│   textAlign: null [D]\n'
-              '│   textDirection: null [D]\n'
-              '│   locale: null [D]\n'
-              '│   softWrap: null [D]\n'
-              '│   overflow: null [D]\n'
-              '│   textScaleFactor: null [D]\n'
-              '│   maxLines: null [D]\n'
-              '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
-              '    softWrap: wrapping at box width\n'
-              '    maxLines: unlimited\n'
-              '    text: "Hello, World!"\n'
-              '    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-              '      parentData: offset=Offset(000, 000) (can use size)\n'
-              '      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)\n'
-              '      size: Size(79.0, 16.0)\n'
-              '      textAlign: start\n'
-              '      textDirection: ltr\n'
-              '      softWrap: wrapping at box width\n'
-              '      overflow: clip\n'
-              '      locale: en_US\n'
-              '      maxLines: unlimited\n',
+            '▼[/icons/inspector/textArea.png] Text\n'
+                '│   "Hello, World!"\n'
+                '│   textAlign: null [D]\n'
+                '│   textDirection: null [D]\n'
+                '│   locale: null [D]\n'
+                '│   softWrap: null [D]\n'
+                '│   overflow: null [D]\n'
+                '│   textScaleFactor: null [D]\n'
+                '│   maxLines: null [D]\n'
+                '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
+                '    softWrap: wrapping at box width\n'
+                '    maxLines: unlimited\n'
+                '    text: "Hello, World!"\n'
+                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
+
         ),
       );
 

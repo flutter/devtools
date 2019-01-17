@@ -11,13 +11,4 @@
     softWrap: wrapping at box width
     maxLines: unlimited
     text: "Hello, World!"
-    ▼renderObject: RenderParagraph#00000 relayoutBoundary=up2
-      parentData: offset=Offset(000, 000) (can use size)
-      constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=544.0)
-      size: Size(79.0, 16.0)
-      textAlign: start
-      textDirection: ltr
-      softWrap: wrapping at box width
-      overflow: clip
-      locale: en_US
-      maxLines: unlimited
+    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2
