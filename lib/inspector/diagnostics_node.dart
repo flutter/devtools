@@ -76,7 +76,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroup inspectorService;
+  final FutureOr<ObjectGroup> inspectorService;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
@@ -379,7 +379,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Instance object for the Dart value because much of the relevant
   /// information to display good visualizations of Flutter values is stored
   /// in properties not in fields.
-  Future<Map<String, InstanceRef>> get valueProperties {
+  Future<Map<String, InstanceRef>> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef?.id == null) {
         _valueProperties = Future.value(null);
@@ -387,8 +387,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
-        _valueProperties = inspectorService.getEnumPropertyValues(valueRef);
-        return _valueProperties;
+        return (await inspectorService)?.getEnumPropertyValues(valueRef);
       }
 
       List<String> propertyNames;
@@ -405,8 +404,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           _valueProperties = Future.value(null);
           return _valueProperties;
       }
-      _valueProperties =
-          inspectorService.getDartObjectProperties(valueRef, propertyNames);
+      _valueProperties = (await inspectorService)
+          ?.getDartObjectProperties(valueRef, propertyNames);
     }
     return _valueProperties;
   }
@@ -453,13 +452,26 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (!hasChildren || _children != null) {
       return;
     }
-    _childrenFuture =
-        inspectorService.getChildren(dartDiagnosticRef, isSummaryTree, this);
+
+    if (_childrenFuture != null) {
+      await _childrenFuture;
+      return;
+    }
+
+    _childrenFuture = _getChildrenHelper();
     try {
       _children = await _childrenFuture;
     } finally {
       _children ??= [];
     }
+  }
+
+  Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
+    return (await inspectorService)?.getChildren(
+      dartDiagnosticRef,
+      isSummaryTree,
+      this,
+    );
   }
 
   void _maybePopulateChildren() {
@@ -574,8 +586,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   FlutterWidget get widget {
-    return inspectorService.inspectorService.widgetCatalog
-        .getWidget(description);
+    return Catalog.instance?.getWidget(description);
   }
 
   Icon get icon {
@@ -644,13 +655,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   String toStringShort() {
     return description;
   }
-}
 
-Future<T> bindFutureToCompleter<T>(Future<T> future, Completer<T> completer) {
-  future
-      .then((v) => completer.complete(v))
-      .catchError((e) => completer.completeError(e));
-  return future;
+  Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
+    await (await inspectorService)
+        ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+  }
 }
 
 class InspectorSourceLocation {

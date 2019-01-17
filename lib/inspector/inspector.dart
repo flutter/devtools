@@ -106,6 +106,7 @@ class InspectorScreen extends Screen {
     inspectorContainer.add(spinner);
 
     try {
+      await ensureInspectorServiceDependencies();
       inspectorService = await InspectorService.create(service);
       final pubRootDirectory =
           await inspectorService.inferPubRootDirectoryIfNeeded();

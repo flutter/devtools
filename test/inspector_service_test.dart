@@ -50,6 +50,7 @@ void main() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
 
     await serviceManager.vmServiceOpened(service, Completer().future);
+    await ensureInspectorServiceDependencies();
     inspectorService = await InspectorService.create(service);
     if (trackWidgetCreation) {
       await inspectorService.inferPubRootDirectoryIfNeeded();
