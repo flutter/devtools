@@ -113,7 +113,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
       // description returned by addDescriptionOf are all indented equally
       // which makes the output easier to read for this case.
       return mismatchDescription
-          .add('expected normalized value\n  ')
+          .add('expected golden file \'$path\' with normalized value\n  ')
           .addDescriptionOf(_value)
           .add('\nbut got\n  ')
           .addDescriptionOf(actualValue)

@@ -529,10 +529,11 @@ void main() async {
           ));
 
       // Verify that the details tree scrolled back as well.
+      // However, now more nodes are expanded.
       expect(
         detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
-            'inspector_controller_details_tree_scaffold.txt'),
+            'inspector_controller_details_tree_scaffold_expanded.txt'),
       );
 
       expect(
