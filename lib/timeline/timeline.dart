@@ -13,9 +13,9 @@ import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
-import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
+import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'fps.dart';
 import 'timeline_protocol.dart';
@@ -264,64 +264,33 @@ class TimelineScreen extends Screen {
 
   // TODO: move this button out of timeline if we decide to make a global button bar.
   CoreElement createHotReloadButton() {
-    final PButton button = new PButton.icon(
-      'Hot Reload',
-      FlutterIcons.hotReload,
-    )
-      ..small()
-      ..hidden(true);
-
-    button.click(() async {
-      try {
-        button.disabled = true;
-        await serviceManager.performHotReload();
-      } catch (e) {
-        framework.showError('Error performing hot reload', e);
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    // Only show the button if the device supports hot reload.
-    serviceManager.hasRegisteredService(
-      registrations.reloadSources,
-      (registered) {
-        button.hidden(!registered);
-      },
-    );
-
-    return button;
+    final VoidFunction action = () async {
+      await serviceManager.performHotReload();
+    };
+    final VoidFunctionWithArg errorAction = (e) {
+      framework.showError('Error performing hot reload', e);
+    };
+    return RegisteredServiceExtensionButton(
+      registrations.hotReload,
+      action,
+      errorAction,
+    ).button;
   }
 
   // TODO: move this button out of timeline if we decide to make a global button bar.
   CoreElement createHotRestartButton() {
-    final PButton button = new PButton.icon(
-      'Hot Restart',
-      FlutterIcons.hotRestart,
-    )
-      ..small()
-      ..hidden(true);
+    final VoidFunction action = () async {
+      await serviceManager.performHotRestart();
+    };
+    final VoidFunctionWithArg errorAction = (e) {
+      framework.showError('Error performing hot restart', e);
+    };
 
-    button.click(() async {
-      try {
-        button.disabled = true;
-        await serviceManager.performHotRestart();
-      } catch (e) {
-        framework.showError('Error performing hot restart', e);
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    // Only show the button if the device supports hot restart.
-    serviceManager.hasRegisteredService(
+    return RegisteredServiceExtensionButton(
       registrations.hotRestart,
-      (registered) {
-        button.hidden(!registered);
-      },
-    );
-
-    return button;
+      action,
+      errorAction,
+    ).button;
   }
 }
 

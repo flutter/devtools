@@ -183,14 +183,14 @@ class ServiceConnectionManager {
 
   Future<void> performHotRestart() async {
     await callMulticastService(
-      registrations.hotRestart,
+      registrations.hotRestart.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
 
   Future<void> performHotReload() async {
     await callMulticastService(
-      registrations.reloadSources,
+      registrations.hotReload.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
@@ -350,7 +350,8 @@ class ServiceExtensionManager {
         break;
       case 'Flutter.ServiceExtensionStateChanged':
         final String name = event.json['extensionData']['extension'].toString();
-        final String valueFromJson = event.json['extensionData']['value'].toString();
+        final String valueFromJson =
+            event.json['extensionData']['value'].toString();
 
         final extension = extensions.toggleableExtensionsWhitelist[name];
         if (extension != null) {

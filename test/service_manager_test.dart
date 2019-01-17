@@ -126,12 +126,12 @@ void main() {
 
     test('callService', () async {
       final registeredService = serviceManager
-              .registeredMethodsForService[registrations.reloadSources] ??
+              .registeredMethodsForService[registrations.hotReload.service] ??
           const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callService(
-        registrations.reloadSources,
+        registrations.hotReload.service,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });
@@ -148,12 +148,12 @@ void main() {
 
     test('callMulticastService', () async {
       final registeredService = serviceManager
-              .registeredMethodsForService[registrations.reloadSources] ??
+              .registeredMethodsForService[registrations.hotReload.service] ??
           const [];
       expect(registeredService, isNotEmpty);
 
       await serviceManager.callMulticastService(
-        registrations.reloadSources,
+        registrations.hotReload.service,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );
     });

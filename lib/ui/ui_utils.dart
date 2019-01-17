@@ -6,6 +6,8 @@ import 'dart:html' as html;
 
 import '../globals.dart';
 import '../service_extensions.dart';
+import '../service_registrations.dart';
+import '../utils.dart';
 import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'primer.dart';
@@ -45,12 +47,15 @@ CoreElement createExtensionCheckBox(
   return outerDiv;
 }
 
+/// Button that calls a service extension. Service extensions can be found in
+/// [service_extensions.dart].
 class ServiceExtensionButton {
   ServiceExtensionButton(this.extensionDescription) {
     button = PButton.icon(
-        extensionDescription.description, extensionDescription.icon,
-        title: extensionDescription.tooltip)
-      ..small();
+      extensionDescription.description,
+      extensionDescription.icon,
+      title: extensionDescription.tooltip,
+    )..small();
 
     final extensionName = extensionDescription.extension;
 
@@ -60,7 +65,7 @@ class ServiceExtensionButton {
     serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName, (available) => button.disabled = !available);
 
-    button.click(() => click());
+    button.click(() => _click());
 
     _updateState();
   }
@@ -68,7 +73,7 @@ class ServiceExtensionButton {
   final ToggleableServiceExtensionDescription extensionDescription;
   PButton button;
 
-  void click() {
+  void _click() {
     final bool wasSelected = button.element.classes.contains('selected');
     serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensionDescription.extension,
@@ -85,5 +90,49 @@ class ServiceExtensionButton {
         extensionDescription.extension,
         (state) => button.toggleClass(
             'selected', state.value == extensionDescription.enabledValue));
+  }
+}
+
+/// Button that calls a registered service from flutter_tools. Registered
+/// services can be found in [service_registrations.dart].
+class RegisteredServiceExtensionButton {
+  RegisteredServiceExtensionButton(
+    this.serviceDescription,
+    this.action,
+    this.errorAction,
+  ) {
+    button = PButton.icon(
+      serviceDescription.title,
+      serviceDescription.icon,
+      title: serviceDescription.title,
+    )
+      ..small()
+      ..hidden(true);
+
+    // Only show the button if the device supports hot restart.
+    serviceManager.hasRegisteredService(
+      serviceDescription.service,
+      (registered) {
+        button.hidden(!registered);
+      },
+    );
+
+    button.click(() => _click());
+  }
+
+  final RegisteredServiceDescription serviceDescription;
+  final VoidFunction action;
+  final VoidFunctionWithArg errorAction;
+  PButton button;
+
+  void _click() async {
+    try {
+      button.disabled = true;
+      action();
+    } catch (e) {
+      errorAction(e);
+    } finally {
+      button.disabled = false;
+    }
   }
 }
