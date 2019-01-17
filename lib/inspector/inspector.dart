@@ -17,7 +17,6 @@ import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart';
 import '../ui/ui_utils.dart';
-
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
 import 'inspector_tree_canvas.dart';

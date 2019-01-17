@@ -22,7 +22,6 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 import '../globals.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
-
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;

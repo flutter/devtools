@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../ui/elements.dart';
-
 import 'inspector_tree.dart';
 
 /// Base class for all inspector tree classes that can be used on the web.
