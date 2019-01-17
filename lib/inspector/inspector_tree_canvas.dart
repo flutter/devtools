@@ -13,7 +13,6 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import '../ui/viewport_canvas.dart';
-
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_web.dart';
