@@ -17,6 +17,15 @@ import '../globals.dart';
 import 'diagnostics_node.dart';
 import 'flutter_widget.dart';
 
+bool _inspectorDependenciesLoaded = false;
+// This method must be called before any methods on the Inspector are used.
+Future<void> loadInspectorServiceDependencies() async {
+  await Catalog.load();
+  // TODO(jacobr): consider also loading common icons needed by the inspector
+  // to avoid flicker on icon load.
+  _inspectorDependenciesLoaded = true;
+}
+
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
 class InspectorService {
@@ -24,7 +33,6 @@ class InspectorService {
     this.vmService,
     this.inspectorLibrary,
     this.supportedServiceMethods,
-    this.widgetCatalog,
   ) : clients = Set() {
     vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
     vmService.onDebugEvent.listen(onDebugVmServiceReceived);
@@ -60,9 +68,19 @@ class InspectorService {
   final Set<InspectorServiceClient> clients;
   final EvalOnDartLibrary inspectorLibrary;
   final Set<String> supportedServiceMethods;
-  final Catalog widgetCatalog;
+
+  /// loadInspectorServiceDependencies must be called before this method is
+  /// called.
+  static Future<ObjectGroup> createGroup(
+    VmService vmService,
+    String groupName,
+  ) async {
+    assert(_inspectorDependenciesLoaded);
+    return (await create(vmService)).createObjectGroup(groupName);
+  }
 
   static Future<InspectorService> create(VmService vmService) async {
+    assert(_inspectorDependenciesLoaded);
     assert(serviceManager.hasConnection);
     assert(serviceManager.service != null);
     final inspectorLibrary = EvalOnDartLibrary(
@@ -72,9 +90,7 @@ class InspectorService {
 
     final libraryFuture =
         inspectorLibrary.getLibrary(await inspectorLibrary.libraryRef, null);
-    final catalogFuture = Catalog.load();
     final library = await libraryFuture;
-    final catalog = await catalogFuture;
     Future<Set<String>> lookupFunctionNames() async {
       for (ClassRef classRef in library.classes) {
         if ('WidgetInspectorService' == classRef.name) {
@@ -94,7 +110,6 @@ class InspectorService {
       vmService,
       inspectorLibrary,
       supportedServiceMethods,
-      catalog,
     );
   }
 

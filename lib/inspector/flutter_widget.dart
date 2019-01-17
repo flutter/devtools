@@ -102,6 +102,9 @@ class Catalog {
 
   static Future<Catalog> _cachedCatalog;
 
+  static Catalog get instance => _instance;
+  static Catalog _instance;
+
   static Future<Catalog> load() {
     return _cachedCatalog ??= _loadHelper();
   }
@@ -109,7 +112,8 @@ class Catalog {
   static Future<Catalog> _loadHelper() async {
     // Local copy of: https\://github.com/flutter/website/tree/master/_data/catalog/widget.json
     final Response response = await get('widgets.json');
-    return decode(response.body);
+    _instance = decode(response.body);
+    return _instance;
   }
 
   @visibleForTesting

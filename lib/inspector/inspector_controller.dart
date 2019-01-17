@@ -762,8 +762,7 @@ class InspectorController implements InspectorServiceClient {
 
         if (toSelect != null) {
           final diagnosticToSelect = toSelect.diagnostic;
-          diagnosticToSelect.inspectorService
-              .setSelectionInspector(diagnosticToSelect.valueRef, true);
+          diagnosticToSelect.setSelectionInspector(true);
         }
       }
     }
@@ -774,8 +773,7 @@ class InspectorController implements InspectorServiceClient {
       // We can't rely on the details tree to update the selection on the server in this case.
       final selection =
           detailsSelection != null ? detailsSelection : diagnostic;
-      selection.inspectorService
-          .setSelectionInspector(selection.valueRef, true);
+      selection.setSelectionInspector(true);
     }
   }
 
