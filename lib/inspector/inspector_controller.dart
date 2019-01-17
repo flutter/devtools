@@ -59,8 +59,8 @@ class InspectorController implements InspectorServiceClient {
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
-  })  : treeGroups = InspectorObjectGroupManager(inspectorService, 'tree'),
-        selectionGroups =
+  })  : _treeGroups = InspectorObjectGroupManager(inspectorService, 'tree'),
+        _selectionGroups =
             InspectorObjectGroupManager(inspectorService, 'selection') {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
@@ -112,11 +112,13 @@ class InspectorController implements InspectorServiceClient {
   final InspectorService inspectorService;
   StreamSubscription<IsolateRef> flutterIsolateSubscription;
 
+  bool _disposed = false;
+
   RateLimiter _refreshRateLimiter;
 
   /// Groups used to manage and cancel requests to load data to display directly
   /// in the tree.
-  final InspectorObjectGroupManager treeGroups;
+  InspectorObjectGroupManager _treeGroups;
 
   /// Groups used to manage and cancel requests to determine what the current
   /// selection is.
@@ -124,7 +126,7 @@ class InspectorController implements InspectorServiceClient {
   /// This group needs to be kept separate from treeGroups as the selection is
   /// shared more with the details subtree.
   /// TODO(jacobr): is there a way we can unify the selection and tree groups?
-  final InspectorObjectGroupManager selectionGroups;
+  InspectorObjectGroupManager _selectionGroups;
 
   /// Node being highlighted due to the current hover.
   InspectorTreeNode get currentShowNode => inspectorTree.hover;
@@ -207,8 +209,8 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> getPendingUpdateDone() async {
     // Wait for the selection to be resolved followed by waiting for the tree to be computed.
-    await selectionGroups.pendingUpdateDone;
-    await treeGroups.pendingUpdateDone;
+    await _selectionGroups.pendingUpdateDone;
+    await _treeGroups.pendingUpdateDone;
     // TODO(jacobr): are there race conditions we need to think mroe carefully about here?
   }
 
@@ -233,8 +235,8 @@ class InspectorController implements InspectorServiceClient {
     // references in this method as that stale data will trigger inspector
     // exceptions.
     programaticSelectionChangeInProgress = true;
-    treeGroups.clear(isolateStopped);
-    selectionGroups.clear(isolateStopped);
+    _treeGroups.clear(isolateStopped);
+    _selectionGroups.clear(isolateStopped);
 
     currentShowNode = null;
     selectedNode = null;
@@ -244,9 +246,7 @@ class InspectorController implements InspectorServiceClient {
     subtreeRoot = null;
 
     inspectorTree.root = inspectorTree.createNode();
-    if (details != null) {
-      details.shutdownTree(isolateStopped);
-    }
+    details?.shutdownTree(isolateStopped);
     programaticSelectionChangeInProgress = false;
     valueToInspectorTreeNode.clear();
   }
@@ -259,7 +259,8 @@ class InspectorController implements InspectorServiceClient {
 
   @override
   Future<void> onForceRefresh() {
-    if (!visibleToUser) {
+    assert(!_disposed);
+    if (!visibleToUser || _disposed) {
       return Future.value(null);
     }
     recomputeTreeRoot(null, null, false);
@@ -303,9 +304,13 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> recomputeTreeRoot(RemoteDiagnosticsNode newSelection,
       RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) async {
-    treeGroups.cancelNext();
+    assert(!_disposed);
+    if (_disposed) {
+      return;
+    }
+    _treeGroups.cancelNext();
     try {
-      final group = treeGroups.next;
+      final group = _treeGroups.next;
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot)
           : group.getRoot(treeType));
@@ -315,7 +320,7 @@ class InspectorController implements InspectorServiceClient {
       // TODO(jacobr): as a performance optimization we should check if the
       // new tree is identical to the existing tree in which case we should
       // dispose the new tree and keep the old tree.
-      treeGroups.promoteNext();
+      _treeGroups.promoteNext();
       clearValueToInspectorTreeNodeMapping();
       if (node != null) {
         final InspectorTreeNode rootNode =
@@ -327,7 +332,7 @@ class InspectorController implements InspectorServiceClient {
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
     } catch (error) {
       _logError(error);
-      treeGroups.cancelNext();
+      _treeGroups.cancelNext();
       return;
     }
   }
@@ -499,30 +504,6 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
-  Future<void> maybeLoadChildren(InspectorTreeNode node) async {
-    if (node?.diagnostic == null) return;
-    final RemoteDiagnosticsNode diagnosticsNode = node.diagnostic;
-    if (diagnosticsNode.hasChildren ||
-        diagnosticsNode.inlineProperties.isNotEmpty) {
-      if (hasPlaceholderChildren(node)) {
-        try {
-          final children = await diagnosticsNode.children;
-          if (!identical(node.diagnostic, diagnosticsNode) ||
-              children == null) {
-            // Node changed, this data is stale.
-            return;
-          }
-          setupChildren(diagnosticsNode, node, children, true);
-          if (node == selectedNode || node == lastExpanded) {
-            animateTo(node);
-          }
-        } catch (e) {
-          // ignore error.
-        }
-      }
-    }
-  }
-
   @override
   void onFlutterFrame() {
     flutterAppFrameReady = true;
@@ -566,9 +547,9 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> updateSelectionFromService() async {
     treeLoadStarted = true;
-    selectionGroups.cancelNext();
+    _selectionGroups.cancelNext();
 
-    final group = selectionGroups.next;
+    final group = _selectionGroups.next;
     final pendingSelectionFuture =
         group.getSelection(selectedDiagnostic, treeType, isSummaryTree);
 
@@ -586,15 +567,15 @@ class InspectorController implements InspectorServiceClient {
         if (group.disposed) return;
       }
 
-      selectionGroups.promoteNext();
+      _selectionGroups.promoteNext();
 
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
     } catch (error) {
-      if (selectionGroups.next == group) {
+      if (_selectionGroups.next == group) {
         _logError(error);
-        selectionGroups.cancelNext();
+        _selectionGroups.cancelNext();
       }
     }
   }
@@ -771,8 +752,7 @@ class InspectorController implements InspectorServiceClient {
       showDetailSubtrees(diagnostic, detailsSelection);
     } else if (diagnostic != null) {
       // We can't rely on the details tree to update the selection on the server in this case.
-      final selection =
-          detailsSelection != null ? detailsSelection : diagnostic;
+      final selection = detailsSelection ?? diagnostic;
       selection.setSelectionInspector(true);
     }
   }
@@ -783,11 +763,14 @@ class InspectorController implements InspectorServiceClient {
   }
 
   void dispose() {
+    assert(!_disposed);
+    _disposed = true;
     flutterIsolateSubscription.cancel();
-    // TODO(jacobr): actually implement.
     if (inspectorService != null) {
       shutdownTree(false);
     }
+    _treeGroups = null;
+    _selectionGroups = null;
     details?.dispose();
   }
 

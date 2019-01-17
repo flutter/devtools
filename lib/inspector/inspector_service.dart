@@ -19,7 +19,10 @@ import 'flutter_widget.dart';
 
 bool _inspectorDependenciesLoaded = false;
 // This method must be called before any methods on the Inspector are used.
-Future<void> loadInspectorServiceDependencies() async {
+Future<void> ensureInspectorServiceDependencies () async {
+  if (_inspectorDependenciesLoaded) {
+    return;
+  }
   await Catalog.load();
   // TODO(jacobr): consider also loading common icons needed by the inspector
   // to avoid flicker on icon load.
@@ -440,6 +443,10 @@ class ObjectGroup {
 
   Future<Object> _callServiceExtension(
       String extension, Map<String, Object> args) {
+    if (disposed) {
+      return Future.value(null);
+    }
+
     return inspectorLibrary.addRequest(this, () async {
       final r = await inspectorService.vmService.callServiceExtension(
         extension,

@@ -118,6 +118,7 @@ class Catalog {
 
   @visibleForTesting
   static void setCatalog(Catalog catalog) {
+    _instance = catalog;
     _cachedCatalog = Future.value(catalog);
   }
 

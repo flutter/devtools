@@ -452,16 +452,26 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (!hasChildren || _children != null) {
       return;
     }
-    _childrenFuture = (await inspectorService)?.getChildren(
-      dartDiagnosticRef,
-      isSummaryTree,
-      this,
-    );
+
+    if (_childrenFuture != null) {
+      await _childrenFuture;
+      return;
+    }
+
+    _childrenFuture = _getChildrenHelper();
     try {
       _children = await _childrenFuture;
     } finally {
       _children ??= [];
     }
+  }
+
+  Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
+    return (await inspectorService)?.getChildren(
+      dartDiagnosticRef,
+      isSummaryTree,
+      this,
+    );
   }
 
   void _maybePopulateChildren() {

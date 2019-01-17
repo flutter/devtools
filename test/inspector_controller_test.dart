@@ -287,7 +287,9 @@ void main() async {
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
 
       await serviceManager.vmServiceOpened(service, Completer().future);
+      await ensureInspectorServiceDependencies();
     }
+
     inspectorService = await InspectorService.create(service);
     if (reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
@@ -334,15 +336,16 @@ void main() async {
   }
 
   Future<void> tearDownEnvironment({bool force = false}) async {
-    if (!force && reuseTestEnvironment) {
-      // Skip actually tearing down for better test performance.
-      return;
-    }
+    inspectorController.dispose();
+    inspectorController = null;
     inspectorService.dispose();
     inspectorService = null;
 
-    await service.allFuturesCompleted.future;
-    await _flutter.stop();
+
+    if (force || !reuseTestEnvironment) {
+      await service.allFuturesCompleted.future;
+      await _flutter.stop();
+    }
   }
 
   group('inspector controller tests', () {
@@ -537,7 +540,7 @@ void main() async {
       await setupEnvironment(true);
 
       await serviceManager.performHotReload();
-      // make sure the inspector does not fall over and die after a hot reload.
+      // Ensure the inspector does not fall over and die after a hot reload.
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
