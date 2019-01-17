@@ -26,7 +26,6 @@ import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
 import 'support/flutter_test_driver.dart';
 
-
 /// Switch this flag to false to debug issues with non-atomic test behavior.
 bool reuseTestEnvironment = true;
 
@@ -174,7 +173,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.
-    final StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
       final row = root.getRow(i, selection: selection);
       if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
@@ -341,7 +340,6 @@ void main() async {
     inspectorService.dispose();
     inspectorService = null;
 
-
     if (force || !reuseTestEnvironment) {
       await service.allFuturesCompleted.future;
       await _flutter.stop();
@@ -402,20 +400,19 @@ void main() async {
         detailsTree.toStringDeep(),
         equalsIgnoringHashCodes(
             '▼[/icons/inspector/textArea.png] Text <-- selected\n'
-                '│   "Hello, World!"\n'
-                '│   textAlign: null [D]\n'
-                '│   textDirection: null [D]\n'
-                '│   locale: null [D]\n'
-                '│   softWrap: null [D]\n'
-                '│   overflow: null [D]\n'
-                '│   textScaleFactor: null [D]\n'
-                '│   maxLines: null [D]\n'
-                '└─▼[/icons/inspector/textArea.png] RichText\n'
-                '    softWrap: wrapping at box width\n'
-                '    maxLines: unlimited\n'
-                '    text: "Hello, World!"\n'
-                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-        ),
+            '│   "Hello, World!"\n'
+            '│   textAlign: null [D]\n'
+            '│   textDirection: null [D]\n'
+            '│   locale: null [D]\n'
+            '│   softWrap: null [D]\n'
+            '│   overflow: null [D]\n'
+            '│   textScaleFactor: null [D]\n'
+            '│   maxLines: null [D]\n'
+            '└─▼[/icons/inspector/textArea.png] RichText\n'
+            '    softWrap: wrapping at box width\n'
+            '    maxLines: unlimited\n'
+            '    text: "Hello, World!"\n'
+            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
       expect(
@@ -429,23 +426,20 @@ void main() async {
       //
       expect(
         detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes(
-            '▼[/icons/inspector/textArea.png] Text\n'
-                '│   "Hello, World!"\n'
-                '│   textAlign: null [D]\n'
-                '│   textDirection: null [D]\n'
-                '│   locale: null [D]\n'
-                '│   softWrap: null [D]\n'
-                '│   overflow: null [D]\n'
-                '│   textScaleFactor: null [D]\n'
-                '│   maxLines: null [D]\n'
-                '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
-                '    softWrap: wrapping at box width\n'
-                '    maxLines: unlimited\n'
-                '    text: "Hello, World!"\n'
-                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-
-        ),
+        equalsIgnoringHashCodes('▼[/icons/inspector/textArea.png] Text\n'
+            '│   "Hello, World!"\n'
+            '│   textAlign: null [D]\n'
+            '│   textDirection: null [D]\n'
+            '│   locale: null [D]\n'
+            '│   softWrap: null [D]\n'
+            '│   overflow: null [D]\n'
+            '│   textScaleFactor: null [D]\n'
+            '│   maxLines: null [D]\n'
+            '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
+            '    softWrap: wrapping at box width\n'
+            '    maxLines: unlimited\n'
+            '    text: "Hello, World!"\n'
+            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
       // make sure the main tree didn't change.

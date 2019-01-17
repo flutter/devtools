@@ -275,15 +275,15 @@ class Toast extends CoreElement {
 
     element.style.left = '0px';
 
-    new Timer(animationDelay, () {
-      new Timer(hideDelay, _hide);
+    Timer(animationDelay, () {
+      Timer(hideDelay, _hide);
     });
   }
 
   void _hide() {
     element.style.left = '400px';
 
-    new Timer(animationDelay, dispose);
+    Timer(animationDelay, dispose);
   }
 
   @override

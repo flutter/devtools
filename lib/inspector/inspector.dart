@@ -159,7 +159,8 @@ class InspectorScreen extends Screen {
       detailsInspectorTree.element.element
     ];
     inspectorContainer.add(elements);
-    splitterSubscription = flexSplitBidirectional(elements,
+    splitterSubscription = flexSplitBidirectional(
+      elements,
       // When we have two columns we want the details tree to be wider.
       horizontalSizes: [35, 65],
       // When we have two rows we want the main tree to be taller.
