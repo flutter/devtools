@@ -121,7 +121,7 @@ class RegisteredServiceExtensionButton {
   }
 
   final RegisteredServiceDescription serviceDescription;
-  final VoidFuture action;
+  final VoidAsyncFunction action;
   final VoidFunctionWithArg errorAction;
   PButton button;
 

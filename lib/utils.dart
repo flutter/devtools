@@ -113,15 +113,15 @@ String getUserHomeDir() {
 
 /// A typedef to represent a function taking no arguments and with no return
 /// value.
-typedef void VoidFunction();
+typedef VoidFunction = void Function();
 
 /// A typedef to represent a function taking no arguments and returning a void
 /// future.
-typedef Future<void> VoidFuture();
+typedef VoidAsyncFunction = Future<void> Function();
 
 /// A typedef to represent a function taking a single argument and with no
 /// return value.
-typedef void VoidFunctionWithArg(dynamic arg);
+typedef VoidFunctionWithArg = void Function(dynamic arg);
 
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
