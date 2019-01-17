@@ -651,6 +651,22 @@ nav.menu li {
     color: #ccc;
 }
 
+.tree-list {
+    padding-left: 25px;
+    list-style: none;
+}
+
+.tree-toggle {
+    width: 14px;
+    font-size: 14px;
+    display: inline-block;
+    user-select: none;
+}
+
+.tree-toggle.octicon-triangle-right {
+    padding-left: 2px;
+}
+
 /* Make sure content inside buttons is vertically centered. */
 .btn {
     display: inline-flex;
