@@ -1,26 +1,16 @@
-# Specify analysis options.
-#
-# Until there are meta linter rules, each desired lint must be explicitly enabled.
-# See: https://github.com/dart-lang/linter/issues/288
-#
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
-# See the configuration guide for more
-# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
-#
-# This file contains the analysis options used by Flutter tools, such as IntelliJ,
-# Android Studio, and the `flutter analyze` command.
+# Start with a base-line of the package:pedantic lints.
+include: package:pedantic/analysis_options.yaml
 
+# Override with more lints to closely match the flutter/flutter repo style.
 analyzer:
-  # strong-mode:
-  #   implicit-dynamic: false
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
   exclude:
-  - build/**
-  - test/fixtures/flutter_app
+    - build/**
+    - test/fixtures/flutter_app
 
 linter:
   rules:
