@@ -1,5 +1,5 @@
 # Start with a base-line of the package:pedantic lints.
-#include: package:pedantic/analysis_options.yaml
+include: package:pedantic/analysis_options.yaml
 
 analyzer:
   errors:
