@@ -1136,7 +1136,7 @@ class ScriptsView implements CoreElementView {
   void clearScripts() => _items.clearItems();
 }
 
-class CallStackView implements CoreElementView{
+class CallStackView implements CoreElementView {
   CallStackView() {
     _items = SelectableList<Frame>()
       ..flex()

@@ -33,7 +33,7 @@ class EvalOnDartLibrary {
     await _initializeComplete;
 
     if (_libraryRef.isCompleted) {
-      _libraryRef = new Completer<LibraryRef>();
+      _libraryRef = Completer<LibraryRef>();
     }
 
     if (!isIsolateNull) {

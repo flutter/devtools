@@ -113,13 +113,11 @@ StreamSubscription<Object> flexSplitBidirectional(
   // when the aspect ratio changes back.
   void createSplitter() {
     final bool horizontal = mediaQueryList.matches;
-    splitter = flexSplit(
-      parts,
-      horizontal: horizontal,
-      gutterSize: gutterSize,
-      minSize: minSize,
-      sizes: horizontal ? horizontalSizes : verticalSizes
-    );
+    splitter = flexSplit(parts,
+        horizontal: horizontal,
+        gutterSize: gutterSize,
+        minSize: minSize,
+        sizes: horizontal ? horizontalSizes : verticalSizes);
   }
 
   createSplitter();

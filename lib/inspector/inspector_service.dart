@@ -19,7 +19,7 @@ import 'flutter_widget.dart';
 
 bool _inspectorDependenciesLoaded = false;
 // This method must be called before any methods on the Inspector are used.
-Future<void> ensureInspectorServiceDependencies () async {
+Future<void> ensureInspectorServiceDependencies() async {
   if (_inspectorDependenciesLoaded) {
     return;
   }

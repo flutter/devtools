@@ -202,10 +202,9 @@ void main() {
     VmServiceWrapper service;
 
     setUp(() async {
-      setGlobal(ServiceConnectionManager, new ServiceConnectionManager());
+      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
 
-      _flutter =
-          FlutterRunTestDriver(new Directory('test/fixtures/flutter_app'));
+      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
       await _flutter.run(withDebugger: true);
       _flutterIsolateId = await _flutter.getFlutterIsolateId();
 
@@ -272,7 +271,7 @@ void main() {
         disabledValue: disabledValue,
       );
 
-      await serviceManager.vmServiceOpened(service, new Completer().future);
+      await serviceManager.vmServiceOpened(service, Completer().future);
 
       await serviceManager
           .serviceExtensionManager.extensionStatesUpdated.future;
@@ -288,7 +287,7 @@ void main() {
       const extensionDescription = extensions.debugPaint;
       final args = {'enabled': true};
       const evalExpression = 'debugPaintSizeEnabled';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/rendering/debug.dart',
         service,
         isolateId: _flutterIsolateId,
@@ -306,7 +305,7 @@ void main() {
       const extensionDescription = extensions.togglePlatformMode;
       final args = {'value': 'iOS'};
       const evalExpression = 'defaultTargetPlatform.toString()';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/foundation/platform.dart',
         service,
         isolateId: _flutterIsolateId,
@@ -330,7 +329,7 @@ void main() {
             extensionDescription.enabledValue
       };
       const evalExpression = 'timeDilation';
-      final library = new EvalOnDartLibrary(
+      final library = EvalOnDartLibrary(
         'package:flutter/src/scheduler/binding.dart',
         service,
         isolateId: _flutterIsolateId,

@@ -291,7 +291,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
     final Completer<CanvasElement> imageCompleter = Completer();
     if (!_fontLoaded) {
       if (_iconsFont == null) {
-        _iconsFont = new FontFace(
+        _iconsFont = FontFace(
           'Material Icons',
           'url(packages/devtools/ui/MaterialIcons-Regular.woff2)',
         );
