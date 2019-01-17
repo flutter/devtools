@@ -121,14 +121,14 @@ class RegisteredServiceExtensionButton {
   }
 
   final RegisteredServiceDescription serviceDescription;
-  final VoidFunction action;
+  final VoidFuture action;
   final VoidFunctionWithArg errorAction;
   PButton button;
 
   void _click() async {
     try {
       button.disabled = true;
-      action();
+      await action();
     } catch (e) {
       errorAction(e);
     } finally {

@@ -115,6 +115,10 @@ String getUserHomeDir() {
 /// value.
 typedef void VoidFunction();
 
+/// A typedef to represent a function taking no arguments and returning a void
+/// future.
+typedef Future<void> VoidFuture();
+
 /// A typedef to represent a function taking a single argument and with no
 /// return value.
 typedef void VoidFunctionWithArg(dynamic arg);

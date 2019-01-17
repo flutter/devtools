@@ -264,7 +264,7 @@ class TimelineScreen extends Screen {
 
   // TODO: move this button out of timeline if we decide to make a global button bar.
   CoreElement createHotReloadButton() {
-    final VoidFunction action = () async {
+    final VoidFuture action = () async {
       await serviceManager.performHotReload();
     };
     final VoidFunctionWithArg errorAction = (e) {
@@ -279,7 +279,7 @@ class TimelineScreen extends Screen {
 
   // TODO: move this button out of timeline if we decide to make a global button bar.
   CoreElement createHotRestartButton() {
-    final VoidFunction action = () async {
+    final VoidFuture action = () async {
       await serviceManager.performHotRestart();
     };
     final VoidFunctionWithArg errorAction = (e) {
