@@ -7,9 +7,9 @@ import 'dart:html' hide Screen;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'debugger/debugger.dart';
-import 'device/device.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
+import 'inspector/inspector.dart';
 import 'logging/logging.dart';
 import 'memory/memory.dart';
 import 'model/model.dart';
@@ -23,11 +23,11 @@ import 'utils.dart';
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
+    addScreen(InspectorScreen());
     addScreen(DebuggerScreen());
     addScreen(MemoryScreen());
     addScreen(TimelineScreen());
     addScreen(PerformanceScreen());
-    addScreen(DeviceScreen());
     addScreen(LoggingScreen());
 
     initGlobalUI();

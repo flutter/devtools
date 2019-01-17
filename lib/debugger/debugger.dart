@@ -1003,7 +1003,7 @@ class SourceEditor {
 
 typedef URIDescriber = String Function(String uri);
 
-class BreakpointsView {
+class BreakpointsView implements CoreElementView {
   BreakpointsView(this._breakpointsCountDiv, DebuggerState debuggerState,
       URIDescriber uriDescriber) {
     _items = SelectableList<Breakpoint>()
@@ -1044,6 +1044,7 @@ class BreakpointsView {
 
   Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
 
+  @override
   CoreElement get element => _items;
 
   Stream<Breakpoint> get onSelectionChanged => _items.onSelectionChanged;
@@ -1057,7 +1058,7 @@ class BreakpointsView {
   }
 }
 
-class ScriptsView {
+class ScriptsView implements CoreElementView {
   ScriptsView(URIDescriber uriDescriber) {
     _items = SelectableList<ScriptRef>()
       ..flex()
@@ -1080,6 +1081,7 @@ class ScriptsView {
 
   List<ScriptRef> get items => _items.items;
 
+  @override
   CoreElement get element => _items;
 
   Stream<ScriptRef> get onSelectionChanged => _items.onSelectionChanged;
@@ -1138,7 +1140,7 @@ class ScriptsView {
   void clearScripts() => _items.clearItems();
 }
 
-class CallStackView {
+class CallStackView implements CoreElementView {
   CallStackView() {
     _items = SelectableList<Frame>()
       ..flex()
@@ -1182,6 +1184,7 @@ class CallStackView {
 
   List<Frame> get items => _items.items;
 
+  @override
   CoreElement get element => _items;
 
   Stream<Frame> get onSelectionChanged => _items.onSelectionChanged;
@@ -1205,7 +1208,7 @@ class CallStackView {
 
 typedef VariableDescriber = Future<String> Function(BoundVariable variable);
 
-class VariablesView {
+class VariablesView implements CoreElementView {
   VariablesView(
       DebuggerState debuggerState, VariableDescriber variableDescriber) {
     _items = SelectableTree<BoundVariable>()
@@ -1274,6 +1277,7 @@ class VariablesView {
 
   List<BoundVariable> get items => _items.items;
 
+  @override
   CoreElement get element => _items;
 
   void showVariables(Frame frame) {
@@ -1468,7 +1472,7 @@ int _breakpointComparator(Breakpoint a, Breakpoint b) {
   return getPos(a.location) - getPos(b.location);
 }
 
-class ConsoleArea {
+class ConsoleArea implements CoreElementView {
   ConsoleArea() {
     final Map<String, dynamic> options = <String, dynamic>{
       'mode': 'text/plain',
@@ -1492,6 +1496,7 @@ class ConsoleArea {
   CodeMirror _editor;
   ScrollInfo _savedScrollInfo;
 
+  @override
   CoreElement get element => _container;
 
   void refresh() => _editor.refresh();

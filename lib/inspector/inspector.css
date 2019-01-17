@@ -1,0 +1,63 @@
+.inspector-tree {
+    border: 1px solid #dfe2e5;
+    border-radius: 3px;
+    overflow: scroll;
+    scroll-behavior: smooth;
+    width: 100%;
+    height: 100%;
+}
+
+.inspector-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    margin-top: 10px;
+    color: #fff;
+    align-items: center;
+    flex: 1 1 auto;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Minimum aspect ratio */
+@media (min-aspect-ratio: 1/1) {
+    .inspector-container {
+        flex-direction: row;
+    }
+}
+
+.inspector-tree-row-content {
+    min-width: 350px;
+}
+
+.property-value {
+    text-indent: -25px;
+    margin-left: 25px;
+}
+
+/*
+TODO(jacobr): make these styles only apply to the inspector toolbar as the
+thresholds are specific to the inspector UI.
+ */
+@media all and (max-width: 1080px) {
+    .btn-group.collapsible .optional-text span {
+        display: none;
+    }
+
+    .btn-group.collapsible .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 1330px) {
+    .btn-group.collapsible.overflow .optional-text span {
+        display: none;
+    }
+
+    .btn-group.collapsible.overflow .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}

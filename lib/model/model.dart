@@ -272,4 +272,4 @@ class App {
   }
 }
 
-typedef Future<T> Handler<T>(dynamic arg);
+typedef Handler<T> = Future<T> Function(dynamic arg);
