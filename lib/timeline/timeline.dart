@@ -59,8 +59,11 @@ class TimelineScreen extends Screen {
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        createHotReloadButton(),
-        createHotRestartButton(),
+        div(c: 'btn-group')
+          ..add([
+            createHotReloadButton(),
+            createHotRestartButton(),
+          ]),
         div()..flex(),
       ]);
     getServiceExtensionButtons().forEach(upperButtonSection.add);
