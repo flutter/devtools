@@ -14,15 +14,16 @@ import 'utils.dart';
 
 // TODO(devoncarew): fixed position header
 
+class TableRow {}
+
 class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
-        _isVirtual = false,
-        isReversed = false {
+        _isVirtual = false {
     _init();
   }
 
-  Table.virtual({this.rowHeight = 29.0, this.isReversed = false})
+  Table.virtual({this.rowHeight = 29.0})
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
     _init();
@@ -31,7 +32,10 @@ class Table<T> extends Object with SetStateMixin {
 
     // TODO(jacobr): remove call to allowInterop once
     // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver = IntersectionObserver(allowInterop(_visibilityChange));
+    _visibilityObserver = IntersectionObserver(
+      allowInterop(_visibilityChange),
+      {'root': element.element},
+    );
     _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
     _visibilityObserver.observe(_spacerAfterVisibleRows.element);
     element.onScroll.listen((_) => _rebuildTable());
@@ -42,10 +46,6 @@ class Table<T> extends Object with SetStateMixin {
   final CoreElement element;
   final bool _isVirtual;
 
-  // Whether to reverse the display of data. This is to allow appending data
-  // to this.rows quickly (using .add()) while still supporting new data being
-  // inserted at the top.
-  final bool isReversed;
   double rowHeight;
   bool _hasPendingRebuild = false;
 
@@ -164,6 +164,26 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     _scheduleRebuild();
+  }
+
+  void scrollTo(T row, {String scrollBehavior = 'smooth'}) {
+    final index = data.indexOf(row);
+    if (index == -1) {
+      return;
+    }
+    if (_hasPendingRebuild) {
+      // Wait for the content to be rendered before we scroll otherwise we may
+      // not be able to scroll far enough.
+      setState(() {
+        // We assume the index is still valid. Alternately we search for the
+        // inex again. The one thing we should absolutely not do is call the
+        // scrollTo helper method again as there is a significant risk scrollTo
+        // would never be called if items are added to the table every frame.
+        _scrollToIndex(index, scrollBehavior: scrollBehavior);
+      });
+      return;
+    }
+    _scrollToIndex(index, scrollBehavior: scrollBehavior);
   }
 
   void _scheduleRebuild() {
@@ -295,9 +315,6 @@ class Table<T> extends Object with SetStateMixin {
       firstRenderedRowInclusive: 0,
       lastRenderedRowExclusive: data?.length ?? 0);
 
-  int _translateRowIndex(int index) =>
-      !isReversed ? index : (data?.length ?? 0) - 1 - index;
-
   int _buildTableRows({
     @required int firstRenderedRowInclusive,
     @required int lastRenderedRowExclusive,
@@ -308,7 +325,7 @@ class Table<T> extends Object with SetStateMixin {
     // Enable the dummy row to fix alternating backgrounds when the first rendered
     // row (taking into account if we're reversing) index is an odd.
     final bool shouldOffsetRowColor =
-        _translateRowIndex(firstRenderedRowInclusive) % 2 == 1;
+        firstRenderedRowInclusive % 2 == 1;
     if (shouldOffsetRowColor) {
       _tbody.element.children
           .insert(0, _dummyRowToForceAlternatingColor.element);
@@ -322,7 +339,7 @@ class Table<T> extends Object with SetStateMixin {
     for (int index = firstRenderedRowInclusive;
         index < lastRenderedRowExclusive;
         index++) {
-      final T dataObject = data[_translateRowIndex(index)];
+      final T dataObject = data[index];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
@@ -377,11 +394,7 @@ class Table<T> extends Object with SetStateMixin {
           tableCell.clazz('right');
         }
 
-        if (column.usesHtml) {
-          tableCell.setInnerHtml(column.render(column.getValue(dataObject)));
-        } else {
-          tableCell.text = column.render(column.getValue(dataObject));
-        }
+        column.renderToElement(tableCell, dataObject);
 
         if (!isReusableColumn) {
           tableRow.add(tableCell);
@@ -437,37 +450,43 @@ class Table<T> extends Object with SetStateMixin {
   void selectByIndex(int newIndex,
       {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
     final CoreElement row = _rowForIndex[newIndex];
-    final T dataObject = data[_translateRowIndex(newIndex)];
+    final T dataObject = data[newIndex];
     _select(row?.element, dataObject, newIndex);
 
     if (keepVisible) {
-      final double rowOffsetPixels =
-          (newIndex * rowHeight) + _thead.offsetHeight;
-      final int visibleStartOffsetPixels = element.scrollTop;
-      final int visibleEndOffsetPixels =
-          element.scrollTop + element.offsetHeight;
-      // If the row Offset is at least 1 row within the visible area, we don't need
-      // to scroll. We subtract an extra rowHeight from the end to allow for the height
-      // of the row itself.
-      final double allowedViewportStart = visibleStartOffsetPixels + rowHeight;
-      final double allowedViewportEnd = visibleEndOffsetPixels - rowHeight * 2;
-
-      if (rowOffsetPixels >= allowedViewportStart &&
-          rowOffsetPixels <= allowedViewportEnd) {
-        return;
-      }
-
-      final double halfTableHeight = element.offsetHeight / 2;
-      final int newScrollTop = (rowOffsetPixels - halfTableHeight)
-          .round()
-          .clamp(0, element.scrollHeight);
-
-      element.element.scrollTo(<String, dynamic>{
-        'left': 0,
-        'top': newScrollTop,
-        'behavior': scrollBehavior,
-      });
+      _scrollToIndex(newIndex, scrollBehavior: scrollBehavior);
     }
+  }
+
+  void _scrollToIndex(int rowIndex, {String scrollBehavior = 'smooth'}) {
+    final double rowOffsetPixels = _rowOffset(rowIndex);
+    final int visibleStartOffsetPixels = element.scrollTop;
+    final int visibleEndOffsetPixels = element.scrollTop + element.offsetHeight;
+    // If the row Offset is at least 1 row within the visible area, we don't need
+    // to scroll. We subtract an extra rowHeight from the end to allow for the height
+    // of the row itself.
+    final double allowedViewportStart = visibleStartOffsetPixels + rowHeight;
+    final double allowedViewportEnd = visibleEndOffsetPixels - rowHeight * 2;
+
+    if (rowOffsetPixels >= allowedViewportStart &&
+        rowOffsetPixels <= allowedViewportEnd) {
+      return;
+    }
+
+    final double halfTableHeight = element.offsetHeight / 2;
+    final int newScrollTop = (rowOffsetPixels - halfTableHeight)
+        .round()
+        .clamp(0, element.scrollHeight);
+
+    element.element.scrollTo(<String, dynamic>{
+      'left': 0,
+      'top': newScrollTop,
+      'behavior': scrollBehavior,
+    });
+  }
+
+  double _rowOffset(int rowIndex) {
+    return (rowIndex * rowHeight) + _thead.offsetHeight;
   }
 
   void _clearSelection() => _select(null, null, null);
@@ -535,6 +554,15 @@ abstract class Column<T> {
 
   @override
   String toString() => title;
+
+  void renderToElement(CoreElement cell, T dataObject) {
+    final String content = render(getValue(dataObject));
+    if (usesHtml) {
+      cell.setInnerHtml(content);
+    } else {
+      cell.text = content;
+    }
+  }
 }
 
 enum SortOrder {
