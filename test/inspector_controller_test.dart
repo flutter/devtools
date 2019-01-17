@@ -26,16 +26,6 @@ import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
 import 'support/flutter_test_driver.dart';
 
-final RegExp offsetRegExp = RegExp(r'Offset[(][0-9.]+, [0-9.]+[)]');
-
-/// Some of these test cases generate inconsistent offsets on local and build
-/// machines so we zero out the offsets to avoid flakes.
-///
-/// If additional fields particulary in the RenderObject subtrees cause issues
-/// we should hide them from the output as well.
-String zeroOffsets(String text) {
-  return text.replaceAll(offsetRegExp, 'Offset(000, 000)');
-}
 
 /// Switch this flag to false to debug issues with non-atomic test behavior.
 bool reuseTestEnvironment = true;
@@ -406,7 +396,7 @@ void main() async {
 
       await detailsTree.nextUiFrame;
       expect(
-        zeroOffsets(detailsTree.toStringDeep()),
+        detailsTree.toStringDeep(),
         equalsIgnoringHashCodes(
             '▼[/icons/inspector/textArea.png] Text <-- selected\n'
                 '│   "Hello, World!"\n'
@@ -426,7 +416,7 @@ void main() async {
       );
 
       expect(
-        zeroOffsets(detailsTree.toStringDeep(includeTextStyles: true)),
+        detailsTree.toStringDeep(includeTextStyles: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_text_details_tree_with_styles.txt'),
       );
@@ -435,7 +425,7 @@ void main() async {
       detailsTree.onTap(const Offset(0, rowHeight * 9.5));
       //
       expect(
-        zeroOffsets(detailsTree.toStringDeep()),
+        detailsTree.toStringDeep(),
         equalsIgnoringHashCodes(
             '▼[/icons/inspector/textArea.png] Text\n'
                 '│   "Hello, World!"\n'
@@ -477,7 +467,7 @@ void main() async {
       // This tree is huge. If there is a change to package:flutter it may
       // change. If this happens don't panic and rebaseline the content.
       expect(
-        zeroOffsets(detailsTree.toStringDeep(hidePropertyLines: true)),
+        detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold.txt'),
       );
@@ -502,7 +492,7 @@ void main() async {
 
       await detailsTree.nextUiFrame;
       expect(
-        zeroOffsets(detailsTree.toStringDeep(hidePropertyLines: true)),
+        detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scrolled_to_center.txt'),
       );
@@ -526,13 +516,13 @@ void main() async {
       // Verify that the details tree scrolled back as well.
       // However, now more nodes are expanded.
       expect(
-        zeroOffsets(detailsTree.toStringDeep(hidePropertyLines: true)),
+        detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_expanded.txt'),
       );
 
       expect(
-        zeroOffsets(detailsTree.toStringDeep(includeTextStyles: true)),
+        detailsTree.toStringDeep(includeTextStyles: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_with_styles.txt'),
       );
