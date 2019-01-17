@@ -319,3 +319,9 @@ class TrustedHtmlTreeSanitizer implements NodeTreeSanitizer {
   @override
   void sanitizeTree(Node node) {}
 }
+
+/// Base class for lightweight views that render to a CoreElement but are not
+/// a CoreElement themselves.
+abstract class CoreElementView {
+  CoreElement get element;
+}

@@ -24,9 +24,15 @@ abstract class HtmlIconRenderer<T extends Icon> {
   HtmlIconRenderer(this.icon);
 
   CanvasImageSource get image;
+
   bool get loaded => image != null;
 
-  CoreElement createElement() {
+  CoreElement createCoreElement() {
+    final element = createElement();
+    return CoreElement.from(element);
+  }
+
+  Element createElement() {
     // All CanvasImageSource types are elements but until Dart has Union types
     // that is hard to express.
     final Object canvasSource = createCanvasSource();
@@ -36,7 +42,7 @@ abstract class HtmlIconRenderer<T extends Icon> {
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px';
     element.classes.add('flutter-icon');
-    return CoreElement.from(element);
+    return element;
   }
 
   @protected
@@ -78,11 +84,12 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
   ImageElement createCanvasSource() => ImageElement(src: src);
 
   @override
-  CoreElement createElement() {
+  Element createElement() {
     // We use a div rather than an ImageElement to display the image directly
     // in the DOM as backgroundImage styling is more flexible.
-    final element = div(c: 'flutter-icon');
-    element.element.style
+    final element = Element.div();
+    element.classes.add('flutter-icon');
+    element.style
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px'
       ..backgroundImage = 'url($src)';
@@ -100,7 +107,7 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
       _image = imageElement;
       completer.complete(imageElement);
     });
-    document.head.append(imageElement); // XXX is this needed?
+    document.head.append(imageElement);
     _imageFuture = completer.future;
     return _imageFuture;
   }
@@ -169,6 +176,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
 
   @override
   int get iconWidth => 18;
+
   @override
   int get iconHeight => 18;
 }
@@ -183,7 +191,9 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   @override
   CanvasImageSource createCanvasSource() {
     final baseImage = baseIconRenderer.image;
-    if (baseImage == null) return null;
+    if (baseImage == null) {
+      return _buildImageAsync();
+    }
 
     return _buildImage(baseImage);
   }
@@ -206,7 +216,15 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
     return _buildImage(source);
   }
 
-  CanvasElement _buildImage(CanvasImageSource source) {
+  CanvasElement _buildImageAsync() {
+    final CanvasElement canvas = _createCanvas();
+    baseIconRenderer.loadImage().then((CanvasImageSource source) {
+      _drawIcon(canvas, source);
+    });
+    return canvas;
+  }
+
+  CanvasElement _createCanvas() {
     final num devicePixelRatio = window.devicePixelRatio;
     final canvas = CanvasElement(
       width: iconWidth * devicePixelRatio,
@@ -215,6 +233,17 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
     canvas.style
       ..width = '${iconWidth}px'
       ..height = '${iconHeight}px';
+    return canvas;
+  }
+
+  CanvasElement _buildImage(CanvasImageSource source) {
+    final CanvasElement canvas = _createCanvas();
+    _drawIcon(canvas, source);
+    return canvas;
+  }
+
+  void _drawIcon(CanvasElement canvas, CanvasImageSource source) {
+    final num devicePixelRatio = window.devicePixelRatio;
 
     // TODO(jacobr): define this color in terms of Color objects.
     const String normalColor = '#231F20';
@@ -229,29 +258,57 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
       ..textBaseline = 'middle'
       ..textAlign = 'center'
       ..fillText(icon.text, iconWidth / 2, iconHeight / 2, iconWidth);
-
-    return canvas;
   }
 }
 
-// TODO(jacobr): this renderer assumes the material design font is already
-// loaded. Fix this code to listen for when the font to be loaded and only
-// provide the image at that point.
 class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
   _MaterialIconRenderer(MaterialIcon icon) : super(icon);
 
   @override
   CanvasImageSource get image {
     if (_image != null) return _image;
+    if (!_fontLoaded) return null;
 
     _image = createCanvasSource();
     return _image;
   }
 
   CanvasElement _image;
+  Future<CanvasElement> _imageFuture;
+
+  static FontFace _iconsFont;
+  static Future<FontFace> _iconsFontFuture;
+  static bool _fontLoaded = false;
 
   @override
-  Future<CanvasImageSource> loadImage() async => image;
+  Future<CanvasImageSource> loadImage() {
+    if (_imageFuture != null) {
+      return _imageFuture;
+    }
+    if (_fontLoaded) {
+      return Future.value(image);
+    }
+    final Completer<CanvasElement> imageCompleter = Completer();
+    if (!_fontLoaded) {
+      if (_iconsFont == null) {
+        _iconsFont = new FontFace(
+          'Material Icons',
+          'url(packages/devtools/ui/MaterialIcons-Regular.woff2)',
+        );
+        document.fonts.add(_iconsFont);
+        _iconsFontFuture = _iconsFont.load();
+        _iconsFontFuture.then((_) {
+          _fontLoaded = true;
+        });
+      }
+
+      _iconsFontFuture.then((_) {
+        _image = createCanvasSource();
+        imageCompleter.complete(_image);
+      });
+    }
+    return imageCompleter.future;
+  }
 
   @override
   CanvasImageSource createCanvasSource() {
@@ -259,19 +316,24 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
       width: iconWidth * window.devicePixelRatio,
       height: iconHeight * window.devicePixelRatio,
     );
-    canvas.context2D
+    final context2D = canvas.context2D
       ..scale(window.devicePixelRatio, window.devicePixelRatio)
+      ..translate(iconWidth / 2, iconHeight / 2);
+    if (icon.angle != 0) {
+      context2D.rotate(icon.angle);
+    }
+    context2D
       ..font = '${icon.fontSize}px Material Icons'
       ..fillStyle = colorToCss(icon.color)
       ..textBaseline = 'middle'
       ..textAlign = 'center'
-      ..fillText(icon.text, iconWidth / 2, iconHeight / 2, iconWidth + 10);
+      ..fillText(icon.text, 0, 0, iconWidth + 10);
     return canvas;
   }
 }
 
 CoreElement createIconElement(Icon icon) {
-  return getIconRenderer(icon).createElement();
+  return getIconRenderer(icon).createCoreElement();
 }
 
 HtmlIconRenderer getIconRenderer(Icon icon) {

@@ -651,6 +651,26 @@ nav.menu li {
     color: #ccc;
 }
 
+/*
+We have to do something with the scrollbars as they flicker due to DOM
+manipulation in our table and ViewportCanvas code.
+
+Currently we overwrite the default to keep the scrollbars always visible
+but a more subtle solution would be better.
+*/
+
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 9px;
+    height: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
 /* Make sure content inside buttons is vertically centered. */
 .btn {
     display: inline-flex;
@@ -685,4 +705,38 @@ nav.menu li {
     right: 30px;
     bottom: 30px;
     z-index: 10;
+}
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(packages/devtools/ui/MaterialIcons-Regular.woff2) format('woff2');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
 }

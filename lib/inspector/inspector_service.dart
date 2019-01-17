@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This code is directly based on
+// src/io/flutter/InspectorService.java
+// If you add methods to this class you should also add them to
+// InspectorService.java
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -94,6 +98,64 @@ class InspectorService {
     );
   }
 
+  /// As we aren't running from an IDE, we don't know exactly what the pub root
+  /// directories are for the current project so we make a best guess if needed
+  /// based on the the root directory of the first non artifical widget in the
+  /// tree.
+  Future<String> inferPubRootDirectoryIfNeeded() async {
+    final group = createObjectGroup('temp');
+    final root = await group.getRoot(FlutterTreeType.widget);
+
+    if (root == null) {
+      // No need to do anything as there isn't a valid tree (yet?).
+      await group.dispose();
+      return null;
+    }
+    final children = await root.children;
+    if (children?.isNotEmpty == true) {
+      // There are already widgets identified as being from the summary tree so
+      // no need to guess the pub root directory.
+      return null;
+    }
+
+    final List<RemoteDiagnosticsNode> allChildren =
+        await group.getChildren(root.dartDiagnosticRef, false, null);
+    final path = allChildren.first.creationLocation?.path;
+    if (path == null) {
+      await group.dispose();
+      return null;
+    }
+    // TODO(jacobr): it would be nice to use Isolate.rootLib similar to how
+    // debugger.dart does but we are currently blocked by the
+    // --track-widget-creation transformer generating absolute paths instead of
+    // package:paths.
+    // Once https://github.com/flutter/flutter/issues/26615 is fixed we will be
+    // able to use package: paths. Temporarily all tools tracking widget
+    // locations will need to support both path formats.
+    // TODO(jacobr): use the list of loaded scripts to determine the appropriate
+    // package root directory given that the root script of this project is in
+    // this directory rather than guessing based on url structure.
+    final parts = path.split('/');
+    String pubRootDirectory;
+    for (int i = parts.length - 1; i >= 0; i--) {
+      String part;
+      if (part == 'lib' || part == 'web') {
+        pubRootDirectory = parts.sublist(0, i).join('/');
+        break;
+      }
+
+      if (part == 'packages') {
+        pubRootDirectory = parts.sublist(0, i + 1).join('/');
+        break;
+      }
+    }
+    pubRootDirectory ??= (parts..removeLast()).join('/');
+
+    await setPubRootDirectories([pubRootDirectory]);
+    await group.dispose();
+    return pubRootDirectory;
+  }
+
   /// Returns whether to use the Daemon API or the VM Service protocol directly.
   ///
   /// The VM Service protocol must be used when paused at a breakpoint as the
@@ -104,10 +166,6 @@ class InspectorService {
     // TODO(jacobr): once there is a debugger, hook to it to determine whether
     // we are suspended.
     // return !app.isFlutterIsolateSuspended();
-  }
-
-  bool get isDetailsSummaryViewSupported {
-    return hasServiceMethod('getSelectedSummaryWidget');
   }
 
   /// Use this method to write code that is backwards compatible with versions
@@ -175,15 +233,22 @@ class InspectorService {
   /// Flutter.Frame event before attempting to display the widget tree. If the
   /// application is ready, the next Flutter.Frame event may never come as no
   /// new frames will be triggered to draw unless something changes in the UI.
-  Future<bool> isWidgetTreeReady() async {
+  Future<bool> isWidgetTreeReady() {
+    return invokeBoolServiceMethodNoArgs('isWidgetTreeReady');
+  }
+
+  Future<bool> invokeBoolServiceMethodNoArgs(String methodName) async {
     if (useDaemonApi) {
-      return await invokeServiceMethodDaemonNoGroupArgs('isWidgetTreeReady') ==
-          true;
+      return await invokeServiceMethodDaemonNoGroupArgs(methodName) == true;
     } else {
-      return (await invokeServiceMethodObservatoryNoGroup('isWidgetTreeReady'))
+      return (await invokeServiceMethodObservatoryNoGroup(methodName))
               ?.valueAsString ==
           'true';
     }
+  }
+
+  Future<bool> isWidgetCreationTracked() {
+    return invokeBoolServiceMethodNoArgs('isWidgetCreationTracked');
   }
 
   Future<Object> invokeServiceMethodDaemonNoGroupArgs(String methodName,
@@ -197,11 +262,13 @@ class InspectorService {
     return invokeServiceMethodDaemonNoGroup(methodName, params);
   }
 
-  void setPubRootDirectories(List<String> rootDirectories) async {
+  Future<void> setPubRootDirectories(List<String> rootDirectories) {
     // No need to call this from a breakpoint.
     assert(useDaemonApi);
-    await invokeServiceMethodDaemonNoGroupArgs(
-        'setPubRootDirectories', rootDirectories);
+    return invokeServiceMethodDaemonNoGroupArgs(
+      'setPubRootDirectories',
+      rootDirectories,
+    );
   }
 
   Future<InstanceRef> invokeServiceMethodObservatoryNoGroup(String methodName) {
@@ -253,9 +320,10 @@ class ObjectGroup {
   /// group but sometimes due to chained futures that can be difficult to avoid
   /// and it is simpler return an empty result that will be ignored anyway than to
   /// attempt carefully cancel futures.
-  void dispose() {
-    invokeVoidServiceMethod('disposeGroup', groupName);
+  Future<void> dispose() {
+    final disposeComplete = invokeVoidServiceMethod('disposeGroup', groupName);
     disposed = true;
+    return disposeComplete;
   }
 
   Future<T> nullIfDisposed<T>(Future<T> supplier()) async {
@@ -310,7 +378,7 @@ class ObjectGroup {
         : getPropertyLocationHelper(superClass, name);
   }
 
-  Future<DiagnosticsNode> getRoot(FlutterTreeType type) {
+  Future<RemoteDiagnosticsNode> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
     switch (type) {
@@ -415,7 +483,7 @@ class ObjectGroup {
     );
   }
 
-  Future<DiagnosticsNode> parseDiagnosticsNodeObservatory(
+  Future<RemoteDiagnosticsNode> parseDiagnosticsNodeObservatory(
       FutureOr<InstanceRef> instanceRefFuture) async {
     return parseDiagnosticsNodeHelper(
         await instanceRefToJson(await instanceRefFuture));
@@ -474,16 +542,17 @@ class ObjectGroup {
     return inspectorLibrary.getInstance(await instanceRef, this);
   }
 
-  Future<DiagnosticsNode> parseDiagnosticsNodeDaemon(
+  Future<RemoteDiagnosticsNode> parseDiagnosticsNodeDaemon(
       Future<Object> json) async {
     if (disposed) return null;
     return parseDiagnosticsNodeHelper(await json);
   }
 
-  DiagnosticsNode parseDiagnosticsNodeHelper(Map<String, Object> jsonElement) {
+  RemoteDiagnosticsNode parseDiagnosticsNodeHelper(
+      Map<String, Object> jsonElement) {
     if (disposed) return null;
     if (jsonElement == null) return null;
-    return DiagnosticsNode(jsonElement, this, false, null);
+    return RemoteDiagnosticsNode(jsonElement, this, false, null);
   }
 
   /// Requires that the InstanceRef is really referring to a String that is valid JSON.
@@ -498,8 +567,9 @@ class ObjectGroup {
     return jsonDecode(json);
   }
 
-  Future<List<DiagnosticsNode>> parseDiagnosticsNodesObservatory(
-      FutureOr<InstanceRef> instanceRefFuture, DiagnosticsNode parent) async {
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesObservatory(
+      FutureOr<InstanceRef> instanceRefFuture,
+      RemoteDiagnosticsNode parent) async {
     if (disposed || instanceRefFuture == null) return [];
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
@@ -507,25 +577,28 @@ class ObjectGroup {
         await instanceRefToJson(instanceRef), parent);
   }
 
-  List<DiagnosticsNode> parseDiagnosticsNodesHelper(
-      List<Object> jsonObject, DiagnosticsNode parent) {
+  List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
+      List<Object> jsonObject, RemoteDiagnosticsNode parent) {
     if (disposed || jsonObject == null) return const [];
-    final List<DiagnosticsNode> nodes = [];
+    final List<RemoteDiagnosticsNode> nodes = [];
     for (Map<String, Object> element in jsonObject) {
-      nodes.add(DiagnosticsNode(element, this, false, parent));
+      nodes.add(RemoteDiagnosticsNode(element, this, false, parent));
     }
     return nodes;
   }
 
-  Future<List<DiagnosticsNode>> parseDiagnosticsNodesDaemon(
-      FutureOr<Object> jsonFuture, DiagnosticsNode parent) async {
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
+      FutureOr<Object> jsonFuture, RemoteDiagnosticsNode parent) async {
     if (disposed || jsonFuture == null) return const [];
 
     return parseDiagnosticsNodesHelper(await jsonFuture, parent);
   }
 
-  Future<List<DiagnosticsNode>> getChildren(InspectorInstanceRef instanceRef,
-      bool summaryTree, DiagnosticsNode parent) {
+  Future<List<RemoteDiagnosticsNode>> getChildren(
+    InspectorInstanceRef instanceRef,
+    bool summaryTree,
+    RemoteDiagnosticsNode parent,
+  ) {
     return getListHelper(
       instanceRef,
       summaryTree ? 'getChildrenSummaryTree' : 'getChildrenDetailsSubtree',
@@ -533,13 +606,16 @@ class ObjectGroup {
     );
   }
 
-  Future<List<DiagnosticsNode>> getProperties(
+  Future<List<RemoteDiagnosticsNode>> getProperties(
       InspectorInstanceRef instanceRef) {
     return getListHelper(instanceRef, 'getProperties', null);
   }
 
-  Future<List<DiagnosticsNode>> getListHelper(InspectorInstanceRef instanceRef,
-      String methodName, DiagnosticsNode parent) async {
+  Future<List<RemoteDiagnosticsNode>> getListHelper(
+    InspectorInstanceRef instanceRef,
+    String methodName,
+    RemoteDiagnosticsNode parent,
+  ) async {
     if (disposed) return const [];
     if (useDaemonApi) {
       return parseDiagnosticsNodesDaemon(
@@ -552,7 +628,7 @@ class ObjectGroup {
     }
   }
 
-  Future<DiagnosticsNode> invokeServiceMethodReturningNode(
+  Future<RemoteDiagnosticsNode> invokeServiceMethodReturningNode(
       String methodName) async {
     if (disposed) return null;
     if (useDaemonApi) {
@@ -563,7 +639,7 @@ class ObjectGroup {
     }
   }
 
-  Future<DiagnosticsNode> invokeServiceMethodReturningNodeInspectorRef(
+  Future<RemoteDiagnosticsNode> invokeServiceMethodReturningNodeInspectorRef(
       String methodName, InspectorInstanceRef ref) {
     if (disposed) return null;
     if (useDaemonApi) {
@@ -594,19 +670,20 @@ class ObjectGroup {
     }
   }
 
-  Future<DiagnosticsNode> getRootWidget() {
-    return invokeServiceMethodReturningNode(
-        inspectorService.isDetailsSummaryViewSupported
-            ? 'getRootWidgetSummaryTree'
-            : 'getRootWidget');
+  Future<RemoteDiagnosticsNode> getRootWidget() {
+    return invokeServiceMethodReturningNode('getRootWidgetSummaryTree');
   }
 
-  Future<DiagnosticsNode> getSummaryTreeWithoutIds() {
+  Future<RemoteDiagnosticsNode> getRootWidgetFullTree() {
+    return invokeServiceMethodReturningNode('getRootWidget');
+  }
+
+  Future<RemoteDiagnosticsNode> getSummaryTreeWithoutIds() {
     return parseDiagnosticsNodeDaemon(
         invokeServiceMethodDaemon('getRootWidgetSummaryTree', null));
   }
 
-  Future<DiagnosticsNode> getRootRenderObject() {
+  Future<RemoteDiagnosticsNode> getRootRenderObject() {
     assert(!disposed);
     return invokeServiceMethodReturningNode('getRootRenderObject');
   }
@@ -647,15 +724,17 @@ class ObjectGroup {
   }
 */
 
-  Future<DiagnosticsNode> getSelection(DiagnosticsNode previousSelection,
-      FlutterTreeType treeType, bool localOnly) async {
+  Future<RemoteDiagnosticsNode> getSelection(
+    RemoteDiagnosticsNode previousSelection,
+    FlutterTreeType treeType,
+    bool localOnly,
+  ) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
     if (disposed) return null;
-    DiagnosticsNode newSelection;
-    final InspectorInstanceRef previousSelectionRef = previousSelection != null
-        ? previousSelection.getDartDiagnosticRef()
-        : null;
+    RemoteDiagnosticsNode newSelection;
+    final InspectorInstanceRef previousSelectionRef =
+        previousSelection != null ? previousSelection.dartDiagnosticRef : null;
 
     switch (treeType) {
       case FlutterTreeType.widget:
@@ -671,24 +750,24 @@ class ObjectGroup {
     if (disposed) return null;
 
     if (newSelection != null &&
-        newSelection.getDartDiagnosticRef() == previousSelectionRef) {
+        newSelection.dartDiagnosticRef == previousSelectionRef) {
       return previousSelection;
     } else {
       return newSelection;
     }
   }
 
-  void setSelectionInspector(
+  Future<void> setSelectionInspector(
       InspectorInstanceRef selection, bool uiAlreadyUpdated) {
     if (disposed) {
-      return;
+      return Future.value(null);
     }
     if (useDaemonApi) {
-      handleSetSelectionDaemon(
+      return handleSetSelectionDaemon(
           invokeServiceMethodDaemonInspectorRef('setSelectionById', selection),
           uiAlreadyUpdated);
     } else {
-      handleSetSelectionObservatory(
+      return handleSetSelectionObservatory(
           invokeServiceMethodObservatoryInspectorRef(
               'setSelectionById', selection),
           uiAlreadyUpdated);
@@ -706,7 +785,7 @@ class ObjectGroup {
         uiAlreadyUpdated);
   }
 
-  void handleSetSelectionObservatory(
+  Future<void> handleSetSelectionObservatory(
       Future<InstanceRef> setSelectionResult, bool uiAlreadyUpdated) async {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     if (disposed) return;
@@ -722,7 +801,7 @@ class ObjectGroup {
     }
   }
 
-  void handleSetSelectionDaemon(
+  Future<void> handleSetSelectionDaemon(
       Future<Object> setSelectionResult, bool uiAlreadyUpdated) async {
     if (disposed) return;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
@@ -764,10 +843,12 @@ class ObjectGroup {
     return properties;
   }
 
-  Future<DiagnosticsNode> getDetailsSubtree(DiagnosticsNode node) async {
+  Future<RemoteDiagnosticsNode> getDetailsSubtree(
+    RemoteDiagnosticsNode node,
+  ) async {
     if (node == null) return null;
     return invokeServiceMethodReturningNodeInspectorRef(
-        'getDetailsSubtree', node.getDartDiagnosticRef());
+        'getDetailsSubtree', node.dartDiagnosticRef);
   }
 }
 

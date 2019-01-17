@@ -113,7 +113,7 @@ String getUserHomeDir() {
 
 /// A typedef to represent a function taking no arguments and with no return
 /// value.
-typedef void VoidFunction();
+typedef VoidFunction = void Function();
 
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
@@ -181,5 +181,81 @@ class JsonUtils {
 
   static bool hasJsonData(String data) {
     return data != null && data.isNotEmpty && data != 'null';
+  }
+}
+
+typedef RateLimiterCallback = Future<Object> Function();
+
+/// Rate limiter that ensures a [callback] is run no more  than the
+/// specified rate and that at most one async [callback] is running at a time.
+class RateLimiter {
+  RateLimiter(double requestsPerSecond, this.callback)
+      : delayBetweenRequests = 1000 ~/ requestsPerSecond;
+
+  final RateLimiterCallback callback;
+  Completer<void> _pendingRequest;
+
+  /// A request has been scheduled to run but is not yet pending.
+  bool requestScheduledButNotStarted = false;
+  int _lastRequestTime;
+  final int delayBetweenRequests;
+
+  Timer _activeTimer;
+
+  /// Schedules the callback to be run the next time the rate limiter allows it.
+  ///
+  /// If multiple calls to scheduleRequest are made before a request is allowed,
+  /// only a single request will be made.
+  void scheduleRequest() {
+    if (requestScheduledButNotStarted) {
+      // No need to schedule a request if one has already been scheduled but
+      // hasn't yet actually started executing.
+      return;
+    }
+
+    if (_pendingRequest != null && !_pendingRequest.isCompleted) {
+      // Wait for the pending request to be done before scheduling the new
+      // request. The existing request has already started so may return state
+      // that is now out of date.
+      requestScheduledButNotStarted = true;
+      _pendingRequest.future.whenComplete(() {
+        _pendingRequest = null;
+        requestScheduledButNotStarted = false;
+        scheduleRequest();
+      });
+      return;
+    }
+
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    if (_lastRequestTime == null ||
+        _lastRequestTime + delayBetweenRequests <= currentTime) {
+      // Safe to perform the request immediately.
+      _performRequest();
+      return;
+    }
+    // Track that we have scheduled a request and then schedule the request
+    // to occur once the rate limiter is available.
+    requestScheduledButNotStarted = true;
+    _activeTimer = Timer(
+        Duration(
+            milliseconds:
+                currentTime - _lastRequestTime + delayBetweenRequests), () {
+      _activeTimer = null;
+      requestScheduledButNotStarted = false;
+      _performRequest();
+    });
+  }
+
+  void _performRequest() async {
+    try {
+      _lastRequestTime = DateTime.now().millisecondsSinceEpoch;
+      await callback();
+    } finally {
+      _pendingRequest.complete(null);
+    }
+  }
+
+  void dispose() {
+    _activeTimer?.cancel();
   }
 }
