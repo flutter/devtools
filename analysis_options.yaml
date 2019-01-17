@@ -1,7 +1,6 @@
 # Start with a base-line of the package:pedantic lints.
-include: package:pedantic/analysis_options.yaml
+#include: package:pedantic/analysis_options.yaml
 
-# Override with more lints to closely match the flutter/flutter repo style.
 analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
@@ -14,6 +13,10 @@ analyzer:
 
 linter:
   rules:
+    # Added on top of the flutter/flutter lints:
+    - prefer_generic_function_type_aliases
+
+    # From flutter/flutter:
     # these rules are documented on and in the same order as
     # the Dart Lint rules page to make maintenance easier
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
