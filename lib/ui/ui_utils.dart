@@ -43,7 +43,7 @@ CoreElement createExtensionCheckBox(
 
   final outerDiv = div(c: 'form-checkbox')
     ..add(CoreElement('label')..add([input, inputLabel]));
-  input.setAttribute('title', extensionDescription.tooltip);
+  input.setAttribute('title', extensionDescription.disabledTooltip);
   return outerDiv;
 }
 
@@ -78,7 +78,7 @@ class ServiceExtensionButton {
     button = PButton.icon(
       extensionDescription.description,
       extensionDescription.icon,
-      title: extensionDescription.tooltip,
+      title: extensionDescription.disabledTooltip,
     )..small();
 
     final extensionName = extensionDescription.extension;
@@ -110,10 +110,14 @@ class ServiceExtensionButton {
 
   void _updateState() {
     // Select button whose state is already enabled.
-    serviceManager.serviceExtensionManager.getServiceExtensionState(
-        extensionDescription.extension,
-        (state) => button.toggleClass(
-            'selected', state.value == extensionDescription.enabledValue));
+    serviceManager.serviceExtensionManager
+        .getServiceExtensionState(extensionDescription.extension, (state) {
+      final extensionEnabled = state.value == extensionDescription.enabledValue;
+      button.toggleClass('selected', extensionEnabled);
+      button.tooltip = extensionEnabled
+          ? extensionDescription.enabledTooltip
+          : extensionDescription.disabledTooltip;
+    });
   }
 }
 

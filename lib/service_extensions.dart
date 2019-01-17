@@ -14,95 +14,107 @@ class ToggleableServiceExtensionDescription<T> {
     this.icon,
     this.enabledValue,
     this.disabledValue,
-    String tooltip,
-  }) : tooltip = tooltip ?? description;
+    this.enabledTooltip,
+    this.disabledTooltip,
+  });
 
   final String extension;
   final String description;
   final Icon icon;
   final T enabledValue;
   final T disabledValue;
-  final String tooltip;
+  final String enabledTooltip;
+  final String disabledTooltip;
 }
+
+const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.debugAllowBanner',
+  description: 'Debug Banner',
+  icon: FlutterIcons.debugBanner,
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Hide Debug Banner',
+  disabledTooltip: 'Show Debug Banner',
+);
 
 const debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
-  description: 'Debug paint',
-  tooltip: 'Toggle debug paint',
+  description: 'Debug Paint',
   icon: FlutterIcons.debugPaint,
   enabledValue: true,
   disabledValue: false,
+  enabledTooltip: 'Hide Debug Paint',
+  disabledTooltip: 'Show Debug Paint',
 );
 
 const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
-  description: 'Paint baselines',
-  tooltip: 'Show paint baselines',
+  description: 'Paint Baselines',
   icon: FlutterIcons.painting,
   enabledValue: true,
   disabledValue: false,
-);
-
-const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.repaintRainbow',
-  description: 'Repaint rainbow',
-  tooltip: 'Toogle Repaint rainbow',
-  icon: FlutterIcons.repaintRainbow,
-  enabledValue: true,
-  disabledValue: false,
+  enabledTooltip: 'Hide Paint Baselines',
+  disabledTooltip: 'Show Paint Baselines',
 );
 
 const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
-  description: 'Performance overlay',
-  tooltip: 'Toggle performance overlay',
+  description: 'Performance Overlay',
   icon: FlutterIcons.performanceOverlay,
   enabledValue: true,
   disabledValue: false,
-);
-
-const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugAllowBanner',
-  description: 'Hide debug banner',
-  tooltip: 'Hide debug mode banner',
-  icon: FlutterIcons.debugBanner,
-  enabledValue: true,
-  disabledValue: false,
+  enabledTooltip: 'Hide Performance Overlay',
+  disabledTooltip: 'Show Performance Overlay',
 );
 
 const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
-  description: 'Track widget rebuilds',
-  tooltip: 'Visualize widget rebuilds',
+  description: 'Track Widget Rebuilds',
   icon: FlutterIcons.greyProgr,
   enabledValue: true,
   disabledValue: false,
+  enabledTooltip: 'Do Not Track Widget Rebuilds',
+  disabledTooltip: 'Track Widget Rebuilds',
 );
 
-const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.show',
-  description: 'Toggle Select Mode',
-  icon: FlutterIcons.locate,
+const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.repaintRainbow',
+  description: 'Repaint Rainbow',
+  icon: FlutterIcons.repaintRainbow,
   enabledValue: true,
   disabledValue: false,
-);
-
-const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
-  extension: 'ext.flutter.platformOverride',
-  description: 'iOS',
-  tooltip: 'Toggle iOS platform',
-  icon: FlutterIcons.phone,
-  enabledValue: 'iOS',
-  disabledValue: 'android',
+  enabledTooltip: 'Hide Repaint Rainbow',
+  disabledTooltip: 'Show Repaint Rainbow',
 );
 
 const slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
-  tooltip: 'Toggle slow animations',
   icon: FlutterIcons.history,
   enabledValue: 5.0,
   disabledValue: 1.0,
+  enabledTooltip: 'Disable Slow Animations',
+  disabledTooltip: 'Enable Slow Animations',
+);
+
+const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
+  extension: 'ext.flutter.platformOverride',
+  description: 'iOS',
+  icon: FlutterIcons.phone,
+  enabledValue: 'iOS',
+  disabledValue: 'android',
+  enabledTooltip: 'Toggle iOS Platform',
+  disabledTooltip: 'Toggle iOS Platform',
+);
+
+const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.inspector.show',
+  description: 'Select Widget Mode',
+  icon: FlutterIcons.locate,
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip:'Disable Select Widget Mode',
+  disabledTooltip: 'Enable Select Widget Mode',
 );
 
 // This extension should never be displayed as a button so does not need a
