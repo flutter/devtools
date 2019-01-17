@@ -9,7 +9,6 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
-import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
@@ -57,6 +56,15 @@ class TimelineScreen extends Screen {
   void createContent(Framework framework, CoreElement mainDiv) {
     FrameDetailsUI frameDetailsUI;
 
+    final CoreElement upperButtonSection = div(c: 'section')
+      ..layoutHorizontal()
+      ..add(<CoreElement>[
+        createHotReloadButton(),
+        createHotRestartButton(),
+        div()..flex(),
+      ]);
+    getServiceExtensionButtons().forEach(upperButtonSection.add);
+
     pauseButton = PButton('Pause recording')
       ..small()
       ..primary()
@@ -68,39 +76,8 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    final trackWidgetBuildsButton =
-        ServiceExtensionButton(extensions.profileWidgetBuilds).button;
-    final perfOverlayButton =
-        ServiceExtensionButton(extensions.performanceOverlay).button;
-    final repaintRainbowButton =
-        ServiceExtensionButton(extensions.repaintRainbow).button;
-    final debugPaintButton =
-        ServiceExtensionButton(extensions.debugPaint).button;
-    final debugPaintBaselinesButton =
-        ServiceExtensionButton(extensions.debugPaintBaselines).button;
-    final slowAnimationsButton =
-        ServiceExtensionButton(extensions.slowAnimations).button;
-    final togglePlatformButton =
-        ServiceExtensionButton(extensions.togglePlatformMode).button;
-
     mainDiv.add(<CoreElement>[
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          createHotReloadButton(),
-          createHotRestartButton(),
-          div()..flex(),
-          div(c: 'btn-group')
-            ..add(<CoreElement>[
-              trackWidgetBuildsButton,
-              perfOverlayButton,
-              debugPaintButton,
-              debugPaintBaselinesButton,
-              repaintRainbowButton,
-              slowAnimationsButton,
-              togglePlatformButton,
-            ]),
-        ]),
+      upperButtonSection,
       div(c: 'section'),
       createLiveChartArea(),
       div(c: 'section'),

@@ -49,45 +49,29 @@ class InspectorScreen extends Screen {
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
+    final CoreElement buttonSection = div(c: 'section')
+      ..layoutHorizontal()
+      ..add(<CoreElement>[
+        div(c: 'btn-group')
+          ..add([
+            ServiceExtensionButton(
+              extensions.toggleSelectWidgetMode,
+            ).button,
+            refreshTreeButton =
+                PButton.icon('Refresh Tree', FlutterIcons.forceRefresh)
+                  ..small()
+                  ..disabled = true
+                  ..click(_refreshInspector),
+          ]),
+        progressElement = ProgressElement()
+          ..clazz('margin-left')
+          ..display = 'none',
+        div()..flex(),
+      ]);
+    getServiceExtensionButtons().forEach(buttonSection.add);
+
     mainDiv.add(<CoreElement>[
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          div(c: 'btn-group')
-            ..add([
-              ServiceExtensionButton(
-                extensions.toggleSelectWidgetMode,
-              ).button,
-              refreshTreeButton =
-                  PButton.icon('Refresh Tree', FlutterIcons.forceRefresh)
-                    ..small()
-                    ..disabled = true
-                    ..click(_refreshInspector),
-            ]),
-          progressElement = ProgressElement()
-            ..clazz('margin-left')
-            ..display = 'none',
-          div()..flex(),
-          div(c: 'btn-group collapsible')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.performanceOverlay).button,
-              ServiceExtensionButton(extensions.togglePlatformMode).button,
-            ]),
-          div(c: 'btn-group collapsible margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.debugPaint).button,
-              ServiceExtensionButton(extensions.debugPaintBaselines).button,
-            ]),
-          div(c: 'btn-group collapsible margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.slowAnimations).button,
-            ]),
-          div(c: 'btn-group collapsible overflow margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.repaintRainbow).button,
-              ServiceExtensionButton(extensions.debugAllowBanner).button,
-            ]),
-        ]),
+      buttonSection,
       inspectorContainer = div(c: 'inspector-container'),
     ]);
 

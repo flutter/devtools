@@ -47,6 +47,30 @@ CoreElement createExtensionCheckBox(
   return outerDiv;
 }
 
+List<CoreElement> getServiceExtensionButtons() {
+  return [
+    div(c: 'btn-group collapsible')
+      ..add(<CoreElement>[
+        ServiceExtensionButton(performanceOverlay).button,
+        ServiceExtensionButton(togglePlatformMode).button,
+      ]),
+    div(c: 'btn-group collapsible margin-left')
+      ..add(<CoreElement>[
+        ServiceExtensionButton(debugPaint).button,
+        ServiceExtensionButton(debugPaintBaselines).button,
+      ]),
+    div(c: 'btn-group collapsible margin-left')
+      ..add(<CoreElement>[
+        ServiceExtensionButton(slowAnimations).button,
+      ]),
+    div(c: 'btn-group collapsible overflow margin-left')
+      ..add(<CoreElement>[
+        ServiceExtensionButton(repaintRainbow).button,
+        ServiceExtensionButton(debugAllowBanner).button,
+      ]),
+  ];
+}
+
 /// Button that calls a service extension. Service extensions can be found in
 /// [service_extensions.dart].
 class ServiceExtensionButton {
