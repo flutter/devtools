@@ -121,7 +121,7 @@ abstract class InspectorTreeNode {
         _parent = parent,
         _expanded = expandChildren;
 
-  bool get linesToChildren  {
+  bool get showLinesToChildren  {
     return _children.length > 1 && !_children.last.isProperty;
   }
 
@@ -366,7 +366,7 @@ abstract class InspectorTreeNode {
           depth: depth,
           isSelected: selection == node,
           highlightDepth: highlightDepth,
-          lineToParent: !node.isProperty && index != 0 && node.parent.linesToChildren,
+          lineToParent: !node.isProperty && index != 0 && node.parent.showLinesToChildren,
         );
       }
       assert(index > current);
