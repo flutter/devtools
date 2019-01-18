@@ -120,7 +120,11 @@ class Framework {
     flash.addClose().click(clearError);
     flash.add(label(text: title));
     if (error != null) {
-      flash.add(div(text: '$error'));
+      final errorString = '$error';
+      // Only display the error object if it has a custom Dart toString.
+      if (!errorString.startsWith('[object ')) {
+        flash.add(div(text: '$error'));
+      }
     }
 
     final CoreElement errorContainer =

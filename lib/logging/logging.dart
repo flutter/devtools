@@ -104,7 +104,7 @@ class LoggingScreen extends Screen {
   }
 
   CoreElement _createTableView() {
-    loggingTable = Table<LogData>.virtual(isReversed: true);
+    loggingTable = Table<LogData>.virtual();
 
     loggingTable.addColumn(LogWhenColumn());
     loggingTable.addColumn(LogKindColumn());
@@ -302,6 +302,8 @@ class LoggingScreen extends Screen {
 
   List<LogData> data = <LogData>[];
 
+  DateTime _lastScrollTime;
+
   void _log(LogData log) {
     // Insert the new item and clamped the list to kMaxLogItemsLength. The table
     // is rendered reversed so new items are at the top but we can use .add()
@@ -321,7 +323,18 @@ class LoggingScreen extends Screen {
     }
 
     if (visible && loggingTable != null) {
+      // TODO(jacobr): adding data should be more incremental than this.
+      // We are blowing away state for all already added rows.
       loggingTable.setRows(data);
+      // Smooth scroll if we havent scrolled in a while, otherwise use an
+      // immediate scroll because repeatedly smooth scrolling on the web means
+      // you never reach your destination.
+      final DateTime now = DateTime.now();
+      final bool smoothScroll = _lastScrollTime == null ||
+          _lastScrollTime.difference(now).inSeconds > 1;
+      _lastScrollTime = now;
+      loggingTable.scrollTo(data.last,
+          scrollBehavior: smoothScroll ? 'smooth' : 'auto');
     } else {
       hasPendingDomUpdates = true;
     }
