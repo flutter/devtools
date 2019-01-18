@@ -15,7 +15,8 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
-import 'fps.dart';
+import 'frame_rendering.dart';
+import 'frame_rendering_chart.dart';
 import 'timeline_protocol.dart';
 
 const Color slowFrameColor = Color(0xFFf97c7c);
