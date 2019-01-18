@@ -330,10 +330,11 @@ class LoggingScreen extends Screen {
       // immediate scroll because repeatedly smooth scrolling on the web means
       // you never reach your destination.
       final DateTime now = DateTime.now();
-      final bool smoothScroll = _lastScrollTime == null || _lastScrollTime.difference(now).inSeconds > 1;
+      final bool smoothScroll = _lastScrollTime == null ||
+          _lastScrollTime.difference(now).inSeconds > 1;
       _lastScrollTime = now;
-      DateTime.now().millisecondsSinceEpoch;
-      loggingTable.scrollTo(data.last, scrollBehavior: smoothScroll ? 'smooth' : 'auto');
+      loggingTable.scrollTo(data.last,
+          scrollBehavior: smoothScroll ? 'smooth' : 'auto');
     } else {
       hasPendingDomUpdates = true;
     }

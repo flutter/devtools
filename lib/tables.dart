@@ -14,8 +14,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): fixed position header
 
-class TableRow {}
-
 class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
@@ -176,7 +174,7 @@ class Table<T> extends Object with SetStateMixin {
       // not be able to scroll far enough.
       setState(() {
         // We assume the index is still valid. Alternately we search for the
-        // inex again. The one thing we should absolutely not do is call the
+        // index again. The one thing we should absolutely not do is call the
         // scrollTo helper method again as there is a significant risk scrollTo
         // would never be called if items are added to the table every frame.
         _scrollToIndex(index, scrollBehavior: scrollBehavior);
