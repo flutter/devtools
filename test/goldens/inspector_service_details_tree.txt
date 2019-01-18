@@ -329,7 +329,7 @@ MaterialApp
                                                      │         │ renderObject: RenderExcludeSemantics#00000
                                                      │         │
                                                      │         └─GestureDetector
-                                                     │           │ startBehavior: start
+                                                     │           │ startBehavior: down
                                                      │           │
                                                      │           └─RawGestureDetector
                                                      │             │ state: RawGestureDetectorState#00000(gestures: [tap], behavior:
