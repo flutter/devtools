@@ -104,6 +104,7 @@ class FramesTracker {
   Stream<Null> get onChange => _changeController.stream;
 
   void start() {
+    assert(eventStreamSubscription == null);
     eventStreamSubscription = service.onExtensionEvent.listen((Event e) {
       if (e.extensionKind == 'Flutter.Frame') {
         final ExtensionData data = e.extensionData;

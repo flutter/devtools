@@ -188,7 +188,7 @@ class TimelineScreen extends Screen {
     await serviceManager.serviceAvailable.future;
 
     final bool shouldBeRunning = !_paused && isCurrentScreen;
-    final bool isRunning = !timelineFramesBuilder.isPaused;
+    final bool isRunning = !timelineFramesBuilder.paused;
 
     if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
       _startTimeline();
@@ -376,7 +376,7 @@ class TimelineFramesBuilder {
   List<TimelineFrame> frames = <TimelineFrame>[];
 
   bool _paused = false;
-  bool get isPaused => _paused;
+  bool get paused => _paused;
 
   List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
   List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
