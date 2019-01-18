@@ -354,13 +354,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       expect(
@@ -380,13 +380,13 @@ void main() async {
       tree.onTap(const Offset(0, rowHeight * 5.5));
       const textSelected = // Comment to make dartfmt behave.
           '▼[[] root ]\n'
-          '└─▼[M] MyApp\n'
-          '  └─▼[M] MaterialApp\n'
-          '    └─▼[S] Scaffold\n'
+          '  ▼[M] MyApp\n'
+          '    ▼[M] MaterialApp\n'
+          '      ▼[S] Scaffold\n'
           '      ├───▼[C] Center\n'
-          '      │   └─▼[/icons/inspector/textArea.png] Text <-- selected\n'
+          '      │     ▼[/icons/inspector/textArea.png] Text <-- selected\n'
           '      └─▼[A] AppBar\n'
-          '        └─▼[/icons/inspector/textArea.png] Text\n';
+          '          ▼[/icons/inspector/textArea.png] Text\n';
 
       expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
       expect(
@@ -451,20 +451,20 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold <-- selected\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold <-- selected\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
       // This tree is huge. If there is a change to package:flutter it may
       // change. If this happens don't panic and rebaseline the content.
       expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
+        detailsTree.toStringDeep(),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold.txt'),
       );
@@ -478,18 +478,18 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center <-- selected\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
       expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
+        detailsTree.toStringDeep(),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scrolled_to_center.txt'),
       );
@@ -501,19 +501,19 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold <-- selected\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold <-- selected\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // Verify that the details tree scrolled back as well.
       // However, now more nodes are expanded.
       expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
+        detailsTree.toStringDeep(),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_expanded.txt'),
       );
@@ -539,13 +539,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot

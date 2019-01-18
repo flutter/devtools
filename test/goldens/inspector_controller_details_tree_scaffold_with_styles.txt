@@ -1,7 +1,7 @@
 ▼[S]<grayed> </grayed><bold>Scaffold</bold> <-- selected
 │   ▶state: ScaffoldState#00000(tickers: tracking 1 ticker)
 └─▼[S]<grayed> </grayed>_ScaffoldScope
-  └─▼[P]<grayed> </grayed>PrimaryScrollController
+    ▼[P]<grayed> </grayed>PrimaryScrollController
     │   ScrollController#00000(no clients)
     └─▼[M]<grayed> </grayed>Material
       │   type: canvas
@@ -25,7 +25,7 @@
           │   shadowColor: [#000000ff]#000000
           │   ▶renderObject: RenderPhysicalModel#00000
           └─▼[N]<grayed> </grayed>NotificationListener <grayed><LayoutChangedNotification></grayed>
-            └─▼[I]<grayed> </grayed>_InkFeatures <grayed>[GlobalKey#00000 ink renderer]</grayed>
+              ▼[I]<grayed> </grayed>_InkFeatures <grayed>[GlobalKey#00000 ink renderer]</grayed>
               │   ▶renderObject: _RenderInkFeatures#00000
               └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedDefaultTextStyle
                 │   duration: 200ms
@@ -74,7 +74,7 @@
                       │       │   BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)
                       │       │   ▶renderObject: RenderConstrainedBox#00000 relayoutBoundary=up1
                       │       └─▼[F]<grayed> </grayed>FlexibleSpaceBarSettings
-                      │         └─▶[A]<grayed> </grayed><bold>AppBar</bold>
+                      │           ▶[A]<grayed> </grayed><bold>AppBar</bold>
                       └─▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.floatingActionButton>]</grayed>
                         │   id: _ScaffoldSlot.floatingActionButton
                         └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery

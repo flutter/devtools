@@ -121,6 +121,10 @@ abstract class InspectorTreeNode {
         _parent = parent,
         _expanded = expandChildren;
 
+  bool get linesToChildren  {
+    return _children.length > 1 && !_children.last.isProperty;
+  }
+
   /// Override this method to define a tree node to build render objects
   /// appropriate for a specific platform.
   InspectorTreeNodeRenderBuilder createRenderBuilder();
@@ -362,7 +366,7 @@ abstract class InspectorTreeNode {
           depth: depth,
           isSelected: selection == node,
           highlightDepth: highlightDepth,
-          lineToParent: !node.isProperty && index != 0,
+          lineToParent: !node.isProperty && index != 0 && node.parent.linesToChildren,
         );
       }
       assert(index > current);
