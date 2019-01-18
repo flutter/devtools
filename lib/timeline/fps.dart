@@ -89,31 +89,45 @@ class FramesChart extends LineChart<FramesTracker> {
 }
 
 class FramesTracker {
-  FramesTracker(this.service) {
-    service.onExtensionEvent.listen((Event e) {
-      if (e.extensionKind == 'Flutter.Frame') {
-        final ExtensionData data = e.extensionData;
-        addSample(FrameInfo.from(data.data));
-      }
-    });
-  }
+  FramesTracker(this.service);
 
   static const int kMaxFrames = 60;
-
-  VmServiceWrapper service;
   final StreamController<Null> _changeController =
       StreamController<Null>.broadcast();
+
+  VmServiceWrapper service;
+  StreamSubscription<Event> eventStreamSubscription;
   List<FrameInfo> samples = <FrameInfo>[];
 
   bool get hasConnection => service != null;
 
   Stream<Null> get onChange => _changeController.stream;
 
-  void start() {}
+  void start() {
+    eventStreamSubscription = service.onExtensionEvent.listen((Event e) {
+      if (e.extensionKind == 'Flutter.Frame') {
+        final ExtensionData data = e.extensionData;
+        _addSample(FrameInfo.from(data.data));
+      }
+    });
+  }
 
-  void stop() {}
+  void stop() {
+    assert(eventStreamSubscription != null);
+    eventStreamSubscription.cancel();
+  }
 
-  void addSample(FrameInfo frame) {
+  void pause() {
+    assert(eventStreamSubscription != null);
+    eventStreamSubscription.pause();
+  }
+
+  void resume() {
+    assert(eventStreamSubscription != null);
+    eventStreamSubscription.resume();
+  }
+
+  void _addSample(FrameInfo frame) {
     if (samples.isEmpty) {
       frame.frameGroupStart = true;
     } else {

@@ -47,7 +47,7 @@ class TimelineScreen extends Screen {
 
   TimelineFramesUI timelineFramesUI;
 
-  bool paused = false;
+  bool _paused = false;
 
   PButton pauseButton;
   PButton resumeButton;
@@ -170,7 +170,7 @@ class TimelineScreen extends Screen {
     pauseButton.disabled = true;
     resumeButton.disabled = false;
 
-    paused = true;
+    _paused = true;
 
     _updateListeningState();
   }
@@ -179,7 +179,7 @@ class TimelineScreen extends Screen {
     pauseButton.disabled = false;
     resumeButton.disabled = true;
 
-    paused = false;
+    _paused = false;
 
     _updateListeningState();
   }
@@ -187,7 +187,7 @@ class TimelineScreen extends Screen {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    final bool shouldBeRunning = !paused && isCurrentScreen;
+    final bool shouldBeRunning = !_paused && isCurrentScreen;
     final bool isRunning = !timelineFramesBuilder.isPaused;
 
     if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
@@ -195,6 +195,7 @@ class TimelineScreen extends Screen {
     }
 
     if (shouldBeRunning && !isRunning) {
+      framesTracker.resume();
       timelineFramesBuilder.resume();
 
       await serviceManager.service
@@ -202,7 +203,7 @@ class TimelineScreen extends Screen {
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
-
+      framesTracker.pause();
       timelineFramesBuilder.pause();
     }
   }
@@ -374,7 +375,8 @@ class TimelineFramesBuilder {
 
   List<TimelineFrame> frames = <TimelineFrame>[];
 
-  bool isPaused = false;
+  bool _paused = false;
+  bool get isPaused => _paused;
 
   List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
   List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
@@ -390,14 +392,14 @@ class TimelineFramesBuilder {
   Stream<Null> get onCleared => _clearedController.stream;
 
   void pause() {
-    isPaused = true;
+    _paused = true;
 
     dartEvents.clear();
     gpuEvents.clear();
   }
 
   void resume() {
-    isPaused = false;
+    _paused = false;
   }
 
   void processTimelineEvent(TimelineThread thread, TimelineThreadEvent event) {
