@@ -1,17 +1,13 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
-import '../vm_service_wrapper.dart';
 import 'frame_rendering.dart';
 import 'timeline.dart';
 

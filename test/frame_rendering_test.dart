@@ -4,13 +4,10 @@
 
 @TestOn('vm')
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools/globals.dart';
 import 'package:devtools/service_extensions.dart' as extensions;
-import 'package:devtools/service_manager.dart';
 import 'package:devtools/timeline/frame_rendering.dart';
-import 'package:devtools/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 
 import 'support/flutter_test_environment.dart';
