@@ -740,3 +740,8 @@ but a more subtle solution would be better.
     /* Support for IE. */
     font-feature-settings: 'liga';
 }
+
+html [full] {
+    height: 100%;
+    overflow: hidden;
+}

@@ -46,7 +46,9 @@ class LoggingScreen extends Screen {
   bool hasPendingDomUpdates = false;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     this.framework = framework;
 
     // TODO(devoncarew): Add checkbox toggles to enable specific logging channels.
@@ -54,7 +56,7 @@ class LoggingScreen extends Screen {
     LogDetailsUI logDetailsUI;
     CoreElement detailsDiv;
 
-    mainDiv.add(<CoreElement>[
+    screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..add(<CoreElement>[
           form()
@@ -92,6 +94,8 @@ class LoggingScreen extends Screen {
     loggingTable.onRowsChanged.listen((_) {
       _updateStatus();
     });
+
+    return screenDiv;
   }
 
   @override

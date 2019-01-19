@@ -59,7 +59,9 @@ class DebuggerScreen extends Screen {
   ConsoleArea consoleArea;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     CoreElement sourceArea;
     CoreElement consoleDiv;
 
@@ -109,7 +111,7 @@ class DebuggerScreen extends Screen {
     consoleArea = ConsoleArea();
     List<CoreElement> navEditorPanels;
 
-    mainDiv.add(<CoreElement>[
+    screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
@@ -292,6 +294,8 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea.refresh();
+
+    return screenDiv;
   }
 
   @override
@@ -302,17 +306,6 @@ class DebuggerScreen extends Screen {
 
     // TODO(devoncarew): On restoring the page, the execution point marker can
     // get out of position
-
-    sourceEditor.restoreScrollPosition();
-    consoleArea.restoreScrollPosition();
-  }
-
-  @override
-  void exiting() {
-    // Codemirror can loose the scroll position when being hidden and shown.
-    // We record and restore it here manually.
-    sourceEditor.saveScrollPosition();
-    consoleArea.saveScrollPosition();
   }
 
   void _initialize() {
@@ -835,7 +828,6 @@ class SourceEditor {
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
   int _currentLineClass;
   CoreElement _executionPointElement;
-  ScrollInfo _savedScrollInfo;
 
   void setBreakpoints(List<Breakpoint> breakpoints) {
     this.breakpoints = breakpoints;
@@ -985,17 +977,6 @@ class SourceEditor {
 
     _refreshMarkers();
   }
-
-  void saveScrollPosition() {
-    _savedScrollInfo = codeMirror.getScrollInfo();
-  }
-
-  void restoreScrollPosition() {
-    if (_savedScrollInfo != null) {
-      codeMirror.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
-      _savedScrollInfo = null;
-    }
-  }
 }
 
 typedef URIDescriber = String Function(String uri);
@@ -1075,6 +1056,7 @@ class ScriptsView implements CoreElementView {
   SelectableList<ScriptRef> _items;
 
   String rootLib;
+
   List<ScriptRef> get items => _items.items;
 
   @override
@@ -1414,7 +1396,6 @@ class ConsoleArea implements CoreElementView {
 
   CoreElement _container;
   CodeMirror _editor;
-  ScrollInfo _savedScrollInfo;
 
   @override
   CoreElement get element => _container;
@@ -1447,16 +1428,5 @@ class ConsoleArea implements CoreElementView {
   @visibleForTesting
   String getContents() {
     return _editor.getDoc().getValue();
-  }
-
-  void saveScrollPosition() {
-    _savedScrollInfo = _editor.getScrollInfo();
-  }
-
-  void restoreScrollPosition() {
-    if (_savedScrollInfo != null) {
-      _editor.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
-      _savedScrollInfo = null;
-    }
   }
 }

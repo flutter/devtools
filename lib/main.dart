@@ -122,7 +122,7 @@ class NotFoundScreen extends Screen {
   NotFoundScreen() : super(name: 'Not Found', id: 'notfound');
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
-    mainDiv.add(p(text: 'Page not found: ${window.location.pathname}'));
+  CoreElement createContent(Framework framework) {
+    return p(text: 'Page not found: ${window.location.pathname}');
   }
 }
