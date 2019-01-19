@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,9 @@ class FramesTracker {
   Stream<Null> get onChange => _changeController.stream;
 
   void start() {
-    assert(eventStreamSubscription == null);
+    if (eventStreamSubscription != null) {
+      stop();
+    }
     eventStreamSubscription = service.onExtensionEvent.listen((Event e) {
       if (e.extensionKind == 'Flutter.Frame') {
         final ExtensionData data = e.extensionData;

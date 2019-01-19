@@ -13,25 +13,20 @@ import 'package:devtools/timeline/frame_rendering.dart';
 import 'package:devtools/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 
+import 'support/flutter_test_environment.dart';
+
 import 'support/flutter_test_driver.dart';
 
 void main() {
   group('frame rendering tests', () {
-    FlutterRunTestDriver _flutter;
-    VmServiceWrapper service;
     FramesTracker framesTracker;
 
-    setUp(() async {
-      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+    FlutterTestEnvironment env = FlutterTestEnvironment(
+      FlutterRunConfiguration(withDebugger: true),
+    );
 
-      await _flutter.run(withDebugger: true);
-      service = _flutter.vmService;
-
-      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-
-      await serviceManager.vmServiceOpened(service, Completer().future);
-
-      framesTracker = FramesTracker(service);
+    env.afterSetup = () {
+      framesTracker = FramesTracker(env.service);
       framesTracker.start();
       expect(framesTracker.eventStreamSubscription, isNotNull);
       expect(framesTracker.samples, isEmpty);
@@ -39,25 +34,24 @@ void main() {
       // Reset this value to true so that the first call to _forceDrawFrame will
       // turn the performance overlay on.
       showPerformanceOverlay = true;
-    });
-
-    tearDown(() async {
+    };
+    env.beforeTearDown = () {
       framesTracker.stop();
       expect(framesTracker.eventStreamSubscription, isNull);
-
-      await service.allFuturesCompleted.future;
-      await _flutter.stop();
-    });
+    };
 
     test('FramesTracker tracks frames', () async {
-      await _forceDrawFrame();
-      expect(framesTracker.samples, isNotEmpty);
-    });
+      await env.setupEnvironment();
 
-    test('FramesTracker pauses and resumes', () async {
       await _forceDrawFrame();
       expect(framesTracker.samples, isNotEmpty);
       expect(framesTracker.samples.length, equals(1));
+
+      await env.tearDownEnvironment();
+    });
+
+    test('FramesTracker pauses and resumes', () async {
+      await env.setupEnvironment();
 
       framesTracker.pause();
       expect(framesTracker.eventStreamSubscription.isPaused, isTrue);
@@ -70,9 +64,13 @@ void main() {
 
       await _forceDrawFrame();
       expect(framesTracker.samples.length, equals(2));
+
+      await env.tearDownEnvironment();
     });
 
-    test('FramesTracker calcRecentFPS', () {
+    test('FramesTracker calcRecentFPS', () async {
+      await env.setupEnvironment();
+
       framesTracker.samples = _fakeSamplesForLowFPS;
       expect(framesTracker.calcRecentFPS(), equals(29.999999999999996));
       expect(framesTracker.calcRecentFPS().round(), equals(30));
@@ -80,6 +78,8 @@ void main() {
       framesTracker.samples = _fakeSamplesFor60FPS;
       expect(framesTracker.calcRecentFPS(), equals(59.99999999999999));
       expect(framesTracker.calcRecentFPS().round(), equals(60));
+
+      await env.tearDownEnvironment(force: true);
     });
   }, tags: 'useFlutterSdk');
 }
