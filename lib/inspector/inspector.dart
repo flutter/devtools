@@ -109,6 +109,7 @@ class InspectorScreen extends Screen {
       inspectorTreeFactory: ({
         summaryTree,
         treeType,
+        onNodeAdded,
         onSelectionChange,
         onExpand,
         onHover,
@@ -117,6 +118,7 @@ class InspectorScreen extends Screen {
           return InspectorTreeHtml(
             summaryTree: summaryTree,
             treeType: treeType,
+            onNodeAdded: onNodeAdded,
             onSelectionChange: onSelectionChange,
             onExpand: onExpand,
             onHover: onHover,
@@ -125,6 +127,7 @@ class InspectorScreen extends Screen {
         return InspectorTreeCanvas(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,

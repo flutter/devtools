@@ -12,6 +12,8 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
+import '../inspector/inspector_tree.dart';
+import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
 import '../timeline/fps.dart';
 import '../ui/elements.dart';
@@ -26,6 +28,8 @@ import '../vm_service_wrapper.dart';
 const int kMaxLogItemsLowerBound = 5000;
 const int kMaxLogItemsUpperBound = 5500;
 final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
+
+bool _verboseDebugging = false;
 
 class LoggingScreen extends Screen {
   LoggingScreen()
@@ -47,7 +51,7 @@ class LoggingScreen extends Screen {
 
   bool hasPendingDomUpdates = false;
 
-  ObjectGroup objectGroup;
+  Future<ObjectGroup> objectGroup;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -58,35 +62,38 @@ class LoggingScreen extends Screen {
     LogDetailsUI logDetailsUI;
     CoreElement detailsDiv;
 
+    CoreElement loggingContainer;
     mainDiv.add(<CoreElement>[
       div(c: 'section')
+        ..layoutHorizontal()
         ..add(<CoreElement>[
-          form()
-            ..layoutHorizontal()
-            ..clazz('align-items-center')
-            ..add(<CoreElement>[
-              createHotReloadRestartGroup(framework),
-              span()..flex(),
-              div(c: 'btn-group')
-                ..add(PButton('Clear logs')
-                  ..small()
-                  ..click(_clear)),
-            ])
-        ]),
-      _createTableView()
-        ..clazz('section')
-        ..flex(),
-      detailsDiv = div(c: 'section table-border')
-        ..layoutVertical()
-        ..add(logDetailsUI = LogDetailsUI()),
+          createHotReloadRestartGroup(framework),
+          span()..flex(),
+          div(c: 'btn-group')
+            ..add(PButton('Clear logs')
+              ..small()
+              ..click(_clear)),
+          div()..flex(),
+        ])
+      ,
+      loggingContainer = div(c: 'logging-container')
+      ..flex()
+      ..add(<CoreElement>[
+        _createTableView()
+          ..clazz('section')
+          ..clazz('logging-panel')
+          ..flex(),
+        logDetailsUI = LogDetailsUI()
+        ..clazz('section')..clazz('table-border')..clazz('logging-panel'),
+      ]),
     ]);
 
     // configure the table / details splitter
     split.flexSplit(
-      [loggingTable.element, detailsDiv],
-      horizontal: false,
+      [loggingTable.element, logDetailsUI],
       gutterSize: defaultSplitterWidth,
-      sizes: [80, 20],
+      sizes: [60, 40],
+      horizontal: true,
       minSize: [200, 60],
     );
 
@@ -155,9 +162,8 @@ class LoggingScreen extends Screen {
     service.onExtensionEvent.listen(_handleExtensionEvent);
 
     await ensureInspectorServiceDependencies();
-    final InspectorService inspectorService =
-        await InspectorService.create(service);
-    objectGroup = inspectorService.createObjectGroup('console-group');
+
+    objectGroup = InspectorService.createGroup(service, 'console-group');
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -176,19 +182,18 @@ class LoggingScreen extends Screen {
         summaryHtml: '$frameInfo$div',
       ));
     } else if (e.extensionKind == 'Flutter.Error') {
-      if (objectGroup != null) {
-        final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(
-            e.extensionData.data, objectGroup, false, null);
-        // todo (pq): add to a tree canvas
+      final RemoteDiagnosticsNode node =
+          RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
+      if (_verboseDebugging) {
         print('XXX node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
-      // todo (pq): remove.
       _log(LogData(
         '${e.extensionKind.toLowerCase()}',
         jsonEncode(e.json),
         e.timestamp,
-        summary: e.json.toString(),
+        summary: node.toDiagnosticsNode().toString(),
+        node: node,
       ));
     } else {
       _log(LogData(
@@ -476,6 +481,7 @@ class LogData {
     this.summaryHtml,
     this.isError = false,
     this.detailsComputer,
+    this.node,
   });
 
   final String kind;
@@ -484,6 +490,7 @@ class LogData {
   final String summary;
   final String summaryHtml;
 
+  final RemoteDiagnosticsNode node;
   String _details;
   Future<String> detailsComputer;
 
@@ -602,11 +609,56 @@ class LogDetailsUI extends CoreElement {
   CoreElement content;
   CoreElement message;
 
+  InspectorTreeHtml tree;
+
   void setData(LogData data) {
     // Reset the vertical scroll value if any.
     content.element.scrollTop = 0;
 
     this.data = data;
+
+    tree = null;
+    if (data.node != null) {
+      message.clear();
+      tree = InspectorTreeHtml(
+        summaryTree: false,
+        treeType: FlutterTreeType.widget,
+        onSelectionChange: () {
+          final InspectorTreeNode node = tree.selection;
+          if (node != null) {
+            tree.maybePopulateChildren(node);
+          }
+          // The ui wasn't updated because this selection was triggered by the logging
+          // view instead of the regular inspector.
+          node.diagnostic.setSelectionInspector(false);
+          // TODO(jacobr): warn if the selection can't be set as the node is
+          // stale which is likely if this is an old log entry.
+        },
+        onExpand: (e) {
+          print("XXX expand $e");
+        },
+        onHover: (e) {
+
+        },
+      );
+
+      InspectorTreeNode root = tree.setupInspectorTreeNode(
+        tree.createNode(),
+        data.node,
+        expandChildren: true,
+        expandProperties: true,
+      );
+      // No sense in collapsing the root node.
+      root.allowExpandCollapse = false;
+      tree.root = root;
+      message.add(tree.element);
+
+      if (_verboseDebugging) {
+        // For debugging purposes only.
+        message.add(div(text: data.summary, c: 'pre-wrap monospace'));
+      }
+      return;
+    }
 
     if (data == null) {
       message.text = '';

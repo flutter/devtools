@@ -75,8 +75,15 @@ abstract class PaintEntry {
 
 abstract class InspectorTreeNodeRenderBuilder<
     R extends InspectorTreeNodeRender> {
+  InspectorTreeNodeRenderBuilder({
+    @required this.level,
+    @required this.treeStyle
+  });
   void appendText(String text, TextStyle textStyle);
   void addIcon(Icon icon);
+
+  final DiagnosticLevel level;
+  final DiagnosticsTreeStyle treeStyle;
 
   InspectorTreeNodeRender build();
 }
@@ -121,7 +128,7 @@ abstract class InspectorTreeNode {
         _parent = parent,
         _expanded = expandChildren;
 
-  bool get showLinesToChildren  {
+  bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
   }
 
@@ -264,8 +271,10 @@ abstract class InspectorTreeNode {
   bool get expanded => _expanded;
   bool _expanded;
 
+  bool allowExpandCollapse = true;
+
   bool get showExpandCollapse {
-    return diagnostic?.hasChildren == true || children.isNotEmpty;
+    return (diagnostic?.hasChildren == true || children.isNotEmpty) && allowExpandCollapse;
   }
 
   set expanded(bool value) {
@@ -318,6 +327,10 @@ abstract class InspectorTreeNode {
     return _childrenCount;
   }
 
+  bool get hasPlaceholderChildren {
+    return children.length == 1 && children.first.diagnostic == null;
+  }
+
   int _childrenCount;
 
   int get subtreeSize => childrenCount + 1;
@@ -366,7 +379,8 @@ abstract class InspectorTreeNode {
           depth: depth,
           isSelected: selection == node,
           highlightDepth: highlightDepth,
-          lineToParent: !node.isProperty && index != 0 && node.parent.showLinesToChildren,
+          lineToParent:
+              !node.isProperty && index != 0 && node.parent.showLinesToChildren,
         );
       }
       assert(index > current);
@@ -439,23 +453,31 @@ class InspectorTreeRow {
 typedef InspectorTreeFactory = InspectorTree Function({
   @required bool summaryTree,
   @required FlutterTreeType treeType,
+  @required NodeAddedCallback onNodeAdded,
   VoidCallback onSelectionChange,
   TreeEventCallback onExpand,
   TreeEventCallback onHover,
 });
 
+/// Callback issued every time a node is added to the tree.
+typedef NodeAddedCallback = void Function(
+    InspectorTreeNode node, RemoteDiagnosticsNode diagnosticsNode);
+
 abstract class InspectorTree {
   InspectorTree({
     @required this.summaryTree,
     @required this.treeType,
+    @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     this.onExpand,
     this.onHover,
-  }) : _onSelectionChange = onSelectionChange;
+  }) : _onSelectionChange = onSelectionChange,
+       _onNodeAdded = onNodeAdded;
 
   final TreeEventCallback onHover;
   final TreeEventCallback onExpand;
   final VoidCallback _onSelectionChange;
+  final NodeAddedCallback _onNodeAdded;
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
@@ -482,7 +504,6 @@ abstract class InspectorTree {
   InspectorTreeNode get hover => _hover;
   InspectorTreeNode _hover;
 
-  Set<VoidCallback> selectionChangeCallbacks = Set<VoidCallback>();
   final bool summaryTree;
   final FlutterTreeType treeType;
 
@@ -492,11 +513,7 @@ abstract class InspectorTree {
   double getRowOffset(int index) {
     return (root.getRow(index)?.depth ?? 0) * columnWidth;
   }
-
-  void addSelectionChangedListener(VoidFunction callback) {
-    selectionChangeCallbacks.add(callback);
-  }
-
+  
   set hover(InspectorTreeNode node) {
     if (node == _hover) {
       return;
@@ -593,18 +610,146 @@ abstract class InspectorTree {
     // TODO(jacobr): add other interactive elements here.
     selection = row.node;
   }
-}
+
+  bool expandPropertiesByDefault(DiagnosticsTreeStyle style) {
+    // This code matches the text style defaults for which styles are
+    //  by default and which aren't.
+    switch (style) {
+      case DiagnosticsTreeStyle.singleLine:
+      case DiagnosticsTreeStyle.headerLine:
+      case DiagnosticsTreeStyle.indentedSingleLine:
+        return false;
+
+      case DiagnosticsTreeStyle.sparse:
+      case DiagnosticsTreeStyle.offstage:
+      case DiagnosticsTreeStyle.dense:
+      case DiagnosticsTreeStyle.transition:
+      case DiagnosticsTreeStyle.error:
+      case DiagnosticsTreeStyle.whitespace:
+      case DiagnosticsTreeStyle.flat:
+      case DiagnosticsTreeStyle.shallow:
+      case DiagnosticsTreeStyle.truncateChildren:
+        return true;
+    }
+    return true;
+  }
+  InspectorTreeNode setupInspectorTreeNode(
+    InspectorTreeNode node,
+    RemoteDiagnosticsNode diagnosticsNode, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
+    assert(expandChildren != null);
+    assert(expandProperties != null);
+    node.diagnostic = diagnosticsNode;
+    if (_onNodeAdded != null) {
+      _onNodeAdded(node, diagnosticsNode);
+    }
+
+    if (diagnosticsNode.hasChildren ||
+        diagnosticsNode.inlineProperties.isNotEmpty) {
+      if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
+        final bool styleIsMultiline = expandPropertiesByDefault(diagnosticsNode.style);
+        setupChildren(
+          diagnosticsNode,
+          node,
+          node.diagnostic.childrenNow,
+          expandChildren: expandChildren && styleIsMultiline,
+          expandProperties: expandProperties && styleIsMultiline,
+        );
+      } else {
+        node.clearChildren();
+        node.appendChild(createNode());
+      }
+    }
+    return node;
+  }
+
+  void setupChildren(
+    RemoteDiagnosticsNode parent,
+    InspectorTreeNode treeNode,
+    List<RemoteDiagnosticsNode> children, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
+    assert(expandChildren != null);
+    assert(expandProperties != null);
+    treeNode.expanded = expandChildren;
+    if (treeNode.children.isNotEmpty) {
+      // Only case supported is this is the loading node.
+      assert(treeNode.children.length == 1);
+      removeNodeFromParent(treeNode.children.first);
+    }
+    final inlineProperties = parent.inlineProperties;
+
+    if (inlineProperties != null) {
+      for (RemoteDiagnosticsNode property in inlineProperties) {
+        appendChild(
+          treeNode,
+          setupInspectorTreeNode(
+            createNode(),
+            property,
+            // We are inside a property so only expand children if
+            // expandProperties is true.
+            expandChildren: expandProperties,
+            expandProperties: expandProperties,
+          ),
+        );
+      }
+    }
+    if (children != null) {
+      for (RemoteDiagnosticsNode child in children) {
+        appendChild(
+          treeNode,
+          setupInspectorTreeNode(
+            createNode(),
+            child,
+            expandChildren: expandChildren,
+            expandProperties: expandProperties,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
+    final RemoteDiagnosticsNode diagnostic = treeNode.diagnostic;
+    if (diagnostic != null &&
+        diagnostic.hasChildren &&
+        (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty)) {
+      try {
+        final children = await diagnostic.children;
+        if (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty) {
+          setupChildren(
+            diagnostic,
+            treeNode,
+            children,
+            expandChildren: true,
+            expandProperties: false,
+          );
+          nodeChanged(treeNode);
+          if (treeNode == selection) {
+            expandPath(treeNode);
+          }
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+  }}
 
 abstract class InspectorTreeFixedRowHeight extends InspectorTree {
   InspectorTreeFixedRowHeight({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
+    @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,

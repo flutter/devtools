@@ -65,3 +65,102 @@ thresholds are specific to the inspector UI.
         box-sizing: content-box;
     }
 }
+
+
+/*
+Styles for rendering html versions of the inspector tree.
+
+You will have to make code changes to tweak the styles for the Canvas tree
+renderer to make them consistent. These styles match names of DiagnosticsTreeStyle
+enum entries and DiagnosticLevel enum entries so these names intentionally violate
+CSS style name best practices.
+
+The main use case for adding custom styles here is for making structured error
+messages beautiful.
+*/
+
+.inspector-style-sparse {
+    
+}
+
+.inspector-style-offstage {
+    
+}
+
+.inspector-style-dense {
+    
+}
+
+.inspector-style-transition {
+    
+}
+
+.inspector-style-whitespace {
+    
+}
+
+.inspector-style-error {
+    background-color: #f97c7c;
+    padding: 12px;
+    margin: 5px 0;
+}
+
+.inspector-style-flat {
+    
+}
+
+.inspector-style-singleLine {
+    
+}
+
+.inspector-style-headerLine {
+    
+}
+
+.inspector-style-indentedSingleLine {
+    
+}
+
+.inspector-style-shallow {
+    
+}
+
+.inspector-style-truncateChildren {
+    
+}
+
+.inspector-level-hidden {
+
+}
+.inspector-level-fine {
+
+}
+.inspector-level-debug {
+
+}
+.inspector-level-info {
+
+}
+.inspector-level-warning {
+
+}
+.inspector-level-hint {
+    background-color: lightgoldenrodyellow;
+    padding: 8px;
+    margin: 5px 0;
+}
+.inspector-level-fix {
+
+}
+.inspector-level-contract {
+
+}
+.inspector-level-violation {
+
+}
+.inspector-level-error {
+
+}
+.inspector-level-off {
+
+}

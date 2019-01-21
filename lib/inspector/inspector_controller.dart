@@ -66,6 +66,7 @@ class InspectorController implements InspectorServiceClient {
     inspectorTree = inspectorTreeFactory(
       summaryTree: isSummaryTree,
       treeType: treeType,
+      onNodeAdded: _onNodeAdded,
       onHover: highlightShowNode,
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
@@ -81,8 +82,6 @@ class InspectorController implements InspectorServiceClient {
     } else {
       details = null;
     }
-
-    inspectorTree.addSelectionChangedListener(selectionChanged);
 
     flutterIsolateSubscription = serviceManager.isolateManager
         .getSelectedIsolate((IsolateRef flutterIsolate) {
@@ -322,8 +321,12 @@ class InspectorController implements InspectorServiceClient {
       _treeGroups.promoteNext();
       clearValueToInspectorTreeNodeMapping();
       if (node != null) {
-        final InspectorTreeNode rootNode =
-            setupInspectorTreeNode(inspectorTree.createNode(), node, true);
+        final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
+          inspectorTree.createNode(),
+          node,
+          expandChildren: true,
+          expandProperties: false
+        );
         inspectorTree.root = rootNode;
       } else {
         inspectorTree.root = inspectorTree.createNode();
@@ -441,68 +444,6 @@ class InspectorController implements InspectorServiceClient {
     inspectorTree.nodeChanged(node);
   }
 
-  InspectorTreeNode setupInspectorTreeNode(InspectorTreeNode node,
-      RemoteDiagnosticsNode diagnosticsNode, bool expandChildren) {
-    node.diagnostic = diagnosticsNode;
-    final InspectorInstanceRef valueRef = diagnosticsNode.valueRef;
-    // Properties do not have unique values so should not go in the valueToInspectorTreeNode map.
-    if (valueRef.id != null && !diagnosticsNode.isProperty) {
-      valueToInspectorTreeNode[valueRef] = node;
-    }
-    parent?.maybeUpdateValueUI(valueRef);
-    if (diagnosticsNode.hasChildren ||
-        diagnosticsNode.inlineProperties.isNotEmpty) {
-      if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
-        setupChildren(
-            diagnosticsNode, node, node.diagnostic.childrenNow, expandChildren);
-      } else {
-        node.clearChildren();
-        node.appendChild(inspectorTree.createNode());
-      }
-    }
-    return node;
-  }
-
-  void setupChildren(
-    RemoteDiagnosticsNode parent,
-    InspectorTreeNode treeNode,
-    List<RemoteDiagnosticsNode> children,
-    bool expandChildren,
-  ) {
-    treeNode.expanded = expandChildren;
-    if (treeNode.children.isNotEmpty) {
-      // Only case supported is this is the loading node.
-      assert(treeNode.children.length == 1);
-      inspectorTree.removeNodeFromParent(treeNode.children.first);
-    }
-    final inlineProperties = parent.inlineProperties;
-
-    if (inlineProperties != null) {
-      for (RemoteDiagnosticsNode property in inlineProperties) {
-        inspectorTree.appendChild(
-          treeNode,
-          setupInspectorTreeNode(
-            inspectorTree.createNode(),
-            property,
-            false,
-          ),
-        );
-      }
-    }
-    if (children != null) {
-      for (RemoteDiagnosticsNode child in children) {
-        inspectorTree.appendChild(
-          treeNode,
-          setupInspectorTreeNode(
-            inspectorTree.createNode(),
-            child,
-            expandChildren,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   void onFlutterFrame() {
     flutterAppFrameReady = true;
@@ -566,6 +507,12 @@ class InspectorController implements InspectorServiceClient {
         if (group.disposed) return;
       }
 
+      if (detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
+         newSelection?.valueRef == selectedDiagnostic?.valueRef) {
+        // No need to change the selection as it didn't actually change.
+        _selectionGroups.cancelNext();
+        return;
+      }
       _selectionGroups.promoteNext();
 
       subtreeRoot = newSelection;
@@ -629,26 +576,6 @@ class InspectorController implements InspectorServiceClient {
     inspectorTree.animateToTargets(targets);
   }
 
-  Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
-    final RemoteDiagnosticsNode diagnostic = treeNode.diagnostic;
-    if (diagnostic != null &&
-        diagnostic.hasChildren &&
-        (hasPlaceholderChildren(treeNode) || treeNode.children.isEmpty)) {
-      try {
-        final children = await diagnostic.children;
-        if (hasPlaceholderChildren(treeNode) || treeNode.children.isEmpty) {
-          setupChildren(diagnostic, treeNode, children, true);
-          inspectorTree.nodeChanged(treeNode);
-          if (treeNode == selectedNode) {
-            inspectorTree.expandPath(treeNode);
-          }
-        }
-      } catch (e) {
-        _logError(e);
-      }
-    }
-  }
-
   void setSelectedNode(InspectorTreeNode newSelection) {
     if (newSelection == selectedNode) {
       return;
@@ -672,7 +599,7 @@ class InspectorController implements InspectorServiceClient {
   }
 
   void _onExpand(InspectorTreeNode node) {
-    maybePopulateChildren(node);
+    inspectorTree.maybePopulateChildren(node);
   }
 
   void selectionChanged() {
@@ -682,7 +609,7 @@ class InspectorController implements InspectorServiceClient {
 
     final InspectorTreeNode node = inspectorTree.selection;
     if (node != null) {
-      maybePopulateChildren(node);
+      inspectorTree.maybePopulateChildren(node);
     }
     if (programaticSelectionChangeInProgress) {
       return;
@@ -784,7 +711,15 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
-  bool hasPlaceholderChildren(InspectorTreeNode node) {
-    return node.children.length == 1 && node.children.first.diagnostic == null;
+  void _onNodeAdded(
+    InspectorTreeNode node,
+    RemoteDiagnosticsNode diagnosticsNode,
+  ) {
+    final InspectorInstanceRef valueRef = diagnosticsNode.valueRef;
+    // Properties do not have unique values so should not go in the valueToInspectorTreeNode map.
+    if (valueRef.id != null && !diagnosticsNode.isProperty) {
+      valueToInspectorTreeNode[valueRef] = node;
+    }
+    parent?.maybeUpdateValueUI(valueRef);
   }
 }
