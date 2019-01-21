@@ -65,10 +65,12 @@ class LoggingScreen extends Screen {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              PButton('Clear logs')
-                ..small()
-                ..click(_clear),
+              createHotReloadRestartGroup(framework),
               span()..flex(),
+              div(c: 'btn-group')
+                ..add(PButton('Clear logs')
+                  ..small()
+                  ..click(_clear)),
             ])
         ]),
       _createTableView()
@@ -175,10 +177,10 @@ class LoggingScreen extends Screen {
       ));
     } else if (e.extensionKind == 'Flutter.Error') {
       if (objectGroup != null) {
-        final node = RemoteDiagnosticsNode(
+        final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(
             e.extensionData.data, objectGroup, false, null);
         // todo (pq): add to a tree canvas
-        print(node);
+        print('XXX node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       // todo (pq): remove.

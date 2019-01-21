@@ -9,7 +9,6 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
-import '../service_registrations.dart' as registrations;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
@@ -59,11 +58,7 @@ class TimelineScreen extends Screen {
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group')
-          ..add([
-            createHotReloadButton(),
-            createHotRestartButton(),
-          ]),
+        createHotReloadRestartGroup(framework),
         div()..flex(),
       ]);
     getServiceExtensionButtons().forEach(upperButtonSection.add);
@@ -239,37 +234,6 @@ class TimelineScreen extends Screen {
     });
 
     timelineFramesUI.timelineData = timelineData;
-  }
-
-  // TODO: move this button out of timeline if we decide to make a global button bar.
-  CoreElement createHotReloadButton() {
-    final action = () async {
-      await serviceManager.performHotReload();
-    };
-    final errorAction = (e) {
-      framework.showError('Error performing hot reload', e);
-    };
-    return RegisteredServiceExtensionButton(
-      registrations.hotReload,
-      action,
-      errorAction,
-    ).button;
-  }
-
-  // TODO: move this button out of timeline if we decide to make a global button bar.
-  CoreElement createHotRestartButton() {
-    final action = () async {
-      await serviceManager.performHotRestart();
-    };
-    final errorAction = (e) {
-      framework.showError('Error performing hot restart', e);
-    };
-
-    return RegisteredServiceExtensionButton(
-      registrations.hotRestart,
-      action,
-      errorAction,
-    ).button;
   }
 }
 

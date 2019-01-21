@@ -4,9 +4,12 @@
 
 import 'dart:html' as html;
 
+
+import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
 import '../service_registrations.dart';
+import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'elements.dart';
 import 'html_icon_renderer.dart';
@@ -71,6 +74,43 @@ List<CoreElement> getServiceExtensionButtons() {
   ];
 }
 
+CoreElement createHotReloadRestartGroup(Framework framework) {
+  return div(c: 'btn-group')
+    ..add([
+      createHotReloadButton(framework),
+      createHotRestartButton(framework),
+    ]);
+}
+
+CoreElement createHotReloadButton(Framework framework) {
+  final action = () async {
+    await serviceManager.performHotReload();
+  };
+  final errorAction = (e) {
+    framework.showError('Error performing hot reload', e);
+  };
+  return RegisteredServiceExtensionButton(
+    registrations.hotReload,
+    action,
+    errorAction,
+  ).button;
+}
+
+// TODO: move this button out of timeline if we decide to make a global button bar.
+CoreElement createHotRestartButton(Framework framework) {
+  final action = () async {
+    await serviceManager.performHotRestart();
+  };
+  final errorAction = (e) {
+    framework.showError('Error performing hot restart', e);
+  };
+
+  return RegisteredServiceExtensionButton(
+    registrations.hotRestart,
+    action,
+    errorAction,
+  ).button;
+}
 /// Button that calls a service extension. Service extensions can be found in
 /// [service_extensions.dart].
 class ServiceExtensionButton {
