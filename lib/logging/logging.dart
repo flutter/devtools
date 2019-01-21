@@ -10,6 +10,8 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../inspector/diagnostics_node.dart';
+import '../inspector/inspector_service.dart';
 import '../tables.dart';
 import '../timeline/fps.dart';
 import '../ui/elements.dart';
@@ -44,6 +46,8 @@ class LoggingScreen extends Screen {
   SetStateMixin loggingStateMixin = SetStateMixin();
 
   bool hasPendingDomUpdates = false;
+
+  ObjectGroup objectGroup;
 
   @override
   void createContent(Framework framework, CoreElement mainDiv) {
@@ -128,7 +132,7 @@ class LoggingScreen extends Screen {
     loggingTable.setRows(data);
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _handleConnectionStart(VmServiceWrapper service) async {
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
@@ -145,11 +149,16 @@ class LoggingScreen extends Screen {
     // Log `dart:developer` `log` events.
     service.onEvent('_Logging').listen(_handleDeveloperLogEvent);
 
-    // Log Flutter frame events.
-    service.onExtensionEvent.listen(_handleFlutterFrameEvent);
+    // Log Flutter extension events.
+    service.onExtensionEvent.listen(_handleExtensionEvent);
+
+    await ensureInspectorServiceDependencies();
+    final InspectorService inspectorService =
+        await InspectorService.create(service);
+    objectGroup = inspectorService.createObjectGroup('console-group');
   }
 
-  void _handleFlutterFrameEvent(Event e) {
+  void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Frame') {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
@@ -163,6 +172,21 @@ class LoggingScreen extends Screen {
         jsonEncode(e.extensionData.data),
         e.timestamp,
         summaryHtml: '$frameInfo$div',
+      ));
+    } else if (e.extensionKind == 'Flutter.Error') {
+      if (objectGroup != null) {
+        final node = RemoteDiagnosticsNode(
+            e.extensionData.data, objectGroup, false, null);
+        // todo (pq): add to a tree canvas
+        print(node);
+      }
+
+      // todo (pq): remove.
+      _log(LogData(
+        '${e.extensionKind.toLowerCase()}',
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: e.json.toString(),
       ));
     } else {
       _log(LogData(
@@ -546,6 +570,8 @@ String getCssClassForEventKind(LogData item) {
     cssClass = 'stderr';
   } else if (item.kind == 'stdout') {
     cssClass = 'stdout';
+  } else if (item.kind == 'flutter.error') {
+    cssClass = 'stderr';
   } else if (item.kind.startsWith('flutter')) {
     cssClass = 'flutter';
   } else if (item.kind == 'gc') {
