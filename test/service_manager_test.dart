@@ -222,7 +222,7 @@ void main() {
     });
   }, tags: 'useFlutterSdk');
 
-  group('serviceManagerTests - restoring device-enabled extension for', () {
+  group('serviceManagerTests - restoring device-enabled extension:', () {
     FlutterRunTestDriver _flutter;
     String _flutterIsolateId;
     VmServiceWrapper service;
