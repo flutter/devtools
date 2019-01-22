@@ -21,13 +21,20 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
+const bool showMemoryPage = false;
+const bool showPerformancePage = false;
+
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
     addScreen(InspectorScreen());
-    addScreen(DebuggerScreen());
-    addScreen(MemoryScreen());
     addScreen(TimelineScreen());
-    addScreen(PerformanceScreen());
+    addScreen(DebuggerScreen());
+    if (showMemoryPage) {
+      addScreen(MemoryScreen());
+    }
+    if (showPerformancePage) {
+      addScreen(PerformanceScreen());
+    }
     addScreen(LoggingScreen());
 
     initGlobalUI();

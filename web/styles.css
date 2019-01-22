@@ -37,6 +37,7 @@ body {
 .masthead-nav {
     float: right;
     margin-top: .5rem;
+    display: inline-flex;
 }
 
 .masthead-nav a:not(:last-child) {
