@@ -77,7 +77,7 @@ abstract class InspectorTreeNodeRenderBuilder<
     R extends InspectorTreeNodeRender> {
   InspectorTreeNodeRenderBuilder({
     @required this.level,
-    @required this.treeStyle
+    @required this.treeStyle,
   });
   void appendText(String text, TextStyle textStyle);
   void addIcon(Icon icon);
@@ -274,7 +274,8 @@ abstract class InspectorTreeNode {
   bool allowExpandCollapse = true;
 
   bool get showExpandCollapse {
-    return (diagnostic?.hasChildren == true || children.isNotEmpty) && allowExpandCollapse;
+    return (diagnostic?.hasChildren == true || children.isNotEmpty) &&
+        allowExpandCollapse;
   }
 
   set expanded(bool value) {
@@ -471,8 +472,8 @@ abstract class InspectorTree {
     VoidCallback onSelectionChange,
     this.onExpand,
     this.onHover,
-  }) : _onSelectionChange = onSelectionChange,
-       _onNodeAdded = onNodeAdded;
+  })  : _onSelectionChange = onSelectionChange,
+        _onNodeAdded = onNodeAdded;
 
   final TreeEventCallback onHover;
   final TreeEventCallback onExpand;
@@ -513,7 +514,7 @@ abstract class InspectorTree {
   double getRowOffset(int index) {
     return (root.getRow(index)?.depth ?? 0) * columnWidth;
   }
-  
+
   set hover(InspectorTreeNode node) {
     if (node == _hover) {
       return;
@@ -633,6 +634,7 @@ abstract class InspectorTree {
     }
     return true;
   }
+
   InspectorTreeNode setupInspectorTreeNode(
     InspectorTreeNode node,
     RemoteDiagnosticsNode diagnosticsNode, {
@@ -649,7 +651,8 @@ abstract class InspectorTree {
     if (diagnosticsNode.hasChildren ||
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
-        final bool styleIsMultiline = expandPropertiesByDefault(diagnosticsNode.style);
+        final bool styleIsMultiline =
+            expandPropertiesByDefault(diagnosticsNode.style);
         setupChildren(
           diagnosticsNode,
           node,
@@ -736,7 +739,8 @@ abstract class InspectorTree {
         print(e);
       }
     }
-  }}
+  }
+}
 
 abstract class InspectorTreeFixedRowHeight extends InspectorTree {
   InspectorTreeFixedRowHeight({
