@@ -322,7 +322,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
     if (icon.angle != 0) {
       context2D.rotate(icon.angle);
     }
-    _drawIcon() {
+    void _drawIcon() {
       context2D
         ..font = '${icon.fontSize}px Material Icons'
         ..fillStyle = colorToCss(icon.color)
@@ -330,6 +330,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
         ..textAlign = 'center'
         ..fillText(icon.text, 0, 0, iconWidth + 10);
     }
+
     if (_fontLoaded) {
       _drawIcon();
     } else {
