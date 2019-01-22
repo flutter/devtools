@@ -49,7 +49,7 @@ class InspectorScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div()..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     final CoreElement buttonSection = div(c: 'section')
       ..layoutHorizontal()
