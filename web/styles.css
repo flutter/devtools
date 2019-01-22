@@ -651,21 +651,19 @@ nav.menu li {
     color: #ccc;
 }
 
-/*
-We have to do something with the scrollbars as they flicker due to DOM
+/* We have to do something with the scrollbars as they flicker due to DOM
 manipulation in our table and ViewportCanvas code.
 
 Currently we overwrite the default to keep the scrollbars always visible
-but a more subtle solution would be better.
-*/
+but a more subtle solution would be better. */
 
-::-webkit-scrollbar {
+.custom-scrollbar ::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 9px;
     height: 9px;
 }
 
-::-webkit-scrollbar-thumb {
+.custom-scrollbar ::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     box-shadow: 0 0 1px rgba(255,255,255,.5);

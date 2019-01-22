@@ -43,7 +43,7 @@ class PerformanceScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div()..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     screenDiv.add(<CoreElement>[
       createLiveChartArea(),
