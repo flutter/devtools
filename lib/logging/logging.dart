@@ -55,7 +55,7 @@ class LoggingScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div()..layoutHorizontal();
+    final CoreElement screenDiv = div()..layoutVertical();
 
     this.framework = framework;
 
@@ -180,11 +180,12 @@ class LoggingScreen extends Screen {
         e.timestamp,
         summaryHtml: '$frameInfo$div',
       ));
+      // todo (pq): add tests for error extension handling once framework changes are landed.
     } else if (e.extensionKind == 'Flutter.Error') {
       final RemoteDiagnosticsNode node =
           RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
       if (_verboseDebugging) {
-        print('XXX node toStringDeep:######\n${node.toStringDeep()}\n###');
+        print('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       _log(LogData(
@@ -627,17 +628,9 @@ class LogDetailsUI extends CoreElement {
           if (node != null) {
             tree.maybePopulateChildren(node);
           }
-          // The ui wasn't updated because this selection was triggered by the logging
-          // view instead of the regular inspector.
           node.diagnostic.setSelectionInspector(false);
           // TODO(jacobr): warn if the selection can't be set as the node is
           // stale which is likely if this is an old log entry.
-        },
-        onExpand: (e) {
-          print('XXX expand $e');
-        },
-        onHover: (e) {
-
         },
       );
 
@@ -652,10 +645,6 @@ class LogDetailsUI extends CoreElement {
       tree.root = root;
       message.add(tree.element);
 
-      if (_verboseDebugging) {
-        // For debugging purposes only.
-        message.add(div(text: data.summary, c: 'pre-wrap monospace'));
-      }
       return;
     }
 
