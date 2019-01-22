@@ -200,7 +200,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
     if (render == null) {
       return null;
     }
-    while (e != null && !e.classes.contains('inspector-icon')) {
+    while (e != null && !e.classes.contains('flutter-icon')) {
       if (e == render.element) {
         return null;
       }
