@@ -22,6 +22,7 @@ body {
 
 .masthead {
     padding: 16px 20px;
+    margin-bottom: 20px;
     text-align: center;
     background-color: #4078c0;
 }
@@ -62,13 +63,6 @@ body {
 
 .masthead-nav .active {
     color: #fff;
-}
-
-#toolbar {
-    padding: 10px 30px;
-    margin-bottom: 10px;
-    color: #7a7a7a;
-    border-bottom: 1px solid #eee;
 }
 
 h2 {
