@@ -663,8 +663,6 @@ manipulation in our table and ViewportCanvas code.
 Currently we overwrite the default to keep the scrollbars always visible
 but a more subtle solution would be better. */
 
-/* todo: set up most pages with this */
-
 .custom-scrollbar ::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 9px;
