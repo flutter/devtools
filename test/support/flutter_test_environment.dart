@@ -12,30 +12,29 @@ import 'package:devtools/vm_service_wrapper.dart';
 
 import 'flutter_test_driver.dart';
 
-/// Switch this flag to false to debug issues with non-atomic test behavior.
-bool reuseTestEnvironment = true;
-
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
     this.testAppDirectory = 'test/fixtures/flutter_app',
   });
 
-  final FlutterRunConfiguration _runConfig;
+  FlutterRunConfiguration _runConfig;
+  FlutterRunConfiguration get runConfig => _runConfig;
   final String testAppDirectory;
   FlutterRunTestDriver _flutter;
   FlutterRunTestDriver get flutter => _flutter;
   VmServiceWrapper _service;
   VmServiceWrapper get service => _service;
 
-  // This function will be called before creating and running the Flutter app.
-  VoidAsyncFunction _beforeSetup;
-  set beforeSetup(VoidAsyncFunction f) => _beforeSetup = f;
-
   // This function will be called after we have ran the Flutter app and the
   // vmService is opened.
-  VoidAsyncFunction _afterSetup;
-  set afterSetup(VoidAsyncFunction f) => _afterSetup = f;
+  VoidAsyncFunction _afterNewSetup;
+  set afterNewSetup(VoidAsyncFunction f) => _afterNewSetup = f;
+
+  // This function will be called for every call to [setupEnvironment], even
+  // when the setup is not forced or triggered by a new FlutterRunConfiguration.
+  VoidAsyncFunction _afterEverySetup;
+  set afterEverySetup(VoidAsyncFunction f) => _afterEverySetup = f;
 
   // The function will be called before tearing down the test and stopping the
   // Flutter app.
@@ -44,28 +43,38 @@ class FlutterTestEnvironment {
 
   bool _needsSetup = true;
 
-  Future<void> setupEnvironment({bool force = false}) async {
-    if (!force && !_needsSetup && reuseTestEnvironment) {
-      // Setting up the environment is slow so we reuse the existing environment
-      // when possible.
-      return;
+  // Switch this flag to false to debug issues with non-atomic test behavior.
+  bool reuseTestEnvironment = true;
+
+  Future<void> setupEnvironment({
+    bool force = false,
+    FlutterRunConfiguration config,
+  }) async {
+    // Setting up the environment is slow so we reuse the existing environment
+    // when possible.
+    if (force ||
+        _needsSetup ||
+        !reuseTestEnvironment ||
+        _isNewRunConfig(config)) {
+      // If we already have a running test device, stop it before setting up a
+      // new one.
+      if (_flutter != null) await tearDownEnvironment(force: true);
+
+      // Update the run configuration if we have a new one.
+      if (_isNewRunConfig(config)) _runConfig = config;
+
+      _needsSetup = false;
+
+      _flutter = FlutterRunTestDriver(Directory(testAppDirectory));
+      await _flutter.run(runConfig: _runConfig);
+
+      _service = _flutter.vmService;
+      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+      await serviceManager.vmServiceOpened(_service, Completer().future);
+
+      if (_afterNewSetup != null) await _afterNewSetup();
     }
-    if (_beforeSetup != null) await _beforeSetup();
-
-    _flutter = FlutterRunTestDriver(Directory(testAppDirectory));
-    await _flutter.run(
-      withDebugger: _runConfig.withDebugger,
-      pauseOnExceptions: _runConfig.pauseOnExceptions,
-      trackWidgetCreation: _runConfig.trackWidgetCreation,
-    );
-
-    _service = _flutter.vmService;
-    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-    await serviceManager.vmServiceOpened(_service, Completer().future);
-
-    if (_afterSetup != null) await _afterSetup();
-
-    _needsSetup = false;
+    if (_afterEverySetup != null) await _afterEverySetup();
   }
 
   Future<void> tearDownEnvironment({bool force = false}) async {
@@ -73,11 +82,15 @@ class FlutterTestEnvironment {
       // Skip actually tearing down for better test performance.
       return;
     }
-    if (_beforeSetup != null) await _beforeTearDown();
+    if (_beforeTearDown != null) await _beforeTearDown();
 
     await _service.allFuturesCompleted.future;
     await _flutter.stop();
 
     _needsSetup = true;
+  }
+
+  bool _isNewRunConfig(FlutterRunConfiguration config) {
+    return config != null && config != _runConfig;
   }
 }

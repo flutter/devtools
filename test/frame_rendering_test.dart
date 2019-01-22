@@ -18,10 +18,10 @@ void main() {
     FramesTracker framesTracker;
 
     final FlutterTestEnvironment env = FlutterTestEnvironment(
-      FlutterRunConfiguration(withDebugger: true),
+      const FlutterRunConfiguration(withDebugger: true),
     );
 
-    env.afterSetup = () {
+    env.afterNewSetup = () {
       framesTracker = FramesTracker(env.service);
       framesTracker.start();
       expect(framesTracker.eventStreamSubscription, isNotNull);

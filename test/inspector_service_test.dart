@@ -3,100 +3,76 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:async';
 import 'dart:io';
 
 import 'package:test/test.dart';
 
-import 'package:devtools/globals.dart';
 import 'package:devtools/inspector/diagnostics_node.dart';
 import 'package:devtools/inspector/flutter_widget.dart';
 import 'package:devtools/inspector/inspector_service.dart';
-import 'package:devtools/service_manager.dart';
-import 'package:devtools/vm_service_wrapper.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
-import 'support/flutter_test_driver.dart';
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 
 /// Switch this flag to false to debug issues with non-atomic test behavior.
 bool reuseTestEnvironment = true;
 
-void main() {
-  bool widgetCreationTracked;
-  FlutterRunTestDriver _flutter;
-  VmServiceWrapper service;
+void main() async {
+  Catalog.setCatalog(
+      Catalog.decode(await File('web/widgets.json').readAsString()));
   InspectorService inspectorService;
 
-  Future<void> setupEnvironment(bool trackWidgetCreation) async {
-    if (trackWidgetCreation == widgetCreationTracked && reuseTestEnvironment) {
-      // Setting up the environment is slow so we reuse the existing environment
-      // when possible.
-      return;
-    }
-    widgetCreationTracked = trackWidgetCreation;
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
 
-    Catalog.setCatalog(
-        Catalog.decode(await File('web/widgets.json').readAsString()));
-
-    _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
-
-    await _flutter.run(
-      withDebugger: true,
-      trackWidgetCreation: trackWidgetCreation,
-    );
-    service = _flutter.vmService;
-
-    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-
-    await serviceManager.vmServiceOpened(service, Completer().future);
+  env.afterNewSetup = () async {
     await ensureInspectorServiceDependencies();
-    inspectorService = await InspectorService.create(service);
-    if (trackWidgetCreation) {
+    inspectorService = await InspectorService.create(env.service);
+    if (env.runConfig.trackWidgetCreation) {
       await inspectorService.inferPubRootDirectoryIfNeeded();
     }
-  }
+  };
 
-  Future<void> tearDownEnvironment({bool force = false}) async {
-    if (!force && reuseTestEnvironment) {
-      // Skip actually tearing down for better test performance.
-      return;
-    }
+  env.beforeTearDown = () {
     inspectorService.dispose();
     inspectorService = null;
-
-    await service.allFuturesCompleted.future;
-    await _flutter.stop();
-  }
+  };
 
   try {
     group('inspector service tests', () {
+      tearDownAll(() async {
+        await env.tearDownEnvironment(force: true);
+      });
+
       test('track widget creation on', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
         expect(await inspectorService.isWidgetCreationTracked(), isTrue);
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('useDaemonApi', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
         expect(inspectorService.useDaemonApi, isTrue);
         // TODO(jacobr): add test where we trigger a breakpoint and verify that
         // the daemon api is now false.
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('hasServiceMethod', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
         expect(inspectorService.hasServiceMethod('someDummyName'), isFalse);
         expect(inspectorService.hasServiceMethod('getRootWidgetSummaryTree'),
             isTrue);
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('createObjectGroup', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
 
         final g1 = inspectorService.createObjectGroup('g1');
         final g2 = inspectorService.createObjectGroup('g2');
@@ -111,11 +87,11 @@ void main() {
         await g1Disposed;
         await g2Disposed;
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('infer pub root directories', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
         final group = inspectorService.createObjectGroup('test-group');
         // These tests are moot if widget creation is not tracked.
         expect(await inspectorService.isWidgetCreationTracked(), isTrue);
@@ -125,11 +101,11 @@ void main() {
         expect(rootDirectory, endsWith('/test/fixtures/flutter_app/lib'));
         await group.dispose();
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('widget tree', () async {
-        await setupEnvironment(true);
+        await env.setupEnvironment();
         final group = inspectorService.createObjectGroup('test-group');
         final RemoteDiagnosticsNode root =
             await group.getRoot(FlutterTreeType.widget);
@@ -228,11 +204,16 @@ void main() {
 
         await group.dispose();
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       test('render tree', () async {
-        await setupEnvironment(false);
+        await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+            withDebugger: true,
+            trackWidgetCreation: false,
+          ),
+        );
 
         final group = inspectorService.createObjectGroup('test-group');
         final RemoteDiagnosticsNode root =
@@ -283,17 +264,22 @@ void main() {
           ),
         );
 
-        await tearDownEnvironment();
+        await env.tearDownEnvironment();
       });
 
       // Run this test last as it will take a long time due to setting up the test
       // environment from scratch.
       test('track widget creation off', () async {
-        await setupEnvironment(false);
+        await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+            withDebugger: true,
+            trackWidgetCreation: false,
+          ),
+        );
 
         expect(await inspectorService.isWidgetCreationTracked(), isFalse);
 
-        await tearDownEnvironment(force: true);
+        await env.tearDownEnvironment();
       });
 
       // TODO(jacobr): add tests verifying that we can stop the running device
