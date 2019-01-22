@@ -6,28 +6,23 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
-
 import 'package:devtools/globals.dart';
 import 'package:devtools/inspector/flutter_widget.dart';
 import 'package:devtools/inspector/inspector_controller.dart';
 import 'package:devtools/inspector/inspector_tree.dart';
 import 'package:devtools/inspector/inspector_text_styles.dart' as styles;
 import 'package:devtools/inspector/inspector_service.dart';
-import 'package:devtools/service_manager.dart';
 import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools/ui/icons.dart';
 import 'package:devtools/ui/material_icons.dart';
-import 'package:devtools/vm_service_wrapper.dart';
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
-import 'support/flutter_test_driver.dart';
-
-/// Switch this flag to false to debug issues with non-atomic test behavior.
-bool reuseTestEnvironment = true;
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 
 class FakePaintEntry extends PaintEntry {
   FakePaintEntry({this.icon, this.text, this.textStyle, @required this.x});
@@ -262,35 +257,22 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
 void main() async {
   Catalog.setCatalog(
       Catalog.decode(await File('web/widgets.json').readAsString()));
-  bool widgetCreationTracked;
-  FlutterRunTestDriver _flutter;
-  VmServiceWrapper service;
   InspectorService inspectorService;
   InspectorController inspectorController;
-
   FakeInspectorTree tree;
   FakeInspectorTree detailsTree;
 
-  Future<void> setupEnvironment(bool trackWidgetCreation) async {
-    if (trackWidgetCreation != widgetCreationTracked || !reuseTestEnvironment) {
-      widgetCreationTracked = trackWidgetCreation;
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
 
-      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+  env.afterNewSetup = () async {
+    await ensureInspectorServiceDependencies();
+  };
 
-      await _flutter.run(
-        withDebugger: true,
-        trackWidgetCreation: trackWidgetCreation,
-      );
-      service = _flutter.vmService;
-
-      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-
-      await serviceManager.vmServiceOpened(service, Completer().future);
-      await ensureInspectorServiceDependencies();
-    }
-
-    inspectorService = await InspectorService.create(service);
-    if (reuseTestEnvironment) {
+  env.afterEverySetup = () async {
+    inspectorService = await InspectorService.create(env.service);
+    if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
@@ -332,23 +314,18 @@ void main() async {
     // twice after being initialized.
     await tree.nextUiFrame;
     await tree.nextUiFrame;
-  }
+  };
 
-  Future<void> tearDownEnvironment({bool force = false}) async {
+  env.beforeTearDown = () {
     inspectorController.dispose();
     inspectorController = null;
     inspectorService.dispose();
     inspectorService = null;
-
-    if (force || !reuseTestEnvironment) {
-      await service.allFuturesCompleted.future;
-      await _flutter.stop();
-    }
-  }
+  };
 
   group('inspector controller tests', () {
     test('initial state', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       expect(
           tree.toStringDeep(),
@@ -370,11 +347,11 @@ void main() async {
 
       expect(detailsTree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment();
     });
 
     test('select widget', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       // select row index 5.
       tree.onTap(const Offset(0, rowHeight * 5.5));
@@ -527,11 +504,11 @@ void main() async {
       // TODO(jacobr): add tests that verified that we scrolled the view to the
       // correct points on selection.
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment();
     });
 
     test('hotReload', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       await serviceManager.performHotReload();
       // Ensure the inspector does not fall over and die after a hot reload.
@@ -551,7 +528,7 @@ void main() async {
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment(force: true);
     });
   }, tags: 'useFlutterSdk');
 }
