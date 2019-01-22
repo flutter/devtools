@@ -65,24 +65,28 @@ class LoggingScreen extends Screen {
     CoreElement detailsDiv;
 
     screenDiv.add(<CoreElement>[
-    div(c: 'section')
-      ..add(<CoreElement>[
-        form()
-          ..layoutHorizontal()
-          ..clazz('align-items-center')
-          ..add(<CoreElement>[
-            PButton('Clear logs')
-              ..small()
-              ..click(_clear),
-            span()..flex(),
-          ])
-      ]),
-    _createTableView()
-      ..clazz('section')
-      ..flex(),
-    detailsDiv = div(c: 'section table-border')
-      ..layoutVertical()
-      ..add(logDetailsUI = LogDetailsUI()),
+      div(c: 'section')
+        ..add(<CoreElement>[
+          form()
+            ..clazz('align-items-center')
+            ..add(<CoreElement>[
+              PButton('Clear logs')
+                ..small()
+                ..click(_clear),
+              span()..flex(),
+            ])
+        ]),
+      div(c: 'section')
+        ..add(<CoreElement>[
+          _createTableView()
+            ..layoutHorizontal()
+            ..clazz('section')
+            ..flex(),
+          detailsDiv = div(c: 'section table-border')
+            ..layoutHorizontal()
+            ..add(logDetailsUI = LogDetailsUI()),
+        ])
+        ..layoutHorizontal(),
     ]);
 
     // configure the table / details splitter
