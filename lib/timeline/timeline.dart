@@ -54,7 +54,9 @@ class TimelineScreen extends Screen {
   PButton resumeButton;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     FrameDetailsUI frameDetailsUI;
 
     final CoreElement upperButtonSection = div(c: 'section')
@@ -80,7 +82,7 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
-    mainDiv.add(<CoreElement>[
+    screenDiv.add(<CoreElement>[
       upperButtonSection,
       div(c: 'section'),
       createLiveChartArea(),
@@ -117,6 +119,8 @@ class TimelineScreen extends Screen {
         frameDetailsUI.updateData(data);
       }
     });
+
+    return screenDiv;
   }
 
   CoreElement createLiveChartArea() {
