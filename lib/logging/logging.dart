@@ -634,14 +634,14 @@ class LogDetailsUI extends CoreElement {
           // stale which is likely if this is an old log entry.
         },
         onExpand: (e) {
-          print("XXX expand $e");
+          print('XXX expand $e');
         },
         onHover: (e) {
 
         },
       );
 
-      InspectorTreeNode root = tree.setupInspectorTreeNode(
+      final InspectorTreeNode root = tree.setupInspectorTreeNode(
         tree.createNode(),
         data.node,
         expandChildren: true,
