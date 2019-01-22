@@ -684,7 +684,7 @@ class LogDetailsUI extends CoreElement {
   void _updateUIFromData() {
     if (data.details.startsWith('{') && data.details.endsWith('}')) {
       try {
-        // If the string decodes properly, than format the json.
+        // If the string decodes properly, then format the json.
         final dynamic result = jsonDecode(data.details);
         message.text = jsonEncoder.convert(result);
       } catch (e) {
