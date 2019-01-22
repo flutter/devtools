@@ -22,7 +22,6 @@ body {
 
 .masthead {
     padding: 16px 20px;
-    margin-bottom: 20px;
     text-align: center;
     background-color: #4078c0;
 }
@@ -63,6 +62,13 @@ body {
 
 .masthead-nav .active {
     color: #fff;
+}
+
+#toolbar {
+    padding: 10px 30px;
+    margin-bottom: 10px;
+    color: #7a7a7a;
+    border-bottom: 1px solid #eee;
 }
 
 h2 {
@@ -651,21 +657,21 @@ nav.menu li {
     color: #ccc;
 }
 
-/*
-We have to do something with the scrollbars as they flicker due to DOM
+/* We have to do something with the scrollbars as they flicker due to DOM
 manipulation in our table and ViewportCanvas code.
 
 Currently we overwrite the default to keep the scrollbars always visible
-but a more subtle solution would be better.
-*/
+but a more subtle solution would be better. */
 
-::-webkit-scrollbar {
+/* todo: set up most pages with this */
+
+.custom-scrollbar ::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 9px;
     height: 9px;
 }
 
-::-webkit-scrollbar-thumb {
+.custom-scrollbar ::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     box-shadow: 0 0 1px rgba(255,255,255,.5);

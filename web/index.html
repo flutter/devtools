@@ -42,6 +42,10 @@
     </div>
 </header>
 
+<div id="toolbar" layout horizontal>
+    <button class="btn btn-sm" type="button" disabled=""><span></span><span>Connect…</span></button>
+</div>
+
 <div id="error-container" class="container"></div>
 
 <div id="content" class="container" flex layout vertical style="overflow: auto;">
@@ -52,7 +56,7 @@
 
 <footer flex layout horizontal none class="footer align-items-center">
     <div class="footer-status" id="global-status" flex>
-        &nbsp;
+        <select class="form-select select-sm" disabled></select>
     </div>
 
     <div class="footer-status text-center" id="page-status" flex horiz-padding>
