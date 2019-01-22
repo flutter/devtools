@@ -56,9 +56,14 @@ class FlutterTestEnvironment {
         _needsSetup ||
         !reuseTestEnvironment ||
         _isNewRunConfig(config)) {
-      _needsSetup = false;
+      // If we already have a running test device, stop it before setting up a
+      // new one.
+      if (_flutter != null) await tearDownEnvironment(force: true);
+
       // Update the run configuration if we have a new one.
       if (_isNewRunConfig(config)) _runConfig = config;
+
+      _needsSetup = false;
 
       _flutter = FlutterRunTestDriver(Directory(testAppDirectory));
       await _flutter.run(runConfig: _runConfig);

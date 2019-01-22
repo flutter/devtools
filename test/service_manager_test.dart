@@ -6,14 +6,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:test/test.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
+
 import 'package:devtools/eval_on_dart_library.dart';
 import 'package:devtools/globals.dart';
 import 'package:devtools/service_extensions.dart' as extensions;
 import 'package:devtools/service_manager.dart';
 import 'package:devtools/service_registrations.dart' as registrations;
 import 'package:devtools/vm_service_wrapper.dart';
-import 'package:test/test.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
@@ -23,6 +24,10 @@ void main() {
     final FlutterTestEnvironment env = FlutterTestEnvironment(
       const FlutterRunConfiguration(withDebugger: true),
     );
+
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
 
     test('vmServiceOpened', () async {
       await env.setupEnvironment();
@@ -218,7 +223,7 @@ void main() {
       expect(finalResult.runtimeType, equals(InstanceRef));
       expect(finalResult.valueAsString, equals('false'));
 
-      await env.tearDownEnvironment(force: true);
+      await env.tearDownEnvironment();
     });
   }, tags: 'useFlutterSdk');
 

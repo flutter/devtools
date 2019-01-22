@@ -5,10 +5,11 @@
 @TestOn('vm')
 import 'dart:io';
 
+import 'package:test/test.dart';
+
 import 'package:devtools/inspector/diagnostics_node.dart';
 import 'package:devtools/inspector/flutter_widget.dart';
 import 'package:devtools/inspector/inspector_service.dart';
-import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
@@ -42,6 +43,10 @@ void main() async {
 
   try {
     group('inspector service tests', () {
+      tearDownAll(() async {
+        await env.tearDownEnvironment(force: true);
+      });
+
       test('track widget creation on', () async {
         await env.setupEnvironment();
         expect(await inspectorService.isWidgetCreationTracked(), isTrue);
@@ -265,14 +270,16 @@ void main() async {
       // Run this test last as it will take a long time due to setting up the test
       // environment from scratch.
       test('track widget creation off', () async {
-        // trackwidgetCreation should still be set to false from the previous
-        // test case, so we do not need to specify trackWidgetCreation: false
-        // here.
-        await env.setupEnvironment();
+        await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+            withDebugger: true,
+            trackWidgetCreation: false,
+          ),
+        );
 
         expect(await inspectorService.isWidgetCreationTracked(), isFalse);
 
-        await env.tearDownEnvironment(force: true);
+        await env.tearDownEnvironment();
       });
 
       // TODO(jacobr): add tests verifying that we can stop the running device

@@ -6,6 +6,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
+
 import 'package:devtools/globals.dart';
 import 'package:devtools/inspector/flutter_widget.dart';
 import 'package:devtools/inspector/inspector_controller.dart';
@@ -16,8 +19,6 @@ import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools/ui/icons.dart';
 import 'package:devtools/ui/material_icons.dart';
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
@@ -324,6 +325,10 @@ void main() async {
   };
 
   group('inspector controller tests', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
     test('initial state', () async {
       await env.setupEnvironment();
 
@@ -528,7 +533,7 @@ void main() async {
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.
 
-      await env.tearDownEnvironment(force: true);
+      await env.tearDownEnvironment();
     });
   }, tags: 'useFlutterSdk');
 }
