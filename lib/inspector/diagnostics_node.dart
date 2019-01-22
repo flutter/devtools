@@ -660,7 +660,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
     return super.toDiagnosticsNode(
       name: name ?? this.name,
-      style: style ?? this.style,
+      style: style ?? DiagnosticsTreeStyle.sparse,
     );
   }
 
