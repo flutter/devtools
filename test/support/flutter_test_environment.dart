@@ -16,9 +16,13 @@ import 'flutter_test_driver.dart';
 bool reuseTestEnvironment = true;
 
 class FlutterTestEnvironment {
-  FlutterTestEnvironment(this._runConfig);
+  FlutterTestEnvironment(
+    this._runConfig, {
+    this.testAppDirectory = 'test/fixtures/flutter_app',
+  });
 
-  FlutterRunConfiguration _runConfig;
+  final FlutterRunConfiguration _runConfig;
+  final String testAppDirectory;
   FlutterRunTestDriver _flutter;
   FlutterRunTestDriver get flutter => _flutter;
   VmServiceWrapper _service;
@@ -48,7 +52,7 @@ class FlutterTestEnvironment {
     }
     if (_beforeSetup != null) await _beforeSetup();
 
-    _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+    _flutter = FlutterRunTestDriver(Directory(testAppDirectory));
     await _flutter.run(
       withDebugger: _runConfig.withDebugger,
       pauseOnExceptions: _runConfig.pauseOnExceptions,
