@@ -7,13 +7,6 @@
 // with a couple of tweaks to support error levels that haven't yet landed in
 // the core Flutter repo but should land soon.
 part of 'fake_flutter.dart';
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 
 // Examples can assume:
 // int rows, columns;

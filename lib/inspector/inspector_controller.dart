@@ -325,7 +325,7 @@ class InspectorController implements InspectorServiceClient {
           inspectorTree.createNode(),
           node,
           expandChildren: true,
-          expandProperties: false
+          expandProperties: false,
         );
         inspectorTree.root = rootNode;
       } else {
@@ -508,7 +508,7 @@ class InspectorController implements InspectorServiceClient {
       }
 
       if (detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
-         newSelection?.valueRef == selectedDiagnostic?.valueRef) {
+          newSelection?.valueRef == selectedDiagnostic?.valueRef) {
         // No need to change the selection as it didn't actually change.
         _selectionGroups.cancelNext();
         return;

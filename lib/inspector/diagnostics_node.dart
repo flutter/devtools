@@ -14,7 +14,7 @@ import '../utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
-Map<K, V> _invertMap<K, V>(Map<V,K> inverted) => Map.fromEntries(
+Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
     inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
 
 const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
@@ -31,7 +31,8 @@ const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
   'off': DiagnosticLevel.off,
 };
 
-final Map<DiagnosticLevel, String> diagnosticLevelToName = _invertMap(nameToDiagnosticLevel);
+final Map<DiagnosticLevel, String> diagnosticLevelToName =
+    _invertMap(nameToDiagnosticLevel);
 
 const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
   'sparse': DiagnosticsTreeStyle.sparse,
@@ -48,8 +49,8 @@ const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
   'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
 };
 
-final Map<DiagnosticsTreeStyle, String> treeStyleToName = _invertMap(nameToTreeStyle);
-
+final Map<DiagnosticsTreeStyle, String> treeStyleToName =
+    _invertMap(nameToTreeStyle);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -357,10 +358,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return defaultValue;
     }
     final level = nameToDiagnosticLevel[value];
-    if (level == null) {
-      print ('Unabled to find level for $value');
-    }
-    assert(level != null);
+    assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
 
@@ -604,10 +602,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Icon get icon {
-    if (isProperty ) return null;
+    if (isProperty) return null;
     Icon icon = widget?.icon;
     if (icon == null && widgetRuntimeType != null)
-    icon ??= iconMaker.fromWidgetName(widgetRuntimeType);
+      icon ??= iconMaker.fromWidgetName(widgetRuntimeType);
     return icon;
   }
 
