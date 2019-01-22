@@ -7,7 +7,7 @@
 			"name": "Launch web app",
 			"url": "http://localhost:8080",
 			"webRoot": "${workspaceFolder}/web",
-			"preLaunchTask": "webdev serve"
+			"preLaunchTask": "pub: build_runner serve"
 		}
 	]
 }

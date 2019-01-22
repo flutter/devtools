@@ -15,7 +15,7 @@ import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
-import '../timeline/fps.dart';
+import '../timeline/frame_rendering.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
@@ -54,7 +54,9 @@ class LoggingScreen extends Screen {
   Future<ObjectGroup> objectGroup;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     this.framework = framework;
 
     // TODO(devoncarew): Add checkbox toggles to enable specific logging channels.
@@ -62,35 +64,30 @@ class LoggingScreen extends Screen {
     LogDetailsUI logDetailsUI;
     CoreElement detailsDiv;
 
-    CoreElement loggingContainer;
-    mainDiv.add(<CoreElement>[
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          createHotReloadRestartGroup(framework),
-          span()..flex(),
-          div(c: 'btn-group')
-            ..add(PButton('Clear logs')
-              ..small()
-              ..click(_clear)),
-          div()..flex(),
-        ])
-      ,
-      loggingContainer = div(c: 'logging-container')
-      ..flex()
+    screenDiv.add(<CoreElement>[
+    div(c: 'section')
       ..add(<CoreElement>[
-        _createTableView()
-          ..clazz('section')
-          ..clazz('logging-panel')
-          ..flex(),
-        logDetailsUI = LogDetailsUI()
-        ..clazz('section')..clazz('table-border')..clazz('logging-panel'),
+        form()
+          ..layoutHorizontal()
+          ..clazz('align-items-center')
+          ..add(<CoreElement>[
+            PButton('Clear logs')
+              ..small()
+              ..click(_clear),
+            span()..flex(),
+          ])
       ]),
+    _createTableView()
+      ..clazz('section')
+      ..flex(),
+    detailsDiv = div(c: 'section table-border')
+      ..layoutVertical()
+      ..add(logDetailsUI = LogDetailsUI()),
     ]);
 
     // configure the table / details splitter
     split.flexSplit(
-      [loggingTable.element, logDetailsUI],
+      [loggingTable.element, detailsDiv],
       gutterSize: defaultSplitterWidth,
       sizes: [60, 40],
       horizontal: true,
@@ -105,6 +102,8 @@ class LoggingScreen extends Screen {
     loggingTable.onRowsChanged.listen((_) {
       _updateStatus();
     });
+
+    return screenDiv;
   }
 
   @override

@@ -48,7 +48,9 @@ class InspectorScreen extends Screen {
   StreamSubscription<Object> splitterSubscription;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     final CoreElement buttonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
@@ -70,7 +72,7 @@ class InspectorScreen extends Screen {
       ]);
     getServiceExtensionButtons().forEach(buttonSection.add);
 
-    mainDiv.add(<CoreElement>[
+    screenDiv.add(<CoreElement>[
       buttonSection,
       inspectorContainer = div(c: 'inspector-container'),
     ]);
@@ -80,6 +82,8 @@ class InspectorScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
+    return screenDiv;
   }
 
   void _handleConnectionStart(VmService service) async {
@@ -90,9 +94,12 @@ class InspectorScreen extends Screen {
 
     try {
       await ensureInspectorServiceDependencies();
-      inspectorService = await InspectorService.create(service);
+
+      // Init the inspector service, or return null.
+      inspectorService =
+          await InspectorService.create(service).catchError((e) => null);
       final pubRootDirectory =
-          await inspectorService.inferPubRootDirectoryIfNeeded();
+          await inspectorService?.inferPubRootDirectoryIfNeeded();
       if (pubRootDirectory != null) {
         // TODO(jacobr): add ui to view and set a different pub root directory and
         // display the pub root directory in the status bar.
@@ -100,6 +107,10 @@ class InspectorScreen extends Screen {
     } finally {
       spinner.element.remove();
       refreshTreeButton.disabled = false;
+    }
+
+    if (inspectorService == null) {
+      return;
     }
 
     // TODO(jacobr): support the Render tree, Layer tree, and Semantic trees as

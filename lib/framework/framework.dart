@@ -31,6 +31,8 @@ class Framework {
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
 
+  final Map<Screen, CoreElement> _screenContents = {};
+
   void addScreen(Screen screen) {
     screens.add(screen);
   }
@@ -74,9 +76,11 @@ class Framework {
 
   CoreElement get mainElement => CoreElement.from(querySelector('#content'));
 
-  final Map<Screen, List<Element>> _contents = <Screen, List<Element>>{};
-
   void load(Screen screen) {
+    if (current == null) {
+      mainElement.element.children.clear();
+    }
+
     if (current != null) {
       final Screen oldScreen = current;
       current = null;
@@ -84,19 +88,22 @@ class Framework {
       oldScreen.visible = false;
 
       pageStatus.removeAll();
-      _contents[oldScreen] = mainElement.element.children.toList();
-      mainElement.element.children.clear();
-    } else {
-      mainElement.element.children.clear();
+
+      _screenContents[oldScreen].hidden(true);
     }
 
     current = screen;
 
-    if (_contents.containsKey(current)) {
-      mainElement.element.children.addAll(_contents[current]);
+    if (_screenContents.containsKey(current)) {
+      _screenContents[current].hidden(false);
     } else {
       current.framework = this;
-      current.createContent(this, mainElement);
+
+      final CoreElement screenContent = current.createContent(this);
+      screenContent.attribute('full');
+      mainElement.add(screenContent);
+
+      _screenContents[current] = screenContent;
     }
 
     current.visible = true;
@@ -217,7 +224,7 @@ abstract class Screen {
 
   Stream<bool> get onVisibleChange => _visible.onValueChange;
 
-  void createContent(Framework framework, CoreElement mainDiv);
+  CoreElement createContent(Framework framework);
 
   void entering() {}
 
