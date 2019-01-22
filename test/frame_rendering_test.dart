@@ -10,15 +10,14 @@ import 'package:devtools/service_extensions.dart' as extensions;
 import 'package:devtools/timeline/frame_rendering.dart';
 import 'package:test/test.dart';
 
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
 import 'support/flutter_test_environment.dart';
-
-import 'support/flutter_test_driver.dart';
 
 void main() {
   group('frame rendering tests', () {
     FramesTracker framesTracker;
 
-    FlutterTestEnvironment env = FlutterTestEnvironment(
+    final FlutterTestEnvironment env = FlutterTestEnvironment(
       FlutterRunConfiguration(withDebugger: true),
     );
 
