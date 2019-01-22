@@ -15,7 +15,8 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
-import 'fps.dart';
+import 'frame_rendering.dart';
+import 'frame_rendering_chart.dart';
 import 'timeline_protocol.dart';
 
 const Color slowFrameColor = Color(0xFFf97c7c);
@@ -47,7 +48,7 @@ class TimelineScreen extends Screen {
 
   TimelineFramesUI timelineFramesUI;
 
-  bool paused = false;
+  bool _paused = false;
 
   PButton pauseButton;
   PButton resumeButton;
@@ -170,7 +171,7 @@ class TimelineScreen extends Screen {
     pauseButton.disabled = true;
     resumeButton.disabled = false;
 
-    paused = true;
+    _paused = true;
 
     _updateListeningState();
   }
@@ -179,7 +180,7 @@ class TimelineScreen extends Screen {
     pauseButton.disabled = false;
     resumeButton.disabled = true;
 
-    paused = false;
+    _paused = false;
 
     _updateListeningState();
   }
@@ -187,14 +188,15 @@ class TimelineScreen extends Screen {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    final bool shouldBeRunning = !paused && isCurrentScreen;
-    final bool isRunning = !timelineFramesBuilder.isPaused;
+    final bool shouldBeRunning = !_paused && isCurrentScreen;
+    final bool isRunning = !timelineFramesBuilder.paused;
 
     if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
       _startTimeline();
     }
 
     if (shouldBeRunning && !isRunning) {
+      framesTracker.resume();
       timelineFramesBuilder.resume();
 
       await serviceManager.service
@@ -202,7 +204,7 @@ class TimelineScreen extends Screen {
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
-
+      framesTracker.pause();
       timelineFramesBuilder.pause();
     }
   }
@@ -374,7 +376,8 @@ class TimelineFramesBuilder {
 
   List<TimelineFrame> frames = <TimelineFrame>[];
 
-  bool isPaused = false;
+  bool _paused = false;
+  bool get paused => _paused;
 
   List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
   List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
@@ -390,14 +393,14 @@ class TimelineFramesBuilder {
   Stream<Null> get onCleared => _clearedController.stream;
 
   void pause() {
-    isPaused = true;
+    _paused = true;
 
     dartEvents.clear();
     gpuEvents.clear();
   }
 
   void resume() {
-    isPaused = false;
+    _paused = false;
   }
 
   void processTimelineEvent(TimelineThread thread, TimelineThreadEvent event) {

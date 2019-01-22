@@ -475,3 +475,16 @@ Stream<String> _transformToLines(Stream<List<int>> byteStream) {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter());
 }
+
+// TODO(kenzie): use FlutterRunConfiguration for run, attach, and _setupProcess.
+class FlutterRunConfiguration {
+  FlutterRunConfiguration({
+    this.withDebugger = false,
+    this.pauseOnExceptions = false,
+    this.trackWidgetCreation = true,
+  });
+
+  final bool withDebugger;
+  final bool pauseOnExceptions;
+  final bool trackWidgetCreation;
+}

@@ -1,17 +1,14 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../charts/charts.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
-import '../vm_service_wrapper.dart';
+import 'frame_rendering.dart';
 import 'timeline.dart';
 
 class FramesChart extends LineChart<FramesTracker> {
@@ -60,10 +57,10 @@ class FramesChart extends LineChart<FramesTracker> {
       x -= 3 * units;
 
       final Color color =
-          _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
+      _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
       final String tooltip = _isSlowFrame(frame)
           ? 'This frame took ${frame.elapsedMs}ms to render, which can cause '
-              'frame rate to drop below 60 FPS.'
+          'frame rate to drop below 60 FPS.'
           : 'This frame took ${frame.elapsedMs}ms to render.';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '
           'width="${2 * units}" height="$height" '
@@ -86,99 +83,4 @@ class FramesChart extends LineChart<FramesTracker> {
   bool _isSlowFrame(FrameInfo frame) {
     return frame.elapsedMs > FrameInfo.kTargetMaxFrameTimeMs;
   }
-}
-
-class FramesTracker {
-  FramesTracker(this.service) {
-    service.onExtensionEvent.listen((Event e) {
-      if (e.extensionKind == 'Flutter.Frame') {
-        final ExtensionData data = e.extensionData;
-        addSample(FrameInfo.from(data.data));
-      }
-    });
-  }
-
-  static const int kMaxFrames = 60;
-
-  VmServiceWrapper service;
-  final StreamController<Null> _changeController =
-      StreamController<Null>.broadcast();
-  List<FrameInfo> samples = <FrameInfo>[];
-
-  bool get hasConnection => service != null;
-
-  Stream<Null> get onChange => _changeController.stream;
-
-  void start() {}
-
-  void stop() {}
-
-  void addSample(FrameInfo frame) {
-    if (samples.isEmpty) {
-      frame.frameGroupStart = true;
-    } else {
-      frame.calcFrameGroupStart(samples.last);
-    }
-    samples.add(frame);
-    while (samples.length > kMaxFrames) {
-      samples.removeAt(0);
-    }
-    _changeController.add(null);
-  }
-
-  FrameInfo get lastSample => samples.isEmpty ? null : samples.last;
-
-  num calcRecentFPS() {
-    int frameCount = 0;
-    int usedFrames = 0;
-
-    for (int i = samples.length - 1; i >= 0; i--) {
-      final FrameInfo frame = samples[i];
-
-      frameCount++;
-
-      num frameTime = frame.elapsedMs;
-      int requiredFrames =
-          (frameTime / FrameInfo.kTargetMaxFrameTimeMs).round();
-      frameTime -= requiredFrames * FrameInfo.kTargetMaxFrameTimeMs;
-      if (frameTime > 0) {
-        requiredFrames++;
-      }
-      usedFrames += requiredFrames;
-
-      if (frame.frameGroupStart) {
-        break;
-      }
-    }
-
-    return 1000 * frameCount / (usedFrames * FrameInfo.kTargetMaxFrameTimeMs);
-  }
-}
-
-class FrameInfo {
-  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
-
-  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
-
-  static FrameInfo from(Map<dynamic, dynamic> data) {
-    return FrameInfo(
-        data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
-  }
-
-  final int number;
-  final num elapsedMs;
-  final num startTimeMs;
-
-  bool frameGroupStart = false;
-
-  num get endTimeMs => startTimeMs + elapsedMs;
-
-  void calcFrameGroupStart(FrameInfo previousFrame) {
-    if (startTimeMs > (previousFrame.endTimeMs + kTargetMaxFrameTimeMs)) {
-      frameGroupStart = true;
-    }
-  }
-
-  @override
-  String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
 }
