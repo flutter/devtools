@@ -74,7 +74,7 @@ class LoggingScreen extends Screen {
               span()..flex(),
             ])
         ]),
-      div(c: 'section')..flex()
+      div(c: 'section log-area')..flex()
         ..add(<CoreElement>[
           _createTableView()
             ..layoutHorizontal()
