@@ -10,6 +10,10 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../inspector/diagnostics_node.dart';
+import '../inspector/inspector_service.dart';
+import '../inspector/inspector_tree.dart';
+import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
 import '../timeline/frame_rendering.dart';
 import '../ui/elements.dart';
@@ -24,6 +28,8 @@ import '../vm_service_wrapper.dart';
 const int kMaxLogItemsLowerBound = 5000;
 const int kMaxLogItemsUpperBound = 5500;
 final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
+
+bool _verboseDebugging = false;
 
 class LoggingScreen extends Screen {
   LoggingScreen()
@@ -45,6 +51,8 @@ class LoggingScreen extends Screen {
 
   bool hasPendingDomUpdates = false;
 
+  Future<ObjectGroup> objectGroup;
+
   @override
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
@@ -60,7 +68,6 @@ class LoggingScreen extends Screen {
       div(c: 'section')
         ..add(<CoreElement>[
           form()
-            ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
               PButton('Clear logs')
@@ -69,20 +76,25 @@ class LoggingScreen extends Screen {
               span()..flex(),
             ])
         ]),
-      _createTableView()
-        ..clazz('section')
-        ..flex(),
-      detailsDiv = div(c: 'section table-border')
-        ..layoutVertical()
-        ..add(logDetailsUI = LogDetailsUI()),
+      div(c: 'section')
+        ..add(<CoreElement>[
+          _createTableView()
+            ..layoutHorizontal()
+            ..clazz('section')
+            ..flex(),
+          detailsDiv = div(c: 'section table-border')
+            ..layoutHorizontal()
+            ..add(logDetailsUI = LogDetailsUI()),
+        ])
+        ..layoutHorizontal(),
     ]);
 
     // configure the table / details splitter
     split.flexSplit(
       [loggingTable.element, detailsDiv],
-      horizontal: false,
       gutterSize: defaultSplitterWidth,
-      sizes: [80, 20],
+      sizes: [60, 40],
+      horizontal: true,
       minSize: [200, 60],
     );
 
@@ -132,7 +144,7 @@ class LoggingScreen extends Screen {
     loggingTable.setRows(data);
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _handleConnectionStart(VmServiceWrapper service) async {
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
@@ -149,11 +161,15 @@ class LoggingScreen extends Screen {
     // Log `dart:developer` `log` events.
     service.onEvent('_Logging').listen(_handleDeveloperLogEvent);
 
-    // Log Flutter frame events.
-    service.onExtensionEvent.listen(_handleFlutterFrameEvent);
+    // Log Flutter extension events.
+    service.onExtensionEvent.listen(_handleExtensionEvent);
+
+    await ensureInspectorServiceDependencies();
+
+    objectGroup = InspectorService.createGroup(service, 'console-group');
   }
 
-  void _handleFlutterFrameEvent(Event e) {
+  void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Frame') {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
@@ -167,6 +183,21 @@ class LoggingScreen extends Screen {
         jsonEncode(e.extensionData.data),
         e.timestamp,
         summaryHtml: '$frameInfo$div',
+      ));
+      // todo (pq): add tests for error extension handling once framework changes are landed.
+    } else if (e.extensionKind == 'Flutter.Error') {
+      final RemoteDiagnosticsNode node =
+          RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
+      if (_verboseDebugging) {
+        print('node toStringDeep:######\n${node.toStringDeep()}\n###');
+      }
+
+      _log(LogData(
+        '${e.extensionKind.toLowerCase()}',
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: node.toDiagnosticsNode().toString(),
+        node: node,
       ));
     } else {
       _log(LogData(
@@ -454,6 +485,7 @@ class LogData {
     this.summaryHtml,
     this.isError = false,
     this.detailsComputer,
+    this.node,
   });
 
   final String kind;
@@ -462,6 +494,7 @@ class LogData {
   final String summary;
   final String summaryHtml;
 
+  final RemoteDiagnosticsNode node;
   String _details;
   Future<String> detailsComputer;
 
@@ -550,6 +583,8 @@ String getCssClassForEventKind(LogData item) {
     cssClass = 'stderr';
   } else if (item.kind == 'stdout') {
     cssClass = 'stdout';
+  } else if (item.kind == 'flutter.error') {
+    cssClass = 'stderr';
   } else if (item.kind.startsWith('flutter')) {
     cssClass = 'flutter';
   } else if (item.kind == 'gc') {
@@ -578,11 +613,44 @@ class LogDetailsUI extends CoreElement {
   CoreElement content;
   CoreElement message;
 
+  InspectorTreeHtml tree;
+
   void setData(LogData data) {
     // Reset the vertical scroll value if any.
     content.element.scrollTop = 0;
 
     this.data = data;
+
+    tree = null;
+    if (data.node != null) {
+      message.clear();
+      tree = InspectorTreeHtml(
+        summaryTree: false,
+        treeType: FlutterTreeType.widget,
+        onSelectionChange: () {
+          final InspectorTreeNode node = tree.selection;
+          if (node != null) {
+            tree.maybePopulateChildren(node);
+          }
+          node.diagnostic.setSelectionInspector(false);
+          // TODO(jacobr): warn if the selection can't be set as the node is
+          // stale which is likely if this is an old log entry.
+        },
+      );
+
+      final InspectorTreeNode root = tree.setupInspectorTreeNode(
+        tree.createNode(),
+        data.node,
+        expandChildren: true,
+        expandProperties: true,
+      );
+      // No sense in collapsing the root node.
+      root.allowExpandCollapse = false;
+      tree.root = root;
+      message.add(tree.element);
+
+      return;
+    }
 
     if (data == null) {
       message.text = '';
@@ -608,7 +676,7 @@ class LogDetailsUI extends CoreElement {
   void _updateUIFromData() {
     if (data.details.startsWith('{') && data.details.endsWith('}')) {
       try {
-        // If the string decodes properly, than format the json.
+        // If the string decodes properly, then format the json.
         final dynamic result = jsonDecode(data.details);
         message.text = jsonEncoder.convert(result);
       } catch (e) {

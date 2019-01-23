@@ -14,7 +14,10 @@ import '../utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
-const Map<String, DiagnosticLevel> diagnosticLevelNames = {
+Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
+    inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
+
+const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
   'hidden': DiagnosticLevel.hidden,
   'fine': DiagnosticLevel.fine,
   'debug': DiagnosticLevel.debug,
@@ -23,22 +26,31 @@ const Map<String, DiagnosticLevel> diagnosticLevelNames = {
   'hint': DiagnosticLevel.hint,
   'fix': DiagnosticLevel.fix,
   'contract': DiagnosticLevel.contract,
+  'violation': DiagnosticLevel.violation,
   'error': DiagnosticLevel.error,
   'off': DiagnosticLevel.off,
 };
 
-const Map<String, DiagnosticsTreeStyle> treeStyleValues = {
+final Map<DiagnosticLevel, String> diagnosticLevelToName =
+    _invertMap(nameToDiagnosticLevel);
+
+const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
   'sparse': DiagnosticsTreeStyle.sparse,
   'offstage': DiagnosticsTreeStyle.offstage,
   'dense': DiagnosticsTreeStyle.dense,
   'transition': DiagnosticsTreeStyle.transition,
   'whitespace': DiagnosticsTreeStyle.whitespace,
   'error': DiagnosticsTreeStyle.error,
+  'flat': DiagnosticsTreeStyle.flat,
   'singleLine': DiagnosticsTreeStyle.singleLine,
+  'headerLine': DiagnosticsTreeStyle.headerLine,
   'indentedSingleLine': DiagnosticsTreeStyle.indentedSingleLine,
   'shallow': DiagnosticsTreeStyle.shallow,
   'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
 };
+
+final Map<DiagnosticsTreeStyle, String> treeStyleToName =
+    _invertMap(nameToTreeStyle);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -345,8 +357,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelNames[value];
-    assert(level != null);
+    final level = nameToDiagnosticLevel[value];
+    assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
 
@@ -359,7 +371,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleValues[value];
+    final style = nameToTreeStyle[value];
     assert(style != null);
     return style ?? defaultValue;
   }
@@ -430,7 +442,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Whether this node is being displayed as a full tree or a filtered tree.
   bool get isStateful => getBooleanMember('stateful', false);
 
-  String get getWidgetRuntimeType => getStringMember('widgetRuntimeType');
+  String get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
   /// Check whether children are already available.
   bool get childrenReady {
@@ -586,13 +598,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   FlutterWidget get widget {
-    return Catalog.instance?.getWidget(description);
+    return Catalog.instance?.getWidget(widgetRuntimeType);
   }
 
   Icon get icon {
     if (isProperty) return null;
     Icon icon = widget?.icon;
-    icon ??= iconMaker.fromWidgetName(description);
+    if (icon == null && widgetRuntimeType != null)
+      icon ??= iconMaker.fromWidgetName(widgetRuntimeType);
     return icon;
   }
 

@@ -18,6 +18,7 @@ import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
+import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_web.dart';
@@ -79,7 +80,12 @@ class HtmlTextPaintEntry extends HtmlPaintEntry {
 }
 
 class InspectorTreeNodeRenderHtmlBuilder
-    implements InspectorTreeNodeRenderBuilder<InspectorTreeNodeHtmlRender> {
+    extends InspectorTreeNodeRenderBuilder<InspectorTreeNodeHtmlRender> {
+  InspectorTreeNodeRenderHtmlBuilder({
+    @required DiagnosticLevel level,
+    @required DiagnosticsTreeStyle treeStyle,
+  }) : super(level: level, treeStyle: treeStyle);
+
   TextStyle lastStyle;
   String font;
   String color;
@@ -87,7 +93,7 @@ class InspectorTreeNodeRenderHtmlBuilder
 
   @override
   void appendText(String text, TextStyle textStyle) {
-    if (text.isEmpty) {
+    if (text == null || text.isEmpty) {
       return;
     }
     if (textStyle != lastStyle) {
@@ -108,16 +114,23 @@ class InspectorTreeNodeRenderHtmlBuilder
   @override
   InspectorTreeNodeHtmlRender build() {
     // The html renderer does not know what its size is.
-    return InspectorTreeNodeHtmlRender(_entries, const Size(0, 0));
+    return InspectorTreeNodeHtmlRender(_entries, const Size(0, 0), [
+      'inspector-level-${diagnosticLevelToName[level]}',
+      'inspector-style-${treeStyleToName[treeStyle]}',
+    ]);
   }
 }
 
 class InspectorTreeNodeHtmlRender
     extends InspectorTreeNodeRender<HtmlPaintEntry> {
-  InspectorTreeNodeHtmlRender(List<HtmlPaintEntry> entries, Size size)
+  InspectorTreeNodeHtmlRender(
+      List<HtmlPaintEntry> entries, Size size, this.cssClasses)
       : super(entries, size);
 
+  final List<String> cssClasses;
+
   void paint(Element container) {
+    container.classes.addAll(cssClasses);
     element = container;
     for (var entry in entries) {
       entry.paint(container);
@@ -136,7 +149,10 @@ class InspectorTreeNodeHtmlRender
 class InspectorTreeNodeHtml extends InspectorTreeNode {
   @override
   InspectorTreeNodeRenderBuilder createRenderBuilder() {
-    return InspectorTreeNodeRenderHtmlBuilder();
+    return InspectorTreeNodeRenderHtmlBuilder(
+      level: diagnostic.level,
+      treeStyle: diagnostic.style,
+    );
   }
 }
 
@@ -144,6 +160,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
   InspectorTreeHtml({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
+    NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
@@ -151,6 +168,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
         super(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -182,7 +200,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
     if (render == null) {
       return null;
     }
-    while (e != null && !e.classes.contains('inspector-icon')) {
+    while (e != null && !e.classes.contains('flutter-icon')) {
       if (e == render.element) {
         return null;
       }
@@ -347,11 +365,13 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
         currentX += columnWidth;
       }
 
+      final rowContentContainer = Element.div();
+      rowContentContainer.classes.add('inspector-tree-row-content');
+      rowContentContainer.style.paddingLeft = '${currentX}px';
       final rowContent = Element.div();
-      rowContent.classes.add('inspector-tree-row-content');
-      rowContent.style.paddingLeft = '${currentX}px';
+      rowContentContainer.append(rowContent);
       renderObject.paint(rowContent);
-      container.append(rowContent);
+      container.append(rowContentContainer);
 
       // TODO(jacobr): handle row selected backgrounds using CSS classes.
       return container;

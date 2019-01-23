@@ -104,12 +104,14 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
   FakeInspectorTree({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
+    @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -290,6 +292,7 @@ void main() async {
       inspectorTreeFactory: ({
         summaryTree,
         treeType,
+        onNodeAdded,
         onSelectionChange,
         onExpand,
         onHover,
@@ -297,6 +300,7 @@ void main() async {
         return FakeInspectorTree(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
