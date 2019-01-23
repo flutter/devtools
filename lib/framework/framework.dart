@@ -122,9 +122,22 @@ class Framework {
     }
   }
 
+  void showInfo(String message, {String title}) {
+    final PFlash flash = PFlash();
+    flash.addClose().click(clearMessages);
+    if (title != null) {
+      flash.add(label(text: title));
+    }
+    flash.add(div(text: message));
+
+    final CoreElement errorContainer =
+        CoreElement.from(querySelector('#messages-container'));
+    errorContainer.add(flash);
+  }
+
   void showError(String title, [dynamic error]) {
     final PFlash flash = PFlash()..warn();
-    flash.addClose().click(clearError);
+    flash.addClose().click(clearMessages);
     flash.add(label(text: title));
     if (error != null) {
       final errorString = '$error';
@@ -135,12 +148,12 @@ class Framework {
     }
 
     final CoreElement errorContainer =
-        CoreElement.from(querySelector('#error-container'));
+        CoreElement.from(querySelector('#messages-container'));
     errorContainer.add(flash);
   }
 
-  void clearError() {
-    querySelector('#error-container').children.clear();
+  void clearMessages() {
+    querySelector('#messages-container').children.clear();
   }
 
   void toast(String message, {String title}) {

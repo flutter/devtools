@@ -46,6 +46,7 @@ class InspectorScreen extends Screen {
   ProgressElement progressElement;
   CoreElement inspectorContainer;
   StreamSubscription<Object> splitterSubscription;
+  bool displayedWidgetTrackingNotice = false;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -158,6 +159,7 @@ class InspectorScreen extends Screen {
     inspectorContainer.add(elements);
     splitterSubscription = flexSplitBidirectional(
       elements,
+      gutterSize: defaultSplitterWidth,
       // When we have two columns we want the details tree to be wider.
       horizontalSizes: [35, 65],
       // When we have two rows we want the main tree to be taller.
@@ -169,6 +171,23 @@ class InspectorScreen extends Screen {
     // when the inspector panel is not visible.
     inspectorController.setVisibleToUser(true);
     inspectorController.setActivate(true);
+
+    // TODO(devoncarew): Should we move this check to a once a day thing?
+    if (!displayedWidgetTrackingNotice) {
+      // ignore: unawaited_futures
+      inspectorService.isWidgetCreationTracked().then((bool value) {
+        if (value) {
+          return;
+        }
+
+        displayedWidgetTrackingNotice = true;
+
+        framework.showInfo(
+            "Consider passing '--track-widget-creation' into flutter run in "
+            'order to allow the widget tree to beter focus on user created '
+            'widgets.');
+      });
+    }
   }
 
   void _handleConnectionStop(dynamic event) {

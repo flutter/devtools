@@ -72,7 +72,7 @@ class InspectorService {
   final EvalOnDartLibrary inspectorLibrary;
   final Set<String> supportedServiceMethods;
 
-  /// loadInspectorServiceDependencies must be called before this method is
+  /// [ensureInspectorServiceDependencies] must be called before this method is
   /// called.
   static Future<ObjectGroup> createGroup(
     VmService vmService,
