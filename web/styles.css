@@ -746,6 +746,5 @@ html [full] {
 }
 
 #messages-container div+div {
-    margin-top: 0.6em;
+    margin-top: 0.25em;
 }
-

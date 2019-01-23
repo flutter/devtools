@@ -123,30 +123,45 @@ class Framework {
   }
 
   void showInfo(String message, {String title}) {
+    _showMessage(message, title: title);
+  }
+
+  void showWarning(String message, {String title}) {
+    _showMessage(message, title: title, warning: true);
+  }
+
+  void showError(String title, [dynamic error]) {
+    String message;
+    if (error != null) {
+      message = '$error';
+      // Only display the error object if it has a custom Dart toString.
+      if (message.startsWith('[object ')) {
+        message = null;
+      }
+    }
+
+    _showMessage(message, title: title, error: true);
+  }
+
+  void _showMessage(
+    String message, {
+    String title,
+    bool warning = false,
+    bool error = false,
+  }) {
     final PFlash flash = PFlash();
+    if (warning) {
+      flash.warning();
+    }
+    if (error) {
+      flash.error();
+    }
     flash.addClose().click(clearMessages);
     if (title != null) {
       flash.add(label(text: title));
     }
     for (String text in message.split('\n\n')) {
       flash.add(div(text: text));
-    }
-
-    final CoreElement errorContainer =
-        CoreElement.from(querySelector('#messages-container'));
-    errorContainer.add(flash);
-  }
-
-  void showError(String title, [dynamic error]) {
-    final PFlash flash = PFlash()..warn();
-    flash.addClose().click(clearMessages);
-    flash.add(label(text: title));
-    if (error != null) {
-      final errorString = '$error';
-      // Only display the error object if it has a custom Dart toString.
-      if (!errorString.startsWith('[object ')) {
-        flash.add(div(text: '$error'));
-      }
     }
 
     final CoreElement errorContainer =

@@ -85,8 +85,12 @@ class PButton extends CoreElement {
 class PFlash extends CoreElement {
   PFlash({String text}) : super('div', classes: 'flash', text: text);
 
-  void warn() {
+  void warning() {
     clazz('flash-warn');
+  }
+
+  void error() {
+    clazz('flash-error');
   }
 
   CoreElement addClose() {

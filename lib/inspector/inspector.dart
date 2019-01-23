@@ -182,8 +182,8 @@ class InspectorScreen extends Screen {
 
         displayedWidgetTrackingNotice = true;
 
-        framework.showInfo(
-            '''Warning: the widget creation tracking feature, required for
+        framework
+            .showWarning('''The widget creation tracking feature, required for
 advanced Flutter Inspector functionality, is not enabled.
 
 To fix this relaunch your application by running 'flutter run
