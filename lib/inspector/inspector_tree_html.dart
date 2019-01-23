@@ -158,7 +158,7 @@ class InspectorTreeNodeHtml extends InspectorTreeNode {
     return InspectorTreeNodeRenderHtmlBuilder(
       level: diagnostic.level,
       treeStyle: diagnostic.style,
-      allowWrap: diagnostic.allowWrap
+      allowWrap: diagnostic.allowWrap,
     );
   }
 }
