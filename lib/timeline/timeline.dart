@@ -229,9 +229,9 @@ class TimelineScreen extends Screen {
     for (TimelineEvent event in events) {
       final TimelineThread thread =
           TimelineThread(timelineData, event.args['name'], event.threadId);
-      // TODO: consider pruning which threads we add based on which ones are
-      // relevant to the user.
-      timelineData.addThread(thread);
+      if (thread.isDartThread || thread.isGpuThread) {
+        timelineData.addThread(thread);
+      }
     }
 
     timelineData.onTimelineThreadEvent.listen((TimelineThreadEvent event) {

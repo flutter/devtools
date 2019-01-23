@@ -117,6 +117,8 @@ class TimelineThread implements Comparable<TimelineThread> {
 
   TimelineThreadEvent durationStack;
 
+  bool get isDartThread => _name == 'io.flutter.1.ui';
+  bool get isGpuThread => _name == 'io.flutter.1.gpu';
   final Map<String, TimelineThreadEvent> _asyncEvents =
       <String, TimelineThreadEvent>{};
 
