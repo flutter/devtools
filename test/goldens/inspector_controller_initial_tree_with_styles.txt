@@ -1,4 +1,4 @@
-▼[[]<grayed> </grayed>root <grayed>]</grayed>
+▼[R]<grayed> </grayed>root <grayed>]</grayed>
   ▼[M]<grayed> </grayed>MyApp
     ▼[M]<grayed> </grayed>MaterialApp
       ▼[S]<grayed> </grayed>Scaffold

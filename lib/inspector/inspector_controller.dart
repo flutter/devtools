@@ -486,6 +486,7 @@ class InspectorController implements InspectorServiceClient {
   }
 
   Future<void> updateSelectionFromService() async {
+    final bool firstFrame = !treeLoadStarted;
     treeLoadStarted = true;
     _selectionGroups.cancelNext();
 
@@ -507,7 +508,8 @@ class InspectorController implements InspectorServiceClient {
         if (group.disposed) return;
       }
 
-      if (detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
+      if (!firstFrame &&
+          detailsSelection?.valueRef == details.selectedDiagnostic?.valueRef &&
           newSelection?.valueRef == selectedDiagnostic?.valueRef) {
         // No need to change the selection as it didn't actually change.
         _selectionGroups.cancelNext();

@@ -339,7 +339,7 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
+            '▼[R] root ]\n'
                 '  ▼[M] MyApp\n'
                 '    ▼[M] MaterialApp\n'
                 '      ▼[S] Scaffold\n'
@@ -365,7 +365,7 @@ void main() async {
       // select row index 5.
       tree.onTap(const Offset(0, rowHeight * 5.5));
       const textSelected = // Comment to make dartfmt behave.
-          '▼[[] root ]\n'
+          '▼[R] root ]\n'
           '  ▼[M] MyApp\n'
           '    ▼[M] MaterialApp\n'
           '      ▼[S] Scaffold\n'
@@ -436,7 +436,7 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
+            '▼[R] root ]\n'
                 '  ▼[M] MyApp\n'
                 '    ▼[M] MaterialApp\n'
                 '      ▼[S] Scaffold <-- selected\n'
@@ -463,7 +463,7 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
+            '▼[R] root ]\n'
                 '  ▼[M] MyApp\n'
                 '    ▼[M] MaterialApp\n'
                 '      ▼[S] Scaffold\n'
@@ -486,7 +486,7 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
+            '▼[R] root ]\n'
                 '  ▼[M] MyApp\n'
                 '    ▼[M] MaterialApp\n'
                 '      ▼[S] Scaffold <-- selected\n'
@@ -524,7 +524,7 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
+            '▼[R] root ]\n'
                 '  ▼[M] MyApp\n'
                 '    ▼[M] MaterialApp\n'
                 '      ▼[S] Scaffold\n'
