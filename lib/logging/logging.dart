@@ -76,7 +76,8 @@ class LoggingScreen extends Screen {
               span()..flex(),
             ])
         ]),
-      div(c: 'section')
+      div(c: 'section log-container')
+        ..flex()
         ..add(<CoreElement>[
           _createTableView()
             ..layoutHorizontal()
@@ -622,6 +623,12 @@ class LogDetailsUI extends CoreElement {
     this.data = data;
 
     tree = null;
+
+    if (data == null) {
+      message.text = '';
+      return;
+    }
+
     if (data.node != null) {
       message.clear();
       tree = InspectorTreeHtml(
@@ -649,11 +656,6 @@ class LogDetailsUI extends CoreElement {
       tree.root = root;
       message.add(tree.element);
 
-      return;
-    }
-
-    if (data == null) {
-      message.text = '';
       return;
     }
 
