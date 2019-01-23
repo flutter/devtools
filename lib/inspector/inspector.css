@@ -2,9 +2,12 @@
 /* Use of this source code is governed by a BSD-style license that can be */
 /* found in the LICENSE file. */
 
-.inspector-tree {
+.inspector-tree-container {
     border: 1px solid #dfe2e5;
     border-radius: 3px;
+}
+
+.inspector-tree {
     overflow: scroll;
     scroll-behavior: smooth;
     width: 100%;
@@ -29,6 +32,11 @@
     .inspector-container {
         flex-direction: row;
     }
+}
+
+.inspector-no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .inspector-tree-row-content {

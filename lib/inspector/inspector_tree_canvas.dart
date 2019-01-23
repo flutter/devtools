@@ -218,7 +218,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       onTap: onTap,
       onMouseMove: onMouseMove,
       onMouseLeave: onMouseLeave,
-      classes: 'inspector-tree',
+      classes: 'inspector-tree inspector-tree-container',
     );
   }
 
