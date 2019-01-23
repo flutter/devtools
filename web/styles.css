@@ -744,3 +744,8 @@ html [full] {
     height: 100%;
     overflow: hidden;
 }
+
+#messages-container div+div {
+    margin-top: 0.6em;
+}
+

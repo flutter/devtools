@@ -128,7 +128,9 @@ class Framework {
     if (title != null) {
       flash.add(label(text: title));
     }
-    flash.add(div(text: message));
+    for (String text in message.split('\n\n')) {
+      flash.add(div(text: text));
+    }
 
     final CoreElement errorContainer =
         CoreElement.from(querySelector('#messages-container'));

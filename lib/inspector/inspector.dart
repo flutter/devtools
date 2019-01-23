@@ -172,7 +172,7 @@ class InspectorScreen extends Screen {
     inspectorController.setVisibleToUser(true);
     inspectorController.setActivate(true);
 
-    // TODO(devoncarew): Should we move this check to a once a day thing?
+    // TODO(devoncarew): Move this notice display to once a day.
     if (!displayedWidgetTrackingNotice) {
       // ignore: unawaited_futures
       inspectorService.isWidgetCreationTracked().then((bool value) {
@@ -183,9 +183,11 @@ class InspectorScreen extends Screen {
         displayedWidgetTrackingNotice = true;
 
         framework.showInfo(
-            "Consider passing '--track-widget-creation' into flutter run in "
-            'order to allow the widget tree to beter focus on user created '
-            'widgets.');
+            '''Warning: the widget creation tracking feature, required for
+advanced Flutter Inspector functionality, is not enabled.
+
+To fix this relaunch your application by running 'flutter run
+--track-widget-creation' or run your application from VS Code or IntelliJ.''');
       });
     }
   }
