@@ -262,8 +262,7 @@ MaterialApp
                                  │ renderObject: RenderCustomPaint#00000
                                  │
                                  └─DefaultTextStyle
-                                   │ debugLabel: fallback style; consider putting your text in a
-                                   │   Material
+                                   │ debugLabel: fallback style; consider putting your text in a Material
                                    │ inherit: true
                                    │ color: Color(0xd0ff0000)
                                    │ family: monospace
@@ -332,8 +331,7 @@ MaterialApp
                                                      │           │ startBehavior: down
                                                      │           │
                                                      │           └─RawGestureDetector
-                                                     │             │ state: RawGestureDetectorState#00000(gestures: [tap], behavior:
-                                                     │             │   opaque)
+                                                     │             │ state: RawGestureDetectorState#00000(gestures: [tap], behavior: opaque)
                                                      │             │
                                                      │             └─_GestureSemantics
                                                      │               │ renderObject: RenderSemanticsGestureHandler#00000
