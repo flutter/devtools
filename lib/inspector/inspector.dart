@@ -46,6 +46,7 @@ class InspectorScreen extends Screen {
   ProgressElement progressElement;
   CoreElement inspectorContainer;
   StreamSubscription<Object> splitterSubscription;
+  bool displayedWidgetTrackingNotice = false;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -158,6 +159,7 @@ class InspectorScreen extends Screen {
     inspectorContainer.add(elements);
     splitterSubscription = flexSplitBidirectional(
       elements,
+      gutterSize: defaultSplitterWidth,
       // When we have two columns we want the details tree to be wider.
       horizontalSizes: [35, 65],
       // When we have two rows we want the main tree to be taller.
@@ -169,6 +171,25 @@ class InspectorScreen extends Screen {
     // when the inspector panel is not visible.
     inspectorController.setVisibleToUser(true);
     inspectorController.setActivate(true);
+
+    // TODO(devoncarew): Move this notice display to once a day.
+    if (!displayedWidgetTrackingNotice) {
+      // ignore: unawaited_futures
+      inspectorService.isWidgetCreationTracked().then((bool value) {
+        if (value) {
+          return;
+        }
+
+        displayedWidgetTrackingNotice = true;
+
+        framework
+            .showWarning('''The widget creation tracking feature, required for
+advanced Flutter Inspector functionality, is not enabled.
+
+To fix this relaunch your application by running 'flutter run
+--track-widget-creation' or run your application from VS Code or IntelliJ.''');
+      });
+    }
   }
 
   void _handleConnectionStop(dynamic event) {
