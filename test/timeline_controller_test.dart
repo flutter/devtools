@@ -35,5 +35,5 @@ void main() {
     //  data from the engine, allowing us to distinguish cpu events from gpu
     //  events as well as to know accurate frame start times, end times, and
     //  events.
-  });
+  }, tags: 'useFlutterSdk');
 }
