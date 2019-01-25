@@ -1,22 +1,22 @@
 MaterialApp
- │ state: _MaterialAppState#00000
+ │ state: _MaterialAppState#6453b
  │
  └─ScrollConfiguration
    │ behavior: _MaterialScrollBehavior
    │
    └─AnimatedTheme
      │ duration: 200ms
-     │ state: _AnimatedThemeState#00000(ticker inactive,
-     │   ThemeDataTween(ThemeData#00000(buttonTheme:
-     │   ButtonThemeData#00000(buttonColor: Color(0xffe0e0e0),
-     │   colorScheme: ColorScheme#00000(primary: MaterialColor(primary
+     │ state: _AnimatedThemeState#b4f4d(ticker inactive,
+     │   ThemeDataTween(ThemeData#80837(buttonTheme:
+     │   ButtonThemeData#8a6d6(buttonColor: Color(0xffe0e0e0),
+     │   colorScheme: ColorScheme#f9640(primary: MaterialColor(primary
      │   value: Color(0xff2196f3)), primaryVariant: Color(0xff1976d2),
      │   secondary: Color(0xff2196f3), secondaryVariant:
      │   Color(0xff1976d2), background: Color(0xff90caf9), error:
      │   Color(0xffd32f2f), onSecondary: Color(0xffffffff),
      │   onBackground: Color(0xffffffff)), materialTapTargetSize:
-     │   MaterialTapTargetSize.padded), textTheme: TextTheme#00000,
-     │   primaryTextTheme: TextTheme#00000(display4:
+     │   MaterialTapTargetSize.padded), textTheme: TextTheme#bcfcd,
+     │   primaryTextTheme: TextTheme#29b10(display4:
      │   TextStyle(debugLabel: whiteMountainView display4, inherit:
      │   true, color: Color(0xb3ffffff), family: Roboto, decoration:
      │   TextDecoration.none), display3: TextStyle(debugLabel:
@@ -56,7 +56,7 @@ MaterialApp
      │   whiteMountainView overline, inherit: true, color:
      │   Color(0xffffffff), family: Roboto, decoration:
      │   TextDecoration.none)), accentTextTheme:
-     │   TextTheme#00000(display4: TextStyle(debugLabel:
+     │   TextTheme#29b10(display4: TextStyle(debugLabel:
      │   whiteMountainView display4, inherit: true, color:
      │   Color(0xb3ffffff), family: Roboto, decoration:
      │   TextDecoration.none), display3: TextStyle(debugLabel:
@@ -96,26 +96,27 @@ MaterialApp
      │   whiteMountainView overline, inherit: true, color:
      │   Color(0xffffffff), family: Roboto, decoration:
      │   TextDecoration.none)), inputDecorationTheme:
-     │   InputDecorationTheme#00000, iconTheme:
-     │   IconThemeData#00000(color: Color(0xdd000000)),
-     │   primaryIconTheme: IconThemeData#00000(color:
-     │   Color(0xffffffff)), accentIconTheme: IconThemeData#00000(color:
-     │   Color(0xffffffff)), sliderTheme: SliderThemeData#00000,
-     │   tabBarTheme: TabBarTheme#00000, chipTheme: ChipThemeData#00000,
-     │   materialTapTargetSize: MaterialTapTargetSize.padded,
-     │   pageTransitionsTheme: PageTransitionsTheme#00000) → null))
+     │   InputDecorationTheme#6198d, iconTheme:
+     │   IconThemeData#2abdc(color: Color(0xdd000000)),
+     │   primaryIconTheme: IconThemeData#15fa8(color:
+     │   Color(0xffffffff)), accentIconTheme: IconThemeData#15fa8(color:
+     │   Color(0xffffffff)), sliderTheme: SliderThemeData#e4fab,
+     │   tabBarTheme: TabBarTheme#e3dcc, cardTheme: CardTheme#b4e63,
+     │   chipTheme: ChipThemeData#8cae4, materialTapTargetSize:
+     │   MaterialTapTargetSize.padded, pageTransitionsTheme:
+     │   PageTransitionsTheme#d4524) → null))
      │
      └─Theme
-       │ data: ThemeData#00000(buttonTheme:
-       │   ButtonThemeData#00000(buttonColor: Color(0xffe0e0e0),
-       │   colorScheme: ColorScheme#00000(primary: MaterialColor(primary
+       │ data: ThemeData#80837(buttonTheme:
+       │   ButtonThemeData#8a6d6(buttonColor: Color(0xffe0e0e0),
+       │   colorScheme: ColorScheme#f9640(primary: MaterialColor(primary
        │   value: Color(0xff2196f3)), primaryVariant: Color(0xff1976d2),
        │   secondary: Color(0xff2196f3), secondaryVariant:
        │   Color(0xff1976d2), background: Color(0xff90caf9), error:
        │   Color(0xffd32f2f), onSecondary: Color(0xffffffff),
        │   onBackground: Color(0xffffffff)), materialTapTargetSize:
-       │   MaterialTapTargetSize.padded), textTheme: TextTheme#00000,
-       │   primaryTextTheme: TextTheme#00000(display4:
+       │   MaterialTapTargetSize.padded), textTheme: TextTheme#bcfcd,
+       │   primaryTextTheme: TextTheme#29b10(display4:
        │   TextStyle(debugLabel: whiteMountainView display4, inherit:
        │   true, color: Color(0xb3ffffff), family: Roboto, decoration:
        │   TextDecoration.none), display3: TextStyle(debugLabel:
@@ -155,7 +156,7 @@ MaterialApp
        │   whiteMountainView overline, inherit: true, color:
        │   Color(0xffffffff), family: Roboto, decoration:
        │   TextDecoration.none)), accentTextTheme:
-       │   TextTheme#00000(display4: TextStyle(debugLabel:
+       │   TextTheme#29b10(display4: TextStyle(debugLabel:
        │   whiteMountainView display4, inherit: true, color:
        │   Color(0xb3ffffff), family: Roboto, decoration:
        │   TextDecoration.none), display3: TextStyle(debugLabel:
@@ -195,22 +196,23 @@ MaterialApp
        │   whiteMountainView overline, inherit: true, color:
        │   Color(0xffffffff), family: Roboto, decoration:
        │   TextDecoration.none)), inputDecorationTheme:
-       │   InputDecorationTheme#00000, iconTheme:
-       │   IconThemeData#00000(color: Color(0xdd000000)),
-       │   primaryIconTheme: IconThemeData#00000(color:
-       │   Color(0xffffffff)), accentIconTheme: IconThemeData#00000(color:
-       │   Color(0xffffffff)), sliderTheme: SliderThemeData#00000,
-       │   tabBarTheme: TabBarTheme#00000, chipTheme: ChipThemeData#00000,
-       │   materialTapTargetSize: MaterialTapTargetSize.padded,
-       │   pageTransitionsTheme: PageTransitionsTheme#00000)
+       │   InputDecorationTheme#6198d, iconTheme:
+       │   IconThemeData#2abdc(color: Color(0xdd000000)),
+       │   primaryIconTheme: IconThemeData#15fa8(color:
+       │   Color(0xffffffff)), accentIconTheme: IconThemeData#15fa8(color:
+       │   Color(0xffffffff)), sliderTheme: SliderThemeData#e4fab,
+       │   tabBarTheme: TabBarTheme#e3dcc, cardTheme: CardTheme#b4e63,
+       │   chipTheme: ChipThemeData#8cae4, materialTapTargetSize:
+       │   MaterialTapTargetSize.padded, pageTransitionsTheme:
+       │   PageTransitionsTheme#d4524)
        │
        └─_InheritedTheme
          └─IconTheme
-           │ data: IconThemeData#00000(color: Color(0xdd000000))
+           │ data: IconThemeData#2abdc(color: Color(0xdd000000))
            │
            └─CupertinoTheme
-             └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
-               │ state: _WidgetsAppState#00000
+             └─WidgetsApp-[GlobalObjectKey _MaterialAppState#6453b]
+               │ state: _WidgetsAppState#7e7d5
                │
                └─MediaQuery
                  │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
@@ -224,7 +226,7 @@ MaterialApp
                    │ delegates: DefaultMaterialLocalizations.delegate(en_US),
                    │   DefaultCupertinoLocalizations.delegate(en_US),
                    │   DefaultWidgetsLocalizations.delegate(en_US)
-                   │ state: _LocalizationsState#00000
+                   │ state: _LocalizationsState#91264
                    │
                    └─Semantics
                      │ container: false
@@ -234,9 +236,9 @@ MaterialApp
                      │ hint: null
                      │ textDirection: ltr
                      │ hintOverrides: null
-                     │ renderObject: RenderSemanticsAnnotations#00000
+                     │ renderObject: RenderSemanticsAnnotations#072f2
                      │
-                     └─_LocalizationsScope-[GlobalKey#00000]
+                     └─_LocalizationsScope-[GlobalKey#2b3e4]
                        └─Directionality
                          │ textDirection: ltr
                          │
@@ -259,7 +261,7 @@ MaterialApp
                                │ text height: 1.0x
                                │
                                └─CustomPaint
-                                 │ renderObject: RenderCustomPaint#00000
+                                 │ renderObject: RenderCustomPaint#12a7a
                                  │
                                  └─DefaultTextStyle
                                    │ debugLabel: fallback style; consider putting your text in a Material
@@ -272,20 +274,20 @@ MaterialApp
                                    │ softWrap: wrapping at box width
                                    │ overflow: clip
                                    │
-                                   └─Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]
-                                     │ state: NavigatorState#00000(tickers: tracking 1 ticker)
+                                   └─Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#7e7d5]
+                                     │ state: NavigatorState#9145e(tickers: tracking 1 ticker)
                                      │
                                      └─Listener
                                        │ listeners: down, up, cancel
                                        │ behavior: deferToChild
-                                       │ renderObject: RenderPointerListener#00000
+                                       │ renderObject: RenderPointerListener#5548b
                                        │
                                        └─AbsorbPointer
                                          │ absorbing: false
-                                         │ renderObject: RenderAbsorbPointer#00000
+                                         │ renderObject: RenderAbsorbPointer#9e54e
                                          │
                                          └─FocusScope
-                                           │ state: _FocusScopeState#00000
+                                           │ state: _FocusScopeState#6b23b
                                            │
                                            └─Semantics
                                              │ container: false
@@ -294,52 +296,52 @@ MaterialApp
                                              │ value: null
                                              │ hint: null
                                              │ hintOverrides: null
-                                             │ renderObject: RenderSemanticsAnnotations#00000
+                                             │ renderObject: RenderSemanticsAnnotations#04d8a
                                              │
                                              └─_FocusScopeMarker
-                                               └─Overlay-[LabeledGlobalKey<OverlayState>#00000]
-                                                 │ state: OverlayState#00000(entries: [OverlayEntry#00000(opaque:
-                                                 │   false; maintainState: false), OverlayEntry#00000(opaque: false;
+                                               └─Overlay-[LabeledGlobalKey<OverlayState>#08c29]
+                                                 │ state: OverlayState#6b98f(entries: [OverlayEntry#5e60f(opaque:
+                                                 │   false; maintainState: false), OverlayEntry#3f482(opaque: false;
                                                  │   maintainState: true)])
                                                  │
                                                  └─_Theatre
-                                                   │ renderObject: _RenderTheatre#00000
+                                                   │ renderObject: _RenderTheatre#6e9c4
                                                    │
                                                    └─Stack
                                                      │ alignment: AlignmentDirectional.topStart
                                                      │ fit: expand
                                                      │ overflow: clip
-                                                     │ renderObject: RenderStack#00000
+                                                     │ renderObject: RenderStack#887bb
                                                      │
-                                                     ├─_OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#00000]
-                                                     │ │ state: _OverlayEntryState#00000
+                                                     ├─_OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#47d0d]
+                                                     │ │ state: _OverlayEntryState#52e37
                                                      │ │
                                                      │ └─IgnorePointer
                                                      │   │ ignoring: false
-                                                     │   │ renderObject: RenderIgnorePointer#00000
+                                                     │   │ renderObject: RenderIgnorePointer#7b311
                                                      │   │
                                                      │   └─ModalBarrier
                                                      │     └─BlockSemantics
                                                      │       │ blocking: true
-                                                     │       │ renderObject: RenderBlockSemantics#00000
+                                                     │       │ renderObject: RenderBlockSemantics#16035
                                                      │       │
                                                      │       └─ExcludeSemantics
                                                      │         │ excluding: true
-                                                     │         │ renderObject: RenderExcludeSemantics#00000
+                                                     │         │ renderObject: RenderExcludeSemantics#45f99
                                                      │         │
                                                      │         └─GestureDetector
                                                      │           │ startBehavior: down
                                                      │           │
                                                      │           └─RawGestureDetector
-                                                     │             │ state: RawGestureDetectorState#00000(gestures: [tap], behavior: opaque)
+                                                     │             │ state: RawGestureDetectorState#d58b1(gestures: [tap], behavior: opaque)
                                                      │             │
                                                      │             └─_GestureSemantics
-                                                     │               │ renderObject: RenderSemanticsGestureHandler#00000
+                                                     │               │ renderObject: RenderSemanticsGestureHandler#32b55
                                                      │               │
                                                      │               └─Listener
                                                      │                 │ listeners: down
                                                      │                 │ behavior: opaque
-                                                     │                 │ renderObject: RenderPointerListener#00000
+                                                     │                 │ renderObject: RenderPointerListener#e50cb
                                                      │                 │
                                                      │                 └─Semantics
                                                      │                   │ container: false
@@ -348,28 +350,28 @@ MaterialApp
                                                      │                   │ value: null
                                                      │                   │ hint: null
                                                      │                   │ hintOverrides: null
-                                                     │                   │ renderObject: RenderSemanticsAnnotations#00000
+                                                     │                   │ renderObject: RenderSemanticsAnnotations#ba8fb
                                                      │                   │
                                                      │                   └─ConstrainedBox
                                                      │                       constraints: BoxConstraints(biggest)
-                                                     │                       renderObject: RenderConstrainedBox#00000
+                                                     │                       renderObject: RenderConstrainedBox#cebc7
                                                      │
-                                                     └─_OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#00000]
-                                                       │ state: _OverlayEntryState#00000
+                                                     └─_OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#4d78e]
+                                                       │ state: _OverlayEntryState#e2735
                                                        │
-                                                       └─_ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]
-                                                         │ state: _ModalScopeState<dynamic>#00000
+                                                       └─_ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#e5ef3]
+                                                         │ state: _ModalScopeState<dynamic>#79031
                                                          │
                                                          └─_ModalScopeStatus
                                                            │ isCurrent: active
                                                            │
                                                            └─Offstage
                                                              │ offstage: false
-                                                             │ renderObject: RenderOffstage#00000
+                                                             │ renderObject: RenderOffstage#55f5e
                                                              │
                                                              └─PageStorage
                                                                └─FocusScope
-                                                                 │ state: _FocusScopeState#00000
+                                                                 │ state: _FocusScopeState#921e5
                                                                  │
                                                                  └─Semantics
                                                                    │ container: false
@@ -378,41 +380,41 @@ MaterialApp
                                                                    │ value: null
                                                                    │ hint: null
                                                                    │ hintOverrides: null
-                                                                   │ renderObject: RenderSemanticsAnnotations#00000
+                                                                   │ renderObject: RenderSemanticsAnnotations#a7788
                                                                    │
                                                                    └─_FocusScopeMarker
                                                                      └─RepaintBoundary
-                                                                       │ renderObject: RenderRepaintBoundary#00000
+                                                                       │ renderObject: RenderRepaintBoundary#648be
                                                                        │
                                                                        └─AnimatedBuilder
-                                                                         │ animation: Listenable.merge([AnimationController#00000(⏭ 1.000;
+                                                                         │ animation: Listenable.merge([AnimationController#1c849(⏭ 1.000;
                                                                          │   paused; for MaterialPageRoute<dynamic>(/))➩ProxyAnimation,
                                                                          │   kAlwaysDismissedAnimation➩ProxyAnimation➩ProxyAnimation])
-                                                                         │ state: _AnimatedState#00000
+                                                                         │ state: _AnimatedState#ab415
                                                                          │
                                                                          └─_FadeUpwardsPageTransition
                                                                            └─SlideTransition
-                                                                             │ animation: AnimationController#00000(⏭ 1.000; paused; for
+                                                                             │ animation: AnimationController#1c849(⏭ 1.000; paused; for
                                                                              │   MaterialPageRoute<dynamic>(/))➩ProxyAnimation➩CurveTween(curve:
                                                                              │   Cubic(0.40, 0.00, 0.20, 1.00))➩Tween<Offset>(Offset(0.0, 0.3) →
                                                                              │   Offset(0.0, 0.0))➩Offset(0.0, 0.0)
-                                                                             │ state: _AnimatedState#00000
+                                                                             │ state: _AnimatedState#ffa81
                                                                              │
                                                                              └─FractionalTranslation
-                                                                               │ renderObject: RenderFractionalTranslation#00000
+                                                                               │ renderObject: RenderFractionalTranslation#81ccb
                                                                                │
                                                                                └─FadeTransition
-                                                                                 │ opacity: AnimationController#00000(⏭ 1.000; paused; for
+                                                                                 │ opacity: AnimationController#1c849(⏭ 1.000; paused; for
                                                                                  │   MaterialPageRoute<dynamic>(/))➩ProxyAnimation➩CurveTween(curve:
                                                                                  │   Cubic(0.42, 0.00, 1.00, 1.00))➩1.0
-                                                                                 │ renderObject: RenderAnimatedOpacity#00000
+                                                                                 │ renderObject: RenderAnimatedOpacity#7cfc3
                                                                                  │
                                                                                  └─IgnorePointer
                                                                                    │ ignoring: false
-                                                                                   │ renderObject: RenderIgnorePointer#00000
+                                                                                   │ renderObject: RenderIgnorePointer#e9102
                                                                                    │
-                                                                                   └─RepaintBoundary-[GlobalKey#00000]
-                                                                                     │ renderObject: RenderRepaintBoundary#00000
+                                                                                   └─RepaintBoundary-[GlobalKey#a2410]
+                                                                                     │ renderObject: RenderRepaintBoundary#0c37b
                                                                                      │
                                                                                      └─Builder
                                                                                        └─Semantics
@@ -422,7 +424,7 @@ MaterialApp
                                                                                          │ value: null
                                                                                          │ hint: null
                                                                                          │ hintOverrides: null
-                                                                                         │ renderObject: RenderSemanticsAnnotations#00000
+                                                                                         │ renderObject: RenderSemanticsAnnotations#544be
                                                                                          │
                                                                                          └─Scaffold
-                                                                                             state: ScaffoldState#00000(tickers: tracking 1 ticker)
+                                                                                             state: ScaffoldState#892c3(tickers: tracking 1 ticker)
