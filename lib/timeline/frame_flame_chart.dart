@@ -71,7 +71,7 @@ class FrameFlameChart extends CoreElement {
 
     int maxRow = 0;
 
-    void _drawRecursively(TimelineThreadEvent event, int row) {
+    void drawRecursively(TimelineThreadEvent event, int row) {
       if (!event.wellFormed) {
         print('event not well formed: $event');
         return;
@@ -90,7 +90,7 @@ class FrameFlameChart extends CoreElement {
       }
 
       for (TimelineThreadEvent child in event.children) {
-        _drawRecursively(child, row + 1);
+        drawRecursively(child, row + 1);
       }
     }
 
@@ -102,7 +102,7 @@ class FrameFlameChart extends CoreElement {
         maxRow = row;
 
         for (TimelineThreadEvent event in data.eventsForThread(thread)) {
-          _drawRecursively(event, row);
+          drawRecursively(event, row);
         }
 
         row = maxRow;
