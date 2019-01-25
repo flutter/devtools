@@ -260,6 +260,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description if the property [value] is null.
   String get ifNull => getStringMember('ifNull');
 
+  bool get allowWrap => getBooleanMember('allowWrap', true);
+
   /// Optional tooltip typically describing the property.
   ///
   /// Example tooltip: 'physical pixels per logical pixel'

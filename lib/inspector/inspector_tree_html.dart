@@ -84,11 +84,13 @@ class InspectorTreeNodeRenderHtmlBuilder
   InspectorTreeNodeRenderHtmlBuilder({
     @required DiagnosticLevel level,
     @required DiagnosticsTreeStyle treeStyle,
+    @required this.allowWrap,
   }) : super(level: level, treeStyle: treeStyle);
 
   TextStyle lastStyle;
   String font;
   String color;
+  final bool allowWrap;
   final List<HtmlPaintEntry> _entries = [];
 
   @override
@@ -114,10 +116,14 @@ class InspectorTreeNodeRenderHtmlBuilder
   @override
   InspectorTreeNodeHtmlRender build() {
     // The html renderer does not know what its size is.
-    return InspectorTreeNodeHtmlRender(_entries, const Size(0, 0), [
+    final classes = [
       'inspector-level-${diagnosticLevelToName[level]}',
       'inspector-style-${treeStyleToName[treeStyle]}',
-    ]);
+    ];
+    if (!allowWrap) {
+      classes.add('inspector-no-wrap');
+    }
+    return InspectorTreeNodeHtmlRender(_entries, const Size(0, 0), classes);
   }
 }
 
@@ -152,6 +158,7 @@ class InspectorTreeNodeHtml extends InspectorTreeNode {
     return InspectorTreeNodeRenderHtmlBuilder(
       level: diagnostic.level,
       treeStyle: diagnostic.style,
+      allowWrap: diagnostic.allowWrap,
     );
   }
 }
@@ -164,7 +171,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
-  })  : _container = div(c: 'inspector-tree'),
+  })  : _container = div(c: 'inspector-tree-html'),
         super(
           summaryTree: summaryTree,
           treeType: treeType,

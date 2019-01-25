@@ -46,6 +46,7 @@ class LoggingScreen extends Screen {
   }
 
   Table<LogData> loggingTable;
+  LogDetailsUI logDetailsUI;
   StatusItem logCountStatus;
   SetStateMixin loggingStateMixin = SetStateMixin();
 
@@ -61,9 +62,6 @@ class LoggingScreen extends Screen {
 
     // TODO(devoncarew): Add checkbox toggles to enable specific logging channels.
 
-    LogDetailsUI logDetailsUI;
-    CoreElement detailsDiv;
-
     screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..add(<CoreElement>[
@@ -76,22 +74,23 @@ class LoggingScreen extends Screen {
               span()..flex(),
             ])
         ]),
-      div(c: 'section')
+      div(c: 'section log-area')..flex()
         ..add(<CoreElement>[
           _createTableView()
             ..layoutHorizontal()
             ..clazz('section')
             ..flex(),
-          detailsDiv = div(c: 'section table-border')
-            ..layoutHorizontal()
-            ..add(logDetailsUI = LogDetailsUI()),
+          logDetailsUI = LogDetailsUI(),
         ])
         ..layoutHorizontal(),
     ]);
 
+    // Needed otherwise the splitter is broken if the details view wants a
+    // larger width than expected. TODO(jacobr): find a cleaner solution.
+    logDetailsUI.element.style.width = '0';
     // configure the table / details splitter
     split.flexSplit(
-      [loggingTable.element, detailsDiv],
+      [loggingTable.element, logDetailsUI],
       gutterSize: defaultSplitterWidth,
       sizes: [60, 40],
       horizontal: true,
@@ -141,6 +140,7 @@ class LoggingScreen extends Screen {
 
   void _clear() {
     data.clear();
+    logDetailsUI?.setData(null);
     loggingTable.setRows(data);
   }
 
@@ -600,7 +600,7 @@ class LogDetailsUI extends CoreElement {
     flex();
 
     add(<CoreElement>[
-      content = div(c: 'log-details')
+      content = div(c: 'log-details table-border')
         ..flex()
         ..add(message = div(c: 'pre-wrap monospace')),
     ]);
@@ -622,6 +622,12 @@ class LogDetailsUI extends CoreElement {
     this.data = data;
 
     tree = null;
+
+    if (data == null) {
+      message.text = '';
+      return;
+    }
+
     if (data.node != null) {
       message.clear();
       tree = InspectorTreeHtml(
@@ -649,11 +655,6 @@ class LogDetailsUI extends CoreElement {
       tree.root = root;
       message.add(tree.element);
 
-      return;
-    }
-
-    if (data == null) {
-      message.text = '';
       return;
     }
 
