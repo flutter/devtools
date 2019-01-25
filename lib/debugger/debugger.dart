@@ -811,10 +811,14 @@ class SourceEditor {
       final List<Breakpoint> lineBps = linesToBreakpoints[line];
 
       if (lineBps == null || lineBps.isEmpty) {
-        debuggerState.addBreakpoint(currentScript.id, line + 1);
+        debuggerState.addBreakpoint(currentScript.id, line + 1).catchError((_) {
+          // ignore
+        });
       } else {
         final Breakpoint bp = lineBps.removeAt(0);
-        debuggerState.removeBreakpoint(bp);
+        debuggerState.removeBreakpoint(bp).catchError((_) {
+          // ignore
+        });
       }
     });
   }
