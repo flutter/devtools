@@ -87,6 +87,11 @@ class InspectorScreen extends Screen {
     return screenDiv;
   }
 
+  @override
+  void exiting() {
+    framework.clearMessages();
+  }
+
   void _handleConnectionStart(VmService service) async {
     refreshTreeButton.disabled = false;
 
@@ -182,9 +187,9 @@ class InspectorScreen extends Screen {
 
         displayedWidgetTrackingNotice = true;
 
-        framework
-            .showWarning('''The widget creation tracking feature, required for
-advanced Flutter Inspector functionality, is not enabled.
+        framework.showWarning(
+            '''The widget creation tracking feature is not enabled (this is
+required for advanced Flutter Inspector functionality).
 
 To fix this relaunch your application by running 'flutter run
 --track-widget-creation' or run your application from VS Code or IntelliJ.''');
