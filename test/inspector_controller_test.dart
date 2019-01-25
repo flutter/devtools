@@ -475,7 +475,7 @@ void main() async {
 
       await detailsTree.nextUiFrame;
       expect(
-        detailsTree.toStringDeep(),
+        detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scrolled_to_center.txt'),
       );
@@ -499,13 +499,13 @@ void main() async {
       // Verify that the details tree scrolled back as well.
       // However, now more nodes are expanded.
       expect(
-        detailsTree.toStringDeep(),
+        detailsTree.toStringDeep(hidePropertyLines: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_expanded.txt'),
       );
 
       expect(
-        detailsTree.toStringDeep(includeTextStyles: true),
+        detailsTree.toStringDeep(hidePropertyLines: true, includeTextStyles: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_with_styles.txt'),
       );

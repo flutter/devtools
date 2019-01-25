@@ -142,7 +142,7 @@ void main() async {
         // When flutter rolls, this string may sometimes change due to
         // implementation details.
         expect(
-          treeToDebugString(nodeInDetailsTree),
+          treeToDebugStringTruncated(nodeInDetailsTree, 30),
           equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
         );
 
