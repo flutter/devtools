@@ -6,6 +6,9 @@ import '../ui/elements.dart';
 import '../ui/primer.dart';
 import 'timeline_protocol.dart';
 
+// Switch this flag to true to dump the frame event trace to console.
+bool _debugEventTrace = false;
+
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     layoutVertical();
@@ -37,21 +40,18 @@ class FrameFlameChart extends CoreElement {
 
     content.clear();
 
-//    if (data != null) {
-//      StringBuffer buf = new StringBuffer();
-//
-//      for (TimelineThread thread in data.threads) {
-//        buf.writeln('${thread.name}:');
-//
-//        for (TEvent event in data.events) {
-//          if (event.threadId == thread.threadId) {
-//            event.format(buf, '  ');
-//          }
-//        }
-//      }
-//
-//      content.text = buf.toString();
-//    }
+    if (_debugEventTrace && data != null) {
+      final StringBuffer buf = new StringBuffer();
+      for (TimelineThread thread in data.threads) {
+        buf.writeln('${thread.name}:');
+        for (TimelineThreadEvent event in data.events) {
+          if (event.threadId == thread.threadId) {
+            event.format(buf, '  ');
+          }
+        }
+      }
+      print(buf.toString());
+    }
 
     if (data != null) {
       _render(data);
@@ -71,9 +71,7 @@ class FrameFlameChart extends CoreElement {
 
     int maxRow = 0;
 
-    Function drawRecursively;
-
-    drawRecursively = (TimelineThreadEvent event, int row) {
+    void _drawRecursively(TimelineThreadEvent event, int row) {
       if (!event.wellFormed) {
         print('event not well formed: $event');
         return;
@@ -92,10 +90,11 @@ class FrameFlameChart extends CoreElement {
       }
 
       for (TimelineThreadEvent child in event.children) {
-        drawRecursively(child, row + 1);
+        _drawRecursively(child, row + 1);
       }
-    };
+    }
 
+    // TODO: investigate if this try/catch is necessary.
     try {
       for (TimelineThread thread in data.threads) {
         _createPosition(thread.name, 0, null, row * rowHeight);
@@ -103,7 +102,7 @@ class FrameFlameChart extends CoreElement {
         maxRow = row;
 
         for (TimelineThreadEvent event in data.eventsForThread(thread)) {
-          drawRecursively(event, row);
+          _drawRecursively(event, row);
         }
 
         row = maxRow;

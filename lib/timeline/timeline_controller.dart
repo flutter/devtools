@@ -8,14 +8,15 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 import '../globals.dart';
 import 'timeline_protocol.dart';
 
-/// This class must not have direct dependencies on dart:html.
+/// This class contains the business logic for [timeline.dart].
 ///
-/// This allows tests of the complicated logic in this class to run on the VM
-/// and will help simplify porting this code to work with Hummingbird.
+/// This class must not have direct dependencies on dart:html. This allows tests
+/// of the complicated logic in this class to run on the VM and will help
+/// simplify porting this code to work with Hummingbird.
 class TimelineController {
   // Frame data.
   static const int maxFrames = 120;
-  List<TimelineFrame> frames = <TimelineFrame>[];
+  final List<TimelineFrame> frames = <TimelineFrame>[];
   final StreamController<TimelineFrame> _frameAddedController =
       StreamController<TimelineFrame>.broadcast();
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
@@ -24,8 +25,8 @@ class TimelineController {
   Stream<Null> get onFramesCleared => _framesClearedController.stream;
 
   // Timeline data.
-  List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
-  List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
+  final List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
+  final List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
 
   TimelineData _timelineData;
   TimelineData get timelineData => _timelineData;
@@ -84,27 +85,35 @@ class TimelineController {
       return;
     }
 
+    // TODO(kenzie): once we have gpu/cpu distinction data from engine, use that
+    //  information to separate dart events from gpu events. Thread names and
+    //  event names are not stable, also rendering us unable to test this logic
+    //  in its current state.
+
     // io.flutter.1.ui, io.flutter.1.gpu
     if (thread.name.endsWith('.ui')) {
       // PipelineProduce
       if (event.name == 'PipelineProduce' && event.wellFormed) {
         dartEvents.add(event);
 
-        _processSamplesData();
+        _processDataSamples();
       }
     } else if (thread.name.endsWith('.gpu')) {
       // MessageLoop::RunExpiredTasks
       if (event.name == 'MessageLoop::RunExpiredTasks' && event.wellFormed) {
         gpuEvents.add(event);
 
-        _processSamplesData();
+        _processDataSamples();
       }
     }
   }
 
-  void _processSamplesData() {
+  void _processDataSamples() {
     while (dartEvents.isNotEmpty && gpuEvents.isNotEmpty) {
       int dartStart = dartEvents.first.startMicros;
+
+      // TODO(kenzie): improve runtime. Perhaps track an index to the first gpu
+      // event to include or check a boolean before adding event to [gpuEvents].
 
       // Throw away any gpu samples that start before dart ones.
       while (gpuEvents.isNotEmpty && gpuEvents.first.startMicros < dartStart) {

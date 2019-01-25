@@ -30,5 +30,10 @@ void main() {
       expect(timelineController.timelineData.threadMap, isNotEmpty);
       await env.tearDownEnvironment();
     });
+
+    // TODO(kenzie): add more tests. We will be able to once we have the proper
+    //  data from the engine, allowing us to distinguish cpu events from gpu
+    //  events as well as to know accurate frame start times, end times, and
+    //  events.
   });
 }
