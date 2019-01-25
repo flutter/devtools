@@ -220,7 +220,7 @@ class TimelineFramesUI extends CoreElement {
       if (element.children.isEmpty) {
         add(frameUI);
       } else {
-        element.children.insert(1, frameUI.element);
+        element.children.insert(0, frameUI.element);
       }
     });
 
