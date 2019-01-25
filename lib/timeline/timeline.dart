@@ -14,8 +14,10 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
+import 'frame_flame_chart.dart';
 import 'frame_rendering.dart';
 import 'frame_rendering_chart.dart';
+import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
 const Color slowFrameColor = Color(0xFFf97c7c);
@@ -40,10 +42,10 @@ class TimelineScreen extends Screen {
   TimelineScreen()
       : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
 
+  TimelineController timelineController = TimelineController();
   FramesChart framesChart;
   SetStateMixin framesChartStateMixin = SetStateMixin();
   FramesTracker framesTracker;
-  TimelineFramesBuilder timelineFramesBuilder = TimelineFramesBuilder();
 
   TimelineFramesUI timelineFramesUI;
 
@@ -56,7 +58,7 @@ class TimelineScreen extends Screen {
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div()..layoutVertical();
 
-    FrameDetailsUI frameDetailsUI;
+    FrameFlameChart frameFlameChart;
 
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
@@ -91,12 +93,12 @@ class TimelineScreen extends Screen {
         ]),
       div(c: 'section')
         ..add(<CoreElement>[
-          timelineFramesUI = TimelineFramesUI(timelineFramesBuilder)
+          timelineFramesUI = TimelineFramesUI(timelineController)
         ]),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
-        ..add(frameDetailsUI = FrameDetailsUI()..attribute('hidden')),
+        ..add(frameFlameChart = FrameFlameChart()..attribute('hidden')),
     ]);
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
@@ -106,12 +108,12 @@ class TimelineScreen extends Screen {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
-      frameDetailsUI.attribute('hidden', frame == null);
+      frameFlameChart.attribute('hidden', frame == null);
 
-      if (frame != null && timelineFramesUI.hasStarted()) {
+      if (frame != null && timelineController.hasStarted) {
         final TimelineFrameData data =
-            timelineFramesUI.timelineData.getFrameData(frame);
-        frameDetailsUI.updateData(data);
+            timelineController.timelineData.getFrameData(frame);
+        frameFlameChart.updateData(data);
       }
     });
 
@@ -155,15 +157,15 @@ class TimelineScreen extends Screen {
 
       for (Map<String, dynamic> json in events) {
         final TimelineEvent e = TimelineEvent(json);
-        timelineFramesUI.timelineData?.processTimelineEvent(e);
+        timelineController.timelineData?.processTimelineEvent(e);
       }
     });
   }
 
   void _handleConnectionStop(dynamic event) {
     framesChart.disabled = true;
-
     framesTracker?.stop();
+    timelineController = null;
   }
 
   void _pauseRecording() {
@@ -188,15 +190,15 @@ class TimelineScreen extends Screen {
     await serviceManager.serviceAvailable.future;
 
     final bool shouldBeRunning = !_paused && isCurrentScreen;
-    final bool isRunning = !timelineFramesBuilder.paused;
+    final bool isRunning = !timelineController.paused;
 
-    if (shouldBeRunning && isRunning && !timelineFramesUI.hasStarted()) {
-      _startTimeline();
+    if (shouldBeRunning && isRunning && !timelineController.hasStarted) {
+      await timelineController.startTimeline();
     }
 
     if (shouldBeRunning && !isRunning) {
       framesTracker.resume();
-      timelineFramesBuilder.resume();
+      timelineController.resume();
 
       await serviceManager.service
           .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
@@ -204,49 +206,15 @@ class TimelineScreen extends Screen {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
       framesTracker.pause();
-      timelineFramesBuilder.pause();
+      timelineController.pause();
     }
-  }
-
-  void _startTimeline() async {
-    await serviceManager.service
-        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
-    await serviceManager.service.clearVMTimeline();
-
-    final Response response = await serviceManager.service.getVMTimeline();
-    final List<dynamic> list = response.json['traceEvents'];
-    final List<Map<String, dynamic>> traceEvents =
-        list.cast<Map<String, dynamic>>();
-
-    final List<TimelineEvent> events = traceEvents
-        .map((Map<String, dynamic> event) => TimelineEvent(event))
-        .where((TimelineEvent event) {
-      return event.name == 'thread_name';
-    }).toList();
-
-    final TimelineData timelineData = TimelineData();
-
-    for (TimelineEvent event in events) {
-      final TimelineThread thread =
-          TimelineThread(timelineData, event.args['name'], event.threadId);
-      // TODO: consider pruning which threads we add based on which ones are
-      // relevant to the user.
-      timelineData.addThread(thread);
-    }
-
-    timelineData.onTimelineThreadEvent.listen((TimelineThreadEvent event) {
-      timelineFramesBuilder.processTimelineEvent(
-          timelineData.getThread(event.threadId), event);
-    });
-
-    timelineFramesUI.timelineData = timelineData;
   }
 }
 
 class TimelineFramesUI extends CoreElement {
-  TimelineFramesUI(TimelineFramesBuilder timelineFramesBuilder)
+  TimelineFramesUI(TimelineController timelineController)
       : super('div', classes: 'timeline-frames') {
-    timelineFramesBuilder.onFrameAdded.listen((TimelineFrame frame) {
+    timelineController.onFrameAdded.listen((TimelineFrame frame) {
       // TODO(devoncarew): Make sure we respect TimelineFramesBuilder.maxFrames.
       final CoreElement frameUI = TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
@@ -256,20 +224,16 @@ class TimelineFramesUI extends CoreElement {
       }
     });
 
-    timelineFramesBuilder.onCleared.listen((Null _) {
+    timelineController.onFramesCleared.listen((Null _) {
       clear();
-
       setSelected(null);
     });
   }
 
   TimelineFrameUI selectedFrame;
-  TimelineData timelineData;
 
   final StreamController<TimelineFrame> _selectedFrameController =
       StreamController<TimelineFrame>.broadcast();
-
-  bool hasStarted() => timelineData != null;
 
   Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
 
@@ -336,236 +300,5 @@ class TimelineFrameUI extends CoreElement {
 
   void setSelected(bool selected) {
     toggleClass('selected', selected);
-  }
-}
-
-class TimelineFramesBuilder {
-  static const int maxFrames = 120;
-
-  List<TimelineFrame> frames = <TimelineFrame>[];
-
-  bool _paused = false;
-  bool get paused => _paused;
-
-  List<TimelineThreadEvent> dartEvents = <TimelineThreadEvent>[];
-  List<TimelineThreadEvent> gpuEvents = <TimelineThreadEvent>[];
-
-  final StreamController<TimelineFrame> _frameAddedController =
-      StreamController<TimelineFrame>.broadcast();
-
-  final StreamController<Null> _clearedController =
-      StreamController<Null>.broadcast();
-
-  Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
-
-  Stream<Null> get onCleared => _clearedController.stream;
-
-  void pause() {
-    _paused = true;
-
-    dartEvents.clear();
-    gpuEvents.clear();
-  }
-
-  void resume() {
-    _paused = false;
-  }
-
-  void processTimelineEvent(TimelineThread thread, TimelineThreadEvent event) {
-    if (thread == null) {
-      return;
-    }
-
-    // io.flutter.1.ui, io.flutter.1.gpu
-    if (thread.name.endsWith('.ui')) {
-      // PipelineProduce
-      if (event.name == 'PipelineProduce' && event.wellFormed) {
-        dartEvents.add(event);
-
-        _processSamplesData();
-      }
-    } else if (thread.name.endsWith('.gpu')) {
-      // MessageLoop::RunExpiredTasks
-      if (event.name == 'MessageLoop::RunExpiredTasks' && event.wellFormed) {
-        gpuEvents.add(event);
-
-        _processSamplesData();
-      }
-    }
-  }
-
-  void _processSamplesData() {
-    while (dartEvents.isNotEmpty && gpuEvents.isNotEmpty) {
-      int dartStart = dartEvents.first.startMicros;
-
-      // Throw away any gpu samples that start before dart ones.
-      while (gpuEvents.isNotEmpty && gpuEvents.first.startMicros < dartStart) {
-        gpuEvents.removeAt(0);
-      }
-
-      if (gpuEvents.isEmpty) {
-        break;
-      }
-
-      // Find the newest dart sample that starts before a gpu one.
-      final int gpuStart = gpuEvents.first.startMicros;
-      while (dartEvents.length > 1 &&
-          (dartEvents[0].startMicros < gpuStart &&
-              dartEvents[1].startMicros < gpuStart)) {
-        dartEvents.removeAt(0);
-      }
-
-      if (dartEvents.isEmpty) {
-        break;
-      }
-
-      // Return the pair.
-      dartStart = dartEvents.first.startMicros;
-      if (dartStart > gpuStart) {
-        break;
-      }
-
-      final TimelineThreadEvent dartEvent = dartEvents.removeAt(0);
-      final TimelineThreadEvent gpuEvent = gpuEvents.removeAt(0);
-
-      final TimelineFrame frame = TimelineFrame(
-          renderStart: dartEvent.startMicros,
-          rasterizeStart: gpuEvent.startMicros);
-      frame.renderDuration = dartEvent.durationMicros;
-      frame.rasterizeDuration = gpuEvent.durationMicros;
-
-      frames.add(frame);
-
-      if (frames.length > maxFrames) {
-        frames.removeAt(0);
-      }
-
-      _frameAddedController.add(frame);
-    }
-  }
-
-  void clear() {
-    frames.clear();
-    _clearedController.add(null);
-  }
-}
-
-class FrameDetailsUI extends CoreElement {
-  FrameDetailsUI() : super('div') {
-    layoutVertical();
-    flex();
-
-    // TODO(devoncarew): listen to tab changes
-    content = div(c: 'frame-timeline')..flex();
-
-    final PTabNav tabNav = PTabNav(<PTabNavTab>[
-      PTabNavTab('Frame timeline'),
-      PTabNavTab('Widget build info'),
-      PTabNavTab('Skia picture'),
-    ]);
-
-    add(<CoreElement>[
-      tabNav,
-      content,
-    ]);
-
-    content.element.style.whiteSpace = 'pre';
-    content.element.style.overflow = 'scroll';
-  }
-
-  TimelineFrameData data;
-  CoreElement content;
-
-  void updateData(TimelineFrameData data) {
-    this.data = data;
-
-    content.clear();
-
-//    if (data != null) {
-//      StringBuffer buf = new StringBuffer();
-//
-//      for (TimelineThread thread in data.threads) {
-//        buf.writeln('${thread.name}:');
-//
-//        for (TEvent event in data.events) {
-//          if (event.threadId == thread.threadId) {
-//            event.format(buf, '  ');
-//          }
-//        }
-//      }
-//
-//      content.text = buf.toString();
-//    }
-
-    if (data != null) {
-      _render(data);
-    }
-  }
-
-  void _render(TimelineFrameData data) {
-    const int leftIndent = 130;
-    const int rowHeight = 25;
-
-    const double microsPerFrame = 1000 * 1000 / 60.0;
-    const double pxPerMicro = microsPerFrame / 1000.0;
-
-    int row = 0;
-
-    final int microsAdjust = data.frame.startMicros;
-
-    int maxRow = 0;
-
-    Function drawRecursively;
-
-    drawRecursively = (TimelineThreadEvent event, int row) {
-      if (!event.wellFormed) {
-        print('event not well formed: $event');
-        return;
-      }
-
-      final double start = (event.startMicros - microsAdjust) / pxPerMicro;
-      final double end =
-          (event.startMicros - microsAdjust + event.durationMicros) /
-              pxPerMicro;
-
-      _createPosition(event.name, leftIndent + start.round(),
-          (end - start).round(), row * rowHeight);
-
-      if (row > maxRow) {
-        maxRow = row;
-      }
-
-      for (TimelineThreadEvent child in event.children) {
-        drawRecursively(child, row + 1);
-      }
-    };
-
-    try {
-      for (TimelineThread thread in data.threads) {
-        _createPosition(thread.name, 0, null, row * rowHeight);
-
-        maxRow = row;
-
-        for (TimelineThreadEvent event in data.eventsForThread(thread)) {
-          drawRecursively(event, row);
-        }
-
-        row = maxRow;
-
-        row++;
-      }
-    } catch (e, st) {
-      print('$e\n$st');
-    }
-  }
-
-  void _createPosition(String name, int left, int width, int top) {
-    final CoreElement item = div(text: name, c: 'timeline-title');
-    item.element.style.left = '${left}px';
-    if (width != null) {
-      item.element.style.width = '${width}px';
-    }
-    item.element.style.top = '${top}px';
-    content.add(item);
   }
 }
