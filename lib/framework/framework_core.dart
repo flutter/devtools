@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
+import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
@@ -17,6 +18,7 @@ class FrameworkCore {
 
   static void _setServiceConnectionManager() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+    setGlobal(MessageBus, MessageBus());
   }
 
   static void initVmService(

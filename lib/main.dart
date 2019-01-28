@@ -7,6 +7,7 @@ import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
@@ -144,11 +145,16 @@ class PerfToolFramework extends Framework {
       try {
         reloadAction.disabled = true;
         await serviceManager.performHotReload();
+        messageBus.addEvent(BusEvent('reload.start'));
         timer.stop();
         // 'reloaded in 600ms'
-        status.setText('reloaded in ${nf.format(timer.elapsedMilliseconds)}ms');
+        final String message = 'reloaded in ${_renderDuration(timer.elapsed)}';
+        messageBus.addEvent(BusEvent('reload.end', data: message));
+        status.setText(message);
       } catch (_) {
-        status.setText('error performing reload');
+        const String message = 'error performing reload';
+        messageBus.addEvent(BusEvent('reload.end', data: message));
+        status.setText(message);
       } finally {
         reloadAction.disabled = false;
         status.timeout();
@@ -168,13 +174,17 @@ class PerfToolFramework extends Framework {
 
       try {
         restartAction.disabled = true;
+        messageBus.addEvent(BusEvent('restart.start'));
         await serviceManager.performHotRestart();
         timer.stop();
         // 'restarted in 1.6s'
-        status.setText(
-            'restarted in ${(timer.elapsedMilliseconds / 1000).toStringAsFixed(1)}s');
+        final String message = 'restarted in ${_renderDuration(timer.elapsed)}';
+        messageBus.addEvent(BusEvent('restart.end', data: message));
+        status.setText(message);
       } catch (_) {
-        status.setText('error performing reload');
+        const String message = 'error performing reload';
+        messageBus.addEvent(BusEvent('restart.end', data: message));
+        status.setText(message);
       } finally {
         restartAction.disabled = false;
         status.timeout();
@@ -231,5 +241,13 @@ class Status {
 
   void dispose() {
     statusLine.remove(item);
+  }
+}
+
+String _renderDuration(Duration duration) {
+  if (duration.inMilliseconds < 1000) {
+    return '${nf.format(duration.inMilliseconds)}ms';
+  } else {
+    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
   }
 }

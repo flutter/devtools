@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../core/message_bus.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
@@ -74,7 +75,8 @@ class LoggingScreen extends Screen {
               span()..flex(),
             ])
         ]),
-      div(c: 'section log-area')..flex()
+      div(c: 'section log-area')
+        ..flex()
         ..add(<CoreElement>[
           _createTableView()
             ..layoutHorizontal()
@@ -104,6 +106,21 @@ class LoggingScreen extends Screen {
     _updateStatus();
     loggingTable.onRowsChanged.listen((_) {
       _updateStatus();
+    });
+
+    messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
+      _log(LogData(
+        'hot.reload',
+        event.data,
+        DateTime.now().millisecondsSinceEpoch,
+      ));
+    });
+    messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
+      _log(LogData(
+        'hot.restart',
+        event.data,
+        DateTime.now().millisecondsSinceEpoch,
+      ));
     });
 
     return screenDiv;

@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../core/message_bus.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/custom.dart';
@@ -294,6 +295,19 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea.refresh();
+
+    messageBus.onEvent(type: 'reload.start').listen((_) {
+      consoleArea.clear();
+    });
+    messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
+      consoleArea.appendText('${event.data}\n\n');
+    });
+    messageBus.onEvent(type: 'restart.start').listen((_) {
+      consoleArea.clear();
+    });
+    messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
+      consoleArea.appendText('${event.data}\n\n');
+    });
 
     return screenDiv;
   }
@@ -1405,6 +1419,10 @@ class ConsoleArea implements CoreElementView {
   CoreElement get element => _container;
 
   void refresh() => _editor.refresh();
+
+  void clear() {
+    _editor.getDoc().setValue('');
+  }
 
   void appendText(String text) {
     // We delay writes here to batch up calls to editor.replaceRange().
