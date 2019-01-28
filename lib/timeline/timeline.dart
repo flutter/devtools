@@ -78,7 +78,7 @@ class TimelineScreen extends Screen {
         resumeButton,
         div()..flex(),
       ]);
-    getServiceExtensionButtons().forEach(upperButtonSection.add);
+    upperButtonSection.add(getServiceExtensionButtons());
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
