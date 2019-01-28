@@ -60,11 +60,6 @@ class TimelineScreen extends Screen {
 
     FrameFlameChart frameFlameChart;
 
-    final CoreElement upperButtonSection = div(c: 'section')
-      ..layoutHorizontal()
-      ..add(<CoreElement>[div()..flex()]);
-    getServiceExtensionButtons().forEach(upperButtonSection.add);
-
     pauseButton = PButton('Pause recording')
       ..small()
       ..primary()
@@ -76,18 +71,19 @@ class TimelineScreen extends Screen {
       ..disabled = true
       ..click(_resumeRecording);
 
+    final CoreElement upperButtonSection = div(c: 'section')
+      ..layoutHorizontal()
+      ..add(<CoreElement>[
+        pauseButton,
+        resumeButton,
+        div()..flex(),
+      ]);
+    getServiceExtensionButtons().forEach(upperButtonSection.add);
+
     screenDiv.add(<CoreElement>[
       upperButtonSection,
       div(c: 'section'),
       createLiveChartArea(),
-      div(c: 'section'),
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          pauseButton,
-          resumeButton,
-          div()..flex(),
-        ]),
       div(c: 'section')
         ..add(<CoreElement>[
           timelineFramesUI = TimelineFramesUI(timelineController)
