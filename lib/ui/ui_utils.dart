@@ -177,7 +177,7 @@ class RegisteredServiceExtensionButton {
       ..small()
       ..hidden(true);
 
-    // Only show the button if the device supports hot restart.
+    // Only show the button if the device supports the given service.
     serviceManager.hasRegisteredService(
       serviceDescription.service,
       (registered) {

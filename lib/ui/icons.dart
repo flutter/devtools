@@ -201,7 +201,6 @@ class CustomIconMaker {
   }
 }
 
-// Strip Java naming convention;
 class IconKind {
   const IconKind(this.name, this.icon, [abstractIcon])
       : abstractIcon = abstractIcon ?? icon;

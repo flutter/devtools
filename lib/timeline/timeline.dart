@@ -62,10 +62,7 @@ class TimelineScreen extends Screen {
 
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
-      ..add(<CoreElement>[
-        createHotReloadRestartGroup(framework),
-        div()..flex(),
-      ]);
+      ..add(<CoreElement>[div()..flex()]);
     getServiceExtensionButtons().forEach(upperButtonSection.add);
 
     pauseButton = PButton('Pause recording')
