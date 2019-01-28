@@ -39,8 +39,13 @@ CoreElement italic({String text, String c, String a}) =>
 CoreElement em({String text, String c, String a}) =>
     CoreElement('em', text: text, classes: c, attributes: a);
 
-CoreElement img({String text, String c, String a}) =>
-    CoreElement('img', text: text, classes: c, attributes: a);
+CoreElement img({String text, String c, String a, String src}) {
+  final CoreElement img =
+      CoreElement('img', text: text, classes: c, attributes: a);
+  // ignore: avoid_as
+  (img.element as ImageElement).src = src;
+  return img;
+}
 
 CoreElement ol({String text, String c, String a}) =>
     CoreElement('ol', text: text, classes: c, attributes: a);

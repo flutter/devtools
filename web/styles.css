@@ -35,7 +35,6 @@ body {
 }
 
 .masthead-nav {
-    float: right;
     margin-top: .5rem;
     display: inline-flex;
 }
@@ -52,7 +51,8 @@ body {
   font-size: 13px;
 }
 
-.masthead a {
+.masthead a,
+.masthead .masthead-item {
     color: rgba(255, 255, 255, 0.5);
     font-size: 1rem;
 }
@@ -300,8 +300,8 @@ form[horizontal] {
 }
 
 [horiz-padding] {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .footer-status {
@@ -747,4 +747,38 @@ html [full] {
 
 #messages-container div+div {
     margin-top: 0.25em;
+}
+
+.action-button {
+    border-radius: 50%;
+    height: 28px;
+    width: 28px;
+    color: white;
+    text-align: center;
+}
+
+.action-button:hover {
+    box-shadow: 0 2px 2px 0 #666;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-button:active {
+    box-shadow: 0 2px 2px 0 #666;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.action-button[disabled] {
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0);
+    opacity: 0.5;
+}
+
+.action-button img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+.action-button+.action-button {
+    margin-left: 8px;
 }

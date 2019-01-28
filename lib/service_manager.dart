@@ -181,16 +181,18 @@ class ServiceConnectionManager {
     _connectionClosedController.add(null);
   }
 
-  Future<void> performHotRestart() async {
+  /// This can throw an [RPCError].
+  Future<void> performHotReload() async {
     await callMulticastService(
-      registrations.hotRestart.service,
+      registrations.hotReload.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
 
-  Future<void> performHotReload() async {
+  /// This can throw an [RPCError].
+  Future<void> performHotRestart() async {
     await callMulticastService(
-      registrations.hotReload.service,
+      registrations.hotRestart.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }

@@ -8,6 +8,7 @@ import 'dart:html' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../main.dart';
+import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
@@ -21,6 +22,9 @@ class Framework {
     pageStatus = StatusLine(CoreElement.from(querySelector('#page-status')));
     auxiliaryStatus =
         StatusLine(CoreElement.from(querySelector('#auxiliary-status')));
+
+    globalActions =
+        ActionsContainer(CoreElement.from(querySelector('#global-actions')));
   }
 
   final List<Screen> screens = <Screen>[];
@@ -30,6 +34,7 @@ class Framework {
   StatusLine globalStatus;
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
+  ActionsContainer globalActions;
 
   final Map<Screen, CoreElement> _screenContents = {};
 
@@ -180,6 +185,14 @@ class Framework {
     toastContainer.add(toast);
     toast.show();
   }
+
+  void addGlobalAction(ActionButton action) {
+    globalActions.addAction(action);
+  }
+
+  void clearGlobalActions() {
+    globalActions.clearActions();
+  }
 }
 
 class StatusLine {
@@ -224,6 +237,28 @@ class StatusLine {
   void removeAll() {
     _items.clear();
     _rebuild();
+  }
+}
+
+class ActionsContainer {
+  ActionsContainer(this.element);
+
+  final CoreElement element;
+  final List<ActionButton> _actions = [];
+
+  void addAction(ActionButton action) {
+    if (_actions.isEmpty) {
+      // add a visual separator
+      element.add(span(text: '•', a: 'horiz-padding', c: 'masthead-item'));
+    }
+
+    _actions.add(action);
+    element.add(action.element);
+  }
+
+  void clearActions() {
+    _actions.clear();
+    element.clear();
   }
 }
 
