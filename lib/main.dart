@@ -134,7 +134,7 @@ class PerfToolFramework extends Framework {
     final ActionButton reloadAction =
         ActionButton('icons/hot-reload-white@2x.png', 'Hot Reload');
     reloadAction.click(() async {
-      // Hide any previous status related to reload.
+      // Hide any previous status related to / restart.
       reloadStatus?.dispose();
 
       final Status status = Status(auxiliaryStatus, 'reloading...');
@@ -164,7 +164,7 @@ class PerfToolFramework extends Framework {
     final ActionButton restartAction =
         ActionButton('icons/hot-restart-white@2x.png', 'Hot Restart');
     restartAction.click(() async {
-      // Hide any previous status related to reload.
+      // Hide any previous status related to / restart.
       reloadStatus?.dispose();
 
       final Status status = Status(auxiliaryStatus, 'restarting...');
@@ -182,7 +182,7 @@ class PerfToolFramework extends Framework {
         messageBus.addEvent(BusEvent('restart.end', data: message));
         status.setText(message);
       } catch (_) {
-        const String message = 'error performing reload';
+        const String message = 'error performing restart';
         messageBus.addEvent(BusEvent('restart.end', data: message));
         status.setText(message);
       } finally {
