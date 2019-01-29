@@ -6,6 +6,8 @@ import '../ui/elements.dart';
 import '../ui/primer.dart';
 import 'timeline_protocol.dart';
 
+// TODO(kenzie): implement zoom functionality.
+
 // Switch this flag to true to dump the frame event trace to console.
 bool _debugEventTrace = false;
 
@@ -32,90 +34,111 @@ class FrameFlameChart extends CoreElement {
     content.element.style.overflow = 'scroll';
   }
 
-  TimelineFrameData data;
+  TimelineFrame frame;
   CoreElement content;
 
-  void updateData(TimelineFrameData data) {
-    this.data = data;
+  void updateFrameData(TimelineFrame frame) {
+    this.frame = frame;
 
     content.clear();
 
-    if (_debugEventTrace && data != null) {
+    // TODO(kenzie): Sometimes we see a dump of the event trace that does not
+    //  match what we draw in the flame chart. Fix this.
+    if (_debugEventTrace && frame != null) {
       final StringBuffer buf = new StringBuffer();
-      for (TimelineThread thread in data.threads) {
-        buf.writeln('${thread.name}:');
-        for (TimelineThreadEvent event in data.events) {
-          if (event.threadId == thread.threadId) {
-            event.format(buf, '  ');
-          }
-        }
+      buf.writeln('CPU:');
+      for (TimelineEvent event in frame.cpuEvents) {
+        event.format(buf, '  ');
+      }
+      buf.writeln('GPU:');
+      for (TimelineEvent event in frame.gpuEvents) {
+        event.format(buf, '  ');
       }
       print(buf.toString());
     }
 
-    if (data != null) {
-      _render(data);
+    if (frame != null) {
+      _render(frame);
     }
   }
 
-  void _render(TimelineFrameData data) {
-    const int leftIndent = 130;
+  void _render(TimelineFrame frame) {
+    const int leftIndent = 60;
     const int rowHeight = 25;
 
+    // TODO(kenzie): re-write this scale logic.
     const double microsPerFrame = 1000 * 1000 / 60.0;
     const double pxPerMicro = microsPerFrame / 1000.0;
 
     int row = 0;
 
-    final int microsAdjust = data.frame.startMicros;
+    final int microsAdjust = frame.startTime;
 
     int maxRow = 0;
 
-    void drawRecursively(TimelineThreadEvent event, int row) {
-      if (!event.wellFormed) {
-        print('event not well formed: $event');
-        return;
-      }
-
-      final double start = (event.startMicros - microsAdjust) / pxPerMicro;
+    void drawRecursively(TimelineEvent event, int row) {
+      final double start = (event.startTime - microsAdjust) / pxPerMicro;
       final double end =
-          (event.startMicros - microsAdjust + event.durationMicros) /
-              pxPerMicro;
+          (event.startTime - microsAdjust + event.duration) / pxPerMicro;
 
-      _createPosition(event.name, leftIndent + start.round(),
-          (end - start).round(), row * rowHeight);
+      _drawFlameChartItem(
+        event,
+        leftIndent + start.round(),
+        (end - start).round(),
+        row * rowHeight,
+      );
 
       if (row > maxRow) {
         maxRow = row;
       }
 
-      for (TimelineThreadEvent child in event.children) {
+      for (TimelineEvent child in event.children) {
         drawRecursively(child, row + 1);
       }
     }
 
-    // TODO: investigate if this try/catch is necessary.
-    try {
-      for (TimelineThread thread in data.threads) {
-        _createPosition(thread.name, 0, null, row * rowHeight);
+    void drawCpuEvents() {
+      final CoreElement sectionTitle = div(text: 'CPU', c: 'timeline-title');
+      sectionTitle.element.style.left = '0';
+      sectionTitle.element.style.top = '0';
+      content.add(sectionTitle);
 
-        maxRow = row;
+      maxRow = row;
 
-        for (TimelineThreadEvent event in data.eventsForThread(thread)) {
-          drawRecursively(event, row);
-        }
-
-        row = maxRow;
-
-        row++;
+      for (TimelineEvent event in frame.cpuEvents) {
+        drawRecursively(event, row);
       }
-    } catch (e, st) {
-      print('$e\n$st');
+
+      row = maxRow;
+
+      row++;
     }
+
+    void drawGpuEvents() {
+      final int sectionTop = row * rowHeight;
+      final CoreElement sectionTitle = div(text: 'GPU', c: 'timeline-title');
+      sectionTitle.element.style.left = '0';
+      sectionTitle.element.style.top = '${sectionTop}px';
+      content.add(sectionTitle);
+
+      maxRow = row;
+
+      for (TimelineEvent event in frame.gpuEvents) {
+        drawRecursively(event, row);
+      }
+
+      row = maxRow;
+
+      row++;
+    }
+
+    drawCpuEvents();
+    drawGpuEvents();
   }
 
-  void _createPosition(String name, int left, int width, int top) {
-    final CoreElement item = div(text: name, c: 'timeline-title');
+  // TODO(kenzie): re-assess this drawing logic.
+  void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
+    final CoreElement item = div(text: event.name, c: 'timeline-title');
     item.element.style.left = '${left}px';
     if (width != null) {
       item.element.style.width = '${width}px';
