@@ -131,6 +131,12 @@ class PerfToolFramework extends Framework {
   }
 
   void _buildReloadRestartButtons() async {
+    // TODO(devoncarew): We currently create hot reload events when hot reload
+    // is initialed, and react to those events in the UI. Going forward, we'll
+    // want to instead have flutter_tools fire hot reload events, and react to
+    // them in the UI. That will mean that our UI will update appropriately
+    // even when other clients (the CLI, and IDE) initial the hot reload.
+
     final ActionButton reloadAction =
         ActionButton('icons/hot-reload-white@2x.png', 'Hot Reload');
     reloadAction.click(() async {
