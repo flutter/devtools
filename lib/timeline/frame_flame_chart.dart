@@ -99,8 +99,8 @@ class FrameFlameChart extends CoreElement {
 
     void drawCpuEvents() {
       final CoreElement sectionTitle = div(text: 'CPU', c: 'timeline-title');
-      sectionTitle.element.style.left = '0px';
-      sectionTitle.element.style.top = '0px';
+      sectionTitle.element.style.left = '0';
+      sectionTitle.element.style.top = '0';
       content.add(sectionTitle);
 
       maxRow = row;
@@ -117,7 +117,7 @@ class FrameFlameChart extends CoreElement {
     void drawGpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'GPU', c: 'timeline-title');
-      sectionTitle.element.style.left = '0px';
+      sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       content.add(sectionTitle);
 
