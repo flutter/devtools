@@ -46,7 +46,7 @@ class FrameworkCore {
           );
         }
       } catch (e) {
-        errorReporter('Unable to connect to service on port $port', e);
+        errorReporter('Unable to connect to app on port $port', e);
       }
     }
   }

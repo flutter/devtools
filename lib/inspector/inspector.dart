@@ -33,7 +33,7 @@ bool _useHtmlInspectorTreeRenderer = false;
 class InspectorScreen extends Screen {
   InspectorScreen()
       : super(
-          name: 'Inspector',
+          name: 'Flutter Inspector',
           id: 'inspector',
           iconClass: 'octicon-device-mobile',
         );
