@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build for Release",
+			"type": "shell",
+			"command": "pub",
+			"args": [
+				"global",
+				"run",
+				"webdev",
+				"build"
+			],
+			"group": "build",
+			"problemMatcher": []
+		}
+	]
+}

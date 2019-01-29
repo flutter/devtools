@@ -11,6 +11,7 @@ dependencies:
   intl: ^0.15.0
   meta: ^1.1.0
   path: ^1.6.0
+  http_server: ^0.9.8+1
   rxdart: ^0.20.0
   vm_service_lib: ^0.3.10+2
 
