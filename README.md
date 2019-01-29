@@ -1,7 +1,4 @@
-# DevTools
 [![Build Status](https://travis-ci.org/flutter/devtools.svg?branch=master)](https://travis-ci.org/flutter/devtools)
-
-Performance tools for Flutter.
 
 ## What is this?
 
