@@ -140,7 +140,8 @@ class Framework {
     if (error != null) {
       message = '$error';
       // Only display the error object if it has a custom Dart toString.
-      if (message.startsWith('[object ')) {
+      if (message.startsWith('[object ') ||
+          message.startsWith('Instance of ')) {
         message = null;
       }
     }
@@ -165,8 +166,10 @@ class Framework {
     if (title != null) {
       flash.add(label(text: title));
     }
-    for (String text in message.split('\n\n')) {
-      flash.add(div(text: text));
+    if (message != null) {
+      for (String text in message.split('\n\n')) {
+        flash.add(div(text: text));
+      }
     }
 
     final CoreElement errorContainer =
