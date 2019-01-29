@@ -8,6 +8,12 @@
 			"url": "http://localhost:8080",
 			"webRoot": "${workspaceFolder}/web",
 			"preLaunchTask": "pub: build_runner serve"
+		},
+		{
+			"name": "Serve pre-built app",
+			"type": "dart",
+			"request": "launch",
+			"program": "bin/devtools.dart"
 		}
 	]
 }

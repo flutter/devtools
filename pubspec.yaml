@@ -7,10 +7,12 @@ environment:
   sdk: '>=2.1.0 <3.0.0'
 
 dependencies:
+  args: ^1.5.1
   codemirror: ^0.4.7
   intl: ^0.15.0
   meta: ^1.1.0
   path: ^1.6.0
+  http_server: ^0.9.8+1
   rxdart: ^0.20.0
   vm_service_lib: ^0.3.10+2
 
@@ -22,3 +24,6 @@ dev_dependencies:
   test: ^1.0.0
   webdev: 1.0.1
   webkit_inspection_protocol: ^0.3.6
+
+executables:
+  devtools:
