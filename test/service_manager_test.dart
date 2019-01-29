@@ -338,8 +338,10 @@ void main() {
 
       // Open the VmService and verify that the enabled extension states are
       // reflected in [ServiceExtensionManager].
-      await serviceManager.vmServiceOpened(service,
-          onClosed: Completer().future);
+      await serviceManager.vmServiceOpened(
+        service,
+        onClosed: Completer().future,
+      );
       await serviceManager
           .serviceExtensionManager.extensionStatesUpdated.future;
 
