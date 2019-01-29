@@ -13,7 +13,7 @@
 			"name": "Serve pre-built app",
 			"type": "dart",
 			"request": "launch",
-			"program": "bin/serve.dart"
+			"program": "bin/devtools.dart"
 		}
 	]
 }
