@@ -24,3 +24,6 @@ dev_dependencies:
   test: ^1.0.0
   webdev: 1.0.1
   webkit_inspection_protocol: ^0.3.6
+
+executables:
+  devtools:
