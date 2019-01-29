@@ -104,9 +104,7 @@ class TimelineScreen extends Screen {
       frameFlameChart.attribute('hidden', frame == null);
 
       if (frame != null && timelineController.hasStarted) {
-        final TimelineFrameData data =
-            timelineController.timelineData.getFrameData(frame);
-        frameFlameChart.updateData(data);
+        frameFlameChart.updateFrameData(frame);
       }
     });
 
@@ -149,7 +147,7 @@ class TimelineScreen extends Screen {
           list.cast<Map<String, dynamic>>();
 
       for (Map<String, dynamic> json in events) {
-        final TimelineEvent e = TimelineEvent(json);
+        final TraceEvent e = TraceEvent(json);
         timelineController.timelineData?.processTimelineEvent(e);
       }
     });
@@ -208,11 +206,13 @@ class TimelineFramesUI extends CoreElement {
   TimelineFramesUI(TimelineController timelineController)
       : super('div', classes: 'timeline-frames') {
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
-      // TODO(devoncarew): Make sure we respect TimelineFramesBuilder.maxFrames.
       final CoreElement frameUI = TimelineFrameUI(this, frame);
       if (element.children.isEmpty) {
         add(frameUI);
       } else {
+        if (element.children.length >= timelineController.maxFrames) {
+          element.children.removeLast();
+        }
         element.children.insert(0, frameUI.element);
       }
     });
@@ -249,7 +249,7 @@ class TimelineFrameUI extends CoreElement {
   TimelineFrameUI(this.framesUI, this.frame)
       : super('div', classes: 'timeline-frame') {
     add(<CoreElement>[
-      span(text: 'dart ${frame.renderAsMs}', c: 'perf-label'),
+      span(text: 'dart ${frame.cpuAsMs}', c: 'perf-label'),
       CoreElement('br'),
       span(text: 'gpu ${frame.gpuAsMs}', c: 'perf-label'),
     ]);
@@ -260,21 +260,21 @@ class TimelineFrameUI extends CoreElement {
     bool isSlow = false;
 
     final CoreElement dartBar = div(c: 'perf-bar left');
-    if (frame.renderDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
+    if (frame.cpuDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       dartBar.clazz('slow');
       isSlow = true;
     }
-    int height = (frame.renderDuration * pixelsPerMs / 1000.0).round();
+    int height = (frame.cpuDuration * pixelsPerMs / 1000.0).round();
     height = math.min(height, 80 - 6);
     dartBar.element.style.height = '${height}px';
     add(dartBar);
 
     final CoreElement gpuBar = div(c: 'perf-bar right');
-    if (frame.rasterizeDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
+    if (frame.gpuDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       gpuBar.clazz('slow');
       isSlow = true;
     }
-    height = (frame.rasterizeDuration * pixelsPerMs / 1000.0).round();
+    height = (frame.gpuDuration * pixelsPerMs / 1000.0).round();
     height = math.min(height, 80 - 6);
     gpuBar.element.style.height = '${height}px';
     add(gpuBar);
