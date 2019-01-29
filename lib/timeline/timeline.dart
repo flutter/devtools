@@ -259,6 +259,8 @@ class TimelineFrameUI extends CoreElement {
 
     bool isSlow = false;
 
+    // TODO(kenzie): add a helper method to draw a bar given a duration and a
+    //  style.
     final CoreElement dartBar = div(c: 'perf-bar left');
     if (frame.cpuDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
       dartBar.clazz('slow');

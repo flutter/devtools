@@ -35,10 +35,14 @@ class TimelineData {
     // TODO(kenzie): Remove this logic once cpu/gpu distinction changes are
     // available in the engine.
     event.frameId ??= frameId;
-    event.type ??= event.threadId == cpuThreadId ? 'cpu' : 'gpu';
+    event.type ??= event.threadId == cpuThreadId
+        ? TimelineEventType.cpu
+        : TimelineEventType.gpu;
 
     // We only care about CPU and GPU events.
-    if (event.type != 'cpu' && event.type != 'gpu' && event.phase != 's') {
+    if (event.type != TimelineEventType.cpu &&
+        event.type != TimelineEventType.gpu &&
+        event.phase != 's') {
       return;
     }
 
@@ -246,11 +250,15 @@ class TimelineFrame {
   bool get isComplete => cpuDuration != null && gpuDuration != null;
 
   String get cpuAsMs {
-    return '${(cpuDuration / 1000.0).toStringAsFixed(1)}ms';
+    return _durationAsMsText(cpuDuration);
   }
 
   String get gpuAsMs {
-    return '${(gpuDuration / 1000.0).toStringAsFixed(1)}ms';
+    return _durationAsMsText(gpuDuration);
+  }
+
+  String _durationAsMsText(int durationMicros) {
+    return '${(durationMicros / 1000.0).toStringAsFixed(1)}ms';
   }
 
   @override
@@ -388,12 +396,18 @@ class TraceEvent {
   int get frameId => _frameId ?? args['frameId'];
   set frameId(int id) => _frameId = id;
 
-  String _type;
-  String get type => _type ?? args['type'];
-  set type(String t) => _type = t;
+  TimelineEventType _type;
+  TimelineEventType get type {
+    if (_type == null) {
+      if (args['type'] == 'cpu') _type = TimelineEventType.cpu;
+      if (args['type'] == 'gpu') _type = TimelineEventType.gpu;
+    }
+    return _type;
+  }
+  set type(TimelineEventType t) => _type = t;
 
-  bool get isCpuEvent => type == 'cpu';
-  bool get isGpuEvent => type == 'gpu';
+  bool get isCpuEvent => type == TimelineEventType.cpu;
+  bool get isGpuEvent => type == TimelineEventType.gpu;
 
   @override
   String toString() => '$type event for frame $frameId - [$category] [$phase] '
