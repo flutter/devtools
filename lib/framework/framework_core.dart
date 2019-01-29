@@ -41,7 +41,7 @@ class FrameworkCore {
         await serviceManager.vmServiceOpened(service, finishedCompleter.future);
       }
     } catch (e) {
-      errorReporter('Unable to connect to service on port $port', e);
+      errorReporter('Unable to connect to app on port $port', e);
     }
   }
 }
