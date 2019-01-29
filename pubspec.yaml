@@ -7,6 +7,7 @@ environment:
   sdk: '>=2.1.0 <3.0.0'
 
 dependencies:
+  args: ^1.5.1
   codemirror: ^0.4.7
   intl: ^0.15.0
   meta: ^1.1.0
