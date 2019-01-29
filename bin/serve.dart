@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart';
 
 import 'package:http_server/http_server.dart' show VirtualDirectory;
+import 'package:path/path.dart';
 
 final webroot = join(dirname(dirname(Platform.script.toFilePath())), 'build');
 
@@ -19,5 +20,9 @@ Future<void> main() async {
   final server = await HttpServer.bind('127.0.0.1', 8765);
 
   virDir.serve(server);
-  print('Listening at http://${server.address.host}:${server.port} ...');
+  printJson({'host': server.address.host, 'port': server.port});
+}
+
+void printJson(Object obj) {
+  print(jsonEncode(obj));
 }
