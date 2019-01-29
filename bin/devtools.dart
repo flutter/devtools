@@ -12,7 +12,6 @@ import 'package:args/args.dart';
 const argHelp = 'help';
 const argMachine = 'machine';
 const argPort = 'port';
-const startPort = 8123;
 
 final argParser = new ArgParser()
   ..addFlag(argHelp, hide: true)
