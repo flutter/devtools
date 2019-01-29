@@ -119,7 +119,9 @@ class ServiceConnectionManager {
   }
 
   Future<void> vmServiceOpened(
-      VmServiceWrapper service, Future<void> onClosed) async {
+    VmServiceWrapper service, {
+    @required Future<void> onClosed,
+  }) async {
     final vm = await service.getVM();
     this.vm = vm;
     sdkVersion = vm.version;

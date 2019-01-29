@@ -6,15 +6,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:test/test.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
-
 import 'package:devtools/eval_on_dart_library.dart';
 import 'package:devtools/globals.dart';
 import 'package:devtools/service_extensions.dart' as extensions;
 import 'package:devtools/service_manager.dart';
 import 'package:devtools/service_registrations.dart' as registrations;
 import 'package:devtools/vm_service_wrapper.dart';
+import 'package:test/test.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
@@ -320,9 +319,9 @@ void main() {
       // Enable a numeric extension on the test device.
       const numericExtensionDescription = extensions.slowAnimations;
       final numericArgs = {
-        numericExtensionDescription.extension
-            .substring(numericExtensionDescription.extension.lastIndexOf('.') + 1):
-        numericExtensionDescription.enabledValue
+        numericExtensionDescription.extension.substring(
+                numericExtensionDescription.extension.lastIndexOf('.') + 1):
+            numericExtensionDescription.enabledValue
       };
       const numericEvalExpression = 'timeDilation';
       final numericLibrary = EvalOnDartLibrary(
@@ -339,7 +338,10 @@ void main() {
 
       // Open the VmService and verify that the enabled extension states are
       // reflected in [ServiceExtensionManager].
-      await serviceManager.vmServiceOpened(service, Completer().future);
+      await serviceManager.vmServiceOpened(
+        service,
+        onClosed: Completer().future,
+      );
       await serviceManager
           .serviceExtensionManager.extensionStatesUpdated.future;
 
