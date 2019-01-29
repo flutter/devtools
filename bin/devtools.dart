@@ -5,26 +5,36 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:http_server/http_server.dart' show VirtualDirectory;
 import 'package:path/path.dart';
-import 'package:args/args.dart';
 
 const argHelp = 'help';
 const argMachine = 'machine';
 const argPort = 'port';
 
 final argParser = new ArgParser()
-  ..addFlag(argHelp, hide: true)
-  ..addFlag(argMachine,
-      negatable: false,
-      abbr: 'm',
-      help: 'Sets output format to JSON for consumption in tools')
-  ..addOption(argPort, abbr: 'p', help: 'Port to serve the web application on');
+  ..addFlag(
+    argHelp,
+    negatable: false,
+    abbr: 'h',
+  )
+  ..addFlag(
+    argMachine,
+    negatable: false,
+    abbr: 'm',
+    help: 'Sets output format to JSON for consumption in tools',
+  )
+  ..addOption(
+    argPort,
+    abbr: 'p',
+    help: 'Port to serve DevTools on',
+  );
 
-var machineMode = false;
+bool machineMode = false;
 final webroot = join(dirname(dirname(Platform.script.toFilePath())), 'build');
 
-Future<void> main(List<String> arguments) async {
+void main(List<String> arguments) async {
   final args = argParser.parse(arguments);
   if (args[argHelp]) {
     print(argParser.usage);
@@ -46,7 +56,7 @@ Future<void> main(List<String> arguments) async {
 
   virDir.serve(server);
   printOutput(
-    'Listening at http://${server.address.host}:${server.port}',
+    'Serving DevTools at http://${server.address.host}:${server.port}',
     {
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port}
