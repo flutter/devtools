@@ -113,7 +113,7 @@ const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   icon: FlutterIcons.locate,
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip:'Disable Select Widget Mode',
+  enabledTooltip: 'Disable Select Widget Mode',
   disabledTooltip: 'Enable Select Widget Mode',
 );
 
