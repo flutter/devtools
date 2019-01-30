@@ -15,7 +15,7 @@ env:
   - BOT=main
   - BOT=test_ddc
   - BOT=test_dart2js
-  - BOT=test_flutter
+  - BOT=flutter_sdk_tests
 script: ./tool/travis.sh
 
 branches:
