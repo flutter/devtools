@@ -5,9 +5,9 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools/globals.dart';
-import 'package:devtools/service_extensions.dart' as extensions;
-import 'package:devtools/timeline/frame_rendering.dart';
+import 'package:devtools/src/globals.dart';
+import 'package:devtools/src/service_extensions.dart' as extensions;
+import 'package:devtools/src/timeline/frame_rendering.dart';
 import 'package:test/test.dart';
 
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;

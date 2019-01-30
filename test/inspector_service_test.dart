@@ -7,9 +7,9 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-import 'package:devtools/inspector/diagnostics_node.dart';
-import 'package:devtools/inspector/flutter_widget.dart';
-import 'package:devtools/inspector/inspector_service.dart';
+import 'package:devtools/src/inspector/diagnostics_node.dart';
+import 'package:devtools/src/inspector/flutter_widget.dart';
+import 'package:devtools/src/inspector/inspector_service.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';

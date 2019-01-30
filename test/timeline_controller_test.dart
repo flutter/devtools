@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools/timeline/timeline_controller.dart';
+import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:test/test.dart';
 
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;

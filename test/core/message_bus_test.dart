@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:devtools/core/message_bus.dart';
+import 'package:devtools/src/core/message_bus.dart';
 import 'package:test/test.dart';
 
 void main() {
