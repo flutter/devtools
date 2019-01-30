@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../ui/elements.dart';
-import '../ui/primer.dart';
 import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
