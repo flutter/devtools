@@ -12,5 +12,5 @@ It's still very early in development - stay tuned.
 ## Use and Development
 
 See the devtools package
-[readme](https://github.com/flutter/devtools/blob/master/packages/devtools/dart_test.yaml)
+[readme](https://github.com/flutter/devtools/blob/master/packages/devtools/README.md)
 for more information.
