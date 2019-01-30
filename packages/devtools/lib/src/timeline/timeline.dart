@@ -177,7 +177,7 @@ class TimelineScreen extends Screen {
     _updateListeningState();
   }
 
-  void _updateButtons({@required paused}) {
+  void _updateButtons({@required bool paused}) {
     pauseButton.disabled = paused;
     resumeButton.disabled = !paused;
 

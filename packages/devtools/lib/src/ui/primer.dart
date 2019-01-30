@@ -68,7 +68,8 @@ class PButton extends CoreElement {
     setAttribute('type', 'button');
     setAttribute('title', title ?? text);
     if (icon != null) {
-      add(createIconElement(_icon = icon));
+      _icon = icon;
+      add(createIconElement(icon));
       if (text != null) {
         add(span(text: text));
       }
