@@ -14,7 +14,10 @@ import '../utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
-const Map<String, DiagnosticLevel> diagnosticLevelNames = {
+Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
+    inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
+
+const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
   'hidden': DiagnosticLevel.hidden,
   'fine': DiagnosticLevel.fine,
   'debug': DiagnosticLevel.debug,
@@ -23,22 +26,31 @@ const Map<String, DiagnosticLevel> diagnosticLevelNames = {
   'hint': DiagnosticLevel.hint,
   'fix': DiagnosticLevel.fix,
   'contract': DiagnosticLevel.contract,
+  'violation': DiagnosticLevel.violation,
   'error': DiagnosticLevel.error,
   'off': DiagnosticLevel.off,
 };
 
-const Map<String, DiagnosticsTreeStyle> treeStyleValues = {
+final Map<DiagnosticLevel, String> diagnosticLevelToName =
+    _invertMap(nameToDiagnosticLevel);
+
+const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
   'sparse': DiagnosticsTreeStyle.sparse,
   'offstage': DiagnosticsTreeStyle.offstage,
   'dense': DiagnosticsTreeStyle.dense,
   'transition': DiagnosticsTreeStyle.transition,
   'whitespace': DiagnosticsTreeStyle.whitespace,
   'error': DiagnosticsTreeStyle.error,
+  'flat': DiagnosticsTreeStyle.flat,
   'singleLine': DiagnosticsTreeStyle.singleLine,
+  'headerLine': DiagnosticsTreeStyle.headerLine,
   'indentedSingleLine': DiagnosticsTreeStyle.indentedSingleLine,
   'shallow': DiagnosticsTreeStyle.shallow,
   'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
 };
+
+final Map<DiagnosticsTreeStyle, String> treeStyleToName =
+    _invertMap(nameToTreeStyle);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -76,7 +88,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroup inspectorService;
+  final FutureOr<ObjectGroup> inspectorService;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
@@ -248,6 +260,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description if the property [value] is null.
   String get ifNull => getStringMember('ifNull');
 
+  bool get allowWrap => getBooleanMember('allowWrap', true);
+
   /// Optional tooltip typically describing the property.
   ///
   /// Example tooltip: 'physical pixels per logical pixel'
@@ -345,8 +359,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelNames[value];
-    assert(level != null);
+    final level = nameToDiagnosticLevel[value];
+    assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
 
@@ -359,7 +373,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleValues[value];
+    final style = nameToTreeStyle[value];
     assert(style != null);
     return style ?? defaultValue;
   }
@@ -379,7 +393,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Instance object for the Dart value because much of the relevant
   /// information to display good visualizations of Flutter values is stored
   /// in properties not in fields.
-  Future<Map<String, InstanceRef>> get valueProperties {
+  Future<Map<String, InstanceRef>> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef?.id == null) {
         _valueProperties = Future.value(null);
@@ -387,8 +401,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
-        _valueProperties = inspectorService.getEnumPropertyValues(valueRef);
-        return _valueProperties;
+        return (await inspectorService)?.getEnumPropertyValues(valueRef);
       }
 
       List<String> propertyNames;
@@ -405,8 +418,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           _valueProperties = Future.value(null);
           return _valueProperties;
       }
-      _valueProperties =
-          inspectorService.getDartObjectProperties(valueRef, propertyNames);
+      _valueProperties = (await inspectorService)
+          ?.getDartObjectProperties(valueRef, propertyNames);
     }
     return _valueProperties;
   }
@@ -431,7 +444,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Whether this node is being displayed as a full tree or a filtered tree.
   bool get isStateful => getBooleanMember('stateful', false);
 
-  String get getWidgetRuntimeType => getStringMember('widgetRuntimeType');
+  String get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
   /// Check whether children are already available.
   bool get childrenReady {
@@ -453,13 +466,26 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (!hasChildren || _children != null) {
       return;
     }
-    _childrenFuture =
-        inspectorService.getChildren(dartDiagnosticRef, isSummaryTree, this);
+
+    if (_childrenFuture != null) {
+      await _childrenFuture;
+      return;
+    }
+
+    _childrenFuture = _getChildrenHelper();
     try {
       _children = await _childrenFuture;
     } finally {
       _children ??= [];
     }
+  }
+
+  Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
+    return (await inspectorService)?.getChildren(
+      dartDiagnosticRef,
+      isSummaryTree,
+      this,
+    );
   }
 
   void _maybePopulateChildren() {
@@ -574,14 +600,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   FlutterWidget get widget {
-    return inspectorService.inspectorService.widgetCatalog
-        .getWidget(description);
+    return Catalog.instance?.getWidget(widgetRuntimeType);
   }
 
   Icon get icon {
     if (isProperty) return null;
     Icon icon = widget?.icon;
-    icon ??= iconMaker.fromWidgetName(description);
+    if (icon == null && widgetRuntimeType != null)
+      icon ??= iconMaker.fromWidgetName(widgetRuntimeType);
     return icon;
   }
 
@@ -644,13 +670,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   String toStringShort() {
     return description;
   }
-}
 
-Future<T> bindFutureToCompleter<T>(Future<T> future, Completer<T> completer) {
-  future
-      .then((v) => completer.complete(v))
-      .catchError((e) => completer.completeError(e));
-  return future;
+  Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
+    await (await inspectorService)
+        ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+  }
 }
 
 class InspectorSourceLocation {

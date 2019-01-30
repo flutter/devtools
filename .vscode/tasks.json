@@ -2,28 +2,17 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "webdev serve",
+			"label": "Build for Release",
 			"type": "shell",
+			"command": "pub",
 			"args": [
+				"global",
 				"run",
 				"webdev",
-				"serve",
-				"web"
+				"build"
 			],
-			"command": "pub",
 			"group": "build",
-			"isBackground": true,
-			"problemMatcher": {
-				"owner": "custom",
-				"pattern": {
-					"regexp": "__________"
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "^\\[INFO\\] Starting Build",
-					"endsPattern": "^\\[INFO\\] Succeeded after"
-				}
-			}
+			"problemMatcher": []
 		}
 	]
 }

@@ -63,11 +63,10 @@ abstract class FlutterTestDriver {
 
   Future<void> _setupProcess(
     List<String> args, {
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
+    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
-    if (withDebugger) {
+    if (runConfig.withDebugger) {
       args.add('--start-paused');
     }
     if (pidFile != null) {
@@ -256,57 +255,52 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   String _currentRunningAppId;
 
   Future<void> run({
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
-    bool trackWidgetCreation = true,
+    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
     final args = <String>[
       'run',
       '--machine',
     ];
-    if (trackWidgetCreation) {
+    if (runConfig.trackWidgetCreation) {
       args.add('--track-widget-creation');
     }
     args.addAll(['-d', 'flutter-tester']);
     await _setupProcess(
       args,
-      withDebugger: withDebugger,
-      pauseOnExceptions: pauseOnExceptions,
+      runConfig: runConfig,
       pidFile: pidFile,
     );
   }
 
   Future<void> attach(
     int port, {
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
+    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
-    await _setupProcess(<String>[
-      'attach',
-      '--machine',
-      '-d',
-      'flutter-tester',
-      '--debug-port',
-      '$port',
-    ],
-        withDebugger: withDebugger,
-        pauseOnExceptions: pauseOnExceptions,
-        pidFile: pidFile);
+    await _setupProcess(
+      <String>[
+        'attach',
+        '--machine',
+        '-d',
+        'flutter-tester',
+        '--debug-port',
+        '$port',
+      ],
+      runConfig: runConfig,
+      pidFile: pidFile,
+    );
   }
 
   @override
   Future<void> _setupProcess(
     List<String> args, {
-    bool withDebugger = false,
-    bool pauseOnExceptions = false,
+    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
     await super._setupProcess(
       args,
-      withDebugger: withDebugger,
-      pauseOnExceptions: pauseOnExceptions,
+      runConfig: runConfig,
       pidFile: pidFile,
     );
 
@@ -322,7 +316,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final Future<Map<String, dynamic>> started =
         _waitFor(event: 'app.started', timeout: appStartTimeout);
 
-    if (withDebugger) {
+    if (runConfig.withDebugger) {
       final Map<String, dynamic> debugPort =
           await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
@@ -349,7 +343,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       // expected by tests. Tests will reload/restart as required if they need
       // to hit breakpoints, etc.
       await waitForPause();
-      if (pauseOnExceptions) {
+      if (runConfig.pauseOnExceptions) {
         await vmService.setExceptionPauseMode(
             await getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
       }
@@ -474,4 +468,16 @@ Stream<String> _transformToLines(Stream<List<int>> byteStream) {
   return byteStream
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter());
+}
+
+class FlutterRunConfiguration {
+  const FlutterRunConfiguration({
+    this.withDebugger = false,
+    this.pauseOnExceptions = false,
+    this.trackWidgetCreation = true,
+  });
+
+  final bool withDebugger;
+  final bool pauseOnExceptions;
+  final bool trackWidgetCreation;
 }

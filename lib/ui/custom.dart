@@ -251,3 +251,22 @@ class TreeToggle extends CoreElement {
 CoreElement _defaultRenderer<T>(T item) {
   return li(text: item.toString(), c: 'list-item');
 }
+
+class ActionButton implements CoreElementView {
+  ActionButton(this.iconPath, this.tooltip) {
+    _element = div(c: 'masthead-item action-button')
+      ..add(img(src: iconPath)..tooltip = tooltip);
+  }
+
+  final String iconPath;
+  final String tooltip;
+
+  CoreElement _element;
+
+  StreamSubscription click(void handle()) => _element.click(handle);
+
+  set disabled(bool value) => _element.disabled = value;
+
+  @override
+  CoreElement get element => _element;
+}

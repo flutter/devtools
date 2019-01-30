@@ -18,7 +18,7 @@ echo "which dart: " `which dart`
 
 # Analyze the source.
 pub global activate tuneup
-tuneup check --ignore-infos
+tuneup check
 
 # Ensure we can build the app.
 pub run webdev build

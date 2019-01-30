@@ -1,11 +1,11 @@
 ▼[S] Scaffold <-- selected
 └─▼[S] _ScaffoldScope
-  └─▼[P] PrimaryScrollController
+    ▼[P] PrimaryScrollController
     └─▼[M] Material
       └─▼[/icons/inspector/resume.png] AnimatedPhysicalModel
         └─▼[P] PhysicalModel
           └─▼[N] NotificationListener <LayoutChangedNotification>
-            └─▼[I] _InkFeatures [GlobalKey#00000 ink renderer]
+              ▼[I] _InkFeatures [GlobalKey#00000 ink renderer]
               └─▼[/icons/inspector/resume.png] AnimatedDefaultTextStyle
                 └─▼[/icons/inspector/textArea.png] DefaultTextStyle
                   └─▼[/icons/inspector/resume.png] AnimatedBuilder
@@ -18,7 +18,7 @@
                       │   └─▼[/icons/inspector/atrule.png] MediaQuery
                       │     └─▼[C] ConstrainedBox
                       │       └─▼[F] FlexibleSpaceBarSettings
-                      │         └─▶[A] AppBar
+                      │           ▶[A] AppBar
                       └─▼[L] LayoutId [<_ScaffoldSlot.floatingActionButton>]
                         └─▼[/icons/inspector/atrule.png] MediaQuery
                           └─▼[F] _FloatingActionButtonTransition

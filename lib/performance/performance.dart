@@ -42,8 +42,10 @@ class PerformanceScreen extends Screen {
   CpuTracker cpuTracker;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
-    mainDiv.add(<CoreElement>[
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+
+    screenDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
@@ -76,6 +78,8 @@ class PerformanceScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
+    return screenDiv;
   }
 
   void _handleIsolateChanged() {

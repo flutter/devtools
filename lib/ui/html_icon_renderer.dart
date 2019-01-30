@@ -291,7 +291,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
     final Completer<CanvasElement> imageCompleter = Completer();
     if (!_fontLoaded) {
       if (_iconsFont == null) {
-        _iconsFont = new FontFace(
+        _iconsFont = FontFace(
           'Material Icons',
           'url(packages/devtools/ui/MaterialIcons-Regular.woff2)',
         );
@@ -322,12 +322,22 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
     if (icon.angle != 0) {
       context2D.rotate(icon.angle);
     }
-    context2D
-      ..font = '${icon.fontSize}px Material Icons'
-      ..fillStyle = colorToCss(icon.color)
-      ..textBaseline = 'middle'
-      ..textAlign = 'center'
-      ..fillText(icon.text, 0, 0, iconWidth + 10);
+    void _drawIcon() {
+      context2D
+        ..font = '${icon.fontSize}px Material Icons'
+        ..fillStyle = colorToCss(icon.color)
+        ..textBaseline = 'middle'
+        ..textAlign = 'center'
+        ..fillText(icon.text, 0, 0, iconWidth + 10);
+    }
+
+    if (_fontLoaded) {
+      _drawIcon();
+    } else {
+      loadImage().then((_) {
+        _drawIcon();
+      });
+    }
     return canvas;
   }
 }

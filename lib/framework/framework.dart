@@ -8,6 +8,7 @@ import 'dart:html' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../main.dart';
+import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
@@ -21,6 +22,9 @@ class Framework {
     pageStatus = StatusLine(CoreElement.from(querySelector('#page-status')));
     auxiliaryStatus =
         StatusLine(CoreElement.from(querySelector('#auxiliary-status')));
+
+    globalActions =
+        ActionsContainer(CoreElement.from(querySelector('#global-actions')));
   }
 
   final List<Screen> screens = <Screen>[];
@@ -30,6 +34,9 @@ class Framework {
   StatusLine globalStatus;
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
+  ActionsContainer globalActions;
+
+  final Map<Screen, CoreElement> _screenContents = {};
 
   void addScreen(Screen screen) {
     screens.add(screen);
@@ -74,9 +81,11 @@ class Framework {
 
   CoreElement get mainElement => CoreElement.from(querySelector('#content'));
 
-  final Map<Screen, List<Element>> _contents = <Screen, List<Element>>{};
-
   void load(Screen screen) {
+    if (current == null) {
+      mainElement.element.children.clear();
+    }
+
     if (current != null) {
       final Screen oldScreen = current;
       current = null;
@@ -84,19 +93,22 @@ class Framework {
       oldScreen.visible = false;
 
       pageStatus.removeAll();
-      _contents[oldScreen] = mainElement.element.children.toList();
-      mainElement.element.children.clear();
-    } else {
-      mainElement.element.children.clear();
+
+      _screenContents[oldScreen].hidden(true);
     }
 
     current = screen;
 
-    if (_contents.containsKey(current)) {
-      mainElement.element.children.addAll(_contents[current]);
+    if (_screenContents.containsKey(current)) {
+      _screenContents[current].hidden(false);
     } else {
       current.framework = this;
-      current.createContent(this, mainElement);
+
+      final CoreElement screenContent = current.createContent(this);
+      screenContent.attribute('full');
+      mainElement.add(screenContent);
+
+      _screenContents[current] = screenContent;
     }
 
     current.visible = true;
@@ -115,21 +127,58 @@ class Framework {
     }
   }
 
+  void showInfo(String message, {String title}) {
+    _showMessage(message, title: title);
+  }
+
+  void showWarning(String message, {String title}) {
+    _showMessage(message, title: title, warning: true);
+  }
+
   void showError(String title, [dynamic error]) {
-    final PFlash flash = PFlash()..warn();
-    flash.addClose().click(clearError);
-    flash.add(label(text: title));
+    String message;
     if (error != null) {
-      flash.add(div(text: '$error'));
+      message = '$error';
+      // Only display the error object if it has a custom Dart toString.
+      if (message.startsWith('[object ') ||
+          message.startsWith('Instance of ')) {
+        message = null;
+      }
+    }
+
+    _showMessage(message, title: title, error: true);
+  }
+
+  void _showMessage(
+    String message, {
+    String title,
+    bool warning = false,
+    bool error = false,
+  }) {
+    final PFlash flash = PFlash();
+    if (warning) {
+      flash.warning();
+    }
+    if (error) {
+      flash.error();
+    }
+    flash.addClose().click(clearMessages);
+    if (title != null) {
+      flash.add(label(text: title));
+    }
+    if (message != null) {
+      for (String text in message.split('\n\n')) {
+        flash.add(div(text: text));
+      }
     }
 
     final CoreElement errorContainer =
-        CoreElement.from(querySelector('#error-container'));
+        CoreElement.from(querySelector('#messages-container'));
     errorContainer.add(flash);
   }
 
-  void clearError() {
-    querySelector('#error-container').children.clear();
+  void clearMessages() {
+    querySelector('#messages-container').children.clear();
   }
 
   void toast(String message, {String title}) {
@@ -138,6 +187,14 @@ class Framework {
         CoreElement.from(querySelector('#toast-container'));
     toastContainer.add(toast);
     toast.show();
+  }
+
+  void addGlobalAction(ActionButton action) {
+    globalActions.addAction(action);
+  }
+
+  void clearGlobalActions() {
+    globalActions.clearActions();
   }
 }
 
@@ -186,6 +243,28 @@ class StatusLine {
   }
 }
 
+class ActionsContainer {
+  ActionsContainer(this.element);
+
+  final CoreElement element;
+  final List<ActionButton> _actions = [];
+
+  void addAction(ActionButton action) {
+    if (_actions.isEmpty) {
+      // add a visual separator
+      element.add(span(text: '•', a: 'horiz-padding', c: 'masthead-item'));
+    }
+
+    _actions.add(action);
+    element.add(action.element);
+  }
+
+  void clearActions() {
+    _actions.clear();
+    element.clear();
+  }
+}
+
 abstract class Screen {
   Screen({
     @required this.name,
@@ -213,7 +292,7 @@ abstract class Screen {
 
   Stream<bool> get onVisibleChange => _visible.onValueChange;
 
-  void createContent(Framework framework, CoreElement mainDiv);
+  CoreElement createContent(Framework framework);
 
   void entering() {}
 
@@ -275,15 +354,15 @@ class Toast extends CoreElement {
 
     element.style.left = '0px';
 
-    new Timer(animationDelay, () {
-      new Timer(hideDelay, _hide);
+    Timer(animationDelay, () {
+      Timer(hideDelay, _hide);
     });
   }
 
   void _hide() {
     element.style.left = '400px';
 
-    new Timer(animationDelay, dispose);
+    Timer(animationDelay, dispose);
   }
 
   @override

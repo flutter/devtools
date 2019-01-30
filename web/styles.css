@@ -35,8 +35,8 @@ body {
 }
 
 .masthead-nav {
-    float: right;
     margin-top: .5rem;
+    display: inline-flex;
 }
 
 .masthead-nav a:not(:last-child) {
@@ -51,7 +51,8 @@ body {
   font-size: 13px;
 }
 
-.masthead a {
+.masthead a,
+.masthead .masthead-item {
     color: rgba(255, 255, 255, 0.5);
     font-size: 1rem;
 }
@@ -299,8 +300,8 @@ form[horizontal] {
 }
 
 [horiz-padding] {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .footer-status {
@@ -651,6 +652,7 @@ nav.menu li {
     color: #ccc;
 }
 
+<<<<<<< HEAD
 .tree-list {
     padding-left: 25px;
     list-style: none;
@@ -667,19 +669,21 @@ nav.menu li {
     padding-left: 2px;
 }
 
+=======
+>>>>>>> master
 /* We have to do something with the scrollbars as they flicker due to DOM
 manipulation in our table and ViewportCanvas code.
 
 Currently we overwrite the default to keep the scrollbars always visible
 but a more subtle solution would be better. */
 
-::-webkit-scrollbar {
+.custom-scrollbar ::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 9px;
     height: 9px;
 }
 
-::-webkit-scrollbar-thumb {
+.custom-scrollbar ::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     box-shadow: 0 0 1px rgba(255,255,255,.5);
@@ -753,4 +757,47 @@ but a more subtle solution would be better. */
 
     /* Support for IE. */
     font-feature-settings: 'liga';
+}
+
+html [full] {
+    height: 100%;
+    overflow: hidden;
+}
+
+#messages-container div+div {
+    margin-top: 0.25em;
+}
+
+.action-button {
+    border-radius: 50%;
+    height: 28px;
+    width: 28px;
+    color: white;
+    text-align: center;
+}
+
+.action-button:hover {
+    box-shadow: 0 2px 2px 0 #666;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-button:active {
+    box-shadow: 0 2px 2px 0 #666;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.action-button[disabled] {
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0);
+    opacity: 0.5;
+}
+
+.action-button img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+.action-button+.action-button {
+    margin-left: 8px;
 }

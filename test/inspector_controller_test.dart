@@ -15,20 +15,15 @@ import 'package:devtools/inspector/inspector_controller.dart';
 import 'package:devtools/inspector/inspector_tree.dart';
 import 'package:devtools/inspector/inspector_text_styles.dart' as styles;
 import 'package:devtools/inspector/inspector_service.dart';
-import 'package:devtools/service_manager.dart';
 import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools/ui/icons.dart';
 import 'package:devtools/ui/material_icons.dart';
-import 'package:devtools/vm_service_wrapper.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
-import 'support/flutter_test_driver.dart';
-
-
-/// Switch this flag to false to debug issues with non-atomic test behavior.
-bool reuseTestEnvironment = true;
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 
 class FakePaintEntry extends PaintEntry {
   FakePaintEntry({this.icon, this.text, this.textStyle, @required this.x});
@@ -109,12 +104,14 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
   FakeInspectorTree({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
+    @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -174,7 +171,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.
-    final StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
       final row = root.getRow(i, selection: selection);
       if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
@@ -263,33 +260,22 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
 void main() async {
   Catalog.setCatalog(
       Catalog.decode(await File('web/widgets.json').readAsString()));
-  bool widgetCreationTracked;
-  FlutterRunTestDriver _flutter;
-  VmServiceWrapper service;
   InspectorService inspectorService;
   InspectorController inspectorController;
-
   FakeInspectorTree tree;
   FakeInspectorTree detailsTree;
 
-  Future<void> setupEnvironment(bool trackWidgetCreation) async {
-    if (trackWidgetCreation != widgetCreationTracked || !reuseTestEnvironment) {
-      widgetCreationTracked = trackWidgetCreation;
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
 
-      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+  env.afterNewSetup = () async {
+    await ensureInspectorServiceDependencies();
+  };
 
-      await _flutter.run(
-        withDebugger: true,
-        trackWidgetCreation: trackWidgetCreation,
-      );
-      service = _flutter.vmService;
-
-      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-
-      await serviceManager.vmServiceOpened(service, Completer().future);
-    }
-    inspectorService = await InspectorService.create(service);
-    if (reuseTestEnvironment) {
+  env.afterEverySetup = () async {
+    inspectorService = await InspectorService.create(env.service);
+    if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
@@ -306,6 +292,7 @@ void main() async {
       inspectorTreeFactory: ({
         summaryTree,
         treeType,
+        onNodeAdded,
         onSelectionChange,
         onExpand,
         onHover,
@@ -313,6 +300,7 @@ void main() async {
         return FakeInspectorTree(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -331,35 +319,34 @@ void main() async {
     // twice after being initialized.
     await tree.nextUiFrame;
     await tree.nextUiFrame;
-  }
+  };
 
-  Future<void> tearDownEnvironment({bool force = false}) async {
-    if (!force && reuseTestEnvironment) {
-      // Skip actually tearing down for better test performance.
-      return;
-    }
+  env.beforeTearDown = () {
+    inspectorController.dispose();
+    inspectorController = null;
     inspectorService.dispose();
     inspectorService = null;
-
-    await service.allFuturesCompleted.future;
-    await _flutter.stop();
-  }
+  };
 
   group('inspector controller tests', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
     test('initial state', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+            '▼[R] root ]\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       expect(
@@ -369,23 +356,23 @@ void main() async {
 
       expect(detailsTree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment();
     });
 
     test('select widget', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       // select row index 5.
       tree.onTap(const Offset(0, rowHeight * 5.5));
       const textSelected = // Comment to make dartfmt behave.
-          '▼[[] root ]\n'
-          '└─▼[M] MyApp\n'
-          '  └─▼[M] MaterialApp\n'
-          '    └─▼[S] Scaffold\n'
+          '▼[R] root ]\n'
+          '  ▼[M] MyApp\n'
+          '    ▼[M] MaterialApp\n'
+          '      ▼[S] Scaffold\n'
           '      ├───▼[C] Center\n'
-          '      │   └─▼[/icons/inspector/textArea.png] Text <-- selected\n'
+          '      │     ▼[/icons/inspector/textArea.png] Text <-- selected\n'
           '      └─▼[A] AppBar\n'
-          '        └─▼[/icons/inspector/textArea.png] Text\n';
+          '          ▼[/icons/inspector/textArea.png] Text\n';
 
       expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
       expect(
@@ -399,20 +386,19 @@ void main() async {
         detailsTree.toStringDeep(),
         equalsIgnoringHashCodes(
             '▼[/icons/inspector/textArea.png] Text <-- selected\n'
-                '│   "Hello, World!"\n'
-                '│   textAlign: null [D]\n'
-                '│   textDirection: null [D]\n'
-                '│   locale: null [D]\n'
-                '│   softWrap: null [D]\n'
-                '│   overflow: null [D]\n'
-                '│   textScaleFactor: null [D]\n'
-                '│   maxLines: null [D]\n'
-                '└─▼[/icons/inspector/textArea.png] RichText\n'
-                '    softWrap: wrapping at box width\n'
-                '    maxLines: unlimited\n'
-                '    text: "Hello, World!"\n'
-                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-        ),
+            '│   "Hello, World!"\n'
+            '│   textAlign: null [D]\n'
+            '│   textDirection: null [D]\n'
+            '│   locale: null [D]\n'
+            '│   softWrap: null [D]\n'
+            '│   overflow: null [D]\n'
+            '│   textScaleFactor: null [D]\n'
+            '│   maxLines: null [D]\n'
+            '└─▼[/icons/inspector/textArea.png] RichText\n'
+            '    softWrap: wrapping at box width\n'
+            '    maxLines: unlimited\n'
+            '    text: "Hello, World!"\n'
+            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
       expect(
@@ -426,23 +412,20 @@ void main() async {
       //
       expect(
         detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes(
-            '▼[/icons/inspector/textArea.png] Text\n'
-                '│   "Hello, World!"\n'
-                '│   textAlign: null [D]\n'
-                '│   textDirection: null [D]\n'
-                '│   locale: null [D]\n'
-                '│   softWrap: null [D]\n'
-                '│   overflow: null [D]\n'
-                '│   textScaleFactor: null [D]\n'
-                '│   maxLines: null [D]\n'
-                '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
-                '    softWrap: wrapping at box width\n'
-                '    maxLines: unlimited\n'
-                '    text: "Hello, World!"\n'
-                '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'
-
-        ),
+        equalsIgnoringHashCodes('▼[/icons/inspector/textArea.png] Text\n'
+            '│   "Hello, World!"\n'
+            '│   textAlign: null [D]\n'
+            '│   textDirection: null [D]\n'
+            '│   locale: null [D]\n'
+            '│   softWrap: null [D]\n'
+            '│   overflow: null [D]\n'
+            '│   textScaleFactor: null [D]\n'
+            '│   maxLines: null [D]\n'
+            '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
+            '    softWrap: wrapping at box width\n'
+            '    maxLines: unlimited\n'
+            '    text: "Hello, World!"\n'
+            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
       // make sure the main tree didn't change.
@@ -453,21 +436,21 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold <-- selected\n'
+            '▼[R] root ]\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold <-- selected\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
       // This tree is huge. If there is a change to package:flutter it may
       // change. If this happens don't panic and rebaseline the content.
       expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
+        detailsTree.toStringDeep(),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold.txt'),
       );
@@ -480,14 +463,14 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+            '▼[R] root ]\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center <-- selected\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
@@ -503,14 +486,14 @@ void main() async {
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold <-- selected\n'
+            '▼[R] root ]\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold <-- selected\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // Verify that the details tree scrolled back as well.
@@ -522,7 +505,7 @@ void main() async {
       );
 
       expect(
-        detailsTree.toStringDeep(includeTextStyles: true),
+        detailsTree.toStringDeep(hidePropertyLines: true, includeTextStyles: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_with_styles.txt'),
       );
@@ -530,31 +513,31 @@ void main() async {
       // TODO(jacobr): add tests that verified that we scrolled the view to the
       // correct points on selection.
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment();
     });
 
     test('hotReload', () async {
-      await setupEnvironment(true);
+      await env.setupEnvironment();
 
       await serviceManager.performHotReload();
-      // make sure the inspector does not fall over and die after a hot reload.
+      // Ensure the inspector does not fall over and die after a hot reload.
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
-            '▼[[] root ]\n'
-                '└─▼[M] MyApp\n'
-                '  └─▼[M] MaterialApp\n'
-                '    └─▼[S] Scaffold\n'
+            '▼[R] root ]\n'
+                '  ▼[M] MyApp\n'
+                '    ▼[M] MaterialApp\n'
+                '      ▼[S] Scaffold\n'
                 '      ├───▼[C] Center\n'
-                '      │   └─▼[/icons/inspector/textArea.png] Text\n'
+                '      │     ▼[/icons/inspector/textArea.png] Text\n'
                 '      └─▼[A] AppBar\n'
-                '        └─▼[/icons/inspector/textArea.png] Text\n',
+                '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.
 
-      await tearDownEnvironment();
+      await env.tearDownEnvironment();
     });
   }, tags: 'useFlutterSdk');
 }

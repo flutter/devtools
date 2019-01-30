@@ -1,98 +1,29 @@
 ▼[S]<grayed> </grayed><bold>Scaffold</bold> <-- selected
-│   ▶state: ScaffoldState#00000(tickers: tracking 1 ticker)
 └─▼[S]<grayed> </grayed>_ScaffoldScope
-  └─▼[P]<grayed> </grayed>PrimaryScrollController
-    │   ScrollController#00000(no clients)
+    ▼[P]<grayed> </grayed>PrimaryScrollController
     └─▼[M]<grayed> </grayed>Material
-      │   type: canvas
-      │   color: [#00000aff]#00000a
-      │   state: _MaterialState#00000
       └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedPhysicalModel
-        │   duration: 200ms
-        │   shape: rectangle
-        │   borderRadius: BorderRadius.zero
-        │   elevation: 0.0
-        │   color: [#00000aff]#00000a
-        │   animateColor: false
-        │   shadowColor: [#000000ff]#000000
-        │   animateShadowColor: true
-        │   ▶state: _AnimatedPhysicalModelState#00000(ticker inactive)
         └─▼[P]<grayed> </grayed>PhysicalModel
-          │   shape: rectangle
-          │   borderRadius: BorderRadius.zero
-          │   elevation: 0.0
-          │   color: [#00000aff]#00000a
-          │   shadowColor: [#000000ff]#000000
-          │   ▶renderObject: RenderPhysicalModel#00000
           └─▼[N]<grayed> </grayed>NotificationListener <grayed><LayoutChangedNotification></grayed>
-            └─▼[I]<grayed> </grayed>_InkFeatures <grayed>[GlobalKey#00000 ink renderer]</grayed>
-              │   ▶renderObject: _RenderInkFeatures#00000
+              ▼[I]<grayed> </grayed>_InkFeatures <grayed>[GlobalKey#00000 ink renderer]</grayed>
               └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedDefaultTextStyle
-                │   duration: 200ms
-                │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
-                │   inherit: false
-                │   color: [#000000dd]#00000000
-                │   family: Roboto
-                │   size: 14.0
-                │   weight: 400
-                │   baseline: alphabetic
-                │   decoration: TextDecoration.none
-                │   softWrap: wrapping at box width
-                │   overflow: clip
-                │   ▶state: _AnimatedDefaultTextStyleState#00000(ticker inactive)
                 └─▼[/icons/inspector/textArea.png]<grayed> </grayed>DefaultTextStyle
-                  │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
-                  │   inherit: false
-                  │   color: [#000000dd]#00000000
-                  │   family: Roboto
-                  │   size: 14.0
-                  │   weight: 400
-                  │   baseline: alphabetic
-                  │   decoration: TextDecoration.none
-                  │   softWrap: wrapping at box width
-                  │   overflow: clip
                   └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedBuilder
-                    │   animation: AnimationController#00000(⏭ 1.000; paused)
-                    │   state: _AnimatedState#00000
                     └─▼[C]<grayed> </grayed>CustomMultiChildLayout
-                      │   ▶renderObject: RenderCustomMultiChildLayoutBox#00000
                       ├───▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.body>]</grayed>
-                      │   │   id: _ScaffoldSlot.body
                       │   └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
-                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, padding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: falsedisableAnimations: falseinvertColors: falseboldText: false)
                       │     └─▼[C]<grayed> </grayed><bold>Center</bold>
-                      │       │   alignment: center
-                      │       │   widthFactor: null [D]
-                      │       │   heightFactor: null [D]
-                      │       │   ▶renderObject: RenderPositionedBox#00000 relayoutBoundary=up1
                       │       └─▶[/icons/inspector/textArea.png]<grayed> </grayed><bold>Text</bold>
                       ├───▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.appBar>]</grayed>
-                      │   │   id: _ScaffoldSlot.appBar
                       │   └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
-                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, padding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: falsedisableAnimations: falseinvertColors: falseboldText: false)
                       │     └─▼[C]<grayed> </grayed>ConstrainedBox
-                      │       │   BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)
-                      │       │   ▶renderObject: RenderConstrainedBox#00000 relayoutBoundary=up1
                       │       └─▼[F]<grayed> </grayed>FlexibleSpaceBarSettings
-                      │         └─▶[A]<grayed> </grayed><bold>AppBar</bold>
+                      │           ▶[A]<grayed> </grayed><bold>AppBar</bold>
                       └─▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.floatingActionButton>]</grayed>
-                        │   id: _ScaffoldSlot.floatingActionButton
                         └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
-                          │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, padding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: falsedisableAnimations: falseinvertColors: falseboldText: false)
                           └─▼[F]<grayed> </grayed>_FloatingActionButtonTransition
-                            │   ▶state: _FloatingActionButtonTransitionState#00000(tickers: tracking 2 tickers)
                             └─▼[/icons/inspector/value.png]<grayed> </grayed>Stack
-                              │   alignment: centerRight
-                              │   fit: loose
-                              │   overflow: clip
-                              │   ▶renderObject: RenderStack#00000 relayoutBoundary=up1
                               └─▼[/icons/inspector/resume.png]<grayed> </grayed>ScaleTransition
-                                │   animation: AnimationMin<double>(_AnimationSwap<double>(AnimationController#00000(⏭ 1.000; paused)➩CurveTween(curve: FlippedCurve(Interval(0.5⋯1.0)➩Cubic(0.25, 0.10, 0.25, 1.00)))➩1.0➪ReverseAnimation, AnimationController#00000(⏭ 1.000; paused)➩CurveTween(curve: Interval(0.5⋯1.0)➩Cubic(0.25, 0.10, 0.25, 1.00))➩1.0), AnimationController#00000(⏮ 0.000; paused)➩Cubic(0.42, 0.00, 1.00, 1.00))
-                                │   state: _AnimatedState#00000
                                 └─▼[/icons/inspector/colors.png]<grayed> </grayed>Transform
-                                  │   ▶renderObject: RenderTransform#00000 relayoutBoundary=up2
                                   └─▼[/icons/inspector/resume.png]<grayed> </grayed>RotationTransition
-                                    │   animation: AnimationController#00000(⏮ 0.000; paused)➩CurveTween(curve: Cubic(0.42, 0.00, 1.00, 1.00))➩Tween<double>(0.875 → 1.0)➩0.875➩TrainHoppingAnimation(next: _AnimationSwap<double>(AnimationController#00000(⏭ 1.000; paused)➩Tween<double>(0.75 → 1.0)➩1.0, AnimationController#00000(⏭ 1.000; paused)➩CurveTween(curve: Threshold)➩1.0➪ReverseAnimation))
-                                    │   state: _AnimatedState#00000
                                     └─▼[/icons/inspector/colors.png]<grayed> </grayed>Transform
-                                        ▶renderObject: RenderTransform#00000 relayoutBoundary=up3

@@ -17,7 +17,6 @@ import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart';
 import '../ui/ui_utils.dart';
-
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
 import 'inspector_tree_canvas.dart';
@@ -34,7 +33,7 @@ bool _useHtmlInspectorTreeRenderer = false;
 class InspectorScreen extends Screen {
   InspectorScreen()
       : super(
-          name: 'Inspector',
+          name: 'Flutter Inspector',
           id: 'inspector',
           iconClass: 'octicon-device-mobile',
         );
@@ -47,48 +46,35 @@ class InspectorScreen extends Screen {
   ProgressElement progressElement;
   CoreElement inspectorContainer;
   StreamSubscription<Object> splitterSubscription;
+  bool displayedWidgetTrackingNotice = false;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
-    mainDiv.add(<CoreElement>[
-      div(c: 'section')
-        ..layoutHorizontal()
-        ..add(<CoreElement>[
-          div(c: 'btn-group')
-            ..add([
-              ServiceExtensionButton(
-                extensions.toggleSelectWidgetMode,
-              ).button,
-              refreshTreeButton =
-                  PButton.icon('Refresh Tree', FlutterIcons.forceRefresh)
-                    ..small()
-                    ..disabled = true
-                    ..click(_refreshInspector),
-            ]),
-          progressElement = ProgressElement()
-            ..clazz('margin-left')
-            ..display = 'none',
-          div()..flex(),
-          div(c: 'btn-group collapsible')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.performanceOverlay).button,
-              ServiceExtensionButton(extensions.togglePlatformMode).button,
-            ]),
-          div(c: 'btn-group collapsible margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.debugPaint).button,
-              ServiceExtensionButton(extensions.debugPaintBaselines).button,
-            ]),
-          div(c: 'btn-group collapsible margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.slowAnimations).button,
-            ]),
-          div(c: 'btn-group collapsible overflow margin-left')
-            ..add(<CoreElement>[
-              ServiceExtensionButton(extensions.repaintRainbow).button,
-              ServiceExtensionButton(extensions.debugAllowBanner).button,
-            ]),
-        ]),
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+
+    final CoreElement buttonSection = div(c: 'section')
+      ..layoutHorizontal()
+      ..add(<CoreElement>[
+        div(c: 'btn-group')
+          ..add([
+            ServiceExtensionButton(
+              extensions.toggleSelectWidgetMode,
+            ).button,
+            refreshTreeButton =
+                PButton.icon('Refresh Tree', FlutterIcons.forceRefresh)
+                  ..small()
+                  ..disabled = true
+                  ..click(_refreshInspector),
+          ]),
+        progressElement = ProgressElement()
+          ..clazz('margin-left')
+          ..display = 'none',
+        div()..flex(),
+      ]);
+    getServiceExtensionButtons().forEach(buttonSection.add);
+
+    screenDiv.add(<CoreElement>[
+      buttonSection,
       inspectorContainer = div(c: 'inspector-container'),
     ]);
 
@@ -97,6 +83,13 @@ class InspectorScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
+    return screenDiv;
+  }
+
+  @override
+  void exiting() {
+    framework.clearMessages();
   }
 
   void _handleConnectionStart(VmService service) async {
@@ -106,9 +99,13 @@ class InspectorScreen extends Screen {
     inspectorContainer.add(spinner);
 
     try {
-      inspectorService = await InspectorService.create(service);
+      await ensureInspectorServiceDependencies();
+
+      // Init the inspector service, or return null.
+      inspectorService =
+          await InspectorService.create(service).catchError((e) => null);
       final pubRootDirectory =
-          await inspectorService.inferPubRootDirectoryIfNeeded();
+          await inspectorService?.inferPubRootDirectoryIfNeeded();
       if (pubRootDirectory != null) {
         // TODO(jacobr): add ui to view and set a different pub root directory and
         // display the pub root directory in the status bar.
@@ -118,6 +115,10 @@ class InspectorScreen extends Screen {
       refreshTreeButton.disabled = false;
     }
 
+    if (inspectorService == null) {
+      return;
+    }
+
     // TODO(jacobr): support the Render tree, Layer tree, and Semantic trees as
     // well as the widget tree.
 
@@ -125,6 +126,7 @@ class InspectorScreen extends Screen {
       inspectorTreeFactory: ({
         summaryTree,
         treeType,
+        onNodeAdded,
         onSelectionChange,
         onExpand,
         onHover,
@@ -133,6 +135,7 @@ class InspectorScreen extends Screen {
           return InspectorTreeHtml(
             summaryTree: summaryTree,
             treeType: treeType,
+            onNodeAdded: onNodeAdded,
             onSelectionChange: onSelectionChange,
             onExpand: onExpand,
             onHover: onHover,
@@ -141,6 +144,7 @@ class InspectorScreen extends Screen {
         return InspectorTreeCanvas(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -158,7 +162,9 @@ class InspectorScreen extends Screen {
       detailsInspectorTree.element.element
     ];
     inspectorContainer.add(elements);
-    splitterSubscription = flexSplitBidirectional(elements,
+    splitterSubscription = flexSplitBidirectional(
+      elements,
+      gutterSize: defaultSplitterWidth,
       // When we have two columns we want the details tree to be wider.
       horizontalSizes: [35, 65],
       // When we have two rows we want the main tree to be taller.
@@ -170,6 +176,25 @@ class InspectorScreen extends Screen {
     // when the inspector panel is not visible.
     inspectorController.setVisibleToUser(true);
     inspectorController.setActivate(true);
+
+    // TODO(devoncarew): Move this notice display to once a day.
+    if (!displayedWidgetTrackingNotice) {
+      // ignore: unawaited_futures
+      inspectorService.isWidgetCreationTracked().then((bool value) {
+        if (value) {
+          return;
+        }
+
+        displayedWidgetTrackingNotice = true;
+
+        framework.showWarning(
+            '''The widget creation tracking feature is not enabled (this is
+required for advanced Flutter Inspector functionality).
+
+To fix this relaunch your application by running 'flutter run
+--track-widget-creation' or run your application from VS Code or IntelliJ.''');
+      });
+    }
   }
 
   void _handleConnectionStop(dynamic event) {

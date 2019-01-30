@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../core/message_bus.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/custom.dart';
@@ -55,7 +56,9 @@ class DebuggerScreen extends Screen {
   ConsoleArea consoleArea;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div()..layoutVertical();
+
     CoreElement sourceArea;
     CoreElement consoleDiv;
 
@@ -105,7 +108,7 @@ class DebuggerScreen extends Screen {
     consoleArea = ConsoleArea();
     List<CoreElement> navEditorPanels;
 
-    mainDiv.add(<CoreElement>[
+    screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
@@ -288,6 +291,21 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea.refresh();
+
+    messageBus.onEvent(type: 'reload.start').listen((_) {
+      consoleArea.clear();
+    });
+    messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
+      consoleArea.appendText('${event.data}\n\n');
+    });
+    messageBus.onEvent(type: 'restart.start').listen((_) {
+      consoleArea.clear();
+    });
+    messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
+      consoleArea.appendText('${event.data}\n\n');
+    });
+
+    return screenDiv;
   }
 
   @override
@@ -298,17 +316,6 @@ class DebuggerScreen extends Screen {
 
     // TODO(devoncarew): On restoring the page, the execution point marker can
     // get out of position
-
-    sourceEditor.restoreScrollPosition();
-    consoleArea.restoreScrollPosition();
-  }
-
-  @override
-  void exiting() {
-    // Codemirror can loose the scroll position when being hidden and shown.
-    // We record and restore it here manually.
-    sourceEditor.saveScrollPosition();
-    consoleArea.saveScrollPosition();
   }
 
   void _initialize() {
@@ -821,10 +828,14 @@ class SourceEditor {
       final List<Breakpoint> lineBps = linesToBreakpoints[line];
 
       if (lineBps == null || lineBps.isEmpty) {
-        debuggerState.addBreakpoint(currentScript.id, line + 1);
+        debuggerState.addBreakpoint(currentScript.id, line + 1).catchError((_) {
+          // ignore
+        });
       } else {
         final Breakpoint bp = lineBps.removeAt(0);
-        debuggerState.removeBreakpoint(bp);
+        debuggerState.removeBreakpoint(bp).catchError((_) {
+          // ignore
+        });
       }
     });
   }
@@ -838,7 +849,6 @@ class SourceEditor {
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
   int _currentLineClass;
   CoreElement _executionPointElement;
-  ScrollInfo _savedScrollInfo;
 
   void setBreakpoints(List<Breakpoint> breakpoints) {
     this.breakpoints = breakpoints;
@@ -987,17 +997,6 @@ class SourceEditor {
     _executionPointElement = null;
 
     _refreshMarkers();
-  }
-
-  void saveScrollPosition() {
-    _savedScrollInfo = codeMirror.getScrollInfo();
-  }
-
-  void restoreScrollPosition() {
-    if (_savedScrollInfo != null) {
-      codeMirror.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
-      _savedScrollInfo = null;
-    }
   }
 }
 
@@ -1494,12 +1493,15 @@ class ConsoleArea implements CoreElementView {
 
   CoreElement _container;
   CodeMirror _editor;
-  ScrollInfo _savedScrollInfo;
 
   @override
   CoreElement get element => _container;
 
   void refresh() => _editor.refresh();
+
+  void clear() {
+    _editor.getDoc().setValue('');
+  }
 
   void appendText(String text) {
     // We delay writes here to batch up calls to editor.replaceRange().
@@ -1527,16 +1529,5 @@ class ConsoleArea implements CoreElementView {
   @visibleForTesting
   String getContents() {
     return _editor.getDoc().getValue();
-  }
-
-  void saveScrollPosition() {
-    _savedScrollInfo = _editor.getScrollInfo();
-  }
-
-  void restoreScrollPosition() {
-    if (_savedScrollInfo != null) {
-      _editor.scrollTo(_savedScrollInfo.left, _savedScrollInfo.top);
-      _savedScrollInfo = null;
-    }
   }
 }

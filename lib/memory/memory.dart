@@ -46,8 +46,10 @@ class MemoryScreen extends Screen {
   ProgressElement progressElement;
 
   @override
-  void createContent(Framework framework, CoreElement mainDiv) {
-    mainDiv.add(<CoreElement>[
+  CoreElement createContent(Framework framework) {
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+
+    screenDiv.add(<CoreElement>[
       createLiveChartArea(),
       div(c: 'section'),
       div(c: 'section')
@@ -84,6 +86,8 @@ class MemoryScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
+    return screenDiv;
   }
 
   void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {

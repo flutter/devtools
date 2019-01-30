@@ -7,6 +7,10 @@ td.log-label-column {
     max-width: 148px;
 }
 
+.log-area {
+    overflow-y: hidden;
+}
+
 .log-details {
     overflow-y: scroll;
     overflow-wrap: break-word;

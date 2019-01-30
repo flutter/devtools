@@ -1,6 +1,13 @@
-.inspector-tree {
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.inspector-tree-container {
     border: 1px solid #dfe2e5;
     border-radius: 3px;
+}
+
+.inspector-tree {
     overflow: scroll;
     scroll-behavior: smooth;
     width: 100%;
@@ -25,6 +32,11 @@
     .inspector-container {
         flex-direction: row;
     }
+}
+
+.inspector-no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .inspector-tree-row-content {
@@ -60,4 +72,103 @@ thresholds are specific to the inspector UI.
         margin-right: 0;
         box-sizing: content-box;
     }
+}
+
+
+/*
+Styles for rendering html versions of the inspector tree.
+
+Should be kept consistent with the styles for the Canvas tree. Styles match names
+of DiagnosticsTreeStyle enum entries and DiagnosticLevel enum entries so these
+names intentionally violate CSS style name best practices.
+
+The main use case for adding custom styles here is for making structured error
+messages beautiful.
+*/
+
+.inspector-style-sparse {
+    
+}
+
+.inspector-style-offstage {
+    
+}
+
+.inspector-style-dense {
+    
+}
+
+.inspector-style-transition {
+    
+}
+
+.inspector-style-whitespace {
+    
+}
+
+.inspector-style-error {
+    background-color: #f97c7c;
+    padding: 12px;
+    margin: 5px 0;
+}
+
+.inspector-style-flat {
+    
+}
+
+.inspector-style-singleLine {
+    
+}
+
+.inspector-style-headerLine {
+    
+}
+
+.inspector-style-indentedSingleLine {
+    
+}
+
+.inspector-style-shallow {
+    
+}
+
+.inspector-style-truncateChildren {
+    
+}
+
+/* levels */
+.inspector-level-hidden {
+
+}
+.inspector-level-fine {
+
+}
+.inspector-level-debug {
+
+}
+.inspector-level-info {
+
+}
+.inspector-level-warning {
+
+}
+.inspector-level-hint {
+    background-color: lightgoldenrodyellow;
+    padding: 8px;
+    margin: 5px 0;
+}
+.inspector-level-fix {
+
+}
+.inspector-level-contract {
+
+}
+.inspector-level-violation {
+
+}
+.inspector-level-error {
+
+}
+.inspector-level-off {
+
 }

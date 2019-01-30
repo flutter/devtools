@@ -13,7 +13,6 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import '../ui/viewport_canvas.dart';
-
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_web.dart';
@@ -107,7 +106,12 @@ class TextPaintEntry extends CanvasPaintEntry {
 }
 
 class InspectorTreeNodeRenderCanvasBuilder
-    implements InspectorTreeNodeRenderBuilder<InspectorTreeNodeCanvasRender> {
+    extends InspectorTreeNodeRenderBuilder<InspectorTreeNodeCanvasRender> {
+  InspectorTreeNodeRenderCanvasBuilder({
+    @required DiagnosticLevel level,
+    @required DiagnosticsTreeStyle treeStyle,
+  }) : super(level: level, treeStyle: treeStyle);
+
   double x = 0;
   TextStyle lastStyle;
   String font;
@@ -118,7 +122,7 @@ class InspectorTreeNodeRenderCanvasBuilder
 
   @override
   void appendText(String text, TextStyle textStyle) {
-    if (text.isEmpty) {
+    if (text == null || text.isEmpty) {
       return;
     }
     if (textStyle != lastStyle) {
@@ -185,7 +189,10 @@ class InspectorTreeNodeCanvasRender
 class InspectorTreeNodeCanvas extends InspectorTreeNode {
   @override
   InspectorTreeNodeRenderBuilder createRenderBuilder() {
-    return InspectorTreeNodeRenderCanvasBuilder();
+    return InspectorTreeNodeRenderCanvasBuilder(
+      level: diagnostic.level,
+      treeStyle: diagnostic.style,
+    );
   }
 }
 
@@ -194,12 +201,14 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
   InspectorTreeCanvas({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
+    @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
     TreeEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
+          onNodeAdded: onNodeAdded,
           onSelectionChange: onSelectionChange,
           onExpand: onExpand,
           onHover: onHover,
@@ -209,7 +218,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       onTap: onTap,
       onMouseMove: onMouseMove,
       onMouseLeave: onMouseLeave,
-      classes: 'inspector-tree',
+      classes: 'inspector-tree inspector-tree-container',
     );
   }
 
