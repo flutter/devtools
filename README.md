@@ -12,7 +12,7 @@ It's still very early in development - stay tuned.
 ## Development
 
 - `git clone https://github.com/flutter/devtools`
-- `cd devtools`
+- `cd devtools/packages/devtools`
 - `pub get`
 
 From a separate terminal:
@@ -20,7 +20,7 @@ From a separate terminal:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
-From the devtools directory:
+From the packages/devtools directory:
 - `pub run webdev serve web`
 
 Then, open a browser window to the local url specified by webdev. After the page has loaded, append
@@ -47,12 +47,14 @@ Make sure your flutter SDK matches the tip of trunk before
 running these tests.
 
 ```
+cd packages/devtools
 pub run test --tags useFlutterSdk
 ```
 
 ### Run all other tests
 
 ```
+cd packages/devtools
 pub run test --exclude-tags useFlutterSdk
 pub run test --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 ```

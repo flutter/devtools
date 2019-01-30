@@ -10,6 +10,7 @@ echo "Make sure your flutter is the tip of trunk Flutter"
 
 set -x #echo on
 which flutter
+cd packages/devtools
 
 pub run test --reporter expanded --tags useFlutterSdk
 

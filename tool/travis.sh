@@ -7,6 +7,9 @@
 # Fast fail the script on failures.
 set -e
 
+pushd packages/devtools
+echo `pwd`
+
 # Print out the Dart version in use.
 dart --version
 
@@ -15,6 +18,8 @@ export PATH=$PATH:~/.pub-cache/bin
 
 # Should be using dart from /Users/travis/dart-sdk/bin/dart
 echo "which dart: " `which dart`
+
+pub get
 
 # Analyze the source.
 pub global activate tuneup
@@ -65,3 +70,5 @@ else
     exit 1
 
 fi
+
+popd
