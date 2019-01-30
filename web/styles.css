@@ -652,7 +652,6 @@ nav.menu li {
     color: #ccc;
 }
 
-<<<<<<< HEAD
 .tree-list {
     padding-left: 25px;
     list-style: none;
@@ -669,8 +668,6 @@ nav.menu li {
     padding-left: 2px;
 }
 
-=======
->>>>>>> master
 /* We have to do something with the scrollbars as they flicker due to DOM
 manipulation in our table and ViewportCanvas code.
 
