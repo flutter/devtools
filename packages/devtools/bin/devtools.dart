@@ -23,12 +23,14 @@ final argParser = new ArgParser()
     argMachine,
     negatable: false,
     abbr: 'm',
-    help: 'Sets output format to JSON for consumption in tools',
+    help: 'Sets output format to JSON for consumption in tools.',
   )
   ..addOption(
     argPort,
     abbr: 'p',
-    help: 'Port to serve DevTools on',
+    help: 'Port to serve DevTools on. '
+        'Pass 0 to automatically assign an available port.',
+    defaultsTo: '9100',
   );
 
 bool machineMode = false;
