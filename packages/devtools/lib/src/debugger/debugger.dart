@@ -70,8 +70,8 @@ class DebuggerScreen extends Screen {
           ..clazz('margin-left')
           ..disabled = true;
 
-    final PButton pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)
-      ..small();
+    final PButton pauseButton =
+        PButton.icon('Pause', FlutterIcons.pause_black_2x)..small();
 
     void _updateResumeButton({@required disabled}) {
       resumeButton.disabled = disabled;
