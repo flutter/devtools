@@ -728,7 +728,7 @@ but a more subtle solution would be better. */
     font-weight: 400;
     src: local('Material Icons'),
     local('MaterialIcons-Regular'),
-    url(packages/devtools/ui/MaterialIcons-Regular.woff2) format('woff2');
+    url(packages/devtools/src/ui/MaterialIcons-Regular.woff2) format('woff2');
 }
 
 .material-icons {

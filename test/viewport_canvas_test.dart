@@ -5,8 +5,8 @@
 @TestOn('browser')
 import 'dart:html';
 
-import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools/ui/viewport_canvas.dart';
+import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools/src/ui/viewport_canvas.dart';
 import 'package:test/test.dart';
 
 Future<void> settleUi() async {

@@ -5,7 +5,7 @@
 //import 'dart:async';
 //import 'dart:convert';
 //
-//import 'package:devtools/timeline/timeline_protocol.dart';
+//import 'package:devtools/src/timeline/timeline_protocol.dart';
 import 'package:test/test.dart';
 
 void main() {

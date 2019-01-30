@@ -10,7 +10,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import 'package:devtools/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:test/test.dart';
 
 /// Asserts that an object's toString() is a plausible one-line description.

@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/globals.dart';
-import 'package:devtools/service_manager.dart';
-import 'package:devtools/utils.dart';
-import 'package:devtools/vm_service_wrapper.dart';
+import 'package:devtools/src/globals.dart';
+import 'package:devtools/src/service_manager.dart';
+import 'package:devtools/src/utils.dart';
+import 'package:devtools/src/vm_service_wrapper.dart';
 
 import 'flutter_test_driver.dart';
 

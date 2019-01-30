@@ -5,7 +5,7 @@
 @TestOn('browser')
 import 'dart:html';
 
-import 'package:devtools/tables.dart';
+import 'package:devtools/src/tables.dart';
 import 'package:test/test.dart';
 
 void main() {

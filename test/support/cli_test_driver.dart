@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools/vm_service_wrapper.dart';
+import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
