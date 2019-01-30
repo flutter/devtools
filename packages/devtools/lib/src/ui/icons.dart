@@ -129,7 +129,12 @@ class FlutterIcons {
   static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
   static const Icon history = UrlIcon('/icons/history.svg');
 
-  static const Icon pause_2x = UrlIcon('/icons/general/pause_white@2x.png');
+  static const UrlIcon pause_2x = UrlIcon('/icons/general/pause_white@2x.png');
+  static const UrlIcon pause_disabled_2x =
+      UrlIcon('/icons/general/pause_white_disabled@2x.png');
+  static const UrlIcon resume_2x = UrlIcon('/icons/general/resume_black@2x.png');
+  static const UrlIcon resume_disabled_2x =
+      UrlIcon('/icons/general/resume_black_disabled@2x.png');
 }
 
 class CustomIcon extends Icon {

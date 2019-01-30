@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
@@ -66,15 +67,12 @@ class TimelineScreen extends Screen {
       ..primary()
       ..click(_pauseRecording);
 
-    resumeButton = PButton()
-      ..small()
-      ..clazz('margin-left')
-      ..disabled = true
-      ..add(<CoreElement>[
-        span(c: 'octicon octicon-triangle-right'),
-        span(text: 'Resume recording'),
-      ])
-      ..click(_resumeRecording);
+    resumeButton =
+        PButton.icon('Resume Recording', FlutterIcons.resume_disabled_2x)
+          ..small()
+          ..clazz('margin-left')
+          ..disabled = true
+          ..click(_resumeRecording);
 
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
@@ -168,21 +166,27 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
-    pauseButton.disabled = true;
-    resumeButton.disabled = false;
-
+    _updateButtons(paused: true);
     _paused = true;
-
     _updateListeningState();
   }
 
   void _resumeRecording() {
-    pauseButton.disabled = false;
-    resumeButton.disabled = true;
-
+    _updateButtons(paused: false);
     _paused = false;
-
     _updateListeningState();
+  }
+
+  void _updateButtons({@required paused}) {
+    pauseButton.disabled = paused;
+    resumeButton.disabled = !paused;
+
+    pauseButton.changeIcon(paused
+        ? FlutterIcons.pause_disabled_2x.src
+        : FlutterIcons.pause_2x.src);
+    resumeButton.changeIcon(paused
+        ? FlutterIcons.resume_2x.src
+        : FlutterIcons.resume_disabled_2x.src);
   }
 
   void _updateListeningState() async {

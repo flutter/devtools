@@ -68,12 +68,19 @@ class PButton extends CoreElement {
     setAttribute('type', 'button');
     setAttribute('title', title ?? text);
     if (icon != null) {
-      add(createIconElement(icon));
+      add(createIconElement(_icon = icon));
       if (text != null) {
         add(span(text: text));
       }
     } else {
       element.text = text;
+    }
+  }
+
+  Icon _icon;
+  void changeIcon(String url) {
+    if (_icon != null) {
+      element.children.first.style.backgroundImage = 'url("$url")';
     }
   }
 
