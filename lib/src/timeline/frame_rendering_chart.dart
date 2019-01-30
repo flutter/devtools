@@ -57,10 +57,10 @@ class FramesChart extends LineChart<FramesTracker> {
       x -= 3 * units;
 
       final Color color =
-      _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
+          _isSlowFrame(frame) ? slowFrameColor : normalFrameColor;
       final String tooltip = _isSlowFrame(frame)
           ? 'This frame took ${frame.elapsedMs}ms to render, which can cause '
-          'frame rate to drop below 60 FPS.'
+              'frame rate to drop below 60 FPS.'
           : 'This frame took ${frame.elapsedMs}ms to render.';
       svgElements.add('<rect x="$x" y="${dim.y - height}" rx="1" ry="1" '
           'width="${2 * units}" height="$height" '

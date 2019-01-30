@@ -322,8 +322,7 @@ class Table<T> extends Object with SetStateMixin {
 
     // Enable the dummy row to fix alternating backgrounds when the first rendered
     // row (taking into account if we're reversing) index is an odd.
-    final bool shouldOffsetRowColor =
-        firstRenderedRowInclusive % 2 == 1;
+    final bool shouldOffsetRowColor = firstRenderedRowInclusive % 2 == 1;
     if (shouldOffsetRowColor) {
       _tbody.element.children
           .insert(0, _dummyRowToForceAlternatingColor.element);

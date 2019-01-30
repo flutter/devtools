@@ -505,7 +505,8 @@ void main() async {
       );
 
       expect(
-        detailsTree.toStringDeep(hidePropertyLines: true, includeTextStyles: true),
+        detailsTree.toStringDeep(
+            hidePropertyLines: true, includeTextStyles: true),
         equalsGoldenIgnoringHashCodes(
             'inspector_controller_details_tree_scaffold_with_styles.txt'),
       );

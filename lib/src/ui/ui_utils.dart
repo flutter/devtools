@@ -4,7 +4,6 @@
 
 import 'dart:html' as html;
 
-
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
@@ -111,6 +110,7 @@ CoreElement createHotRestartButton(Framework framework) {
     errorAction,
   ).button;
 }
+
 /// Button that calls a service extension. Service extensions can be found in
 /// [service_extensions.dart].
 class ServiceExtensionButton {

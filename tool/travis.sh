@@ -20,6 +20,13 @@ echo "which dart: " `which dart`
 pub global activate tuneup
 tuneup check
 
+# Verify that dartfmt has been run.
+echo "Checking dartfmt..."
+if [[ $(dartfmt -n --set-exit-if-changed web/ lib/ test/) ]]; then
+	echo "Failed dartfmt check: run dartfmt -w lib/ test/"
+	exit 1
+fi
+
 # Ensure we can build the app.
 pub run webdev build
 
