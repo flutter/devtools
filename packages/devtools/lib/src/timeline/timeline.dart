@@ -63,7 +63,7 @@ class TimelineScreen extends Screen {
 
     final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
       PTabNavTab('Frame Timeline'),
-      // TODO: uncomment these tabs once they are implemented.
+      // TODO(kenzie): uncomment these tabs once they are implemented.
       //PTabNavTab('Widget build info'),
       //PTabNavTab('Skia picture'),
     ]);
