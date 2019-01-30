@@ -23,6 +23,18 @@ tuneup check
 # Ensure we can build the app.
 pub run webdev build
 
+# Verify that the libraries are error and warning-free.
+echo "Running dartanalyzer..."
+dartanalyzer $DARTANALYZER_FLAGS \
+  web/main.dart
+
+# Verify that dartfmt has been run.
+echo "Checking dartfmt..."
+if [[ $(dartfmt -n --set-exit-if-changed web/ lib/ test/) ]]; then
+	echo "Failed dartfmt check: run dartfmt -w lib/ test/"
+	exit 1
+fi
+
 if [ "$BOT" = "main" ]; then
 
     # Run tests that do not require the Flutter SDK.
