@@ -19,6 +19,8 @@ class Test {
   static const Duration delay = Duration(seconds: 4);
 
   int count = 0;
+  String aaa = 'aaa';
+  String bbb = 'ccc';
 
   void doWork() async {
     final String description = 'items: $count';

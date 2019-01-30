@@ -20,8 +20,6 @@ import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 
-// TODO(devoncarew): allow browsing object fields
-
 // TODO(devoncarew): improve selection behavior in the left nav area
 
 // TODO(devoncarew): have the console area be collapsible
@@ -30,8 +28,6 @@ import '../utils.dart';
 // replacing them (flutter hot restart)
 
 // TODO(devoncarew): show toasts for some events (new isolate creation)
-
-// TODO(devoncarew): handle displaying lists and maps in the variables view
 
 // TODO(devoncarew): handle displaying large lists, maps, in the variables view
 
@@ -367,7 +363,7 @@ class DebuggerScreen extends Screen {
         }
       }
     };
-    variablesView = VariablesView(describer);
+    variablesView = VariablesView(debuggerState, describer);
 
     _breakpointsCountDiv = span(text: '0', c: 'counter');
     breakpointsView = BreakpointsView(
@@ -716,6 +712,13 @@ class DebuggerState {
     if (_paused.value != value) {
       _paused.add(value);
     }
+  }
+
+  /// Get the populated [Instance] object, given an [InstanceRef].
+  ///
+  /// The return value can be one of [Instance] or [Sentinel].
+  Future<dynamic> getInstance(InstanceRef instanceRef) {
+    return _service.getObject(isolateRef.id, instanceRef.id);
   }
 
   Future<Script> getScript(ScriptRef scriptRef) async {
@@ -1205,20 +1208,23 @@ class CallStackView implements CoreElementView {
 typedef VariableDescriber = Future<String> Function(BoundVariable variable);
 
 class VariablesView implements CoreElementView {
-  VariablesView(VariableDescriber variableDescriber) {
-    _items = SelectableList<BoundVariable>()
+  VariablesView(
+      DebuggerState debuggerState, VariableDescriber variableDescriber) {
+    _items = SelectableTree<BoundVariable>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
-    _items.canDeselect = true;
+
+    _items.setChildProvider(new VariablesChildProvider(debuggerState));
 
     _items.setRenderer((BoundVariable variable) {
       final String name = variable.name;
       final dynamic value = variable.value;
+
       String valueStr;
+
       if (value is InstanceRef) {
         if (value.valueAsString == null) {
-          // TODO(devoncarew): also show an expandable toggle
           valueStr = value.classRef.name;
         } else {
           valueStr = value.valueAsString;
@@ -1229,6 +1235,15 @@ class VariablesView implements CoreElementView {
             valueStr = "'$valueStr'";
           }
         }
+
+        if (value.kind == InstanceKind.kList) {
+          valueStr = '[${value.length}] $valueStr';
+        } else if (value.kind == InstanceKind.kMap) {
+          valueStr = '{ ${value.length} } $valueStr';
+        } else if (value.kind != null && value.kind.endsWith('List')) {
+          // Uint8List, Uint16List, ...
+          valueStr = '[${value.length}] $valueStr';
+        }
       } else if (value is Sentinel) {
         valueStr = value.valueAsString;
       } else if (value is TypeArgumentsRef) {
@@ -1237,10 +1252,11 @@ class VariablesView implements CoreElementView {
         valueStr = value.toString();
       }
 
-      final CoreElement element = li(
-        text: name,
-        c: 'list-item',
-      )..add(span(text: ' $valueStr', c: 'subtle'));
+      final CoreElement element = li(c: 'list-item')
+        ..add([
+          span(text: name),
+          span(text: ' $valueStr', c: 'subtle'),
+        ]);
 
       StreamSubscription sub;
 
@@ -1256,7 +1272,7 @@ class VariablesView implements CoreElementView {
     });
   }
 
-  SelectableList<BoundVariable> _items;
+  SelectableTree<BoundVariable> _items;
 
   List<BoundVariable> get items => _items.items;
 
@@ -1270,6 +1286,69 @@ class VariablesView implements CoreElementView {
 
   void clearVariables() {
     _items.setItems(<BoundVariable>[]);
+  }
+}
+
+class VariablesChildProvider extends ChildProvider<BoundVariable> {
+  VariablesChildProvider(this.debuggerState);
+
+  final DebuggerState debuggerState;
+
+  @override
+  bool hasChildren(BoundVariable item) {
+    final dynamic value = item.value;
+    return value is InstanceRef && value.valueAsString == null;
+  }
+
+  @override
+  Future<List<BoundVariable>> getChildren(BoundVariable item) async {
+    final dynamic value = item.value;
+    if (value is! InstanceRef) {
+      return [];
+    }
+
+    final InstanceRef instanceRef = value;
+    final dynamic result = await debuggerState.getInstance(instanceRef);
+    if (result is! Instance) {
+      return [];
+    }
+
+    // TODO: how to test?
+
+    final Instance instance = result;
+    if (instance.associations != null) {
+      return instance.associations.map((MapAssociation assoc) {
+        // For string keys, quote the key value.
+        String keyString = assoc.key.valueAsString;
+        if (assoc.key is InstanceRef &&
+            assoc.key.kind == InstanceKind.kString) {
+          keyString = "'$keyString'";
+        }
+        return new BoundVariable()
+          ..name = '[$keyString]'
+          ..value = assoc.value;
+      }).toList();
+    } else if (instance.elements != null) {
+      final List<BoundVariable> result = [];
+      int index = 0;
+
+      for (dynamic value in instance.elements) {
+        result.add(new BoundVariable()
+          ..name = '[$index]'
+          ..value = value);
+        index++;
+      }
+
+      return result;
+    } else if (instance.fields != null) {
+      return instance.fields.map((BoundField field) {
+        return new BoundVariable()
+          ..name = field.decl.name
+          ..value = field.value;
+      }).toList();
+    } else {
+      return [];
+    }
   }
 }
 

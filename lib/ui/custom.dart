@@ -53,12 +53,11 @@ class SelectableList<T> extends CoreElement {
   ListRenderer<T> renderer;
   CoreElement _selectedElement;
 
-  final StreamController<T> _selectionController =
-      StreamController<T>.broadcast();
+  final StreamController<T> _selectionController = StreamController.broadcast();
   final StreamController<T> _doubleClickController =
-      StreamController<T>.broadcast();
+      StreamController.broadcast();
   final StreamController<void> _itemsChangedController =
-      StreamController<void>.broadcast();
+      StreamController.broadcast();
 
   bool canDeselect = false;
 
@@ -109,8 +108,106 @@ class SelectableList<T> extends CoreElement {
     setItems(<T>[]);
   }
 
-  CoreElement _defaultRenderer(T item) {
-    return li(text: item.toString(), c: 'list-item');
+  void _select(CoreElement element, T item, {bool clear = false}) {
+    _selectedElement?.toggleClass('selected', false);
+
+    if (clear) {
+      element = null;
+      item = null;
+    }
+
+    _selectedElement = element;
+    element?.toggleClass('selected', true);
+    _selectionController.add(item);
+  }
+}
+
+abstract class ChildProvider<T> {
+  bool hasChildren(T item);
+
+  Future<List<T>> getChildren(T item);
+}
+
+class SelectableTree<T> extends CoreElement {
+  SelectableTree() : super('ul');
+
+  List<T> items = <T>[];
+  ListRenderer<T> renderer;
+  ChildProvider<T> childProvider;
+  CoreElement _selectedElement;
+
+  final StreamController<T> _selectionController = StreamController.broadcast();
+
+  Stream<T> get onSelectionChanged => _selectionController.stream;
+
+  void setRenderer(ListRenderer<T> renderer) {
+    this.renderer = renderer;
+  }
+
+  void setChildProvider(ChildProvider<T> childProvider) {
+    this.childProvider = childProvider;
+  }
+
+  void setItems(List<T> items) {
+    this.items = items;
+
+    final bool hadSelection = _selectedElement != null;
+    _selectedElement = null;
+
+    clear();
+
+    for (T item in items) {
+      _populateInto(this, item);
+    }
+
+    if (hadSelection && _selectedElement == null) {
+      _selectionController.add(null);
+    }
+  }
+
+  void _populateInto(CoreElement parent, T item) {
+    final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
+    final CoreElement obj = renderer(item);
+    obj.click(() {
+      _select(obj, item, clear: obj.hasClass('selected'));
+    });
+
+    final CoreElement element = div();
+    element.add(obj);
+
+    if (childProvider.hasChildren(item)) {
+      final TreeToggle toggle = new TreeToggle();
+      obj.element.children.insert(0, toggle.element);
+
+      bool hasPopulated = false;
+      final CoreElement children = ul(c: 'tree-list');
+      element.add(children);
+      children.hidden(true);
+
+      toggle.onOpen.listen((bool open) {
+        children.hidden(!open);
+
+        if (!hasPopulated) {
+          hasPopulated = true;
+
+          childProvider.getChildren(item).then((List<T> results) {
+            for (T result in results) {
+              _populateInto(children, result);
+            }
+          }).catchError((e) {
+            // ignore
+          });
+        }
+      });
+    } else {
+      obj.element.children.insert(0, new TreeToggle(empty: true).element);
+    }
+
+    parent.add(element);
+  }
+
+  void clearItems() {
+    setItems(<T>[]);
   }
 
   void _select(CoreElement element, T item, {bool clear = false}) {
@@ -125,6 +222,34 @@ class SelectableList<T> extends CoreElement {
     element?.toggleClass('selected', true);
     _selectionController.add(item);
   }
+}
+
+class TreeToggle extends CoreElement {
+  TreeToggle({bool empty = false})
+      : super('div', classes: 'tree-toggle octicon') {
+    if (!empty) {
+      click(() {
+        _isOpen = !_isOpen;
+        _openController.add(_isOpen);
+        toggleClass('octicon-triangle-right', !_isOpen);
+        toggleClass('octicon-triangle-down', _isOpen);
+      });
+    }
+    if (!empty) {
+      clazz('octicon-triangle-right');
+    }
+  }
+
+  bool _isOpen = false;
+
+  final StreamController<bool> _openController =
+      new StreamController.broadcast();
+
+  Stream<bool> get onOpen => _openController.stream;
+}
+
+CoreElement _defaultRenderer<T>(T item) {
+  return li(text: item.toString(), c: 'list-item');
 }
 
 class ActionButton implements CoreElementView {
