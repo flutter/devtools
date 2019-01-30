@@ -58,7 +58,15 @@ class TimelineScreen extends Screen {
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div()..layoutVertical();
 
+    CoreElement frameDetailsContainer;
     FrameFlameChart frameFlameChart;
+
+    final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
+      PTabNavTab('Frame Timeline'),
+      // TODO: uncomment these tabs once they are implemented.
+      //PTabNavTab('Widget build info'),
+      //PTabNavTab('Skia picture'),
+    ]);
 
     // TODO(kenzie): add pause icon to button and make collapsible.
     pauseButton = PButton('Pause recording')
@@ -96,7 +104,11 @@ class TimelineScreen extends Screen {
       div(c: 'section')
         ..layoutVertical()
         ..flex()
-        ..add(frameFlameChart = FrameFlameChart()..attribute('hidden')),
+        ..add(frameDetailsContainer = div()
+          ..layoutVertical()
+          ..flex()
+          ..add(<CoreElement>[frameTabNav, frameFlameChart = FrameFlameChart()])
+          ..attribute('hidden')),
     ]);
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
@@ -106,7 +118,7 @@ class TimelineScreen extends Screen {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
-      frameFlameChart.attribute('hidden', frame == null);
+      frameDetailsContainer.attribute('hidden', frame == null);
 
       if (frame != null && timelineController.hasStarted) {
         frameFlameChart.updateFrameData(frame);
