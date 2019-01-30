@@ -28,7 +28,7 @@ tuneup check
 # Verify that dartfmt has been run.
 echo "Checking dartfmt..."
 if [[ $(dartfmt -n --set-exit-if-changed web/ lib/ test/) ]]; then
-	echo "Failed dartfmt check: run dartfmt -w lib/ test/"
+	echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/"
 	exit 1
 fi
 
@@ -40,6 +40,12 @@ if [ "$BOT" = "main" ]; then
     # Run tests that do not require the Flutter SDK.
     pub run test --reporter expanded --exclude-tags useFlutterSdk
     pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+
+elif [ "$BOT" = "main_release" ]; then
+
+    # Run tests that do not require the Flutter SDK.
+    WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk
+    WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter" ]; then
 

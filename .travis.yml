@@ -12,8 +12,9 @@ addons:
   chrome: stable
 
 env:
-  - BOT=main
-  - BOT=flutter
+  - BOT=main              # run our tests with the app compiled with DDC
+  - BOT=main_release      # run our tests with the app compiled with dart2js
+  - BOT=flutter           # run flutter related tests
 script: ./tool/travis.sh
 
 branches:

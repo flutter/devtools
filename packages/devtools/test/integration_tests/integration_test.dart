@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
 import 'package:test/test.dart';
 
 import 'app.dart';
@@ -13,7 +12,10 @@ import 'logging.dart';
 void main() {
   group('integration', () {
     setUpAll(() async {
-      webdevFixture = await WebdevFixture.create(verbose: true);
+      const bool testInReleaseMode = bool.fromEnvironment('WEBDEV_RELEASE');
+
+      webdevFixture =
+          await WebdevFixture.create(release: testInReleaseMode, verbose: true);
       browserManager = await BrowserManager.create();
     });
 

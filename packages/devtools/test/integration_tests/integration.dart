@@ -271,8 +271,16 @@ class AppError {
 class WebdevFixture {
   WebdevFixture._(this.process, this.url);
 
-  static Future<WebdevFixture> create({bool verbose = false}) async {
+  static Future<WebdevFixture> create({
+    bool release = false,
+    bool verbose = false,
+  }) async {
     // 'pub run webdev serve web'
+
+    final List<String> cliArgs = ['run', 'webdev', 'serve', 'web'];
+    if (release) {
+      cliArgs.add('-release');
+    }
 
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
@@ -285,7 +293,7 @@ class WebdevFixture {
 
     final Process process = await Process.start(
       'pub',
-      <String>['run', 'webdev', 'serve', 'web'],
+      cliArgs,
       environment: environment,
     );
 
