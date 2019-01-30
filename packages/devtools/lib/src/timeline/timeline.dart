@@ -5,12 +5,14 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -60,18 +62,17 @@ class TimelineScreen extends Screen {
 
     FrameFlameChart frameFlameChart;
 
-    // TODO(kenzie): add pause icon to button and make collapsible.
-    pauseButton = PButton('Pause recording')
+    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
       ..click(_pauseRecording);
 
-    // TODO(kenzie): add resume icon to button and make collapsible.
-    resumeButton = PButton('Resume recording')
-      ..small()
-      ..clazz('margin-left')
-      ..disabled = true
-      ..click(_resumeRecording);
+    resumeButton =
+        PButton.icon('Resume Recording', FlutterIcons.resume_black_disabled_2x)
+          ..small()
+          ..clazz('margin-left')
+          ..disabled = true
+          ..click(_resumeRecording);
 
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
@@ -165,21 +166,27 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
-    pauseButton.disabled = true;
-    resumeButton.disabled = false;
-
+    _updateButtons(paused: true);
     _paused = true;
-
     _updateListeningState();
   }
 
   void _resumeRecording() {
-    pauseButton.disabled = false;
-    resumeButton.disabled = true;
-
+    _updateButtons(paused: false);
     _paused = false;
-
     _updateListeningState();
+  }
+
+  void _updateButtons({@required bool paused}) {
+    pauseButton.disabled = paused;
+    resumeButton.disabled = !paused;
+
+    pauseButton.changeIcon(paused
+        ? FlutterIcons.pause_white_disabled_2x.src
+        : FlutterIcons.pause_white_2x.src);
+    resumeButton.changeIcon(paused
+        ? FlutterIcons.resume_black_2x.src
+        : FlutterIcons.resume_black_disabled_2x.src);
   }
 
   void _updateListeningState() async {
