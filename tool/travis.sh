@@ -21,33 +21,33 @@ echo "which dart: " `which dart`
 
 pub get
 
-# Analyze the source.
-pub global activate tuneup
-tuneup check
-
-# Verify that dartfmt has been run.
-echo "Checking dartfmt..."
-if [[ $(dartfmt -n --set-exit-if-changed web/ lib/ test/) ]]; then
-	echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/"
-	exit 1
-fi
-
 # Ensure we can build the app.
 pub run webdev build
 
 if [ "$BOT" = "main" ]; then
 
-    # Run tests that do not require the Flutter SDK.
+    # Analyze the source.
+    pub global activate tuneup
+    tuneup check
+
+    # Verify that dartfmt has been run.
+    echo "Checking dartfmt..."
+    if [[ $(dartfmt -n --set-exit-if-changed web/ lib/ test/) ]]; then
+        echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/"
+        exit 1
+    fi
+
+elif [ "$BOT" = "test_ddc" ]; then
+
     pub run test --reporter expanded --exclude-tags useFlutterSdk
     pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
-elif [ "$BOT" = "main_release" ]; then
+elif [ "$BOT" = "test_dart2js" ]; then
 
-    # Run tests that do not require the Flutter SDK.
     WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk
     WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
-elif [ "$BOT" = "flutter" ]; then
+elif [ "$BOT" = "test_flutter" ]; then
 
     # Get Flutter.
     git clone https://github.com/flutter/flutter.git ../flutter
@@ -64,11 +64,6 @@ elif [ "$BOT" = "flutter" ]; then
 
     # Run tests that require the Flutter SDK.
     pub run test --reporter expanded --tags useFlutterSdk
-
-    # Chrome test passes locally but fails on Travis. See example failure:
-    # https://travis-ci.org/flutter/devtools/jobs/472755560.
-    # TODO: investigate if we have a need to run tests requiring the Flutter SDK on Chrome.
-    # pub run test --reporter expanded --tags useFlutterSdk --platform chrome-no-sandbox
 
 else
 

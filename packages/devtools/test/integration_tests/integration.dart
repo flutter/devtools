@@ -279,7 +279,7 @@ class WebdevFixture {
 
     final List<String> cliArgs = ['run', 'webdev', 'serve', 'web'];
     if (release) {
-      cliArgs.add('-release');
+      cliArgs.add('--release');
     }
 
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
