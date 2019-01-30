@@ -13,7 +13,10 @@ addons:
 
 env:
   - BOT=main
-  - BOT=flutter
+  - BOT=test_ddc
+# TODO(devoncarew): Uncomment this once the app runs in release mode.
+#  - BOT=test_dart2js
+  - BOT=flutter_sdk_tests
 script: ./tool/travis.sh
 
 branches:

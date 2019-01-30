@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'app.dart';
@@ -13,7 +15,11 @@ import 'logging.dart';
 void main() {
   group('integration', () {
     setUpAll(() async {
-      webdevFixture = await WebdevFixture.create(verbose: true);
+      final bool testInReleaseMode =
+          Platform.environment['WEBDEV_RELEASE'] == 'true';
+
+      webdevFixture =
+          await WebdevFixture.create(release: testInReleaseMode, verbose: true);
       browserManager = await BrowserManager.create();
     });
 
