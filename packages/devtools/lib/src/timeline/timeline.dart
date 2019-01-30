@@ -62,13 +62,13 @@ class TimelineScreen extends Screen {
 
     FrameFlameChart frameFlameChart;
 
-    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_2x)
+    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
       ..click(_pauseRecording);
 
     resumeButton =
-        PButton.icon('Resume Recording', FlutterIcons.resume_disabled_2x)
+        PButton.icon('Resume Recording', FlutterIcons.resume_black_disabled_2x)
           ..small()
           ..clazz('margin-left')
           ..disabled = true
@@ -182,11 +182,11 @@ class TimelineScreen extends Screen {
     resumeButton.disabled = !paused;
 
     pauseButton.changeIcon(paused
-        ? FlutterIcons.pause_disabled_2x.src
-        : FlutterIcons.pause_2x.src);
+        ? FlutterIcons.pause_white_disabled_2x.src
+        : FlutterIcons.pause_white_2x.src);
     resumeButton.changeIcon(paused
-        ? FlutterIcons.resume_2x.src
-        : FlutterIcons.resume_disabled_2x.src);
+        ? FlutterIcons.resume_black_2x.src
+        : FlutterIcons.resume_black_disabled_2x.src);
   }
 
   void _updateListeningState() async {

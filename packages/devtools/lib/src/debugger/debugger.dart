@@ -15,6 +15,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
@@ -62,36 +63,45 @@ class DebuggerScreen extends Screen {
     CoreElement sourceArea;
     CoreElement consoleDiv;
 
-    final PButton resumeButton = PButton()
-      ..primary()
-      ..small()
-      ..clazz('margin-left')
-      ..disabled = true
-      ..add(<CoreElement>[
-        span(c: 'octicon octicon-triangle-right'),
-        span(text: 'Resume'),
-      ]);
+    final PButton resumeButton =
+        PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
+          ..primary()
+          ..small()
+          ..clazz('margin-left')
+          ..disabled = true;
+
+    final PButton pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)
+      ..small();
+
+    void _updateResumeButton({@required disabled}) {
+      resumeButton.disabled = disabled;
+      resumeButton.changeIcon(disabled
+          ? FlutterIcons.resume_white_disabled_2x.src
+          : FlutterIcons.resume_white_2x.src);
+    }
+
+    void _updatePauseButton({@required disabled}) {
+      pauseButton.disabled = disabled;
+      pauseButton.changeIcon(disabled
+          ? FlutterIcons.pause_black_disabled_2x.src
+          : FlutterIcons.pause_black_2x.src);
+    }
+
     resumeButton.click(() async {
-      resumeButton.disabled = true;
+      _updateResumeButton(disabled: true);
       await debuggerState.resume();
-      resumeButton.disabled = false;
+      _updateResumeButton(disabled: false);
     });
 
-    final PButton pauseButton = PButton()
-      ..small()
-      ..add(<CoreElement>[
-        span(c: 'octicon octicon-primitive-dot'),
-        span(text: 'Pause'),
-      ]);
     pauseButton.click(() async {
-      pauseButton.disabled = true;
+      _updatePauseButton(disabled: true);
       await debuggerState.pause();
-      pauseButton.disabled = false;
+      _updatePauseButton(disabled: false);
     });
 
     debuggerState.onPausedChanged.listen((bool isPaused) {
-      resumeButton.disabled = !isPaused;
-      pauseButton.disabled = isPaused;
+      _updatePauseButton(disabled: isPaused);
+      _updateResumeButton(disabled: !isPaused);
     });
 
     PButton stepOver, stepIn, stepOut;

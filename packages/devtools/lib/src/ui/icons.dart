@@ -129,12 +129,22 @@ class FlutterIcons {
   static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
   static const Icon history = UrlIcon('/icons/history.svg');
 
-  static const UrlIcon pause_2x = UrlIcon('/icons/general/pause_white@2x.png');
-  static const UrlIcon pause_disabled_2x =
+  static const UrlIcon pause_black_2x =
+      UrlIcon('/icons/general/pause_black@2x.png');
+  static const UrlIcon pause_black_disabled_2x =
+      UrlIcon('/icons/general/pause_black_disabled@2x.png');
+  static const UrlIcon pause_white_2x =
+      UrlIcon('/icons/general/pause_white@2x.png');
+  static const UrlIcon pause_white_disabled_2x =
       UrlIcon('/icons/general/pause_white_disabled@2x.png');
-  static const UrlIcon resume_2x = UrlIcon('/icons/general/resume_black@2x.png');
-  static const UrlIcon resume_disabled_2x =
+  static const UrlIcon resume_black_2x =
+      UrlIcon('/icons/general/resume_black@2x.png');
+  static const UrlIcon resume_black_disabled_2x =
       UrlIcon('/icons/general/resume_black_disabled@2x.png');
+  static const UrlIcon resume_white_2x =
+      UrlIcon('/icons/general/resume_white@2x.png');
+  static const UrlIcon resume_white_disabled_2x =
+      UrlIcon('/icons/general/resume_white_disabled@2x.png');
 }
 
 class CustomIcon extends Icon {
