@@ -11,6 +11,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -60,22 +61,29 @@ class TimelineScreen extends Screen {
 
     FrameFlameChart frameFlameChart;
 
-    pauseButton = PButton('Pause recording')
+    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_2x)
       ..small()
       ..primary()
       ..click(_pauseRecording);
 
-    resumeButton = PButton('Resume recording')
+    resumeButton = PButton()
       ..small()
       ..clazz('margin-left')
       ..disabled = true
+      ..add(<CoreElement>[
+        span(c: 'octicon octicon-triangle-right'),
+        span(text: 'Resume recording'),
+      ])
       ..click(_resumeRecording);
 
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        pauseButton,
-        resumeButton,
+        div(c: 'btn-group')
+          ..add([
+            pauseButton,
+            resumeButton,
+          ]),
         div()..flex(),
       ]);
     upperButtonSection.add(getServiceExtensionButtons());

@@ -128,6 +128,8 @@ class FlutterIcons {
   static const Icon repaintRainbow = UrlIcon('/icons/repaint_rainbow.png');
   static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
   static const Icon history = UrlIcon('/icons/history.svg');
+
+  static const Icon pause_2x = UrlIcon('/icons/general/pause_white@2x.png');
 }
 
 class CustomIcon extends Icon {
