@@ -3,6 +3,5 @@ targets:
     builders:
       build_web_compilers|entrypoint:
         options:
-          compiler: dart2js
           dart2js_args:
           - -O0
