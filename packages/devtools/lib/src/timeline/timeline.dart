@@ -60,11 +60,13 @@ class TimelineScreen extends Screen {
 
     FrameFlameChart frameFlameChart;
 
+    // TODO(kenzie): add pause icon to button and make collapsible.
     pauseButton = PButton('Pause recording')
       ..small()
       ..primary()
       ..click(_pauseRecording);
 
+    // TODO(kenzie): add resume icon to button and make collapsible.
     resumeButton = PButton('Resume recording')
       ..small()
       ..clazz('margin-left')
@@ -74,8 +76,11 @@ class TimelineScreen extends Screen {
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        pauseButton,
-        resumeButton,
+        div(c: 'btn-group')
+          ..add([
+            pauseButton,
+            resumeButton,
+          ]),
         div()..flex(),
       ]);
     upperButtonSection.add(getServiceExtensionButtons());
