@@ -239,10 +239,11 @@ class Table<T> extends Object with SetStateMixin {
     if (data == null) {
       return;
     }
-    if (_isVirtual)
+    if (_isVirtual) {
       _rebuildVirtualTable();
-    else
+    } else {
       _rebuildStaticTable();
+    }
   }
 
   void _rebuildVirtualTable() {

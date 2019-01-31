@@ -196,7 +196,7 @@ class LoggingScreen extends Screen {
       final String div = createFrameDivHtml(frame);
 
       _log(LogData(
-        '${e.extensionKind.toLowerCase()}',
+        e.extensionKind.toLowerCase(),
         jsonEncode(e.extensionData.data),
         e.timestamp,
         summaryHtml: '$frameInfo$div',
@@ -210,7 +210,7 @@ class LoggingScreen extends Screen {
       }
 
       _log(LogData(
-        '${e.extensionKind.toLowerCase()}',
+        e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: node.toDiagnosticsNode().toString(),
@@ -218,7 +218,7 @@ class LoggingScreen extends Screen {
       ));
     } else {
       _log(LogData(
-        '${e.extensionKind.toLowerCase()}',
+        e.extensionKind.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: e.json.toString(),

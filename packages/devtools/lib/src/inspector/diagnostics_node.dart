@@ -107,9 +107,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   int get hashCode => dartDiagnosticRef.hashCode;
 
   /// Separator text to show between property names and values.
-  String get separator {
-    return showSeparator ? ':' : '';
-  }
+  String get separator => showSeparator ? ':' : '';
 
   /// Label describing the [RemoteDiagnosticsNode], typically shown before a separator
   /// (see [showSeparator]).
@@ -232,7 +230,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Only specified for ObjectFlagProperty.
   String get ifPresent => getStringMember('ifPresent');
 
-  bool get hasIfPresen => json.containsKey('ifPresent');
+  bool get hasIfPresent => json.containsKey('ifPresent');
 
   /// If the [value] of the property equals [defaultValue] the priority [level]
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
