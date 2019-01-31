@@ -432,6 +432,7 @@ class ServiceExtensionManager {
             'WidgetsBinding.instance.debugDidSendFirstFrameEvent',
             isAlive: null,
           );
+
           didSendFirstFrameEvent =
               value != null && value.valueAsString == 'true';
         }
