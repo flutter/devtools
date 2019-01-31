@@ -2,43 +2,10 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build for Release",
+			"label": "Build Release Package",
 			"type": "shell",
-			"command": "pub",
-			"args": [
-				"global",
-				"run",
-				"webdev",
-				"build",
-				"--output",
-				"web:_release_package/lib/build"
-			],
+			"command": "tool/build.sh",
 			"group": "build",
-			"problemMatcher": [],
-			"dependsOn": [
-				"Copy Pubspec",
-				"Copy Executable",
-			]
-		},
-		{
-			"label": "Copy Pubspec",
-			"type": "shell",
-			"command": "cp",
-			"args": [
-				"pubspec.yaml",
-				"_release_package"
-			],
-			"problemMatcher": []
-		},
-		{
-			"label": "Copy Executable",
-			"type": "shell",
-			"command": "cp",
-			"args": [
-				"-R",
-				"bin",
-				"_release_package/bin"
-			],
 			"problemMatcher": []
 		}
 	]
