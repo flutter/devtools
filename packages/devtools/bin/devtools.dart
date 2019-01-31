@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart' show VirtualDirectory;
@@ -34,7 +35,6 @@ final argParser = new ArgParser()
   );
 
 bool machineMode = false;
-final webroot = join(dirname(dirname(Platform.script.toFilePath())), 'build');
 
 void main(List<String> arguments) async {
   final args = argParser.parse(arguments);
@@ -44,6 +44,10 @@ void main(List<String> arguments) async {
   }
 
   machineMode = args[argMachine];
+
+  final buildFolder = await Isolate.resolvePackageUri(
+      Uri(scheme: 'package', path: 'devtools/build'));
+  final webroot = buildFolder.toFilePath();
   final virDir = new VirtualDirectory(webroot);
 
   // Set up a directory handler to serve index.html files.
