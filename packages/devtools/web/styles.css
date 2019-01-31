@@ -663,6 +663,8 @@ nav.menu li {
     width: 14px;
     font-size: 14px;
     display: inline-block;
+    padding-bottom: 1px;
+    color: #777;
     user-select: none;
 }
 
