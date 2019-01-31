@@ -433,7 +433,6 @@ class ServiceExtensionManager {
             isAlive: null,
           );
 
-
           didSendFirstFrameEvent =
               value != null && value.valueAsString == 'true';
         }
