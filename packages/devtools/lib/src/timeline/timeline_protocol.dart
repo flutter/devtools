@@ -10,6 +10,7 @@ import 'dart:async';
 enum TimelineEventType {
   cpu,
   gpu,
+  unknown,
 }
 
 // TODO(kenzie): re-assess all event handling logic. Ensure the parent/children
@@ -17,13 +18,20 @@ enum TimelineEventType {
 class TimelineData {
   TimelineData({this.cpuThreadId, this.gpuThreadId});
 
-  // TODO(kenzie): Remove these members once cpu/gpu distinction changes are
-  // available in the engine.
+  // TODO(kenzie): Remove the following members once cpu/gpu distinction changes
+  //  and frame ids are available in the engine.
   final int cpuThreadId;
   final int gpuThreadId;
-  int frameId = 0;
+  String frameId;
 
-  final Map<int, TimelineFrame> frames = <int, TimelineFrame>{};
+  // TODO(kenzie): stop depending on this once we have frame ids.
+  // Marks whether we have received a frame start event. Since we aren't certain
+  // of event frame ids right now, we should only listen for events after the
+  // start frame event and before the end frame event.
+  bool _listeningForFrameEvents = false;
+
+  // Maps frame ids to their respective frames.
+  final Map<String, TimelineFrame> frames = <String, TimelineFrame>{};
   final StreamController<TimelineFrame> _frameCompleteController =
       StreamController<TimelineFrame>.broadcast();
   Stream<TimelineFrame> get onFrameCompleted => _frameCompleteController.stream;
@@ -32,73 +40,97 @@ class TimelineData {
   TimelineEvent durationStack;
 
   void processTimelineEvent(TraceEvent event) {
-    // TODO(kenzie): Remove this logic once cpu/gpu distinction changes are
-    // available in the engine.
-    event.frameId ??= frameId;
-    event.type ??= event.threadId == cpuThreadId
-        ? TimelineEventType.cpu
-        : TimelineEventType.gpu;
+    // TODO(kenzie): stop manually setting the type once we have that data from
+    // the engine.
+    event.type = _inferEventType(event);
 
-    // We only care about CPU and GPU events.
-    if (event.type != TimelineEventType.cpu &&
-        event.type != TimelineEventType.gpu &&
-        event.phase != 's') {
+    // Always handle frame start and end events.
+    if (event.phase == 's') {
+      _handleFrameStartEvent(event);
+      return;
+    } else if (event.phase == 'f') {
+      _handleFrameEndEvent(event);
       return;
     }
 
-    // Always handle frame start events. This is where we add the first
-    // [TimelineFrame] to [frames].
-    if (event.phase == 's') {
-      _handleFrameStartEvent(event);
-    }
+    // Only handle events that take place between frame start and frame end.
+    if (_listeningForFrameEvents) {
+      // TODO(kenzie): stop manually setting the frame id once we have ids from
+      // the engine.
+      event.frameId ??= frameId;
 
-    // Only handle events for frames that we are aware of (i.e. we have handled
-    // the start frame event and added a [TimelineFrame] to [frames] with the
-    // given id).
-    if (frames.containsKey(event.frameId)) {
-      switch (event.phase) {
-        case 'f':
-          _handleFrameEndEvent(event);
-          break;
-        case 'B':
-          _handleDurationBeginEvent(event);
-          break;
-        case 'E':
-          _handleDurationEndEvent(event);
-          break;
-        case 'X':
-          _handleDurationCompleteEvent(event);
-          break;
-        case 'b':
-          _handleAsyncBeginEvent(event);
-          break;
-        case 'n':
-          _handleAsyncInstantEvent(event);
-          break;
-        case 'e':
-          _handleAsyncEndEvent(event);
-          break;
+      // We only care about CPU and GPU events.
+      if (event.type != TimelineEventType.cpu &&
+          event.type != TimelineEventType.gpu) {
+        return;
+      }
+
+      // Only handle events for frames that we are aware of (i.e. we have handled
+      // the start frame event and added a [TimelineFrame] to [frames] with the
+      // given id).
+      if (frames.containsKey(event.frameId)) {
+        switch (event.phase) {
+          case 'B':
+            _handleDurationBeginEvent(event);
+            break;
+          case 'E':
+            _handleDurationEndEvent(event);
+            break;
+          case 'X':
+            _handleDurationCompleteEvent(event);
+            break;
+          case 'b':
+            _handleAsyncBeginEvent(event);
+            break;
+          case 'n':
+            _handleAsyncInstantEvent(event);
+            break;
+          case 'e':
+            _handleAsyncEndEvent(event);
+            break;
+        }
       }
     }
   }
 
+  TimelineEventType _inferEventType(TraceEvent event) {
+    if (event.threadId == cpuThreadId) {
+      return TimelineEventType.cpu;
+    } else if (event.threadId == gpuThreadId) {
+      return TimelineEventType.gpu;
+    } else {
+      return TimelineEventType.unknown;
+    }
+  }
+
   void _handleFrameStartEvent(TraceEvent event) {
-    // TODO(kenzie): this should be an assert once we have the actual frameId
-    // from the event. Since we are manually creating frame ids for now, we will
-    // only handle a start frame event once the previous frame has finished.
-    // This means, for now, we will skip a frame when its start event overlaps
-    // with an incomplete frame.
-    if (!frames.containsKey(event.frameId)) {
+    // We should not be receiving multiple frame start events with the same id.
+    assert(!frames.containsKey(event.frameId));
+
+    // Only handle one frame at a time. If we are currently listening for frame
+    // events, then the frame has already started.
+    if (!_listeningForFrameEvents) {
+      // TODO(kenzie): stop manually setting the frame id once we have ids from
+      // the engine.
+      frameId = event.id;
+      event.frameId = event.id;
+
       frames[event.frameId] =
           TimelineFrame(event.frameId, event.timestampMicros);
+      _listeningForFrameEvents = true;
     }
   }
 
   void _handleFrameEndEvent(TraceEvent event) {
-    final frame = frames[event.frameId];
-    frame.endTime = event.timestampMicros;
-    _frameCompleteController.add(frame);
-    frameId++;
+    // Only handle frame end events for frames we know about (i.e. we have
+    // received the frame start event for this frame and have been listening for
+    // its events).
+    if (frames.containsKey(event.id)) {
+      final frame = frames[event.id];
+      frame.endTime = event.timestampMicros;
+      _frameCompleteController.add(frame);
+      _listeningForFrameEvents = false;
+    }
   }
 
   void _handleDurationBeginEvent(TraceEvent event) {
@@ -209,7 +241,7 @@ class TimelineData {
 class TimelineFrame {
   TimelineFrame(this.id, this.startTime);
 
-  final int id;
+  final String id;
 
   final List<TimelineEvent> cpuEvents = [];
   final List<TimelineEvent> gpuEvents = [];
@@ -390,17 +422,22 @@ class TraceEvent {
     }
   }
 
-  // TODO(kenzie): remove getters and setters for the following properties once
-  //  CPU/GPU distinction data is available in the engine.
-  int _frameId;
-  int get frameId => _frameId ?? args['frameId'];
-  set frameId(int id) => _frameId = id;
+  // TODO(kenzie): remove setters for these members once we get the data from
+  //  the engine.
+  String _frameId;
+  String get frameId => _frameId ?? args['frameId'];
+  set frameId(String id) => _frameId = id;
 
   TimelineEventType _type;
   TimelineEventType get type {
     if (_type == null) {
-      if (args['type'] == 'cpu') _type = TimelineEventType.cpu;
-      if (args['type'] == 'gpu') _type = TimelineEventType.gpu;
+      if (args['type'] == 'ui') {
+        _type = TimelineEventType.cpu;
+      } else if (args['type'] == 'gpu') {
+        _type = TimelineEventType.gpu;
+      } else {
+        _type = TimelineEventType.unknown;
+      }
     }
     return _type;
   }
@@ -411,6 +448,7 @@ class TraceEvent {
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   @override
-  String toString() => '$type event for frame $frameId - [$category] [$phase] '
+  String toString() =>
+      '$type event [frameId: $frameId] [id: $id] [cat: $category] [ph: $phase] '
       '$name - [timestamp: $timestampMicros] [duration: $duration]';
 }

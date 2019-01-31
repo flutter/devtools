@@ -27,11 +27,11 @@ class FrameFlameChart extends CoreElement {
     //  match what we draw in the flame chart. Fix this.
     if (_debugEventTrace && frame != null) {
       final StringBuffer buf = new StringBuffer();
-      buf.writeln('CPU:');
+      buf.writeln('CPU for frame ${frame.id}:');
       for (TimelineEvent event in frame.cpuEvents) {
         event.format(buf, '  ');
       }
-      buf.writeln('GPU:');
+      buf.writeln('GPU for frame ${frame.id}:');
       for (TimelineEvent event in frame.gpuEvents) {
         event.format(buf, '  ');
       }
