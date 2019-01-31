@@ -273,7 +273,8 @@ class DebuggerScreen extends Screen {
 
         final String file =
             scriptRef.uri.substring(scriptRef.uri.lastIndexOf('/') + 1);
-        deviceStatus.element.text = 'paused at $file ${position.line}:${position.column}';
+        deviceStatus.element.text =
+            'paused at $file ${position.line}:${position.column}';
       } else {
         deviceStatus.element.text = '';
       }
