@@ -42,15 +42,7 @@ class TimelineData {
   void processTimelineEvent(TraceEvent event) {
     // TODO(kenzie): stop manually setting the type once we have that data from
     // the engine.
-    if (event.type == null) {
-      if (event.threadId == cpuThreadId) {
-        event.type = TimelineEventType.cpu;
-      } else if (event.threadId == gpuThreadId) {
-        event.type = TimelineEventType.gpu;
-      } else {
-        event.type = TimelineEventType.unknown;
-      }
-    }
+    event.type = _inferEventType(event);
 
     // Always handle frame start and end events.
     if (event.phase == 's') {
@@ -98,6 +90,16 @@ class TimelineData {
             break;
         }
       }
+    }
+  }
+
+  TimelineEventType _inferEventType(TraceEvent event) {
+    if (event.threadId == cpuThreadId) {
+      return TimelineEventType.cpu;
+    } else if (event.threadId == gpuThreadId) {
+      return TimelineEventType.gpu;
+    } else {
+      return TimelineEventType.unknown;
     }
   }
 
