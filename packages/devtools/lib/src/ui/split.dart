@@ -15,8 +15,9 @@ import 'package:js/js_util.dart' as js_util;
 import 'elements.dart';
 
 typedef _ElementStyleCallback = Function(
-    Object dimension, Object size, num gutterSize);
-typedef _GutterStyleCallback = Function(Object dimension, num gutterSize);
+    Object dimension, Object size, num gutterSize, int index);
+typedef _GutterStyleCallback = Function(
+    Object dimension, num gutterSize, int index);
 
 @JS()
 @anonymous
@@ -75,12 +76,12 @@ Splitter flexSplit(
   return _split(
     parts.map((o) => o is CoreElement ? o.element : o).toList(),
     _SplitOptions(
-      elementStyle: allowInterop((dimension, size, gutterSize) {
+      elementStyle: allowInterop((dimension, size, gutterSize, index) {
         return js_util.jsify({
           'flex-basis': 'calc($size% - ${gutterSize}px)',
         });
       }),
-      gutterStyle: allowInterop((dimension, gutterSize) {
+      gutterStyle: allowInterop((dimension, gutterSize, index) {
         return js_util.jsify({
           'flex-basis': '${gutterSize}px',
         });
