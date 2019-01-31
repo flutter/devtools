@@ -8,7 +8,10 @@ pushd "$(dirname "$0")/.."
 
 pub global run webdev build --output web:$BUILD_OUTPUT/lib/build
 cp pubspec.yaml $BUILD_OUTPUT
-cp -R bin $BUILD_OUTPUT/bin
+cp -R bin $BUILD_OUTPUT
+pushd $BUILD_OUTPUT
+pub get
+popd
 
 # TODO: The pubspec has all dependencies, but we only need args+http_server.
 

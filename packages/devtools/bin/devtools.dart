@@ -8,7 +8,6 @@ import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart' show VirtualDirectory;
-import 'package:path/path.dart';
 
 const argHelp = 'help';
 const argMachine = 'machine';
