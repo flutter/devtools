@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../ui/elements.dart';
-import '../ui/primer.dart';
 import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
@@ -13,44 +12,26 @@ bool _debugEventTrace = false;
 
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
-    layoutVertical();
     flex();
-
-    // TODO(devoncarew): listen to tab changes
-    content = div(c: 'frame-timeline')..flex();
-
-    final PTabNav tabNav = PTabNav(<PTabNavTab>[
-      PTabNavTab('Frame timeline'),
-      PTabNavTab('Widget build info'),
-      PTabNavTab('Skia picture'),
-    ]);
-
-    add(<CoreElement>[
-      tabNav,
-      content,
-    ]);
-
-    content.element.style.whiteSpace = 'pre';
-    content.element.style.overflow = 'scroll';
+    clazz('frame-timeline');
   }
 
   TimelineFrame frame;
-  CoreElement content;
 
   void updateFrameData(TimelineFrame frame) {
     this.frame = frame;
 
-    content.clear();
+    clear();
 
     // TODO(kenzie): Sometimes we see a dump of the event trace that does not
     //  match what we draw in the flame chart. Fix this.
     if (_debugEventTrace && frame != null) {
       final StringBuffer buf = new StringBuffer();
-      buf.writeln('CPU:');
+      buf.writeln('CPU for frame ${frame.id}:');
       for (TimelineEvent event in frame.cpuEvents) {
         event.format(buf, '  ');
       }
-      buf.writeln('GPU:');
+      buf.writeln('GPU for frame ${frame.id}:');
       for (TimelineEvent event in frame.gpuEvents) {
         event.format(buf, '  ');
       }
@@ -101,7 +82,7 @@ class FrameFlameChart extends CoreElement {
       final CoreElement sectionTitle = div(text: 'CPU', c: 'timeline-title');
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '0';
-      content.add(sectionTitle);
+      add(sectionTitle);
 
       maxRow = row;
 
@@ -119,7 +100,7 @@ class FrameFlameChart extends CoreElement {
       final CoreElement sectionTitle = div(text: 'GPU', c: 'timeline-title');
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
-      content.add(sectionTitle);
+      add(sectionTitle);
 
       maxRow = row;
 
@@ -144,6 +125,6 @@ class FrameFlameChart extends CoreElement {
       item.element.style.width = '${width}px';
     }
     item.element.style.top = '${top}px';
-    content.add(item);
+    add(item);
   }
 }

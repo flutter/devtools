@@ -520,6 +520,8 @@ div.tabnav {
 .frame-timeline {
     position: relative;
     margin-top: 4px;
+    whitespace: pre;
+    overflow: scroll;
 }
 
 .frame-timeline .timeline-title {
