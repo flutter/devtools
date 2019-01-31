@@ -441,6 +441,7 @@ class TraceEvent {
     }
     return _type;
   }
+
   set type(TimelineEventType t) => _type = t;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
