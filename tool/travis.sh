@@ -24,20 +24,20 @@ pub get
 
 if [ "$BOT" = "main" ]; then
 
+    # Verify that dartfmt has been run.
+    echo "Checking dartfmt..."
+
+    if [[ $(dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/) ]]; then
+        echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/ web/"
+        dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/
+        exit 1
+    fi
+
     # Analyze the source.
     pub global activate tuneup && tuneup check
 
     # Ensure we can build the app.
     pub run webdev build
-
-    # Verify that dartfmt has been run.
-    echo "Checking dartfmt..."
-
-    if [[ $(dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/ > /dev/null) ]]; then
-        echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/ web/"
-        dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/
-        exit 1
-    fi
 
 elif [ "$BOT" = "test_ddc" ]; then
 
