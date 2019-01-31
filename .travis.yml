@@ -4,7 +4,8 @@ os:
 
 language: dart
 dart:
- - "dev/raw/latest"
+  - stable
+  - "dev/raw/latest"
 addons:
   chrome: stable
 
