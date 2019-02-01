@@ -98,7 +98,7 @@ void main() async {
         await inspectorService.setPubRootDirectories([]);
         final String rootDirectory =
             await inspectorService.inferPubRootDirectoryIfNeeded();
-        expect(rootDirectory, endsWith('/test/fixtures/flutter_app/lib'));
+        expect(rootDirectory, endsWith('/fixtures/flutter_app/lib'));
         await group.dispose();
 
         await env.tearDownEnvironment();
