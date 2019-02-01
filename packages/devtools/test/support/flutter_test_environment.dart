@@ -15,7 +15,7 @@ import 'flutter_test_driver.dart';
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = 'test/fixtures/flutter_app',
+    this.testAppDirectory = '../../fixtures/flutter_app',
   });
 
   FlutterRunConfiguration _runConfig;

@@ -4,15 +4,10 @@
 .dart_tool/
 .packages
 .pub/
-build/
 pubspec.lock
 
 .idea/
 .data_dir/
-
-# Directory created by dartdoc
-# If you don't generate documentation locally you can remove this line.
-doc/api/
 
 # .DS_Store is a file that stores custom attributes of its containing folder,
 # such as the position of icons or the choice of a background image.

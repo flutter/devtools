@@ -232,7 +232,7 @@ void main() {
     VmServiceWrapper service;
 
     setUp(() async {
-      _flutter = FlutterRunTestDriver(Directory('test/fixtures/flutter_app'));
+      _flutter = FlutterRunTestDriver(Directory('../../fixtures/flutter_app'));
       await _flutter.run(
           runConfig: const FlutterRunConfiguration(withDebugger: true));
       _flutterIsolateId = await _flutter.getFlutterIsolateId();
