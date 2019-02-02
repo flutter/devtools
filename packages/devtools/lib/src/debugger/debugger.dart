@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../core/js_utils.dart';
 import '../core/message_bus.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
@@ -835,11 +836,20 @@ class SourcePosition {
 
 class SourceEditor {
   SourceEditor(this.codeMirror, this.debuggerState) {
-    codeMirror.onGutterClick.listen((int line) {
-      final List<Breakpoint> lineBps = linesToBreakpoints[line];
+    final EventListener3Arg<GutterClickEvent> gutterListener =
+        EventListener3Arg(
+      codeMirror.jsProxy,
+      'gutterClick',
+      cvtEvent: (arg1, arg2, arg3) => GutterClickEvent(arg1, arg2),
+    );
+
+    gutterListener.stream.listen((GutterClickEvent event) {
+      final List<Breakpoint> lineBps = linesToBreakpoints[event.line];
 
       if (lineBps == null || lineBps.isEmpty) {
-        debuggerState.addBreakpoint(currentScript.id, line + 1).catchError((_) {
+        debuggerState
+            .addBreakpoint(currentScript.id, event.line + 1)
+            .catchError((_) {
           // ignore
         });
       } else {
@@ -1541,4 +1551,14 @@ class ConsoleArea implements CoreElementView {
   String getContents() {
     return _editor.getDoc().getValue();
   }
+}
+
+class GutterClickEvent {
+  GutterClickEvent(this.line, this.gutter);
+
+  final int line;
+  final String gutter;
+
+  @override
+  String toString() => '$line $gutter';
 }
