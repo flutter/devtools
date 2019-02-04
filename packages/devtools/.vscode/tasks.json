@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build for Release",
+			"label": "Build Release Package",
 			"type": "shell",
 			"command": "pub",
 			"args": [
@@ -13,6 +13,28 @@
 			],
 			"group": "build",
 			"problemMatcher": []
+		},
+		{
+			"label": "Build + Serve Release Build",
+			"type": "shell",
+			"command": "dart",
+			"args": [
+				"bin/devtools.dart"
+			],
+			"group": "build",
+			"problemMatcher": {
+				"owner": "custom",
+				"pattern": {
+					"regexp": "_________________"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "_________________",
+					"endsPattern": "^Serving DevTools"
+				}
+			},
+			"isBackground": true,
+			"dependsOn": "Build Release Package"
 		}
-	]
+	],
 }
