@@ -42,6 +42,7 @@ class FlutterTestEnvironment {
   set beforeTearDown(VoidAsyncFunction f) => _beforeTearDown = f;
 
   bool _needsSetup = true;
+  bool get _needsTeardown => !_needsSetup;
 
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
@@ -79,7 +80,7 @@ class FlutterTestEnvironment {
   }
 
   Future<void> tearDownEnvironment({bool force = false}) async {
-    if (!force && reuseTestEnvironment) {
+    if (!_needsTeardown || (!force && reuseTestEnvironment)) {
       // Skip actually tearing down for better test performance.
       return;
     }
