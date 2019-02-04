@@ -8,6 +8,8 @@ import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart' show VirtualDirectory;
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 const argHelp = 'help';
 const argMachine = 'machine';
@@ -33,8 +35,6 @@ final argParser = new ArgParser()
     defaultsTo: '9100',
   );
 
-bool machineMode = false;
-
 void main(List<String> arguments) async {
   final args = argParser.parse(arguments);
   if (args[argHelp]) {
@@ -42,12 +42,12 @@ void main(List<String> arguments) async {
     return;
   }
 
-  machineMode = args[argMachine];
-
-  final buildFolder = await Isolate.resolvePackageUri(
-      Uri(scheme: 'package', path: 'devtools/build'));
-  final webroot = buildFolder.toFilePath();
-  final virDir = new VirtualDirectory(webroot);
+  final bool machineMode = args[argMachine];
+  final Uri resourceUri = await Isolate.resolvePackageUri(
+      Uri(scheme: 'package', path: 'devtools/devtools.dart'));
+  final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
+  final String buildDir = path.join(packageDir, 'build');
+  final virDir = new VirtualDirectory(buildDir);
 
   // Set up a directory handler to serve index.html files.
   virDir.allowDirectoryListing = true;
@@ -66,9 +66,14 @@ void main(List<String> arguments) async {
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port}
     },
+    machineMode: machineMode,
   );
 }
 
-void printOutput(String message, Object json) {
+void printOutput(
+  String message,
+  Object json, {
+  @required bool machineMode,
+}) {
   print(machineMode ? jsonEncode(json) : message);
 }

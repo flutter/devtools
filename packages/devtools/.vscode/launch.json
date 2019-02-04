@@ -4,16 +4,18 @@
 		{
 			"type": "chrome",
 			"request": "launch",
-			"name": "Launch web app",
+			"name": "Serve DDC app",
 			"url": "http://localhost:8080",
 			"webRoot": "${workspaceFolder}/web",
 			"preLaunchTask": "pub: build_runner serve"
 		},
 		{
-			"name": "Serve pre-built app",
-			"type": "dart",
+			"type": "chrome",
 			"request": "launch",
-			"program": "_release_package/bin/devtools.dart"
-		}
-	]
+			"name": "Build+Run Release dart2js app",
+			"url": "http://localhost:9100",
+			"webRoot": "${workspaceFolder}/build",
+			"preLaunchTask": "Build + Serve Release Build",
+		},
+	],
 }
