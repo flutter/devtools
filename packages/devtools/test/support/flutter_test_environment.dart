@@ -87,6 +87,7 @@ class FlutterTestEnvironment {
 
     await _service.allFuturesCompleted.future;
     await _flutter.stop();
+    _flutter = null;
 
     _needsSetup = true;
   }
