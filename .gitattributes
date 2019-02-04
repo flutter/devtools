@@ -23,3 +23,6 @@
 *.jar    binary
 *.png    binary
 *.zip    binary
+
+# Preserve \n line endings in Golden files.
+**/test/goldens/* eol=lf
