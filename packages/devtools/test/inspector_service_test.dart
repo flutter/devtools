@@ -43,14 +43,12 @@ void main() async {
 
   try {
     group('inspector service tests', () {
-      tearDownAll(() async {
-        await env.tearDownEnvironment(force: true);
-      });
+      tearDown(env.tearDownEnvironment);
+      tearDownAll(() => env.tearDownEnvironment(force: true));
 
       test('track widget creation on', () async {
         await env.setupEnvironment();
         expect(await inspectorService.isWidgetCreationTracked(), isTrue);
-        await env.tearDownEnvironment();
       });
 
       test('useDaemonApi', () async {
@@ -58,8 +56,6 @@ void main() async {
         expect(inspectorService.useDaemonApi, isTrue);
         // TODO(jacobr): add test where we trigger a breakpoint and verify that
         // the daemon api is now false.
-
-        await env.tearDownEnvironment();
       });
 
       test('hasServiceMethod', () async {
@@ -67,8 +63,6 @@ void main() async {
         expect(inspectorService.hasServiceMethod('someDummyName'), isFalse);
         expect(inspectorService.hasServiceMethod('getRootWidgetSummaryTree'),
             isTrue);
-
-        await env.tearDownEnvironment();
       });
 
       test('createObjectGroup', () async {
@@ -86,8 +80,6 @@ void main() async {
         expect(g2.disposed, isTrue);
         await g1Disposed;
         await g2Disposed;
-
-        await env.tearDownEnvironment();
       });
 
       test('infer pub root directories', () async {
@@ -100,8 +92,6 @@ void main() async {
             await inspectorService.inferPubRootDirectoryIfNeeded();
         expect(rootDirectory, endsWith('/fixtures/flutter_app/lib'));
         await group.dispose();
-
-        await env.tearDownEnvironment();
       });
 
       test('widget tree', () async {
@@ -203,8 +193,6 @@ void main() async {
         );
 
         await group.dispose();
-
-        await env.tearDownEnvironment();
       });
 
       test('render tree', () async {
@@ -263,8 +251,6 @@ void main() async {
                 ' └─child: RenderCustomPaint#00000\n',
           ),
         );
-
-        await env.tearDownEnvironment();
       });
 
       // Run this test last as it will take a long time due to setting up the test
@@ -278,8 +264,6 @@ void main() async {
         );
 
         expect(await inspectorService.isWidgetCreationTracked(), isFalse);
-
-        await env.tearDownEnvironment();
       });
 
       // TODO(jacobr): add tests verifying that we can stop the running device
