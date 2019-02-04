@@ -21,6 +21,10 @@ void main() {
       const FlutterRunConfiguration(withDebugger: true),
     );
 
+    setUp(env.setupEnvironment);
+    tearDown(env.tearDownEnvironment);
+    tearDownAll(() => env.tearDownEnvironment(force: true));
+
     env.afterNewSetup = () {
       framesTracker = FramesTracker(env.service);
       framesTracker.start();
@@ -37,18 +41,12 @@ void main() {
     };
 
     test('FramesTracker tracks frames', () async {
-      await env.setupEnvironment();
-
       await _forceDrawFrame();
       expect(framesTracker.samples, isNotEmpty);
       expect(framesTracker.samples.length, equals(1));
-
-      await env.tearDownEnvironment();
     });
 
     test('FramesTracker pauses and resumes', () async {
-      await env.setupEnvironment();
-
       framesTracker.pause();
       expect(framesTracker.eventStreamSubscription.isPaused, isTrue);
 
@@ -60,13 +58,9 @@ void main() {
 
       await _forceDrawFrame();
       expect(framesTracker.samples.length, equals(2));
-
-      await env.tearDownEnvironment();
     });
 
     test('FramesTracker calcRecentFPS', () async {
-      await env.setupEnvironment();
-
       framesTracker.samples = _fakeSamplesForLowFPS;
       expect(framesTracker.calcRecentFPS(), equals(29.999999999999996));
       expect(framesTracker.calcRecentFPS().round(), equals(30));
@@ -74,8 +68,6 @@ void main() {
       framesTracker.samples = _fakeSamplesFor60FPS;
       expect(framesTracker.calcRecentFPS(), equals(59.99999999999999));
       expect(framesTracker.calcRecentFPS().round(), equals(60));
-
-      await env.tearDownEnvironment(force: true);
     });
   }, tags: 'useFlutterSdk');
 }

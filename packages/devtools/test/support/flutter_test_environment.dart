@@ -79,6 +79,10 @@ class FlutterTestEnvironment {
   }
 
   Future<void> tearDownEnvironment({bool force = false}) async {
+    if (_needsSetup) {
+      // _needsSetup=true means we've never run setup code or already cleaned up
+      return;
+    }
     if (!force && reuseTestEnvironment) {
       // Skip actually tearing down for better test performance.
       return;
