@@ -74,7 +74,7 @@ class CliAppFixture extends AppFixture {
   static Future<CliAppFixture> create(String appScriptPath) async {
     final Process process = await Process.start(
       Platform.resolvedExecutable,
-      <String>['--observe=0', appScriptPath],
+      <String>['--observe=0', '--pause-isolates-on-start', appScriptPath],
     );
 
     final Stream<String> lines =
@@ -102,6 +102,9 @@ class CliAppFixture extends AppFixture {
         VmServiceWrapper(await vmServiceConnect('localhost', port));
 
     final VM vm = await serviceConnection.getVM();
+
+    await Future.wait(
+        vm.isolates.map((isolate) => serviceConnection.resume(isolate.id)));
 
     return CliAppFixture._(
       appScriptPath,
