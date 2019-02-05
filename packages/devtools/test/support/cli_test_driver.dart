@@ -130,7 +130,7 @@ class CliAppFixture extends AppFixture {
   }
 
   static List<int> _parseLines(String source, String keyword) {
-    final List<String> lines = source.split('\n');
+    final List<String> lines = source.replaceAll('\r', '').split('\n');
     final List<int> matches = [];
 
     for (int i = 0; i < lines.length; i++) {
