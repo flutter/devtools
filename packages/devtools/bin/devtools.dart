@@ -20,24 +20,29 @@ final argParser = new ArgParser()
     argHelp,
     negatable: false,
     abbr: 'h',
+    help: 'Prints help output.',
+  )
+  ..addOption(
+    argPort,
+    defaultsTo: '9100',
+    abbr: 'p',
+    help: 'Port to serve DevTools on. '
+        'Pass 0 to automatically assign an available port.',
   )
   ..addFlag(
     argMachine,
     negatable: false,
     abbr: 'm',
     help: 'Sets output format to JSON for consumption in tools.',
-  )
-  ..addOption(
-    argPort,
-    abbr: 'p',
-    help: 'Port to serve DevTools on. '
-        'Pass 0 to automatically assign an available port.',
-    defaultsTo: '9100',
   );
 
 void main(List<String> arguments) async {
   final args = argParser.parse(arguments);
   if (args[argHelp]) {
+    print('Dart DevTools version ${await _getVersion()}');
+    print('');
+    print('usage: devtools <options>');
+    print('');
     print(argParser.usage);
     return;
   }
@@ -68,6 +73,21 @@ void main(List<String> arguments) async {
     },
     machineMode: machineMode,
   );
+}
+
+Future<String> _getVersion() async {
+  final Uri resourceUri = await Isolate.resolvePackageUri(
+      Uri(scheme: 'package', path: 'devtools/devtools.dart'));
+  final String packageDir =
+      path.dirname(path.dirname(resourceUri.toFilePath()));
+  final File pubspecFile = File(path.join(packageDir, 'pubspec.yaml'));
+  final String versionLine =
+      pubspecFile.readAsLinesSync().firstWhere((String line) {
+    return line.startsWith('version: ');
+  }, orElse: () => null);
+  return versionLine == null
+      ? 'unknown'
+      : versionLine.substring('version: '.length).trim();
 }
 
 void printOutput(
