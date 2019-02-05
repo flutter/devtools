@@ -56,10 +56,17 @@ class DevtoolsManager {
         baseUri.resolve('index.html?port=${appFixture.servicePort}');
     await tabInstance.tab.navigate(baseAppUri.toString());
 
-    await delay();
-
     // wait for app initialization
     await tabInstance.getBrowserChannel();
+
+    // TODO(dantup): Find a better way to wait for something here. This delay
+    // fixes the following tests on Windows (list scripts has also been seen to
+    // fail elsewhere).
+    //     integration logging displays log data [E]
+    //     integration logging log screen postpones write when offscreen [E]
+    //     integration debugging lists scripts [E]
+    // integration debugging pause [E]
+    await delay();
   }
 
   Future<void> switchPage(String page) async {
