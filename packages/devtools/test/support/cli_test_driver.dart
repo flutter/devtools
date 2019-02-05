@@ -10,6 +10,8 @@ import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
+import '../integration_tests/integration.dart';
+
 class AppFixture {
   AppFixture._(
     this.process,
@@ -103,8 +105,9 @@ class CliAppFixture extends AppFixture {
 
     final VM vm = await serviceConnection.getVM();
 
-    await Future.wait(
-        vm.isolates.map((isolate) => serviceConnection.resume(isolate.id)));
+    final Isolate isolate =
+        await _waitForIsolate(serviceConnection, 'PauseStart');
+    await serviceConnection.resume(isolate.id);
 
     return CliAppFixture._(
       appScriptPath,
@@ -114,6 +117,26 @@ class CliAppFixture extends AppFixture {
       serviceConnection,
       vm.isolates,
     );
+  }
+
+  static Future<Isolate> _waitForIsolate(
+    VmServiceWrapper serviceConnection,
+    String pauseEventKind,
+  ) async {
+    Isolate foundIsolate;
+    await waitFor(() async {
+      final vm = await serviceConnection.getVM();
+      final isolates = await Future.wait(
+        vm.isolates.map((ref) => serviceConnection.getIsolate(ref.id)),
+      );
+      foundIsolate = isolates.firstWhere(
+        (isolate) =>
+            isolate is Isolate && isolate.pauseEvent.kind == pauseEventKind,
+        orElse: () => null,
+      );
+      return foundIsolate != null;
+    });
+    return foundIsolate;
   }
 
   String get scriptSource {
