@@ -65,7 +65,7 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     cd devtools
 
     # Run tests that require the Flutter SDK.
-    pub run test --reporter expanded --tags useFlutterSdk
+    pub run test -j1 --reporter expanded --tags useFlutterSdk
 
 else
 
