@@ -2,15 +2,16 @@
 
 ## What is this?
 
-This repo is a companion repo to the main [flutter repo](https://github.com/flutter/flutter).
+This is a companion repo to the main [flutter repo](https://github.com/flutter/flutter).
 It contains the source code for a suite of performance tools for Dart and Flutter.
 
-## But there's not much here?
+## Getting started
 
-It's still very early in development - stay tuned.
+See the package's [readme](https://github.com/flutter/devtools/blob/master/packages/devtools/README.md)
+for instructions about how to try out DevTools.
 
-## Use and Development
+## Contributing and development
 
-See the devtools package
-[readme](https://github.com/flutter/devtools/blob/master/packages/devtools/README.md)
-for more information.
+Contributions welcome! See our
+[contributing page](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
+for an overview of how to build and contribute to the project.
