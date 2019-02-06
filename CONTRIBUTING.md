@@ -49,7 +49,7 @@ running these tests.
 
 ```
 cd packages/devtools
-pub run test --tags useFlutterSdk
+pub run test -j1 --tags useFlutterSdk
 ```
 
 ### Run all other tests
