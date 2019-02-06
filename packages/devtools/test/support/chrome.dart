@@ -13,7 +13,9 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip show ChromeTab;
 
-final _useChromeHeadless = Platform.environment['TEST_HEADLESS_CHROME'] != null;
+// Change this if you want to be able to see Chrome opening while tests run
+// to aid debugging.
+const _useChromeHeadless = true;
 
 class Chrome {
   factory Chrome.from(String executable) {
