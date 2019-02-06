@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
 import 'package:test/test.dart';
 
 import '../support/cli_test_driver.dart';
 import 'integration.dart';
 
-void appTests() {
+void main() {
   CliAppFixture appFixture;
   BrowserTabInstance tabInstance;
+
+  setUpAll(sharedSetUpAll);
+  tearDownAll(sharedTearDownAll);
 
   setUp(() async {
     appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');

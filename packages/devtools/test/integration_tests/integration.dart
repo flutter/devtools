@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:test/test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
@@ -18,6 +16,20 @@ const bool verboseTesting = false;
 
 WebdevFixture webdevFixture;
 BrowserManager browserManager;
+
+Future<void> sharedSetUpAll() async {
+  final bool testInReleaseMode =
+      Platform.environment['WEBDEV_RELEASE'] == 'true';
+
+  webdevFixture =
+      await WebdevFixture.create(release: testInReleaseMode, verbose: true);
+  browserManager = await BrowserManager.create();
+}
+
+Future<void> sharedTearDownAll() async {
+  await browserManager?.teardown();
+  await webdevFixture?.teardown();
+}
 
 Future<void> waitFor(
   Future<bool> condition(), {
