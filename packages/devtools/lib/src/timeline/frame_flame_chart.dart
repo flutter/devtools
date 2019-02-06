@@ -17,24 +17,20 @@ class FrameFlameChart extends CoreElement {
   }
 
   TimelineFrame frame;
+  CoreElement sectionTitles;
+  CoreElement flameChart;
 
   void updateFrameData(TimelineFrame frame) {
     this.frame = frame;
 
     clear();
 
-    // TODO(kenzie): Sometimes we see a dump of the event trace that does not
-    //  match what we draw in the flame chart. Fix this.
     if (_debugEventTrace && frame != null) {
       final StringBuffer buf = new StringBuffer();
       buf.writeln('CPU for frame ${frame.id}:');
-      for (TimelineEvent event in frame.cpuEvents) {
-        event.format(buf, '  ');
-      }
+      frame.pipelineProduceFlow.format(buf, '  ');
       buf.writeln('GPU for frame ${frame.id}:');
-      for (TimelineEvent event in frame.gpuEvents) {
-        event.format(buf, '  ');
-      }
+      frame.pipelineConsumeFlow.format(buf, '  ');
       print(buf.toString());
     }
 
@@ -44,7 +40,7 @@ class FrameFlameChart extends CoreElement {
   }
 
   void _render(TimelineFrame frame) {
-    const int leftIndent = 60;
+    const int leftIndent = 80;
     const int rowHeight = 25;
 
     // TODO(kenzie): re-write this scale logic.
@@ -79,20 +75,19 @@ class FrameFlameChart extends CoreElement {
     }
 
     void drawCpuEvents() {
+      final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'CPU', c: 'timeline-title');
       sectionTitle.element.style.left = '0';
-      sectionTitle.element.style.top = '0';
+      sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
 
       maxRow = row;
 
-      for (TimelineEvent event in frame.cpuEvents) {
-        drawRecursively(event, row);
-      }
+      drawRecursively(frame.pipelineProduceFlow, row);
 
       row = maxRow;
 
-      row++;
+      row += 2;
     }
 
     void drawGpuEvents() {
@@ -104,13 +99,11 @@ class FrameFlameChart extends CoreElement {
 
       maxRow = row;
 
-      for (TimelineEvent event in frame.gpuEvents) {
-        drawRecursively(event, row);
-      }
+      drawRecursively(frame.pipelineConsumeFlow, row);
 
       row = maxRow;
 
-      row++;
+      row += 2;
     }
 
     drawCpuEvents();

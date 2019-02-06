@@ -24,10 +24,6 @@ class TimelineController {
       StreamController<Null>.broadcast();
   Stream<Null> get onFramesCleared => _framesClearedController.stream;
 
-  // Timeline data.
-  final List<TimelineEvent> dartEvents = <TimelineEvent>[];
-  final List<TimelineEvent> gpuEvents = <TimelineEvent>[];
-
   TimelineData _timelineData;
   TimelineData get timelineData => _timelineData;
 
@@ -38,9 +34,6 @@ class TimelineController {
 
   void pause() {
     _paused = true;
-
-    dartEvents.clear();
-    gpuEvents.clear();
   }
 
   void resume() {

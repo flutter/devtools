@@ -520,7 +520,7 @@ div.tabnav {
 .frame-timeline {
     position: relative;
     margin-top: 4px;
-    whitespace: pre;
+    white-space: pre;
     overflow: scroll;
 }
 
@@ -530,6 +530,7 @@ div.tabnav {
     padding: 0 2px;
     position: absolute;
     overflow-x: hidden;
+    white-space: pre;
     cursor: default;
 }
 
