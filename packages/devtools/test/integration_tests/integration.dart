@@ -54,8 +54,7 @@ class DevtoolsManager {
   Future<void> start(AppFixture appFixture, {Uri overrideUri}) async {
     final Uri baseAppUri =
         baseUri.resolve('index.html?port=${appFixture.servicePort}');
-    await tabInstance.tab
-        .navigate(overrideUri?.toString() ?? baseAppUri.toString());
+    await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
     await tabInstance.getBrowserChannel();

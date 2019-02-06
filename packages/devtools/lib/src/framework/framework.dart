@@ -416,6 +416,7 @@ class ConnectDialog {
     });
 
     textfield.element.onKeyDown.listen((KeyboardEvent event) {
+      // Check for an enter key press ('\n').
       if (event.keyCode == 13) {
         event.preventDefault();
 
@@ -448,27 +449,31 @@ class ConnectDialog {
   void _tryConnect() {
     final InputElement inputElement = textfield.element;
     final String value = inputElement.value.trim();
-
     final int port = int.tryParse(value);
+
+    void handleConnectError() {
+      // TODO(devoncarew): We should provide the user some instructions about
+      // how to resolve an issue connecting.
+      framework.toast("Unable to connect to '$value'.");
+    }
 
     if (port != null) {
       _connect(port).catchError((dynamic error) {
-        framework.toast("Unable to connect to '$value'.");
+        handleConnectError();
       });
     } else {
       try {
         final Uri uri = Uri.parse(value);
         if (uri.hasPort) {
           _connect(uri.port).catchError((dynamic error) {
-            framework.toast("Unable to connect to '$value'.");
+            handleConnectError();
           });
         } else {
-          framework.toast("Unable to connect to '$value'.");
+          handleConnectError();
         }
       } catch (_) {
         // ignore
-
-        framework.toast("Unable to connect to '$value'.");
+        handleConnectError();
       }
     }
   }
