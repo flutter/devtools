@@ -96,6 +96,8 @@ class PerfToolFramework extends Framework {
 
     // Listen for clicks on the 'send feedback' button.
     queryId('send-feedback-button').onClick.listen((_) {
+      // TODO(devoncarew): Fill in useful product info here, like the Flutter
+      // SDK version and the version of DevTools in use.
       window.open('https://github.com/flutter/devtools/issues', '_feedback');
     });
   }
