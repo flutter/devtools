@@ -1,78 +1,64 @@
 [![Build Status](https://travis-ci.org/flutter/devtools.svg?branch=master)](https://travis-ci.org/flutter/devtools)
 
-## What is this?
+## Trying it out
 
-This repo is a companion repo to the main [flutter repo](https://github.com/flutter/flutter).
-It contains the source code for a suite of performance tools for Dart and Flutter.
+### Installing
 
-## But there's not much here?
+Currently, the best way to try DevTools out is by running it as a pub globally activated package.
 
-It's still very early in development - stay tuned.
+If you have `pub` on your path, you can run:
 
-## Development
+- `pub global activate devtools`
 
-- `git clone https://github.com/flutter/devtools`
-- `cd devtools/packages/devtools`
-- `pub get`
+If you have `flutter` on your path, you can run:
 
-From a separate terminal:
-- `cd <path/to/flutter-sdk>/examples/flutter_gallery`
-- ensure the iOS Simulator is open (or a physical device is connected)
-- `flutter run`
+- `flutter packages pub global activate devtools`
 
-From the packages/devtools directory:
-- `pub run webdev serve web`
+That will install (or update) DevTools on your machine.
 
-Then, open a browser window to the local url specified by webdev. After the page has loaded, append
-`?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by 
-the `flutter run` output.
+Going forward, we expect to have additional (and easier!) distributions mechanisms for DevTools.
 
-For more productive development, launch your flutter application specifying
-`--observatory-port` so the observatory is available on a fixed port. This
-lets you avoid manually entering the observatory port parameter each time
-you launch the application.
+### Run the DevTools application server
 
-- `flutter run --observatory-port=8888`
-- `open http://localhost:8080/?port=8888`
+Next, run the local web server, which will serve the DevTools application itself.
 
-`pub run webdev` provides a fast development server that incrementally
-rebuilds the portion of the application that was edited each time you reload
-the page in the browser. If initial app load times become slow as this tool
-grows, we can integrate with the hot restart support in `webdev`.
+Run one of the following two commands:
 
-## Testing
+- `pub global run devtools` (if you have `pub` on your path)
 
-### Running tests that depend on the Flutter SDK
-Make sure your flutter SDK matches the tip of trunk before
-running these tests.
+- `flutter packages pub global run devtools` (if you have `flutter` on your path)
+
+On the command-line, you should see output that looks something like:
 
 ```
-cd packages/devtools
-pub run test --tags useFlutterSdk
+Serving DevTools at http://127.0.0.1:9100
 ```
 
-### Run all other tests
+### Start an application to debug
+
+Next, start an app to connect to. This can be either a Flutter application or a Dart
+command-line application. The example below uses a Flutter app.
+
+- `cd path/to/flutter/app`
+- and, run `flutter run --observatory-port=9200`
+
+You'll need to have a device connected or a simulator open for `flutter run` to work. Once the app
+starts up, you'll be able to connect to it from devtools.
+
+### Open DevTools and connect to the target app
+
+Using DevTools now is as simple as opening a local browser window and pointing the DevTools app to the 
+running Flutter application. If you used the same ports as the example above, you can open:
 
 ```
-cd packages/devtools
-pub run test --exclude-tags useFlutterSdk
-pub run test --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+http://localhost:9100/?port=9200
 ```
 
-### Updating golden files:
-Some of the golden file tests will fail if Flutter changes the implementation or diagnostic
-properties of widgets used by the inspector tests. If this happens, make sure the golden
-file output still looks reasonable and execute the following command to update the golden files.
+This can also be done via the command line with `open http://localhost:9100/?port=9200`. The first port
+in the url is for the local server that is serving the DevTools web UI. The second port is to tell
+DevTools itself which local app to connect to for debugging and inspection.
 
-```
-tool/update_goldens.sh
-```
+## Feedback
 
-## Deployment
-
-The general deployment strategy for this tool has not yet been finalized.
-
-Currently the application is built using [dartdevc](https://webdev.dartlang.org/tools/dartdevc),
-which provides a productive development experience. The application, however, will be deployed
-using the Dart2Js compiler, which generates significantly faster JS. Before optimizing slow code,
-make sure there is still a performance issue when running the application with Dart2js.
+Feedback and issues are best reported at https://github.com/flutter/devtools/issues. Thanks for
+trying out DevTools!
