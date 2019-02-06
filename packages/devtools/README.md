@@ -14,21 +14,19 @@ If you have `flutter` on your path, you can run:
 
 - `flutter packages pub global activate devtools`
 
-That will  install (or update) DevTools on your machine.
+That will install (or update) DevTools on your machine.
 
 Going forward, we expect to have additional (and easier!) distributions mechanisms for DevTools.
 
 ### Run the DevTools application server
 
-Next, you want to run the local web server which can serve the DevTools application itself.
+Next, run the local web server, which will serve the DevTools application itself.
 
-Run one of the following two commands; if you have `pub` on your path:
+Run one of the following two commands:
 
-- `pub global run devtools`
+- `pub global run devtools` (if you have `pub` on your path)
 
-And if you have `flutter` on your path:
-
-- `flutter packages pub global run devtools`
+- `flutter packages pub global run devtools` (if you have `flutter` on your path)
 
 On the command-line, you should see output that looks something like:
 
@@ -38,11 +36,11 @@ Serving DevTools at http://127.0.0.1:9100
 
 ### Start an application to debug
 
-Next, you'll want to start an app to connect to. This can be either a Flutter application or a Dart
+Next, start an app to connect to. This can be either a Flutter application or a Dart
 command-line application. The example below uses a Flutter app.
 
-- change to the directory for a Flutter app
-- run `flutter run --observatory-port=9200`
+- `cd path/to/flutter/app`
+- and, run `flutter run --observatory-port=9200`
 
 You'll need to have a device connected or a simulator open for `flutter run` to work. Once the app
 starts up, you'll be able to connect to it from devtools.

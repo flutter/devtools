@@ -44,7 +44,8 @@ grows, we can integrate with the hot restart support in `webdev`.
 ## Testing
 
 ### Running tests that depend on the Flutter SDK
-Make sure your flutter SDK matches the tip of trunk before
+
+Make sure your Flutter SDK matches the tip of trunk before
 running these tests.
 
 ```
@@ -60,7 +61,8 @@ pub run test --exclude-tags useFlutterSdk
 pub run test --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 ```
 
-### Updating golden files:
+### Updating golden files
+
 Some of the golden file tests will fail if Flutter changes the implementation or diagnostic
 properties of widgets used by the inspector tests. If this happens, make sure the golden
 file output still looks reasonable and execute the following command to update the golden files.
