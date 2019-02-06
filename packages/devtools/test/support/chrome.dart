@@ -13,6 +13,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip show ChromeTab;
 
+final _useChromeHeadless = Platform.environment['TEST_HEADLESS_CHROME'] != null;
+
 class Chrome {
   factory Chrome.from(String executable) {
     return FileSystemEntity.isFileSync(executable)
@@ -66,6 +68,13 @@ class Chrome {
       '--user-data-dir=${getCreateChromeDataDir()}',
       '--remote-debugging-port=$debugPort'
     ];
+    if (_useChromeHeadless) {
+      args.addAll(<String>[
+        '--headless',
+        '--disable-gpu',
+        '--no-sandbox',
+      ]);
+    }
     if (url != null) {
       args.add(url);
     }
@@ -207,7 +216,7 @@ class ChromeTab {
   }
 
   Future<String> createNewTarget() {
-    return _wip.target.createTarget('');
+    return _wip.target.createTarget('about:blank');
   }
 
   bool get isConnected => _wip != null;

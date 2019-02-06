@@ -206,7 +206,13 @@ class BrowserTabInstance {
   }
 
   Future<void> close() async {
-    await tab.wipConnection.target.closeTarget(tab.wipTab.id);
+    // In Headless Chrome, we get Inspector.detached when we close the last
+    // target rather than a response.
+    await Future.any(<Future<Object>>[
+      tab.wipConnection.onNotification
+          .firstWhere((n) => n.method == 'Inspector.detached'),
+      tab.wipConnection.target.closeTarget(tab.wipTab.id),
+    ]);
   }
 
   void _handleBrowserMessage(Map<dynamic, dynamic> message) {

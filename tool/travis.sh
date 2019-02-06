@@ -22,6 +22,9 @@ echo "which dart: " `which dart`
 # Provision our packages.
 pub get
 
+# Use Headless Chrome on the bots (this is required for Linux).
+export TEST_HEADLESS_CHROME=true
+
 if [ "$BOT" = "main" ]; then
 
     # Verify that dartfmt has been run.
