@@ -8,9 +8,6 @@ import 'dart:html' hide Point;
 /// Finds the first descendant element of this document with the given id.
 Element queryId(String id) => querySelector('#$id');
 
-/// Finds the first descendant element of this document with the given id.
-Element $(String id) => querySelector('#$id');
-
 CoreElement button({String text, String c, String a}) =>
     CoreElement('button', text: text, classes: c, attributes: a);
 

@@ -79,6 +79,7 @@ class PButton extends CoreElement {
   }
 
   Icon _icon;
+
   void changeIcon(String url) {
     if (_icon != null) {
       element.children.first.style.backgroundImage = 'url("$url")';
