@@ -18,14 +18,12 @@ class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
 
-    globalStatus =
-        StatusLine(CoreElement.from(querySelector('#global-status')));
-    pageStatus = StatusLine(CoreElement.from(querySelector('#page-status')));
-    auxiliaryStatus =
-        StatusLine(CoreElement.from(querySelector('#auxiliary-status')));
+    globalStatus = StatusLine(CoreElement.from(queryId('global-status')));
+    pageStatus = StatusLine(CoreElement.from(queryId('page-status')));
+    auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')));
 
     globalActions =
-        ActionsContainer(CoreElement.from(querySelector('#global-actions')));
+        ActionsContainer(CoreElement.from(queryId('global-actions')));
 
     connectDialog = new ConnectDialog(this);
   }
@@ -87,7 +85,7 @@ class Framework {
     loadScreenFromLocation();
   }
 
-  CoreElement get mainElement => CoreElement.from(querySelector('#content'));
+  CoreElement get mainElement => CoreElement.from(queryId('content'));
 
   void load(Screen screen) {
     if (current == null) {
@@ -181,18 +179,18 @@ class Framework {
     }
 
     final CoreElement errorContainer =
-        CoreElement.from(querySelector('#messages-container'));
+        CoreElement.from(queryId('messages-container'));
     errorContainer.add(flash);
   }
 
   void clearMessages() {
-    querySelector('#messages-container').children.clear();
+    queryId('messages-container').children.clear();
   }
 
   void toast(String message, {String title}) {
     final Toast toast = Toast(title: title, message: message);
     final CoreElement toastContainer =
-        CoreElement.from(querySelector('#toast-container'));
+        CoreElement.from(queryId('toast-container'));
     toastContainer.add(toast);
     toast.show();
   }
@@ -379,7 +377,7 @@ class Toast extends CoreElement {
 
 class ConnectDialog {
   ConnectDialog(this.framework) {
-    parent = CoreElement.from(querySelector('#connect-dialog'));
+    parent = CoreElement.from(queryId('connect-dialog'));
     parent.layoutVertical();
 
     parent.add([

@@ -53,7 +53,7 @@ class PerfToolFramework extends Framework {
   Status reloadStatus;
 
   void initGlobalUI() {
-    final CoreElement mainNav = CoreElement.from(querySelector('#main-nav'));
+    final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
 
     for (Screen screen in screens) {
@@ -92,6 +92,13 @@ class PerfToolFramework extends Framework {
       if (!serviceManager.hasConnection) {
         toast('Device connection lost.');
       }
+    });
+
+    // Listen for clicks on the 'send feedback' button.
+    queryId('send-feedback-button').onClick.listen((_) {
+      // TODO(devoncarew): Fill in useful product info here, like the Flutter
+      // SDK version and the version of DevTools in use.
+      window.open('https://github.com/flutter/devtools/issues', '_feedback');
     });
   }
 

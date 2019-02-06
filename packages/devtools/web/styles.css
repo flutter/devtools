@@ -809,3 +809,9 @@ html [full] {
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
 }
+
+.masthead-item .octicon {
+    top: 1px;
+    position: relative;
+    font-weight: bold;
+}
