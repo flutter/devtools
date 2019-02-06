@@ -63,12 +63,12 @@ class TimelineScreen extends Screen {
     CoreElement frameDetailsContainer;
     FrameFlameChart frameFlameChart;
 
-    final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
-      PTabNavTab('Frame Timeline'),
-      // TODO(kenzie): uncomment these tabs once they are implemented.
-      //PTabNavTab('Widget build info'),
-      //PTabNavTab('Skia picture'),
-    ]);
+    // TODO(kenzie): uncomment these tabs once they are implemented.
+//    final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
+//      PTabNavTab('Frame Timeline'),
+//      PTabNavTab('Widget build info'),
+//      PTabNavTab('Skia picture'),
+//    ]);
 
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
@@ -108,7 +108,7 @@ class TimelineScreen extends Screen {
         ..add(frameDetailsContainer = div()
           ..layoutVertical()
           ..flex()
-          ..add(<CoreElement>[frameTabNav, frameFlameChart = FrameFlameChart()])
+          ..add(<CoreElement>[frameFlameChart = FrameFlameChart()])
           ..attribute('hidden')),
     ]);
 
@@ -256,7 +256,7 @@ class TimelineFramesUI extends CoreElement {
 
   void setSelected(TimelineFrameUI frameUI) {
     if (selectedFrame == frameUI) {
-      frameUI = null;
+      return;
     }
 
     if (selectedFrame != frameUI) {
