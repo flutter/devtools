@@ -1,5 +1,10 @@
 [![Build Status](https://travis-ci.org/flutter/devtools.svg?branch=master)](https://travis-ci.org/flutter/devtools)
 
+## What is this?
+
+This is a companion repo to the main Flutter repo. It contains the source code for a suite of
+performance tools for Dart and Flutter.
+
 ## Trying it out
 
 ### Installing
