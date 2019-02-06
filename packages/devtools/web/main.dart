@@ -12,8 +12,12 @@ void main() {
   // Load the web app framework.
   final PerfToolFramework framework = PerfToolFramework();
 
-  FrameworkCore.initVmService((String title, dynamic error) {
+  FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
     framework.showError(title, error);
+  }).then((bool connected) {
+    if (!connected) {
+      framework.showConnectionDialog();
+    }
   });
 
   framework.loadScreenFromLocation();

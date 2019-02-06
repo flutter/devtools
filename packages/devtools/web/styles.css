@@ -802,3 +802,10 @@ html [full] {
 .action-button+.action-button {
     margin-left: 8px;
 }
+
+#connect-dialog {
+    display: none;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
