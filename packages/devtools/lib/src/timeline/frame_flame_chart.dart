@@ -87,7 +87,7 @@ class FrameFlameChart extends CoreElement {
 
       row = maxRow;
 
-      row += 2;
+      row++;
     }
 
     void drawGpuEvents() {
@@ -103,10 +103,14 @@ class FrameFlameChart extends CoreElement {
 
       row = maxRow;
 
-      row += 2;
+      row++;
     }
 
     drawCpuEvents();
+
+    // Add an additional row for spacing between CPU and GPU events.
+    row++;
+
     drawGpuEvents();
   }
 

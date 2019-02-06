@@ -23,19 +23,25 @@ class TimelineData {
   //  and frame ids are available in the engine.
   final int cpuThreadId;
   final int gpuThreadId;
-  String frameId;
-
-  // Maps frame ids to their respective frames.
-  final Map<String, TimelineFrame> _frames = <String, TimelineFrame>{};
-
-  final List<TimelineEvent> _pendingEvents = [];
 
   final StreamController<TimelineFrame> _frameCompleteController =
       StreamController<TimelineFrame>.broadcast();
   Stream<TimelineFrame> get onFrameCompleted => _frameCompleteController.stream;
 
-  final Map<String, TimelineEvent> _asyncEvents = <String, TimelineEvent>{};
+  /// Frames we are in the process of forming.
+  ///
+  /// Once frames are ready, we will remove them from this Map and add them to
+  /// [_frameCompleteController].
+  final Map<String, TimelineFrame> _pendingFrames = <String, TimelineFrame>{};
+
+  /// Events we have collected and are waiting to add to their respective
+  /// frames.
+  final List<TimelineEvent> _pendingEvents = [];
+
+  /// The current stack of duration events for CPU work.
   TimelineEvent _cpuDurationStack;
+
+  /// The current stack of duration events for GPU work.
   TimelineEvent _gpuDurationStack;
 
   void processTimelineEvent(TraceEvent event) {
@@ -63,15 +69,8 @@ class TimelineData {
       case 'X':
         _handleDurationCompleteEvent(event);
         break;
-      case 'b':
-        _handleAsyncBeginEvent(event);
-        break;
-      case 'n':
-        _handleAsyncInstantEvent(event);
-        break;
-      case 'e':
-        _handleAsyncEndEvent(event);
-        break;
+      // We do not need to handle async events (phases 'b', 'n', 'e') because
+      // CPU/GPU work will take place in DurationEvents.
     }
   }
 
@@ -87,23 +86,23 @@ class TimelineData {
 
   void _handleFrameStartEvent(TraceEvent event) {
     if (event.id != null) {
-      if (_frames[event.id] == null) {
+      if (_pendingFrames[event.id] == null) {
         // Create a new TimelineFrame if we do not already have one for this id.
-        _frames[event.id] = TimelineFrame(event.id);
+        _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _frames[event.id].startTime = event.timestampMicros;
+      _pendingFrames[event.id].startTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
 
   void _handleFrameEndEvent(TraceEvent event) async {
     if (event.id != null) {
-      if (_frames[event.id] == null) {
+      if (_pendingFrames[event.id] == null) {
         // Sometimes frame end events can come in before frame start events, so
         // create a new TimelineFrame if we do not already have one for this id.
-        _frames[event.id] = TimelineFrame(event.id);
+        _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _frames[event.id].endTime = event.timestampMicros;
+      _pendingFrames[event.id].endTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
@@ -120,9 +119,9 @@ class TimelineData {
         _cpuDurationStack.addChild(e);
         _cpuDurationStack = e;
       }
-      // Do not add these events to a null stack. MessageLoop::RunExpiredTasks
-      // will either a) start outside of our frame start time, or b) parent
-      // irrelevant events - neither of which do we want.
+      // Do not add MessageLoop::RunExpiredTasks events to a null stack. These
+      // events will either a) start outside of our frame start time, or b)
+      // parent irrelevant events - neither of which we want.
       else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
         _cpuDurationStack = e;
       }
@@ -131,11 +130,11 @@ class TimelineData {
         _gpuDurationStack.addChild(e);
         _gpuDurationStack = e;
       }
-      // Do not add these events to a null stack. A single
-      // MessageLoop::RunExpiredTasks event can parent multiple PipelineConsume
-      // event flows, and we want to consider each PipelineConsume flow to be
-      // its own event. MessageLoop::RunExpiredTasks can also parent irrelevant
-      // events that we do not want to track.
+      // Do not add MessageLoop::RunExpiredTasks events to a null stack. A
+      // single MessageLoop::RunExpiredTasks event can parent multiple
+      // PipelineConsume event flows, and we want to consider each
+      // PipelineConsume flow to be its own event. This event can also parent
+      // irrelevant events that we do not want to track.
       else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
         _gpuDurationStack = e;
       }
@@ -153,7 +152,8 @@ class TimelineData {
       if (_cpuDurationStack == null) {
         _maybeAddEvent(current);
       }
-    } else if (event.isGpuEvent && _gpuDurationStack != null) {
+    }
+    if (event.isGpuEvent && _gpuDurationStack != null) {
       _gpuDurationStack.endTime = event.timestampMicros;
       current = _gpuDurationStack;
 
@@ -180,7 +180,6 @@ class TimelineData {
         _maybeAddEvent(e);
       }
     }
-
     if (event.isGpuEvent) {
       if (_gpuDurationStack != null) {
         _gpuDurationStack.addChild(e, findChildLocation: true);
@@ -190,58 +189,8 @@ class TimelineData {
     }
   }
 
-  // TODO(kenzie): consider removing async event handling if the events we are
-  // interested in are guaranteed not to be async. Check with Chinmay.
-  void _handleAsyncBeginEvent(TraceEvent event) {
-    final TimelineEvent e = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-    );
-
-    final String asyncUID = event.asyncUID;
-    if (_asyncEvents[asyncUID] != null) {
-      e.parent = _asyncEvents[asyncUID];
-    }
-    _asyncEvents[asyncUID] = e;
-  }
-
-  void _handleAsyncEndEvent(TraceEvent event) {
-    final String asyncUID = event.asyncUID;
-
-    if (_asyncEvents[asyncUID] != null) {
-      _asyncEvents[asyncUID].endTime = event.timestampMicros;
-
-      final TimelineEvent current = _asyncEvents[asyncUID];
-
-      // Since this event is complete, move back up the stack.
-      _asyncEvents[asyncUID] = current.parent;
-
-      if (_asyncEvents[asyncUID] == null) {
-        _asyncEvents.remove(asyncUID);
-        _maybeAddEvent(current);
-      }
-    }
-  }
-
-  void _handleAsyncInstantEvent(TraceEvent event) {
-    final TimelineEvent e = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-    );
-    e.endTime = event.timestampMicros + event.duration;
-
-    final String asyncUID = event.asyncUID;
-    if (_asyncEvents[asyncUID] != null) {
-      _asyncEvents[asyncUID].addChild(e, findChildLocation: true);
-    } else {
-      _maybeAddEvent(e);
-    }
-  }
-
   /// Looks through [_pendingEvents] and attempts to add events to frames in
-  /// [_frames].
+  /// [_pendingFrames].
   void _maybeAddPendingEvents() {
     final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
     for (TimelineFrame frame in frames) {
@@ -260,7 +209,7 @@ class TimelineData {
     }
   }
 
-  /// Add event to an available frame in [_frames] if we can, or otherwise add it
+  /// Add event to an available frame in [_pendingFrames] if we can, or otherwise add it
   /// to [_pendingEvents].
   void _maybeAddEvent(TimelineEvent event) {
     if (!event.isPipelineProduceFlow && !event.isPipelineConsumeFlow) {
@@ -319,9 +268,10 @@ class TimelineData {
   }
 
   List<TimelineFrame> _getAndSortWellFormedFrames() {
-    final List<TimelineFrame> frames = List<TimelineFrame>.from(_frames.values)
-        .where((TimelineFrame f) => f.wellFormed)
-        .toList();
+    final List<TimelineFrame> frames =
+        List<TimelineFrame>.from(_pendingFrames.values)
+            .where((TimelineFrame f) => f.wellFormed)
+            .toList();
 
     // Sort frames by their startTime. Sorting these frames ensures we will
     // handle the oldest frame first when iterating through the list.
@@ -332,7 +282,7 @@ class TimelineData {
   void _maybeAddCompletedFrame(TimelineFrame frame) {
     if (frame.readyForTimeline && !frame.addedToTimeline.isCompleted) {
       _frameCompleteController.add(frame);
-      _frames.remove(frame);
+      _pendingFrames.remove(frame);
       frame.addedToTimeline.complete();
     }
   }
