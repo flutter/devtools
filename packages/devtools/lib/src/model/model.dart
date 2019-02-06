@@ -19,13 +19,15 @@ import '../framework/framework.dart';
 import '../logging/logging.dart';
 import '../main.dart';
 
-// TODO(devoncarew): Only enable logging after enabled by the client.
-
 class App {
   App(this.framework) {
     _register<void>('echo', echo);
     _register<void>('switchPage', switchPage);
     _register<String>('currentPageId', currentPageId);
+
+    // ConnectDialog
+    _register<void>('connectDialog.isVisible', connectDialogIsVisible);
+    _register<void>('connectDialog.connectTo', connectDialogConnectTo);
 
     // LoggingScreen
     _register<void>('logs.clearLogs', logsClearLogs);
@@ -73,8 +75,6 @@ class App {
     };
 
     js.context['devtools'] = binding;
-
-    _sendNotification('app.inited');
   }
 
   Future<void> echo(dynamic message) async {
@@ -87,12 +87,19 @@ class App {
       throw 'page $pageId not found';
     }
     framework.load(screen);
-
-    // TODO(devoncarew): Listen for and log framework page change events?
   }
 
   Future<String> currentPageId([dynamic _]) async {
     return framework.current?.id;
+  }
+
+  Future<bool> connectDialogIsVisible([dynamic _]) async {
+    return framework.connectDialog.isVisible();
+  }
+
+  Future<void> connectDialogConnectTo([dynamic port]) async {
+    // ignore: invalid_use_of_visible_for_testing_member
+    return framework.connectDialog.connectTo(port);
   }
 
   Future<void> logsClearLogs([dynamic _]) async {

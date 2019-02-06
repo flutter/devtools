@@ -12,6 +12,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../utils.dart';
+import 'framework_core.dart';
 
 class Framework {
   Framework() {
@@ -25,6 +26,8 @@ class Framework {
 
     globalActions =
         ActionsContainer(CoreElement.from(querySelector('#global-actions')));
+
+    connectDialog = new ConnectDialog(this);
   }
 
   final List<Screen> screens = <Screen>[];
@@ -35,6 +38,7 @@ class Framework {
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
   ActionsContainer globalActions;
+  ConnectDialog connectDialog;
 
   final Map<Screen, CoreElement> _screenContents = {};
 
@@ -51,6 +55,10 @@ class Framework {
     window.history.pushState(null, screen.name, ref);
 
     load(screen);
+  }
+
+  void showConnectionDialog() {
+    connectDialog.show();
   }
 
   void loadScreenFromLocation() {
@@ -367,4 +375,128 @@ class Toast extends CoreElement {
 
   @override
   String toString() => '$title $message';
+}
+
+class ConnectDialog {
+  ConnectDialog(this.framework) {
+    parent = CoreElement.from(querySelector('#connect-dialog'));
+    parent.layoutVertical();
+
+    parent.add([
+      h2(text: 'Connect'),
+      CoreElement('dl', classes: 'form-group')
+        ..add([
+          CoreElement('dt')
+            ..add([
+              label(text: 'Connect to a running app')
+                ..setAttribute('for', 'port-field'),
+            ]),
+          CoreElement('dd')
+            ..add([
+              p(
+                  text: 'Enter a port or URL to a running Dart or Flutter '
+                      'application.',
+                  c: 'note'),
+            ]),
+          CoreElement('dd')
+            ..add([
+              textfield = CoreElement('input', classes: 'form-control input-sm')
+                ..setAttribute('type', 'text')
+                ..setAttribute('placeholder', 'Port')
+                ..id = 'port-field',
+              connectButton = PButton('Connect')
+                ..small()
+                ..clazz('margin-left'),
+            ]),
+        ]),
+    ]);
+
+    connectButton.click(() {
+      _tryConnect();
+    });
+
+    textfield.element.onKeyDown.listen((KeyboardEvent event) {
+      // Check for an enter key press ('\n').
+      if (event.keyCode == 13) {
+        event.preventDefault();
+
+        _tryConnect();
+      }
+    });
+  }
+
+  final Framework framework;
+
+  CoreElement parent;
+  CoreElement textfield;
+  CoreElement connectButton;
+
+  void show() {
+    parent.display = 'initial';
+  }
+
+  void hide() {
+    parent.display = 'none';
+  }
+
+  bool isVisible() => parent.display != 'none';
+
+  @visibleForTesting
+  void connectTo(int port) async {
+    await _connect(port);
+  }
+
+  void _tryConnect() {
+    final InputElement inputElement = textfield.element;
+    final String value = inputElement.value.trim();
+    final int port = int.tryParse(value);
+
+    void handleConnectError() {
+      // TODO(devoncarew): We should provide the user some instructions about
+      // how to resolve an issue connecting.
+      framework.toast("Unable to connect to '$value'.");
+    }
+
+    if (port != null) {
+      _connect(port).catchError((dynamic error) {
+        handleConnectError();
+      });
+    } else {
+      try {
+        final Uri uri = Uri.parse(value);
+        if (uri.hasPort) {
+          _connect(uri.port).catchError((dynamic error) {
+            handleConnectError();
+          });
+        } else {
+          handleConnectError();
+        }
+      } catch (_) {
+        // ignore
+        handleConnectError();
+      }
+    }
+  }
+
+  Future _connect(int port) async {
+    final bool connected = await FrameworkCore.initVmService(
+      explicitPort: port,
+      errorReporter: (String title, dynamic error) {
+        // ignore - we report this in _tryConnect
+      },
+    );
+
+    if (connected) {
+      // Re-write the url to include the new port
+      final Location location = window.location;
+      Uri uri = Uri.parse(location.href);
+      uri = uri.replace(queryParameters: {'port': port.toString()});
+      window.history.pushState(null, null, uri.toString());
+
+      // Hide the dialog
+      hide();
+    } else {
+      throw 'not connected';
+    }
+  }
 }

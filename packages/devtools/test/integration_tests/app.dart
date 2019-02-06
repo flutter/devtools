@@ -30,4 +30,39 @@ void appTests() {
     final String currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logs');
   });
+
+  test('connect dialog displays', () async {
+    // start with no port
+    final Uri baseAppUri = webdevFixture.baseUri.resolve('index.html');
+    final DevtoolsManager tools =
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    await tools.start(appFixture, overrideUri: baseAppUri);
+
+    final ConnectDialogManager connectDialog = ConnectDialogManager(tools);
+
+    // make sure the connect dialog displays
+    await waitFor(() async => await connectDialog.isVisible());
+
+    // have it connect to a port
+    await connectDialog.connectTo(appFixture.servicePort);
+
+    // make sure the connect dialog becomes hidden
+    await waitFor(() async => !(await connectDialog.isVisible()));
+  });
+}
+
+class ConnectDialogManager {
+  ConnectDialogManager(this.tools);
+
+  final DevtoolsManager tools;
+
+  Future<bool> isVisible() async {
+    final AppResponse response =
+        await tools.tabInstance.send('connectDialog.isVisible');
+    return response.result;
+  }
+
+  Future connectTo(int port) async {
+    await tools.tabInstance.send('connectDialog.connectTo', port);
+  }
 }

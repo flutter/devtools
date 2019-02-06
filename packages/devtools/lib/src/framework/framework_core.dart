@@ -11,6 +11,8 @@ import '../service.dart';
 import '../service_manager.dart';
 import '../vm_service_wrapper.dart';
 
+typedef ErrorReporter = void Function(String title, dynamic error);
+
 class FrameworkCore {
   static void init() {
     _setServiceConnectionManager();
@@ -21,17 +23,21 @@ class FrameworkCore {
     setGlobal(MessageBus, MessageBus());
   }
 
-  static void initVmService(
-    void errorReporter(String title, dynamic error),
-  ) async {
-    int port;
+  /// Returns true if we're able to connect to a device and false otherwise.
+  static Future<bool> initVmService({
+    int explicitPort,
+    ErrorReporter errorReporter,
+  }) async {
+    int port = explicitPort;
 
     // Identify the port so that we can connect to the VM service.
-    if (window.location.search.isNotEmpty) {
-      final Uri uri = Uri.parse(window.location.toString());
-      final String portStr = uri.queryParameters['port'];
-      if (portStr != null) {
-        port = int.tryParse(portStr);
+    if (port == null) {
+      if (window.location.search.isNotEmpty) {
+        final Uri uri = Uri.parse(window.location.toString());
+        final String portStr = uri.queryParameters['port'];
+        if (portStr != null) {
+          port = int.tryParse(portStr);
+        }
       }
     }
 
@@ -46,10 +52,16 @@ class FrameworkCore {
             service,
             onClosed: finishedCompleter.future,
           );
+          return true;
+        } else {
+          return false;
         }
       } catch (e) {
         errorReporter('Unable to connect to app on port $port', e);
+        return false;
       }
+    } else {
+      return false;
     }
   }
 }
