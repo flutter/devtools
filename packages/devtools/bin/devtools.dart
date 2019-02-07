@@ -69,7 +69,6 @@ void main(List<String> arguments) async {
 
   // Make a handler that delegates to the correct handler based on path.
   final handler = (shelf.Request request) {
-    print(request.url.path);
     return request.url.path.startsWith('packages/')
         // request.change here will strip the `packages` prefix from the path
         // so it's relative to packHandler's root.
