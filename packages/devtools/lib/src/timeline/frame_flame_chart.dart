@@ -28,9 +28,9 @@ class FrameFlameChart extends CoreElement {
     if (_debugEventTrace && frame != null) {
       final StringBuffer buf = new StringBuffer();
       buf.writeln('CPU for frame ${frame.id}:');
-      frame.pipelineProduceFlow.format(buf, '  ');
+      frame.cpuEventFlow.format(buf, '  ');
       buf.writeln('GPU for frame ${frame.id}:');
-      frame.pipelineConsumeFlow.format(buf, '  ');
+      frame.gpuEventFlow.format(buf, '  ');
       print(buf.toString());
     }
 
@@ -83,7 +83,7 @@ class FrameFlameChart extends CoreElement {
 
       maxRow = row;
 
-      drawRecursively(frame.pipelineProduceFlow, row);
+      drawRecursively(frame.cpuEventFlow, row);
 
       row = maxRow;
 
@@ -99,7 +99,7 @@ class FrameFlameChart extends CoreElement {
 
       maxRow = row;
 
-      drawRecursively(frame.pipelineConsumeFlow, row);
+      drawRecursively(frame.gpuEventFlow, row);
 
       row = maxRow;
 
@@ -108,6 +108,8 @@ class FrameFlameChart extends CoreElement {
 
     drawCpuEvents();
 
+    // TODO(kenzie): improve this by adding a spacer div instead of just
+    //  increasing the row. Do this once each section is in its own container.
     // Add an additional row for spacing between CPU and GPU events.
     row++;
 
