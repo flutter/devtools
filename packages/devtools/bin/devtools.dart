@@ -7,9 +7,11 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:args/args.dart';
-import 'package:http_server/http_server.dart' show VirtualDirectory;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf_io.dart' as shelf;
+import 'package:shelf_static/shelf_static.dart';
 
 const argHelp = 'help';
 const argMachine = 'machine';
@@ -48,23 +50,34 @@ void main(List<String> arguments) async {
   }
 
   final bool machineMode = args[argMachine];
+  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
+
   final Uri resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
   final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
-  final String buildDir = path.join(packageDir, 'build');
-  final virDir = new VirtualDirectory(buildDir);
 
-  // Set up a directory handler to serve index.html files.
-  virDir.allowDirectoryListing = true;
-  virDir.directoryHandler = (dir, request) {
-    final indexUri = new Uri.file(dir.path).resolve('index.html');
-    virDir.serveFile(new File(indexUri.toFilePath()), request);
+  // Default static handler for all non-package requests.
+  final String buildDir = path.join(packageDir, 'build');
+  final buildHandler =
+      createStaticHandler(buildDir, defaultDocument: 'index.html');
+
+  // The packages folder is renamed in the pub package so this handler serves
+  // out of the `pack` folder.
+  final String packagesDir = path.join(packageDir, 'build', 'pack');
+  final packHandler =
+      createStaticHandler(packagesDir, defaultDocument: 'index.html');
+
+  // Make a handler that delegates to the correct handler based on path.
+  final handler = (shelf.Request request) {
+    return request.url.path.startsWith('packages/')
+        // request.change here will strip the `packages` prefix from the path
+        // so it's relative to packHandler's root.
+        ? packHandler(request.change(path: 'packages'))
+        : buildHandler(request);
   };
 
-  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
-  final server = await HttpServer.bind('127.0.0.1', port);
+  final server = await shelf.serve(handler, '127.0.0.1', port);
 
-  virDir.serve(server);
   printOutput(
     'Serving DevTools at http://${server.address.host}:${server.port}',
     {
