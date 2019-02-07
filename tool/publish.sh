@@ -17,7 +17,7 @@ perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
 
 set +x
 echo "Ready to publish."
-echo "Verify the package works and then publish the package and then revert the change to .gitignore"
+echo "Verify the package works, then publish the package, and finally, revert the change to .gitignore."
 echo "Publish by:"
 echo "cd packages/devtools"
 echo "pub publish"
