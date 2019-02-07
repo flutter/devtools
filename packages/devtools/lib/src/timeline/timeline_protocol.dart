@@ -322,6 +322,8 @@ class TimelineFrame {
   final String id;
 
   /// Marks whether this frame has been added to the timeline.
+  ///
+  /// This should only be set once.
   bool get addedToTimeline => _addedToTimeline;
   bool _addedToTimeline;
   set addedToTimeline(v) {
