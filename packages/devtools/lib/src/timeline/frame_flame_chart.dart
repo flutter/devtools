@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/flutter_html_shim.dart';
 import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
@@ -12,11 +14,21 @@ bool _debugEventTrace = false;
 
 // Amber 50 color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const cpuColorPalette = ['#FFECB3', '#FFE082', '#FFD54F', '#FFCA28'];
+const cpuColorPalette = [
+  Color(0xFFFFECB3),
+  Color(0xFFFFE082),
+  Color(0xFFFFD54F),
+  Color(0xFFFFCA28),
+];
 
 // Light Green 50 color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const gpuColorPalette = ['#DCEDC8', '#C5E1A5', '#AED581', '#9CCC65'];
+const gpuColorPalette = [
+  Color(0xFFDCEDC8),
+  Color(0xFFC5E1A5),
+  Color(0xFFAED581),
+  Color(0xFF9CCC65),
+];
 
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
@@ -28,17 +40,17 @@ class FrameFlameChart extends CoreElement {
   CoreElement sectionTitles;
   CoreElement flameChart;
 
-  int cpuColorOffset = 0;
-  String get cpuColor {
-    final color = cpuColorPalette[cpuColorOffset % cpuColorPalette.length];
-    cpuColorOffset++;
+  int _cpuColorOffset = 0;
+  Color get cpuColor {
+    final color = cpuColorPalette[_cpuColorOffset % cpuColorPalette.length];
+    _cpuColorOffset++;
     return color;
   }
 
-  int gpuColorOffset = 0;
-  String get gpuColor {
-    final color = gpuColorPalette[gpuColorOffset % gpuColorPalette.length];
-    gpuColorOffset++;
+  int _gpuColorOffset = 0;
+  Color get gpuColor {
+    final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
+    _gpuColorOffset++;
     return color;
   }
 
@@ -99,7 +111,7 @@ class FrameFlameChart extends CoreElement {
     void drawCpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = cpuColorPalette.last;
+      sectionTitle.element.style.background = colorToCss(cpuColorPalette.last);
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -116,7 +128,7 @@ class FrameFlameChart extends CoreElement {
     void drawGpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = gpuColorPalette.last;
+      sectionTitle.element.style.background = colorToCss(gpuColorPalette.last);
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -143,7 +155,8 @@ class FrameFlameChart extends CoreElement {
   // TODO(kenzie): re-assess this drawing logic.
   void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
     final CoreElement item = div(text: event.name, c: 'flame-chart-item');
-    item.element.style.background = event.isCpuEvent ? cpuColor : gpuColor;
+    item.element.style.background =
+        event.isCpuEvent ? colorToCss(cpuColor) : colorToCss(gpuColor);
     item.element.style.left = '${left}px';
     if (width != null) {
       item.element.style.width = '${width}px';
