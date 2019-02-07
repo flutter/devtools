@@ -303,10 +303,10 @@ class TimelineData {
   }
 
   void _maybeAddCompletedFrame(TimelineFrame frame) {
-    if (frame.isReadyForTimeline && !frame.addedToTimeline.isCompleted) {
+    if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
       _frameCompleteController.add(frame);
       _pendingFrames.remove(frame);
-      frame.addedToTimeline.complete();
+      frame.addedToTimeline = true;
     }
   }
 }
@@ -322,7 +322,14 @@ class TimelineFrame {
   final String id;
 
   /// Marks whether this frame has been added to the timeline.
-  final Completer<Null> addedToTimeline = Completer();
+  ///
+  /// This should only be set once.
+  bool get addedToTimeline => _addedToTimeline;
+  bool _addedToTimeline;
+  set addedToTimeline(v) {
+    assert(_addedToTimeline == null);
+    _addedToTimeline = v;
+  }
 
   /// Flow of events showing the CPU work for the frame.
   TimelineEvent get cpuEventFlow => _cpuEventFlow;
