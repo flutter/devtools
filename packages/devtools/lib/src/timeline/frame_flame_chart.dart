@@ -39,16 +39,16 @@ class FrameFlameChart extends CoreElement {
   TimelineFrame frame;
   CoreElement sectionTitles;
   CoreElement flameChart;
-
   int _cpuColorOffset = 0;
-  Color get cpuColor {
+  int _gpuColorOffset = 0;
+
+  Color nextCpuColor() {
     final color = cpuColorPalette[_cpuColorOffset % cpuColorPalette.length];
     _cpuColorOffset++;
     return color;
   }
 
-  int _gpuColorOffset = 0;
-  Color get gpuColor {
+  Color nextGpuColor() {
     final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
     _gpuColorOffset++;
     return color;
@@ -155,8 +155,9 @@ class FrameFlameChart extends CoreElement {
   // TODO(kenzie): re-assess this drawing logic.
   void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
     final CoreElement item = div(text: event.name, c: 'flame-chart-item');
-    item.element.style.background =
-        event.isCpuEvent ? colorToCss(cpuColor) : colorToCss(gpuColor);
+    item.element.style.background = event.isCpuEvent
+        ? colorToCss(nextCpuColor())
+        : colorToCss(nextGpuColor());
     item.element.style.left = '${left}px';
     if (width != null) {
       item.element.style.width = '${width}px';
