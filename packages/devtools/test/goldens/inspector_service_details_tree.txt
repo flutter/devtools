@@ -4,28 +4,28 @@ MaterialApp
  └─ScrollConfiguration
    │ behavior: _MaterialScrollBehavior
    │
-   └─AnimatedTheme
-     │ duration: 200ms
-     │ state: _AnimatedThemeState#00000(ticker inactive,
-     │   ThemeDataTween(ThemeData#00000(buttonTheme:
-     │   ButtonThemeData#00000(buttonColor: Color(0xffe0e0e0),
-     │   colorScheme: ColorScheme#00000(primary: MaterialColor(primary
-     │   value: Color(0xff2196f3)), primaryVariant: Color(0xff1976d2),
-     │   secondary: Color(0xff2196f3), secondaryVariant:
-     │   Color(0xff1976d2), background: Color(0xff90caf9), error:
-     │   Color(0xffd32f2f), onSecondary: Color(0xffffffff),
-     │   onBackground: Color(0xffffffff)), materialTapTargetSize:
-     │   MaterialTapTargetSize.padded), textTheme: TextTheme#00000,
-     │   primaryTextTheme: TextTheme#00000(display4:
-     │   TextStyle(debugLabel: whiteMountainView display4, inherit:
-     │   true, color: Color(0xb3ffffff), family: Roboto, decoration:
-     │   TextDecoration.none), display3: TextStyle(debugLabel:
-     │   whiteMountainView display3, inherit: true, color:
-     │   Color(0xb3ffffff), family: Roboto, decoration:
-     │   TextDecoration.none), display2: TextStyle(debugLabel:
-     │   whiteMountainView display2, inherit: true, color:
-     │   Color(0xb3ffffff), family: Roboto, decoration:
-     │   TextDecoration.none), display1: TextStyle(debugLabel:
-     │   whiteMountainView display1, inherit: true, color:
-     │   Color(0xb3ffffff), family: Roboto, decoration:
+   └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
+     │ state: _WidgetsAppState#00000
+     │
+     └─MediaQuery
+       │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
+       │   3.0, textScaleFactor: 1.0, platformBrightness:
+       │   Brightness.light, padding: EdgeInsets.zero, viewInsets:
+       │   EdgeInsets.zero, alwaysUse24HourFormat: false,
+       │   accessibleNavigation: falsedisableAnimations:
+       │   falseinvertColors: falseboldText: false)
+       │
+       └─Localizations
+         │ locale: en_US
+         │ delegates: DefaultMaterialLocalizations.delegate(en_US),
+         │   DefaultCupertinoLocalizations.delegate(en_US),
+         │   DefaultWidgetsLocalizations.delegate(en_US)
+         │ state: _LocalizationsState#00000
+         │
+         └─Semantics
+           │ container: false
+           │ properties: SemanticsProperties
+           │ label: null
+           │ value: null
+           │ hint: null
 ...
