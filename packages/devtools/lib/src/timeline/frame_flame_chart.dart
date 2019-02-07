@@ -10,6 +10,14 @@ import 'timeline_protocol.dart';
 // Switch this flag to true to dump the frame event trace to console.
 bool _debugEventTrace = false;
 
+// Amber 50 color palette from
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+const cpuColorPalette = ['#FFECB3', '#FFE082', '#FFD54F', '#FFCA28'];
+
+// Light Green 50 color palette from
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+const gpuColorPalette = ['#DCEDC8', '#C5E1A5', '#AED581', '#9CCC65'];
+
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
@@ -19,6 +27,20 @@ class FrameFlameChart extends CoreElement {
   TimelineFrame frame;
   CoreElement sectionTitles;
   CoreElement flameChart;
+
+  int cpuColorOffset = 0;
+  String get cpuColor {
+    final color = cpuColorPalette[cpuColorOffset % cpuColorPalette.length];
+    cpuColorOffset++;
+    return color;
+  }
+
+  int gpuColorOffset = 0;
+  String get gpuColor {
+    final color = gpuColorPalette[gpuColorOffset % gpuColorPalette.length];
+    gpuColorOffset++;
+    return color;
+  }
 
   void updateFrameData(TimelineFrame frame) {
     this.frame = frame;
@@ -76,7 +98,8 @@ class FrameFlameChart extends CoreElement {
 
     void drawCpuEvents() {
       final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'CPU', c: 'timeline-title');
+      final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
+      sectionTitle.element.style.background = cpuColorPalette.last;
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -92,7 +115,8 @@ class FrameFlameChart extends CoreElement {
 
     void drawGpuEvents() {
       final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'GPU', c: 'timeline-title');
+      final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
+      sectionTitle.element.style.background = gpuColorPalette.last;
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -118,7 +142,8 @@ class FrameFlameChart extends CoreElement {
 
   // TODO(kenzie): re-assess this drawing logic.
   void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
-    final CoreElement item = div(text: event.name, c: 'timeline-title');
+    final CoreElement item = div(text: event.name, c: 'flame-chart-item');
+    item.element.style.background = event.isCpuEvent ? cpuColor : gpuColor;
     item.element.style.left = '${left}px';
     if (width != null) {
       item.element.style.width = '${width}px';
