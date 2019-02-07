@@ -68,5 +68,5 @@ properties of widgets used by the inspector tests. If this happens, make sure th
 file output still looks reasonable and execute the following command to update the golden files.
 
 ```
-tool/update_goldens.sh
+./tool/update_goldens.sh
 ```
