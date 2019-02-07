@@ -438,7 +438,7 @@ class TimelineEvent {
 
     return findChild(this, childName);
   }
-  
+
   void addChild(TimelineEvent child, {bool knownChildLocation = true}) {
     // Places the child in it's correct position amongst the other children.
     void _putChildInSubtree(TimelineEvent root) {

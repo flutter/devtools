@@ -109,7 +109,7 @@ class FrameFlameChart extends CoreElement {
     drawCpuEvents();
 
     // TODO(kenzie): improve this by adding a spacer div instead of just
-    //  increasing the row. Do this once each section is in its own container.
+    // increasing the row. Do this once each section is in its own container.
     // Add an additional row for spacing between CPU and GPU events.
     row++;
 
