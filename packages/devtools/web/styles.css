@@ -523,9 +523,8 @@ div.tabnav {
     overflow: scroll;
 }
 
-.frame-timeline .timeline-title {
+.frame-timeline .flame-chart-item {
     border-radius: 2px;
-    background: #ddd;
     padding: 0 2px;
     position: absolute;
     overflow-x: hidden;
