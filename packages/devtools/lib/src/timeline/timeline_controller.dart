@@ -54,10 +54,12 @@ class TimelineController {
     int cpuThreadId;
     int gpuThreadId;
     for (TraceEvent event in events) {
-      if (event.args['name'].startsWith('io.flutter.1.ui')) {
+      // iOS - 'io.flutter.1.ui', Android - '1.ui'.
+      if (event.args['name'].contains('1.ui')) {
         cpuThreadId = event.threadId;
       }
-      if (event.args['name'].startsWith('io.flutter.1.gpu')) {
+      // iOS - 'io.flutter.1.gpu', Android - '1.gpu'.
+      if (event.args['name'].contains('1.gpu')) {
         gpuThreadId = event.threadId;
       }
     }
