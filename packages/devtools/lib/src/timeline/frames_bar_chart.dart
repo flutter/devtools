@@ -16,10 +16,10 @@ class FramesBarChart extends CoreElement {
       : super('div', classes: 'timeline-frames') {
     layoutHorizontal();
     element.style
-        ..alignItems = 'flex-end'
-        ..height = '${chartHeight}px'
-        ..paddingTop = '${padding}px'
-        ..paddingBottom = '${padding}px';
+      ..alignItems = 'flex-end'
+      ..height = '${chartHeight}px'
+      ..paddingTop = '${padding}px'
+      ..paddingBottom = '${padding}px';
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
       final CoreElement frameUI = FrameBar(this, frame);
