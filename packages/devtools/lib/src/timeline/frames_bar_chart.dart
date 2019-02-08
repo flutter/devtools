@@ -66,7 +66,7 @@ class FrameBar extends CoreElement {
       : super('div', classes: 'timeline-frame') {
     layoutVertical();
 
-    drawFrame();
+    _initialize();
 
     click(() {
       framesBarChart.setSelected(this);
@@ -86,7 +86,7 @@ class FrameBar extends CoreElement {
   CoreElement _cpuBar;
   CoreElement _gpuBar;
 
-  void drawFrame() {
+  void _initialize() {
     final cpuBarHeight = math.min(maxBarHeight, frame.cpuDurationMs * pxPerMs);
 
     // If we are going to run out of room to display the frame bar, trim the gpu
