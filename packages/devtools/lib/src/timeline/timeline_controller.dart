@@ -14,23 +14,16 @@ import 'timeline_protocol.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController {
-  // Max number of frames we should store and display in the UI.
-  final int maxFrames = 120;
-
   final StreamController<TimelineFrame> _frameAddedController =
       StreamController<TimelineFrame>.broadcast();
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
-  final StreamController<Null> _framesClearedController =
-      StreamController<Null>.broadcast();
-  Stream<Null> get onFramesCleared => _framesClearedController.stream;
 
   TimelineData _timelineData;
   TimelineData get timelineData => _timelineData;
-
   bool get hasStarted => timelineData != null;
 
-  bool _paused = false;
   bool get paused => _paused;
+  bool _paused = false;
 
   void pause() {
     _paused = true;
@@ -69,8 +62,6 @@ class TimelineController {
       }
     }
 
-    // TODO(kenzie): to preserve memory, remove oldest frame from timelineData
-    //  once we reach our max number of frames.
     final TimelineData timelineData =
         TimelineData(cpuThreadId: cpuThreadId, gpuThreadId: gpuThreadId);
 

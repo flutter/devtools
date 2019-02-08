@@ -5,6 +5,7 @@
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import 'timeline.dart';
 import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
@@ -18,7 +19,7 @@ const cpuColorPalette = [
   Color(0xFFFFECB3),
   Color(0xFFFFE082),
   Color(0xFFFFD54F),
-  Color(0xFFFFCA28),
+  mainCpuColor,
 ];
 
 // Light Green 50 color palette from
@@ -27,13 +28,13 @@ const gpuColorPalette = [
   Color(0xFFDCEDC8),
   Color(0xFFC5E1A5),
   Color(0xFFAED581),
-  Color(0xFF9CCC65),
+  mainGpuColor,
 ];
 
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
-    clazz('frame-timeline');
+    clazz('flame-chart');
   }
 
   TimelineFrame frame;
@@ -111,7 +112,7 @@ class FrameFlameChart extends CoreElement {
     void drawCpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(cpuColorPalette.last);
+      sectionTitle.element.style.background = mainCpuColorCss;
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -128,7 +129,7 @@ class FrameFlameChart extends CoreElement {
     void drawGpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(gpuColorPalette.last);
+      sectionTitle.element.style.background = mainGpuColorCss;
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);

@@ -16,7 +16,6 @@ import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
-import '../timeline/frame_rendering.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
@@ -704,4 +703,32 @@ class LogDetailsUI extends CoreElement {
       message.text = data.details;
     }
   }
+}
+
+class FrameInfo {
+  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
+
+  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
+
+  static FrameInfo from(Map<dynamic, dynamic> data) {
+    return FrameInfo(
+        data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
+  }
+
+  final int number;
+  final num elapsedMs;
+  final num startTimeMs;
+
+  bool frameGroupStart = false;
+
+  num get endTimeMs => startTimeMs + elapsedMs;
+
+  void calcFrameGroupStart(FrameInfo previousFrame) {
+    if (startTimeMs > (previousFrame.endTimeMs + kTargetMaxFrameTimeMs)) {
+      frameGroupStart = true;
+    }
+  }
+
+  @override
+  String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
 }

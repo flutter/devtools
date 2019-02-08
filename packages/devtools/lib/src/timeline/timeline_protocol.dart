@@ -361,18 +361,12 @@ class TimelineFrame {
   /// Frame start time in micros.
   int get startTime => _startTime;
   int _startTime;
-  set startTime(int t) {
-    assert(_startTime == null);
-    _startTime = t;
-  }
+  set startTime(int t) => _startTime ??= t;
 
   /// Frame end time in micros.
   int get endTime => _endTime;
   int _endTime;
-  set endTime(int t) {
-    assert(_endTime == null);
-    _endTime = t;
-  }
+  set endTime(int t) => _endTime ??= t;
 
   bool get isWellFormed => _startTime != null && _endTime != null;
 
@@ -384,22 +378,27 @@ class TimelineFrame {
   int get cpuStartTime => _cpuEventFlow.startTime;
   int get cpuEndTime => cpuStartTime + cpuDuration;
   int get cpuDuration => _cpuEventFlow.duration;
+  double get cpuDurationMs => cpuDuration / 1000;
 
   // Timing info for GPU portion of the frame.
   int get gpuStartTime => _gpuEventFlow.startTime;
   int get gpuEndTime => gpuStartTime + gpuDuration;
   int get gpuDuration => _gpuEventFlow.duration;
+  double get gpuDurationMs => gpuDuration / 1000;
+
+  bool get isCpuSlow => cpuDurationMs > 8.0;
+  bool get isGpuSlow => gpuDurationMs > 8.0;
 
   String get cpuAsMs {
-    return _durationAsMsText(cpuDuration);
+    return _durationAsMsText(cpuDurationMs);
   }
 
   String get gpuAsMs {
-    return _durationAsMsText(gpuDuration);
+    return _durationAsMsText(gpuDurationMs);
   }
 
-  String _durationAsMsText(int durationMicros) {
-    return '${(durationMicros / 1000.0).toStringAsFixed(1)}ms';
+  String _durationAsMsText(double durationMs) {
+    return '${durationMs.toStringAsFixed(1)}ms';
   }
 
   @override
