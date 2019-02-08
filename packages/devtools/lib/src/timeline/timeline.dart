@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -17,13 +14,14 @@ import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'frame_flame_chart.dart';
-import 'frame_rendering.dart';
-import 'frame_rendering_chart.dart';
+import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-const Color slowFrameColor = Color(0xFFf97c7c);
-const Color normalFrameColor = Color(0xFF4078c0);
+const Color mainCpuColor = Color(0xFFFFCA28);
+const Color mainGpuColor = Color(0xFF9CCC65);
+const Color slowFrameColor = Color(0xFFE50C0C);
+const Color selectedFrameColor = Color(0xFF4078C0);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -45,11 +43,8 @@ class TimelineScreen extends Screen {
       : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
 
   TimelineController timelineController = TimelineController();
-  FramesChart framesChart;
-  SetStateMixin framesChartStateMixin = SetStateMixin();
-  FramesTracker framesTracker;
 
-  TimelineFramesUI timelineFramesUI;
+  FramesBarChart framesBarChart;
 
   bool _paused = false;
 
@@ -97,11 +92,10 @@ class TimelineScreen extends Screen {
     screenDiv.add(<CoreElement>[
       upperButtonSection,
       div(c: 'section'),
-      createLiveChartArea(),
       div(c: 'section')
-        ..add(<CoreElement>[
-          timelineFramesUI = TimelineFramesUI(timelineController)
-        ]),
+        ..add(
+            <CoreElement>[framesBarChart = FramesBarChart(timelineController)]),
+      div(c: 'section'),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
@@ -118,7 +112,7 @@ class TimelineScreen extends Screen {
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
-    timelineFramesUI.onSelectedFrame.listen((TimelineFrame frame) {
+    framesBarChart.onSelectedFrame.listen((TimelineFrame frame) {
       frameDetailsContainer.attribute('hidden', frame == null);
 
       if (frame != null && timelineController.hasStarted) {
@@ -127,14 +121,6 @@ class TimelineScreen extends Screen {
     });
 
     return screenDiv;
-  }
-
-  CoreElement createLiveChartArea() {
-    final CoreElement container = div(c: 'section perf-chart table-border')
-      ..layoutVertical();
-    framesChart = FramesChart(container);
-    framesChart.disabled = true;
-    return container;
   }
 
   @override
@@ -148,17 +134,6 @@ class TimelineScreen extends Screen {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    framesChart.disabled = false;
-
-    framesTracker = FramesTracker(service);
-    framesTracker.start();
-
-    framesTracker.onChange.listen((Null _) {
-      framesChartStateMixin.setState(() {
-        framesChart.updateFrom(framesTracker);
-      });
-    });
-
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
@@ -172,8 +147,6 @@ class TimelineScreen extends Screen {
   }
 
   void _handleConnectionStop(dynamic event) {
-    framesChart.disabled = true;
-    framesTracker?.stop();
     timelineController = null;
   }
 
@@ -212,7 +185,6 @@ class TimelineScreen extends Screen {
     }
 
     if (shouldBeRunning && !isRunning) {
-      framesTracker.resume();
       timelineController.resume();
 
       await serviceManager.service
@@ -220,104 +192,7 @@ class TimelineScreen extends Screen {
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
-      framesTracker.pause();
       timelineController.pause();
     }
-  }
-}
-
-class TimelineFramesUI extends CoreElement {
-  TimelineFramesUI(TimelineController timelineController)
-      : super('div', classes: 'timeline-frames') {
-    timelineController.onFrameAdded.listen((TimelineFrame frame) {
-      final CoreElement frameUI = TimelineFrameUI(this, frame);
-      if (element.children.isEmpty) {
-        add(frameUI);
-      } else {
-        if (element.children.length >= timelineController.maxFrames) {
-          element.children.removeLast();
-        }
-        element.children.insert(0, frameUI.element);
-      }
-    });
-
-    timelineController.onFramesCleared.listen((Null _) {
-      clear();
-      setSelected(null);
-    });
-  }
-
-  TimelineFrameUI selectedFrame;
-
-  final StreamController<TimelineFrame> _selectedFrameController =
-      StreamController<TimelineFrame>.broadcast();
-
-  Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
-
-  void setSelected(TimelineFrameUI frameUI) {
-    if (selectedFrame == frameUI) {
-      return;
-    }
-
-    if (selectedFrame != frameUI) {
-      selectedFrame?.setSelected(false);
-      selectedFrame = frameUI;
-      selectedFrame?.setSelected(true);
-
-      _selectedFrameController.add(selectedFrame?.frame);
-    }
-  }
-}
-
-class TimelineFrameUI extends CoreElement {
-  TimelineFrameUI(this.framesUI, this.frame)
-      : super('div', classes: 'timeline-frame') {
-    add(<CoreElement>[
-      span(text: 'dart ${frame.cpuAsMs}', c: 'perf-label'),
-      CoreElement('br'),
-      span(text: 'gpu ${frame.gpuAsMs}', c: 'perf-label'),
-    ]);
-
-    const double pixelsPerMs =
-        (80.0 - 6) / (FrameInfo.kTargetMaxFrameTimeMs * 2);
-
-    bool isSlow = false;
-
-    // TODO(kenzie): add a helper method to draw a bar given a duration and a
-    //  style.
-    final CoreElement dartBar = div(c: 'perf-bar left');
-    if (frame.cpuDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
-      dartBar.clazz('slow');
-      isSlow = true;
-    }
-    int height = (frame.cpuDuration * pixelsPerMs / 1000.0).round();
-    height = math.min(height, 80 - 6);
-    dartBar.element.style.height = '${height}px';
-    add(dartBar);
-
-    final CoreElement gpuBar = div(c: 'perf-bar right');
-    if (frame.gpuDuration > (FrameInfo.kTargetMaxFrameTimeMs * 1000)) {
-      gpuBar.clazz('slow');
-      isSlow = true;
-    }
-    height = (frame.gpuDuration * pixelsPerMs / 1000.0).round();
-    height = math.min(height, 80 - 6);
-    gpuBar.element.style.height = '${height}px';
-    add(gpuBar);
-
-    if (isSlow) {
-      clazz('slow');
-    }
-
-    click(() {
-      framesUI.setSelected(this);
-    });
-  }
-
-  final TimelineFramesUI framesUI;
-  final TimelineFrame frame;
-
-  void setSelected(bool selected) {
-    toggleClass('selected', selected);
   }
 }

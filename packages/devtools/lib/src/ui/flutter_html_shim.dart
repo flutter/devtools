@@ -14,7 +14,15 @@ String fontStyleToCss(TextStyle textStyle) {
   return sb.toString();
 }
 
+final Map<Color, String> _cssColors = {};
+
 String colorToCss(Color color) {
+  String cssColor = _cssColors[color];
+  if (cssColor != null) {
+    return cssColor;
+  }
   final int rgbaColor = ((color.value & 0xffffff) << 8) | (color.alpha);
-  return '#${rgbaColor.toRadixString(16).padLeft(8, '0')}';
+  cssColor = '#${rgbaColor.toRadixString(16).padLeft(8, '0')}';
+  _cssColors[color] = cssColor;
+  return cssColor;
 }

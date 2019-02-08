@@ -90,8 +90,15 @@ class TimelineData {
         // Create a new TimelineFrame if we do not already have one for this id.
         _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _pendingFrames[event.id].startTime = event.timestampMicros;
-      _maybeAddPendingEvents();
+      if (_pendingFrames[event.id].startTime == null) {
+        _pendingFrames[event.id].startTime = event.timestampMicros;
+        _maybeAddPendingEvents();
+      } else {
+        // TODO(kenzie): investigate and prevent this case.
+        print('Error - already set startTime '
+            '${_pendingFrames[event.id].startTime} for frame ${event.id}.\n'
+            'TraceEvent - ${event.json.toString()}');
+      }
     }
   }
 
@@ -102,8 +109,14 @@ class TimelineData {
         // create a new TimelineFrame if we do not already have one for this id.
         _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _pendingFrames[event.id].endTime = event.timestampMicros;
-      _maybeAddPendingEvents();
+      if (_pendingFrames[event.id].endTime == null) {
+        _pendingFrames[event.id].endTime = event.timestampMicros;
+        _maybeAddPendingEvents();
+      } else {
+        // TODO(kenzie): investigate and prevent this case.
+        print('Error - already set endTime ${_pendingFrames[event.id].endTime}'
+            ' for frame ${event.id}.\nTraceEvent - ${event.json.toString()}');
+      }
     }
   }
 
@@ -321,6 +334,10 @@ class TimelineFrame {
 
   final String id;
 
+  // TODO(kenzie): we should query the device for targetFps at some point.
+  static const targetFps = 60;
+  static const targetMaxDuration = 1000 / targetFps;
+
   /// Marks whether this frame has been added to the timeline.
   ///
   /// This should only be set once.
@@ -384,22 +401,27 @@ class TimelineFrame {
   int get cpuStartTime => _cpuEventFlow.startTime;
   int get cpuEndTime => cpuStartTime + cpuDuration;
   int get cpuDuration => _cpuEventFlow.duration;
+  double get cpuDurationMs => cpuDuration / 1000;
 
   // Timing info for GPU portion of the frame.
   int get gpuStartTime => _gpuEventFlow.startTime;
   int get gpuEndTime => gpuStartTime + gpuDuration;
   int get gpuDuration => _gpuEventFlow.duration;
+  double get gpuDurationMs => gpuDuration / 1000;
+
+  bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
+  bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
 
   String get cpuAsMs {
-    return _durationAsMsText(cpuDuration);
+    return _durationAsMsText(cpuDurationMs);
   }
 
   String get gpuAsMs {
-    return _durationAsMsText(gpuDuration);
+    return _durationAsMsText(gpuDurationMs);
   }
 
-  String _durationAsMsText(int durationMicros) {
-    return '${(durationMicros / 1000.0).toStringAsFixed(1)}ms';
+  String _durationAsMsText(double durationMs) {
+    return '${durationMs.toStringAsFixed(1)}ms';
   }
 
   @override

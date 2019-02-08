@@ -14,23 +14,16 @@ import 'timeline_protocol.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class TimelineController {
-  // Max number of frames we should store and display in the UI.
-  final int maxFrames = 120;
-
   final StreamController<TimelineFrame> _frameAddedController =
       StreamController<TimelineFrame>.broadcast();
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
-  final StreamController<Null> _framesClearedController =
-      StreamController<Null>.broadcast();
-  Stream<Null> get onFramesCleared => _framesClearedController.stream;
 
   TimelineData _timelineData;
   TimelineData get timelineData => _timelineData;
-
   bool get hasStarted => timelineData != null;
 
-  bool _paused = false;
   bool get paused => _paused;
+  bool _paused = false;
 
   void pause() {
     _paused = true;
@@ -61,16 +54,16 @@ class TimelineController {
     int cpuThreadId;
     int gpuThreadId;
     for (TraceEvent event in events) {
-      if (event.args['name'].startsWith('io.flutter.1.ui')) {
+      // iOS - 'io.flutter.1.ui', Android - '1.ui'.
+      if (event.args['name'].contains('1.ui')) {
         cpuThreadId = event.threadId;
       }
-      if (event.args['name'].startsWith('io.flutter.1.gpu')) {
+      // iOS - 'io.flutter.1.gpu', Android - '1.gpu'.
+      if (event.args['name'].contains('1.gpu')) {
         gpuThreadId = event.threadId;
       }
     }
 
-    // TODO(kenzie): to preserve memory, remove oldest frame from timelineData
-    //  once we reach our max number of frames.
     final TimelineData timelineData =
         TimelineData(cpuThreadId: cpuThreadId, gpuThreadId: gpuThreadId);
 
