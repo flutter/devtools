@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/flutter_html_shim.dart';
 import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
@@ -104,13 +105,13 @@ class FrameBar extends CoreElement {
     _cpuBar.element.title = cpuTooltip;
     _cpuBar.element.style
       ..height = '${cpuBarHeight}px'
-      ..backgroundColor = cssColors[_getCpuBarColor()];
+      ..backgroundColor = colorToCss(_getCpuBarColor());
 
     _gpuBar = div(c: 'bar top');
     _gpuBar.element.title = gpuTooltip;
     _gpuBar.element.style
       ..height = '${gpuBarHeight}px'
-      ..backgroundColor = cssColors[_getGpuBarColor()];
+      ..backgroundColor = colorToCss(_getGpuBarColor());
 
     element.style.height = '${cpuBarHeight + gpuBarHeight}px';
 
@@ -133,9 +134,11 @@ class FrameBar extends CoreElement {
 
   void setSelected(bool selected) {
     toggleClass('selected', selected);
-    _cpuBar.element.style.backgroundColor =
-        selected ? cssColors[selectedFrameColor] : cssColors[_getCpuBarColor()];
-    _gpuBar.element.style.backgroundColor =
-        selected ? cssColors[selectedFrameColor] : cssColors[_getGpuBarColor()];
+    _cpuBar.element.style.backgroundColor = selected
+        ? colorToCss(selectedFrameColor)
+        : colorToCss(_getCpuBarColor());
+    _gpuBar.element.style.backgroundColor = selected
+        ? colorToCss(selectedFrameColor)
+        : colorToCss(_getGpuBarColor());
   }
 }

@@ -9,7 +9,6 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
-import '../ui/flutter_html_shim.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -23,13 +22,6 @@ const Color mainCpuColor = Color(0xFFFFCA28);
 const Color mainGpuColor = Color(0xFF9CCC65);
 const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedFrameColor = Color(0xFF4078C0);
-
-final Map<Color, String> cssColors = {
-  mainCpuColor: colorToCss(mainCpuColor),
-  mainGpuColor: colorToCss(mainGpuColor),
-  slowFrameColor: colorToCss(slowFrameColor),
-  selectedFrameColor: colorToCss(selectedFrameColor),
-};
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
