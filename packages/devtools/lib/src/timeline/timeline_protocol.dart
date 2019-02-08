@@ -93,6 +93,11 @@ class TimelineData {
       if (_pendingFrames[event.id].startTime == null) {
         _pendingFrames[event.id].startTime = event.timestampMicros;
         _maybeAddPendingEvents();
+      } else {
+        // TODO(kenzie): investigate and prevent this case.
+        print('Error - already set startTime '
+            '${_pendingFrames[event.id].startTime} for frame ${event.id}.\n'
+            'TraceEvent - ${event.json.toString()}');
       }
     }
   }
@@ -107,6 +112,10 @@ class TimelineData {
       if (_pendingFrames[event.id].endTime == null) {
         _pendingFrames[event.id].endTime = event.timestampMicros;
         _maybeAddPendingEvents();
+      } else {
+        // TODO(kenzie): investigate and prevent this case.
+        print('Error - already set endTime ${_pendingFrames[event.id].endTime}'
+            ' for frame ${event.id}.\nTraceEvent - ${event.json.toString()}');
       }
     }
   }
