@@ -12,7 +12,7 @@
 }
 
 .timeline-frame {
-    width: 28px;
+    width: 22px;
     border-radius: 1px;
     cursor: pointer;
     position: relative;
@@ -25,7 +25,7 @@
 }
 
 .timeline-frame .bar {
-    width: 28px;
+    width: 22px;
 }
 
 .timeline-frame .bar.bottom {

@@ -159,7 +159,7 @@ class VmServiceWrapper implements VmService {
   @override
   Future<SourceReport> getSourceReport(
     String isolateId,
-    List<SourceReportKind> reports, {
+    List<String> reports, {
     String scriptId,
     int tokenPos,
     int endTokenPos,
