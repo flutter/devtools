@@ -23,10 +23,13 @@ const Color mainCpuColor = Color(0xFFFFCA28);
 const Color mainGpuColor = Color(0xFF9CCC65);
 const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedFrameColor = Color(0xFF4078C0);
-final String mainCpuColorCss = colorToCss(mainCpuColor);
-final String mainGpuColorCss = colorToCss(mainGpuColor);
-final String slowFrameColorCss = colorToCss(slowFrameColor);
-final String selectedFrameColorCss = colorToCss(selectedFrameColor);
+
+final Map<Color, String> cssColors = {
+  mainCpuColor: colorToCss(mainCpuColor),
+  mainGpuColor: colorToCss(mainGpuColor),
+  slowFrameColor: colorToCss(slowFrameColor),
+  selectedFrameColor: colorToCss(selectedFrameColor),
+};
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

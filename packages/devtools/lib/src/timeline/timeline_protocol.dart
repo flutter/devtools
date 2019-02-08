@@ -90,8 +90,10 @@ class TimelineData {
         // Create a new TimelineFrame if we do not already have one for this id.
         _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _pendingFrames[event.id].startTime = event.timestampMicros;
-      _maybeAddPendingEvents();
+      if (_pendingFrames[event.id].startTime == null) {
+        _pendingFrames[event.id].startTime = event.timestampMicros;
+        _maybeAddPendingEvents();
+      }
     }
   }
 
@@ -102,8 +104,10 @@ class TimelineData {
         // create a new TimelineFrame if we do not already have one for this id.
         _pendingFrames[event.id] = TimelineFrame(event.id);
       }
-      _pendingFrames[event.id].endTime = event.timestampMicros;
-      _maybeAddPendingEvents();
+      if (_pendingFrames[event.id].endTime == null) {
+        _pendingFrames[event.id].endTime = event.timestampMicros;
+        _maybeAddPendingEvents();
+      }
     }
   }
 
@@ -321,6 +325,10 @@ class TimelineFrame {
 
   final String id;
 
+  // TODO(kenzie): we should query the device for targetFps at some point.
+  static const targetFps = 60;
+  static const targetMaxDuration = 1000 / targetFps;
+
   /// Marks whether this frame has been added to the timeline.
   ///
   /// This should only be set once.
@@ -361,12 +369,18 @@ class TimelineFrame {
   /// Frame start time in micros.
   int get startTime => _startTime;
   int _startTime;
-  set startTime(int t) => _startTime ??= t;
+  set startTime(int t) {
+    assert(_startTime == null);
+    _startTime = t;
+  }
 
   /// Frame end time in micros.
   int get endTime => _endTime;
   int _endTime;
-  set endTime(int t) => _endTime ??= t;
+  set endTime(int t) {
+    assert(_endTime == null);
+    _endTime = t;
+  }
 
   bool get isWellFormed => _startTime != null && _endTime != null;
 
@@ -386,8 +400,8 @@ class TimelineFrame {
   int get gpuDuration => _gpuEventFlow.duration;
   double get gpuDurationMs => gpuDuration / 1000;
 
-  bool get isCpuSlow => cpuDurationMs > 8.0;
-  bool get isGpuSlow => gpuDurationMs > 8.0;
+  bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
+  bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
 
   String get cpuAsMs {
     return _durationAsMsText(cpuDurationMs);

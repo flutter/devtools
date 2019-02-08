@@ -710,7 +710,7 @@ class FrameInfo {
 
   static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
-  static FrameInfo from(Map<dynamic, dynamic> data) {
+  static FrameInfo from(Map<String, dynamic> data) {
     return FrameInfo(
         data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
   }
@@ -719,15 +719,7 @@ class FrameInfo {
   final num elapsedMs;
   final num startTimeMs;
 
-  bool frameGroupStart = false;
-
   num get endTimeMs => startTimeMs + elapsedMs;
-
-  void calcFrameGroupStart(FrameInfo previousFrame) {
-    if (startTimeMs > (previousFrame.endTimeMs + kTargetMaxFrameTimeMs)) {
-      frameGroupStart = true;
-    }
-  }
 
   @override
   String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';

@@ -112,7 +112,7 @@ class FrameFlameChart extends CoreElement {
     void drawCpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = mainCpuColorCss;
+      sectionTitle.element.style.background = cssColors[mainCpuColor];
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);
@@ -129,7 +129,7 @@ class FrameFlameChart extends CoreElement {
     void drawGpuEvents() {
       final int sectionTop = row * rowHeight;
       final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = mainGpuColorCss;
+      sectionTitle.element.style.background = cssColors[mainGpuColor];
       sectionTitle.element.style.left = '0';
       sectionTitle.element.style.top = '${sectionTop}px';
       add(sectionTitle);

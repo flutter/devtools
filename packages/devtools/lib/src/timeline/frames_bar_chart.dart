@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
@@ -14,10 +15,11 @@ class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
       : super('div', classes: 'timeline-frames') {
     layoutHorizontal();
-    element.style.alignItems = 'flex-end';
-    element.style.height = '${chartHeight}px';
-    element.style.paddingTop = '${padding}px';
-    element.style.paddingBottom = '${padding}px';
+    element.style
+        ..alignItems = 'flex-end'
+        ..height = '${chartHeight}px'
+        ..paddingTop = '${padding}px'
+        ..paddingBottom = '${padding}px';
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
       final CoreElement frameUI = FrameBar(this, frame);
@@ -91,21 +93,24 @@ class FrameBar extends CoreElement {
     final gpuBarHeight =
         math.min(maxBarHeight - cpuBarHeight, frame.gpuDurationMs * pxPerMs);
 
-    final String cpuTooltip = frame.isCpuSlow
+    final cpuTooltip = frame.isCpuSlow
         ? _slowFrameWarning('GPU', frame.gpuAsMs)
         : 'GPU: ${frame.gpuAsMs}';
     final gpuTooltip = frame.isCpuSlow
         ? _slowFrameWarning('GPU', frame.gpuAsMs)
         : 'GPU: ${frame.gpuAsMs}';
 
-    _cpuBar = div(c: 'bar bottom')
-      ..element.style.height = '${cpuBarHeight}px'
-      ..element.style.background = _getCpuBarColor()
-      ..element.title = cpuTooltip;
-    _gpuBar = div(c: 'bar top')
-      ..element.style.height = '${gpuBarHeight}px'
-      ..element.style.background = _getGpuBarColor()
-      ..element.title = gpuTooltip;
+    _cpuBar = div(c: 'bar bottom');
+    _cpuBar.element.title = cpuTooltip;
+    _cpuBar.element.style
+      ..height = '${cpuBarHeight}px'
+      ..backgroundColor = cssColors[_getCpuBarColor()];
+
+    _gpuBar = div(c: 'bar top');
+    _gpuBar.element.title = gpuTooltip;
+    _gpuBar.element.style
+      ..height = '${gpuBarHeight}px'
+      ..backgroundColor = cssColors[_getGpuBarColor()];
 
     element.style.height = '${cpuBarHeight + gpuBarHeight}px';
 
@@ -113,12 +118,12 @@ class FrameBar extends CoreElement {
     add(_cpuBar);
   }
 
-  String _getCpuBarColor() {
-    return frame.isCpuSlow ? slowFrameColorCss : mainCpuColorCss;
+  Color _getCpuBarColor() {
+    return frame.isCpuSlow ? slowFrameColor : mainCpuColor;
   }
 
-  String _getGpuBarColor() {
-    return frame.isGpuSlow ? slowFrameColorCss : mainGpuColorCss;
+  Color _getGpuBarColor() {
+    return frame.isGpuSlow ? slowFrameColor : mainGpuColor;
   }
 
   String _slowFrameWarning(String type, String duration) {
@@ -129,8 +134,8 @@ class FrameBar extends CoreElement {
   void setSelected(bool selected) {
     toggleClass('selected', selected);
     _cpuBar.element.style.backgroundColor =
-        selected ? selectedFrameColorCss : _getCpuBarColor();
+        selected ? cssColors[selectedFrameColor] : cssColors[_getCpuBarColor()];
     _gpuBar.element.style.backgroundColor =
-        selected ? selectedFrameColorCss : _getGpuBarColor();
+        selected ? cssColors[selectedFrameColor] : cssColors[_getGpuBarColor()];
   }
 }
