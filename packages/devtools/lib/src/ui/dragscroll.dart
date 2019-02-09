@@ -1,94 +1,76 @@
 import 'dart:html';
 
 class DragScroll {
-  var mousemove = 'mousemove';
-  var mouseup = 'mouseup';
-  var mousedown = 'mousedown';
-  var EventListener = 'EventListener';
+  Expando<dynamic> mouseDownExpando = new Expando();
+  Expando<dynamic> mouseUpExpando = new Expando();
+  Expando<dynamic> mouseMoveExpando = new Expando();
 
-// ??? what are these ???
-//  var addEventListener = 'add'+EventListener;
-//  var removeEventListener = 'remove'+EventListener;
-
-
+  final mouseDown = 'mousedown';
+  final mouseUp = 'mouseup';
+  final mouseMove = 'mousemove';
 
   num newScrollX;
   num newScrollY;
 
-  var dragged = [];
+  List<Node> dragged = [];
 
-  void reset(int i, /*type?*/ eventListener) {
-    while( i < dragged.length) {
-      eventListener = dragged[i++];
-      eventListener = eventListener.container ?? eventListener;
-      /* what are mu mm md? mouse up, mouse move, and mouse down? */
-      eventListener.removeEventListener(mousedown, eventListener.md, false);
-      window.removeEventListener(mouseup, eventListener.mu, false);
-      window.removeEventListener(mousemove, eventListener.mm, false);
+  void reset() {
+    for (Element element in dragged) {
+      element.removeEventListener(mouseDown, mouseDownExpando[element], false);
+      window.removeEventListener(mouseUp, mouseUpExpando[element], false);
+      window.removeEventListener(mouseMove, mouseMoveExpando[element], false);
     }
 
     dragged = document.getElementsByClassName('dragscroll');
 
-    i = 0;
-    while( i < dragged.length) {
-      // is this (function) block a method? is function its name or a keyword?
-      (function(
-        /*type?*/ eventListener,
-          num lastClientX,
-          num lastClientY,
-          num pushed,
-          /*type?*/scroller,
-          /*type?*/ container){
+    var lastClientX;
+    var lastClientY;
+    bool pushed = false;
 
-        container = eventListener.container ?? eventListener;
+    for (Element element in dragged) {
+      element.addEventListener(
+        mouseDown,
+        mouseDownExpando[element] = (e) {
+          if (!element.attributes.containsKey('nochilddrag') ||
+              document.elementFromPoint(e.pageX, e.pageY) == element) {
+            pushed = true;
+            lastClientX = e.clientX;
+            lastClientY = e.clientY;
 
-        container.addEventListener(
-          mousedown,
-          // container.md?? is this calling the above function recursively??
-          container.md = function(e) {
-            if (!eventListener.hasAttribute('nochilddrag') ||
-              document.elementFromPoint(e.pageX, e.pageY) == container) {
-                pushed = 1;
-                lastClientX = e.clientX;
-                lastClientY = e.clientY;
-
-                e.preventDefault();
-            }
-          },
-          false,
-      );
-
-      window.addEventListener(
-        mouseup,
-        container.mu => pushed = 0, // is this right?
-        false,
-      );
-
-      window.addEventListener(
-        mousemove,
-        // same question. recursively calling itself?
-        container.mm = function(e) {
-          if (pushed) {
-            scroller = eventListener.scroller ?? eventListener;
-            newScrollX = -lastClientX + (lastClientX=e.clientX);
-            newScrollY = -lastClientY + (lastClientY=e.clientY);
-
-            scroller.scrollLeft -= newScrollX;
-            scroller.scrollTop -= newScrollY;
-
-            if (eventListener == document.body) {
-              scroller = document.documentElement;
-              scroller.scrollLeft -= newScrollX;
-             scroller.scrollTop -= newScrollY;
-            }
+            e.preventDefault();
           }
         },
         false,
       );
 
-      });
+      window.addEventListener(
+        mouseUp,
+        mouseUpExpando[element] = (e) => pushed = false,
+        false,
+      );
 
-      dragged[i++];
+      window.addEventListener(
+        mouseMove,
+        // same question. recursively calling itself?
+        mouseMoveExpando[element] = (e) {
+          if (pushed) {
+            lastClientX = e.clientX;
+            lastClientY = e.clientY;
+            newScrollX = -lastClientX + lastClientX;
+            newScrollY = -lastClientY + lastClientY;
+
+            element.scrollLeft -= newScrollX;
+            element.scrollTop -= newScrollY;
+
+            if (element == document.body) {
+              element = document.documentElement;
+              element.scrollLeft -= newScrollX;
+              element.scrollTop -= newScrollY;
+            }
+          }
+        },
+        false,
+      );
     }
   }
 }
