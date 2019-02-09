@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:html';
-import 'dart:js';
 
 import 'package:meta/meta.dart';
 
@@ -25,21 +24,12 @@ class Table<T> extends Object with SetStateMixin {
       : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
         _isVirtual = true {
     _init();
+
     _spacerBeforeVisibleRows = CoreElement('tr');
     _spacerAfterVisibleRows = CoreElement('tr');
 
-    // TODO(jacobr): remove call to allowInterop once
-    // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver = IntersectionObserver(
-      allowInterop(_visibilityChange),
-      {'root': element.element},
-    );
-    _visibilityObserver.observe(_spacerBeforeVisibleRows.element);
-    _visibilityObserver.observe(_spacerAfterVisibleRows.element);
-    element.onScroll.listen((_) => _rebuildTable());
+    element.onScroll.listen((_) => _scheduleRebuild());
   }
-
-  IntersectionObserver _visibilityObserver;
 
   final CoreElement element;
   final bool _isVirtual;
@@ -76,14 +66,18 @@ class Table<T> extends Object with SetStateMixin {
 
   void _init() {
     element.add(_table);
+
+    // handle hey events
     _table.onKeyDown.listen((KeyboardEvent e) {
       int indexOffset;
+      // TODO(dantup): PgUp/PgDown/Home/End?
       if (e.keyCode == KeyCode.UP) {
         indexOffset = -1;
       } else if (e.keyCode == KeyCode.DOWN) {
         indexOffset = 1;
-        // TODO(dantup): PgUp/PgDown/Home/End?
-      } else {
+      }
+
+      if (indexOffset == null) {
         return;
       }
 
@@ -101,9 +95,7 @@ class Table<T> extends Object with SetStateMixin {
     });
   }
 
-  void dispose() {
-    _visibilityObserver.disconnect();
-  }
+  void dispose() {}
 
   Stream<T> get onSelect => _selectController.stream;
 
@@ -189,6 +181,7 @@ class Table<T> extends Object with SetStateMixin {
       // Set a flag to ensure we don't schedule rebuilds if there's already one
       // in the queue.
       _hasPendingRebuild = true;
+
       setState(() {
         _hasPendingRebuild = false;
         _rebuildTable();
@@ -234,11 +227,12 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildTable() {
-    // If we've never had any data set, we don't need to (and can't - since
-    // all the elements aren't created) rebuild.
+    // If we've never had any data set, we don't need to (and can't - since all
+    // the elements aren't created) rebuild.
     if (data == null) {
       return;
     }
+
     if (_isVirtual) {
       _rebuildVirtualTable();
     } else {
@@ -247,6 +241,12 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void _rebuildVirtualTable() {
+    // TODO(devoncarew): We should make this more efficient. We currently
+    // rebuild the entire table on each scroll. Often scrolls are small, and the
+    // set of rows currently in the table are already correct. We also don't
+    // need to build rows that are already in the table, just add and remove the
+    // deltas.
+
     int firstRenderedRowInclusive = 0;
     int lastRenderedRowExclusive = data?.length ?? 0;
 
@@ -310,9 +310,11 @@ class Table<T> extends Object with SetStateMixin {
     _tbody.element.children.add(_spacerAfterVisibleRows.element);
   }
 
-  void _rebuildStaticTable() => _buildTableRows(
-      firstRenderedRowInclusive: 0,
-      lastRenderedRowExclusive: data?.length ?? 0);
+  void _rebuildStaticTable() {
+    _buildTableRows(
+        firstRenderedRowInclusive: 0,
+        lastRenderedRowExclusive: data?.length ?? 0);
+  }
 
   int _buildTableRows({
     @required int firstRenderedRowInclusive,
@@ -381,8 +383,8 @@ class Table<T> extends Object with SetStateMixin {
 
         currentColumnIndex++;
 
-        // TODO(dantup): Should we make CoreElement expose ClassList instead
-        // of having flat strings?
+        // TODO(dantup): Should we make CoreElement expose ClassList instead of
+        // having flat strings?
         tableCell.element.classes.clear();
         if (column.cssClass != null) {
           column.cssClass.split(' ').forEach(tableCell.clazz);
@@ -511,10 +513,6 @@ class Table<T> extends Object with SetStateMixin {
     _doSort();
     _scheduleRebuild();
   }
-
-  void _visibilityChange(List entries, IntersectionObserver observer) {
-    _scheduleRebuild();
-  }
 }
 
 abstract class Column<T> {
@@ -542,7 +540,7 @@ abstract class Column<T> {
     return value.toString();
   }
 
-  static String fastIntl(int value) {
+  static String fastIntl(num value) {
     if (value is int && value < 1000) {
       return value.toString();
     } else {
