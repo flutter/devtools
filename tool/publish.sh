@@ -12,6 +12,7 @@ pushd packages/devtools
 pub get
 
 pub run webdev build
+mv ./build/packages ./build/pack
 
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
 
