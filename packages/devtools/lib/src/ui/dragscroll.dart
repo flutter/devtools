@@ -15,7 +15,7 @@ void listenForDragScrolling(CoreElement element) {
 
   dragged.addEventListener(
     'mousedown',
-        (event) {
+    (event) {
       final MouseEvent m = event;
       clicked = true;
       lastX = m.client.x;
@@ -30,20 +30,20 @@ void listenForDragScrolling(CoreElement element) {
 
   window.addEventListener(
     'mouseup',
-        (event) => clicked = false,
+    (event) => clicked = false,
     false,
   );
 
   window.addEventListener(
     'mousemove',
-        (event) {
+    (event) {
       final MouseEvent m = event;
       if (clicked) {
         final num newX = m.client.x;
         final num newY = m.client.y;
 
-        final deltaX = lastX - newX;
-        final deltaY = lastY - newY;
+        final num deltaX = lastX - newX;
+        final num deltaY = lastY - newY;
 
         dragged.scrollLeft += deltaX;
         dragged.scrollTop += deltaY;
