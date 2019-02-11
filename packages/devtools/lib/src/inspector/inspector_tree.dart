@@ -18,6 +18,7 @@ import 'package:meta/meta.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
+import '../ui/theme.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_controller.dart';
@@ -35,9 +36,23 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
-const Color selectedRowBackgroundColor = Color.fromARGB(255, 202, 191, 69);
-const Color highlightLineColor = Colors.black;
-const Color defaultTreeLineColor = Colors.grey;
+const Color selectedRowBackgroundColor = ThemedColor(
+  Color.fromARGB(255, 202, 191, 69),
+  Color.fromARGB(255, 99, 101, 103),
+);
+const Color hoverColor = ThemedColor(
+  Colors.yellowAccent,
+  Color.fromARGB(255, 70, 73, 76),
+);
+const Color highlightLineColor = ThemedColor(
+  Colors.black,
+  Color.fromARGB(255, 200, 200, 200),
+);
+const Color defaultTreeLineColor = ThemedColor(
+  Colors.grey,
+  Color.fromARGB(255, 150, 150, 150),
+);
+
 const double iconPadding = 3.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;

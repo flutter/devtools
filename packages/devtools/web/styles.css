@@ -2,16 +2,58 @@
 /* Use of this source code is governed by a BSD-style license that can be */
 /* found in the LICENSE file. */
 
+/* All color values that need to be customized depending on whether a light */
+/* or dark theme is used must be specified with CSS variables. */
+/* TODO(jacobr): the current list of variables is a bit redundant and should */
+/* be refactored to eliminate cases where very similar colors are used with */
+/* no clear reason to diverge. */
+/* If you add a CSS variable here, be sure to also add it to styles_dart.css */
+:root {
+    --default-background-rgb: 255, 255, 255;
+    --default-background: #fff;
+    --default-color: #000;
+    --default-color-thumb: #000;
+    --header-item-rgb: 255, 255, 255;
+    --header-item: #fff;
+    --masthead-background: #4078c0;
+    --border-color: #eee;
+    --light-background: #ccc;
+    --selected-border: #a2a2a2;
+    --title: #555;
+    --table-border: #dfe2e5;
+    --light-text-color: #fff;
+    --selected-background: #4078c0;
+    --header-backround: #f3f3f3;
+    --header-color: #586069;
+    --even-row-background: #f7f7f7;
+    --row-hover-background: #f2f4fa;
+    --error-background: #f97c7c;
+    --hint-background: lightgoldenrodyellow;
+    --footer-color: #7a7a7a;
+    --footer-link-hover: #0366d6;
+    --footer-strong: #333;
+    --disabled-background: #ddd;
+    --counter-color: #666;
+    --menu-item-border: #e1e4e8;
+    --toast-border: #d8dee2;
+    --subtle: #777;
+    --shadow-color: #ddd;
+    --dark-shadow-color: #666;
+    --toast-background: f9f9f9;
+    --selected-line: #c4daf7;
+}
+
 .lead, .page-title + .markdown-body > p:first-child {
     margin-bottom: 30px;
     font-size: 20px;
     font-weight: 300;
-    color: #555;
+    color: var(--title);
 }
 
 body {
     overflow: hidden;
     font-size: 14px;
+    background-color: var(--default-background);
 }
 
 .container {
@@ -24,13 +66,13 @@ body {
     padding: 16px 20px;
     margin-bottom: 20px;
     text-align: center;
-    background-color: #4078c0;
+    background-color: var(--masthead-background);
 }
 
 .masthead .masthead-logo {
     display: inline-block;
     font-size: 1.5rem;
-    color: #fff;
+    color: var(--default-background);
     float: left;
 }
 
@@ -53,23 +95,23 @@ body {
 
 .masthead a,
 .masthead .masthead-item {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(var(--header-item-rgb), 0.5) !important;
     font-size: 1rem;
 }
 
 .masthead a:hover {
-    color: #fff;
+    color: var(--header-item) !important;;
     text-decoration: none;
 }
 
 .masthead-nav .active {
-    color: #fff;
+    color: var(--header-item) !important;;
 }
 
 h2 {
     font-size: 18px;
     font-weight: 600;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 8px;
     padding-bottom: 0;
 }
@@ -125,8 +167,8 @@ span.label.gc {
 }
 
 table thead {
-    background-color: #f3f3f3;
-    border-bottom: 1px solid #dfe2e5;
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--table-border);
 }
 
 table tbody {
@@ -139,8 +181,8 @@ tbody.selectable tr {
 
 table th {
   font-weight: 600;
-  color: #586069;
-  background-color: #f3f3f3;
+  color: var(--header-color);
+  background-color: var(--header-backround);
   white-space: nowrap;
 }
 
@@ -151,7 +193,7 @@ table th.wide {
 table td,
 table th {
   padding: 4px 8px;
-  /*border: 1px solid #dfe2e5;*/
+  /*border: 1px solid var(--table-border);*/
 }
 
 tr th.right span.sortable:before {
@@ -185,25 +227,25 @@ tr th.left span.sortable.up:after {
 }
 
 table tr:nth-child(2n) {
-    background-color: #f7f7f7;
+    background-color: var(--even-row-background);
 }
 
 table tr:hover {
-  background-color: #f2f4fa;
+  background-color: var(--row-hover-background);
 }
 
 table tr.selected {
-    color: #fff;
-    background-color: #4078c0;
+    color: var(--light-text-color);
+    background-color: var(--selected-background);
 }
 
 .table-border {
-   border: 1px solid #dfe2e5;
+   border: 1px solid var(--table-border);
    border-radius: 3px;
 }
 
 .gutter {
-    background-color: #fff;
+    background-color: var(--default-background);
     background-repeat: no-repeat;
     background-position: 50%;
 }
@@ -234,18 +276,18 @@ input:disabled+label {
 }
 
 .frame-bar {
-    background: #4078c0;
+    background: var(--masthead-background);
     height: 12px;
     display: inline-block;
     border-radius: 1px;
 }
 
 tr.selected .frame-bar {
-    background: #fff;
+    background: var(--default-background);
 }
 
 .frame-bar.over-budget {
-    background: #f97c7c;
+    background: var(--error-background);
 }
 
 form[horizontal] {
@@ -277,16 +319,16 @@ form[horizontal] {
 .footer {
     padding: 10px 30px;
     margin-top: 20px;
-    color: #7a7a7a;
-    border-top: 1px solid #eee;
+    color: var(--footer-color);
+    border-top: 1px solid var(--border-color);
 }
 
 .footer a {
-    color: #7a7a7a;
+    color: var(--footer-color);
 }
 
 .footer a:hover {
-    color: #0366d6;
+    color: var(--footer-link-hover);
     text-decoration: none;
 }
 
@@ -315,7 +357,7 @@ form[horizontal] {
 }
 
 .footer strong {
-    color: #333;
+    color: var(--footer-strong);
 }
 
 .section + .section {
@@ -331,7 +373,7 @@ form + form {
     margin-bottom: 0.2em;
     font-size: 1.2em;
     font-weight: bold;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .form-checkbox {
@@ -353,7 +395,7 @@ form + form {
 }
 
 .perf-chart[disabled] {
-  background: #ddd;
+  background: var(--disabled-background);
   opacity: 0.5;
 }
 
@@ -361,7 +403,7 @@ form + form {
     padding: 4px 8px;
     position: absolute;
     bottom: 0;
-    color: #7a7a7a;
+    color: var(--footer-color);
 }
 
 .perf-chart .perf-label.top-right {
@@ -409,20 +451,21 @@ a[disabled] {
 }
 
 .masthead a[disabled]:hover {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--default-background);
+    opacity: 0.5;
 }
 
 .progress-element {
     width: 200px;
     height: 16px;
-    background: #ccc;
+    background: var(--light-background);
     border-radius: 1px;
     position: relative;
     display: inline-block;
 }
 
 .progress-element .complete {
-    background: #4078c0;
+    background: var(--selected-background);
     display: inline-block;
     position: absolute;
     top: 0;
@@ -488,8 +531,8 @@ div.tabnav-tab {
     height: 23px;
     margin: 1px;
     border-radius: 50%;
-    border: 3px solid #4078c0;
-    border-color: #4078c0 transparent #4078c0 transparent;
+    border: 3px solid var(--selected-background);
+    border-color: var(--selected-background) transparent var(--selected-background) transparent;
     animation: spin 1.2s linear infinite;
 }
 
@@ -511,8 +554,8 @@ nav.menu {
   padding: 2px 5px;
   font-size: 11px;
   font-weight: bold;
-  color: #666;
-  background-color: #eee;
+  color: var(--counter-color);
+  background-color: var(--border-color);
   border-radius: 10px;
 }
 
@@ -532,7 +575,7 @@ nav.menu li {
 }
 
 .menu-item-bottom-border {
-    border-bottom: 1px solid #e1e4e8;
+    border-bottom: 1px solid var(--menu-item-border);
 }
 
 .list-item {
@@ -540,21 +583,21 @@ nav.menu li {
 }
 
 .list-item.subtle {
-    color: #777;
+    color: var(--subtle);
 }
 
 .list-item .subtle {
     font-size: 90%;
-    color: #777;
+    color: var(--subtle);
 }
 
 .list-item.selected {
-    color: #fff;
-    background-color: #4078c0;
+    color: var(--light-text-color);
+    background-color: var(--selected-background);
 }
 
 .list-item.selected .subtle {
-    color: #ccc;
+    color: var(--light-background);
 }
 
 .tree-list {
@@ -567,7 +610,7 @@ nav.menu li {
     font-size: 14px;
     display: inline-block;
     padding-bottom: 1px;
-    color: #777;
+    color: var(--subtle);
     user-select: none;
 }
 
@@ -589,8 +632,9 @@ but a more subtle solution would be better. */
 
 .custom-scrollbar ::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: rgba(0,0,0,.5);
-    box-shadow: 0 0 1px rgba(255,255,255,.5);
+    background-color: var(--default-color-thumb);
+    box-shadow: 0 0 1px var(--default-background);
+    opacity: 0.5;
 }
 
 /* Make sure content inside buttons is vertically centered. */
@@ -605,11 +649,11 @@ but a more subtle solution would be better. */
 }
 
 .toast {
-    border: 1px solid #d8dee2;
+    border: 1px solid var(--toast-border);
     border-radius: 3px;
-    background: #f9f9f9;
+    background: var(--toast-background);
     padding: 10px;
-    box-shadow: 1px 1px 2px 0px #ddd;
+    box-shadow: 1px 1px 2px 0px var(--shadow-color);
 
     transition-property: left;
     transition-duration: 0.5s;
@@ -681,18 +725,18 @@ html [full] {
 }
 
 .action-button:hover {
-    box-shadow: 0 2px 2px 0 #666;
-    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 2px 0 var(--dark-shadow-color);
+    background-color: rgba(var(--default-background-rgb), 0.1);
 }
 
 .action-button:active {
-    box-shadow: 0 2px 2px 0 #666;
-    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 2px 0 var(--dark-shadow-color);
+    background-color: rgba(var(--default-background-rgb), 0.3);
 }
 
 .action-button[disabled] {
     box-shadow: none;
-    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(var(--default-background-rgb), 0);
     opacity: 0.5;
 }
 
@@ -709,7 +753,7 @@ html [full] {
 #connect-dialog {
     display: none;
     padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
 }
 

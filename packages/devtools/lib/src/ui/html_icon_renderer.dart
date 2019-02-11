@@ -15,6 +15,7 @@ import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 import 'icons.dart';
 import 'material_icons.dart';
+import 'theme.dart';
 
 final Expando<HtmlIconRenderer> rendererExpando = Expando('IconRenderer');
 
@@ -138,10 +139,10 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
     // draw a black and gray grid to use as the background to disambiguate
     // opaque colors from translucent colors.
     context
-      ..fillStyle = 'white'
+      ..fillStyle = colorToCss(white)
       ..fillRect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
-      ..fillStyle = 'gray'
+      ..fillStyle = colorToCss(grey)
       ..fillRect(iconMargin, iconMargin, iconWidth / 2 - iconMargin,
           iconHeight / 2 - iconMargin)
       ..fillRect(iconWidth / 2, iconHeight / 2, iconWidth / 2 - iconMargin,
@@ -149,7 +150,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
       ..fillStyle = colorToCss(color)
       ..fillRect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
-      ..strokeStyle = 'black'
+      ..strokeStyle = colorToCss(black)
       ..rect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
       ..stroke();

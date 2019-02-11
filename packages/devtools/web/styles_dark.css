@@ -1,0 +1,48 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+/* If you add a CSS variable here, be sure to also add it to styles.css */
+:root {
+    --default-background-rgb: 30, 30, 30;
+    --default-background: #1e1e1e;
+    --header-item-rgb: 255, 255, 255;
+    --header-item: #fff;
+    --default-color: #fff;
+    --default-color-thumb: #888;
+    --masthead-background: #3c3c3c;
+    --border-color: #484848;
+    --border-color-dark: #484848;
+    --light-background: #585858;
+    --selected-background: #37373d;
+    --table-border: #484848;
+    --header-backround: #282828;
+    --header-color: #ccc;
+    --even-row-background: #1e1e1e;
+    --row-hover-background: #2b2d2e;
+    --error-background: #7c1c05;
+    --hint-background: #4b4b3f;
+    --footer-color: #858585;
+    --footer-link-hover: #0366d6;
+    --footer-strong: #ccc;
+    --disabled-background: #555;
+    --counter-color: #999;
+    --menu-item-border: #484541;
+    --subtle: #888;
+    --toast-border: #585551;
+    --shadow-color: #585858;
+    --dark-shadow-color: #999;
+    --toast-background: #212121;
+    --selected-line: #626d7b;
+}
+
+body {
+    /* Disable the background image from the github-dart theme as it is too */
+    /* busy for this tool. */
+    background-image: none !important;
+}
+
+.gutter {
+    /* The white gutter icon image looks too bright with opacity 1  */
+    opacity: 0.5;
+}

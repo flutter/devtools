@@ -16,6 +16,7 @@
     <link rel="icon" sizes="64x64" href="favicon.png">
 
     <link rel="stylesheet" href="packages/devtools/src/ui/primer_6.0.0.css">
+
     <link rel="stylesheet" href="packages/devtools/src/ui/octicons_4.4.0.css">
     <link rel="stylesheet" href="packages/devtools/src/ui/flex.css">
     <link rel="stylesheet" href="styles.css">
@@ -23,6 +24,18 @@
     <link rel="stylesheet" href="packages/devtools/src/inspector/inspector.css">
     <link rel="stylesheet" href="packages/devtools/src/logging/logging.css">
     <link rel="stylesheet" href="packages/devtools/src/timeline/timeline.css">
+
+    <script type="text/javascript">
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('theme') == 'dark') {
+                document.write(
+                    '<link rel="stylesheet" href="packages/devtools/src/ui/github-dark.css">' +
+                    '<link rel="stylesheet" href="styles_dark.css">'
+                );
+            }
+        })();
+    </script>
 
     <link href="packages/codemirror/codemirror.css" rel="stylesheet">
     <script src="packages/codemirror/codemirror.js"></script>
