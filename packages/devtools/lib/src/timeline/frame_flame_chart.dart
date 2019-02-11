@@ -4,7 +4,7 @@
 
 import 'dart:html';
 
-import '../ui/dragscroll.dart';
+import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
@@ -38,7 +38,7 @@ class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
     clazz('flame-chart');
-    listenForDragScrolling(this);
+    enableDragScrolling(this);
   }
 
   TimelineFrame frame;
