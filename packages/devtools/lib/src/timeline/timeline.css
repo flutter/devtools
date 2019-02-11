@@ -53,7 +53,6 @@
     border-radius: 2px;
     padding: 0 2px;
     position: absolute;
-    overflow-x: hidden;
     white-space: nowrap;
     cursor: default;
 }
