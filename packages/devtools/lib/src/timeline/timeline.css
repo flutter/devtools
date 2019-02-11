@@ -57,3 +57,16 @@
     white-space: nowrap;
     cursor: default;
 }
+
+.flame-chart-item-label-wrapper {
+    position: sticky;
+    left: 0;
+    position: -webkit-sticky;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.flame-chart-item-label {
+    display: inline-block;
+    color: black;
+}

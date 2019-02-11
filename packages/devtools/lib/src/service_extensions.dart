@@ -50,7 +50,7 @@ const debugPaint = ToggleableServiceExtensionDescription<bool>._(
 const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint Baselines',
-  icon: FlutterIcons.painting,
+  icon: FlutterIcons.text,
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Paint Baselines',
