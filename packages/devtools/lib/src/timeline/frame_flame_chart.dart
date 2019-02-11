@@ -158,12 +158,12 @@ class FrameFlameChart extends CoreElement {
   // TODO(kenzie): re-assess this drawing logic.
   void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
     final item = Element.div()..className = 'flame-chart-item';
-    final wrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
-    wrapper.append(Element.span()
+    final labelWrapper = Element.div()
+      ..className = 'flame-chart-item-label-wrapper';
+    labelWrapper.append(Element.span()
       ..text = event.name
-      ..className = 'flame-chart-item-label'
-    );
-    item.append(wrapper);
+      ..className = 'flame-chart-item-label');
+    item.append(labelWrapper);
     final style = item.style;
     style.background = event.isCpuEvent
         ? colorToCss(nextCpuColor())
@@ -171,7 +171,10 @@ class FrameFlameChart extends CoreElement {
     style.left = '${left}px';
     if (width != null) {
       style.width = '${width}px';
-      wrapper.style.maxWidth = '${width}px';
+      // This is critical to avoid having labels overflow the items boundaries.
+      // For some reason, overflow:hidden does not play well with
+      // position: sticky; so we have to implement this way.
+      labelWrapper.style.maxWidth = '${width}px';
     }
     style.top = '${top}px';
     element.append(item);
