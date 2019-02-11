@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
+
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
@@ -155,15 +157,26 @@ class FrameFlameChart extends CoreElement {
 
   // TODO(kenzie): re-assess this drawing logic.
   void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
-    final CoreElement item = div(text: event.name, c: 'flame-chart-item');
-    item.element.style.background = event.isCpuEvent
+    final item = Element.div()..className = 'flame-chart-item';
+    final labelWrapper = Element.div()
+      ..className = 'flame-chart-item-label-wrapper';
+    labelWrapper.append(Element.span()
+      ..text = event.name
+      ..className = 'flame-chart-item-label');
+    item.append(labelWrapper);
+    final style = item.style;
+    style.background = event.isCpuEvent
         ? colorToCss(nextCpuColor())
         : colorToCss(nextGpuColor());
-    item.element.style.left = '${left}px';
+    style.left = '${left}px';
     if (width != null) {
-      item.element.style.width = '${width}px';
+      style.width = '${width}px';
+      // This is critical to avoid having labels overflow the items boundaries.
+      // For some reason, overflow:hidden does not play well with
+      // position: sticky; so we have to implement this way.
+      labelWrapper.style.maxWidth = '${width}px';
     }
-    item.element.style.top = '${top}px';
-    add(item);
+    style.top = '${top}px';
+    element.append(item);
   }
 }
