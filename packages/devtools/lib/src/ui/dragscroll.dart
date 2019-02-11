@@ -1,76 +1,53 @@
 import 'dart:html';
 
-class DragScroll {
-  Expando<dynamic> mouseDownExpando = new Expando();
-  Expando<dynamic> mouseUpExpando = new Expando();
-  Expando<dynamic> mouseMoveExpando = new Expando();
+import '../ui/elements.dart';
 
-  final mouseDown = 'mousedown';
-  final mouseUp = 'mouseup';
-  final mouseMove = 'mousemove';
+void listenForDragScrolling(CoreElement element) {
+  final dragged = element.element;
 
-  num newScrollX;
-  num newScrollY;
+  num lastX;
+  num lastY;
+  bool clicked = false;
 
-  List<Node> dragged = [];
+  dragged.addEventListener(
+    'mousedown',
+    (event) {
+      final MouseEvent m = event;
+      clicked = true;
+      lastX = m.client.x;
+      lastY = m.client.y;
 
-  void reset() {
-    for (Element element in dragged) {
-      element.removeEventListener(mouseDown, mouseDownExpando[element], false);
-      window.removeEventListener(mouseUp, mouseUpExpando[element], false);
-      window.removeEventListener(mouseMove, mouseMoveExpando[element], false);
-    }
+      // TODO(kenzie): once flame chart items are clickable, we will need to
+      // tweak this logic to differentiate between clicks and click-drags.
+      m.preventDefault();
+    },
+    false,
+  );
 
-    dragged = document.getElementsByClassName('dragscroll');
+  window.addEventListener(
+    'mouseup',
+    (event) => clicked = false,
+    false,
+  );
 
-    var lastClientX;
-    var lastClientY;
-    bool pushed = false;
+  window.addEventListener(
+    'mousemove',
+    (event) {
+      final MouseEvent m = event;
+      if (clicked) {
+        final num newX = m.client.x;
+        final num newY = m.client.y;
 
-    for (Element element in dragged) {
-      element.addEventListener(
-        mouseDown,
-        mouseDownExpando[element] = (e) {
-          if (!element.attributes.containsKey('nochilddrag') ||
-              document.elementFromPoint(e.pageX, e.pageY) == element) {
-            pushed = true;
-            lastClientX = e.clientX;
-            lastClientY = e.clientY;
+        final deltaX = lastX - newX;
+        final deltaY = lastY - newY;
 
-            e.preventDefault();
-          }
-        },
-        false,
-      );
+        dragged.scrollLeft += deltaX;
+        dragged.scrollTop += deltaY;
 
-      window.addEventListener(
-        mouseUp,
-        mouseUpExpando[element] = (e) => pushed = false,
-        false,
-      );
-
-      window.addEventListener(
-        mouseMove,
-        // same question. recursively calling itself?
-        mouseMoveExpando[element] = (e) {
-          if (pushed) {
-            lastClientX = e.clientX;
-            lastClientY = e.clientY;
-            newScrollX = -lastClientX + lastClientX;
-            newScrollY = -lastClientY + lastClientY;
-
-            element.scrollLeft -= newScrollX;
-            element.scrollTop -= newScrollY;
-
-            if (element == document.body) {
-              element = document.documentElement;
-              element.scrollLeft -= newScrollX;
-              element.scrollTop -= newScrollY;
-            }
-          }
-        },
-        false,
-      );
-    }
-  }
+        lastX = newX;
+        lastY = newY;
+      }
+    },
+    false,
+  );
 }

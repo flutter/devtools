@@ -43,10 +43,9 @@
 }
 
 .flame-chart {
-    padding: 10px;
     position: relative;
     margin-top: 4px;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 .flame-chart .flame-chart-item {
