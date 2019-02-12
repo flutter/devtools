@@ -105,8 +105,8 @@ class FrameFlameChart extends CoreElement {
     final int frameStartOffset = frame.startTime;
 
     final cpuSectionHeight =
-        frame.cpuEventFlow.getDepth() * rowHeight + sectionSpacing;
-    final gpuSectionHeight = frame.gpuEventFlow.getDepth() * rowHeight;
+        frame.cpuEventFlow.depth * rowHeight + sectionSpacing;
+    final gpuSectionHeight = frame.gpuEventFlow.depth * rowHeight;
     final flameChartWidth = max(
         element.clientWidth,
         leftIndent +

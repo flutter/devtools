@@ -453,6 +453,21 @@ class TimelineEvent {
   bool get isCpuEventFlow => _hasChild('Engine::BeginFrame');
   bool get isGpuEventFlow => _hasChild('PipelineConsume');
 
+  /// Returns the depth of this TimelineEvent tree, including [this].
+  int get depth => _depth ?? _getDepth(this);
+  int _depth;
+
+  int _getDepth(TimelineEvent root) {
+    if (root == null) {
+      return 0;
+    }
+    _depth = 0;
+    for (TimelineEvent child in root.children) {
+      _depth = max(_depth, _getDepth(child));
+    }
+    return _depth + 1;
+  }
+
   /// Whether there is a child with the given name [childName] is contained
   /// somewhere in the subtree [children].
   bool _hasChild(String childName) {
@@ -531,20 +546,6 @@ class TimelineEvent {
     } else {
       return startTime < e.startTime;
     }
-  }
-
-  /// Returns the depth of this TimelineEvent tree, including [this].
-  int getDepth() => _getDepth(this);
-
-  int _getDepth(TimelineEvent root) {
-    if (root == null) {
-      return 0;
-    }
-    int depth = 0;
-    for (TimelineEvent child in root.children) {
-      depth = max(depth, _getDepth(child));
-    }
-    return depth + 1;
   }
 
   void format(StringBuffer buf, String indent) {
