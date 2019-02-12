@@ -60,13 +60,14 @@
     position: absolute;
     white-space: nowrap;
     cursor: default;
+    height: 24px;
 }
 
 .flame-chart-item-label-wrapper {
     position: sticky;
     left: 0;
     position: -webkit-sticky;
-    overflow: hidden;
+    overflow-x: hidden;
     display: inline-block;
 }
 
