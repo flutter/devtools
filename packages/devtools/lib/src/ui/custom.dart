@@ -141,64 +141,64 @@ class SelectableTree<T> extends CoreElement {
 
   @visibleForTesting
   void handleKeyPress(KeyboardEvent e) {
-    void handleDownKey() {
-      if (_selectedItem != null) {
-        final nextElm = _selectedItem.getNextVisibleElement();
-        if (nextElm != null) {
-          select(nextElm);
-        }
-      } else {
-        if (treeItems.isNotEmpty) {
-          select(treeItems.first);
-        }
-      }
-    }
-
-    void handleUpKey() {
-      if (_selectedItem != null) {
-        final prevElm = selectedItem.getPreviousVisibleElement();
-        if (prevElm != null) {
-          select(prevElm);
-        }
-      } else {
-        if (treeItems.isNotEmpty) {
-          select(treeItems.last.getLastVisibleDescendant() ?? treeItems.last);
-        }
-      }
-    }
-
-    void handleRightKey() {
-      if (!_selectedItem.hasChildren) {
-        return;
-      }
-      if (!_selectedItem.isExpanded) {
-        _selectedItem.expand();
-      } else {
-        select(_selectedItem.visibleChildren.first);
-      }
-    }
-
-    void handleLeftKey() {
-      if (_selectedItem.isExpanded) {
-        _selectedItem.collapse();
-      } else if (_selectedItem.parent != null) {
-        select(_selectedItem.parent);
-      }
-    }
-
     if (e.keyCode == KeyCode.DOWN) {
-      handleDownKey();
+      _handleDownKey();
     } else if (e.keyCode == KeyCode.UP) {
-      handleUpKey();
+      _handleUpKey();
     } else if (e.keyCode == KeyCode.RIGHT) {
-      handleRightKey();
+      _handleRightKey();
     } else if (e.keyCode == KeyCode.LEFT) {
-      handleLeftKey();
+      _handleLeftKey();
     } else {
       return; // don't preventDefault if we were anything else.
     }
 
     e.preventDefault();
+  }
+
+  void _handleDownKey() {
+    if (_selectedItem != null) {
+      final nextElm = _selectedItem.getNextVisibleElement();
+      if (nextElm != null) {
+        select(nextElm);
+      }
+    } else {
+      if (treeItems.isNotEmpty) {
+        select(treeItems.first);
+      }
+    }
+  }
+
+  void _handleUpKey() {
+    if (_selectedItem != null) {
+      final prevElm = selectedItem.getPreviousVisibleElement();
+      if (prevElm != null) {
+        select(prevElm);
+      }
+    } else {
+      if (treeItems.isNotEmpty) {
+        select(treeItems.last.getLastVisibleDescendant() ?? treeItems.last);
+      }
+    }
+  }
+
+  void _handleRightKey() {
+    if (!_selectedItem.hasChildren) {
+      return;
+    }
+    if (!_selectedItem.isExpanded) {
+      _selectedItem.expand();
+    } else {
+      select(_selectedItem.visibleChildren.first);
+    }
+  }
+
+  void _handleLeftKey() {
+    if (_selectedItem.isExpanded) {
+      _selectedItem.collapse();
+    } else if (_selectedItem.parent != null) {
+      select(_selectedItem.parent);
+    }
   }
 
   List<T> items = <T>[];
