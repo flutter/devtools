@@ -239,16 +239,16 @@ abstract class InspectorTreeNode {
       // Non property, regular node case.
       if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
         if (name.startsWith('child ')) {
-          builder.appendText(name, inspector_text_styles.grayed);
+          builder.appendText(name, inspector_text_styles.unimportant);
         } else {
           builder.appendText(name, textStyle);
         }
 
         if (diagnostic.showSeparator) {
           builder.appendText(
-              diagnostic.separator, inspector_text_styles.grayed);
+              diagnostic.separator, inspector_text_styles.unimportant);
         } else {
-          builder.appendText(' ', inspector_text_styles.grayed);
+          builder.appendText(' ', inspector_text_styles.unimportant);
         }
       }
 
@@ -259,14 +259,14 @@ abstract class InspectorTreeNode {
       final String description = diagnostic.description;
       final match = _primaryDescriptionPattern.firstMatch(description);
       if (match != null) {
-        builder.appendText(' ', inspector_text_styles.grayed);
+        builder.appendText(' ', inspector_text_styles.unimportant);
         builder.appendText(match.group(1), textStyle);
         if (match.group(2).isNotEmpty) {
           builder.appendText(' ', textStyle);
-          builder.appendText(match.group(2), inspector_text_styles.grayed);
+          builder.appendText(match.group(2), inspector_text_styles.unimportant);
         }
       } else if (diagnostic.description?.isNotEmpty == true) {
-        builder.appendText(' ', inspector_text_styles.grayed);
+        builder.appendText(' ', inspector_text_styles.unimportant);
         builder.appendText(diagnostic.description, textStyle);
       }
     }

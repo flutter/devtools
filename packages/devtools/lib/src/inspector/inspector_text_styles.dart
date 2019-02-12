@@ -1,7 +1,7 @@
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/theme.dart';
 
-final TextStyle grayed = TextStyle(
+final TextStyle unimportant = TextStyle(
   color: ThemedColor(Colors.grey.shade500, Colors.grey.shade400),
 );
 const TextStyle regular = TextStyle(color: black);
@@ -24,7 +24,7 @@ const TextStyle regularItalic =
 /// Pretty sames for common text styles to make it easier to debug output
 /// containing these names.
 final Map<TextStyle, String> debugStyleNames = {
-  grayed: 'grayed',
+  unimportant: 'grayed',
   regular: '',
   warning: 'warning',
   error: 'error',

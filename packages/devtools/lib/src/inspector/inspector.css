@@ -20,7 +20,6 @@
     display: flex;
     overflow: hidden;
     margin-top: 10px;
-    color: var(--default-background);
     align-items: center;
     flex: 1 1 auto;
     flex-direction: column;
