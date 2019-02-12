@@ -9,38 +9,38 @@
 /* no clear reason to diverge. */
 /* If you add a CSS variable here, be sure to also add it to styles_dart.css */
 :root {
+    --border-color: #eee;
+    --counter-color: #666;
+    --dark-shadow-color: #666;
     --default-background-rgb: 255, 255, 255;
     --default-background: #fff;
-    --default-color: #000;
     --default-color-thumb: #000;
-    --header-item-rgb: 255, 255, 255;
-    --header-item: #fff;
-    --masthead-background: #4078c0;
-    --border-color: #eee;
-    --light-background: #ccc;
-    --selected-border: #a2a2a2;
-    --title: #555;
-    --table-border: #dfe2e5;
-    --light-text-color: #fff;
-    --selected-background: #4078c0;
-    --header-backround: #f3f3f3;
-    --header-color: #586069;
-    --even-row-background: #f7f7f7;
-    --row-hover-background: #f2f4fa;
+    --default-color: #000;
+    --disabled-background: #ddd;
     --error-background: #f97c7c;
-    --hint-background: lightgoldenrodyellow;
+    --even-row-background: #f7f7f7;
     --footer-color: #7a7a7a;
     --footer-link-hover: #0366d6;
     --footer-strong: #333;
-    --disabled-background: #ddd;
-    --counter-color: #666;
+    --header-backround: #f3f3f3;
+    --header-color: #586069;
+    --header-item-rgb: 255, 255, 255;
+    --header-item: #fff;
+    --hint-background: lightgoldenrodyellow;
+    --light-background: #ccc;
+    --light-text-color: #fff;
+    --masthead-background: #4078c0;
     --menu-item-border: #e1e4e8;
-    --toast-border: #d8dee2;
-    --subtle: #777;
-    --shadow-color: #ddd;
-    --dark-shadow-color: #666;
-    --toast-background: f9f9f9;
+    --row-hover-background: #f2f4fa;
+    --selected-background: #4078c0;
+    --selected-border: #a2a2a2;
     --selected-line: #c4daf7;
+    --shadow-color: #ddd;
+    --subtle: #777;
+    --table-border: #dfe2e5;
+    --title: #555;
+    --toast-background: f9f9f9;
+    --toast-border: #d8dee2;
 }
 
 .lead, .page-title + .markdown-body > p:first-child {
