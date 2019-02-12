@@ -11,8 +11,6 @@ import 'framework/framework.dart';
 import 'ui/elements.dart';
 import 'utils.dart';
 
-// TODO(devoncarew): fixed position header
-
 class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
@@ -125,8 +123,9 @@ class Table<T> extends Object with SetStateMixin {
                 c: 'interactable${column.supportsSorting ? ' sortable' : ''}');
             s.click(() => _columnClicked(column));
             _spanForColumn[column] = s;
-            final CoreElement header = th(c: column.numeric ? 'right' : 'left')
-              ..add(s);
+            final CoreElement header =
+                th(c: 'sticky-top ${column.numeric ? 'right' : 'left'}')
+                  ..add(s);
             if (column.wide) {
               header.clazz('wide');
             }
