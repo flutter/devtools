@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -530,6 +531,21 @@ class TimelineEvent {
     } else {
       return startTime < e.startTime;
     }
+  }
+
+  /// Returns the depth of this TimelineEvent tree, including [this].
+  int getDepth() {
+    int maxDepth(TimelineEvent root) {
+      if (root == null) {
+        return 0;
+      }
+      int maximum = 0;
+      for (TimelineEvent child in root.children) {
+        maximum = max(maximum, maxDepth(child));
+      }
+      return maximum + 1;
+    }
+    return maxDepth(this);
   }
 
   void format(StringBuffer buf, String indent) {

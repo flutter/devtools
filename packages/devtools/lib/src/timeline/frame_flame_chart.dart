@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html';
+import 'dart:math';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
@@ -37,7 +38,10 @@ const gpuColorPalette = [
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
+    layoutVertical();
     clazz('flame-chart');
+    element.style.backgroundColor = colorToCss(const Color(0xFFF3F3F3));
+
     enableDragScrolling(this);
   }
 
@@ -79,86 +83,91 @@ class FrameFlameChart extends CoreElement {
   }
 
   void _render(TimelineFrame frame) {
-    const int leftIndent = 80;
+    const int leftIndent = 70;
     const int rowHeight = 25;
 
-    // TODO(kenzie): re-write this scale logic.
-    const double microsPerFrame = 1000 * 1000 / 60.0;
-    const double pxPerMicro = microsPerFrame / 1000.0;
+    // 16,666 microseconds / frame will achieve a frame rate of 60 FPS.
+    const double targetMicrosPerFrame = 1000 * 1000 / 60.0;
 
-    int row = 0;
+    // Pixels per microsecond in order to fit a single frame in 1500px. In order
+    // for the whole frame to fit in 1500px at this drawing ratio, the frame
+    // duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
+    const double pixelsPerMicro = 1500 / targetMicrosPerFrame;
 
-    final int microsAdjust = frame.startTime;
+    final int frameStartOffset = frame.startTime;
 
-    int maxRow = 0;
+    // Add 15 to account for vertical spacing between the CPU and GPU sections.
+    final cpuSectionHeight = frame.cpuEventFlow.getDepth() * rowHeight + 15;
+    final gpuSectionHeight = frame.gpuEventFlow.getDepth() * rowHeight;
+    final flameChartWidth = max(
+        element.clientWidth,
+        leftIndent +
+            (frame.gpuEventFlow.endTime - frame.cpuEventFlow.startTime) *
+                pixelsPerMicro);
 
-    void drawRecursively(TimelineEvent event, int row) {
-      final double start = (event.startTime - microsAdjust) / pxPerMicro;
-      final double end =
-          (event.startTime - microsAdjust + event.duration) / pxPerMicro;
+    void drawRecursively(TimelineEvent event, int row, CoreElement section) {
+      final double startPx =
+          (event.startTime - frameStartOffset) * pixelsPerMicro;
+      final double endPx = (event.endTime - frameStartOffset) * pixelsPerMicro;
 
       _drawFlameChartItem(
         event,
-        leftIndent + start.round(),
-        (end - start).round(),
+        leftIndent + startPx.round(),
+        (endPx - startPx).round(),
         row * rowHeight,
+        section,
       );
 
-      if (row > maxRow) {
-        maxRow = row;
-      }
-
       for (TimelineEvent child in event.children) {
-        drawRecursively(child, row + 1);
+        drawRecursively(child, row + 1, section);
       }
     }
 
     void drawCpuEvents() {
-      final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(mainCpuColor);
-      sectionTitle.element.style.left = '0';
-      sectionTitle.element.style.top = '${sectionTop}px';
-      add(sectionTitle);
+      final section = div(c: 'flame-chart-section');
+      add(section);
 
-      maxRow = row;
+      final style = section.element.style;
+      style.height = '${cpuSectionHeight}px';
+      style.width = '${flameChartWidth}px';
+      style.backgroundColor = colorToCss(const Color(0xFFF9F9F9));
 
-      drawRecursively(frame.cpuEventFlow, row);
+      final sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
+      final titleStyle = sectionTitle.element.style;
+      titleStyle.background = colorToCss(mainCpuColor);
+      titleStyle.fontWeight = 'bold';
+      titleStyle.left = '0';
+      titleStyle.top = '0';
+      section.add(sectionTitle);
 
-      row = maxRow;
-
-      row++;
+      drawRecursively(frame.cpuEventFlow, 0, section);
     }
 
     void drawGpuEvents() {
-      final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(mainGpuColor);
-      sectionTitle.element.style.left = '0';
-      sectionTitle.element.style.top = '${sectionTop}px';
-      add(sectionTitle);
+      final section = div(c: 'flame-chart-section');
+      add(section);
 
-      maxRow = row;
+      final style = section.element.style;
+      style.height = '${gpuSectionHeight}px';
+      style.width = '${flameChartWidth}px';
 
-      drawRecursively(frame.gpuEventFlow, row);
+      final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
+      final titleStyle = sectionTitle.element.style;
+      titleStyle.background = colorToCss(mainGpuColor);
+      titleStyle.fontWeight = 'bold';
+      titleStyle.left = '0';
+      titleStyle.top = '0';
+      section.add(sectionTitle);
 
-      row = maxRow;
-
-      row++;
+      drawRecursively(frame.gpuEventFlow, 0, section);
     }
 
     drawCpuEvents();
-
-    // TODO(kenzie): improve this by adding a spacer div instead of just
-    // increasing the row. Do this once each section is in its own container.
-    // Add an additional row for spacing between CPU and GPU events.
-    row++;
-
     drawGpuEvents();
   }
 
-  // TODO(kenzie): re-assess this drawing logic.
-  void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
+  void _drawFlameChartItem(
+      TimelineEvent event, int left, int width, int top, CoreElement section) {
     final item = Element.div()..className = 'flame-chart-item';
     final labelWrapper = Element.div()
       ..className = 'flame-chart-item-label-wrapper';
@@ -179,6 +188,6 @@ class FrameFlameChart extends CoreElement {
       labelWrapper.style.maxWidth = '${width}px';
     }
     style.top = '${top}px';
-    element.append(item);
+    section.element.append(item);
   }
 }
