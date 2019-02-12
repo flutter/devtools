@@ -113,6 +113,11 @@ span.label.gc {
     background-color: #424242;
 }
 
+.sticky-top {
+    position: sticky;
+    top: 0;
+}
+
 .table-virtual {
     overflow-anchor: none;
 }
