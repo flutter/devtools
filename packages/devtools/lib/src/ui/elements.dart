@@ -152,7 +152,7 @@ class CoreElement {
     } else if (child is Element) {
       element.children.add(child);
     } else {
-      throw ArgumentError('argument type not supported');
+      throw ArgumentError('argument type ${child.runtimeType} not supported');
     }
     return child;
   }
