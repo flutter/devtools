@@ -39,7 +39,7 @@ command-line application. The example below uses a Flutter app:
 - `flutter run --observatory-port=9200`
 
 You'll need to have a device connected - or a simulator open - for `flutter run` to work.
-Once the app starts you'll be able to connect to it from DevTools.
+Once the app starts, you'll be able to connect to it from DevTools.
 
 ## Opening DevTools and connecting to the target app
 
@@ -54,5 +54,5 @@ open http://localhost:9100/?port=9200
 from the command line.
 
 In the above url, the first port is for the local server serving the DevTools web UI. The
-second port is to tell DevTools itself which local app to connect to in order to debug and
+second port tells DevTools itself which local app to connect to in order to debug and
 inspect the app.
