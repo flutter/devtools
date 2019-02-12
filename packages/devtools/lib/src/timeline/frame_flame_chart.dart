@@ -49,7 +49,46 @@ class FrameFlameChart extends CoreElement {
       ..overflow = 'hidden';
 
     enableDragScrolling(this);
+    element.onMouseMove.listen((MouseEvent e) => _handleMouseMove(e));
+    element.onMouseWheel.listen((WheelEvent e) => _handleMouseWheel(e));
   }
+
+  /// Target maximum microseconds per frame.
+  ///
+  /// 16,666 microseconds per frame will achieve a frame rate of 60 FPS.
+  static const double targetMicrosPerFrame = 1000 * 1000 / 60.0;
+
+  /// Pixels per microsecond in order to fit a single frame in 1500px.
+  ///
+  /// For the whole frame to fit in 1500px at this drawing ratio, the frame
+  /// duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
+  static const double pixelsPerMicro = 1500 / targetMicrosPerFrame;
+
+  num _zoomLevel = 1;
+  num _minZoomLevel;
+
+  // Throttling the zoomUnit makes the scrolling smoother.
+  num get _zoomUnit {
+    if (_zoomLevel <= 1) {
+      return .01;
+    } else if (_zoomLevel <= 1.05) {
+      return .02;
+    } else if (_zoomLevel <= 1.2) {
+      return .04;
+    } else if (_zoomLevel <= 1.3) {
+      return .06;
+    } else if (_zoomLevel < 3) {
+      return .1;
+    } else {
+      return .2;
+    }
+  }
+
+  num currentMouseX;
+  num currentMouseY;
+  num currentScrollWidth;
+  num currentScrollTop = 0;
+  num currentScrollLeft = 0;
 
   TimelineFrame frame;
   CoreElement sectionTitles;
@@ -84,39 +123,31 @@ class FrameFlameChart extends CoreElement {
     }
 
     if (frame != null) {
-      _render(frame);
+      _render();
     }
   }
 
-  void _render(TimelineFrame frame) {
+  void _render({bool reRender = false}) {
     const int leftIndent = 70;
     const int rowHeight = 25;
     const int sectionSpacing = 15;
 
-    // 16,666 microseconds / frame will achieve a frame rate of 60 FPS.
-    const double targetMicrosPerFrame = 1000 * 1000 / 60.0;
-
-    /// Pixels per microsecond in order to fit a single frame in 1500px.
-    ///
-    /// For the whole frame to fit in 1500px at this drawing ratio, the frame
-    /// duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
-    const double pixelsPerMicro = 1500 / targetMicrosPerFrame;
+    final double pixelsPerMicroWithZoom = pixelsPerMicro * _zoomLevel;
 
     final int frameStartOffset = frame.startTime;
 
     final cpuSectionHeight =
         frame.cpuEventFlow.depth * rowHeight + sectionSpacing;
     final gpuSectionHeight = frame.gpuEventFlow.depth * rowHeight;
-    final flameChartWidth = max(
-        element.clientWidth,
-        leftIndent +
-            (frame.gpuEventFlow.endTime - frame.cpuEventFlow.startTime) *
-                pixelsPerMicro);
+
+    CoreElement cpuSection;
+    CoreElement gpuSection;
 
     void drawRecursively(TimelineEvent event, int row, CoreElement section) {
       final double startPx =
-          (event.startTime - frameStartOffset) * pixelsPerMicro;
-      final double endPx = (event.endTime - frameStartOffset) * pixelsPerMicro;
+          (event.startTime - frameStartOffset) * pixelsPerMicroWithZoom;
+      final double endPx =
+          (event.endTime - frameStartOffset) * pixelsPerMicroWithZoom;
 
       _drawFlameChartItem(
         event,
@@ -135,12 +166,11 @@ class FrameFlameChart extends CoreElement {
     }
 
     void drawCpuEvents() {
-      final section = div(c: 'flame-chart-section');
-      add(section);
+      cpuSection = div(c: 'flame-chart-section');
+      add(cpuSection);
 
-      section.element.style
+      cpuSection.element.style
         ..height = '${cpuSectionHeight}px'
-        ..width = '${flameChartWidth}px'
         ..backgroundColor = colorToCss(cpuSectionBackground);
 
       final sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
@@ -149,18 +179,17 @@ class FrameFlameChart extends CoreElement {
         ..fontWeight = 'bold'
         ..left = '0'
         ..top = '0';
-      section.add(sectionTitle);
+      cpuSection.add(sectionTitle);
 
-      drawRecursively(frame.cpuEventFlow, 0, section);
+      drawRecursively(frame.cpuEventFlow, 0, cpuSection);
     }
 
     void drawGpuEvents() {
-      final section = div(c: 'flame-chart-section');
-      add(section);
+      gpuSection = div(c: 'flame-chart-section');
+      add(gpuSection);
 
-      section.element.style
+      gpuSection.element.style
         ..height = '${gpuSectionHeight}px'
-        ..width = '${flameChartWidth}px'
         ..top = '${cpuSectionHeight}px';
 
       final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
@@ -169,13 +198,52 @@ class FrameFlameChart extends CoreElement {
         ..fontWeight = 'bold'
         ..left = '0'
         ..top = '0';
-      section.add(sectionTitle);
+      gpuSection.add(sectionTitle);
 
-      drawRecursively(frame.gpuEventFlow, 0, section);
+      drawRecursively(frame.gpuEventFlow, 0, gpuSection);
     }
 
     drawCpuEvents();
     drawGpuEvents();
+
+    final num scrollWidth = element.scrollWidth;
+
+    // Set the section widths to [scrollWidth], as this should be the max width
+    // we need for the flame chart.
+    cpuSection.element.style.width = '${scrollWidth}px';
+    gpuSection.element.style.width = '${scrollWidth}px';
+
+    if (reRender) {
+      // If we are re-rendering, we need to calculate and set our scroll position.
+      final scrollLeft = scrollWidth *
+          (currentMouseX + currentScrollLeft) /
+          currentScrollWidth -
+          currentMouseX;
+      element.scrollLeft = scrollLeft.round();
+
+      // Maintain the current vertical scrolling position.
+      element.scrollTop = currentScrollTop;
+    } else {
+      // This is the initial render. Calculate our minimum zoom level.
+      if (element.clientWidth == scrollWidth) {
+        // If the entire flame chart fits on the screen, we have no need to zoom
+        // out further.
+        _minZoomLevel = 1;
+      } else {
+        // Multiply by .75 to account for rounding in drawing calculations. This
+        // way the entire frame should fit on the screen at minimum zoom level.
+        _minZoomLevel = min(element.clientWidth / scrollWidth * .75, 1);
+      }
+    }
+  }
+
+  void _reRender() {
+    clear();
+    // Reset the color offsets so that the chart coloring stays consistent on
+    // re-rendering.
+    _cpuColorOffset = 0;
+    _gpuColorOffset = 0;
+    _render(reRender: true);
   }
 
   void _drawFlameChartItem(
@@ -201,5 +269,55 @@ class FrameFlameChart extends CoreElement {
     }
     style.top = '${top}px';
     section.element.append(item);
+  }
+
+  void _handleMouseMove(MouseEvent e) {
+    // Subtract offsets so that [currentMouseX] and [currentMouseY] reflect the
+    // (x, y) coordinates within the flame chart.
+    currentMouseX = e.client.x - element.offsetLeft;
+    currentMouseY = e.client.y - element.offsetTop;
+
+    // Store current scroll values for re-calculating scroll location on zoom.
+    currentScrollTop = element.scrollTop;
+    currentScrollLeft = element.scrollLeft;
+    currentScrollWidth = element.scrollWidth;
+  }
+
+  void _handleMouseWheel(WheelEvent e) {
+    e.preventDefault();
+
+    if (e.deltaY.abs() > e.deltaX.abs()) {
+      _handleZoom(e.deltaY);
+    } else if (e.deltaX.abs() > e.deltaY.abs()) {
+      // Manually perform horizontal scrolling.
+      element.scrollLeft += e.deltaX;
+      currentScrollLeft = element.scrollLeft;
+    }
+  }
+
+  void _handleZoom(num deltaY) {
+    if (deltaY > -0.0) {
+      _zoomIn();
+    } else if (deltaY < -0.0) {
+      _zoomOut();
+    }
+  }
+
+  void _zoomIn() {
+    if (_zoomLevel >= 20) {
+      // Already at max zoom level. Do nothing.
+    } else if (frame != null) {
+      _zoomLevel += _zoomUnit;
+      _reRender();
+    }
+  }
+
+  void _zoomOut() {
+    if (_zoomLevel <= _minZoomLevel) {
+      // Already at min zoom level. Do nothing.
+    } else if (frame != null) {
+      _zoomLevel -= _zoomUnit;
+      _reRender();
+    }
   }
 }
