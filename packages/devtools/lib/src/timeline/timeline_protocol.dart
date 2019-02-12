@@ -545,6 +545,7 @@ class TimelineEvent {
       }
       return maximum + 1;
     }
+
     return maxDepth(this);
   }
 
