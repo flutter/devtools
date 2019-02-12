@@ -42,13 +42,13 @@
     border: 2px solid #A2A2A2;
 }
 
-.flame-chart {
-    position: relative;
-    margin-top: 4px;
-    overflow: hidden;
+.flame-chart-section {
+    min-width: 100%;
+    position: absolute;
+    box-shadow: inset 4px 4px 9px -7px #bbbbbb;
 }
 
-.flame-chart .flame-chart-item {
+.flame-chart-section .flame-chart-item {
     border-radius: 2px;
     padding: 0 2px;
     position: absolute;

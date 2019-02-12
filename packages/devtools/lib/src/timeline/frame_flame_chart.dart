@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html';
+import 'dart:math';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
@@ -34,10 +35,19 @@ const gpuColorPalette = [
   mainGpuColor,
 ];
 
+const cpuSectionBackground = Color(0xFFF9F9F9);
+const gpuSectionBackground = Color(0xFFF3F3F3);
+
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
-    clazz('flame-chart');
+    layoutVertical();
+    element.style
+      ..backgroundColor = colorToCss(gpuSectionBackground)
+      ..position = 'relative'
+      ..marginTop = '4px'
+      ..overflow = 'hidden';
+
     enableDragScrolling(this);
   }
 
@@ -79,86 +89,97 @@ class FrameFlameChart extends CoreElement {
   }
 
   void _render(TimelineFrame frame) {
-    const int leftIndent = 80;
+    const int leftIndent = 70;
     const int rowHeight = 25;
+    const int sectionSpacing = 15;
 
-    // TODO(kenzie): re-write this scale logic.
-    const double microsPerFrame = 1000 * 1000 / 60.0;
-    const double pxPerMicro = microsPerFrame / 1000.0;
+    // 16,666 microseconds / frame will achieve a frame rate of 60 FPS.
+    const double targetMicrosPerFrame = 1000 * 1000 / 60.0;
 
-    int row = 0;
+    /// Pixels per microsecond in order to fit a single frame in 1500px.
+    ///
+    /// For the whole frame to fit in 1500px at this drawing ratio, the frame
+    /// duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
+    const double pixelsPerMicro = 1500 / targetMicrosPerFrame;
 
-    final int microsAdjust = frame.startTime;
+    final int frameStartOffset = frame.startTime;
 
-    int maxRow = 0;
+    final cpuSectionHeight =
+        frame.cpuEventFlow.depth * rowHeight + sectionSpacing;
+    final gpuSectionHeight = frame.gpuEventFlow.depth * rowHeight;
+    final flameChartWidth = max(
+        element.clientWidth,
+        leftIndent +
+            (frame.gpuEventFlow.endTime - frame.cpuEventFlow.startTime) *
+                pixelsPerMicro);
 
-    void drawRecursively(TimelineEvent event, int row) {
-      final double start = (event.startTime - microsAdjust) / pxPerMicro;
-      final double end =
-          (event.startTime - microsAdjust + event.duration) / pxPerMicro;
+    void drawRecursively(TimelineEvent event, int row, CoreElement section) {
+      final double startPx =
+          (event.startTime - frameStartOffset) * pixelsPerMicro;
+      final double endPx = (event.endTime - frameStartOffset) * pixelsPerMicro;
 
       _drawFlameChartItem(
         event,
-        leftIndent + start.round(),
-        (end - start).round(),
+        // TODO(kenzie): technically we will want to round to fraction of a px
+        // for high dpi devices where 1 logical pixel may equal 2 physical
+        // pixels, etc.
+        leftIndent + startPx.round(),
+        (endPx - startPx).round(),
         row * rowHeight,
+        section,
       );
 
-      if (row > maxRow) {
-        maxRow = row;
-      }
-
       for (TimelineEvent child in event.children) {
-        drawRecursively(child, row + 1);
+        drawRecursively(child, row + 1, section);
       }
     }
 
     void drawCpuEvents() {
-      final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(mainCpuColor);
-      sectionTitle.element.style.left = '0';
-      sectionTitle.element.style.top = '${sectionTop}px';
-      add(sectionTitle);
+      final section = div(c: 'flame-chart-section');
+      add(section);
 
-      maxRow = row;
+      section.element.style
+        ..height = '${cpuSectionHeight}px'
+        ..width = '${flameChartWidth}px'
+        ..backgroundColor = colorToCss(cpuSectionBackground);
 
-      drawRecursively(frame.cpuEventFlow, row);
+      final sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
+      sectionTitle.element.style
+        ..background = colorToCss(mainCpuColor)
+        ..fontWeight = 'bold'
+        ..left = '0'
+        ..top = '0';
+      section.add(sectionTitle);
 
-      row = maxRow;
-
-      row++;
+      drawRecursively(frame.cpuEventFlow, 0, section);
     }
 
     void drawGpuEvents() {
-      final int sectionTop = row * rowHeight;
-      final CoreElement sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      sectionTitle.element.style.background = colorToCss(mainGpuColor);
-      sectionTitle.element.style.left = '0';
-      sectionTitle.element.style.top = '${sectionTop}px';
-      add(sectionTitle);
+      final section = div(c: 'flame-chart-section');
+      add(section);
 
-      maxRow = row;
+      section.element.style
+        ..height = '${gpuSectionHeight}px'
+        ..width = '${flameChartWidth}px'
+        ..top = '${cpuSectionHeight}px';
 
-      drawRecursively(frame.gpuEventFlow, row);
+      final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
+      sectionTitle.element.style
+        ..background = colorToCss(mainGpuColor)
+        ..fontWeight = 'bold'
+        ..left = '0'
+        ..top = '0';
+      section.add(sectionTitle);
 
-      row = maxRow;
-
-      row++;
+      drawRecursively(frame.gpuEventFlow, 0, section);
     }
 
     drawCpuEvents();
-
-    // TODO(kenzie): improve this by adding a spacer div instead of just
-    // increasing the row. Do this once each section is in its own container.
-    // Add an additional row for spacing between CPU and GPU events.
-    row++;
-
     drawGpuEvents();
   }
 
-  // TODO(kenzie): re-assess this drawing logic.
-  void _drawFlameChartItem(TimelineEvent event, int left, int width, int top) {
+  void _drawFlameChartItem(
+      TimelineEvent event, int left, int width, int top, CoreElement section) {
     final item = Element.div()..className = 'flame-chart-item';
     final labelWrapper = Element.div()
       ..className = 'flame-chart-item-label-wrapper';
@@ -179,6 +200,6 @@ class FrameFlameChart extends CoreElement {
       labelWrapper.style.maxWidth = '${width}px';
     }
     style.top = '${top}px';
-    element.append(item);
+    section.element.append(item);
   }
 }

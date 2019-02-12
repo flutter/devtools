@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -451,6 +452,23 @@ class TimelineEvent {
 
   bool get isCpuEventFlow => _hasChild('Engine::BeginFrame');
   bool get isGpuEventFlow => _hasChild('PipelineConsume');
+
+  /// Depth of this TimelineEvent tree, including [this].
+  ///
+  /// We assume that TimelineEvent nodes are not modified after the first time
+  /// [depth] is accessed. We would need to clear the cache if this was
+  /// supported.
+  int get depth {
+    if (_depth != 0) {
+      return _depth;
+    }
+    for (TimelineEvent child in children) {
+      _depth = max(_depth, child.depth);
+    }
+    return _depth = _depth + 1;
+  }
+
+  int _depth = 0;
 
   /// Whether there is a child with the given name [childName] is contained
   /// somewhere in the subtree [children].
