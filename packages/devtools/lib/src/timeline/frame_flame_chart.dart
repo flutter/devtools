@@ -160,7 +160,8 @@ class FrameFlameChart extends CoreElement {
 
       section.element.style
         ..height = '${gpuSectionHeight}px'
-        ..width = '${flameChartWidth}px';
+        ..width = '${flameChartWidth}px'
+        ..top = '${cpuSectionHeight}px';
 
       final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
       sectionTitle.element.style

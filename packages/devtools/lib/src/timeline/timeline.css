@@ -44,7 +44,7 @@
 
 .flame-chart-section {
     min-width: 100%;
-    position: relative;
+    position: absolute;
     box-shadow: inset 4px 4px 9px -7px #bbbbbb;
 }
 
