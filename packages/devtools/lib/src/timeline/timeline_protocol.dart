@@ -453,20 +453,22 @@ class TimelineEvent {
   bool get isCpuEventFlow => _hasChild('Engine::BeginFrame');
   bool get isGpuEventFlow => _hasChild('PipelineConsume');
 
-  /// Returns the depth of this TimelineEvent tree, including [this].
-  int get depth => _depth ?? _getDepth(this);
-  int _depth;
-
-  int _getDepth(TimelineEvent root) {
-    if (root == null) {
-      return 0;
+  /// Depth of this TimelineEvent tree, including [this].
+  ///
+  /// We assume that TimelineEvent nodes are not modified after the first time
+  /// [depth] is accessed. We would need to clear the cache if this was
+  /// supported.
+  int get depth {
+    if (_depth != 0) {
+      return _depth;
     }
-    _depth = 0;
-    for (TimelineEvent child in root.children) {
-      _depth = max(_depth, _getDepth(child));
+    for (TimelineEvent child in children) {
+      _depth = max(_depth, child.depth);
     }
-    return _depth + 1;
+    return _depth = _depth + 1;
   }
+
+  int _depth = 0;
 
   /// Whether there is a child with the given name [childName] is contained
   /// somewhere in the subtree [children].
