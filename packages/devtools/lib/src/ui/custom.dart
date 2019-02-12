@@ -121,7 +121,6 @@ class SelectableList<T> extends CoreElement {
 
     _selectedElement = element;
     element?.toggleClass('selected', true);
-    // TODO(dantup): Figure out why this doesn't work.
     element?.scrollIntoView();
     _selectionController.add(item);
   }
@@ -326,6 +325,7 @@ class SelectableTree<T> extends CoreElement {
 
     _selectedItem = element;
     element?.toggleClass('selected', true);
+    element?.scrollIntoView();
     _selectionController.add(element?.item);
   }
 }
