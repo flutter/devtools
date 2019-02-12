@@ -42,12 +42,6 @@
     border: 2px solid #A2A2A2;
 }
 
-.flame-chart {
-    position: relative;
-    margin-top: 4px;
-    overflow: hidden;
-}
-
 .flame-chart-section {
     min-width: 100%;
     position: relative;

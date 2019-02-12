@@ -534,19 +534,17 @@ class TimelineEvent {
   }
 
   /// Returns the depth of this TimelineEvent tree, including [this].
-  int getDepth() {
-    int maxDepth(TimelineEvent root) {
-      if (root == null) {
-        return 0;
-      }
-      int maximum = 0;
-      for (TimelineEvent child in root.children) {
-        maximum = max(maximum, maxDepth(child));
-      }
-      return maximum + 1;
-    }
+  int getDepth() => _getDepth(this);
 
-    return maxDepth(this);
+  int _getDepth(TimelineEvent root) {
+    if (root == null) {
+      return 0;
+    }
+    int depth = 0;
+    for (TimelineEvent child in root.children) {
+      depth = max(depth, _getDepth(child));
+    }
+    return depth + 1;
   }
 
   void format(StringBuffer buf, String indent) {

@@ -35,12 +35,18 @@ const gpuColorPalette = [
   mainGpuColor,
 ];
 
+const cpuSectionBackground = Color(0xFFF9F9F9);
+const gpuSectionBackground = Color(0xFFF3F3F3);
+
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div') {
     flex();
     layoutVertical();
-    clazz('flame-chart');
-    element.style.backgroundColor = colorToCss(const Color(0xFFF3F3F3));
+    element.style
+      ..backgroundColor = colorToCss(gpuSectionBackground)
+      ..position = 'relative'
+      ..marginTop = '4px'
+      ..overflow = 'hidden';
 
     enableDragScrolling(this);
   }
@@ -85,19 +91,21 @@ class FrameFlameChart extends CoreElement {
   void _render(TimelineFrame frame) {
     const int leftIndent = 70;
     const int rowHeight = 25;
+    const int sectionSpacing = 15;
 
     // 16,666 microseconds / frame will achieve a frame rate of 60 FPS.
     const double targetMicrosPerFrame = 1000 * 1000 / 60.0;
 
-    // Pixels per microsecond in order to fit a single frame in 1500px. In order
-    // for the whole frame to fit in 1500px at this drawing ratio, the frame
-    // duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
+    /// Pixels per microsecond in order to fit a single frame in 1500px.
+    ///
+    /// For the whole frame to fit in 1500px at this drawing ratio, the frame
+    /// duration must be [targetMicrosPerFrame] or less. 1500px is arbitrary.
     const double pixelsPerMicro = 1500 / targetMicrosPerFrame;
 
     final int frameStartOffset = frame.startTime;
 
-    // Add 15 to account for vertical spacing between the CPU and GPU sections.
-    final cpuSectionHeight = frame.cpuEventFlow.getDepth() * rowHeight + 15;
+    final cpuSectionHeight =
+        frame.cpuEventFlow.getDepth() * rowHeight + sectionSpacing;
     final gpuSectionHeight = frame.gpuEventFlow.getDepth() * rowHeight;
     final flameChartWidth = max(
         element.clientWidth,
@@ -112,6 +120,9 @@ class FrameFlameChart extends CoreElement {
 
       _drawFlameChartItem(
         event,
+        // TODO(kenzie): technically we will want to round to fraction of a px
+        // for high dpi devices where 1 logical pixel may equal 2 physical
+        // pixels, etc.
         leftIndent + startPx.round(),
         (endPx - startPx).round(),
         row * rowHeight,
@@ -127,17 +138,17 @@ class FrameFlameChart extends CoreElement {
       final section = div(c: 'flame-chart-section');
       add(section);
 
-      final style = section.element.style;
-      style.height = '${cpuSectionHeight}px';
-      style.width = '${flameChartWidth}px';
-      style.backgroundColor = colorToCss(const Color(0xFFF9F9F9));
+      section.element.style
+        ..height = '${cpuSectionHeight}px'
+        ..width = '${flameChartWidth}px'
+        ..backgroundColor = colorToCss(cpuSectionBackground);
 
       final sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
-      final titleStyle = sectionTitle.element.style;
-      titleStyle.background = colorToCss(mainCpuColor);
-      titleStyle.fontWeight = 'bold';
-      titleStyle.left = '0';
-      titleStyle.top = '0';
+      sectionTitle.element.style
+        ..background = colorToCss(mainCpuColor)
+        ..fontWeight = 'bold'
+        ..left = '0'
+        ..top = '0';
       section.add(sectionTitle);
 
       drawRecursively(frame.cpuEventFlow, 0, section);
@@ -147,16 +158,16 @@ class FrameFlameChart extends CoreElement {
       final section = div(c: 'flame-chart-section');
       add(section);
 
-      final style = section.element.style;
-      style.height = '${gpuSectionHeight}px';
-      style.width = '${flameChartWidth}px';
+      section.element.style
+        ..height = '${gpuSectionHeight}px'
+        ..width = '${flameChartWidth}px';
 
       final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
-      final titleStyle = sectionTitle.element.style;
-      titleStyle.background = colorToCss(mainGpuColor);
-      titleStyle.fontWeight = 'bold';
-      titleStyle.left = '0';
-      titleStyle.top = '0';
+      sectionTitle.element.style
+        ..background = colorToCss(mainGpuColor)
+        ..fontWeight = 'bold'
+        ..left = '0'
+        ..top = '0';
       section.add(sectionTitle);
 
       drawRecursively(frame.gpuEventFlow, 0, section);
