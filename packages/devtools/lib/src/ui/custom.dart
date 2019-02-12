@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
+
+import 'package:meta/meta.dart';
 
 import 'elements.dart';
 
@@ -118,6 +121,8 @@ class SelectableList<T> extends CoreElement {
 
     _selectedElement = element;
     element?.toggleClass('selected', true);
+    // TODO(dantup): Figure out why this doesn't work.
+    element?.scrollIntoView();
     _selectionController.add(item);
   }
 }
@@ -129,12 +134,80 @@ abstract class ChildProvider<T> {
 }
 
 class SelectableTree<T> extends CoreElement {
-  SelectableTree() : super('ul');
+  SelectableTree() : super('ul') {
+    // Ensure the tree can be tabbed into.
+    element.tabIndex = 0;
+    element.onKeyDown.listen(handleKeyPress);
+  }
+
+  @visibleForTesting
+  void handleKeyPress(KeyboardEvent e) {
+    void handleDownKey() {
+      if (_selectedItem != null) {
+        final nextElm = _selectedItem.getNextVisibleElement();
+        if (nextElm != null) {
+          select(nextElm);
+        }
+      } else {
+        if (treeItems.isNotEmpty) {
+          select(treeItems.first);
+        }
+      }
+    }
+
+    void handleUpKey() {
+      if (_selectedItem != null) {
+        final prevElm = selectedItem.getPreviousVisibleElement();
+        if (prevElm != null) {
+          select(prevElm);
+        }
+      } else {
+        if (treeItems.isNotEmpty) {
+          select(treeItems.last.getLastVisibleDescendant() ?? treeItems.last);
+        }
+      }
+    }
+
+    void handleRightKey() {
+      if (!_selectedItem.hasChildren) {
+        return;
+      }
+      if (!_selectedItem.isExpanded) {
+        _selectedItem.expand();
+      } else {
+        select(_selectedItem.visibleChildren.first);
+      }
+    }
+
+    void handleLeftKey() {
+      if (_selectedItem.isExpanded) {
+        _selectedItem.collapse();
+      } else if (_selectedItem.parent != null) {
+        select(_selectedItem.parent);
+      }
+    }
+
+    if (e.keyCode == KeyCode.DOWN) {
+      handleDownKey();
+    } else if (e.keyCode == KeyCode.UP) {
+      handleUpKey();
+    } else if (e.keyCode == KeyCode.RIGHT) {
+      handleRightKey();
+    } else if (e.keyCode == KeyCode.LEFT) {
+      handleLeftKey();
+    } else {
+      return; // don't preventDefault if we were anything else.
+    }
+
+    e.preventDefault();
+  }
 
   List<T> items = <T>[];
+  List<TreeItem<T>> treeItems = [];
   ListRenderer<T> renderer;
   ChildProvider<T> childProvider;
-  CoreElement _selectedElement;
+  TreeItem<T> _selectedItem;
+  TreeItem<T> get selectedItem => _selectedItem;
 
   final StreamController<T> _selectionController = StreamController.broadcast();
 
@@ -151,25 +224,23 @@ class SelectableTree<T> extends CoreElement {
   void setItems(List<T> items) {
     this.items = items;
 
-    final bool hadSelection = _selectedElement != null;
-    _selectedElement = null;
+    final bool hadSelection = _selectedItem != null;
+    _selectedItem = null;
 
     clear();
 
-    for (T item in items) {
-      _populateInto(this, item);
-    }
+    treeItems = _populateItems(items, this, null);
 
-    if (hadSelection && _selectedElement == null) {
+    if (hadSelection && _selectedItem == null) {
       _selectionController.add(null);
     }
   }
 
-  void _populateInto(CoreElement parent, T item) {
+  TreeItem<T> _populateInto(CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
-    final CoreElement obj = renderer(item);
+    final TreeItem<T> obj = TreeItem<T>(renderer(item), item);
     obj.click(() {
-      _select(obj, item, clear: obj.hasClass('selected'));
+      select(obj, clear: obj.hasClass('selected'));
     });
 
     final CoreElement element = div();
@@ -180,20 +251,24 @@ class SelectableTree<T> extends CoreElement {
       obj.element.children.insert(0, toggle.element);
 
       bool hasPopulated = false;
-      final CoreElement children = ul(c: 'tree-list');
-      element.add(children);
-      children.hidden(true);
+      final CoreElement childContainer = ul(c: 'tree-list');
+      element.add(childContainer);
+      childContainer.hidden(true);
+
+      // Attach helpers that allow TreeItem to expand/collapse for use in
+      // keyboard navigation.
+      obj.expand = () => toggle.toggle(onlyExpand: true);
+      obj.collapse = () => toggle.toggle(onlyCollapse: true);
 
       toggle.onOpen.listen((bool open) {
-        children.hidden(!open);
+        obj.isExpanded = open;
+        childContainer.hidden(!open);
 
         if (!hasPopulated) {
           hasPopulated = true;
 
           childProvider.getChildren(item).then((List<T> results) {
-            for (T result in results) {
-              _populateInto(children, result);
-            }
+            _populateItems(results, childContainer, obj);
           }).catchError((e) {
             // ignore
           });
@@ -203,24 +278,55 @@ class SelectableTree<T> extends CoreElement {
       obj.element.children.insert(0, new TreeToggle(empty: true).element);
     }
 
-    parent.add(element);
+    container.add(element);
+
+    return obj;
+  }
+
+  /// Populates [results] into [container] while wiring up the TreeItem properties
+  /// for tracking siblings/parents/children to allow keyboard navigation.
+  List<TreeItem<T>> _populateItems(
+    List results,
+    CoreElement container,
+    TreeItem<T> obj,
+  ) {
+    final List<TreeItem<T>> children = [];
+    TreeItem<T> previousNode;
+
+    for (T result in results) {
+      final TreeItem<T> node = _populateInto(container, result);
+      children.add(node);
+
+      node.hasChildren = childProvider.hasChildren(result);
+      node.parent = obj;
+
+      if (previousNode != null) {
+        node.previousSibling = previousNode;
+        previousNode.nextSibling ??= node;
+      }
+
+      previousNode = node;
+    }
+
+    obj?.children?.addAll(children);
+    return children;
   }
 
   void clearItems() {
     setItems(<T>[]);
   }
 
-  void _select(CoreElement element, T item, {bool clear = false}) {
-    _selectedElement?.toggleClass('selected', false);
+  @visibleForTesting
+  void select(TreeItem<T> element, {bool clear = false}) {
+    _selectedItem?.toggleClass('selected', false);
 
     if (clear) {
       element = null;
-      item = null;
     }
 
-    _selectedElement = element;
+    _selectedItem = element;
     element?.toggleClass('selected', true);
-    _selectionController.add(item);
+    _selectionController.add(element?.item);
   }
 }
 
@@ -228,16 +334,21 @@ class TreeToggle extends CoreElement {
   TreeToggle({bool empty = false})
       : super('div', classes: 'tree-toggle octicon') {
     if (!empty) {
-      click(() {
-        _isOpen = !_isOpen;
-        _openController.add(_isOpen);
-        toggleClass('octicon-triangle-right', !_isOpen);
-        toggleClass('octicon-triangle-down', _isOpen);
-      });
+      click(toggle);
     }
     if (!empty) {
       clazz('octicon-triangle-right');
     }
+  }
+
+  void toggle({bool onlyExpand = false, bool onlyCollapse = false}) {
+    if ((onlyExpand && _isOpen) || (onlyCollapse && !_isOpen)) {
+      return;
+    }
+    _isOpen = !_isOpen;
+    _openController.add(_isOpen);
+    toggleClass('octicon-triangle-right', !_isOpen);
+    toggleClass('octicon-triangle-down', _isOpen);
   }
 
   bool _isOpen = false;
@@ -246,6 +357,48 @@ class TreeToggle extends CoreElement {
       new StreamController.broadcast();
 
   Stream<bool> get onOpen => _openController.stream;
+}
+
+class TreeItem<T> extends CoreElement {
+  TreeItem(CoreElement core, this.item) : super.from(core.element);
+  final T item;
+  bool isExpanded = false, hasChildren = false;
+  Function() expand, collapse;
+  TreeItem<T> parent;
+  TreeItem<T> previousSibling, nextSibling;
+  final List<TreeItem<T>> children = [];
+  List<TreeItem<T>> get visibleChildren => isExpanded ? children : [];
+
+  TreeItem<T> getNextVisibleElement({includeChildren = true}) {
+    // The next visible element below this one is first of:
+    // - Our first child
+    // - Our next sibling
+    // - The next sibling of our parent
+    // - The next sibling of our parents parent (recursive...)
+    if (includeChildren && isExpanded && visibleChildren.isNotEmpty) {
+      return visibleChildren.first;
+    }
+    return nextSibling ?? parent?.getNextVisibleElement(includeChildren: false);
+  }
+
+  TreeItem<T> getPreviousVisibleElement() {
+    // The previous visible element above this one is first of:
+    // - Our previous sibling's last visible ancestor
+    // - Our previous sibling
+    // - Our parent
+
+    return previousSibling?.getLastVisibleDescendant() ??
+        previousSibling ??
+        parent;
+  }
+
+  TreeItem<T> getLastVisibleDescendant() {
+    var node = this;
+    while (node.isExpanded && node.visibleChildren.isNotEmpty) {
+      node = node.visibleChildren.last;
+    }
+    return node;
+  }
 }
 
 CoreElement _defaultRenderer<T>(T item) {
