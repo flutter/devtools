@@ -446,6 +446,7 @@ class TimelineEvent {
   List<TimelineEvent> children = <TimelineEvent>[];
 
   int get duration => (endTime != null) ? endTime - startTime : null;
+  double get durationMs => duration / 1000;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
   bool get isGpuEvent => type == TimelineEventType.gpu;
