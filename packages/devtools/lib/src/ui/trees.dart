@@ -71,6 +71,32 @@ mixin TreeKeyboardNavigation<T> {
   }
 }
 
+class Tree<T> {
+  // Connects parents, children and sibling nodes required to be able to traverse
+  // the tree.
+  void connectNodes(
+    TreeNode<T> parent,
+    List<TreeNode<T>> children,
+    bool Function(T) hasChildren,
+  ) {
+    TreeNode<T> previousNode;
+
+    for (TreeNode<T> node in children) {
+      node.parent = parent;
+      node.hasChildren = hasChildren(node.data);
+
+      if (previousNode != null) {
+        node.previousSibling = previousNode;
+        previousNode.nextSibling ??= node;
+      }
+
+      previousNode = node;
+    }
+
+    parent?.children?.addAll(children);
+  }
+}
+
 class TreeNode<T> {
   TreeNode(this.data);
   T data;

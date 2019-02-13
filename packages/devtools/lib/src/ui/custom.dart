@@ -137,7 +137,9 @@ class SelectableTreeNodeItem<T> {
 }
 
 class SelectableTree<T> extends CoreElement
-    with TreeKeyboardNavigation<SelectableTreeNodeItem<T>> {
+    with
+        Tree<SelectableTreeNodeItem<T>>,
+        TreeKeyboardNavigation<SelectableTreeNodeItem<T>> {
   SelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
@@ -173,14 +175,15 @@ class SelectableTree<T> extends CoreElement
 
     clear();
 
-    treeNodes = _populateItems(items, this, null);
+    treeNodes = _buildTree(items, this, null);
 
     if (hadSelection && _selectedItem == null) {
       _selectionController.add(null);
     }
   }
 
-  TreeNode _populateInto(CoreElement container, T item) {
+  TreeNode<SelectableTreeNodeItem<T>> _addItemToTree(
+      CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
     final obj = TreeNode(new SelectableTreeNodeItem(renderer(item), item));
     obj.data.element.click(() {
@@ -212,7 +215,7 @@ class SelectableTree<T> extends CoreElement
           hasPopulated = true;
 
           childProvider.getChildren(item).then((List<T> results) {
-            _populateItems(results, childContainer, obj);
+            _buildTree(results, childContainer, obj);
           }).catchError((e) {
             // ignore
           });
@@ -228,33 +231,21 @@ class SelectableTree<T> extends CoreElement
     return obj;
   }
 
-  /// Populates [results] into [container] while wiring up the TreeItem properties
-  /// for tracking siblings/parents/children to allow keyboard navigation.
-  List<TreeNode<SelectableTreeNodeItem<T>>> _populateItems(
-    List results,
+  /// Builds a tree for [results] into [container].
+  List<TreeNode<SelectableTreeNodeItem<T>>> _buildTree(
+    List<T> results,
     CoreElement container,
-    TreeNode<SelectableTreeNodeItem<T>> obj,
+    TreeNode<SelectableTreeNodeItem<T>> parent,
   ) {
-    final List<TreeNode<SelectableTreeNodeItem<T>>> children = [];
-    TreeNode<SelectableTreeNodeItem<T>> previousNode;
+    final List<TreeNode<SelectableTreeNodeItem<T>>> children =
+        results.map((result) => _addItemToTree(container, result)).toList();
 
-    for (T result in results) {
-      final TreeNode<SelectableTreeNodeItem<T>> node =
-          _populateInto(container, result);
-      children.add(node);
+    connectNodes(
+      parent,
+      children,
+      (node) => childProvider.hasChildren(node.item),
+    );
 
-      node.hasChildren = childProvider.hasChildren(result);
-      node.parent = obj;
-
-      if (previousNode != null) {
-        node.previousSibling = previousNode;
-        previousNode.nextSibling ??= node;
-      }
-
-      previousNode = node;
-    }
-
-    obj?.children?.addAll(children);
     return children;
   }
 
