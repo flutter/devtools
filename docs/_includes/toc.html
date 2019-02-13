@@ -1,31 +1,31 @@
 <nav class="menu docs-menu">
-  <a class="menu-item {% if page.name == 'index.md' %} selected {% endif %}" href="index.html">
+  <a class="menu-item {% if page.name == 'index.md' %} selected {% endif %}" href="{{ "/" | relative_url }}">
     Getting Started
   </a>
 
-  <a class="menu-item indent {% if page.name == 'android_studio.md' %} selected {% endif %}" href="android_studio">
+  <a class="menu-item indent {% if page.name == 'android_studio.md' %} selected {% endif %}" href="{{ "/android_studio" | relative_url }}">
     Android Studio / IntelliJ
   </a>
-  <a class="menu-item indent {% if page.name == 'vscode.md' %} selected {% endif %}" href="vscode">
+  <a class="menu-item indent {% if page.name == 'vscode.md' %} selected {% endif %}" href="{{ "/vscode" | relative_url }}">
     VS Code
   </a>
-  <a class="menu-item indent {% if page.name == 'cli.md' %} selected {% endif %}" href="cli">
+  <a class="menu-item indent {% if page.name == 'cli.md' %} selected {% endif %}" href="{{ "/cli" | relative_url }}">
     Command Line
   </a>
 
   <div class="menu-item no-nav">
     Using DevTools
   </div>
-  <a class="menu-item indent {% if page.name == 'inspector.md' %} selected {% endif %}" href="inspector">
+  <a class="menu-item indent {% if page.name == 'inspector.md' %} selected {% endif %}" href="{{ "/inspector" | relative_url }}">
     Flutter Inspector
   </a>
-  <a class="menu-item indent {% if page.name == 'timeline.md' %} selected {% endif %}" href="timeline">
+  <a class="menu-item indent {% if page.name == 'timeline.md' %} selected {% endif %}" href="{{ "/timeline" | relative_url }}">
     Timeline View
   </a>
-  <a class="menu-item indent {% if page.name == 'debugger.md' %} selected {% endif %}" href="debugger">
+  <a class="menu-item indent {% if page.name == 'debugger.md' %} selected {% endif %}" href="{{ "/debugger" | relative_url }}">
     Debugger
   </a>
-  <a class="menu-item indent {% if page.name == 'logging.md' %} selected {% endif %}" href="logging">
+  <a class="menu-item indent {% if page.name == 'logging.md' %} selected {% endif %}" href="{{ "/logging" | relative_url }}">
     Logging View
   </a>
 </nav>
