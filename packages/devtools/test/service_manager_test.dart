@@ -58,18 +58,12 @@ void main() {
       runZoned(() {
         Future<void> asyncTestMethod() async {
           // Service with less than 1 registration.
-          bool caughtException = false;
-          // TODO(jacobr): there is a simpler pattern for writing this I'm
-          // forgetting.
-          try {
-            await serviceManager.service.addBreakpoint(
-                serviceManager.isolateManager.selectedIsolate.id,
-                'fake-script-id',
-                1);
-          } catch (e) {
-            caughtException = true;
-          }
-          expect(caughtException, isTrue);
+          expect(
+              serviceManager.service.addBreakpoint(
+                  serviceManager.isolateManager.selectedIsolate.id,
+                  'fake-script-id',
+                  1),
+              throwsException);
 
           await env.tearDownEnvironment();
         }
