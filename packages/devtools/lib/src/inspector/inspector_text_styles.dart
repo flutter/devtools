@@ -4,7 +4,7 @@ import '../ui/theme.dart';
 final TextStyle unimportant = TextStyle(
   color: ThemedColor(Colors.grey.shade500, Colors.grey.shade400),
 );
-const TextStyle regular = TextStyle(color: black);
+const TextStyle regular = TextStyle(color: defaultForeground);
 final TextStyle warning = TextStyle(
   color: ThemedColor(Colors.orange.shade500, Colors.orange.shade400),
 );
@@ -17,9 +17,9 @@ final TextStyle link = TextStyle(
 );
 
 const TextStyle regularBold =
-    TextStyle(color: black, fontWeight: FontWeight.w700);
+    TextStyle(color: defaultForeground, fontWeight: FontWeight.w700);
 const TextStyle regularItalic =
-    TextStyle(color: black, fontStyle: FontStyle.italic);
+    TextStyle(color: defaultForeground, fontStyle: FontStyle.italic);
 
 /// Pretty sames for common text styles to make it easier to debug output
 /// containing these names.

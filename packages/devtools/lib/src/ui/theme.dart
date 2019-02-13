@@ -20,8 +20,8 @@ void initializeTheme(String theme) {
 }
 
 // Commonly used themed colors.
-const ThemedColor white = ThemedColor(Colors.white, Colors.black);
-const ThemedColor black =
+const ThemedColor defaultBackground = ThemedColor(Colors.white, Colors.black);
+const ThemedColor defaultForeground =
     ThemedColor(Colors.black, Color.fromARGB(255, 187, 187, 187));
 const ThemedColor grey = ThemedColor(
     Color.fromARGB(255, 128, 128, 128), Color.fromARGB(255, 128, 128, 128));

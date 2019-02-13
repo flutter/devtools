@@ -139,7 +139,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
     // draw a black and gray grid to use as the background to disambiguate
     // opaque colors from translucent colors.
     context
-      ..fillStyle = colorToCss(white)
+      ..fillStyle = colorToCss(defaultBackground)
       ..fillRect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
       ..fillStyle = colorToCss(grey)
@@ -150,7 +150,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
       ..fillStyle = colorToCss(color)
       ..fillRect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
-      ..strokeStyle = colorToCss(black)
+      ..strokeStyle = colorToCss(defaultForeground)
       ..rect(iconMargin, iconMargin, iconWidth - iconMargin * 2,
           iconHeight - iconMargin * 2)
       ..stroke();

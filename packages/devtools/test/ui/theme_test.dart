@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:test/test.dart';
 
 import 'package:devtools/src/ui/theme.dart';
@@ -11,17 +15,17 @@ void main() {
 
   test('light theme', () {
     initializeTheme('light');
-    expect(white.red, equals(255));
-    expect(white.green, equals(255));
-    expect(white.blue, equals(255));
-    expect(white.alpha, equals(255));
-    expect(colorToCss(white), equals('#ffffffff'));
+    expect(defaultBackground.red, equals(255));
+    expect(defaultBackground.green, equals(255));
+    expect(defaultBackground.blue, equals(255));
+    expect(defaultBackground.alpha, equals(255));
+    expect(colorToCss(defaultBackground), equals('#ffffffff'));
 
-    expect(black.red, equals(0));
-    expect(black.green, equals(0));
-    expect(black.blue, equals(0));
-    expect(black.alpha, equals(255));
-    expect(colorToCss(black), equals('#000000ff'));
+    expect(defaultForeground.red, equals(0));
+    expect(defaultForeground.green, equals(0));
+    expect(defaultForeground.blue, equals(0));
+    expect(defaultForeground.alpha, equals(255));
+    expect(colorToCss(defaultForeground), equals('#000000ff'));
 
     expect(customColor.value, equals(customLight.value));
     expect(customColor.alpha, equals(customLight.alpha));
@@ -33,17 +37,17 @@ void main() {
 
   test('dark theme', () {
     initializeTheme('dark');
-    expect(white.red, equals(0));
-    expect(white.green, equals(0));
-    expect(white.blue, equals(0));
-    expect(white.alpha, equals(255));
-    expect(colorToCss(white), equals('#000000ff'));
+    expect(defaultBackground.red, equals(0));
+    expect(defaultBackground.green, equals(0));
+    expect(defaultBackground.blue, equals(0));
+    expect(defaultBackground.alpha, equals(255));
+    expect(colorToCss(defaultBackground), equals('#000000ff'));
 
-    expect(black.red, equals(187));
-    expect(black.green, equals(187));
-    expect(black.blue, equals(187));
-    expect(black.alpha, equals(255));
-    expect(colorToCss(black), equals('#bbbbbbff'));
+    expect(defaultForeground.red, equals(187));
+    expect(defaultForeground.green, equals(187));
+    expect(defaultForeground.blue, equals(187));
+    expect(defaultForeground.alpha, equals(255));
+    expect(colorToCss(defaultForeground), equals('#bbbbbbff'));
 
     expect(customColor.value, equals(customDark.value));
     expect(customColor.alpha, equals(customDark.alpha));
