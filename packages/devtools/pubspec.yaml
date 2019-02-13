@@ -20,6 +20,14 @@ dependencies:
   shelf_static: ^0.2.8
   rxdart: ^0.20.0
   vm_service_lib: ^3.14.1
+  octicons:
+    path: ../../third_party/packages/octicons
+  polymer_css:
+    path: ../../third_party/packages/polymer_css
+  primer_css:
+    path: ../../third_party/packages/primer_css
+  split:
+    path: ../../third_party/packages/split
 
 dev_dependencies:
   build_runner: 1.0.0
