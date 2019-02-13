@@ -7,8 +7,10 @@
 │   overflow: null [D]
 │   textScaleFactor: null [D]
 │   maxLines: null [D]
+│   dependencies: [MediaQuery, DefaultTextStyle]
 └─▼[/icons/inspector/textArea.png]<grayed> </grayed>RichText
     softWrap: wrapping at box width
     maxLines: unlimited
     text: "Hello, World!"
+    dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]
     ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2
