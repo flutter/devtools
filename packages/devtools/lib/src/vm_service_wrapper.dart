@@ -357,12 +357,18 @@ class VmServiceWrapper implements VmService {
       allFuturesCompleted = Completer<bool>();
     }
     _activeFutures.add(future);
-    future.whenComplete(() {
+
+    void futureComplete() {
       _activeFutures.remove(future);
       if (_activeFutures.isEmpty && !allFuturesCompleted.isCompleted) {
         allFuturesCompleted.complete(true);
       }
-    });
+    }
+
+    future.then(
+      (value) => futureComplete(),
+      onError: (error) => futureComplete(),
+    );
     return future;
   }
 }
