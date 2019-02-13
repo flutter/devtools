@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
 
 import 'elements.dart';
 import 'trees.dart';
+import 'trees_html.dart';
 
 class ProgressElement extends CoreElement {
   ProgressElement() : super('div') {
@@ -140,27 +140,12 @@ class SelectableTreeNodeItem<T> {
 class SelectableTree<T> extends CoreElement
     with
         Tree<SelectableTreeNodeItem<T>>,
-        TreeNavigator<SelectableTreeNodeItem<T>> {
+        TreeNavigator<SelectableTreeNodeItem<T>>,
+        HtmlTreeNavigator<SelectableTreeNodeItem<T>> {
   SelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
-    element.onKeyDown.listen(_handleKeyPress);
-  }
-
-  void _handleKeyPress(KeyboardEvent e) {
-    if (e.keyCode == KeyCode.DOWN) {
-      moveDown();
-    } else if (e.keyCode == KeyCode.UP) {
-      moveUp();
-    } else if (e.keyCode == KeyCode.RIGHT) {
-      moveRight();
-    } else if (e.keyCode == KeyCode.LEFT) {
-      moveLeft();
-    } else {
-      return; // don't preventDefault if we were anything else.
-    }
-
-    e.preventDefault();
+    element.onKeyDown.listen(handleKeyPress);
   }
 
   List<T> items = <T>[];
@@ -272,7 +257,7 @@ class SelectableTree<T> extends CoreElement
 
   @override
   void select(TreeNode<SelectableTreeNodeItem<T>> node, {bool clear = false}) {
-    selectedItem?.data?.element?.toggleClass('selected', false);
+    _selectedItem?.data?.element?.toggleClass('selected', false);
 
     if (clear) {
       node = null;
