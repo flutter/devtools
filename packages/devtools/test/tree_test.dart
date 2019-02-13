@@ -7,6 +7,7 @@ import 'dart:html';
 
 import 'package:devtools/src/ui/custom.dart';
 import 'package:devtools/src/ui/elements.dart';
+import 'package:devtools/src/ui/trees.dart';
 import 'package:test/test.dart';
 
 import 'integration_tests/integration.dart';
@@ -34,7 +35,7 @@ void main() {
     });
 
     test('includes children when expanded', () async {
-      tree.treeItems[1].expand();
+      tree.treeNodes[1].expand();
       await shortDelay();
       final textTree = tree.getTextTree();
       const expectedTree = '''
@@ -49,9 +50,9 @@ void main() {
     });
 
     test('hides children when collapsed', () async {
-      tree.treeItems[1].expand();
+      tree.treeNodes[1].expand();
       await shortDelay();
-      tree.treeItems[1].collapse();
+      tree.treeNodes[1].collapse();
       await shortDelay();
       final textTree = tree.getTextTree();
       const expectedTree = '''
@@ -64,7 +65,7 @@ void main() {
 
     group('keyboard navigation', () {
       test('DOWN moves selection to next sibling if not expanded', () async {
-        tree.select(tree.treeItems.first);
+        tree.select(tree.treeNodes.first);
         expect(tree.getTextTree(), equals('''
 - Item 1 ***
 - Item 2
@@ -80,7 +81,7 @@ void main() {
       });
 
       test('DOWN moves selection to first child if expanded', () async {
-        tree.select(tree.treeItems.first);
+        tree.select(tree.treeNodes.first);
         tree.selectedItem.expand();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
@@ -103,7 +104,7 @@ void main() {
 '''));
       });
       test('DOWN sticks to the last item if nothing below it', () async {
-        tree.select(tree.treeItems.last);
+        tree.select(tree.treeNodes.last);
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
@@ -135,7 +136,7 @@ void main() {
       });
 
       test('UP moves selection to previous sibling if not expanded', () async {
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -152,9 +153,9 @@ void main() {
 
       test('UP moves selection to last child of previous sibling if expanded',
           () async {
-        tree.treeItems[0].expand();
+        tree.treeNodes[0].expand();
         await shortDelay();
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         expect(tree.getTextTree(), equals('''
 - Item 1
   - Item 1.1
@@ -175,7 +176,7 @@ void main() {
 '''));
       });
       test('UP sticks to the first item if nothing above it', () async {
-        tree.select(tree.treeItems.first);
+        tree.select(tree.treeNodes.first);
         expect(tree.getTextTree(), equals('''
 - Item 1 ***
 - Item 2
@@ -192,9 +193,9 @@ void main() {
 
       test('UP selects the last visible item if there is no selection',
           () async {
-        tree.treeItems.last.expand();
+        tree.treeNodes.last.expand();
         await shortDelay();
-        tree.treeItems.last.children.last.expand();
+        tree.treeNodes.last.children.last.expand();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
 - Item 1
@@ -223,7 +224,7 @@ void main() {
       });
 
       test('LEFT does nothing for level=1', () {
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -238,7 +239,7 @@ void main() {
 '''));
       });
       test('LEFT collapses an expanded node', () async {
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         tree.selectedItem.expand();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
@@ -259,9 +260,9 @@ void main() {
 '''));
       });
       test('LEFT moves to parent of a collapsed node', () async {
-        tree.treeItems[1].expand();
+        tree.treeNodes[1].expand();
         await shortDelay();
-        tree.select(tree.treeItems[1].children[1]);
+        tree.select(tree.treeNodes[1].children[1]);
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
@@ -283,7 +284,7 @@ void main() {
       });
       test('RIGHT does nothing for leaf node', () async {
         // Expand all the middle nodes to the leaf.
-        var children = tree.treeItems;
+        var children = tree.treeNodes;
         while (children[1].hasChildren) {
           children[1].expand();
           await shortDelay();
@@ -323,7 +324,7 @@ void main() {
 '''));
       });
       test('RIGHT expands a collapsed node', () async {
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -342,7 +343,7 @@ void main() {
 '''));
       });
       test('RIGHT moves to first child of expanded node', () async {
-        tree.select(tree.treeItems[1]);
+        tree.select(tree.treeNodes[1]);
         tree.selectedItem.expand();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
@@ -380,7 +381,7 @@ class TestStringTreeView extends SelectableTree<String> {
   String getTextTree() {
     final StringBuffer output = StringBuffer();
 
-    void addLevel(int indent, List<TreeItem<String>> items) {
+    void addLevel(int indent, List<TreeNode<String>> items) {
       for (var item in items) {
         output.writeln(
             '${' ' * indent * 2}- ${item.item} ${item == selectedItem ? '***' : ''}'
@@ -389,7 +390,7 @@ class TestStringTreeView extends SelectableTree<String> {
       }
     }
 
-    addLevel(0, treeItems);
+    addLevel(0, treeNodes);
     return output.toString();
   }
 }
