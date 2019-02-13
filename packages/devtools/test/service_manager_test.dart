@@ -53,7 +53,7 @@ void main() {
       );
       expect(serviceManager.callService('fakeMethod'), throwsException);
 
-      Completer<Object> testDone = Completer();
+      final Completer<Object> testDone = Completer();
       Object testError;
       runZoned(() {
         Future<void> asyncTestMethod() async {
