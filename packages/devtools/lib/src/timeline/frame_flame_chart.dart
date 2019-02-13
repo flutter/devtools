@@ -86,7 +86,6 @@ class FrameFlameChart extends CoreElement {
 
   num _currentMouseX;
   num _currentScrollWidth;
-  num _currentScrollTop = 0;
   num _currentScrollLeft = 0;
 
   TimelineFrame _frame;
@@ -260,7 +259,6 @@ class FrameFlameChart extends CoreElement {
     _currentMouseX = e.client.x - element.offsetLeft;
 
     // Store current scroll values for re-calculating scroll location on zoom.
-    _currentScrollTop = element.scrollTop;
     _currentScrollLeft = element.scrollLeft;
     _currentScrollWidth = element.scrollWidth;
   }
