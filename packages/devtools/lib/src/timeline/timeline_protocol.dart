@@ -413,18 +413,6 @@ class TimelineFrame {
   bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
   bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
 
-  String get cpuAsMs {
-    return _durationAsMsText(cpuDurationMs);
-  }
-
-  String get gpuAsMs {
-    return _durationAsMsText(gpuDurationMs);
-  }
-
-  String _durationAsMsText(double durationMs) {
-    return '${durationMs.toStringAsFixed(1)}ms';
-  }
-
   @override
   String toString() {
     return 'Frame $id - start: $startTime end: $endTime total dur: $duration '
@@ -446,7 +434,6 @@ class TimelineEvent {
   List<TimelineEvent> children = <TimelineEvent>[];
 
   int get duration => (endTime != null) ? endTime - startTime : null;
-  double get durationMs => duration / 1000;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
   bool get isGpuEvent => type == TimelineEventType.gpu;

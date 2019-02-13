@@ -8,13 +8,14 @@ import 'dart:math' as math;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../utils.dart';
 import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
 class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
-      : super('div', classes: 'timeline-frames') {
+      : super('div', classes: 'timeline-frames section-border') {
     layoutHorizontal();
     element.style
       ..alignItems = 'flex-end'
@@ -94,12 +95,12 @@ class FrameBar extends CoreElement {
     final gpuBarHeight =
         math.min(maxBarHeight - cpuBarHeight, frame.gpuDurationMs * pxPerMs);
 
-    final cpuTooltip = frame.isCpuSlow
-        ? _slowFrameWarning('GPU', frame.gpuAsMs)
-        : 'GPU: ${frame.gpuAsMs}';
-    final gpuTooltip = frame.isCpuSlow
-        ? _slowFrameWarning('GPU', frame.gpuAsMs)
-        : 'GPU: ${frame.gpuAsMs}';
+    final cpuMs = microsAsMsText(frame.cpuDuration);
+    final gpuMs = microsAsMsText(frame.gpuDuration);
+    final cpuTooltip =
+        frame.isCpuSlow ? _slowFrameWarning('GPU', cpuMs) : 'GPU: $cpuMs';
+    final gpuTooltip =
+        frame.isCpuSlow ? _slowFrameWarning('GPU', gpuMs) : 'GPU: ${gpuMs}';
 
     _cpuBar = div(c: 'bar bottom');
     _cpuBar.element.title = cpuTooltip;

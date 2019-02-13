@@ -57,6 +57,10 @@ String printMb(num bytes, [int fractionDigits = 1]) {
   return (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
 }
 
+String microsAsMsText(int micros, {bool includeUnit = true}) {
+  return '${(micros / 1000).toStringAsFixed(1)}${includeUnit ? ' ms' : ''}';
+}
+
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
   String name = ref.name;

@@ -11,8 +11,10 @@ import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
+import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
@@ -55,8 +57,10 @@ class TimelineScreen extends Screen {
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div()..layoutVertical();
 
-    CoreElement frameDetailsContainer;
-    FrameFlameChart frameFlameChart;
+    FrameFlameChart flameChart;
+    EventDetails eventDetails;
+
+    bool splitterConfigured = false;
 
     // TODO(kenzie): uncomment these tabs once they are implemented.
 //    final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
@@ -93,17 +97,14 @@ class TimelineScreen extends Screen {
       upperButtonSection,
       div(c: 'section'),
       div(c: 'section')
-        ..add(
-            <CoreElement>[framesBarChart = FramesBarChart(timelineController)]),
-      div(c: 'section'),
+        ..add(framesBarChart = FramesBarChart(timelineController)),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
-        ..add(frameDetailsContainer = div()
-          ..layoutVertical()
-          ..flex()
-          ..add(<CoreElement>[frameFlameChart = FrameFlameChart()])
-          ..attribute('hidden')),
+        ..add(<CoreElement>[
+          flameChart = FrameFlameChart()..attribute('hidden'),
+          eventDetails = EventDetails()..attribute('hidden'),
+        ]),
     ]);
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
@@ -113,12 +114,29 @@ class TimelineScreen extends Screen {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     framesBarChart.onSelectedFrame.listen((TimelineFrame frame) {
-      frameDetailsContainer.attribute('hidden', frame == null);
-
       if (frame != null && timelineController.hasStarted) {
-        frameFlameChart.updateFrameData(frame);
+        flameChart.attribute('hidden', frame == null);
+        eventDetails.attribute('hidden', frame == null);
+
+        flameChart.updateFrameData(frame);
+        eventDetails.reset();
+
+        // Configure the flame chart / event details splitter if we haven't
+        // already.
+        if (!splitterConfigured) {
+          split.flexSplit(
+            [flameChart, eventDetails],
+            horizontal: false,
+            gutterSize: defaultSplitterWidth,
+            sizes: [80, 20],
+            minSize: [200, 60],
+          );
+          splitterConfigured = true;
+        }
       }
     });
+
+    onSelectedEvent.listen(eventDetails.update);
 
     return screenDiv;
   }
