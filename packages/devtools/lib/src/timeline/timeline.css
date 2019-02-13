@@ -6,9 +6,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    border: 1px solid;
-    border-color: var(--light-background);
-    border-radius: 3px;
     direction: rtl;
 }
 
@@ -53,10 +50,10 @@
 
 .flame-chart-section .flame-chart-item {
     border-radius: 2px;
+    cursor: pointer;
     padding: 0 2px;
     position: absolute;
     white-space: nowrap;
-    cursor: default;
     height: 24px;
 }
 
@@ -71,4 +68,10 @@
 .flame-chart-item-label {
     display: inline-block;
     color: black;
+}
+
+.section-border {
+    border: 1px solid;
+    border-color: var(--light-background);
+    border-radius: 3px;
 }
