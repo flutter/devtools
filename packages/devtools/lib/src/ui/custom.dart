@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
 
 import 'elements.dart';
 import 'trees.dart';
@@ -143,7 +144,23 @@ class SelectableTree<T> extends CoreElement
   SelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
-    element.onKeyDown.listen(handleKeyPress);
+    element.onKeyDown.listen(_handleKeyPress);
+  }
+
+  void _handleKeyPress(KeyboardEvent e) {
+    if (e.keyCode == KeyCode.DOWN) {
+      handleDownKey();
+    } else if (e.keyCode == KeyCode.UP) {
+      handleUpKey();
+    } else if (e.keyCode == KeyCode.RIGHT) {
+      handleRightKey();
+    } else if (e.keyCode == KeyCode.LEFT) {
+      handleLeftKey();
+    } else {
+      return; // don't preventDefault if we were anything else.
+    }
+
+    e.preventDefault();
   }
 
   List<T> items = <T>[];

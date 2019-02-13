@@ -2,30 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
-
+/// Provides functionality for moving around a tree using the keyboard.
 mixin TreeKeyboardNavigation<T> {
   List<TreeNode<T>> get treeNodes;
   TreeNode<T> get selectedItem;
   void select(TreeNode<T> node);
 
-  void handleKeyPress(KeyboardEvent e) {
-    if (e.keyCode == KeyCode.DOWN) {
-      _handleDownKey();
-    } else if (e.keyCode == KeyCode.UP) {
-      _handleUpKey();
-    } else if (e.keyCode == KeyCode.RIGHT) {
-      _handleRightKey();
-    } else if (e.keyCode == KeyCode.LEFT) {
-      _handleLeftKey();
-    } else {
-      return; // don't preventDefault if we were anything else.
-    }
-
-    e.preventDefault();
-  }
-
-  void _handleDownKey() {
+  void handleDownKey() {
     if (selectedItem != null) {
       final nextElm = selectedItem.getNextVisibleElement();
       if (nextElm != null) {
@@ -38,7 +21,7 @@ mixin TreeKeyboardNavigation<T> {
     }
   }
 
-  void _handleUpKey() {
+  void handleUpKey() {
     if (selectedItem != null) {
       final prevElm = selectedItem.getPreviousVisibleElement();
       if (prevElm != null) {
@@ -51,7 +34,7 @@ mixin TreeKeyboardNavigation<T> {
     }
   }
 
-  void _handleRightKey() {
+  void handleRightKey() {
     if (!selectedItem.hasChildren) {
       return;
     }
@@ -62,7 +45,7 @@ mixin TreeKeyboardNavigation<T> {
     }
   }
 
-  void _handleLeftKey() {
+  void handleLeftKey() {
     if (selectedItem.isExpanded) {
       selectedItem.collapse();
     } else if (selectedItem.parent != null) {
@@ -71,6 +54,7 @@ mixin TreeKeyboardNavigation<T> {
   }
 }
 
+/// Provies shared functionality for trees.
 class Tree<T> {
   // Connects parents, children and sibling nodes required to be able to traverse
   // the tree.
@@ -97,6 +81,7 @@ class Tree<T> {
   }
 }
 
+/// Represents a node in a tree that holds some [data].
 class TreeNode<T> {
   TreeNode(this.data);
   T data;

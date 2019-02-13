@@ -72,7 +72,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.DOWN));
+        tree.handleDownKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -93,7 +93,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.DOWN));
+        tree.handleDownKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
   - Item 1.1 ***
@@ -111,7 +111,7 @@ void main() {
 - Item 3 ***
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.DOWN));
+        tree.handleDownKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
@@ -127,7 +127,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.DOWN));
+        tree.handleDownKey();
         expect(tree.getTextTree(), equals('''
 - Item 1 ***
 - Item 2
@@ -143,7 +143,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.UP));
+        tree.handleUpKey();
         expect(tree.getTextTree(), equals('''
 - Item 1 ***
 - Item 2
@@ -165,7 +165,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.UP));
+        tree.handleUpKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
   - Item 1.1
@@ -183,7 +183,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.UP));
+        tree.handleUpKey();
         expect(tree.getTextTree(), equals('''
 - Item 1 ***
 - Item 2
@@ -209,7 +209,7 @@ void main() {
     - Item 3.3.3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.UP));
+        tree.handleUpKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
@@ -231,7 +231,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.LEFT));
+        tree.handleLeftKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -251,7 +251,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.LEFT));
+        tree.handleLeftKey();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
 - Item 1
@@ -272,7 +272,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.LEFT));
+        tree.handleLeftKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2 ***
@@ -307,7 +307,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.RIGHT));
+        tree.handleRightKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
@@ -331,7 +331,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.RIGHT));
+        tree.handleRightKey();
         await shortDelay();
         expect(tree.getTextTree(), equals('''
 - Item 1
@@ -355,7 +355,7 @@ void main() {
 - Item 3
 '''));
 
-        tree.handleKeyPress(new KeyEvent('keydown', keyCode: KeyCode.RIGHT));
+        tree.handleRightKey();
         expect(tree.getTextTree(), equals('''
 - Item 1
 - Item 2
