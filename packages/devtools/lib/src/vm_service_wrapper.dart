@@ -21,6 +21,8 @@ class VmServiceWrapper implements VmService {
 
   VmService _vmService;
   final Map<String, Future<Success>> _activeStreams = {};
+
+  // ignore: prefer_collection_literals
   final Set<Future<Object>> _activeFutures = Set();
   Completer<bool> allFuturesCompleted = Completer<bool>();
 
