@@ -381,10 +381,11 @@ class TestStringTreeView extends SelectableTree<String> {
   String getTextTree() {
     final StringBuffer output = StringBuffer();
 
-    void addLevel(int indent, List<TreeNode<String>> items) {
+    void addLevel(
+        int indent, List<TreeNode<SelectableTreeNodeItem<String>>> items) {
       for (var item in items) {
         output.writeln(
-            '${' ' * indent * 2}- ${item.item} ${item == selectedItem ? '***' : ''}'
+            '${' ' * indent * 2}- ${item.data.item} ${item == selectedItem ? '***' : ''}'
                 .trimRight());
         addLevel(indent + 1, item.visibleChildren);
       }

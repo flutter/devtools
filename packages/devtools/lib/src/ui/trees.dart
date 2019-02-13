@@ -4,8 +4,6 @@
 
 import 'dart:html';
 
-import 'elements.dart';
-
 mixin TreeKeyboardNavigation<T> {
   List<TreeNode<T>> get treeNodes;
   TreeNode<T> get selectedItem;
@@ -73,9 +71,9 @@ mixin TreeKeyboardNavigation<T> {
   }
 }
 
-class TreeNode<T> extends CoreElement {
-  TreeNode(CoreElement core, this.item) : super.from(core.element);
-  final T item;
+class TreeNode<T> {
+  TreeNode(this.data);
+  T data;
   bool isExpanded = false, hasChildren = false;
   Function() expand, collapse;
   TreeNode<T> parent;
@@ -83,7 +81,7 @@ class TreeNode<T> extends CoreElement {
   final List<TreeNode<T>> children = [];
   List<TreeNode<T>> get visibleChildren => isExpanded ? children : [];
 
-  TreeNode<T> getNextVisibleElement({includeChildren = true}) {
+  TreeNode<T> getNextVisibleElement({bool includeChildren = true}) {
     // The next visible element below this one is first of:
     // - Our first child
     // - Our next sibling

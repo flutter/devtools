@@ -130,7 +130,14 @@ abstract class ChildProvider<T> {
   Future<List<T>> getChildren(T item);
 }
 
-class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
+class SelectableTreeNodeItem<T> {
+  SelectableTreeNodeItem(this.element, this.item);
+  final CoreElement element;
+  final T item;
+}
+
+class SelectableTree<T> extends CoreElement
+    with TreeKeyboardNavigation<SelectableTreeNodeItem<T>> {
   SelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
@@ -139,12 +146,12 @@ class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
 
   List<T> items = <T>[];
   @override
-  List<TreeNode<T>> treeNodes = [];
+  List<TreeNode<SelectableTreeNodeItem<T>>> treeNodes = [];
   ListRenderer<T> renderer;
   ChildProvider<T> childProvider;
-  TreeNode<T> _selectedItem;
+  TreeNode<SelectableTreeNodeItem<T>> _selectedItem;
   @override
-  TreeNode<T> get selectedItem => _selectedItem;
+  TreeNode<SelectableTreeNodeItem<T>> get selectedItem => _selectedItem;
 
   final StreamController<T> _selectionController = StreamController.broadcast();
 
@@ -173,19 +180,19 @@ class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
     }
   }
 
-  TreeNode<T> _populateInto(CoreElement container, T item) {
+  TreeNode _populateInto(CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
-    final TreeNode<T> obj = TreeNode<T>(renderer(item), item);
-    obj.click(() {
-      select(obj, clear: obj.hasClass('selected'));
+    final obj = TreeNode(new SelectableTreeNodeItem(renderer(item), item));
+    obj.data.element.click(() {
+      select(obj, clear: obj.data.element.hasClass('selected'));
     });
 
     final CoreElement element = div();
-    element.add(obj);
+    element.add(obj.data.element);
 
     if (childProvider.hasChildren(item)) {
       final TreeToggle toggle = new TreeToggle();
-      obj.element.children.insert(0, toggle.element);
+      obj.data.element.element.children.insert(0, toggle.element);
 
       bool hasPopulated = false;
       final CoreElement childContainer = ul(c: 'tree-list');
@@ -212,7 +219,8 @@ class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
         }
       });
     } else {
-      obj.element.children.insert(0, new TreeToggle(empty: true).element);
+      obj.data.element.element.children
+          .insert(0, new TreeToggle(empty: true).element);
     }
 
     container.add(element);
@@ -222,16 +230,17 @@ class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
 
   /// Populates [results] into [container] while wiring up the TreeItem properties
   /// for tracking siblings/parents/children to allow keyboard navigation.
-  List<TreeNode<T>> _populateItems(
+  List<TreeNode<SelectableTreeNodeItem<T>>> _populateItems(
     List results,
     CoreElement container,
-    TreeNode<T> obj,
+    TreeNode<SelectableTreeNodeItem<T>> obj,
   ) {
-    final List<TreeNode<T>> children = [];
-    TreeNode<T> previousNode;
+    final List<TreeNode<SelectableTreeNodeItem<T>>> children = [];
+    TreeNode<SelectableTreeNodeItem<T>> previousNode;
 
     for (T result in results) {
-      final TreeNode<T> node = _populateInto(container, result);
+      final TreeNode<SelectableTreeNodeItem<T>> node =
+          _populateInto(container, result);
       children.add(node);
 
       node.hasChildren = childProvider.hasChildren(result);
@@ -254,17 +263,17 @@ class SelectableTree<T> extends CoreElement with TreeKeyboardNavigation<T> {
   }
 
   @override
-  void select(TreeNode<T> node, {bool clear = false}) {
-    selectedItem?.toggleClass('selected', false);
+  void select(TreeNode<SelectableTreeNodeItem<T>> node, {bool clear = false}) {
+    selectedItem?.data?.element?.toggleClass('selected', false);
 
     if (clear) {
       node = null;
     }
 
     _selectedItem = node;
-    node?.toggleClass('selected', true);
-    node?.scrollIntoView();
-    _selectionController.add(node?.item);
+    _selectedItem?.data?.element?.toggleClass('selected', true);
+    _selectedItem?.data?.element?.scrollIntoView();
+    _selectionController.add(node?.data?.item);
   }
 }
 
