@@ -36,6 +36,7 @@ class InspectorService {
     this.vmService,
     this.inspectorLibrary,
     this.supportedServiceMethods,
+    // ignore: prefer_collection_literals
   ) : clients = Set() {
     vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
     vmService.onDebugEvent.listen(onDebugVmServiceReceived);
@@ -98,6 +99,7 @@ class InspectorService {
       for (ClassRef classRef in library.classes) {
         if ('WidgetInspectorService' == classRef.name) {
           final classObj = await inspectorLibrary.getClass(classRef, null);
+          // ignore: prefer_collection_literals
           final Set<String> functionNames = Set();
           for (FuncRef funcRef in classObj.functions) {
             functionNames.add(funcRef.name);

@@ -334,14 +334,17 @@ class ServiceExtensionManager {
       <String, StreamController<ServiceExtensionState>>{};
 
   /// All available service extensions.
+  // ignore: prefer_collection_literals
   final Set<String> _serviceExtensions = Set<String>();
 
   /// All service extensions that are currently enabled.
   final Map<String, ServiceExtensionState> _enabledServiceExtensions =
       <String, ServiceExtensionState>{};
 
-  /// Temporarily stores service extensions that we need to add. We should not add
-  /// extensions until the first frame event has been received [_firstFrameEventReceived].
+  /// Temporarily stores service extensions that we need to add. We should not
+  /// add extensions until the first frame event has been received
+  /// [_firstFrameEventReceived].
+  // ignore: prefer_collection_literals
   final Set<String> _pendingServiceExtensions = Set<String>();
 
   Completer<Null> extensionStatesUpdated = Completer();
