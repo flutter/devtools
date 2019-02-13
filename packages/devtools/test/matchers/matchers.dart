@@ -125,7 +125,6 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
           .addDescriptionOf(_value)
           .add('\nbut got\n  ')
           .addDescriptionOf(actualValue)
-          .add('\nTo update golden files:\n')
           .add('\nTo update golden files run:\n')
           .add('export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"\n')
           .add('pub run test test/\n')

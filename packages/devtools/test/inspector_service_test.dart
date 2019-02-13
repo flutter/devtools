@@ -158,11 +158,13 @@ void main() async {
                 ' │ overflow: null\n'
                 ' │ textScaleFactor: null\n'
                 ' │ maxLines: null\n'
+                ' │ dependencies: [MediaQuery, DefaultTextStyle]\n'
                 ' │\n'
                 ' └─RichText\n'
                 '     softWrap: wrapping at box width\n'
                 '     maxLines: unlimited\n'
                 '     text: "Hello, World!"\n'
+                '     dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
                 '     renderObject: RenderParagraph#00000 relayoutBoundary=up2\n',
           ),
         );

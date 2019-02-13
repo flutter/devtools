@@ -394,10 +394,12 @@ void main() async {
             '│   overflow: null [D]\n'
             '│   textScaleFactor: null [D]\n'
             '│   maxLines: null [D]\n'
+            '│   dependencies: [MediaQuery, DefaultTextStyle]\n'
             '└─▼[/icons/inspector/textArea.png] RichText\n'
             '    softWrap: wrapping at box width\n'
             '    maxLines: unlimited\n'
             '    text: "Hello, World!"\n'
+            '    dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
             '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
@@ -407,8 +409,8 @@ void main() async {
             'inspector_controller_text_details_tree_with_styles.txt'),
       );
 
-      // Select row nine (right text)
-      detailsTree.onTap(const Offset(0, rowHeight * 9.5));
+      // Select row ten (rich text)
+      detailsTree.onTap(const Offset(0, rowHeight * 10.5));
       //
       expect(
         detailsTree.toStringDeep(),
@@ -421,10 +423,12 @@ void main() async {
             '│   overflow: null [D]\n'
             '│   textScaleFactor: null [D]\n'
             '│   maxLines: null [D]\n'
+            '│   dependencies: [MediaQuery, DefaultTextStyle]\n'
             '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
             '    softWrap: wrapping at box width\n'
             '    maxLines: unlimited\n'
             '    text: "Hello, World!"\n'
+            '    dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
             '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
