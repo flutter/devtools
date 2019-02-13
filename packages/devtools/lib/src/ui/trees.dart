@@ -90,7 +90,7 @@ mixin TreeNavigator<T> {
   }
 }
 
-/// Provies shared functionality for trees.
+/// Provides shared functionality for trees.
 class Tree<T> {
   // Connects parents, children and sibling nodes required to be able to traverse
   // the tree.
