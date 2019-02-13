@@ -356,6 +356,7 @@ class FlameChartItem {
     }
     style.top = '${_top}px';
 
+    // TODO(kenzie): make flame chart item appear selected.
     e.onClick.listen((e) => _selectedEventController.add(_event));
   }
 
