@@ -278,6 +278,7 @@ class FrameFlameChart extends CoreElement {
   }
 
   void _handleZoom(num deltaY) {
+    // TODO(kenzie): use deltaY to calculate [_zoomMultiplier].
     if (deltaY > -0.0) {
       _zoomIn();
     } else if (deltaY < -0.0) {
@@ -316,9 +317,6 @@ class FrameFlameChart extends CoreElement {
             _currentMouseX)
         .round();
     element.scrollLeft = scrollLeft;
-
-    // Maintain the current vertical scrolling position.
-    element.scrollTop = _currentScrollTop;
 
     // Update our current scroll values.
     _currentScrollLeft = element.scrollLeft;
