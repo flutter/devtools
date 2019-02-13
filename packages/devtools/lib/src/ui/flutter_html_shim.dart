@@ -16,6 +16,12 @@ String fontStyleToCss(TextStyle textStyle) {
 
 final Map<Color, String> _cssColors = {};
 
+/// Call this method when the theme has changed invaliding previous cached
+/// css colors for ThemedColor objects.
+void clearColorCache() {
+  _cssColors.clear();
+}
+
 String colorToCss(Color color) {
   String cssColor = _cssColors[color];
   if (cssColor != null) {

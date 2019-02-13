@@ -15,19 +15,33 @@
     <title>Dart DevTools</title>
     <link rel="icon" sizes="64x64" href="favicon.png">
 
-    <link rel="stylesheet" href="packages/devtools/src/ui/primer_6.0.0.css">
-    <link rel="stylesheet" href="packages/devtools/src/ui/octicons_4.4.0.css">
-    <link rel="stylesheet" href="packages/devtools/src/ui/flex.css">
+    <link rel="stylesheet" href="packages/primer_css/primer_11.0.0.css">
+
+    <link rel="stylesheet" href="packages/octicons/octicons_4.4.0.css">
+    <link rel="stylesheet" href="packages/polymer_css/flex.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="packages/devtools/src/debugger/debugger.css">
     <link rel="stylesheet" href="packages/devtools/src/inspector/inspector.css">
     <link rel="stylesheet" href="packages/devtools/src/logging/logging.css">
     <link rel="stylesheet" href="packages/devtools/src/timeline/timeline.css">
 
+    <script type="text/javascript">
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('theme') == 'dark') {
+                document.write(
+   // TODO(jacobr): find a dark primer theme with the right licensing terms.
+   //                 '<link rel="stylesheet" href="packages/devtools/src/ui/github-dark.css">' +
+                    '<link rel="stylesheet" href="styles_dark.css">'
+                );
+            }
+        })();
+    </script>
+
     <link href="packages/codemirror/codemirror.css" rel="stylesheet">
     <script src="packages/codemirror/codemirror.js"></script>
 
-    <script type="text/javascript" src="third_party/split/split.min.js"></script>
+    <script type="text/javascript" src="packages/split/split.min.js"></script>
 
     <script defer src="main.dart.js"></script>
 </head>

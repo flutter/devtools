@@ -70,3 +70,11 @@ file output still looks reasonable and execute the following command to update t
 ```
 ./tool/update_goldens.sh
 ```
+
+### third_party dependencies
+
+All content not authored by the Flutter team must go in the third_party
+directory. As an expedient to make the third_party code work well with our build scripts,
+code in third_party should be given a stub pubspec.yaml file so that you can
+reference the resources from the packages directory from
+`packages/devtools/web/index.html`

@@ -4,9 +4,10 @@
 
 .timeline-frames {
     overflow-x: auto;
-    overflow-y: none;
+    overflow-y: hidden;
     white-space: nowrap;
-    border: 1px solid #ccc;
+    border: 1px solid;
+    border-color: var(--light-background);
     border-radius: 3px;
     direction: rtl;
 }
@@ -32,14 +33,16 @@
     border-left: 1px solid;
     border-right: 1px solid;
     border-bottom: 1px solid;
+    border-color: var(--light-background);
 }
 
 .timeline-frame .bar.top {
     border: 1px solid;
+    border-color: var(--light-background);
 }
 
 .timeline-frame.selected .bar {
-    border: 2px solid #A2A2A2;
+    border-color: var(--selected-border);
 }
 
 .flame-chart-section {

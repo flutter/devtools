@@ -9,12 +9,16 @@ import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
+import '../ui/theme.dart' as theme;
 import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 
 class FrameworkCore {
   static void init() {
+    final Uri uri = Uri.parse(window.location.toString());
+    theme.initializeTheme(uri.queryParameters['theme']);
+
     _setServiceConnectionManager();
   }
 

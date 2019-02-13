@@ -34,7 +34,7 @@ void _logError(error) {
 TextStyle textStyleForLevel(DiagnosticLevel level) {
   switch (level) {
     case DiagnosticLevel.hidden:
-      return inspector_text_styles.grayed;
+      return inspector_text_styles.unimportant;
     case DiagnosticLevel.warning:
       return inspector_text_styles.warning;
     case DiagnosticLevel.error:

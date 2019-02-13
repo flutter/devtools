@@ -8,9 +8,9 @@
 
 .source-head {
     font-weight: 600;
-    color: #586069;
-    background-color: #f3f3f3;
-    border-bottom: 1px solid #dfe2e5;
+    color: var(--header-color);
+    background-color: var(--header-backround);
+    border-bottom: 1px solid var(--table-border);
     padding: 4px 8px;
 }
 
@@ -20,15 +20,15 @@
 
 .CodeMirror-gutter-elt .octicon {
     margin-left: 4px;
-    color: #4078c0;
+    color: var(--selected-background);
 }
 
 .CodeMirror-linebackground.executionLine {
-    background: #c4daf7;
+    background: var(--selected-line);
 }
 
 .execution-marker {
-    color: #4078c0;
+    color: var(--selected-background);
     margin-left: -2px;
     margin-top: -2px;
     z-index: 10;

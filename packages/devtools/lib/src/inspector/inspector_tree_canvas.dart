@@ -367,7 +367,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
 
     if (row.isSelected || row.node == hover) {
       final Color backgroundColor =
-          row.isSelected ? selectedRowBackgroundColor : Colors.yellowAccent;
+          row.isSelected ? selectedRowBackgroundColor : hoverColor;
       final double x = getDepthIndent(row.depth) - columnWidth * 0.15;
       if (x <= visible.right) {
         final fillStyle = canvas.fillStyle;

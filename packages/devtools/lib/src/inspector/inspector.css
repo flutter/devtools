@@ -3,7 +3,7 @@
 /* found in the LICENSE file. */
 
 .inspector-tree-container {
-    border: 1px solid #dfe2e5;
+    border: 1px solid var(--table-border);
     border-radius: 3px;
 }
 
@@ -20,7 +20,6 @@
     display: flex;
     overflow: hidden;
     margin-top: 10px;
-    color: #fff;
     align-items: center;
     flex: 1 1 auto;
     flex-direction: column;
@@ -107,7 +106,7 @@ messages beautiful.
 }
 
 .inspector-style-error {
-    background-color: #f97c7c;
+    background-color: var(--error-background);
     padding: 12px;
     margin: 5px 0;
 }
@@ -153,7 +152,7 @@ messages beautiful.
 
 }
 .inspector-level-hint {
-    background-color: lightgoldenrodyellow;
+    background-color: var(--hint-background);
     padding: 8px;
     margin: 5px 0;
 }
