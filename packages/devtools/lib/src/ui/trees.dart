@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Provides functionality for moving around a tree using the keyboard.
-mixin TreeKeyboardNavigation<T> {
+/// Provides functionality for navigating around a tree.
+mixin TreeNavigator<T> {
   List<TreeNode<T>> get treeNodes;
   TreeNode<T> get selectedItem;
   void select(TreeNode<T> node);
 
-  void handleDownKey() {
+  void moveDown() {
     if (selectedItem != null) {
-      final nextElm = selectedItem.getNextVisibleElement();
+      final nextElm = _getNextVisibleElement(selectedItem);
       if (nextElm != null) {
         select(nextElm);
       }
@@ -21,20 +21,20 @@ mixin TreeKeyboardNavigation<T> {
     }
   }
 
-  void handleUpKey() {
+  void moveUp() {
     if (selectedItem != null) {
-      final prevElm = selectedItem.getPreviousVisibleElement();
+      final prevElm = _getPreviousVisibleElement(selectedItem);
       if (prevElm != null) {
         select(prevElm);
       }
     } else {
       if (treeNodes.isNotEmpty) {
-        select(treeNodes.last.getLastVisibleDescendant() ?? treeNodes.last);
+        select(_getLastVisibleDescendant(treeNodes.last) ?? treeNodes.last);
       }
     }
   }
 
-  void handleRightKey() {
+  void moveRight() {
     if (!selectedItem.hasChildren) {
       return;
     }
@@ -45,12 +45,46 @@ mixin TreeKeyboardNavigation<T> {
     }
   }
 
-  void handleLeftKey() {
+  void moveLeft() {
     if (selectedItem.isExpanded) {
       selectedItem.collapse();
     } else if (selectedItem.parent != null) {
       select(selectedItem.parent);
     }
+  }
+
+  TreeNode<T> _getNextVisibleElement(TreeNode<T> node,
+      {bool includeChildren = true}) {
+    // The next visible element below this one is first of:
+    // - Our first child
+    // - Our next sibling
+    // - The next sibling of our parent
+    // - The next sibling of our parents parent (recursive...)
+    if (includeChildren && node.isExpanded && node.visibleChildren.isNotEmpty) {
+      return node.visibleChildren.first;
+    }
+    return node.nextSibling ??
+        _getNextVisibleElement(node.parent, includeChildren: false);
+  }
+
+  TreeNode<T> _getPreviousVisibleElement(TreeNode<T> node) {
+    // The previous visible element above this one is first of:
+    // - Our previous sibling's last visible ancestor
+    // - Our previous sibling
+    // - Our parent
+
+    return node.previousSibling != null
+        ? _getLastVisibleDescendant(node.previousSibling) ??
+            node.previousSibling ??
+            node.parent
+        : node.parent;
+  }
+
+  TreeNode<T> _getLastVisibleDescendant(TreeNode<T> node) {
+    while (node.isExpanded && node.visibleChildren.isNotEmpty) {
+      node = node.visibleChildren.last;
+    }
+    return node;
   }
 }
 
@@ -91,35 +125,4 @@ class TreeNode<T> {
   TreeNode<T> previousSibling, nextSibling;
   final List<TreeNode<T>> children = [];
   List<TreeNode<T>> get visibleChildren => isExpanded ? children : [];
-
-  TreeNode<T> getNextVisibleElement({bool includeChildren = true}) {
-    // The next visible element below this one is first of:
-    // - Our first child
-    // - Our next sibling
-    // - The next sibling of our parent
-    // - The next sibling of our parents parent (recursive...)
-    if (includeChildren && isExpanded && visibleChildren.isNotEmpty) {
-      return visibleChildren.first;
-    }
-    return nextSibling ?? parent?.getNextVisibleElement(includeChildren: false);
-  }
-
-  TreeNode<T> getPreviousVisibleElement() {
-    // The previous visible element above this one is first of:
-    // - Our previous sibling's last visible ancestor
-    // - Our previous sibling
-    // - Our parent
-
-    return previousSibling?.getLastVisibleDescendant() ??
-        previousSibling ??
-        parent;
-  }
-
-  TreeNode<T> getLastVisibleDescendant() {
-    var node = this;
-    while (node.isExpanded && node.visibleChildren.isNotEmpty) {
-      node = node.visibleChildren.last;
-    }
-    return node;
-  }
 }

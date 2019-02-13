@@ -140,7 +140,7 @@ class SelectableTreeNodeItem<T> {
 class SelectableTree<T> extends CoreElement
     with
         Tree<SelectableTreeNodeItem<T>>,
-        TreeKeyboardNavigation<SelectableTreeNodeItem<T>> {
+        TreeNavigator<SelectableTreeNodeItem<T>> {
   SelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
@@ -149,13 +149,13 @@ class SelectableTree<T> extends CoreElement
 
   void _handleKeyPress(KeyboardEvent e) {
     if (e.keyCode == KeyCode.DOWN) {
-      handleDownKey();
+      moveDown();
     } else if (e.keyCode == KeyCode.UP) {
-      handleUpKey();
+      moveUp();
     } else if (e.keyCode == KeyCode.RIGHT) {
-      handleRightKey();
+      moveRight();
     } else if (e.keyCode == KeyCode.LEFT) {
-      handleLeftKey();
+      moveLeft();
     } else {
       return; // don't preventDefault if we were anything else.
     }
