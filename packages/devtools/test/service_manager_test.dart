@@ -266,7 +266,7 @@ void main() {
 
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(2));
+  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(3));
 
   group('serviceManagerTests - restoring device-enabled extension:', () {
     FlutterRunTestDriver _flutter;
