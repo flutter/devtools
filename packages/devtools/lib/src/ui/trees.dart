@@ -10,7 +10,7 @@ mixin TreeNavigator<T> {
 
   void moveDown() {
     if (selectedItem != null) {
-      final nextElm = _getNextVisibleElement(selectedItem);
+      final nextElm = _getNextVisibleElementBelow(selectedItem);
       if (nextElm != null) {
         select(nextElm);
       }
@@ -23,7 +23,7 @@ mixin TreeNavigator<T> {
 
   void moveUp() {
     if (selectedItem != null) {
-      final prevElm = _getPreviousVisibleElement(selectedItem);
+      final prevElm = _getPreviousVisibleElementAbove(selectedItem);
       if (prevElm != null) {
         select(prevElm);
       }
@@ -53,7 +53,7 @@ mixin TreeNavigator<T> {
     }
   }
 
-  TreeNode<T> _getNextVisibleElement(TreeNode<T> node,
+  TreeNode<T> _getNextVisibleElementBelow(TreeNode<T> node,
       {bool includeChildren = true}) {
     // The next visible element below this one is first of:
     // - Our first child
@@ -64,10 +64,12 @@ mixin TreeNavigator<T> {
       return node.visibleChildren.first;
     }
     return node.nextSibling ??
-        _getNextVisibleElement(node.parent, includeChildren: false);
+        (node.parent != null
+            ? _getNextVisibleElementBelow(node.parent, includeChildren: false)
+            : null);
   }
 
-  TreeNode<T> _getPreviousVisibleElement(TreeNode<T> node) {
+  TreeNode<T> _getPreviousVisibleElementAbove(TreeNode<T> node) {
     // The previous visible element above this one is first of:
     // - Our previous sibling's last visible ancestor
     // - Our previous sibling
