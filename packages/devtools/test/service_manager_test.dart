@@ -44,6 +44,48 @@ void main() {
       await env.tearDownEnvironment();
     });
 
+    test('invalid setBreakpoint throws exception', () async {
+      await env.setupEnvironment();
+      // Service with more than 1 registration.
+      serviceManager.registeredMethodsForService.putIfAbsent(
+        'fakeMethod',
+        () => ['registration1.fakeMethod', 'registration2.fakeMethod'],
+      );
+      expect(serviceManager.callService('fakeMethod'), throwsException);
+
+      Completer<Object> testDone = Completer();
+      Object testError;
+      runZoned(() {
+        Future<void> asyncTestMethod() async {
+          // Service with less than 1 registration.
+          bool caughtException = false;
+          // TODO(jacobr): there is a simpler pattern for writing this I'm
+          // forgetting.
+          try {
+            await serviceManager.service.addBreakpoint(
+                serviceManager.isolateManager.selectedIsolate.id,
+                'fake-script-id',
+                1);
+          } catch (e) {
+            caughtException = true;
+          }
+          expect(caughtException, isTrue);
+
+          await env.tearDownEnvironment();
+        }
+
+        testDone.complete(asyncTestMethod());
+      }, onError: ([error]) {
+        testError = error;
+      });
+      await testDone.future;
+      // Verify that no uncaught exceptions were thrown in an async manner
+      // while running the test.
+      // This case catches a regression where a setting a breakpoint at an
+      // invalid line would throw an uncaught exception.
+      expect(testError, isNull);
+    });
+
     test('toggle boolean service extension', () async {
       await env.setupEnvironment();
 
