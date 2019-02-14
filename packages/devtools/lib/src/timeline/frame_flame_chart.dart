@@ -40,6 +40,7 @@ const gpuSectionBackground = Color(0xFFF3F3F3);
 
 final StreamController<TimelineEvent> _selectedEventController =
     StreamController<TimelineEvent>.broadcast();
+
 Stream<TimelineEvent> get onSelectedEvent => _selectedEventController.stream;
 
 class FrameFlameChart extends CoreElement {
@@ -76,6 +77,8 @@ class FrameFlameChart extends CoreElement {
   /// chart is drawn within view at minimum zoom level.
   static const num minZoomMultiplier = 0.75;
 
+  static const padding = 2;
+
   /// All flame chart items currently drawn on the chart.
   final List<FlameChartItem> _chartItems = [];
 
@@ -86,6 +89,7 @@ class FrameFlameChart extends CoreElement {
   final num _maxZoomLevel = 120;
   num _zoomLevel = 1;
   num _minZoomLevel;
+
   num get _zoomMultiplier => _zoomLevel * 0.075;
 
   num _currentMouseX;
@@ -159,9 +163,9 @@ class FrameFlameChart extends CoreElement {
         // TODO(kenzie): technically we will want to round to fraction of a px
         // for high dpi devices where 1 logical pixel may equal 2 physical
         // pixels, etc.
-        startPx.round(),
+        startPx.round() + padding,
         (endPx - startPx).round(),
-        row * rowHeight,
+        row * rowHeight + padding,
         section,
       );
 
@@ -182,8 +186,8 @@ class FrameFlameChart extends CoreElement {
       sectionTitle.element.style
         ..background = colorToCss(mainCpuColor)
         ..fontWeight = 'bold'
-        ..left = '0'
-        ..top = '0';
+        ..left = '${padding}px'
+        ..top = '${padding}px';
       _cpuSection.add(sectionTitle);
 
       drawRecursively(_frame.cpuEventFlow, 0, _cpuSection);
@@ -201,8 +205,8 @@ class FrameFlameChart extends CoreElement {
       sectionTitle.element.style
         ..background = colorToCss(mainGpuColor)
         ..fontWeight = 'bold'
-        ..left = '0'
-        ..top = '0';
+        ..left = '${padding}px'
+        ..top = '${padding}px';
       _gpuSection.add(sectionTitle);
 
       drawRecursively(_frame.gpuEventFlow, 0, _gpuSection);
@@ -327,8 +331,13 @@ class FrameFlameChart extends CoreElement {
 }
 
 class FlameChartItem {
-  FlameChartItem(this._event, this._startingLeft, this._startingWidth,
-      this._top, this._backgroundColor) {
+  FlameChartItem(
+    this._event,
+    this._startingLeft,
+    this._startingWidth,
+    this._top,
+    this._backgroundColor,
+  ) {
     currentLeft = _startingLeft;
     currentWidth = _startingWidth;
 

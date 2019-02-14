@@ -20,8 +20,7 @@ class FramesBarChart extends CoreElement {
     element.style
       ..alignItems = 'flex-end'
       ..height = '${chartHeight}px'
-      ..paddingTop = '${padding}px'
-      ..paddingBottom = '${padding}px';
+      ..paddingTop = '${topPadding}px';
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
       final CoreElement frameUI = FrameBar(this, frame);
@@ -36,9 +35,9 @@ class FramesBarChart extends CoreElement {
     });
   }
 
-  static const int chartHeight = 200;
+  static const int chartHeight = 100;
   static const int maxFrames = 120;
-  static const padding = 5;
+  static const topPadding = 2;
 
   FrameBar selectedFrame;
 
@@ -74,9 +73,9 @@ class FrameBar extends CoreElement {
     });
   }
 
-  // Chart height minus padding on top and bottom.
+  // Chart height minus top padding.
   static const maxBarHeight =
-      FramesBarChart.chartHeight - (FramesBarChart.padding * 2);
+      FramesBarChart.chartHeight - FramesBarChart.topPadding;
 
   // Let a 16ms frame take up 1/3 of the [TimelineFramesUI] height, so we should
   // be able to fit 48ms (3x16) in [chartHeight] pixels.
