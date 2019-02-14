@@ -33,6 +33,13 @@ void debuggingTests() {
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
 
+    // TODO(dantup): This check can be removed on the next stable Dart release
+    // since we'll only be running the tests where getScripts is supported.
+    if (!(await debuggingManager.supportsScripts())) {
+      print('=== VM does not support getScripts, skipping test ===');
+      return;
+    }
+
     // Get the list of scripts.
     final List<String> scripts = await debuggingManager.getScripts();
     expect(scripts, isNotEmpty);
@@ -59,6 +66,14 @@ void debuggingTests() {
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, isEmpty);
+
+    // TODO(dantup): This check can be removed on the next stable Dart release
+    // since we'll only be running the tests where getScripts is supported.
+    if (!(await debuggingManager.supportsScripts())) {
+      print(
+          '=== VM does not support getScripts, required by addBreakpoint, skipping test ===');
+      return;
+    }
 
     // set and verify breakpoints
     for (int line in breakpointLines) {
@@ -123,6 +138,14 @@ void debuggingTests() {
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, isEmpty);
+
+    // TODO(dantup): This check can be removed on the next stable Dart release
+    // since we'll only be running the tests where getScripts is supported.
+    if (!(await debuggingManager.supportsScripts())) {
+      print(
+          '=== VM does not support getScripts, required by addBreakpoint, skipping test ===');
+      return;
+    }
 
     // set and verify breakpoint
     await debuggingManager.addBreakpoint(
@@ -350,6 +373,13 @@ class DebuggingManager {
         await tools.tabInstance.send('debugger.getScripts');
     final List<dynamic> result = response.result;
     return result.cast<String>();
+  }
+
+  Future<bool> supportsScripts() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.supportsScripts');
+    final bool result = response.result;
+    return result;
   }
 
   Future<List<String>> getCallStackFrames() async {
