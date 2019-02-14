@@ -62,9 +62,7 @@ class FrameFlameChart extends CoreElement {
 
     onSelectedFlameChartItem.listen((FlameChartItem item) {
       // Unselect the previously selected item.
-      if (_selectedItem != null) {
-        _selectedItem.setSelected(false);
-      }
+      _selectedItem?.setSelected(false);
 
       // Select the new item.
       item.setSelected(true);
