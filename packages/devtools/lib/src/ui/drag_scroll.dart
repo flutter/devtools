@@ -6,40 +6,47 @@ import 'dart:html';
 
 import '../ui/elements.dart';
 
-void enableDragScrolling(CoreElement element) {
-  final dragged = element.element;
+class DragScroll {
+  /// Whether the element was dragged on the previous click.
+  bool wasDragged = false;
 
-  num lastX;
-  num lastY;
-  bool clicked = false;
+  void enableDragScrolling(CoreElement element) {
+    final dragged = element.element;
 
-  dragged.onMouseDown.listen((event) {
-    final MouseEvent m = event;
-    clicked = true;
-    lastX = m.client.x;
-    lastY = m.client.y;
+    num lastX;
+    num lastY;
+    bool clicked = false;
 
-    // TODO(kenzie): once flame chart items are clickable, we will need to
-    // tweak this logic to differentiate between clicks and click-drags.
-    m.preventDefault();
-  });
+    dragged.onMouseDown.listen((event) {
+      final MouseEvent m = event;
+      clicked = true;
+      wasDragged = false;
 
-  window.onMouseUp.listen((event) => clicked = false);
+      lastX = m.client.x;
+      lastY = m.client.y;
 
-  window.onMouseMove.listen((event) {
-    final MouseEvent m = event;
-    if (clicked) {
-      final num newX = m.client.x;
-      final num newY = m.client.y;
+      m.preventDefault();
+    });
 
-      final num deltaX = lastX - newX;
-      final num deltaY = lastY - newY;
+    window.onMouseUp.listen((event) => clicked = false);
 
-      dragged.scrollLeft += deltaX;
-      dragged.scrollTop += deltaY;
+    window.onMouseMove.listen((event) {
+      final MouseEvent m = event;
+      if (clicked) {
+        final num newX = m.client.x;
+        final num newY = m.client.y;
 
-      lastX = newX;
-      lastY = newY;
-    }
-  });
+        final num deltaX = lastX - newX;
+        final num deltaY = lastY - newY;
+
+        dragged.scrollLeft += deltaX;
+        dragged.scrollTop += deltaY;
+
+        lastX = newX;
+        lastY = newY;
+
+        wasDragged = true;
+      }
+    });
+  }
 }

@@ -44,6 +44,8 @@ final StreamController<FlameChartItem> _selectedFlameChartItemController =
 Stream<FlameChartItem> get onSelectedFlameChartItem =>
     _selectedFlameChartItemController.stream;
 
+final DragScroll _dragScroll = DragScroll();
+
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div', classes: 'section-border') {
     flex();
@@ -54,7 +56,7 @@ class FrameFlameChart extends CoreElement {
       ..marginTop = '4px'
       ..overflow = 'hidden';
 
-    enableDragScrolling(this);
+    _dragScroll.enableDragScrolling(this);
     element.onMouseMove.listen(_handleMouseMove);
     element.onMouseWheel.listen(_handleMouseWheel);
 
@@ -379,7 +381,12 @@ class FlameChartItem {
     }
     style.top = '${_top}px';
 
-    e.onClick.listen((e) => _selectedFlameChartItemController.add(this));
+    e.onClick.listen((e) {
+      // Prevent clicks when the chart was being dragged.
+      if (!_dragScroll.wasDragged) {
+        _selectedFlameChartItemController.add(this);
+      }
+    });
   }
 
   /// Offset to account for section titles (i.e 'CPU' and 'GPU').
