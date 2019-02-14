@@ -430,7 +430,7 @@ class DebuggerScreen extends Screen {
       breakpointsView.element,
       PNavMenuItem('Scripts')
         ..add(
-          scriptCountDiv = span(text: 'Unavailable', c: 'counter'),
+          scriptCountDiv = span(text: '-', c: 'counter'),
         )
         ..click(() => scriptsView.element.toggleAttribute('hidden')),
       scriptsView.element,
