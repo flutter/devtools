@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
@@ -9,6 +10,7 @@ import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../utils.dart';
 import 'timeline.dart';
 import 'timeline_protocol.dart';
 
@@ -38,8 +40,12 @@ const gpuColorPalette = [
 const cpuSectionBackground = Color(0xFFF9F9F9);
 const gpuSectionBackground = Color(0xFFF3F3F3);
 
+final StreamController<TimelineEvent> _selectedEventController =
+    StreamController<TimelineEvent>.broadcast();
+Stream<TimelineEvent> get onSelectedEvent => _selectedEventController.stream;
+
 class FrameFlameChart extends CoreElement {
-  FrameFlameChart() : super('div') {
+  FrameFlameChart() : super('div', classes: 'section-border') {
     flex();
     layoutVertical();
     element.style
@@ -329,7 +335,7 @@ class FlameChartItem {
     currentWidth = _startingWidth;
 
     e = Element.div()..className = 'flame-chart-item';
-    e.title = '${_event.durationMs}ms';
+    e.title = microsAsMsText(_event.duration);
 
     _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
     _labelWrapper.append(Element.span()
@@ -349,6 +355,9 @@ class FlameChartItem {
       _labelWrapper.style.maxWidth = '${_startingWidth}px';
     }
     style.top = '${_top}px';
+
+    // TODO(kenzie): make flame chart item appear selected.
+    e.onClick.listen((e) => _selectedEventController.add(_event));
   }
 
   /// Offset to account for section titles (i.e 'CPU' and 'GPU').
