@@ -20,8 +20,13 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-const Color mainCpuColor = Color(0xFFFFCA28);
-const Color mainGpuColor = Color(0xFF9CCC65);
+// Blue 300 from
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+const Color mainCpuColor = Color(0xFF64B5F6);
+// Teal 300 from
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+const Color mainGpuColor = Color(0xFF4DB6AC);
+
 const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedFrameColor = Color(0xFF4078C0);
 
