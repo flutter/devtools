@@ -17,18 +17,18 @@ Start a debug session for your application by opening the root folder of your pr
 
 Once the debug session is active and the application has started, the **Dart: Open DevTools** command will become available in the VS Code command palette:
 
-<img src="{{ "/assets/images/vscode/command.png" | relative_url }}" width="700" height="115" />
+<img src="images/vscode_command.png" width="700" height="115" />
 
 The first time you run this (and subsequently when the DevTools package is updated) you will be prompted to activate or upgrade DevTools.
 
-<img src="{{ "/assets/images/vscode/install_prompt.png" | relative_url }}" width="500" height="175" />
+<img src="images/vscode_install_prompt.png" width="500" height="175" />
 
 Clicking the Activate/Upgrade button will use `pub global activate` to activate the DevTools package for you.
 
 Next, DevTools will launch in your browser and automatically connect to your debug session.
 
-<img src="{{ "/assets/images/vscode/show_in_browser.png" | relative_url }}" width="700" height="400" />
+<img src="images/vscode_show_in_browser.png" width="700" height="400" />
 
 While the Dart DevTools are active, you'll see them in the status bar of VS Code. If you've closed the browser tab, you can click on here to re-launch your browser (so long as there's still a suitable Dart/Flutter debugging session available).
 
-<img src="{{ "/assets/images/vscode/status_bar.png" | relative_url }}" width="380" height="100" />
+<img src="images/vscode_status_bar.png" width="380" height="100" />
