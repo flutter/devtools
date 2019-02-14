@@ -17,6 +17,7 @@ import '../globals.dart';
 import 'diagnostics_node.dart';
 import 'flutter_widget.dart';
 
+const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 bool _inspectorDependenciesLoaded = false;
 // This method must be called before any methods on the Inspector are used.
 Future<void> ensureInspectorServiceDependencies() async {
@@ -88,12 +89,14 @@ class InspectorService {
     assert(serviceManager.hasConnection);
     assert(serviceManager.service != null);
     final inspectorLibrary = EvalOnDartLibrary(
-      'package:flutter/src/widgets/widget_inspector.dart',
+      inspectorLibraryUri,
       vmService,
     );
 
-    final libraryFuture =
-        inspectorLibrary.getLibrary(await inspectorLibrary.libraryRef, null);
+    final libraryRef = await inspectorLibrary.libraryRef.catchError(
+        (_) => throw FlutterInspectorLibraryNotFound(),
+        test: (e) => e is LibraryNotFound);
+    final libraryFuture = inspectorLibrary.getLibrary(libraryRef, null);
     final library = await libraryFuture;
     Future<Set<String>> lookupFunctionNames() async {
       for (ClassRef classRef in library.classes) {
@@ -1023,4 +1026,8 @@ class InspectorObjectGroupManager {
       _pendingNext = null;
     }
   }
+}
+
+class FlutterInspectorLibraryNotFound extends LibraryNotFound {
+  FlutterInspectorLibraryNotFound() : super(inspectorLibraryUri);
 }
