@@ -7,6 +7,7 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_extensions.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
@@ -35,8 +36,6 @@ const Color selectedFrameColor = Color(0xFF4078C0);
 // TODO(devoncarew): show the list of widgets re-drawn during a frame
 
 // TODO(devoncarew): display whether running in debug or profile
-
-// TODO(devoncarew): use colors for the category
 
 // TODO:(devoncarew): show the total frame count
 
@@ -96,11 +95,15 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
       ]);
-    upperButtonSection.add(getServiceExtensionButtons());
+    upperButtonSection.add(
+      div(c: 'btn-group collapsible')
+        ..add(<CoreElement>[
+          ServiceExtensionButton(performanceOverlay).button,
+        ]),
+    );
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
-      div(c: 'section'),
       div(c: 'section')
         ..add(framesBarChart = FramesBarChart(timelineController)),
       div(c: 'section')
@@ -141,7 +144,7 @@ class TimelineScreen extends Screen {
       }
     });
 
-    onSelectedEvent.listen(eventDetails.update);
+    flameChart.onSelectedChartItem.listen(eventDetails.update);
 
     return screenDiv;
   }
