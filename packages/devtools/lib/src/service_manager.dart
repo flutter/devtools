@@ -33,6 +33,16 @@ class ServiceConnectionManager {
 
   final Completer<Null> serviceAvailable = Completer();
 
+  VmServiceCapabilities _serviceCapabilities;
+  Future<VmServiceCapabilities> get serviceCapabilities async {
+    if (_serviceCapabilities == null) {
+      await serviceAvailable.future;
+      final version = await service.getVersion();
+      _serviceCapabilities = new VmServiceCapabilities(version);
+    }
+    return _serviceCapabilities;
+  }
+
   final Map<String, StreamController<bool>> _serviceRegistrationController =
       <String, StreamController<bool>>{};
   final Map<String, List<String>> _registeredMethodsForService = {};
@@ -334,14 +344,17 @@ class ServiceExtensionManager {
       <String, StreamController<ServiceExtensionState>>{};
 
   /// All available service extensions.
+  // ignore: prefer_collection_literals
   final Set<String> _serviceExtensions = Set<String>();
 
   /// All service extensions that are currently enabled.
   final Map<String, ServiceExtensionState> _enabledServiceExtensions =
       <String, ServiceExtensionState>{};
 
-  /// Temporarily stores service extensions that we need to add. We should not add
-  /// extensions until the first frame event has been received [_firstFrameEventReceived].
+  /// Temporarily stores service extensions that we need to add. We should not
+  /// add extensions until the first frame event has been received
+  /// [_firstFrameEventReceived].
+  // ignore: prefer_collection_literals
   final Set<String> _pendingServiceExtensions = Set<String>();
 
   Completer<Null> extensionStatesUpdated = Completer();
@@ -657,4 +670,12 @@ class ServiceExtensionState {
   // For boolean service extensions, [enabled] should equal [value].
   final bool enabled;
   final dynamic value;
+}
+
+class VmServiceCapabilities {
+  VmServiceCapabilities(this.version);
+  final Version version;
+
+  bool get supportsGetScripts =>
+      version.major > 3 || (version.major == 3 && version.minor >= 12);
 }

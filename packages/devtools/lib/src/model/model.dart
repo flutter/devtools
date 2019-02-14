@@ -16,6 +16,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../debugger/debugger.dart';
 import '../framework/framework.dart';
+import '../globals.dart';
 import '../logging/logging.dart';
 import '../main.dart';
 
@@ -44,6 +45,7 @@ class App {
     _register<void>(
         'debugger.setExceptionPauseMode', debuggerSetExceptionPauseMode);
     _register<List<String>>('debugger.getBreakpoints', debuggerGetBreakpoints);
+    _register<bool>('debugger.supportsScripts', debuggerSupportsScripts);
     _register<List<String>>('debugger.getScripts', debuggerGetScripts);
     _register<List<String>>(
         'debugger.getCallStackFrames', debuggerGetCallStackFrames);
@@ -160,6 +162,10 @@ class App {
     return screen.debuggerState.breakpoints.map((Breakpoint breakpoint) {
       return breakpoint.id;
     }).toList();
+  }
+
+  Future<bool> debuggerSupportsScripts([dynamic _]) async {
+    return (await serviceManager.serviceCapabilities).supportsGetScripts;
   }
 
   Future<List<String>> debuggerGetScripts([dynamic _]) async {

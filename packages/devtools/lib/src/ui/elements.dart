@@ -149,10 +149,12 @@ class CoreElement {
       return child.map<dynamic>((dynamic c) => add(c)).toList();
     } else if (child is CoreElement) {
       element.children.add(child.element);
+    } else if (child is CoreElementView) {
+      element.children.add(child.element.element);
     } else if (child is Element) {
       element.children.add(child);
     } else {
-      throw ArgumentError('argument type not supported');
+      throw ArgumentError('argument type ${child.runtimeType} not supported');
     }
     return child;
   }

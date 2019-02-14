@@ -73,7 +73,7 @@ class EvalOnDartLibrary {
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError('Library $libraryName not found');
+      _libraryRef.completeError(new LibraryNotFound(libraryName));
     } catch (e) {
       _handleError(e);
     }
@@ -229,4 +229,10 @@ class EvalOnDartLibrary {
       return value;
     });
   }
+}
+
+class LibraryNotFound implements Exception {
+  LibraryNotFound(this.library);
+  String library;
+  String get message => 'Library $library not found';
 }

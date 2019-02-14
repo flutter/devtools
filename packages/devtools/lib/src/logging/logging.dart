@@ -52,6 +52,7 @@ class LoggingScreen extends Screen {
 
   bool hasPendingDomUpdates = false;
 
+  /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
   Future<ObjectGroup> objectGroup;
 
   @override
@@ -182,7 +183,9 @@ class LoggingScreen extends Screen {
 
     await ensureInspectorServiceDependencies();
 
-    objectGroup = InspectorService.createGroup(service, 'console-group');
+    objectGroup = InspectorService.createGroup(service, 'console-group')
+        .catchError((e) => null,
+            test: (e) => e is FlutterInspectorLibraryNotFound);
   }
 
   void _handleExtensionEvent(Event e) async {

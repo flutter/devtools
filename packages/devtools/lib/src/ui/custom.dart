@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'elements.dart';
+import 'trees.dart';
+import 'trees_html.dart';
 
 class ProgressElement extends CoreElement {
   ProgressElement() : super('div') {
@@ -118,6 +120,7 @@ class SelectableList<T> extends CoreElement {
 
     _selectedElement = element;
     element?.toggleClass('selected', true);
+    element?.scrollIntoView();
     _selectionController.add(item);
   }
 }
@@ -128,13 +131,31 @@ abstract class ChildProvider<T> {
   Future<List<T>> getChildren(T item);
 }
 
-class SelectableTree<T> extends CoreElement {
-  SelectableTree() : super('ul');
+class SelectableTreeNodeItem<T> {
+  SelectableTreeNodeItem(this.element, this.item);
+  final CoreElement element;
+  final T item;
+}
+
+class SelectableTree<T> extends CoreElement
+    with
+        Tree<SelectableTreeNodeItem<T>>,
+        TreeNavigator<SelectableTreeNodeItem<T>>,
+        HtmlTreeNavigator<SelectableTreeNodeItem<T>> {
+  SelectableTree() : super('ul') {
+    // Ensure the tree can be tabbed into.
+    element.tabIndex = 0;
+    element.onKeyDown.listen(handleKeyPress);
+  }
 
   List<T> items = <T>[];
+  @override
+  List<TreeNode<SelectableTreeNodeItem<T>>> treeNodes = [];
   ListRenderer<T> renderer;
   ChildProvider<T> childProvider;
-  CoreElement _selectedElement;
+  TreeNode<SelectableTreeNodeItem<T>> _selectedItem;
+  @override
+  TreeNode<SelectableTreeNodeItem<T>> get selectedItem => _selectedItem;
 
   final StreamController<T> _selectionController = StreamController.broadcast();
 
@@ -151,76 +172,101 @@ class SelectableTree<T> extends CoreElement {
   void setItems(List<T> items) {
     this.items = items;
 
-    final bool hadSelection = _selectedElement != null;
-    _selectedElement = null;
+    final bool hadSelection = _selectedItem != null;
+    _selectedItem = null;
 
     clear();
 
-    for (T item in items) {
-      _populateInto(this, item);
-    }
+    treeNodes = _buildTree(items, this, null);
 
-    if (hadSelection && _selectedElement == null) {
+    if (hadSelection && _selectedItem == null) {
       _selectionController.add(null);
     }
   }
 
-  void _populateInto(CoreElement parent, T item) {
+  TreeNode<SelectableTreeNodeItem<T>> _addItemToTree(
+      CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
-    final CoreElement obj = renderer(item);
-    obj.click(() {
-      _select(obj, item, clear: obj.hasClass('selected'));
+    final obj = TreeNode(new SelectableTreeNodeItem(renderer(item), item));
+    obj.data.element.click(() {
+      select(obj, clear: obj.data.element.hasClass('selected'));
     });
 
     final CoreElement element = div();
-    element.add(obj);
+    element.add(obj.data.element);
 
     if (childProvider.hasChildren(item)) {
       final TreeToggle toggle = new TreeToggle();
-      obj.element.children.insert(0, toggle.element);
+      obj.data.element.element.children.insert(0, toggle.element);
 
       bool hasPopulated = false;
-      final CoreElement children = ul(c: 'tree-list');
-      element.add(children);
-      children.hidden(true);
+      final CoreElement childContainer = ul(c: 'tree-list');
+      element.add(childContainer);
+      childContainer.hidden(true);
+
+      // Attach helpers that allow TreeItem to expand/collapse for use in
+      // keyboard navigation.
+      obj.expand = () => toggle.toggle(onlyExpand: true);
+      obj.collapse = () => toggle.toggle(onlyCollapse: true);
 
       toggle.onOpen.listen((bool open) {
-        children.hidden(!open);
+        obj.isExpanded = open;
+        childContainer.hidden(!open);
 
         if (!hasPopulated) {
           hasPopulated = true;
 
           childProvider.getChildren(item).then((List<T> results) {
-            for (T result in results) {
-              _populateInto(children, result);
-            }
+            _buildTree(results, childContainer, obj);
           }).catchError((e) {
             // ignore
           });
         }
       });
     } else {
-      obj.element.children.insert(0, new TreeToggle(empty: true).element);
+      obj.data.element.element.children
+          .insert(0, new TreeToggle(empty: true).element);
     }
 
-    parent.add(element);
+    container.add(element);
+
+    return obj;
+  }
+
+  /// Builds a tree for [results] into [container].
+  List<TreeNode<SelectableTreeNodeItem<T>>> _buildTree(
+    List<T> results,
+    CoreElement container,
+    TreeNode<SelectableTreeNodeItem<T>> parent,
+  ) {
+    final List<TreeNode<SelectableTreeNodeItem<T>>> children =
+        results.map((result) => _addItemToTree(container, result)).toList();
+
+    connectNodes(
+      parent,
+      children,
+      (node) => childProvider.hasChildren(node.item),
+    );
+
+    return children;
   }
 
   void clearItems() {
     setItems(<T>[]);
   }
 
-  void _select(CoreElement element, T item, {bool clear = false}) {
-    _selectedElement?.toggleClass('selected', false);
+  @override
+  void select(TreeNode<SelectableTreeNodeItem<T>> node, {bool clear = false}) {
+    _selectedItem?.data?.element?.toggleClass('selected', false);
 
     if (clear) {
-      element = null;
-      item = null;
+      node = null;
     }
 
-    _selectedElement = element;
-    element?.toggleClass('selected', true);
-    _selectionController.add(item);
+    _selectedItem = node;
+    _selectedItem?.data?.element?.toggleClass('selected', true);
+    _selectedItem?.data?.element?.scrollIntoView();
+    _selectionController.add(node?.data?.item);
   }
 }
 
@@ -228,16 +274,21 @@ class TreeToggle extends CoreElement {
   TreeToggle({bool empty = false})
       : super('div', classes: 'tree-toggle octicon') {
     if (!empty) {
-      click(() {
-        _isOpen = !_isOpen;
-        _openController.add(_isOpen);
-        toggleClass('octicon-triangle-right', !_isOpen);
-        toggleClass('octicon-triangle-down', _isOpen);
-      });
+      click(toggle);
     }
     if (!empty) {
       clazz('octicon-triangle-right');
     }
+  }
+
+  void toggle({bool onlyExpand = false, bool onlyCollapse = false}) {
+    if ((onlyExpand && _isOpen) || (onlyCollapse && !_isOpen)) {
+      return;
+    }
+    _isOpen = !_isOpen;
+    _openController.add(_isOpen);
+    toggleClass('octicon-triangle-right', !_isOpen);
+    toggleClass('octicon-triangle-down', _isOpen);
   }
 
   bool _isOpen = false;

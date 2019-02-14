@@ -21,6 +21,8 @@ class VmServiceWrapper implements VmService {
 
   VmService _vmService;
   final Map<String, Future<Success>> _activeStreams = {};
+
+  // ignore: prefer_collection_literals
   final Set<Future<Object>> _activeFutures = Set();
   Completer<bool> allFuturesCompleted = Completer<bool>();
 
@@ -355,12 +357,18 @@ class VmServiceWrapper implements VmService {
       allFuturesCompleted = Completer<bool>();
     }
     _activeFutures.add(future);
-    future.whenComplete(() {
+
+    void futureComplete() {
       _activeFutures.remove(future);
       if (_activeFutures.isEmpty && !allFuturesCompleted.isCompleted) {
         allFuturesCompleted.complete(true);
       }
-    });
+    }
+
+    future.then(
+      (value) => futureComplete(),
+      onError: (error) => futureComplete(),
+    );
     return future;
   }
 }
