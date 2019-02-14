@@ -28,7 +28,7 @@ const Color mainCpuColor = Color(0xFF64B5F6);
 const Color mainGpuColor = Color(0xFF4DB6AC);
 
 const Color slowFrameColor = Color(0xFFE50C0C);
-const Color selectedFrameColor = Color(0xFF4078C0);
+const Color selectedColor = Color(0xFF4078C0);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -141,7 +141,8 @@ class TimelineScreen extends Screen {
       }
     });
 
-    onSelectedEvent.listen(eventDetails.update);
+    onSelectedFlameChartItem
+        .listen((FlameChartItem item) => eventDetails.update(item.event));
 
     return screenDiv;
   }
