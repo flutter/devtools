@@ -13,7 +13,7 @@ To use the Dart DevTools from VS Code you will need the [Dart extension](https:/
 
 Start a debug session for your application by opening the root folder of your project (the one containing `pubspec.yaml`) in VS Code and clicking **Debug > Start Debugging** (`F5`).
 
-## Launch the DevTools
+## Launch DevTools
 
 Once the debug session is active and the application has started, the **Dart: Open DevTools** command will become available in the VS Code command palette:
 
