@@ -214,15 +214,11 @@ class ChromeTab {
       });
 
       onExceptionThrown.listen((ex) {
-        // TODO(dantup): Should we throw here, to fail tests? Currently we'd get
-        // failures like:
-        // Library package:flutter/src/widgets/widget_inspector.dart not found
-        // but this may need to be fixed for non-Flutter usage of DevTools anyway.
-        print('JavaScript exception occurred: ${ex.method}\n\n'
+        throw 'JavaScript exception occurred: ${ex.method}\n\n'
             '${ex.params}\n\n'
             '${ex.exceptionDetails?.text}\n\n'
             '${ex.exceptionDetails?.exception}\n\n'
-            '${ex.exceptionDetails?.stackTrace}');
+            '${ex.exceptionDetails?.stackTrace}';
       });
     }
 
