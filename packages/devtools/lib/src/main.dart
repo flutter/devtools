@@ -58,15 +58,23 @@ class PerfToolFramework extends Framework {
 
     for (Screen screen in screens) {
       final CoreElement link = CoreElement('a')
-        ..attributes['href'] = screen.ref
-        ..onClick.listen((MouseEvent e) {
-          e.preventDefault();
-          navigateTo(screen.id);
-        })
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}')
-        ]);
+        ])
+        ..disabled = screen.disabled;
+      if (screen.disabled) {
+        link
+          ..tooltip =
+              'This section is disabled because it is available in your editor';
+      } else {
+        link
+          ..attributes['href'] = screen.ref
+          ..onClick.listen((MouseEvent e) {
+            e.preventDefault();
+            navigateTo(screen.id);
+          });
+      }
       mainNav.add(link);
     }
 

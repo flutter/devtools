@@ -35,7 +35,12 @@ import '../utils.dart';
 class DebuggerScreen extends Screen {
   DebuggerScreen()
       : debuggerState = DebuggerState(),
-        super(name: 'Debugger', id: 'debugger', iconClass: 'octicon-bug') {
+        super(
+          name: 'Debugger',
+          id: 'debugger',
+          iconClass: 'octicon-bug',
+          disabled: shouldHideTab('debugger'),
+        ) {
     deviceStatus = StatusItem();
     addStatusItem(deviceStatus);
   }

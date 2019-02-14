@@ -276,11 +276,13 @@ abstract class Screen {
     @required this.name,
     @required this.id,
     this.iconClass,
+    this.disabled = false,
   });
 
   final String name;
   final String id;
   final String iconClass;
+  final bool disabled;
 
   Framework framework;
 

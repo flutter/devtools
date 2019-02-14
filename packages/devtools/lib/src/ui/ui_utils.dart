@@ -204,3 +204,8 @@ class RegisteredServiceExtensionButton {
     }
   }
 }
+
+bool shouldHideTab(String key) {
+  final qs = Uri.splitQueryString(html.window.location.search.substring(1));
+  return qs['hide']?.split(',')?.contains(key) ?? false;
+}
