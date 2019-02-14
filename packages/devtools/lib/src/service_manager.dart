@@ -35,9 +35,11 @@ class ServiceConnectionManager {
 
   VmServiceCapabilities _serviceCapabilities;
   Future<VmServiceCapabilities> get serviceCapabilities async {
-    await serviceAvailable.future;
-    final version = await service.getVersion();
-    _serviceCapabilities ??= new VmServiceCapabilities(version);
+    if (_serviceCapabilities == null) {
+      await serviceAvailable.future;
+      final version = await service.getVersion();
+      _serviceCapabilities = new VmServiceCapabilities(version);
+    }
     return _serviceCapabilities;
   }
 

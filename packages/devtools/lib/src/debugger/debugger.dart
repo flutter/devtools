@@ -505,9 +505,9 @@ class DebuggerScreen extends Screen {
     final bool isRunning = isolate.pauseEvent == null ||
         isolate.pauseEvent.kind == EventKind.kResume;
 
-    final scriptsAvailable =
+    final getScriptsSupport =
         (await serviceManager.serviceCapabilities).supportsGetScripts;
-    if (scriptsAvailable) {
+    if (getScriptsSupport) {
       final ScriptList scriptList =
           await serviceManager.service.getScripts(isolate.id);
       final List<ScriptRef> scripts = scriptList.scripts.toList();
