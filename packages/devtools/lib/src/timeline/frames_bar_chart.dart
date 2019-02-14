@@ -136,10 +136,10 @@ class FrameBar extends CoreElement {
   void setSelected(bool selected) {
     toggleClass('selected', selected);
     _cpuBar.element.style.backgroundColor = selected
-        ? colorToCss(selectedFrameColor)
+        ? colorToCss(selectedColor)
         : colorToCss(_getCpuBarColor());
     _gpuBar.element.style.backgroundColor = selected
-        ? colorToCss(selectedFrameColor)
+        ? colorToCss(selectedColor)
         : colorToCss(_getGpuBarColor());
   }
 }

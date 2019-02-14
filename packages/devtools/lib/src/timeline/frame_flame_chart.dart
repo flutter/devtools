@@ -38,9 +38,11 @@ const gpuColorPalette = [
 const cpuSectionBackground = Color(0xFFF9F9F9);
 const gpuSectionBackground = Color(0xFFF3F3F3);
 
-final StreamController<TimelineEvent> _selectedEventController =
-    StreamController<TimelineEvent>.broadcast();
-Stream<TimelineEvent> get onSelectedEvent => _selectedEventController.stream;
+final StreamController<FlameChartItem> _selectedFlameChartItemController =
+    StreamController<FlameChartItem>.broadcast();
+
+Stream<FlameChartItem> get onSelectedFlameChartItem =>
+    _selectedFlameChartItemController.stream;
 
 class FrameFlameChart extends CoreElement {
   FrameFlameChart() : super('div', classes: 'section-border') {
@@ -55,6 +57,17 @@ class FrameFlameChart extends CoreElement {
     enableDragScrolling(this);
     element.onMouseMove.listen(_handleMouseMove);
     element.onMouseWheel.listen(_handleMouseWheel);
+
+    onSelectedFlameChartItem.listen((FlameChartItem item) {
+      // Unselect the previously selected item.
+      if (_selectedItem != null) {
+        _selectedItem.setSelected(false);
+      }
+
+      // Select the new item.
+      item.setSelected(true);
+      _selectedItem = item;
+    });
   }
 
   /// Target maximum microseconds per frame.
@@ -91,6 +104,8 @@ class FrameFlameChart extends CoreElement {
   num _currentMouseX;
   num _currentScrollWidth;
   num _currentScrollLeft = 0;
+
+  FlameChartItem _selectedItem;
 
   TimelineFrame _frame;
   CoreElement _cpuSection;
@@ -336,9 +351,11 @@ class FlameChartItem {
     e.title = microsAsMsText(_event.duration);
 
     _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
-    _labelWrapper.append(Element.span()
+    _label = Element.span()
       ..text = _event.name
-      ..className = 'flame-chart-item-label');
+      ..className = 'flame-chart-item-label'
+      ..style.color = colorToCss(defaultTextColor);
+    _labelWrapper.append(_label);
     e.append(_labelWrapper);
 
     final style = e.style;
@@ -355,15 +372,22 @@ class FlameChartItem {
     style.top = '${_top}px';
 
     // TODO(kenzie): make flame chart item appear selected.
-    e.onClick.listen((e) => _selectedEventController.add(_event));
+    e.onClick.listen((e) => _selectedFlameChartItemController.add(this));
   }
 
   /// Offset to account for section titles (i.e 'CPU' and 'GPU').
   static const leftOffset = 70;
 
+  static const defaultTextColor = Color(0xFF000000);
+  static const selectedTextColor = Color(0xFFFFFFFF);
+
   Element e;
+  Element _label;
   Element _labelWrapper;
+
+  TimelineEvent get event => _event;
   final TimelineEvent _event;
+
   final num _top;
   final Color _backgroundColor;
 
@@ -382,5 +406,12 @@ class FlameChartItem {
       e.style.width = '${currentWidth}px';
       _labelWrapper.style.maxWidth = '${currentWidth}px';
     }
+  }
+
+  void setSelected(bool selected) {
+    e.style.backgroundColor =
+        colorToCss(selected ? selectedColor : _backgroundColor);
+    _label.style.color =
+        colorToCss(selected ? selectedTextColor : defaultTextColor);
   }
 }
