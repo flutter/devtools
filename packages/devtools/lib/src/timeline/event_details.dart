@@ -35,7 +35,6 @@ class EventDetails extends CoreElement {
     _title = div(text: defaultTitleText);
     _title.element.style
       ..borderRadius = '20px'
-      ..fontSize = 'large'
       ..fontWeight = 'bold'
       ..padding = '$verticalPadding $horizontalPadding'
       ..width = 'fit-content';

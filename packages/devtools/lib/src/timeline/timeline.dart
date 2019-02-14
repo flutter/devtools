@@ -133,7 +133,7 @@ class TimelineScreen extends Screen {
             [flameChart, eventDetails],
             horizontal: false,
             gutterSize: defaultSplitterWidth,
-            sizes: [70, 30],
+            sizes: [75, 25],
             minSize: [200, 60],
           );
           splitterConfigured = true;
