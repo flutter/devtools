@@ -19,21 +19,19 @@ import 'timeline_protocol.dart';
 // Switch this flag to true to dump the frame event trace to console.
 bool _debugEventTrace = false;
 
-// Amber 50 color palette from
+// Blue 100-300 color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const cpuColorPalette = [
-  Color(0xFFFFECB3),
-  Color(0xFFFFE082),
-  Color(0xFFFFD54F),
+  Color(0xFFBBDEFB),
+  Color(0xFF90CAF9),
   mainCpuColor,
 ];
 
-// Light Green 50 color palette from
+// Teal 100-300 color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const gpuColorPalette = [
-  Color(0xFFDCEDC8),
-  Color(0xFFC5E1A5),
-  Color(0xFFAED581),
+  Color(0xFFB2DFDB),
+  Color(0xFF80CBC4),
   mainGpuColor,
 ];
 
