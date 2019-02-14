@@ -52,7 +52,7 @@ class LoggingScreen extends Screen {
 
   bool hasPendingDomUpdates = false;
 
-  /// ObjectGroup for Flutter (null for non-Flutter apps).
+  /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
   Future<ObjectGroup> objectGroup;
 
   @override
