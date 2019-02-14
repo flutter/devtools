@@ -95,12 +95,12 @@ class FrameBar extends CoreElement {
     final gpuBarHeight =
         math.min(maxBarHeight - cpuBarHeight, frame.gpuDurationMs * pxPerMs);
 
-    final cpuMs = microsAsMsText(frame.cpuDuration);
-    final gpuMs = microsAsMsText(frame.gpuDuration);
-    final cpuTooltip =
-        frame.isCpuSlow ? _slowFrameWarning('GPU', cpuMs) : 'GPU: $cpuMs';
-    final gpuTooltip =
-        frame.isCpuSlow ? _slowFrameWarning('GPU', gpuMs) : 'GPU: $gpuMs';
+    final cpuTooltip = frame.isCpuSlow
+        ? _slowFrameWarning('CPU', msAsText(frame.cpuDurationMs))
+        : 'CPU: ${msAsText(frame.cpuDurationMs)}';
+    final gpuTooltip = frame.isGpuSlow
+        ? _slowFrameWarning('GPU', msAsText(frame.gpuDurationMs))
+        : 'GPU: ${msAsText(frame.gpuDurationMs)}';
 
     _cpuBar = div(c: 'bar bottom');
     _cpuBar.element.title = cpuTooltip;

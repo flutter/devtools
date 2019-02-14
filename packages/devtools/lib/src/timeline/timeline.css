@@ -50,6 +50,7 @@
 
 .flame-chart-section .flame-chart-item {
     border-radius: 2px;
+    cursor: pointer;
     padding: 0 2px;
     position: absolute;
     white-space: nowrap;

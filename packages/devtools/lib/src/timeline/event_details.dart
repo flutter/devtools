@@ -13,6 +13,7 @@ class EventDetails extends CoreElement {
     flex();
     layoutVertical();
     element.style
+      ..clipPath = 'inset(0px 0px 0px 0px)'
       ..padding = '8px'
       ..marginTop = '4px'
       ..marginBottom = '4px'
