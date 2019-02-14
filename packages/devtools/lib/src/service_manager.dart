@@ -33,6 +33,14 @@ class ServiceConnectionManager {
 
   final Completer<Null> serviceAvailable = Completer();
 
+  VmServiceCapabilities _serviceCapabilities;
+  Future<VmServiceCapabilities> get serviceCapabilities async {
+    await serviceAvailable.future;
+    final version = await service.getVersion();
+    _serviceCapabilities ??= new VmServiceCapabilities(version);
+    return _serviceCapabilities;
+  }
+
   final Map<String, StreamController<bool>> _serviceRegistrationController =
       <String, StreamController<bool>>{};
   final Map<String, List<String>> _registeredMethodsForService = {};
@@ -660,4 +668,12 @@ class ServiceExtensionState {
   // For boolean service extensions, [enabled] should equal [value].
   final bool enabled;
   final dynamic value;
+}
+
+class VmServiceCapabilities {
+  VmServiceCapabilities(this.version);
+  final Version version;
+
+  bool get supportsGetScripts =>
+      version.major > 3 || (version.major == 3 && version.minor >= 12);
 }

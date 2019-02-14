@@ -430,7 +430,7 @@ class DebuggerScreen extends Screen {
       breakpointsView.element,
       PNavMenuItem('Scripts')
         ..add(
-          scriptCountDiv = span(text: '0', c: 'counter'),
+          scriptCountDiv = span(text: 'Unavailable', c: 'counter'),
         )
         ..click(() => scriptsView.element.toggleAttribute('hidden')),
       scriptsView.element,
@@ -499,24 +499,28 @@ class DebuggerScreen extends Screen {
   }
 
   void _populateFromIsolate(Isolate isolate) async {
-    final ScriptList scriptList =
-        await serviceManager.service.getScripts(isolate.id);
-    final List<ScriptRef> scripts = scriptList.scripts.toList();
-
-    debuggerState.scripts = scripts;
-
     debuggerState.setRootLib(isolate.rootLib);
     debuggerState.updateFrom(isolate);
 
     final bool isRunning = isolate.pauseEvent == null ||
         isolate.pauseEvent.kind == EventKind.kResume;
 
-    scriptsView.showScripts(
-      scripts,
-      debuggerState.rootLib.uri,
-      debuggerState.commonScriptPrefix,
-      selectRootScript: isRunning,
-    );
+    final scriptsAvailable =
+        (await serviceManager.serviceCapabilities).supportsGetScripts;
+    if (scriptsAvailable) {
+      final ScriptList scriptList =
+          await serviceManager.service.getScripts(isolate.id);
+      final List<ScriptRef> scripts = scriptList.scripts.toList();
+
+      debuggerState.scripts = scripts;
+
+      scriptsView.showScripts(
+        scripts,
+        debuggerState.rootLib.uri,
+        debuggerState.commonScriptPrefix,
+        selectRootScript: isRunning,
+      );
+    }
   }
 
   void _displaySource(Script script) {
