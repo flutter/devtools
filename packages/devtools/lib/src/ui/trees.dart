@@ -71,7 +71,7 @@ mixin TreeNavigator<T> {
 
   TreeNode<T> _getPreviousVisibleElementAbove(TreeNode<T> node) {
     // The previous visible element above this one is first of:
-    // - Our previous sibling's last visible ancestor
+    // - Our previous sibling's last visible descendant
     // - Our previous sibling
     // - Our parent
 
