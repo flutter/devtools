@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:html';
-import 'dart:math';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
