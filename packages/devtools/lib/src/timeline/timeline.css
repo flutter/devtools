@@ -69,6 +69,13 @@
     display: inline-block;
 }
 
+.flame-chart-item.flame-chart-title {
+    font-weight: bold;
+    padding-left: 4px;
+    padding-right: 4px;
+    cursor: default;
+}
+
 .section-border {
     border: 1px solid;
     border-color: var(--light-background);
