@@ -96,10 +96,7 @@ class TimelineScreen extends Screen {
         div()..flex(),
       ]);
     upperButtonSection.add(
-      div(c: 'btn-group collapsible')
-        ..add(<CoreElement>[
-          ServiceExtensionButton(performanceOverlay).button,
-        ]),
+      ServiceExtensionButton(performanceOverlay).button,
     );
 
     screenDiv.add(<CoreElement>[
