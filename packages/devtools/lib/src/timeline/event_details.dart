@@ -5,19 +5,13 @@
 import '../ui/elements.dart';
 import '../ui/flutter_html_shim.dart';
 import '../utils.dart';
-import 'timeline.dart';
+import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
 class EventDetails extends CoreElement {
   EventDetails() : super('div', classes: 'section-border') {
     flex();
     layoutVertical();
-    element.style
-      ..clipPath = 'inset(0px 0px 0px 0px)'
-      ..padding = '8px'
-      ..marginTop = '4px'
-      ..marginBottom = '4px'
-      ..position = 'relative';
 
     addTitle();
     addDetails();
@@ -31,13 +25,12 @@ class EventDetails extends CoreElement {
 
   void addTitle() {
     const horizontalPadding = '12px';
-    const verticalPadding = '4px';
+    const verticalPadding = '3px';
+
     _title = div(text: defaultTitleText);
     _title.element.style
-      ..borderRadius = '20px'
       ..fontWeight = 'bold'
-      ..padding = '$verticalPadding $horizontalPadding'
-      ..width = 'fit-content';
+      ..padding = '$verticalPadding $horizontalPadding';
     add(_title);
   }
 
@@ -46,16 +39,15 @@ class EventDetails extends CoreElement {
     add(_details);
   }
 
-  void update(TimelineEvent event) {
-    _event = event;
+  void update(FlameChartItem item) {
+    _event = item.event;
 
     // Update title.
     _title.text = '${_event.name}';
-    _title.element.style.backgroundColor =
-        event.isCpuEvent ? colorToCss(mainCpuColor) : colorToCss(mainGpuColor);
+    _title.element.style.backgroundColor = colorToCss(item.backgroundColor);
 
     // Update details.
-    _details.update(event);
+    _details.update(item.event);
   }
 
   void reset() {

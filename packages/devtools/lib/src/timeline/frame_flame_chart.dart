@@ -196,10 +196,10 @@ class FrameFlameChart extends CoreElement {
         ..height = '${cpuSectionHeight}px'
         ..backgroundColor = colorToCss(cpuSectionBackground);
 
-      final sectionTitle = div(text: 'CPU', c: 'flame-chart-item');
+      final sectionTitle =
+          div(text: 'CPU', c: 'flame-chart-item flame-chart-title');
       sectionTitle.element.style
         ..background = colorToCss(mainCpuColor)
-        ..fontWeight = 'bold'
         ..left = '${padding}px'
         ..top = '${padding}px';
       _cpuSection.add(sectionTitle);
@@ -215,10 +215,10 @@ class FrameFlameChart extends CoreElement {
         ..height = '${gpuSectionHeight}px'
         ..top = '${cpuSectionHeight}px';
 
-      final sectionTitle = div(text: 'GPU', c: 'flame-chart-item');
+      final sectionTitle =
+          div(text: 'GPU', c: 'flame-chart-item flame-chart-title');
       sectionTitle.element.style
         ..background = colorToCss(mainGpuColor)
-        ..fontWeight = 'bold'
         ..left = '${padding}px'
         ..top = '${padding}px';
       _gpuSection.add(sectionTitle);
@@ -409,6 +409,8 @@ class FlameChartItem {
 
   num currentLeft;
   num currentWidth;
+
+  Color get backgroundColor => _backgroundColor;
 
   void updateForZoomLevel(num zoom) {
     currentLeft = leftOffset + (_startingLeft * zoom).round();
