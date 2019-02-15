@@ -377,7 +377,13 @@ class TimelineFrame {
   }
 
   /// Frame start time in micros.
-  int get startTime => _startTime;
+  ///
+  /// We take the min of [cpuStartTime] and [_startTime] because we use an
+  /// epsilon when determining if an event fits within frame boundaries.
+  /// Therefore, there is a chance that [cpuStartTime] could be less than
+  /// [_startTime].
+  int get startTime =>
+      cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
   int _startTime;
   set startTime(int t) {
     assert(_startTime == null);
@@ -385,7 +391,13 @@ class TimelineFrame {
   }
 
   /// Frame end time in micros.
-  int get endTime => _endTime;
+  ///
+  /// We take the max of [gpuEndTime] and [_endTime] because we use an epsilon
+  /// when determining if an event fits within frame boundaries. Therefore,
+  /// there is a chance that [gpuEndTime] could be greater than [_endTime].
+  int get endTime => gpuStartTime != null && gpuDuration != null
+      ? max(gpuEndTime, _endTime)
+      : _endTime;
   int _endTime;
   set endTime(int t) {
     assert(_endTime == null);
@@ -399,15 +411,15 @@ class TimelineFrame {
       endTime != null && startTime != null ? endTime - startTime : null;
 
   // Timing info for CPU portion of the frame.
-  int get cpuStartTime => _cpuEventFlow.startTime;
+  int get cpuStartTime => _cpuEventFlow?.startTime;
   int get cpuEndTime => cpuStartTime + cpuDuration;
-  int get cpuDuration => _cpuEventFlow.duration;
+  int get cpuDuration => _cpuEventFlow?.duration;
   double get cpuDurationMs => cpuDuration / 1000;
 
   // Timing info for GPU portion of the frame.
-  int get gpuStartTime => _gpuEventFlow.startTime;
+  int get gpuStartTime => _gpuEventFlow?.startTime;
   int get gpuEndTime => gpuStartTime + gpuDuration;
-  int get gpuDuration => _gpuEventFlow.duration;
+  int get gpuDuration => _gpuEventFlow?.duration;
   double get gpuDurationMs => gpuDuration / 1000;
 
   bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
