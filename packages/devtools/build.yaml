@@ -4,4 +4,4 @@ targets:
       build_web_compilers|entrypoint:
         options:
           dart2js_args:
-          - -O0
+          - -O1
