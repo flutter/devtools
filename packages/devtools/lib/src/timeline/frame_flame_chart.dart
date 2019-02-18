@@ -155,7 +155,12 @@ class FrameFlameChart extends CoreElement {
         _frame.cpuEventFlow.depth * rowHeight + sectionSpacing;
     final gpuSectionHeight = _frame.gpuEventFlow.depth * rowHeight;
 
-    void drawRecursively(TimelineEvent event, int row, CoreElement section) {
+    void drawRecursively(
+      TimelineEvent event,
+      int row,
+      CoreElement section, {
+      bool includeDuration = false,
+    }) {
       // Do not round these values. Rounding the left could case us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
@@ -168,6 +173,7 @@ class FrameFlameChart extends CoreElement {
         endPx - startPx,
         row * rowHeight + padding,
         section,
+        includeDuration: includeDuration,
       );
 
       for (TimelineEvent child in event.children) {
@@ -191,7 +197,8 @@ class FrameFlameChart extends CoreElement {
         ..top = '${padding}px';
       _cpuSection.add(sectionTitle);
 
-      drawRecursively(_frame.cpuEventFlow, 0, _cpuSection);
+      drawRecursively(_frame.cpuEventFlow, 0, _cpuSection,
+          includeDuration: true);
     }
 
     void drawGpuEvents() {
@@ -210,7 +217,8 @@ class FrameFlameChart extends CoreElement {
         ..top = '${padding}px';
       _gpuSection.add(sectionTitle);
 
-      drawRecursively(_frame.gpuEventFlow, 0, _gpuSection);
+      drawRecursively(_frame.gpuEventFlow, 0, _gpuSection,
+          includeDuration: true);
     }
 
     drawCpuEvents();
@@ -224,14 +232,16 @@ class FrameFlameChart extends CoreElement {
     num left,
     num width,
     num top,
-    CoreElement section,
-  ) {
+    CoreElement section, {
+    bool includeDuration = false,
+  }) {
     final item = FlameChartItem(
       event,
       left,
       width,
       top,
       event.isCpuEvent ? nextCpuColor() : nextGpuColor(),
+      includeDuration: includeDuration,
     );
 
     _chartItems.add(item);
@@ -342,8 +352,9 @@ class FlameChartItem {
     this._startingLeft,
     this._startingWidth,
     this._top,
-    this._backgroundColor,
-  ) {
+    this._backgroundColor, {
+    bool includeDuration = false,
+  }) {
     currentLeft = _startingLeft;
     currentWidth = _startingWidth;
 
@@ -351,8 +362,12 @@ class FlameChartItem {
     e.title = microsAsMsText(_event.duration);
 
     _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
+    String name = event.name;
+    if (includeDuration) {
+      name = '$name (${microsAsMsText(event.duration)})';
+    }
     _label = Element.span()
-      ..text = _event.name
+      ..text = name
       ..className = 'flame-chart-item-label'
       ..style.color = colorToCss(defaultTextColor);
     _labelWrapper.append(_label);
