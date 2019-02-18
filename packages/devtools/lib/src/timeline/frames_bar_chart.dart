@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
@@ -16,28 +15,48 @@ import 'timeline_protocol.dart';
 class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
       : super('div', classes: 'timeline-frames section-border') {
-    layoutHorizontal();
-    element.style
-      ..alignItems = 'flex-end'
-      ..height = '${chartHeight}px'
-      ..paddingTop = '${topPadding}px';
+    layoutVertical();
+
+    element.style.height = '${chartHeight}px';
+
+    final CoreElement frames = div(c: 'frames-container')
+      ..layoutHorizontal()
+      ..flex()
+      ..element.style.alignItems = 'flex-end'
+      ..height = '${chartHeight}px';
+    add(frames);
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
       final CoreElement frameUI = FrameBar(this, frame);
-      if (element.children.isEmpty) {
-        add(frameUI);
+      if (frames.element.children.isEmpty) {
+        frames.add(frameUI);
       } else {
-        if (element.children.length >= maxFrames) {
-          element.children.removeLast();
+        if (frames.element.children.length >= maxFrames) {
+          frames.element.children.removeLast();
         }
-        element.children.insert(0, frameUI.element);
+        frames.element.children.insert(0, frameUI.element);
       }
     });
+
+    // Add horizontal lines for frame MS targets.
+    for (int i = 1; i <= 5; i++) {
+      final num y = (TimelineFrame.targetMaxDuration / 2.0) * i * pxPerMs;
+      final CoreElement divider = div(c: 'divider-line');
+      divider.element.style.bottom = '${y}px';
+      if (i % 2 == 1) {
+        divider.toggleClass('subtle');
+      }
+      add(divider);
+    }
   }
 
   static const int chartHeight = 100;
   static const int maxFrames = 120;
-  static const topPadding = 2;
+
+  // Let a 16ms frame take up 1/3 of the [TimelineFramesUI] height, so we should
+  // be able to fit 48ms (3x16) in [chartHeight] pixels.
+  static const double pxPerMs =
+      chartHeight / (TimelineFrame.targetMaxDuration * 3);
 
   FrameBar selectedFrame;
 
@@ -74,12 +93,7 @@ class FrameBar extends CoreElement {
   }
 
   // Chart height minus top padding.
-  static const maxBarHeight =
-      FramesBarChart.chartHeight - FramesBarChart.topPadding;
-
-  // Let a 16ms frame take up 1/3 of the [TimelineFramesUI] height, so we should
-  // be able to fit 48ms (3x16) in [chartHeight] pixels.
-  static const double pxPerMs = maxBarHeight / 48;
+  static const maxBarHeight = FramesBarChart.chartHeight;
 
   final FramesBarChart framesBarChart;
   final TimelineFrame frame;
@@ -87,12 +101,8 @@ class FrameBar extends CoreElement {
   CoreElement _gpuBar;
 
   void _initialize() {
-    final cpuBarHeight = math.min(maxBarHeight, frame.cpuDurationMs * pxPerMs);
-
-    // If we are going to run out of room to display the frame bar, trim the gpu
-    // portion.
-    final gpuBarHeight =
-        math.min(maxBarHeight - cpuBarHeight, frame.gpuDurationMs * pxPerMs);
+    final cpuBarHeight = frame.cpuDurationMs * FramesBarChart.pxPerMs;
+    final gpuBarHeight = frame.gpuDurationMs * FramesBarChart.pxPerMs;
 
     final cpuTooltip = frame.isCpuSlow
         ? _slowFrameWarning('CPU', msAsText(frame.cpuDurationMs))
@@ -101,13 +111,13 @@ class FrameBar extends CoreElement {
         ? _slowFrameWarning('GPU', msAsText(frame.gpuDurationMs))
         : 'GPU: ${msAsText(frame.gpuDurationMs)}';
 
-    _cpuBar = div(c: 'bar bottom');
+    _cpuBar = div(c: 'bar top');
     _cpuBar.element.title = cpuTooltip;
     _cpuBar.element.style
       ..height = '${cpuBarHeight}px'
       ..backgroundColor = colorToCss(_getCpuBarColor());
 
-    _gpuBar = div(c: 'bar top');
+    _gpuBar = div(c: 'bar bottom');
     _gpuBar.element.title = gpuTooltip;
     _gpuBar.element.style
       ..height = '${gpuBarHeight}px'
@@ -115,8 +125,8 @@ class FrameBar extends CoreElement {
 
     element.style.height = '${cpuBarHeight + gpuBarHeight}px';
 
-    add(_gpuBar);
     add(_cpuBar);
+    add(_gpuBar);
   }
 
   Color _getCpuBarColor() {

@@ -37,8 +37,6 @@ const Color selectedColor = Color(0xFF4078C0);
 
 // TODO(devoncarew): display whether running in debug or profile
 
-// TODO:(devoncarew): show the total frame count
-
 // TODO(devoncarew): Have a timeline view thumbnail overview.
 
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
@@ -79,7 +77,7 @@ class TimelineScreen extends Screen {
       ..click(_pauseRecording);
 
     resumeButton =
-        PButton.icon('Resume Recording', FlutterIcons.resume_black_disabled_2x)
+        PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)
           ..small()
           ..clazz('margin-left')
           ..disabled = true
