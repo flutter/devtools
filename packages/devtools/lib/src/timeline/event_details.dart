@@ -4,7 +4,6 @@
 
 import '../ui/elements.dart';
 import '../ui/flutter_html_shim.dart';
-import '../utils.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
@@ -73,11 +72,19 @@ class _Details extends CoreElement {
   void update(TimelineEvent event) {
     attribute('hidden', false);
     _duration.text = 'Duration:'
-        ' ${microsAsMsText(event.duration)} - '
+        ' ${_microsAsMsText(event.duration)} - '
         '[${event.startTime} - ${event.endTime}]';
   }
 
   void reset() {
     _duration.text = '';
   }
+}
+
+String _microsAsMsText(num micros, {bool includeUnit = true}) {
+  return _msAsText(micros / 1000, includeUnit: includeUnit);
+}
+
+String _msAsText(num milliseconds, {bool includeUnit = true}) {
+  return '${milliseconds.toStringAsFixed(3)}${includeUnit ? ' ms' : ''}';
 }
