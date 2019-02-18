@@ -82,7 +82,6 @@ class TimelineScreen extends Screen {
           ..clazz('margin-left')
           ..disabled = true
           ..click(_resumeRecording);
-
     final CoreElement upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
