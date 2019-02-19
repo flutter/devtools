@@ -27,6 +27,7 @@ class TimelineData {
 
   final StreamController<TimelineFrame> _frameCompleteController =
       StreamController<TimelineFrame>.broadcast();
+
   Stream<TimelineFrame> get onFrameCompleted => _frameCompleteController.stream;
 
   /// Frames we are in the process of assembling.
@@ -180,25 +181,25 @@ class TimelineData {
   }
 
   void _handleDurationCompleteEvent(TraceEvent event) {
-    final e = TimelineEvent(
+    final TimelineEvent timelineEvent = TimelineEvent(
       event.name,
       event.timestampMicros,
       event.type,
     );
-    e.endTime = event.timestampMicros + event.duration;
+    timelineEvent.endTime = event.timestampMicros + event.duration;
 
     if (event.isCpuEvent) {
       if (_cpuEventNode != null) {
-        _cpuEventNode.addChild(e, knownChildLocation: false);
+        _cpuEventNode.addChild(timelineEvent, knownChildLocation: false);
       } else {
-        _maybeAddEvent(e);
+        _maybeAddEvent(timelineEvent);
       }
     }
     if (event.isGpuEvent) {
       if (_gpuEventNode != null) {
-        _gpuEventNode.addChild(e, knownChildLocation: false);
+        _gpuEventNode.addChild(timelineEvent, knownChildLocation: false);
       } else {
-        _maybeAddEvent(e);
+        _maybeAddEvent(timelineEvent);
       }
     }
   }
@@ -206,26 +207,35 @@ class TimelineData {
   /// Looks through [_pendingEvents] and attempts to add events to frames in
   /// [_pendingFrames].
   void _maybeAddPendingEvents() {
-    final frames = _getAndSortWellFormedFrames();
+    // Sort _pendingEvents by their startTime. This ensures we will add the
+    // first matching event within the time boundary to the frame.
+    _pendingEvents.sort((TimelineEvent a, TimelineEvent b) {
+      return a.startTime.compareTo(b.startTime);
+    });
+
+    final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
     for (TimelineFrame frame in frames) {
-      // Sort _pendingEvents by their startTime. This ensures we will add the
-      // first matching event within the time boundary to the frame.
-      _pendingEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+      final List<TimelineEvent> eventsToRemove = [];
 
-      // Make a copy of [_pendingEvents] to iterate through.
-      final events = _pendingEvents.toList();
-
-      for (TimelineEvent event in events) {
+      for (TimelineEvent event in _pendingEvents) {
         final bool eventAdded = _maybeAddEventToFrame(event, frame);
         if (eventAdded) {
+          eventsToRemove.add(event);
+          break;
+        }
+      }
+
+      if (eventsToRemove.isNotEmpty) {
+        // ignore: prefer_foreach
+        for (TimelineEvent event in eventsToRemove) {
           _pendingEvents.remove(event);
         }
       }
     }
   }
 
-  /// Add event to an available frame in [_pendingFrames] if we can, or otherwise add it
-  /// to [_pendingEvents].
+  /// Add event to an available frame in [_pendingFrames] if we can, or
+  /// otherwise add it to [_pendingEvents].
   void _maybeAddEvent(TimelineEvent event) {
     if (!event.isCpuEventFlow && !event.isGpuEventFlow) {
       // We do not care about events that are neither the main flow of CPU
@@ -235,9 +245,12 @@ class TimelineData {
 
     bool eventAdded = false;
 
-    final frames = _getAndSortWellFormedFrames();
+    final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
     for (TimelineFrame frame in frames) {
       eventAdded = _maybeAddEventToFrame(event, frame);
+      if (eventAdded) {
+        break;
+      }
     }
 
     if (!eventAdded) {
@@ -245,34 +258,34 @@ class TimelineData {
     }
   }
 
-  /// Add event [e] to frame [f] if it meets the necessary criteria.
+  /// Add event [event] to frame [frame] if it meets the necessary criteria.
   ///
   /// Returns a bool indicating whether the event was added to the frame.
-  bool _maybeAddEventToFrame(TimelineEvent e, TimelineFrame f) {
-    assert(f.isWellFormed);
+  bool _maybeAddEventToFrame(TimelineEvent event, TimelineFrame frame) {
+    assert(frame.isWellFormed);
 
     // TODO(kenzie): consider trimming VSYNC layer from pipelineProduceFlow. It
     // can start outside of the frame's time boundaries and could pose a risk
     // for us missing a frame.
 
     // Ensure the event fits within the frame's time boundaries.
-    if (!_eventOccursWithinFrameBoundaries(e, f)) {
+    if (!_eventOccursWithinFrameBoundaries(event, frame)) {
       return false;
     }
 
     bool eventAdded = false;
 
-    if (e.isCpuEventFlow && f.cpuEventFlow == null) {
-      f.cpuEventFlow = e;
+    if (event.isCpuEventFlow && frame.cpuEventFlow == null) {
+      frame.cpuEventFlow = event;
       eventAdded = true;
-    } else if (e.isGpuEventFlow && f.gpuEventFlow == null) {
-      f.gpuEventFlow = e;
+    } else if (event.isGpuEventFlow && frame.gpuEventFlow == null) {
+      frame.gpuEventFlow = event;
       eventAdded = true;
     }
 
     // Adding event [e] could mean we have completed the frame. Check if we
     // should add the completed frame to [_frameCompleteController].
-    _maybeAddCompletedFrame(f);
+    _maybeAddCompletedFrame(frame);
 
     return eventAdded;
   }
@@ -305,14 +318,16 @@ class TimelineData {
   }
 
   List<TimelineFrame> _getAndSortWellFormedFrames() {
-    final frames = _pendingFrames.values
-        .toList()
-        .where((frame) => frame.isWellFormed)
+    final List<TimelineFrame> frames = _pendingFrames.values
+        .where((TimelineFrame frame) => frame.isWellFormed)
         .toList();
 
     // Sort frames by their startTime. Sorting these frames ensures we will
     // handle the oldest frame first when iterating through the list.
-    frames.sort((a, b) => a.startTime.compareTo(b.startTime));
+    frames.sort((TimelineFrame a, TimelineFrame b) {
+      return a.startTime.compareTo(b.startTime);
+    });
+
     return frames;
   }
 
@@ -336,14 +351,15 @@ class TimelineFrame {
   final String id;
 
   // TODO(kenzie): we should query the device for targetFps at some point.
-  static const targetFps = 60;
-  static const targetMaxDuration = 1000 / targetFps;
+  static const targetFps = 60.0;
+  static const targetMaxDuration = 1000.0 / targetFps;
 
   /// Marks whether this frame has been added to the timeline.
   ///
   /// This should only be set once.
   bool get addedToTimeline => _addedToTimeline;
   bool _addedToTimeline;
+
   set addedToTimeline(v) {
     assert(_addedToTimeline == null);
     _addedToTimeline = v;
@@ -352,6 +368,7 @@ class TimelineFrame {
   /// Flow of events showing the CPU work for the frame.
   TimelineEvent get cpuEventFlow => _cpuEventFlow;
   TimelineEvent _cpuEventFlow;
+
   set cpuEventFlow(TimelineEvent e) {
     assert(_cpuEventFlow == null, 'cpuEventFlow already set');
     _cpuEventFlow = e;
@@ -360,6 +377,7 @@ class TimelineFrame {
   /// Flow of events showing the GPU work for the frame.
   TimelineEvent get gpuEventFlow => _gpuEventFlow;
   TimelineEvent _gpuEventFlow;
+
   set gpuEventFlow(TimelineEvent e) {
     assert(_gpuEventFlow == null, 'gpuEventFlow already set');
     _gpuEventFlow = e;
@@ -385,9 +403,10 @@ class TimelineFrame {
   int get startTime =>
       cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
   int _startTime;
-  set startTime(int t) {
+
+  set startTime(int time) {
     assert(_startTime == null);
-    _startTime = t;
+    _startTime = time;
   }
 
   /// Frame end time in micros.
@@ -399,9 +418,10 @@ class TimelineFrame {
       ? max(gpuEndTime, _endTime)
       : _endTime;
   int _endTime;
-  set endTime(int t) {
+
+  set endTime(int time) {
     assert(_endTime == null);
-    _endTime = t;
+    _endTime = time;
   }
 
   bool get isWellFormed => _startTime != null && _endTime != null;
@@ -412,17 +432,24 @@ class TimelineFrame {
 
   // Timing info for CPU portion of the frame.
   int get cpuStartTime => _cpuEventFlow?.startTime;
+
   int get cpuEndTime => cpuStartTime + cpuDuration;
+
   int get cpuDuration => _cpuEventFlow?.duration;
+
   double get cpuDurationMs => cpuDuration / 1000;
 
   // Timing info for GPU portion of the frame.
   int get gpuStartTime => _gpuEventFlow?.startTime;
+
   int get gpuEndTime => gpuStartTime + gpuDuration;
+
   int get gpuDuration => _gpuEventFlow?.duration;
+
   double get gpuDurationMs => gpuDuration / 1000;
 
   bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
+
   bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
 
   @override
@@ -448,9 +475,11 @@ class TimelineEvent {
   int get duration => (endTime != null) ? endTime - startTime : null;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
+
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   bool get isCpuEventFlow => _hasChild('Engine::BeginFrame');
+
   bool get isGpuEventFlow => _hasChild('PipelineConsume');
 
   /// Depth of this TimelineEvent tree, including [this].
@@ -649,6 +678,7 @@ class TraceEvent {
   }
 
   TimelineEventType _type;
+
   TimelineEventType get type {
     if (_type == null) {
       if (args['type'] == 'ui') {
@@ -665,6 +695,7 @@ class TraceEvent {
   set type(TimelineEventType t) => _type = t;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
+
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   @override
