@@ -3,4 +3,4 @@ description: Stub pubspec file for octicons third_party dependency
 version: 0.0.1
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.1.0-dev <3.0.0'
