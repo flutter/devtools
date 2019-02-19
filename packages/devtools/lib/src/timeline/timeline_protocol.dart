@@ -215,7 +215,6 @@ class TimelineData {
 
     final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
     for (TimelineFrame frame in frames) {
-      // Make a copy of [_pendingEvents] to iterate through.
       final List<TimelineEvent> eventsToRemove = [];
 
       for (TimelineEvent event in _pendingEvents) {
