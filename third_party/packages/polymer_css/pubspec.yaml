@@ -1,5 +1,7 @@
 name: polymer_css
-description: Stub pubspec file for polymer_css third_party dependency
+description: Minimal package with polymer_css third_party dependency to package:devtools.
+author: Dart Team <misc@dartlang.org>
+homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/polymer_css
 version: 0.0.1
 
 environment:
