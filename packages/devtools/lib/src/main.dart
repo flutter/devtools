@@ -64,10 +64,14 @@ class PerfToolFramework extends Framework {
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}')
-        ])
-        ..disabled = screen.disabled;
+        ]);
       if (screen.disabled) {
         link
+          ..onClick.listen((MouseEvent e) {
+            e.preventDefault();
+            toast(link.tooltip);
+          })
+          ..toggleClass('disabled', true)
           ..tooltip =
               'This section is disabled because it provides functionality already available in your code editor';
       } else {

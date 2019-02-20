@@ -100,7 +100,8 @@ body {
     text-decoration: none;
 }
 
-.masthead a[disabled] {
+.masthead a.disabled {
+    cursor: default;
     opacity: 0.5;
 }
 
