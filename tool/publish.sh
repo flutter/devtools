@@ -11,6 +11,7 @@ pushd packages/devtools
 
 pub get
 
+rm -rf build
 pub run webdev build
 mv ./build/packages ./build/pack
 

@@ -1,0 +1,8 @@
+name: plotly_js
+description: Minimal package containing plotly third_party dependency used by package:devtools.
+author: Dart Team <misc@dartlang.org>
+homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/plotly_js
+version: 0.0.1
+
+environment:
+  sdk: '>=2.1.0 <3.0.0'

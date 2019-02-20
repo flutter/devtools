@@ -1,5 +1,7 @@
 name: primer_css
-description: Stub pubspec file for primer_css third_party dependency
+description: Minimal package containing primer_css third_party dependency used by package:devtools.
+author: Dart Team <misc@dartlang.org>
+homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/split
 version: 0.0.1
 
 environment:
