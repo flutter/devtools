@@ -86,6 +86,7 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
         font: Font(
+          // TODO(terry): font color needs be be a ThemedColor.
           color: 'white',
         ),
         bordercolor: colorToCss(hoverJankColor),
@@ -103,6 +104,7 @@ class FramesBarPlotly {
       name: 'GPU Jank',
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
+        // TODO(terry): font color needs be be a ThemedColor.
         font: Font(color: 'black'),
         bordercolor: colorToCss(hoverJankColor),
       ),
