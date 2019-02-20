@@ -79,12 +79,8 @@ class PlotlyDivGraph extends CoreElement {
   int _lastPlottedFrameIndex = 0;
   bool _createdPlot = false;
 
-  // This routine should only be called using a mutex.acquireWrite() as it's
-  // destructive to our lists (collecting indexes, and durations) which are
-  // stored on a FrameAdded event.  These lists are chunked to the plotly chart
-  // to reduce chart lag. Chunking is defined as frameChunking frames received
-  // or frames information received in a second (whichever comes first) are
-  // plotted.
+  /// These lists are batch updated to the plotly chart to reduce chart lag
+  /// relative to updating every frame.
   void plotData(TimelineController timelineController) {
     final int dataLength = dataIndexes.length;
     if (dataLength > 0) {
@@ -117,9 +113,9 @@ class PlotlyDivGraph extends CoreElement {
       plotlyChart.chartClick(frameGraph, _plotlyClick);
 
       if (!_processDatum) {
-        // The once a second chunking (other chunking uses frameChunking).
-        timer =
-            Timer.periodic(const Duration(milliseconds: 166), (Timer t) async {
+        // Only update data 6 times a second.
+        // TODO(jacobr): only run the timer when there is actual work to do.
+        timer = Timer.periodic(const Duration(milliseconds: 166), (Timer t) {
           // Skip if there is no new data.
           if (_lastPlottedFrameIndex == _frameIndex) return;
           _lastPlottedFrameIndex = _frameIndex;

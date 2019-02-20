@@ -89,8 +89,8 @@ class FrameFlameChart extends CoreElement {
 
   /// Maximum scroll delta allowed for scrollwheel based zooming.
   ///
-  // This isn't really needed but is a reasonable for safety in case we
-  // aren't handling some mouse based scroll wheel behavior well, etc.
+  /// This isn't really needed but is a reasonable for safety in case we
+  /// aren't handling some mouse based scroll wheel behavior well, etc.
   final num maxScrollWheelDelta = 20;
 
   num get _zoomMultiplier => _zoomLevel * 0.0075;
@@ -289,10 +289,10 @@ class FrameFlameChart extends CoreElement {
     assert(_frame != null);
 
     deltaY = deltaY.clamp(-maxScrollWheelDelta, maxScrollWheelDelta);
-    num zoomLevel = _zoomLevel + deltaY * _zoomMultiplier;
-    zoomLevel = zoomLevel.clamp(_minZoomLevel, _maxZoomLevel);
+    num newZoomLevel = _zoomLevel + deltaY * _zoomMultiplier;
+    newZoomLevel = newZoomLevel.clamp(_minZoomLevel, _maxZoomLevel);
 
-    if (zoomLevel == _zoomLevel) return;
+    if (newZoomLevel == _zoomLevel) return;
     // Store current scroll values for re-calculating scroll location on zoom.
     double lastScrollLeft = element.scrollLeft.toDouble();
     // Test whether the scroll offset has changed by more than rounding error
@@ -305,12 +305,12 @@ class FrameFlameChart extends CoreElement {
     // Calculate and set our new horizontal scroll position.
     if (fixedX >= 0) {
       floatingPointScrollLeft =
-          fixedX * zoomLevel / _zoomLevel + flameChartInset - mouseX;
+          fixedX * newZoomLevel / _zoomLevel + flameChartInset - mouseX;
     } else {
       // No need to transform as we are in the fixed portion of the window.
       floatingPointScrollLeft = lastScrollLeft;
     }
-    _zoomLevel = zoomLevel;
+    _zoomLevel = newZoomLevel;
 
     for (FlameChartItem item in _chartItems) {
       item.updateHorizontalPosition(zoom: _zoomLevel);
