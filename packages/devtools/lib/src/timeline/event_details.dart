@@ -71,9 +71,7 @@ class _Details extends CoreElement {
 
   void update(TimelineEvent event) {
     attribute('hidden', false);
-    _duration.text = 'Duration:'
-        ' ${_microsAsMsText(event.duration)} - '
-        '[${event.startTime} - ${event.endTime}]';
+    _duration.text = 'Duration: ${_microsAsMsText(event.duration)}';
   }
 
   void reset() {

@@ -19,9 +19,7 @@ class FramesBarPlotly {
   static const int cpuHighWaterMarkTraceIndex = 4;
   static const int gpuHighWaterMarkTraceIndex = 5;
 
-  static String cpuColor = colorToCss(mainCpuColor);
-  static String gpuColor = colorToCss(mainGpuColor);
-
+  // TODO(jacobr): make these use Color.
   static const String cpuJankColor = 'rgba(255, 0, 0, .8)'; // Border
   static const String gpuJankColor = 'rgba(255, 0, 0, .8)'; // Border
 
@@ -68,7 +66,7 @@ class FramesBarPlotly {
       name: 'CPU',
       hoverinfo: 'y+name',
       marker: Marker(
-        color: cpuColor,
+        color: colorToCss(mainCpuColor),
       ),
       width: [0],
     );
@@ -80,7 +78,7 @@ class FramesBarPlotly {
       name: 'GPU',
       hoverinfo: 'y+name',
       marker: Marker(
-        color: gpuColor,
+        color: colorToCss(mainGpuColor),
       ),
       width: [0],
     );
@@ -98,7 +96,7 @@ class FramesBarPlotly {
         bordercolor: 'rgba(255, 0, 0, .8)',
       ),
       marker: Marker(
-        color: cpuColor,
+        color: colorToCss(mainCpuColor),
         line: Line(
           color: gpuJankColor,
           width: 2,
@@ -118,7 +116,7 @@ class FramesBarPlotly {
         bordercolor: 'rgba(255, 0, 0, .7)',
       ),
       marker: Marker(
-        color: gpuColor,
+        color: colorToCss(mainGpuColor),
         line: Line(
           color: gpuJankColor,
           width: 2,

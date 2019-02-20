@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:mutex/mutex.dart';
-
 import '../ui/elements.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
@@ -65,17 +63,11 @@ class PlotlyDivGraph extends CoreElement {
 
   static const String frameGraph = 'graph_frame_timeline';
 
-  // Data is adding to a ploting graph every second or every 20 frames of data
-  // collected.  Otherwise plotly will lag is displaying the data.
-  static const int frameChunking = 20;
-
   bool _processDatum;
   Timer timer;
   final FramesBarChart framesBarChart;
   final TimelineFrame frame;
   final Map<int, TimelineFrame> _frames = {};
-
-  ReadWriteMutex mutex = ReadWriteMutex();
 
   List<int> dataIndexes = [];
   List<num> cpuDurations = [];
@@ -83,7 +75,8 @@ class PlotlyDivGraph extends CoreElement {
 
   FramesBarPlotly plotlyChart;
 
-  int frameIndex = 0;
+  int _frameIndex = 0;
+  int _lastPlottedFrameIndex = 0;
   bool _createdPlot = false;
 
   // This routine should only be called using a mutex.acquireWrite() as it's
@@ -125,54 +118,37 @@ class PlotlyDivGraph extends CoreElement {
 
       if (!_processDatum) {
         // The once a second chunking (other chunking uses frameChunking).
-        timer = Timer.periodic(const Duration(seconds: 1), (Timer t) async {
-          // Get the lock.
-          await mutex.acquireWrite();
-          try {
-            plotData(timelineController);
-          } finally {
-            // Release the lock.
-            mutex.release();
-          }
+        timer =
+            Timer.periodic(const Duration(milliseconds: 166), (Timer t) async {
+          // Skip if there is no new data.
+          if (_lastPlottedFrameIndex == _frameIndex) return;
+          _lastPlottedFrameIndex = _frameIndex;
+          plotData(timelineController);
         });
       }
     }
 
     if (_processDatum) {
       // TODO(terry): Either making this faster or remove and use chunking.
-      plotlyChart.plotFPSDatum(frameIndex, frame.cpuDurationMs,
+      plotlyChart.plotFPSDatum(_frameIndex, frame.cpuDurationMs,
           frame.gpuDurationMs, timelineController.paused);
     } else {
-      // Get the lock.
-      await mutex.acquireWrite();
-      try {
-        // TODO(terry): Eventually, below failure can happen, then onFrameAdded
-        //              events may not be received or the data can go negative
-        //              add sentry to detect bad values.
-        //
-        //    Error - already set endTime ### for frame 1650.
-        //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
-        if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
-          dataIndexes.add(frameIndex);
-          cpuDurations.add(frame.cpuDurationMs);
-          gpuDurations.add(frame.gpuDurationMs);
+      // TODO(terry): Eventually, below failure can happen, then onFrameAdded
+      //              events may not be received or the data can go negative
+      //              add sentry to detect bad values.
+      //
+      //    Error - already set endTime ### for frame 1650.
+      //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
+      if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
+        dataIndexes.add(_frameIndex);
+        cpuDurations.add(frame.cpuDurationMs);
+        gpuDurations.add(frame.gpuDurationMs);
 
-          _frames.addAll({frameIndex: frame});
-
-          // Chunk the data every frameChunking frames otherwise Plotly lags.
-          final int dataLength = dataIndexes.length;
-          if (dataLength > frameChunking) {
-            plotData(timelineController);
-          }
-
-          frameIndex++;
-        } else {
-          // TODO(terry): HACK - Ignore the event.
-          print('WARNING: Ignored onFrameAdded - bad data');
-        }
-      } finally {
-        // Release the lock.
-        mutex.release();
+        _frames.addAll({_frameIndex: frame});
+        _frameIndex++;
+      } else {
+        // TODO(terry): HACK - Ignore the event.
+        print('WARNING: Ignored onFrameAdded - bad data');
       }
     }
   }

@@ -4,6 +4,9 @@
 
 import 'dart:async';
 import 'dart:html';
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
@@ -59,7 +62,6 @@ class FrameFlameChart extends CoreElement {
       ..overflow = 'hidden';
 
     _dragScroll.enableDragScrolling(this);
-    element.onMouseMove.listen(_handleMouseMove);
     element.onMouseWheel.listen(_handleMouseWheel);
 
     onSelectedFlameChartItem.listen((FlameChartItem item) {
@@ -85,11 +87,18 @@ class FrameFlameChart extends CoreElement {
   final _minZoomLevel = 1;
   num _zoomLevel = 1;
 
-  num get _zoomMultiplier => _zoomLevel * 0.075;
+  /// Maximum scroll delta allowed for scrollwheel based zooming.
+  ///
+  // This isn't really needed but is a reasonable for safety in case we
+  // aren't handling some mouse based scroll wheel behavior well, etc.
+  final num maxScrollWheelDelta = 20;
 
-  num _currentScrollWidth;
-  num _currentScrollLeft = 0;
-  num _currentMouseX = 0;
+  num get _zoomMultiplier => _zoomLevel * 0.0075;
+
+  // The DOM doesn't allow floating point scroll offsets so we track a
+  // theoretical floating point scroll offset corresponding to the current
+  // scroll offset to reduce floating point error when zooming.
+  num floatingPointScrollLeft = 0;
 
   FlameChartItem _selectedItem;
 
@@ -224,7 +233,6 @@ class FrameFlameChart extends CoreElement {
     drawCpuEvents();
     drawGpuEvents();
     _setSectionWidths();
-    _currentScrollWidth = element.scrollWidth;
   }
 
   void _drawFlameChartItem(
@@ -265,84 +273,51 @@ class FrameFlameChart extends CoreElement {
     return maxRight;
   }
 
-  void _handleMouseMove(MouseEvent e) {
-    // Subtract offset so that [currentMouseX] reflects the x coordinate within
-    // the bounds of the flame chart.
-    _currentMouseX = e.client.x - element.offsetLeft;
-
-    // Store current scroll values for re-calculating scroll location on zoom.
-    _currentScrollLeft = element.scrollLeft;
-    _currentScrollWidth = element.scrollWidth;
-  }
-
   void _handleMouseWheel(WheelEvent e) {
     e.preventDefault();
 
-    if (e.deltaY.abs() > e.deltaX.abs()) {
-      _handleZoom(e.deltaY);
-    } else if (e.deltaX.abs() > e.deltaY.abs()) {
+    if (e.deltaY.abs() >= e.deltaX.abs()) {
+      final mouseX = e.client.x - element.getBoundingClientRect().left;
+      _handleZoom(e.deltaY, mouseX);
+    } else {
       // Manually perform horizontal scrolling.
       element.scrollLeft += e.deltaX;
-      _currentScrollLeft = element.scrollLeft;
     }
   }
 
-  void _handleZoom(num deltaY) {
-    // TODO(kenzie): use deltaY to calculate [_zoomMultiplier].
-    if (deltaY > -0.0) {
-      _zoomIn();
-    } else if (deltaY < -0.0) {
-      _zoomOut();
-    }
-  }
-
-  void _zoomIn() {
+  void _handleZoom(num deltaY, num mouseX) {
     assert(_frame != null);
-    if (_zoomLevel == _maxZoomLevel) {
-      // Already at max zoom level. Do nothing.
-      return;
-    }
 
-    if (_zoomLevel + _zoomMultiplier <= _maxZoomLevel) {
-      _zoomLevel += _zoomMultiplier;
+    deltaY = deltaY.clamp(-maxScrollWheelDelta, maxScrollWheelDelta);
+    num zoomLevel = _zoomLevel + deltaY * _zoomMultiplier;
+    zoomLevel = zoomLevel.clamp(_minZoomLevel, _maxZoomLevel);
+
+    if (zoomLevel == _zoomLevel) return;
+    // Store current scroll values for re-calculating scroll location on zoom.
+    double lastScrollLeft = element.scrollLeft.toDouble();
+    // Test whether the scroll offset has changed by more than rounding error
+    // since the last time an exact scroll offset was calculated.
+    if ((floatingPointScrollLeft - lastScrollLeft).abs() < 0.5) {
+      lastScrollLeft = floatingPointScrollLeft;
+    }
+    // Position in the zoomable coordinate space that we want to keep fixed.
+    final double fixedX = mouseX + lastScrollLeft - flameChartInset;
+    // Calculate and set our new horizontal scroll position.
+    if (fixedX >= 0) {
+      floatingPointScrollLeft =
+          fixedX * zoomLevel / _zoomLevel + flameChartInset - mouseX;
     } else {
-      _zoomLevel = _maxZoomLevel;
+      // No need to transform as we are in the fixed portion of the window.
+      floatingPointScrollLeft = lastScrollLeft;
     }
-    _updateChartForZoom();
-  }
+    _zoomLevel = zoomLevel;
 
-  void _zoomOut() {
-    assert(_frame != null);
-    if (_zoomLevel == _minZoomLevel) {
-      // Already at min zoom level. Do nothing.
-      return;
-    }
-
-    if (_zoomLevel - _zoomMultiplier >= _minZoomLevel) {
-      _zoomLevel -= _zoomMultiplier;
-    } else {
-      _zoomLevel = _minZoomLevel;
-    }
-    _updateChartForZoom();
-  }
-
-  void _updateChartForZoom() {
     for (FlameChartItem item in _chartItems) {
-      item.updateForZoomLevel(_zoomLevel);
+      item.updateHorizontalPosition(zoom: _zoomLevel);
     }
     _setSectionWidths();
 
-    // Calculate and set our new horizontal scroll position.
-    final scrollLeft = (element.scrollWidth *
-                (_currentMouseX + _currentScrollLeft) /
-                _currentScrollWidth -
-            _currentMouseX)
-        .round();
-    element.scrollLeft = scrollLeft;
-
-    // Update our current scroll values.
-    _currentScrollLeft = element.scrollLeft;
-    _currentScrollWidth = element.scrollWidth;
+    element.scrollLeft = math.max(0, floatingPointScrollLeft.round());
   }
 }
 
@@ -355,11 +330,8 @@ class FlameChartItem {
     this._backgroundColor, {
     bool includeDuration = false,
   }) {
-    currentLeft = _startingLeft;
-    currentWidth = _startingWidth;
-
     e = Element.div()..className = 'flame-chart-item';
-    e.title = microsAsMsText(_event.duration);
+    e.title = '${event.name} (${microsAsMsText(_event.duration)})';
 
     _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
     String name = event.name;
@@ -373,18 +345,10 @@ class FlameChartItem {
     _labelWrapper.append(_label);
     e.append(_labelWrapper);
 
-    final style = e.style;
-    style
+    e.style
       ..background = colorToCss(_backgroundColor)
-      ..left = '${flameChartInset + _startingLeft}px';
-    if (_startingWidth != null) {
-      style.width = '${_startingWidth}px';
-      // This is critical to avoid having labels overflow the items boundaries.
-      // For some reason, overflow:hidden does not play well with
-      // position: sticky; so we have to implement this way.
-      _labelWrapper.style.maxWidth = '${_startingWidth}px';
-    }
-    style.top = '${_top}px';
+      ..top = '${_top}px';
+    updateHorizontalPosition(zoom: 1);
 
     e.onClick.listen((e) {
       // Prevent clicks when the chart was being dragged.
@@ -396,6 +360,9 @@ class FlameChartItem {
 
   static const defaultTextColor = Color(0xFF000000);
   static const selectedTextColor = Color(0xFFFFFFFF);
+  // Pixels of padding to place on the right side of the label to ensure label
+  // text does not get too close to the right hand size of each bar.
+  static const labelPaddingRight = 4;
 
   Element e;
   Element _label;
@@ -416,7 +383,7 @@ class FlameChartItem {
 
   Color get backgroundColor => _backgroundColor;
 
-  void updateForZoomLevel(num zoom) {
+  void updateHorizontalPosition({@required num zoom}) {
     // Do not round these values. Rounding the left could case us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
@@ -426,7 +393,8 @@ class FlameChartItem {
     e.style.left = '${newLeft}px';
     if (_startingWidth != null) {
       e.style.width = '${newWidth}px';
-      _labelWrapper.style.maxWidth = '${newWidth}px';
+      _labelWrapper.style.maxWidth =
+          '${math.max(0, newWidth - labelPaddingRight)}px';
     }
     currentLeft = newLeft;
     currentWidth = newWidth;
