@@ -42,6 +42,8 @@ class PerfToolFramework extends Framework {
     }
     addScreen(LoggingScreen());
 
+    sortScreens();
+
     initGlobalUI();
 
     initTestingModel();
@@ -113,6 +115,16 @@ class PerfToolFramework extends Framework {
 
   void initTestingModel() {
     App.register(this);
+  }
+
+  void sortScreens() {
+    // Move disabled screens to the end, but otherwise preserve order.
+    final sortedScreens = screens
+        .where((screen) => !screen.disabled)
+        .followedBy(screens.where((screen) => screen.disabled))
+        .toList();
+    screens.clear();
+    screens.addAll(sortedScreens);
   }
 
   IsolateRef get currentIsolate =>
