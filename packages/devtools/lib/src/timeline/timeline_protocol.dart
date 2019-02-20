@@ -91,13 +91,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-
-      // If we receive a duplicate event for the same frame id, take the minimum
-      // start time to be the truth.
-      pendingFrame.startTime = pendingFrame.startTime != null
-          ? min(pendingFrame.startTime, event.timestampMicros)
-          : event.timestampMicros;
-
+      pendingFrame.startTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
@@ -107,13 +101,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-
-      // If we receive a duplicate event for the same frame id, take the maximum
-      // end time to be the truth.
-      pendingFrame.endTime = pendingFrame.endTime != null
-          ? max(pendingFrame.endTime, event.timestampMicros)
-          : event.timestampMicros;
-
+      pendingFrame.endTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
@@ -403,7 +391,7 @@ class TimelineFrame {
   int get startTime =>
       cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
   int _startTime;
-  set startTime(int time) => _startTime = time;
+  set startTime(int time) => _startTime = min(_startTime, time);
 
   /// Frame end time in micros.
   ///
@@ -414,7 +402,7 @@ class TimelineFrame {
       ? max(gpuEndTime, _endTime)
       : _endTime;
   int _endTime;
-  set endTime(int time) => _endTime = time;
+  set endTime(int time) => _endTime = max(_endTime, time);
 
   bool get isWellFormed => _startTime != null && _endTime != null;
 
