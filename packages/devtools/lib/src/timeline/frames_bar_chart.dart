@@ -29,7 +29,7 @@ class FramesBarChart extends CoreElement {
     });
   }
 
-  static const int chartHeight = 300;
+  static const int chartHeight = 160;
   static const int maxFrames = 500;
   static const topPadding = 2;
 

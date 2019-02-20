@@ -28,9 +28,8 @@ class FramesBarPlotly {
 
   final String _domName;
 
-  Layout getFPSTimeseriesLayout(chartTitle) {
+  Layout getFPSTimeseriesLayout() {
     return Layout(
-      title: chartTitle,
       xaxis: AxisLayout(
         ticks: '',
         showgrid: false,
@@ -50,8 +49,8 @@ class FramesBarPlotly {
       margin: Margin(
         l: 80,
         r: 0,
-        b: 15,
-        t: 30,
+        b: 5,
+        t: 5,
         pad: 5,
       ),
     );
@@ -67,6 +66,10 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       marker: Marker(
         color: colorToCss(mainCpuColor),
+        line: Line(
+          color: colorToCss(mainCpuColor),
+          width: 1,
+        ),
       ),
       width: [0],
     );
@@ -79,6 +82,10 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       marker: Marker(
         color: colorToCss(mainGpuColor),
+        line: Line(
+          color: colorToCss(mainGpuColor),
+          width: 1,
+        ),
       ),
       width: [0],
     );
@@ -98,8 +105,8 @@ class FramesBarPlotly {
       marker: Marker(
         color: colorToCss(mainCpuColor),
         line: Line(
-          color: gpuJankColor,
-          width: 2,
+          color: cpuJankColor,
+          width: 1,
         ),
       ),
       width: [0],
@@ -119,7 +126,7 @@ class FramesBarPlotly {
         color: colorToCss(mainGpuColor),
         line: Line(
           color: gpuJankColor,
-          width: 2,
+          width: 1,
         ),
       ),
       width: [0],
@@ -138,7 +145,7 @@ class FramesBarPlotly {
     Plotly.newPlot(
         _domName,
         createFPSTraces(),
-        getFPSTimeseriesLayout('Frame Rendering Time'),
+        getFPSTimeseriesLayout(),
         Configuration(
           responsive: true,
           displaylogo: false,
