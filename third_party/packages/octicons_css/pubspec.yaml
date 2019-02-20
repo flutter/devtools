@@ -1,0 +1,7 @@
+name: octicons_css
+description: Stub package for octicons_css third_party dependency to package:devtools.
+author: Dart Team <misc@dartlang.org>
+homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/octicons
+version: 0.0.1
+environment:
+  sdk: '>=2.1.0-dev <3.0.0'
