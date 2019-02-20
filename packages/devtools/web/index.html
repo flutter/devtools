@@ -36,10 +36,49 @@
                 );
             }
         })();
+
+        // Plotly wrappers.
+        function hookupPlotlyClick(domName, jsFunction) {
+            var graph = document.getElementById(domName);
+            graph.on('plotly_click', jsFunction);
+        }
+
+        function _copyTrace(x, y, orgTrace, xData, yData, traces) {
+          if (x.length > 0) {
+            var newX = [];
+            var newY = [];
+            for (var idx = 0; idx < x.length; idx++) {
+              newX.push(x[idx]);
+              newY.push(y[idx]);
+            }
+            xData.push(newX);
+            yData.push(newY);
+            traces.push(orgTrace);
+          }
+        }
+
+        // TODO(terry): Used instead of normal JS interop (reified List).  Need to eliminate.
+        function myExtendTraces(domName, x0, x1, x2, x3, y0, y1, y2, y3, orgTraces) {
+          var data = {};
+          var xData = [];
+          var yData = [];
+          var traces = [];
+
+          _copyTrace(x0, y0, orgTraces[0], xData, yData, traces);
+          _copyTrace(x1, y1, orgTraces[1], xData, yData, traces);
+          _copyTrace(x2, y2, orgTraces[2], xData, yData, traces);
+          _copyTrace(x3, y3, orgTraces[3], xData, yData, traces);
+
+          data = { x: xData, y: yData};
+
+          Plotly.extendTraces(domName, data, traces);
+        }
     </script>
 
     <link href="packages/codemirror/codemirror.css" rel="stylesheet">
     <script src="packages/codemirror/codemirror.js"></script>
+
+    <script type="text/javascript" src="packages/plotly/plotly.min.js"></script>
 
     <script type="text/javascript" src="packages/split/split.min.js"></script>
 

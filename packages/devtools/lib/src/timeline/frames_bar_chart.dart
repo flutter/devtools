@@ -4,149 +4,176 @@
 
 import 'dart:async';
 
+import 'package:mutex/mutex.dart';
+
 import '../ui/elements.dart';
-import '../ui/fake_flutter/dart_ui/dart_ui.dart';
-import '../ui/flutter_html_shim.dart';
-import '../utils.dart';
-import 'timeline.dart';
+import '../ui/plotly.dart';
+import 'frames_bar_plotly.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
 class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
       : super('div', classes: 'timeline-frames section-border') {
-    layoutVertical();
-
-    element.style.height = '${chartHeight}px';
-
-    final CoreElement frames = div(c: 'frames-container')
-      ..layoutHorizontal()
-      ..flex()
-      ..element.style.alignItems = 'flex-end'
-      ..height = '${chartHeight}px';
-    add(frames);
+    layoutHorizontal();
+    element.style
+      ..alignItems = 'flex-end'
+      ..height = '${chartHeight}px'
+      ..paddingTop = '${topPadding}px';
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
-      final CoreElement frameUI = FrameBar(this, frame);
-      if (frames.element.children.isEmpty) {
-        frames.add(frameUI);
-      } else {
-        if (frames.element.children.length >= maxFrames) {
-          frames.element.children.removeLast();
-        }
-        frames.element.children.insert(0, frameUI.element);
+      if (frameUIgraph == null) {
+        frameUIgraph = PlotlyDivGraph(this, frame, false); // Process chunks
+        add(frameUIgraph);
       }
-    });
 
-    // Add horizontal lines for frame MS targets.
-    for (int i = 1; i <= 5; i++) {
-      final num y = (TimelineFrame.targetMaxDuration / 2.0) * i * pxPerMs;
-      final CoreElement divider = div(c: 'divider-line');
-      divider.element.style.bottom = '${y}px';
-      if (i % 2 == 1) {
-        divider.toggleClass('subtle');
-      }
-      add(divider);
-    }
+      frameUIgraph.process(timelineController, frame);
+    });
   }
 
-  static const int chartHeight = 100;
-  static const int maxFrames = 120;
+  static const int chartHeight = 300;
+  static const int maxFrames = 500;
+  static const topPadding = 2;
 
-  // Let a 16ms frame take up 1/3 of the [TimelineFramesUI] height, so we should
-  // be able to fit 48ms (3x16) in [chartHeight] pixels.
-  static const double pxPerMs =
-      chartHeight / (TimelineFrame.targetMaxDuration * 3);
-
-  FrameBar selectedFrame;
+  TimelineFrame selectedFrame;
+  PlotlyDivGraph frameUIgraph;
 
   final StreamController<TimelineFrame> _selectedFrameController =
       StreamController<TimelineFrame>.broadcast();
 
   Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
 
-  void setSelected(FrameBar frameUI) {
-    if (selectedFrame == frameUI) {
+  void setSelected(TimelineFrame frame) {
+    if (selectedFrame == frame) {
       return;
     }
 
-    if (selectedFrame != frameUI) {
-      selectedFrame?.setSelected(false);
-      selectedFrame = frameUI;
-      selectedFrame?.setSelected(true);
-
-      _selectedFrameController.add(selectedFrame?.frame);
-    }
+    selectedFrame = frame;
+    _selectedFrameController.add(frame);
   }
 }
 
-class FrameBar extends CoreElement {
-  FrameBar(this.framesBarChart, this.frame)
-      : super('div', classes: 'timeline-frame') {
-    layoutVertical();
-
-    _initialize();
-
-    click(() {
-      framesBarChart.setSelected(this);
-    });
+class PlotlyDivGraph extends CoreElement {
+  PlotlyDivGraph(this.framesBarChart, this.frame, [bool datum = true])
+      : _processDatum = datum,
+        super('div') {
+    element.id = frameGraph;
+    element.style
+      ..height = '100%'
+      ..width = '100%';
   }
 
-  // Chart height minus top padding.
-  static const maxBarHeight = FramesBarChart.chartHeight;
+  static const String frameGraph = 'graph_frame_timeline';
 
+  // Data is adding to a ploting graph every second or every 20 frames of data
+  // collected.  Otherwise plotly will lag is displaying the data.
+  static const int frameChunking = 20;
+
+  bool _processDatum;
+  Timer timer;
   final FramesBarChart framesBarChart;
   final TimelineFrame frame;
-  CoreElement _cpuBar;
-  CoreElement _gpuBar;
+  final Map<int, TimelineFrame> _frames = {};
 
-  void _initialize() {
-    final cpuBarHeight = frame.cpuDurationMs * FramesBarChart.pxPerMs;
-    final gpuBarHeight = frame.gpuDurationMs * FramesBarChart.pxPerMs;
+  ReadWriteMutex mutex = ReadWriteMutex();
 
-    final cpuTooltip = frame.isCpuSlow
-        ? _slowFrameWarning('CPU', msAsText(frame.cpuDurationMs))
-        : 'CPU: ${msAsText(frame.cpuDurationMs)}';
-    final gpuTooltip = frame.isGpuSlow
-        ? _slowFrameWarning('GPU', msAsText(frame.gpuDurationMs))
-        : 'GPU: ${msAsText(frame.gpuDurationMs)}';
+  List<int> dataIndexes = [];
+  List<num> cpuDurations = [];
+  List<num> gpuDurations = [];
 
-    _cpuBar = div(c: 'bar top');
-    _cpuBar.element.title = cpuTooltip;
-    _cpuBar.element.style
-      ..height = '${cpuBarHeight}px'
-      ..backgroundColor = colorToCss(_getCpuBarColor());
+  FramesBarPlotly plotlyChart;
 
-    _gpuBar = div(c: 'bar bottom');
-    _gpuBar.element.title = gpuTooltip;
-    _gpuBar.element.style
-      ..height = '${gpuBarHeight}px'
-      ..backgroundColor = colorToCss(_getGpuBarColor());
+  int frameIndex = 0;
+  bool _createdPlot = false;
 
-    element.style.height = '${cpuBarHeight + gpuBarHeight}px';
+  // This routine should only be called using a mutex.acquireWrite() as it's
+  // destructive to our lists (collecting indexes, and durations) which are
+  // stored on a FrameAdded event.  These lists are chunked to the plotly chart
+  // to reduce chart lag. Chunking is defined as frameChunking frames received
+  // or frames information received in a second (whichever comes first) are
+  // plotted.
+  void plotData(TimelineController timelineController) {
+    final int dataLength = dataIndexes.length;
+    if (dataLength > 0) {
+      plotlyChart.plotFPSDataList(
+          dataIndexes, cpuDurations, gpuDurations, timelineController.paused);
 
-    add(_cpuBar);
-    add(_gpuBar);
+      dataIndexes.removeRange(0, dataLength);
+      cpuDurations.removeRange(0, dataLength);
+      gpuDurations.removeRange(0, dataLength);
+    }
   }
 
-  Color _getCpuBarColor() {
-    return frame.isCpuSlow ? slowFrameColor : mainCpuColor;
+  void _plotlyClick(DataEvent data) {
+    final int xPosition = data.points[0].x;
+    if (_frames.containsKey(xPosition)) {
+      final TimelineFrame timelineFrame = _frames[xPosition];
+      framesBarChart.setSelected(timelineFrame);
+    }
   }
 
-  Color _getGpuBarColor() {
-    return frame.isGpuSlow ? slowFrameColor : mainGpuColor;
-  }
+  void process(
+      TimelineController timelineController, TimelineFrame frame) async {
+    if (!_createdPlot) {
+      plotlyChart = new FramesBarPlotly(frameGraph);
+      plotlyChart.plotFPS();
 
-  String _slowFrameWarning(String type, String duration) {
-    return 'The $type portion of this frame took $duration to render. This is '
-        'longer than 8 ms, which can cause frame rate to drop below 60 FPS.';
-  }
+      _createdPlot = true;
 
-  void setSelected(bool selected) {
-    toggleClass('selected', selected);
-    _cpuBar.element.style.backgroundColor =
-        selected ? colorToCss(selectedColor) : colorToCss(_getCpuBarColor());
-    _gpuBar.element.style.backgroundColor =
-        selected ? colorToCss(selectedColor) : colorToCss(_getGpuBarColor());
+      // Hookup clicks in the plotly chart.
+      plotlyChart.chartClick(frameGraph, _plotlyClick);
+
+      if (!_processDatum) {
+        // The once a second chunking (other chunking uses frameChunking).
+        timer = Timer.periodic(const Duration(seconds: 1), (Timer t) async {
+          // Get the lock.
+          await mutex.acquireWrite();
+          try {
+            plotData(timelineController);
+          } finally {
+            // Release the lock.
+            mutex.release();
+          }
+        });
+      }
+    }
+
+    if (_processDatum) {
+      // TODO(terry): Either making this faster or remove and use chunking.
+      plotlyChart.plotFPSDatum(frameIndex, frame.cpuDurationMs,
+          frame.gpuDurationMs, timelineController.paused);
+    } else {
+      // Get the lock.
+      await mutex.acquireWrite();
+      try {
+        // TODO(terry): Eventually, below failure can happen, then onFrameAdded
+        //              events may not be received or the data can go negative
+        //              add sentry to detect bad values.
+        //
+        //    Error - already set endTime ### for frame 1650.
+        //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
+        if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
+          dataIndexes.add(frameIndex);
+          cpuDurations.add(frame.cpuDurationMs);
+          gpuDurations.add(frame.gpuDurationMs);
+
+          _frames.addAll({frameIndex: frame});
+
+          // Chunk the data every frameChunking frames otherwise Plotly lags.
+          final int dataLength = dataIndexes.length;
+          if (dataLength > frameChunking) {
+            plotData(timelineController);
+          }
+
+          frameIndex++;
+        } else {
+          // TODO(terry): HACK - Ignore the event.
+          print('WARNING: Ignored onFrameAdded - bad data');
+        }
+      } finally {
+        // Release the lock.
+        mutex.release();
+      }
+    }
   }
 }

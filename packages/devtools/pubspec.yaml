@@ -14,6 +14,8 @@ dependencies:
   intl: ^0.15.0
   js: ^0.6.1+1
   meta: ^1.1.0
+  mutex:
+    git: git://github.com/hoylen/dart-mutex.git
   path: ^1.6.0
   pedantic: ^1.4.0
   shelf: ^0.7.4
@@ -22,6 +24,8 @@ dependencies:
   vm_service_lib: ^3.14.1
   octicons:
     path: ../../third_party/packages/octicons
+  plotly:
+    path: ../../third_party/packages/plotly
   polymer_css:
     path: ../../third_party/packages/polymer_css
   primer_css:
