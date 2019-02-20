@@ -19,12 +19,8 @@ class FramesBarPlotly {
   static const int cpuHighWaterMarkTraceIndex = 4;
   static const int gpuHighWaterMarkTraceIndex = 5;
 
-  // TODO(jacobr): make these use Color.
-  static const String cpuJankColor = 'rgba(255, 0, 0, .8)'; // Border
-  static const String gpuJankColor = 'rgba(255, 0, 0, .8)'; // Border
-
   // Default number of bars displayed in zoom (range slider).
-  static const int ticksInRangeSlider = 70;
+  static const int ticksInRangeSlider = 90;
 
   final String _domName;
 
@@ -66,10 +62,6 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       marker: Marker(
         color: colorToCss(mainCpuColor),
-        line: Line(
-          color: colorToCss(mainCpuColor),
-          width: 1,
-        ),
       ),
       width: [0],
     );
@@ -82,10 +74,6 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       marker: Marker(
         color: colorToCss(mainGpuColor),
-        line: Line(
-          color: colorToCss(mainGpuColor),
-          width: 1,
-        ),
       ),
       width: [0],
     );
@@ -98,16 +86,13 @@ class FramesBarPlotly {
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
         font: Font(
+          // TODO(terry): font color needs be be a ThemedColor.
           color: 'white',
         ),
-        bordercolor: 'rgba(255, 0, 0, .8)',
+        bordercolor: colorToCss(hoverJankColor),
       ),
       marker: Marker(
-        color: colorToCss(mainCpuColor),
-        line: Line(
-          color: cpuJankColor,
-          width: 1,
-        ),
+        color: colorToCss(cpuJankColor),
       ),
       width: [0],
     );
@@ -119,15 +104,12 @@ class FramesBarPlotly {
       name: 'GPU Jank',
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
-        font: Font(color: 'white'),
-        bordercolor: 'rgba(255, 0, 0, .7)',
+        // TODO(terry): font color needs be be a ThemedColor.
+        font: Font(color: 'black'),
+        bordercolor: colorToCss(hoverJankColor),
       ),
       marker: Marker(
-        color: colorToCss(mainGpuColor),
-        line: Line(
-          color: gpuJankColor,
-          width: 1,
-        ),
+        color: colorToCss(gpuJankColor),
       ),
       width: [0],
     );

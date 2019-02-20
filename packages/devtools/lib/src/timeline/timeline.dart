@@ -21,12 +21,20 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
+// TODO(terry): These colors need to be ThemedColor.
 // Blue 300 from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const Color mainCpuColor = Color(0xFF64B5F6);
 // Teal 300 from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const Color mainGpuColor = Color(0xFF4DB6AC);
+
+// Red 300
+const Color gpuJankColor = Color(0xFFE57373);
+// Red 800
+const Color cpuJankColor = Color(0xFFC62828);
+// Red 500
+const Color hoverJankColor = Color(0xFFF44336);
 
 const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedColor = Color(0xFF4078C0);
