@@ -20,10 +20,6 @@ enum TimelineEventType {
 class TimelineData {
   TimelineData({this.cpuThreadId, this.gpuThreadId});
 
-  /// Threshold for determining whether we will log a warning for a duplicate
-  /// trace event.
-  static const duplicateTraceWarningThreshold = 10;
-
   // TODO(kenzie): Remove the following members once cpu/gpu distinction changes
   //  and frame ids are available in the engine.
   final int cpuThreadId;
@@ -93,29 +89,15 @@ class TimelineData {
   void _handleFrameStartEvent(TraceEvent event) {
     if (event.id != null) {
       final String id = _getFrameId(event);
-      if (_pendingFrames[id] == null) {
-        // Create a new TimelineFrame if we do not already have one for this id.
-        _pendingFrames[id] = TimelineFrame(id);
-      }
+      final pendingFrame =
+          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
 
-      // Drop any duplicate trace events. Log a warning to console if the
-      // timestamp delta exceeds [duplicateTraceWarningThreshold].
-      if (_pendingFrames[id].startTime != null) {
-        final delta =
-            (_pendingFrames[id].startTime - event.timestampMicros).abs();
-        if (delta > duplicateTraceWarningThreshold) {
-          print('Warning - received duplicate FrameStart event for frame $id.\n'
-              'Attempting to overwrite startTime '
-              '${_pendingFrames[id].startTime} with new value: '
-              '${event.timestampMicros}.\n Delta = $delta.\n If you see this'
-              'warning, please copy and paste this message into a new issue at '
-              'https://github.com/flutter/devtools/issues/new, and CC '
-              '@kenzieschmoll.');
-        }
-        return;
-      }
+      // If we receive a duplicate event for the same frame id, take the minimum
+      // start time to be the truth.
+      pendingFrame.startTime = pendingFrame.startTime != null
+          ? min(pendingFrame.startTime, event.timestampMicros)
+          : event.timestampMicros;
 
-      _pendingFrames[id].startTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
@@ -123,30 +105,15 @@ class TimelineData {
   void _handleFrameEndEvent(TraceEvent event) async {
     if (event.id != null) {
       final String id = _getFrameId(event);
-      if (_pendingFrames[id] == null) {
-        // Sometimes frame end events can come in before frame start events, so
-        // create a new TimelineFrame if we do not already have one for this id.
-        _pendingFrames[id] = TimelineFrame(id);
-      }
+      final pendingFrame =
+          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
 
-      // Drop any duplicate trace events. Log a warning to console if the
-      // timestamp delta exceeds [duplicateTraceWarningThreshold].
-      if (_pendingFrames[id].endTime != null) {
-        final delta =
-            (_pendingFrames[id].endTime - event.timestampMicros).abs();
-        if (delta > duplicateTraceWarningThreshold) {
-          print('Warning - received duplicate FrameEnd event for frame $id.\n'
-              'Attempting to overwrite endTime '
-              '${_pendingFrames[id].endTime} with new value: '
-              '${event.timestampMicros}.\n Delta = $delta.\n If you see this'
-              'warning, please copy and paste this message into a new issue at '
-              'https://github.com/flutter/devtools/issues/new, and CC '
-              '@kenzieschmoll.');
-        }
-        return;
-      }
+      // If we receive a duplicate event for the same frame id, take the maximum
+      // end time to be the truth.
+      pendingFrame.endTime = pendingFrame.endTime != null
+          ? max(pendingFrame.endTime, event.timestampMicros)
+          : event.timestampMicros;
 
-      _pendingFrames[id].endTime = event.timestampMicros;
       _maybeAddPendingEvents();
     }
   }
