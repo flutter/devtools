@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
+import 'package:devtools/src/ui/ui_utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'core/message_bus.dart';
@@ -32,7 +33,7 @@ class PerfToolFramework extends Framework {
   PerfToolFramework() {
     addScreen(InspectorScreen());
     addScreen(TimelineScreen());
-    addScreen(DebuggerScreen());
+    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
     if (showMemoryPage) {
       addScreen(MemoryScreen());
     }
@@ -66,7 +67,7 @@ class PerfToolFramework extends Framework {
       if (screen.disabled) {
         link
           ..tooltip =
-              'This section is disabled because it is available in your editor';
+              'This section is disabled because it provides functionality already available in your code editor';
       } else {
         link
           ..attributes['href'] = screen.ref
