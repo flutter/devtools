@@ -9,21 +9,21 @@ title: Using the Debugger
 ## Getting started
 
 DevTools includes a full source level debugger, including breakpoints, stepping, and
-variables inspection.
+variable inspection.
 
-When you open the Debugger tab in DevTools, you should see all the libraries for you
-application listed in bottom left of the screen (under the `Scripts` area), and the
-source for the main entry-point for your app in the loaded in the main source area.
+When you open the debugger tab, you should see all the libraries for you application
+listed in bottom left of the screen (under the `Scripts` area), and the source for the
+main entry-point for your app in the loaded in the main source area.
 
-In order to browser around more of your application sources, you can scroll through
-the `Scripts` area and select other source files.
+In order to browse around more of your application sources, you can scroll through
+the `Scripts` area and select other source files to display.
 
 <img src="images/debugger_screenshot.png" width="900" />
 
 ## Setting breakpoints
 
 To set a breakpoint, click on the left margin (the line number ruler) in the source
-area. Click once will set a breakpoint, which should also show up in the
+area. Clicking once will set a breakpoint, which should also show up in the
 `Breakpoints` area on the left. Clicking again will remove the breakpoint.
 
 ## The call stack and variables areas
@@ -31,7 +31,7 @@ area. Click once will set a breakpoint, which should also show up in the
 When your application encounters a breakpoint, it'll pause there, and the DevTools
 debugger will show the paused execution location in the source area. In addition,
 the `Call stack` and `Variables` areas will populate with the current call stack
-fir the paused isolate, and the local variables for the selected frame. Selecting
+for the paused isolate, and the local variables for the selected frame. Selecting
 other frames in the `Call stack` area will change the contents of the `Variables`
 area.
 
@@ -41,15 +41,20 @@ to see their fields. Hovering over an object in the `Variables` area will call t
 
 ## Stepping through source code
 
-When paused, the three stepping buttons become active. Use `Step in` to step into a
-method invocation, stopping at the first executable line in that invoked method. Use
-`Step over` to step over a method invocation - this steps through source lines in the
-current method. Use `Step out` to step out of the current method, without stopping at
-any intermediary lines.
+When paused, the three stepping buttons become active.
+
+- use `Step in` to step into a method invocation, stopping at the first executable line
+  in that invoked method
+- use `Step over` to step over a method invocation; this steps through source lines in
+  the current method
+- use `Step out` to step out of the current method, without stopping at any intermediary
+  lines
+
+In addition, the `Resume` button will continue regular execution of the application.
 
 ## Console output
 
-Console output for the running app (stdout and stderr) is displayed in console, below
+Console output for the running app (stdout and stderr) is displayed in the console, below
 the source code area.
 
 ## Breaking on exceptions
@@ -63,4 +68,4 @@ pause whether or not the breakpoint was caught by application code.
 
 ## Known issues
 
-- when performing a hot restart for a Flutter application user breakpoints are cleared
+- when performing a hot restart for a Flutter application, user breakpoints are cleared
