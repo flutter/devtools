@@ -63,7 +63,7 @@ void main() {
 }
 ```
 
-The logging view will interpret the JSON encoded error param as a data object, and
+The logging view will interpret the JSON encoded error param as a data object and
 render it in the details view for that log entry.
 
 ## Showing network traffic
@@ -78,12 +78,12 @@ dependencies:
     git: https://github.com/pq/logs
 ```
 
-and, in your app code:
+and, in your application code:
 
 ```dart
 import 'package:logs/logs.dart';
 
-Log httpLog = new Log('http');
+final Log httpLog = new Log('http');
 
 void main() {
   httpLog.enabled = true;
@@ -91,7 +91,8 @@ void main() {
 
 ```
 
-Once http logging is enabled, you should see http calls logged to the logging view.
+Once http logging is enabled, you should see http calls (those that ultimately go through
+`dart:io`'s `HttpClient` class) logged to the logging view.
 
 ## Clear logs
 
