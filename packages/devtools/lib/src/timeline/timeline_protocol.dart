@@ -391,7 +391,9 @@ class TimelineFrame {
   int get startTime =>
       cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
   int _startTime;
-  set startTime(int time) => _startTime = min(_startTime, time);
+  set startTime(int time) {
+    _startTime = _startTime != null ? min(_startTime, time) : time;
+  }
 
   /// Frame end time in micros.
   ///
@@ -402,7 +404,9 @@ class TimelineFrame {
       ? max(gpuEndTime, _endTime)
       : _endTime;
   int _endTime;
-  set endTime(int time) => _endTime = max(_endTime, time);
+  set endTime(int time) {
+    _endTime = _endTime != null ? max(_endTime, time) : time;
+  }
 
   bool get isWellFormed => _startTime != null && _endTime != null;
 
