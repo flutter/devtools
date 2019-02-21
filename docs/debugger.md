@@ -5,7 +5,6 @@ title: Using the Debugger
 * toc
 {:toc}
 
-
 ## Getting started
 
 DevTools includes a full source level debugger, including breakpoints, stepping, and
