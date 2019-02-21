@@ -13,11 +13,9 @@ class FramesBarPlotly {
   static const int jankMs = 8;
 
   static const int cpuGoodTraceIndex = 0;
-  static const int cpuJankTraceIndex = 1;
-  static const int gpuGoodTraceIndex = 2;
+  static const int gpuGoodTraceIndex = 1;
+  static const int cpuJankTraceIndex = 2;
   static const int gpuJankTraceIndex = 3;
-  static const int cpuHighWaterMarkTraceIndex = 4;
-  static const int gpuHighWaterMarkTraceIndex = 5;
 
   // Default number of bars displayed in zoom (range slider).
   static const int ticksInRangeSlider = 90;
@@ -30,7 +28,12 @@ class FramesBarPlotly {
         ticks: '',
         showgrid: false,
         showticklabels: false,
-        rangeslider: RangeSlider(),
+        rangeslider: RangeSlider(
+          rangemode: 'nonnegative',
+          autorange: true,
+        ),
+        rangemode: 'nonnegative',
+        autorange: true,
       ),
       yaxis: AxisLayout(
         title: 'Milliseconds',
@@ -39,8 +42,6 @@ class FramesBarPlotly {
       hovermode: 'x',
       autosize: true,
       barmode: 'stack',
-      bargap: 0.15,
-      bargroupgap: 0.1,
       dragmode: 'pan',
       margin: Margin(
         l: 80,
@@ -53,11 +54,16 @@ class FramesBarPlotly {
   }
 
   static List<Data> createFPSTraces() {
+    // Strange plotly bug with initial setup of x,y.  If x and y are empty array
+    // then the first entry, for each trace, isn't rendered but hover does
+    // display the Y value.  So prime each trace with some data.  Added
+    // at x-axis -1 (hide rangemode: nonnegative displays at 0 and greater)
+    // and y is zero.
     final Data traceCpuGood = Data(
-      y: [],
-      x: [],
+      y: [0],
+      x: [-1],
       type: 'bar',
-      stackgroup: 'one',
+      legendgroup: 'good_group',
       name: 'CPU',
       hoverinfo: 'y+name',
       marker: Marker(
@@ -67,9 +73,10 @@ class FramesBarPlotly {
     );
 
     final Data traceGpuGood = Data(
-      y: [],
-      x: [],
+      y: [0],
+      x: [-1],
       type: 'bar',
+      legendgroup: 'good_group',
       name: 'GPU',
       hoverinfo: 'y+name',
       marker: Marker(
@@ -79,9 +86,10 @@ class FramesBarPlotly {
     );
 
     final Data traceCpuJank = Data(
-      y: [],
-      x: [],
+      y: [0],
+      x: [-1],
       type: 'bar',
+      legendgroup: 'jank_group',
       name: 'CPU Jank',
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
@@ -98,9 +106,10 @@ class FramesBarPlotly {
     );
 
     final Data traceGpuJank = Data(
-      y: [],
-      x: [],
+      y: [0],
+      x: [-1],
       type: 'bar',
+      legendgroup: 'jank_group',
       name: 'GPU Jank',
       hoverinfo: 'y+name',
       hoverlabel: HoverLabel(
@@ -233,19 +242,19 @@ class FramesBarPlotly {
     // TODO(terry): Eliminate this JS call (result of reified List?).
     myExtendTraces(
       _domName,
-      cpuJankX,
       cpuGoodX,
-      gpuJankX,
       gpuGoodX,
-      cpuJankTrace,
+      cpuJankX,
+      gpuJankX,
       cpuGoodTrace,
-      gpuJankTrace,
       gpuGoodTrace,
+      cpuJankTrace,
+      gpuJankTrace,
       [
-        cpuJankTraceIndex,
         cpuGoodTraceIndex,
+        gpuGoodTraceIndex,
+        cpuJankTraceIndex,
         gpuJankTraceIndex,
-        gpuGoodTraceIndex
       ],
     );
 
@@ -259,8 +268,12 @@ class FramesBarPlotly {
         Data(),
         Layout(
           xaxis: AxisLayout(
+            rangemode: 'nonnegative',
             range: [dataIndex - ticksInRangeSlider, dataIndex],
-            rangeslider: RangeSlider(),
+            rangeslider: RangeSlider(
+              rangemode: 'nonnegative',
+              autorange: true,
+            ),
           ),
         ),
       );
