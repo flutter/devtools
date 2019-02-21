@@ -88,38 +88,26 @@ class TimelineData {
 
   void _handleFrameStartEvent(TraceEvent event) {
     if (event.id != null) {
-      if (_pendingFrames[event.id] == null) {
-        // Create a new TimelineFrame if we do not already have one for this id.
-        _pendingFrames[event.id] = TimelineFrame(event.id);
-      }
-      if (_pendingFrames[event.id].startTime == null) {
-        _pendingFrames[event.id].startTime = event.timestampMicros;
-        _maybeAddPendingEvents();
-      } else {
-        // TODO(kenzie): investigate and prevent this case.
-        print('Error - already set startTime '
-            '${_pendingFrames[event.id].startTime} for frame ${event.id}.\n'
-            'TraceEvent - ${event.json.toString()}');
-      }
+      final String id = _getFrameId(event);
+      final pendingFrame =
+          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+      pendingFrame.startTime = event.timestampMicros;
+      _maybeAddPendingEvents();
     }
   }
 
   void _handleFrameEndEvent(TraceEvent event) async {
     if (event.id != null) {
-      if (_pendingFrames[event.id] == null) {
-        // Sometimes frame end events can come in before frame start events, so
-        // create a new TimelineFrame if we do not already have one for this id.
-        _pendingFrames[event.id] = TimelineFrame(event.id);
-      }
-      if (_pendingFrames[event.id].endTime == null) {
-        _pendingFrames[event.id].endTime = event.timestampMicros;
-        _maybeAddPendingEvents();
-      } else {
-        // TODO(kenzie): investigate and prevent this case.
-        print('Error - already set endTime ${_pendingFrames[event.id].endTime}'
-            ' for frame ${event.id}.\nTraceEvent - ${event.json.toString()}');
-      }
+      final String id = _getFrameId(event);
+      final pendingFrame =
+          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+      pendingFrame.endTime = event.timestampMicros;
+      _maybeAddPendingEvents();
     }
+  }
+
+  String _getFrameId(TraceEvent event) {
+    return '${event.name}-${event.id}';
   }
 
   void _handleDurationBeginEvent(TraceEvent event) {
@@ -403,10 +391,8 @@ class TimelineFrame {
   int get startTime =>
       cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
   int _startTime;
-
   set startTime(int time) {
-    assert(_startTime == null);
-    _startTime = time;
+    _startTime = _startTime != null ? min(_startTime, time) : time;
   }
 
   /// Frame end time in micros.
@@ -418,10 +404,8 @@ class TimelineFrame {
       ? max(gpuEndTime, _endTime)
       : _endTime;
   int _endTime;
-
   set endTime(int time) {
-    assert(_endTime == null);
-    _endTime = time;
+    _endTime = _endTime != null ? max(_endTime, time) : time;
   }
 
   bool get isWellFormed => _startTime != null && _endTime != null;
