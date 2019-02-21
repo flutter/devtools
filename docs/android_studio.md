@@ -2,6 +2,9 @@
 title: Running from Android Studio
 ---
 
+* toc
+{:toc}
+
 ## Installing the Flutter plugin
 
 Install the Flutter plugin if you don't already have it installed. This can be done
