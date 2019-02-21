@@ -83,7 +83,7 @@ class FrameFlameChart extends CoreElement {
   ///
   /// Arbitrary large number to accommodate spacing for some of the shortest
   /// events when zoomed in to [_maxZoomLevel].
-  final num _maxZoomLevel = 150;
+  final _maxZoomLevel = 150;
   final _minZoomLevel = 1;
   num _zoomLevel = 1;
 
@@ -93,7 +93,7 @@ class FrameFlameChart extends CoreElement {
   /// aren't handling some mouse based scroll wheel behavior well, etc.
   final num maxScrollWheelDelta = 20;
 
-  num get _zoomMultiplier => _zoomLevel * 0.0075;
+  num get _zoomMultiplier => _zoomLevel * 0.003;
 
   // The DOM doesn't allow floating point scroll offsets so we track a
   // theoretical floating point scroll offset corresponding to the current
@@ -103,6 +103,7 @@ class FrameFlameChart extends CoreElement {
   FlameChartItem _selectedItem;
 
   TimelineFrame _frame;
+  TimelineGrid _timelineGrid;
   CoreElement _cpuSection;
   CoreElement _gpuSection;
 
@@ -145,6 +146,7 @@ class FrameFlameChart extends CoreElement {
     element.scrollTop = 0;
     _cpuColorOffset = 0;
     _gpuColorOffset = 0;
+    _zoomLevel = 1;
     _chartItems.clear();
   }
 
@@ -170,7 +172,7 @@ class FrameFlameChart extends CoreElement {
       CoreElement section, {
       bool includeDuration = false,
     }) {
-      // Do not round these values. Rounding the left could case us to have
+      // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
       final double startPx = (event.startTime - frameStartOffset) * pxPerMicro;
@@ -196,6 +198,7 @@ class FrameFlameChart extends CoreElement {
 
       _cpuSection.element.style
         ..height = '${cpuSectionHeight}px'
+        ..top = '${rowHeight}px'
         ..backgroundColor = colorToCss(cpuSectionBackground);
 
       final sectionTitle =
@@ -206,8 +209,12 @@ class FrameFlameChart extends CoreElement {
         ..top = '${padding}px';
       _cpuSection.add(sectionTitle);
 
-      drawRecursively(_frame.cpuEventFlow, 0, _cpuSection,
-          includeDuration: true);
+      drawRecursively(
+        _frame.cpuEventFlow,
+        0,
+        _cpuSection,
+        includeDuration: true,
+      );
     }
 
     void drawGpuEvents() {
@@ -216,7 +223,7 @@ class FrameFlameChart extends CoreElement {
 
       _gpuSection.element.style
         ..height = '${gpuSectionHeight}px'
-        ..top = '${cpuSectionHeight}px';
+        ..top = '${rowHeight + cpuSectionHeight}px';
 
       final sectionTitle =
           div(text: 'GPU', c: 'flame-chart-item flame-chart-title');
@@ -226,12 +233,23 @@ class FrameFlameChart extends CoreElement {
         ..top = '${padding}px';
       _gpuSection.add(sectionTitle);
 
-      drawRecursively(_frame.gpuEventFlow, 0, _gpuSection,
-          includeDuration: true);
+      drawRecursively(
+        _frame.gpuEventFlow,
+        0,
+        _gpuSection,
+        includeDuration: true,
+      );
+    }
+
+    void drawTimelineGrid() {
+      _timelineGrid = TimelineGrid(_frame.durationMs, getFlameChartWidth());
+      add(_timelineGrid);
     }
 
     drawCpuEvents();
     drawGpuEvents();
+    drawTimelineGrid();
+
     _setSectionWidths();
   }
 
@@ -257,8 +275,9 @@ class FrameFlameChart extends CoreElement {
   }
 
   void _setSectionWidths() {
-    // Add [flameChartInset] to account for spacing at the end of the chart.
-    final width = getFlameChartWidth() + flameChartInset;
+    // Add 2 * [flameChartInset] to account for spacing at the beginning and end
+    // of the chart.
+    final width = getFlameChartWidth() + 2 * flameChartInset;
     _cpuSection.element.style.width = '${width}px';
     _gpuSection.element.style.width = '${width}px';
   }
@@ -270,7 +289,9 @@ class FrameFlameChart extends CoreElement {
         maxRight = item.currentLeft + item.currentWidth;
       }
     }
-    return maxRight;
+    // Subtract [flameChartInset] to account for spacing at the beginning of the
+    // chart.
+    return maxRight - flameChartInset;
   }
 
   void _handleMouseWheel(WheelEvent e) {
@@ -316,6 +337,8 @@ class FrameFlameChart extends CoreElement {
       item.updateHorizontalPosition(zoom: _zoomLevel);
     }
     _setSectionWidths();
+
+    _timelineGrid.updateForZoom(_zoomLevel, getFlameChartWidth());
 
     element.scrollLeft = math.max(0, floatingPointScrollLeft.round());
   }
@@ -384,7 +407,7 @@ class FlameChartItem {
   Color get backgroundColor => _backgroundColor;
 
   void updateHorizontalPosition({@required num zoom}) {
-    // Do not round these values. Rounding the left could case us to have
+    // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
     final newLeft = flameChartInset + _startingLeft * zoom;
@@ -405,5 +428,144 @@ class FlameChartItem {
         colorToCss(selected ? selectedColor : _backgroundColor);
     _label.style.color =
         colorToCss(selected ? selectedTextColor : defaultTextColor);
+  }
+}
+
+class TimelineGrid extends CoreElement {
+  TimelineGrid(this._frameDurationMs, this._flameChartWidth)
+      : super('div', classes: 'flame-chart-grid') {
+    flex();
+    layoutHorizontal();
+    _initializeGrid(baseGridInterval);
+  }
+
+  static const baseGridInterval = 150;
+
+  final num _frameDurationMs;
+
+  num _zoomLevel = 1;
+
+  num _flameChartWidth;
+
+  num get _flameChartWidthWithInsets => _flameChartWidth + 2 * flameChartInset;
+
+  final List<TimelineGridItem> _gridItems = [];
+
+  void _initializeGrid(num interval) {
+    // Draw the first grid item since it will have a different width than the
+    // rest.
+    final gridItem = TimelineGridItem(0, flameChartInset, 0);
+    _gridItems.add(gridItem);
+    add(gridItem);
+
+    num left = flameChartInset;
+
+    while (left + interval < _flameChartWidthWithInsets) {
+      // TODO(kenzie): Instead of calculating timestamp based on position, track
+      // timestamp var and increment it by time interval represented by each
+      // grid item. See comment on https://github.com/flutter/devtools/pull/325.
+      final timestamp = getTimestampForPosition(left + interval);
+      final gridItem = TimelineGridItem(left, interval, timestamp);
+
+      _gridItems.add(gridItem);
+      add(gridItem);
+
+      left += interval;
+    }
+  }
+
+  num getTimestampForPosition(num gridItemEnd) {
+    return (gridItemEnd - flameChartInset) /
+        _flameChartWidth *
+        _frameDurationMs;
+  }
+
+  void updateForZoom(num newZoomLevel, num newFlameChartWidth) {
+    if (_zoomLevel == newZoomLevel) {
+      return;
+    }
+
+    _flameChartWidth = newFlameChartWidth;
+    element.style.width = '${_flameChartWidthWithInsets}px';
+
+    final log2ZoomLevel = log2(_zoomLevel);
+    final log2NewZoomLevel = log2(newZoomLevel);
+
+    final gridZoomFactor = math.pow(2, log2NewZoomLevel);
+    final gridIntervalPx = baseGridInterval / gridZoomFactor;
+
+    /// The physical pixel width of the grid interval at [newZoomLevel].
+    final zoomedGridIntervalPx = gridIntervalPx * newZoomLevel;
+
+    // TODO(kenzie): add tests for grid drawing and zooming logic.
+    if (log2NewZoomLevel == log2ZoomLevel) {
+      // Don't modify the first grid item. This item will have a fixed left of
+      // 0, width of [flameChartInset], and timestamp of '0.0 ms'.
+      for (int i = 1; i < _gridItems.length; i++) {
+        final currentItem = _gridItems[i];
+
+        final newLeft = flameChartInset + zoomedGridIntervalPx * (i - 1);
+        currentItem.setPosition(newLeft, zoomedGridIntervalPx);
+      }
+    } else {
+      clear();
+      _gridItems.clear();
+      _initializeGrid(zoomedGridIntervalPx);
+    }
+
+    _zoomLevel = newZoomLevel;
+  }
+}
+
+/// Describes a single item in the frame chart's timeline grid.
+///
+/// A single item consists of a line and a timestamp describing the location
+/// in the overall timeline [TimelineGrid].
+class TimelineGridItem extends CoreElement {
+  TimelineGridItem(this.currentLeft, this.currentWidth, this.timestamp)
+      : super('div', classes: 'flame-chart-grid-item') {
+    _initGridItem();
+  }
+
+  static const gridLineWidth = 1;
+  static const timestampPadding = 4;
+
+  final num timestamp;
+  num currentLeft;
+  num currentWidth;
+
+  /// The timestamp label for this grid item.
+  CoreElement timestampLabel;
+
+  /// The line for this grid item.
+  CoreElement gridLine;
+
+  void _initGridItem() {
+    gridLine = div(c: 'grid-line');
+    add(gridLine);
+
+    timestampLabel = div(c: 'timestamp');
+    // TODO(kenzie): add more advanced logic for rounding the timestamps. See
+    // https://github.com/flutter/devtools/issues/329.
+    timestampLabel.text =
+        msAsText(timestamp, fractionDigits: timestamp == 0 ? 1 : 3);
+    add(timestampLabel);
+
+    setPosition(currentLeft, currentWidth);
+  }
+
+  void setPosition(num left, num width) {
+    currentLeft = left;
+    currentWidth = width;
+
+    element.style
+      ..left = '${left}px'
+      ..width = '${width}px';
+
+    // Update [gridLine] position.
+    gridLine.element.style.left = '${width - gridLineWidth}px';
+
+    // Update [timestampLabel] position.
+    timestampLabel.element.style.width = '${width - 2 * timestampPadding}px';
   }
 }
