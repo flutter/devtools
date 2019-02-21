@@ -37,7 +37,9 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 typedef TreeHoverEventCallback = void Function(
-    InspectorTreeNode node, Icon icon);
+  InspectorTreeNode node,
+  Icon icon,
+);
 
 const Color selectedRowBackgroundColor = ThemedColor(
   Color.fromARGB(255, 202, 191, 69),
@@ -587,7 +589,6 @@ abstract class InspectorTree {
         return;
       }
       _computingHover = true;
-      // Clear the tooltip while we are computing it.
       Map<String, InstanceRef> properties;
       try {
         properties = await diagnostic.valueProperties;
@@ -595,7 +596,8 @@ abstract class InspectorTree {
         _computingHover = false;
       }
       if (lastHover != diagnostic) {
-        // Skipping as a different tooltip is already displayed.
+        // Skipping as the tooltip is no longer relevant for the currently
+        // hovered over node.
         return;
       }
       if (properties == null) {
