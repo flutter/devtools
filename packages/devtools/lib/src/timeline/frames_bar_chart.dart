@@ -144,7 +144,8 @@ class PlotlyDivGraph extends CoreElement {
         _frameIndex++;
       } else {
         // TODO(terry): HACK - Ignore the event.
-        print('WARNING: Ignored onFrameAdded - bad data');
+        print('WARNING: Ignored onFrameAdded - bad data.\n [cpuDuration: '
+            '${frame.cpuDuration}, gpuDuration: ${frame.gpuDuration}');
       }
     }
   }
