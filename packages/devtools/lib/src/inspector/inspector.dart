@@ -83,7 +83,6 @@ class InspectorScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
-
     return screenDiv;
   }
 
@@ -104,12 +103,6 @@ class InspectorScreen extends Screen {
       // Init the inspector service, or return null.
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);
-      final pubRootDirectory =
-          await inspectorService?.inferPubRootDirectoryIfNeeded();
-      if (pubRootDirectory != null) {
-        // TODO(jacobr): add ui to view and set a different pub root directory and
-        // display the pub root directory in the status bar.
-      }
     } finally {
       spinner.element.remove();
       refreshTreeButton.disabled = false;

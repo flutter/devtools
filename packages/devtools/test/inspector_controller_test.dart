@@ -544,5 +544,71 @@ void main() async {
 
       await env.tearDownEnvironment();
     });
+
+    test('hotRestart', () async {
+      await env.setupEnvironment();
+
+      // Select row index 4.
+      // The important thing about this is that the details tree should scroll
+      // instead of re-rooting as the selected row is already visible in the
+      // details tree.
+      tree.onTap(const Offset(0, rowHeight * 4.5));
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R] root ]\n'
+              '  ▼[M] MyApp\n'
+              '    ▼[M] MaterialApp\n'
+              '      ▼[S] Scaffold\n'
+              '      ├───▼[C] Center <-- selected\n'
+              '      │     ▼[/icons/inspector/textArea.png] Text\n'
+              '      └─▼[A] AppBar\n'
+              '          ▼[/icons/inspector/textArea.png] Text\n',
+        ),
+      );
+
+      await serviceManager.performHotRestart();
+      // The isolate starts out paused on a hot restart so we have to resume
+      // it manually to make the test pass.
+      await serviceManager.service
+          .resume(serviceManager.isolateManager.selectedIsolate.id);
+
+      // First UI transition is to an empty tree.
+      await detailsTree.nextUiFrame;
+      expect(tree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
+
+      // Notice that the selection has been lost due to the hot restart.
+      await detailsTree.nextUiFrame;
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R] root ]\n'
+              '  ▼[M] MyApp\n'
+              '    ▼[M] MaterialApp\n'
+              '      ▼[S] Scaffold\n'
+              '      ├───▼[C] Center\n'
+              '      │     ▼[/icons/inspector/textArea.png] Text\n'
+              '      └─▼[A] AppBar\n'
+              '          ▼[/icons/inspector/textArea.png] Text\n',
+        ),
+      );
+
+      // Verify that the selection can actually be changed after a restart.
+      tree.onTap(const Offset(0, rowHeight * 4.5));
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R] root ]\n'
+              '  ▼[M] MyApp\n'
+              '    ▼[M] MaterialApp\n'
+              '      ▼[S] Scaffold\n'
+              '      ├───▼[C] Center <-- selected\n'
+              '      │     ▼[/icons/inspector/textArea.png] Text\n'
+              '      └─▼[A] AppBar\n'
+              '          ▼[/icons/inspector/textArea.png] Text\n',
+        ),
+      );
+      await env.tearDownEnvironment();
+    });
   }, tags: 'useFlutterSdk', timeout: const Timeout.factor(2));
 }

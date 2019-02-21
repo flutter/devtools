@@ -85,9 +85,8 @@ class InspectorController implements InspectorServiceClient {
 
     flutterIsolateSubscription = serviceManager.isolateManager
         .getSelectedIsolate((IsolateRef flutterIsolate) {
-      if (flutterIsolate == null) {
-        onIsolateStopped();
-      }
+      // Any time we have a new isolate it means the previous isolate stopped.
+      onIsolateStopped();
     });
   }
 
@@ -290,7 +289,8 @@ class InspectorController implements InspectorServiceClient {
     if (flutterAppFrameReady) {
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-      await updateSelectionFromService();
+      await inspectorService.inferPubRootDirectoryIfNeeded();
+      await updateSelectionFromService(true);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       flutterAppFrameReady = ready;
@@ -482,11 +482,10 @@ class InspectorController implements InspectorServiceClient {
       // Wait for the master to update.
       return;
     }
-    updateSelectionFromService();
+    updateSelectionFromService(false);
   }
 
-  Future<void> updateSelectionFromService() async {
-    final bool firstFrame = !treeLoadStarted;
+  Future<void> updateSelectionFromService(bool firstFrame) async {
     treeLoadStarted = true;
     _selectionGroups.cancelNext();
 

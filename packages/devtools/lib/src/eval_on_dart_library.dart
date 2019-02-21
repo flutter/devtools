@@ -23,7 +23,8 @@ class EvalOnDartLibrary {
     } else {
       selectedIsolateStreamSubscription = serviceManager.isolateManager
           .getSelectedIsolate((IsolateRef isolate) {
-        final String id = isolate != null ? isolate.id : null;
+        final String id = isolate?.id;
+        _initializeComplete = null;
         _init(id, isolate == null);
       });
     }
@@ -65,6 +66,10 @@ class EvalOnDartLibrary {
 
     try {
       final Isolate isolate = await service.getIsolate(_isolateId);
+      if (isolate == null || _libraryRef.isCompleted) {
+        // Nothing to do here.
+        return;
+      }
       for (LibraryRef library in isolate.libraries) {
         if (library.uri == libraryName) {
           assert(!_libraryRef.isCompleted);
@@ -94,7 +99,16 @@ class EvalOnDartLibrary {
     if (_disposed) return null;
 
     try {
-      final LibraryRef libraryRef = await _libraryRef.future;
+      LibraryRef libraryRef;
+      while (true) {
+        libraryRef = await _libraryRef.future;
+        if (_libraryRef.isCompleted) {
+          // Avoid race condition where a new isolate loaded
+          // while we were waiting for the library ref.
+          break;
+        }
+      }
+      if (libraryRef == null) return null;
       final result = await service.evaluate(
         _isolateId,
         libraryRef.id,
