@@ -14,6 +14,7 @@ library inspector_tree;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
@@ -35,6 +36,8 @@ final CustomIconMaker _customIconMaker = CustomIconMaker();
 const bool _showRenderObjectPropertiesAsLinks = false;
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
+typedef TreeHoverEventCallback = void Function(
+    InspectorTreeNode node, Icon icon);
 
 const Color selectedRowBackgroundColor = ThemedColor(
   Color.fromARGB(255, 202, 191, 69),
@@ -129,7 +132,7 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
 
   Rect get paintBounds => _offset & size;
 
-  Icon hitTest(Offset location);
+  PaintEntry hitTest(Offset location);
 }
 
 /// This class could be refactored out to be a reasonable generic collapsible
@@ -472,7 +475,7 @@ typedef InspectorTreeFactory = InspectorTree Function({
   @required NodeAddedCallback onNodeAdded,
   VoidCallback onSelectionChange,
   TreeEventCallback onExpand,
-  TreeEventCallback onHover,
+  TreeHoverEventCallback onHover,
 });
 
 /// Callback issued every time a node is added to the tree.
@@ -486,11 +489,12 @@ abstract class InspectorTree {
     @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     this.onExpand,
-    this.onHover,
-  })  : _onSelectionChange = onSelectionChange,
+    TreeHoverEventCallback onHover,
+  })  : _onHoverCallback = onHover,
+        _onSelectionChange = onSelectionChange,
         _onNodeAdded = onNodeAdded;
 
-  final TreeEventCallback onHover;
+  final TreeHoverEventCallback _onHoverCallback;
   final TreeEventCallback onExpand;
   final VoidCallback _onSelectionChange;
   final NodeAddedCallback _onNodeAdded;
@@ -538,6 +542,74 @@ abstract class InspectorTree {
       _hover = node;
       // TODO(jacobr): we could choose to repaint only a portion of the UI
     });
+  }
+
+  String get tooltip;
+  set tooltip(String value);
+
+  RemoteDiagnosticsNode _currentHoverDiagnostic;
+  bool _computingHover = false;
+
+  Future<void> onHover(InspectorTreeNode node, PaintEntry entry) async {
+    if (_onHoverCallback != null) {
+      _onHoverCallback(node, entry?.icon);
+    }
+
+    final diagnostic = node?.diagnostic;
+    final lastHover = _currentHoverDiagnostic;
+    _currentHoverDiagnostic = diagnostic;
+    // Only show tooltips when we are hovering over specific content in a row
+    // rather than over the entire row.
+    // TODO(jacobr): consider showing the tooltip any time we are on a row with
+    // a diagnostics node to make tooltips more discoverable.
+    // To make this work well we would need to add custom tooltip rendering that
+    // more clearly links tooltips to the exact content in a row they apply to.
+    if (diagnostic == null || entry == null) {
+      tooltip = '';
+      _computingHover = false;
+      return;
+    }
+
+    if (entry.icon == defaultIcon) {
+      tooltip = 'Default value';
+      _computingHover = false;
+      return;
+    }
+
+    if (diagnostic.isEnumProperty()) {
+      // We can display a better tooltip than the one provied with the
+      // RemoteDiagnosticsNode as we have access to introspection
+      // via the vm service.
+
+      if (lastHover == diagnostic && _computingHover) {
+        // No need to spam the VMService. We are already computing the hover
+        // for this node.
+        return;
+      }
+      _computingHover = true;
+      // Clear the tooltip while we are computing it.
+      Map<String, InstanceRef> properties;
+      try {
+        properties = await diagnostic.valueProperties;
+      } finally {
+        _computingHover = false;
+      }
+      if (lastHover != diagnostic) {
+        // Skipping as a different tooltip is already displayed.
+        return;
+      }
+      if (properties == null) {
+        // Something went wrong getting the enum value.
+        // Fall back to the regular tooltip;
+        tooltip = diagnostic.tooltip ?? '';
+        return;
+      }
+      tooltip = 'Allowed values:\n${properties.keys.join('\n')}';
+      return;
+    }
+
+    tooltip = diagnostic.tooltip ?? '';
+    _computingHover = false;
   }
 
   /// Split text into two groups, word characters at the start of a string
@@ -605,8 +677,7 @@ abstract class InspectorTree {
       return;
     }
 
-    final icon = row.node.renderObject?.hitTest(offset);
-    onTapIcon(row, icon);
+    onTapIcon(row, row.node.renderObject?.hitTest(offset)?.icon);
   }
 
   void onTapIcon(InspectorTreeRow row, Icon icon) {
@@ -764,7 +835,7 @@ abstract class InspectorTreeFixedRowHeight extends InspectorTree {
     @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
-    TreeEventCallback onHover,
+    TreeHoverEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
@@ -777,6 +848,20 @@ abstract class InspectorTreeFixedRowHeight extends InspectorTree {
   Rect getBoundingBox(InspectorTreeRow row);
 
   void scrollToRect(Rect targetRect);
+
+  /// The future completes when the possible tooltip on hover is available.
+  ///
+  /// Generally only await this future for tests that check for the value shown
+  /// on hover matches the expected value.
+  Future<void> onMouseMove(Offset offset) async {
+    final row = getRow(offset);
+    if (row != null) {
+      final node = row.node;
+      await onHover(node, node?.renderObject?.hitTest(offset));
+    } else {
+      await onHover(null, null);
+    }
+  }
 
   @override
   void animateToTargets(List<InspectorTreeNode> targets) {

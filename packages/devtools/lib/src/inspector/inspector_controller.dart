@@ -21,6 +21,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
+import '../ui/icons.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -178,14 +179,14 @@ class InspectorController implements InspectorServiceClient {
   }
 
   void endShowNode() {
-    highlightShowNode(null);
+    highlightShowNode(null, null);
   }
 
   bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
-    return highlightShowNode(valueToInspectorTreeNode[ref]);
+    return highlightShowNode(valueToInspectorTreeNode[ref], null);
   }
 
-  bool highlightShowNode(InspectorTreeNode node) {
+  bool highlightShowNode(InspectorTreeNode node, Icon icon) {
     if (node == null && parent != null) {
       // If nothing is highlighted, highlight the node selected in the parent
       // tree so user has context of where the node selected in the parent is

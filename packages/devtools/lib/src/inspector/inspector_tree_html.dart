@@ -146,7 +146,7 @@ class InspectorTreeNodeHtmlRender
   Element element;
 
   @override
-  Icon hitTest(Offset location) {
+  PaintEntry hitTest(Offset location) {
     // TODO(jacobr): consider removing this method from the base class.
     throw 'Not yet supported by HTML tree';
   }
@@ -170,7 +170,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
     NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
-    TreeEventCallback onHover,
+    TreeHoverEventCallback onHover,
   })  : _container = div(c: 'inspector-tree-html'),
         super(
           summaryTree: summaryTree,
@@ -269,13 +269,14 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
 
   void onMouseMove(MouseEvent mouseEvent) {
     if (onHover != null) {
-      onHover(_resolveTreeRow(mouseEvent.target)?.node);
+      // TODO(jacobr): determine the icon
+      onHover(_resolveTreeRow(mouseEvent.target)?.node, null);
     }
   }
 
   void onMouseLeave(MouseEvent mouseEvent) {
     if (onHover != null) {
-      onHover(null);
+      onHover(null, null);
     }
   }
 
@@ -398,5 +399,13 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
         renderObject?.element?.scrollIntoView();
       }
     });
+  }
+
+  @override
+  String get tooltip => element.tooltip;
+
+  @override
+  set tooltip(String value) {
+    element.tooltip = value;
   }
 }
