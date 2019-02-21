@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
+import 'package:devtools/src/ui/ui_utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'core/message_bus.dart';
@@ -32,7 +33,7 @@ class PerfToolFramework extends Framework {
   PerfToolFramework() {
     addScreen(InspectorScreen());
     addScreen(TimelineScreen());
-    addScreen(DebuggerScreen());
+    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
     if (showMemoryPage) {
       addScreen(MemoryScreen());
     }
@@ -40,6 +41,8 @@ class PerfToolFramework extends Framework {
       addScreen(PerformanceScreen());
     }
     addScreen(LoggingScreen());
+
+    sortScreens();
 
     initGlobalUI();
 
@@ -58,15 +61,27 @@ class PerfToolFramework extends Framework {
 
     for (Screen screen in screens) {
       final CoreElement link = CoreElement('a')
-        ..attributes['href'] = screen.ref
-        ..onClick.listen((MouseEvent e) {
-          e.preventDefault();
-          navigateTo(screen.id);
-        })
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}')
         ]);
+      if (screen.disabled) {
+        link
+          ..onClick.listen((MouseEvent e) {
+            e.preventDefault();
+            toast(link.tooltip);
+          })
+          ..toggleClass('disabled', true)
+          ..tooltip =
+              'This section is disabled because it provides functionality already available in your code editor';
+      } else {
+        link
+          ..attributes['href'] = screen.ref
+          ..onClick.listen((MouseEvent e) {
+            e.preventDefault();
+            navigateTo(screen.id);
+          });
+      }
       mainNav.add(link);
     }
 
@@ -104,6 +119,16 @@ class PerfToolFramework extends Framework {
 
   void initTestingModel() {
     App.register(this);
+  }
+
+  void sortScreens() {
+    // Move disabled screens to the end, but otherwise preserve order.
+    final sortedScreens = screens
+        .where((screen) => !screen.disabled)
+        .followedBy(screens.where((screen) => screen.disabled))
+        .toList();
+    screens.clear();
+    screens.addAll(sortedScreens);
   }
 
   IsolateRef get currentIsolate =>

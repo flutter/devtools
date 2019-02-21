@@ -39,7 +39,7 @@
     --subtle: #777;
     --table-border: #dfe2e5;
     --title: #555;
-    --toast-background: f9f9f9;
+    --toast-background: #f9f9f9;
     --toast-border: #d8dee2;
 }
 
@@ -97,11 +97,16 @@ body {
 .masthead .masthead-item {
     color: rgba(var(--header-item-rgb), 0.5) !important;
     font-size: 1rem;
+    text-decoration: none;
 }
 
-.masthead a:hover {
+.masthead a.disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.masthead a:hover:not([disabled]) {
     color: var(--header-item) !important;;
-    text-decoration: none;
 }
 
 .masthead-nav .active {

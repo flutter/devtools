@@ -204,3 +204,13 @@ class RegisteredServiceExtensionButton {
     }
   }
 }
+
+bool shouldDisableTab(String key) {
+  final queryString = html.window.location.search;
+  if (queryString == null || queryString.length <= 1) {
+    return false;
+  }
+
+  final qsParams = Uri.splitQueryString(queryString.substring(1));
+  return qsParams['hide']?.split(',')?.contains(key) ?? false;
+}

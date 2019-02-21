@@ -67,7 +67,7 @@ class Framework {
       assert(id[0] == '#');
       id = id.substring(1);
     }
-    Screen screen = getScreen(id);
+    Screen screen = getScreen(id, onlyEnabled: true);
     screen ??= screens.first;
     if (screen != null) {
       load(screen);
@@ -76,8 +76,10 @@ class Framework {
     }
   }
 
-  Screen getScreen(String id) {
-    return screens.firstWhere((Screen screen) => screen.id == id,
+  Screen getScreen(String id, {bool onlyEnabled = false}) {
+    return screens.firstWhere(
+        (Screen screen) =>
+            screen.id == id && (!onlyEnabled || !screen.disabled),
         orElse: () => null);
   }
 
@@ -276,11 +278,13 @@ abstract class Screen {
     @required this.name,
     @required this.id,
     this.iconClass,
+    this.disabled = false,
   });
 
   final String name;
   final String id;
   final String iconClass;
+  final bool disabled;
 
   Framework framework;
 
