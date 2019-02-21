@@ -54,6 +54,11 @@ class FramesBarPlotly {
   }
 
   static List<Data> createFPSTraces() {
+    // Strange plotly bug with initial setup of x,y.  If x and y are empty array
+    // then the first entry, for each trace, isn't rendered but hover does
+    // display the Y value.  So prime each trace with some data.  Added
+    // at x-axis -1 (hide rangemode: nonnegative displays at 0 and greater)
+    // and y is zero.
     final Data traceCpuGood = Data(
       y: [0],
       x: [-1],
