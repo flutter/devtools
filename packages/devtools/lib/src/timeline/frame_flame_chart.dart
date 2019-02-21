@@ -432,7 +432,7 @@ class FlameChartItem {
 }
 
 class TimelineGrid extends CoreElement {
-  TimelineGrid(this._frameDurationMs, this.flameChartWidth)
+  TimelineGrid(this._frameDurationMs, this._flameChartWidth)
       : super('div', classes: 'flame-chart-grid') {
     flex();
     layoutHorizontal();
@@ -443,13 +443,11 @@ class TimelineGrid extends CoreElement {
 
   final num _frameDurationMs;
 
-  num zoomLevel = 1;
+  num _zoomLevel = 1;
 
-  num flameChartWidth;
+  num _flameChartWidth;
 
-  num get flameChartWidthWithInsets => flameChartWidth + 2 * flameChartInset;
-
-  num interval = baseGridInterval;
+  num get _flameChartWidthWithInsets => _flameChartWidth + 2 * flameChartInset;
 
   final List<TimelineGridItem> _gridItems = [];
 
@@ -462,7 +460,7 @@ class TimelineGrid extends CoreElement {
 
     num left = flameChartInset;
 
-    while (left + interval < flameChartWidthWithInsets) {
+    while (left + interval < _flameChartWidthWithInsets) {
       final timestamp = getTimestampForPosition(left + interval);
       final gridItem = TimelineGridItem(left, interval, timestamp);
 
@@ -479,18 +477,20 @@ class TimelineGrid extends CoreElement {
   }
 
   num getTimestampForPosition(num gridItemEnd) {
-    return (gridItemEnd - flameChartInset) / flameChartWidth * _frameDurationMs;
+    return (gridItemEnd - flameChartInset) /
+        _flameChartWidth *
+        _frameDurationMs;
   }
 
   void updateForZoom(num newZoomLevel, num newFlameChartWidth) {
-    if (zoomLevel == newZoomLevel) {
+    if (_zoomLevel == newZoomLevel) {
       return;
     }
 
-    flameChartWidth = newFlameChartWidth;
-    element.style.width = '${flameChartWidthWithInsets}px';
+    _flameChartWidth = newFlameChartWidth;
+    element.style.width = '${_flameChartWidthWithInsets}px';
 
-    final log2ZoomLevel = log2(zoomLevel);
+    final log2ZoomLevel = log2(_zoomLevel);
     final log2NewZoomLevel = log2(newZoomLevel);
 
     final gridZoomFactor = math.pow(2, log2NewZoomLevel);
@@ -513,7 +513,7 @@ class TimelineGrid extends CoreElement {
       _drawGrid(zoomedGridIntervalPx);
     }
 
-    zoomLevel = newZoomLevel;
+    _zoomLevel = newZoomLevel;
   }
 }
 
