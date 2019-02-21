@@ -436,7 +436,7 @@ class TimelineGrid extends CoreElement {
       : super('div', classes: 'flame-chart-grid') {
     flex();
     layoutHorizontal();
-    _drawGrid(baseGridInterval);
+    _initializeGrid(baseGridInterval);
   }
 
   static const baseGridInterval = 150;
@@ -451,7 +451,7 @@ class TimelineGrid extends CoreElement {
 
   final List<TimelineGridItem> _gridItems = [];
 
-  void _drawGrid(num interval) {
+  void _initializeGrid(num interval) {
     // Draw the first grid item since it will have a different width than the
     // rest.
     final gridItem = TimelineGridItem(0, flameChartInset, 0);
@@ -469,11 +469,6 @@ class TimelineGrid extends CoreElement {
 
       left += interval;
     }
-  }
-
-  void _clear() {
-    clear();
-    _gridItems.clear();
   }
 
   num getTimestampForPosition(num gridItemEnd) {
@@ -499,6 +494,7 @@ class TimelineGrid extends CoreElement {
     /// The physical pixel width of the grid interval at [newZoomLevel].
     final zoomedGridIntervalPx = gridIntervalPx * newZoomLevel;
 
+    // TODO(kenzie): add tests for grid drawing and zooming logic.
     if (log2NewZoomLevel == log2ZoomLevel) {
       // Don't modify the first grid item. This item will have a fixed left of
       // 0, width of [flameChartInset], and timestamp of '0.0 ms'.
@@ -506,11 +502,12 @@ class TimelineGrid extends CoreElement {
         final currentItem = _gridItems[i];
 
         final newLeft = flameChartInset + zoomedGridIntervalPx * (i - 1);
-        currentItem.update(newLeft, zoomedGridIntervalPx);
+        currentItem.setPosition(newLeft, zoomedGridIntervalPx);
       }
     } else {
-      _clear();
-      _drawGrid(zoomedGridIntervalPx);
+      clear();
+      _gridItems.clear();
+      _initializeGrid(zoomedGridIntervalPx);
     }
 
     _zoomLevel = newZoomLevel;
@@ -530,7 +527,7 @@ class TimelineGridItem extends CoreElement {
   static const gridLineWidth = 1;
   static const timestampPadding = 4;
 
-  num timestamp;
+  final num timestamp;
   num currentLeft;
   num currentWidth;
 
@@ -545,12 +542,16 @@ class TimelineGridItem extends CoreElement {
     add(gridLine);
 
     timestampLabel = div(c: 'timestamp');
+    // TODO(kenzie): add more advanced logic for rounding the timestamps. See
+    // https://github.com/flutter/devtools/issues/329.
+    timestampLabel.text =
+        msAsText(timestamp, fractionDigits: timestamp == 0 ? 1 : 3);
     add(timestampLabel);
 
-    update(currentLeft, currentWidth);
+    setPosition(currentLeft, currentWidth);
   }
 
-  void update(num left, num width) {
+  void setPosition(num left, num width) {
     currentLeft = left;
     currentWidth = width;
 
@@ -561,11 +562,7 @@ class TimelineGridItem extends CoreElement {
     // Update [gridLine] position.
     gridLine.element.style.left = '${width - gridLineWidth}px';
 
-    // Update [timestampLabel] position and text.
-    timestampLabel.element.style
-      ..left = '${timestampPadding}px'
-      ..width = '${width - 2 * timestampPadding}px';
-    timestampLabel.text =
-        msAsText(timestamp, fractionDigits: timestamp == 0 ? 1 : 3);
+    // Update [timestampLabel] position.
+    timestampLabel.element.style.width = '${width - 2 * timestampPadding}px';
   }
 }

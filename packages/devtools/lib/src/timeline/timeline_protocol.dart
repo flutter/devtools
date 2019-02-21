@@ -330,6 +330,8 @@ class TimelineData {
   }
 }
 
+// TODO(kenzie): simplify the API on this class. Reduce duplicated logic for CPU
+// and GPU values.
 /// Data describing a single frame.
 ///
 /// Each TimelineFrame should have 2 distinct pieces of data:

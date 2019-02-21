@@ -116,6 +116,7 @@
 
 .flame-chart-grid-item .timestamp {
     top: 2px;
+    left: 4px;
     text-align: end;
     position: absolute;
 }
