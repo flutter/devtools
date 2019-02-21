@@ -567,6 +567,10 @@ void main() async {
         ),
       );
 
+      /// After the hot restart some existing calls to the vm service may
+      /// timeout and that is ok.
+      serviceManager.service.doNotWaitForPendingFuturesBeforeExit();
+
       await serviceManager.performHotRestart();
       // The isolate starts out paused on a hot restart so we have to resume
       // it manually to make the test pass.

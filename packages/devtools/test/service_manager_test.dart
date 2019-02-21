@@ -253,6 +253,10 @@ void main() {
 
       await serviceManager.performHotRestart();
 
+      /// After the hot restart some existing calls to the vm service may
+      /// timeout and that is ok.
+      serviceManager.service.doNotWaitForPendingFuturesBeforeExit();
+
       // Verify topLevelFieldForTest is false again after hot restart.
       final finalResult = await library.eval(evalExpression, isAlive: null);
       expect(finalResult.runtimeType, equals(InstanceRef));
@@ -397,7 +401,7 @@ void main() {
         numericExtensionDescription.enabledValue,
       );
     });
-  }, tags: 'useFlutterSdk');
+  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
 }
 
 Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,
