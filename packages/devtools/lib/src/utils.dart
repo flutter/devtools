@@ -65,6 +65,20 @@ String msAsText(num milliseconds, {bool includeUnit = true}) {
   return '${milliseconds.toStringAsFixed(1)}${includeUnit ? ' ms' : ''}';
 }
 
+num nullSafeMin(num possiblyNullA, num b) {
+  if (possiblyNullA == null) {
+    return b;
+  }
+  return min(possiblyNullA, b);
+}
+
+num nullSafeMax(num possiblyNullA, num b) {
+  if (possiblyNullA == null) {
+    return b;
+  }
+  return max(possiblyNullA, b);
+}
+
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
   String name = ref.name;
