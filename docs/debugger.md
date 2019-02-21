@@ -7,7 +7,7 @@ title: Using the Debugger
 
 ## Getting started
 
-DevTools includes a full source level debugger, including breakpoints, stepping, and
+DevTools includes a full source level debugger, supporting breakpoints, stepping, and
 variable inspection.
 
 When you open the debugger tab, you should see all the libraries for you application
@@ -67,4 +67,4 @@ pause whether or not the breakpoint was caught by application code.
 
 ## Known issues
 
-- when performing a hot restart for a Flutter application, user breakpoints are cleared
+- When performing a hot restart for a Flutter application, user breakpoints are cleared.
