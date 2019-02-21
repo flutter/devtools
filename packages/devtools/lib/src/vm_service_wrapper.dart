@@ -352,6 +352,19 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  /// Testing only method to indicate that we don't really need to await all
+  /// currently pending futures.
+  ///
+  /// If you use this method be sure to indicate why you believe all pending
+  /// futures are safe to ignore. Currently the theory is this method should be
+  /// used after a hot restart to avoid bugs where we have zombie futures lying
+  /// around causing tests to flake.
+  void doNotWaitForPendingFuturesBeforeExit() {
+    allFuturesCompleted = Completer<bool>();
+    allFuturesCompleted.complete(true);
+    _activeFutures.clear();
+  }
+
   Future<T> _trackFuture<T>(Future<T> future) {
     if (allFuturesCompleted.isCompleted) {
       allFuturesCompleted = Completer<bool>();

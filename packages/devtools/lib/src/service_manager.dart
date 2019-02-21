@@ -491,27 +491,37 @@ class ServiceExtensionManager {
     final expectedValueType =
         extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
 
-    final response = await _service.callServiceExtension(
-      name,
-      isolateId: _isolateManager.selectedIsolate.id,
-    );
-    switch (expectedValueType) {
-      case bool:
-        final bool enabled = response.json['enabled'] == 'true' ? true : false;
-        await _maybeRestoreExtension(name, enabled);
-        return;
-      case String:
-        final String value = response.json['value'];
-        await _maybeRestoreExtension(name, value);
-        return;
-      case int:
-      case double:
-        final num value =
-            num.parse(response.json[name.substring(name.lastIndexOf('.') + 1)]);
-        await _maybeRestoreExtension(name, value);
-        return;
-      default:
-        return;
+    try {
+      final response = await _service.callServiceExtension(
+        name,
+        isolateId: _isolateManager.selectedIsolate.id,
+      );
+      switch (expectedValueType) {
+        case bool:
+          final bool enabled =
+              response.json['enabled'] == 'true' ? true : false;
+          await _maybeRestoreExtension(name, enabled);
+          return;
+        case String:
+          final String value = response.json['value'];
+          await _maybeRestoreExtension(name, value);
+          return;
+        case int:
+        case double:
+          final num value = num.parse(
+              response.json[name.substring(name.lastIndexOf('.') + 1)]);
+          await _maybeRestoreExtension(name, value);
+          return;
+        default:
+          return;
+      }
+    } catch (e) {
+      // Do not report an error if the VMService has gone away or the
+      // selectedIsolate has been closed probably due to a hot restart.
+      // There is no need
+      // TODO(jacobr): validate that the exception is one of a short list
+      // of allowed network related exceptions rather than ignoring all
+      // exceptions.
     }
   }
 

@@ -41,30 +41,6 @@ class InspectorService {
   ) : clients = Set() {
     vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
     vmService.onDebugEvent.listen(onDebugVmServiceReceived);
-
-    // TODO(jacobr): determine what to claim the pub root directories are
-    // or cleanup this code.
-    /*
-    assert (app.getVMServiceManager() != null);
-
-        app.getVMServiceManager().hasServiceExtension('ext.flutter.inspector.setPubRootDirectories', (bool available) -> {
-        if (!available) {
-        return;
-        }
-        final List<String> rootDirectories = new List<>();
-        for (PubRoot root : app.getPubRoots()) {
-        String path = root.getRoot().getCanonicalPath();
-        if (SystemInfo.isWindows) {
-        // TODO(jacobr): remove after https://github.com/flutter/flutter-intellij/issues/2217.
-        // The problem is setPubRootDirectories is currently expecting
-        // valid URIs as opposed to windows paths.
-        path = 'file:///' + path;
-        }
-        rootDirectories.add(path);
-        }
-        setPubRootDirectories(rootDirectories);
-        });
-        */
   }
 
   static int nextGroupId = 0;
@@ -94,8 +70,9 @@ class InspectorService {
     );
 
     final libraryRef = await inspectorLibrary.libraryRef.catchError(
-        (_) => throw FlutterInspectorLibraryNotFound(),
-        test: (e) => e is LibraryNotFound);
+      (_) => throw FlutterInspectorLibraryNotFound(),
+      test: (e) => e is LibraryNotFound,
+    );
     final libraryFuture = inspectorLibrary.getLibrary(libraryRef, null);
     final library = await libraryFuture;
     Future<Set<String>> lookupFunctionNames() async {
@@ -110,10 +87,13 @@ class InspectorService {
           return functionNames;
         }
       }
-      throw Exception('WidgetInspectorService class not found');
+      // WidgetInspectorService is not available. Either this is not a Flutter
+      // application or it is running in profile mode.
+      return null;
     }
 
     final supportedServiceMethods = await lookupFunctionNames();
+    if (supportedServiceMethods == null) return null;
     return InspectorService(
       vmService,
       inspectorLibrary,
@@ -241,7 +221,7 @@ class InspectorService {
   }
 
   void onExtensionVmServiceRecieved(Event e) {
-    if ('Flutter.Frame' == e.kind) {
+    if ('Flutter.Frame' == e.extensionKind) {
       for (InspectorServiceClient client in clients) {
         try {
           client.onFlutterFrame();

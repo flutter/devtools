@@ -172,6 +172,8 @@ class InspectorTreeNodeCanvasRender
   // TODO(jacobr): share this method with test code.
   @override
   Icon hitTest(Offset location) {
+    if (offset == null) return null;
+
     location = location - offset;
     if (location.dy < 0 || location.dy >= size.height) {
       return null;

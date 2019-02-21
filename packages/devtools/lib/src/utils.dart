@@ -284,6 +284,7 @@ class RateLimiter {
   void _performRequest() async {
     try {
       _lastRequestTime = DateTime.now().millisecondsSinceEpoch;
+      _pendingRequest = Completer();
       await callback();
     } finally {
       _pendingRequest.complete(null);
