@@ -461,6 +461,9 @@ class TimelineGrid extends CoreElement {
     num left = flameChartInset;
 
     while (left + interval < _flameChartWidthWithInsets) {
+      // TODO(kenzie): Instead of calculating timestamp based on position, track
+      // timestamp var and increment it by time interval represented by each
+      // grid item. See comment on https://github.com/flutter/devtools/pull/325.
       final timestamp = getTimestampForPosition(left + interval);
       final gridItem = TimelineGridItem(left, interval, timestamp);
 
