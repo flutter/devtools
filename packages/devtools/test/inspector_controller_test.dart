@@ -363,7 +363,7 @@ void main() async {
       await env.setupEnvironment();
 
       // select row index 5.
-      tree.onTap(const Offset(0, rowHeight * 5.5));
+      simulateRowClick(tree, rowIndex: 5);
       const textSelected = // Comment to make dartfmt behave.
           '▼[R] root ]\n'
           '  ▼[M] MyApp\n'
@@ -409,9 +409,8 @@ void main() async {
             'inspector_controller_text_details_tree_with_styles.txt'),
       );
 
-      // Select row ten (rich text)
-      detailsTree.onTap(const Offset(0, rowHeight * 10.5));
-      //
+      // Select the RichText row.
+      simulateRowClick(detailsTree, rowIndex: 10);
       expect(
         detailsTree.toStringDeep(),
         equalsIgnoringHashCodes('▼[/icons/inspector/textArea.png] Text\n'
@@ -436,7 +435,8 @@ void main() async {
       expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
 
       // select row index 3.
-      tree.onTap(const Offset(0, rowHeight * 3.5));
+      simulateRowClick(tree, rowIndex: 3);
+
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
@@ -459,11 +459,10 @@ void main() async {
             'inspector_controller_details_tree_scaffold.txt'),
       );
 
-      // Select row index 4.
       // The important thing about this is that the details tree should scroll
       // instead of re-rooting as the selected row is already visible in the
       // details tree.
-      tree.onTap(const Offset(0, rowHeight * 4.5));
+      simulateRowClick(tree, rowIndex: 4);
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
@@ -486,7 +485,7 @@ void main() async {
 
       // Selecting the root node of the details tree should change selection
       // in the main tree.
-      detailsTree.onTap(const Offset(0, 0));
+      simulateRowClick(detailsTree, rowIndex: 0);
       expect(
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
@@ -548,11 +547,10 @@ void main() async {
     test('hotRestart', () async {
       await env.setupEnvironment();
 
-      // Select row index 4.
       // The important thing about this is that the details tree should scroll
       // instead of re-rooting as the selected row is already visible in the
       // details tree.
-      tree.onTap(const Offset(0, rowHeight * 4.5));
+      simulateRowClick(tree, rowIndex: 4);
       expect(
         tree.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -598,7 +596,7 @@ void main() async {
       );
 
       // Verify that the selection can actually be changed after a restart.
-      tree.onTap(const Offset(0, rowHeight * 4.5));
+      simulateRowClick(tree, rowIndex: 4);
       expect(
         tree.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -615,4 +613,10 @@ void main() async {
       await env.tearDownEnvironment();
     });
   }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+}
+
+void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
+  // Tap at the vertical center of row.
+  // The x coordinate does not matter as any tap in the row counts.
+  tree.onTap(Offset(0, rowHeight * (rowIndex + 0.5)));
 }
