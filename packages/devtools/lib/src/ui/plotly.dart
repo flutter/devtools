@@ -85,6 +85,7 @@ class Data {
     String hoverinfo,
     HoverLabel hoverlabel,
     bool showlegend,
+    String legendgroup,
     List<int> width,
   });
 
@@ -101,6 +102,7 @@ class Data {
   external String get hoverinfo;
   external HoverLabel get hoverlabel;
   external bool get showlegend;
+  external String get legendgroup;
   external List<int> get width;
 }
 
@@ -222,7 +224,8 @@ class AxisLayout {
     String title,
     bool fixedrange,
     String type,
-    String autorange,
+    bool autorange,
+    String rangemode,
     List<num> range,
     RangeSlider rangeslider,
     RangeSelector rangeselector,
@@ -235,7 +238,8 @@ class AxisLayout {
   external String get title;
   external bool get fixedrange;
   external String get type;
-  external String get autorange;
+  external bool get autorange;
+  external String get rangemode;
   external List<num> get range;
   external RangeSlider get rangeslider;
   external RangeSelector get rangeselector;
@@ -298,6 +302,7 @@ class RangeSlider {
     List<num> range,
     num thickness,
     bool visible,
+    String rangemode,
   });
 
   external String get bgcolor;
@@ -307,6 +312,7 @@ class RangeSlider {
   external List<num> get range;
   external num get thickness;
   external bool get visible;
+  external String get rangemode;
 }
 
 @JS()
