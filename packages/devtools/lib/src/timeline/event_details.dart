@@ -71,18 +71,26 @@ class _Details extends CoreElement {
     // Adding two flex divs may not be the best way to center this text, but
     // this is fine here because the code is temporary.
     add(div()..flex());
-    add(div(
+    _comingSoon = div(
       text: 'Coming soon: view CPU sampling data in this area.',
       c: 'coming-soon',
-    )..flex());
+    )..flex()..attribute('hidden');
+    add(_comingSoon);
     add(div()..flex());
   }
 
   CoreElement _duration;
+  CoreElement _comingSoon;
 
   void update(TimelineEvent event) {
     attribute('hidden', false);
     _duration.text = 'Duration: ${_microsAsMsText(event.duration)}';
+
+    if (event.isCpuEvent) {
+      _comingSoon.attribute('hidden', false);
+    } else {
+      _comingSoon.attribute('hidden', true);
+    }
   }
 
   void reset() {
