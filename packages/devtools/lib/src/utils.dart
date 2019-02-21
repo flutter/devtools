@@ -65,18 +65,18 @@ String msAsText(num milliseconds, {bool includeUnit = true}) {
   return '${milliseconds.toStringAsFixed(1)}${includeUnit ? ' ms' : ''}';
 }
 
-num nullSafeMin(num possiblyNullA, num b) {
-  if (possiblyNullA == null) {
-    return b;
+num nullSafeMin(num a, num b) {
+  if (a == null || b == null) {
+    return a ?? b;
   }
-  return min(possiblyNullA, b);
+  return min(a, b);
 }
 
-num nullSafeMax(num possiblyNullA, num b) {
-  if (possiblyNullA == null) {
-    return b;
+num nullSafeMax(num a, num b) {
+  if (a == null || b == null) {
+    return a ?? b;
   }
-  return max(possiblyNullA, b);
+  return max(a, b);
 }
 
 String isolateName(IsolateRef ref) {
