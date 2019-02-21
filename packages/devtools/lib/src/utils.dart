@@ -57,12 +57,15 @@ String printMb(num bytes, [int fractionDigits = 1]) {
   return (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
 }
 
-String microsAsMsText(num micros, {bool includeUnit = true}) {
+String microsAsMsText(num micros,
+    {bool includeUnit = true, int fractionDigits = 1}) {
   return msAsText(micros / 1000, includeUnit: includeUnit);
 }
 
-String msAsText(num milliseconds, {bool includeUnit = true}) {
-  return '${milliseconds.toStringAsFixed(1)}${includeUnit ? ' ms' : ''}';
+String msAsText(num milliseconds,
+    {bool includeUnit = true, int fractionDigits = 1}) {
+  return '${milliseconds.toStringAsFixed(fractionDigits)}'
+      '${includeUnit ? ' ms' : ''}';
 }
 
 num nullSafeMin(num a, num b) {
@@ -78,6 +81,8 @@ num nullSafeMax(num a, num b) {
   }
   return max(a, b);
 }
+
+int log2(num x) => (log(x) / log(2)).floor();
 
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
