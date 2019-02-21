@@ -74,7 +74,9 @@ class _Details extends CoreElement {
     _comingSoon = div(
       text: 'Coming soon: view CPU sampling data in this area.',
       c: 'coming-soon',
-    )..flex()..attribute('hidden');
+    )
+      ..flex()
+      ..attribute('hidden');
     add(_comingSoon);
     add(div()..flex());
   }
