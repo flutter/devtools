@@ -412,7 +412,8 @@ class TimelineFrame {
   // Timing info for CPU portion of the frame.
   int get cpuStartTime => _cpuEventFlow?.startTime;
 
-  int get cpuEndTime => cpuStartTime + cpuDuration;
+  int get cpuEndTime =>
+      cpuStartTime != null ? cpuStartTime + cpuDuration : null;
 
   int get cpuDuration => _cpuEventFlow?.duration;
 
@@ -421,7 +422,8 @@ class TimelineFrame {
   // Timing info for GPU portion of the frame.
   int get gpuStartTime => _gpuEventFlow?.startTime;
 
-  int get gpuEndTime => gpuStartTime + gpuDuration;
+  int get gpuEndTime =>
+      gpuStartTime != null ? gpuStartTime + gpuDuration : null;
 
   int get gpuDuration => _gpuEventFlow?.duration;
 
