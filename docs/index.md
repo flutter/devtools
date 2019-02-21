@@ -5,7 +5,7 @@ title: Getting Started
 ## What is it?
 
 Dart DevTools is a suite of performance tools for Dart and Flutter. It's currently in
-preview release, but we're actively working improvements and on shipping new versions.
+preview release, but we're actively working on improvements and on shipping new versions.
 
 ## What can I do with it?
 
@@ -24,3 +24,9 @@ See the
 <a href="{{ "/vscode" | relative_url }}">VS Code</a>, and
 <a href="{{ "/cli" | relative_url }}">command line</a> pages for installation
 instructions.
+
+## Providing feedback
+
+Please file issues and other feedback at
+[github.com/flutter/devtools/issues](https://github.com/flutter/devtools/issues);
+thanks!

@@ -2,6 +2,9 @@
 title: Using the Logging View
 ---
 
+* toc
+{:toc}
+
 ## What is it?
 
 The logging view displays events from the Dart runtime, application frameworks (like
@@ -16,7 +19,7 @@ By default the logging view shows:
 - stdout and stderr from applications
 - custom logging events from applications
 
-<img src="images/logging_log_entries.png" width="809" height="320" />
+<img src="images/logging_log_entries.png" width="800" />
 
 ## Logging from your application
 
@@ -94,6 +97,6 @@ void main() {
 Once http logging is enabled, you should see http calls (those that ultimately go through
 `dart:io`'s `HttpClient` class) logged to the logging view.
 
-## Clear logs
+## Clearing logs
 
 To clear the log entries in the logging view, hit the `Clear logs` button.
