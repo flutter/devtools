@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import '../utils.dart';
+
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
@@ -388,25 +390,18 @@ class TimelineFrame {
   /// epsilon when determining if an event fits within frame boundaries.
   /// Therefore, there is a chance that [cpuStartTime] could be less than
   /// [_startTime].
-  int get startTime =>
-      cpuStartTime != null ? min(cpuStartTime, _startTime) : _startTime;
+  int get startTime => nullSafeMin(_startTime, cpuStartTime);
   int _startTime;
-  set startTime(int time) {
-    _startTime = _startTime != null ? min(_startTime, time) : time;
-  }
+  set startTime(int time) => _startTime = nullSafeMin(_startTime, time);
 
   /// Frame end time in micros.
   ///
   /// We take the max of [gpuEndTime] and [_endTime] because we use an epsilon
   /// when determining if an event fits within frame boundaries. Therefore,
   /// there is a chance that [gpuEndTime] could be greater than [_endTime].
-  int get endTime => gpuStartTime != null && gpuDuration != null
-      ? max(gpuEndTime, _endTime)
-      : _endTime;
+  int get endTime => nullSafeMax(_endTime, gpuEndTime);
   int _endTime;
-  set endTime(int time) {
-    _endTime = _endTime != null ? max(_endTime, time) : time;
-  }
+  set endTime(int time) => _endTime = nullSafeMax(_endTime, time);
 
   bool get isWellFormed => _startTime != null && _endTime != null;
 
