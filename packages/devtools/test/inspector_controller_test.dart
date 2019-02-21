@@ -610,5 +610,5 @@ void main() async {
       );
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(4));
+  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
 }
