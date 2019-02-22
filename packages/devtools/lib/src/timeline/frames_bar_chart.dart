@@ -75,8 +75,10 @@ class PlotlyDivGraph extends CoreElement {
 
   FramesBarPlotly plotlyChart;
 
-  int _frameIndex = 0;
-  int _lastPlottedFrameIndex = 0;
+  // X coordinate 0 for real data (xCoordNotUsed is reserved for each trace
+  // since first bar color isn't shown when x coord is xCoordNotUsed.
+  int _frameIndex = FramesBarPlotly.xCoordFirst;
+  int _lastPlottedFrameIndex = -1;
   bool _createdPlot = false;
 
   /// These lists are batch updated to the plotly chart to reduce chart lag
@@ -101,6 +103,23 @@ class PlotlyDivGraph extends CoreElement {
     }
   }
 
+  void _plotlyHover(DataEvent data) {
+    final List<HoverFX> hoverDisplay = [];
+
+    for (Point pt in data.points) {
+      final int ptNumber = pt.pointNumber;
+      final int x = pt.data.x[ptNumber];
+      // Only display the hover if its not the first data point for each trace
+      // (curveNumber). Works around first bar in a trace color not rendered.
+      if (x != FramesBarPlotly.xCoordNotUsed) {
+        hoverDisplay.add(
+            HoverFX(curveNumber: pt.curveNumber, pointNumber: pt.pointNumber));
+      }
+    }
+
+    plotFXHover(frameGraph, hoverDisplay);
+  }
+
   void process(
       TimelineController timelineController, TimelineFrame frame) async {
     if (!_createdPlot) {
@@ -111,6 +130,7 @@ class PlotlyDivGraph extends CoreElement {
 
       // Hookup clicks in the plotly chart.
       plotlyChart.chartClick(frameGraph, _plotlyClick);
+      plotlyChart.chartHover(frameGraph, _plotlyHover);
 
       if (!_processDatum) {
         // Only update data 6 times a second.

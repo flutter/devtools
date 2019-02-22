@@ -38,9 +38,15 @@
         })();
 
         // Plotly wrappers.
+        // TODO(terry): Remove JS code move to Dart JS interop.
         function hookupPlotlyClick(domName, jsFunction) {
             var graph = document.getElementById(domName);
             graph.on('plotly_click', jsFunction);
+        }
+
+        function hookupPlotlyHover(domName, jsFunction) {
+            var graph = document.getElementById(domName);
+            graph.on('plotly_hover', jsFunction);
         }
 
         function _copyTrace(x, y, orgTrace, xData, yData, traces) {

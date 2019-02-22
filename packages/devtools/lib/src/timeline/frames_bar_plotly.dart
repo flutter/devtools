@@ -17,6 +17,13 @@ class FramesBarPlotly {
   static const int cpuJankTraceIndex = 2;
   static const int gpuJankTraceIndex = 3;
 
+  // Careful if changing this to something other than -1 because of
+  // rangemode: nonnegative
+  static const int xCoordNotUsed = -1;
+  static const int yCoordNotUsed = 0;
+
+  static const int xCoordFirst = 0;
+
   // Default number of bars displayed in zoom (range slider).
   static const int ticksInRangeSlider = 90;
 
@@ -25,12 +32,11 @@ class FramesBarPlotly {
   Layout getFPSTimeseriesLayout() {
     return Layout(
       xaxis: AxisLayout(
-        ticks: '',
-        showgrid: false,
-        showticklabels: false,
-        rangeslider: RangeSlider(
-          rangemode: 'nonnegative',
-          autorange: true,
+        rangeslider: RangeSlider(),
+        // TODO(terry): Need ThemedColor for dark theme.
+        // Hide ticks by using font color of bgColor.
+        tickfont: Font(
+          color: 'white',
         ),
         rangemode: 'nonnegative',
         autorange: true,
@@ -57,11 +63,11 @@ class FramesBarPlotly {
     // Strange plotly bug with initial setup of x,y.  If x and y are empty array
     // then the first entry, for each trace, isn't rendered but hover does
     // display the Y value.  So prime each trace with some data.  Added
-    // at x-axis -1 (hide rangemode: nonnegative displays at 0 and greater)
-    // and y is zero.
+    // at x-axis coord of xCoordNotUsed (-1) (hide rangemode: nonnegative
+    // displays at 0 and greater) and y is zero.
     final Data traceCpuGood = Data(
-      y: [0],
-      x: [-1],
+      y: [yCoordNotUsed],
+      x: [xCoordNotUsed],
       type: 'bar',
       legendgroup: 'good_group',
       name: 'CPU',
@@ -73,8 +79,8 @@ class FramesBarPlotly {
     );
 
     final Data traceGpuGood = Data(
-      y: [0],
-      x: [-1],
+      y: [yCoordNotUsed],
+      x: [xCoordNotUsed],
       type: 'bar',
       legendgroup: 'good_group',
       name: 'GPU',
@@ -86,8 +92,8 @@ class FramesBarPlotly {
     );
 
     final Data traceCpuJank = Data(
-      y: [0],
-      x: [-1],
+      y: [yCoordNotUsed],
+      x: [xCoordNotUsed],
       type: 'bar',
       legendgroup: 'jank_group',
       name: 'CPU Jank',
@@ -106,8 +112,8 @@ class FramesBarPlotly {
     );
 
     final Data traceGpuJank = Data(
-      y: [0],
-      x: [-1],
+      y: [yCoordNotUsed],
+      x: [xCoordNotUsed],
       type: 'bar',
       legendgroup: 'jank_group',
       name: 'GPU Jank',
@@ -262,25 +268,32 @@ class FramesBarPlotly {
   }
 
   void rangeSliderToLast(int dataIndex) {
-    if (dataIndex > ticksInRangeSlider) {
-      Plotly.update(
-        _domName,
-        Data(),
-        Layout(
-          xaxis: AxisLayout(
+    Plotly.update(
+      _domName,
+      Data(),
+      Layout(
+        xaxis: AxisLayout(
+          // TODO(terry): Need ThemedColor for dark theme too.
+          // Hide ticks by using font color of bgColor as we slide.
+          tickfont: Font(
+            color: 'white',
+          ),
+          rangemode: 'nonnegative',
+          range: [dataIndex - ticksInRangeSlider, dataIndex],
+          rangeslider: RangeSlider(
             rangemode: 'nonnegative',
-            range: [dataIndex - ticksInRangeSlider, dataIndex],
-            rangeslider: RangeSlider(
-              rangemode: 'nonnegative',
-              autorange: true,
-            ),
+            autorange: true,
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   void chartClick(String domName, Function f) {
     mouseClick(domName, f);
+  }
+
+  void chartHover(String domName, Function f) {
+    hoverOver(domName, f);
   }
 }

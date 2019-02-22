@@ -21,6 +21,12 @@ external void _hookupPlotlyClick(
   Function jsFunction,
 );
 
+@JS('hookupPlotlyHover')
+external void _hookupPlotlyHover(
+  String domName,
+  Function jsFunction,
+);
+
 @JS()
 external void myExtendTraces(
   String domName,
@@ -55,6 +61,9 @@ class Plotly {
     List<int> traceindex,
   ]);
 }
+
+@JS('Plotly.Fx.hover')
+external void plotFXHover(String domName, List<HoverFX> hoverInfo);
 
 @JS()
 @anonymous
@@ -231,6 +240,7 @@ class AxisLayout {
     RangeSelector rangeselector,
     bool showgrid,
     bool showticklabels,
+    Font tickfont,
   });
 
   external String get tickformat;
@@ -245,6 +255,7 @@ class AxisLayout {
   external RangeSelector get rangeselector;
   external bool get showgrid;
   external bool get showticklabels;
+  external Font get tickfont;
 }
 
 @JS()
@@ -303,6 +314,7 @@ class RangeSlider {
     num thickness,
     bool visible,
     String rangemode,
+    Font tickfont,
   });
 
   external String get bgcolor;
@@ -313,6 +325,7 @@ class RangeSlider {
   external num get thickness;
   external bool get visible;
   external String get rangemode;
+  external Font get tickfont;
 }
 
 @JS()
@@ -343,7 +356,7 @@ class DataEvent {
 class Point {
   external factory Point({
     int curveNumber,
-    List<Data> data,
+    Data data,
     int pointIndex,
     int pointNumber,
     AxisLayout xaxis,
@@ -353,7 +366,7 @@ class Point {
   });
 
   external int get curveNumber;
-  external List<Data> get data;
+  external Data get data;
   external int get pointIndex;
   external int get pointNumber;
   external AxisLayout get xaxis;
@@ -362,10 +375,29 @@ class Point {
   external num get y;
 }
 
+@JS()
+@anonymous
+class HoverFX {
+  external factory HoverFX({
+    int curveNumber,
+    int pointNumber,
+  });
+
+  external int get curveNumber;
+  external int get pointNumber;
+}
+
 void mouseClick(
   String domName,
   Function f,
 ) {
   // Hookup clicks in the plotly chart.
   _hookupPlotlyClick(domName, allowInterop(f));
+}
+
+void hoverOver(
+  String domName,
+  Function f,
+) {
+  _hookupPlotlyHover(domName, allowInterop(f));
 }
