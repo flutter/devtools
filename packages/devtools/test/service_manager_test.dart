@@ -228,9 +228,9 @@ void main() {
       await env.tearDownEnvironment();
     });
 
-   // TODO(jacobr): uncomment out the hotRestart tests once
-   // https://github.com/flutter/devtools/issues/337 is fixed.
-   /*
+    // TODO(jacobr): uncomment out the hotRestart tests once
+    // https://github.com/flutter/devtools/issues/337 is fixed.
+    /*
     test('hotRestart', () async {
       await env.setupEnvironment();
 
