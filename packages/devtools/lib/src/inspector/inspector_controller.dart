@@ -207,8 +207,8 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> getPendingUpdateDone() async {
     // Wait for the selection to be resolved followed by waiting for the tree to be computed.
-    await _selectionGroups.pendingUpdateDone;
-    await _treeGroups.pendingUpdateDone;
+    await _selectionGroups?.pendingUpdateDone;
+    await _treeGroups?.pendingUpdateDone;
     // TODO(jacobr): are there race conditions we need to think mroe carefully about here?
   }
 
