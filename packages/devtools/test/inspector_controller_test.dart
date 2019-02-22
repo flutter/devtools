@@ -436,10 +436,9 @@ void main() async {
 
       // Test hovering over the icon shown when a property has its default
       // value.
-      final int rowIndex = 2;
+      const int rowIndex = 2;
       final double y = detailsTree.getRowY(rowIndex);
       final textAlignRow = detailsTree.getRow(Offset(0, y));
-      final renderObject = textAlignRow.node.renderObject;
       final FakePaintEntry lastIconEntry = textAlignRow
           .node.renderObject.entries
           .firstWhere((entry) => entry.icon == defaultIcon, orElse: () => null);
@@ -452,7 +451,7 @@ void main() async {
       await tree.onHover(null, null);
       expect(tree.tooltip, isEmpty);
       // TODO(jacobr): add a test that covers hovering over an enum value
-      // and getting a tooltip containg all its values.
+      // and getting a tooltip containing all its values.
 
       // make sure the main tree didn't change due to changing selection in the
       // detail tree

@@ -266,7 +266,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// If present, the tooltip is added in parenthesis after the raw value when
   /// generating the string description.
-  String get tooltip => getStringMember('tooltip');
+  String get tooltip => getStringMember('tooltip') ?? '';
 
   bool get hasTooltip => json.containsKey('tooltip');
 

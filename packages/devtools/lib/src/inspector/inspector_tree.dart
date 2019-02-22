@@ -603,14 +603,14 @@ abstract class InspectorTree {
       if (properties == null) {
         // Something went wrong getting the enum value.
         // Fall back to the regular tooltip;
-        tooltip = diagnostic.tooltip ?? '';
+        tooltip = diagnostic.tooltip;
         return;
       }
       tooltip = 'Allowed values:\n${properties.keys.join('\n')}';
       return;
     }
 
-    tooltip = diagnostic.tooltip ?? '';
+    tooltip = diagnostic.tooltip;
     _computingHover = false;
   }
 
