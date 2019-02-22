@@ -73,6 +73,11 @@ class InspectorScreen extends Screen {
       ]);
     getServiceExtensionButtons().forEach(buttonSection.add);
 
+    buttonSection.add(div(c: 'btn-group collapsible margin-left')
+      ..add([
+        createTipsButton('Inspector'),
+      ]));
+
     screenDiv.add(<CoreElement>[
       buttonSection,
       inspectorContainer = div(c: 'inspector-container'),

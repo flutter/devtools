@@ -145,6 +145,11 @@ class FlutterIcons {
       UrlIcon('/icons/general/resume_white@2x.png');
   static const UrlIcon resume_white_disabled_2x =
       UrlIcon('/icons/general/resume_white_disabled@2x.png');
+
+  static const UrlIcon lightbulb =
+      UrlIcon('/icons/general/lightbulb_outline.png');
+  static const UrlIcon lightbulb_2x =
+      UrlIcon('/icons/general/lightbulb_outline@2x.png');
 }
 
 class CustomIcon extends Icon {

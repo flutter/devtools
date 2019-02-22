@@ -11,7 +11,9 @@ import '../service_registrations.dart';
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'elements.dart';
+import 'fake_flutter/dart_ui/dart_ui.dart';
 import 'html_icon_renderer.dart';
+import 'material_icons.dart';
 import 'primer.dart';
 
 const int defaultSplitterWidth = 12;
@@ -71,6 +73,21 @@ List<CoreElement> getServiceExtensionButtons() {
         ServiceExtensionButton(debugAllowBanner).button,
       ]),
   ];
+}
+
+CoreElement createTipsButton(String pageName) {
+  return PButton.icon(
+    '$pageName Docs',
+    MaterialIcon(
+      'description',
+      Colors.black45,
+    ),
+    title: 'Documentation on using the $pageName page',
+    classes: ['btn-outline'],
+  )
+    ..small()
+    ..click(() => html.window.open(
+        'https://flutter.github.io/devtools/${pageName.toLowerCase()}', null));
 }
 
 CoreElement createHotReloadRestartGroup(Framework framework) {
