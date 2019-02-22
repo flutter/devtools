@@ -126,8 +126,8 @@ class FramesBarPlotly {
     // Return in trace index order
     return [
       traceCpuGood,
-      traceCpuJank,
       traceGpuGood,
+      traceCpuJank,
       traceGpuJank,
     ];
   }
