@@ -12,6 +12,7 @@ import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'elements.dart';
 import 'html_icon_renderer.dart';
+import 'icons.dart';
 import 'primer.dart';
 
 const int defaultSplitterWidth = 12;
@@ -71,6 +72,17 @@ List<CoreElement> getServiceExtensionButtons() {
         ServiceExtensionButton(debugAllowBanner).button,
       ]),
   ];
+}
+
+CoreElement createTipsButton(String pageName, String endPath) {
+  return PButton.icon(
+    '$pageName Tips',
+    FlutterIcons.lightbulb,
+    title: 'Tips for using the $pageName page',
+  )
+    ..small()
+    ..click(() =>
+        html.window.open('https://flutter.github.io/devtools/$endPath', null));
 }
 
 CoreElement createHotReloadRestartGroup(Framework framework) {
