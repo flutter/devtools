@@ -74,7 +74,7 @@ class LoggingScreen extends Screen {
                 ..small()
                 ..click(_clear),
               span()..flex(),
-              createTipsButton('Logging', 'logging'),
+              createTipsButton('Logging'),
             ])
         ]),
       div(c: 'section log-area')

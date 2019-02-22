@@ -104,7 +104,7 @@ class TimelineScreen extends Screen {
       ServiceExtensionButton(performanceOverlay).button,
       div(c: 'btn-group margin-left')
         ..add([
-          createTipsButton('Timeline', 'timeline'),
+          createTipsButton('Timeline'),
         ]),
     ]);
 

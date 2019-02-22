@@ -167,7 +167,7 @@ class DebuggerScreen extends Screen {
                   div()..flex(),
                   div(c: 'btn-group margin-left')
                     ..add([
-                      createTipsButton('Debugger', 'debugger'),
+                      createTipsButton('Debugger'),
                     ]),
                 ]),
               sourceArea = div(c: 'section table-border')

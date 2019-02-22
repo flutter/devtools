@@ -75,7 +75,7 @@ class InspectorScreen extends Screen {
 
     buttonSection.add(div(c: 'btn-group collapsible margin-left')
       ..add([
-        createTipsButton('Inspector', 'inspector'),
+        createTipsButton('Inspector'),
       ]));
 
     screenDiv.add(<CoreElement>[

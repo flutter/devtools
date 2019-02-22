@@ -74,15 +74,15 @@ List<CoreElement> getServiceExtensionButtons() {
   ];
 }
 
-CoreElement createTipsButton(String pageName, String endPath) {
+CoreElement createTipsButton(String pageName) {
   return PButton.icon(
     '$pageName Tips',
     FlutterIcons.lightbulb,
     title: 'Tips for using the $pageName page',
   )
     ..small()
-    ..click(() =>
-        html.window.open('https://flutter.github.io/devtools/$endPath', null));
+    ..click(() => html.window.open(
+        'https://flutter.github.io/devtools/${pageName.toLowerCase()}', null));
 }
 
 CoreElement createHotReloadRestartGroup(Framework framework) {
