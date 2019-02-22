@@ -109,9 +109,9 @@ class PlotlyDivGraph extends CoreElement {
     for (Point pt in data.points) {
       final int ptNumber = pt.pointNumber;
       final int x = pt.data.x[ptNumber];
-      // Only display the hover if its not the first data pointfor each trace
+      // Only display the hover if its not the first data point for each trace
       // (curveNumber). Works around first bar in a trace color not rendered.
-    if (x != FramesBarPlotly.xCoordNotUsed) {
+      if (x != FramesBarPlotly.xCoordNotUsed) {
         hoverDisplay.add(
             HoverFX(curveNumber: pt.curveNumber, pointNumber: pt.pointNumber));
       }

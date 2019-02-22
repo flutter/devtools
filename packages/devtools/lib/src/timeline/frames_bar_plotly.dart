@@ -33,6 +33,7 @@ class FramesBarPlotly {
     return Layout(
       xaxis: AxisLayout(
         rangeslider: RangeSlider(),
+        // TODO(terry): Need ThemedColor for dark theme.
         // Hide ticks by using font color of bgColor.
         tickfont: Font(
           color: 'white',
@@ -272,6 +273,7 @@ class FramesBarPlotly {
       Data(),
       Layout(
         xaxis: AxisLayout(
+          // TODO(terry): Need ThemedColor for dark theme too.
           // Hide ticks by using font color of bgColor as we slide.
           tickfont: Font(
             color: 'white',
