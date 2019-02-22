@@ -52,7 +52,7 @@ class FakeInspectorTreeNodeRender
       : super(entries, size);
 
   @override
-  Icon hitTest(Offset location) {
+  PaintEntry hitTest(Offset location) {
     location = location - offset;
     if (location.dy < 0 || location.dy >= size.height) {
       return null;
@@ -60,7 +60,7 @@ class FakeInspectorTreeNodeRender
     // There is no need to optimize this but we could perform a binary search.
     for (var entry in entries) {
       if (entry.x <= location.dx && entry.right > location.dx) {
-        return entry.icon;
+        return entry;
       }
     }
     return null;
@@ -107,7 +107,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
-    TreeEventCallback onHover,
+    TreeHoverEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
@@ -255,6 +255,9 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     }
     return sb.toString();
   }
+
+  @override
+  String tooltip = '';
 }
 
 void main() async {
@@ -431,7 +434,27 @@ void main() async {
             '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
       );
 
-      // make sure the main tree didn't change.
+      // Test hovering over the icon shown when a property has its default
+      // value.
+      const int rowIndex = 2;
+      final double y = detailsTree.getRowY(rowIndex);
+      final textAlignRow = detailsTree.getRow(Offset(0, y));
+      final FakePaintEntry lastIconEntry = textAlignRow
+          .node.renderObject.entries
+          .firstWhere((entry) => entry.icon == defaultIcon, orElse: () => null);
+      // If the entry doesn't have the defaultIcon then the tree has changed
+      // and the rest of this test case won't make sense.
+      expect(lastIconEntry.icon, equals(defaultIcon));
+      expect(tree.tooltip, isEmpty);
+      await tree.onHover(textAlignRow.node, lastIconEntry);
+      expect(tree.tooltip, equals('Default value'));
+      await tree.onHover(null, null);
+      expect(tree.tooltip, isEmpty);
+      // TODO(jacobr): add a test that covers hovering over an enum value
+      // and getting a tooltip containing all its values.
+
+      // make sure the main tree didn't change due to changing selection in the
+      // detail tree
       expect(tree.toStringDeep(), equalsIgnoringHashCodes(textSelected));
 
       // select row index 3.
@@ -572,6 +595,7 @@ void main() async {
       await serviceManager.performHotRestart();
       // The isolate starts out paused on a hot restart so we have to resume
       // it manually to make the test pass.
+
       await serviceManager.service
           .resume(serviceManager.isolateManager.selectedIsolate.id);
 
@@ -616,7 +640,6 @@ void main() async {
 }
 
 void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
-  // Tap at the vertical center of row.
   // The x coordinate does not matter as any tap in the row counts.
-  tree.onTap(Offset(0, rowHeight * (rowIndex + 0.5)));
+  tree.onTap(Offset(0, tree.getRowY(rowIndex)));
 }

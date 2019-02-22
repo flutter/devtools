@@ -169,9 +169,8 @@ class InspectorTreeNodeCanvasRender
     }
   }
 
-  // TODO(jacobr): share this method with test code.
   @override
-  Icon hitTest(Offset location) {
+  PaintEntry hitTest(Offset location) {
     if (offset == null) return null;
 
     location = location - offset;
@@ -181,7 +180,7 @@ class InspectorTreeNodeCanvasRender
     // There is no need to optimize this but we could perform a binary search.
     for (var entry in entries) {
       if (entry.x <= location.dx && entry.right > location.dx) {
-        return entry.icon;
+        return entry;
       }
     }
     return null;
@@ -206,7 +205,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     @required NodeAddedCallback onNodeAdded,
     VoidCallback onSelectionChange,
     TreeEventCallback onExpand,
-    TreeEventCallback onHover,
+    TreeHoverEventCallback onHover,
   }) : super(
           summaryTree: summaryTree,
           treeType: treeType,
@@ -260,15 +259,17 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     _viewportCanvas.rebuild(force: true);
   }
 
-  void onMouseMove(Offset offset) {
-    if (onHover != null) {
-      onHover(getRow(offset)?.node);
-    }
+  @override
+  String get tooltip => _viewportCanvas.element.tooltip;
+
+  @override
+  set tooltip(String value) {
+    _viewportCanvas.element.tooltip = value;
   }
 
   void onMouseLeave() {
     if (onHover != null) {
-      onHover(null);
+      onHover(null, null);
     }
   }
 
