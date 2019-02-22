@@ -132,12 +132,7 @@ class PlotlyDivGraph extends CoreElement {
         FramesBarPlotly.gpuJankTraceIndex
       ];
 
-      String color = data.data[traceIndex].marker.color;
-
-      final int cpuJankLength =
-          data.data[FramesBarPlotly.cpuJankTraceIndex].x.length;
-      final int gpuJankLength =
-          data.data[FramesBarPlotly.gpuJankTraceIndex].x.length;
+      final String color = data.data[traceIndex].marker.color;
 
       String newCpuColor;
       String newGpuColor;

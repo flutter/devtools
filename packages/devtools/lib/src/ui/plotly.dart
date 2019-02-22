@@ -67,7 +67,7 @@ class Plotly {
     List<int> traceindex,
   ]);
 
-  external static restyle(
+  external static void restyle(
     String domName,
     String style,
     List update,
