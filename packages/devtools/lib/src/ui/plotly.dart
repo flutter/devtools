@@ -27,6 +27,12 @@ external void _hookupPlotlyHover(
   Function jsFunction,
 );
 
+@JS('hookupPlotlyLegendClick')
+external bool _hookupPlotlyLegendClick(
+  String domName,
+  Function jsFunction,
+);
+
 @JS()
 external void myExtendTraces(
   String domName,
@@ -56,10 +62,17 @@ class Plotly {
   );
   external static void update(
     String domName,
-    Data data,
+    List<Data> data,
     Layout layout, [
     List<int> traceindex,
   ]);
+
+  external static restyle(
+    String domName,
+    String style,
+    List update,
+    List<int> traces,
+  );
 }
 
 @JS('Plotly.Fx.hover')
@@ -353,6 +366,15 @@ class DataEvent {
 
 @JS()
 @anonymous
+class LegendDataEvent {
+  external dynamic get event;
+  external int get curveNumber;
+  external List<Data> get data;
+  external int get expandedIndex;
+}
+
+@JS()
+@anonymous
 class Point {
   external factory Point({
     int curveNumber,
@@ -400,4 +422,12 @@ void hoverOver(
   Function f,
 ) {
   _hookupPlotlyHover(domName, allowInterop(f));
+}
+
+bool legendClick(
+  String domName,
+  Function f,
+) {
+  // Hookup clicks in the legend in a plotly chart.
+  return _hookupPlotlyLegendClick(domName, allowInterop(f));
 }

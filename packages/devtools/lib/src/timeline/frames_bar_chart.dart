@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import '../ui/elements.dart';
+import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
+import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
@@ -120,6 +122,50 @@ class PlotlyDivGraph extends CoreElement {
     plotFXHover(frameGraph, hoverDisplay);
   }
 
+  bool _plotlyLegendClick(LegendDataEvent data) {
+    final int traceIndex = data.curveNumber;
+
+    if (traceIndex == FramesBarPlotly.cpuJankTraceIndex ||
+        traceIndex == FramesBarPlotly.gpuJankTraceIndex) {
+      final List<int> traces = [
+        FramesBarPlotly.cpuJankTraceIndex,
+        FramesBarPlotly.gpuJankTraceIndex
+      ];
+
+      String color = data.data[traceIndex].marker.color;
+
+      final int cpuJankLength =
+          data.data[FramesBarPlotly.cpuJankTraceIndex].x.length;
+      final int gpuJankLength =
+          data.data[FramesBarPlotly.gpuJankTraceIndex].x.length;
+
+      String newCpuColor;
+      String newGpuColor;
+
+      if (color == colorToCss(cpuJankColor) ||
+          color == colorToCss(gpuJankColor)) {
+        // Flip to cpuGoodColor/gpuGoodColor
+        newCpuColor = colorToCss(mainCpuColor);
+        newGpuColor = colorToCss(mainGpuColor);
+      } else {
+        // Flip back to cpuJankColor/gpuJankColor
+        newCpuColor = colorToCss(cpuJankColor);
+        newGpuColor = colorToCss(gpuJankColor);
+      }
+
+      Plotly.restyle(
+        frameGraph,
+        'marker.color',
+        [newCpuColor, newGpuColor],
+        traces,
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
   void process(
       TimelineController timelineController, TimelineFrame frame) async {
     if (!_createdPlot) {
@@ -128,9 +174,10 @@ class PlotlyDivGraph extends CoreElement {
 
       _createdPlot = true;
 
-      // Hookup clicks in the plotly chart.
+      // Hookup events in the plotly chart.
       plotlyChart.chartClick(frameGraph, _plotlyClick);
       plotlyChart.chartHover(frameGraph, _plotlyHover);
+      plotlyChart.chartLegendClick(frameGraph, _plotlyLegendClick);
 
       if (!_processDatum) {
         // Only update data 6 times a second.

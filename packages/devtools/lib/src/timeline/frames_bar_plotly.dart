@@ -270,7 +270,7 @@ class FramesBarPlotly {
   void rangeSliderToLast(int dataIndex) {
     Plotly.update(
       _domName,
-      Data(),
+      [Data()],
       Layout(
         xaxis: AxisLayout(
           // TODO(terry): Need ThemedColor for dark theme too.
@@ -295,5 +295,9 @@ class FramesBarPlotly {
 
   void chartHover(String domName, Function f) {
     hoverOver(domName, f);
+  }
+
+  void chartLegendClick(String domName, Function f) {
+    legendClick(domName, f);
   }
 }
