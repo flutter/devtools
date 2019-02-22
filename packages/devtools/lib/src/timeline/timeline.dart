@@ -100,9 +100,13 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
       ]);
-    upperButtonSection.add(
+    upperButtonSection.add([
       ServiceExtensionButton(performanceOverlay).button,
-    );
+      div(c: 'btn-group margin-left')
+        ..add([
+          createTipsButton('Timeline'),
+        ]),
+    ]);
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,

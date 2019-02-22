@@ -51,7 +51,7 @@
 TODO(jacobr): make these styles only apply to the inspector toolbar as the
 thresholds are specific to the inspector UI.
  */
-@media all and (max-width: 1080px) {
+@media all and (max-width: 1220px) {
     .btn-group.collapsible .optional-text span {
         display: none;
     }
@@ -62,7 +62,7 @@ thresholds are specific to the inspector UI.
     }
 }
 
-@media all and (max-width: 1330px) {
+@media all and (max-width: 1410px) {
     .btn-group.collapsible.overflow .optional-text span {
         display: none;
     }

@@ -68,11 +68,13 @@ class LoggingScreen extends Screen {
         ..add(<CoreElement>[
           form()
             ..clazz('align-items-center')
+            ..layoutHorizontal()
             ..add(<CoreElement>[
               PButton('Clear logs')
                 ..small()
                 ..click(_clear),
               span()..flex(),
+              createTipsButton('Logging'),
             ])
         ]),
       div(c: 'section log-area')

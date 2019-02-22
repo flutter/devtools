@@ -660,6 +660,10 @@ but a more subtle solution would be better. */
     line-height: 22px;
 }
 
+.btn-outline:hover .flutter-icon {
+  filter: brightness(0) invert(1);
+}
+
 .toast {
     border: 1px solid var(--toast-border);
     border-radius: 3px;
