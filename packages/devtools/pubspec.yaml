@@ -1,6 +1,6 @@
 name: devtools
 description: A suite of web-based performance tooling for Dart and Flutter.
-version: 0.0.7
+version: 0.0.9
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
@@ -15,7 +15,7 @@ dependencies:
   js: ^0.6.1+1
   meta: ^1.1.0
   path: ^1.6.0
-  pedantic: ^1.5.0
+  pedantic: ^1.4.0
   shelf: ^0.7.4
   shelf_static: ^0.2.8
   rxdart: ^0.20.0
