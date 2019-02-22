@@ -58,20 +58,36 @@ class EventDetails extends CoreElement {
 
 class _Details extends CoreElement {
   _Details() : super('div') {
+    layoutVertical();
+    flex();
+
     element.style
       ..marginTop = '6px'
       ..marginLeft = '12px';
 
     add(_duration = div());
 
-    // TODO(kenzie): query vm for samples.
+    // TODO(kenzie): remove this once we can display CPU samples.
+    // Adding two flex divs may not be the best way to center this text, but
+    // this is fine here because the code is temporary.
+    add(div()..flex());
+    _comingSoon = div(
+      text: 'Coming soon: view CPU sampling data in this area.',
+      c: 'coming-soon',
+    )
+      ..flex()
+      ..attribute('hidden');
+    add(_comingSoon);
+    add(div()..flex());
   }
 
   CoreElement _duration;
+  CoreElement _comingSoon;
 
   void update(TimelineEvent event) {
     attribute('hidden', false);
     _duration.text = 'Duration: ${_microsAsMsText(event.duration)}';
+    _comingSoon.attribute('hidden', !event.isCpuEvent);
   }
 
   void reset() {
