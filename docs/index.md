@@ -27,6 +27,7 @@ instructions.
 
 ## Providing feedback
 
-Please file issues and other feedback at
-[github.com/flutter/devtools/issues](https://github.com/flutter/devtools/issues);
-thanks!
+DevTools is currently in a preview release stage. Please try it out, and provide
+feedback and file issues at
+[github.com/flutter/devtools/issues](https://github.com/flutter/devtools/issues).
+Thanks!
