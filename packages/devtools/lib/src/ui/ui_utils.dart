@@ -11,8 +11,9 @@ import '../service_registrations.dart';
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'elements.dart';
+import 'fake_flutter/dart_ui/dart_ui.dart';
 import 'html_icon_renderer.dart';
-import 'icons.dart';
+import 'material_icons.dart';
 import 'primer.dart';
 
 const int defaultSplitterWidth = 12;
@@ -76,9 +77,12 @@ List<CoreElement> getServiceExtensionButtons() {
 
 CoreElement createTipsButton(String pageName) {
   return PButton.icon(
-    '$pageName Tips',
-    FlutterIcons.lightbulb,
-    title: 'Tips for using the $pageName page',
+    '$pageName Docs',
+    const MaterialIcon(
+      'description',
+      Colors.black45,
+    ),
+    title: 'Documentation on using the $pageName page',
     classes: ['btn-outline'],
   )
     ..small()
