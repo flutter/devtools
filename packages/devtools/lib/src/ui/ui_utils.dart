@@ -78,7 +78,7 @@ List<CoreElement> getServiceExtensionButtons() {
 CoreElement createTipsButton(String pageName) {
   return PButton.icon(
     '$pageName Docs',
-    MaterialIcon(
+    const MaterialIcon(
       'description',
       Colors.black45,
     ),

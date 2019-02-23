@@ -15,7 +15,7 @@ class MaterialIcon extends Icon {
     this.color, {
     this.fontSize = 18,
     this.iconWidth = 18,
-    this.angle = 0,
+    this.angle = 0.0,
   });
 
   final String text;
