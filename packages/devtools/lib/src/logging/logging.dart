@@ -33,7 +33,7 @@ bool _verboseDebugging = false;
 
 class LoggingScreen extends Screen {
   LoggingScreen()
-      : super(name: 'Logging', id: 'logs', iconClass: 'octicon-clippy') {
+      : super(name: 'Logging', id: 'logging', iconClass: 'octicon-clippy') {
     logCountStatus = StatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
@@ -73,8 +73,6 @@ class LoggingScreen extends Screen {
               PButton('Clear logs')
                 ..small()
                 ..click(_clear),
-              span()..flex(),
-              createTipsButton('Logging'),
             ])
         ]),
       div(c: 'section log-area')

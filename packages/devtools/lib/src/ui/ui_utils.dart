@@ -4,6 +4,8 @@
 
 import 'dart:html' as html;
 
+import 'package:meta/meta.dart';
+
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
@@ -75,19 +77,27 @@ List<CoreElement> getServiceExtensionButtons() {
   ];
 }
 
-CoreElement createTipsButton(String pageName) {
-  return PButton.icon(
-    '$pageName Docs',
-    const MaterialIcon(
-      'description',
-      Colors.black45,
-    ),
-    title: 'Documentation on using the $pageName page',
-    classes: ['btn-outline'],
-  )
-    ..small()
-    ..click(() => html.window.open(
-        'https://flutter.github.io/devtools/${pageName.toLowerCase()}', null));
+StatusItem createLinkStatusItem(
+  String text, {
+  @required String href,
+  @required String title,
+}) {
+  // TODO(jacobr): cleanup icon rendering so the icon changes color on hover.
+  final icon = createIconElement(const MaterialIcon(
+    'open_in_new',
+    Colors.black45,
+  ));
+  // TODO(jacobr): add this style to the css for all icons displayed as HTML
+  // once we verify there are not unintended consequences.
+  icon.element.style
+    ..verticalAlign = 'text-bottom'
+    ..marginBottom = '0';
+  final element = CoreElement('a')
+    ..add(<CoreElement>[icon, span(text: text)])
+    ..setAttribute('href', href)
+    ..setAttribute('target', '_blank')
+    ..element.title = title;
+  return StatusItem()..element.add(element);
 }
 
 CoreElement createHotReloadRestartGroup(Framework framework) {

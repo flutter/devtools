@@ -11,6 +11,7 @@ import '../main.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
+import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
@@ -122,6 +123,7 @@ class Framework {
     current.visible = true;
     current.entering();
     pageStatus.addAll(current.statusItems);
+    auxiliaryStatus.defaultStatus = screen.helpStatus;
 
     updatePage();
   }
@@ -212,24 +214,37 @@ class StatusLine {
   final CoreElement element;
   final List<StatusItem> _items = <StatusItem>[];
 
+  /// Status to show if no actual status is provided..
+  final List<StatusItem> _defaultStatusItems = <StatusItem>[];
+
   void add(StatusItem item) {
     _items.add(item);
 
     _rebuild();
   }
 
+  set defaultStatus(StatusItem defaultStatus) {
+    _defaultStatusItems.clear();
+    if (defaultStatus != null) {
+      _defaultStatusItems.add(defaultStatus);
+    }
+    _rebuild();
+  }
+
   void _rebuild() {
     element.clear();
+    final List<StatusItem> items =
+        _items.isEmpty ? _defaultStatusItems : _items;
 
-    if (_items.isNotEmpty) {
-      element.add(_items.first.element);
-
-      for (StatusItem item in _items.sublist(1)) {
+    bool first = true;
+    for (StatusItem item in items) {
+      if (!first) {
         element.add(SpanElement()
           ..text = '•'
           ..classes.add('separator'));
-        element.add(item.element);
       }
+      element.add(item.element);
+      first = false;
     }
   }
 
@@ -279,11 +294,16 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabled = false,
-  });
+  }) : helpStatus = createLinkStatusItem(
+          '$name Docs',
+          href: 'https://flutter.github.io/devtools/$id',
+          title: 'Documentation on using the $name page',
+        );
 
   final String name;
   final String id;
   final String iconClass;
+  final StatusItem helpStatus;
   final bool disabled;
 
   Framework framework;
@@ -314,7 +334,7 @@ abstract class Screen {
     statusItems.add(item);
   }
 
-  void removeStatusItems(StatusItem item) {
+  void removeStatusItem(StatusItem item) {
     statusItems.remove(item);
   }
 
@@ -326,16 +346,6 @@ class SetStateMixin {
   void setState(Function rebuild) {
     window.requestAnimationFrame((_) => rebuild());
   }
-}
-
-class HelpInfo {
-  HelpInfo({
-    @required this.title,
-    @required this.url,
-  });
-
-  final String title;
-  final String url;
 }
 
 class StatusItem {

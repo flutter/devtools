@@ -31,8 +31,8 @@ class App {
     _register<void>('connectDialog.connectTo', connectDialogConnectTo);
 
     // LoggingScreen
-    _register<void>('logs.clearLogs', logsClearLogs);
-    _register<int>('logs.logCount', logsLogCount);
+    _register<void>('logging.clearLogs', logsClearLogs);
+    _register<int>('logging.logCount', logsLogCount);
 
     // DebuggerScreen
     _register<String>('debugger.getState', debuggerGetState);
@@ -105,12 +105,12 @@ class App {
   }
 
   Future<void> logsClearLogs([dynamic _]) async {
-    final LoggingScreen screen = framework.getScreen('logs');
+    final LoggingScreen screen = framework.getScreen('logging');
     screen.loggingTable.setRows(<LogData>[]);
   }
 
   Future<int> logsLogCount([dynamic _]) async {
-    final LoggingScreen screen = framework.getScreen('logs');
+    final LoggingScreen screen = framework.getScreen('logging');
     return screen.loggingTable.rowCount;
   }
 

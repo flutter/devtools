@@ -165,10 +165,6 @@ class DebuggerScreen extends Screen {
                     ]),
                   div()..flex(),
                   breakOnExceptionControl,
-                  div(c: 'btn-group margin-left')
-                    ..add([
-                      createTipsButton('Debugger'),
-                    ]),
                 ]),
               sourceArea = div(c: 'section table-border')
                 ..layoutVertical()

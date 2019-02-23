@@ -7,7 +7,6 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
-import '../service_extensions.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
@@ -100,13 +99,6 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
       ]);
-    upperButtonSection.add([
-      ServiceExtensionButton(performanceOverlay).button,
-      div(c: 'btn-group margin-left')
-        ..add([
-          createTipsButton('Timeline'),
-        ]),
-    ]);
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
