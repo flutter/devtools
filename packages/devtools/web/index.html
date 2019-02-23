@@ -49,6 +49,12 @@
             graph.on('plotly_hover', jsFunction);
         }
 
+        // Return false to cancel default handling, true to cause default handling.
+        function hookupPlotlyLegendClick(domName, jsFunction) {
+            var graph = document.getElementById(domName);
+            graph.on('plotly_legendclick', jsFunction);
+        }
+
         function _copyTrace(x, y, orgTrace, xData, yData, traces) {
           if (x.length > 0) {
             var newX = [];
