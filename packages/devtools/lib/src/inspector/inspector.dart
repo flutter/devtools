@@ -37,7 +37,6 @@ class InspectorScreen extends Screen {
           id: 'inspector',
           iconClass: 'octicon-device-mobile',
         );
-
   PButton refreshTreeButton;
 
   SetStateMixin inspectorStateMixin = SetStateMixin();
@@ -72,11 +71,6 @@ class InspectorScreen extends Screen {
         div()..flex(),
       ]);
     getServiceExtensionButtons().forEach(buttonSection.add);
-
-    buttonSection.add(div(c: 'btn-group collapsible margin-left')
-      ..add([
-        createTipsButton('Inspector'),
-      ]));
 
     screenDiv.add(<CoreElement>[
       buttonSection,
