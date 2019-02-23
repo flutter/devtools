@@ -6,6 +6,7 @@ title: Using the Timeline View
 {:toc}
 
 ## What is it?
+
 The timeline view displays information about Flutter frames. It consists of
  three parts, each increasing in granularity:
 - Frame Rendering Chart
@@ -16,6 +17,7 @@ The timeline view displays information about Flutter frames. It consists of
 performance unless your application is run in profile mode.
 
 ## Frame Rendering Chart
+
 This chart is populated with individual frames as they are rendered in your application. Each bar in the chart
 represents a frame. The bars are color-coded to highlight the different portions of work that occur when rendering a
 Flutter frame:
@@ -27,6 +29,7 @@ Flutter frame:
 Clicking a bar will display additional details about the frame.
 
 ### Jank
+
 The frame rendering chart shows CPU and GPU jank in shades of red. We consider a portion of the frame to be janky when
 it takes more than 8 ms to complete.
 
@@ -35,6 +38,7 @@ are two portions of work for each frame (CPU and GPU), each portion should compl
 missed, you may experience UI jank or dropped frames.
 
 ## Flame Chart
+
 The flame chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on and so
 forth. The CPU and GPU events are separate event flows, but they share a common timeline (displayed at the top of the
 flame chart). This timeline is strictly for the given frame. It does not reflect the clock shared by all frames.
@@ -46,6 +50,7 @@ can either click and drag the chart or scroll horizontally. You can also click a
 details section below the chart.
 
 ## Event Details
+
 This section shows details for a specific event. Currently, only the event name and duration are displayed. This feature
 is actively being worked on. We are planning to display CPU sampling data here in the future.
 

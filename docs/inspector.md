@@ -2,6 +2,11 @@
 title: Using the Flutter Inspector
 ---
 
+* toc
+{:toc}
+
+## What is it?
+
 The Flutter widget inspector is powerful tool for visualizing and exploring
 Flutter widget trees. The Flutter framework uses widgets as
 [the core building block](https://flutter.dev/docs/development/ui/widgets-intro)
@@ -14,7 +19,7 @@ exploring Flutter these widget trees, and can be useful for:
 
 <img src="images/inspector_screenshot.png" width="800" />
 
-## Getting started with the inspector
+## Getting started
 
 To start click the `Flutter Inspector` tab on the DevTools toolbar.
 
@@ -29,6 +34,12 @@ button again in order to exit the widget select mode.
 
 When debugging layout issues, the key fields to look at are the `size` and
 `constraints` fields. The constraints flow down the tree, and the sizes flow back up.
+
+## DartConf 2018 inspector talk
+
+For a demonstration of what's generally possible with the inspector, see the
+[DartConf 2018 talk](https://www.youtube.com/watch?v=JIcmJNT9DNI), demonstrating
+the IntelliJ version of the Flutter inspector.
 
 ## Track widget creation
 
@@ -49,9 +60,3 @@ flutter run --track-widget-creation
 
 If you launch without the flag, you can still use the inspector; you'll see an in-line,
 dismissible reminder message about using the source instrumentation flag.
-
-## The IntelliJ inspector
-
-For a demonstration of what's generally possible with the inspector, see the
-[DartConf 2018 talk](https://www.youtube.com/watch?v=JIcmJNT9DNI), demonstrating
-the IntelliJ version of the Flutter inspector.

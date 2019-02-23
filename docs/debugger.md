@@ -17,7 +17,7 @@ main entry-point for your app in the loaded in the main source area.
 In order to browse around more of your application sources, you can scroll through
 the `Scripts` area and select other source files to display.
 
-<img src="images/debugger_screenshot.png" width="900" />
+<img src="images/debugger_screenshot.png" width="800" />
 
 ## Setting breakpoints
 

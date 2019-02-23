@@ -7,8 +7,8 @@ It contains the source code for a suite of performance tools for Dart and Flutte
 
 ## Getting started
 
-See the package's [readme](https://github.com/flutter/devtools/blob/master/packages/devtools/README.md)
-for instructions on trying out DevTools.
+For documentation on installing and trying out DevTools, please see our
+[docs](https://flutter.github.io/devtools/).
 
 ## Contributing and development
 
