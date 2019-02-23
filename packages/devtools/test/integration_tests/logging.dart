@@ -25,10 +25,10 @@ void loggingTests() {
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
-    await tools.switchPage('logs');
+    await tools.switchPage('logging');
 
     final String currentPageId = await tools.currentPageId();
-    expect(currentPageId, 'logs');
+    expect(currentPageId, 'logging');
 
     // Cause app to log.
     final LoggingManager logs = LoggingManager(tools);
@@ -45,10 +45,10 @@ void loggingTests() {
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
-    await tools.switchPage('logs');
+    await tools.switchPage('logging');
 
     final String currentPageId = await tools.currentPageId();
-    expect(currentPageId, 'logs');
+    expect(currentPageId, 'logging');
 
     final LoggingManager logs = LoggingManager(tools);
 
@@ -65,7 +65,7 @@ void loggingTests() {
     expect(await logs.logCount(), 0);
 
     // Switch to the logs page.
-    await tools.switchPage('logs');
+    await tools.switchPage('logging');
 
     // Verify the log data shows up in the UI.
     await waitFor(() async => await logs.logCount() > 0);
@@ -79,11 +79,12 @@ class LoggingManager {
   final DevtoolsManager tools;
 
   Future<void> clearLogs() async {
-    await tools.tabInstance.send('logs.clearLogs');
+    await tools.tabInstance.send('logging.clearLogs');
   }
 
   Future<int> logCount() async {
-    final AppResponse response = await tools.tabInstance.send('logs.logCount');
+    final AppResponse response =
+        await tools.tabInstance.send('logging.logCount');
     return response.result;
   }
 }

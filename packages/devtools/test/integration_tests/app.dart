@@ -25,10 +25,10 @@ void appTests() {
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
-    await tools.switchPage('logs');
+    await tools.switchPage('logging');
 
     final String currentPageId = await tools.currentPageId();
-    expect(currentPageId, 'logs');
+    expect(currentPageId, 'logging');
   });
 
   test('connect dialog displays', () async {
