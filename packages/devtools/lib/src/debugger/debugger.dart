@@ -163,8 +163,8 @@ class DebuggerScreen extends Screen {
                         ])
                         ..small(),
                     ]),
-                  breakOnExceptionControl,
                   div()..flex(),
+                  breakOnExceptionControl,
                   div(c: 'btn-group margin-left')
                     ..add([
                       createTipsButton('Debugger'),
