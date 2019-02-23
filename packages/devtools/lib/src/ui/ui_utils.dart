@@ -79,6 +79,7 @@ CoreElement createTipsButton(String pageName) {
     '$pageName Tips',
     FlutterIcons.lightbulb,
     title: 'Tips for using the $pageName page',
+    classes: ['btn-outline'],
   )
     ..small()
     ..click(() => html.window.open(
