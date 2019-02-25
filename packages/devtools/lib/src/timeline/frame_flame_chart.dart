@@ -243,6 +243,8 @@ class FrameFlameChart extends CoreElement {
 
     void drawTimelineGrid() {
       _timelineGrid = TimelineGrid(_frame.durationMs, getFlameChartWidth());
+      _timelineGrid.element.style.height =
+          '${2 * rowHeight + cpuSectionHeight + gpuSectionHeight}px';
       add(_timelineGrid);
     }
 
