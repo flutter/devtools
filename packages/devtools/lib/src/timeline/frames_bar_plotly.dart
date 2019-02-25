@@ -12,10 +12,10 @@ class FramesBarPlotly {
   // Any duration of cpu/gpu greater than 8 ms is a jank.
   static const int jankMs = 8;
 
-  static const int cpuGoodTraceIndex = 0;
-  static const int gpuGoodTraceIndex = 1;
-  static const int cpuJankTraceIndex = 2;
-  static const int gpuJankTraceIndex = 3;
+  static const int gpuGoodTraceIndex = 0;
+  static const int gpuJankTraceIndex = 1;
+  static const int cpuGoodTraceIndex = 2;
+  static const int cpuJankTraceIndex = 3;
 
   // Careful if changing this to something other than -1 because of
   // rangemode: nonnegative
@@ -129,12 +129,11 @@ class FramesBarPlotly {
       width: [0],
     );
 
-    // Return in trace index order
     return [
-      traceCpuGood,
       traceGpuGood,
-      traceCpuJank,
       traceGpuJank,
+      traceCpuGood,
+      traceCpuJank,
     ];
   }
 
