@@ -129,6 +129,11 @@ class FramesBarPlotly {
       width: [0],
     );
 
+    // WARNING: Must return in trace index order:
+    //    gpuGoodTraceIndex  [value 0]
+    //    gpuJankTraceIndex  [value 1]
+    //    cpuGoodTraceIndex  [value 2]
+    //    cpuJankTraceIndex  [value 3]
     return [
       traceGpuGood,
       traceGpuJank,
