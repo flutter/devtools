@@ -202,8 +202,7 @@ class DebuggerScreen extends Screen {
 
       // Only enable step over and step out if we're paused at a frame. When
       // paused w/o a frame (in the message loop), step over and out aren't
-      // meaningful (and also crash the vm:
-      // https://github.com/dart-lang/sdk/issues/35601).
+      // meaningful.
       stepOver.enabled = value && (debuggerState._lastEvent.topFrame != null);
       stepOut.enabled = value && (debuggerState._lastEvent.topFrame != null);
     });
@@ -565,14 +564,14 @@ class DebuggerState {
 
   final Map<String, Script> _scriptCache = <String, Script>{};
 
-  final BehaviorSubject<bool> _paused = BehaviorSubject<bool>(seedValue: false);
+  final BehaviorSubject<bool> _paused = BehaviorSubject<bool>.seeded(false);
   final BehaviorSubject<bool> _supportsStepping =
-      BehaviorSubject<bool>(seedValue: false);
+      BehaviorSubject<bool>.seeded(false);
 
   Event _lastEvent;
 
   final BehaviorSubject<List<Breakpoint>> _breakpoints =
-      BehaviorSubject<List<Breakpoint>>(seedValue: <Breakpoint>[]);
+      BehaviorSubject<List<Breakpoint>>.seeded(<Breakpoint>[]);
 
   final BehaviorSubject<String> _exceptionPauseMode = BehaviorSubject();
 
@@ -1375,37 +1374,38 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
 class BreakOnExceptionControl extends CoreElement {
   BreakOnExceptionControl()
       : super('div', classes: 'break-on-exceptions margin-left flex-no-wrap') {
-    final CoreElement unhandled = CoreElement('input')
+    final CoreElement unhandledExceptionsElement = CoreElement('input')
       ..setAttribute('type', 'checkbox');
-    _unhandledElement = unhandled.element;
+    _unhandledElement = unhandledExceptionsElement.element;
 
-    final CoreElement all = CoreElement('input')
+    final CoreElement allExceptionsElement = CoreElement('input')
       ..setAttribute('type', 'checkbox');
-    _allElement = all.element;
+    _allElement = allExceptionsElement.element;
 
     add([
+      span(text: 'Break on exceptions: ', c: 'strong'),
       CoreElement('label')
         ..add(<CoreElement>[
-          unhandled,
-          span(text: ' Break on unhandled exceptions')
+          unhandledExceptionsElement,
+          span(text: ' unhandled')
         ]),
       CoreElement('label')
         ..add(<CoreElement>[
-          all,
-          span(text: ' Break on all exceptions'),
+          allExceptionsElement,
+          span(text: ' all'),
         ]),
     ]);
 
-    unhandled.element.onChange.listen((_) {
+    unhandledExceptionsElement.element.onChange.listen((_) {
       _pauseModeController.add(exceptionPauseMode);
     });
 
-    all.element.onChange.listen((_) {
+    allExceptionsElement.element.onChange.listen((_) {
       if (_allElement.checked) {
-        unhandled.enabled = false;
+        unhandledExceptionsElement.enabled = false;
         _unhandledElement.checked = true;
       } else {
-        unhandled.enabled = true;
+        unhandledExceptionsElement.enabled = true;
       }
       _pauseModeController.add(exceptionPauseMode);
     });

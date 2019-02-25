@@ -778,3 +778,7 @@ html [full] {
     position: relative;
     font-weight: bold;
 }
+
+span.strong {
+    font-weight: 600;
+}
