@@ -92,6 +92,7 @@ class _Details extends CoreElement {
 
   void reset() {
     _duration.text = '';
+    _comingSoon.attribute('hidden', true);
   }
 }
 
