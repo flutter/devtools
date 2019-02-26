@@ -268,7 +268,7 @@ class FramesBarPlotly {
       ],
     );
 
-    if (!paused) rangeSliderToLast(dataIndexes.last);
+    if (!paused) rangeSliderToLast(dataIndexes.last + 1);
   }
 
   void rangeSliderToLast(int dataIndex) {
