@@ -314,8 +314,8 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
   @override
   CanvasImageSource createCanvasSource() {
     final canvas = CanvasElement(
-      width: iconWidth * window.devicePixelRatio,
-      height: iconHeight * window.devicePixelRatio,
+      width: (iconWidth * window.devicePixelRatio).toInt(),
+      height: (iconHeight * window.devicePixelRatio).toInt(),
     );
     final context2D = canvas.context2D
       ..scale(window.devicePixelRatio, window.devicePixelRatio)
