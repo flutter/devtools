@@ -97,16 +97,49 @@ class PlotlyDivGraph extends CoreElement {
     }
   }
 
+  Selection currentSelection = null;
+
   void _plotlyClick(DataEvent data) {
     final int xPosition = data.points[0].x;
-    if (_frames.containsKey(xPosition)) {
-      final TimelineFrame timelineFrame = _frames[xPosition];
-      framesBarChart.setSelected(timelineFrame);
+
+    final List<int> pointNumbers = [];
+    final List<int> xValues = [];
+    final List<num> yValues = [];
+    final List<int> traces = [];
+
+    for (Point pt in data.points) {
+      // Don't allow selecting an already selected bar.
+      if (pt.curveNumber != FramesBarPlotly.gpuSelectTraceIndex &&
+          pt.curveNumber != FramesBarPlotly.cpuSelectTraceIndex) {
+        pointNumbers.add(pt.pointNumber);
+        traces.add(pt.curveNumber);
+        xValues.add(pt.x);
+        yValues.add(pt.y);
+      }
+    }
+
+    // Create selection once.
+    currentSelection ??= Selection(frameGraph, element);
+
+    // If this bar isn't currently selected then select the bar clicked.
+    if (xValues.length == 2 &&
+        !currentSelection.isSelected(xValues)) {
+      currentSelection.select(pointNumbers, traces, xValues, yValues);
+
+      if (_frames.containsKey(xPosition)) {
+        final TimelineFrame timelineFrame = _frames[xPosition];
+        framesBarChart.setSelected(timelineFrame);
+      }
+    } else {
+      _plotlyHover(data);
     }
   }
 
   void _plotlyHover(DataEvent data) {
     final List<HoverFX> hoverDisplay = [];
+
+    // Hovering over a selected bar?
+    bool selectionTrace = false;
 
     for (Point pt in data.points) {
       final int ptNumber = pt.pointNumber;
@@ -114,8 +147,25 @@ class PlotlyDivGraph extends CoreElement {
       // Only display the hover if its not the first data point for each trace
       // (curveNumber). Works around first bar in a trace color not rendered.
       if (x != FramesBarPlotly.xCoordNotUsed) {
+        selectionTrace |=
+            (pt.curveNumber == FramesBarPlotly.gpuSelectTraceIndex) ||
+                (pt.curveNumber == FramesBarPlotly.cpuSelectTraceIndex);
         hoverDisplay.add(
             HoverFX(curveNumber: pt.curveNumber, pointNumber: pt.pointNumber));
+      }
+    }
+
+    if (selectionTrace) {
+      // Hide the hover of the gpu good/jank & cpu good/jank trace of the
+      // selected bar.
+      for (var fx in hoverDisplay) {
+        final int traceIndex = fx.curveNumber;
+        if (traceIndex == FramesBarPlotly.gpuGoodTraceIndex ||
+            traceIndex == FramesBarPlotly.gpuJankTraceIndex ||
+            traceIndex == FramesBarPlotly.cpuGoodTraceIndex ||
+            traceIndex == FramesBarPlotly.cpuJankTraceIndex) {
+          hoverDisplay.remove(fx);
+        }
       }
     }
 
