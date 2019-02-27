@@ -729,7 +729,7 @@ html [full] {
 }
 
 #messages-container div+div {
-    margin-top: 0.25em;
+    margin-top: 1em;
 }
 
 .action-button {
