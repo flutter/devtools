@@ -728,6 +728,12 @@ html [full] {
     overflow: hidden;
 }
 
+.flash div {
+    max-width: 70em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #messages-container div+div {
     margin-top: 1em;
 }
