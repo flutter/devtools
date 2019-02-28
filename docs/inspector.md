@@ -47,7 +47,7 @@ Part of the functionality of the Flutter inspector is based on instrumenting the
 application code in order to better understand the source locations where widgets are
 created. The source instrumentation allows the Flutter inspector to present the widget
 tree in a manner similar to how the UI was defined in your source code. Without it,
-the tree of nodes in the widget tree is much deeper, and it can be more difficult to
+the tree of nodes in the widget tree are much deeper, and it can be more difficult to
 understand how the runtime widget hierarchy corresponds to your application's UI.
 
 When an application is launched from IDEs, the source instrumentation happens
