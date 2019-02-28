@@ -22,6 +22,10 @@ This chart is populated with individual frames as they are rendered in your appl
 represents a frame. The bars are color-coded to highlight the different portions of work that occur when rendering a
 Flutter frame: work from the CPU thread and work from the GPU thread.
 
+<img src="images/timeline_frame_rendering_chart.png" width="800" />
+
+Clicking a bar will display additional details about the frame.
+
 ### CPU
 
 The CPU thread (or UI thread) executes Dart code in the Dart VM. This includes code from your application as well as the
@@ -35,10 +39,6 @@ The GPU thread executes graphics code from the Flutter Engine. This thread takes
 talking to the GPU (graphic processing unit). You cannot directly access the GPU thread or its data, but if this thread
 is slow, it’s a result of something you’ve done in the Dart code. Skia, the graphics library, runs on this thread, which
 is sometimes called the rasterizer thread.
-
-<img src="images/timeline_frame_rendering_chart.png" width="800" />
-
-Clicking a bar will display additional details about the frame.
 
 ### Jank
 
