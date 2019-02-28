@@ -25,6 +25,12 @@ class FramesBarPlotly {
   // Compute total number of traces in graph.
   static const int numberOfTraces = cpuSelectTraceIndex + 1;
 
+  // Any point in our frame chart is in only two traces.  The gpu duration will
+  // be in either gpu good or gpu jank trace.  The cpu duration will be in
+  // either cpu good or cpu jank trace.  The only exception is a select bar that
+  // will be in gpu selection and cpu selection traces.
+  static const int activeTracesPerX = 2;
+
   // Careful if changing this to something other than -1 because of
   // rangemode: nonnegative
   static const int xCoordNotUsed = -1;
@@ -87,107 +93,113 @@ class FramesBarPlotly {
 
     // trace GPU Good
     allTraces.insert(
-        gpuGoodTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          type: 'bar',
-          legendgroup: 'good_group',
-          name: 'GPU',
-          hoverinfo: 'y+name',
-          marker: Marker(
-            color: colorToCss(mainGpuColor),
-          ),
-          width: [0],
-        ));
+      gpuGoodTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        type: 'bar',
+        legendgroup: 'good_group',
+        name: 'GPU',
+        hoverinfo: 'y+name',
+        marker: Marker(
+          color: colorToCss(mainGpuColor),
+        ),
+        width: [0],
+      ),
+    );
 
     // trace GPU Jank
     allTraces.insert(
-        gpuJankTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          type: 'bar',
-          legendgroup: 'jank_group',
-          name: 'GPU Jank',
-          hoverinfo: 'y+name',
-          hoverlabel: HoverLabel(
-            // TODO(terry): font color needs be be a ThemedColor.
-            font: Font(color: 'black'),
-            bordercolor: colorToCss(hoverJankColor),
-          ),
-          marker: Marker(
-            color: colorToCss(gpuJankColor),
-          ),
-          width: [0],
-        ));
+      gpuJankTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        type: 'bar',
+        legendgroup: 'jank_group',
+        name: 'GPU Jank',
+        hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          // TODO(terry): font color needs be be a ThemedColor.
+          font: Font(color: 'black'),
+          bordercolor: colorToCss(hoverJankColor),
+        ),
+        marker: Marker(
+          color: colorToCss(gpuJankColor),
+        ),
+        width: [0],
+      ),
+    );
 
-    // trace GPU Seleect
+    // trace GPU Select
     allTraces.insert(
-        gpuSelectTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          hoverinfo: 'y+name',
-          showlegend: false,
-          type: 'bar',
-          marker: Marker(
-            color: 'blue', // TODO(terry): Handle ThemedColor dart mode.
-          ),
-        ));
+      gpuSelectTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        hoverinfo: 'y+name',
+        showlegend: false,
+        type: 'bar',
+        marker: Marker(
+          color: 'blue', // TODO(terry): Handle ThemedColor dart mode.
+        ),
+      ),
+    );
 
     // trace CPU Good
     allTraces.insert(
-        cpuGoodTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          type: 'bar',
-          legendgroup: 'good_group',
-          name: 'CPU',
-          hoverinfo: 'y+name',
-          marker: Marker(
-            color: colorToCss(mainCpuColor),
-          ),
-          width: [0],
-        ));
+      cpuGoodTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        type: 'bar',
+        legendgroup: 'good_group',
+        name: 'CPU',
+        hoverinfo: 'y+name',
+        marker: Marker(
+          color: colorToCss(mainCpuColor),
+        ),
+        width: [0],
+      ),
+    );
 
     // trace CPU Jank
     allTraces.insert(
-        cpuJankTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          type: 'bar',
-          legendgroup: 'jank_group',
-          name: 'CPU Jank',
-          hoverinfo: 'y+name',
-          hoverlabel: HoverLabel(
-            font: Font(
-              // TODO(terry): font color needs be be a ThemedColor.
-              color: 'white',
-            ),
-            bordercolor: colorToCss(hoverJankColor),
+      cpuJankTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        type: 'bar',
+        legendgroup: 'jank_group',
+        name: 'CPU Jank',
+        hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          font: Font(
+            // TODO(terry): font color needs be be a ThemedColor.
+            color: 'white',
           ),
-          marker: Marker(
-            color: colorToCss(cpuJankColor),
-          ),
-          width: [0],
-        ));
+          bordercolor: colorToCss(hoverJankColor),
+        ),
+        marker: Marker(
+          color: colorToCss(cpuJankColor),
+        ),
+        width: [0],
+      ),
+    );
 
-    // trace CPU Seleect
+    // trace CPU Select
     allTraces.insert(
-        cpuSelectTraceIndex,
-        Data(
-          y: [yCoordNotUsed],
-          x: [xCoordNotUsed],
-          hoverinfo: 'y+name',
-          showlegend: false,
-          type: 'bar',
-          marker: Marker(
-            color: 'darkblue', // TODO(terry): Handle ThemedColor dart mode.
-          ),
-        ));
+      cpuSelectTraceIndex,
+      Data(
+        y: [yCoordNotUsed],
+        x: [xCoordNotUsed],
+        hoverinfo: 'y+name',
+        showlegend: false,
+        type: 'bar',
+        marker: Marker(
+          color: 'darkblue', // TODO(terry): Handle ThemedColor dart mode.
+        ),
+      ),
+    );
 
     assert(allTraces.length == numberOfTraces);
 
@@ -196,14 +208,15 @@ class FramesBarPlotly {
 
   void plotFPS() {
     Plotly.newPlot(
-        _domName,
-        createFPSTraces(),
-        getFPSTimeseriesLayout(),
-        Configuration(
-          responsive: true,
-          displaylogo: false,
-          displayModeBar: false,
-        ));
+      _domName,
+      createFPSTraces(),
+      getFPSTimeseriesLayout(),
+      Configuration(
+        responsive: true,
+        displaylogo: false,
+        displayModeBar: false,
+      ),
+    );
   }
 
   void plotFPSDatum(
@@ -359,7 +372,12 @@ class FramesBarPlotly {
 }
 
 class SelectTrace {
-  SelectTrace(this.traceIndex, this.ptNumber, this.xValue, this.yValue);
+  SelectTrace(
+    this.traceIndex,
+    this.ptNumber,
+    this.xValue,
+    this.yValue,
+  );
 
   final int traceIndex;
   int ptNumber;
@@ -368,15 +386,17 @@ class SelectTrace {
 }
 
 class Selection {
-  Selection(this._domName, dynamic graphDiv)
-      : _data = getProperty(graphDiv, 'data');
+  Selection(
+    this._domName,
+    dynamic graphDiv,
+  ) : _data = getProperty(graphDiv, 'data');
 
   final String _domName;
   final List<Data> _data;
   List<SelectTrace> selectInfo = [];
 
   bool isSelected(List<SelectTrace> newSelection) =>
-      selectInfo.length == 2 &&
+      selectInfo.length == FramesBarPlotly.activeTracesPerX &&
       selectInfo[0].xValue == newSelection[0].xValue &&
       selectInfo[1].xValue == newSelection[1].xValue;
 
@@ -385,7 +405,7 @@ class Selection {
 
   void select(List<SelectTrace> newSelection) {
     // Supports one bar selection and not selecting a currently selected bar.
-    assert(newSelection.length == 2 &&
+    assert(newSelection.length == FramesBarPlotly.activeTracesPerX &&
         newSelection[0].traceIndex != FramesBarPlotly.gpuSelectTraceIndex &&
         newSelection[1].traceIndex != FramesBarPlotly.cpuSelectTraceIndex);
 
@@ -442,15 +462,27 @@ class Selection {
 
     // Construct the hover names for each selection trace.
     final String gpuSelectionHoverName =
-        selectInfo[0].traceIndex == FramesBarPlotly.gpuGoodTraceIndex ? 'GPU' : 'GPU Jank';
+        selectInfo[0].traceIndex == FramesBarPlotly.gpuGoodTraceIndex
+            ? 'GPU'
+            : 'GPU Jank';
     final String cpuSelectionHoverName =
-    selectInfo[1].traceIndex == FramesBarPlotly.cpuGoodTraceIndex ? 'CPU' : 'CPU Jank';
+        selectInfo[1].traceIndex == FramesBarPlotly.cpuGoodTraceIndex
+            ? 'CPU'
+            : 'CPU Jank';
 
     // Update the hovers for the selection traces.
-    Plotly.restyle(_domName, 'name', [gpuSelectionHoverName],
-        [FramesBarPlotly.gpuSelectTraceIndex]);
-    Plotly.restyle(_domName, 'name', [cpuSelectionHoverName],
-        [FramesBarPlotly.cpuSelectTraceIndex]);
+    Plotly.restyle(
+      _domName,
+      'name',
+      [gpuSelectionHoverName],
+      [FramesBarPlotly.gpuSelectTraceIndex],
+    );
+    Plotly.restyle(
+      _domName,
+      'name',
+      [cpuSelectionHoverName],
+      [FramesBarPlotly.cpuSelectTraceIndex],
+    );
   }
 
   /// Unselect the current bar in the selection traces. Then restore the data
