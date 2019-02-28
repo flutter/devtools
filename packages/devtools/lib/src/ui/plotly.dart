@@ -48,6 +48,16 @@ external void myExtendTraces(
 );
 
 @JS()
+external void selectionExtendTraces(
+  String domName,
+  List x0,
+  List x1,
+  List y0,
+  List y1,
+  List traces,
+);
+
+@JS()
 class Plotly {
   external static void newPlot(
     String domName,

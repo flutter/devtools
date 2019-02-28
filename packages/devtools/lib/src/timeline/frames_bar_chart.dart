@@ -97,11 +97,41 @@ class PlotlyDivGraph extends CoreElement {
     }
   }
 
+  Selection currentSelection;
+
   void _plotlyClick(DataEvent data) {
     final int xPosition = data.points[0].x;
-    if (_frames.containsKey(xPosition)) {
-      final TimelineFrame timelineFrame = _frames[xPosition];
-      framesBarChart.setSelected(timelineFrame);
+
+    final List<SelectTrace> newSelection = [];
+
+    for (Point pt in data.points) {
+      if (pt.curveNumber != FramesBarPlotly.gpuSelectTraceIndex &&
+          pt.curveNumber != FramesBarPlotly.cpuSelectTraceIndex) {
+        newSelection.add(SelectTrace(
+          pt.curveNumber,
+          pt.pointNumber,
+          pt.x,
+          pt.y,
+        ));
+      }
+    }
+
+    // Create selection once.
+    currentSelection ??= Selection(frameGraph, element);
+
+    // Don't allow selecting an already selected bar.  If this bar isn't
+    // currently selected then select the bar clicked.  Also, newSelection
+    // should always have 2 entries a point in the frames bar chart always
+    // exist in 2 traces a gpu duration is either in the good/junk trace and the
+    // same is true for cpu too.
+    if (newSelection.length == FramesBarPlotly.activeTracesPerX &&
+        !currentSelection.isSelected(newSelection)) {
+      currentSelection.select(newSelection);
+
+      if (_frames.containsKey(xPosition)) {
+        final TimelineFrame timelineFrame = _frames[xPosition];
+        framesBarChart.setSelected(timelineFrame);
+      }
     }
   }
 
