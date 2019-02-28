@@ -102,19 +102,14 @@ class PlotlyDivGraph extends CoreElement {
   void _plotlyClick(DataEvent data) {
     final int xPosition = data.points[0].x;
 
-    final List<int> pointNumbers = [];
-    final List<int> xValues = [];
-    final List<num> yValues = [];
-    final List<int> traces = [];
+    List<SelectTrace> newSelection = [];
 
     for (Point pt in data.points) {
       // Don't allow selecting an already selected bar.
       if (pt.curveNumber != FramesBarPlotly.gpuSelectTraceIndex &&
           pt.curveNumber != FramesBarPlotly.cpuSelectTraceIndex) {
-        pointNumbers.add(pt.pointNumber);
-        traces.add(pt.curveNumber);
-        xValues.add(pt.x);
-        yValues.add(pt.y);
+        newSelection
+            .add(SelectTrace(pt.curveNumber, pt.pointNumber, pt.x, pt.y));
       }
     }
 
@@ -122,16 +117,14 @@ class PlotlyDivGraph extends CoreElement {
     currentSelection ??= Selection(frameGraph, element);
 
     // If this bar isn't currently selected then select the bar clicked.
-    if (xValues.length == 2 &&
-        !currentSelection.isSelected(xValues)) {
-      currentSelection.select(pointNumbers, traces, xValues, yValues);
+    if (newSelection.length == 2 &&
+        !currentSelection.isSelected(newSelection)) {
+      currentSelection.select(newSelection);
 
       if (_frames.containsKey(xPosition)) {
         final TimelineFrame timelineFrame = _frames[xPosition];
         framesBarChart.setSelected(timelineFrame);
       }
-    } else {
-      _plotlyHover(data);
     }
   }
 

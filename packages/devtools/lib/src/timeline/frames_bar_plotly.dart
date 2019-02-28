@@ -86,96 +86,108 @@ class FramesBarPlotly {
     // displays at 0 and greater) and y is zero.
 
     // trace GPU Good
-    allTraces.insert(gpuGoodTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      type: 'bar',
-      legendgroup: 'good_group',
-      name: 'GPU',
-      hoverinfo: 'y+name',
-      marker: Marker(
-        color: colorToCss(mainGpuColor),
-      ),
-      width: [0],
-    ));
+    allTraces.insert(
+        gpuGoodTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          type: 'bar',
+          legendgroup: 'good_group',
+          name: 'GPU',
+          hoverinfo: 'y+name',
+          marker: Marker(
+            color: colorToCss(mainGpuColor),
+          ),
+          width: [0],
+        ));
 
     // trace GPU Jank
-    allTraces.insert(gpuJankTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      type: 'bar',
-      legendgroup: 'jank_group',
-      name: 'GPU Jank',
-      hoverinfo: 'y+name',
-      hoverlabel: HoverLabel(
-        // TODO(terry): font color needs be be a ThemedColor.
-        font: Font(color: 'black'),
-        bordercolor: colorToCss(hoverJankColor),
-      ),
-      marker: Marker(
-        color: colorToCss(gpuJankColor),
-      ),
-      width: [0],
-    ));
+    allTraces.insert(
+        gpuJankTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          type: 'bar',
+          legendgroup: 'jank_group',
+          name: 'GPU Jank',
+          hoverinfo: 'y+name',
+          hoverlabel: HoverLabel(
+            // TODO(terry): font color needs be be a ThemedColor.
+            font: Font(color: 'black'),
+            bordercolor: colorToCss(hoverJankColor),
+          ),
+          marker: Marker(
+            color: colorToCss(gpuJankColor),
+          ),
+          width: [0],
+        ));
 
     // trace GPU Seleect
-    allTraces.insert(gpuSelectTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      hoverinfo: 'y+name',
-      showlegend: false,
-      type: 'bar',
-      marker: Marker(
-        color: 'blue', // TODO(terry): Handle ThemedColor dart mode.
-      ),
-    ));
+    allTraces.insert(
+        gpuSelectTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          hoverinfo: 'y+name',
+          showlegend: false,
+          type: 'bar',
+          marker: Marker(
+            color: 'blue', // TODO(terry): Handle ThemedColor dart mode.
+          ),
+        ));
 
     // trace CPU Good
-    allTraces.insert(cpuGoodTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      type: 'bar',
-      legendgroup: 'good_group',
-      name: 'CPU',
-      hoverinfo: 'y+name',
-      marker: Marker(
-        color: colorToCss(mainCpuColor),
-      ),
-      width: [0],
-    ));
+    allTraces.insert(
+        cpuGoodTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          type: 'bar',
+          legendgroup: 'good_group',
+          name: 'CPU',
+          hoverinfo: 'y+name',
+          marker: Marker(
+            color: colorToCss(mainCpuColor),
+          ),
+          width: [0],
+        ));
 
     // trace CPU Jank
-    allTraces.insert(cpuJankTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      type: 'bar',
-      legendgroup: 'jank_group',
-      name: 'CPU Jank',
-      hoverinfo: 'y+name',
-      hoverlabel: HoverLabel(
-        font: Font(
-          // TODO(terry): font color needs be be a ThemedColor.
-          color: 'white',
-        ),
-        bordercolor: colorToCss(hoverJankColor),
-      ),
-      marker: Marker(
-        color: colorToCss(cpuJankColor),
-      ),
-      width: [0],
-    ));
+    allTraces.insert(
+        cpuJankTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          type: 'bar',
+          legendgroup: 'jank_group',
+          name: 'CPU Jank',
+          hoverinfo: 'y+name',
+          hoverlabel: HoverLabel(
+            font: Font(
+              // TODO(terry): font color needs be be a ThemedColor.
+              color: 'white',
+            ),
+            bordercolor: colorToCss(hoverJankColor),
+          ),
+          marker: Marker(
+            color: colorToCss(cpuJankColor),
+          ),
+          width: [0],
+        ));
 
     // trace CPU Seleect
-    allTraces.insert(cpuSelectTraceIndex, Data(
-      y: [yCoordNotUsed],
-      x: [xCoordNotUsed],
-      hoverinfo: 'y+name',
-      showlegend: false,
-      type: 'bar',
-      marker: Marker(
-        color: 'darkblue', // TODO(terry): Handle ThemedColor dart mode.
-      ),
-    ));
+    allTraces.insert(
+        cpuSelectTraceIndex,
+        Data(
+          y: [yCoordNotUsed],
+          x: [xCoordNotUsed],
+          hoverinfo: 'y+name',
+          showlegend: false,
+          type: 'bar',
+          marker: Marker(
+            color: 'darkblue', // TODO(terry): Handle ThemedColor dart mode.
+          ),
+        ));
 
     assert(allTraces.length == numberOfTraces);
 
@@ -350,7 +362,7 @@ class SelectTrace {
   SelectTrace(this.traceIndex, this.ptNumber, this.xValue, this.yValue);
 
   final int traceIndex;
-  final int ptNumber;
+  int ptNumber;
   final int xValue;
   final num yValue;
 }
@@ -363,20 +375,19 @@ class Selection {
   final List<Data> _data;
   List<SelectTrace> selectInfo = [];
 
-  bool isSelected(List<int> xValues) =>
+  bool isSelected(List<SelectTrace> newSelection) =>
       selectInfo.length == 2 &&
-      selectInfo[0].xValue == xValues[0] &&
-      selectInfo[1].xValue == xValues[1];
+      selectInfo[0].xValue == newSelection[0].xValue &&
+      selectInfo[1].xValue == newSelection[1].xValue;
 
   int get selectedPointNumber =>
       selectInfo.isNotEmpty ? selectInfo[0].ptNumber : -1;
 
-  void select(List<int> pointNumbers, List<int> traces, List<int> xValues,
-      List<num> yValues) {
+  void select(List<SelectTrace> newSelection) {
     // Supports one bar selection and not selecting a currently selected bar.
-    assert(traces.length == 2 &&
-        traces[0] != FramesBarPlotly.gpuSelectTraceIndex &&
-        traces[1] != FramesBarPlotly.cpuSelectTraceIndex);
+    assert(newSelection.length == 2 &&
+        newSelection[0].traceIndex != FramesBarPlotly.gpuSelectTraceIndex &&
+        newSelection[1].traceIndex != FramesBarPlotly.cpuSelectTraceIndex);
 
     List<SelectTrace> oldSelectInfo = unselect();
 
@@ -389,41 +400,41 @@ class Selection {
       int oldTrace1 = oldSelectInfo[1].traceIndex;
       int oldPtNum1 = oldSelectInfo[1].ptNumber;
 
+      int newTrace0 = newSelection[0].traceIndex;
+      int newPtNum0 = newSelection[0].ptNumber;
+      int newTrace1 = newSelection[1].traceIndex;
+      int newPtNum1 = newSelection[1].ptNumber;
+
       // After unselecting we're selecting a point to the right of our
       // old selection in a particular trace so we need to adjust to take into
       // the old data we just restored in a trace. (Check both traces).
-      if (oldTrace0 == traces[0] && pointNumbers[0] >= oldPtNum0) {
-        pointNumbers[0] += 1;
+      if (oldTrace0 == newTrace0 && newPtNum0 >= oldPtNum0) {
+        newSelection[0].ptNumber += 1;
       }
-      if (oldTrace1 == traces[1] && pointNumbers[1] >= oldPtNum1) {
-        pointNumbers[1] += 1;
+      if (oldTrace1 == newTrace1 && newPtNum1 >= oldPtNum1) {
+        newSelection[1].ptNumber += 1;
       }
     }
 
-    // Construct our new selection info.
-    int index = 0;
-    for (var trace in traces) {
-      selectInfo.add(SelectTrace(
-          trace, pointNumbers[index], xValues[index], yValues[index]));
-      index++;
-    }
+    // This is our new current selection.
+    selectInfo = newSelection;
 
     // Make room for our selection bar remove the data we're selecting it will
     // exist in the selection traces.
-    _data[traces[0]].x.removeAt(pointNumbers[0]);
-    _data[traces[0]].y.removeAt(pointNumbers[0]);
-    _data[traces[1]].x.removeAt(pointNumbers[1]);
-    _data[traces[1]].y.removeAt(pointNumbers[1]);
+    for (var selectTrace in selectInfo) {
+      _data[selectTrace.traceIndex].x.removeAt(selectTrace.ptNumber);
+      _data[selectTrace.traceIndex].y.removeAt(selectTrace.ptNumber);
+    }
 
     // Move the data to the selection traces.
     selectionExtendTraces(_domName, [
-      xValues[0],
+      selectInfo[0].xValue,
     ], [
-      xValues[1],
+      selectInfo[1].xValue,
     ], [
-      yValues[0],
+      selectInfo[0].yValue,
     ], [
-      yValues[1],
+      selectInfo[1].yValue,
     ], [
       FramesBarPlotly.gpuSelectTraceIndex,
       FramesBarPlotly.cpuSelectTraceIndex,
@@ -431,9 +442,9 @@ class Selection {
 
     // Construct the hover names for each selection trace.
     final String gpuSelectionHoverName =
-        traces[0] == FramesBarPlotly.gpuGoodTraceIndex ? 'GPU' : 'GPU Jank';
+        selectInfo[0].traceIndex == FramesBarPlotly.gpuGoodTraceIndex ? 'GPU' : 'GPU Jank';
     final String cpuSelectionHoverName =
-        traces[1] == FramesBarPlotly.cpuGoodTraceIndex ? 'CPU' : 'CPU Jank';
+    selectInfo[1].traceIndex == FramesBarPlotly.cpuGoodTraceIndex ? 'CPU' : 'CPU Jank';
 
     // Update the hovers for the selection traces.
     Plotly.restyle(_domName, 'name', [gpuSelectionHoverName],
