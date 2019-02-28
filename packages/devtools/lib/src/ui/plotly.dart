@@ -264,6 +264,13 @@ class AxisLayout {
     bool showgrid,
     bool showticklabels,
     Font tickfont,
+    int nticks,
+    String tickmode,
+    List<int> tickvals,
+    List<int> ticktext,
+    String exponentformat,
+    String showticksuffix,
+    String hoverformat,
   });
 
   external String get tickformat;
@@ -279,6 +286,13 @@ class AxisLayout {
   external bool get showgrid;
   external bool get showticklabels;
   external Font get tickfont;
+  external int get nticks;
+  external String get tickmode;
+  external List<int> get tickvals;
+  external List<int> get ticktext;
+  external String get exponentformat;
+  external String get showticksuffix;
+  external String get hoverformat;
 }
 
 @JS()
