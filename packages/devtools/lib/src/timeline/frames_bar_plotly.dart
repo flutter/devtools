@@ -140,7 +140,8 @@ class FramesBarPlotly {
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(selectedGpuColor), // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(
+              selectedGpuColor), // TODO(terry): Handle ThemedColor dart mode.
         ),
       ),
     );
@@ -196,7 +197,8 @@ class FramesBarPlotly {
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(selectedCpuColor), // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(
+              selectedCpuColor), // TODO(terry): Handle ThemedColor dart mode.
         ),
       ),
     );
