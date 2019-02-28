@@ -140,7 +140,7 @@ class FramesBarPlotly {
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: 'blue', // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(selectedGpuColor), // TODO(terry): Handle ThemedColor dart mode.
         ),
       ),
     );
@@ -196,7 +196,7 @@ class FramesBarPlotly {
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: 'darkblue', // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(selectedCpuColor), // TODO(terry): Handle ThemedColor dart mode.
         ),
       ),
     );
@@ -409,21 +409,21 @@ class Selection {
         newSelection[0].traceIndex != FramesBarPlotly.gpuSelectTraceIndex &&
         newSelection[1].traceIndex != FramesBarPlotly.cpuSelectTraceIndex);
 
-    List<SelectTrace> oldSelectInfo = unselect();
+    final List<SelectTrace> oldSelectInfo = unselect();
 
     // Maybe adjust our current pointNumbers (plotly term is an array index
     // into data). If we messed with a trace and the old pointNumbers was before
     // our new bar we need to adjust.
     if (oldSelectInfo.isNotEmpty) {
-      int oldTrace0 = oldSelectInfo[0].traceIndex;
-      int oldPtNum0 = oldSelectInfo[0].ptNumber;
-      int oldTrace1 = oldSelectInfo[1].traceIndex;
-      int oldPtNum1 = oldSelectInfo[1].ptNumber;
+      final int oldTrace0 = oldSelectInfo[0].traceIndex;
+      final int oldPtNum0 = oldSelectInfo[0].ptNumber;
+      final int oldTrace1 = oldSelectInfo[1].traceIndex;
+      final int oldPtNum1 = oldSelectInfo[1].ptNumber;
 
-      int newTrace0 = newSelection[0].traceIndex;
-      int newPtNum0 = newSelection[0].ptNumber;
-      int newTrace1 = newSelection[1].traceIndex;
-      int newPtNum1 = newSelection[1].ptNumber;
+      final int newTrace0 = newSelection[0].traceIndex;
+      final int newPtNum0 = newSelection[0].ptNumber;
+      final int newTrace1 = newSelection[1].traceIndex;
+      final int newPtNum1 = newSelection[1].ptNumber;
 
       // After unselecting, the old selection data is restored back to our
       // traces (gpu good/jank and cpu good/jank) from the selection traces.
@@ -510,7 +510,7 @@ class Selection {
       _data[FramesBarPlotly.cpuSelectTraceIndex].x.removeAt(1);
       _data[FramesBarPlotly.cpuSelectTraceIndex].y.removeAt(1);
 
-      List<SelectTrace> oldSelectInfo = [];
+      final List<SelectTrace> oldSelectInfo = [];
       oldSelectInfo.add(selectInfo[0]);
       oldSelectInfo.add(selectInfo[1]);
 

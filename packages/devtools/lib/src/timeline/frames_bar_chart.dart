@@ -97,12 +97,12 @@ class PlotlyDivGraph extends CoreElement {
     }
   }
 
-  Selection currentSelection = null;
+  Selection currentSelection;
 
   void _plotlyClick(DataEvent data) {
     final int xPosition = data.points[0].x;
 
-    List<SelectTrace> newSelection = [];
+    final List<SelectTrace> newSelection = [];
 
     for (Point pt in data.points) {
       if (pt.curveNumber != FramesBarPlotly.gpuSelectTraceIndex &&
