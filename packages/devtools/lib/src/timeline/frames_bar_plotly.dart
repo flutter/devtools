@@ -425,9 +425,10 @@ class Selection {
       int newTrace1 = newSelection[1].traceIndex;
       int newPtNum1 = newSelection[1].ptNumber;
 
-      // After unselecting we're selecting a point to the right of our
-      // old selection in a particular trace so we need to adjust to take into
-      // the old data we just restored in a trace. (Check both traces).
+      // After unselecting, the old selection data is restored back to our
+      // traces (gpu good/jank and cpu good/jank) from the selection traces.
+      // Adjust the newSelection pointNumbers to point to the new location of
+      // the real data after unselect.
       if (oldTrace0 == newTrace0 && newPtNum0 >= oldPtNum0) {
         newSelection[0].ptNumber += 1;
       }
@@ -497,7 +498,7 @@ class Selection {
         final int xValue = selectTrace.xValue;
         final num yValue = selectTrace.yValue;
 
-        // Restore our data point (selected) back to trace (gpu good/jank &
+        // Restore our data point (selected) back to traces (gpu good/jank &
         // cpu good/jank).
         _data[trace].x.insert(ptNumber, xValue);
         _data[trace].y.insert(ptNumber, yValue);
