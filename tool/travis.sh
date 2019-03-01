@@ -33,6 +33,9 @@ if [ "$BOT" = "main" ]; then
         exit 1
     fi
 
+    # Make sure the app versions are in sync.
+    dart tool/version_check.dart
+
     # Analyze the source.
     pub global activate tuneup && tuneup check
 
