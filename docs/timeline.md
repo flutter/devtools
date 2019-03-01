@@ -47,7 +47,7 @@ workloads are more difficult for the GPU. They may involve unnecessary calls to
 objects, and clips or shadows in specific situations.
 
 More information on profiling the GPU thread can be found at
-flutter.dev](https://flutter.dev/docs/testing/ui-performance#identifying-problems-in-the-gpu-graph).
+[flutter.dev](https://flutter.dev/docs/testing/ui-performance#identifying-problems-in-the-gpu-graph).
 
 ### Jank
 
