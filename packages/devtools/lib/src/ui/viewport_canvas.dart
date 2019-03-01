@@ -5,6 +5,7 @@
 import 'dart:html' hide VoidCallback;
 import 'dart:js';
 
+import 'package:devtools/src/ui/ui_utils.dart';
 import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
@@ -23,22 +24,13 @@ const bool _debugChunks = false;
 
 int _nextChunkId = 0;
 
-num _devicePixelRatio = window.devicePixelRatio;
-
 /// Helper class managing a [chunkSize] x [chunkSize] canvas used to render a
 /// single tile of the [ViewportCanvas].
 class _CanvasChunk {
   _CanvasChunk(_ChunkPosition position)
-      : canvas = CanvasElement(
-            width: chunkSize * _devicePixelRatio,
-            height: chunkSize * _devicePixelRatio) {
-    canvas.style
-      ..position = 'absolute'
-      ..width = '${chunkSize}px'
-      ..height = '${chunkSize}px';
-    _context = canvas.context2D
-      ..scale(_devicePixelRatio, _devicePixelRatio)
-      ..save();
+      : canvas = createHighDpiCanvas(chunkSize, chunkSize) {
+    canvas.style.position = 'absolute';
+    _context = canvas.context2D..save();
     this.position = position;
     _dirty = true;
     if (_debugChunks) {

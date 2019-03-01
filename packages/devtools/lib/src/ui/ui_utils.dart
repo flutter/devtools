@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:html';
 
 import 'package:meta/meta.dart';
 
@@ -13,6 +14,7 @@ import '../service_registrations.dart';
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'elements.dart';
+import 'environment.dart' as environment;
 import 'fake_flutter/dart_ui/dart_ui.dart';
 import 'html_icon_renderer.dart';
 import 'material_icons.dart';
@@ -240,4 +242,34 @@ bool shouldDisableTab(String key) {
 
   final qsParams = Uri.splitQueryString(queryString.substring(1));
   return qsParams['hide']?.split(',')?.contains(key) ?? false;
+}
+
+/// Creates a canvas scaled to match the device's devicePixelRatio.
+///
+/// A default canvas will look pixelated on high devicePixelRatio screens so it
+/// is important to scale the canvas to reflect the devices physical pixels
+/// instead of logical pixels.
+///
+/// There are some complicated edge cases for non-integer devicePixelRatios as
+/// found on Windows 10 so always use this method instead of rolling your own.
+CanvasElement createHighDpiCanvas(int width, int height) {
+  // If the size has to be rounded, we choose to err towards a higher resolution
+  // image instead of a lower resolution one. The cost of a higher resolution
+  // image is generally only slightly higher memory usage while a lower
+  // resolution image could introduce rendering artifacts.
+  final int scaledWidth = (width * environment.devicePixelRatio).ceil();
+  final int scaledHeight = (height * environment.devicePixelRatio).ceil();
+  final canvas = CanvasElement(width: scaledWidth, height: scaledHeight);
+  canvas.style
+    ..width = '${width}px'
+    ..height = '${height}px';
+  final context = canvas.context2D;
+
+  // If there is rounding error as in the case of a non-integer DPI as on some
+  // Windows 10 machines, the ratio between the Canvas's dimensions and its size
+  // won't precisely match environment.devicePixelRatio.
+  // We fix this issue by applying a scale transform to the canvas to reflect
+  // the actual ratio between the canvas size and logical pixels in each axis.
+  context.scale(scaledWidth / width, scaledHeight / height);
+  return canvas;
 }
