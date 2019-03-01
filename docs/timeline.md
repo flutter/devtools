@@ -20,13 +20,34 @@ performance unless your application is run in profile mode.
 
 This chart is populated with individual frames as they are rendered in your application. Each bar in the chart
 represents a frame. The bars are color-coded to highlight the different portions of work that occur when rendering a
-Flutter frame:
-- CPU: Dart code running from your application as well as the the Flutter framework
-- GPU: graphics code running from the Flutter Engine
+Flutter frame: work from the CPU thread and work from the GPU thread.
 
 <img src="images/timeline_frame_rendering_chart.png" width="800" />
 
 Clicking a bar will display additional details about the frame.
+
+### CPU
+
+The CPU thread (or UI thread) executes Dart code in the Dart VM. This includes code from your application as well as the
+Flutter framework. When your app creates and displays a scene, the CPU thread creates a layer tree, a lightweight object
+containing device-agnostic painting commands, and sends the layer tree to the GPU thread to be rendered on the device.
+Do **not** block this thread.
+
+### GPU
+
+The GPU thread executes graphics code from the Flutter Engine. This thread takes the layer tree and displays it by
+talking to the GPU (graphic processing unit). You cannot directly access the GPU thread or its data, but if this thread
+is slow, it’s a result of something you’ve done in the Dart code. Skia, the graphics library, runs on this thread, which
+is sometimes called the rasterizer thread.
+
+Sometimes a scene results in a layer tree that is easy to construct, but expensive to render on the GPU thread. In this
+case, you’ll need to figure out what your code is doing that is causing rendering code to be slow. Specific kinds of
+workloads are more difficult for the GPU. They may involve unnecessary calls to
+[saveLayer](https://docs.flutter.io/flutter/dart-ui/Canvas/saveLayer.html), intersecting opacities with multiple
+objects, and clips or shadows in specific situations.
+
+More information on profiling the GPU thread can be found at
+[flutter.dev](https://flutter.dev/docs/testing/ui-performance#identifying-problems-in-the-gpu-graph).
 
 ### Jank
 
@@ -36,6 +57,9 @@ it takes more than 8 ms to complete.
 To achieve a frame rendering rate of 60 FPS (frames per second), each frame must render in ~16 ms or less. Since there
 are two portions of work for each frame (CPU and GPU), each portion should complete in 8 ms or less. When this target is
 missed, you may experience UI jank or dropped frames.
+
+See [Flutter performance profiling](https://flutter.dev/docs/testing/ui-performance) for more detailed information on
+how to analyze your app's performance.
 
 ## Flame Chart
 
