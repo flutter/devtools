@@ -11,11 +11,13 @@ import 'dart:html';
 import 'package:meta/meta.dart';
 
 import 'elements.dart';
+import 'environment.dart' as environment;
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
 import 'icons.dart';
 import 'material_icons.dart';
 import 'theme.dart';
+import 'ui_utils.dart';
 
 final Expando<HtmlIconRenderer> rendererExpando = Expando('IconRenderer');
 
@@ -63,7 +65,7 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
         super(icon);
 
   static String _maybeRewriteIconUrl(String url) {
-    if (window.devicePixelRatio > 1 &&
+    if (environment.devicePixelRatio > 1 &&
         url.endsWith('.png') &&
         !url.endsWith('@2x.png')) {
       // By convention icons all have high DPI verisons with @2x added to the
@@ -123,17 +125,8 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
 
   @override
   CanvasElement createCanvasSource() {
-    final devicePixelRatio = window.devicePixelRatio;
-    final canvas = CanvasElement(
-      width: iconWidth * devicePixelRatio,
-      height: iconHeight * devicePixelRatio,
-    );
-    canvas.style
-      ..width = '${iconWidth}px'
-      ..height = '${iconHeight}px';
+    final canvas = createHighDpiCanvas(iconWidth, iconHeight);
     final context = canvas.context2D;
-
-    context.scale(devicePixelRatio, devicePixelRatio);
     context.clearRect(0, 0, iconWidth, iconHeight);
 
     // draw a black and gray grid to use as the background to disambiguate
@@ -226,15 +219,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 
   CanvasElement _createCanvas() {
-    final num devicePixelRatio = window.devicePixelRatio;
-    final canvas = CanvasElement(
-      width: iconWidth * devicePixelRatio,
-      height: iconHeight * devicePixelRatio,
-    );
-    canvas.style
-      ..width = '${iconWidth}px'
-      ..height = '${iconHeight}px';
-    return canvas;
+    return createHighDpiCanvas(iconWidth, iconHeight);
   }
 
   CanvasElement _buildImage(CanvasImageSource source) {
@@ -244,13 +229,10 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 
   void _drawIcon(CanvasElement canvas, CanvasImageSource source) {
-    final num devicePixelRatio = window.devicePixelRatio;
-
     // TODO(jacobr): define this color in terms of Color objects.
     const String normalColor = '#231F20';
 
     canvas.context2D
-      ..scale(devicePixelRatio, devicePixelRatio)
       ..drawImageScaled(source, 0, 0, iconWidth, iconHeight)
       ..strokeStyle = normalColor
       // In IntelliJ this was:
@@ -313,12 +295,8 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
 
   @override
   CanvasImageSource createCanvasSource() {
-    final canvas = CanvasElement(
-      width: iconWidth * window.devicePixelRatio,
-      height: iconHeight * window.devicePixelRatio,
-    );
+    final canvas = createHighDpiCanvas(iconWidth, iconHeight);
     final context2D = canvas.context2D
-      ..scale(window.devicePixelRatio, window.devicePixelRatio)
       ..translate(iconWidth / 2, iconHeight / 2);
     if (icon.angle != 0) {
       context2D.rotate(icon.angle);
