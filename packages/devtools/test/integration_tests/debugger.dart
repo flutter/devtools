@@ -327,26 +327,26 @@ class DebuggingManager {
   Future<String> getLocation() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getLocation');
-    return response.result;
+    return response.result as String;
   }
 
   Future<List<String>> getVariables() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getVariables');
-    final List<dynamic> result = response.result;
+    final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<String> getState() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getState');
-    return response.result;
+    return response.result as String;
   }
 
   Future<String> getConsoleContents() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getConsoleContents');
-    return response.result;
+    return response.result as String;
   }
 
   Future<void> clearBreakpoints() async {
@@ -364,28 +364,27 @@ class DebuggingManager {
   Future<List<String>> getBreakpoints() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getBreakpoints');
-    final List<dynamic> result = response.result;
+    final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<List<String>> getScripts() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getScripts');
-    final List<dynamic> result = response.result;
+    final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<bool> supportsScripts() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.supportsScripts');
-    final bool result = response.result;
-    return result;
+    return response.result as bool;
   }
 
   Future<List<String>> getCallStackFrames() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getCallStackFrames');
-    final List<dynamic> result = response.result;
+    final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 }
