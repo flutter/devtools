@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'dart:html';
 
 import 'package:meta/meta.dart';
 
@@ -252,14 +251,14 @@ bool shouldDisableTab(String key) {
 ///
 /// There are some complicated edge cases for non-integer devicePixelRatios as
 /// found on Windows 10 so always use this method instead of rolling your own.
-CanvasElement createHighDpiCanvas(int width, int height) {
+html.CanvasElement createHighDpiCanvas(int width, int height) {
   // If the size has to be rounded, we choose to err towards a higher resolution
   // image instead of a lower resolution one. The cost of a higher resolution
   // image is generally only slightly higher memory usage while a lower
   // resolution image could introduce rendering artifacts.
   final int scaledWidth = (width * environment.devicePixelRatio).ceil();
   final int scaledHeight = (height * environment.devicePixelRatio).ceil();
-  final canvas = CanvasElement(width: scaledWidth, height: scaledHeight);
+  final canvas = html.CanvasElement(width: scaledWidth, height: scaledHeight);
   canvas.style
     ..width = '${width}px'
     ..height = '${height}px';

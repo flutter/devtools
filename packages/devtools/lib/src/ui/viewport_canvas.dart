@@ -5,12 +5,12 @@
 import 'dart:html' hide VoidCallback;
 import 'dart:js';
 
-import 'package:devtools/src/ui/ui_utils.dart';
 import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
 import 'elements.dart';
 import 'fake_flutter/fake_flutter.dart';
+import 'ui_utils.dart';
 
 // Generally, chunkSize should be a power of 2 for more efficient GPU handling
 // of canvases.
