@@ -40,6 +40,15 @@ talking to the GPU (graphic processing unit). You cannot directly access the GPU
 is slow, it’s a result of something you’ve done in the Dart code. Skia, the graphics library, runs on this thread, which
 is sometimes called the rasterizer thread.
 
+Sometimes a scene results in a layer tree that is easy to construct, but expensive to render on the GPU thread. In this
+case, you’ll need to figure out what your code is doing that is causing rendering code to be slow. Specific kinds of
+workloads are more difficult for the GPU. They may involve unnecessary calls to
+[saveLayer](https://docs.flutter.io/flutter/dart-ui/Canvas/saveLayer.html), intersecting opacities with multiple
+objects, and clips or shadows in specific situations.
+
+More information on profiling the GPU thread can be found at
+flutter.dev](https://flutter.dev/docs/testing/ui-performance#identifying-problems-in-the-gpu-graph).
+
 ### Jank
 
 The frame rendering chart shows CPU and GPU jank in shades of red. We consider a portion of the frame to be janky when
