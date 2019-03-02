@@ -57,13 +57,23 @@ String printMb(num bytes, [int fractionDigits = 1]) {
   return (bytes / (1024 * 1024)).toStringAsFixed(fractionDigits);
 }
 
-String microsAsMsText(num micros,
-    {bool includeUnit = true, int fractionDigits = 1}) {
-  return msAsText(micros / 1000, includeUnit: includeUnit);
+String microsAsMsText(
+  num micros, {
+  bool includeUnit = true,
+  int fractionDigits = 1,
+}) {
+  return msAsText(
+    micros / 1000,
+    includeUnit: includeUnit,
+    fractionDigits: fractionDigits,
+  );
 }
 
-String msAsText(num milliseconds,
-    {bool includeUnit = true, int fractionDigits = 1}) {
+String msAsText(
+  num milliseconds, {
+  bool includeUnit = true,
+  int fractionDigits = 1,
+}) {
   return '${milliseconds.toStringAsFixed(fractionDigits)}'
       '${includeUnit ? ' ms' : ''}';
 }
