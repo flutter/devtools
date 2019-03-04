@@ -21,6 +21,7 @@ echo "which dart: " `which dart`
 
 # Provision our packages.
 pub get
+pub global activate webdev
 
 if [ "$BOT" = "main" ]; then
 
