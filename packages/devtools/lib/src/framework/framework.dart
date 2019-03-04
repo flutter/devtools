@@ -499,10 +499,12 @@ class ConnectDialog {
     );
 
     if (connected) {
-      // Re-write the url to include the new port
+      // Re-write the url to include the new port. Keep existing query params.
       final Location location = window.location;
       Uri uri = Uri.parse(location.href);
-      uri = uri.replace(queryParameters: {'port': port.toString()});
+      uri = uri.replace(
+          queryParameters: {'port': port.toString()}
+            ..addAll(uri.queryParameters));
       window.history.pushState(null, null, uri.toString());
 
       // Hide the dialog
