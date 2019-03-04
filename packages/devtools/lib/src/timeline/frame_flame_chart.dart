@@ -242,7 +242,7 @@ class FrameFlameChart extends CoreElement {
     }
 
     void drawTimelineGrid() {
-      _timelineGrid = TimelineGrid(_frame.durationMs, getFlameChartWidth());
+      _timelineGrid = TimelineGrid(_frame.duration, getFlameChartWidth());
       _timelineGrid.element.style.height =
           '${2 * rowHeight + cpuSectionHeight + gpuSectionHeight}px';
       add(_timelineGrid);
@@ -435,7 +435,7 @@ class FlameChartItem {
 }
 
 class TimelineGrid extends CoreElement {
-  TimelineGrid(this._frameDurationMs, this._flameChartWidth)
+  TimelineGrid(this._frameDuration, this._flameChartWidth)
       : super('div', classes: 'flame-chart-grid') {
     flex();
     layoutHorizontal();
@@ -444,7 +444,8 @@ class TimelineGrid extends CoreElement {
 
   static const baseGridInterval = 150;
 
-  final num _frameDurationMs;
+  /// Frame duration in micros.
+  final num _frameDuration;
 
   num _zoomLevel = 1;
 
@@ -457,7 +458,8 @@ class TimelineGrid extends CoreElement {
   void _initializeGrid(num interval) {
     // Draw the first grid item since it will have a different width than the
     // rest.
-    final gridItem = TimelineGridItem(0, flameChartInset, 0);
+    final gridItem =
+        TimelineGridItem(0, flameChartInset, Duration(microseconds: 0));
     _gridItems.add(gridItem);
     add(gridItem);
 
@@ -467,8 +469,9 @@ class TimelineGrid extends CoreElement {
       // TODO(kenzie): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
-      final timestampMs = getTimestampForPosition(left + interval);
-      final gridItem = TimelineGridItem(left, interval, timestampMs);
+      final Duration timestamp =
+          Duration(microseconds: getTimestampForPosition(left + interval));
+      final gridItem = TimelineGridItem(left, interval, timestamp);
 
       _gridItems.add(gridItem);
       add(gridItem);
@@ -477,10 +480,11 @@ class TimelineGrid extends CoreElement {
     }
   }
 
+  /// Returns the timestamp rounded to the nearest microsecond for the
+  /// x-position.
   num getTimestampForPosition(num gridItemEnd) {
-    return (gridItemEnd - flameChartInset) /
-        _flameChartWidth *
-        _frameDurationMs;
+    return ((gridItemEnd - flameChartInset) / _flameChartWidth * _frameDuration)
+        .round();
   }
 
   void updateForZoom(num newZoomLevel, num newFlameChartWidth) {
@@ -525,7 +529,7 @@ class TimelineGrid extends CoreElement {
 /// A single item consists of a line and a timestamp describing the location
 /// in the overall timeline [TimelineGrid].
 class TimelineGridItem extends CoreElement {
-  TimelineGridItem(this.currentLeft, this.currentWidth, this.timestampMs)
+  TimelineGridItem(this.currentLeft, this.currentWidth, this.timestamp)
       : super('div', classes: 'flame-chart-grid-item') {
     _initGridItem();
   }
@@ -533,7 +537,7 @@ class TimelineGridItem extends CoreElement {
   static const gridLineWidth = 1;
   static const timestampPadding = 4;
 
-  final num timestampMs;
+  final Duration timestamp;
   num currentLeft;
   num currentWidth;
 
@@ -551,8 +555,8 @@ class TimelineGridItem extends CoreElement {
     // TODO(kenzie): add more advanced logic for rounding the timestamps. See
     // https://github.com/flutter/devtools/issues/329.
     timestampLabel.text = msText(
-      Duration(microseconds: (timestampMs * 1000).round()),
-      fractionDigits: timestampMs == 0 ? 1 : 3,
+      timestamp,
+      fractionDigits: timestamp.inMicroseconds == 0 ? 1 : 3,
     );
     add(timestampLabel);
 

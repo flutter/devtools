@@ -411,8 +411,6 @@ class TimelineFrame {
   int get duration =>
       endTime != null && startTime != null ? endTime - startTime : null;
 
-  double get durationMs => duration != null ? duration / 1000 : null;
-
   // Timing info for CPU portion of the frame.
   int get cpuStartTime => _cpuEventFlow?.startTime;
 
