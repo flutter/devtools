@@ -459,7 +459,7 @@ class TimelineGrid extends CoreElement {
     // Draw the first grid item since it will have a different width than the
     // rest.
     final gridItem =
-        TimelineGridItem(0, flameChartInset, Duration(microseconds: 0));
+        TimelineGridItem(0, flameChartInset, const Duration(microseconds: 0));
     _gridItems.add(gridItem);
     add(gridItem);
 

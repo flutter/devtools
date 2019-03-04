@@ -22,21 +22,21 @@ void main() {
     });
 
     test('msAsText', () {
-      expect(msText(Duration(microseconds: 3111)), equals('3.1 ms'));
+      expect(msText(const Duration(microseconds: 3111)), equals('3.1 ms'));
       expect(
-        msText(Duration(microseconds: 3199), includeUnit: false),
+        msText(const Duration(microseconds: 3199), includeUnit: false),
         equals('3.2'),
       );
       expect(
-        msText(Duration(microseconds: 3159), fractionDigits: 2),
+        msText(const Duration(microseconds: 3159), fractionDigits: 2),
         equals('3.16 ms'),
       );
       expect(
-        msText(Duration(microseconds: 3111), fractionDigits: 3),
+        msText(const Duration(microseconds: 3111), fractionDigits: 3),
         equals('3.111 ms'),
       );
       expect(
-        msText(Duration(milliseconds: 3)),
+        msText(const Duration(milliseconds: 3)),
         equals('3.0 ms'),
       );
     });
