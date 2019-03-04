@@ -355,13 +355,14 @@ class FlameChartItem {
     this._backgroundColor, {
     bool includeDuration = false,
   }) {
+    final durationText = msText(Duration(microseconds: _event.duration));
     e = Element.div()..className = 'flame-chart-item';
-    e.title = '${event.name} (${microsAsMsText(_event.duration)})';
+    e.title = '${_event.name} ($durationText)';
 
     _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
-    String name = event.name;
+    String name = _event.name;
     if (includeDuration) {
-      name = '$name (${microsAsMsText(event.duration)})';
+      name = '$name ($durationText)';
     }
     _label = Element.span()
       ..text = name
@@ -466,8 +467,8 @@ class TimelineGrid extends CoreElement {
       // TODO(kenzie): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
-      final timestamp = getTimestampForPosition(left + interval);
-      final gridItem = TimelineGridItem(left, interval, timestamp);
+      final timestampMs = getTimestampForPosition(left + interval);
+      final gridItem = TimelineGridItem(left, interval, timestampMs);
 
       _gridItems.add(gridItem);
       add(gridItem);
@@ -524,7 +525,7 @@ class TimelineGrid extends CoreElement {
 /// A single item consists of a line and a timestamp describing the location
 /// in the overall timeline [TimelineGrid].
 class TimelineGridItem extends CoreElement {
-  TimelineGridItem(this.currentLeft, this.currentWidth, this.timestamp)
+  TimelineGridItem(this.currentLeft, this.currentWidth, this.timestampMs)
       : super('div', classes: 'flame-chart-grid-item') {
     _initGridItem();
   }
@@ -532,7 +533,7 @@ class TimelineGridItem extends CoreElement {
   static const gridLineWidth = 1;
   static const timestampPadding = 4;
 
-  final num timestamp;
+  final num timestampMs;
   num currentLeft;
   num currentWidth;
 
@@ -549,8 +550,10 @@ class TimelineGridItem extends CoreElement {
     timestampLabel = div(c: 'timestamp');
     // TODO(kenzie): add more advanced logic for rounding the timestamps. See
     // https://github.com/flutter/devtools/issues/329.
-    timestampLabel.text =
-        msAsText(timestamp, fractionDigits: timestamp == 0 ? 1 : 3);
+    timestampLabel.text = msText(
+      Duration(microseconds: (timestampMs * 1000).round()),
+      fractionDigits: timestampMs == 0 ? 1 : 3,
+    );
     add(timestampLabel);
 
     setPosition(currentLeft, currentWidth);

@@ -22,17 +22,23 @@ void main() {
     });
 
     test('msAsText', () {
-      expect(msAsText(3.111), equals('3.1 ms'));
-      expect(msAsText(3.111, includeUnit: false), equals('3.1'));
-      expect(msAsText(3.111, fractionDigits: 3), equals('3.111 ms'));
-      expect(msAsText(3), equals('3.0 ms'));
-    });
-
-    test('microsAsMsText', () {
-      expect(microsAsMsText(3111), equals('3.1 ms'));
-      expect(microsAsMsText(3111, includeUnit: false), equals('3.1'));
-      expect(microsAsMsText(3111, fractionDigits: 3), equals('3.111 ms'));
-      expect(microsAsMsText(3000), equals('3.0 ms'));
+      expect(msText(Duration(microseconds: 3111)), equals('3.1 ms'));
+      expect(
+        msText(Duration(microseconds: 3199), includeUnit: false),
+        equals('3.2'),
+      );
+      expect(
+        msText(Duration(microseconds: 3159), fractionDigits: 2),
+        equals('3.16 ms'),
+      );
+      expect(
+        msText(Duration(microseconds: 3111), fractionDigits: 3),
+        equals('3.111 ms'),
+      );
+      expect(
+        msText(Duration(milliseconds: 3)),
+        equals('3.0 ms'),
+      );
     });
 
     test('nullSafeMin', () {
