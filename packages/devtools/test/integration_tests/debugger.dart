@@ -40,7 +40,12 @@ void debuggingTests() {
       return;
     }
 
-    // Get the list of scripts.
+    // Allow some time for the scripts view to be populated, as it requires
+    // some isolate events to fire that we have not already waited for.
+    await waitFor(
+      () async => (await debuggingManager.getScripts()).isNotEmpty,
+      timeoutMessage: 'Scripts view was not populated',
+    );
     final List<String> scripts = await debuggingManager.getScripts();
     expect(scripts, isNotEmpty);
     expect(scripts, anyElement(endsWith(appFixture.appScriptPath)));
