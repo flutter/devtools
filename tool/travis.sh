@@ -40,7 +40,7 @@ if [ "$BOT" = "main" ]; then
     pub global activate tuneup && tuneup check
 
     # Ensure we can build the app.
-    pub run webdev build
+    pub run build_runner build
 
 elif [ "$BOT" = "test_ddc" ]; then
 
