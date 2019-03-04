@@ -5,6 +5,7 @@
 @TestOn('browser')
 import 'dart:html';
 
+import 'package:devtools/src/ui/environment.dart' as environment;
 import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/src/ui/viewport_canvas.dart';
 import 'package:test/test.dart';
@@ -17,6 +18,10 @@ Future<void> settleUi() async {
 }
 
 void main() {
+  // Use a floating point device pixel ratio to put more pressure on the canvas
+  // logic to round pixel values correctly.
+  environment.overrideDevicePixelRatio(2.3);
+
   group('virtual canvas logic', () {
     ViewportCanvas viewportCanvas;
     final paintsRequested = <Rect>[];
@@ -214,7 +219,10 @@ void main() {
 
       for (var canvas in canvases) {
         final context = canvas.context2D;
-        expect(canvas.width, equals(chunkSize * window.devicePixelRatio));
+        expect(canvas.width,
+            equals((chunkSize * environment.devicePixelRatio).ceil()));
+        expect(canvas.height,
+            equals((chunkSize * environment.devicePixelRatio).ceil()));
         final imageData =
             context.getImageData(0, 0, canvas.width, canvas.height);
         // Verify outer margin is transparent.

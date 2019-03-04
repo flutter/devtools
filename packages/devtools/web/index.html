@@ -81,9 +81,23 @@
           _copyTrace(x2, y2, orgTraces[2], xData, yData, traces);
           _copyTrace(x3, y3, orgTraces[3], xData, yData, traces);
 
-          data = { x: xData, y: yData};
+          data = {x: xData, y: yData};
 
           Plotly.extendTraces(domName, data, traces);
+        }
+
+        function selectionExtendTraces(domName, x0, x1, y0, y1, orgTraces) {
+            var data = {};
+            var xData = [];
+            var yData = [];
+            var traces = [];
+
+            _copyTrace(x0, y0, orgTraces[0], xData, yData, traces);
+            _copyTrace(x1, y1, orgTraces[1], xData, yData, traces);
+
+            data = {x: xData, y: yData};
+
+            Plotly.extendTraces(domName, data, traces);
         }
     </script>
 

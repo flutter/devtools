@@ -38,6 +38,11 @@ const Color hoverJankColor = Color(0xFFF44336);
 const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedColor = Color(0xFF4078C0);
 
+// Blue A700
+const Color selectedGpuColor = Color(0xFF2962FF);
+// Dark Blue
+const Color selectedCpuColor = Color(0xFF09007E);
+
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
 // TODO(devoncarew): show the list of widgets re-drawn during a frame
