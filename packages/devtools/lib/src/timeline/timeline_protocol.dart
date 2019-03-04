@@ -411,8 +411,6 @@ class TimelineFrame {
   int get duration =>
       endTime != null && startTime != null ? endTime - startTime : null;
 
-  double get durationMs => duration != null ? duration / 1000 : null;
-
   // Timing info for CPU portion of the frame.
   int get cpuStartTime => _cpuEventFlow?.startTime;
 
@@ -449,14 +447,19 @@ class TimelineEvent {
   TimelineEvent(this.name, this.startTime, this.type);
 
   final String name;
-  final int startTime;
+
   final TimelineEventType type;
 
+  /// Event start time in micros.
+  final int startTime;
+
+  /// Event end time in micros.
   int endTime;
 
   TimelineEvent parent;
   List<TimelineEvent> children = <TimelineEvent>[];
 
+  /// Event duration in micros.
   int get duration => (endTime != null) ? endTime - startTime : null;
 
   bool get isCpuEvent => type == TimelineEventType.cpu;
