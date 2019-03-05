@@ -254,10 +254,6 @@ class TimelineData {
   bool _maybeAddEventToFrame(TimelineEvent event, TimelineFrame frame) {
     assert(frame.isWellFormed);
 
-    // TODO(kenzie): consider trimming VSYNC layer from pipelineProduceFlow. It
-    // can start outside of the frame's time boundaries and could pose a risk
-    // for us missing a frame.
-
     // Ensure the event fits within the frame's time boundaries.
     if (!_eventOccursWithinFrameBoundaries(event, frame)) {
       return false;
@@ -287,7 +283,7 @@ class TimelineData {
 
     // Epsilon in microseconds. If more than half of the event fits in bounds,
     // then we consider the event as fitting. If the event has a large duration,
-    // consider it as fitting if it fits within 500 ms of the frame bound.
+    // consider it as fitting if it fits within 500 micros of the frame bound.
     final int epsilon = min(e.duration ~/ 2, 500);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
