@@ -63,8 +63,16 @@ class FramesBarPlotly {
         range: [0, 2],
         nticks: 3,
         tickmode: 'array',
-        tickvals: [1, 10, 100,],
-        ticktext: [1, 10, 100,],
+        tickvals: [
+          1,
+          10,
+          100,
+        ],
+        ticktext: [
+          1,
+          10,
+          100,
+        ],
         hoverformat: '.3f',
       ),
       hovermode: 'x',

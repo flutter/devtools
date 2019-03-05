@@ -225,16 +225,11 @@ class PlotlyDivGraph extends CoreElement {
     //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
     if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
       dataIndexes.add(_frameIndex);
-
-      if (_frameIndex == 50) {
-        cpuDurations.add(frame.cpuDurationMs + 400);
-      } else {
-        cpuDurations.add(frame.cpuDurationMs);
-      }
-//        cpuDurations.add(frame.cpuDurationMs);
+      cpuDurations.add(frame.cpuDurationMs);
       gpuDurations.add(frame.gpuDurationMs);
 
       _frames.addAll({_frameIndex: frame});
+
       _frameIndex++;
     } else {
       // TODO(terry): HACK - Ignore the event.
