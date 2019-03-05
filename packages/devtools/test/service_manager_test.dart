@@ -86,7 +86,10 @@ void main() {
       final extensionName = extensions.debugPaint.extension;
       const evalExpression = 'debugPaintSizeEnabled';
       final library = EvalOnDartLibrary(
-        'package:flutter/src/rendering/debug.dart',
+        [
+          'package:flutter/src/rendering/debug.dart',
+          'package:flutter_web/src/rendering/debug.dart',
+        ],
         env.service,
       );
 
@@ -112,7 +115,10 @@ void main() {
       final extensionName = extensions.togglePlatformMode.extension;
       const evalExpression = 'defaultTargetPlatform.toString()';
       final library = EvalOnDartLibrary(
-        'package:flutter/src/foundation/platform.dart',
+        [
+          'package:flutter_web/src/foundation/platform.dart',
+          'package:flutter/src/foundation/platform.dart',
+        ],
         env.service,
       );
 
@@ -146,7 +152,10 @@ void main() {
       final extensionName = extensions.slowAnimations.extension;
       const evalExpression = 'timeDilation';
       final library = EvalOnDartLibrary(
-        'package:flutter/src/scheduler/binding.dart',
+        [
+          'package:flutter_web/src/scheduler/binding.dart',
+          'package:flutter/src/scheduler/binding.dart',
+        ],
         env.service,
       );
 
@@ -331,7 +340,10 @@ void main() {
       final boolArgs = {'enabled': true};
       const boolEvalExpression = 'debugPaintSizeEnabled';
       final boolLibrary = EvalOnDartLibrary(
-        'package:flutter/src/rendering/debug.dart',
+        [
+          'package:flutter/src/rendering/debug.dart',
+          'package:flutter_web/src/rendering/debug.dart',
+        ],
         service,
         isolateId: _flutterIsolateId,
       );
@@ -347,7 +359,10 @@ void main() {
       final stringArgs = {'value': 'iOS'};
       const stringEvalExpression = 'defaultTargetPlatform.toString()';
       final stringLibrary = EvalOnDartLibrary(
-        'package:flutter/src/foundation/platform.dart',
+        [
+          'package:flutter/src/foundation/platform.dart',
+          'package:flutter_web/src/foundation/platform.dart',
+        ],
         service,
         isolateId: _flutterIsolateId,
       );
@@ -369,7 +384,10 @@ void main() {
       };
       const numericEvalExpression = 'timeDilation';
       final numericLibrary = EvalOnDartLibrary(
-        'package:flutter/src/scheduler/binding.dart',
+        [
+          'package:flutter/src/scheduler/binding.dart',
+          'package:flutter_web/src/scheduler/binding.dart',
+        ],
         service,
         isolateId: _flutterIsolateId,
       );

@@ -438,7 +438,10 @@ class ServiceExtensionManager {
               value != null && value.json['enabled'] == 'true';
         } else {
           final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-            'package:flutter/src/widgets/binding.dart',
+            [
+              'package:flutter/src/widgets/binding.dart',
+              'package:flutter_web/src/widgets/binding.dart',
+            ],
             _service,
           );
           final InstanceRef value = await flutterLibrary.eval(
