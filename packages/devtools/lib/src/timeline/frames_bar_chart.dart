@@ -14,19 +14,24 @@ import 'timeline_protocol.dart';
 
 class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
-      : super('div', classes: 'timeline-frames section-border') {
+      : super('div', classes: 'timeline-frames') {
     layoutHorizontal();
     element.style
       ..alignItems = 'flex-end'
       ..height = '${chartHeight}px'
       ..paddingTop = '${topPadding}px';
 
-    timelineController.onFrameAdded.listen((TimelineFrame frame) {
-      if (frameUIgraph == null) {
-        frameUIgraph = PlotlyDivGraph(this, frame, false); // Process chunks
-        add(frameUIgraph);
-      }
+    frameUIgraph = PlotlyDivGraph(this, timelineController); // Process chunks
+    add(frameUIgraph);
 
+    // Make sure DIV exist.
+    // TODO(terry): Use requestAnimationFrame instead?
+    Timer.run(() {
+      if (!_createdPlot)
+        _createdPlot = frameUIgraph.createPlot(timelineController);
+    });
+
+    timelineController.onFrameAdded.listen((TimelineFrame frame) {
       frameUIgraph.process(timelineController, frame);
     });
   }
@@ -37,6 +42,7 @@ class FramesBarChart extends CoreElement {
 
   TimelineFrame selectedFrame;
   PlotlyDivGraph frameUIgraph;
+  bool _createdPlot = false;
 
   final StreamController<TimelineFrame> _selectedFrameController =
       StreamController<TimelineFrame>.broadcast();
@@ -54,9 +60,8 @@ class FramesBarChart extends CoreElement {
 }
 
 class PlotlyDivGraph extends CoreElement {
-  PlotlyDivGraph(this.framesBarChart, this.frame, [bool datum = true])
-      : _processDatum = datum,
-        super('div') {
+  PlotlyDivGraph(this.framesBarChart, TimelineController timelineController)
+      : super('div') {
     element.id = frameGraph;
     element.style
       ..height = '100%'
@@ -65,10 +70,9 @@ class PlotlyDivGraph extends CoreElement {
 
   static const String frameGraph = 'graph_frame_timeline';
 
-  bool _processDatum;
   Timer timer;
   final FramesBarChart framesBarChart;
-  final TimelineFrame frame;
+  TimelineFrame frame;
   final Map<int, TimelineFrame> _frames = {};
 
   List<int> dataIndexes = [];
@@ -81,7 +85,6 @@ class PlotlyDivGraph extends CoreElement {
   // since first bar color isn't shown when x coord is xCoordNotUsed.
   int _frameIndex = FramesBarPlotly.xCoordFirst;
   int _lastPlottedFrameIndex = -1;
-  bool _createdPlot = false;
 
   /// These lists are batch updated to the plotly chart to reduce chart lag
   /// relative to updating every frame.
@@ -191,59 +194,52 @@ class PlotlyDivGraph extends CoreElement {
     return true;
   }
 
+  bool createPlot(TimelineController timelineController) {
+    plotlyChart = new FramesBarPlotly(frameGraph);
+    plotlyChart.plotFPS();
+
+    // Hookup events in the plotly chart.
+    plotlyChart.chartClick(frameGraph, _plotlyClick);
+    plotlyChart.chartHover(frameGraph, _plotlyHover);
+    plotlyChart.chartLegendClick(frameGraph, _plotlyLegendClick);
+
+    // Only update data 6 times a second.
+    // TODO(jacobr): only run the timer when there is actual work to do.
+    timer = Timer.periodic(const Duration(milliseconds: 166), (Timer t) {
+      // Skip if there is no new data.
+      if (_lastPlottedFrameIndex == _frameIndex) return;
+      _lastPlottedFrameIndex = _frameIndex;
+      plotData(timelineController);
+    });
+
+    return true;
+  }
+
   void process(
       TimelineController timelineController, TimelineFrame frame) async {
-    if (!_createdPlot) {
-      plotlyChart = new FramesBarPlotly(frameGraph);
-      plotlyChart.plotFPS();
+    // TODO(terry): Eventually, below failure can happen, then onFrameAdded
+    //              events may not be received or the data can go negative
+    //              add sentry to detect bad values.
+    //
+    //    Error - already set endTime ### for frame 1650.
+    //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
+    if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
+      dataIndexes.add(_frameIndex);
 
-      _createdPlot = true;
-
-      // Hookup events in the plotly chart.
-      plotlyChart.chartClick(frameGraph, _plotlyClick);
-      plotlyChart.chartHover(frameGraph, _plotlyHover);
-      plotlyChart.chartLegendClick(frameGraph, _plotlyLegendClick);
-
-      if (!_processDatum) {
-        // Only update data 6 times a second.
-        // TODO(jacobr): only run the timer when there is actual work to do.
-        timer = Timer.periodic(const Duration(milliseconds: 166), (Timer t) {
-          // Skip if there is no new data.
-          if (_lastPlottedFrameIndex == _frameIndex) return;
-          _lastPlottedFrameIndex = _frameIndex;
-          plotData(timelineController);
-        });
-      }
-    }
-
-    if (_processDatum) {
-      // TODO(terry): Either making this faster or remove and use chunking.
-      plotlyChart.plotFPSDatum(_frameIndex, frame.cpuDurationMs,
-          frame.gpuDurationMs, timelineController.paused);
-    } else {
-      // TODO(terry): Eventually, below failure can happen, then onFrameAdded
-      //              events may not be received or the data can go negative
-      //              add sentry to detect bad values.
-      //
-      //    Error - already set endTime ### for frame 1650.
-      //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
-      if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
-        dataIndexes.add(_frameIndex);
-if (_frameIndex == 50) {
-  cpuDurations.add(frame.cpuDurationMs + 400);
-} else {
-  cpuDurations.add(frame.cpuDurationMs);
-}
-//        cpuDurations.add(frame.cpuDurationMs);
-        gpuDurations.add(frame.gpuDurationMs);
-
-        _frames.addAll({_frameIndex: frame});
-        _frameIndex++;
+      if (_frameIndex == 50) {
+        cpuDurations.add(frame.cpuDurationMs + 400);
       } else {
-        // TODO(terry): HACK - Ignore the event.
-        print('WARNING: Ignored onFrameAdded - bad data.\n [cpuDuration: '
-            '${frame.cpuDuration}, gpuDuration: ${frame.gpuDuration}');
+        cpuDurations.add(frame.cpuDurationMs);
       }
+//        cpuDurations.add(frame.cpuDurationMs);
+      gpuDurations.add(frame.gpuDurationMs);
+
+      _frames.addAll({_frameIndex: frame});
+      _frameIndex++;
+    } else {
+      // TODO(terry): HACK - Ignore the event.
+      print('WARNING: Ignored onFrameAdded - bad data.\n [cpuDuration: '
+          '${frame.cpuDuration}, gpuDuration: ${frame.gpuDuration}');
     }
   }
 }
