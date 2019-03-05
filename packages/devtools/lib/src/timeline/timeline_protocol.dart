@@ -365,7 +365,6 @@ class TimelineData {
 
   void _maybeAddCompletedFrame(TimelineFrame frame) {
     if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
-      print('adding frame ${frame.id}');
       _frameCompleteController.add(frame);
       _pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
