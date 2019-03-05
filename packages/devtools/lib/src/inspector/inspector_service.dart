@@ -17,7 +17,13 @@ import '../globals.dart';
 import 'diagnostics_node.dart';
 import 'flutter_widget.dart';
 
-const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
+// TODO(jacobr): remove flutter_web entry once flutter_web and flutter are
+// unified.
+const inspectorLibraryUriCandidates = [
+  'package:flutter/src/widgets/widget_inspector.dart',
+  'package:flutter_web/src/widgets/widget_inspector.dart',
+];
+
 bool _inspectorDependenciesLoaded = false;
 // This method must be called before any methods on the Inspector are used.
 Future<void> ensureInspectorServiceDependencies() async {
@@ -65,7 +71,7 @@ class InspectorService {
     assert(serviceManager.hasConnection);
     assert(serviceManager.service != null);
     final inspectorLibrary = EvalOnDartLibrary(
-      inspectorLibraryUri,
+      inspectorLibraryUriCandidates,
       vmService,
     );
 
@@ -1009,5 +1015,5 @@ class InspectorObjectGroupManager {
 }
 
 class FlutterInspectorLibraryNotFound extends LibraryNotFound {
-  FlutterInspectorLibraryNotFound() : super(inspectorLibraryUri);
+  FlutterInspectorLibraryNotFound() : super(inspectorLibraryUriCandidates);
 }

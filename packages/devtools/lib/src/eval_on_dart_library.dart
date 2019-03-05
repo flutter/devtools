@@ -14,7 +14,11 @@ import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
 
 class EvalOnDartLibrary {
-  EvalOnDartLibrary(this.libraryName, this.service, {String isolateId}) {
+  EvalOnDartLibrary(
+    Iterable<String> candidateLibraryNames,
+    this.service, {
+    String isolateId,
+  }) : _candidateLibraryNames = Set.from(candidateLibraryNames) {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
@@ -49,7 +53,7 @@ class EvalOnDartLibrary {
     _disposed = true;
   }
 
-  final String libraryName;
+  final Set<String> _candidateLibraryNames;
   final VmServiceWrapper service;
   Completer<LibraryRef> _libraryRef;
   Future<void> _initializeComplete;
@@ -71,14 +75,14 @@ class EvalOnDartLibrary {
         return;
       }
       for (LibraryRef library in isolate.libraries) {
-        if (library.uri == libraryName) {
+        if (_candidateLibraryNames.contains(library.uri)) {
           assert(!_libraryRef.isCompleted);
           _libraryRef.complete(library);
           return;
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError(new LibraryNotFound(libraryName));
+      _libraryRef.completeError(new LibraryNotFound(_candidateLibraryNames));
     } catch (e) {
       _handleError(e);
     }
@@ -246,7 +250,7 @@ class EvalOnDartLibrary {
 }
 
 class LibraryNotFound implements Exception {
-  LibraryNotFound(this.library);
-  String library;
-  String get message => 'Library $library not found';
+  LibraryNotFound(this.candidateNames);
+  Iterable<String> candidateNames;
+  String get message => 'Library matchining one of $candidateNames not found';
 }
