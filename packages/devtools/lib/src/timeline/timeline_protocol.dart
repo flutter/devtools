@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
+
 import '../utils.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
@@ -18,6 +20,9 @@ enum TimelineEventType {
   gpu,
   unknown,
 }
+
+/// Delay in ms for processing trace events.
+const traceEventDelay = 1000;
 
 class TimelineData {
   TimelineData({this.cpuThreadId, this.gpuThreadId});
@@ -48,14 +53,73 @@ class TimelineData {
   /// The current node in the tree structure of GPU duration events.
   TimelineEvent _gpuEventNode;
 
+  final HeapPriorityQueue<TraceEventWrapper> _cpuTraceHeap =
+      HeapPriorityQueue(traceComparator);
+
+  final HeapPriorityQueue<TraceEventWrapper> _gpuTraceHeap =
+      HeapPriorityQueue(traceComparator);
+
+  static int traceComparator(TraceEventWrapper a, TraceEventWrapper b) {
+    final compare = a.event.timestampMicros.compareTo(b.event.timestampMicros);
+    if (compare == 0 && a.event.name == b.event.name) {
+      // If the events share both their name and their timestamp, ensure the
+      // DurationBegin event has priority over DurationEnd events. Duration
+      // events are the only case where this should matter - we must have a
+      // begin event followed by an end event and we rely on this ordering.
+      return a.event.phase.compareTo(b.event.phase);
+    } else if (compare == 0) {
+      // Otherwise if the events share a timestamp, order them in the order we
+      // received them.
+      return -1;
+    }
+    return compare;
+  }
+
   void processTimelineEvent(TraceEvent event) {
     // TODO(kenzie): stop manually setting the type once we have that data from
     // the engine.
     event.type = _inferEventType(event);
 
-    if (!event.isGpuEvent && !event.isCpuEvent) return;
+    if (!_shouldProcessTraceEvent(event)) return;
 
-    if (_debugEventTrace) print(event.toString());
+    // Add trace event to respective heap.
+    if (event.isCpuEvent) {
+      _cpuTraceHeap
+          .add(TraceEventWrapper(event, DateTime.now().millisecondsSinceEpoch));
+      _processEventsWithDelay(_cpuTraceHeap);
+    } else {
+      _gpuTraceHeap
+          .add(TraceEventWrapper(event, DateTime.now().millisecondsSinceEpoch));
+      _processEventsWithDelay(_gpuTraceHeap);
+    }
+  }
+
+  void _processEventsWithDelay(HeapPriorityQueue<TraceEventWrapper> heap) {
+    final timeSinceReceivingOldestEvent =
+        DateTime.now().millisecondsSinceEpoch - heap.first.timeReceived;
+    if (!shouldProcessTopEvent(heap)) {
+      Timer(
+        Duration(milliseconds: traceEventDelay - timeSinceReceivingOldestEvent),
+        () => _processReadyEvents(heap),
+      );
+    } else {
+      _processReadyEvents(heap);
+    }
+  }
+
+  void _processReadyEvents(HeapPriorityQueue<TraceEventWrapper> heap) {
+    while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
+      _handleEvent(heap.removeFirst().event);
+    }
+  }
+
+  bool shouldProcessTopEvent(HeapPriorityQueue<TraceEventWrapper> heap) {
+    return DateTime.now().millisecondsSinceEpoch - heap.first.timeReceived >=
+        traceEventDelay;
+  }
+
+  void _handleEvent(TraceEvent event) {
+    if (_debugEventTrace) print(event.json.toString());
 
     switch (event.phase) {
       case 's':
@@ -75,16 +139,6 @@ class TimelineData {
         break;
       // We do not need to handle async events (phases 'b', 'n', 'e') because
       // CPU/GPU work will take place in DurationEvents.
-    }
-  }
-
-  TimelineEventType _inferEventType(TraceEvent event) {
-    if (event.threadId == cpuThreadId) {
-      return TimelineEventType.cpu;
-    } else if (event.threadId == gpuThreadId) {
-      return TimelineEventType.gpu;
-    } else {
-      return TimelineEventType.unknown;
     }
   }
 
@@ -123,24 +177,14 @@ class TimelineData {
       if (_cpuEventNode != null) {
         _cpuEventNode.addChild(e);
         _cpuEventNode = e;
-      }
-      // Do not add MessageLoop::RunExpiredTasks events to a null stack. These
-      // events will either a) start outside of our frame start time, or b)
-      // parent irrelevant events - neither of which we want.
-      else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
+      } else {
         _cpuEventNode = e;
       }
     } else if (event.isGpuEvent) {
       if (_gpuEventNode != null) {
         _gpuEventNode.addChild(e);
         _gpuEventNode = e;
-      }
-      // Do not add MessageLoop::RunExpiredTasks events to a null stack. A
-      // single MessageLoop::RunExpiredTasks event can parent multiple
-      // PipelineConsume event flows, and we want to consider each
-      // PipelineConsume flow to be its own event. This event can also parent
-      // irrelevant events that we do not want to track.
-      else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
+      } else {
         _gpuEventNode = e;
       }
     }
@@ -321,10 +365,34 @@ class TimelineData {
 
   void _maybeAddCompletedFrame(TimelineFrame frame) {
     if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
+      print('adding frame ${frame.id}');
       _frameCompleteController.add(frame);
       _pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
     }
+  }
+
+  TimelineEventType _inferEventType(TraceEvent event) {
+    if (event.threadId == cpuThreadId) {
+      return TimelineEventType.cpu;
+    } else if (event.threadId == gpuThreadId) {
+      return TimelineEventType.gpu;
+    } else {
+      return TimelineEventType.unknown;
+    }
+  }
+
+  bool _shouldProcessTraceEvent(TraceEvent event) {
+    const List<String> phaseWhitelist = ['s', 'f', 'B', 'E', 'X'];
+    return phaseWhitelist.contains(event.phase) &&
+        // Do not process Garbage Collection events.
+        event.category != 'GC' &&
+        // Do not process MessageLoop::RunExpiredTasks events. These events can
+        // either a) start outside of our frame start time, b) parent irrelevant
+        // events, or c) parent multiple event flows - none of which we want.
+        event.name != 'MessageLoop::RunExpiredTasks' &&
+        // Only process events from the CPU or GPU thread.
+        (event.isGpuEvent || event.isCpuEvent);
   }
 }
 
@@ -524,7 +592,7 @@ class TimelineEvent {
         // [otherChild] is the parent of [child].
         if (otherChild._isParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
-          _putChildInSubtree(otherChild);
+          return _putChildInSubtree(otherChild);
         }
       }
 
@@ -687,4 +755,10 @@ class TraceEvent {
   @override
   String toString() => '$type event [id: $id] [cat: $category] [ph: $phase] '
       '$name - [timestamp: $timestampMicros] [duration: $duration]';
+}
+
+class TraceEventWrapper {
+  TraceEventWrapper(this.event, this.timeReceived);
+  TraceEvent event;
+  num timeReceived;
 }
