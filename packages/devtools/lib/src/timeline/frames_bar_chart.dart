@@ -209,7 +209,7 @@ class PlotlyDivGraph extends CoreElement {
       // Skip if there is no new data.
       if (_lastPlottedFrameIndex == _frameIndex) return;
       _lastPlottedFrameIndex = _frameIndex;
-      plotData(timelineController);  // Plot the chunks of data collected.
+      plotData(timelineController); // Plot the chunks of data collected.
     });
 
     return true;
