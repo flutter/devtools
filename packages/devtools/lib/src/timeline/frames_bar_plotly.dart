@@ -51,20 +51,36 @@ class FramesBarPlotly {
         // Hide ticks by using font color of bgColor.
         tickfont: Font(
           color: 'white',
+          size: 1,
         ),
         rangemode: 'nonnegative',
         autorange: true,
       ),
       yaxis: AxisLayout(
         title: 'Milliseconds',
-        fixedrange: true,
+        tickformat: '.0f',
+        type: 'log',
+        range: [0, 2],
+        nticks: 3,
+        tickmode: 'array',
+        tickvals: [
+          1,
+          10,
+          100,
+        ],
+        ticktext: [
+          1,
+          10,
+          100,
+        ],
+        hoverformat: '.3f',
       ),
       hovermode: 'x',
       autosize: true,
       barmode: 'stack',
       dragmode: 'pan',
       margin: Margin(
-        l: 80,
+        l: 60,
         r: 0,
         b: 5,
         t: 5,
