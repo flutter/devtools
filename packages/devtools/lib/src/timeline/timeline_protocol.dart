@@ -285,8 +285,10 @@ class TimelineData {
     // do event times extend slightly beyond the times we get from frame start
     // and end flow events.
 
-    // Epsilon in microseconds.
-    const int epsilon = 50;
+    // Epsilon in microseconds. If more than half of the event fits in bounds,
+    // then we consider the event as fitting. If the event has a large duration,
+    // consider it as fitting if it fits within 500 ms of the frame bound.
+    final int epsilon = min(e.duration ~/ 2, 500);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
     final bool fitsStartBoundary = f.startTime - e.startTime - epsilon < 0;
@@ -324,7 +326,7 @@ class TimelineData {
   void _maybeAddCompletedFrame(TimelineFrame frame) {
     if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
       _frameCompleteController.add(frame);
-      _pendingFrames.remove(frame);
+      _pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
     }
   }
