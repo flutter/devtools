@@ -21,7 +21,7 @@ class FramesBarChart extends CoreElement {
       ..height = '${chartHeight}px'
       ..paddingTop = '${topPadding}px';
 
-    frameUIgraph = PlotlyDivGraph(this, timelineController); // Process chunks
+    frameUIgraph = PlotlyDivGraph(this, timelineController);
     add(frameUIgraph);
 
     // Make sure DIV exist.
@@ -209,12 +209,13 @@ class PlotlyDivGraph extends CoreElement {
       // Skip if there is no new data.
       if (_lastPlottedFrameIndex == _frameIndex) return;
       _lastPlottedFrameIndex = _frameIndex;
-      plotData(timelineController);
+      plotData(timelineController);  // Plot the chunks of data collected.
     });
 
     return true;
   }
 
+  // Add current frame data to chunks of data for later plotting.
   void process(
       TimelineController timelineController, TimelineFrame frame) async {
     // TODO(terry): Eventually, below failure can happen, then onFrameAdded
