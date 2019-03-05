@@ -22,7 +22,8 @@ From a separate terminal:
 - `flutter run`
 
 From the packages/devtools directory:
-- `pub global activate webdev`
+- `pub global activate webdev` (install webdev globally)
+- `export PATH=$PATH:~/.pub-cache/bin` (make globally activated packages available from the command line)
 - `webdev serve`
 
 Then, open a browser window to the local url specified by webdev. After the page has loaded, append
