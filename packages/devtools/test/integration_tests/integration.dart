@@ -290,7 +290,7 @@ class WebdevFixture {
   }) async {
     // 'pub run webdev serve web'
 
-    final List<String> cliArgs = ['run', 'webdev', 'serve', 'web'];
+    final List<String> cliArgs = ['serve', 'web'];
     if (release) {
       cliArgs.add('--release');
     }
@@ -305,7 +305,7 @@ class WebdevFixture {
     }
 
     final Process process = await Process.start(
-      'pub',
+      'webdev',
       cliArgs,
       environment: environment,
     );
