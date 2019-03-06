@@ -12,7 +12,7 @@ pushd packages/devtools
 pub get
 
 rm -rf build
-pub run build_runner build
+pub run build_runner build -o web:build --release
 mv ./build/packages ./build/pack
 
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
