@@ -793,3 +793,8 @@ html [full] {
 span.strong {
     font-weight: 600;
 }
+
+.CodeMirror {
+    /* Override the CodeMirror theme to use our own background color */
+    background: var(--default-background) !important;
+}
