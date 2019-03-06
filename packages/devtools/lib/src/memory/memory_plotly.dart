@@ -41,7 +41,8 @@ class MemoryPlotly {
   static const String USED_COLOR = '#48B2E7';
 
   List<Data> createMemoryTraces() {
-    Data normalized_trace = Data(
+    /* TODO(terry): Enable gc markers.
+    final Data normalized_trace = Data(
       y: [],
       x: [],
       type: 'scatter',
@@ -54,8 +55,9 @@ class MemoryPlotly {
       text: [],
       hoverinfo: 'y+name',
     );
+    */
 
-    Data external_trace = Data(
+    final Data externalTrace = Data(
       x: [],
       y: [],
       text: [],
@@ -67,7 +69,7 @@ class MemoryPlotly {
       name: 'External',
     );
 
-    Data used_trace = Data(
+    final Data usedTrace = Data(
       x: [],
       y: [],
       text: [],
@@ -79,7 +81,7 @@ class MemoryPlotly {
       name: 'Used',
     );
 
-    Data capacity_trace = Data(
+    final Data capacityTrace = Data(
       x: [],
       y: [],
       text: [],
@@ -93,7 +95,7 @@ class MemoryPlotly {
       name: 'Capacity',
     );
 
-    Data rss_trace = Data(
+    final Data rssTrace = Data(
       x: [],
       y: [],
       text: [],
@@ -108,7 +110,7 @@ class MemoryPlotly {
       name: 'RSS',
     );
 
-    return [external_trace, used_trace, capacity_trace, rss_trace];
+    return [externalTrace, usedTrace, capacityTrace, rssTrace];
   }
 
   // Resetting to live view, it's an autoscale back to full view.
@@ -157,7 +159,7 @@ class MemoryPlotly {
 
     if (liveUpdate) {
       // Display 2 minutes of collected data in the chart, all data is accessible.
-      int startTime = DateTime.fromMillisecondsSinceEpoch(timestamps[0])
+      final int startTime = DateTime.fromMillisecondsSinceEpoch(timestamps[0])
           .subtract(Duration(minutes: 2))
           .millisecondsSinceEpoch;
       rangeSliderToLast(startTime, timestamps[0]);

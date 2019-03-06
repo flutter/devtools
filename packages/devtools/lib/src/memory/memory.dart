@@ -212,14 +212,11 @@ class MemoryScreen extends Screen {
 
     try {
       // 'reset': true to reset the object allocation accumulators
-      final Response response = await serviceManager.service.callMethod(
-          '_getAllocationProfile',
-          isolateId: _isolateId,
-          args: {'gc': 'full'});
-      final List<dynamic> members = response.json['members'];
+      await serviceManager.service.callMethod('_getAllocationProfile',
+          isolateId: _isolateId, args: {'gc': 'full'});
     } catch (e) {
       // TODO(terry): Need something probably logging?
-      print("ERROR: $e");
+      print('ERROR: $e');
     } finally {
       gcNowButton.disabled = false;
     }
@@ -435,7 +432,7 @@ class MemoryChart extends CoreElement {
     }
 
     while (data.samples.isNotEmpty) {
-      HeapSample newSample = data.samples.removeAt(0);
+      final HeapSample newSample = data.samples.removeAt(0);
       plotlyChart.plotMemoryDataList([newSample.timestamp], [newSample.rss],
           [newSample.capacity], [newSample.used], [newSample.external]);
     }
@@ -535,7 +532,6 @@ class MemoryTracker {
   }
 
   void _recalculate([bool fromGC = false]) {
-    int current = 0;
     int total = 0;
 
     int used = 0;
@@ -550,8 +546,6 @@ class MemoryTracker {
 
       capacity += external;
 
-      current += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.used + heap.external);
       total += heaps.fold<int>(
           0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
     }
@@ -563,8 +557,7 @@ class MemoryTracker {
       time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(
-        HeapSample(time, this.processRss, capacity, used, external, fromGC));
+    _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
   }
 
   void _addSample(HeapSample sample) {
