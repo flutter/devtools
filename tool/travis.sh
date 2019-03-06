@@ -41,7 +41,7 @@ if [ "$BOT" = "main" ]; then
     pub global activate tuneup && tuneup check
 
     # Ensure we can build the app.
-    pub run build_runner build
+    pub run build_runner build -o web:build --release
 
 elif [ "$BOT" = "test_ddc" ]; then
 
