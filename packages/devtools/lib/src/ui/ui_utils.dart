@@ -19,7 +19,7 @@ import 'html_icon_renderer.dart';
 import 'material_icons.dart';
 import 'primer.dart';
 
-const int defaultSplitterWidth = 12;
+const int defaultSplitterWidth = 10;
 
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {

@@ -58,7 +58,6 @@
 .flame-chart-section {
     min-width: 100%;
     position: absolute;
-    box-shadow: inset 4px 4px 9px -7px #bbbbbb;
 }
 
 .flame-chart-section .flame-chart-item {
@@ -68,6 +67,7 @@
     position: absolute;
     white-space: nowrap;
     height: 24px;
+    z-index: 1;
 }
 
 .flame-chart-item-label-wrapper {
@@ -107,8 +107,7 @@
 
 .flame-chart-grid-item .grid-line {
     top: 0;
-    background-color: black;
-    opacity: 0.15;
+    background-color: var(--light-background);
     min-height: 100%;
     width: 1px;
     position: absolute;
