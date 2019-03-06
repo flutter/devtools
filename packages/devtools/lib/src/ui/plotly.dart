@@ -204,6 +204,9 @@ class Layout {
     num bargroupgap,
     String dragmode,
     HoverLabel hoverlabel,
+    List<Shape> shapes,
+    Font font,
+    Legend legend,
   });
 
   external String get title;
@@ -217,6 +220,47 @@ class Layout {
   external num get bargap;
   external num get bargroupgap;
   external String get dragmode;
+  external List<Shape> get shapes;
+  external Font get font;
+  external Legend get legend;
+}
+
+@JS()
+@anonymous
+class Shape {
+  Shape({
+    String type,
+    String xref,
+    String layer,
+    int x0,
+    int y0,
+    int x1,
+    int y1,
+    Line line,
+  });
+
+  external String get type;
+  external String get xref;
+  external String get layer;
+  external int get x0;
+  external int get y0;
+  external int get x1;
+  external int get y1;
+  external Line get line;
+}
+
+@JS()
+@anonymous
+class Legend {
+  Legend({
+    String orientation,
+    num x,
+    num y,
+  });
+
+  external String get orientation;
+  external num get x;
+  external num get y;
 }
 
 @JS()

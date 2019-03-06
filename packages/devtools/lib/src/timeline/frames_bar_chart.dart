@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../framework/framework.dart';
 import '../ui/elements.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
@@ -15,6 +16,8 @@ import 'timeline_protocol.dart';
 class FramesBarChart extends CoreElement {
   FramesBarChart(TimelineController timelineController)
       : super('div', classes: 'timeline-frames') {
+    // No frame around component, so data spikes can appear to go through the
+    // roof (highest horizontal line is 100 ms).
     layoutHorizontal();
     element.style
       ..alignItems = 'flex-end'
@@ -25,16 +28,19 @@ class FramesBarChart extends CoreElement {
     add(frameUIgraph);
 
     // Make sure DIV exist.
-    // TODO(terry): Use requestAnimationFrame instead?
-    Timer.run(() {
-      if (!_createdPlot)
-        _createdPlot = frameUIgraph.createPlot(timelineController);
+    frameBarChartStateMixin.setState(() {
+      if (!_createdPlot) {
+        frameUIgraph.createPlot(timelineController);
+        _createdPlot = true;
+      }
     });
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
       frameUIgraph.process(timelineController, frame);
     });
   }
+
+  SetStateMixin frameBarChartStateMixin = SetStateMixin();
 
   static const int chartHeight = 160;
   static const int maxFrames = 500;
@@ -194,7 +200,7 @@ class PlotlyDivGraph extends CoreElement {
     return true;
   }
 
-  bool createPlot(TimelineController timelineController) {
+  void createPlot(TimelineController timelineController) {
     plotlyChart = new FramesBarPlotly(frameGraph);
     plotlyChart.plotFPS();
 
@@ -211,8 +217,6 @@ class PlotlyDivGraph extends CoreElement {
       _lastPlottedFrameIndex = _frameIndex;
       plotData(timelineController); // Plot the chunks of data collected.
     });
-
-    return true;
   }
 
   // Add current frame data to chunks of data for later plotting.

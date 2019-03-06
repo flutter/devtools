@@ -9,7 +9,7 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 
 class FramesBarPlotly {
-  FramesBarPlotly(this._domName);
+  FramesBarPlotly(this._domName, [this.useLogScale = true]);
 
   // Any duration of cpu/gpu greater than 8 ms is a jank.
   static const int jankMs = 8;
@@ -42,6 +42,32 @@ class FramesBarPlotly {
   static const int ticksInRangeSlider = 90;
 
   final String _domName;
+  final bool useLogScale;
+
+  final yAxisLogScale = AxisLayout(
+    title: 'Milliseconds',
+    tickformat: '.0f',
+    type: 'log',
+    range: [0, 2],
+    nticks: 3,
+    tickmode: 'array',
+    tickvals: [
+      1,
+      10,
+      100,
+    ],
+    ticktext: [
+      1,
+      10,
+      100,
+    ],
+    hoverformat: '.3f',
+  );
+
+  final yAxisLinearScale = AxisLayout(
+    title: 'Milliseconds',
+    fixedrange: true,
+  );
 
   Layout getFPSTimeseriesLayout() {
     return Layout(
@@ -56,29 +82,45 @@ class FramesBarPlotly {
         rangemode: 'nonnegative',
         autorange: true,
       ),
-      yaxis: AxisLayout(
-        title: 'Milliseconds',
-        tickformat: '.0f',
-        type: 'log',
-        range: [0, 2],
-        nticks: 3,
-        tickmode: 'array',
-        tickvals: [
-          1,
-          10,
-          100,
-        ],
-        ticktext: [
-          1,
-          10,
-          100,
-        ],
-        hoverformat: '.3f',
-      ),
+      yaxis: useLogScale ? yAxisLogScale : yAxisLinearScale,
       hovermode: 'x',
       autosize: true,
       barmode: 'stack',
       dragmode: 'pan',
+      shapes: [
+        // TODO(terry): Display somewhere what the lines are showing (8/16 ms).
+        // TODO(terry): Unable to place in legend directly.
+        Shape(
+          type: 'line',
+          xref: 'paper',
+          // TOD(terry): Verify do we like the line above or below the bars.
+          // layer: 'below',
+          x0: 0,
+          y0: 8,
+          x1: 1,
+          y1: 8,
+          line: Line(
+            dash: 'dot',
+            color: colorToCss(mainGpuColor),
+            width: 1,
+          ),
+        ),
+        Shape(
+          type: 'line',
+          xref: 'paper',
+          // TOD(terry): Verify do we like the line above or below the bars.
+          // layer: 'below',
+          x0: 0,
+          y0: 16,
+          x1: 1,
+          y1: 16,
+          line: Line(
+            dash: 'longdash',
+            color: colorToCss(mainCpuColor),
+            width: 1,
+          ),
+        ),
+      ],
       margin: Margin(
         l: 60,
         r: 0,
