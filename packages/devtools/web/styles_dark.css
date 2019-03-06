@@ -4,6 +4,7 @@
 
 /* If you add a CSS variable here, be sure to also add it to styles.css */
 :root {
+    --chart-bar-color: #4078c0;
     --border-color-dark: #484848;
     --border-color: #484848;
     --counter-color: #999;

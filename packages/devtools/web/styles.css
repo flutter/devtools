@@ -10,6 +10,7 @@
 /* If you add a CSS variable here, be sure to also add it to styles_dart.css */
 :root {
     --border-color: #eee;
+    --chart-bar-color: #4078c0;
     --counter-color: #666;
     --dark-shadow-color: #666;
     --default-background-rgb: 255, 255, 255;
@@ -288,7 +289,7 @@ input:disabled+label {
 }
 
 .frame-bar {
-    background: var(--masthead-background);
+    background: var(--chart-bar-color);
     height: 12px;
     display: inline-block;
     border-radius: 1px;
