@@ -44,7 +44,7 @@ class FramesBarPlotly {
   final String _domName;
   final bool useLogScale;
 
-  final yAxisLogScale = AxisLayout(
+  final _yAxisLogScale = AxisLayout(
     title: 'Milliseconds',
     tickformat: '.0f',
     type: 'log',
@@ -64,7 +64,7 @@ class FramesBarPlotly {
     hoverformat: '.3f',
   );
 
-  final yAxisLinearScale = AxisLayout(
+  final _yAxisLinearScale = AxisLayout(
     title: 'Milliseconds',
     fixedrange: true,
   );
@@ -82,7 +82,7 @@ class FramesBarPlotly {
         rangemode: 'nonnegative',
         autorange: true,
       ),
-      yaxis: useLogScale ? yAxisLogScale : yAxisLinearScale,
+      yaxis: useLogScale ? _yAxisLogScale : _yAxisLinearScale,
       hovermode: 'x',
       autosize: true,
       barmode: 'stack',

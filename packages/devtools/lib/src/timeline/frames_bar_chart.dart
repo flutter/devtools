@@ -13,7 +13,7 @@ import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-class FramesBarChart extends CoreElement {
+class FramesBarChart extends CoreElement with SetStateMixin {
   FramesBarChart(TimelineController timelineController)
       : super('div', classes: 'timeline-frames') {
     // No frame around component, so data spikes can appear to go through the
@@ -28,7 +28,7 @@ class FramesBarChart extends CoreElement {
     add(frameUIgraph);
 
     // Make sure DIV exist.
-    frameBarChartStateMixin.setState(() {
+    setState(() {
       if (!_createdPlot) {
         frameUIgraph.createPlot(timelineController);
         _createdPlot = true;
@@ -39,8 +39,6 @@ class FramesBarChart extends CoreElement {
       frameUIgraph.process(timelineController, frame);
     });
   }
-
-  SetStateMixin frameBarChartStateMixin = SetStateMixin();
 
   static const int chartHeight = 160;
   static const int maxFrames = 500;

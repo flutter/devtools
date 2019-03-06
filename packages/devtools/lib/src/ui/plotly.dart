@@ -228,7 +228,7 @@ class Layout {
 @JS()
 @anonymous
 class Shape {
-  Shape({
+  external factory Shape({
     String type,
     String xref,
     String layer,
@@ -252,7 +252,7 @@ class Shape {
 @JS()
 @anonymous
 class Legend {
-  Legend({
+  external factory Legend({
     String orientation,
     num x,
     num y,
