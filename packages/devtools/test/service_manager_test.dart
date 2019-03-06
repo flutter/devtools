@@ -18,6 +18,8 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
 
+// Error codes defined by
+// https://www.jsonrpc.org/specification#error_object
 const jsonRpcInvalidParamsCode = -32602;
 
 void main() {
