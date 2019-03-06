@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,10 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:devtools/src/ui/icons.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import '../charts/charts.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../tables.dart';
@@ -18,9 +19,9 @@ import '../ui/primer.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
-// TODO(devoncarew): expose _getAllocationProfile
+import 'memory_plotly.dart';
 
-// TODO(devoncarew): have a 'show vm objects' checkbox
+// TODO(devoncarew): expose _getAllocationProfile
 
 class MemoryScreen extends Screen {
   MemoryScreen()
@@ -36,6 +37,13 @@ class MemoryScreen extends Screen {
   StatusItem objectCountStatus;
 
   PButton loadSnapshotButton;
+  PButton pauseButton;
+  PButton resumeButton;
+
+  PButton vmMemorySnapshotButton;
+  PButton resetAccumulatorsButton;
+  PButton filterLibrariesButton;
+  PButton gcNowButton;
 
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
   CoreElement tableContainer;
@@ -45,13 +53,62 @@ class MemoryScreen extends Screen {
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
 
+  void updateResumeButton({@required bool disabled}) {
+    resumeButton.disabled = disabled;
+    resumeButton.changeIcon(disabled
+        ? FlutterIcons.resume_white_disabled_2x.src
+        : FlutterIcons.resume_white_2x.src);
+  }
+
+  void updatePauseButton({@required bool disabled}) {
+    pauseButton.disabled = disabled;
+    pauseButton.changeIcon(disabled
+        ? FlutterIcons.pause_black_disabled_2x.src
+        : FlutterIcons.pause_black_2x.src);
+  }
+
   @override
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
+    resumeButton = PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
+      ..primary()
+      ..small()
+      ..disabled = true;
+
+    pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)
+      ..small()
+      ..clazz('margin-left');
+
+    // TODO(terry): Need to correctly handle enabled and disabled.
+    vmMemorySnapshotButton = PButton.icon('', FlutterIcons.snapshotDisabled,
+        title: 'Memory Snapshot')
+      ..small()
+      ..clazz('margin-left')
+      ..disabled = true;
+    resetAccumulatorsButton = PButton.icon(
+        '', FlutterIcons.resetAccumulatorsDisabled,
+        title: 'Reset Accumulators')
+      ..small()
+      ..disabled = true;
+    filterLibrariesButton =
+        PButton.icon('', FlutterIcons.filterDisabled, title: 'Filter')
+          ..small()
+          ..disabled = true;
+    gcNowButton =
+        PButton.icon('', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+          ..small()
+          ..click(_gcNow);
+
+    resumeButton.click(() {
+      memoryChart.resume();
+    });
+
+    pauseButton.click(() {
+      memoryChart.pause();
+    });
+
     screenDiv.add(<CoreElement>[
-      createLiveChartArea(),
-      div(c: 'section'),
       div(c: 'section')
         ..add(<CoreElement>[
           form()
@@ -63,12 +120,17 @@ class MemoryScreen extends Screen {
                 ..primary()
                 ..disabled = true
                 ..click(_loadAllocationProfile),
-              progressElement = ProgressElement()
-                ..clazz('margin-left')
-                ..display = 'none',
+              pauseButton,
+              resumeButton,
               div()..flex(),
+              vmMemorySnapshotButton,
+              resetAccumulatorsButton,
+              filterLibrariesButton,
+              gcNowButton,
             ])
         ]),
+      createLiveChartArea(),
+      div(c: 'section'),
       tableContainer = div(c: 'section overflow-auto')..layoutHorizontal()
     ]);
 
@@ -144,6 +206,25 @@ class MemoryScreen extends Screen {
     }
   }
 
+  // TODO(terry): Need to record the GC event in the timeline.
+  Future<Null> _gcNow() async {
+    gcNowButton.disabled = true;
+
+    try {
+      // 'reset': true to reset the object allocation accumulators
+      final Response response = await serviceManager.service.callMethod(
+          '_getAllocationProfile',
+          isolateId: _isolateId,
+          args: {'gc': 'full'});
+      final List<dynamic> members = response.json['members'];
+    } catch (e) {
+      // TODO(terry): Need something probably logging?
+      print("ERROR: $e");
+    } finally {
+      gcNowButton.disabled = false;
+    }
+  }
+
 //  void _loadHeapSnapshot() {
 //    List<Event> events = [];
 //    Completer<List<Event>> graphEventsCompleter = new Completer();
@@ -204,7 +285,10 @@ class MemoryScreen extends Screen {
   CoreElement createLiveChartArea() {
     final CoreElement container = div(c: 'section perf-chart table-border')
       ..layoutVertical();
-    memoryChart = MemoryChart(container);
+    memoryChart = MemoryChart(this);
+
+    container.add(memoryChart);
+
     memoryChart.disabled = true;
     return container;
   }
@@ -327,71 +411,55 @@ class MemoryColumnSimple<T> extends Column<T> {
   String getValue(T item) => getter(item);
 }
 
-class MemoryChart extends LineChart<MemoryTracker> {
-  MemoryChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
-    processLabel = parent.add(div(c: 'perf-label'));
-    processLabel.element.style.left = '0';
-
-    heapLabel = parent.add(div(c: 'perf-label'));
-    heapLabel.element.style.right = '0';
+class MemoryChart extends CoreElement {
+  MemoryChart(this._memoryScreen) : super('div') {
+    element.id = memoryGraph;
+    element.style
+      ..alignItems = 'flex-end'
+      ..height = '${chartHeight}px'
+      ..paddingTop = '${topPadding}px';
   }
 
-  CoreElement processLabel;
-  CoreElement heapLabel;
+  static const String memoryGraph = 'memory_timeline';
+  static const int chartHeight = 320;
+  static const int topPadding = 0;
 
-  @override
-  void update(MemoryTracker data) {
-    if (data.samples.isEmpty || dim == null) {
-      // TODO:
-      return;
+  final MemoryScreen _memoryScreen;
+  bool chartCreated = false;
+  MemoryPlotly plotlyChart;
+
+  void updateFrom(MemoryTracker data) {
+    if (!chartCreated) {
+      plotlyChart = MemoryPlotly(memoryGraph, this)..plotMemory();
+      chartCreated = true;
     }
 
-    // display the process usage
-    final String rss = '${printMb(data.processRss ?? 0, 0)} MB RSS';
-    processLabel.text = rss;
-
-    // display the dart heap usage
-    final String used =
-        '${printMb(data.currentHeap, 1)} of ${printMb(data.heapMax, 1)} MB';
-    heapLabel.text = used;
-
-    // re-render the svg
-
-    // Make the y height large enough for the largest sample,
-    const int tenMB = 1024 * 1024 * 10;
-    final int top = (data.maxHeapData ~/ tenMB) * tenMB + tenMB;
-
-    final int width = MemoryTracker.kMaxGraphTime.inMilliseconds;
-    final int right = data.samples.last.time;
-
-    // TODO(devoncarew): draw dots for GC events?
-
-    chartElement.setInnerHtml('''
-            <svg viewBox="0 0 ${dim.x} ${LineChart.fixedHeight}">
-            <polyline
-                fill="none"
-                stroke="#0074d9"
-                stroke-width="3"
-                points="${createPoints(data.samples, top, width, right)}"/>
-            </svg>
-            ''');
+    while (data.samples.isNotEmpty) {
+      HeapSample newSample = data.samples.removeAt(0);
+      plotlyChart.plotMemoryDataList([newSample.timestamp], [newSample.rss],
+          [newSample.capacity], [newSample.used], [newSample.external]);
+    }
   }
 
-  String createPoints(List<HeapSample> samples, int top, int width, int right) {
-    // 0,120 20,60 40,80 60,20
-    return samples.map((HeapSample sample) {
-      final int x = dim.x - ((right - sample.time) * dim.x ~/ width);
-      final int y = dim.y - (sample.bytes * dim.y ~/ top);
-      return '$x,$y';
-    }).join(' ');
+  void pause() {
+    _memoryScreen.updatePauseButton(disabled: true);
+    _memoryScreen.updateResumeButton(disabled: false);
+
+    plotlyChart.setLiveUpdate(live: false);
+  }
+
+  void resume() {
+    _memoryScreen.updateResumeButton(disabled: true);
+    _memoryScreen.updatePauseButton(disabled: false);
+
+    plotlyChart.setLiveUpdate(live: true);
   }
 }
 
 class MemoryTracker {
   MemoryTracker(this.service);
 
-  static const Duration kMaxGraphTime = Duration(minutes: 1);
-  static const Duration kUpdateDelay = Duration(seconds: 1);
+  static const Duration kUpdateDelay = Duration(milliseconds: 200);
 
   VmServiceWrapper service;
   Timer _pollingTimer;
@@ -407,15 +475,12 @@ class MemoryTracker {
 
   Stream<Null> get onChange => _changeController.stream;
 
-  int get currentHeap => samples.last.bytes;
-
-  int get maxHeapData {
-    return samples.fold<int>(heapMax,
-        (int value, HeapSample sample) => math.max(value, sample.bytes));
-  }
+  int get currentCapacity => samples.last.capacity;
+  int get currentUsed => samples.last.used;
+  int get currentExternal => samples.last.external;
 
   void start() {
-    _pollingTimer = Timer(const Duration(milliseconds: 100), _pollMemory);
+    _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
     service.onGCEvent.listen(_handleGCEvent);
   }
 
@@ -432,8 +497,10 @@ class MemoryTracker {
       HeapSpace.parse(event.json['old'])
     ];
     _updateGCEvent(event.isolate.id, heaps);
+    // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
+  // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
   Future<Null> _pollMemory() async {
     if (!hasConnection) {
       return;
@@ -448,8 +515,6 @@ class MemoryTracker {
 
     _pollingTimer = Timer(kUpdateDelay, _pollMemory);
   }
-
-  // TODO(devoncarew): add a way to pause polling
 
   void _update(VM vm, List<Isolate> isolates) {
     processRss = vm.json['_currentRSS'];
@@ -473,7 +538,18 @@ class MemoryTracker {
     int current = 0;
     int total = 0;
 
+    int used = 0;
+    int capacity = 0;
+    int external = 0;
     for (List<HeapSpace> heaps in isolateHeaps.values) {
+      used += heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.used);
+      capacity +=
+          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.capacity);
+      external +=
+          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.external);
+
+      capacity += external;
+
       current += heaps.fold<int>(
           0, (int i, HeapSpace heap) => i + heap.used + heap.external);
       total += heaps.fold<int>(
@@ -484,26 +560,15 @@ class MemoryTracker {
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (samples.isNotEmpty) {
-      time = math.max(time, samples.last.time);
+      time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(HeapSample(current, time, fromGC));
+    _addSample(
+        HeapSample(time, this.processRss, capacity, used, external, fromGC));
   }
 
   void _addSample(HeapSample sample) {
-    if (samples.isEmpty) {
-      // Add an initial synthetic sample so the first version of the graph draws some data.
-      samples.add(HeapSample(
-          sample.bytes, sample.time - kUpdateDelay.inMilliseconds ~/ 4, false));
-    }
-
     samples.add(sample);
-
-    // delete old samples
-    final int oldestTime =
-        (DateTime.now().subtract(kMaxGraphTime).subtract(kUpdateDelay * 2))
-            .millisecondsSinceEpoch;
-    samples.retainWhere((HeapSample sample) => sample.time >= oldestTime);
 
     _changeController.add(null);
   }
@@ -516,10 +581,14 @@ class MemoryTracker {
 }
 
 class HeapSample {
-  HeapSample(this.bytes, this.time, this.isGC);
+  HeapSample(this.timestamp, this.rss, this.capacity, this.used, this.external,
+      this.isGC);
 
-  final int bytes;
-  final int time;
+  final int timestamp;
+  final int rss;
+  final int capacity;
+  final int used;
+  final int external;
   final bool isGC;
 }
 

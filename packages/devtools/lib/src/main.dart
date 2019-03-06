@@ -34,9 +34,7 @@ class PerfToolFramework extends Framework {
     addScreen(InspectorScreen());
     addScreen(TimelineScreen());
     addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
-    if (showMemoryPage) {
-      addScreen(MemoryScreen());
-    }
+    addScreen(MemoryScreen());
     if (showPerformancePage) {
       addScreen(PerformanceScreen());
     }

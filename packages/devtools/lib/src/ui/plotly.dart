@@ -33,6 +33,12 @@ external bool _hookupPlotlyLegendClick(
   Function jsFunction,
 );
 
+@JS('hookupPlotlyDoubleClick')
+external void _hookupPlotlyDoubleClick(
+  String domName,
+  Function jsFunction,
+);
+
 @JS()
 external void myExtendTraces(
   String domName,
@@ -119,6 +125,7 @@ class Data {
     bool showlegend,
     String legendgroup,
     List<int> width,
+    String visible,
   });
 
   external List get x;
@@ -136,6 +143,7 @@ class Data {
   external bool get showlegend;
   external String get legendgroup;
   external List<int> get width;
+  external String get visible;
 }
 
 @JS()
@@ -337,6 +345,7 @@ class AxisLayout {
   external String get exponentformat;
   external String get showticksuffix;
   external String get hoverformat;
+  external String get hockerformat;
 }
 
 @JS()
@@ -498,4 +507,11 @@ bool legendClick(
 ) {
   // Hookup clicks in the legend in a plotly chart.
   return _hookupPlotlyLegendClick(domName, allowInterop(f));
+}
+
+void doubleClick(
+  String domName,
+  Function f,
+) {
+  _hookupPlotlyDoubleClick(domName, allowInterop(f));
 }

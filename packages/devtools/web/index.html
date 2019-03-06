@@ -55,6 +55,12 @@
             graph.on('plotly_legendclick', jsFunction);
         }
 
+
+        function hookupPlotlyDoubleClick(domName, jsFunction) {
+            var graph = document.getElementById(domName);
+            graph.on('plotly_doubleclick', jsFunction);
+        }
+
         function _copyTrace(x, y, orgTrace, xData, yData, traces) {
           if (x.length > 0) {
             var newX = [];
