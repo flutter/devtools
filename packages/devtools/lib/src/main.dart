@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
-import 'package:devtools/src/ui/ui_utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'core/message_bus.dart';
@@ -22,6 +21,7 @@ import 'timeline/timeline.dart';
 import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'ui/primer.dart';
+import 'ui/ui_utils.dart';
 import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
@@ -33,11 +33,11 @@ class PerfToolFramework extends Framework {
   PerfToolFramework() {
     addScreen(InspectorScreen());
     addScreen(TimelineScreen());
-    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
     addScreen(MemoryScreen());
     if (showPerformancePage) {
       addScreen(PerformanceScreen());
     }
+    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
     addScreen(LoggingScreen());
 
     sortScreens();

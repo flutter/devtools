@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:devtools/src/ui/icons.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -15,7 +14,10 @@ import '../globals.dart';
 import '../tables.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/split.dart' as split;
+import '../ui/ui_utils.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 
@@ -23,7 +25,7 @@ import 'memory_plotly.dart';
 
 // TODO(devoncarew): expose _getAllocationProfile
 
-class MemoryScreen extends Screen {
+class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen()
       : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
     classCountStatus = StatusItem();
@@ -36,7 +38,6 @@ class MemoryScreen extends Screen {
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
 
-  PButton loadSnapshotButton;
   PButton pauseButton;
   PButton resumeButton;
 
@@ -46,10 +47,9 @@ class MemoryScreen extends Screen {
   PButton gcNowButton;
 
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+  MemoryChart memoryChart;
   CoreElement tableContainer;
 
-  MemoryChart memoryChart;
-  SetStateMixin memoryChartStateMixin = SetStateMixin();
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
 
@@ -81,22 +81,23 @@ class MemoryScreen extends Screen {
       ..clazz('margin-left');
 
     // TODO(terry): Need to correctly handle enabled and disabled.
-    vmMemorySnapshotButton = PButton.icon('', FlutterIcons.snapshotDisabled,
+    vmMemorySnapshotButton = PButton.icon('Snapshot', FlutterIcons.snapshot,
         title: 'Memory Snapshot')
       ..small()
       ..clazz('margin-left')
+      ..click(_loadAllocationProfile)
       ..disabled = true;
     resetAccumulatorsButton = PButton.icon(
-        '', FlutterIcons.resetAccumulatorsDisabled,
+        'Reset', FlutterIcons.resetAccumulators,
         title: 'Reset Accumulators')
       ..small()
       ..disabled = true;
     filterLibrariesButton =
-        PButton.icon('', FlutterIcons.filterDisabled, title: 'Filter')
+        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
           ..small()
           ..disabled = true;
     gcNowButton =
-        PButton.icon('', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+        PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
           ..small()
           ..click(_gcNow);
 
@@ -115,26 +116,41 @@ class MemoryScreen extends Screen {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              loadSnapshotButton = PButton('Load heap snapshot')
-                ..small()
-                ..primary()
-                ..disabled = true
-                ..click(_loadAllocationProfile),
-              pauseButton,
-              resumeButton,
-              div()..flex(),
-              vmMemorySnapshotButton,
-              resetAccumulatorsButton,
-              filterLibrariesButton,
-              gcNowButton,
-            ])
+              div(c: 'btn-group flex-no-wrap margin-left')
+                ..add(<CoreElement>[
+                  pauseButton,
+                  resumeButton,
+                ]),
+              div(c: 'btn-group flex-no-wrap margin-left')
+                ..add(<CoreElement>[
+                  vmMemorySnapshotButton,
+                  resetAccumulatorsButton,
+                  filterLibrariesButton,
+                  gcNowButton,
+                ]),
+            ]),
         ]),
-      createLiveChartArea(),
+      memoryChart = MemoryChart(this)..disabled = true,
       div(c: 'section'),
-      tableContainer = div(c: 'section overflow-auto')..layoutHorizontal()
+      tableContainer = div(c: 'section overflow-auto')
+        ..layoutHorizontal()
+        ..flex(),
     ]);
 
     _pushNextTable(null, _createHeapStatsTableView());
+
+    bool splitterConfigured = false;
+
+    if (!splitterConfigured) {
+      split.flexSplit(
+        [memoryChart, tableContainer],
+        horizontal: false,
+        gutterSize: defaultSplitterWidth,
+        sizes: [18, 82],
+        minSize: [200, 200],
+      );
+      splitterConfigured = true;
+    }
 
     _updateStatus(null);
 
@@ -179,7 +195,7 @@ class MemoryScreen extends Screen {
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   Future<Null> _loadAllocationProfile() async {
-    loadSnapshotButton.disabled = true;
+    vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
         tableStack.first.element.add(Spinner()..clazz('padded'));
@@ -202,11 +218,10 @@ class MemoryScreen extends Screen {
       _updateStatus(heapStats);
       spinner.element.remove();
     } finally {
-      loadSnapshotButton.disabled = false;
+      vmMemorySnapshotButton.disabled = false;
     }
   }
 
-  // TODO(terry): Need to record the GC event in the timeline.
   Future<Null> _gcNow() async {
     gcNowButton.disabled = true;
 
@@ -215,7 +230,7 @@ class MemoryScreen extends Screen {
       await serviceManager.service.callMethod('_getAllocationProfile',
           isolateId: _isolateId, args: {'gc': 'full'});
     } catch (e) {
-      // TODO(terry): Need something probably logging?
+      framework.toast('Unable to GC', title: 'Error');
       print('ERROR: $e');
     } finally {
       gcNowButton.disabled = false;
@@ -279,17 +294,6 @@ class MemoryScreen extends Screen {
 //    });
 //  }
 
-  CoreElement createLiveChartArea() {
-    final CoreElement container = div(c: 'section perf-chart table-border')
-      ..layoutVertical();
-    memoryChart = MemoryChart(this);
-
-    container.add(memoryChart);
-
-    memoryChart.disabled = true;
-    return container;
-  }
-
   Table<ClassHeapStats> _createHeapStatsTableView() {
     final Table<ClassHeapStats> table = Table<ClassHeapStats>.virtual()
       ..element.display = 'none'
@@ -311,21 +315,34 @@ class MemoryScreen extends Screen {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    loadSnapshotButton.disabled = false;
+    pauseButton.disabled = false;
+    resumeButton.disabled = true;
+
+    vmMemorySnapshotButton.disabled = false;
+    gcNowButton.disabled = false;
+
     memoryChart.disabled = false;
 
     memoryTracker = MemoryTracker(service);
     memoryTracker.start();
 
     memoryTracker.onChange.listen((Null _) {
-      memoryChartStateMixin.setState(() {
+      setState(() {
         memoryChart.updateFrom(memoryTracker);
       });
     });
   }
 
   void _handleConnectionStop(dynamic event) {
-    loadSnapshotButton.disabled = true;
+    pauseButton.disabled = true;
+    resumeButton.disabled = true;
+
+    vmMemorySnapshotButton.disabled = true;
+    resetAccumulatorsButton.disabled = true;
+    filterLibrariesButton.disabled = true;
+
+    gcNowButton.disabled = true;
+
     memoryChart.disabled = true;
 
     memoryTracker?.stop();
@@ -409,47 +426,56 @@ class MemoryColumnSimple<T> extends Column<T> {
 }
 
 class MemoryChart extends CoreElement {
-  MemoryChart(this._memoryScreen) : super('div') {
-    element.id = memoryGraph;
+  MemoryChart(this._memoryScreen)
+      : super('div', classes: 'section section-border') {
+    flex();
+    layoutVertical();
+
+    element.id = _memoryGraph;
     element.style
-      ..alignItems = 'flex-end'
-      ..height = '${chartHeight}px'
-      ..paddingTop = '${topPadding}px';
+      ..boxSizing = 'content-box'; // border-box causes right/left border cut.
   }
 
-  static const String memoryGraph = 'memory_timeline';
-  static const int chartHeight = 320;
-  static const int topPadding = 0;
+  static const String _memoryGraph = 'memory_timeline';
 
   final MemoryScreen _memoryScreen;
-  bool chartCreated = false;
-  MemoryPlotly plotlyChart;
+  bool _chartCreated = false;
+  MemoryPlotly _plotlyChart;
 
   void updateFrom(MemoryTracker data) {
-    if (!chartCreated) {
-      plotlyChart = MemoryPlotly(memoryGraph, this)..plotMemory();
-      chartCreated = true;
+    if (!_chartCreated) {
+      _plotlyChart = MemoryPlotly(_memoryGraph, this)..plotMemory();
+      _chartCreated = true;
     }
 
-    while (data.samples.isNotEmpty) {
-      final HeapSample newSample = data.samples.removeAt(0);
-      plotlyChart.plotMemoryDataList([newSample.timestamp], [newSample.rss],
-          [newSample.capacity], [newSample.used], [newSample.external]);
+    for (HeapSample newSample in data.samples) {
+      _plotlyChart.plotMemoryDataList(
+        [newSample.timestamp],
+        [newSample.rss],
+        [newSample.capacity],
+        [newSample.used],
+        [newSample.external],
+      );
+
+      // TODO(terry): Need to add glyph to a GC trace.  Noticing GC within 100ms
+      // of last GC should be ignored (same GC?). Check with VM folks.
+      if (newSample.isGC) print('GC Occurred ${newSample.timestamp}');
     }
+    data.samples.clear();
   }
 
   void pause() {
     _memoryScreen.updatePauseButton(disabled: true);
     _memoryScreen.updateResumeButton(disabled: false);
 
-    plotlyChart.setLiveUpdate(live: false);
+    _plotlyChart.liveUpdate = false;
   }
 
   void resume() {
     _memoryScreen.updateResumeButton(disabled: true);
     _memoryScreen.updatePauseButton(disabled: false);
 
-    plotlyChart.setLiveUpdate(live: true);
+    _plotlyChart.liveUpdate = true;
   }
 }
 

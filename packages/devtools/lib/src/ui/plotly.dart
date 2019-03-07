@@ -144,6 +144,8 @@ class Data {
   external String get legendgroup;
   external List<int> get width;
   external String get visible;
+
+  external void set visible(String);
 }
 
 @JS()

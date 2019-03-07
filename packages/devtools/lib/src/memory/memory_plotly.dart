@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools/src/memory/memory.dart';
 import '../ui/plotly.dart';
+
+import 'memory.dart';
 
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
@@ -25,7 +26,7 @@ class MemoryPlotly {
           title: 'Heap',
           fixedrange: true,
         ),
-        margin: Margin(l: 80, r: 0, b: 5, t: 5, pad: 5));
+        margin: Margin(l: 80, r: 5, b: 5, t: 5, pad: 5));
   }
 
 //  static const int MEMORY_GC_TRACE = 0;   // TODO(terry):
@@ -39,6 +40,32 @@ class MemoryPlotly {
   static const String CAPACITY_COLOR = '#C0C0C0';
   static const String EXTERNAL_COLOR = '#4794C0';
   static const String USED_COLOR = '#48B2E7';
+
+  Data _createTrace(String name, String color, {String group, String dash}) {
+    String dashName = '';
+    int widthValue = 0;
+    String modeName = '';
+
+    if (dash != null) {
+      dashName = dash;
+      widthValue = 2;
+      modeName = 'lines';
+    }
+    return Data(
+      x: [],
+      y: [],
+      text: [],
+      line: Line(
+        color: color,
+        dash: dashName,
+        width: widthValue,
+      ),
+      type: 'scatter',
+      mode: modeName,
+      stackgroup: group != null ? 'one' : '',
+      name: name,
+    );
+  }
 
   List<Data> createMemoryTraces() {
     /* TODO(terry): Enable gc markers.
@@ -57,58 +84,27 @@ class MemoryPlotly {
     );
     */
 
-    final Data externalTrace = Data(
-      x: [],
-      y: [],
-      text: [],
-      line: Line(
-        color: EXTERNAL_COLOR,
-      ),
-      type: 'scatter',
-      stackgroup: 'one',
-      name: 'External',
+    final Data externalTrace = _createTrace(
+      'External',
+      EXTERNAL_COLOR,
+      group: 'one',
     );
-
-    final Data usedTrace = Data(
-      x: [],
-      y: [],
-      text: [],
-      line: Line(
-        color: USED_COLOR,
-      ),
-      type: 'scatter',
-      stackgroup: 'one',
-      name: 'Used',
+    final Data usedTrace = _createTrace(
+      'Used',
+      USED_COLOR,
+      group: 'one',
     );
-
-    final Data capacityTrace = Data(
-      x: [],
-      y: [],
-      text: [],
-      line: Line(
-        color: CAPACITY_COLOR,
-        dash: 'dot',
-        width: 2,
-      ),
-      type: 'scatter',
-      mode: 'lines',
-      name: 'Capacity',
+    final Data capacityTrace = _createTrace(
+      'Capacity',
+      CAPACITY_COLOR,
+      dash: 'dot',
     );
-
-    final Data rssTrace = Data(
-      x: [],
-      y: [],
-      text: [],
-      line: Line(
-        color: RSS_COLOR,
-        dash: 'dash',
-        width: 2,
-      ),
-      type: 'scatter',
-      visible: 'legendonly',
-      mode: 'lines',
-      name: 'RSS',
+    final Data rssTrace = _createTrace(
+      'RSS',
+      RSS_COLOR,
+      dash: 'dash',
     );
+    rssTrace.visible = 'legendonly';
 
     return [externalTrace, usedTrace, capacityTrace, rssTrace];
   }
@@ -141,14 +137,14 @@ class MemoryPlotly {
     // TODO(terry): Eliminate this JS call (result of reified List?).
     myExtendTraces(
       _domName,
-      timestamps,
-      timestamps,
-      timestamps,
-      timestamps,
-      rsses,
-      capacities,
-      externals,
-      uses,
+      timestamps, // x coordinates for RSS trace.
+      timestamps, // x coordinates for capacity trace.
+      timestamps, // x coordinates for external trace.
+      timestamps, // x coordinates for used trace.
+      rsses, // y coordinates for RSS trace.
+      capacities, // y coordinates for capacity trace.
+      externals, // y coordinates for external trace.
+      uses, // y coordinates for used trace.
       [
         MEMORY_RSS_TRACE,
         MEMORY_CAPACITY_TRACE,
