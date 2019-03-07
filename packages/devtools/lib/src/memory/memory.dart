@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -19,9 +18,10 @@ import '../ui/primer.dart';
 import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../utils.dart';
-import '../vm_service_wrapper.dart';
 
+import 'memory_controller.dart';
 import 'memory_plotly.dart';
+import 'memory_protocol.dart';
 
 // TODO(devoncarew): expose _getAllocationProfile
 
@@ -34,6 +34,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     objectCountStatus = StatusItem();
     addStatusItem(objectCountStatus);
   }
+
+  MemoryController memoryController = MemoryController();
 
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
@@ -53,6 +55,11 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
 
+  @override
+  void entering() {
+    _updateListeningState();
+  }
+
   void updateResumeButton({@required bool disabled}) {
     resumeButton.disabled = disabled;
     resumeButton.changeIcon(disabled
@@ -69,7 +76,8 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')
+      ..layoutVertical();
 
     resumeButton = PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
       ..primary()
@@ -93,13 +101,13 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..disabled = true;
     filterLibrariesButton =
-        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
-          ..small()
-          ..disabled = true;
+    PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
+      ..small()
+      ..disabled = true;
     gcNowButton =
-        PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
-          ..small()
-          ..click(_gcNow);
+    PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+      ..small()
+      ..click(_gcNow);
 
     resumeButton.click(() {
       memoryChart.resume();
@@ -130,7 +138,8 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      memoryChart = MemoryChart(this)..disabled = true,
+      memoryChart = MemoryChart(this, memoryController)
+        ..disabled = true,
       div(c: 'section'),
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
@@ -153,17 +162,6 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
 
     _updateStatus(null);
-
-    // TODO(devoncarew): don't rebuild until the component is active
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-      _handleIsolateChanged();
-    });
-
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceManager.hasConnection) {
-      _handleConnectionStart(serviceManager.service);
-    }
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
 
     return screenDiv;
   }
@@ -188,17 +186,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  void _handleIsolateChanged() {
-    // TODO(devoncarew): update buttons
-  }
-
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   Future<Null> _loadAllocationProfile() async {
     vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-        tableStack.first.element.add(Spinner()..clazz('padded'));
+    tableStack.first.element.add(Spinner()
+      ..clazz('padded'));
 
     // TODO(devoncarew): error handling
 
@@ -314,40 +309,6 @@ class MemoryScreen extends Screen with SetStateMixin {
     return table;
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
-    pauseButton.disabled = false;
-    resumeButton.disabled = true;
-
-    vmMemorySnapshotButton.disabled = false;
-    gcNowButton.disabled = false;
-
-    memoryChart.disabled = false;
-
-    memoryTracker = MemoryTracker(service);
-    memoryTracker.start();
-
-    memoryTracker.onChange.listen((Null _) {
-      setState(() {
-        memoryChart.updateFrom(memoryTracker);
-      });
-    });
-  }
-
-  void _handleConnectionStop(dynamic event) {
-    pauseButton.disabled = true;
-    resumeButton.disabled = true;
-
-    vmMemorySnapshotButton.disabled = true;
-    resetAccumulatorsButton.disabled = true;
-    filterLibrariesButton.disabled = true;
-
-    gcNowButton.disabled = true;
-
-    memoryChart.disabled = true;
-
-    memoryTracker?.stop();
-  }
-
   void _updateStatus(List<ClassHeapStats> data) {
     if (data == null) {
       classCountStatus.element.text = '';
@@ -360,6 +321,38 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
       objectCountStatus.element.text = '${nf.format(objectCount)} objects';
     }
+  }
+
+  void _updateListeningState() async {
+    await serviceManager.serviceAvailable.future;
+
+    final bool shouldBeRunning = isCurrentScreen;
+
+    if (shouldBeRunning && !memoryController.hasStarted) {
+      await memoryController.startTimeline();
+
+      pauseButton.disabled = false;
+      resumeButton.disabled = true;
+
+      vmMemorySnapshotButton.disabled = false;
+      gcNowButton.disabled = false;
+
+      memoryChart.disabled = false;
+    }
+  }
+
+  // VM Service has stopped (disconnected).
+  void serviceDisconnet() {
+    pauseButton.disabled = true;
+    resumeButton.disabled = true;
+
+    vmMemorySnapshotButton.disabled = true;
+    resetAccumulatorsButton.disabled = true;
+    filterLibrariesButton.disabled = true;
+
+    gcNowButton.disabled = true;
+
+    memoryChart.disabled = true;
   }
 }
 
@@ -426,7 +419,7 @@ class MemoryColumnSimple<T> extends Column<T> {
 }
 
 class MemoryChart extends CoreElement {
-  MemoryChart(this._memoryScreen)
+  MemoryChart(this._memoryScreen, this._memoryController)
       : super('div', classes: 'section section-border') {
     flex();
     layoutVertical();
@@ -434,15 +427,26 @@ class MemoryChart extends CoreElement {
     element.id = _memoryGraph;
     element.style
       ..boxSizing = 'content-box'; // border-box causes right/left border cut.
+
+    _memoryController.onMemory.listen((MemoryTracker memoryTracker) {
+      if (!_memoryController.memoryTracker.hasConnection) {
+        // VM Service connection has stopped.
+        _memoryScreen.serviceDisconnet();
+      } else {
+        updateChart(memoryTracker);
+      }
+    });
   }
 
   static const String _memoryGraph = 'memory_timeline';
 
   final MemoryScreen _memoryScreen;
+  final MemoryController _memoryController;
+
   bool _chartCreated = false;
   MemoryPlotly _plotlyChart;
 
-  void updateFrom(MemoryTracker data) {
+  void updateChart(MemoryTracker data) {
     if (!_chartCreated) {
       _plotlyChart = MemoryPlotly(_memoryGraph, this)..plotMemory();
       _chartCreated = true;
@@ -477,138 +481,6 @@ class MemoryChart extends CoreElement {
 
     _plotlyChart.liveUpdate = true;
   }
-}
-
-class MemoryTracker {
-  MemoryTracker(this.service);
-
-  static const Duration kUpdateDelay = Duration(milliseconds: 200);
-
-  VmServiceWrapper service;
-  Timer _pollingTimer;
-  final StreamController<Null> _changeController =
-      StreamController<Null>.broadcast();
-
-  final List<HeapSample> samples = <HeapSample>[];
-  final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
-  int heapMax;
-  int processRss;
-
-  bool get hasConnection => service != null;
-
-  Stream<Null> get onChange => _changeController.stream;
-
-  int get currentCapacity => samples.last.capacity;
-  int get currentUsed => samples.last.used;
-  int get currentExternal => samples.last.external;
-
-  void start() {
-    _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
-    service.onGCEvent.listen(_handleGCEvent);
-  }
-
-  void stop() {
-    _pollingTimer?.cancel();
-    service = null;
-  }
-
-  void _handleGCEvent(Event event) {
-    //final bool ignore = event.json['reason'] == 'compact';
-
-    final List<HeapSpace> heaps = <HeapSpace>[
-      HeapSpace.parse(event.json['new']),
-      HeapSpace.parse(event.json['old'])
-    ];
-    _updateGCEvent(event.isolate.id, heaps);
-    // TODO(terry): expose when GC occured as markers in memory timeline.
-  }
-
-  // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
-  Future<Null> _pollMemory() async {
-    if (!hasConnection) {
-      return;
-    }
-
-    final VM vm = await service.getVM();
-    final List<Isolate> isolates =
-        await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      return await service.getIsolate(ref.id);
-    }));
-    _update(vm, isolates);
-
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
-  }
-
-  void _update(VM vm, List<Isolate> isolates) {
-    processRss = vm.json['_currentRSS'];
-
-    isolateHeaps.clear();
-
-    for (Isolate isolate in isolates) {
-      final List<HeapSpace> heaps = getHeaps(isolate).toList();
-      isolateHeaps[isolate.id] = heaps;
-    }
-
-    _recalculate();
-  }
-
-  void _updateGCEvent(String id, List<HeapSpace> heaps) {
-    isolateHeaps[id] = heaps;
-    _recalculate(true);
-  }
-
-  void _recalculate([bool fromGC = false]) {
-    int total = 0;
-
-    int used = 0;
-    int capacity = 0;
-    int external = 0;
-    for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.used);
-      capacity +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.capacity);
-      external +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.external);
-
-      capacity += external;
-
-      total += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
-    }
-
-    heapMax = total;
-
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (samples.isNotEmpty) {
-      time = math.max(time, samples.last.timestamp);
-    }
-
-    _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
-  }
-
-  void _addSample(HeapSample sample) {
-    samples.add(sample);
-
-    _changeController.add(null);
-  }
-
-  // TODO(devoncarew): fix HeapSpace.parse upstream
-  static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    final Map<String, dynamic> heaps = isolate.json['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
-  }
-}
-
-class HeapSample {
-  HeapSample(this.timestamp, this.rss, this.capacity, this.used, this.external,
-      this.isGC);
-
-  final int timestamp;
-  final int rss;
-  final int capacity;
-  final int used;
-  final int external;
-  final bool isGC;
 }
 
 // {
