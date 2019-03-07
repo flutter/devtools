@@ -1,28 +1,31 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import '../charts/charts.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../tables.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
+import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/split.dart' as split;
+import '../ui/ui_utils.dart';
 import '../utils.dart';
-import '../vm_service_wrapper.dart';
+
+import 'memory_controller.dart';
+import 'memory_plotly.dart';
+import 'memory_protocol.dart';
 
 // TODO(devoncarew): expose _getAllocationProfile
 
-// TODO(devoncarew): have a 'show vm objects' checkbox
-
-class MemoryScreen extends Screen {
+class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen()
       : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
     classCountStatus = StatusItem();
@@ -32,60 +35,131 @@ class MemoryScreen extends Screen {
     addStatusItem(objectCountStatus);
   }
 
+  final MemoryController memoryController = MemoryController();
+
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
 
-  PButton loadSnapshotButton;
+  PButton pauseButton;
+  PButton resumeButton;
+
+  PButton vmMemorySnapshotButton;
+  PButton resetAccumulatorsButton;
+  PButton filterLibrariesButton;
+  PButton gcNowButton;
 
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+  MemoryChart memoryChart;
   CoreElement tableContainer;
 
-  MemoryChart memoryChart;
-  SetStateMixin memoryChartStateMixin = SetStateMixin();
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
+
+  @override
+  void entering() {
+    _updateListeningState();
+  }
+
+  void updateResumeButton({@required bool disabled}) {
+    resumeButton.disabled = disabled;
+    resumeButton.changeIcon(disabled
+        ? FlutterIcons.resume_white_disabled_2x.src
+        : FlutterIcons.resume_white_2x.src);
+  }
+
+  void updatePauseButton({@required bool disabled}) {
+    pauseButton.disabled = disabled;
+    pauseButton.changeIcon(disabled
+        ? FlutterIcons.pause_black_disabled_2x.src
+        : FlutterIcons.pause_black_2x.src);
+  }
 
   @override
   CoreElement createContent(Framework framework) {
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
+    resumeButton = PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
+      ..primary()
+      ..small()
+      ..disabled = true;
+
+    pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)
+      ..small()
+      ..clazz('margin-left');
+
+    // TODO(terry): Need to correctly handle enabled and disabled.
+    vmMemorySnapshotButton = PButton.icon('Snapshot', FlutterIcons.snapshot,
+        title: 'Memory Snapshot')
+      ..small()
+      ..clazz('margin-left')
+      ..click(_loadAllocationProfile)
+      ..disabled = true;
+    resetAccumulatorsButton = PButton.icon(
+        'Reset', FlutterIcons.resetAccumulators,
+        title: 'Reset Accumulators')
+      ..small()
+      ..disabled = true;
+    filterLibrariesButton =
+        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
+          ..small()
+          ..disabled = true;
+    gcNowButton =
+        PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+          ..small()
+          ..click(_gcNow);
+
+    resumeButton.click(() {
+      memoryChart.resume();
+    });
+
+    pauseButton.click(() {
+      memoryChart.pause();
+    });
+
     screenDiv.add(<CoreElement>[
-      createLiveChartArea(),
-      div(c: 'section'),
       div(c: 'section')
         ..add(<CoreElement>[
           form()
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              loadSnapshotButton = PButton('Load heap snapshot')
-                ..small()
-                ..primary()
-                ..disabled = true
-                ..click(_loadAllocationProfile),
-              progressElement = ProgressElement()
-                ..clazz('margin-left')
-                ..display = 'none',
-              div()..flex(),
-            ])
+              div(c: 'btn-group flex-no-wrap margin-left')
+                ..add(<CoreElement>[
+                  pauseButton,
+                  resumeButton,
+                ]),
+              div(c: 'btn-group flex-no-wrap margin-left')
+                ..add(<CoreElement>[
+                  vmMemorySnapshotButton,
+                  resetAccumulatorsButton,
+                  filterLibrariesButton,
+                  gcNowButton,
+                ]),
+            ]),
         ]),
-      tableContainer = div(c: 'section overflow-auto')..layoutHorizontal()
+      memoryChart = MemoryChart(this, memoryController)..disabled = true,
+      div(c: 'section'),
+      tableContainer = div(c: 'section overflow-auto')
+        ..layoutHorizontal()
+        ..flex(),
     ]);
 
     _pushNextTable(null, _createHeapStatsTableView());
 
-    _updateStatus(null);
+    bool splitterConfigured = false;
 
-    // TODO(devoncarew): don't rebuild until the component is active
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-      _handleIsolateChanged();
-    });
-
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceManager.hasConnection) {
-      _handleConnectionStart(serviceManager.service);
+    if (!splitterConfigured) {
+      split.flexSplit(
+        [memoryChart, tableContainer],
+        horizontal: false,
+        gutterSize: defaultSplitterWidth,
+        sizes: [18, 82],
+        minSize: [200, 200],
+      );
+      splitterConfigured = true;
     }
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
+    _updateStatus(null);
 
     return screenDiv;
   }
@@ -110,14 +184,10 @@ class MemoryScreen extends Screen {
     }
   }
 
-  void _handleIsolateChanged() {
-    // TODO(devoncarew): update buttons
-  }
-
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   Future<Null> _loadAllocationProfile() async {
-    loadSnapshotButton.disabled = true;
+    vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
         tableStack.first.element.add(Spinner()..clazz('padded'));
@@ -140,7 +210,22 @@ class MemoryScreen extends Screen {
       _updateStatus(heapStats);
       spinner.element.remove();
     } finally {
-      loadSnapshotButton.disabled = false;
+      vmMemorySnapshotButton.disabled = false;
+    }
+  }
+
+  Future<Null> _gcNow() async {
+    gcNowButton.disabled = true;
+
+    try {
+      // 'reset': true to reset the object allocation accumulators
+      await serviceManager.service.callMethod('_getAllocationProfile',
+          isolateId: _isolateId, args: {'gc': 'full'});
+    } catch (e) {
+      framework.toast('Unable to GC', title: 'Error');
+      print('ERROR: $e');
+    } finally {
+      gcNowButton.disabled = false;
     }
   }
 
@@ -201,14 +286,6 @@ class MemoryScreen extends Screen {
 //    });
 //  }
 
-  CoreElement createLiveChartArea() {
-    final CoreElement container = div(c: 'section perf-chart table-border')
-      ..layoutVertical();
-    memoryChart = MemoryChart(container);
-    memoryChart.disabled = true;
-    return container;
-  }
-
   Table<ClassHeapStats> _createHeapStatsTableView() {
     final Table<ClassHeapStats> table = Table<ClassHeapStats>.virtual()
       ..element.display = 'none'
@@ -229,27 +306,6 @@ class MemoryScreen extends Screen {
     return table;
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
-    loadSnapshotButton.disabled = false;
-    memoryChart.disabled = false;
-
-    memoryTracker = MemoryTracker(service);
-    memoryTracker.start();
-
-    memoryTracker.onChange.listen((Null _) {
-      memoryChartStateMixin.setState(() {
-        memoryChart.updateFrom(memoryTracker);
-      });
-    });
-  }
-
-  void _handleConnectionStop(dynamic event) {
-    loadSnapshotButton.disabled = true;
-    memoryChart.disabled = true;
-
-    memoryTracker?.stop();
-  }
-
   void _updateStatus(List<ClassHeapStats> data) {
     if (data == null) {
       classCountStatus.element.text = '';
@@ -262,6 +318,38 @@ class MemoryScreen extends Screen {
       }
       objectCountStatus.element.text = '${nf.format(objectCount)} objects';
     }
+  }
+
+  void _updateListeningState() async {
+    await serviceManager.serviceAvailable.future;
+
+    final bool shouldBeRunning = isCurrentScreen;
+
+    if (shouldBeRunning && !memoryController.hasStarted) {
+      await memoryController.startTimeline();
+
+      pauseButton.disabled = false;
+      resumeButton.disabled = true;
+
+      vmMemorySnapshotButton.disabled = false;
+      gcNowButton.disabled = false;
+
+      memoryChart.disabled = false;
+    }
+  }
+
+  // VM Service has stopped (disconnected).
+  void serviceDisconnet() {
+    pauseButton.disabled = true;
+    resumeButton.disabled = true;
+
+    vmMemorySnapshotButton.disabled = true;
+    resetAccumulatorsButton.disabled = true;
+    filterLibrariesButton.disabled = true;
+
+    gcNowButton.disabled = true;
+
+    memoryChart.disabled = true;
   }
 }
 
@@ -327,200 +415,69 @@ class MemoryColumnSimple<T> extends Column<T> {
   String getValue(T item) => getter(item);
 }
 
-class MemoryChart extends LineChart<MemoryTracker> {
-  MemoryChart(CoreElement parent) : super(parent, classes: 'perf-chart') {
-    processLabel = parent.add(div(c: 'perf-label'));
-    processLabel.element.style.left = '0';
+class MemoryChart extends CoreElement {
+  MemoryChart(this._memoryScreen, this._memoryController)
+      : super('div', classes: 'section section-border') {
+    flex();
+    layoutVertical();
 
-    heapLabel = parent.add(div(c: 'perf-label'));
-    heapLabel.element.style.right = '0';
+    element.id = _memoryGraph;
+    element.style
+      ..boxSizing = 'content-box'; // border-box causes right/left border cut.
+
+    _memoryController.onMemory.listen((MemoryTracker memoryTracker) {
+      if (!_memoryController.memoryTracker.hasConnection) {
+        // VM Service connection has stopped.
+        _memoryScreen.serviceDisconnet();
+      } else {
+        updateChart(memoryTracker);
+      }
+    });
   }
 
-  CoreElement processLabel;
-  CoreElement heapLabel;
+  static const String _memoryGraph = 'memory_timeline';
 
-  @override
-  void update(MemoryTracker data) {
-    if (data.samples.isEmpty || dim == null) {
-      // TODO:
-      return;
+  final MemoryScreen _memoryScreen;
+  final MemoryController _memoryController;
+
+  bool _chartCreated = false;
+  MemoryPlotly _plotlyChart;
+
+  void updateChart(MemoryTracker data) {
+    if (!_chartCreated) {
+      _plotlyChart = MemoryPlotly(_memoryGraph, this)..plotMemory();
+      _chartCreated = true;
     }
 
-    // display the process usage
-    final String rss = '${printMb(data.processRss ?? 0, 0)} MB RSS';
-    processLabel.text = rss;
+    for (HeapSample newSample in data.samples) {
+      _plotlyChart.plotMemoryDataList(
+        [newSample.timestamp],
+        [newSample.rss],
+        [newSample.capacity],
+        [newSample.used],
+        [newSample.external],
+      );
 
-    // display the dart heap usage
-    final String used =
-        '${printMb(data.currentHeap, 1)} of ${printMb(data.heapMax, 1)} MB';
-    heapLabel.text = used;
-
-    // re-render the svg
-
-    // Make the y height large enough for the largest sample,
-    const int tenMB = 1024 * 1024 * 10;
-    final int top = (data.maxHeapData ~/ tenMB) * tenMB + tenMB;
-
-    final int width = MemoryTracker.kMaxGraphTime.inMilliseconds;
-    final int right = data.samples.last.time;
-
-    // TODO(devoncarew): draw dots for GC events?
-
-    chartElement.setInnerHtml('''
-            <svg viewBox="0 0 ${dim.x} ${LineChart.fixedHeight}">
-            <polyline
-                fill="none"
-                stroke="#0074d9"
-                stroke-width="3"
-                points="${createPoints(data.samples, top, width, right)}"/>
-            </svg>
-            ''');
-  }
-
-  String createPoints(List<HeapSample> samples, int top, int width, int right) {
-    // 0,120 20,60 40,80 60,20
-    return samples.map((HeapSample sample) {
-      final int x = dim.x - ((right - sample.time) * dim.x ~/ width);
-      final int y = dim.y - (sample.bytes * dim.y ~/ top);
-      return '$x,$y';
-    }).join(' ');
-  }
-}
-
-class MemoryTracker {
-  MemoryTracker(this.service);
-
-  static const Duration kMaxGraphTime = Duration(minutes: 1);
-  static const Duration kUpdateDelay = Duration(seconds: 1);
-
-  VmServiceWrapper service;
-  Timer _pollingTimer;
-  final StreamController<Null> _changeController =
-      StreamController<Null>.broadcast();
-
-  final List<HeapSample> samples = <HeapSample>[];
-  final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
-  int heapMax;
-  int processRss;
-
-  bool get hasConnection => service != null;
-
-  Stream<Null> get onChange => _changeController.stream;
-
-  int get currentHeap => samples.last.bytes;
-
-  int get maxHeapData {
-    return samples.fold<int>(heapMax,
-        (int value, HeapSample sample) => math.max(value, sample.bytes));
-  }
-
-  void start() {
-    _pollingTimer = Timer(const Duration(milliseconds: 100), _pollMemory);
-    service.onGCEvent.listen(_handleGCEvent);
-  }
-
-  void stop() {
-    _pollingTimer?.cancel();
-    service = null;
-  }
-
-  void _handleGCEvent(Event event) {
-    //final bool ignore = event.json['reason'] == 'compact';
-
-    final List<HeapSpace> heaps = <HeapSpace>[
-      HeapSpace.parse(event.json['new']),
-      HeapSpace.parse(event.json['old'])
-    ];
-    _updateGCEvent(event.isolate.id, heaps);
-  }
-
-  Future<Null> _pollMemory() async {
-    if (!hasConnection) {
-      return;
+      // TODO(terry): Need to add glyph to a GC trace.  Noticing GC within 100ms
+      // of last GC should be ignored (same GC?). Check with VM folks.
+      if (newSample.isGC) print('GC Occurred ${newSample.timestamp}');
     }
-
-    final VM vm = await service.getVM();
-    final List<Isolate> isolates =
-        await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      return await service.getIsolate(ref.id);
-    }));
-    _update(vm, isolates);
-
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    data.samples.clear();
   }
 
-  // TODO(devoncarew): add a way to pause polling
+  void pause() {
+    _memoryScreen.updatePauseButton(disabled: true);
+    _memoryScreen.updateResumeButton(disabled: false);
 
-  void _update(VM vm, List<Isolate> isolates) {
-    processRss = vm.json['_currentRSS'];
-
-    isolateHeaps.clear();
-
-    for (Isolate isolate in isolates) {
-      final List<HeapSpace> heaps = getHeaps(isolate).toList();
-      isolateHeaps[isolate.id] = heaps;
-    }
-
-    _recalculate();
+    _plotlyChart.liveUpdate = false;
   }
 
-  void _updateGCEvent(String id, List<HeapSpace> heaps) {
-    isolateHeaps[id] = heaps;
-    _recalculate(true);
+  void resume() {
+    _memoryScreen.updateResumeButton(disabled: true);
+    _memoryScreen.updatePauseButton(disabled: false);
+
+    _plotlyChart.liveUpdate = true;
   }
-
-  void _recalculate([bool fromGC = false]) {
-    int current = 0;
-    int total = 0;
-
-    for (List<HeapSpace> heaps in isolateHeaps.values) {
-      current += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.used + heap.external);
-      total += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
-    }
-
-    heapMax = total;
-
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (samples.isNotEmpty) {
-      time = math.max(time, samples.last.time);
-    }
-
-    _addSample(HeapSample(current, time, fromGC));
-  }
-
-  void _addSample(HeapSample sample) {
-    if (samples.isEmpty) {
-      // Add an initial synthetic sample so the first version of the graph draws some data.
-      samples.add(HeapSample(
-          sample.bytes, sample.time - kUpdateDelay.inMilliseconds ~/ 4, false));
-    }
-
-    samples.add(sample);
-
-    // delete old samples
-    final int oldestTime =
-        (DateTime.now().subtract(kMaxGraphTime).subtract(kUpdateDelay * 2))
-            .millisecondsSinceEpoch;
-    samples.retainWhere((HeapSample sample) => sample.time >= oldestTime);
-
-    _changeController.add(null);
-  }
-
-  // TODO(devoncarew): fix HeapSpace.parse upstream
-  static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    final Map<String, dynamic> heaps = isolate.json['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
-  }
-}
-
-class HeapSample {
-  HeapSample(this.bytes, this.time, this.isGC);
-
-  final int bytes;
-  final int time;
-  final bool isGC;
 }
 
 // {
