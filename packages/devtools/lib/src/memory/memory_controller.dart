@@ -15,13 +15,12 @@ import 'memory_protocol.dart';
 /// simplify porting this code to work with Hummingbird.
 class MemoryController {
   final StreamController<MemoryTracker> _memoryTrackerController =
-  StreamController<MemoryTracker>.broadcast();
+      StreamController<MemoryTracker>.broadcast();
 
   Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
 
   MemoryTracker _memoryTracker;
   MemoryTracker get memoryTracker => _memoryTracker;
-
 
   bool get hasStarted => _memoryTracker != null;
 

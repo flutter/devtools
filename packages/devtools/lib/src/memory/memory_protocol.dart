@@ -17,7 +17,7 @@ class MemoryTracker {
   VmServiceWrapper service;
   Timer _pollingTimer;
   final StreamController<Null> _changeController =
-  StreamController<Null>.broadcast();
+      StreamController<Null>.broadcast();
 
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
@@ -61,7 +61,7 @@ class MemoryTracker {
 
     final VM vm = await service.getVM();
     final List<Isolate> isolates =
-    await Future.wait(vm.isolates.map((IsolateRef ref) async {
+        await Future.wait(vm.isolates.map((IsolateRef ref) async {
       return await service.getIsolate(ref.id);
     }));
     _update(vm, isolates);
