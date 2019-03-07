@@ -12,8 +12,19 @@ import '../utils.dart';
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
-// Switch this flag to true to dump timeline events to console.
-bool _debugEventTrace = false;
+// Switch this flag to true collect debug info from the timeline protocol. This
+// will also add a button to the timeline page that will download files with
+// this info on click.
+bool debugTimeline = true;
+
+/// Strings that we will build and output to text files for debug purposes.
+///
+/// [debugTraceEvents]: trace events in the order we receive them
+/// [debugHandledTraceEvents]: trace events in the order we handle them
+/// [debugFrameTracking]: significant events in the frame tracking process
+StringBuffer debugTraceEvents = StringBuffer();
+StringBuffer debugHandledTraceEvents = StringBuffer();
+StringBuffer debugFrameTracking = StringBuffer();
 
 enum TimelineEventType {
   cpu,

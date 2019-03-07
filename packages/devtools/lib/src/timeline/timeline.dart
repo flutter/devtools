@@ -1,7 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import 'dart:html' as html;
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -66,6 +66,7 @@ class TimelineScreen extends Screen {
 
   PButton pauseButton;
   PButton resumeButton;
+  CoreElement upperButtonSection;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -94,7 +95,8 @@ class TimelineScreen extends Screen {
           ..clazz('margin-left')
           ..disabled = true
           ..click(_resumeRecording);
-    final CoreElement upperButtonSection = div(c: 'section')
+
+    upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
         div(c: 'btn-group')
@@ -104,6 +106,8 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
       ]);
+
+    _maybeAddDebugDumpButton();
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
@@ -170,7 +174,7 @@ class TimelineScreen extends Screen {
 
       for (Map<String, dynamic> json in events) {
         final TraceEvent e = TraceEvent(json);
-        timelineController.timelineData?.processTimelineEvent(e);
+        timelineController.timelineData?.processTraceEvent(e);
       }
     });
   }
@@ -222,6 +226,93 @@ class TimelineScreen extends Screen {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
       timelineController.pause();
+    }
+  }
+
+  /// Adds a button to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if the [debugTimeline] flag
+  /// is true.
+  void _maybeAddDebugDumpButton() {
+    if (debugTimeline) {
+      upperButtonSection.add(PButton('Debug dump')
+        ..small()
+        ..click(() {
+          // TODO(kenzie): we can replace this with something more sophisticated
+          // in the future, but for now this is a good debugging addition.
+
+          // Trace events in the order we received them.
+          final debugTraceEventsOutput = html.document.createElement('a');
+          debugTraceEventsOutput.setAttribute(
+              'href',
+              html.Url.createObjectUrl(
+                  html.Blob([debugTraceEvents.toString()])));
+          debugTraceEventsOutput.setAttribute('download', 'trace_output.txt');
+          debugTraceEventsOutput.style.display = 'none';
+          html.document.body.append(debugTraceEventsOutput);
+          debugTraceEventsOutput.click();
+          debugTraceEventsOutput.remove();
+
+          // Trace events in the order we handled them.
+          final debugHandledTraceEventsOutput =
+              html.document.createElement('a');
+          debugHandledTraceEventsOutput.setAttribute(
+              'href',
+              html.Url.createObjectUrl(
+                  html.Blob([debugHandledTraceEvents.toString()])));
+          debugHandledTraceEventsOutput.setAttribute(
+              'download', 'handled_output.txt');
+          debugHandledTraceEventsOutput.style.display = 'none';
+          html.document.body.append(debugHandledTraceEventsOutput);
+          debugHandledTraceEventsOutput.click();
+          debugHandledTraceEventsOutput.remove();
+
+          // Significant events in the frame tracking process.
+          final debugFrameTrackingOutput = html.document.createElement('a');
+          debugFrameTrackingOutput.setAttribute(
+              'href',
+              html.Url.createObjectUrl(
+                  html.Blob([debugFrameTracking.toString()])));
+          debugFrameTrackingOutput.setAttribute(
+              'download', 'frame_tracking_output.txt');
+          debugFrameTrackingOutput.style.display = 'none';
+          html.document.body.append(debugFrameTrackingOutput);
+          debugFrameTrackingOutput.click();
+          debugFrameTrackingOutput.remove();
+
+          // Current status of our frame tracking elements (i.e. pendingEvents,
+          // pendingFrames).
+          final buf = StringBuffer();
+          buf.writeln(
+              'Pending events - ${timelineController.timelineData.pendingEvents.length}');
+          for (TimelineEvent event
+              in timelineController.timelineData.pendingEvents) {
+            event.format(buf, '    ');
+            buf.writeln();
+          }
+          buf.writeln(
+              '\nPending frames - ${timelineController.timelineData.pendingFrames.length}');
+          for (TimelineFrame frame
+              in timelineController.timelineData.pendingFrames.values) {
+            buf.writeln('${frame.toString()}');
+          }
+          buf.writeln('\nCurrent CPU event node:');
+          timelineController
+              .timelineData.eventNodes[TimelineEventType.cpu.index]
+              .format(buf, '   ');
+          buf.writeln('\n Current GPU event node:');
+          timelineController
+              .timelineData.eventNodes[TimelineEventType.gpu.index]
+              .format(buf, '   ');
+
+          final trackingOutput = html.document.createElement('a');
+          trackingOutput.setAttribute(
+              'href', html.Url.createObjectUrl(html.Blob([buf.toString()])));
+          trackingOutput.setAttribute('download', 'tracking_status.txt');
+          trackingOutput.style.display = 'none';
+          html.document.body.append(trackingOutput);
+          trackingOutput.click();
+          trackingOutput.remove();
+        }));
     }
   }
 }
