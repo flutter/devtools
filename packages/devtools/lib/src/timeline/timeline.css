@@ -58,7 +58,6 @@
 .flame-chart-section {
     min-width: 100%;
     position: absolute;
-    box-shadow: inset 4px 4px 9px -7px #bbbbbb;
 }
 
 .flame-chart-section .flame-chart-item {
@@ -107,8 +106,8 @@
 
 .flame-chart-grid-item .grid-line {
     top: 0;
-    background-color: black;
-    opacity: 0.15;
+    background-color: var(--light-background);
+    opacity: 0.5;
     min-height: 100%;
     width: 1px;
     position: absolute;

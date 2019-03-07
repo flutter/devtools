@@ -58,7 +58,6 @@ class FrameFlameChart extends CoreElement {
     element.style
       ..backgroundColor = colorToCss(gpuSectionBackground)
       ..position = 'relative'
-      ..marginTop = '4px'
       ..overflow = 'hidden';
 
     _dragScroll.enableDragScrolling(this);
@@ -386,6 +385,7 @@ class FlameChartItem {
 
   static const defaultTextColor = Color(0xFF000000);
   static const selectedTextColor = Color(0xFFFFFFFF);
+
   // Pixels of padding to place on the right side of the label to ensure label
   // text does not get too close to the right hand size of each bar.
   static const labelPaddingRight = 4;
