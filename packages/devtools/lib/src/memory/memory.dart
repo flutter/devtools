@@ -35,7 +35,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     addStatusItem(objectCountStatus);
   }
 
-  MemoryController memoryController = MemoryController();
+  final MemoryController memoryController = MemoryController();
 
   StatusItem classCountStatus;
   StatusItem objectCountStatus;
@@ -76,8 +76,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div(c: 'custom-scrollbar')
-      ..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     resumeButton = PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
       ..primary()
@@ -101,13 +100,13 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..disabled = true;
     filterLibrariesButton =
-    PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
-      ..small()
-      ..disabled = true;
+        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
+          ..small()
+          ..disabled = true;
     gcNowButton =
-    PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
-      ..small()
-      ..click(_gcNow);
+        PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+          ..small()
+          ..click(_gcNow);
 
     resumeButton.click(() {
       memoryChart.resume();
@@ -138,8 +137,7 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      memoryChart = MemoryChart(this, memoryController)
-        ..disabled = true,
+      memoryChart = MemoryChart(this, memoryController)..disabled = true,
       div(c: 'section'),
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
@@ -192,8 +190,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-    tableStack.first.element.add(Spinner()
-      ..clazz('padded'));
+        tableStack.first.element.add(Spinner()..clazz('padded'));
 
     // TODO(devoncarew): error handling
 

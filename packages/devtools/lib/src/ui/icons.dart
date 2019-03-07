@@ -153,20 +153,12 @@ class FlutterIcons {
 
   static const UrlIcon snapshot =
       UrlIcon('/icons/memory/snapshot_color_1x_24dp.png');
-  static const UrlIcon snapshotDisabled =
-      UrlIcon('/icons/memory/snapshot_1x_24dp_disabled.png');
   static const UrlIcon resetAccumulators =
       UrlIcon('/icons/memory/reset_icon.png');
-  static const UrlIcon resetAccumulatorsDisabled =
-      UrlIcon('/icons/memory/reset_icon_disabled.png');
   static const UrlIcon filter =
       UrlIcon('/icons/memory/ic_filter_alt_black_1x_web_24dp.png');
-  static const UrlIcon filterDisabled =
-      UrlIcon('/icons/memory/ic_filter_alt_black_1x_web_24dp_disabled.png');
   static const UrlIcon gcNow =
       UrlIcon('/icons/memory/ic_delete_outline_black_1x_web_24dp.png');
-  static const UrlIcon gcNowDisabled =
-      UrlIcon('/icons/memory/ic_delete_outline_black_1x_web_24dp_disabled.png');
 }
 
 class CustomIcon extends Icon {
