@@ -82,7 +82,7 @@ void main(List<String> arguments) async {
     'Serving DevTools at http://${server.address.host}:${server.port}',
     {
       'method': 'server.started',
-      'params': {'host': server.address.host, 'port': server.port}
+      'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
     },
     machineMode: machineMode,
   );
