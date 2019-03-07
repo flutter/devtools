@@ -13,7 +13,7 @@ final int currentDateTimeinMs = DateTime.now().millisecondsSinceEpoch;
 
 int previousTimestamp = 0;
 
-bool validateHeapInfo(MemoryTracker data) {
+void validateHeapInfo(MemoryTracker data) {
   for (final HeapSample sample in data.samples) {
     expect(sample.timestamp > 0, isTrue);
     expect(sample.timestamp > previousTimestamp, isTrue);
@@ -49,7 +49,7 @@ void main() {
 
       memoryController.onMemory.listen((MemoryTracker memoryTracker) {
         if (!memoryController.memoryTracker.hasConnection) {
-          // VM Service connection has stopped.
+          // VM Service connection has stopped - unexpected.
           expect(true, isFalse);
         } else {
           validateHeapInfo(memoryTracker);
