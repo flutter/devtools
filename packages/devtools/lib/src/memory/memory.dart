@@ -11,14 +11,12 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../tables.dart';
+import '../timeline/frames_bar_chart.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
-import '../ui/split.dart' as split;
-import '../ui/ui_utils.dart';
 import '../utils.dart';
-
 import 'memory_controller.dart';
 import 'memory_plotly.dart';
 import 'memory_protocol.dart';
@@ -83,9 +81,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..disabled = true;
 
-    pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)
-      ..small()
-      ..clazz('margin-left');
+    pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)..small();
 
     // TODO(terry): Need to correctly handle enabled and disabled.
     vmMemorySnapshotButton = PButton.icon('Snapshot', FlutterIcons.snapshot,
@@ -123,11 +119,12 @@ class MemoryScreen extends Screen with SetStateMixin {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              div(c: 'btn-group flex-no-wrap margin-left')
+              div(c: 'btn-group flex-no-wrap')
                 ..add(<CoreElement>[
                   pauseButton,
                   resumeButton,
                 ]),
+              div()..flex(),
               div(c: 'btn-group flex-no-wrap margin-left')
                 ..add(<CoreElement>[
                   vmMemorySnapshotButton,
@@ -138,26 +135,12 @@ class MemoryScreen extends Screen with SetStateMixin {
             ]),
         ]),
       memoryChart = MemoryChart(this, memoryController)..disabled = true,
-      div(c: 'section'),
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
         ..flex(),
     ]);
 
     _pushNextTable(null, _createHeapStatsTableView());
-
-    bool splitterConfigured = false;
-
-    if (!splitterConfigured) {
-      split.flexSplit(
-        [memoryChart, tableContainer],
-        horizontal: false,
-        gutterSize: defaultSplitterWidth,
-        sizes: [18, 82],
-        minSize: [200, 200],
-      );
-      splitterConfigured = true;
-    }
 
     _updateStatus(null);
 
@@ -174,8 +157,15 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Push the new table on to the stack and to the right of current.
     if (next != null) {
+      final bool isFirst = tableStack.isEmpty;
+
       tableStack.addLast(next);
-      tableContainer.add(next.element..clazz('margin-left'));
+      tableContainer.add(next.element);
+
+      if (!isFirst) {
+        next.element.clazz('margin-left');
+      }
+
       tableContainer.element.scrollTo(<String, dynamic>{
         'left': tableContainer.element.scrollWidth,
         'top': 0,
@@ -418,12 +408,12 @@ class MemoryColumnSimple<T> extends Column<T> {
 class MemoryChart extends CoreElement {
   MemoryChart(this._memoryScreen, this._memoryController)
       : super('div', classes: 'section section-border') {
-    flex();
     layoutVertical();
 
     element.id = _memoryGraph;
     element.style
-      ..boxSizing = 'content-box'; // border-box causes right/left border cut.
+      ..boxSizing = 'content-box' // border-box causes right/left border cut.
+      ..height = '${FramesBarChart.chartHeight}px';
 
     _memoryController.onMemory.listen((MemoryTracker memoryTracker) {
       if (!_memoryController.memoryTracker.hasConnection) {
