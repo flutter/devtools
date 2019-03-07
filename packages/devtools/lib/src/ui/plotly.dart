@@ -145,7 +145,7 @@ class Data {
   external List<int> get width;
   external String get visible;
 
-  external void set visible(String);
+  external set visible(String value);
 }
 
 @JS()
