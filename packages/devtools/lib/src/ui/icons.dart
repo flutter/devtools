@@ -151,8 +151,7 @@ class FlutterIcons {
   static const UrlIcon lightbulb_2x =
       UrlIcon('/icons/general/lightbulb_outline@2x.png');
 
-  static const UrlIcon snapshot =
-      UrlIcon('/icons/memory/snapshot_color.png');
+  static const UrlIcon snapshot = UrlIcon('/icons/memory/snapshot_color.png');
   static const UrlIcon resetAccumulators =
       UrlIcon('/icons/memory/reset_icon.png');
   static const UrlIcon filter =

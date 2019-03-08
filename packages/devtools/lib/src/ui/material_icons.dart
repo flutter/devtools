@@ -34,6 +34,7 @@ class FlutterMaterialIcons {
 
   static Icon getIconForCodePoint(int charCode) {
     final String code = String.fromCharCode(charCode);
-    return _iconCache.putIfAbsent(code, () => MaterialIcon(code, defaultForeground));
+    return _iconCache.putIfAbsent(
+        code, () => MaterialIcon(code, defaultForeground));
   }
 }
