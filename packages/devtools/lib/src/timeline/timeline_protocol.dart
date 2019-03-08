@@ -489,7 +489,8 @@ class TimelineData {
   }
 
   bool _shouldProcessTraceEvent(TraceEvent event) {
-    final Set<String> phaseWhitelist = {'s', 'f', 'B', 'E', 'X'};
+    // ignore: prefer_collection_literals
+    final Set<String> phaseWhitelist = Set.of(['s', 'f', 'B', 'E', 'X']);
     return phaseWhitelist.contains(event.phase) &&
         // Do not process Garbage Collection events.
         event.category != 'GC' &&
