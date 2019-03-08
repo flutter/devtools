@@ -33,6 +33,12 @@ external bool _hookupPlotlyLegendClick(
   Function jsFunction,
 );
 
+@JS('hookupPlotlyDoubleClick')
+external void _hookupPlotlyDoubleClick(
+  String domName,
+  Function jsFunction,
+);
+
 @JS()
 external void myExtendTraces(
   String domName,
@@ -119,6 +125,7 @@ class Data {
     bool showlegend,
     String legendgroup,
     List<int> width,
+    String visible,
   });
 
   external List get x;
@@ -136,6 +143,9 @@ class Data {
   external bool get showlegend;
   external String get legendgroup;
   external List<int> get width;
+  external String get visible;
+
+  external set visible(String value);
 }
 
 @JS()
@@ -204,6 +214,9 @@ class Layout {
     num bargroupgap,
     String dragmode,
     HoverLabel hoverlabel,
+    List<Shape> shapes,
+    Font font,
+    Legend legend,
   });
 
   external String get title;
@@ -217,6 +230,47 @@ class Layout {
   external num get bargap;
   external num get bargroupgap;
   external String get dragmode;
+  external List<Shape> get shapes;
+  external Font get font;
+  external Legend get legend;
+}
+
+@JS()
+@anonymous
+class Shape {
+  external factory Shape({
+    String type,
+    String xref,
+    String layer,
+    int x0,
+    int y0,
+    int x1,
+    int y1,
+    Line line,
+  });
+
+  external String get type;
+  external String get xref;
+  external String get layer;
+  external int get x0;
+  external int get y0;
+  external int get x1;
+  external int get y1;
+  external Line get line;
+}
+
+@JS()
+@anonymous
+class Legend {
+  external factory Legend({
+    String orientation,
+    num x,
+    num y,
+  });
+
+  external String get orientation;
+  external num get x;
+  external num get y;
 }
 
 @JS()
@@ -293,6 +347,7 @@ class AxisLayout {
   external String get exponentformat;
   external String get showticksuffix;
   external String get hoverformat;
+  external String get hockerformat;
 }
 
 @JS()
@@ -454,4 +509,11 @@ bool legendClick(
 ) {
   // Hookup clicks in the legend in a plotly chart.
   return _hookupPlotlyLegendClick(domName, allowInterop(f));
+}
+
+void doubleClick(
+  String domName,
+  Function f,
+) {
+  _hookupPlotlyDoubleClick(domName, allowInterop(f));
 }

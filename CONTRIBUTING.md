@@ -22,10 +22,12 @@ From a separate terminal:
 - `flutter run`
 
 From the packages/devtools directory:
-- `pub run webdev serve web`
+- `pub global activate webdev` (install webdev globally)
+- `export PATH=$PATH:~/.pub-cache/bin` (make globally activated packages available from the command line)
+- `webdev serve`
 
 Then, open a browser window to the local url specified by webdev. After the page has loaded, append
-`?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by 
+`?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by
 the `flutter run` output.
 
 For more productive development, launch your Flutter application specifying
@@ -36,7 +38,7 @@ you launch the application.
 - `flutter run --observatory-port=8888`
 - `open http://localhost:8080/?port=8888`
 
-`pub run webdev` provides a fast development server that incrementally
+`webdev` provides a fast development server that incrementally
 rebuilds the portion of the application that was edited each time you reload
 the page in the browser. If initial app load times become slow as this tool
 grows, we can integrate with the hot restart support in `webdev`.

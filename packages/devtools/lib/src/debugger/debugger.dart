@@ -981,7 +981,7 @@ class SourceEditor {
     _refreshMarkers();
   }
 
-  final Map<String, int> _lastScrollPositions = <String, int>{};
+  final Map<String, num> _lastScrollPositions = <String, num>{};
 
   void displayScript(Script newScript, {SourcePosition scrollTo}) {
     if (currentScript != null) {
@@ -1007,7 +1007,7 @@ class SourceEditor {
       if (scrollTo != null) {
         codeMirror.scrollIntoView(scrollTo.line - 1, 0, margin: 150);
       } else {
-        final int top = _lastScrollPositions[newScript.uri] ?? 0;
+        final num top = _lastScrollPositions[newScript.uri] ?? 0;
         codeMirror.scrollTo(0, top);
       }
     }
