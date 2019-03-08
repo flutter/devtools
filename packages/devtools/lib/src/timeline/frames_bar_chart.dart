@@ -107,7 +107,7 @@ class PlotlyDivGraph extends CoreElement {
   Selection currentSelection;
 
   void _plotlyClick(DataEvent data) {
-    final int xPosition = data.points[0].x;
+    final num xPosition = data.points[0].x;
 
     final List<SelectTrace> newSelection = [];
 

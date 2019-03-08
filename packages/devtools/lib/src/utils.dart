@@ -66,14 +66,14 @@ String msText(
       '${includeUnit ? ' ms' : ''}';
 }
 
-num nullSafeMin(num a, num b) {
+T nullSafeMin<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }
-  return min(a, b);
+  return min<T>(a, b);
 }
 
-num nullSafeMax(num a, num b) {
+T nullSafeMax<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }

@@ -441,7 +441,7 @@ class SelectTrace {
 
   final int traceIndex;
   int ptNumber;
-  final int xValue;
+  final num xValue;
   final num yValue;
 }
 
@@ -555,7 +555,7 @@ class Selection {
       for (var selectTrace in selectInfo) {
         final int trace = selectTrace.traceIndex;
         final int ptNumber = selectTrace.ptNumber;
-        final int xValue = selectTrace.xValue;
+        final num xValue = selectTrace.xValue;
         final num yValue = selectTrace.yValue;
 
         // Restore our data point (selected) back to traces (gpu good/jank &

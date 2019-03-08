@@ -157,7 +157,7 @@ class FrameFlameChart extends CoreElement {
     ///
     /// Subtract 2 * [sectionLabelOffset] to account for extra space at the
     /// beginning/end of the chart.
-    final num pxPerMicro =
+    final double pxPerMicro =
         (element.clientWidth - 2 * flameChartInset) / _frame.duration;
 
     final int frameStartOffset = _frame.startTime;
@@ -303,7 +303,7 @@ class FrameFlameChart extends CoreElement {
       _handleZoom(e.deltaY, mouseX);
     } else {
       // Manually perform horizontal scrolling.
-      element.scrollLeft += e.deltaX;
+      element.scrollLeft += e.deltaX.round();
     }
   }
 
@@ -316,14 +316,14 @@ class FrameFlameChart extends CoreElement {
 
     if (newZoomLevel == _zoomLevel) return;
     // Store current scroll values for re-calculating scroll location on zoom.
-    double lastScrollLeft = element.scrollLeft.toDouble();
+    num lastScrollLeft = element.scrollLeft;
     // Test whether the scroll offset has changed by more than rounding error
     // since the last time an exact scroll offset was calculated.
     if ((floatingPointScrollLeft - lastScrollLeft).abs() < 0.5) {
       lastScrollLeft = floatingPointScrollLeft;
     }
     // Position in the zoomable coordinate space that we want to keep fixed.
-    final double fixedX = mouseX + lastScrollLeft - flameChartInset;
+    final num fixedX = mouseX + lastScrollLeft - flameChartInset;
     // Calculate and set our new horizontal scroll position.
     if (fixedX >= 0) {
       floatingPointScrollLeft =
@@ -482,7 +482,7 @@ class TimelineGrid extends CoreElement {
 
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
-  num getTimestampForPosition(num gridItemEnd) {
+  int getTimestampForPosition(num gridItemEnd) {
     return ((gridItemEnd - flameChartInset) / _flameChartWidth * _frameDuration)
         .round();
   }
