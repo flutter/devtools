@@ -122,7 +122,7 @@ class TimelineData {
 
     // Using a periodic timer ensures we will never leave events on the heap
     // that are ready to process. This should be inexpensive to repeat.
-    Timer.periodic(Duration(milliseconds: 100), (_) {
+    Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (shouldProcessTopEvent(heap) && !processing) {
         processing = true;
         while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
@@ -489,7 +489,7 @@ class TimelineData {
   }
 
   bool _shouldProcessTraceEvent(TraceEvent event) {
-    final Set<String> phaseWhitelist = Set.of(['s', 'f', 'B', 'E', 'X']);
+    final Set<String> phaseWhitelist = {'s', 'f', 'B', 'E', 'X'};
     return phaseWhitelist.contains(event.phase) &&
         // Do not process Garbage Collection events.
         event.category != 'GC' &&
