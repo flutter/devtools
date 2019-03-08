@@ -104,8 +104,12 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   void setRows(List<T> data) {
-    // If the selected object is no longer valid, clear the selection.
+    // If the selected object is no longer valid, clear the selection and
+    // scroll to the top.
     if (!data.contains(_selectedObject)) {
+      if (rowCount > 0) {
+        _scrollToIndex(0, scrollBehavior: 'auto');
+      }
       _clearSelection();
     }
 
