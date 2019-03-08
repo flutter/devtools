@@ -768,6 +768,10 @@ html [full] {
     vertical-align: middle;
 }
 
+.btn[disabled] .flutter-icon {
+    opacity: 0.5;
+}
+
 .action-button+.action-button {
     margin-left: 8px;
 }

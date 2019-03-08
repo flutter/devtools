@@ -5,7 +5,9 @@
 library material_icons;
 
 import 'fake_flutter/fake_flutter.dart';
+
 import 'icons.dart';
+import 'theme.dart';
 
 /// Class for icons consistent with
 /// https://docs.flutter.io/flutter/material/Icons-class.html
@@ -32,6 +34,7 @@ class FlutterMaterialIcons {
 
   static Icon getIconForCodePoint(int charCode) {
     final String code = String.fromCharCode(charCode);
-    return _iconCache.putIfAbsent(code, () => MaterialIcon(code, Colors.black));
+    return _iconCache.putIfAbsent(
+        code, () => MaterialIcon(code, defaultForeground));
   }
 }
