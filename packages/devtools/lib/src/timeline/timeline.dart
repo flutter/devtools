@@ -252,20 +252,6 @@ class TimelineScreen extends Screen {
           debugTraceEventsOutput.click();
           debugTraceEventsOutput.remove();
 
-          // Trace events in the order we handled them.
-          final debugHandledTraceEventsOutput =
-              html.document.createElement('a');
-          debugHandledTraceEventsOutput.setAttribute(
-              'href',
-              html.Url.createObjectUrl(
-                  html.Blob([debugHandledTraceEvents.toString()])));
-          debugHandledTraceEventsOutput.setAttribute(
-              'download', 'handled_output.txt');
-          debugHandledTraceEventsOutput.style.display = 'none';
-          html.document.body.append(debugHandledTraceEventsOutput);
-          debugHandledTraceEventsOutput.click();
-          debugHandledTraceEventsOutput.remove();
-
           // Significant events in the frame tracking process.
           final debugFrameTrackingOutput = html.document.createElement('a');
           debugFrameTrackingOutput.setAttribute(
@@ -295,14 +281,22 @@ class TimelineScreen extends Screen {
               in timelineController.timelineData.pendingFrames.values) {
             buf.writeln('${frame.toString()}');
           }
-          buf.writeln('\nCurrent CPU event node:');
-          timelineController
-              .timelineData.eventNodes[TimelineEventType.cpu.index]
-              .format(buf, '   ');
-          buf.writeln('\n Current GPU event node:');
-          timelineController
-              .timelineData.eventNodes[TimelineEventType.gpu.index]
-              .format(buf, '   ');
+          if (timelineController.timelineData
+                  .currentEventNodes[TimelineEventType.cpu.index] !=
+              null) {
+            buf.writeln('\nCurrent CPU event node:');
+            timelineController
+                .timelineData.currentEventNodes[TimelineEventType.cpu.index]
+                .format(buf, '   ');
+          }
+          if (timelineController.timelineData
+                  .currentEventNodes[TimelineEventType.gpu.index] !=
+              null) {
+            buf.writeln('\n Current GPU event node:');
+            timelineController
+                .timelineData.currentEventNodes[TimelineEventType.gpu.index]
+                .format(buf, '   ');
+          }
 
           final trackingOutput = html.document.createElement('a');
           trackingOutput.setAttribute(
