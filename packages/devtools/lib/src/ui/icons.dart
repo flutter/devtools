@@ -150,6 +150,14 @@ class FlutterIcons {
       UrlIcon('/icons/general/lightbulb_outline.png');
   static const UrlIcon lightbulb_2x =
       UrlIcon('/icons/general/lightbulb_outline@2x.png');
+
+  static const UrlIcon snapshot = UrlIcon('/icons/memory/snapshot_color.png');
+  static const UrlIcon resetAccumulators =
+      UrlIcon('/icons/memory/reset_icon.png');
+  static const UrlIcon filter =
+      UrlIcon('/icons/memory/ic_filter_list_alt_black.png');
+  static const UrlIcon gcNow =
+      UrlIcon('/icons/memory/ic_delete_outline_black.png');
 }
 
 class CustomIcon extends Icon {

@@ -111,7 +111,7 @@ class TimelineScreen extends Screen {
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
-      div(c: 'section')
+      div(c: 'section section-border')
         ..add(framesBarChart = FramesBarChart(timelineController)),
       div(c: 'section')
         ..layoutVertical()
