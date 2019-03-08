@@ -187,7 +187,7 @@ class ServiceConnectionManager {
       try {
         await service.streamListen(id);
       } catch (e) {
-        print("Service client strem not supported: '$id'");
+        print("Service client stream not supported: '$id'");
         print('  $e');
       }
     }));
