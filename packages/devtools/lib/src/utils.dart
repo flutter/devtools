@@ -66,18 +66,18 @@ String msText(
       '${includeUnit ? ' ms' : ''}';
 }
 
-num nullSafeMin(num a, num b) {
+T nullSafeMin<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }
-  return min(a, b);
+  return min<T>(a, b);
 }
 
-num nullSafeMax(num a, num b) {
+T nullSafeMax<T extends num>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }
-  return max(a, b);
+  return max<T>(a, b);
 }
 
 int log2(num x) => (log(x) / log(2)).floor();
