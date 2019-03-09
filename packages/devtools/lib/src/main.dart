@@ -100,7 +100,7 @@ class PerfToolFramework extends Framework {
     serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
 
-    _initHotReloadRestartServiceListener();
+    _initHotReloadRestartServiceListeners();
 
     serviceManager.onStateChange.listen((_) {
       _rebuildConnectionStatus();
@@ -151,7 +151,7 @@ class PerfToolFramework extends Framework {
     }
   }
 
-  void _initHotReloadRestartServiceListener() {
+  void _initHotReloadRestartServiceListeners() {
     serviceManager.hasRegisteredService(
       registrations.hotReload.service,
       (bool reloadServiceAvailable) {
