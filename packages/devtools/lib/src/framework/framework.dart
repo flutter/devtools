@@ -203,8 +203,8 @@ class Framework {
     globalActions.addAction(action);
   }
 
-  void clearGlobalActions() {
-    globalActions.clearActions();
+  void removeGlobalAction(String name) {
+    globalActions.removeAction(name);
   }
 }
 
@@ -280,6 +280,10 @@ class ActionsContainer {
 
     _actions.add(action);
     element.add(action.element);
+  }
+
+  void removeAction(String name) {
+    _actions.removeWhere((ActionButton button) => button.tooltip == name);
   }
 
   void clearActions() {

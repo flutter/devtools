@@ -53,6 +53,9 @@ class PerfToolFramework extends Framework {
   StatusItem connectionStatus;
   Status reloadStatus;
 
+  static const _reloadTooltip = 'Hot Reload';
+  static const _restartTooltip = 'Hot Restart';
+
   void initGlobalUI() {
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
@@ -97,7 +100,7 @@ class PerfToolFramework extends Framework {
     serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_rebuildIsolateSelect);
 
-    _initHotReloadServiceListener();
+    _initHotReloadRestartServiceListener();
 
     serviceManager.onStateChange.listen((_) {
       _rebuildConnectionStatus();
@@ -148,27 +151,41 @@ class PerfToolFramework extends Framework {
     }
   }
 
-  void _initHotReloadServiceListener() {
-    final hotReloadServiceName = registrations.hotReload.service;
-    serviceManager.hasRegisteredService(hotReloadServiceName,
-        (bool reloadServiceAvailable) {
-      if (reloadServiceAvailable) {
-        _buildReloadRestartButtons();
-      } else {
-        clearGlobalActions();
-      }
-    });
+  void _initHotReloadRestartServiceListener() {
+    serviceManager.hasRegisteredService(
+      registrations.hotReload.service,
+      (bool reloadServiceAvailable) {
+        if (reloadServiceAvailable) {
+          _buildReloadButton();
+        } else {
+          removeGlobalAction(_reloadTooltip);
+        }
+      },
+    );
+
+    serviceManager.hasRegisteredService(
+      registrations.hotRestart.service,
+      (bool reloadServiceAvailable) {
+        if (reloadServiceAvailable) {
+          _buildRestartButton();
+        } else {
+          removeGlobalAction(_restartTooltip);
+        }
+      },
+    );
   }
 
-  void _buildReloadRestartButtons() async {
+  void _buildReloadButton() async {
     // TODO(devoncarew): We currently create hot reload events when hot reload
     // is initialed, and react to those events in the UI. Going forward, we'll
     // want to instead have flutter_tools fire hot reload events, and react to
     // them in the UI. That will mean that our UI will update appropriately
     // even when other clients (the CLI, and IDE) initial the hot reload.
 
-    final ActionButton reloadAction =
-        ActionButton('icons/hot-reload-white@2x.png', 'Hot Reload');
+    final ActionButton reloadAction = ActionButton(
+      'icons/hot-reload-white@2x.png',
+      _reloadTooltip,
+    );
     reloadAction.click(() async {
       // Hide any previous status related to / restart.
       reloadStatus?.dispose();
@@ -197,10 +214,16 @@ class PerfToolFramework extends Framework {
       }
     });
 
-    final ActionButton restartAction =
-        ActionButton('icons/hot-restart-white@2x.png', 'Hot Restart');
+    addGlobalAction(reloadAction);
+  }
+
+  void _buildRestartButton() async {
+    final ActionButton restartAction = ActionButton(
+      'icons/hot-restart-white@2x.png',
+      _restartTooltip,
+    );
     restartAction.click(() async {
-      // Hide any previous status related to / restart.
+      // Hide any previous status related to reload / restart.
       reloadStatus?.dispose();
 
       final Status status = Status(auxiliaryStatus, 'restarting...');
@@ -227,7 +250,6 @@ class PerfToolFramework extends Framework {
       }
     });
 
-    addGlobalAction(reloadAction);
     addGlobalAction(restartAction);
   }
 
