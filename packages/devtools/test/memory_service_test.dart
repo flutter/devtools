@@ -48,7 +48,6 @@ const int defaultSampleSize = 5;
 
 Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   // Keep memory profiler running for n samples of heap info from the VM.
-  int trackers = 0;
   for (var trackers = 0; trackers < sampleCount; trackers++) {
     await memoryController.onMemory.first;
   }
