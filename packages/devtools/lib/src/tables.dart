@@ -11,8 +11,6 @@ import 'framework/framework.dart';
 import 'ui/elements.dart';
 import 'utils.dart';
 
-import 'dart:developer';
-
 class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
