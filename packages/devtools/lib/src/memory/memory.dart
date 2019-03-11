@@ -178,7 +178,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     resetAccumulatorsButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-    tableStack.first.element.add(Spinner()..clazz('padded'));
+        tableStack.first.element.add(Spinner()..clazz('padded'));
 
     try {
       final List<ClassHeapStats> heapStats =

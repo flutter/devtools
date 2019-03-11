@@ -41,21 +41,21 @@ external void _hookupPlotlyDoubleClick(
 
 @JS()
 external void extendTraces1(
-    String domName,
-    List x0,
-    List y0,
-    List traces,
-    );
+  String domName,
+  List x0,
+  List y0,
+  List traces,
+);
 
 @JS()
 external void extendTraces2(
-    String domName,
-    List x0,
-    List x1,
-    List y0,
-    List y1,
-    List traces,
-    );
+  String domName,
+  List x0,
+  List x1,
+  List y0,
+  List y1,
+  List traces,
+);
 
 @JS()
 external void extendTraces4(

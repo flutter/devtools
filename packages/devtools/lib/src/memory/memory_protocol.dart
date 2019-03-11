@@ -143,7 +143,6 @@ class HeapSample {
 
 // Heap Statistics
 
-
 // {
 //   type: ClassHeapStats,
 //   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
@@ -190,7 +189,6 @@ class ClassHeapStats {
   String toString() =>
       '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
 }
-
 
 class InstanceSummary {
   InstanceSummary(this.classRef, this.objectRef);
