@@ -54,7 +54,9 @@ class FlutterIcons {
 
   static const Icon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
   static const Icon hotReload = UrlIcon('/icons/hot-reload.png');
+  static const Icon hotReloadWhite_2x = UrlIcon('icons/hot-reload-white@2x.png');
   static const Icon hotRestart = UrlIcon('/icons/hot-restart.png');
+  static const Icon hotRestartWhite_2x = UrlIcon('icons/hot-restart-white@2x.png');
 
   static const Icon iconRun = UrlIcon('/icons/refinal Icon_run.png');
   static const Icon iconDebug = UrlIcon('/icons/refinal Icon_debug.png');

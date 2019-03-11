@@ -20,6 +20,7 @@ import 'service_registrations.dart' as registrations;
 import 'timeline/timeline.dart';
 import 'ui/custom.dart';
 import 'ui/elements.dart';
+import 'ui/icons.dart';
 import 'ui/primer.dart';
 import 'ui/ui_utils.dart';
 import 'utils.dart';
@@ -182,10 +183,8 @@ class PerfToolFramework extends Framework {
     // them in the UI. That will mean that our UI will update appropriately
     // even when other clients (the CLI, and IDE) initial the hot reload.
 
-    final ActionButton reloadAction = ActionButton(
-      'icons/hot-reload-white@2x.png',
-      _reloadTooltip,
-    );
+    final ActionButton reloadAction =
+        ActionButton(FlutterIcons.hotReloadWhite_2x, _reloadTooltip);
     reloadAction.click(() async {
       // Hide any previous status related to / restart.
       reloadStatus?.dispose();
@@ -218,10 +217,8 @@ class PerfToolFramework extends Framework {
   }
 
   void _buildRestartButton() async {
-    final ActionButton restartAction = ActionButton(
-      'icons/hot-restart-white@2x.png',
-      _restartTooltip,
-    );
+    final ActionButton restartAction =
+        ActionButton(FlutterIcons.hotRestartWhite_2x, _restartTooltip);
     restartAction.click(() async {
       // Hide any previous status related to reload / restart.
       reloadStatus?.dispose();

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../ui/icons.dart';
 import 'elements.dart';
 import 'trees.dart';
 import 'trees_html.dart';
@@ -304,12 +305,12 @@ CoreElement _defaultRenderer<T>(T item) {
 }
 
 class ActionButton implements CoreElementView {
-  ActionButton(this.iconPath, this.tooltip) {
+  ActionButton(this.icon, this.tooltip) {
     _element = div(c: 'masthead-item action-button')
-      ..add(img(src: iconPath)..tooltip = tooltip);
+      ..add(img(src: icon.src)..tooltip = tooltip);
   }
 
-  final String iconPath;
+  final UrlIcon icon;
   final String tooltip;
 
   CoreElement _element;
