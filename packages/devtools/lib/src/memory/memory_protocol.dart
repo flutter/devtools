@@ -140,3 +140,75 @@ class HeapSample {
   final int external;
   final bool isGC;
 }
+
+// Heap Statistics
+
+
+// {
+//   type: ClassHeapStats,
+//   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
+//   new: [0, 0, 0, 0, 0, 0, 0, 0],
+//   old: [3892, 809536, 3892, 809536, 0, 0, 0, 0],
+//   promotedInstances: 0,
+//   promotedBytes: 0
+// }
+class ClassHeapStats {
+  ClassHeapStats(this.json) {
+    classRef = ClassRef.parse(json['class']);
+    _update(json['new']);
+    _update(json['old']);
+  }
+
+  static const int ALLOCATED_BEFORE_GC = 0;
+  static const int ALLOCATED_BEFORE_GC_SIZE = 1;
+  static const int LIVE_AFTER_GC = 2;
+  static const int LIVE_AFTER_GC_SIZE = 3;
+  static const int ALLOCATED_SINCE_GC = 4;
+  static const int ALLOCATED_SINCE_GC_SIZE = 5;
+  static const int ACCUMULATED = 6;
+  static const int ACCUMULATED_SIZE = 7;
+
+  final Map<String, dynamic> json;
+
+  int instancesCurrent = 0;
+  int instancesAccumulated = 0;
+  int bytesCurrent = 0;
+  int bytesAccumulated = 0;
+
+  ClassRef classRef;
+
+  String get type => json['type'];
+
+  void _update(List<dynamic> stats) {
+    instancesAccumulated += stats[ACCUMULATED];
+    bytesAccumulated += stats[ACCUMULATED_SIZE];
+    instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC];
+    bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
+  }
+
+  @override
+  String toString() =>
+      '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
+}
+
+
+class InstanceSummary {
+  InstanceSummary(this.classRef, this.objectRef);
+
+  String classRef;
+  String objectRef;
+
+  @override
+  String toString() => '[InstanceSummary id: $objectRef, class: $classRef]';
+}
+
+class InstanceData {
+  InstanceData(this.instance, this.name, this.value);
+
+  InstanceSummary instance;
+  String name;
+  dynamic value;
+
+  @override
+  String toString() => '[InstanceData name: $name, value: $value]';
+}

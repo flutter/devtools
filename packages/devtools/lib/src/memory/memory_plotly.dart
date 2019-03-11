@@ -4,7 +4,7 @@
 
 import '../ui/plotly.dart';
 
-import 'memory.dart';
+import 'memory_chart.dart';
 
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
@@ -29,11 +29,11 @@ class MemoryPlotly {
         margin: Margin(l: 80, r: 5, b: 5, t: 5, pad: 5));
   }
 
-//  static const int MEMORY_GC_TRACE = 0;   // TODO(terry):
-  static const int MEMORY_EXTERNAL_TRACE = 0;
-  static const int MEMORY_USED_TRACE = 1;
-  static const int MEMORY_CAPACITY_TRACE = 2;
-  static const int MEMORY_RSS_TRACE = 3;
+  static const int MEMORY_GC_TRACE = 0;
+  static const int MEMORY_EXTERNAL_TRACE = 1;
+  static const int MEMORY_USED_TRACE = 2;
+  static const int MEMORY_CAPACITY_TRACE = 3;
+  static const int MEMORY_RSS_TRACE = 4;
 
   // TODO(terry): expose as CSSColor and Themed.
   static const String RSS_COLOR = '#F1B876';
@@ -41,72 +41,87 @@ class MemoryPlotly {
   static const String EXTERNAL_COLOR = '#4794C0';
   static const String USED_COLOR = '#48B2E7';
 
-  Data _createTrace(String name, String color, {String group, String dash}) {
-    String dashName = '';
+  Data _createTrace(
+    String name, {
+    String color,
+    String group,
+    String dash,
+    String symbol,
+    int size,
+  }) {
     int widthValue = 0;
     String modeName = '';
 
-    if (dash != null) {
-      dashName = dash;
-      widthValue = 2;
-      modeName = 'lines';
+    Line line;
+    if (color != null) {
+      if (dash != null) {
+        widthValue = 2;
+        modeName = 'lines';
+      }
+      line = Line(color: color, dash: dash, width: widthValue);
     }
-    return Data(
-      x: [],
-      y: [],
-      text: [],
-      line: Line(
-        color: color,
-        dash: dashName,
-        width: widthValue,
-      ),
-      type: 'scatter',
-      mode: modeName,
-      stackgroup: group != null ? 'one' : '',
-      name: name,
-    );
+
+    Marker marker;
+    if (symbol != null) {
+      // Ignore color use symbol and size.
+      marker = Marker(symbol: symbol, size: size);
+      modeName = 'markers';
+    }
+
+    if (marker == null) {
+      return Data(
+        x: [],
+        y: [],
+        text: [],
+        line: line,
+        type: 'scatter',
+        mode: modeName,
+        stackgroup: group != null ? 'one' : '',
+        name: name,
+        hoverinfo: 'y+name',
+      );
+    } else {
+      return Data(
+        x: [],
+        y: [],
+        text: [],
+        marker: marker,
+        type: 'scatter',
+        mode: modeName,
+        stackgroup: group != null ? 'one' : '',
+        name: name,
+        hoverinfo: 'y+name',
+      );
+    }
   }
 
   List<Data> createMemoryTraces() {
-    /* TODO(terry): Enable gc markers.
-    final Data normalized_trace = Data(
-      y: [],
-      x: [],
-      type: 'scatter',
-      mode: 'markers',
-      marker: Marker(
-        symbol: 'circle',
-        size: 10,
-      ),
-      name: 'GC',
-      text: [],
-      hoverinfo: 'y+name',
-    );
-    */
+    final Data gcTrace = _createTrace('GC', symbol: 'circle', size: 10);
+    gcTrace.hoverinfo = 'x+name';
 
     final Data externalTrace = _createTrace(
       'External',
-      EXTERNAL_COLOR,
+      color: EXTERNAL_COLOR,
       group: 'one',
     );
     final Data usedTrace = _createTrace(
       'Used',
-      USED_COLOR,
+      color: USED_COLOR,
       group: 'one',
     );
     final Data capacityTrace = _createTrace(
       'Capacity',
-      CAPACITY_COLOR,
+      color: CAPACITY_COLOR,
       dash: 'dot',
     );
     final Data rssTrace = _createTrace(
       'RSS',
-      RSS_COLOR,
+      color: RSS_COLOR,
       dash: 'dash',
     );
     rssTrace.visible = 'legendonly';
 
-    return [externalTrace, usedTrace, capacityTrace, rssTrace];
+    return [gcTrace, externalTrace, usedTrace, capacityTrace, rssTrace];
   }
 
   // Resetting to live view, it's an autoscale back to full view.
@@ -127,6 +142,17 @@ class MemoryPlotly {
     doubleClick(_domName, _doubleClick);
   }
 
+  void plotMarkersDataList(List<int> timestamps, List<num> gces) {
+    extendTraces1(
+      _domName,
+      timestamps, // x coordinates for RSS trace.
+      gces, // y coordinates for RSS trace.
+      [
+        MEMORY_GC_TRACE,
+      ],
+    );
+  }
+
   void plotMemoryDataList(
     List<int> timestamps,
     List<num> rsses,
@@ -135,7 +161,7 @@ class MemoryPlotly {
     List<num> externals,
   ) {
     // TODO(terry): Eliminate this JS call (result of reified List?).
-    myExtendTraces(
+    extendTraces4(
       _domName,
       timestamps, // x coordinates for RSS trace.
       timestamps, // x coordinates for capacity trace.
