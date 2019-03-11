@@ -1,7 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:html' as html;
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -238,7 +237,7 @@ class TimelineScreen extends Screen {
         ..small()
         ..click(() {
           // Trace events in the order we received them.
-          downloadFile(debugTraceEvents.toString(), 'trace_output.txt');
+          downloadFile(debugTraceEvents.toString(), 'trace_output.json');
           // Significant events in the frame tracking process.
           downloadFile(
               debugFrameTracking.toString(), 'frame_tracking_output.txt');

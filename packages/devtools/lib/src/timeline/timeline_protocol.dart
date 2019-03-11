@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+
 import 'package:meta/meta.dart';
 
 import '../utils.dart';
@@ -25,6 +27,8 @@ bool debugTimeline = true;
 /// also contains the trace events in the order we handle them.
 StringBuffer debugTraceEvents = StringBuffer();
 StringBuffer debugFrameTracking = StringBuffer();
+
+bool mapEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
 enum TimelineEventType {
   cpu,
@@ -89,7 +93,7 @@ class TimelineData {
     if (!_shouldProcessTraceEvent(event)) return;
 
     if (debugTimeline) {
-      debugTraceEvents.writeln(event.json.toString());
+      debugTraceEvents.write('${jsonEncode(event.json)},');
     }
 
     // Process flow events now. Process Duration events after a delay. Only
@@ -119,6 +123,7 @@ class TimelineData {
     }
   }
 
+  // todo fix timer stuff create util delayed queue
   void _processDurationEventsWithDelay(
       HeapPriorityQueue<TraceEventWrapper> heap) {
     // Tracks whether we are already processing events on the heap.
@@ -245,7 +250,8 @@ class TimelineData {
     // off balance due to duplicate events from the engine. Balance the tree so
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
-      if (event.json == previousDurationEndEvents[event.type.index]?.json) {
+      if (mapEquals(
+          event.json, previousDurationEndEvents[event.type.index]?.json)) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
         // Trace example:
@@ -256,13 +262,14 @@ class TimelineData {
         // FrameWork Workload - DurationEnd ([event] - duplicate)
         // VSYNC - DurationEnd
         //
+        print('duplicate end ${event.json}');
         return;
       } else if (current.name ==
               previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
-          current.eventTraces.first ==
-              current.children.first.eventTraces.first) {
+          mapEquals(current.eventTraces.first,
+              current.children.first.eventTraces.first)) {
         // There was a duplicate DurationBegin event associated with
         // [previousDurationEndEvent]. [event] is actually the DurationEnd event
         // for [current.parent]. Trim the extra layer created by the duplicate.
@@ -278,9 +285,13 @@ class TimelineData {
         current.parent.removeChild(current);
         current = current.parent;
         currentEventNodes[event.type.index] = current;
+
+        print('duplicate begin ${event.json}');
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
         // the tracking node.
+
+        print('cant recover ${event.json}');
         currentEventNodes[event.type.index] = null;
         return;
       }
@@ -329,7 +340,7 @@ class TimelineData {
     final current = currentEventNodes[event.type.index];
     if (current != null) {
       if (current.containsChildWithCondition((TimelineEvent event) =>
-          event.eventTraces.first == timelineEvent.eventTraces.first)) {
+          mapEquals(event.eventTraces.first, timelineEvent.eventTraces.first))) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }
@@ -699,9 +710,9 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          parent.eventTraces.first == parent.children.first.eventTraces.first &&
+          mapEquals(parent.eventTraces.first, parent.children.first.eventTraces.first) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          parent.eventTraces.last == parent.children.first.eventTraces.last) {
+          mapEquals(parent.eventTraces.last, parent.children.first.eventTraces.last)) {
         parent.removeChild(children.first);
       }
     }
