@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:codemirror/codemirror.dart';
+import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -219,6 +220,9 @@ class DebuggerScreen extends Screen {
     final CodeMirror codeMirror =
         CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
+    if (isDarkTheme) {
+      codeMirror.setTheme('darcula');
+    }
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');
 
