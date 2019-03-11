@@ -16,7 +16,7 @@ import '../utils.dart';
 // Switch this flag to true collect debug info from the timeline protocol. This
 // will also add a button to the timeline page that will download files with
 // this info on click.
-bool debugTimeline = false;
+bool debugTimeline = true;
 
 /// Strings that we will build and output to text files for debug purposes.
 ///
@@ -92,7 +92,11 @@ class TimelineData {
       debugTraceEvents.writeln(event.json.toString());
     }
 
-    // Process flow events now. Process Duration events after a delay.
+    // Process flow events now. Process Duration events after a delay. Only
+    // process flow events whose name is PipelineItem, as these events mark the
+    // start and end for a frame. Processing other types of flow events would
+    // lead to us creating Timeline frames where we shouldn't and therefore
+    // showing bad data to the user.
     switch (event.phase) {
       case 's':
         if (event.name.contains('PipelineItem')) {
@@ -241,8 +245,7 @@ class TimelineData {
     // off balance due to duplicate events from the engine. Balance the tree so
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
-      if (event.json.toString() ==
-          previousDurationEndEvents[event.type.index]?.json.toString()) {
+      if (event.json == previousDurationEndEvents[event.type.index]?.json) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
         // Trace example:
@@ -258,8 +261,8 @@ class TimelineData {
               previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
-          current.eventTraces.first.toString() ==
-              current.children.first.eventTraces.first.toString()) {
+          current.eventTraces.first ==
+              current.children.first.eventTraces.first) {
         // There was a duplicate DurationBegin event associated with
         // [previousDurationEndEvent]. [event] is actually the DurationEnd event
         // for [current.parent]. Trim the extra layer created by the duplicate.
@@ -326,8 +329,7 @@ class TimelineData {
     final current = currentEventNodes[event.type.index];
     if (current != null) {
       if (current.containsChildWithCondition((TimelineEvent event) =>
-          event.eventTraces.first.toString() ==
-          timelineEvent.eventTraces.first.toString())) {
+          event.eventTraces.first == timelineEvent.eventTraces.first)) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }
@@ -697,11 +699,9 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          parent.eventTraces.first.toString() ==
-              parent.children.first.eventTraces.first.toString() &&
+          parent.eventTraces.first == parent.children.first.eventTraces.first &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          parent.eventTraces.last.toString() ==
-              parent.children.first.eventTraces.last.toString()) {
+          parent.eventTraces.last == parent.children.first.eventTraces.last) {
         parent.removeChild(children.first);
       }
     }

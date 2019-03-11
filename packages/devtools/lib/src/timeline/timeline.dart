@@ -237,33 +237,11 @@ class TimelineScreen extends Screen {
       upperButtonSection.add(PButton('Debug dump')
         ..small()
         ..click(() {
-          // TODO(kenzie): we can replace this with something more sophisticated
-          // in the future, but for now this is a good debugging addition.
-
           // Trace events in the order we received them.
-          final debugTraceEventsOutput = html.document.createElement('a');
-          debugTraceEventsOutput.setAttribute(
-              'href',
-              html.Url.createObjectUrl(
-                  html.Blob([debugTraceEvents.toString()])));
-          debugTraceEventsOutput.setAttribute('download', 'trace_output.txt');
-          debugTraceEventsOutput.style.display = 'none';
-          html.document.body.append(debugTraceEventsOutput);
-          debugTraceEventsOutput.click();
-          debugTraceEventsOutput.remove();
-
+          downloadFile(debugTraceEvents.toString(), 'trace_output.txt');
           // Significant events in the frame tracking process.
-          final debugFrameTrackingOutput = html.document.createElement('a');
-          debugFrameTrackingOutput.setAttribute(
-              'href',
-              html.Url.createObjectUrl(
-                  html.Blob([debugFrameTracking.toString()])));
-          debugFrameTrackingOutput.setAttribute(
-              'download', 'frame_tracking_output.txt');
-          debugFrameTrackingOutput.style.display = 'none';
-          html.document.body.append(debugFrameTrackingOutput);
-          debugFrameTrackingOutput.click();
-          debugFrameTrackingOutput.remove();
+          downloadFile(
+              debugFrameTracking.toString(), 'frame_tracking_output.txt');
 
           // Current status of our frame tracking elements (i.e. pendingEvents,
           // pendingFrames).
@@ -297,15 +275,7 @@ class TimelineScreen extends Screen {
                 .timelineData.currentEventNodes[TimelineEventType.gpu.index]
                 .format(buf, '   ');
           }
-
-          final trackingOutput = html.document.createElement('a');
-          trackingOutput.setAttribute(
-              'href', html.Url.createObjectUrl(html.Blob([buf.toString()])));
-          trackingOutput.setAttribute('download', 'tracking_status.txt');
-          trackingOutput.style.display = 'none';
-          html.document.body.append(trackingOutput);
-          trackingOutput.click();
-          trackingOutput.remove();
+          downloadFile(buf.toString(), 'tracking_status.txt');
         }));
     }
   }
