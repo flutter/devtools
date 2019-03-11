@@ -17,14 +17,14 @@ class MemoryRow {
   String toString() => name;
 }
 
-class MemoryColumnClassName extends Column<ClassHeapStats> {
+class MemoryColumnClassName extends Column<ClassHeapDetailStats> {
   MemoryColumnClassName() : super('Class', wide: true);
 
   @override
-  dynamic getValue(ClassHeapStats item) => item.classRef.name;
+  dynamic getValue(ClassHeapDetailStats item) => item.classRef.name;
 }
 
-class MemoryColumnSize extends Column<ClassHeapStats> {
+class MemoryColumnSize extends Column<ClassHeapDetailStats> {
   MemoryColumnSize() : super('Size');
 
   @override
@@ -33,7 +33,7 @@ class MemoryColumnSize extends Column<ClassHeapStats> {
   //String get cssClass => 'monospace';
 
   @override
-  dynamic getValue(ClassHeapStats item) => item.bytesCurrent;
+  dynamic getValue(ClassHeapDetailStats item) => item.bytesCurrent;
 
   @override
   String render(dynamic value) {
@@ -45,27 +45,28 @@ class MemoryColumnSize extends Column<ClassHeapStats> {
   }
 }
 
-class MemoryColumnInstanceCount extends Column<ClassHeapStats> {
+class MemoryColumnInstanceCount extends Column<ClassHeapDetailStats> {
   MemoryColumnInstanceCount() : super('Count');
 
   @override
   bool get numeric => true;
 
   @override
-  dynamic getValue(ClassHeapStats item) => item.instancesCurrent;
+  dynamic getValue(ClassHeapDetailStats item) => item.instancesCurrent;
 
   @override
   String render(dynamic value) => Column.fastIntl(value);
 }
 
-class MemoryColumnInstanceAccumulatedCount extends Column<ClassHeapStats> {
+class MemoryColumnInstanceAccumulatedCount
+    extends Column<ClassHeapDetailStats> {
   MemoryColumnInstanceAccumulatedCount() : super('Accumulator');
 
   @override
   bool get numeric => true;
 
   @override
-  dynamic getValue(ClassHeapStats item) => item.instancesAccumulated;
+  dynamic getValue(ClassHeapDetailStats item) => item.instancesAccumulated;
 
   @override
   String render(dynamic value) => Column.fastIntl(value);

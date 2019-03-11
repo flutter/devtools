@@ -49,12 +49,12 @@ const int defaultSampleSize = 5;
 Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   // Keep memory profiler running for n samples of heap info from the VM.
   int trackers = 0;
-  while (trackers++ < sampleCount) {
+  for (var trackers = 0; trackers < sampleCount; trackers++) {
     await memoryController.onMemory.first;
   }
 }
 
-void check(ClassHeapStats classStat, String className,
+void checkHeapStat(ClassHeapDetailStats classStat, String className,
     {int instanceCount, int accumulatorCount}) {
   expect(classStat.classRef.name, equals(className));
   expect(classStat.instancesCurrent, equals(instanceCount));
@@ -92,41 +92,49 @@ void main() async {
     test('allocations', () async {
       await env.setupEnvironment();
 
-      final List<ClassHeapStats> classStats =
+      final List<ClassHeapDetailStats> classStats =
           await memoryController.getAllocationProfile();
 
-      final Iterator<ClassHeapStats> iterator = classStats.iterator;
+      final Iterator<ClassHeapDetailStats> iterator = classStats.iterator;
       while (iterator.moveNext()) {
-        final ClassHeapStats classStat = iterator.current;
+        final ClassHeapDetailStats classStat = iterator.current;
 
         if (classStat.classRef.name == 'MyApp')
-          check(classStat, 'MyApp', instanceCount: 1, accumulatorCount: 2);
+          checkHeapStat(classStat, 'MyApp',
+              instanceCount: 1, accumulatorCount: 2);
         else if (classStat.classRef.name == 'ThemeData')
-          check(classStat, 'ThemeData', instanceCount: 2, accumulatorCount: 4);
+          checkHeapStat(classStat, 'ThemeData',
+              instanceCount: 2, accumulatorCount: 4);
         else if (classStat.classRef.name == 'AppBar')
-          check(classStat, 'AppBar', instanceCount: 1, accumulatorCount: 2);
+          checkHeapStat(classStat, 'AppBar',
+              instanceCount: 1, accumulatorCount: 2);
         else if (classStat.classRef.name == 'Center')
-          check(classStat, 'Center', instanceCount: 1, accumulatorCount: 2);
+          checkHeapStat(classStat, 'Center',
+              instanceCount: 1, accumulatorCount: 2);
       }
     });
 
     test('reset', () async {
       await env.setupEnvironment();
 
-      final List<ClassHeapStats> classStats =
+      final List<ClassHeapDetailStats> classStats =
           await memoryController.getAllocationProfile(reset: true);
-      final Iterator<ClassHeapStats> iterator = classStats.iterator;
+      final Iterator<ClassHeapDetailStats> iterator = classStats.iterator;
       while (iterator.moveNext()) {
-        final ClassHeapStats classStat = iterator.current;
+        final ClassHeapDetailStats classStat = iterator.current;
 
         if (classStat.classRef.name == 'MyApp')
-          check(classStat, 'MyApp', instanceCount: 1, accumulatorCount: 0);
+          checkHeapStat(classStat, 'MyApp',
+              instanceCount: 1, accumulatorCount: 0);
         else if (classStat.classRef.name == 'ThemeData')
-          check(classStat, 'ThemeData', instanceCount: 2, accumulatorCount: 0);
+          checkHeapStat(classStat, 'ThemeData',
+              instanceCount: 2, accumulatorCount: 0);
         else if (classStat.classRef.name == 'AppBar')
-          check(classStat, 'AppBar', instanceCount: 1, accumulatorCount: 0);
+          checkHeapStat(classStat, 'AppBar',
+              instanceCount: 1, accumulatorCount: 0);
         else if (classStat.classRef.name == 'Center')
-          check(classStat, 'Center', instanceCount: 1, accumulatorCount: 0);
+          checkHeapStat(classStat, 'Center',
+              instanceCount: 1, accumulatorCount: 0);
       }
     });
   }, tags: 'useFlutterSdk');

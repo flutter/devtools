@@ -105,10 +105,16 @@ class MemoryScreen extends Screen with SetStateMixin {
           ..disabled = true;
 
     resumeButton.click(() {
+      updateResumeButton(disabled: true);
+      updatePauseButton(disabled: false);
+
       memoryChart.resume();
     });
 
     pauseButton.click(() {
+      updatePauseButton(disabled: true);
+      updateResumeButton(disabled: false);
+
       memoryChart.pause();
     });
 
@@ -134,11 +140,15 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      memoryChart = MemoryChart(this, memoryController)..disabled = true,
+      memoryChart = MemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
         ..flex(),
     ]);
+
+    memoryController.onDisconnect.listen((__) {
+      serviceDisconnet();
+    });
 
     _pushNextTable(null, _createHeapStatsTableView());
 
@@ -181,7 +191,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         tableStack.first.element.add(Spinner()..clazz('padded'));
 
     try {
-      final List<ClassHeapStats> heapStats =
+      final List<ClassHeapDetailStats> heapStats =
           await memoryController.resetAllocationProfile();
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
@@ -200,7 +210,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         tableStack.first.element.add(Spinner()..clazz('padded'));
 
     try {
-      final List<ClassHeapStats> heapStats =
+      final List<ClassHeapDetailStats> heapStats =
           await memoryController.getAllocationProfile();
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
@@ -256,10 +266,11 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryChart.disabled = true;
   }
 
-  Table<ClassHeapStats> _createHeapStatsTableView() {
-    final Table<ClassHeapStats> table = Table<ClassHeapStats>.virtual()
-      ..element.display = 'none'
-      ..element.clazz('memory-table');
+  Table<ClassHeapDetailStats> _createHeapStatsTableView() {
+    final Table<ClassHeapDetailStats> table =
+        Table<ClassHeapDetailStats>.virtual()
+          ..element.display = 'none'
+          ..element.clazz('memory-table');
 
     table.addColumn(MemoryColumnSize());
     table.addColumn(MemoryColumnInstanceCount());
@@ -268,7 +279,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     table.setSortColumn(table.columns.first);
 
-    table.onSelect.listen((ClassHeapStats row) async {
+    table.onSelect.listen((ClassHeapDetailStats row) async {
       final Table<InstanceSummary> newTable =
           row == null ? null : await _createInstanceListTableView(row);
       _pushNextTable(table, newTable);
@@ -278,7 +289,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<Table<InstanceSummary>> _createInstanceListTableView(
-      ClassHeapStats row) async {
+      ClassHeapDetailStats row) async {
     final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
       ..element.clazz('memory-table');
 
@@ -298,14 +309,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     return table;
   }
 
-  void _updateStatus(List<ClassHeapStats> data) {
+  void _updateStatus(List<ClassHeapDetailStats> data) {
     if (data == null) {
       classCountStatus.element.text = '';
       objectCountStatus.element.text = '';
     } else {
       classCountStatus.element.text = '${nf.format(data.length)} classes';
       int objectCount = 0;
-      for (ClassHeapStats stats in data) {
+      for (ClassHeapDetailStats stats in data) {
         objectCount += stats.instancesCurrent;
       }
       objectCountStatus.element.text = '${nf.format(objectCount)} objects';

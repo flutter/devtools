@@ -143,6 +143,10 @@ class HeapSample {
 
 // Heap Statistics
 
+// More detailed/simpler then the ClassHeapStats (for handling accumulators to
+// detect leaks and simpler then drilling into new/old which should be hidden
+// with a new protocol).
+//
 // {
 //   type: ClassHeapStats,
 //   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
@@ -151,8 +155,8 @@ class HeapSample {
 //   promotedInstances: 0,
 //   promotedBytes: 0
 // }
-class ClassHeapStats {
-  ClassHeapStats(this.json) {
+class ClassHeapDetailStats {
+  ClassHeapDetailStats(this.json) {
     classRef = ClassRef.parse(json['class']);
     _update(json['new']);
     _update(json['old']);

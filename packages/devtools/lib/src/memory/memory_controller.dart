@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'package:vm_service_lib/vm_service_lib.dart' hide ClassHeapStats;
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
@@ -18,12 +18,15 @@ import 'memory_protocol.dart';
 class MemoryController {
   MemoryController();
 
-  final StreamController<MemoryTracker> _memoryTrackerController =
-      StreamController<MemoryTracker>.broadcast();
-
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
+  final StreamController<MemoryTracker> _memoryTrackerController =
+      StreamController<MemoryTracker>.broadcast();
   Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
+
+  final StreamController<void> _disconnectController =
+      StreamController<void>.broadcast();
+  Stream<void> get onDisconnect => _disconnectController.stream;
 
   MemoryTracker _memoryTracker;
   MemoryTracker get memoryTracker => _memoryTracker;
@@ -48,6 +51,8 @@ class MemoryController {
   void _handleConnectionStop(dynamic event) {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
+
+    _disconnectController.add(Null);
     hasStopped = true;
   }
 
@@ -63,11 +68,11 @@ class MemoryController {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
-  Future<List<ClassHeapStats>> resetAllocationProfile() =>
+  Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
       getAllocationProfile(reset: true);
 
   // 'reset': true to reset the object allocation accumulators
-  Future<List<ClassHeapStats>> getAllocationProfile(
+  Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
     final Map resetArg = reset ? {'reset': 'true'} : {};
 
@@ -79,10 +84,10 @@ class MemoryController {
 
     final List<dynamic> members = response.json['members'];
 
-    final List<ClassHeapStats> heapStats = members
+    final List<ClassHeapDetailStats> heapStats = members
         .cast<Map<String, dynamic>>()
-        .map((Map<String, dynamic> d) => ClassHeapStats(d))
-        .where((ClassHeapStats stats) {
+        .map((Map<String, dynamic> d) => ClassHeapDetailStats(d))
+        .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
     }).toList();
 
