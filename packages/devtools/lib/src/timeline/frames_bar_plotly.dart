@@ -375,7 +375,7 @@ class FramesBarPlotly {
     }
 
     // TODO(terry): Eliminate this JS call (result of reified List?).
-    myExtendTraces(
+    extendTraces4(
       _domName,
       cpuGoodX,
       gpuGoodX,
@@ -508,7 +508,7 @@ class Selection {
     }
 
     // Move the data to the selection traces.
-    selectionExtendTraces(_domName, [
+    extendTraces2(_domName, [
       selectInfo[0].xValue,
     ], [
       selectInfo[1].xValue,
