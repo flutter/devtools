@@ -243,16 +243,6 @@ bool shouldDisableTab(String key) {
   return qsParams['hide']?.split(',')?.contains(key) ?? false;
 }
 
-bool get useDarkTheme {
-  final queryString = html.window.location.search;
-  if (queryString == null || queryString.length <= 1) {
-    return false;
-  }
-
-  final qsParams = Uri.splitQueryString(queryString.substring(1));
-  return qsParams['theme'] == 'dark';
-}
-
 /// Creates a canvas scaled to match the device's devicePixelRatio.
 ///
 /// A default canvas will look pixelated on high devicePixelRatio screens so it
