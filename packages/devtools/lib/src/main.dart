@@ -184,7 +184,7 @@ class PerfToolFramework extends Framework {
     // even when other clients (the CLI, and IDE) initial the hot reload.
 
     final ActionButton reloadAction =
-        ActionButton(FlutterIcons.hotReloadWhite_2x, _reloadTooltip);
+        ActionButton(FlutterIcons.hotReloadWhite, _reloadTooltip);
     reloadAction.click(() async {
       // Hide any previous status related to / restart.
       reloadStatus?.dispose();
@@ -218,7 +218,7 @@ class PerfToolFramework extends Framework {
 
   void _buildRestartButton() async {
     final ActionButton restartAction =
-        ActionButton(FlutterIcons.hotRestartWhite_2x, _restartTooltip);
+        ActionButton(FlutterIcons.hotRestartWhite, _restartTooltip);
     restartAction.click(() async {
       // Hide any previous status related to reload / restart.
       reloadStatus?.dispose();

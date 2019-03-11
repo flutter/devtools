@@ -743,7 +743,9 @@ html [full] {
     height: 28px;
     width: 28px;
     color: white;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-button:hover {
@@ -762,10 +764,8 @@ html [full] {
     opacity: 0.5;
 }
 
-.action-button img {
-    width: 18px;
-    height: 18px;
-    vertical-align: middle;
+.action-button .flutter-icon {
+    margin: 2px;
 }
 
 .btn[disabled] .flutter-icon {
