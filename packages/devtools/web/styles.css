@@ -23,7 +23,7 @@
     --footer-color: #7a7a7a;
     --footer-link-hover: #0366d6;
     --footer-strong: #333;
-    --header-backround: #f3f3f3;
+    --header-background: #f3f3f3;
     --header-color: #586069;
     --header-item-rgb: 255, 255, 255;
     --header-item: rgba(var(--header-item-rgb), 1);
@@ -193,7 +193,7 @@ tbody.selectable tr {
 table th {
   font-weight: 600;
   color: var(--header-color);
-  background-color: var(--header-backround);
+  background-color: var(--header-background);
   white-space: nowrap;
 }
 

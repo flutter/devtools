@@ -9,7 +9,7 @@
 .source-head {
     font-weight: 600;
     color: var(--header-color);
-    background-color: var(--header-backround);
+    background-color: var(--header-background);
     border-bottom: 1px solid var(--table-border);
     padding: 4px 8px;
 }
