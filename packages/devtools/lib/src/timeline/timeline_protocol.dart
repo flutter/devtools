@@ -13,7 +13,10 @@ import 'package:meta/meta.dart';
 import '../utils.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview.
+// This class depends on the stability of event names we receive from the
+// engine. That dependency is tracked at
+// https://github.com/flutter/flutter/issues/27609.
 
 // Switch this flag to true collect debug info from the timeline protocol. This
 // will also add a button to the timeline page that will download files with
@@ -132,12 +135,8 @@ class TimelineData {
         // Process duration events with a delay.
         maybeExecuteWithDelay(
           shouldProcessTopEvent(heap),
-          Duration(
-            milliseconds: traceEventDelay.inMilliseconds -
-                DateTime.now().millisecondsSinceEpoch -
-                heap.first.timeReceived,
-          ),
-              () => _processDurationEvents(heap),
+          Duration(milliseconds: traceEventDelay.inMilliseconds),
+          () => _processDurationEvents(heap),
         );
     }
   }

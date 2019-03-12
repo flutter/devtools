@@ -237,14 +237,14 @@ class TimelineScreen extends Screen {
         ..small()
         ..click(() {
           // Trace event json in the order we received the events.
-          final traceEvents = debugTraceEvents.toString();
-          traceEvents.replaceRange(
+          String traceEvents = debugTraceEvents.toString();
+          traceEvents = traceEvents.replaceRange(
               traceEvents.length - 1, traceEvents.length, ']}');
           downloadFile(traceEvents, 'trace_output.json');
 
           // Trace event json in the order we handled the events.
-          final handledTraceEvents = debugTraceEvents.toString();
-          handledTraceEvents.replaceRange(
+          String handledTraceEvents = debugTraceEvents.toString();
+          handledTraceEvents = handledTraceEvents.replaceRange(
               handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
           downloadFile(
               handledTraceEvents.toString(), 'handled_trace_output.json');
@@ -284,6 +284,20 @@ class TimelineScreen extends Screen {
             timelineController
                 .timelineData.currentEventNodes[TimelineEventType.gpu.index]
                 .format(buf, '   ');
+          }
+          if (timelineController.timelineData.heaps[TimelineEventType.cpu.index].isNotEmpty) {
+            buf.writeln('\nCPU heap');
+            for (TraceEventWrapper wrapper in timelineController.timelineData
+                .heaps[TimelineEventType.cpu.index].toList()) {
+              buf.writeln(wrapper.event.json.toString());
+            }
+          }
+          if (timelineController.timelineData.heaps[TimelineEventType.gpu.index].isNotEmpty) {
+            buf.writeln('\nGPU heap');
+            for (TraceEventWrapper wrapper in timelineController.timelineData
+                .heaps[TimelineEventType.gpu.index].toList()) {
+              buf.writeln(wrapper.event.json.toString());
+            }
           }
           downloadFile(buf.toString(), 'tracking_status.txt');
         }));
