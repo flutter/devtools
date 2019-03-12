@@ -9,7 +9,7 @@
     --border-color: #484848;
     --counter-color: #999;
     --dark-shadow-color: #999;
-    --default-background-rgb: 30, 30, 30;
+    --default-background-rgb: 47, 43, 43;
     --default-background: rgba(var(--default-background-rgb), 1);
     --default-color-thumb: #888;
     --default-color: #fff;
@@ -19,13 +19,14 @@
     --footer-color: #858585;
     --footer-link-hover: #0366d6;
     --footer-strong: #ccc;
-    --header-backround: #282828;
+    --header-background: #282828;
     --header-color: #ccc;
     --header-item-rgb: 255, 255, 255;
     --header-item: rgba(var(--header-item-rgb), 1);
     --hint-background: #4b4b3f;
     --light-background: #585858;
-    --masthead-background: #3c3c3c;
+    --masthead-background: #525050;
+    --list-background: #3f3f3f;
     --menu-item-border: #484541;
     --row-hover-background: #2b2d2e;
     --selected-background: #37373d;
@@ -38,7 +39,7 @@
 }
 
 body {
-    /* Disable the background image from the github-dart theme as it is too */
+    /* Disable the background image from the github-dark theme as it is too */
     /* busy for this tool. */
     background-image: none !important;
 }
@@ -46,4 +47,13 @@ body {
 .gutter {
     /* The white gutter icon image looks too bright with opacity 1  */
     opacity: 0.5;
+}
+
+.menu {
+    background-color: var(--list-background);
+}
+
+nav.menu .menu-item {
+    color: wheat;
+    font-weight: bold;
 }
