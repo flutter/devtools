@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math' as math;
 
+import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 
 import '../ui/drag_scroll.dart';
@@ -21,24 +22,21 @@ import 'timeline_protocol.dart';
 // Switch this flag to true to dump the frame event trace to console.
 bool _debugEventTrace = false;
 
-// Blue 100-300 color palette from
+// Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const cpuColorPalette = [
-  Color(0xFFBBDEFB),
-  Color(0xFF90CAF9),
-  mainCpuColor,
+final cpuColorPalette = [
+  isDarkTheme ? mainCpuColor : const Color(0xFFBBDEFB),
+  isDarkTheme ? const Color(0xFF1E88E5) : const Color(0xFF90CAF9),
+  isDarkTheme ? const Color(0xFF1976D2) : mainCpuColor,
 ];
 
-// Teal 100-300 color palette from
+// Teal 100-300 (light mode) or 400-600 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const gpuColorPalette = [
-  Color(0xFFB2DFDB),
-  Color(0xFF80CBC4),
-  mainGpuColor,
+final gpuColorPalette = [
+  isDarkTheme ? mainGpuColor : const Color(0xFFB2DFDB),
+  isDarkTheme ? const Color(0xFF009688) : const Color(0xFF80CBC4),
+  isDarkTheme ? const Color(0xFF00796B) : mainGpuColor,
 ];
-
-const cpuSectionBackground = Color(0xFFF9F9F9);
-const gpuSectionBackground = Color(0xFFF3F3F3);
 
 /// Inset for the start/end of the flame chart.
 const flameChartInset = 70;
@@ -52,13 +50,9 @@ Stream<FlameChartItem> get onSelectedFlameChartItem =>
 final DragScroll _dragScroll = DragScroll();
 
 class FrameFlameChart extends CoreElement {
-  FrameFlameChart() : super('div', classes: 'section-border') {
+  FrameFlameChart() : super('div', classes: 'section-border flame-chart') {
     flex();
     layoutVertical();
-    element.style
-      ..backgroundColor = colorToCss(gpuSectionBackground)
-      ..position = 'relative'
-      ..overflow = 'hidden';
 
     _dragScroll.enableDragScrolling(this);
     element.onMouseWheel.listen(_handleMouseWheel);
@@ -192,13 +186,12 @@ class FrameFlameChart extends CoreElement {
     }
 
     void drawCpuEvents() {
-      _cpuSection = div(c: 'flame-chart-section');
+      _cpuSection = div(c: 'flame-chart-section cpu');
       add(_cpuSection);
 
       _cpuSection.element.style
         ..height = '${cpuSectionHeight}px'
-        ..top = '${rowHeight}px'
-        ..backgroundColor = colorToCss(cpuSectionBackground);
+        ..top = '${rowHeight}px';
 
       final sectionTitle =
           div(text: 'CPU', c: 'flame-chart-item flame-chart-title');
@@ -383,8 +376,8 @@ class FlameChartItem {
     });
   }
 
-  static const defaultTextColor = Color(0xFF000000);
-  static const selectedTextColor = Color(0xFFFFFFFF);
+  final defaultTextColor = isDarkTheme ? Colors.white : Colors.black;
+  final selectedTextColor = isDarkTheme ? Colors.black : Colors.white;
 
   // Pixels of padding to place on the right side of the label to ensure label
   // text does not get too close to the right hand size of each bar.
@@ -428,7 +421,7 @@ class FlameChartItem {
 
   void setSelected(bool selected) {
     e.style.backgroundColor =
-        colorToCss(selected ? selectedColor : _backgroundColor);
+        colorToCss(selected ? selectedFlameChartItemColor : _backgroundColor);
     _label.style.color =
         colorToCss(selected ? selectedTextColor : defaultTextColor);
   }

@@ -55,9 +55,19 @@
     border-color: var(--selected-border);
 }
 
+.flame-chart {
+    background-color: var(--shaded-background-darker);
+    position: relative;
+    overflow: hidden;
+}
+
 .flame-chart-section {
     min-width: 100%;
     position: absolute;
+}
+
+.flame-chart-section.cpu {
+    background-color: var(--shaded-background-lighter);
 }
 
 .flame-chart-section .flame-chart-item {
@@ -124,6 +134,15 @@
     border: 1px solid;
     border-color: var(--light-background);
     border-radius: 3px;
+}
+
+.event-details-title {
+    padding: 3px 12px;
+    font-weight: bold;
+}
+
+.event-details {
+    margin: 6px 0px 0px 12px;
 }
 
 .coming-soon {
