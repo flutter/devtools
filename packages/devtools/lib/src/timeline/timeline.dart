@@ -236,8 +236,19 @@ class TimelineScreen extends Screen {
       upperButtonSection.add(PButton('Debug dump')
         ..small()
         ..click(() {
-          // Trace events in the order we received them.
-          downloadFile(debugTraceEvents.toString(), 'trace_output.json');
+          // Trace event json in the order we received the events.
+          final traceEvents = debugTraceEvents.toString();
+          traceEvents.replaceRange(
+              traceEvents.length - 1, traceEvents.length, ']}');
+          downloadFile(traceEvents, 'trace_output.json');
+
+          // Trace event json in the order we handled the events.
+          final handledTraceEvents = debugTraceEvents.toString();
+          handledTraceEvents.replaceRange(
+              handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
+          downloadFile(
+              handledTraceEvents.toString(), 'handled_trace_output.json');
+
           // Significant events in the frame tracking process.
           downloadFile(
               debugFrameTracking.toString(), 'frame_tracking_output.txt');

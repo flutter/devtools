@@ -105,6 +105,16 @@ String funcRefName(FuncRef ref) {
   }
 }
 
+void maybeExecuteWithDelay(bool condition, Duration delay, void callback()) {
+  if (condition || delay.inMilliseconds <= 0) {
+    callback();
+  } else {
+    Timer(delay, () {
+      callback();
+    });
+  }
+}
+
 class Property<T> {
   Property(this._value);
 

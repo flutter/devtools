@@ -17,15 +17,25 @@ import '../utils.dart';
 
 // Switch this flag to true collect debug info from the timeline protocol. This
 // will also add a button to the timeline page that will download files with
-// this info on click.
+// debug info on click.
 bool debugTimeline = true;
 
-/// Strings that we will build and output to text files for debug purposes.
+/// Buffer that will store trace event json in the order we receive the events.
 ///
-/// [debugTraceEvents]: trace events in the order we receive them
-/// [debugFrameTracking]: significant events in the frame tracking process. This
-/// also contains the trace events in the order we handle them.
-StringBuffer debugTraceEvents = StringBuffer();
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
+StringBuffer debugTraceEvents = StringBuffer()..write('{"traceEvents":[');
+
+/// Buffer that will store trace event json in the order we handle the events.
+///
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
+StringBuffer handledTraceEvents = StringBuffer()..write('{"traceEvents":[');
+
+/// Buffer that will store significant events in the frame tracking process.
+///
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
 StringBuffer debugFrameTracking = StringBuffer();
 
 bool mapEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
@@ -39,13 +49,13 @@ enum TimelineEventType {
 /// Epsilon in micros used for determining it an event fits within a given frame
 /// boundary.
 ///
-/// This epsilon will not be used if the duration of the event exceeds 2000
+/// This epsilon will not be used if the duration of the event is less than 2000
 /// micros (2 ms). We do this to hold a requirement that at least half of the
 /// event must fit within the frame boundaries.
-const traceEventEpsilon = 1000;
+const Duration traceEventEpsilon = Duration(microseconds: 1000);
 
 /// Delay in ms for processing trace events.
-const traceEventDelay = 1000;
+const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 class TimelineData {
   TimelineData({this.cpuThreadId, this.gpuThreadId});
@@ -71,18 +81,18 @@ class TimelineData {
   final List<TimelineEvent> pendingEvents = [];
 
   /// The current nodes in the tree structures of CPU and GPU duration events.
-  final List<TimelineEvent> currentEventNodes = List.generate(2, (_) => null);
+  final List<TimelineEvent> currentEventNodes = [null, null];
 
-  /// The previously handled DurationEnd event for both CPU and GPU.
+  /// The previously handled DurationEnd events for both CPU and GPU.
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
-  List<TraceEvent> previousDurationEndEvents = List.generate(2, (_) => null);
+  List<TraceEvent> previousDurationEndEvents = [null, null];
 
   /// Heaps that order and store trace events as we receive them.
   final List<HeapPriorityQueue<TraceEventWrapper>> heaps = List.generate(
     2,
-    (_) => HeapPriorityQueue(TraceEventWrapper.traceComparator),
+    (_) => HeapPriorityQueue(),
   );
 
   void processTraceEvent(TraceEvent event) {
@@ -119,33 +129,29 @@ class TimelineData {
           event,
           DateTime.now().millisecondsSinceEpoch,
         ));
-        _processDurationEventsWithDelay(heap);
+        // Process duration events with a delay.
+        maybeExecuteWithDelay(
+          shouldProcessTopEvent(heap),
+          Duration(
+            milliseconds: traceEventDelay.inMilliseconds -
+                DateTime.now().millisecondsSinceEpoch -
+                heap.first.timeReceived,
+          ),
+              () => _processDurationEvents(heap),
+        );
     }
-  }
-
-  // todo fix timer stuff create util delayed queue
-  void _processDurationEventsWithDelay(
-      HeapPriorityQueue<TraceEventWrapper> heap) {
-    // Tracks whether we are already processing events on the heap.
-    bool processing = false;
-
-    // Using a periodic timer ensures we will never leave events on the heap
-    // that are ready to process. This should be inexpensive to repeat.
-    Timer.periodic(const Duration(milliseconds: 100), (_) {
-      if (shouldProcessTopEvent(heap) && !processing) {
-        processing = true;
-        while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
-          _processDurationEvent(heap.removeFirst());
-        }
-        processing = false;
-      }
-    });
   }
 
   bool shouldProcessTopEvent(HeapPriorityQueue<TraceEventWrapper> heap) {
     return heap.isNotEmpty &&
         DateTime.now().millisecondsSinceEpoch - heap.first.timeReceived >=
-            traceEventDelay;
+            traceEventDelay.inMilliseconds;
+  }
+
+  void _processDurationEvents(HeapPriorityQueue<TraceEventWrapper> heap) {
+    while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
+      _processDurationEvent(heap.removeFirst());
+    }
   }
 
   void _processDurationEvent(TraceEventWrapper eventWrapper) {
@@ -160,18 +166,19 @@ class TimelineData {
     }
 
     if (debugTimeline) {
+      handledTraceEvents.write('${jsonEncode(event.json)},');
       debugFrameTracking.writeln('Handling - ${event.json.toString()}');
     }
 
     switch (event.phase) {
       case 'B':
-        _handleDurationBeginEvent(event, eventWrapper.orderId);
+        _handleDurationBeginEvent(event, eventWrapper.id);
         break;
       case 'E':
         _handleDurationEndEvent(event);
         break;
       case 'X':
-        _handleDurationCompleteEvent(event, eventWrapper.orderId);
+        _handleDurationCompleteEvent(event, eventWrapper.id);
         break;
       // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
       // because CPU/GPU work will take place in DurationEvents.
@@ -192,6 +199,7 @@ class TimelineData {
       pendingFrame.startTime = event.timestampMicros;
 
       if (debugTimeline) {
+        handledTraceEvents.write('${jsonEncode(event.json)},');
         debugFrameTracking
             .writeln('Frame Start: $id - ${event.json.toString()}');
       }
@@ -208,6 +216,7 @@ class TimelineData {
       pendingFrame.endTime = event.timestampMicros;
 
       if (debugTimeline) {
+        handledTraceEvents.write('${jsonEncode(event.json)},');
         debugFrameTracking.writeln('Frame End: $id');
       }
 
@@ -219,7 +228,7 @@ class TimelineData {
     return '${event.name}-${event.id}';
   }
 
-  void _handleDurationBeginEvent(TraceEvent event, int orderId) {
+  void _handleDurationBeginEvent(TraceEvent event, int wrapperId) {
     final current = currentEventNodes[event.type.index];
     if (current == null &&
         !(event.name.contains('VSYNC') ||
@@ -231,7 +240,7 @@ class TimelineData {
       event.name,
       event.timestampMicros,
       event.type,
-      orderId,
+      wrapperId,
       event.json,
     );
 
@@ -327,20 +336,20 @@ class TimelineData {
     }
   }
 
-  void _handleDurationCompleteEvent(TraceEvent event, int orderId) {
+  void _handleDurationCompleteEvent(TraceEvent event, int wrapperId) {
     final TimelineEvent timelineEvent = TimelineEvent(
       event.name,
       event.timestampMicros,
       event.type,
-      orderId,
+      wrapperId,
       event.json,
     );
     timelineEvent.endTime = event.timestampMicros + event.duration;
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current.containsChildWithCondition((TimelineEvent event) =>
-          mapEquals(event.eventTraces.first, timelineEvent.eventTraces.first))) {
+      if (current.containsChildWithCondition((TimelineEvent event) => mapEquals(
+          event.eventTraces.first, timelineEvent.eventTraces.first))) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }
@@ -456,7 +465,7 @@ class TimelineData {
     // then we consider the event as fitting. If the event has a large duration,
     // consider it as fitting if it fits within [traceEventEpsilon] micros of
     // the frame bound.
-    final int epsilon = min(e.duration ~/ 2, traceEventEpsilon);
+    final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
     final bool fitsStartBoundary = f.startTime - e.startTime - epsilon < 0;
@@ -621,7 +630,7 @@ class TimelineFrame {
 }
 
 class TimelineEvent {
-  TimelineEvent(this.name, this.startTime, this.type, this.orderId,
+  TimelineEvent(this.name, this.startTime, this.type, this.beginTraceWrapperId,
       Map<String, dynamic> json) {
     eventTraces.add(json);
   }
@@ -630,7 +639,7 @@ class TimelineEvent {
 
   final TimelineEventType type;
 
-  final int orderId;
+  final int beginTraceWrapperId;
 
   /// Event start time in micros.
   final int startTime;
@@ -710,9 +719,11 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          mapEquals(parent.eventTraces.first, parent.children.first.eventTraces.first) &&
+          mapEquals(parent.eventTraces.first,
+              parent.children.first.eventTraces.first) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          mapEquals(parent.eventTraces.last, parent.children.first.eventTraces.last)) {
+          mapEquals(parent.eventTraces.last,
+              parent.children.first.eventTraces.last)) {
         parent.removeChild(children.first);
       }
     }
@@ -798,7 +809,7 @@ class TimelineEvent {
   bool _couldBeParentOf(TimelineEvent e) {
     if (endTime != null && e.endTime != null) {
       if (startTime == e.startTime && endTime == e.endTime) {
-        return orderId < e.orderId;
+        return beginTraceWrapperId < e.beginTraceWrapperId;
       }
       return startTime <= e.startTime && endTime >= e.endTime;
     } else if (endTime != null) {
@@ -809,7 +820,7 @@ class TimelineEvent {
       // not be the parent of [e].
       return startTime <= e.startTime && endTime > e.startTime;
     } else if (startTime == e.startTime) {
-      return orderId < e.orderId;
+      return beginTraceWrapperId < e.beginTraceWrapperId;
     } else {
       return startTime < e.startTime;
     }
@@ -955,20 +966,23 @@ class TraceEvent {
       '$name - [timestamp: $timestampMicros] [duration: $duration]';
 }
 
-int _orderId = 0;
+int _traceEventWrapperId = 0;
 
-class TraceEventWrapper {
-  TraceEventWrapper(this.event, this.timeReceived) : orderId = _orderId++;
+class TraceEventWrapper implements Comparable<TraceEventWrapper> {
+  TraceEventWrapper(this.event, this.timeReceived)
+      : id = _traceEventWrapperId++;
   final TraceEvent event;
   final num timeReceived;
-  final int orderId;
+  final int id;
 
   bool processed = false;
 
-  static int traceComparator(TraceEventWrapper a, TraceEventWrapper b) {
+  @override
+  int compareTo(TraceEventWrapper other) {
     // Order events based on their timestamps. If the events share a timestamp,
     // order them in the order we received them.
-    final compare = a.event.timestampMicros.compareTo(b.event.timestampMicros);
-    return compare != 0 ? compare : a.orderId.compareTo(b.orderId);
+    final compare =
+        event.timestampMicros.compareTo(other.event.timestampMicros);
+    return compare != 0 ? compare : id.compareTo(other.id);
   }
 }

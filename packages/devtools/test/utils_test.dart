@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
@@ -61,6 +63,22 @@ void main() {
       expect(log2(2), equals(1));
       expect(log2(3), equals(1));
       expect(log2(4), equals(2));
+    });
+
+    test('maybeExecuteWithDelay', () async {
+      int n = 1;
+
+      // Condition n >= 2 is false, so we should execute with a delay.
+      maybeExecuteWithDelay(n >= 2, const Duration(milliseconds: 500), () => n++);
+      expect(n, equals(1));
+      await Future.delayed(const Duration(milliseconds: 250));
+      expect(n, equals(1));
+      await Future.delayed(const Duration(milliseconds: 250));
+      expect(n, equals(2));
+
+      // Condition n >= 2 is true, so we should not execute with a delay.
+      maybeExecuteWithDelay(n >= 2, const Duration(milliseconds: 500), () => n++);
+      expect(n, equals(3));
     });
   });
 }
