@@ -221,7 +221,7 @@ class DebuggerScreen extends Screen {
         CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
-      codeMirror.setTheme('darcula');
+      codeMirror.setTheme('zenburn');
     }
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');
@@ -1506,6 +1506,9 @@ class ConsoleArea implements CoreElementView {
       ..flex();
     _editor = CodeMirror.fromElement(_container.element, options: options);
     _editor.setReadOnly(true);
+    if (isDarkTheme) {
+      _editor.setTheme('zenburn');
+    }
 
     final codeMirrorElement = _container.element.children[0];
     codeMirrorElement.setAttribute('flex', '');
