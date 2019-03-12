@@ -373,7 +373,12 @@ class DebuggerScreen extends Screen {
         return ref.valueAsString;
       } else {
         final dynamic result = await serviceManager.service.invoke(
-            debuggerState.isolateRef.id, ref.id, 'toString', <String>[]);
+          debuggerState.isolateRef.id,
+          ref.id,
+          'toString',
+          <String>[],
+          disableBreakpoints: true,
+        );
         if (result is ErrorRef) {
           return '${result.kind} ${result.message}';
         } else if (result is InstanceRef) {
