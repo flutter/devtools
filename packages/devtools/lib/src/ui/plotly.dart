@@ -40,7 +40,25 @@ external void _hookupPlotlyDoubleClick(
 );
 
 @JS()
-external void myExtendTraces(
+external void extendTraces1(
+  String domName,
+  List x0,
+  List y0,
+  List traces,
+);
+
+@JS()
+external void extendTraces2(
+  String domName,
+  List x0,
+  List x1,
+  List y0,
+  List y1,
+  List traces,
+);
+
+@JS()
+external void extendTraces4(
   String domName,
   List x0,
   List x1,
@@ -50,16 +68,6 @@ external void myExtendTraces(
   List y1,
   List y2,
   List y3,
-  List traces,
-);
-
-@JS()
-external void selectionExtendTraces(
-  String domName,
-  List x0,
-  List x1,
-  List y0,
-  List y1,
   List traces,
 );
 
@@ -146,6 +154,7 @@ class Data {
   external String get visible;
 
   external set visible(String value);
+  external set hoverinfo(String value);
 }
 
 @JS()

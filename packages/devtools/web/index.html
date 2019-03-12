@@ -15,11 +15,10 @@
     <title>Dart DevTools</title>
     <link rel="icon" sizes="64x64" href="favicon.png">
 
-    <link rel="stylesheet" href="packages/primer_css/primer_11.0.0.css">
+
 
     <link rel="stylesheet" href="packages/octicons_css/octicons_4.4.0.css">
     <link rel="stylesheet" href="packages/polymer_css/flex.css">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="packages/devtools/src/debugger/debugger.css">
     <link rel="stylesheet" href="packages/devtools/src/inspector/inspector.css">
     <link rel="stylesheet" href="packages/devtools/src/logging/logging.css">
@@ -30,10 +29,15 @@
             var params = new URLSearchParams(window.location.search);
             if (params.get('theme') == 'dark') {
                 document.write(
-   // TODO(jacobr): find a dark primer theme with the right licensing terms.
-   //                 '<link rel="stylesheet" href="packages/devtools/src/ui/github-dark.css">' +
+                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0_dark.css">' +
+                    '<link rel="stylesheet" href="styles.css">' +
                     '<link rel="stylesheet" href="styles_dark.css">'
                 );
+            } else {
+                document.write(
+                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">' +
+                    '<link rel="stylesheet" href="styles.css">'
+                )
             }
         })();
 
@@ -76,7 +80,34 @@
         }
 
         // TODO(terry): Used instead of normal JS interop (reified List).  Need to eliminate.
-        function myExtendTraces(domName, x0, x1, x2, x3, y0, y1, y2, y3, orgTraces) {
+        function extendTraces1(domName, x0, y0, orgTraces) {
+            var data = {};
+            var xData = [];
+            var yData = [];
+            var traces = [];
+
+            _copyTrace(x0, y0, orgTraces[0], xData, yData, traces);
+
+            data = {x: xData, y: yData};
+
+            Plotly.extendTraces(domName, data, traces);
+        }
+
+        function extendTraces2(domName, x0, x1, y0, y1, orgTraces) {
+            var data = {};
+            var xData = [];
+            var yData = [];
+            var traces = [];
+
+            _copyTrace(x0, y0, orgTraces[0], xData, yData, traces);
+            _copyTrace(x1, y1, orgTraces[1], xData, yData, traces);
+
+            data = {x: xData, y: yData};
+
+            Plotly.extendTraces(domName, data, traces);
+        }
+
+        function extendTraces4(domName, x0, x1, x2, x3, y0, y1, y2, y3, orgTraces) {
           var data = {};
           var xData = [];
           var yData = [];
@@ -90,20 +121,6 @@
           data = {x: xData, y: yData};
 
           Plotly.extendTraces(domName, data, traces);
-        }
-
-        function selectionExtendTraces(domName, x0, x1, y0, y1, orgTraces) {
-            var data = {};
-            var xData = [];
-            var yData = [];
-            var traces = [];
-
-            _copyTrace(x0, y0, orgTraces[0], xData, yData, traces);
-            _copyTrace(x1, y1, orgTraces[1], xData, yData, traces);
-
-            data = {x: xData, y: yData};
-
-            Plotly.extendTraces(domName, data, traces);
         }
     </script>
 

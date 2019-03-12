@@ -10,6 +10,7 @@
 /* If you add a CSS variable here, be sure to also add it to styles_dart.css */
 :root {
     --border-color: #eee;
+    --chart-bar-color: #4078c0;
     --counter-color: #666;
     --dark-shadow-color: #666;
     --default-background-rgb: 255, 255, 255;
@@ -288,7 +289,7 @@ input:disabled+label {
 }
 
 .frame-bar {
-    background: var(--masthead-background);
+    background: var(--chart-bar-color);
     height: 12px;
     display: inline-block;
     border-radius: 1px;
@@ -743,7 +744,9 @@ html [full] {
     height: 28px;
     width: 28px;
     color: white;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-button:hover {
@@ -762,10 +765,8 @@ html [full] {
     opacity: 0.5;
 }
 
-.action-button img {
-    width: 18px;
-    height: 18px;
-    vertical-align: middle;
+.action-button .flutter-icon {
+    margin: 2px;
 }
 
 .btn[disabled] .flutter-icon {
@@ -791,4 +792,9 @@ html [full] {
 
 span.strong {
     font-weight: 600;
+}
+
+.CodeMirror {
+    /* Override the CodeMirror theme to use our own background color */
+    background: var(--default-background) !important;
 }

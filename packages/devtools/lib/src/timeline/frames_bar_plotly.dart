@@ -375,7 +375,7 @@ class FramesBarPlotly {
     }
 
     // TODO(terry): Eliminate this JS call (result of reified List?).
-    myExtendTraces(
+    extendTraces4(
       _domName,
       cpuGoodX,
       gpuGoodX,
@@ -441,7 +441,7 @@ class SelectTrace {
 
   final int traceIndex;
   int ptNumber;
-  final int xValue;
+  final num xValue;
   final num yValue;
 }
 
@@ -508,7 +508,7 @@ class Selection {
     }
 
     // Move the data to the selection traces.
-    selectionExtendTraces(_domName, [
+    extendTraces2(_domName, [
       selectInfo[0].xValue,
     ], [
       selectInfo[1].xValue,
@@ -555,7 +555,7 @@ class Selection {
       for (var selectTrace in selectInfo) {
         final int trace = selectTrace.traceIndex;
         final int ptNumber = selectTrace.ptNumber;
-        final int xValue = selectTrace.xValue;
+        final num xValue = selectTrace.xValue;
         final num yValue = selectTrace.yValue;
 
         // Restore our data point (selected) back to traces (gpu good/jank &

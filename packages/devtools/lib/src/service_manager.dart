@@ -34,6 +34,7 @@ class ServiceConnectionManager {
   final Completer<Null> serviceAvailable = Completer();
 
   VmServiceCapabilities _serviceCapabilities;
+
   Future<VmServiceCapabilities> get serviceCapabilities async {
     if (_serviceCapabilities == null) {
       await serviceAvailable.future;
@@ -181,7 +182,15 @@ class ServiceConnectionManager {
       '_Logging',
       '_Service',
     ];
-    await Future.wait(streamIds.map((id) => service.streamListen(id)));
+
+    await Future.wait(streamIds.map((String id) async {
+      try {
+        await service.streamListen(id);
+      } catch (e) {
+        print("Service client stream not supported: '$id'");
+        print('  $e');
+      }
+    }));
   }
 
   void vmServiceClosed() {
@@ -687,6 +696,7 @@ class ServiceExtensionState {
 
 class VmServiceCapabilities {
   VmServiceCapabilities(this.version);
+
   final Version version;
 
   bool get supportsGetScripts =>

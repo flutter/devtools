@@ -39,8 +39,8 @@ class DragScroll {
         final num deltaX = lastX - newX;
         final num deltaY = lastY - newY;
 
-        dragged.scrollLeft += deltaX;
-        dragged.scrollTop += deltaY;
+        dragged.scrollLeft += deltaX.round();
+        dragged.scrollTop += deltaY.round();
 
         lastX = newX;
         lastY = newY;

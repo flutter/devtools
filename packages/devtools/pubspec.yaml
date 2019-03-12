@@ -33,7 +33,7 @@ dependencies:
     ^0.0.1
 #    path: ../../third_party/packages/polymer_css
   primer_css:
-     ^0.0.1
+     ^0.0.2
 #    path: ../../third_party/packages/primer_css
   split:
     ^0.0.1
