@@ -98,10 +98,11 @@ class TimelineScreen extends Screen {
 //      PTabNavTab('Skia picture'),
 //    ]);
 
-    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
-      ..small()
-      ..primary()
-      ..click(_pauseRecording);
+    pauseButton =
+        PButton.icon('Pause recording', FlutterIcons.pause_white_2x_primary)
+          ..small()
+          ..primary()
+          ..click(_pauseRecording);
 
     resumeButton =
         PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)

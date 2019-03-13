@@ -142,6 +142,11 @@ class FlutterIcons {
       UrlIcon('/icons/general/pause_white@2x.png', invertDark: true);
   static const UrlIcon pause_white_disabled_2x =
       UrlIcon('/icons/general/pause_white_disabled@2x.png', invertDark: true);
+
+  /// Used on "primary" buttons that have colored backgrounds, so is not
+  /// inverted for Dark theme.
+  static const UrlIcon pause_white_2x_primary =
+      UrlIcon('/icons/general/pause_white@2x.png');
   static const UrlIcon resume_black_2x =
       UrlIcon('/icons/general/resume_black@2x.png');
   static const UrlIcon resume_black_disabled_2x =
