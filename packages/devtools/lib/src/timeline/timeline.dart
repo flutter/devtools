@@ -1,7 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -12,6 +11,7 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
+import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'event_details.dart';
@@ -20,7 +20,6 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-// TODO(terry): These colors need to be ThemedColor.
 // Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const mainCpuColor = ThemedColor(Color(0xFF64B5F6), Color(0xFF42A5F5));
