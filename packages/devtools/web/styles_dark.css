@@ -32,6 +32,8 @@
     --selected-background: #37373d;
     --selected-line: #626d7b;
     --shadow-color: #585858;
+    --shaded-background-lighter: #323232;
+    --shaded-background-darker: var(--default-background);
     --subtle: #888;
     --table-border: #484848;
     --toast-background: #212121;

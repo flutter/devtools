@@ -1,7 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -12,6 +11,7 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
+import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'event_details.dart';
@@ -20,13 +20,20 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-// TODO(terry): These colors need to be ThemedColor.
-// Blue 300 from
+// Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const Color mainCpuColor = Color(0xFF64B5F6);
-// Teal 300 from
+const mainCpuLight = Color(0xFF64B5F6);
+const mainCpuDark = Color(0xFF42A5F5);
+const mainCpuColor = ThemedColor(mainCpuLight, mainCpuDark);
+
+// Teal 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const Color mainGpuColor = Color(0xFF4DB6AC);
+const mainGpuLight = Color(0xFF4DB6AC);
+const mainGpuDark = Color(0xFF26A69A);
+const mainGpuColor = ThemedColor(mainGpuLight, mainGpuDark);
+
+const selectedFlameChartItemColor =
+    ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
 
 // Red 300
 const Color gpuJankColor = Color(0xFFE57373);
@@ -36,7 +43,6 @@ const Color cpuJankColor = Color(0xFFC62828);
 const Color hoverJankColor = Color(0xFFF44336);
 
 const Color slowFrameColor = Color(0xFFE50C0C);
-const Color selectedColor = Color(0xFF4078C0);
 
 // Blue A700
 const Color selectedGpuColor = Color(0xFF2962FF);
