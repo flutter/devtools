@@ -25,17 +25,17 @@ bool _debugEventTrace = false;
 // Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final cpuColorPalette = [
-  const ThemedColor(Color(0xFFBBDEFB), mainCpuColor),
+  const ThemedColor(Color(0xFFBBDEFB), mainCpuDark),
   const ThemedColor(Color(0xFF90CAF9), Color(0xFF1E88E5)),
-  const ThemedColor(mainCpuColor, Color(0xFF1976D2)),
+  const ThemedColor(mainCpuLight, Color(0xFF1976D2)),
 ];
 
 // Teal 100-300 (light mode) or 400-600 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final gpuColorPalette = [
-  const ThemedColor(Color(0xFFB2DFDB), mainGpuColor),
+  const ThemedColor(Color(0xFFB2DFDB), mainGpuDark),
   const ThemedColor(Color(0xFF80CBC4), Color(0xFF009688)),
-  const ThemedColor(mainGpuColor, Color(0xFF00796B)),
+  const ThemedColor(mainGpuLight, Color(0xFF00796B)),
 ];
 
 /// Inset for the start/end of the flame chart.

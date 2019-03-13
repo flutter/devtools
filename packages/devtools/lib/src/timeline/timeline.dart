@@ -22,11 +22,15 @@ import 'timeline_protocol.dart';
 
 // Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainCpuColor = ThemedColor(Color(0xFF64B5F6), Color(0xFF42A5F5));
+const mainCpuLight = Color(0xFF64B5F6);
+const mainCpuDark = Color(0xFF42A5F5);
+const mainCpuColor = ThemedColor(mainCpuLight, mainCpuDark);
 
 // Teal 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainGpuColor = ThemedColor(Color(0xFF4DB6AC), Color(0xFF26A69A));
+const mainGpuLight = Color(0xFF4DB6AC);
+const mainGpuDark = Color(0xFF26A69A);
+const mainGpuColor = ThemedColor(mainGpuLight, mainGpuDark);
 
 const selectedFlameChartItemColor =
     ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
