@@ -59,3 +59,9 @@ nav.menu .menu-item {
     color: wheat;
     font-weight: bold;
 }
+
+.rangeslider-mask-min, .rangeslider-mask-max {
+    /* Override the non-visible selection area of Plotly's rangeslider. */
+    fill: rgba(255, 255, 255, .6) !important;
+    fill-opacity: 0.6 !important;
+}

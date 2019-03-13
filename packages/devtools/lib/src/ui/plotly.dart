@@ -226,6 +226,10 @@ class Layout {
     List<Shape> shapes,
     Font font,
     Legend legend,
+    // ignore: non_constant_identifier_names
+    String plot_bgcolor,
+    // ignore: non_constant_identifier_names
+    String paper_bgcolor,
   });
 
   external String get title;
@@ -242,6 +246,10 @@ class Layout {
   external List<Shape> get shapes;
   external Font get font;
   external Legend get legend;
+  // ignore: non_constant_identifier_names
+  external String get plot_bgcolor;
+  // ignore: non_constant_identifier_names
+  external String get paper_bgcolor;
 }
 
 @JS()
@@ -275,11 +283,13 @@ class Legend {
     String orientation,
     num x,
     num y,
+    Font font,
   });
 
   external String get orientation;
   external num get x;
   external num get y;
+  external Font get font;
 }
 
 @JS()
@@ -334,6 +344,7 @@ class AxisLayout {
     String exponentformat,
     String showticksuffix,
     String hoverformat,
+    Font titlefont,
   });
 
   external String get tickformat;
@@ -357,6 +368,7 @@ class AxisLayout {
   external String get showticksuffix;
   external String get hoverformat;
   external String get hockerformat;
+  external Font get titlefont;
 }
 
 @JS()
