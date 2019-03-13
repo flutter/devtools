@@ -40,6 +40,8 @@ class ThemedColor implements Color {
 
   Color get _current => isDarkTheme ? _dark : _light;
 
+  ThemedColor reverse() => ThemedColor(_dark, _light);
+
   @override
   int get alpha => _current.alpha;
 

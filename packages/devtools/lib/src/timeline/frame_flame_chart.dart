@@ -6,13 +6,13 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math' as math;
 
-import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline.dart';
 import 'timeline_protocol.dart';
@@ -25,17 +25,17 @@ bool _debugEventTrace = false;
 // Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final cpuColorPalette = [
-  isDarkTheme ? mainCpuColor : const Color(0xFFBBDEFB),
-  isDarkTheme ? const Color(0xFF1E88E5) : const Color(0xFF90CAF9),
-  isDarkTheme ? const Color(0xFF1976D2) : mainCpuColor,
+  const ThemedColor(Color(0xFFBBDEFB), mainCpuColor),
+  const ThemedColor(Color(0xFF90CAF9), Color(0xFF1E88E5)),
+  const ThemedColor(mainCpuColor, Color(0xFF1976D2)),
 ];
 
 // Teal 100-300 (light mode) or 400-600 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final gpuColorPalette = [
-  isDarkTheme ? mainGpuColor : const Color(0xFFB2DFDB),
-  isDarkTheme ? const Color(0xFF009688) : const Color(0xFF80CBC4),
-  isDarkTheme ? const Color(0xFF00796B) : mainGpuColor,
+  const ThemedColor(Color(0xFFB2DFDB), mainGpuColor),
+  const ThemedColor(Color(0xFF80CBC4), Color(0xFF009688)),
+  const ThemedColor(mainGpuColor, Color(0xFF00796B)),
 ];
 
 /// Inset for the start/end of the flame chart.
@@ -376,8 +376,8 @@ class FlameChartItem {
     });
   }
 
-  final defaultTextColor = isDarkTheme ? Colors.white : Colors.black;
-  final selectedTextColor = isDarkTheme ? Colors.black : Colors.white;
+  final defaultTextColor = defaultBackground.reverse();
+  final selectedTextColor = defaultBackground;
 
   // Pixels of padding to place on the right side of the label to ensure label
   // text does not get too close to the right hand size of each bar.
