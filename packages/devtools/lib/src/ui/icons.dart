@@ -25,9 +25,12 @@ abstract class Icon {
 }
 
 class UrlIcon extends Icon {
-  const UrlIcon(this.src);
+  const UrlIcon(this.src, {this.invertDark = false});
 
   final String src;
+
+  /// Whether the icon shout be inverted when rendered in the Dark theme.
+  final bool invertDark;
 }
 
 class FlutterIcons {
@@ -132,13 +135,13 @@ class FlutterIcons {
   static const Icon history = UrlIcon('/icons/history.svg');
 
   static const UrlIcon pause_black_2x =
-      UrlIcon('/icons/general/pause_black@2x.png');
+      UrlIcon('/icons/general/pause_black@2x.png', invertDark: true);
   static const UrlIcon pause_black_disabled_2x =
-      UrlIcon('/icons/general/pause_black_disabled@2x.png');
+      UrlIcon('/icons/general/pause_black_disabled@2x.png', invertDark: true);
   static const UrlIcon pause_white_2x =
-      UrlIcon('/icons/general/pause_white@2x.png');
+      UrlIcon('/icons/general/pause_white@2x.png', invertDark: true);
   static const UrlIcon pause_white_disabled_2x =
-      UrlIcon('/icons/general/pause_white_disabled@2x.png');
+      UrlIcon('/icons/general/pause_white_disabled@2x.png', invertDark: true);
   static const UrlIcon resume_black_2x =
       UrlIcon('/icons/general/resume_black@2x.png');
   static const UrlIcon resume_black_disabled_2x =
@@ -155,11 +158,11 @@ class FlutterIcons {
 
   static const UrlIcon snapshot = UrlIcon('/icons/memory/snapshot_color.png');
   static const UrlIcon resetAccumulators =
-      UrlIcon('/icons/memory/reset_icon.png');
+      UrlIcon('/icons/memory/reset_icon.png', invertDark: true);
   static const UrlIcon filter =
-      UrlIcon('/icons/memory/ic_filter_list_alt_black.png');
+      UrlIcon('/icons/memory/ic_filter_list_alt_black.png', invertDark: true);
   static const UrlIcon gcNow =
-      UrlIcon('/icons/memory/ic_delete_outline_black.png');
+      UrlIcon('/icons/memory/ic_delete_outline_black.png', invertDark: true);
 }
 
 class CustomIcon extends Icon {

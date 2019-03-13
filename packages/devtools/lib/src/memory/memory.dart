@@ -73,9 +73,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..disabled = true;
 
-    pauseButton =
-        PButton.icon('Pause', FlutterIcons.pause_black_2x, invertDark: true)
-          ..small();
+    pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)..small();
 
     // TODO(terry): Need to correctly handle enabled and disabled.
     vmMemorySnapshotButton = PButton.icon('Snapshot', FlutterIcons.snapshot,
@@ -86,19 +84,19 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..disabled = true;
     resetAccumulatorsButton = PButton.icon(
         'Reset', FlutterIcons.resetAccumulators,
-        title: 'Reset Accumulators', invertDark: true)
+        title: 'Reset Accumulators')
       ..small()
       ..click(_resetAllocatorCounts)
       ..disabled = true;
-    filterLibrariesButton = PButton.icon('Filter', FlutterIcons.filter,
-        title: 'Filter', invertDark: true)
-      ..small()
-      ..disabled = true;
-    gcNowButton = PButton.icon('GC', FlutterIcons.gcNow,
-        title: 'Manual Garbage Collect', invertDark: true)
-      ..small()
-      ..click(_gcNow)
-      ..disabled = true;
+    filterLibrariesButton =
+        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
+          ..small()
+          ..disabled = true;
+    gcNowButton =
+        PButton.icon('GC', FlutterIcons.gcNow, title: 'Manual Garbage Collect')
+          ..small()
+          ..click(_gcNow)
+          ..disabled = true;
 
     resumeButton.click(() {
       updateResumeButton(disabled: true);

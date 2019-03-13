@@ -75,8 +75,4 @@ nav.menu .menu-item {
     background-image: linear-gradient(-180deg, #1f1f1f 0%, #1f1f1f 90%);
     box-shadow: none;
 }
-
-.btn.invert-dark .flutter-icon {
-    filter: invert(1);
-}
 /* /Tweak how buttons look in the dark theme to not be so dark */
