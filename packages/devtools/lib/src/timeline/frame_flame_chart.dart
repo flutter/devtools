@@ -376,7 +376,7 @@ class FlameChartItem {
     });
   }
 
-  final defaultTextColor = defaultBackground.reverse();
+  final defaultTextColor = const ThemedColor(Colors.black, Colors.white);
   final selectedTextColor = defaultBackground;
 
   // Pixels of padding to place on the right side of the label to ensure label
