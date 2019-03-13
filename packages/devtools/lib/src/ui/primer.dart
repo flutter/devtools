@@ -63,11 +63,15 @@ class PButton extends CoreElement {
     setAttribute('type', 'button');
   }
 
-  PButton.icon(String text, Icon icon, {String title, List<String> classes})
+  PButton.icon(String text, Icon icon,
+      {String title, List<String> classes, bool invertDark = false})
       : super('button', classes: 'btn optional-text') {
     setAttribute('type', 'button');
     setAttribute('title', title ?? text);
     classes?.forEach(clazz);
+    if (invertDark) {
+      clazz('invert-dark');
+    }
     if (icon != null) {
       _icon = icon;
       add(createIconElement(icon));

@@ -77,20 +77,15 @@ class DebuggerScreen extends Screen {
           ..disabled = true;
 
     final PButton pauseButton =
-        PButton.icon('Pause', FlutterIcons.pause_black_2x)..small();
+        PButton.icon('Pause', FlutterIcons.pause_black_2x, invertDark: true)
+          ..small();
 
     void _updateResumeButton({@required bool disabled}) {
       resumeButton.disabled = disabled;
-      resumeButton.changeIcon(disabled
-          ? FlutterIcons.resume_white_disabled_2x.src
-          : FlutterIcons.resume_white_2x.src);
     }
 
     void _updatePauseButton({@required bool disabled}) {
       pauseButton.disabled = disabled;
-      pauseButton.changeIcon(disabled
-          ? FlutterIcons.pause_black_disabled_2x.src
-          : FlutterIcons.pause_black_2x.src);
     }
 
     resumeButton.click(() async {
