@@ -9,9 +9,6 @@ import '../ui/theme.dart';
 
 import 'memory_chart.dart';
 
-const ThemedColor chartBackground =
-    ThemedColor(Colors.white, Color.fromRGBO(47, 43, 43, 1));
-
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
 
