@@ -17,7 +17,7 @@
     --error-background: #7c1c05;
     --even-row-background: #1e1e1e;
     --footer-color: #858585;
-    --footer-link-hover: #0366d6;
+    --footer-link-hover: wheat;
     --footer-strong: #ccc;
     --header-background: #282828;
     --header-color: #ccc;
@@ -76,3 +76,8 @@ nav.menu .menu-item {
     box-shadow: none;
 }
 /* /Tweak how buttons look in the dark theme to not be so dark */
+
+.flash-warn {
+    background-color: #fffbdd;
+    color: #735c0f;
+}
