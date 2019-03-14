@@ -96,6 +96,9 @@ class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
       ..width = '${icon.iconWidth}px'
       ..height = '${icon.iconHeight}px'
       ..backgroundImage = 'url($src)';
+    if (icon.invertDark && isDarkTheme) {
+      element.style.filter = 'invert(1)';
+    }
     return element;
   }
 

@@ -81,16 +81,10 @@ class DebuggerScreen extends Screen {
 
     void _updateResumeButton({@required bool disabled}) {
       resumeButton.disabled = disabled;
-      resumeButton.changeIcon(disabled
-          ? FlutterIcons.resume_white_disabled_2x.src
-          : FlutterIcons.resume_white_2x.src);
     }
 
     void _updatePauseButton({@required bool disabled}) {
       pauseButton.disabled = disabled;
-      pauseButton.changeIcon(disabled
-          ? FlutterIcons.pause_black_disabled_2x.src
-          : FlutterIcons.pause_black_2x.src);
     }
 
     resumeButton.click(() async {

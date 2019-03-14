@@ -98,10 +98,11 @@ class TimelineScreen extends Screen {
 //      PTabNavTab('Skia picture'),
 //    ]);
 
-    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
-      ..small()
-      ..primary()
-      ..click(_pauseRecording);
+    pauseButton =
+        PButton.icon('Pause recording', FlutterIcons.pause_white_2x_primary)
+          ..small()
+          ..primary()
+          ..click(_pauseRecording);
 
     resumeButton =
         PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)
@@ -209,13 +210,6 @@ class TimelineScreen extends Screen {
   void _updateButtons({@required bool paused}) {
     pauseButton.disabled = paused;
     resumeButton.disabled = !paused;
-
-    pauseButton.changeIcon(paused
-        ? FlutterIcons.pause_white_disabled_2x.src
-        : FlutterIcons.pause_white_2x.src);
-    resumeButton.changeIcon(paused
-        ? FlutterIcons.resume_black_2x.src
-        : FlutterIcons.resume_black_disabled_2x.src);
   }
 
   void _updateListeningState() async {

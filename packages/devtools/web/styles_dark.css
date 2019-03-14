@@ -65,3 +65,14 @@ nav.menu .menu-item {
     fill: rgba(255, 255, 255, .6) !important;
     fill-opacity: 0.6 !important;
 }
+
+/* Tweak how buttons look in the dark theme to not be so dark */
+.btn:not(.btn-primary), .btn:not(.btn-primary)[disabled] {
+    background-image: linear-gradient(-180deg, #3f3f3f 0%, #3f3f3f 90%);
+}
+
+.btn.selected:not(.btn-primary), .btn.selected:not(.btn-primary)[disabled] {
+    background-image: linear-gradient(-180deg, #1f1f1f 0%, #1f1f1f 90%);
+    box-shadow: none;
+}
+/* /Tweak how buttons look in the dark theme to not be so dark */
