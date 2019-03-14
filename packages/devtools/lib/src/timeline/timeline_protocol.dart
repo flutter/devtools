@@ -12,7 +12,7 @@ import 'package:meta/meta.dart';
 import '../utils.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview.
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
 // This class depends on the stability of event names we receive from the
 // engine. That dependency is tracked at
 // https://github.com/flutter/flutter/issues/27609.
@@ -32,7 +32,8 @@ StringBuffer debugTraceEvents = StringBuffer()..write('{"traceEvents":[');
 ///
 /// This buffer is for debug purposes. When [debugTimeline] is true, we will
 /// be able to dump this buffer to a downloadable text file.
-StringBuffer handledTraceEvents = StringBuffer()..write('{"traceEvents":[');
+StringBuffer debugHandledTraceEvents = StringBuffer()
+  ..write('{"traceEvents":[');
 
 /// Buffer that will store significant events in the frame tracking process.
 ///
@@ -130,10 +131,10 @@ class TimelineData {
           DateTime.now().millisecondsSinceEpoch,
         ));
         // Process duration events with a delay.
-        maybeExecuteWithDelay(
-          shouldProcessTopEvent(heap),
+        executeWithDelay(
           Duration(milliseconds: traceEventDelay.inMilliseconds),
           () => _processDurationEvents(heap),
+          executeNow: shouldProcessTopEvent(heap),
         );
     }
   }
@@ -162,7 +163,7 @@ class TimelineData {
     }
 
     if (debugTimeline) {
-      handledTraceEvents.write('${jsonEncode(event.json)},');
+      debugHandledTraceEvents.write('${jsonEncode(event.json)},');
       debugFrameTracking.writeln('Handling - ${event.json.toString()}');
     }
 
@@ -195,7 +196,7 @@ class TimelineData {
       pendingFrame.startTime = event.timestampMicros;
 
       if (debugTimeline) {
-        handledTraceEvents.write('${jsonEncode(event.json)},');
+        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
         debugFrameTracking
             .writeln('Frame Start: $id - ${event.json.toString()}');
       }
@@ -212,7 +213,7 @@ class TimelineData {
       pendingFrame.endTime = event.timestampMicros;
 
       if (debugTimeline) {
-        handledTraceEvents.write('${jsonEncode(event.json)},');
+        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
         debugFrameTracking.writeln('Frame End: $id');
       }
 
@@ -251,7 +252,7 @@ class TimelineData {
     // off balance due to duplicate events from the engine. Balance the tree so
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
-      if (collectionEquals(
+      if (collectionEquals<Map<String, dynamic>>(
         event.json,
         previousDurationEndEvents[event.type.index]?.json,
       )) {
@@ -274,7 +275,7 @@ class TimelineData {
               previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
-          collectionEquals(
+          collectionEquals<Map<String, dynamic>>(
             current.beginTraceEventJson,
             current.children.first.beginTraceEventJson,
           )) {
@@ -359,8 +360,8 @@ class TimelineData {
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current
-          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
+      if (current.containsChildWithCondition(
+          (TimelineEvent e) => collectionEquals<Map<String, dynamic>>(
                 e.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
@@ -738,10 +739,10 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          collectionEquals(parent.beginTraceEventJson,
+          collectionEquals<Map<String, dynamic>>(parent.beginTraceEventJson,
               parent.children.first.beginTraceEventJson) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          collectionEquals(parent.endTraceEventJson,
+          collectionEquals<Map<String, dynamic>>(parent.endTraceEventJson,
               parent.children.first.endTraceEventJson)) {
         parent.removeChild(children.first);
       }
@@ -860,8 +861,9 @@ class TimelineEvent {
       for (TimelineEvent child in children) {
         child.writeTraceToBuffer(buf);
       }
-      for (var json in traceEvents.where(
-          (trace) => !collectionEquals(trace.event.json, beginTraceEventJson))) {
+      for (var json in traceEvents.where((trace) =>
+          !collectionEquals<Map<String, dynamic>>(
+              trace.event.json, beginTraceEventJson))) {
         buf.writeln(json.toString());
       }
     }

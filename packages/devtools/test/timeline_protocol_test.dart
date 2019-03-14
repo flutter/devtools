@@ -22,11 +22,17 @@ void main() {
     expect(goldenCpuString() == originalGoldenCpuEvent.toString(), isTrue);
     expect(goldenGpuString() == originalGoldenGpuEvent.toString(), isTrue);
     expect(
-      collectionEquals(goldenCpuTraceEvents, originalGoldenCpuTraceEvents),
+      collectionEquals<List<TraceEvent>>(
+        goldenCpuTraceEvents,
+        originalGoldenCpuTraceEvents,
+      ),
       isTrue,
     );
     expect(
-      collectionEquals(goldenGpuTraceEvents, originalGoldenGpuTraceEvents),
+      collectionEquals<List<TraceEvent>>(
+        goldenGpuTraceEvents,
+        originalGoldenGpuTraceEvents,
+      ),
       isTrue,
     );
   });
@@ -253,7 +259,6 @@ void main() {
         'ph': 'B',
         'args': {}
       });
-
       traceEvents = [
         vsyncEvent,
         animatorBeginFrameEvent,
@@ -347,7 +352,10 @@ void main() {
       // Now [frameEvent]'s children are [engineBeginFrameEvent]'s children.
       expect(engineBeginFrameEvent.children.length, equals(7));
       expect(
-        collectionEquals(engineBeginFrameEvent.children, frameEvent.children),
+        collectionEquals<List<TimelineEvent>>(
+          engineBeginFrameEvent.children,
+          frameEvent.children,
+        ),
         isTrue,
       );
     });

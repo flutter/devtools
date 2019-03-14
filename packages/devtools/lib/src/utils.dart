@@ -12,7 +12,8 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
+bool collectionEquals<T>(T e1, T e2) =>
+    const DeepCollectionEquality().equals(e1, e2);
 
 const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet
@@ -108,8 +109,9 @@ String funcRefName(FuncRef ref) {
   }
 }
 
-void maybeExecuteWithDelay(bool condition, Duration delay, void callback()) {
-  if (condition || delay.inMilliseconds <= 0) {
+void executeWithDelay(Duration delay, void callback(),
+    {bool executeNow = false}) {
+  if (executeNow || delay.inMilliseconds <= 0) {
     callback();
   } else {
     Timer(delay, () {

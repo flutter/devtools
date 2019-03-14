@@ -313,7 +313,7 @@ class TimelineScreen extends Screen {
               buf.writeln(wrapper.event.json.toString());
             }
           }
-          downloadFile(buf.toString(), 'tracking_status.txt');
+          downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
         }));
     }
   }

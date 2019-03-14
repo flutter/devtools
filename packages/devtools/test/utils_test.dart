@@ -65,12 +65,15 @@ void main() {
       expect(log2(4), equals(2));
     });
 
-    test('maybeExecuteWithDelay', () async {
+    test('executeWithDelay', () async {
       int n = 1;
 
       // Condition n >= 2 is false, so we should execute with a delay.
-      maybeExecuteWithDelay(
-          n >= 2, const Duration(milliseconds: 500), () => n++);
+      executeWithDelay(
+        const Duration(milliseconds: 500),
+        () => n++,
+        executeNow: n >= 2,
+      );
       expect(n, equals(1));
       await Future.delayed(const Duration(milliseconds: 250));
       expect(n, equals(1));
@@ -78,8 +81,11 @@ void main() {
       expect(n, equals(2));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
-      maybeExecuteWithDelay(
-          n >= 2, const Duration(milliseconds: 500), () => n++);
+      executeWithDelay(
+        const Duration(milliseconds: 500),
+        () => n++,
+        executeNow: n >= 2,
+      );
       expect(n, equals(3));
     });
   });
