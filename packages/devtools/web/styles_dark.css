@@ -76,3 +76,8 @@ nav.menu .menu-item {
     box-shadow: none;
 }
 /* /Tweak how buttons look in the dark theme to not be so dark */
+
+.flash-warn {
+    background-color: #fffbdd;
+    color: #735c0f;
+}
