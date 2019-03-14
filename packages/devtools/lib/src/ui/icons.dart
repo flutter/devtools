@@ -136,6 +136,8 @@ class FlutterIcons {
 
   static const UrlIcon pause_black_2x =
       UrlIcon('/icons/general/pause_black@2x.png', invertDark: true);
+  // TODO(dantup): Remove the invertDark option from these...
+  // https://github.com/flutter/devtools/pull/423#pullrequestreview-214139125
   static const UrlIcon pause_black_disabled_2x =
       UrlIcon('/icons/general/pause_black_disabled@2x.png', invertDark: true);
   static const UrlIcon pause_white_2x =
