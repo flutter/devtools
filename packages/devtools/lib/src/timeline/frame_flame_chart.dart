@@ -19,9 +19,6 @@ import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
 
-// Switch this flag to true to dump the frame event trace to console.
-bool _debugEventTrace = false;
-
 // Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final cpuColorPalette = [

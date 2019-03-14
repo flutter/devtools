@@ -662,7 +662,6 @@ class TimelineEvent {
   TimelineEventType type;
 
   /// Event start time in micros.
-  @visibleForTesting
   int startTime;
 
   /// Event end time in micros.
