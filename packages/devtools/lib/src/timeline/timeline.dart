@@ -55,6 +55,8 @@ const Color selectedGpuColor =
 // Dark Blue is light, Indigo A200 is dark
 const Color selectedCpuColor =
     ThemedColor(Color(0xFF09007E), Color(0xFF536DFE));
+// Selection is high-contrast need white font.
+const Color hoverTextColor = ThemedColor(Colors.white, defaultForeground);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

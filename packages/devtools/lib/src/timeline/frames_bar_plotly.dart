@@ -266,7 +266,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedCpuColor),
           font: Font(
-            color: colorToCss(defaultForeground),
+            color: colorToCss(hoverTextColor),
           ),
           bordercolor: colorToCss(selectedCpuColor),
         ),
