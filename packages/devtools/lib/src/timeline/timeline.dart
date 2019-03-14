@@ -50,9 +50,11 @@ const hoverJankColor = ThemedColor(Color(0xFFF44336), Color(0xFFD32F2F));
 const Color slowFrameColor = Color(0xFFE50C0C);
 
 // Blue A700 is light, Indigo A400 is dark
-const Color selectedGpuColor = ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
+const Color selectedGpuColor =
+    ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
 // Dark Blue is light, Indigo A200 is dark
-const Color selectedCpuColor = ThemedColor(Color(0xFF09007E), Color(0xFF536DFE));
+const Color selectedCpuColor =
+    ThemedColor(Color(0xFF09007E), Color(0xFF536DFE));
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
