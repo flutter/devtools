@@ -86,7 +86,7 @@ StatusItem createLinkStatusItem(
   // TODO(jacobr): cleanup icon rendering so the icon changes color on hover.
   final icon = createIconElement(const MaterialIcon(
     'open_in_new',
-    Colors.black45,
+    Colors.grey,
   ));
   // TODO(jacobr): add this style to the css for all icons displayed as HTML
   // once we verify there are not unintended consequences.

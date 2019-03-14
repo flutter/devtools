@@ -24,7 +24,7 @@ dependencies:
   rxdart: ^0.21.0
   shelf: ^0.7.4
   shelf_static: ^0.2.8
-  vm_service_lib: ^3.14.2
+  vm_service_lib: ^3.14.3-dev.4
   # We would use local dependencies for these packages if pub publish allowed it.
   octicons_css:
     ^0.0.1

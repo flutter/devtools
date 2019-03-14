@@ -1,9 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import '../ui/elements.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/theme.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
@@ -23,13 +24,7 @@ class EventDetails extends CoreElement {
   _Details _details;
 
   void addTitle() {
-    const horizontalPadding = '12px';
-    const verticalPadding = '3px';
-
-    _title = div(text: defaultTitleText);
-    _title.element.style
-      ..fontWeight = 'bold'
-      ..padding = '$verticalPadding $horizontalPadding';
+    _title = div(text: defaultTitleText, c: 'event-details-title');
     add(_title);
   }
 
@@ -57,13 +52,9 @@ class EventDetails extends CoreElement {
 }
 
 class _Details extends CoreElement {
-  _Details() : super('div') {
+  _Details() : super('div', classes: 'event-details') {
     layoutVertical();
     flex();
-
-    element.style
-      ..marginTop = '6px'
-      ..marginLeft = '12px';
 
     add(_duration = div());
 
@@ -77,6 +68,11 @@ class _Details extends CoreElement {
     )
       ..flex()
       ..attribute('hidden');
+
+    if (isDarkTheme) {
+      _comingSoon.element.style.color = colorToCss(Colors.white);
+    }
+
     add(_comingSoon);
     add(div()..flex());
   }

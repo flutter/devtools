@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
+import '../ui/theme.dart';
 
 import 'memory_chart.dart';
 
@@ -14,17 +17,28 @@ class MemoryPlotly {
 
   Layout getMemoryLayout(chartTitle) {
     return Layout(
+        plot_bgcolor: colorToCss(chartBackground),
+        paper_bgcolor: colorToCss(chartBackground),
         title: chartTitle,
+        legend: Legend(font: Font(color: colorToCss(defaultForeground))),
         xaxis: AxisLayout(
           type: 'date',
           tickformat: '%-I:%M:%S %p',
           hoverformat: '%M:%S.%L %p',
+          titlefont: Font(color: colorToCss(defaultForeground)),
+          tickfont: Font(
+            color: colorToCss(defaultForeground),
+          ),
           range: [],
           rangeslider: RangeSlider(),
         ),
         yaxis: AxisLayout(
           title: 'Heap',
+          titlefont: Font(color: colorToCss(defaultForeground)),
           fixedrange: true,
+          tickfont: Font(
+            color: colorToCss(defaultForeground),
+          ),
         ),
         margin: Margin(l: 80, r: 5, b: 5, t: 5, pad: 5));
   }
@@ -35,11 +49,25 @@ class MemoryPlotly {
   static const int MEMORY_CAPACITY_TRACE = 3;
   static const int MEMORY_RSS_TRACE = 4;
 
-  // TODO(terry): expose as CSSColor and Themed.
-  static const String RSS_COLOR = '#F1B876';
-  static const String CAPACITY_COLOR = '#C0C0C0';
-  static const String EXTERNAL_COLOR = '#4794C0';
-  static const String USED_COLOR = '#48B2E7';
+  // Orange 50 - light is Orange 600, dark is Orange 900
+  static String rssColor =
+      colorToCss(const ThemedColor(Color(0xFFFB8C00), Color(0xFFE65100)));
+
+  // Blue Gray 50 - list is Blue 700, dark is Blue 100
+  static String capacityColor =
+      colorToCss(const ThemedColor(Color(0xFF455A64), Color(0xFFCFD8DC)));
+
+  // Light Blue 50 - light is Blue 800, dark is Blue 900
+  static String externalColor =
+      colorToCss(const ThemedColor(Color(0xFF0277BD), Color(0xFF01579B)));
+
+  // Light Blue 50 - light is Blue 300, dark is Blue 400
+  static String usedColor =
+      colorToCss(const ThemedColor(Color(0xFF4FC3F7), Color(0xFF29B6F6)));
+
+  // Light Blue 50 - light is Blue 500, dark is Blue 600
+  static String gcColor =
+      colorToCss(const ThemedColor(Color(0xFF03A9F4), Color(0xFF039BE5)));
 
   Data _createTrace(
     String name, {
@@ -58,13 +86,20 @@ class MemoryPlotly {
         widthValue = 2;
         modeName = 'lines';
       }
-      line = Line(color: color, dash: dash, width: widthValue);
+      line = Line(
+        color: color,
+        dash: dash,
+        width: widthValue,
+      );
     }
 
     Marker marker;
     if (symbol != null) {
-      // Ignore color use symbol and size.
-      marker = Marker(symbol: symbol, size: size);
+      marker = Marker(
+        symbol: symbol,
+        color: color,
+        size: size,
+      );
       modeName = 'markers';
     }
 
@@ -96,27 +131,32 @@ class MemoryPlotly {
   }
 
   List<Data> createMemoryTraces() {
-    final Data gcTrace = _createTrace('GC', symbol: 'circle', size: 10);
+    final Data gcTrace = _createTrace(
+      'GC',
+      color: gcColor,
+      symbol: 'circle',
+      size: 10,
+    );
     gcTrace.hoverinfo = 'x+name';
 
     final Data externalTrace = _createTrace(
       'External',
-      color: EXTERNAL_COLOR,
+      color: externalColor,
       group: 'one',
     );
     final Data usedTrace = _createTrace(
       'Used',
-      color: USED_COLOR,
+      color: usedColor,
       group: 'one',
     );
     final Data capacityTrace = _createTrace(
       'Capacity',
-      color: CAPACITY_COLOR,
+      color: capacityColor,
       dash: 'dot',
     );
     final Data rssTrace = _createTrace(
       'RSS',
-      color: RSS_COLOR,
+      color: rssColor,
       dash: 'dash',
     );
     rssTrace.visible = 'legendonly';
@@ -194,6 +234,9 @@ class MemoryPlotly {
       [Data()],
       Layout(
         xaxis: AxisLayout(
+          tickfont: Font(
+            color: colorToCss(defaultForeground),
+          ),
           range: [startTime, endTime],
           rangeslider: RangeSlider(
             autorange: true,

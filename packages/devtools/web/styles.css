@@ -23,7 +23,7 @@
     --footer-color: #7a7a7a;
     --footer-link-hover: #0366d6;
     --footer-strong: #333;
-    --header-backround: #f3f3f3;
+    --header-background: #f3f3f3;
     --header-color: #586069;
     --header-item-rgb: 255, 255, 255;
     --header-item: rgba(var(--header-item-rgb), 1);
@@ -37,6 +37,8 @@
     --selected-border: #a2a2a2;
     --selected-line: #c4daf7;
     --shadow-color: #ddd;
+    --shaded-background-lighter: #f9f9f9;
+    --shaded-background-darker: #f3f3f3;
     --subtle: #777;
     --table-border: #dfe2e5;
     --title: #555;
@@ -193,7 +195,7 @@ tbody.selectable tr {
 table th {
   font-weight: 600;
   color: var(--header-color);
-  background-color: var(--header-backround);
+  background-color: var(--header-background);
   white-space: nowrap;
 }
 
@@ -792,9 +794,4 @@ html [full] {
 
 span.strong {
     font-weight: 600;
-}
-
-.CodeMirror {
-    /* Override the CodeMirror theme to use our own background color */
-    background: var(--default-background) !important;
 }

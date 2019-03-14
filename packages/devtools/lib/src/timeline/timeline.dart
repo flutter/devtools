@@ -11,6 +11,7 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/split.dart' as split;
+import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'event_details.dart';
@@ -19,28 +20,43 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-// TODO(terry): These colors need to be ThemedColor.
-// Blue 300 from
+// Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const Color mainCpuColor = Color(0xFF64B5F6);
-// Teal 300 from
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const Color mainGpuColor = Color(0xFF4DB6AC);
+const mainCpuLight = Color(0xFF64B5F6);
+const mainCpuDark = Color(0xFF42A5F5);
+const mainCpuColor = ThemedColor(mainCpuLight, mainCpuDark);
 
-// Red 300
-const Color gpuJankColor = Color(0xFFE57373);
-// Red 800
-const Color cpuJankColor = Color(0xFFC62828);
-// Red 500
-const Color hoverJankColor = Color(0xFFF44336);
+// Teal 300 (light mode) or 400 (dark mode) from
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+const mainGpuLight = Color(0xFF4DB6AC);
+const mainGpuDark = Color(0xFF26A69A);
+const mainGpuColor = ThemedColor(mainGpuLight, mainGpuDark);
+
+const selectedFlameChartItemColor =
+    ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
+
+// Chart is Teal 300 is light, Teal 500 is dark
+const gpuChartColor = ThemedColor(mainGpuLight, Color(0xFF009688));
+// Chart is Blue 300 is light, Blue 500 is dark
+const cpuChartColor = ThemedColor(mainCpuLight, Color(0xFF03A9F4));
+
+// Red 300 is light, Red 500 is dark
+const gpuJankColor = ThemedColor(Color(0xFFE57373), Color(0xFFF44336));
+// Red 800 is light, Red 800 is dark
+const cpuJankColor = ThemedColor(Color(0xFFC62828), Color(0xFFC62828));
+// Red 500 is light, Red 700 is dark
+const hoverJankColor = ThemedColor(Color(0xFFF44336), Color(0xFFD32F2F));
 
 const Color slowFrameColor = Color(0xFFE50C0C);
-const Color selectedColor = Color(0xFF4078C0);
 
-// Blue A700
-const Color selectedGpuColor = Color(0xFF2962FF);
-// Dark Blue
-const Color selectedCpuColor = Color(0xFF09007E);
+// Blue A700 is light, Indigo A400 is dark
+const Color selectedGpuColor =
+    ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
+// Dark Blue is light, Indigo A200 is dark
+const Color selectedCpuColor =
+    ThemedColor(Color(0xFF09007E), Color(0xFF536DFE));
+// Selection is high-contrast need white font.
+const Color hoverTextColor = ThemedColor(Colors.white, defaultForeground);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
@@ -83,10 +99,11 @@ class TimelineScreen extends Screen {
 //      PTabNavTab('Skia picture'),
 //    ]);
 
-    pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
-      ..small()
-      ..primary()
-      ..click(_pauseRecording);
+    pauseButton =
+        PButton.icon('Pause recording', FlutterIcons.pause_white_2x_primary)
+          ..small()
+          ..primary()
+          ..click(_pauseRecording);
 
     resumeButton =
         PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)
@@ -197,13 +214,6 @@ class TimelineScreen extends Screen {
   void _updateButtons({@required bool paused}) {
     pauseButton.disabled = paused;
     resumeButton.disabled = !paused;
-
-    pauseButton.changeIcon(paused
-        ? FlutterIcons.pause_white_disabled_2x.src
-        : FlutterIcons.pause_white_2x.src);
-    resumeButton.changeIcon(paused
-        ? FlutterIcons.resume_black_2x.src
-        : FlutterIcons.resume_black_disabled_2x.src);
   }
 
   void _updateListeningState() async {
