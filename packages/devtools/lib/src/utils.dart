@@ -7,9 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
+
+bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
 const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet

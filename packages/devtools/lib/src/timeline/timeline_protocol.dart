@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-
 import 'package:meta/meta.dart';
 
 import '../utils.dart';
@@ -40,8 +39,6 @@ StringBuffer handledTraceEvents = StringBuffer()..write('{"traceEvents":[');
 /// This buffer is for debug purposes. When [debugTimeline] is true, we will
 /// be able to dump this buffer to a downloadable text file.
 StringBuffer debugFrameTracking = StringBuffer();
-
-bool mapEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
 enum TimelineEventType {
   cpu,
@@ -171,13 +168,13 @@ class TimelineData {
 
     switch (event.phase) {
       case 'B':
-        _handleDurationBeginEvent(event, eventWrapper.id);
+        _handleDurationBeginEvent(eventWrapper);
         break;
       case 'E':
-        _handleDurationEndEvent(event);
+        _handleDurationEndEvent(eventWrapper);
         break;
       case 'X':
-        _handleDurationCompleteEvent(event, eventWrapper.id);
+        _handleDurationCompleteEvent(eventWrapper);
         break;
       // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
       // because CPU/GPU work will take place in DurationEvents.
@@ -227,7 +224,8 @@ class TimelineData {
     return '${event.name}-${event.id}';
   }
 
-  void _handleDurationBeginEvent(TraceEvent event, int wrapperId) {
+  void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
     final current = currentEventNodes[event.type.index];
     if (current == null &&
         !(event.name.contains('VSYNC') ||
@@ -235,13 +233,7 @@ class TimelineData {
       return;
     }
 
-    final timelineEvent = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-      wrapperId,
-      event.json,
-    );
+    final timelineEvent = TimelineEvent(eventWrapper);
 
     if (current != null) {
       current.addChild(timelineEvent);
@@ -249,7 +241,8 @@ class TimelineData {
     currentEventNodes[event.type.index] = timelineEvent;
   }
 
-  void _handleDurationEndEvent(TraceEvent event) {
+  void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
     TimelineEvent current = currentEventNodes[event.type.index];
 
     if (current == null) return;
@@ -258,48 +251,71 @@ class TimelineData {
     // off balance due to duplicate events from the engine. Balance the tree so
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
-      if (mapEquals(
-          event.json, previousDurationEndEvents[event.type.index]?.json)) {
+      if (collectionEquals(
+        event.json,
+        previousDurationEndEvents[event.type.index]?.json,
+      )) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
         // Trace example:
         // VSYNC - DurationBegin
-        // Framework Workload - DurationBegin
+        // Animator::BeginFrame - DurationBegin
         // ...
-        // FrameWork Workload - DurationEnd [previousDurationEndEvent]
-        // FrameWork Workload - DurationEnd ([event] - duplicate)
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+        // Animator::BeginFrame - DurationEnd ([event] - duplicate)
         // VSYNC - DurationEnd
         //
-        print('duplicate end ${event.json}');
+        if (debugTimeline) {
+          debugFrameTracking
+              .writeln('Duplicate duration end event: ${event.json}');
+        }
         return;
       } else if (current.name ==
               previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
-          mapEquals(current.eventTraces.first,
-              current.children.first.eventTraces.first)) {
+          collectionEquals(
+            current.beginTraceEventJson,
+            current.children.first.beginTraceEventJson,
+          )) {
         // There was a duplicate DurationBegin event associated with
         // [previousDurationEndEvent]. [event] is actually the DurationEnd event
         // for [current.parent]. Trim the extra layer created by the duplicate.
         //
         // Trace example:
         // VSYNC - DurationBegin
-        // Framework Workload - DurationBegin (duplicate - remove this node)
-        // Framework Workload - DurationBegin
+        // Animator::BeginFrame - DurationBegin (duplicate - remove this node)
+        // Animator::BeginFrame - DurationBegin
         // ...
-        // FrameWork Workload - DurationEnd [previousDurationEndEvent]
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
         // VSYNC - DurationEnd [event]
         //
+        if (debugTimeline) {
+          debugFrameTracking.writeln(
+              'Duplicate duration begin event: ${current.beginTraceEventJson}');
+        }
+
         current.parent.removeChild(current);
         current = current.parent;
         currentEventNodes[event.type.index] = current;
-
-        print('duplicate begin ${event.json}');
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
         // the tracking node.
-
-        print('cant recover ${event.json}');
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        //  Animator::BeginFrame - DurationBegin
+        //   VSYNC - DurationBegin (duplicate)
+        //    Animator::BeginFrame - DurationBegin (duplicate)
+        //     ...
+        //  Animator::BeginFrame - DurationEnd
+        // VSYNC - DurationEnd
+        if (debugTimeline) {
+          debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
+          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking.writeln(
+              'Current: ${currentEventNodes[event.type.index].toString()}');
+        }
         currentEventNodes[event.type.index] = null;
         return;
       }
@@ -308,7 +324,7 @@ class TimelineData {
     previousDurationEndEvents[event.type.index] = event;
 
     current.endTime = event.timestampMicros;
-    current.eventTraces.add(event.json);
+    current.traceEvents.add(eventWrapper);
 
     // Even if the event is well nested, we could still have a duplicate in the
     // tree that needs to be removed. Ex:
@@ -335,20 +351,19 @@ class TimelineData {
     }
   }
 
-  void _handleDurationCompleteEvent(TraceEvent event, int wrapperId) {
-    final TimelineEvent timelineEvent = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-      wrapperId,
-      event.json,
-    );
+  void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+    final TimelineEvent timelineEvent = TimelineEvent(eventWrapper);
+
     timelineEvent.endTime = event.timestampMicros + event.duration;
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current.containsChildWithCondition((TimelineEvent event) => mapEquals(
-          event.eventTraces.first, timelineEvent.eventTraces.first))) {
+      if (current
+          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
+                e.beginTraceEventJson,
+                timelineEvent.beginTraceEventJson,
+              ))) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }
@@ -405,6 +420,7 @@ class TimelineData {
     for (TimelineFrame frame in frames) {
       eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
+        _maybeAddPendingEvents();
         break;
       }
     }
@@ -425,7 +441,7 @@ class TimelineData {
     // Ensure the frame does not already have an event of this type and that
     // the event fits within the frame's time boundaries.
     if (frame.eventFlows[event.type.index] != null ||
-        !_eventOccursWithinFrameBoundaries(event, frame)) {
+        !eventOccursWithinFrameBounds(event, frame)) {
       return false;
     }
 
@@ -455,7 +471,7 @@ class TimelineData {
     }
   }
 
-  bool _eventOccursWithinFrameBoundaries(TimelineEvent e, TimelineFrame f) {
+  bool eventOccursWithinFrameBounds(TimelineEvent e, TimelineFrame f) {
     // TODO(kenzie): talk to the engine team about why we need the epsilon. Why
     // do event times extend slightly beyond the times we get from frame start
     // and end flow events.
@@ -467,8 +483,8 @@ class TimelineData {
     final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
-    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon < 0;
-    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon > 0;
+    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon <= 0;
+    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon >= 0;
 
     // The [gpuEventFlow] should always start after the [cpuEventFlow].
     bool satisfiesCpuGpuOrder() {
@@ -629,33 +645,37 @@ class TimelineFrame {
 }
 
 class TimelineEvent {
-  TimelineEvent(this.name, this.startTime, this.type, this.beginTraceWrapperId,
-      Map<String, dynamic> json) {
-    eventTraces.add(json);
-  }
+  TimelineEvent(TraceEventWrapper firstTraceEvent)
+      : traceEvents = [firstTraceEvent],
+        type = firstTraceEvent.event.type,
+        startTime = firstTraceEvent.event.timestampMicros;
 
-  final String name;
-
-  final TimelineEventType type;
-
-  final int beginTraceWrapperId;
-
-  /// Event start time in micros.
-  final int startTime;
-
-  /// Json from associated trace events.
+  /// Trace events associated with this [TimelineEvent].
   ///
   /// There will either be one entry in the list (for DurationComplete events)
   /// or two (one for the associated DurationBegin event and one for the
   /// associated DurationEnd event).
-  final List<Map<String, dynamic>> eventTraces = [];
+  final List<TraceEventWrapper> traceEvents;
+
+  @visibleForTesting
+  TimelineEventType type;
+
+  /// Event start time in micros.
+  @visibleForTesting
+  int startTime;
 
   /// Event end time in micros.
   int endTime;
 
   TimelineEvent parent;
 
-  List<TimelineEvent> children = <TimelineEvent>[];
+  List<TimelineEvent> children = [];
+
+  String get name => traceEvents.first.event.name;
+
+  Map<String, dynamic> get beginTraceEventJson => traceEvents.first.event.json;
+
+  Map<String, dynamic> get endTraceEventJson => traceEvents.last.event.json;
 
   /// Event duration in micros.
   int get duration => (endTime != null) ? endTime - startTime : null;
@@ -718,11 +738,11 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          mapEquals(parent.eventTraces.first,
-              parent.children.first.eventTraces.first) &&
+          collectionEquals(parent.beginTraceEventJson,
+              parent.children.first.beginTraceEventJson) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          mapEquals(parent.eventTraces.last,
-              parent.children.first.eventTraces.last)) {
+          collectionEquals(parent.endTraceEventJson,
+              parent.children.first.endTraceEventJson)) {
         parent.removeChild(children.first);
       }
     }
@@ -739,10 +759,8 @@ class TimelineEvent {
 
   void removeChild(TimelineEvent childToRemove) {
     assert(children.contains(childToRemove));
-    for (TimelineEvent child in childToRemove.children) {
-      child.parent = this;
-      children.add(child);
-    }
+    final List<TimelineEvent> newChildren = List.from(childToRemove.children);
+    newChildren.forEach(_addChild);
     children.remove(childToRemove);
   }
 
@@ -761,7 +779,7 @@ class TimelineEvent {
       // those members will need to be reordered in the tree.
       final childrenToReorder = [];
       for (TimelineEvent otherChild in _children) {
-        if (child._couldBeParentOf(otherChild)) {
+        if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
       }
@@ -784,7 +802,7 @@ class TimelineEvent {
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
       for (TimelineEvent otherChild in _children.reversed) {
-        if (otherChild._couldBeParentOf(child)) {
+        if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
           _putChildInTree(otherChild);
           return;
@@ -805,10 +823,10 @@ class TimelineEvent {
     child.parent = this;
   }
 
-  bool _couldBeParentOf(TimelineEvent e) {
+  bool couldBeParentOf(TimelineEvent e) {
     if (endTime != null && e.endTime != null) {
       if (startTime == e.startTime && endTime == e.endTime) {
-        return beginTraceWrapperId < e.beginTraceWrapperId;
+        return traceEvents.first.id < e.traceEvents.first.id;
       }
       return startTime <= e.startTime && endTime >= e.endTime;
     } else if (endTime != null) {
@@ -819,15 +837,14 @@ class TimelineEvent {
       // not be the parent of [e].
       return startTime <= e.startTime && endTime > e.startTime;
     } else if (startTime == e.startTime) {
-      return beginTraceWrapperId < e.beginTraceWrapperId;
+      return traceEvents.first.id < e.traceEvents.first.id;
     } else {
       return startTime < e.startTime;
     }
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln(
-        '$indent$name [start: $startTime] [end: $endTime] [dur: $duration]');
+    buf.writeln('$indent$name [start: $startTime] [end: $endTime]');
     for (TimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
@@ -838,23 +855,36 @@ class TimelineEvent {
   }
 
   void writeTraceToBuffer(StringBuffer buf) {
-    if (eventTraces.isNotEmpty) {
-      buf.writeln(eventTraces.first.toString());
+    if (traceEvents.isNotEmpty) {
+      buf.writeln(beginTraceEventJson.toString());
       for (TimelineEvent child in children) {
         child.writeTraceToBuffer(buf);
       }
-      for (var json in eventTraces.where((json) => json != eventTraces.first)) {
+      for (var json in traceEvents.where(
+          (trace) => !collectionEquals(trace.event.json, beginTraceEventJson))) {
         buf.writeln(json.toString());
       }
     }
   }
 
+  @visibleForTesting
+  TimelineEvent deepCopy() {
+    final copy = TimelineEvent(traceEvents.first);
+    copy.endTime = endTime;
+    copy.parent = parent;
+    for (TimelineEvent child in children) {
+      copy._addChild(child.deepCopy());
+    }
+    return copy;
+  }
+
   // TODO(kenzie): use DiagnosticableTreeMixin instead.
   @override
-  String toString() => '[$type] $name [start $startTime] [end $endTime] [dur '
-      '$duration] \n'
-      '  - parent: ${parent != null ? parent.name : 'null'} \n'
-      '  - children.length: ${children.length}';
+  String toString() {
+    final buf = StringBuffer();
+    format(buf, '  ');
+    return buf.toString();
+  }
 }
 
 // TODO(devoncarew): Upstream this class to the service protocol library.
@@ -862,22 +892,15 @@ class TimelineEvent {
 /// A single timeline event.
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  factory TraceEvent(Map<String, dynamic> json) {
-    return TraceEvent._(json, json['name'], json['cat'], json['ph'],
-        json['pid'], json['tid'], json['dur'], json['ts'], json['args']);
-  }
-
-  TraceEvent._(
-    this.json,
-    this.name,
-    this.category,
-    this.phase,
-    this.processId,
-    this.threadId,
-    this.duration,
-    this.timestampMicros,
-    this.args,
-  );
+  TraceEvent(this.json)
+      : name = json['name'],
+        category = json['cat'],
+        phase = json['ph'],
+        processId = json['pid'],
+        threadId = json['tid'],
+        duration = json['dur'],
+        timestampMicros = json['ts'],
+        args = json['args'];
 
   /// The original event JSON.
   final Map<String, dynamic> json;
