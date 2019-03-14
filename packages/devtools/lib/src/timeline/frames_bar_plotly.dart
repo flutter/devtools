@@ -7,6 +7,7 @@ import 'package:js/js_util.dart';
 import '../timeline/timeline.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
+import '../ui/theme.dart';
 
 class FramesBarPlotly {
   FramesBarPlotly(this._domName, [this.useLogScale = true]);
@@ -50,6 +51,10 @@ class FramesBarPlotly {
     type: 'log',
     range: [0, 2],
     nticks: 3,
+    titlefont: Font(color: colorToCss(defaultForeground)),
+    tickfont: Font(
+      color: colorToCss(defaultForeground),
+    ),
     tickmode: 'array',
     tickvals: [
       1,
@@ -71,12 +76,14 @@ class FramesBarPlotly {
 
   Layout getFPSTimeseriesLayout() {
     return Layout(
+      plot_bgcolor: colorToCss(chartBackground),
+      paper_bgcolor: colorToCss(chartBackground),
+      legend: Legend(font: Font(color: colorToCss(defaultForeground))),
       xaxis: AxisLayout(
         rangeslider: RangeSlider(),
-        // TODO(terry): Need ThemedColor for dark theme.
         // Hide ticks by using font color of bgColor.
         tickfont: Font(
-          color: 'white',
+          color: colorToCss(chartBackground),
           size: 1,
         ),
         rangemode: 'nonnegative',
@@ -101,7 +108,7 @@ class FramesBarPlotly {
           y1: 8,
           line: Line(
             dash: 'dot',
-            color: colorToCss(mainGpuColor),
+            color: colorToCss(gpuChartColor),
             width: 1,
           ),
         ),
@@ -116,7 +123,7 @@ class FramesBarPlotly {
           y1: 16,
           line: Line(
             dash: 'longdash',
-            color: colorToCss(mainCpuColor),
+            color: colorToCss(cpuChartColor),
             width: 1,
           ),
         ),
@@ -160,7 +167,7 @@ class FramesBarPlotly {
         name: 'GPU',
         hoverinfo: 'y+name',
         marker: Marker(
-          color: colorToCss(mainGpuColor),
+          color: colorToCss(gpuChartColor),
         ),
         width: [0],
       ),
@@ -177,8 +184,7 @@ class FramesBarPlotly {
         name: 'GPU Jank',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
-          // TODO(terry): font color needs be be a ThemedColor.
-          font: Font(color: 'black'),
+          font: Font(color: colorToCss(defaultBackground)),
           bordercolor: colorToCss(hoverJankColor),
         ),
         marker: Marker(
@@ -195,11 +201,17 @@ class FramesBarPlotly {
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          bgcolor: colorToCss(selectedGpuColor),
+          font: Font(
+            color: colorToCss(defaultForeground),
+          ),
+          bordercolor: colorToCss(selectedGpuColor),
+        ),
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(
-              selectedGpuColor), // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(selectedGpuColor),
         ),
       ),
     );
@@ -215,7 +227,7 @@ class FramesBarPlotly {
         name: 'CPU',
         hoverinfo: 'y+name',
         marker: Marker(
-          color: colorToCss(mainCpuColor),
+          color: colorToCss(cpuChartColor),
         ),
         width: [0],
       ),
@@ -233,8 +245,7 @@ class FramesBarPlotly {
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
-            // TODO(terry): font color needs be be a ThemedColor.
-            color: 'white',
+            color: colorToCss(defaultForeground),
           ),
           bordercolor: colorToCss(hoverJankColor),
         ),
@@ -252,11 +263,17 @@ class FramesBarPlotly {
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          bgcolor: colorToCss(selectedCpuColor),
+          font: Font(
+            color: colorToCss(defaultForeground),
+          ),
+          bordercolor: colorToCss(selectedCpuColor),
+        ),
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(
-              selectedCpuColor), // TODO(terry): Handle ThemedColor dart mode.
+          color: colorToCss(selectedCpuColor),
         ),
       ),
     );
@@ -402,10 +419,9 @@ class FramesBarPlotly {
       [Data()],
       Layout(
         xaxis: AxisLayout(
-          // TODO(terry): Need ThemedColor for dark theme too.
           // Hide ticks by using font color of bgColor as we slide.
           tickfont: Font(
-            color: 'white',
+            color: colorToCss(chartBackground),
           ),
           rangemode: 'nonnegative',
           range: [dataIndex - ticksInRangeSlider, dataIndex],
