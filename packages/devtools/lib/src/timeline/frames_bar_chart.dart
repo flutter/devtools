@@ -176,9 +176,9 @@ class PlotlyDivGraph extends CoreElement {
 
       if (color == colorToCss(cpuJankColor) ||
           color == colorToCss(gpuJankColor)) {
-        // Flip to cpuGoodColor/gpuGoodColor
-        newCpuColor = colorToCss(mainCpuColor);
-        newGpuColor = colorToCss(mainGpuColor);
+        // Flip to cpuChartColor/gpuChartColor
+        newCpuColor = colorToCss(cpuChartColor);
+        newGpuColor = colorToCss(gpuChartColor);
       } else {
         // Flip back to cpuJankColor/gpuJankColor
         newCpuColor = colorToCss(cpuJankColor);

@@ -100,9 +100,15 @@ class VmServiceWrapper implements VmService {
     String targetId,
     String expression, {
     Map<String, String> scope,
+    bool disableBreakpoints,
   }) {
-    return _trackFuture(
-        _vmService.evaluate(isolateId, targetId, expression, scope: scope));
+    return _trackFuture(_vmService.evaluate(
+      isolateId,
+      targetId,
+      expression,
+      scope: scope,
+      disableBreakpoints: disableBreakpoints,
+    ));
   }
 
   @override
@@ -111,9 +117,15 @@ class VmServiceWrapper implements VmService {
     int frameIndex,
     String expression, {
     Map<String, String> scope,
+    bool disableBreakpoints,
   }) {
-    return _trackFuture(_vmService
-        .evaluateInFrame(isolateId, frameIndex, expression, scope: scope));
+    return _trackFuture(_vmService.evaluateInFrame(
+      isolateId,
+      frameIndex,
+      expression,
+      scope: scope,
+      disableBreakpoints: disableBreakpoints,
+    ));
   }
 
   @override
@@ -196,10 +208,16 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String targetId,
     String selector,
-    List<String> argumentIds,
-  ) {
-    return _trackFuture(
-        _vmService.invoke(isolateId, targetId, selector, argumentIds));
+    List<String> argumentIds, {
+    bool disableBreakpoints,
+  }) {
+    return _trackFuture(_vmService.invoke(
+      isolateId,
+      targetId,
+      selector,
+      argumentIds,
+      disableBreakpoints: disableBreakpoints,
+    ));
   }
 
   @override

@@ -58,16 +58,10 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   void updateResumeButton({@required bool disabled}) {
     resumeButton.disabled = disabled;
-    resumeButton.changeIcon(disabled
-        ? FlutterIcons.resume_white_disabled_2x.src
-        : FlutterIcons.resume_white_2x.src);
   }
 
   void updatePauseButton({@required bool disabled}) {
     pauseButton.disabled = disabled;
-    pauseButton.changeIcon(disabled
-        ? FlutterIcons.pause_black_disabled_2x.src
-        : FlutterIcons.pause_black_2x.src);
   }
 
   @override

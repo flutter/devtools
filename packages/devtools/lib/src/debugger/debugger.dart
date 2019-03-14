@@ -81,16 +81,10 @@ class DebuggerScreen extends Screen {
 
     void _updateResumeButton({@required bool disabled}) {
       resumeButton.disabled = disabled;
-      resumeButton.changeIcon(disabled
-          ? FlutterIcons.resume_white_disabled_2x.src
-          : FlutterIcons.resume_white_2x.src);
     }
 
     void _updatePauseButton({@required bool disabled}) {
       pauseButton.disabled = disabled;
-      pauseButton.changeIcon(disabled
-          ? FlutterIcons.pause_black_disabled_2x.src
-          : FlutterIcons.pause_black_2x.src);
     }
 
     resumeButton.click(() async {
@@ -221,7 +215,7 @@ class DebuggerScreen extends Screen {
         CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
-      codeMirror.setTheme('darcula');
+      codeMirror.setTheme('zenburn');
     }
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');
@@ -373,7 +367,12 @@ class DebuggerScreen extends Screen {
         return ref.valueAsString;
       } else {
         final dynamic result = await serviceManager.service.invoke(
-            debuggerState.isolateRef.id, ref.id, 'toString', <String>[]);
+          debuggerState.isolateRef.id,
+          ref.id,
+          'toString',
+          <String>[],
+          disableBreakpoints: true,
+        );
         if (result is ErrorRef) {
           return '${result.kind} ${result.message}';
         } else if (result is InstanceRef) {
@@ -1506,6 +1505,9 @@ class ConsoleArea implements CoreElementView {
       ..flex();
     _editor = CodeMirror.fromElement(_container.element, options: options);
     _editor.setReadOnly(true);
+    if (isDarkTheme) {
+      _editor.setTheme('zenburn');
+    }
 
     final codeMirrorElement = _container.element.children[0];
     codeMirrorElement.setAttribute('flex', '');

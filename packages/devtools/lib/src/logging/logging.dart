@@ -297,8 +297,13 @@ class LoggingScreen extends Screen {
             result += '\n\n$errorString';
           } else {
             // Call `toString()` on the error object and display that.
-            final dynamic toStringResult = await service
-                .invoke(e.isolate.id, error.id, 'toString', <String>[]);
+            final dynamic toStringResult = await service.invoke(
+              e.isolate.id,
+              error.id,
+              'toString',
+              <String>[],
+              disableBreakpoints: true,
+            );
 
             if (toStringResult is ErrorRef) {
               final String errorString = _valueAsString(error);
