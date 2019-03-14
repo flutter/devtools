@@ -20,7 +20,7 @@ import '../utils.dart';
 // Switch this flag to true collect debug info from the timeline protocol. This
 // will also add a button to the timeline page that will download files with
 // debug info on click.
-bool debugTimeline = true;
+bool debugTimeline = false;
 
 /// Buffer that will store trace event json in the order we receive the events.
 ///
