@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
@@ -61,6 +63,54 @@ void main() {
       expect(log2(2), equals(1));
       expect(log2(3), equals(1));
       expect(log2(4), equals(2));
+    });
+
+    test('executeWithDelay', () async {
+      const delayMs = 500;
+      int n = 1;
+      int start;
+      int end;
+
+      // Condition n >= 2 is false, so we should execute with a delay.
+      start = DateTime.now().millisecondsSinceEpoch;
+      executeWithDelay(
+        const Duration(milliseconds: 500),
+        () {
+          n++;
+          end = DateTime.now().millisecondsSinceEpoch;
+        },
+        executeNow: n >= 2,
+      );
+
+      expect(n, equals(1));
+      expect(end, isNull);
+      await Future.delayed(const Duration(milliseconds: 250));
+      expect(n, equals(1));
+      expect(end, isNull);
+      await Future.delayed(const Duration(milliseconds: 250));
+      expect(n, equals(2));
+      expect(end, isNotNull);
+
+      // 100ms is arbitrary. This can be increased if this test starts to flake.
+      const epsilonMs = 100;
+      expect((end - start - delayMs).abs(), lessThan(epsilonMs));
+
+      // Condition n >= 2 is true, so we should not execute with a delay.
+      end = null;
+      start = DateTime.now().millisecondsSinceEpoch;
+      executeWithDelay(
+        const Duration(milliseconds: 500),
+        () {
+          n++;
+          end = DateTime.now().millisecondsSinceEpoch;
+        },
+        executeNow: true,
+      );
+      expect(n, equals(3));
+      expect(end, isNotNull);
+      // 200ms is arbitrary. It is less than 500, which is what matters. This
+      // can be increased if this test starts to flake.
+      expect(end - start, lessThan(200));
     });
   });
 }

@@ -19,9 +19,6 @@ import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
 
-// Switch this flag to true to dump the frame event trace to console.
-bool _debugEventTrace = false;
-
 // Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final cpuColorPalette = [
@@ -119,12 +116,16 @@ class FrameFlameChart extends CoreElement {
     _frame = frame;
     _resetChart();
 
-    if (_debugEventTrace && frame != null) {
-      final StringBuffer buf = new StringBuffer();
+    if (debugTimeline && frame != null) {
+      final buf = StringBuffer();
       buf.writeln('CPU for frame ${frame.id}:');
       frame.cpuEventFlow.format(buf, '  ');
-      buf.writeln('GPU for frame ${frame.id}:');
+      buf.writeln('\nCPU trace for frame ${frame.id}');
+      frame.cpuEventFlow.writeTraceToBuffer(buf);
+      buf.writeln('\nGPU for frame ${frame.id}:');
       frame.gpuEventFlow.format(buf, '  ');
+      buf.writeln('\nGPU trace for frame ${frame.id}');
+      frame.gpuEventFlow.writeTraceToBuffer(buf);
       print(buf.toString());
     }
 

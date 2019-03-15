@@ -272,3 +272,13 @@ html.CanvasElement createHighDpiCanvas(int width, int height) {
   context.scale(scaledWidth / width, scaledHeight / height);
   return canvas;
 }
+
+void downloadFile(String src, String filename) {
+  final element = html.document.createElement('a');
+  element.setAttribute('href', html.Url.createObjectUrl(html.Blob([src])));
+  element.setAttribute('download', filename);
+  element.style.display = 'none';
+  html.document.body.append(element);
+  element.click();
+  element.remove();
+}

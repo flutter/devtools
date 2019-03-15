@@ -81,6 +81,7 @@ class TimelineScreen extends Screen {
 
   PButton pauseButton;
   PButton resumeButton;
+  CoreElement upperButtonSection;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -110,7 +111,8 @@ class TimelineScreen extends Screen {
           ..clazz('margin-left')
           ..disabled = true
           ..click(_resumeRecording);
-    final CoreElement upperButtonSection = div(c: 'section')
+
+    upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
         div(c: 'btn-group')
@@ -120,6 +122,8 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
       ]);
+
+    _maybeAddDebugDumpButton();
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
@@ -186,7 +190,7 @@ class TimelineScreen extends Screen {
 
       for (Map<String, dynamic> json in events) {
         final TraceEvent e = TraceEvent(json);
-        timelineController.timelineData?.processTimelineEvent(e);
+        timelineController.timelineData?.processTraceEvent(e);
       }
     });
   }
@@ -231,6 +235,86 @@ class TimelineScreen extends Screen {
       // TODO(devoncarew): turn off the events
       await serviceManager.service.setVMTimelineFlags(<String>[]);
       timelineController.pause();
+    }
+  }
+
+  /// Adds a button to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if the [debugTimeline] flag
+  /// is true.
+  void _maybeAddDebugDumpButton() {
+    if (debugTimeline) {
+      upperButtonSection.add(PButton('Debug dump')
+        ..small()
+        ..click(() {
+          // Trace event json in the order we received the events.
+          String traceEvents = debugTraceEvents.toString();
+          traceEvents = traceEvents.replaceRange(
+              traceEvents.length - 1, traceEvents.length, ']}');
+          downloadFile(traceEvents, 'trace_output.json');
+
+          // Trace event json in the order we handled the events.
+          String handledTraceEvents = debugTraceEvents.toString();
+          handledTraceEvents = handledTraceEvents.replaceRange(
+              handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
+          downloadFile(
+              handledTraceEvents.toString(), 'handled_trace_output.json');
+
+          // Significant events in the frame tracking process.
+          downloadFile(
+              debugFrameTracking.toString(), 'frame_tracking_output.txt');
+
+          // Current status of our frame tracking elements (i.e. pendingEvents,
+          // pendingFrames).
+          final buf = StringBuffer();
+          buf.writeln(
+              'Pending events - ${timelineController.timelineData.pendingEvents.length}');
+          for (TimelineEvent event
+              in timelineController.timelineData.pendingEvents) {
+            event.format(buf, '    ');
+            buf.writeln();
+          }
+          buf.writeln(
+              '\nPending frames - ${timelineController.timelineData.pendingFrames.length}');
+          for (TimelineFrame frame
+              in timelineController.timelineData.pendingFrames.values) {
+            buf.writeln('${frame.toString()}');
+          }
+          if (timelineController.timelineData
+                  .currentEventNodes[TimelineEventType.cpu.index] !=
+              null) {
+            buf.writeln('\nCurrent CPU event node:');
+            timelineController
+                .timelineData.currentEventNodes[TimelineEventType.cpu.index]
+                .format(buf, '   ');
+          }
+          if (timelineController.timelineData
+                  .currentEventNodes[TimelineEventType.gpu.index] !=
+              null) {
+            buf.writeln('\n Current GPU event node:');
+            timelineController
+                .timelineData.currentEventNodes[TimelineEventType.gpu.index]
+                .format(buf, '   ');
+          }
+          if (timelineController
+              .timelineData.heaps[TimelineEventType.cpu.index].isNotEmpty) {
+            buf.writeln('\nCPU heap');
+            for (TraceEventWrapper wrapper in timelineController
+                .timelineData.heaps[TimelineEventType.cpu.index]
+                .toList()) {
+              buf.writeln(wrapper.event.json.toString());
+            }
+          }
+          if (timelineController
+              .timelineData.heaps[TimelineEventType.gpu.index].isNotEmpty) {
+            buf.writeln('\nGPU heap');
+            for (TraceEventWrapper wrapper in timelineController
+                .timelineData.heaps[TimelineEventType.gpu.index]
+                .toList()) {
+              buf.writeln(wrapper.event.json.toString());
+            }
+          }
+          downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
+        }));
     }
   }
 }

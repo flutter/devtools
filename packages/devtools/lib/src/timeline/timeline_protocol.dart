@@ -3,21 +3,60 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 import '../utils.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
+// This class depends on the stability of event names we receive from the
+// engine. That dependency is tracked at
+// https://github.com/flutter/flutter/issues/27609.
 
-// Switch this flag to true to dump timeline events to console.
-bool _debugEventTrace = false;
+// Switch this flag to true collect debug info from the timeline protocol. This
+// will also add a button to the timeline page that will download files with
+// debug info on click.
+bool debugTimeline = false;
+
+/// Buffer that will store trace event json in the order we receive the events.
+///
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
+StringBuffer debugTraceEvents = StringBuffer()..write('{"traceEvents":[');
+
+/// Buffer that will store trace event json in the order we handle the events.
+///
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
+StringBuffer debugHandledTraceEvents = StringBuffer()
+  ..write('{"traceEvents":[');
+
+/// Buffer that will store significant events in the frame tracking process.
+///
+/// This buffer is for debug purposes. When [debugTimeline] is true, we will
+/// be able to dump this buffer to a downloadable text file.
+StringBuffer debugFrameTracking = StringBuffer();
 
 enum TimelineEventType {
   cpu,
   gpu,
   unknown,
 }
+
+/// Epsilon in micros used for determining it an event fits within a given frame
+/// boundary.
+///
+/// This epsilon will not be used if the duration of the event is less than 2000
+/// micros (2 ms). We do this to hold a requirement that at least half of the
+/// event must fit within the frame boundaries.
+const Duration traceEventEpsilon = Duration(microseconds: 1000);
+
+/// Delay in ms for processing trace events.
+const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 class TimelineData {
   TimelineData({this.cpuThreadId, this.gpuThreadId});
@@ -36,55 +75,116 @@ class TimelineData {
   ///
   /// Once frames are ready, we will remove them from this Map and add them to
   /// [_frameCompleteController].
-  final Map<String, TimelineFrame> _pendingFrames = <String, TimelineFrame>{};
+  final Map<String, TimelineFrame> pendingFrames = <String, TimelineFrame>{};
 
   /// Events we have collected and are waiting to add to their respective
   /// frames.
-  final List<TimelineEvent> _pendingEvents = [];
+  final List<TimelineEvent> pendingEvents = [];
 
-  /// The current node in the tree structure of CPU duration events.
-  TimelineEvent _cpuEventNode;
+  /// The current nodes in the tree structures of CPU and GPU duration events.
+  final List<TimelineEvent> currentEventNodes = [null, null];
 
-  /// The current node in the tree structure of GPU duration events.
-  TimelineEvent _gpuEventNode;
+  /// The previously handled DurationEnd events for both CPU and GPU.
+  ///
+  /// We need this information to balance the tree structures of our event nodes
+  /// if they fall out of balance due to duplicate trace events.
+  List<TraceEvent> previousDurationEndEvents = [null, null];
 
-  void processTimelineEvent(TraceEvent event) {
+  /// Heaps that order and store trace events as we receive them.
+  final List<HeapPriorityQueue<TraceEventWrapper>> heaps = List.generate(
+    2,
+    (_) => HeapPriorityQueue(),
+  );
+
+  void processTraceEvent(TraceEvent event) {
     // TODO(kenzie): stop manually setting the type once we have that data from
     // the engine.
     event.type = _inferEventType(event);
 
-    if (!event.isGpuEvent && !event.isCpuEvent) return;
+    if (!_shouldProcessTraceEvent(event)) return;
 
-    if (_debugEventTrace) print(event.toString());
+    if (debugTimeline) {
+      debugTraceEvents.write('${jsonEncode(event.json)},');
+    }
 
+    // Process flow events now. Process Duration events after a delay. Only
+    // process flow events whose name is PipelineItem, as these events mark the
+    // start and end for a frame. Processing other types of flow events would
+    // lead to us creating Timeline frames where we shouldn't and therefore
+    // showing bad data to the user.
     switch (event.phase) {
       case 's':
-        _handleFrameStartEvent(event);
+        if (event.name.contains('PipelineItem')) {
+          _handleFrameStartEvent(event);
+        }
         break;
       case 'f':
-        _handleFrameEndEvent(event);
+        if (event.name.contains('PipelineItem')) {
+          _handleFrameEndEvent(event);
+        }
         break;
-      case 'B':
-        _handleDurationBeginEvent(event);
-        break;
-      case 'E':
-        _handleDurationEndEvent(event);
-        break;
-      case 'X':
-        _handleDurationCompleteEvent(event);
-        break;
-      // We do not need to handle async events (phases 'b', 'n', 'e') because
-      // CPU/GPU work will take place in DurationEvents.
+      default:
+        // Add trace event to respective heap.
+        final heap = heaps[event.type.index];
+        heap.add(TraceEventWrapper(
+          event,
+          DateTime.now().millisecondsSinceEpoch,
+        ));
+        // Process duration events with a delay.
+        executeWithDelay(
+          Duration(milliseconds: traceEventDelay.inMilliseconds),
+          () => _processDurationEvents(heap),
+          executeNow: shouldProcessTopEvent(heap),
+        );
     }
   }
 
-  TimelineEventType _inferEventType(TraceEvent event) {
-    if (event.threadId == cpuThreadId) {
-      return TimelineEventType.cpu;
-    } else if (event.threadId == gpuThreadId) {
-      return TimelineEventType.gpu;
-    } else {
-      return TimelineEventType.unknown;
+  bool shouldProcessTopEvent(HeapPriorityQueue<TraceEventWrapper> heap) {
+    return heap.isNotEmpty &&
+        DateTime.now().millisecondsSinceEpoch - heap.first.timeReceived >=
+            traceEventDelay.inMilliseconds;
+  }
+
+  void _processDurationEvents(HeapPriorityQueue<TraceEventWrapper> heap) {
+    while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
+      _processDurationEvent(heap.removeFirst());
+    }
+  }
+
+  void _processDurationEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+
+    // We may get a stray event whose timestamp is out of bounds of our current
+    // event node. Do not process these events.
+    if (currentEventNodes[event.type.index] != null &&
+        event.timestampMicros <
+            currentEventNodes[event.type.index].getRoot().startTime) {
+      return;
+    }
+
+    if (debugTimeline) {
+      debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+      debugFrameTracking.writeln('Handling - ${event.json.toString()}');
+    }
+
+    switch (event.phase) {
+      case 'B':
+        _handleDurationBeginEvent(eventWrapper);
+        break;
+      case 'E':
+        _handleDurationEndEvent(eventWrapper);
+        break;
+      case 'X':
+        _handleDurationCompleteEvent(eventWrapper);
+        break;
+      // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
+      // because CPU/GPU work will take place in DurationEvents.
+    }
+
+    if (debugTimeline) {
+      debugFrameTracking.writeln('After Handling:');
+      currentEventNodes[event.type.index]
+          ?.formatFromRoot(debugFrameTracking, '  ');
     }
   }
 
@@ -92,8 +192,15 @@ class TimelineData {
     if (event.id != null) {
       final String id = _getFrameId(event);
       final pendingFrame =
-          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+          pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
       pendingFrame.startTime = event.timestampMicros;
+
+      if (debugTimeline) {
+        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+        debugFrameTracking
+            .writeln('Frame Start: $id - ${event.json.toString()}');
+      }
+
       _maybeAddPendingEvents();
     }
   }
@@ -102,8 +209,14 @@ class TimelineData {
     if (event.id != null) {
       final String id = _getFrameId(event);
       final pendingFrame =
-          _pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+          pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
       pendingFrame.endTime = event.timestampMicros;
+
+      if (debugTimeline) {
+        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+        debugFrameTracking.writeln('Frame End: $id');
+      }
+
       _maybeAddPendingEvents();
     }
   }
@@ -112,94 +225,163 @@ class TimelineData {
     return '${event.name}-${event.id}';
   }
 
-  void _handleDurationBeginEvent(TraceEvent event) {
-    final e = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-    );
+  void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+    final current = currentEventNodes[event.type.index];
+    if (current == null &&
+        !(event.name.contains('VSYNC') ||
+            event.name.contains('GPURasterizer::Draw'))) {
+      return;
+    }
 
-    if (event.isCpuEvent) {
-      if (_cpuEventNode != null) {
-        _cpuEventNode.addChild(e);
-        _cpuEventNode = e;
+    final timelineEvent = TimelineEvent(eventWrapper);
+
+    if (current != null) {
+      current.addChild(timelineEvent);
+    }
+    currentEventNodes[event.type.index] = timelineEvent;
+  }
+
+  void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+    TimelineEvent current = currentEventNodes[event.type.index];
+
+    if (current == null) return;
+
+    // If the names of [event] and [current] do not match, our event nesting is
+    // off balance due to duplicate events from the engine. Balance the tree so
+    // we can continue processing trace events for [current].
+    if (event.name != current.name) {
+      if (collectionEquals(
+        event.json,
+        previousDurationEndEvents[event.type.index]?.json,
+      )) {
+        // This is a duplicate of the previous DurationEnd event we received.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        // Animator::BeginFrame - DurationBegin
+        // ...
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+        // Animator::BeginFrame - DurationEnd ([event] - duplicate)
+        // VSYNC - DurationEnd
+        //
+        if (debugTimeline) {
+          debugFrameTracking
+              .writeln('Duplicate duration end event: ${event.json}');
+        }
+        return;
+      } else if (current.name ==
+              previousDurationEndEvents[event.type.index]?.name &&
+          current.parent?.name == event.name &&
+          current.children.length == 1 &&
+          collectionEquals(
+            current.beginTraceEventJson,
+            current.children.first.beginTraceEventJson,
+          )) {
+        // There was a duplicate DurationBegin event associated with
+        // [previousDurationEndEvent]. [event] is actually the DurationEnd event
+        // for [current.parent]. Trim the extra layer created by the duplicate.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        // Animator::BeginFrame - DurationBegin (duplicate - remove this node)
+        // Animator::BeginFrame - DurationBegin
+        // ...
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+        // VSYNC - DurationEnd [event]
+        //
+        if (debugTimeline) {
+          debugFrameTracking.writeln(
+              'Duplicate duration begin event: ${current.beginTraceEventJson}');
+        }
+
+        current.parent.removeChild(current);
+        current = current.parent;
+        currentEventNodes[event.type.index] = current;
+      } else {
+        // The current event node has fallen into an unrecoverable state. Reset
+        // the tracking node.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        //  Animator::BeginFrame - DurationBegin
+        //   VSYNC - DurationBegin (duplicate)
+        //    Animator::BeginFrame - DurationBegin (duplicate)
+        //     ...
+        //  Animator::BeginFrame - DurationEnd
+        // VSYNC - DurationEnd
+        if (debugTimeline) {
+          debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
+          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking.writeln(
+              'Current: ${currentEventNodes[event.type.index].toString()}');
+        }
+        currentEventNodes[event.type.index] = null;
+        return;
       }
-      // Do not add MessageLoop::RunExpiredTasks events to a null stack. These
-      // events will either a) start outside of our frame start time, or b)
-      // parent irrelevant events - neither of which we want.
-      else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
-        _cpuEventNode = e;
+    }
+
+    previousDurationEndEvents[event.type.index] = event;
+
+    current.endTime = event.timestampMicros;
+    current.traceEvents.add(eventWrapper);
+
+    // Even if the event is well nested, we could still have a duplicate in the
+    // tree that needs to be removed. Ex:
+    //   VSYNC - StartTime 123
+    //      VSYNC - StartTime 123 (duplicate)
+    //      VSYNC - EndTime 234 (duplicate)
+    //   VSYNC - EndTime 234
+    current.maybeRemoveDuplicate();
+
+    // Since this event is complete, move back up the tree to the nearest
+    // incomplete event.
+    while (current.parent?.endTime != null) {
+      current = current.parent;
+    }
+    currentEventNodes[event.type.index] = current.parent;
+
+    // If we have reached a null parent, this event is fully formed.
+    if (current.parent == null) {
+      if (debugTimeline) {
+        debugFrameTracking.writeln('Trying to add event after DurationEnd:');
+        current.format(debugFrameTracking, '   ');
       }
-    } else if (event.isGpuEvent) {
-      if (_gpuEventNode != null) {
-        _gpuEventNode.addChild(e);
-        _gpuEventNode = e;
-      }
-      // Do not add MessageLoop::RunExpiredTasks events to a null stack. A
-      // single MessageLoop::RunExpiredTasks event can parent multiple
-      // PipelineConsume event flows, and we want to consider each
-      // PipelineConsume flow to be its own event. This event can also parent
-      // irrelevant events that we do not want to track.
-      else if (!event.name.contains('MessageLoop::RunExpiredTasks')) {
-        _gpuEventNode = e;
-      }
+      _maybeAddEvent(current);
     }
   }
 
-  void _handleDurationEndEvent(TraceEvent event) {
-    TimelineEvent current;
-    if (event.isCpuEvent && _cpuEventNode != null) {
-      _cpuEventNode.endTime = event.timestampMicros;
-      current = _cpuEventNode;
+  void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+    final TimelineEvent timelineEvent = TimelineEvent(eventWrapper);
 
-      // Since this event is complete, move back up the stack.
-      _cpuEventNode = _cpuEventNode.parent;
-      if (_cpuEventNode == null) {
-        _maybeAddEvent(current);
-      }
-    }
-    if (event.isGpuEvent && _gpuEventNode != null) {
-      _gpuEventNode.endTime = event.timestampMicros;
-      current = _gpuEventNode;
-
-      // Since this event is complete, move back up the stack.
-      _gpuEventNode = _gpuEventNode.parent;
-      if (_gpuEventNode == null) {
-        _maybeAddEvent(current);
-      }
-    }
-  }
-
-  void _handleDurationCompleteEvent(TraceEvent event) {
-    final TimelineEvent timelineEvent = TimelineEvent(
-      event.name,
-      event.timestampMicros,
-      event.type,
-    );
     timelineEvent.endTime = event.timestampMicros + event.duration;
 
-    if (event.isCpuEvent) {
-      if (_cpuEventNode != null) {
-        _cpuEventNode.addChild(timelineEvent, knownChildLocation: false);
-      } else {
-        _maybeAddEvent(timelineEvent);
+    final current = currentEventNodes[event.type.index];
+    if (current != null) {
+      if (current
+          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
+                e.beginTraceEventJson,
+                timelineEvent.beginTraceEventJson,
+              ))) {
+        // This is a duplicate DurationComplete event. Return early.
+        return;
       }
-    }
-    if (event.isGpuEvent) {
-      if (_gpuEventNode != null) {
-        _gpuEventNode.addChild(timelineEvent, knownChildLocation: false);
-      } else {
-        _maybeAddEvent(timelineEvent);
-      }
+      current.addChild(timelineEvent);
+    } else {
+      _maybeAddEvent(timelineEvent);
     }
   }
 
-  /// Looks through [_pendingEvents] and attempts to add events to frames in
-  /// [_pendingFrames].
+  /// Looks through [pendingEvents] and attempts to add events to frames in
+  /// [pendingFrames].
   void _maybeAddPendingEvents() {
+    if (pendingEvents.isEmpty || pendingFrames.isEmpty) return;
+
     // Sort _pendingEvents by their startTime. This ensures we will add the
     // first matching event within the time boundary to the frame.
-    _pendingEvents.sort((TimelineEvent a, TimelineEvent b) {
+    pendingEvents.sort((TimelineEvent a, TimelineEvent b) {
       return a.startTime.compareTo(b.startTime);
     });
 
@@ -207,7 +389,7 @@ class TimelineData {
     for (TimelineFrame frame in frames) {
       final List<TimelineEvent> eventsToRemove = [];
 
-      for (TimelineEvent event in _pendingEvents) {
+      for (TimelineEvent event in pendingEvents) {
         final bool eventAdded = _maybeAddEventToFrame(event, frame);
         if (eventAdded) {
           eventsToRemove.add(event);
@@ -218,14 +400,14 @@ class TimelineData {
       if (eventsToRemove.isNotEmpty) {
         // ignore: prefer_foreach
         for (TimelineEvent event in eventsToRemove) {
-          _pendingEvents.remove(event);
+          pendingEvents.remove(event);
         }
       }
     }
   }
 
-  /// Add event to an available frame in [_pendingFrames] if we can, or
-  /// otherwise add it to [_pendingEvents].
+  /// Add event to an available frame in [pendingFrames] if we can, or
+  /// otherwise add it to [pendingEvents].
   void _maybeAddEvent(TimelineEvent event) {
     if (!event.isCpuEventFlow && !event.isGpuEventFlow) {
       // We do not care about events that are neither the main flow of CPU
@@ -239,56 +421,71 @@ class TimelineData {
     for (TimelineFrame frame in frames) {
       eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
+        _maybeAddPendingEvents();
         break;
       }
     }
 
     if (!eventAdded) {
-      _pendingEvents.add(event);
+      if (debugTimeline) {
+        debugFrameTracking
+            .writeln('Adding event [${event.name}: ${event.startTime} '
+                '- ${event.endTime}] to pendingEvents');
+      }
+      pendingEvents.add(event);
     }
   }
 
-  /// Add event [event] to frame [frame] if it meets the necessary criteria.
-  ///
-  /// Returns a bool indicating whether the event was added to the frame.
+  /// Attempts to add [event] to [frame], and returns a bool indicating whether
+  /// the attempt was successful.
   bool _maybeAddEventToFrame(TimelineEvent event, TimelineFrame frame) {
-    assert(frame.isWellFormed);
-
-    // Ensure the event fits within the frame's time boundaries.
-    if (!_eventOccursWithinFrameBoundaries(event, frame)) {
+    // Ensure the frame does not already have an event of this type and that
+    // the event fits within the frame's time boundaries.
+    if (frame.eventFlows[event.type.index] != null ||
+        !eventOccursWithinFrameBounds(event, frame)) {
       return false;
     }
 
-    bool eventAdded = false;
+    frame.eventFlows[event.type.index] = event;
 
-    if (event.isCpuEventFlow && frame.cpuEventFlow == null) {
-      frame.cpuEventFlow = event;
-      eventAdded = true;
-    } else if (event.isGpuEventFlow && frame.gpuEventFlow == null) {
-      frame.gpuEventFlow = event;
-      eventAdded = true;
+    if (debugTimeline) {
+      debugFrameTracking
+          .writeln('Adding event [${event.name}: ${event.startTime} '
+              '- ${event.endTime}] to frame ${frame.id}');
     }
 
     // Adding event [e] could mean we have completed the frame. Check if we
     // should add the completed frame to [_frameCompleteController].
     _maybeAddCompletedFrame(frame);
 
-    return eventAdded;
+    return true;
   }
 
-  bool _eventOccursWithinFrameBoundaries(TimelineEvent e, TimelineFrame f) {
+  void _maybeAddCompletedFrame(TimelineFrame frame) {
+    if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
+      if (debugTimeline) {
+        debugFrameTracking.writeln('Completing ${frame.id}');
+      }
+      _frameCompleteController.add(frame);
+      pendingFrames.remove(frame.id);
+      frame.addedToTimeline = true;
+    }
+  }
+
+  bool eventOccursWithinFrameBounds(TimelineEvent e, TimelineFrame f) {
     // TODO(kenzie): talk to the engine team about why we need the epsilon. Why
     // do event times extend slightly beyond the times we get from frame start
     // and end flow events.
 
     // Epsilon in microseconds. If more than half of the event fits in bounds,
     // then we consider the event as fitting. If the event has a large duration,
-    // consider it as fitting if it fits within 500 micros of the frame bound.
-    final int epsilon = min(e.duration ~/ 2, 500);
+    // consider it as fitting if it fits within [traceEventEpsilon] micros of
+    // the frame bound.
+    final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
-    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon < 0;
-    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon > 0;
+    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon <= 0;
+    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon >= 0;
 
     // The [gpuEventFlow] should always start after the [cpuEventFlow].
     bool satisfiesCpuGpuOrder() {
@@ -306,7 +503,7 @@ class TimelineData {
   }
 
   List<TimelineFrame> _getAndSortWellFormedFrames() {
-    final List<TimelineFrame> frames = _pendingFrames.values
+    final List<TimelineFrame> frames = pendingFrames.values
         .where((TimelineFrame frame) => frame.isWellFormed)
         .toList();
 
@@ -319,12 +516,28 @@ class TimelineData {
     return frames;
   }
 
-  void _maybeAddCompletedFrame(TimelineFrame frame) {
-    if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
-      _frameCompleteController.add(frame);
-      _pendingFrames.remove(frame.id);
-      frame.addedToTimeline = true;
+  TimelineEventType _inferEventType(TraceEvent event) {
+    if (event.threadId == cpuThreadId) {
+      return TimelineEventType.cpu;
+    } else if (event.threadId == gpuThreadId) {
+      return TimelineEventType.gpu;
+    } else {
+      return TimelineEventType.unknown;
     }
+  }
+
+  bool _shouldProcessTraceEvent(TraceEvent event) {
+    // ignore: prefer_collection_literals
+    final Set<String> phaseWhitelist = Set.of(['s', 'f', 'B', 'E', 'X']);
+    return phaseWhitelist.contains(event.phase) &&
+        // Do not process Garbage Collection events.
+        event.category != 'GC' &&
+        // Do not process MessageLoop::RunExpiredTasks events. These events can
+        // either a) start outside of our frame start time, b) parent irrelevant
+        // events, or c) parent multiple event flows - none of which we want.
+        event.name != 'MessageLoop::RunExpiredTasks' &&
+        // Only process events from the CPU or GPU thread.
+        (event.isGpuEvent || event.isCpuEvent);
   }
 }
 
@@ -355,31 +568,22 @@ class TimelineFrame {
     _addedToTimeline = v;
   }
 
-  /// Flow of events showing the CPU work for the frame.
-  TimelineEvent get cpuEventFlow => _cpuEventFlow;
-  TimelineEvent _cpuEventFlow;
+  /// Event flows for the CPU and GPU work for the frame.
+  final List<TimelineEvent> eventFlows = List.generate(2, (_) => null);
 
-  set cpuEventFlow(TimelineEvent e) {
-    assert(_cpuEventFlow == null, 'cpuEventFlow already set');
-    _cpuEventFlow = e;
-  }
+  /// Flow of events describing the CPU work for the frame.
+  TimelineEvent get cpuEventFlow => eventFlows[TimelineEventType.cpu.index];
 
-  /// Flow of events showing the GPU work for the frame.
-  TimelineEvent get gpuEventFlow => _gpuEventFlow;
-  TimelineEvent _gpuEventFlow;
-
-  set gpuEventFlow(TimelineEvent e) {
-    assert(_gpuEventFlow == null, 'gpuEventFlow already set');
-    _gpuEventFlow = e;
-  }
+  /// Flow of events describing the GPU work for the frame.
+  TimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
 
   /// Whether the frame is ready for the timeline.
   ///
   /// A frame is ready once it has both required event flows as well as
   /// [startTime] and [endTime].
   bool get isReadyForTimeline {
-    return _cpuEventFlow != null &&
-        _gpuEventFlow != null &&
+    return cpuEventFlow != null &&
+        gpuEventFlow != null &&
         _startTime != null &&
         _endTime != null;
   }
@@ -410,22 +614,22 @@ class TimelineFrame {
       endTime != null && startTime != null ? endTime - startTime : null;
 
   // Timing info for CPU portion of the frame.
-  int get cpuStartTime => _cpuEventFlow?.startTime;
+  int get cpuStartTime => cpuEventFlow?.startTime;
 
   int get cpuEndTime =>
       cpuStartTime != null ? cpuStartTime + cpuDuration : null;
 
-  int get cpuDuration => _cpuEventFlow?.duration;
+  int get cpuDuration => cpuEventFlow?.duration;
 
   double get cpuDurationMs => cpuDuration != null ? cpuDuration / 1000 : null;
 
   // Timing info for GPU portion of the frame.
-  int get gpuStartTime => _gpuEventFlow?.startTime;
+  int get gpuStartTime => gpuEventFlow?.startTime;
 
   int get gpuEndTime =>
       gpuStartTime != null ? gpuStartTime + gpuDuration : null;
 
-  int get gpuDuration => _gpuEventFlow?.duration;
+  int get gpuDuration => gpuEventFlow?.duration;
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
@@ -435,27 +639,43 @@ class TimelineFrame {
 
   @override
   String toString() {
-    return 'Frame $id - start: $startTime end: $endTime total dur: $duration '
-        'cpu: [start $cpuStartTime dur $cpuDuration] gpu: [start: $gpuStartTime'
-        ' dur $gpuDuration]';
+    return 'Frame $id - [start: $startTime], [end: $endTime],'
+        'cpu: [start $cpuStartTime end $cpuEndTime], gpu: [start: $gpuStartTime'
+        ' end $gpuEndTime]';
   }
 }
 
 class TimelineEvent {
-  TimelineEvent(this.name, this.startTime, this.type);
+  TimelineEvent(TraceEventWrapper firstTraceEvent)
+      : traceEvents = [firstTraceEvent],
+        type = firstTraceEvent.event.type,
+        startTime = firstTraceEvent.event.timestampMicros;
 
-  final String name;
+  /// Trace events associated with this [TimelineEvent].
+  ///
+  /// There will either be one entry in the list (for DurationComplete events)
+  /// or two (one for the associated DurationBegin event and one for the
+  /// associated DurationEnd event).
+  final List<TraceEventWrapper> traceEvents;
 
-  final TimelineEventType type;
+  @visibleForTesting
+  TimelineEventType type;
 
   /// Event start time in micros.
-  final int startTime;
+  int startTime;
 
   /// Event end time in micros.
   int endTime;
 
   TimelineEvent parent;
-  List<TimelineEvent> children = <TimelineEvent>[];
+
+  List<TimelineEvent> children = [];
+
+  String get name => traceEvents.first.event.name;
+
+  Map<String, dynamic> get beginTraceEventJson => traceEvents.first.event.json;
+
+  Map<String, dynamic> get endTraceEventJson => traceEvents.last.event.json;
 
   /// Event duration in micros.
   int get duration => (endTime != null) ? endTime - startTime : null;
@@ -464,9 +684,11 @@ class TimelineEvent {
 
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
-  bool get isCpuEventFlow => _hasChild('Engine::BeginFrame');
+  bool get isCpuEventFlow => containsChildWithCondition(
+      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
 
-  bool get isGpuEventFlow => _hasChild('PipelineConsume');
+  bool get isGpuEventFlow => containsChildWithCondition(
+      (TimelineEvent event) => event.name.contains('PipelineConsume'));
 
   /// Depth of this TimelineEvent tree, including [this].
   ///
@@ -485,25 +707,70 @@ class TimelineEvent {
 
   int _depth = 0;
 
-  /// Whether there is a child with the given name [childName] is contained
-  /// somewhere in the subtree [children].
-  bool _hasChild(String childName) {
-    bool findChild(TimelineEvent event, String childName) {
-      if (event.name.contains(childName)) {
+  TimelineEvent getRoot() {
+    TimelineEvent root = this;
+    while (root.parent != null) {
+      root = root.parent;
+    }
+    return root;
+  }
+
+  bool containsChildWithCondition(bool condition(TimelineEvent _)) {
+    bool _containsChildWithCondition(
+      TimelineEvent root,
+      bool condition(TimelineEvent _),
+    ) {
+      if (condition(root)) {
         return true;
       }
-      for (TimelineEvent e in event.children) {
-        return findChild(e, childName);
+      for (TimelineEvent newRoot in root.children) {
+        if (_containsChildWithCondition(newRoot, condition)) {
+          return true;
+        }
       }
       return false;
     }
 
-    return findChild(this, childName);
+    return _containsChildWithCondition(this, condition);
   }
 
-  void addChild(TimelineEvent child, {bool knownChildLocation = true}) {
+  void maybeRemoveDuplicate() {
+    void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
+      if (parent.children.length == 1 &&
+          // [parent]'s DurationBegin trace is equal to that of its only child.
+          collectionEquals(
+            parent.beginTraceEventJson,
+            parent.children.first.beginTraceEventJson,
+          ) &&
+          // [parent]'s DurationEnd trace is equal to that of its only child.
+          collectionEquals(
+            parent.endTraceEventJson,
+            parent.children.first.endTraceEventJson,
+          )) {
+        parent.removeChild(children.first);
+      }
+    }
+
+    // Remove [this] event's child if it is a duplicate of [this].
+    if (children.isNotEmpty) {
+      _maybeRemoveDuplicate(parent: this);
+    }
+    // Remove [this] event if it is a duplicate of [parent].
+    if (parent != null) {
+      _maybeRemoveDuplicate(parent: parent);
+    }
+  }
+
+  void removeChild(TimelineEvent childToRemove) {
+    assert(children.contains(childToRemove));
+    final List<TimelineEvent> newChildren = List.from(childToRemove.children);
+    newChildren.forEach(_addChild);
+    children.remove(childToRemove);
+  }
+
+  void addChild(TimelineEvent child) {
     // Places the child in it's correct position amongst the other children.
-    void _putChildInSubtree(TimelineEvent root) {
+    void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
         root._addChild(child);
@@ -511,20 +778,38 @@ class TimelineEvent {
       }
 
       final _children = root.children.toList();
+
+      // If [child] is the parent of some or all of the members in [_children],
+      // those members will need to be reordered in the tree.
+      final childrenToReorder = [];
       for (TimelineEvent otherChild in _children) {
-        // [child] is the parent of [otherChild].
-        if (child._isParentOf(otherChild)) {
+        if (child.couldBeParentOf(otherChild)) {
+          childrenToReorder.add(otherChild);
+        }
+      }
+
+      if (childrenToReorder.isNotEmpty) {
+        root._addChild(child);
+
+        for (TimelineEvent otherChild in childrenToReorder) {
           // Link [otherChild] with its correct parent [child].
           child._addChild(otherChild);
 
           // Unlink [otherChild] from its incorrect parent [root].
           root.children.remove(otherChild);
         }
+        return;
+      }
 
-        // [otherChild] is the parent of [child].
-        if (otherChild._isParentOf(child)) {
+      // Check if a member of [_children] is the parent of [child]. If multiple
+      // children in [_children] share a timestamp, they both could be the
+      // parent of [child]. We reverse [_children] so that we will pick the last
+      // received candidate as the new parent of [child].
+      for (TimelineEvent otherChild in _children.reversed) {
+        if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
-          _putChildInSubtree(otherChild);
+          _putChildInTree(otherChild);
+          return;
         }
       }
 
@@ -533,52 +818,77 @@ class TimelineEvent {
       root._addChild(child);
     }
 
-    if (knownChildLocation) {
-      // For DurationBegin events, we can guarantee they will be received in
-      // increasing timestamp order and we can guarantee the nesting order. This
-      // means we know the child's location in the tree and we can add it
-      // directly.
-      _addChild(child);
-    } else {
-      // For DurationComplete events, we cannot guarantee they will be received
-      // in increasing timestamp order. Because a DurationComplete event tells
-      // us both the startTime and endTime, we also can't guarantee the nesting
-      // order of these events. Therefore, we must properly order and nest the
-      // events as we add them.
-      _putChildInSubtree(this);
-    }
+    _putChildInTree(this);
   }
 
   void _addChild(TimelineEvent child) {
-    if (!children.contains(child)) {
-      children.add(child);
-      child.parent = this;
-    }
+    assert(!children.contains(child));
+    children.add(child);
+    child.parent = this;
   }
 
-  // TODO(kenzie): consider comparing with an epsilon for endTime.
-  bool _isParentOf(TimelineEvent e) {
+  bool couldBeParentOf(TimelineEvent e) {
     if (endTime != null && e.endTime != null) {
-      return startTime < e.startTime && endTime > e.endTime;
+      if (startTime == e.startTime && endTime == e.endTime) {
+        return traceEvents.first.id < e.traceEvents.first.id;
+      }
+      return startTime <= e.startTime && endTime >= e.endTime;
+    } else if (endTime != null) {
+      // We don't use >= to compare [endTime] and [e.startTime] here because we
+      // don't want to falsely make [this] the parent of [e]. We do not know
+      // [e.endTime], meaning [e] could start at [endTime] and end later than
+      // [endTime] (unless e has a duration of 0). In this case, [this] would
+      // not be the parent of [e].
+      return startTime <= e.startTime && endTime > e.startTime;
+    } else if (startTime == e.startTime) {
+      return traceEvents.first.id < e.traceEvents.first.id;
     } else {
       return startTime < e.startTime;
     }
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln(
-        '$indent$name [start: $startTime] [end: $endTime] [dur: $duration]');
+    buf.writeln('$indent$name [start: $startTime] [end: $endTime]');
     for (TimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
   }
 
+  void formatFromRoot(StringBuffer buf, String indent) {
+    getRoot().format(buf, indent);
+  }
+
+  void writeTraceToBuffer(StringBuffer buf) {
+    if (traceEvents.isNotEmpty) {
+      buf.writeln(beginTraceEventJson.toString());
+      for (TimelineEvent child in children) {
+        child.writeTraceToBuffer(buf);
+      }
+      for (var json in traceEvents.where((trace) =>
+          !collectionEquals(trace.event.json, beginTraceEventJson))) {
+        buf.writeln(json.toString());
+      }
+    }
+  }
+
+  @visibleForTesting
+  TimelineEvent deepCopy() {
+    final copy = TimelineEvent(traceEvents.first);
+    copy.endTime = endTime;
+    copy.parent = parent;
+    for (TimelineEvent child in children) {
+      copy._addChild(child.deepCopy());
+    }
+    return copy;
+  }
+
   // TODO(kenzie): use DiagnosticableTreeMixin instead.
   @override
-  String toString() => '[$type] $name [start $startTime] [end $endTime] [dur '
-      '$duration] \n'
-      '  - parent: ${parent != null ? parent.name : 'null'} \n'
-      '  - children.length: ${children.length}';
+  String toString() {
+    final buf = StringBuffer();
+    format(buf, '  ');
+    return buf.toString();
+  }
 }
 
 // TODO(devoncarew): Upstream this class to the service protocol library.
@@ -586,22 +896,15 @@ class TimelineEvent {
 /// A single timeline event.
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  factory TraceEvent(Map<String, dynamic> json) {
-    return TraceEvent._(json, json['name'], json['cat'], json['ph'],
-        json['pid'], json['tid'], json['dur'], json['ts'], json['args']);
-  }
-
-  TraceEvent._(
-    this.json,
-    this.name,
-    this.category,
-    this.phase,
-    this.processId,
-    this.threadId,
-    this.duration,
-    this.timestampMicros,
-    this.args,
-  );
+  TraceEvent(this.json)
+      : name = json['name'],
+        category = json['cat'],
+        phase = json['ph'],
+        processId = json['pid'],
+        threadId = json['tid'],
+        duration = json['dur'],
+        timestampMicros = json['ts'],
+        args = json['args'];
 
   /// The original event JSON.
   final Map<String, dynamic> json;
@@ -687,4 +990,25 @@ class TraceEvent {
   @override
   String toString() => '$type event [id: $id] [cat: $category] [ph: $phase] '
       '$name - [timestamp: $timestampMicros] [duration: $duration]';
+}
+
+int _traceEventWrapperId = 0;
+
+class TraceEventWrapper implements Comparable<TraceEventWrapper> {
+  TraceEventWrapper(this.event, this.timeReceived)
+      : id = _traceEventWrapperId++;
+  final TraceEvent event;
+  final num timeReceived;
+  final int id;
+
+  bool processed = false;
+
+  @override
+  int compareTo(TraceEventWrapper other) {
+    // Order events based on their timestamps. If the events share a timestamp,
+    // order them in the order we received them.
+    final compare =
+        event.timestampMicros.compareTo(other.event.timestampMicros);
+    return compare != 0 ? compare : id.compareTo(other.id);
+  }
 }
