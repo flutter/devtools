@@ -66,27 +66,52 @@ void main() {
     });
 
     test('executeWithDelay', () async {
+      const delayMs = 500;
       int n = 1;
+      int start;
+      int end;
 
       // Condition n >= 2 is false, so we should execute with a delay.
+      start = DateTime.now().millisecondsSinceEpoch;
       executeWithDelay(
         const Duration(milliseconds: 500),
-        () => n++,
+        () {
+          n++;
+          end = DateTime.now().millisecondsSinceEpoch;
+        },
         executeNow: n >= 2,
       );
+
       expect(n, equals(1));
+      expect(end, isNull);
       await Future.delayed(const Duration(milliseconds: 250));
       expect(n, equals(1));
+      expect(end, isNull);
       await Future.delayed(const Duration(milliseconds: 250));
       expect(n, equals(2));
+      expect(end, isNotNull);
+
+      // 10 ms is arbitrary. This can be increased if this test starts to flake.
+      const epsilonMs = 10;
+      final delayedAsExpected = (end - start) > (delayMs - epsilonMs) &&
+          (end - start) < (delayMs + epsilonMs);
+      expect(delayedAsExpected, isTrue);
 
       // Condition n >= 2 is true, so we should not execute with a delay.
+      end = null;
+      start = DateTime.now().millisecondsSinceEpoch;
       executeWithDelay(
         const Duration(milliseconds: 500),
-        () => n++,
+        () {
+          n++;
+          end = DateTime.now().millisecondsSinceEpoch;
+        },
         executeNow: n >= 2,
       );
       expect(n, equals(3));
+      expect(end, isNotNull);
+      // 10 ms is arbitrary. It is far less than 500, which is what matters.
+      expect(end - start, lessThan(10));
     });
   });
 }
