@@ -108,8 +108,9 @@ void main() {
       );
       expect(n, equals(3));
       expect(end, isNotNull);
-      // 10 ms is arbitrary. It is far less than 500, which is what matters.
-      expect(end - start, lessThan(10));
+      // 200 ms is arbitrary. It is less than 500, which is what matters. This
+      // can be increased if this test starts to flake.
+      expect(end - start, lessThan(200));
     });
   });
 }
