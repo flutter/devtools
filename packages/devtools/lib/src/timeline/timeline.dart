@@ -51,7 +51,7 @@ const Color slowFrameColor = Color(0xFFE50C0C);
 
 // Blue A700 is light, Deep Purple A400 is dark
 const Color selectedGpuColor =
-    ThemedColor(Color(0xFF2962FF), Color(0xFF651FFF));
+    ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
 // Dark Blue is light, Deep Purple A100 is dark
 const Color selectedCpuColor =
     ThemedColor(Color(0xFF09007E), Color(0xFFB388FF));
