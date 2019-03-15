@@ -23,6 +23,13 @@ void initializeTheme(String theme) {
 const ThemedColor defaultBackground = ThemedColor(Colors.white, Colors.black);
 const ThemedColor defaultForeground =
     ThemedColor(Colors.black, Color.fromARGB(255, 187, 187, 187));
+
+// Text color [defaultForeground] is too gray, making it hard to read the text
+// in dark theme. We should use a more white color for dark theme, but not
+// jarring white #FFFFFF.
+const ThemedColor contrastForeground =
+    ThemedColor(Colors.black, Color.fromARGB(255, 240, 240, 240));
+
 const ThemedColor grey = ThemedColor(
     Color.fromARGB(255, 128, 128, 128), Color.fromARGB(255, 128, 128, 128));
 

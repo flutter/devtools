@@ -35,11 +35,6 @@ const mainGpuColor = ThemedColor(mainGpuLight, mainGpuDark);
 const selectedFlameChartItemColor =
     ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
 
-// Chart is Teal 300 is light, Teal 500 is dark
-const gpuChartColor = ThemedColor(mainGpuLight, Color(0xFF009688));
-// Chart is Blue 300 is light, Blue 500 is dark
-const cpuChartColor = ThemedColor(mainCpuLight, Color(0xFF03A9F4));
-
 // Red 300 is light, Red 500 is dark
 const gpuJankColor = ThemedColor(Color(0xFFE57373), Color(0xFFF44336));
 // Red 800 is light, Red 800 is dark
@@ -52,11 +47,16 @@ const Color slowFrameColor = Color(0xFFE50C0C);
 // Blue A700 is light, Indigo A400 is dark
 const Color selectedGpuColor =
     ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
-// Dark Blue is light, Indigo A200 is dark
+// Dark Blue is light, Deep Purple A200 is dark
 const Color selectedCpuColor =
-    ThemedColor(Color(0xFF09007E), Color(0xFF536DFE));
-// Selection is high-contrast need white font.
-const Color hoverTextColor = ThemedColor(Colors.white, defaultForeground);
+    ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
+
+// Jank/Selection is high-contrast need white-ish font.
+const Color hoverTextHighContrastColor =
+    ThemedColor(Colors.white, contrastForeground);
+// Other hovers are not as contrasty (good frames) black text looks best in both
+// light and dark mode.
+const Color hoverTextColor = ThemedColor(Colors.black, Colors.black);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

@@ -108,7 +108,7 @@ class FramesBarPlotly {
           y1: 8,
           line: Line(
             dash: 'dot',
-            color: colorToCss(gpuChartColor),
+            color: colorToCss(mainGpuColor),
             width: 1,
           ),
         ),
@@ -123,7 +123,7 @@ class FramesBarPlotly {
           y1: 16,
           line: Line(
             dash: 'longdash',
-            color: colorToCss(cpuChartColor),
+            color: colorToCss(mainCpuColor),
             width: 1,
           ),
         ),
@@ -166,8 +166,13 @@ class FramesBarPlotly {
         legendgroup: 'good_group',
         name: 'GPU',
         hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          font: Font(
+            color: colorToCss(hoverTextColor),
+          ),
+        ),
         marker: Marker(
-          color: colorToCss(gpuChartColor),
+          color: colorToCss(mainGpuColor),
         ),
         width: [0],
       ),
@@ -184,7 +189,9 @@ class FramesBarPlotly {
         name: 'GPU Jank',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
-          font: Font(color: colorToCss(defaultBackground)),
+          font: Font(
+            color: colorToCss(hoverTextHighContrastColor),
+          ),
           bordercolor: colorToCss(hoverJankColor),
         ),
         marker: Marker(
@@ -204,7 +211,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedGpuColor),
           font: Font(
-            color: colorToCss(defaultForeground),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(selectedGpuColor),
         ),
@@ -226,8 +233,13 @@ class FramesBarPlotly {
         legendgroup: 'good_group',
         name: 'CPU',
         hoverinfo: 'y+name',
+        hoverlabel: HoverLabel(
+          font: Font(
+            color: colorToCss(hoverTextColor),
+          ),
+        ),
         marker: Marker(
-          color: colorToCss(cpuChartColor),
+          color: colorToCss(mainCpuColor),
         ),
         width: [0],
       ),
@@ -245,7 +257,7 @@ class FramesBarPlotly {
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
-            color: colorToCss(defaultForeground),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(hoverJankColor),
         ),
@@ -266,7 +278,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedCpuColor),
           font: Font(
-            color: colorToCss(hoverTextColor),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(selectedCpuColor),
         ),
