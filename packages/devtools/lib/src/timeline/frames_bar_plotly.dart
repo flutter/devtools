@@ -5,6 +5,7 @@
 import 'package:js/js_util.dart';
 
 import '../timeline/timeline.dart';
+import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 import '../ui/theme.dart';
@@ -184,7 +185,7 @@ class FramesBarPlotly {
         name: 'GPU Jank',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
-          font: Font(color: colorToCss(defaultBackground)),
+          font: Font(color: colorToCss(Colors.white)),
           bordercolor: colorToCss(hoverJankColor),
         ),
         marker: Marker(
@@ -204,7 +205,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedGpuColor),
           font: Font(
-            color: colorToCss(defaultForeground),
+            color: colorToCss(Colors.white),
           ),
           bordercolor: colorToCss(selectedGpuColor),
         ),
@@ -245,7 +246,7 @@ class FramesBarPlotly {
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
-            color: colorToCss(defaultForeground),
+            color: colorToCss(Colors.white),
           ),
           bordercolor: colorToCss(hoverJankColor),
         ),
@@ -266,7 +267,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedCpuColor),
           font: Font(
-            color: colorToCss(hoverTextColor),
+            color: colorToCss(Colors.white),
           ),
           bordercolor: colorToCss(selectedCpuColor),
         ),
