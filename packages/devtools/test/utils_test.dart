@@ -91,8 +91,8 @@ void main() {
       expect(n, equals(2));
       expect(end, isNotNull);
 
-      // 10 ms is arbitrary. This can be increased if this test starts to flake.
-      const epsilonMs = 10;
+      // 100ms is arbitrary. This can be increased if this test starts to flake.
+      const epsilonMs = 100;
       expect((end - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
@@ -108,7 +108,7 @@ void main() {
       );
       expect(n, equals(3));
       expect(end, isNotNull);
-      // 200 ms is arbitrary. It is less than 500, which is what matters. This
+      // 200ms is arbitrary. It is less than 500, which is what matters. This
       // can be increased if this test starts to flake.
       expect(end - start, lessThan(200));
     });
