@@ -51,13 +51,8 @@ const Color selectedGpuColor =
 const Color selectedCpuColor =
     ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
 
-// Text color defaultForeground is too gray hard to read text, make it a little
-// whitter, not jarring white #FFFFFF.
-const ThemedColor contrastForeground =
-    ThemedColor(Colors.black, Color.fromARGB(255, 240, 240, 240));
-
 // Jank/Selection is high-contrast need white-ish font.
-const Color hoverTextHiContrastColor =
+const Color hoverTextHighContrastColor =
     ThemedColor(Colors.white, contrastForeground);
 // Other hovers are not as contrasty (good frames) black text looks best in both
 // light and dark mode.

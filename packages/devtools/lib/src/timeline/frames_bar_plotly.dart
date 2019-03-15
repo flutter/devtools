@@ -190,7 +190,7 @@ class FramesBarPlotly {
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
-            color: colorToCss(hoverTextHiContrastColor),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(hoverJankColor),
         ),
@@ -211,7 +211,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedGpuColor),
           font: Font(
-            color: colorToCss(hoverTextHiContrastColor),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(selectedGpuColor),
         ),
@@ -257,7 +257,7 @@ class FramesBarPlotly {
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
-            color: colorToCss(hoverTextHiContrastColor),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(hoverJankColor),
         ),
@@ -278,7 +278,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedCpuColor),
           font: Font(
-            color: colorToCss(hoverTextHiContrastColor),
+            color: colorToCss(hoverTextHighContrastColor),
           ),
           bordercolor: colorToCss(selectedCpuColor),
         ),
