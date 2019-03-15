@@ -93,9 +93,7 @@ void main() {
 
       // 10 ms is arbitrary. This can be increased if this test starts to flake.
       const epsilonMs = 10;
-      final delayedAsExpected = (end - start) > (delayMs - epsilonMs) &&
-          (end - start) < (delayMs + epsilonMs);
-      expect(delayedAsExpected, isTrue);
+      expect((end - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
       end = null;
@@ -106,7 +104,7 @@ void main() {
           n++;
           end = DateTime.now().millisecondsSinceEpoch;
         },
-        executeNow: n >= 2,
+        executeNow: true,
       );
       expect(n, equals(3));
       expect(end, isNotNull);

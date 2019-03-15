@@ -252,7 +252,7 @@ class TimelineData {
     // off balance due to duplicate events from the engine. Balance the tree so
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
-      if (collectionEquals<Map<String, dynamic>>(
+      if (collectionEquals(
         event.json,
         previousDurationEndEvents[event.type.index]?.json,
       )) {
@@ -275,7 +275,7 @@ class TimelineData {
               previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
-          collectionEquals<Map<String, dynamic>>(
+          collectionEquals(
             current.beginTraceEventJson,
             current.children.first.beginTraceEventJson,
           )) {
@@ -360,8 +360,8 @@ class TimelineData {
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current.containsChildWithCondition(
-          (TimelineEvent e) => collectionEquals<Map<String, dynamic>>(
+      if (current
+          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
                 e.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
@@ -738,11 +738,15 @@ class TimelineEvent {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
-          collectionEquals<Map<String, dynamic>>(parent.beginTraceEventJson,
-              parent.children.first.beginTraceEventJson) &&
+          collectionEquals(
+            parent.beginTraceEventJson,
+            parent.children.first.beginTraceEventJson,
+          ) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
-          collectionEquals<Map<String, dynamic>>(parent.endTraceEventJson,
-              parent.children.first.endTraceEventJson)) {
+          collectionEquals(
+            parent.endTraceEventJson,
+            parent.children.first.endTraceEventJson,
+          )) {
         parent.removeChild(children.first);
       }
     }
@@ -861,8 +865,7 @@ class TimelineEvent {
         child.writeTraceToBuffer(buf);
       }
       for (var json in traceEvents.where((trace) =>
-          !collectionEquals<Map<String, dynamic>>(
-              trace.event.json, beginTraceEventJson))) {
+          !collectionEquals(trace.event.json, beginTraceEventJson))) {
         buf.writeln(json.toString());
       }
     }

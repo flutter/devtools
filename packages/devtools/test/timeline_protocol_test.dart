@@ -22,17 +22,11 @@ void main() {
     expect(goldenCpuString() == originalGoldenCpuEvent.toString(), isTrue);
     expect(goldenGpuString() == originalGoldenGpuEvent.toString(), isTrue);
     expect(
-      collectionEquals<List<TraceEvent>>(
-        goldenCpuTraceEvents,
-        originalGoldenCpuTraceEvents,
-      ),
+      collectionEquals(goldenCpuTraceEvents, originalGoldenCpuTraceEvents),
       isTrue,
     );
     expect(
-      collectionEquals<List<TraceEvent>>(
-        goldenGpuTraceEvents,
-        originalGoldenGpuTraceEvents,
-      ),
+      collectionEquals(goldenGpuTraceEvents, originalGoldenGpuTraceEvents),
       isTrue,
     );
   });
@@ -352,10 +346,7 @@ void main() {
       // Now [frameEvent]'s children are [engineBeginFrameEvent]'s children.
       expect(engineBeginFrameEvent.children.length, equals(7));
       expect(
-        collectionEquals<List<TimelineEvent>>(
-          engineBeginFrameEvent.children,
-          frameEvent.children,
-        ),
+        collectionEquals(engineBeginFrameEvent.children, frameEvent.children),
         isTrue,
       );
     });
