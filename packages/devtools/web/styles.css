@@ -107,20 +107,6 @@ body {
     font-size: 1.5rem;
 }
 
-.masthead .force-wrap {
-    display: none;
-    flex-basis: 100%;
-}
-@media all and (max-width: 1000px) {
-    .masthead .force-wrap {
-        display: block;
-    }
-    /* Hide the separator since it's now on next line */
-    #global-actions .action-separator {
-        display: none;
-    }
-}
-
 .small-octicon {
   font-size: 13px;
 }
@@ -841,9 +827,10 @@ span.strong {
  * Also support optional directly on elements to be hidden.
  */
 
+@media all and (max-width: 550px) { .optional-550 { display: none; } }
 @media all and (max-width: 700px) { .optional-700 { display: none; } }
-@media all and (max-width: 800px) { .optional-800 { display: none; } }
 @media all and (max-width: 850px) { .optional-850 { display: none; } }
+@media all and (max-width: 950px) { .optional-950 { display: none; } }
 @media all and (max-width: 1200px) { .optional-1200 { display: none; } }
 @media all and (max-width: 1400px) { .optional-1400 { display: none; } }
 
