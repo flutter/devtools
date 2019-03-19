@@ -69,6 +69,7 @@ body {
     padding: 16px 20px;
     margin-bottom: 20px;
     text-align: center;
+    white-space: nowrap;
     background-color: var(--masthead-background);
 }
 
@@ -732,9 +733,12 @@ html [full] {
 }
 
 .flash div {
-    max-width: 70em;
     margin-left: auto;
     margin-right: auto;
+}
+
+.flash-close {
+    line-height: 1.5;
 }
 
 #messages-container div+div {
