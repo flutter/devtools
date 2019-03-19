@@ -12,24 +12,24 @@ import '../ui/theme.dart';
 class FramesBarPlotly {
   FramesBarPlotly(this._domName, [this.useLogScale = true]);
 
-  // Any duration of cpu/gpu greater than 8 ms is a jank.
+  // Any duration of ui/gpu greater than 8 ms is a jank.
   static const int jankMs = 8;
 
   static const int gpuGoodTraceIndex = 0;
   static const int gpuJankTraceIndex = 1;
   static const int gpuSelectTraceIndex = 2;
-  static const int cpuGoodTraceIndex = 3;
-  static const int cpuJankTraceIndex = 4;
-  static const int cpuSelectTraceIndex = 5;
+  static const int uiGoodTraceIndex = 3;
+  static const int uiJankTraceIndex = 4;
+  static const int uiSelectTraceIndex = 5;
   // IMPORTANT: Last trace need to update numberOfTraces constant below.
 
   // Compute total number of traces in graph.
-  static const int numberOfTraces = cpuSelectTraceIndex + 1;
+  static const int numberOfTraces = uiSelectTraceIndex + 1;
 
   // Any point in our frame chart is in only two traces.  The gpu duration will
-  // be in either gpu good or gpu jank trace.  The cpu duration will be in
-  // either cpu good or cpu jank trace.  The only exception is a select bar that
-  // will be in gpu selection and cpu selection traces.
+  // be in either gpu good or gpu jank trace.  The ui duration will be in
+  // either ui good or ui jank trace.  The only exception is a select bar that
+  // will be in gpu selection and ui selection traces.
   static const int activeTracesPerX = 2;
 
   // Careful if changing this to something other than -1 because of
@@ -123,7 +123,7 @@ class FramesBarPlotly {
           y1: 16,
           line: Line(
             dash: 'longdash',
-            color: colorToCss(mainCpuColor),
+            color: colorToCss(mainUiColor),
             width: 1,
           ),
         ),
@@ -143,9 +143,9 @@ class FramesBarPlotly {
   //         GPU Good Trace Data,   // array index gpuGoodTraceIndex
   //         GPU Jank Trace Data,   // array index gpuJankTraceIndex
   //         GPU Select Trace Data, // array index gpuSelectTraceIndex
-  //         CPU Good Trace Data,   // array index cpuGoodTraceIndex
-  //         CPU Jank Trace Data,   // array index cpuJankTraceIndex
-  //         CPU Select Trace Data, // array index cpuSelectTraceIndex
+  //         UI Good Trace Data,   // array index uiGoodTraceIndex
+  //         UI Jank Trace Data,   // array index uiJankTraceIndex
+  //         UI Select Trace Data, // array index uiSelectTraceIndex
   //       ]
   static List<Data> createFPSTraces() {
     final List<Data> allTraces = [];
@@ -223,15 +223,15 @@ class FramesBarPlotly {
       ),
     );
 
-    // trace CPU Good
+    // trace UI Good
     allTraces.insert(
-      cpuGoodTraceIndex,
+      uiGoodTraceIndex,
       Data(
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         type: 'bar',
         legendgroup: 'good_group',
-        name: 'CPU',
+        name: 'UI',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
@@ -239,21 +239,21 @@ class FramesBarPlotly {
           ),
         ),
         marker: Marker(
-          color: colorToCss(mainCpuColor),
+          color: colorToCss(mainUiColor),
         ),
         width: [0],
       ),
     );
 
-    // trace CPU Jank
+    // trace UI Jank
     allTraces.insert(
-      cpuJankTraceIndex,
+      uiJankTraceIndex,
       Data(
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         type: 'bar',
         legendgroup: 'jank_group',
-        name: 'CPU Jank',
+        name: 'UI Jank',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
           font: Font(
@@ -262,30 +262,30 @@ class FramesBarPlotly {
           bordercolor: colorToCss(hoverJankColor),
         ),
         marker: Marker(
-          color: colorToCss(cpuJankColor),
+          color: colorToCss(uiJankColor),
         ),
         width: [0],
       ),
     );
 
-    // trace CPU Select
+    // trace UI Select
     allTraces.insert(
-      cpuSelectTraceIndex,
+      uiSelectTraceIndex,
       Data(
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
-          bgcolor: colorToCss(selectedCpuColor),
+          bgcolor: colorToCss(selectedUiColor),
           font: Font(
             color: colorToCss(hoverTextHighContrastColor),
           ),
-          bordercolor: colorToCss(selectedCpuColor),
+          bordercolor: colorToCss(selectedUiColor),
         ),
         showlegend: false,
         type: 'bar',
         marker: Marker(
-          color: colorToCss(selectedCpuColor),
+          color: colorToCss(selectedUiColor),
         ),
       ),
     );
@@ -310,13 +310,13 @@ class FramesBarPlotly {
 
   void plotFPSDatum(
     int dataIndex,
-    num cpuDuration,
+    num uiDuration,
     num gpuDuration,
     bool paused,
   ) {
     final List<int> traces = [];
 
-    traces.add(cpuDuration > jankMs ? cpuJankTraceIndex : cpuGoodTraceIndex);
+    traces.add(uiDuration > jankMs ? uiJankTraceIndex : uiGoodTraceIndex);
     traces.add(gpuDuration > jankMs ? gpuJankTraceIndex : gpuGoodTraceIndex);
 
     final TraceData data = TraceData(
@@ -325,7 +325,7 @@ class FramesBarPlotly {
         [dataIndex],
       ],
       y: [
-        [cpuDuration],
+        [uiDuration],
         [gpuDuration],
       ],
     );
@@ -342,15 +342,15 @@ class FramesBarPlotly {
   // Chunky plotting of data to reduce plotly live charting lag.
   void plotFPSDataList(
     List<int> dataIndexes,
-    List<num> cpuDurations,
+    List<num> uiDurations,
     List<num> gpuDurations,
     bool paused,
   ) {
-    final List<int> cpuGoodX = [];
-    final List<num> cpuGoodTrace = [];
+    final List<int> uiGoodX = [];
+    final List<num> uiGoodTrace = [];
 
-    final List<int> cpuJankX = [];
-    final List<num> cpuJankTrace = [];
+    final List<int> uiJankX = [];
+    final List<num> uiJankTrace = [];
 
     final List<int> gpuGoodX = [];
     final List<num> gpuGoodTrace = [];
@@ -360,15 +360,15 @@ class FramesBarPlotly {
 
     final int totalIndexes = dataIndexes.length;
     for (int dataIndex = 0; dataIndex < totalIndexes; dataIndex++) {
-      final num cpuDuration = cpuDurations[dataIndex];
+      final num uiDuration = uiDurations[dataIndex];
       final num gpuDuration = gpuDurations[dataIndex];
 
-      if (cpuDuration > jankMs) {
-        cpuJankX.add(dataIndexes[dataIndex]);
-        cpuJankTrace.add(cpuDuration);
+      if (uiDuration > jankMs) {
+        uiJankX.add(dataIndexes[dataIndex]);
+        uiJankTrace.add(uiDuration);
       } else {
-        cpuGoodX.add(dataIndexes[dataIndex]);
-        cpuGoodTrace.add(cpuDuration);
+        uiGoodX.add(dataIndexes[dataIndex]);
+        uiGoodTrace.add(uiDuration);
       }
 
       if (gpuDuration > jankMs) {
@@ -382,15 +382,15 @@ class FramesBarPlotly {
 
     final TraceData data = TraceData(x: [], y: []);
     final List<int> traces = [];
-    if (cpuJankX.isNotEmpty) {
-      data.x.add(cpuJankX);
-      data.y.add(cpuJankTrace);
-      traces.add(cpuJankTraceIndex);
+    if (uiJankX.isNotEmpty) {
+      data.x.add(uiJankX);
+      data.y.add(uiJankTrace);
+      traces.add(uiJankTraceIndex);
     }
-    if (cpuGoodX.isNotEmpty) {
-      data.x.add(cpuGoodX);
-      data.y.add(cpuGoodTrace);
-      traces.add(cpuGoodTraceIndex);
+    if (uiGoodX.isNotEmpty) {
+      data.x.add(uiGoodX);
+      data.y.add(uiGoodTrace);
+      traces.add(uiGoodTraceIndex);
     }
     if (gpuJankX.isNotEmpty) {
       data.x.add(gpuJankX);
@@ -406,18 +406,18 @@ class FramesBarPlotly {
     // TODO(terry): Eliminate this JS call (result of reified List?).
     extendTraces4(
       _domName,
-      cpuGoodX,
+      uiGoodX,
       gpuGoodX,
-      cpuJankX,
+      uiJankX,
       gpuJankX,
-      cpuGoodTrace,
+      uiGoodTrace,
       gpuGoodTrace,
-      cpuJankTrace,
+      uiJankTrace,
       gpuJankTrace,
       [
-        cpuGoodTraceIndex,
+        uiGoodTraceIndex,
         gpuGoodTraceIndex,
-        cpuJankTraceIndex,
+        uiJankTraceIndex,
         gpuJankTraceIndex,
       ],
     );
@@ -495,7 +495,7 @@ class Selection {
     // Supports one bar selection and not selecting a currently selected bar.
     assert(newSelection.length == FramesBarPlotly.activeTracesPerX &&
         newSelection[0].traceIndex != FramesBarPlotly.gpuSelectTraceIndex &&
-        newSelection[1].traceIndex != FramesBarPlotly.cpuSelectTraceIndex);
+        newSelection[1].traceIndex != FramesBarPlotly.uiSelectTraceIndex);
 
     final List<SelectTrace> oldSelectInfo = unselect();
 
@@ -514,7 +514,7 @@ class Selection {
       final int newPtNum1 = newSelection[1].ptNumber;
 
       // After unselecting, the old selection data is restored back to our
-      // traces (gpu good/jank and cpu good/jank) from the selection traces.
+      // traces (gpu good/jank and UI good/jank) from the selection traces.
       // Adjust the newSelection pointNumbers to point to the new location of
       // the real data after unselect.
       if (oldTrace0 == newTrace0 && newPtNum0 >= oldPtNum0) {
@@ -546,7 +546,7 @@ class Selection {
       selectInfo[1].yValue,
     ], [
       FramesBarPlotly.gpuSelectTraceIndex,
-      FramesBarPlotly.cpuSelectTraceIndex,
+      FramesBarPlotly.uiSelectTraceIndex,
     ]);
 
     // Construct the hover names for each selection trace.
@@ -554,10 +554,10 @@ class Selection {
         selectInfo[0].traceIndex == FramesBarPlotly.gpuGoodTraceIndex
             ? 'GPU'
             : 'GPU Jank';
-    final String cpuSelectionHoverName =
-        selectInfo[1].traceIndex == FramesBarPlotly.cpuGoodTraceIndex
-            ? 'CPU'
-            : 'CPU Jank';
+    final String uiSelectionHoverName =
+        selectInfo[1].traceIndex == FramesBarPlotly.uiGoodTraceIndex
+            ? 'UI'
+            : 'UI Jank';
 
     // Update the hovers for the selection traces.
     Plotly.restyle(
@@ -569,13 +569,13 @@ class Selection {
     Plotly.restyle(
       _domName,
       'name',
-      [cpuSelectionHoverName],
-      [FramesBarPlotly.cpuSelectTraceIndex],
+      [uiSelectionHoverName],
+      [FramesBarPlotly.uiSelectTraceIndex],
     );
   }
 
   /// Unselect the current bar in the selection traces. Then restore the data
-  /// point in the gpu good/jank and cpu good/jank trace.
+  /// point in the gpu good/jank and UI good/jank trace.
   ///
   /// Returns the old selectionInfo of empty list if no selection.
   List<SelectTrace> unselect() {
@@ -587,7 +587,7 @@ class Selection {
         final num yValue = selectTrace.yValue;
 
         // Restore our data point (selected) back to traces (gpu good/jank &
-        // cpu good/jank).
+        // UI good/jank).
         _data[trace].x.insert(ptNumber, xValue);
         _data[trace].y.insert(ptNumber, yValue);
       }
@@ -595,8 +595,8 @@ class Selection {
       // Remove all trace selection data.
       _data[FramesBarPlotly.gpuSelectTraceIndex].x.removeAt(1);
       _data[FramesBarPlotly.gpuSelectTraceIndex].y.removeAt(1);
-      _data[FramesBarPlotly.cpuSelectTraceIndex].x.removeAt(1);
-      _data[FramesBarPlotly.cpuSelectTraceIndex].y.removeAt(1);
+      _data[FramesBarPlotly.uiSelectTraceIndex].x.removeAt(1);
+      _data[FramesBarPlotly.uiSelectTraceIndex].y.removeAt(1);
 
       final List<SelectTrace> oldSelectInfo = [];
       oldSelectInfo.add(selectInfo[0]);

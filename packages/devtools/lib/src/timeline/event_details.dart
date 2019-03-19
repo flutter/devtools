@@ -83,7 +83,7 @@ class _Details extends CoreElement {
   void update(TimelineEvent event) {
     attribute('hidden', false);
     _duration.text = 'Duration: ${_microsAsMsText(event.duration)}';
-    _comingSoon.attribute('hidden', !event.isCpuEvent);
+    _comingSoon.attribute('hidden', !event.isUiEvent);
   }
 
   void reset() {

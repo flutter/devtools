@@ -22,15 +22,15 @@ import 'timeline_protocol.dart';
 
 // Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainCpuLight = Color(0xFF64B5F6);
-const mainCpuDark = Color(0xFF42A5F5);
-const mainCpuColor = ThemedColor(mainCpuLight, mainCpuDark);
+const mainUiColorLight = Color(0xFF64B5F6);
+const mainUiColorDark = Color(0xFF42A5F5);
+const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 
 // Teal 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainGpuLight = Color(0xFF4DB6AC);
-const mainGpuDark = Color(0xFF26A69A);
-const mainGpuColor = ThemedColor(mainGpuLight, mainGpuDark);
+const mainGpuColorLight = Color(0xFF4DB6AC);
+const mainGpuColorDark = Color(0xFF26A69A);
+const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
 
 const selectedFlameChartItemColor =
     ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
@@ -38,7 +38,7 @@ const selectedFlameChartItemColor =
 // Red 300 is light, Red 500 is dark
 const gpuJankColor = ThemedColor(Color(0xFFE57373), Color(0xFFF44336));
 // Red 800 is light, Red 800 is dark
-const cpuJankColor = ThemedColor(Color(0xFFC62828), Color(0xFFC62828));
+const uiJankColor = ThemedColor(Color(0xFFC62828), Color(0xFFC62828));
 // Red 500 is light, Red 700 is dark
 const hoverJankColor = ThemedColor(Color(0xFFF44336), Color(0xFFD32F2F));
 
@@ -48,8 +48,7 @@ const Color slowFrameColor = Color(0xFFE50C0C);
 const Color selectedGpuColor =
     ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
 // Dark Blue is light, Deep Purple A200 is dark
-const Color selectedCpuColor =
-    ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
+const Color selectedUiColor = ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
 
 // Jank/Selection is high-contrast need white-ish font.
 const Color hoverTextHighContrastColor =
@@ -279,12 +278,12 @@ class TimelineScreen extends Screen {
               in timelineController.timelineData.pendingFrames.values) {
             buf.writeln('${frame.toString()}');
           }
-          if (timelineController.timelineData
-                  .currentEventNodes[TimelineEventType.cpu.index] !=
+          if (timelineController
+                  .timelineData.currentEventNodes[TimelineEventType.ui.index] !=
               null) {
-            buf.writeln('\nCurrent CPU event node:');
+            buf.writeln('\nCurrent UI event node:');
             timelineController
-                .timelineData.currentEventNodes[TimelineEventType.cpu.index]
+                .timelineData.currentEventNodes[TimelineEventType.ui.index]
                 .format(buf, '   ');
           }
           if (timelineController.timelineData
@@ -296,10 +295,10 @@ class TimelineScreen extends Screen {
                 .format(buf, '   ');
           }
           if (timelineController
-              .timelineData.heaps[TimelineEventType.cpu.index].isNotEmpty) {
-            buf.writeln('\nCPU heap');
+              .timelineData.heaps[TimelineEventType.ui.index].isNotEmpty) {
+            buf.writeln('\nUI heap');
             for (TraceEventWrapper wrapper in timelineController
-                .timelineData.heaps[TimelineEventType.cpu.index]
+                .timelineData.heaps[TimelineEventType.ui.index]
                 .toList()) {
               buf.writeln(wrapper.event.json.toString());
             }

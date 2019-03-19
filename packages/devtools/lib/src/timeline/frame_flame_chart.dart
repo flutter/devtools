@@ -21,18 +21,18 @@ import 'timeline_protocol.dart';
 
 // Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-final cpuColorPalette = [
-  const ThemedColor(Color(0xFFBBDEFB), mainCpuDark),
+final uiColorPalette = [
+  const ThemedColor(Color(0xFFBBDEFB), mainUiColorDark),
   const ThemedColor(Color(0xFF90CAF9), Color(0xFF1E88E5)),
-  const ThemedColor(mainCpuLight, Color(0xFF1976D2)),
+  const ThemedColor(mainUiColorLight, Color(0xFF1976D2)),
 ];
 
 // Teal 100-300 (light mode) or 400-600 (dark mode) color palette from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final gpuColorPalette = [
-  const ThemedColor(Color(0xFFB2DFDB), mainGpuDark),
+  const ThemedColor(Color(0xFFB2DFDB), mainGpuColorDark),
   const ThemedColor(Color(0xFF80CBC4), Color(0xFF009688)),
-  const ThemedColor(mainGpuLight, Color(0xFF00796B)),
+  const ThemedColor(mainGpuColorLight, Color(0xFF00796B)),
 ];
 
 /// Inset for the start/end of the flame chart.
@@ -94,15 +94,15 @@ class FrameFlameChart extends CoreElement {
 
   TimelineFrame _frame;
   TimelineGrid _timelineGrid;
-  CoreElement _cpuSection;
+  CoreElement _uiSection;
   CoreElement _gpuSection;
 
-  int _cpuColorOffset = 0;
+  int _uiColorOffset = 0;
   int _gpuColorOffset = 0;
 
-  Color nextCpuColor() {
-    final color = cpuColorPalette[_cpuColorOffset % cpuColorPalette.length];
-    _cpuColorOffset++;
+  Color nextUiColor() {
+    final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
+    _uiColorOffset++;
     return color;
   }
 
@@ -118,11 +118,11 @@ class FrameFlameChart extends CoreElement {
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
-      buf.writeln('CPU for frame ${frame.id}:');
-      frame.cpuEventFlow.format(buf, '  ');
-      buf.writeln('\nCPU trace for frame ${frame.id}');
-      frame.cpuEventFlow.writeTraceToBuffer(buf);
-      buf.writeln('\nGPU for frame ${frame.id}:');
+      buf.writeln('UI timeline event for frame ${frame.id}:');
+      frame.uiEventFlow.format(buf, '  ');
+      buf.writeln('\nUI trace for frame ${frame.id}');
+      frame.uiEventFlow.writeTraceToBuffer(buf);
+      buf.writeln('\nGPU timeline event frame ${frame.id}:');
       frame.gpuEventFlow.format(buf, '  ');
       buf.writeln('\nGPU trace for frame ${frame.id}');
       frame.gpuEventFlow.writeTraceToBuffer(buf);
@@ -138,7 +138,7 @@ class FrameFlameChart extends CoreElement {
     clear();
     element.scrollLeft = 0;
     element.scrollTop = 0;
-    _cpuColorOffset = 0;
+    _uiColorOffset = 0;
     _gpuColorOffset = 0;
     _zoomLevel = 1;
     _chartItems.clear();
@@ -156,8 +156,8 @@ class FrameFlameChart extends CoreElement {
         (element.clientWidth - 2 * flameChartInset) / _frame.duration;
 
     final int frameStartOffset = _frame.startTime;
-    final cpuSectionHeight =
-        _frame.cpuEventFlow.depth * rowHeight + sectionSpacing;
+    final uiSectionHeight =
+        _frame.uiEventFlow.depth * rowHeight + sectionSpacing;
     final gpuSectionHeight = _frame.gpuEventFlow.depth * rowHeight;
 
     void drawRecursively(
@@ -186,26 +186,26 @@ class FrameFlameChart extends CoreElement {
       }
     }
 
-    void drawCpuEvents() {
-      _cpuSection = div(c: 'flame-chart-section cpu');
-      add(_cpuSection);
+    void drawUiEvents() {
+      _uiSection = div(c: 'flame-chart-section ui');
+      add(_uiSection);
 
-      _cpuSection.element.style
-        ..height = '${cpuSectionHeight}px'
+      _uiSection.element.style
+        ..height = '${uiSectionHeight}px'
         ..top = '${rowHeight}px';
 
       final sectionTitle =
-          div(text: 'CPU', c: 'flame-chart-item flame-chart-title');
+          div(text: 'UI', c: 'flame-chart-item flame-chart-title');
       sectionTitle.element.style
-        ..background = colorToCss(mainCpuColor)
+        ..background = colorToCss(mainUiColor)
         ..left = '${padding}px'
         ..top = '${padding}px';
-      _cpuSection.add(sectionTitle);
+      _uiSection.add(sectionTitle);
 
       drawRecursively(
-        _frame.cpuEventFlow,
+        _frame.uiEventFlow,
         0,
-        _cpuSection,
+        _uiSection,
         includeDuration: true,
       );
     }
@@ -216,7 +216,7 @@ class FrameFlameChart extends CoreElement {
 
       _gpuSection.element.style
         ..height = '${gpuSectionHeight}px'
-        ..top = '${rowHeight + cpuSectionHeight}px';
+        ..top = '${rowHeight + uiSectionHeight}px';
 
       final sectionTitle =
           div(text: 'GPU', c: 'flame-chart-item flame-chart-title');
@@ -237,11 +237,11 @@ class FrameFlameChart extends CoreElement {
     void drawTimelineGrid() {
       _timelineGrid = TimelineGrid(_frame.duration, getFlameChartWidth());
       _timelineGrid.element.style.height =
-          '${2 * rowHeight + cpuSectionHeight + gpuSectionHeight}px';
+          '${2 * rowHeight + uiSectionHeight + gpuSectionHeight}px';
       add(_timelineGrid);
     }
 
-    drawCpuEvents();
+    drawUiEvents();
     drawGpuEvents();
     drawTimelineGrid();
 
@@ -261,7 +261,7 @@ class FrameFlameChart extends CoreElement {
       left,
       width,
       top,
-      event.isCpuEvent ? nextCpuColor() : nextGpuColor(),
+      event.isUiEvent ? nextUiColor() : nextGpuColor(),
       includeDuration: includeDuration,
     );
 
@@ -273,7 +273,7 @@ class FrameFlameChart extends CoreElement {
     // Add 2 * [flameChartInset] to account for spacing at the beginning and end
     // of the chart.
     final width = getFlameChartWidth() + 2 * flameChartInset;
-    _cpuSection.element.style.width = '${width}px';
+    _uiSection.element.style.width = '${width}px';
     _gpuSection.element.style.width = '${width}px';
   }
 

@@ -49,14 +49,14 @@ class TimelineController {
       return event.name == 'thread_name';
     }).toList();
 
-    // TODO(kenzie): Remove this logic once cpu/gpu distinction changes are
+    // TODO(kenzie): Remove this logic once ui/gpu distinction changes are
     // available in the engine.
-    int cpuThreadId;
+    int uiThreadId;
     int gpuThreadId;
     for (TraceEvent event in events) {
       // iOS - 'io.flutter.1.ui', Android - '1.ui'.
       if (event.args['name'].contains('1.ui')) {
-        cpuThreadId = event.threadId;
+        uiThreadId = event.threadId;
       }
       // iOS - 'io.flutter.1.gpu', Android - '1.gpu'.
       if (event.args['name'].contains('1.gpu')) {
@@ -65,7 +65,7 @@ class TimelineController {
     }
 
     final TimelineData timelineData =
-        TimelineData(cpuThreadId: cpuThreadId, gpuThreadId: gpuThreadId);
+        TimelineData(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
 
     timelineData.onFrameCompleted.listen((frame) {
       _frameAddedController.add(frame);
