@@ -295,7 +295,8 @@ class ActionsContainer {
   void addAction(ActionButton action) {
     if (_actions.isEmpty) {
       // add a visual separator
-      element.add(span(text: '•', a: 'horiz-padding', c: 'masthead-item'));
+      element.add(span(
+          text: '•', a: 'horiz-padding', c: 'masthead-item action-separator'));
     }
 
     _actions.add(action);

@@ -49,12 +49,13 @@ class InspectorScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar inspector-page')
+      ..layoutVertical();
 
     final CoreElement buttonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group')
+        div(c: 'btn-group collapsible-700 nowrap')
           ..add([
             ServiceExtensionButton(
               extensions.toggleSelectWidgetMode,

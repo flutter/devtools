@@ -47,32 +47,6 @@
     margin-left: 25px;
 }
 
-/*
-TODO(jacobr): make these styles only apply to the inspector toolbar as the
-thresholds are specific to the inspector UI.
- */
-@media all and (max-width: 1220px) {
-    .btn-group.collapsible .optional-text span {
-        display: none;
-    }
-
-    .btn-group.collapsible .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
-@media all and (max-width: 1410px) {
-    .btn-group.collapsible.overflow .optional-text span {
-        display: none;
-    }
-
-    .btn-group.collapsible.overflow .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
 
 /*
 Styles for rendering html versions of the inspector tree.
