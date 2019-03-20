@@ -89,7 +89,12 @@ class FlutterTestEnvironment {
     }
     if (_beforeTearDown != null) await _beforeTearDown();
 
-    await _service.allFuturesCompleted.future;
+    await _service.allFuturesCompleted.timeout(Duration(seconds: 20),
+        onTimeout: () {
+      throw 'Timed out waiting for futures to complete during teardown. '
+          '${_service.activeFutures.length} futures remained:\n\n'
+          '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
+    });
     await _flutter.stop();
     _flutter = null;
 
