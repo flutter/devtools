@@ -76,4 +76,12 @@ class MemoryChart extends CoreElement {
   void resume() {
     _plotlyChart.liveUpdate = true;
   }
+
+  void plotSnapshot() {
+    _plotlyChart.plotSnapshot();
+  }
+
+  void plotReset() {
+    _plotlyChart.plotReset();
+  }
 }

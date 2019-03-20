@@ -40,7 +40,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     });
   }
 
-  static const int chartHeight = 160;
+  static const int chartHeight = 230;
   static const int maxFrames = 500;
   static const topPadding = 2;
 
