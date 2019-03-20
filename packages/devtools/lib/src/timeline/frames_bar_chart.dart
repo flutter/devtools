@@ -80,7 +80,7 @@ class PlotlyDivGraph extends CoreElement {
   final Map<int, TimelineFrame> _frames = {};
 
   List<int> dataIndexes = [];
-  List<num> cpuDurations = [];
+  List<num> uiDurations = [];
   List<num> gpuDurations = [];
 
   FramesBarPlotly plotlyChart;
@@ -96,10 +96,10 @@ class PlotlyDivGraph extends CoreElement {
     final int dataLength = dataIndexes.length;
     if (dataLength > 0) {
       plotlyChart.plotFPSDataList(
-          dataIndexes, cpuDurations, gpuDurations, timelineController.paused);
+          dataIndexes, uiDurations, gpuDurations, timelineController.paused);
 
       dataIndexes.removeRange(0, dataLength);
-      cpuDurations.removeRange(0, dataLength);
+      uiDurations.removeRange(0, dataLength);
       gpuDurations.removeRange(0, dataLength);
     }
   }
@@ -113,7 +113,7 @@ class PlotlyDivGraph extends CoreElement {
 
     for (Point pt in data.points) {
       if (pt.curveNumber != FramesBarPlotly.gpuSelectTraceIndex &&
-          pt.curveNumber != FramesBarPlotly.cpuSelectTraceIndex) {
+          pt.curveNumber != FramesBarPlotly.uiSelectTraceIndex) {
         newSelection.add(SelectTrace(
           pt.curveNumber,
           pt.pointNumber,
@@ -130,7 +130,7 @@ class PlotlyDivGraph extends CoreElement {
     // currently selected then select the bar clicked.  Also, newSelection
     // should always have 2 entries a point in the frames bar chart always
     // exist in 2 traces a gpu duration is either in the good/junk trace and the
-    // same is true for cpu too.
+    // same is true for UI too.
     if (newSelection.length == FramesBarPlotly.activeTracesPerX &&
         !currentSelection.isSelected(newSelection)) {
       currentSelection.select(newSelection);
@@ -162,33 +162,33 @@ class PlotlyDivGraph extends CoreElement {
   bool _plotlyLegendClick(LegendDataEvent data) {
     final int traceIndex = data.curveNumber;
 
-    if (traceIndex == FramesBarPlotly.cpuJankTraceIndex ||
+    if (traceIndex == FramesBarPlotly.uiJankTraceIndex ||
         traceIndex == FramesBarPlotly.gpuJankTraceIndex) {
       final List<int> traces = [
-        FramesBarPlotly.cpuJankTraceIndex,
+        FramesBarPlotly.uiJankTraceIndex,
         FramesBarPlotly.gpuJankTraceIndex
       ];
 
       final String color = data.data[traceIndex].marker.color;
 
-      String newCpuColor;
+      String newUiColor;
       String newGpuColor;
 
-      if (color == colorToCss(cpuJankColor) ||
+      if (color == colorToCss(uiJankColor) ||
           color == colorToCss(gpuJankColor)) {
-        // Flip to cpuChartColor/gpuChartColor
-        newCpuColor = colorToCss(mainCpuColor);
+        // Flip to uiChartColor/gpuChartColor
+        newUiColor = colorToCss(mainUiColor);
         newGpuColor = colorToCss(mainGpuColor);
       } else {
-        // Flip back to cpuJankColor/gpuJankColor
-        newCpuColor = colorToCss(cpuJankColor);
+        // Flip back to uiJankColor/gpuJankColor
+        newUiColor = colorToCss(uiJankColor);
         newGpuColor = colorToCss(gpuJankColor);
       }
 
       Plotly.restyle(
         frameGraph,
         'marker.color',
-        [newCpuColor, newGpuColor],
+        [newUiColor, newGpuColor],
         traces,
       );
 
@@ -226,9 +226,9 @@ class PlotlyDivGraph extends CoreElement {
     //
     //    Error - already set endTime ### for frame 1650.
     //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
-    if (frame.cpuDurationMs > 0 && frame.gpuDurationMs > 0) {
+    if (frame.uiDurationMs > 0 && frame.gpuDurationMs > 0) {
       dataIndexes.add(_frameIndex);
-      cpuDurations.add(frame.cpuDurationMs);
+      uiDurations.add(frame.uiDurationMs);
       gpuDurations.add(frame.gpuDurationMs);
 
       _frames.addAll({_frameIndex: frame});
@@ -236,8 +236,8 @@ class PlotlyDivGraph extends CoreElement {
       _frameIndex++;
     } else {
       // TODO(terry): HACK - Ignore the event.
-      print('WARNING: Ignored onFrameAdded - bad data.\n [cpuDuration: '
-          '${frame.cpuDuration}, gpuDuration: ${frame.gpuDuration}');
+      print('WARNING: Ignored onFrameAdded - bad data.\n [uiDuration: '
+          '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}');
     }
   }
 }

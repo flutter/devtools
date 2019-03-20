@@ -10,19 +10,19 @@ import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final originalGoldenCpuEvent = goldenCpuTimelineEvent.deepCopy();
+  final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
   final originalGoldenGpuEvent = goldenGpuTimelineEvent.deepCopy();
-  final originalGoldenCpuTraceEvents = List.of(goldenCpuTraceEvents);
+  final originalGoldenUiTraceEvents = List.of(goldenUiTraceEvents);
   final originalGoldenGpuTraceEvents = List.of(goldenGpuTraceEvents);
 
   setUp(() {
     // If any of these expect statements fail, a golden was modified while the
     // tests were running. Do not modify the goldens. Instead, make a copy and
     // modify the copy.
-    expect(goldenCpuString() == originalGoldenCpuEvent.toString(), isTrue);
+    expect(goldenUiString() == originalGoldenUiEvent.toString(), isTrue);
     expect(goldenGpuString() == originalGoldenGpuEvent.toString(), isTrue);
     expect(
-      collectionEquals(goldenCpuTraceEvents, originalGoldenCpuTraceEvents),
+      collectionEquals(goldenUiTraceEvents, originalGoldenUiTraceEvents),
       isTrue,
     );
     expect(
@@ -36,13 +36,13 @@ void main() {
 
     setUp(() {
       timelineData = TimelineData(
-        cpuThreadId: cpuThreadId,
+        uiThreadId: uiThreadId,
         gpuThreadId: gpuThreadId,
       );
     });
 
     test('infers correct trace event type', () {
-      final cpuEvent = goldenCpuTraceEvents.first;
+      final uiEvent = goldenUiTraceEvents.first;
       final gpuEvent = goldenGpuTraceEvents.first;
       final unknownEvent = testTraceEvent({
         'name': 'Random Event We Should Not Process',
@@ -54,13 +54,13 @@ void main() {
         'args': {}
       });
 
-      expect(cpuEvent.type, equals(TimelineEventType.unknown));
+      expect(uiEvent.type, equals(TimelineEventType.unknown));
       expect(gpuEvent.type, equals(TimelineEventType.unknown));
       expect(unknownEvent.type, equals(TimelineEventType.unknown));
-      timelineData.processTraceEvent(cpuEvent);
+      timelineData.processTraceEvent(uiEvent);
       timelineData.processTraceEvent(gpuEvent);
       timelineData.processTraceEvent(unknownEvent);
-      expect(cpuEvent.type, equals(TimelineEventType.cpu));
+      expect(uiEvent.type, equals(TimelineEventType.ui));
       expect(gpuEvent.type, equals(TimelineEventType.gpu));
       expect(unknownEvent.type, equals(TimelineEventType.unknown));
     });
@@ -85,13 +85,13 @@ void main() {
 
     test('duration trace events form timeline event tree', () async {
       expect(timelineData.pendingEvents, isEmpty);
-      goldenCpuTraceEvents.forEach(timelineData.processTraceEvent);
+      goldenUiTraceEvents.forEach(timelineData.processTraceEvent);
 
       await delayForEventProcessing();
 
       expect(timelineData.pendingEvents.length, equals(1));
-      final processedCpuEvent = timelineData.pendingEvents.first;
-      expect(processedCpuEvent.toString(), equals(goldenCpuString()));
+      final processedUiEvent = timelineData.pendingEvents.first;
+      expect(processedUiEvent.toString(), equals(goldenUiString()));
     });
 
     test('event occurs within frame boundaries', () {
@@ -101,7 +101,7 @@ void main() {
         ..startTime = frameStartTime
         ..endTime = frameEndTime;
 
-      final event = goldenCpuTimelineEvent.deepCopy()
+      final event = goldenUiTimelineEvent.deepCopy()
         ..startTime = frameStartTime
         ..endTime = 5000;
 
@@ -133,32 +133,31 @@ void main() {
       event.endTime = frameEndTime + traceEventEpsilon.inMicroseconds + 1;
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
-      // Satisfies CPU / GPU order.
-      final cpuEvent = event
+      // Satisfies UI / GPU order.
+      final uiEvent = event
         ..startTime = 5000
         ..endTime = 6000;
       final gpuEvent = goldenGpuTimelineEvent.deepCopy()
         ..startTime = 4000
         ..endTime = 8000;
 
-      expect(
-          timelineData.eventOccursWithinFrameBounds(cpuEvent, frame), isTrue);
+      expect(timelineData.eventOccursWithinFrameBounds(uiEvent, frame), isTrue);
       expect(
           timelineData.eventOccursWithinFrameBounds(gpuEvent, frame), isTrue);
 
-      frame.eventFlows[TimelineEventType.cpu.index] = cpuEvent;
+      frame.eventFlows[TimelineEventType.ui.index] = uiEvent;
       expect(
           timelineData.eventOccursWithinFrameBounds(gpuEvent, frame), isFalse);
 
-      frame.eventFlows[TimelineEventType.cpu.index] = null;
+      frame.eventFlows[TimelineEventType.ui.index] = null;
       frame.eventFlows[TimelineEventType.gpu.index] = gpuEvent;
       expect(
-          timelineData.eventOccursWithinFrameBounds(cpuEvent, frame), isFalse);
+          timelineData.eventOccursWithinFrameBounds(uiEvent, frame), isFalse);
     });
 
     test('frame completed', () async {
       expect(timelineData.pendingEvents, isEmpty);
-      goldenCpuTraceEvents.forEach(timelineData.processTraceEvent);
+      goldenUiTraceEvents.forEach(timelineData.processTraceEvent);
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(1));
 
@@ -175,18 +174,18 @@ void main() {
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(0));
       expect(timelineData.pendingFrames.length, equals(0));
-      expect(frame.cpuEventFlow.toString(), equals(goldenCpuString()));
+      expect(frame.uiEventFlow.toString(), equals(goldenUiString()));
       expect(frame.gpuEventFlow.toString(), equals(goldenGpuString()));
       expect(frame.addedToTimeline, isTrue);
     });
 
     test('handles out of order timestamps', () async {
-      final List<TraceEvent> traceEvents = List.of(goldenCpuTraceEvents);
+      final List<TraceEvent> traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.reversed.forEach(timelineData.processTraceEvent);
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(1));
       expect(timelineData.pendingEvents.first.toString(),
-          equals(goldenCpuString()));
+          equals(goldenUiString()));
     });
 
     test('handles trace event duplicates', () async {
@@ -197,14 +196,14 @@ void main() {
       //     ...
       //  Animator::BeginFrame
       // VSYNC
-      List<TraceEvent> traceEvents = List.of(goldenCpuTraceEvents);
-      traceEvents.insert(1, goldenCpuTraceEvents[1]);
+      List<TraceEvent> traceEvents = List.of(goldenUiTraceEvents);
+      traceEvents.insert(1, goldenUiTraceEvents[1]);
 
       traceEvents.forEach(timelineData.processTraceEvent);
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(1));
       expect(timelineData.pendingEvents.first.toString(),
-          equals(goldenCpuString()));
+          equals(goldenUiString()));
 
       timelineData.pendingEvents.clear();
 
@@ -215,15 +214,15 @@ void main() {
       //   Animator::BeginFrame
       //  Animator::BeginFrame
       // VSYNC
-      traceEvents = List.of(goldenCpuTraceEvents);
-      traceEvents.insert(goldenCpuTraceEvents.length - 2,
-          goldenCpuTraceEvents[goldenCpuTraceEvents.length - 2]);
+      traceEvents = List.of(goldenUiTraceEvents);
+      traceEvents.insert(goldenUiTraceEvents.length - 2,
+          goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
       traceEvents.forEach(timelineData.processTraceEvent);
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(1));
       expect(timelineData.pendingEvents.first.toString(),
-          equals(goldenCpuString()));
+          equals(goldenUiString()));
 
       timelineData.pendingEvents.clear();
 
@@ -238,7 +237,7 @@ void main() {
       final vsyncEvent = testTraceEvent({
         'name': 'VSYNC',
         'cat': 'Embedder',
-        'tid': cpuThreadId,
+        'tid': uiThreadId,
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
@@ -247,7 +246,7 @@ void main() {
       final animatorBeginFrameEvent = testTraceEvent({
         'name': 'Animator::BeginFrame',
         'cat': 'Embedder',
-        'tid': cpuThreadId,
+        'tid': uiThreadId,
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
@@ -259,46 +258,43 @@ void main() {
         vsyncEvent,
         animatorBeginFrameEvent
       ];
-      traceEvents.addAll(
-          goldenCpuTraceEvents.getRange(2, goldenCpuTraceEvents.length));
-      traceEvents.insert(2, goldenCpuTraceEvents[0]);
-      traceEvents.insert(3, goldenCpuTraceEvents[1]);
+      traceEvents
+          .addAll(goldenUiTraceEvents.getRange(2, goldenUiTraceEvents.length));
+      traceEvents.insert(2, goldenUiTraceEvents[0]);
+      traceEvents.insert(3, goldenUiTraceEvents[1]);
       traceEvents.forEach(timelineData.processTraceEvent);
       await delayForEventProcessing();
       expect(timelineData.pendingEvents.length, equals(0));
       expect(
-          timelineData.currentEventNodes[TimelineEventType.cpu.index], isNull);
+          timelineData.currentEventNodes[TimelineEventType.ui.index], isNull);
     });
   });
 
   group('TimelineEvent', () {
     test('get depth', () {
-      expect(goldenCpuTimelineEvent.depth, equals(7));
+      expect(goldenUiTimelineEvent.depth, equals(7));
     });
 
     test('getRoot', () {
-      expect(goldenCpuTimelineEvent.getRoot(), equals(vsyncEvent));
+      expect(goldenUiTimelineEvent.getRoot(), equals(vsyncEvent));
       expect(buildEvent.getRoot(), equals(vsyncEvent));
     });
 
     test('containsChildWithCondition', () {
       expect(
-        goldenCpuTimelineEvent
-            .containsChildWithCondition((TimelineEvent event) {
+        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
           return event.name == 'Animate';
         }),
         isTrue,
       );
       expect(
-        goldenCpuTimelineEvent
-            .containsChildWithCondition((TimelineEvent event) {
+        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
           return event.beginTraceEventJson == animateEvent.beginTraceEventJson;
         }),
         isTrue,
       );
       expect(
-        goldenCpuTimelineEvent
-            .containsChildWithCondition((TimelineEvent event) {
+        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
           return event.name == 'FakeEventName';
         }),
         isFalse,
@@ -306,25 +302,25 @@ void main() {
     });
 
     test('maybeRemoveDuplicate', () {
-      final goldenCopy = goldenCpuTimelineEvent.deepCopy();
+      final goldenCopy = goldenUiTimelineEvent.deepCopy();
 
       // Event with no duplicates should be unchanged.
       goldenCopy.maybeRemoveDuplicate();
-      expect(goldenCopy.toString(), equals(goldenCpuString()));
+      expect(goldenCopy.toString(), equals(goldenUiString()));
 
       // Add a duplicate event in [goldenCopy]'s event tree.
       final duplicateEvent = goldenCopy.deepCopy();
       duplicateEvent.parent = goldenCopy;
       duplicateEvent.children = goldenCopy.children;
       goldenCopy.children = [duplicateEvent];
-      expect(goldenCopy.toString(), isNot(equals(goldenCpuString())));
+      expect(goldenCopy.toString(), isNot(equals(goldenUiString())));
 
       goldenCopy.maybeRemoveDuplicate();
-      expect(goldenCopy.toString(), equals(goldenCpuString()));
+      expect(goldenCopy.toString(), equals(goldenUiString()));
     });
 
     test('removeChild', () {
-      final goldenCopy = goldenCpuTimelineEvent.deepCopy();
+      final goldenCopy = goldenUiTimelineEvent.deepCopy();
 
       // VSYNC
       //  Animator::BeginFrame
@@ -404,14 +400,14 @@ TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {
   return TraceEventWrapper(testTraceEvent(json), _testTimeReceived++);
 }
 
-const cpuThreadId = 1;
+const uiThreadId = 1;
 const gpuThreadId = 2;
 const unknownThreadId = 3;
 
 final frameStartEvent = testTraceEvent({
   'name': 'PipelineItem',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650806,
   'ph': 's',
@@ -431,66 +427,66 @@ final frameEndEvent = testTraceEvent({
   'args': {}
 });
 
-// Mark: CPU golden data.
+// Mark: UI golden data.
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final TimelineEvent vsyncEvent = testTimelineEvent(_vsyncJson)
   ..endTime = 118039652422
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent animatorBeginFrameEvent =
     testTimelineEvent(_animatorBeginFrameJson)
       ..endTime = 118039652421
-      ..type = TimelineEventType.cpu;
+      ..type = TimelineEventType.ui;
 
 final TimelineEvent frameworkWorkloadEvent =
     testTimelineEvent(_frameworkWorkloadJson)
       ..endTime = 118039652412
-      ..type = TimelineEventType.cpu;
+      ..type = TimelineEventType.ui;
 
 final TimelineEvent engineBeginFrameEvent =
     testTimelineEvent(_engineBeginFrameJson)
       ..endTime = 118039652411
-      ..type = TimelineEventType.cpu;
+      ..type = TimelineEventType.ui;
 
 final TimelineEvent frameEvent = testTimelineEvent(_frameJson)
   ..endTime = 118039652334
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent animateEvent = testTimelineEvent(_animateJson)
   ..endTime = 118039650871
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent layoutEvent = testTimelineEvent(_layoutJson)
   ..endTime = 118039651087
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent buildEvent = testTimelineEvent(_buildJson)
   ..endTime = 118039651017
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent compositingBitsEvent =
     testTimelineEvent(_compositingBitsJson)
       ..endTime = 118039651090
-      ..type = TimelineEventType.cpu;
+      ..type = TimelineEventType.ui;
 
 final TimelineEvent paintEvent = testTimelineEvent(_paintJson)
   ..endTime = 118039651165
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent compositingEvent = testTimelineEvent(_compositingJson)
   ..endTime = 118039651460
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent semanticsEvent = testTimelineEvent(_semanticsJson)
   ..endTime = 118039652210
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
 final TimelineEvent finalizeTreeEvent = testTimelineEvent(_finalizeTreeJson)
   ..endTime = 118039652308
-  ..type = TimelineEventType.cpu;
+  ..type = TimelineEventType.ui;
 
-final goldenCpuTimelineEvent = vsyncEvent
+final goldenUiTimelineEvent = vsyncEvent
   ..children = [
     animatorBeginFrameEvent
       ..parent = vsyncEvent
@@ -524,9 +520,9 @@ final goldenCpuTimelineEvent = vsyncEvent
   ]
   ..traceEvents.add(testTraceEventWrapper(_endVsyncJson));
 
-String goldenCpuString() => goldenCpuTimelineEvent.toString();
+String goldenUiString() => goldenUiTimelineEvent.toString();
 
-final List<TraceEvent> goldenCpuTraceEvents = [
+final List<TraceEvent> goldenUiTraceEvents = [
   testTraceEvent(_vsyncJson),
   testTraceEvent(_animatorBeginFrameJson),
   testTraceEvent(_frameworkWorkloadJson),
@@ -549,7 +545,7 @@ final List<TraceEvent> goldenCpuTraceEvents = [
 const Map<String, dynamic> _vsyncJson = {
   'name': 'VSYNC',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650802,
   'ph': 'B',
@@ -559,7 +555,7 @@ const Map<String, dynamic> _vsyncJson = {
 const Map<String, dynamic> _animatorBeginFrameJson = {
   'name': 'Animator::BeginFrame',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650803,
   'ph': 'B',
@@ -569,7 +565,7 @@ const Map<String, dynamic> _animatorBeginFrameJson = {
 const Map<String, dynamic> _frameworkWorkloadJson = {
   'name': 'Framework Workload',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650807,
   'ph': 'B',
@@ -579,7 +575,7 @@ const Map<String, dynamic> _frameworkWorkloadJson = {
 const Map<String, dynamic> _engineBeginFrameJson = {
   'name': 'Engine::BeginFrame',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650809,
   'ph': 'B',
@@ -589,7 +585,7 @@ const Map<String, dynamic> _engineBeginFrameJson = {
 const Map<String, dynamic> _animateJson = {
   'name': 'Animate',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650838,
   'ph': 'X',
@@ -600,7 +596,7 @@ const Map<String, dynamic> _animateJson = {
 const Map<String, dynamic> _buildJson = {
   'name': 'Build',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650984,
   'ph': 'X',
@@ -611,7 +607,7 @@ const Map<String, dynamic> _buildJson = {
 const Map<String, dynamic> _layoutJson = {
   'name': 'Layout',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650876,
   'ph': 'X',
@@ -622,7 +618,7 @@ const Map<String, dynamic> _layoutJson = {
 const Map<String, dynamic> _compositingBitsJson = {
   'name': 'Compositing bits',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039651088,
   'ph': 'X',
@@ -633,7 +629,7 @@ const Map<String, dynamic> _compositingBitsJson = {
 const Map<String, dynamic> _paintJson = {
   'name': 'Paint',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039651091,
   'ph': 'X',
@@ -644,7 +640,7 @@ const Map<String, dynamic> _paintJson = {
 const Map<String, dynamic> _compositingJson = {
   'name': 'Compositing',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039651166,
   'ph': 'X',
@@ -655,7 +651,7 @@ const Map<String, dynamic> _compositingJson = {
 const Map<String, dynamic> _semanticsJson = {
   'name': 'Semantics',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039651462,
   'ph': 'X',
@@ -666,7 +662,7 @@ const Map<String, dynamic> _semanticsJson = {
 const Map<String, dynamic> _finalizeTreeJson = {
   'name': 'Finalize tree',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039652219,
   'ph': 'X',
@@ -677,7 +673,7 @@ const Map<String, dynamic> _finalizeTreeJson = {
 const Map<String, dynamic> _frameJson = {
   'name': 'Frame',
   'cat': 'Dart',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039650834,
   'ph': 'X',
@@ -688,7 +684,7 @@ const Map<String, dynamic> _frameJson = {
 const Map<String, dynamic> _endVsyncJson = {
   'name': 'VSYNC',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039652422,
   'ph': 'E',
@@ -698,7 +694,7 @@ const Map<String, dynamic> _endVsyncJson = {
 const Map<String, dynamic> _endAnimatorBeginFrameJson = {
   'name': 'Animator::BeginFrame',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039652421,
   'ph': 'E',
@@ -708,7 +704,7 @@ const Map<String, dynamic> _endAnimatorBeginFrameJson = {
 const Map<String, dynamic> _endFrameworkWorkloadJson = {
   'name': 'Framework Workload',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039652412,
   'ph': 'E',
@@ -718,14 +714,14 @@ const Map<String, dynamic> _endFrameworkWorkloadJson = {
 const Map<String, dynamic> _endEngineBeginFrameJson = {
   'name': 'Engine::BeginFrame',
   'cat': 'Embedder',
-  'tid': cpuThreadId,
+  'tid': uiThreadId,
   'pid': 94955,
   'ts': 118039652411,
   'ph': 'E',
   'args': {}
 };
 
-// Mark: GPU golden data. This data is abbreviated in comparison to the CPU
+// Mark: GPU golden data. This data is abbreviated in comparison to the UI
 // golden data. We do not need both data sets to be complete for testing.
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.

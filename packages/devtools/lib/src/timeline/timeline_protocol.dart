@@ -42,7 +42,7 @@ StringBuffer debugHandledTraceEvents = StringBuffer()
 StringBuffer debugFrameTracking = StringBuffer();
 
 enum TimelineEventType {
-  cpu,
+  ui,
   gpu,
   unknown,
 }
@@ -59,11 +59,11 @@ const Duration traceEventEpsilon = Duration(microseconds: 1000);
 const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 class TimelineData {
-  TimelineData({this.cpuThreadId, this.gpuThreadId});
+  TimelineData({this.uiThreadId, this.gpuThreadId});
 
-  // TODO(kenzie): Remove the following members once cpu/gpu distinction changes
+  // TODO(kenzie): Remove the following members once ui/gpu distinction changes
   //  and frame ids are available in the engine.
-  final int cpuThreadId;
+  final int uiThreadId;
   final int gpuThreadId;
 
   final StreamController<TimelineFrame> _frameCompleteController =
@@ -81,10 +81,10 @@ class TimelineData {
   /// frames.
   final List<TimelineEvent> pendingEvents = [];
 
-  /// The current nodes in the tree structures of CPU and GPU duration events.
+  /// The current nodes in the tree structures of UI and GPU duration events.
   final List<TimelineEvent> currentEventNodes = [null, null];
 
-  /// The previously handled DurationEnd events for both CPU and GPU.
+  /// The previously handled DurationEnd events for both UI and GPU.
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
@@ -178,7 +178,7 @@ class TimelineData {
         _handleDurationCompleteEvent(eventWrapper);
         break;
       // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
-      // because CPU/GPU work will take place in DurationEvents.
+      // because UI/GPU work will take place in DurationEvents.
     }
 
     if (debugTimeline) {
@@ -409,8 +409,8 @@ class TimelineData {
   /// Add event to an available frame in [pendingFrames] if we can, or
   /// otherwise add it to [pendingEvents].
   void _maybeAddEvent(TimelineEvent event) {
-    if (!event.isCpuEventFlow && !event.isGpuEventFlow) {
-      // We do not care about events that are neither the main flow of CPU
+    if (!event.isUiEventFlow && !event.isGpuEventFlow) {
+      // We do not care about events that are neither the main flow of UI
       // events nor the main flow of GPU events.
       return;
     }
@@ -487,19 +487,19 @@ class TimelineData {
     final bool fitsStartBoundary = f.startTime - e.startTime - epsilon <= 0;
     final bool fitsEndBoundary = f.endTime - e.endTime + epsilon >= 0;
 
-    // The [gpuEventFlow] should always start after the [cpuEventFlow].
-    bool satisfiesCpuGpuOrder() {
-      if (e.isCpuEventFlow && f.gpuEventFlow != null) {
+    // The [gpuEventFlow] should always start after the [uiEventFlow].
+    bool satisfiesUiGpuOrder() {
+      if (e.isUiEventFlow && f.gpuEventFlow != null) {
         return e.startTime < f.gpuEventFlow.startTime;
-      } else if (e.isGpuEventFlow && f.cpuEventFlow != null) {
-        return e.startTime > f.cpuEventFlow.startTime;
+      } else if (e.isGpuEventFlow && f.uiEventFlow != null) {
+        return e.startTime > f.uiEventFlow.startTime;
       }
-      // We do not have enough information about the frame to compare CPU and
+      // We do not have enough information about the frame to compare UI and
       // GPU start times, so return true.
       return true;
     }
 
-    return fitsStartBoundary && fitsEndBoundary && satisfiesCpuGpuOrder();
+    return fitsStartBoundary && fitsEndBoundary && satisfiesUiGpuOrder();
   }
 
   List<TimelineFrame> _getAndSortWellFormedFrames() {
@@ -517,8 +517,8 @@ class TimelineData {
   }
 
   TimelineEventType _inferEventType(TraceEvent event) {
-    if (event.threadId == cpuThreadId) {
-      return TimelineEventType.cpu;
+    if (event.threadId == uiThreadId) {
+      return TimelineEventType.ui;
     } else if (event.threadId == gpuThreadId) {
       return TimelineEventType.gpu;
     } else {
@@ -536,17 +536,17 @@ class TimelineData {
         // either a) start outside of our frame start time, b) parent irrelevant
         // events, or c) parent multiple event flows - none of which we want.
         event.name != 'MessageLoop::RunExpiredTasks' &&
-        // Only process events from the CPU or GPU thread.
-        (event.isGpuEvent || event.isCpuEvent);
+        // Only process events from the UI or GPU thread.
+        (event.isGpuEvent || event.isUiEvent);
   }
 }
 
-// TODO(kenzie): simplify the API on this class. Reduce duplicated logic for CPU
+// TODO(kenzie): simplify the API on this class. Reduce duplicated logic for UI
 // and GPU values.
 /// Data describing a single frame.
 ///
 /// Each TimelineFrame should have 2 distinct pieces of data:
-/// * [cpuEventFlow] : flow of events showing the CPU work for the frame.
+/// * [uiEventFlow] : flow of events showing the UI work for the frame.
 /// * [gpuEventFlow] : flow of events showing the GPU work for the frame.
 class TimelineFrame {
   TimelineFrame(this.id);
@@ -568,11 +568,11 @@ class TimelineFrame {
     _addedToTimeline = v;
   }
 
-  /// Event flows for the CPU and GPU work for the frame.
+  /// Event flows for the UI and GPU work for the frame.
   final List<TimelineEvent> eventFlows = List.generate(2, (_) => null);
 
-  /// Flow of events describing the CPU work for the frame.
-  TimelineEvent get cpuEventFlow => eventFlows[TimelineEventType.cpu.index];
+  /// Flow of events describing the UI work for the frame.
+  TimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
 
   /// Flow of events describing the GPU work for the frame.
   TimelineEvent get gpuEventFlow => eventFlows[TimelineEventType.gpu.index];
@@ -582,7 +582,7 @@ class TimelineFrame {
   /// A frame is ready once it has both required event flows as well as
   /// [startTime] and [endTime].
   bool get isReadyForTimeline {
-    return cpuEventFlow != null &&
+    return uiEventFlow != null &&
         gpuEventFlow != null &&
         _startTime != null &&
         _endTime != null;
@@ -590,11 +590,11 @@ class TimelineFrame {
 
   /// Frame start time in micros.
   ///
-  /// We take the min of [cpuStartTime] and [_startTime] because we use an
+  /// We take the min of [uiStartTime] and [_startTime] because we use an
   /// epsilon when determining if an event fits within frame boundaries.
-  /// Therefore, there is a chance that [cpuStartTime] could be less than
+  /// Therefore, there is a chance that [uiStartTime] could be less than
   /// [_startTime].
-  int get startTime => nullSafeMin(_startTime, cpuStartTime);
+  int get startTime => nullSafeMin(_startTime, uiStartTime);
   int _startTime;
   set startTime(int time) => _startTime = nullSafeMin(_startTime, time);
 
@@ -613,15 +613,14 @@ class TimelineFrame {
   int get duration =>
       endTime != null && startTime != null ? endTime - startTime : null;
 
-  // Timing info for CPU portion of the frame.
-  int get cpuStartTime => cpuEventFlow?.startTime;
+  // Timing info for UI portion of the frame.
+  int get uiStartTime => uiEventFlow?.startTime;
 
-  int get cpuEndTime =>
-      cpuStartTime != null ? cpuStartTime + cpuDuration : null;
+  int get uiEndTime => uiStartTime != null ? uiStartTime + uiDuration : null;
 
-  int get cpuDuration => cpuEventFlow?.duration;
+  int get uiDuration => uiEventFlow?.duration;
 
-  double get cpuDurationMs => cpuDuration != null ? cpuDuration / 1000 : null;
+  double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
   // Timing info for GPU portion of the frame.
   int get gpuStartTime => gpuEventFlow?.startTime;
@@ -633,14 +632,14 @@ class TimelineFrame {
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
-  bool get isCpuSlow => cpuDurationMs > targetMaxDuration / 2;
+  bool get isUiSlow => uiDurationMs > targetMaxDuration / 2;
 
   bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
 
   @override
   String toString() {
     return 'Frame $id - [start: $startTime], [end: $endTime],'
-        'cpu: [start $cpuStartTime end $cpuEndTime], gpu: [start: $gpuStartTime'
+        'ui: [start $uiStartTime end $uiEndTime], gpu: [start: $gpuStartTime'
         ' end $gpuEndTime]';
   }
 }
@@ -680,11 +679,11 @@ class TimelineEvent {
   /// Event duration in micros.
   int get duration => (endTime != null) ? endTime - startTime : null;
 
-  bool get isCpuEvent => type == TimelineEventType.cpu;
+  bool get isUiEvent => type == TimelineEventType.ui;
 
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
-  bool get isCpuEventFlow => containsChildWithCondition(
+  bool get isUiEventFlow => containsChildWithCondition(
       (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
 
   bool get isGpuEventFlow => containsChildWithCondition(
@@ -971,7 +970,7 @@ class TraceEvent {
   TimelineEventType get type {
     if (_type == null) {
       if (args['type'] == 'ui') {
-        _type = TimelineEventType.cpu;
+        _type = TimelineEventType.ui;
       } else if (args['type'] == 'gpu') {
         _type = TimelineEventType.gpu;
       } else {
@@ -983,7 +982,7 @@ class TraceEvent {
 
   set type(TimelineEventType t) => _type = t;
 
-  bool get isCpuEvent => type == TimelineEventType.cpu;
+  bool get isUiEvent => type == TimelineEventType.ui;
 
   bool get isGpuEvent => type == TimelineEventType.gpu;
 

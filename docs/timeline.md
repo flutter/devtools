@@ -20,16 +20,16 @@ performance unless your application is run in profile mode.
 
 This chart is populated with individual frames as they are rendered in your application. Each bar in the chart
 represents a frame. The bars are color-coded to highlight the different portions of work that occur when rendering a
-Flutter frame: work from the CPU thread and work from the GPU thread.
+Flutter frame: work from the UI thread and work from the GPU thread.
 
 <img src="images/timeline_frame_rendering_chart.png" width="800" />
 
 Clicking a bar will display additional details about the frame.
 
-### CPU
+### UI
 
-The CPU thread (or UI thread) executes Dart code in the Dart VM. This includes code from your application as well as the
-Flutter framework. When your app creates and displays a scene, the CPU thread creates a layer tree, a lightweight object
+The UI thread executes Dart code in the Dart VM. This includes code from your application as well as the
+Flutter framework. When your app creates and displays a scene, the UI thread creates a layer tree, a lightweight object
 containing device-agnostic painting commands, and sends the layer tree to the GPU thread to be rendered on the device.
 Do **not** block this thread.
 
@@ -51,11 +51,11 @@ More information on profiling the GPU thread can be found at
 
 ### Jank
 
-The frame rendering chart shows CPU and GPU jank in shades of red. We consider a portion of the frame to be janky when
+The frame rendering chart shows UI and GPU jank in shades of red. We consider a portion of the frame to be janky when
 it takes more than 8 ms to complete.
 
 To achieve a frame rendering rate of 60 FPS (frames per second), each frame must render in ~16 ms or less. Since there
-are two portions of work for each frame (CPU and GPU), each portion should complete in 8 ms or less. When this target is
+are two portions of work for each frame (UI and GPU), each portion should complete in 8 ms or less. When this target is
 missed, you may experience UI jank or dropped frames.
 
 See [Flutter performance profiling](https://flutter.dev/docs/testing/ui-performance) for more detailed information on
@@ -64,7 +64,7 @@ how to analyze your app's performance.
 ## Flame Chart
 
 The flame chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on and so
-forth. The CPU and GPU events are separate event flows, but they share a common timeline (displayed at the top of the
+forth. The UI and GPU events are separate event flows, but they share a common timeline (displayed at the top of the
 flame chart). This timeline is strictly for the given frame. It does not reflect the clock shared by all frames.
 
 <img src="images/timeline_flame_chart.png" width="800" />
