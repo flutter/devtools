@@ -672,9 +672,9 @@ class TimelineEvent {
 
   String get name => traceEvents.first.event.name;
 
-  Map<String, dynamic> get beginTraceEventJson => traceEvents.first.event.json;
+  Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
-  Map<String, dynamic> get endTraceEventJson => traceEvents.last.event.json;
+  Map<String, dynamic> get endTraceEventJson => traceEvents.last.json;
 
   /// Event duration in micros.
   int get duration => (endTime != null) ? endTime - startTime : null;
@@ -863,9 +863,9 @@ class TimelineEvent {
       for (TimelineEvent child in children) {
         child.writeTraceToBuffer(buf);
       }
-      for (var json in traceEvents.where((trace) =>
-          !collectionEquals(trace.event.json, beginTraceEventJson))) {
-        buf.writeln(json.toString());
+      for (var traceEvent in traceEvents.where((event) =>
+          !collectionEquals(event.json, beginTraceEventJson))) {
+        buf.writeln(traceEvent.json.toString());
       }
     }
   }
@@ -997,8 +997,12 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
   TraceEventWrapper(this.event, this.timeReceived)
       : id = _traceEventWrapperId++;
   final TraceEvent event;
+
   final num timeReceived;
+
   final int id;
+
+  Map<String, dynamic> get json => event.json;
 
   bool processed = false;
 
