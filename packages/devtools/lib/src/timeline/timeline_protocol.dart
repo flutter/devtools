@@ -863,8 +863,8 @@ class TimelineEvent {
       for (TimelineEvent child in children) {
         child.writeTraceToBuffer(buf);
       }
-      for (var traceEvent in traceEvents.where((event) =>
-          !collectionEquals(event.json, beginTraceEventJson))) {
+      for (var traceEvent in traceEvents.where(
+          (event) => !collectionEquals(event.json, beginTraceEventJson))) {
         buf.writeln(traceEvent.json.toString());
       }
     }
