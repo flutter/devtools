@@ -11,8 +11,6 @@ import '../ui/theme.dart';
 
 import 'memory_chart.dart';
 
-import 'dart:developer';
-
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
 
@@ -80,7 +78,7 @@ class MemoryPlotly {
                 family: fontFamily,
                 color: colorToCss(defaultForeground),
               ),
-              orientation: "v",
+              orientation: 'v',
               x: 1.03,
               xanchor: 'left',
               y: 1.1,
@@ -126,16 +124,16 @@ class MemoryPlotly {
         shapes: [
           // Background of event timeline subplot
           Shape(
-            fillcolor: "#ccc",
+            fillcolor: '#ccc',
             line: Line(
               width: 0,
             ),
             opacity: .5,
-            type: "rect",
-            xref: "paper",
+            type: 'rect',
+            xref: 'paper',
             x0: 0,
             x1: 1,
-            yref: "y2",
+            yref: 'y2',
             y0: 0,
             y1: 2,
             layer: 'below',
@@ -281,7 +279,7 @@ class MemoryPlotly {
   void _doubleClick(DataEvent data) => _memoryChart.resume();
 
   void plotMemory([createEventTimeline = false]) {
-    List<Data> memoryTraces = createMemoryTraces();
+    final List<Data> memoryTraces = createMemoryTraces();
 
     if (createEventTimeline) {
       eventTimeline = EventTimeline(_domName, _memoryChart.element);
@@ -305,10 +303,10 @@ class MemoryPlotly {
   bool get hasEventTimeline => eventTimeline != null;
 
   void createEventTimeline() {
-    List<Data> memoryTraces = createMemoryTraces();
+    final List<Data> memoryTraces = createMemoryTraces();
 
     eventTimeline = EventTimeline(_domName, _memoryChart.element);
-    List<Data> eventTraces = eventTimeline.getEventTimelineTraces();
+    final List<Data> eventTraces = eventTimeline.getEventTimelineTraces();
 
     eventTimeline.computeTraceIndexes(memoryTraces);
 
@@ -386,8 +384,8 @@ class MemoryPlotly {
     if (!hasEventTimeline) createEventTimeline();
 
     final List data = getProperty(_memoryChart.element, 'data');
-    var capacityTrace = data[MEMORY_CAPACITY_TRACE];
-    var timestamp = capacityTrace.x[capacityTrace.x.length - 1];
+    final Data capacityTrace = data[MEMORY_CAPACITY_TRACE];
+    final int timestamp = capacityTrace.x[capacityTrace.x.length - 1];
 
     eventTimeline.plotSnapshot(timestamp);
   }
@@ -396,22 +394,24 @@ class MemoryPlotly {
     if (!hasEventTimeline) createEventTimeline();
 
     final List data = getProperty(_memoryChart.element, 'data');
-    var capacityTrace = data[MEMORY_CAPACITY_TRACE];
-    var timestamp = capacityTrace.x[capacityTrace.x.length - 1];
+    final Data capacityTrace = data[MEMORY_CAPACITY_TRACE];
+    final int timestamp = capacityTrace.x[capacityTrace.x.length - 1];
 
     eventTimeline.plotReset(timestamp);
   }
 }
 
 class EventTimeline {
-  dynamic _chart;
   EventTimeline(this._domName, this._chart);
+
+  final String _domName;
+  dynamic _chart;
 
   // Trace index within the traces passed to addEventTimelineTo
   int resetTraceIndex;
   int snapshotTraceIndex;
   List<Data> addEventTimelineTo(List<Data> traces) {
-    List<Data> eventTraces = getEventTimelineTraces();
+    final List<Data> eventTraces = getEventTimelineTraces();
 
     resetTraceIndex = traces.length;
     traces.add(eventTraces[RESET_TRACE_INDEX]); // Reset trace.
@@ -427,15 +427,13 @@ class EventTimeline {
     snapshotTraceIndex = resetTraceIndex + 1;
   }
 
-  final String _domName;
-
   // Indexes for traces returned from getEventTimelineTraces
   static const int RESET_TRACE_INDEX = 0;
   static const int SNAPSHOT_TRACE_INDEX = 1;
   List<Data> getEventTimelineTraces() {
     // Create traces for the event timeline subplot.
 
-    Data resetTrace = Data(
+    final Data resetTrace = Data(
       x: [Null], // Trace legend entry appears w/o data.
       y: [Null], // Trace legend entry appears w/o data.
       name: 'Reset',
@@ -449,13 +447,13 @@ class EventTimeline {
           width: 2,
         ),
         size: 5,
-        symbol: "hexagon2-open-dot",
+        symbol: 'hexagon2-open-dot',
       ),
       hoverinfo: 'name+x',
       showlegend: true,
     );
 
-    Data snapshotTrace = Data(
+    final Data snapshotTrace = Data(
       x: [Null], // Trace legend entry appears w/o data.
       y: [Null], // Trace legend entry appears w/o data.
       name: 'Snapshot',
@@ -469,7 +467,7 @@ class EventTimeline {
           width: 2,
         ),
         size: 10,
-        symbol: "hexagon2-open",
+        symbol: 'hexagon2-open',
       ),
       hoverinfo: 'name+x',
       showlegend: true,
@@ -495,21 +493,9 @@ class EventTimeline {
     final Layout layout = getProperty(_chart, 'layout');
     final List<Shape> shapes = layout.shapes;
 
-    int nextShape = shapes.length;
+    final int nextShape = shapes.length;
 
-    Shape lastShape = shapes[nextShape - 1];
-
-    bool isPaperShape = false;
-    bool isSnapshotShape = false;
-    bool isResetShape = false;
-    if (lastShape.xref == 'paper') {
-      // First shape that colors the entire event timeline chart.
-      isPaperShape = true;
-    } else if (lastShape.yref == 'y2') {
-      // We're a snapshot or reset.
-    }
-
-    var jsShape = createEventShape(
+    final jsShape = createEventShape(
         '$_EVENT_MEMORY: $lastEventType > $eventType',
         nextShape,
         lastEventTime,
