@@ -79,7 +79,7 @@ List<CoreElement> getServiceExtensionButtons() {
 }
 
 StatusItem createLinkStatusItem(
-  String text, {
+  CoreElement textElement, {
   @required String href,
   @required String title,
 }) {
@@ -94,7 +94,7 @@ StatusItem createLinkStatusItem(
     ..verticalAlign = 'text-bottom'
     ..marginBottom = '0';
   final element = CoreElement('a')
-    ..add(<CoreElement>[icon, span(text: text)])
+    ..add(<CoreElement>[icon, textElement])
     ..setAttribute('href', href)
     ..setAttribute('target', '_blank')
     ..element.title = title;

@@ -320,7 +320,9 @@ abstract class Screen {
     this.iconClass,
     this.disabled = false,
   }) : helpStatus = createLinkStatusItem(
-          '$name Docs',
+          span()
+            ..add(span(text: '$name', c: 'optional-700'))
+            ..add(span(text: ' Docs')),
           href: 'https://flutter.github.io/devtools/$id',
           title: 'Documentation on using the $name page',
         );
