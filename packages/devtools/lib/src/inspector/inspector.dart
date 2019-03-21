@@ -75,7 +75,7 @@ class InspectorScreen extends Screen {
 
     screenDiv.add(<CoreElement>[
       buttonSection,
-      inspectorContainer = div(c: 'inspector-container'),
+      inspectorContainer = div(c: 'inspector-container bidirectional'),
     ]);
 
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);

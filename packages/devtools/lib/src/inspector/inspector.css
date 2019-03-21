@@ -15,22 +15,11 @@
 }
 
 .inspector-container {
-    height: 100%;
-    width: 100%;
-    display: flex;
     overflow: hidden;
     margin-top: 10px;
     align-items: center;
     flex: 1 1 auto;
-    flex-direction: column;
     box-sizing: border-box;
-}
-
-/* Minimum aspect ratio */
-@media (min-aspect-ratio: 1/1) {
-    .inspector-container {
-        flex-direction: row;
-    }
 }
 
 .inspector-no-wrap {

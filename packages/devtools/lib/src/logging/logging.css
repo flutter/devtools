@@ -9,6 +9,7 @@ td.log-label-column {
 
 .log-area {
     overflow-y: hidden;
+    flex: 1 1 auto;
 }
 
 .log-details {

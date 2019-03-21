@@ -75,28 +75,24 @@ class LoggingScreen extends Screen {
                 ..click(_clear),
             ])
         ]),
-      div(c: 'section log-area')
+      div(c: 'section log-area bidirectional')
         ..flex()
         ..add(<CoreElement>[
           _createTableView()
             ..layoutHorizontal()
             ..clazz('section')
+            ..clazz('full-size')
             ..flex(),
           logDetailsUI = LogDetailsUI(),
-        ])
-        ..layoutHorizontal(),
+        ]),
     ]);
 
-    // Needed otherwise the splitter is broken if the details view wants a
-    // larger width than expected. TODO(jacobr): find a cleaner solution.
-    logDetailsUI.element.style.width = '0';
     // configure the table / details splitter
-    split.flexSplit(
+    split.flexSplitBidirectional(
       [loggingTable.element, logDetailsUI],
       gutterSize: defaultSplitterWidth,
-      sizes: [60, 40],
-      horizontal: true,
-      minSize: [200, 60],
+      horizontalSizes: [60, 40],
+      verticalSizes: [50, 50],
     );
 
     loggingTable.onSelect.listen((LogData selection) {
@@ -619,7 +615,7 @@ String getCssClassForEventKind(LogData item) {
 }
 
 class LogDetailsUI extends CoreElement {
-  LogDetailsUI() : super('div') {
+  LogDetailsUI() : super('div', classes: 'full-size') {
     layoutVertical();
     flex();
 
