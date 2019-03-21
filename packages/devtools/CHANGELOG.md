@@ -7,6 +7,9 @@
 
 ## 0.0.1
 - initial (pre-release) release
+
+<!--
+List of possible sections to use for areas that have changed. 
 ### Documentation
 ### Debugger
 ### Inspector
@@ -14,3 +17,4 @@
 ### Memory
 ### Table
 ### Timeline
+-->

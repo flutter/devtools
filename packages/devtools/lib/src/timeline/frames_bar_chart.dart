@@ -22,6 +22,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     element.style
       ..alignItems = 'flex-end'
       ..height = '${chartHeight}px'
+      ..width = '100%'
       ..paddingTop = '${topPadding}px';
 
     frameUIgraph = PlotlyDivGraph(this, timelineController);
@@ -40,7 +41,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     });
   }
 
-  static const int chartHeight = 160;
+  static const int chartHeight = 170;
   static const int maxFrames = 500;
   static const topPadding = 2;
 

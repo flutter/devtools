@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:js/js_util.dart';
+
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
@@ -12,35 +14,144 @@ import 'memory_chart.dart';
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
 
+  static const String fontFamily = 'sans-serif';
+
   final String _domName;
   final MemoryChart _memoryChart;
 
-  Layout getMemoryLayout(chartTitle) {
-    return Layout(
+  // We're going to dynamically add the Event timeline chart to our memory
+  // profiler chart.
+  EventTimeline eventTimeline;
+
+  AxisLayout getXAxisLayout([int startTime = -1, int endTime = -1]) {
+    return AxisLayout(
+      type: 'date',
+      tickformat: '%-I:%M:%S %p',
+      hoverformat: '%H:%M:%S.%L %p',
+      titlefont: Font(
+        family: fontFamily,
+        color: colorToCss(defaultForeground),
+      ),
+      tickfont: Font(
+        family: fontFamily,
+        color: colorToCss(defaultForeground),
+      ),
+      showgrid: true,
+      gridcolor: colorToCss(defaultForeground.withAlpha(50)),
+      gridwidth: 1,
+      range: startTime == -1 ? [] : [startTime, endTime],
+      rangeslider: startTime == -1
+          ? RangeSlider()
+          : RangeSlider(
+              autorange: true,
+            ),
+    );
+  }
+
+  Layout getMemoryLayout(String chartTitle, [bool addEventTimeline = false]) {
+    Layout layout;
+
+    AxisLayout getYAxis(List<num> range) {
+      return AxisLayout(
+        domain: range,
+        title: Title(
+          text: 'Heap',
+        ),
+        titlefont: Font(
+          family: fontFamily,
+          color: colorToCss(defaultForeground),
+        ),
+        fixedrange: true,
+        tickfont: Font(
+          family: fontFamily,
+          color: colorToCss(defaultForeground),
+        ),
+        showgrid: false,
+        zeroline: false,
+      );
+    }
+
+    Legend getLegend([bool events = false]) {
+      return events
+          ? Legend(
+              font: Font(
+                family: fontFamily,
+                color: colorToCss(defaultForeground),
+              ),
+              orientation: 'v',
+              x: 1.03,
+              xanchor: 'left',
+              y: 1.1,
+            )
+          : Legend(
+              font: Font(
+                family: fontFamily,
+                color: colorToCss(defaultForeground),
+              ),
+            );
+    }
+
+    final Margin margins = Margin(l: 80, r: 5, b: 5, t: 5, pad: 5);
+
+    if (addEventTimeline) {
+      layout = Layout(
         plot_bgcolor: colorToCss(chartBackground),
         paper_bgcolor: colorToCss(chartBackground),
         title: chartTitle,
-        legend: Legend(font: Font(color: colorToCss(defaultForeground))),
-        xaxis: AxisLayout(
-          type: 'date',
-          tickformat: '%-I:%M:%S %p',
-          hoverformat: '%M:%S.%L %p',
-          titlefont: Font(color: colorToCss(defaultForeground)),
-          tickfont: Font(
-            color: colorToCss(defaultForeground),
+        xaxis: getXAxisLayout(),
+        yaxis: getYAxis([0, 0.90]),
+        yaxis2: AxisLayout(
+          domain: [.90, 1],
+          anchor: 'y',
+          side: 'right',
+          showgrid: false,
+          zeroline: false,
+          showline: false,
+          ticks: '',
+          showticklabels: false,
+          range: [.50, 1.50],
+          type: 'linear',
+          title: Title(
+            text: 'Events',
+            font: Font(
+              family: fontFamily,
+              size: 10,
+            ),
           ),
-          range: [],
-          rangeslider: RangeSlider(),
         ),
-        yaxis: AxisLayout(
-          title: 'Heap',
-          titlefont: Font(color: colorToCss(defaultForeground)),
-          fixedrange: true,
-          tickfont: Font(
-            color: colorToCss(defaultForeground),
+        legend: getLegend(true),
+        margin: margins,
+        shapes: [
+          // Background of event timeline subplot
+          Shape(
+            fillcolor: '#ccc',
+            line: Line(
+              width: 0,
+            ),
+            opacity: .5,
+            type: 'rect',
+            xref: 'paper',
+            x0: 0,
+            x1: 1,
+            yref: 'y2',
+            y0: 0,
+            y1: 2,
+            layer: 'below',
           ),
-        ),
-        margin: Margin(l: 80, r: 5, b: 5, t: 5, pad: 5));
+        ],
+      );
+    } else {
+      layout = Layout(
+          plot_bgcolor: colorToCss(chartBackground),
+          paper_bgcolor: colorToCss(chartBackground),
+          title: chartTitle,
+          legend: getLegend(),
+          xaxis: getXAxisLayout(),
+          yaxis: getYAxis([]),
+          margin: margins);
+    }
+
+    return layout;
   }
 
   static const int MEMORY_GC_TRACE = 0;
@@ -105,8 +216,9 @@ class MemoryPlotly {
 
     if (marker == null) {
       return Data(
-        x: [],
-        y: [],
+        // Null is needed so the trace legend entry appears w/o data.
+        x: [Null],
+        y: [Null],
         text: [],
         line: line,
         type: 'scatter',
@@ -117,8 +229,9 @@ class MemoryPlotly {
       );
     } else {
       return Data(
-        x: [],
-        y: [],
+        // Null is needed so the trace legend entry appears w/o data.
+        x: [Null],
+        y: [Null],
         text: [],
         marker: marker,
         type: 'scatter',
@@ -167,11 +280,18 @@ class MemoryPlotly {
   // Resetting to live view, it's an autoscale back to full view.
   void _doubleClick(DataEvent data) => _memoryChart.resume();
 
-  void plotMemory() {
+  void plotMemory([createEventTimeline = false]) {
+    final List<Data> memoryTraces = createMemoryTraces();
+
+    if (createEventTimeline) {
+      eventTimeline = EventTimeline(_domName, _memoryChart.element);
+      eventTimeline.addEventTimelineTo(memoryTraces);
+    }
+
     Plotly.newPlot(
       _domName,
-      createMemoryTraces(),
-      getMemoryLayout(''),
+      memoryTraces,
+      getMemoryLayout('', createEventTimeline),
       Configuration(
         responsive: true,
         displaylogo: false,
@@ -180,6 +300,24 @@ class MemoryPlotly {
     );
 
     doubleClick(_domName, _doubleClick);
+  }
+
+  bool get hasEventTimeline => eventTimeline != null;
+
+  void createEventTimeline() {
+    final List<Data> memoryTraces = createMemoryTraces();
+
+    eventTimeline = EventTimeline(_domName, _memoryChart.element);
+    final List<Data> eventTraces = eventTimeline.getEventTimelineTraces();
+
+    eventTimeline.computeTraceIndexes(memoryTraces);
+
+    Plotly.relayout(_domName, getMemoryLayout('', true));
+
+    Plotly.addTraces(_domName, eventTraces, [
+      eventTimeline.resetTraceIndex,
+      eventTimeline.snapshotTraceIndex,
+    ]);
   }
 
   void plotMarkersDataList(List<int> timestamps, List<num> gces) {
@@ -233,18 +371,7 @@ class MemoryPlotly {
       _domName,
       [Data()],
       Layout(
-        xaxis: AxisLayout(
-          tickfont: Font(
-            color: colorToCss(defaultForeground),
-          ),
-          range: [startTime, endTime],
-          rangeslider: RangeSlider(
-            autorange: true,
-          ),
-          type: 'date',
-          tickformat: '%-I:%M:%S %p',
-          hoverformat: '%-I:%M:%S.%L %p',
-        ),
+        xaxis: getXAxisLayout(startTime, endTime),
       ),
     );
   }
@@ -253,5 +380,147 @@ class MemoryPlotly {
 
   void setLiveUpdate({bool live}) {
     liveUpdate = live;
+  }
+
+  void plotSnapshot() {
+    if (!hasEventTimeline) createEventTimeline();
+
+    final List data = getProperty(_memoryChart.element, 'data');
+    final Data capacityTrace = data[MEMORY_CAPACITY_TRACE];
+    final int timestamp = capacityTrace.x[capacityTrace.x.length - 1];
+
+    eventTimeline.plotSnapshot(timestamp);
+  }
+
+  void plotReset() {
+    if (!hasEventTimeline) createEventTimeline();
+
+    final List data = getProperty(_memoryChart.element, 'data');
+    final Data capacityTrace = data[MEMORY_CAPACITY_TRACE];
+    final int timestamp = capacityTrace.x[capacityTrace.x.length - 1];
+
+    eventTimeline.plotReset(timestamp);
+  }
+}
+
+/// Create an Event Timeline subplot, notice it is associated with y2.  This
+/// requires that the layout these traces exist in the 'yaxis2' area.  For an
+/// example, look at MemoryPloty's getMemoryLayout method it creates a yaxis2
+/// positioned above yaxis.
+class EventTimeline {
+  EventTimeline(this._domName, this._chart);
+
+  final String _domName;
+  dynamic _chart;
+
+  // Trace index within the traces passed to addEventTimelineTo
+  int resetTraceIndex;
+  int snapshotTraceIndex;
+  List<Data> addEventTimelineTo(List<Data> traces) {
+    final List<Data> eventTraces = getEventTimelineTraces();
+
+    resetTraceIndex = traces.length;
+    traces.add(eventTraces[RESET_TRACE_INDEX]); // Reset trace.
+
+    snapshotTraceIndex = traces.length;
+    traces.add(eventTraces[SNAPSHOT_TRACE_INDEX]); // Snapshot trace.
+
+    return traces;
+  }
+
+  void computeTraceIndexes(List<Data> traces) {
+    resetTraceIndex = traces.length;
+    snapshotTraceIndex = resetTraceIndex + 1;
+  }
+
+  // Indexes for traces returned from getEventTimelineTraces
+  static const int RESET_TRACE_INDEX = 0;
+  static const int SNAPSHOT_TRACE_INDEX = 1;
+  List<Data> getEventTimelineTraces() {
+    // Create traces for the event timeline subplot.
+
+    final Data resetTrace = Data(
+      // Null is needed so the trace legend entry appears w/o data.
+      x: [Null],
+      y: [Null],
+      name: 'Reset',
+      type: 'scatter',
+      mode: 'markers',
+      yaxis: 'y2',
+      marker: Marker(
+        color: 'blue',
+        line: Line(
+          color: 'lightblue',
+          width: 2,
+        ),
+        size: 5,
+        symbol: 'hexagon2-open-dot',
+      ),
+      hoverinfo: 'name+x',
+      showlegend: true,
+    );
+
+    final Data snapshotTrace = Data(
+      // Null is needed so the trace legend entry appears w/o data.
+      x: [Null],
+      y: [Null],
+      name: 'Snapshot',
+      type: 'scatter',
+      mode: 'markers',
+      yaxis: 'y2',
+      marker: Marker(
+        color: 'blue',
+        line: Line(
+          color: 'lightblue',
+          width: 2,
+        ),
+        size: 10,
+        symbol: 'hexagon2-open',
+      ),
+      hoverinfo: 'name+x',
+      showlegend: true,
+    );
+
+    return [resetTrace, snapshotTrace];
+  }
+
+  static const String _EVENT_MEMORY = 'mem';
+  static const String _SNAPSHOT_EVENT = 's';
+  static const String _RESET_EVENT = 'r';
+
+  String lastEventType = '';
+  int lastEventTime = -1;
+
+  void displayDuration(int time, String eventType) {
+    if (eventType == _SNAPSHOT_EVENT) {
+      lastEventType = eventType;
+      lastEventTime = time;
+      return;
+    }
+
+    final Layout layout = getProperty(_chart, 'layout');
+    final List<Shape> shapes = layout.shapes;
+
+    final int nextShape = shapes.length;
+
+    final jsShape = createEventShape(
+        '$_EVENT_MEMORY: $lastEventType > $eventType',
+        nextShape,
+        lastEventTime,
+        time);
+    Plotly.relayout(_domName, jsShape);
+
+    lastEventTime = time;
+    lastEventType = eventType;
+  }
+
+  void plotSnapshot(int timestamp) {
+    extendTraces1(_domName, [timestamp], [1], [snapshotTraceIndex]);
+    displayDuration(timestamp, _SNAPSHOT_EVENT);
+  }
+
+  void plotReset(int timestamp) {
+    extendTraces1(_domName, [timestamp], [1], [resetTraceIndex]);
+    displayDuration(timestamp, _RESET_EVENT);
   }
 }

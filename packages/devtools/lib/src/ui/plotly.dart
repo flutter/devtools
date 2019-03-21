@@ -72,7 +72,20 @@ external void extendTraces4(
 );
 
 @JS()
+external Shape createEventShape(
+  devToolEvent,
+  shapeIndex,
+  lastEventTime,
+  time,
+);
+
+@JS()
 class Plotly {
+  external static void addTraces(
+    String domName,
+    List<Data> traces,
+    List<int> traceindex,
+  );
   external static void newPlot(
     String domName,
     List<Data> traces, [
@@ -84,19 +97,23 @@ class Plotly {
     TraceData traceData,
     List<int> traceindex,
   );
-  external static void update(
+  external static void relayout(
     String domName,
-    List<Data> data,
-    Layout layout, [
-    List<int> traceindex,
-  ]);
-
+//    Shape shape,
+    dynamic layout,
+  );
   external static void restyle(
     String domName,
     String style,
     List update,
     List<int> traces,
   );
+  external static void update(
+    String domName,
+    List<Data> data,
+    Layout layout, [
+    List<int> traceindex,
+  ]);
 }
 
 @JS('Plotly.Fx.hover')
@@ -134,6 +151,7 @@ class Data {
     String legendgroup,
     List<int> width,
     String visible,
+    String yaxis,
   });
 
   external List get x;
@@ -152,7 +170,9 @@ class Data {
   external String get legendgroup;
   external List<int> get width;
   external String get visible;
+  external String get yaxis;
 
+  // Setters.
   external set visible(String value);
   external set hoverinfo(String value);
 }
@@ -209,12 +229,28 @@ class Transform {
 
 @JS()
 @anonymous
+class Title {
+  external factory Title({
+    String text,
+    Font font,
+    int size,
+  });
+
+  external String get text;
+  external Font get font;
+  external int get size;
+}
+
+@JS()
+@anonymous
 class Layout {
   external factory Layout({
     String title,
     bool showlegend,
     AxisLayout xaxis,
     AxisLayout yaxis,
+    AxisLayout yaxis2,
+    AxisLayout yaxis3,
     bool autosize,
     Margin margin,
     String hovermode,
@@ -236,6 +272,8 @@ class Layout {
   external bool get showlegend;
   external AxisLayout get xaxis;
   external AxisLayout get yaxis;
+  external AxisLayout get yaxis2;
+  external AxisLayout get yaxis3;
   external bool get autosize;
   external Margin get margin;
   external String get hovermode;
@@ -258,22 +296,28 @@ class Shape {
   external factory Shape({
     String type,
     String xref,
+    String yref,
     String layer,
     int x0,
     int y0,
     int x1,
     int y1,
     Line line,
+    String fillcolor,
+    num opacity,
   });
 
   external String get type;
   external String get xref;
+  external String get yref;
   external String get layer;
   external int get x0;
   external int get y0;
   external int get x1;
   external int get y1;
   external Line get line;
+  external String get fillcolor;
+  external num get opacity;
 }
 
 @JS()
@@ -284,12 +328,14 @@ class Legend {
     num x,
     num y,
     Font font,
+    String xanchor,
   });
 
   external String get orientation;
   external num get x;
   external num get y;
   external Font get font;
+  external String get xanchor;
 }
 
 @JS()
@@ -326,7 +372,7 @@ class AxisLayout {
   external factory AxisLayout({
     String tickformat,
     String ticks,
-    String title,
+    Title title,
     bool fixedrange,
     String type,
     bool autorange,
@@ -345,11 +391,19 @@ class AxisLayout {
     String showticksuffix,
     String hoverformat,
     Font titlefont,
+    List<num> domain,
+    bool zeroline,
+    String anchor,
+    String side,
+    bool showline,
+    Legend legend,
+    String gridcolor,
+    int gridwidth,
   });
 
   external String get tickformat;
   external String get ticks;
-  external String get title;
+  external Title get title;
   external bool get fixedrange;
   external String get type;
   external bool get autorange;
@@ -369,6 +423,14 @@ class AxisLayout {
   external String get hoverformat;
   external String get hockerformat;
   external Font get titlefont;
+  external List<num> get domain;
+  external bool get zeroline;
+  external String get anchor;
+  external String get side;
+  external bool get showline;
+  external Legend get legend;
+  external String get gridcolor;
+  external int get gridwidth;
 }
 
 @JS()

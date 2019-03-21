@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
+
 import '../timeline/frames_bar_chart.dart';
 import '../ui/elements.dart';
 
@@ -17,7 +19,8 @@ class MemoryChart extends CoreElement {
     element.id = _memoryGraph;
     element.style
       ..boxSizing = 'content-box' // border-box causes right/left border cut.
-      ..height = '${FramesBarChart.chartHeight}px';
+      ..height = '${FramesBarChart.chartHeight}px'
+      ..width = '100%';
 
     _memoryController.onMemory.listen((MemoryTracker memoryTracker) {
       if (_memoryController.memoryTracker.hasConnection) {
@@ -27,6 +30,9 @@ class MemoryChart extends CoreElement {
   }
 
   static const String _memoryGraph = 'memory_timeline';
+
+  // Height of chart when event timeline is visible.
+  final int _memoryGraphEventTimelineHeight = 230;
 
   final MemoryController _memoryController;
 
@@ -75,5 +81,21 @@ class MemoryChart extends CoreElement {
 
   void resume() {
     _plotlyChart.liveUpdate = true;
+  }
+
+  void plotSnapshot() {
+    if (element.style.height != '${_memoryGraphEventTimelineHeight}px') {
+      element.style..height = '${_memoryGraphEventTimelineHeight}px';
+      element.dispatchEvent(new Event('resize'));
+    }
+    _plotlyChart.plotSnapshot();
+  }
+
+  void plotReset() {
+    if (element.style.height != '${_memoryGraphEventTimelineHeight}px') {
+      element.style..height = '${_memoryGraphEventTimelineHeight}px';
+      element.dispatchEvent(new Event('resize'));
+    }
+    _plotlyChart.plotReset();
   }
 }

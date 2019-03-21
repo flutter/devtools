@@ -179,6 +179,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<void> _resetAllocatorCounts() async {
+    memoryChart.plotReset();
+
     resetAccumulatorsButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
@@ -198,6 +200,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<void> _loadAllocationProfile({bool reset = false}) async {
+    memoryChart.plotSnapshot();
+
     vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =

@@ -60,6 +60,7 @@ class MemoryTracker {
     }
 
     final VM vm = await service.getVM();
+    // TODO(terry): Need to handle a possible Sentinel being returned.
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
       return await service.getIsolate(ref.id);

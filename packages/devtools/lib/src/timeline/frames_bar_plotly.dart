@@ -46,7 +46,9 @@ class FramesBarPlotly {
   final bool useLogScale;
 
   final _yAxisLogScale = AxisLayout(
-    title: 'Milliseconds',
+    title: Title(
+      text: 'Milliseconds',
+    ),
     tickformat: '.0f',
     type: 'log',
     range: [0, 2],
@@ -70,7 +72,9 @@ class FramesBarPlotly {
   );
 
   final _yAxisLinearScale = AxisLayout(
-    title: 'Milliseconds',
+    title: Title(
+      text: 'Milliseconds',
+    ),
     fixedrange: true,
   );
 
