@@ -4,6 +4,7 @@
 
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
+import 'package:platform_detect/platform_detect.dart';
 
 void main() {
   // Initialize the core framework.
@@ -19,6 +20,11 @@ void main() {
       framework.showConnectionDialog();
     }
   });
+
+  if (!browser.isChrome) {
+    framework.showWarning('WARNING: Unsupported browser; DevTools is only '
+        'supported by Chrome.');
+  }
 
   framework.loadScreenFromLocation();
 }
