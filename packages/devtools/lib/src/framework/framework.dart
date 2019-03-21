@@ -110,9 +110,12 @@ class Framework {
 
     if (_screenContents.containsKey(current)) {
       _screenContents[current].hidden(false);
-      // Fire a resize an active plotly chart (transitioning from display:none).
-      // Computation
-      _screenContents[current].element.dispatchEvent(new Event('resize'));
+      if (screen.needsResizing) {
+        // Fire a resize used to ensure a plotly chart (transitioning from one
+        // screen to another uses display:none).
+        _screenContents[current].element.dispatchEvent(new Event('resize'));
+        screen.needsResizing = false;
+      }
     } else {
       current.framework = this;
 
@@ -121,6 +124,17 @@ class Framework {
       mainElement.add(screenContent);
 
       _screenContents[current] = screenContent;
+
+      // Only resize the screens that isn't the current screen.
+      screenContent.element.onResize.listen((e) {
+        e.stopImmediatePropagation(); // Don't bubble up the resize event.
+
+        _screenContents.forEach((Screen theScreen, CoreElement content) {
+          if (current != theScreen) {
+            theScreen.needsResizing = true;
+          }
+        });
+      });
     }
 
     current.visible = true;
@@ -312,6 +326,8 @@ abstract class Screen {
   final String iconClass;
   final StatusItem helpStatus;
   final bool disabled;
+
+  bool needsResizing = false;
 
   Framework framework;
 
