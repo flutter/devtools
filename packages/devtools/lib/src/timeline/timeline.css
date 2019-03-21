@@ -55,9 +55,24 @@
     border-color: var(--selected-border);
 }
 
-.flame-chart {
+.flame-chart-container {
     background-color: var(--shaded-background-darker);
     position: relative;
+    overflow: hidden;
+}
+
+.timeline-background {
+    background-color: var(--shaded-background-darker);
+    min-width: 100%;
+    position: sticky;
+    top: 0;
+}
+
+.flame-chart {
+    min-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
     overflow: hidden;
 }
 
@@ -82,7 +97,6 @@
 .flame-chart-item-label-wrapper {
     position: sticky;
     left: 0;
-    position: -webkit-sticky;
     overflow-x: hidden;
     display: inline-block;
 }
@@ -127,7 +141,7 @@
     top: 2px;
     left: 4px;
     text-align: end;
-    position: absolute;
+    position: sticky;
 }
 
 .section-border {
