@@ -125,8 +125,11 @@ class Framework {
 
       _screenContents[current] = screenContent;
 
-      // Only resize the screens that isn't the current screen.
       screenContent.element.onResize.listen((e) {
+        // Need to stop event listeners, within the screen from getting the
+        // resize event. This doesn't stop event listeners higher up in the tree
+        // from receiving the resize event.  Plotly can chart get's resized even
+        // though its in a div with a 'display:none' and will resize improperly.
         e.stopImmediatePropagation(); // Don't bubble up the resize event.
 
         _screenContents.forEach((Screen theScreen, CoreElement content) {
