@@ -13,6 +13,16 @@ void main() {
   // Load the web app framework.
   final PerfToolFramework framework = PerfToolFramework();
 
+  if (!browser.isChrome) {
+    framework.disableAppWithError(
+      'ERROR: You are running DevTools on '
+          '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
+          'but DevTools only runs on Chrome.',
+      'Reopen this url in a Chrome broswer to use DevTools.',
+    );
+    return;
+  }
+
   FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
     framework.showError(title, error);
   }).then((bool connected) {
@@ -20,11 +30,6 @@ void main() {
       framework.showConnectionDialog();
     }
   });
-
-  if (!browser.isChrome) {
-    framework.showWarning('WARNING: Unsupported browser; DevTools is only '
-        'supported by Chrome.');
-  }
 
   framework.loadScreenFromLocation();
 }

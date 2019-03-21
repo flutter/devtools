@@ -119,6 +119,15 @@ class PerfToolFramework extends Framework {
     });
   }
 
+  void disableAppWithError(String title, [dynamic error]) {
+    document
+        .getElementById('header')
+        .children
+        .removeWhere((e) => e.id != 'title');
+    document.getElementById('content').children.clear();
+    showError(title, error);
+  }
+
   void initTestingModel() {
     App.register(this);
   }
