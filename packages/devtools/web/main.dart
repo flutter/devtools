@@ -4,6 +4,7 @@
 
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
+import 'package:platform_detect/platform_detect.dart';
 
 void main() {
   // Initialize the core framework.
@@ -11,6 +12,16 @@ void main() {
 
   // Load the web app framework.
   final PerfToolFramework framework = PerfToolFramework();
+
+  if (!browser.isChrome) {
+    framework.disableAppWithError(
+      'ERROR: You are running DevTools on '
+          '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
+          'but DevTools only runs on Chrome.',
+      'Reopen this url in a Chrome broswer to use DevTools.',
+    );
+    return;
+  }
 
   FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
     framework.showError(title, error);
