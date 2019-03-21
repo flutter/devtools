@@ -47,7 +47,8 @@ Stream<FlameChartItem> get onSelectedFlameChartItem =>
 final DragScroll _dragScroll = DragScroll();
 
 class FrameFlameChart extends CoreElement {
-  FrameFlameChart() : super('div', classes: 'section-border flame-chart') {
+  FrameFlameChart()
+      : super('div', classes: 'section-border flame-chart-container') {
     flex();
     layoutVertical();
 
@@ -94,6 +95,8 @@ class FrameFlameChart extends CoreElement {
 
   TimelineFrame _frame;
   TimelineGrid _timelineGrid;
+  CoreElement _flameChart;
+  CoreElement _timelineBackground;
   CoreElement _uiSection;
   CoreElement _gpuSection;
 
@@ -159,6 +162,7 @@ class FrameFlameChart extends CoreElement {
     final uiSectionHeight =
         _frame.uiEventFlow.depth * rowHeight + sectionSpacing;
     final gpuSectionHeight = _frame.gpuEventFlow.depth * rowHeight;
+    final flameChartHeight = 2 * rowHeight + uiSectionHeight + gpuSectionHeight;
 
     void drawRecursively(
       TimelineEvent event,
@@ -186,9 +190,15 @@ class FrameFlameChart extends CoreElement {
       }
     }
 
+    void drawTimelineBackground() {
+      _timelineBackground = div(c: 'timeline-background')
+        ..element.style.height = '${rowHeight}px';
+      add(_timelineBackground);
+    }
+
     void drawUiEvents() {
       _uiSection = div(c: 'flame-chart-section ui');
-      add(_uiSection);
+      _flameChart.add(_uiSection);
 
       _uiSection.element.style
         ..height = '${uiSectionHeight}px'
@@ -212,7 +222,7 @@ class FrameFlameChart extends CoreElement {
 
     void drawGpuEvents() {
       _gpuSection = div(c: 'flame-chart-section');
-      add(_gpuSection);
+      _flameChart.add(_gpuSection);
 
       _gpuSection.element.style
         ..height = '${gpuSectionHeight}px'
@@ -236,11 +246,17 @@ class FrameFlameChart extends CoreElement {
 
     void drawTimelineGrid() {
       _timelineGrid = TimelineGrid(_frame.duration, getFlameChartWidth());
-      _timelineGrid.element.style.height =
-          '${2 * rowHeight + uiSectionHeight + gpuSectionHeight}px';
+      _timelineGrid.element.style.height = '${flameChartHeight}px';
       add(_timelineGrid);
     }
 
+    _flameChart = div(c: 'flame-chart')
+      ..flex()
+      ..layoutVertical();
+    _flameChart.element.style.height = '${flameChartHeight}px';
+    add(_flameChart);
+
+    drawTimelineBackground();
     drawUiEvents();
     drawGpuEvents();
     drawTimelineGrid();
@@ -273,6 +289,8 @@ class FrameFlameChart extends CoreElement {
     // Add 2 * [flameChartInset] to account for spacing at the beginning and end
     // of the chart.
     final width = getFlameChartWidth() + 2 * flameChartInset;
+    _flameChart.element.style.width = '${width}px';
+    _timelineBackground.element.style.width = '${width}px';
     _uiSection.element.style.width = '${width}px';
     _gpuSection.element.style.width = '${width}px';
   }
