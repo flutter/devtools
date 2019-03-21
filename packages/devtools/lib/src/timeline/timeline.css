@@ -64,7 +64,6 @@
 .timeline-background {
     background-color: var(--shaded-background-darker);
     min-width: 100%;
-    position: -webkit-sticky;
     position: sticky;
     top: 0;
 }
@@ -98,7 +97,6 @@
 .flame-chart-item-label-wrapper {
     position: sticky;
     left: 0;
-    position: -webkit-sticky;
     overflow-x: hidden;
     display: inline-block;
 }
