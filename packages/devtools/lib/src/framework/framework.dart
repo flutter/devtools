@@ -110,6 +110,9 @@ class Framework {
 
     if (_screenContents.containsKey(current)) {
       _screenContents[current].hidden(false);
+      // Fire a resize an active plotly chart (transitioning from display:none).
+      // Computation
+      _screenContents[current].element.dispatchEvent(new Event('resize'));
     } else {
       current.framework = this;
 

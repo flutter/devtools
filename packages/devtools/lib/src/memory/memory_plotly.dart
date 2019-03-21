@@ -216,8 +216,9 @@ class MemoryPlotly {
 
     if (marker == null) {
       return Data(
-        x: [Null], // Trace legend entry appears w/o data.
-        y: [Null], // Trace legend entry appears w/o data.
+        // Null is needed so the trace legend entry appears w/o data.
+        x: [Null],
+        y: [Null],
         text: [],
         line: line,
         type: 'scatter',
@@ -228,8 +229,9 @@ class MemoryPlotly {
       );
     } else {
       return Data(
-        x: [Null], // Trace legend entry appears w/o data.
-        y: [Null], // Trace legend entry appears w/o data.
+        // Null is needed so the trace legend entry appears w/o data.
+        x: [Null],
+        y: [Null],
         text: [],
         marker: marker,
         type: 'scatter',
@@ -401,6 +403,10 @@ class MemoryPlotly {
   }
 }
 
+/// Create an Event Timeline subplot, notice it is associated with y2.  This
+/// requires that the layout these traces exist in the 'yaxis2' area.  For an
+/// example, look at MemoryPloty's getMemoryLayout method it creates a yaxis2
+/// positioned above yaxis.
 class EventTimeline {
   EventTimeline(this._domName, this._chart);
 
@@ -434,8 +440,9 @@ class EventTimeline {
     // Create traces for the event timeline subplot.
 
     final Data resetTrace = Data(
-      x: [Null], // Trace legend entry appears w/o data.
-      y: [Null], // Trace legend entry appears w/o data.
+      // Null is needed so the trace legend entry appears w/o data.
+      x: [Null],
+      y: [Null],
       name: 'Reset',
       type: 'scatter',
       mode: 'markers',
@@ -454,8 +461,9 @@ class EventTimeline {
     );
 
     final Data snapshotTrace = Data(
-      x: [Null], // Trace legend entry appears w/o data.
-      y: [Null], // Trace legend entry appears w/o data.
+      // Null is needed so the trace legend entry appears w/o data.
+      x: [Null],
+      y: [Null],
       name: 'Snapshot',
       type: 'scatter',
       mode: 'markers',
