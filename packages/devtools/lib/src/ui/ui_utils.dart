@@ -233,7 +233,7 @@ class RegisteredServiceExtensionButton {
   }
 }
 
-bool shouldDisableTab(String key) {
+bool tabDisabledByQuery(String key) {
   final queryString = html.window.location.search;
   if (queryString == null || queryString.length <= 1) {
     return false;

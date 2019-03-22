@@ -9,6 +9,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
+import 'eval_on_dart_library.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
 import 'inspector/inspector.dart';
@@ -30,21 +31,14 @@ import 'utils.dart';
 const bool showMemoryPage = false;
 const bool showPerformancePage = false;
 
+const flutterLibraryUriCandidates = [
+  'package:flutter/src/widgets/binding.dart',
+  'package:flutter_web/src/widgets/binding.dart',
+];
+
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
-    addScreen(InspectorScreen());
-    addScreen(TimelineScreen());
-    addScreen(MemoryScreen());
-    if (showPerformancePage) {
-      addScreen(PerformanceScreen());
-    }
-    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
-    addScreen(LoggingScreen());
-
-    sortScreens();
-
     initGlobalUI();
-
     initTestingModel();
   }
 
@@ -57,7 +51,12 @@ class PerfToolFramework extends Framework {
   static const _reloadTooltip = 'Hot Reload';
   static const _restartTooltip = 'Hot Restart';
 
-  void initGlobalUI() {
+  void initGlobalUI() async {
+    await serviceManager.serviceAvailable.future;
+    await addScreens();
+    sortScreens();
+    screensReady.complete();
+
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
 
@@ -74,8 +73,7 @@ class PerfToolFramework extends Framework {
             toast(link.tooltip);
           })
           ..toggleClass('disabled', true)
-          ..tooltip =
-              'This section is disabled because it provides functionality already available in your code editor';
+          ..tooltip = screen.disabledTooltip;
       } else {
         link
           ..attributes['href'] = screen.ref
@@ -119,6 +117,10 @@ class PerfToolFramework extends Framework {
     });
   }
 
+  void initTestingModel() {
+    App.register(this);
+  }
+
   void disableAppWithError(String title, [dynamic error]) {
     document
         .getElementById('header')
@@ -128,8 +130,75 @@ class PerfToolFramework extends Framework {
     showError(title, error);
   }
 
-  void initTestingModel() {
-    App.register(this);
+  Future<bool> isFlutterApp() async {
+    final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
+      flutterLibraryUriCandidates,
+      serviceManager.service,
+    );
+
+    try {
+      await flutterLibrary.libraryRef.catchError(
+        (_) => throw FlutterLibraryNotFound(),
+        test: (e) => e is LibraryNotFound,
+      );
+    } catch (e) {
+      if (e is FlutterLibraryNotFound) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<bool> isProfileBuild() async {
+    try {
+      final Isolate isolate = await serviceManager.service
+          .getIsolate(serviceManager.isolateManager.selectedIsolate.id);
+      await serviceManager.service.evaluate(
+        serviceManager.isolateManager.selectedIsolate.id,
+        isolate.rootLib.id,
+        '1+1',
+      );
+      // If we reach this return statement, no error was thrown and this is not
+      // a profile build.
+      return false;
+    } catch (e) {
+      if (e is RPCError) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> addScreens() async {
+    final _isFlutterApp = await isFlutterApp();
+    final _isProfileBuild = await isProfileBuild();
+
+    addScreen(InspectorScreen(
+      disabled: !_isFlutterApp || _isProfileBuild,
+      disabledTooltip: !_isFlutterApp
+          ? 'This section is disabled because you are not running a Flutter '
+              'application'
+          : 'This section is disabled because you are running a profile build '
+          'of your application',
+    ));
+    addScreen(TimelineScreen(
+      disabled: !_isFlutterApp,
+      disabledTooltip: 'This section is disabled because you are not running a '
+          'Flutter application',
+    ));
+    addScreen(MemoryScreen());
+    if (showPerformancePage) {
+      addScreen(PerformanceScreen());
+    }
+    addScreen(DebuggerScreen(
+      disabled: _isProfileBuild || tabDisabledByQuery('debugger'),
+      disabledTooltip: _isProfileBuild
+          ? 'This section is disabled because you are running a profile build '
+              'of your application'
+          : 'This section is disabled because it provides functionality already'
+          ' available in your code editor',
+    ));
+    addScreen(LoggingScreen());
   }
 
   void sortScreens() {
@@ -314,4 +383,8 @@ String _renderDuration(Duration duration) {
   } else {
     return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
   }
+}
+
+class FlutterLibraryNotFound extends LibraryNotFound {
+  FlutterLibraryNotFound() : super(flutterLibraryUriCandidates);
 }

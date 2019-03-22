@@ -69,8 +69,14 @@ const Color hoverTextColor = ThemedColor(Colors.black, Colors.black);
 // area associated with the selected frame.
 
 class TimelineScreen extends Screen {
-  TimelineScreen()
-      : super(name: 'Timeline', id: 'timeline', iconClass: 'octicon-pulse');
+  TimelineScreen({bool disabled, String disabledTooltip})
+      : super(
+          name: 'Timeline',
+          id: 'timeline',
+          iconClass: 'octicon-pulse',
+          disabled: disabled,
+          disabledTooltip: disabledTooltip,
+        );
 
   TimelineController timelineController = TimelineController();
 
