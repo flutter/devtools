@@ -20,18 +20,19 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
+// Light mode is Light Blue 50 palette and Dark mode is Blue 50 palette.
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainUiColorLight = Color(0xFF80D8FF); // Light Blue 50 - A100
-const mainUiColorSelectedLight = Color(0xFF448AFF); // Light Blue 50 - 100
+const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
+const mainUiColorSelectedLight = Color(0xFF0091EA); // Light Blue 50 - A700
 
 const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
-const mainGpuColorSelectedLight = Color(0xFF0D47A1); // Blue 50 - 900
+const mainGpuColorSelectedLight = Color(0xFF01579B); // Light Blue 50 - 900
 
-const mainUiColorDark = Color(0xFFB3E5FC); // Light Blue 50 - 100
-const mainUiColorSelectedDark = Color(0xFF03A9F4); // Light Blue 50 - 500
+const mainUiColorDark = Color(0xFFBBDEFB); // Blue 50 - 100
+const mainUiColorSelectedDark = Color(0xFF82B1FF); // Blue 50 - A100
 
-const mainGpuColorDark = Color(0xFF03A9F4); // Light Blue 50 - 500
-const mainGpuColorSelectedDark = Color(0xFF2962FF); // Blue 50 - A700
+const mainGpuColorDark = Color(0xFF02196F3); // Blue 50 - 500
+const mainGpuColorSelectedDark = Color(0xFF1565C0); // Blue 50 - 800
 
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
