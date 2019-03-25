@@ -37,8 +37,10 @@ const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
 const selectedFlameChartItemColor =
     ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
 
-const jankGlowInside = ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
-const jankGlowEdge = ThemedColor(Color.fromRGBO(255, 0, 0, .5), Color.fromRGBO(255, 0, 0, .5));
+const jankGlowInside =
+    ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
+const jankGlowEdge =
+    ThemedColor(Color.fromRGBO(255, 0, 0, .5), Color.fromRGBO(255, 0, 0, .5));
 
 // Red 50 - 400 is light at 1/2 opacity, Red Red 500 - 600 is dark at full opacity.
 const highwater16ms = ThemedColor(Color(0x7FEF5350), Color(0xFFE53935));
@@ -46,8 +48,7 @@ const highwater16ms = ThemedColor(Color(0x7FEF5350), Color(0xFFE53935));
 const Color slowFrameColor = Color(0xFFE50C0C);
 
 // Light Blue 50 - A100 light, Light Blue 50 - 100 is dark
-const Color selectedUiColor =
-    ThemedColor(Color(0xFF80D8FF), Color(0xFFB3E5FC));
+const Color selectedUiColor = ThemedColor(Color(0xFF80D8FF), Color(0xFFB3E5FC));
 
 // Light Blue 50 - 700 is light, Light Blue 50 - 500 is dark
 const Color selectedGpuColor =
