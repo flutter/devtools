@@ -6,10 +6,8 @@ import 'dart:async';
 
 import '../framework/framework.dart';
 import '../ui/elements.dart';
-import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
-import 'timeline.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
@@ -31,7 +29,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     // Make sure DIV exist.
     setState(() {
       if (!_createdPlot) {
-        frameUIgraph.createPlot(timelineController);
+        frameUIgraph.createPlot(timelineController, frameUIgraph.element);
         _createdPlot = true;
       }
     });
@@ -160,53 +158,13 @@ class PlotlyDivGraph extends CoreElement {
     plotFXHover(frameGraph, hoverDisplay);
   }
 
-  bool _plotlyLegendClick(LegendDataEvent data) {
-    final int traceIndex = data.curveNumber;
-
-    if (traceIndex == FramesBarPlotly.uiJankTraceIndex ||
-        traceIndex == FramesBarPlotly.gpuJankTraceIndex) {
-      final List<int> traces = [
-        FramesBarPlotly.uiJankTraceIndex,
-        FramesBarPlotly.gpuJankTraceIndex
-      ];
-
-      final String color = data.data[traceIndex].marker.color;
-
-      String newUiColor;
-      String newGpuColor;
-
-      if (color == colorToCss(uiJankColor) ||
-          color == colorToCss(gpuJankColor)) {
-        // Flip to uiChartColor/gpuChartColor
-        newUiColor = colorToCss(mainUiColor);
-        newGpuColor = colorToCss(mainGpuColor);
-      } else {
-        // Flip back to uiJankColor/gpuJankColor
-        newUiColor = colorToCss(uiJankColor);
-        newGpuColor = colorToCss(gpuJankColor);
-      }
-
-      Plotly.restyle(
-        frameGraph,
-        'marker.color',
-        [newUiColor, newGpuColor],
-        traces,
-      );
-
-      return false;
-    }
-
-    return true;
-  }
-
-  void createPlot(TimelineController timelineController) {
-    plotlyChart = new FramesBarPlotly(frameGraph);
+  void createPlot(TimelineController timelineController, dynamic element) {
+    plotlyChart = new FramesBarPlotly(frameGraph, element);
     plotlyChart.plotFPS();
 
     // Hookup events in the plotly chart.
     plotlyChart.chartClick(frameGraph, _plotlyClick);
     plotlyChart.chartHover(frameGraph, _plotlyHover);
-    plotlyChart.chartLegendClick(frameGraph, _plotlyLegendClick);
 
     // Only update data 6 times a second.
     // TODO(jacobr): only run the timer when there is actual work to do.

@@ -20,42 +20,43 @@ import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_protocol.dart';
 
-// Blue 300 (light mode) or 400 (dark mode) from
+// Light mode is Light Blue 50 palette and Dark mode is Blue 50 palette.
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainUiColorLight = Color(0xFF64B5F6);
-const mainUiColorDark = Color(0xFF42A5F5);
-const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
+const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
+const mainUiColorSelectedLight = Color(0xFF0091EA); // Light Blue 50 - A700
 
-// Teal 300 (light mode) or 400 (dark mode) from
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainGpuColorLight = Color(0xFF4DB6AC);
-const mainGpuColorDark = Color(0xFF26A69A);
+const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
+const mainGpuColorSelectedLight = Color(0xFF01579B); // Light Blue 50 - 900
+
+const mainUiColorDark = Color(0xFFBBDEFB); // Blue 50 - 100
+const mainUiColorSelectedDark = Color(0xFF82B1FF); // Blue 50 - A100
+
+const mainGpuColorDark = Color(0xFF02196F3); // Blue 50 - 500
+const mainGpuColorSelectedDark = Color(0xFF1565C0); // Blue 50 - 800
+
+const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
 
-const selectedFlameChartItemColor =
-    ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
+const Color selectedUiColor =
+    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
+const Color selectedGpuColor =
+    ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
-// Red 300 is light, Red 500 is dark
-const gpuJankColor = ThemedColor(Color(0xFFE57373), Color(0xFFF44336));
-// Red 800 is light, Red 800 is dark
-const uiJankColor = ThemedColor(Color(0xFFC62828), Color(0xFFC62828));
-// Red 500 is light, Red 700 is dark
-const hoverJankColor = ThemedColor(Color(0xFFF44336), Color(0xFFD32F2F));
+const selectedFlameChartItemColor =
+    ThemedColor(Color(0xFF4078C0), Colors.white);
+
+const jankGlowInside =
+    ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
+const jankGlowEdge =
+    ThemedColor(Color.fromRGBO(255, 0, 0, .5), Color.fromRGBO(255, 0, 0, .6));
+
+// Red 50 - 400 is light at 1/2 opacity, Red 500 - 600 is dark at full opacity.
+const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFE53935));
 
 const Color slowFrameColor = Color(0xFFE50C0C);
 
-// Blue A700 is light, Indigo A400 is dark
-const Color selectedGpuColor =
-    ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
-// Dark Blue is light, Deep Purple A200 is dark
-const Color selectedUiColor = ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
-
-// Jank/Selection is high-contrast need white-ish font.
-const Color hoverTextHighContrastColor =
-    ThemedColor(Colors.white, contrastForeground);
-// Other hovers are not as contrasty (good frames) black text looks best in both
-// light and dark mode.
-const Color hoverTextColor = ThemedColor(Colors.black, Colors.black);
+const Color hoverTextHighContrastColor = Colors.white;
+const Color hoverTextColor = Colors.black;
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

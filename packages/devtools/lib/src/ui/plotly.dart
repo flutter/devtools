@@ -72,6 +72,15 @@ external void extendTraces4(
 );
 
 @JS()
+external Shape createGlowShape(
+  int shapeIndex,
+  num x,
+  num y,
+  String fillColor,
+  String lineColor,
+);
+
+@JS()
 external Shape createEventShape(
   devToolEvent,
   shapeIndex,
