@@ -112,7 +112,7 @@ class FramesBarPlotly {
           y1: 16,
           line: Line(
             dash: 'longdash',
-            color: colorToCss(highwater16ms),
+            color: colorToCss(highwater16msColor),
             width: 1,
           ),
         ),
