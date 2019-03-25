@@ -43,7 +43,7 @@ const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
 const selectedFlameChartItemColor =
-    ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
+    ThemedColor(Color(0xFF4078C0), Colors.white);
 
 const jankGlowInside =
     ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
