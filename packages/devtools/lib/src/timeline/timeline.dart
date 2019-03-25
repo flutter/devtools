@@ -22,40 +22,44 @@ import 'timeline_protocol.dart';
 
 // Blue 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainUiColorLight = Color(0xFF64B5F6);
-const mainUiColorDark = Color(0xFF42A5F5);
+const mainUiColorLight = Color(0xFF448AFF); // Blue 50 - Blue A200
+const mainUiColorDark = Color(0xFF82B1FF); // Blue 50 - Blue A100
+
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 
 // Teal 300 (light mode) or 400 (dark mode) from
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainGpuColorLight = Color(0xFF4DB6AC);
-const mainGpuColorDark = Color(0xFF26A69A);
+const mainGpuColorLight = Color(0xFF0D47A1); // Blue 50 - Blue 900
+const mainGpuColorDark = Color(0xFF2962FF); // Blue 50 - Blue A700
+
 const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
 
 const selectedFlameChartItemColor =
     ThemedColor(Color(0xFF4078C0), Color(0xFFFFFFFF));
 
-// Red 300 is light, Red 500 is dark
-const gpuJankColor = ThemedColor(Color(0xFFE57373), Color(0xFFF44336));
-// Red 800 is light, Red 800 is dark
-const uiJankColor = ThemedColor(Color(0xFFC62828), Color(0xFFC62828));
-// Red 500 is light, Red 700 is dark
-const hoverJankColor = ThemedColor(Color(0xFFF44336), Color(0xFFD32F2F));
+const jankGlowInside = ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
+const jankGlowEdge = ThemedColor(Color.fromRGBO(255, 0, 0, .5), Color.fromRGBO(255, 0, 0, .5));
+
+// Red 50 - 400 is light at 1/2 opacity, Red Red 500 - 600 is dark at full opacity.
+const highwater16ms = ThemedColor(Color(0x7FEF5350), Color(0xFFE53935));
 
 const Color slowFrameColor = Color(0xFFE50C0C);
 
-// Blue A700 is light, Indigo A400 is dark
+// Light Blue 50 - A100 light, Light Blue 50 - 100 is dark
+const Color selectedUiColor =
+    ThemedColor(Color(0xFF80D8FF), Color(0xFFB3E5FC));
+
+// Light Blue 50 - 700 is light, Light Blue 50 - 500 is dark
 const Color selectedGpuColor =
-    ThemedColor(Color(0xFF2962FF), Color(0xFF3D5AFE));
-// Dark Blue is light, Deep Purple A200 is dark
-const Color selectedUiColor = ThemedColor(Color(0xFF09007E), Color(0xFF7C4DFF));
+    ThemedColor(Color(0xFF0288D1), Color(0xFF03A9F4));
 
 // Jank/Selection is high-contrast need white-ish font.
 const Color hoverTextHighContrastColor =
-    ThemedColor(Colors.white, contrastForeground);
+    ThemedColor(Colors.black, Colors.black);
+
 // Other hovers are not as contrasty (good frames) black text looks best in both
 // light and dark mode.
-const Color hoverTextColor = ThemedColor(Colors.black, Colors.black);
+const Color hoverTextColor = ThemedColor(Colors.white, Colors.white);
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

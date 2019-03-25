@@ -123,6 +123,27 @@
           Plotly.extendTraces(domName, data, traces);
         }
 
+        // Red glow a janking frame.
+        function createGlowShape(shapeIndex, x, y, fillColor, lineColor) {
+            var jsShape = {};
+            jsShape['shapes[' + shapeIndex + ']'] = {
+                'fillcolor': fillColor,
+                'line': {
+                    'color': lineColor,
+                    'width': 4,
+                },
+                'type': "rect",
+                'x0': x - .4,
+                'x1': x + .4,
+                'yref': 'y',
+                'y0': '0',
+                'y1': y,
+                layer: 'above',
+            };
+
+            return jsShape;
+        }
+
         // Need to create dynamic key/value pair for Shape.
         function createEventShape(devToolEvent, shapeIndex, lastEventTime, time) {
           var jsShape = {};

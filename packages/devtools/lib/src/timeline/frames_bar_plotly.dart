@@ -10,17 +10,15 @@ import '../ui/plotly.dart';
 import '../ui/theme.dart';
 
 class FramesBarPlotly {
-  FramesBarPlotly(this._domName, [this.useLogScale = true]);
+  FramesBarPlotly(this._domName, this._chart, [this.useLogScale = true]);
 
   // Any duration of ui/gpu greater than 8 ms is a jank.
-  static const int jankMs = 8;
+  static const int jankMs = 16;
 
   static const int gpuGoodTraceIndex = 0;
-  static const int gpuJankTraceIndex = 1;
-  static const int gpuSelectTraceIndex = 2;
-  static const int uiGoodTraceIndex = 3;
-  static const int uiJankTraceIndex = 4;
-  static const int uiSelectTraceIndex = 5;
+  static const int gpuSelectTraceIndex = 1;
+  static const int uiGoodTraceIndex = 2;
+  static const int uiSelectTraceIndex = 3;
   // IMPORTANT: Last trace need to update numberOfTraces constant below.
 
   // Compute total number of traces in graph.
@@ -43,6 +41,7 @@ class FramesBarPlotly {
   static const int ticksInRangeSlider = 90;
 
   final String _domName;
+  final dynamic _chart;
   final bool useLogScale;
 
   final _yAxisLogScale = AxisLayout(
@@ -69,6 +68,7 @@ class FramesBarPlotly {
       100,
     ],
     hoverformat: '.3f',
+    showgrid: false,
   );
 
   final _yAxisLinearScale = AxisLayout(
@@ -107,27 +107,12 @@ class FramesBarPlotly {
           // TOD(terry): Verify do we like the line above or below the bars.
           // layer: 'below',
           x0: 0,
-          y0: 8,
-          x1: 1,
-          y1: 8,
-          line: Line(
-            dash: 'dot',
-            color: colorToCss(mainGpuColor),
-            width: 1,
-          ),
-        ),
-        Shape(
-          type: 'line',
-          xref: 'paper',
-          // TOD(terry): Verify do we like the line above or below the bars.
-          // layer: 'below',
-          x0: 0,
           y0: 16,
           x1: 1,
           y1: 16,
           line: Line(
             dash: 'longdash',
-            color: colorToCss(mainUiColor),
+            color: colorToCss(highwater16ms),
             width: 1,
           ),
         ),
@@ -167,7 +152,6 @@ class FramesBarPlotly {
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         type: 'bar',
-        legendgroup: 'good_group',
         name: 'GPU',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
@@ -177,29 +161,6 @@ class FramesBarPlotly {
         ),
         marker: Marker(
           color: colorToCss(mainGpuColor),
-        ),
-        width: [0],
-      ),
-    );
-
-    // trace GPU Jank
-    allTraces.insert(
-      gpuJankTraceIndex,
-      Data(
-        y: [yCoordNotUsed],
-        x: [xCoordNotUsed],
-        type: 'bar',
-        legendgroup: 'jank_group',
-        name: 'GPU Jank',
-        hoverinfo: 'y+name',
-        hoverlabel: HoverLabel(
-          font: Font(
-            color: colorToCss(hoverTextHighContrastColor),
-          ),
-          bordercolor: colorToCss(hoverJankColor),
-        ),
-        marker: Marker(
-          color: colorToCss(gpuJankColor),
         ),
         width: [0],
       ),
@@ -234,7 +195,6 @@ class FramesBarPlotly {
         y: [yCoordNotUsed],
         x: [xCoordNotUsed],
         type: 'bar',
-        legendgroup: 'good_group',
         name: 'UI',
         hoverinfo: 'y+name',
         hoverlabel: HoverLabel(
@@ -244,29 +204,6 @@ class FramesBarPlotly {
         ),
         marker: Marker(
           color: colorToCss(mainUiColor),
-        ),
-        width: [0],
-      ),
-    );
-
-    // trace UI Jank
-    allTraces.insert(
-      uiJankTraceIndex,
-      Data(
-        y: [yCoordNotUsed],
-        x: [xCoordNotUsed],
-        type: 'bar',
-        legendgroup: 'jank_group',
-        name: 'UI Jank',
-        hoverinfo: 'y+name',
-        hoverlabel: HoverLabel(
-          font: Font(
-            color: colorToCss(hoverTextHighContrastColor),
-          ),
-          bordercolor: colorToCss(hoverJankColor),
-        ),
-        marker: Marker(
-          color: colorToCss(uiJankColor),
         ),
         width: [0],
       ),
@@ -312,37 +249,6 @@ class FramesBarPlotly {
     );
   }
 
-  void plotFPSDatum(
-    int dataIndex,
-    num uiDuration,
-    num gpuDuration,
-    bool paused,
-  ) {
-    final List<int> traces = [];
-
-    traces.add(uiDuration > jankMs ? uiJankTraceIndex : uiGoodTraceIndex);
-    traces.add(gpuDuration > jankMs ? gpuJankTraceIndex : gpuGoodTraceIndex);
-
-    final TraceData data = TraceData(
-      x: [
-        [dataIndex],
-        [dataIndex],
-      ],
-      y: [
-        [uiDuration],
-        [gpuDuration],
-      ],
-    );
-
-    Plotly.extendTraces(
-      _domName,
-      data,
-      traces,
-    );
-
-    if (!paused) rangeSliderToLast(dataIndex);
-  }
-
   // Chunky plotting of data to reduce plotly live charting lag.
   void plotFPSDataList(
     List<int> dataIndexes,
@@ -353,53 +259,30 @@ class FramesBarPlotly {
     final List<int> uiGoodX = [];
     final List<num> uiGoodTrace = [];
 
-    final List<int> uiJankX = [];
-    final List<num> uiJankTrace = [];
-
     final List<int> gpuGoodX = [];
     final List<num> gpuGoodTrace = [];
-
-    final List<int> gpuJankX = [];
-    final List<num> gpuJankTrace = [];
 
     final int totalIndexes = dataIndexes.length;
     for (int dataIndex = 0; dataIndex < totalIndexes; dataIndex++) {
       final num uiDuration = uiDurations[dataIndex];
       final num gpuDuration = gpuDurations[dataIndex];
 
-      if (uiDuration > jankMs) {
-        uiJankX.add(dataIndexes[dataIndex]);
-        uiJankTrace.add(uiDuration);
-      } else {
-        uiGoodX.add(dataIndexes[dataIndex]);
-        uiGoodTrace.add(uiDuration);
-      }
+      uiGoodX.add(dataIndexes[dataIndex]);
+      uiGoodTrace.add(uiDuration);
+      gpuGoodX.add(dataIndexes[dataIndex]);
+      gpuGoodTrace.add(gpuDuration);
 
-      if (gpuDuration > jankMs) {
-        gpuJankX.add(dataIndexes[dataIndex]);
-        gpuJankTrace.add(gpuDuration);
-      } else {
-        gpuGoodX.add(dataIndexes[dataIndex]);
-        gpuGoodTrace.add(gpuDuration);
+      if (uiDuration + gpuDuration > jankMs) {
+        glowBarFrame(dataIndexes[dataIndex], uiDuration + gpuDuration);
       }
     }
 
     final TraceData data = TraceData(x: [], y: []);
     final List<int> traces = [];
-    if (uiJankX.isNotEmpty) {
-      data.x.add(uiJankX);
-      data.y.add(uiJankTrace);
-      traces.add(uiJankTraceIndex);
-    }
     if (uiGoodX.isNotEmpty) {
       data.x.add(uiGoodX);
       data.y.add(uiGoodTrace);
       traces.add(uiGoodTraceIndex);
-    }
-    if (gpuJankX.isNotEmpty) {
-      data.x.add(gpuJankX);
-      data.y.add(gpuJankTrace);
-      traces.add(gpuJankTraceIndex);
     }
     if (gpuGoodX.isNotEmpty) {
       data.x.add(gpuGoodX);
@@ -408,21 +291,15 @@ class FramesBarPlotly {
     }
 
     // TODO(terry): Eliminate this JS call (result of reified List?).
-    extendTraces4(
+    extendTraces2(
       _domName,
       uiGoodX,
       gpuGoodX,
-      uiJankX,
-      gpuJankX,
       uiGoodTrace,
       gpuGoodTrace,
-      uiJankTrace,
-      gpuJankTrace,
       [
         uiGoodTraceIndex,
         gpuGoodTraceIndex,
-        uiJankTraceIndex,
-        gpuJankTraceIndex,
       ],
     );
 
@@ -448,6 +325,22 @@ class FramesBarPlotly {
         ),
       ),
     );
+  }
+
+  void glowBarFrame(num x, num y) {
+    final Layout layout = getProperty(_chart, 'layout');
+    final List<Shape> shapes = layout.shapes;
+
+    final int nextShape = shapes.length;
+
+    final jsShape = createGlowShape(
+      nextShape,
+      x,
+      y,
+      colorToCss(jankGlowInside),
+      colorToCss(jankGlowEdge),
+    );
+    Plotly.relayout(_domName, jsShape);
   }
 
   void chartClick(String domName, Function f) {
