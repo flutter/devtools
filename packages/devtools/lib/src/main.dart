@@ -31,10 +31,8 @@ import 'utils.dart';
 const bool showMemoryPage = false;
 const bool showPerformancePage = false;
 
-const flutterLibraryUriCandidates = [
-  'package:flutter/src/widgets/binding.dart',
-  'package:flutter_web/src/widgets/binding.dart',
-];
+const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
+const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
@@ -132,19 +130,30 @@ class PerfToolFramework extends Framework {
 
   Future<bool> isFlutterApp() async {
     final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-      flutterLibraryUriCandidates,
+      [flutterLibraryUri, flutterWebLibraryUri],
       serviceManager.service,
     );
 
     try {
-      await flutterLibrary.libraryRef.catchError(
-        (_) => throw FlutterLibraryNotFound(),
-        test: (e) => e is LibraryNotFound,
-      );
-    } catch (e) {
-      if (e is FlutterLibraryNotFound) {
-        return false;
-      }
+      await flutterLibrary.libraryRef;
+    } on LibraryNotFound catch (_) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> isFlutterWebApp() async {
+    // TODO(kenzie): fix this if screens should still be disabled when flutter
+    // merges with flutter_web.
+    final EvalOnDartLibrary flutterWebLibrary = EvalOnDartLibrary(
+      [flutterWebLibraryUri],
+      serviceManager.service,
+    );
+
+    try {
+      await flutterWebLibrary.libraryRef;
+    } on LibraryNotFound catch (_) {
+      return false;
     }
     return true;
   }
@@ -152,51 +161,63 @@ class PerfToolFramework extends Framework {
   Future<bool> isProfileBuild() async {
     try {
       final Isolate isolate = await serviceManager.service
-          .getIsolate(serviceManager.isolateManager.selectedIsolate.id);
+          .getIsolate(serviceManager.isolateManager.isolates.first.id);
+      // This evaluate statement will throw an error in a profile build.
       await serviceManager.service.evaluate(
-        serviceManager.isolateManager.selectedIsolate.id,
+        serviceManager.isolateManager.isolates.first.id,
         isolate.rootLib.id,
         '1+1',
       );
       // If we reach this return statement, no error was thrown and this is not
       // a profile build.
       return false;
-    } catch (e) {
-      if (e is RPCError) {
-        return true;
-      }
+    } on RPCError catch (_) {
+      return true;
     }
-    return false;
   }
 
   Future<void> addScreens() async {
     final _isFlutterApp = await isFlutterApp();
+    final _isFlutterWebApp = await isFlutterWebApp();
     final _isProfileBuild = await isProfileBuild();
 
     addScreen(InspectorScreen(
-      disabled: !_isFlutterApp || _isProfileBuild,
-      disabledTooltip: !_isFlutterApp
-          ? 'This section is disabled because you are not running a Flutter '
+      disabled: !_isFlutterApp || !_isFlutterWebApp || _isProfileBuild,
+      disabledTooltip: (!_isFlutterApp || !_isFlutterWebApp)
+          ? 'This screen is disabled because you are not running a Flutter '
               'application'
-          : 'This section is disabled because you are running a profile build '
+          : 'This screen is disabled because you are running a profile build '
           'of your application',
     ));
     addScreen(TimelineScreen(
-      disabled: !_isFlutterApp,
-      disabledTooltip: 'This section is disabled because you are not running a '
+      disabled: !_isFlutterApp || _isFlutterWebApp,
+      disabledTooltip: _isFlutterWebApp
+          ? 'This screen is disabled because it is not yet ready for Flutter'
+              ' Web'
+          : 'This screen is disabled because you are not running a '
           'Flutter application',
     ));
-    addScreen(MemoryScreen());
+    addScreen(MemoryScreen(
+      disabled: _isFlutterWebApp,
+      disabledTooltip:
+          'This screen is disabled because it is not yet ready for Flutter'
+          ' Web',
+    ));
     if (showPerformancePage) {
       addScreen(PerformanceScreen());
     }
+
     addScreen(DebuggerScreen(
-      disabled: _isProfileBuild || tabDisabledByQuery('debugger'),
-      disabledTooltip: _isProfileBuild
-          ? 'This section is disabled because you are running a profile build '
-              'of your application'
-          : 'This section is disabled because it provides functionality already'
-          ' available in your code editor',
+      disabled:
+          _isFlutterWebApp || _isProfileBuild || tabDisabledByQuery('debugger'),
+      disabledTooltip: _isFlutterWebApp
+          ? 'This screen is disabled because it is not yet ready for Flutter'
+              ' Web'
+          : (_isProfileBuild
+              ? 'This screen is disabled because you are running a profile '
+                  'build of your application'
+              : 'This screen is disabled because it provides functionality '
+              'already available in your code editor'),
     ));
     addScreen(LoggingScreen());
   }
@@ -383,8 +404,4 @@ String _renderDuration(Duration duration) {
   } else {
     return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
   }
-}
-
-class FlutterLibraryNotFound extends LibraryNotFound {
-  FlutterLibraryNotFound() : super(flutterLibraryUriCandidates);
 }

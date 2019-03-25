@@ -322,7 +322,7 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabled = false,
-    this.disabledTooltip = 'This section is not available',
+    this.disabledTooltip = 'This screen is not available',
   }) : helpStatus = createLinkStatusItem(
           '$name Docs',
           href: 'https://flutter.github.io/devtools/$id',
