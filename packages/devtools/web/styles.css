@@ -107,6 +107,17 @@ body {
     font-size: 1.5rem;
 }
 
+@media all and (max-width: 550px) {
+    /* At 550px we hide "Dart DevTools" from the title, so we can reduce spacing
+     * around the icons */
+    .masthead {
+        padding: 8px var(--page-outer-padding);
+    }
+    .masthead-nav {
+        margin-top: 0;
+    }
+}
+
 .small-octicon {
   font-size: 13px;
 }
