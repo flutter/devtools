@@ -56,21 +56,21 @@ CoreElement createExtensionCheckBox(
 
 List<CoreElement> getServiceExtensionButtons() {
   return [
-    div(c: 'btn-group collapsible')
+    div(c: 'btn-group collapsible-1200 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(performanceOverlay).button,
         ServiceExtensionButton(togglePlatformMode).button,
       ]),
-    div(c: 'btn-group collapsible margin-left')
+    div(c: 'btn-group collapsible-1200 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(debugPaint).button,
         ServiceExtensionButton(debugPaintBaselines).button,
       ]),
-    div(c: 'btn-group collapsible margin-left')
+    div(c: 'btn-group collapsible-1200 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(slowAnimations).button,
       ]),
-    div(c: 'btn-group collapsible overflow margin-left')
+    div(c: 'btn-group collapsible-1400 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(repaintRainbow).button,
         ServiceExtensionButton(debugAllowBanner).button,
@@ -79,7 +79,7 @@ List<CoreElement> getServiceExtensionButtons() {
 }
 
 StatusItem createLinkStatusItem(
-  String text, {
+  CoreElement textElement, {
   @required String href,
   @required String title,
 }) {
@@ -94,7 +94,7 @@ StatusItem createLinkStatusItem(
     ..verticalAlign = 'text-bottom'
     ..marginBottom = '0';
   final element = CoreElement('a')
-    ..add(<CoreElement>[icon, span(text: text)])
+    ..add(<CoreElement>[icon, textElement])
     ..setAttribute('href', href)
     ..setAttribute('target', '_blank')
     ..element.title = title;

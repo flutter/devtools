@@ -46,6 +46,20 @@
     --toast-border: #d8dee2;
 }
 
+/*
+ * Variables used in media queries (not themes) to handle different screen
+ * sizes better
+ */
+:root {
+    --page-outer-padding: 30px;
+}
+
+@media all and (max-width: 600px) {
+    :root {
+        --page-outer-padding: 20px;
+    }
+}
+
 .lead, .page-title + .markdown-body > p:first-child {
     margin-bottom: 30px;
     font-size: 20px;
@@ -61,15 +75,14 @@ body {
 
 .container {
     width: initial;
-    margin-right: 30px;
-    margin-left: 30px;
+    margin-right: var(--page-outer-padding);
+    margin-left: var(--page-outer-padding);
 }
 
 .masthead {
-    padding: 16px 20px;
+    padding: 16px var(--page-outer-padding);
     margin-bottom: 20px;
     text-align: center;
-    white-space: nowrap;
     background-color: var(--masthead-background);
 }
 
@@ -82,6 +95,7 @@ body {
 
 .masthead-nav {
     margin-top: .5rem;
+    white-space: nowrap;
     display: inline-flex;
 }
 
@@ -332,8 +346,13 @@ form[horizontal] {
     width: 100%;
 }
 
+.full-size {
+    width: 100%;
+    height: 100%;
+}
+
 .footer {
-    padding: 10px 30px;
+    padding: 10px var(--page-outer-padding);
     margin-top: 20px;
     color: var(--footer-color);
     border-top: 1px solid var(--border-color);
@@ -361,6 +380,7 @@ form[horizontal] {
     padding-left: 15px;
     padding-right: 15px;
 }
+
 
 .footer-status {
     display: inline-block;
@@ -790,6 +810,11 @@ html [full] {
     margin-bottom: 20px;
 }
 
+#connect-dialog #port-field {
+    /* Override the max-width to take the button into account */
+    max-width: calc(100% - 100px);
+}
+
 .masthead-item .octicon {
     top: 1px;
     position: relative;
@@ -798,4 +823,70 @@ html [full] {
 
 span.strong {
     font-weight: 600;
+}
+
+/*
+ * Support tagging elements with collapsible that can have children tagged
+ * with optional-text to be hidden when the page is below a certain threshold.
+ *
+ * Also support optional directly on elements to be hidden.
+ */
+
+@media all and (max-width: 550px) { .optional-550 { display: none; } }
+@media all and (max-width: 700px) { .optional-700 { display: none; } }
+@media all and (max-width: 850px) { .optional-850 { display: none; } }
+@media all and (max-width: 950px) { .optional-950 { display: none; } }
+@media all and (max-width: 1200px) { .optional-1200 { display: none; } }
+@media all and (max-width: 1400px) { .optional-1400 { display: none; } }
+
+
+/*
+ * Support tagging btn-groups with collapsible that can have children tagged
+ * with optional-text to be hidden when the page is below a certain threshold.
+ */
+
+@media all and (max-width: 700px) {
+    .btn-group.collapsible-700 .optional-text span {
+        display: none;
+    }
+
+    .btn-group.collapsible-700 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 1200px) {
+    .btn-group.collapsible-1200 .optional-text span {
+        display: none;
+    }
+
+    .btn-group.collapsible-1200 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 1400px) {
+    .btn-group.collapsible-1400 .optional-text span {
+        display: none;
+    }
+
+    .btn-group.collapsible-1400 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+/* Bidirectional splitters that change direction when window is wider/taller  */
+.bidirectional {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+@media (min-aspect-ratio: 1/1) {
+    .bidirectional {
+        flex-direction: row;
+    }
 }

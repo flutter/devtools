@@ -125,7 +125,7 @@ class MemoryScreen extends Screen with SetStateMixin {
                   resumeButton,
                 ]),
               div()..flex(),
-              div(c: 'btn-group flex-no-wrap margin-left')
+              div(c: 'btn-group collapsible-700 flex-no-wrap margin-left')
                 ..add(<CoreElement>[
                   vmMemorySnapshotButton,
                   resetAccumulatorsButton,
