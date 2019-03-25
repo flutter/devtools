@@ -19,20 +19,20 @@ import 'timeline_protocol.dart';
 
 // TODO(kenzie): implement zoom functionality.
 
-// Blue 100-300 (light mode) or 400, 600, 700 (dark mode) color palette from
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Light Blue 50 - 200-400 (light mode) or Blue 50 - 100-300 (dark mode) color
+// palette from https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final uiColorPalette = [
-  const ThemedColor(Color(0xFFBBDEFB), mainUiColorDark),
-  const ThemedColor(Color(0xFF90CAF9), Color(0xFF1E88E5)),
-  const ThemedColor(mainUiColorLight, Color(0xFF1976D2)),
+  const ThemedColor(mainUiColorLight, mainUiColorDark),
+  const ThemedColor(Color(0xFF4FC3F7), Color(0xFF90CAF9)),
+  const ThemedColor(Color(0xFF29B6F6), Color(0xFF64B5F6)),
 ];
 
-// Teal 100-300 (light mode) or 400-600 (dark mode) color palette from
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Light Blue 50 - 700-900 (light mode) or Blue 50 - 600-800 (dark mode) color
+// palette from https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 final gpuColorPalette = [
-  const ThemedColor(Color(0xFFB2DFDB), mainGpuColorDark),
-  const ThemedColor(Color(0xFF80CBC4), Color(0xFF009688)),
-  const ThemedColor(mainGpuColorLight, Color(0xFF00796B)),
+  const ThemedColor(mainGpuColorLight, mainGpuColorDark),
+  const ThemedColor(Color(0xFF0277BD), Color(0xFF1976D2)),
+  const ThemedColor(Color(0xFF01579B), Color(0xFF1565C0)),
 ];
 
 /// Inset for the start/end of the flame chart.
@@ -366,6 +366,8 @@ class FlameChartItem {
     this._backgroundColor, {
     bool includeDuration = false,
   }) {
+    defaultTextColor = event.isUiEvent ? Colors.black : Colors.white;
+
     final durationText = msText(Duration(microseconds: _event.duration));
     e = Element.div()..className = 'flame-chart-item';
     e.title = '${_event.name} ($durationText)';
@@ -395,8 +397,8 @@ class FlameChartItem {
     });
   }
 
-  final defaultTextColor = const ThemedColor(Colors.black, Colors.white);
-  final selectedTextColor = defaultBackground;
+  static const selectedTextColor = Colors.black;
+  Color defaultTextColor;
 
   // Pixels of padding to place on the right side of the label to ensure label
   // text does not get too close to the right hand size of each bar.
@@ -439,8 +441,13 @@ class FlameChartItem {
   }
 
   void setSelected(bool selected) {
-    e.style.backgroundColor =
-        colorToCss(selected ? selectedFlameChartItemColor : _backgroundColor);
+    e.style
+      ..backgroundColor =
+          colorToCss(selected ? selectedFlameChartItemColor : _backgroundColor)
+      ..border = selected ? '1px solid' : 'none'
+      ..borderColor = selected
+          ? colorToCss(const Color(0x5A1B1F23))
+          : colorToCss(const Color(0x231B1F23));
     _label.style.color =
         colorToCss(selected ? selectedTextColor : defaultTextColor);
   }

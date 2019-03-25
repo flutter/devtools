@@ -176,7 +176,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedGpuColor),
           font: Font(
-            color: colorToCss(hoverTextHighContrastColor),
+            color: colorToCss(hoverTextColor),
           ),
           bordercolor: colorToCss(selectedGpuColor),
         ),
@@ -219,7 +219,7 @@ class FramesBarPlotly {
         hoverlabel: HoverLabel(
           bgcolor: colorToCss(selectedUiColor),
           font: Font(
-            color: colorToCss(hoverTextHighContrastColor),
+            color: colorToCss(hoverTextColor),
           ),
           bordercolor: colorToCss(selectedUiColor),
         ),
