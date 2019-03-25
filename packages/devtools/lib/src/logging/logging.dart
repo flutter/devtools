@@ -92,7 +92,7 @@ class LoggingScreen extends Screen {
       [loggingTable.element, logDetailsUI],
       gutterSize: defaultSplitterWidth,
       horizontalSizes: [60, 40],
-      verticalSizes: [50, 50],
+      verticalSizes: [70, 30],
     );
 
     loggingTable.onSelect.listen((LogData selection) {
