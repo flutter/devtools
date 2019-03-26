@@ -85,11 +85,11 @@ Displays a list of all instances by their handle name. _TODO INSPECTING AN INSTA
 
 ## Memory Actions
 
-###Liveness of the Memory Usage Overview Chart
+### Liveness of the Memory Usage Overview Chart
 - Pause - Pause the memory usage overview chart to allow inspecting of of the data currently being plotted.  New memory data continues to receive new data, notice the Range Selector grows, to the right.
 - Resume - The memroy usage overview chart is live and displaying the current time and the latest memory data received.
 
-###Managing the Objects and Statistics in the Heap
+### Managing the Objects and Statistics in the Heap
 - Snapshot - Returns the list of all active classes in the heap.  The Accumulator column displays the number of allocated objects since the previous "Reset".
 - Reset - Zeroes out the Accumulator column in the Snapshot Classes table and refreshes the displayed data.
 - Filter - TODO
