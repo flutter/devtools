@@ -7,7 +7,7 @@ import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'app_utils.dart';
+import 'connected_app.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
@@ -129,13 +129,27 @@ class PerfToolFramework extends Framework {
   }
 
   Future<void> addScreens() async {
-    final _isFlutterApp = await isFlutterApp();
-    final _isFlutterWebApp = await isFlutterWebApp();
-    final _isProfileBuild = await isProfileBuild();
+    final _isFlutterApp = await serviceManager.connectedApp.isFlutterApp;
+    final _isFlutterWebApp = await serviceManager.connectedApp.isFlutterWebApp;
+    final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
+    final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
+
+    String getDebuggerDisabledTooltip() {
+      if (_isFlutterWebApp) {
+        return 'This screen is disabled because it is not yet ready for Flutter'
+            ' Web';
+      }
+      if (_isProfileBuild) {
+        return 'This screen is disabled because you are running a profile build'
+            ' of your application';
+      }
+      return 'This screen is disabled because it provides functionality already'
+          ' available in your code editor';
+    }
 
     addScreen(InspectorScreen(
-      disabled: (!_isFlutterApp && !_isFlutterWebApp) || _isProfileBuild,
-      disabledTooltip: !_isFlutterApp && !_isFlutterWebApp
+      disabled: !_isAnyFlutterApp || _isProfileBuild,
+      disabledTooltip: !_isAnyFlutterApp
           ? 'This screen is disabled because you are not running a Flutter '
               'application'
           : 'This screen is disabled because you are running a profile build '
@@ -161,14 +175,7 @@ class PerfToolFramework extends Framework {
     addScreen(DebuggerScreen(
       disabled:
           _isFlutterWebApp || _isProfileBuild || tabDisabledByQuery('debugger'),
-      disabledTooltip: _isFlutterWebApp
-          ? 'This screen is disabled because it is not yet ready for Flutter'
-              ' Web'
-          : (_isProfileBuild
-              ? 'This screen is disabled because you are running a profile '
-                  'build of your application'
-              : 'This screen is disabled because it provides functionality '
-              'already available in your code editor'),
+      disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
   }
