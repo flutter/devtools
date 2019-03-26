@@ -7,7 +7,7 @@ title: Using the Memory View
 
 ## What is it?
 
-Dynamically allocated Dart objects (e.g., new ClassName()) live in a portion of memory called the heap.
+Dynamically allocated Dart objects e.g., ```new ClassName()``` live in a portion of memory called the heap.
 
 DevTool’s Memory profile tab lets you peek at how an isolate is using memory at a given moment. This page also provides accumulator counts that you can use to study the rate of memory allocation. The accumulators are useful if you suspect that your application is leaking memory, or has other bugs relating to memory allocation.
 
@@ -45,7 +45,7 @@ garbage collection and Resident Set Size.
 - Inspecting contents of an instance - _TODO_
 - Total Active Objects and Classes in the Heap - Total Classes allocated in the Heap and Total Objects (instances) in the Heap.
 
-### Memory Chart
+## Memory Chart
 
 <img src="images/memory_basic_chart.png" width="800" />
 
@@ -65,7 +65,7 @@ To view RSS click on the RSS name in the legend.
 
 For more detailed information on the [Dart VM](https://mrale.ph/dartvm/) and memory.
 
-### Event Timeline
+## Event Timeline
 
 <img src="images/memory_parts.png" width="800" />
 
@@ -74,26 +74,28 @@ Chart displaying when a DevTool event (Snapshot and Reset button clicked) in rel
 Clicking on the Snapshot button will show the current state of the memory (heap) with regards to all active classes their instances.  When the Reset button is pressed the accumulator for all classes reset to zero, notice that the reset is tied with a faint blue when a Snapshot is again clicked displays the new accumulators values since the last Reset. 
 
 
-### Snapshot Classes
+## Snapshot Classes
 - Size - Total amount of memory used by current objects in the heap.
 - Count - Total number of current objects in the heap.
 - Accumulator - Total number of objects in the heap since the last reset.
 - Class - An aggregate of the objects allocated to this class. Clicking the class takes you to the list of all instances of this class.
 
-### Instances of a Class
+## Instances of a Class
 Displays a list of all instances by their handle name. _TODO INSPECTING AN INSTANCE_.
 
-### Memory Actions
-####Liveness of the Memory Usage Overview Chart
+## Memory Actions
+
+###Liveness of the Memory Usage Overview Chart
 - Pause - Pause the memory usage overview chart to allow inspecting of of the data currently being plotted.  New memory data continues to receive new data, notice the Range Selector grows, to the right.
 - Resume - The memroy usage overview chart is live and displaying the current time and the latest memory data received.
-####Managing the Objects and Statistics in the Heap
+
+###Managing the Objects and Statistics in the Heap
 - Snapshot - Returns the list of all active classes in the heap.  The Accumulator column displays the number of allocated objects since the previous "Reset".
 - Reset - Zeroes out the Accumulator column in the Snapshot Classes table and refreshes the displayed data.
 - Filter - TODO
 - GC - Initiates a garbage collection.
 
-### Glossary of VM Terms
+## Glossary of VM Terms
 To truly understand how DevTool works, you need to understand computer science concepts such as memory allocation, the heap, garbage collection, and memory leaks. This glossary contains brief definitions of some of the terms used by DevTool.
 - Garbage collection - (GC) is the process of searching the heap to locate, and reclaim, regions of “dead” memory—memory that is no longer being used by an application. This process allows the memory to be re-used and minimizes the risk of an application running out of memory, causing it to crash. Garbage collection is performed automatically by the Dart VM. In DevTool, you can perform garbage collection on demand by clicking the GC button.
 - Heap - Dart objects that are dynamically allocated live in a portion of memory called the heap. An object allocated from the heap is freed (eligible for garbage collection) when nothing points to it, or when the application terminates. When nothing points to an object, it is considered to be dead. When an object is pointed to by another object, it is live.
