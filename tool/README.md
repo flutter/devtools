@@ -9,7 +9,7 @@ title: Publishing Devtool
 
 Create a branch for your release. Below we're creating release 0.0.15, with all the PRs. 
 
-# Update master and create a local release branch
+# Update master branch and create a local release branch
 ```shell
 cd ~/devtools-git/devtools
 
@@ -22,7 +22,7 @@ git checkout -b release_0_0_15
 cd packages/devtools
 ```
 
-# Update to the release number in two files:
+# Update the release number in two files:
 - **packages/devtools/pubspec.yaml**
 
 Change the ```version version: 0.0.15``` to ```version version: 0.0.15```
@@ -31,7 +31,7 @@ Change the ```version version: 0.0.15``` to ```version version: 0.0.15```
 
 Change the ```const String version = '0.0.14';``` to ```const String version = '0.0.15';```
 
-# Update to the CHANGELOG.md
+# Update the CHANGELOG.md
 - **packages/devtools/CHANGELOG.md**
 
 Add the release number and date followed by the features or changes e.g.,
