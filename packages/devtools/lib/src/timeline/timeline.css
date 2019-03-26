@@ -110,6 +110,11 @@
     padding-left: 4px;
     padding-right: 4px;
     cursor: default;
+    color: white;
+}
+
+.flame-chart-section.ui .flame-chart-item.flame-chart-title {
+    color: black;
 }
 
 .flame-chart-grid {

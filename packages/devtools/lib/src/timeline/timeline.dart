@@ -23,16 +23,16 @@ import 'timeline_protocol.dart';
 // Light mode is Light Blue 50 palette and Dark mode is Blue 50 palette.
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
-const mainUiColorSelectedLight = Color(0xFF0091EA); // Light Blue 50 - A700
+const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
 
 const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
-const mainGpuColorSelectedLight = Color(0xFF01579B); // Light Blue 50 - 900
+const mainGpuColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
 
 const mainUiColorDark = Color(0xFFBBDEFB); // Blue 50 - 100
-const mainUiColorSelectedDark = Color(0xFF82B1FF); // Blue 50 - A100
+const mainUiColorSelectedDark = Colors.white;
 
-const mainGpuColorDark = Color(0xFF02196F3); // Blue 50 - 500
-const mainGpuColorSelectedDark = Color(0xFF1565C0); // Blue 50 - 800
+const mainGpuColorDark = Color(0xFF1E88E5); // Blue 50 - 600
+const mainGpuColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
@@ -43,7 +43,7 @@ const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
 const selectedFlameChartItemColor =
-    ThemedColor(Color(0xFF4078C0), Colors.white);
+    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
 
 const jankGlowInside =
     ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
