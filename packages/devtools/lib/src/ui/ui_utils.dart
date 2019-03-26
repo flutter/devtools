@@ -21,6 +21,12 @@ import 'primer.dart';
 
 const int defaultSplitterWidth = 10;
 
+const debugModeWarning = '''You are running your app in debug mode. Debug mode
+frame rendering times are not indicative of release performance.
+
+Relaunch your application in profile mode by running 'flutter run --profile', or
+launch in profile mode from VS Code or IntelliJ.''';
+
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {
   final extensionName = extensionDescription.extension;
@@ -137,6 +143,12 @@ CoreElement createHotRestartButton(Framework framework) {
     action,
     errorAction,
   ).button;
+}
+
+Future<void> maybeShowDebugWarning(Framework framework) async {
+  if (!await serviceManager.connectedApp.isProfileBuild) {
+    framework.showWarning(debugModeWarning);
+  }
 }
 
 /// Button that calls a service extension. Service extensions can be found in

@@ -14,6 +14,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/ui_utils.dart';
 import '../utils.dart';
 
 import 'memory_chart.dart';
@@ -60,6 +61,11 @@ class MemoryScreen extends Screen with SetStateMixin {
   @override
   void entering() {
     _updateListeningState();
+  }
+
+  @override
+  void exiting() {
+    framework.clearMessages();
   }
 
   void updateResumeButton({@required bool disabled}) {
@@ -149,6 +155,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryController.onDisconnect.listen((__) {
       serviceDisconnet();
     });
+
+    maybeShowDebugWarning(framework);
 
     _pushNextTable(null, _createHeapStatsTableView());
 
