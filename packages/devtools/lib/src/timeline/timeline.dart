@@ -206,7 +206,7 @@ class TimelineScreen extends Screen {
 frame rendering times are not indicative of release performance.
 
 Relaunch your application in profile mode by running 'flutter run --profile', or
-launch in profile mode from VS code or IntelliJ.''',
+launch in profile mode from VS Code or IntelliJ.''',
       );
     }
   }
