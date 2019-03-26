@@ -188,7 +188,7 @@ class TimelineScreen extends Screen {
     _updateListeningState();
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) {
+  void _handleConnectionStart(VmServiceWrapper service) async {
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
@@ -199,6 +199,16 @@ class TimelineScreen extends Screen {
         timelineController.timelineData?.processTraceEvent(e);
       }
     });
+
+    if (!await serviceManager.connectedApp.isProfileBuild) {
+      framework.showWarning(
+        '''You are running your app in debug mode. Debug mode
+frame rendering times are not indicative of release performance.
+
+Relaunch your application in profile mode by running 'flutter run --profile', or
+launch in profile mode from VS code or IntelliJ.''',
+      );
+    }
   }
 
   void _handleConnectionStop(dynamic event) {
