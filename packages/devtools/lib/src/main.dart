@@ -7,9 +7,9 @@ import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import 'app_utils.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
-import 'eval_on_dart_library.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
 import 'inspector/inspector.dart';
@@ -128,69 +128,21 @@ class PerfToolFramework extends Framework {
     showError(title, error);
   }
 
-  Future<bool> isFlutterApp() async {
-    final EvalOnDartLibrary flutterLibrary = EvalOnDartLibrary(
-      [flutterLibraryUri, flutterWebLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  Future<bool> isFlutterWebApp() async {
-    // TODO(kenzie): fix this if screens should still be disabled when flutter
-    // merges with flutter_web.
-    final EvalOnDartLibrary flutterWebLibrary = EvalOnDartLibrary(
-      [flutterWebLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterWebLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  Future<bool> isProfileBuild() async {
-    try {
-      final Isolate isolate = await serviceManager.service
-          .getIsolate(serviceManager.isolateManager.isolates.first.id);
-      // This evaluate statement will throw an error in a profile build.
-      await serviceManager.service.evaluate(
-        serviceManager.isolateManager.isolates.first.id,
-        isolate.rootLib.id,
-        '1+1',
-      );
-      // If we reach this return statement, no error was thrown and this is not
-      // a profile build.
-      return false;
-    } on RPCError catch (_) {
-      return true;
-    }
-  }
-
   Future<void> addScreens() async {
     final _isFlutterApp = await isFlutterApp();
     final _isFlutterWebApp = await isFlutterWebApp();
     final _isProfileBuild = await isProfileBuild();
 
     addScreen(InspectorScreen(
-      disabled: !_isFlutterApp || !_isFlutterWebApp || _isProfileBuild,
-      disabledTooltip: (!_isFlutterApp || !_isFlutterWebApp)
+      disabled: (!_isFlutterApp && !_isFlutterWebApp) || _isProfileBuild,
+      disabledTooltip: !_isFlutterApp && !_isFlutterWebApp
           ? 'This screen is disabled because you are not running a Flutter '
               'application'
           : 'This screen is disabled because you are running a profile build '
           'of your application',
     ));
     addScreen(TimelineScreen(
-      disabled: !_isFlutterApp || _isFlutterWebApp,
+      disabled: !_isFlutterApp,
       disabledTooltip: _isFlutterWebApp
           ? 'This screen is disabled because it is not yet ready for Flutter'
               ' Web'
@@ -206,7 +158,6 @@ class PerfToolFramework extends Framework {
     if (showPerformancePage) {
       addScreen(PerformanceScreen());
     }
-
     addScreen(DebuggerScreen(
       disabled:
           _isFlutterWebApp || _isProfileBuild || tabDisabledByQuery('debugger'),

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import 'app_utils.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
@@ -178,10 +179,14 @@ class ServiceConnectionManager {
       'GC',
       'Timeline',
       'Extension',
-      '_Graph',
-      '_Logging',
       '_Service',
     ];
+
+    // The following streams are not yet supported by Flutter Web.
+    final _isFlutterWebApp = await isFlutterWebApp();
+    if (!_isFlutterWebApp) {
+      streamIds.addAll(['_Graph', '_Logging']);
+    }
 
     await Future.wait(streamIds.map((String id) async {
       try {
