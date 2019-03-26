@@ -30,21 +30,12 @@ import 'utils.dart';
 const bool showMemoryPage = false;
 const bool showPerformancePage = false;
 
+const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
+const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
+
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
-    addScreen(InspectorScreen());
-    addScreen(TimelineScreen());
-    addScreen(MemoryScreen());
-    if (showPerformancePage) {
-      addScreen(PerformanceScreen());
-    }
-    addScreen(DebuggerScreen(disabled: shouldDisableTab('debugger')));
-    addScreen(LoggingScreen());
-
-    sortScreens();
-
     initGlobalUI();
-
     initTestingModel();
   }
 
@@ -57,7 +48,12 @@ class PerfToolFramework extends Framework {
   static const _reloadTooltip = 'Hot Reload';
   static const _restartTooltip = 'Hot Restart';
 
-  void initGlobalUI() {
+  void initGlobalUI() async {
+    await serviceManager.serviceAvailable.future;
+    await addScreens();
+    sortScreens();
+    screensReady.complete();
+
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
 
@@ -74,8 +70,7 @@ class PerfToolFramework extends Framework {
             toast(link.tooltip);
           })
           ..toggleClass('disabled', true)
-          ..tooltip =
-              'This section is disabled because it provides functionality already available in your code editor';
+          ..tooltip = screen.disabledTooltip;
       } else {
         link
           ..attributes['href'] = screen.ref
@@ -119,6 +114,10 @@ class PerfToolFramework extends Framework {
     });
   }
 
+  void initTestingModel() {
+    App.register(this);
+  }
+
   void disableAppWithError(String title, [dynamic error]) {
     document
         .getElementById('header')
@@ -128,8 +127,56 @@ class PerfToolFramework extends Framework {
     showError(title, error);
   }
 
-  void initTestingModel() {
-    App.register(this);
+  Future<void> addScreens() async {
+    final _isFlutterApp = await serviceManager.connectedApp.isFlutterApp;
+    final _isFlutterWebApp = await serviceManager.connectedApp.isFlutterWebApp;
+    final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
+    final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
+
+    String getDebuggerDisabledTooltip() {
+      if (_isFlutterWebApp) {
+        return 'This screen is disabled because it is not yet ready for Flutter'
+            ' Web';
+      }
+      if (_isProfileBuild) {
+        return 'This screen is disabled because you are running a profile build'
+            ' of your application';
+      }
+      return 'This screen is disabled because it provides functionality already'
+          ' available in your code editor';
+    }
+
+    addScreen(InspectorScreen(
+      disabled: !_isAnyFlutterApp || _isProfileBuild,
+      disabledTooltip: !_isAnyFlutterApp
+          ? 'This screen is disabled because you are not running a Flutter '
+              'application'
+          : 'This screen is disabled because you are running a profile build '
+          'of your application',
+    ));
+    addScreen(TimelineScreen(
+      disabled: !_isFlutterApp,
+      disabledTooltip: _isFlutterWebApp
+          ? 'This screen is disabled because it is not yet ready for Flutter'
+              ' Web'
+          : 'This screen is disabled because you are not running a '
+          'Flutter application',
+    ));
+    addScreen(MemoryScreen(
+      disabled: _isFlutterWebApp,
+      disabledTooltip:
+          'This screen is disabled because it is not yet ready for Flutter'
+          ' Web',
+    ));
+    if (showPerformancePage) {
+      addScreen(PerformanceScreen());
+    }
+    addScreen(DebuggerScreen(
+      disabled:
+          _isFlutterWebApp || _isProfileBuild || tabDisabledByQuery('debugger'),
+      disabledTooltip: getDebuggerDisabledTooltip(),
+    ));
+    addScreen(LoggingScreen());
   }
 
   void sortScreens() {

@@ -23,10 +23,10 @@ class FrameworkCore {
     final Uri uri = Uri.parse(window.location.toString());
     theme.initializeTheme(uri.queryParameters['theme']);
 
-    _setServiceConnectionManager();
+    _setGlobals();
   }
 
-  static void _setServiceConnectionManager() {
+  static void _setGlobals() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
   }

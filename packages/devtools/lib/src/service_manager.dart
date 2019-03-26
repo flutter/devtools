@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
@@ -15,9 +16,8 @@ import 'vm_service_wrapper.dart';
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    final IsolateManager isolateManager = IsolateManager();
-    final ServiceExtensionManager serviceExtensionManager =
-        ServiceExtensionManager();
+    final isolateManager = IsolateManager();
+    final serviceExtensionManager = ServiceExtensionManager();
     isolateManager._serviceExtensionManager = serviceExtensionManager;
     serviceExtensionManager._isolateManager = isolateManager;
     _isolateManager = isolateManager;
@@ -58,6 +58,8 @@ class ServiceConnectionManager {
 
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
+
+  ConnectedApp connectedApp;
 
   VmServiceWrapper service;
   VM vm;
@@ -143,6 +145,8 @@ class ServiceConnectionManager {
     this.service = service;
     serviceAvailable.complete();
 
+    connectedApp = ConnectedApp();
+
     service.onServiceEvent.listen((e) {
       if (e.kind == EventKind.kServiceRegistered) {
         if (!_registeredMethodsForService.containsKey(e.service)) {
@@ -178,10 +182,13 @@ class ServiceConnectionManager {
       'GC',
       'Timeline',
       'Extension',
-      '_Graph',
-      '_Logging',
       '_Service',
     ];
+
+    // The following streams are not yet supported by Flutter Web.
+    if (!await connectedApp.isFlutterWebApp) {
+      streamIds.addAll(['_Graph', '_Logging']);
+    }
 
     await Future.wait(streamIds.map((String id) async {
       try {
@@ -197,6 +204,7 @@ class ServiceConnectionManager {
     service = null;
     vm = null;
     sdkVersion = null;
+    connectedApp = null;
 
     _stateController.add(null);
     _connectionClosedController.add(null);

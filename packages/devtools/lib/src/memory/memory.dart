@@ -22,8 +22,14 @@ import 'memory_detail.dart';
 import 'memory_protocol.dart';
 
 class MemoryScreen extends Screen with SetStateMixin {
-  MemoryScreen()
-      : super(name: 'Memory', id: 'memory', iconClass: 'octicon-package') {
+  MemoryScreen({bool disabled, String disabledTooltip})
+      : super(
+          name: 'Memory',
+          id: 'memory',
+          iconClass: 'octicon-package',
+          disabled: disabled,
+          disabledTooltip: disabledTooltip,
+        ) {
     classCountStatus = StatusItem();
     addStatusItem(classCountStatus);
 

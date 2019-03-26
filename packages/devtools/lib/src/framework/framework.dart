@@ -31,6 +31,8 @@ class Framework {
 
   final List<Screen> screens = <Screen>[];
 
+  final Completer<void> screensReady = Completer();
+
   Screen current;
 
   StatusLine globalStatus;
@@ -60,21 +62,23 @@ class Framework {
     connectDialog.show();
   }
 
-  void loadScreenFromLocation() {
-    // Screens are identified by the hash as that works better with the webdev
-    // server.
-    String id = window.location.hash;
-    if (id.isNotEmpty) {
-      assert(id[0] == '#');
-      id = id.substring(1);
-    }
-    Screen screen = getScreen(id, onlyEnabled: true);
-    screen ??= screens.first;
-    if (screen != null) {
-      load(screen);
-    } else {
-      load(NotFoundScreen());
-    }
+  void loadScreenFromLocation() async {
+    await screensReady.future.whenComplete(() {
+      // Screens are identified by the hash as that works better with the webdev
+      // server.
+      String id = window.location.hash;
+      if (id.isNotEmpty) {
+        assert(id[0] == '#');
+        id = id.substring(1);
+      }
+      Screen screen = getScreen(id, onlyEnabled: true);
+      screen ??= screens.first;
+      if (screen != null) {
+        load(screen);
+      } else {
+        load(NotFoundScreen());
+      }
+    });
   }
 
   Screen getScreen(String id, {bool onlyEnabled = false}) {
@@ -319,6 +323,7 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabled = false,
+    this.disabledTooltip = 'This screen is not available',
   }) : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
@@ -332,6 +337,7 @@ abstract class Screen {
   final String iconClass;
   final StatusItem helpStatus;
   final bool disabled;
+  final String disabledTooltip;
 
   bool needsResizing = false;
 

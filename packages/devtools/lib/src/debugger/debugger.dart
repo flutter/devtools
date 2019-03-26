@@ -34,13 +34,16 @@ import '../utils.dart';
 // TODO(devoncarew): handle displaying large lists, maps, in the variables view
 
 class DebuggerScreen extends Screen {
-  DebuggerScreen({bool disabled})
-      : debuggerState = DebuggerState(),
+  DebuggerScreen({
+    bool disabled,
+    String disabledTooltip,
+  })  : debuggerState = DebuggerState(),
         super(
           name: 'Debugger',
           id: 'debugger',
           iconClass: 'octicon-bug',
           disabled: disabled,
+          disabledTooltip: disabledTooltip,
         ) {
     deviceStatus = StatusItem();
     addStatusItem(deviceStatus);
