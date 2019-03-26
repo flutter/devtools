@@ -7,7 +7,6 @@ import 'dart:html' hide Screen;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'connected_app.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
