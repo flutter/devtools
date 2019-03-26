@@ -33,7 +33,7 @@
 }
 
 .break-on-exceptions {
-    line-height: 28px;
+    line-height: 32px;
 }
 
 .break-on-exceptions label {
@@ -47,4 +47,18 @@
 .flex-no-wrap {
     flex-wrap: nowrap;
     white-space: nowrap;
+}
+
+/* Octicons CSS fixes (make 16px and centered) */
+/* These icons are 8px wide and have 8px padding on the right, so offset
+ * by 4px to the left */
+ .octicon-chevron-right {
+    margin-left: 4px;
+    margin-right: -4px;
+}
+/* These icons are 10px wide and have 6px padding on the right, so offset
+ * by 3px to the left */
+ .octicon-chevron-down, .octicon-chevron-up {
+    margin-left: 3px;
+    margin-right: -3px;
 }

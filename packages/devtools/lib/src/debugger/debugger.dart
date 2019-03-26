@@ -132,33 +132,22 @@ class DebuggerScreen extends Screen {
             ..element.style.overflowX = 'hidden'
             ..layoutVertical()
             ..add(<CoreElement>[
-              div(c: 'section')
+              div(c: 'section flex-wrap')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  pauseButton,
-                  resumeButton,
-                  div(c: 'btn-group flex-no-wrap margin-left')
+                  div(c: 'btn-group collapsible-700 flex-no-wrap')
                     ..add(<CoreElement>[
-                      stepIn = PButton()
-                        ..add(<CoreElement>[
-                          span(c: 'octicon octicon-chevron-down'),
-                          span(text: 'Step in'),
-                        ])
-                        ..small(),
-                      stepOver = PButton()
-                        ..add(<CoreElement>[
-                          span(c: 'octicon octicon-chevron-right'),
-                          span(text: 'Step over'),
-                        ])
-                        ..small(),
-                      stepOut = PButton()
-                        ..add(<CoreElement>[
-                          span(c: 'octicon octicon-chevron-up'),
-                          span(text: 'Step out'),
-                        ])
-                        ..small(),
+                      pauseButton,
+                      resumeButton,
                     ]),
-                  div()..flex(),
+                  div(c: 'btn-group flex-no-wrap margin-left collapsible-1000')
+                    ..add(<CoreElement>[
+                      stepIn = PButton.octicon('Step in', icon: 'chevron-down'),
+                      stepOver =
+                          PButton.octicon('Step over', icon: 'chevron-right'),
+                      stepOut = PButton.octicon('Step out', icon: 'chevron-up'),
+                    ]),
+                  div(c: 'margin-right')..flex(),
                   breakOnExceptionControl,
                 ]),
               sourceArea = div(c: 'section table-border')
@@ -1376,7 +1365,7 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
 
 class BreakOnExceptionControl extends CoreElement {
   BreakOnExceptionControl()
-      : super('div', classes: 'break-on-exceptions margin-left flex-no-wrap') {
+      : super('div', classes: 'break-on-exceptions flex-no-wrap') {
     final CoreElement unhandledExceptionsElement = CoreElement('input')
       ..setAttribute('type', 'checkbox');
     _unhandledElement = unhandledExceptionsElement.element;
@@ -1386,7 +1375,9 @@ class BreakOnExceptionControl extends CoreElement {
     _allElement = allExceptionsElement.element;
 
     add([
-      span(text: 'Break on exceptions: ', c: 'strong'),
+      span(text: 'Break on', c: 'strong'),
+      span(text: ' exceptions', c: 'strong optional-1000'),
+      span(text: ': ', c: 'strong'),
       CoreElement('label')
         ..add(<CoreElement>[
           unhandledExceptionsElement,
