@@ -67,7 +67,7 @@ For more detailed information on the [Dart VM](https://mrale.ph/dartvm/) and mem
 
 ### Event Timeline
 
-<img src='images/memory_parts.png" width="800" />
+<img src="images/memory_parts.png" width="800" />
 
 Chart displaying when a DevTool event (Snapshot and Reset button clicked) in relation to the timeline of the memory chart.  Hovering over the markers in the Event timeline will display the time when the Snapshot or Reset happened.  This helps to correlate to when in the timeline (x-axis) a memory leak might have occurred.
 
