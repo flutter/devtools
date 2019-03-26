@@ -63,6 +63,8 @@ From the git UI tool create the PR, squash and commit.
 ```shell
 cd ~/devtools-git/devtools
 
+git checkout master
+
 git pull upstream master
 ```
 ## Prep to publish
