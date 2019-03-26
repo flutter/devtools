@@ -185,6 +185,7 @@ class TimelineScreen extends Screen {
 
   @override
   void exiting() {
+    framework.clearMessages();
     _updateListeningState();
   }
 
