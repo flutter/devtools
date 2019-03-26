@@ -175,6 +175,8 @@ class TimelineScreen extends Screen {
 
     onSelectedFlameChartItem.listen(eventDetails.update);
 
+    maybeShowDebugWarning(framework);
+
     return screenDiv;
   }
 
@@ -185,6 +187,7 @@ class TimelineScreen extends Screen {
 
   @override
   void exiting() {
+    framework.clearMessages();
     _updateListeningState();
   }
 
