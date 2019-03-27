@@ -28,7 +28,11 @@ class VmServiceWrapper implements VmService {
   final Map<String, Future<Success>> _activeStreams = {};
 
   final Set<TrackedFuture<Object>> activeFutures = {};
-  Completer<bool> _allFuturesCompleter = Completer<bool>();
+  Completer<bool> _allFuturesCompleter = Completer<bool>()
+    // Mark the future as completed by default so if we don't track any
+    // futures but someone tries to wait on [allFuturesCompleted] they don't
+    // hang. The first tracked future will replace this with a new completer.
+    ..complete(true);
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
   @override
