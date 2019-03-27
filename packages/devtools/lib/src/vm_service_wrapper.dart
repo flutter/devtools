@@ -23,8 +23,7 @@ class VmServiceWrapper implements VmService {
   final Map<String, Future<Success>> _activeStreams = {};
 
   // ignore: prefer_collection_literals
-  final Set<Future<Object>> activeFutures = Set();
-  final Map<Future, String> activeFutureDescriptions = {};
+  final Set<TrackedFuture<Object>> activeFutures = Set();
   Completer<bool> _allFuturesCompleter = Completer<bool>();
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
@@ -174,7 +173,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<FlagList> getFlagList() =>
-      _trackFuture('getFlagList', _vmService.getFlagList());
+      _trackFuture("getFlagList", _vmService.getFlagList());
 
   @override
   Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
@@ -425,19 +424,17 @@ class VmServiceWrapper implements VmService {
     _allFuturesCompleter = Completer<bool>();
     _allFuturesCompleter.complete(true);
     activeFutures.clear();
-    activeFutureDescriptions.clear();
   }
 
   Future<T> _trackFuture<T>(String name, Future<T> future) {
+    final trackedFuture = new TrackedFuture(name, future);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
-    activeFutures.add(future);
-    activeFutureDescriptions.putIfAbsent(future, () => name);
+    activeFutures.add(trackedFuture);
 
     void futureComplete() {
-      activeFutures.remove(future);
-      activeFutureDescriptions.remove(future);
+      activeFutures.remove(trackedFuture);
       if (activeFutures.isEmpty && !_allFuturesCompleter.isCompleted) {
         _allFuturesCompleter.complete(true);
       }
@@ -449,4 +446,11 @@ class VmServiceWrapper implements VmService {
     );
     return future;
   }
+}
+
+class TrackedFuture<T> {
+  TrackedFuture(this.name, this.future);
+
+  final String name;
+  final Future<T> future;
 }
