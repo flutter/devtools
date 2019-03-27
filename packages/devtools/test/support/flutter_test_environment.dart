@@ -89,7 +89,7 @@ class FlutterTestEnvironment {
     }
     if (_beforeTearDown != null) await _beforeTearDown();
 
-    await _service.allFuturesCompleted.timeout(Duration(seconds: 20),
+    await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
         onTimeout: () {
       throw 'Timed out waiting for futures to complete during teardown. '
           '${_service.activeFutures.length} futures remained:\n\n'
