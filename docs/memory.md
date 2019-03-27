@@ -95,7 +95,7 @@ Displays a list of class instances by their handle name. **_TODO: Add link to in
 
 ### Liveness of the Memory Overview Chart
 - Pause - Pause the memory overview chart to allow inspecting the currently plotted data. Incoming memory data is still received; notice the Range Selector continues to grow to the right.
-- Resume - The memroy overview chart is live and displaying the current time and the latest memory data received.
+- Resume - The memory overview chart is live and displaying the current time and the latest memory data received.
 
 ### Managing the Objects and Statistics in the Heap
 - Snapshot - Returns the list of active classes in the heap. The Accumulator column displays the number of allocated objects since the previous "Reset".
@@ -105,7 +105,7 @@ Displays a list of class instances by their handle name. **_TODO: Add link to in
 
 ## Glossary of VM Terms
 Here are some computer science concepts that will help you better understand how your application uses memory.
-- Garbage collection (GC) - GC is the process of searching the heap to locate, and reclaim, regions of “dead” memory—memory that is no longer being used by an application. This process allows the memory to be re-used and minimizes the risk of an application running out of memory, causing it to crash. Garbage collection is performed automatically by the Dart VM. In DevTool, you can perform garbage collection on demand by clicking the GC button.
+- Garbage collection (GC) - GC is the process of searching the heap to locate, and reclaim, regions of “dead” memory—memory that is no longer being used by an application. This process allows the memory to be re-used and minimizes the risk of an application running out of memory, causing it to crash. Garbage collection is performed automatically by the Dart VM. In DevTools, you can perform garbage collection on demand by clicking the GC button.
 - Heap - Dart objects that are dynamically allocated live in a portion of memory called the heap. An object allocated from the heap is freed (eligible for garbage collection) when nothing points to it, or when the application terminates. When nothing points to an object, it is considered to be dead. When an object is pointed to by another object, it is live.
 - Isolates - Dart supports concurrent execution by way of isolates, which you can think of as processes without the overhead. Each isolate has its own memory and code, which can’t be affected by any other isolate. For more information, see [The Event Loop and Dart](https://webdev.dartlang.org/articles/performance/event-loop).
 - Memory leak - A memory leak occurs when an object is live (meaning that another object points to it) but it is not being used (so it shouldn’t have any references from other objects). Such an object can’t be garbage collected, so it takes up space in the heap and contributes to memory fragmentation. Memory leaks put unnecessary pressure on the VM and can be difficult to debug.
