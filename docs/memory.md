@@ -27,7 +27,7 @@ Memory profiling consists of four parts, each increasing in granularity:
 
 **Use a profile build of your application to analyze performance.** Memory usage is not indicative of release performance unless your application is run in profile mode. In general, memory usage is fairly accurate in relative terms between debug, release or profile mode. However, the absolute memory used maybe higher in debug versus release builds. In a release build work can be computed and optimized ahead of time.  However, in a debug build that same work may have to be computed at runtime. 
 
-## Memory Overview Chart
+## Memory Anatomy
 
 Is a timeseries graph to visualize the state of the Flutter memory at successive intervals of time. Each data point on
 the chart corresponds to the timestamp (x-axis) of measured quantities (y-axis) of the heap e.g., usage, capacity, external,
