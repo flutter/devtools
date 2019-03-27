@@ -183,11 +183,11 @@ class InspectorScreen extends Screen {
         displayedWidgetTrackingNotice = true;
 
         framework.showWarning(
-            '''The widget creation tracking feature is not enabled; this feature
-allows the Flutter inspector to present the widget tree in a manner similar to
-how the UI was defined in your source code. Without it, the tree of nodes in the
-widget tree are much deeper, and it can be more difficult to understand how the
-runtime widget hierarchy corresponds to your application’s UI.
+            message: '''The widget creation tracking feature is not enabled;
+this feature allows the Flutter inspector to present the widget tree in a manner
+similar to how the UI was defined in your source code. Without it, the tree of
+nodes in the widget tree are much deeper, and it can be more difficult to
+understand how the runtime widget hierarchy corresponds to your application’s UI.
 
 To fix this, relaunch your application by running 'flutter run
 --track-widget-creation' (or run your application from VS Code or IntelliJ).''');
