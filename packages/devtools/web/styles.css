@@ -889,11 +889,6 @@ span.strong {
         margin-right: 0;
         box-sizing: content-box;
     }
-
-    .btn-group.collapsible-1200 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
 }
 
 @media all and (max-width: 1400px) {
