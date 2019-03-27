@@ -67,6 +67,7 @@ class PButton extends CoreElement {
 
   PButton.octicon(String text, {@required String icon})
       : super('button', classes: 'btn optional-text') {
+    tooltip = text;
     add(<CoreElement>[
       span(c: 'octicon octicon-$icon'),
       span(c: 'optional-text', text: text),
