@@ -7,23 +7,27 @@ import 'dart:async';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 class VmServiceWrapper implements VmService {
-  VmServiceWrapper(this._vmService);
+  VmServiceWrapper(
+    this._vmService, {
+    this.trackFutures = false,
+  });
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
     void writeMessage(String message), {
     Log log,
     DisposeHandler disposeHandler,
+    this.trackFutures = false,
   }) {
     _vmService = VmService(inStream, writeMessage,
         log: log, disposeHandler: disposeHandler);
   }
 
   VmService _vmService;
+  final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
-  // ignore: prefer_collection_literals
-  final Set<TrackedFuture<Object>> activeFutures = Set();
+  final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>();
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
@@ -173,7 +177,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<FlagList> getFlagList() =>
-      _trackFuture("getFlagList", _vmService.getFlagList());
+      _trackFuture('getFlagList', _vmService.getFlagList());
 
   @override
   Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
@@ -427,6 +431,9 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<T> _trackFuture<T>(String name, Future<T> future) {
+    if (!trackFutures) {
+      return future;
+    }
     final trackedFuture = new TrackedFuture(name, future);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
