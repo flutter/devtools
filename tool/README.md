@@ -53,7 +53,9 @@ From the git UI tool create the PR, squash and commit.
 
 ## Publishing DevTools
 ### Update your master branch from the remote repository
-> Ensure that the tip of master is at the above commit, just made, otherwise checkout using the SHA1 of the above commit. 
+> Ensure that the tip of master is the above commit, just made with the exact set of PRs wanted.  Otherwise, checkout using the SHA1 of the above commit e.g.,
+``` git checkout -b release_15 <SHA1>``` then proceed to the step 'Prep to publish'.
+
 ```shell
 cd ~/devtools-git/devtools
 
@@ -66,7 +68,7 @@ git pull upstream master
 ./tool/publish.sh
 ``` 
 ### Publish
-- #### Verify the package works DevTools
+- #### Verify the package works (DevTools)
 - #### Publish the package
 ```shell
 cd packages/devtools
