@@ -97,7 +97,7 @@ Displays a list of class instances by their handle name. **_TODO: Add link to in
 
 ## Memory Actions
 
-<img src="images/memory_actions.png" width="800" />
+<img src="images/memory_actions.png" />
 
 ### Liveness of the Memory Overview Chart
 - Pause - Pause the memory overview chart to allow inspecting the currently plotted data. Incoming memory data is still received; notice the Range Selector continues to grow to the right.
