@@ -2,8 +2,8 @@
 
 ## What is this?
 
-This is a companion repo to the main [flutter repo](https://github.com/flutter/flutter).
-It contains the source code for a suite of performance tools for Dart and Flutter.
+Dart DevTools is a suite of performance tools for Dart and Flutter. 
+It’s currently in preview release, but we’re actively working on improvements and on shipping new versions.
 
 ## Getting started
 
