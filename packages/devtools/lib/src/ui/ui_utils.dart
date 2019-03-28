@@ -149,11 +149,12 @@ Future<void> maybeShowDebugWarning(Framework framework) async {
               'rendering times are not indicative of release performance.'),
       div()
         ..add(span(
-            text: '''Relaunch your application with the '--profile' switch '''))
+            text:
+                '''Relaunch your application with the '--profile' argument, or '''))
         ..add(a(
-            text: 'or the profile mode option in VS Code or IntelliJ',
+            text: 'relaunch in profile mode from VS Code or IntelliJ',
             href: runInProfileModeDocsUrl,
-            target: 'blank;'))
+            target: '_blank;'))
         ..add(span(text: '.')),
     ]);
   }
