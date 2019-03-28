@@ -33,7 +33,7 @@ Is a timeseries graph to visualize the state of the Flutter memory at successive
 the chart corresponds to the timestamp (x-axis) of measured quantities (y-axis) of the heap e.g., usage, capacity, external,
 garbage collection and Resident Set Size.
 
-<img src="images/memory_anatomy.png" />
+<img src="images/memory_anatomy.png" width="800" />
 
 - Legend - All collected measurements regarding the memory. Clicking on a legend name will hide or show that data.
 - Range Selector - All memory data collected (timeseries).  The left-most or first time/data (memory information) in the selector is when the application was launched. The right-most or last time/data is the continual memory information being received (live) until the application is stopped.
@@ -53,7 +53,7 @@ garbage collection and Resident Set Size.
 
 ## Memory Overview Chart
 
-<img src="images/memory_basic_chart.png" />
+<img src="images/memory_basic_chart.png" width="800" />
 
 This chart is a timeseries graph to help visualize the state of the heap at various points in time.
 
@@ -65,7 +65,7 @@ y-axis are (from top to bottom):
 - Used - Objects (Dart objects) in the the heap.
 - External - Memory that is not in the Dart heap but is still part of the total memory footprint. Objects in external memory would be native objects (e.g., memory read from a file, a decoded image, etc.). The native objects are exposed to the Dart VM from the native OS (e.g., Android, Linux, Windows, iOS) using a Dart Embedder. The embedder creates a Dart wrapper with a finalizer allowing Dart code to communicate with these native resources. Flutter has an embedder for Android and iOS for more information on Dart Embedders see [Dart Embedder](https://www.dartlang.org/articles/server/native-extensions) or [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders).
 
-<img src="images/memory_rss_chart.png" />
+<img src="images/memory_rss_chart.png" width="800" />
 
 To view RSS (Resident Set Size), click on the name RSS located in the legend.
 
@@ -74,16 +74,16 @@ To view RSS (Resident Set Size), click on the name RSS located in the legend.
 See [Dart VM Internals](https://mrale.ph/dartvm/) for more information.
 
 ## Event Timeline
-<img src="images/memory_snapshot_reset.png" />
+<img src="images/memory_snapshot_reset.png" width="800" />
 
 This chart displays DevTools events (e.g., Snapshot and Reset button clicks) in relation to the memory chart timeline. Hovering over the markers in the Event Timeline will display the time when the event occurred. This helps identify when a memory leak might have occurred in the timeline (x-axis).
 
-<img src="images/memory_eventtimeline.png" />
+<img src="images/memory_eventtimeline.png" width="800" />
 
 Clicking on the Snapshot button will show the current state of the heap with regard to all active classes and their instances. When the Reset button is pressed, the accumulator for all classes is reset to zero. The reset is temporally tied,  using a faint blue horizontal bar,  to the previous Snapshot. Clicking on the Reset button, again, will reset the accumulators since the last Reset and temporally tie the latest reset to the previous reset.
 
 ## Snapshot Classes
-<img src="images/memory_classes.png" />
+<img src="images/memory_classes.png" width="800" />
 
 Classes allocated in the heap, total instances, total bytes allocated, and an accumulator of allocations since the last reset
 
@@ -97,7 +97,7 @@ Displays a list of class instances by their handle name. **_TODO: Add link to in
 
 ## Memory Actions
 
-<img src="images/memory_actions.png" />
+<img src="images/memory_actions.png" width="800" />
 
 ### Liveness of the Memory Overview Chart
 - Pause - Pause the memory overview chart to allow inspecting the currently plotted data. Incoming memory data is still received; notice the Range Selector continues to grow to the right.
