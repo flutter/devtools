@@ -20,12 +20,8 @@ import 'material_icons.dart';
 import 'primer.dart';
 
 const int defaultSplitterWidth = 10;
-
-const debugModeWarning = '''You are running your app in debug mode. Debug mode
-frame rendering times are not indicative of release performance.
-
-Relaunch your application in profile mode by running 'flutter run --profile', or
-launch in profile mode from VS Code or IntelliJ.''';
+const String runInProfileModeDocsUrl =
+    'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
 
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {
@@ -147,7 +143,20 @@ CoreElement createHotRestartButton(Framework framework) {
 
 Future<void> maybeShowDebugWarning(Framework framework) async {
   if (!await serviceManager.connectedApp.isProfileBuild) {
-    framework.showWarning(debugModeWarning);
+    framework.showWarning(children: <CoreElement>[
+      div(
+          text: 'You are running your app in debug mode. Debug mode frame '
+              'rendering times are not indicative of release performance.'),
+      div()
+        ..add(span(
+            text:
+                '''Relaunch your application with the '--profile' argument, or '''))
+        ..add(a(
+            text: 'relaunch in profile mode from VS Code or IntelliJ',
+            href: runInProfileModeDocsUrl,
+            target: '_blank;'))
+        ..add(span(text: '.')),
+    ]);
   }
 }
 

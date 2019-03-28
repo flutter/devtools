@@ -161,12 +161,13 @@ class Framework {
     }
   }
 
-  void showInfo(String message, {String title}) {
-    _showMessage(message, title: title);
+  void showInfo({String message, String title, List<CoreElement> children}) {
+    _showMessage(message: message, title: title, children: children);
   }
 
-  void showWarning(String message, {String title}) {
-    _showMessage(message, title: title, warning: true);
+  void showWarning({String message, String title, List<CoreElement> children}) {
+    _showMessage(
+        message: message, title: title, children: children, warning: true);
   }
 
   void showError(String title, [dynamic error]) {
@@ -180,14 +181,15 @@ class Framework {
       }
     }
 
-    _showMessage(message, title: title, error: true);
+    _showMessage(message: message, title: title, error: true);
   }
 
-  void _showMessage(
-    String message, {
+  void _showMessage({
+    String message,
     String title,
     bool warning = false,
     bool error = false,
+    List<CoreElement> children,
   }) {
     final PFlash flash = PFlash();
     if (warning) {
@@ -204,6 +206,9 @@ class Framework {
       for (String text in message.split('\n\n')) {
         flash.add(div(text: text));
       }
+    }
+    if (children != null) {
+      children.forEach(flash.add);
     }
 
     final CoreElement errorContainer =
