@@ -65,7 +65,7 @@ y-axis are (from top to bottom):
 - Used - Objects (Dart objects) in the the heap.
 - External - Memory that is not in the Dart heap but is still part of the total memory footprint. Objects in external memory would be native objects (e.g., memory read from a file, a decoded image, etc.). The native objects are exposed to the Dart VM from the native OS (e.g., Android, Linux, Windows, iOS) using a Dart Embedder. The embedder creates a Dart wrapper with a finalizer allowing Dart code to communicate with these native resources. Flutter has an embedder for Android and iOS for more information on Dart Embedders see [Dart Embedder](https://www.dartlang.org/articles/server/native-extensions) or [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders).
 
-<img src="images/memory_rss_chart.png" width="100%" />
+<img src="images/memory_rss_chart.png" width="983" />
 
 To view RSS (Resident Set Size), click on the name RSS located in the legend.
 
