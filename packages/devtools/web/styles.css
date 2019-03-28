@@ -688,6 +688,7 @@ but a more subtle solution would be better. */
 .btn {
     display: inline-flex;
     align-items: center;
+    height: 30px; /* Force height to 22px even when there's no text (2x3px padding + 2x1px margin) */
 }
 
 /* Increase line height so standard sized icons look ok in buttons. */
@@ -847,6 +848,7 @@ span.strong {
 @media all and (max-width: 700px) { .optional-700 { display: none; } }
 @media all and (max-width: 850px) { .optional-850 { display: none; } }
 @media all and (max-width: 950px) { .optional-950 { display: none; } }
+@media all and (max-width: 1000px) { .optional-1000 { display: none; } }
 @media all and (max-width: 1200px) { .optional-1200 { display: none; } }
 @media all and (max-width: 1400px) { .optional-1400 { display: none; } }
 
@@ -857,7 +859,7 @@ span.strong {
  */
 
 @media all and (max-width: 700px) {
-    .btn-group.collapsible-700 .optional-text span {
+    .btn-group.collapsible-700 .optional-text span:not(.octicon) {
         display: none;
     }
 
@@ -867,8 +869,19 @@ span.strong {
     }
 }
 
+@media all and (max-width: 1000px) {
+    .btn-group.collapsible-1000 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-1000 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
 @media all and (max-width: 1200px) {
-    .btn-group.collapsible-1200 .optional-text span {
+    .btn-group.collapsible-1200 .optional-text span:not(.octicon) {
         display: none;
     }
 
@@ -879,7 +892,7 @@ span.strong {
 }
 
 @media all and (max-width: 1400px) {
-    .btn-group.collapsible-1400 .optional-text span {
+    .btn-group.collapsible-1400 .optional-text span:not(.octicon) {
         display: none;
     }
 

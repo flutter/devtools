@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:meta/meta.dart';
+
 import 'elements.dart';
 import 'html_icon_renderer.dart';
 import 'icons.dart';
@@ -61,6 +63,16 @@ class PTooltip {
 class PButton extends CoreElement {
   PButton([String text]) : super('button', text: text, classes: 'btn') {
     setAttribute('type', 'button');
+  }
+
+  PButton.octicon(String text, {@required String icon})
+      : super('button', classes: 'btn optional-text') {
+    tooltip = text;
+    add(<CoreElement>[
+      span(c: 'octicon octicon-$icon'),
+      span(c: 'optional-text', text: text),
+    ]);
+    small();
   }
 
   PButton.icon(String text, Icon icon, {String title, List<String> classes})
