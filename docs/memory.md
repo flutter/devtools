@@ -25,7 +25,7 @@ Memory profiling consists of four parts, each increasing in granularity:
 - Snapshot Classes
 - Class Instances
 
-**Use a profile build of your application to analyze performance.** Memory usage is not indicative of release performance unless your application is run in profile mode. In general, memory usage is fairly accurate in relative terms between debug, release or profile mode. However, the absolute memory used maybe higher in debug versus release builds. In a release build work can be computed and optimized ahead of time.  However, in a debug build that same work may have to be computed at runtime. 
+**Use a profile build of your application to analyze performance.** Memory usage is not indicative of release performance unless your application is run in profile mode. In general, memory usage is fairly accurate in relative terms between debug, release or profile mode. Profile mode may show higher absolute memory usage; a service isolate is created to profile your application, this isolate will not exist in release mode.  Absolute memory used may also be higher in debug versus release mode. In release mode work can be computed and optimized ahead of time while in debug mode that same work may have to be computed at runtime, requiring more information. 
 
 ## Memory Anatomy
 
@@ -63,7 +63,7 @@ y-axis are (from top to bottom):
 - Capacity - Current capacity of the heap.
 - GC - GC has occurred.
 - Used - Objects (Dart objects) in the the heap.
-- External - memory that is not in the Dart heap but is still retained (e.g., memory read from a file or a decoded image in Flutter).
+- External - Memory that is not in the Dart heap but is still part of the total memory footprint. Objects in external memory would be native objects (e.g., memory read from a file, a decoded image, etc.). The native objects are exposed to the Dart VM from the native OS (e.g., Android, Linux, Windows, iOS) using a Dart Embedder. The embedder creates a Dart wrapper with a finalizer allowing Dart code to communicate with these native resources. Flutter has an embedder for Android and iOS for more information on Dart Embedders see [Dart Embedder](https://www.dartlang.org/articles/server/native-extensions) or [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders).
 
 <img src="images/memory_rss_chart.png" width="800" />
 
@@ -74,13 +74,17 @@ To view RSS (Resident Set Size), click on the name RSS located in the legend.
 See [Dart VM Internals](https://mrale.ph/dartvm/) for more information.
 
 ## Event Timeline
-<img src="images/memory_parts.png" width="800" />
+<img src="images/memory_snapshot_reset.png" width="800" />
 
 This chart displays DevTools events (e.g., Snapshot and Reset button clicks) in relation to the memory chart timeline. Hovering over the markers in the Event Timeline will display the time when the event occurred. This helps identify when a memory leak might have occurred in the timeline (x-axis).
+
+<img src="images/memory_eventtimeline.png" width="800" />
 
 Clicking on the Snapshot button will show the current state of the heap with regard to all active classes and their instances. When the Reset button is pressed, the accumulator for all classes is reset to zero. The reset is temporally tied,  using a faint blue horizontal bar,  to the previous Snapshot. Clicking on the Reset button, again, will reset the accumulators since the last Reset and temporally tie the latest reset to the previous reset.
 
 ## Snapshot Classes
+<img src="images/memory_classes.png" width="800" />
+
 Classes allocated in the heap, total instances, total bytes allocated, and an accumulator of allocations since the last reset
 
 - Size - Total amount of memory used by current objects in the heap.
@@ -92,6 +96,8 @@ Classes allocated in the heap, total instances, total bytes allocated, and an ac
 Displays a list of class instances by their handle name. **_TODO: Add link to inspecting data values_**.
 
 ## Memory Actions
+
+<img src="images/memory_actions.png" width="800" />
 
 ### Liveness of the Memory Overview Chart
 - Pause - Pause the memory overview chart to allow inspecting the currently plotted data. Incoming memory data is still received; notice the Range Selector continues to grow to the right.
