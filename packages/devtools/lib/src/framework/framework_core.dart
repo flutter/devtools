@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
+import 'package:devtools/src/utils.dart';
+
 import '../../devtools.dart' as devtools show version;
 import '../core/message_bus.dart';
 import '../globals.dart';
@@ -33,28 +35,20 @@ class FrameworkCore {
 
   /// Returns true if we're able to connect to a device and false otherwise.
   static Future<bool> initVmService({
-    int explicitPort,
+    Uri explicitUri,
     ErrorReporter errorReporter,
   }) async {
-    int port = explicitPort;
+    var uri = explicitUri ?? _getUriFromQuerystring();
 
-    // Identify the port so that we can connect to the VM service.
-    if (port == null) {
-      if (window.location.search.isNotEmpty) {
-        final Uri uri = Uri.parse(window.location.toString());
-        final String portStr = uri.queryParameters['port'];
-        if (portStr != null) {
-          port = int.tryParse(portStr);
-        }
-      }
-    }
-
-    if (port != null) {
+    if (uri != null) {
       final Completer<Null> finishedCompleter = Completer<Null>();
 
+      // Map the URI (which may be Observatory web app) to a WebSocket URI for
+      // the VM service.
+      uri = getVmServiceUriFromObservatoryUri(uri);
+
       try {
-        final VmServiceWrapper service =
-            await connect('localhost', port, finishedCompleter);
+        final VmServiceWrapper service = await connect(uri, finishedCompleter);
         if (serviceManager != null) {
           await serviceManager.vmServiceOpened(
             service,
@@ -65,11 +59,47 @@ class FrameworkCore {
           return false;
         }
       } catch (e) {
-        errorReporter('Unable to connect to app on port $port', e);
+        errorReporter('Unable to connect to VM service at $uri', e);
         return false;
       }
     } else {
       return false;
     }
+  }
+
+  /// Gets a VM Service URI from the querystring (in preference from the 'uri'
+  /// value, but otherwise from 'port').
+  static Uri _getUriFromQuerystring() {
+    if (window.location.search.isEmpty) {
+      return null;
+    }
+
+    final queryParams = Uri.parse(window.location.toString()).queryParameters;
+
+    // First try to use uri.
+    if (queryParams['uri'] != null) {
+      final uri = Uri.tryParse(queryParams['uri']);
+
+      // Lots of things are considered valid URIs (including empty strings
+      // and single letters) since they can be relative, so we need to do some
+      // extra checks.
+      if (uri != null &&
+          uri.isAbsolute &&
+          (uri.isScheme('ws') ||
+              uri.isScheme('wss') ||
+              uri.isScheme('http') ||
+              uri.isScheme('https'))) {
+        return uri;
+      }
+    }
+
+    // Otherwise try the legacy port option. Here we assume ws:/localhost and
+    // do not support tokens.
+    final port = int.tryParse(queryParams['port'] ?? '');
+    if (port != null) {
+      return Uri.parse('ws://localhost:$port/ws');
+    }
+
+    return null;
   }
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
@@ -16,7 +17,7 @@ class AppFixture {
   AppFixture._(
     this.process,
     this.lines,
-    this.servicePort,
+    this.serviceUri,
     this.serviceConnection,
     this.isolates,
   ) {
@@ -37,7 +38,7 @@ class AppFixture {
 
   final Process process;
   final Stream<String> lines;
-  final int servicePort;
+  final Uri serviceUri;
   final VmServiceWrapper serviceConnection;
   final List<IsolateRef> isolates;
   Future<void> _onAppStarted;
@@ -66,10 +67,10 @@ class CliAppFixture extends AppFixture {
     this.appScriptPath,
     Process process,
     Stream<String> lines,
-    int servicePort,
+    Uri serviceUri,
     VmServiceWrapper serviceConnection,
     List<IsolateRef> isolates,
-  ) : super._(process, lines, servicePort, serviceConnection, isolates);
+  ) : super._(process, lines, serviceUri, serviceConnection, isolates);
 
   final String appScriptPath;
 
@@ -93,15 +94,21 @@ class CliAppFixture extends AppFixture {
       }
     });
 
-    // Observatory listening on http://127.0.0.1:9595/
-    String observatoryText = await completer.future;
-    observatoryText =
-        observatoryText.substring(observatoryText.lastIndexOf(':') + 1);
-    observatoryText = observatoryText.substring(0, observatoryText.length - 1);
-    final int port = int.parse(observatoryText);
+    // Observatory listening on http://127.0.0.1:9595/(token)
+    final String observatoryText = await completer.future;
+    final String observatoryUri =
+        observatoryText.replaceAll('Observatory listening on ', '');
+    var uri = Uri.parse(observatoryUri);
+
+    if (uri == null || !uri.isAbsolute) {
+      throw 'Could not parse VM Service URI from $observatoryText';
+    }
+
+    // Map to WS URI.
+    uri = getVmServiceUriFromObservatoryUri(uri);
 
     final VmServiceWrapper serviceConnection =
-        VmServiceWrapper(await vmServiceConnect('localhost', port));
+        VmServiceWrapper(await vmServiceConnectUri(uri.toString()));
 
     final VM vm = await serviceConnection.getVM();
 
@@ -113,7 +120,7 @@ class CliAppFixture extends AppFixture {
       appScriptPath,
       process,
       lineController.stream,
-      port,
+      uri,
       serviceConnection,
       vm.isolates,
     );

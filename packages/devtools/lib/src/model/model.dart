@@ -99,9 +99,9 @@ class App {
     return framework.connectDialog.isVisible();
   }
 
-  Future<void> connectDialogConnectTo([dynamic port]) async {
-    // ignore: invalid_use_of_visible_for_testing_member
-    return framework.connectDialog.connectTo(port);
+  Future<void> connectDialogConnectTo([dynamic uri]) async {
+    // uri comes as a String (from JSON) so needs changing back to a URI.
+    return framework.connectDialog.connectTo(Uri.parse(uri));
   }
 
   Future<void> logsClearLogs([dynamic _]) async {
@@ -121,7 +121,6 @@ class App {
 
   Future<String> debuggerGetConsoleContents([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
-    // ignore: invalid_use_of_visible_for_testing_member
     return screen.consoleArea.getContents();
   }
 
@@ -153,7 +152,6 @@ class App {
 
   Future<void> debuggerClearBreakpoints([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
-    // ignore: invalid_use_of_visible_for_testing_member
     await screen.debuggerState.clearBreakpoints();
   }
 
@@ -226,7 +224,6 @@ class App {
     final int line = params[1] + 1;
 
     final DebuggerScreen screen = framework.getScreen('debugger');
-    // ignore: invalid_use_of_visible_for_testing_member
     await screen.debuggerState.addBreakpointByPathFragment(path, line);
   }
 

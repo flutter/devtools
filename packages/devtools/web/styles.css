@@ -822,7 +822,7 @@ html [full] {
     margin-bottom: 20px;
 }
 
-#connect-dialog #port-field {
+#connect-dialog #uri-field {
     /* Override the max-width to take the button into account */
     max-width: calc(100% - 100px);
 }
