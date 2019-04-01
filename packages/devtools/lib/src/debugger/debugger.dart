@@ -639,7 +639,6 @@ class DebuggerState {
   Future<Success> stepOut() =>
       _service.resume(isolateRef.id, step: StepOption.kOut);
 
-  @visibleForTesting
   Future<void> clearBreakpoints() async {
     final List<Breakpoint> breakpoints = _breakpoints.value.toList();
     await Future.forEach(breakpoints, (Breakpoint breakpoint) {
@@ -651,7 +650,6 @@ class DebuggerState {
     return _service.addBreakpoint(isolateRef.id, scriptId, line);
   }
 
-  @visibleForTesting
   Future<void> addBreakpointByPathFragment(String path, int line) async {
     final ScriptRef ref =
         scripts.firstWhere((ref) => ref.uri.endsWith(path), orElse: () => null);
@@ -1546,7 +1544,6 @@ class ConsoleArea implements CoreElementView {
     _editor.scrollIntoView(lastLineIndex, lastLine.length);
   }
 
-  @visibleForTesting
   String getContents() {
     return _editor.getDoc().getValue();
   }
