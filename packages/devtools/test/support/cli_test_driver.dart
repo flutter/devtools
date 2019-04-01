@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
@@ -97,11 +98,14 @@ class CliAppFixture extends AppFixture {
     final String observatoryText = await completer.future;
     final String observatoryUri =
         observatoryText.replaceAll('Observatory listening on ', '');
-    final uri = Uri.parse(observatoryUri);
+    var uri = Uri.parse(observatoryUri);
 
     if (uri == null || !uri.isAbsolute) {
       throw 'Could not parse VM Service URI from $observatoryText';
     }
+
+    // Map to WS URI.
+    uri = getVmServiceUriFromObservatoryUri(uri);
 
     final VmServiceWrapper serviceConnection =
         VmServiceWrapper(await vmServiceConnectUri(uri.toString()));

@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
+import 'package:devtools/src/utils.dart';
+
 import '../../devtools.dart' as devtools show version;
 import '../core/message_bus.dart';
 import '../globals.dart';
@@ -43,7 +45,7 @@ class FrameworkCore {
 
       // Map the URI (which may be Observatory web app) to a WebSocket URI for
       // the VM service.
-      uri = _convertToWsUri(uri);
+      uri = getVmServiceUriFromObservatoryUri(uri);
 
       try {
         final VmServiceWrapper service = await connect(uri, finishedCompleter);
@@ -63,20 +65,6 @@ class FrameworkCore {
     } else {
       return false;
     }
-  }
-
-  /// Map the URI (which may already be Observatory web app) to a WebSocket URI
-  /// for the VM service. If the URI is already a VM Service WebSocket URI it
-  /// will not be modified.
-  static Uri _convertToWsUri(Uri uri) {
-    final isSecure = uri.isScheme('wss') || uri.isScheme('https');
-    final scheme = isSecure ? 'wss' : 'ws';
-
-    final path = uri.path.endsWith('/ws')
-        ? uri.path
-        : (uri.path.endsWith('/') ? '${uri.path}ws' : '${uri.path}/ws');
-
-    return uri.replace(scheme: scheme, path: path);
   }
 
   /// Gets a VM Service URI from the querystring (in preference from the 'uri'
