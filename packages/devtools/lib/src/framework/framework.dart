@@ -493,7 +493,6 @@ class ConnectDialog {
 
   bool isVisible() => parent.display != 'none';
 
-  @visibleForTesting
   void connectTo(Uri uri) async {
     await _connect(uri);
   }
