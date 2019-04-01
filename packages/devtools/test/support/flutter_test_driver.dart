@@ -46,7 +46,7 @@ abstract class FlutterTestDriver {
 
   Stream<String> get stdout => _stdout.stream;
 
-  int get vmServicePort => _vmServiceWsUri.port;
+  Uri get vmServiceUri => _vmServiceWsUri;
 
   bool get hasExited => _hasExited;
 

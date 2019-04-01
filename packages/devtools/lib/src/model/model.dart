@@ -99,9 +99,9 @@ class App {
     return framework.connectDialog.isVisible();
   }
 
-  Future<void> connectDialogConnectTo([dynamic port]) async {
+  Future<void> connectDialogConnectTo([dynamic uri]) async {
     // ignore: invalid_use_of_visible_for_testing_member
-    return framework.connectDialog.connectTo(port);
+    return framework.connectDialog.connectTo(uri);
   }
 
   Future<void> logsClearLogs([dynamic _]) async {

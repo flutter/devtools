@@ -44,7 +44,7 @@ void appTests() {
     await waitFor(() async => await connectDialog.isVisible());
 
     // have it connect to a port
-    await connectDialog.connectTo(appFixture.servicePort);
+    await connectDialog.connectTo(appFixture.serviceUri);
 
     // make sure the connect dialog becomes hidden
     await waitFor(() async => !(await connectDialog.isVisible()));
@@ -62,7 +62,7 @@ class ConnectDialogManager {
     return response.result;
   }
 
-  Future connectTo(int port) async {
-    await tools.tabInstance.send('connectDialog.connectTo', port);
+  Future connectTo(Uri uri) async {
+    await tools.tabInstance.send('connectDialog.connectTo', uri);
   }
 }
