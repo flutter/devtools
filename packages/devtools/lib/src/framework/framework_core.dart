@@ -93,7 +93,7 @@ class FrameworkCore {
       }
     }
 
-    // Otherwise try the legacy port oprtion. Here we assume ws:/localhost and
+    // Otherwise try the legacy port option. Here we assume ws:/localhost and
     // do not support tokens.
     final port = int.tryParse(queryParams['port'] ?? '');
     if (port != null) {
