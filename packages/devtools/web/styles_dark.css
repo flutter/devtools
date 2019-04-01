@@ -9,7 +9,7 @@
     --border-color: #484848;
     --counter-color: #999;
     --dark-shadow-color: #999;
-    --default-background-rgb: 47, 43, 43;
+    --default-background-rgb: 32, 33, 36;
     --default-background: rgba(var(--default-background-rgb), 1);
     --default-color-thumb: #888;
     --default-color: #fff;
@@ -25,7 +25,7 @@
     --header-item: rgba(var(--header-item-rgb), 1);
     --hint-background: #4b4b3f;
     --light-background: #585858;
-    --masthead-background: #525050;
+    --masthead-background: #394959;
     --list-background: #3f3f3f;
     --menu-item-border: #484541;
     --row-hover-background: #2b2d2e;
@@ -66,18 +66,60 @@ nav.menu .menu-item {
     fill-opacity: 0.6 !important;
 }
 
-/* Tweak how buttons look in the dark theme to not be so dark */
-.btn:not(.btn-primary), .btn:not(.btn-primary)[disabled] {
-    border: 1px solid #222222;
-    border-radius: 3px;
-    background: linear-gradient(#5f5f5f 5%, #535353 10%, #4f4f4f 100%);
-    box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+/* Set defaults for buttons (mostly removing Primer styles) */
+.btn, .btn[disabled], .btn:hover, .btn.hover, .btn:active, .btn.selected {
+    border-radius: 2px;
+    border-width: 1px;
+    border-color: rgba(var(--white-rgb), 0.08);
+    background-image: none;
+    box-shadow: none;
+    position: relative;
 }
-.btn.selected:not(.btn-primary), .btn.selected:not(.btn-primary)[disabled] {
-    color: #ffffff;
-    background: linear-gradient(#1C547C 5%, #104870 90%, #0C446C 100%);
+
+.btn {
+    background-color: transparent;
+    border: 1px solid #5f6368;
+    font-weight: normal;
+    color: #89b5f8;
 }
-/* /Tweak how buttons look in the dark theme to not be so dark */
+
+.btn[disabled] {
+    /* ??? */
+}
+
+.btn:active, .btn.selected {
+    background-color: #3a4556;
+    border-color: #3a4556;
+}
+
+.btn:hover, .btn.hover {
+    background-color: #3b3b3e;
+    border-color: #3b3b3e;
+}
+
+.btn:hover:active, .btn.hover:active, .btn.selected:hover, .btn.selected.hover {
+    /* This needs a better colour - I made this one up and it's bad */
+    background-color: #394959;
+    border-color: #394959;
+}
+
+.btn.btn-primary {
+    background-color: #89b5f8;
+    border-color: #89b5f8;
+    color: #202124;
+}
+
+.btn.btn-primary:active, .btn.btn-primary.selected {
+    /* What should primary selected buttons look like (can we have them?) */
+}
+
+.btn.btn-primary:hover, .btn.btn-primary.hover {
+    /* What is the primary hover state? */
+}
+
+.btn.btn-primary:hover:active, .btn.btn-primary.hover:active, .btn.btn-primary.selected:hover, .btn.btn-primary.selected.hover {
+    /* What should primary selected+hover buttons look like (can we have them?) */
+}
 
 .flash-warn {
     background-color: #fffbdd;
