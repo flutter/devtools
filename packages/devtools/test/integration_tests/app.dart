@@ -63,6 +63,7 @@ class ConnectDialogManager {
   }
 
   Future connectTo(Uri uri) async {
-    await tools.tabInstance.send('connectDialog.connectTo', uri);
+    // We have to convert to String here as this goes over JSON.
+    await tools.tabInstance.send('connectDialog.connectTo', uri.toString());
   }
 }

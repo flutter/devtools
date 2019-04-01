@@ -100,8 +100,9 @@ class App {
   }
 
   Future<void> connectDialogConnectTo([dynamic uri]) async {
+    // uri comes as a String (from JSON) so needs changing back to a URI.
     // ignore: invalid_use_of_visible_for_testing_member
-    return framework.connectDialog.connectTo(uri);
+    return framework.connectDialog.connectTo(Uri.parse(uri));
   }
 
   Future<void> logsClearLogs([dynamic _]) async {
