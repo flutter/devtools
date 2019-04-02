@@ -101,7 +101,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
     final flameChartHeight =
         2 * FlameChart.rowHeight + uiSectionHeight + gpuSectionHeight;
 
-    void drawRecursively(
+    void drawSubtree(
       TimelineEvent event,
       int row,
       CoreElement section, {
@@ -123,7 +123,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
       );
 
       for (TimelineEvent child in event.children) {
-        drawRecursively(child, row + 1, section);
+        drawSubtree(child, row + 1, section);
       }
     }
 
@@ -149,7 +149,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
         ..top = '${FlameChart.padding}px';
       _uiSection.add(sectionTitle);
 
-      drawRecursively(
+      drawSubtree(
         frame.uiEventFlow,
         0,
         _uiSection,
@@ -173,7 +173,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
         ..top = '${FlameChart.padding}px';
       _gpuSection.add(sectionTitle);
 
-      drawRecursively(
+      drawSubtree(
         frame.gpuEventFlow,
         0,
         _gpuSection,

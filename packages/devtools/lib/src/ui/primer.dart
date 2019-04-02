@@ -121,7 +121,6 @@ class PTabNav extends CoreElement {
     for (PTabNavTab tab in tabs) {
       tab.click(() {
         selectTab(tab);
-        tab.performOnClick();
       });
     }
   }
@@ -136,10 +135,10 @@ class PTabNav extends CoreElement {
 }
 
 class PTabNavTab extends CoreElement {
-  PTabNavTab(String name, {this.performOnClick})
+  PTabNavTab(String name, {this.onTabSelected})
       : super('div', classes: 'tabnav-tab', text: name);
 
-  final VoidCallback performOnClick;
+  final VoidCallback onTabSelected;
 }
 
 /// A menu navigation element - a vertically oriented list of items.

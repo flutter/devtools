@@ -142,6 +142,8 @@ class VmServiceWrapper implements VmService {
     return _trackFuture(_vmService.getCpuProfile(isolateId, tags));
   }
 
+  // TODO(kenzie): keep track of all private methods we are currently using to
+  // share with the VM team and request that they be made public.
   Future<Response> getCpuProfileTimeline(
       String isolateId, int origin, int extent) async {
     return _trackFuture(callMethod(

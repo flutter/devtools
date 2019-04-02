@@ -16,7 +16,6 @@ Stream<CpuFlameChartItem> get onSelectedCpuFlameChartItem =>
 
 final DragScroll _dragScroll = DragScroll();
 
-// TODO(kenzie): get feedback on this palette and add dark theme colors.
 const colorPalette = [
   Color(0xFFFF5722),
   Color(0xFFFF6D00),
@@ -38,8 +37,8 @@ class CpuFlameChart extends FlameChart<CpuProfileData> {
 
   int _colorOffset = 0;
 
-  // TODO(kenzie): do something more intelligent for color selection (maybe base
-  // it on cpu consumption).
+  // TODO(kenzie): maybe colors should be based on CPU consumption or on
+  // categories (Widget, Render, Layer, User code, etc.)
   Color nextColor() {
     final color = colorPalette[_colorOffset % colorPalette.length];
     _colorOffset++;
@@ -82,7 +81,7 @@ class CpuFlameChart extends FlameChart<CpuProfileData> {
       return left;
     }
 
-    void drawRecursively(CpuStackFrame stackFrame, int row) {
+    void drawSubtree(CpuStackFrame stackFrame, int row) {
       final double width =
           totalWidth * stackFrame.cpuConsumptionRatio - samplePadding;
 
@@ -98,14 +97,14 @@ class CpuFlameChart extends FlameChart<CpuProfileData> {
       addItemToFlameChart(item, this);
 
       for (CpuStackFrame child in stackFrame.children) {
-        drawRecursively(
+        drawSubtree(
           child,
           row + 1,
         );
       }
     }
 
-    drawRecursively(cpuProfileData.cpuProfileRoot, 0);
+    drawSubtree(cpuProfileData.cpuProfileRoot, 0);
   }
 
   @override

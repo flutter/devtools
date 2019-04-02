@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:html';
+
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../globals.dart';
@@ -20,28 +22,29 @@ import 'timeline_protocol.dart';
 // TODO(kenzie): this should be removed once the cpu flame chart is optimized.
 const bool showCpuFlameChart = false;
 
-enum EventDetailsTabType {
-  flameChart,
-  bottomUp,
-  callTree,
-}
-
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
     flex();
     layoutVertical();
 
-    final flameChartTab = PTabNavTab('CPU Flame Chart', performOnClick: () {
-      _details.uiEventDetails.showTab(EventDetailsTabType.flameChart);
-    });
-    final bottomUpTab = PTabNavTab('Bottom Up', performOnClick: () {
-      _details.uiEventDetails.showTab(EventDetailsTabType.bottomUp);
-    });
-    final callTreeTab = PTabNavTab('Call Tree', performOnClick: () {
-      _details.uiEventDetails.showTab(EventDetailsTabType.callTree);
-    });
+    _title = div(text: defaultTitleText, c: 'event-details-heading')
+      ..element.style.backgroundColor = colorToCss(defaultTitleBackground);
+    _details = _Details()..attribute('hidden');
 
-    tabNav = PTabNav(<PTabNavTab>[
+    final flameChartTab = EventDetailsTabNavTab(
+      'CPU Flame Chart',
+      () => _details.uiEventDetails.showTab(EventDetailsTabType.flameChart),
+    );
+    final bottomUpTab = EventDetailsTabNavTab(
+      'Bottom Up',
+      () => _details.uiEventDetails.showTab(EventDetailsTabType.bottomUp),
+    );
+    final callTreeTab = EventDetailsTabNavTab(
+      'Call Tree',
+      () => _details.uiEventDetails.showTab(EventDetailsTabType.callTree),
+    );
+
+    tabNav = EventDetailsTabNav(<EventDetailsTabNavTab>[
       flameChartTab,
       bottomUpTab,
       callTreeTab,
@@ -49,12 +52,7 @@ class EventDetails extends CoreElement {
       ..element.style.borderBottom = '0';
 
     content = div(c: 'event-details-section section-border')..flex();
-
-    content.add(<CoreElement>[
-      _title = div(text: defaultTitleText, c: 'event-details-heading')
-        ..element.style.backgroundColor = colorToCss(defaultTitleBackground),
-      _details = _Details()..attribute('hidden'),
-    ]);
+    content.add(<CoreElement>[_title, _details]);
 
     add(tabNav);
     add(content);
@@ -228,4 +226,25 @@ class _UiEventDetails extends CoreElement {
   void updateStackFrameDetails(CpuFlameChartItem item) {
     stackFrameDetails.text = item.stackFrame.toString();
   }
+}
+
+enum EventDetailsTabType {
+  flameChart,
+  bottomUp,
+  callTree,
+}
+
+class EventDetailsTabNav extends PTabNav {
+  EventDetailsTabNav(List<EventDetailsTabNavTab> tabs) : super(tabs);
+
+  @override
+  void selectTab(PTabNavTab tab) {
+    super.selectTab(tab);
+    tab.onTabSelected();
+  }
+}
+
+class EventDetailsTabNavTab extends PTabNavTab {
+  EventDetailsTabNavTab(String name, VoidCallback onTabSelected)
+      : super(name, onTabSelected: onTabSelected);
 }
