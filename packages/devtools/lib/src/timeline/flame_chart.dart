@@ -230,6 +230,7 @@ class FlameChartItem {
   // This method should be overridden by the subclass.
   void setText() {}
 
+  // TODO(kenzie): set a global click listener instead of setting one per item.
   // This method should be overridden by the subclass.
   void setOnClick() {}
 

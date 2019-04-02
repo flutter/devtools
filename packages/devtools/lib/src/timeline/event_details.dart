@@ -1,8 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:html';
-
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../globals.dart';
@@ -33,23 +31,38 @@ class EventDetails extends CoreElement {
 
     final flameChartTab = EventDetailsTabNavTab(
       'CPU Flame Chart',
-      () => _details.uiEventDetails.showTab(EventDetailsTabType.flameChart),
+      EventDetailsTabType.flameChart,
     );
     final bottomUpTab = EventDetailsTabNavTab(
       'Bottom Up',
-      () => _details.uiEventDetails.showTab(EventDetailsTabType.bottomUp),
+      EventDetailsTabType.bottomUp,
     );
     final callTreeTab = EventDetailsTabNavTab(
       'Call Tree',
-      () => _details.uiEventDetails.showTab(EventDetailsTabType.callTree),
+      EventDetailsTabType.callTree,
     );
 
-    tabNav = EventDetailsTabNav(<EventDetailsTabNavTab>[
+    tabNav = PTabNav(<EventDetailsTabNavTab>[
       flameChartTab,
       bottomUpTab,
       callTreeTab,
     ])
       ..element.style.borderBottom = '0';
+
+    tabNav.onTabSelected.listen((PTabNavTab tab) {
+      assert(tab is EventDetailsTabNavTab);
+      switch ((tab as EventDetailsTabNavTab).type) {
+        case EventDetailsTabType.flameChart:
+          _details.uiEventDetails.showTab(EventDetailsTabType.flameChart);
+          break;
+        case EventDetailsTabType.bottomUp:
+          _details.uiEventDetails.showTab(EventDetailsTabType.bottomUp);
+          break;
+        case EventDetailsTabType.callTree:
+          _details.uiEventDetails.showTab(EventDetailsTabType.callTree);
+          break;
+      }
+    });
 
     content = div(c: 'event-details-section section-border')..flex();
     content.add(<CoreElement>[_title, _details]);
@@ -234,18 +247,8 @@ enum EventDetailsTabType {
   callTree,
 }
 
-class EventDetailsTabNav extends PTabNav {
-  EventDetailsTabNav(List<EventDetailsTabNavTab> tabs) : super(tabs);
-
-  @override
-  void selectTab(PTabNavTab tab) {
-    assert(tab is EventDetailsTabNavTab);
-    super.selectTab(tab);
-    tab.onTabSelected();
-  }
-}
-
 class EventDetailsTabNavTab extends PTabNavTab {
-  EventDetailsTabNavTab(String name, VoidCallback onTabSelected)
-      : super(name, onTabSelected: onTabSelected);
+  EventDetailsTabNavTab(String name, this.type) : super(name);
+
+  final EventDetailsTabType type;
 }

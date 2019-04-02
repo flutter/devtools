@@ -125,20 +125,23 @@ class PTabNav extends CoreElement {
     }
   }
 
+  final StreamController<PTabNavTab> _selectedTabController =
+      StreamController<PTabNavTab>.broadcast();
+
+  Stream<PTabNavTab> get onTabSelected => _selectedTabController.stream;
+
   PTabNavTab selectedTab;
 
   void selectTab(PTabNavTab tab) {
     selectedTab?.toggleClass('selected', false);
     selectedTab = tab;
     selectedTab?.toggleClass('selected', true);
+    _selectedTabController.add(selectedTab);
   }
 }
 
 class PTabNavTab extends CoreElement {
-  PTabNavTab(String name, {this.onTabSelected})
-      : super('div', classes: 'tabnav-tab', text: name);
-
-  final VoidCallback onTabSelected;
+  PTabNavTab(String name) : super('div', classes: 'tabnav-tab', text: name);
 }
 
 /// A menu navigation element - a vertically oriented list of items.

@@ -64,12 +64,13 @@ class CpuFlameChart extends FlameChart<CpuProfileData> {
       if (stackFrame.parent == null) {
         left = flameChartInset.toDouble();
       } else {
-        final stackFrameIndex = stackFrame.parent.children.indexOf(stackFrame);
+        final stackFrameIndex = stackFrame.index;
         if (stackFrameIndex == 0) {
           // This is the first child of parent. [left] should equal the left
           // value of [stackFrame]'s parent.
           left = stackFrameLefts[stackFrame.parent.id];
         } else {
+          assert(stackFrameIndex != -1);
           // [stackFrame] is not the first child of its parent. [left] should
           // equal the right value of its previous sibling.
           final previous = stackFrame.parent.children[stackFrameIndex - 1];

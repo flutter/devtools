@@ -63,6 +63,9 @@ class CpuStackFrame {
   CpuStackFrame parent;
   List<CpuStackFrame> children = [];
 
+  /// Index in [parent.children].
+  int index = -1;
+
   bool get isLeaf => children.isEmpty;
 
   /// Depth of this CpuStackFrame tree, including [this].
@@ -86,11 +89,15 @@ class CpuStackFrame {
 
   int _sampleCount;
 
-  double get cpuConsumptionRatio => sampleCount / getRoot().sampleCount;
+  double get cpuConsumptionRatio =>
+      _cpuConsumptionRatio ??= sampleCount / getRoot().sampleCount;
+
+  double _cpuConsumptionRatio;
 
   void addChild(CpuStackFrame child) {
     children.add(child);
     child.parent = this;
+    child.index = children.length - 1;
   }
 
   CpuStackFrame getRoot() {
