@@ -142,6 +142,19 @@ class VmServiceWrapper implements VmService {
     return _trackFuture(_vmService.getCpuProfile(isolateId, tags));
   }
 
+  Future<Response> getCpuProfileTimeline(
+      String isolateId, int origin, int extent) async {
+    return _trackFuture(callMethod(
+      '_getCpuProfileTimeline',
+      isolateId: isolateId,
+      args: {
+        'tags': 'None',
+        'timeOriginMicros': origin,
+        'timeExtentMicros': extent,
+      },
+    ));
+  }
+
   @override
   Future<FlagList> getFlagList() => _trackFuture(_vmService.getFlagList());
 

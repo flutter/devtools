@@ -85,7 +85,7 @@
     background-color: var(--shaded-background-lighter);
 }
 
-.flame-chart-section .flame-chart-item {
+.flame-chart-item {
     border-radius: 2px;
     cursor: pointer;
     padding: 0 2px;
@@ -155,17 +155,55 @@
     border-radius: 3px;
 }
 
-.event-details-title {
+.event-details-section {
+    position: relative;
+}
+
+.event-details-heading {
+    background-color: var(--shaded-background-darker);
     padding: 3px 12px;
     font-weight: bold;
+    min-width: 100%;
 }
 
 .event-details {
-    margin: 6px 0px 0px 12px;
+    position: relative;
+    /* 100% height minus the height of the event-details-heading */
+    height: calc(100% - 27px);
 }
 
-.coming-soon {
+.ui-details-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* 100% height minus the height of stack-frame-details */
+    height: calc(100% - 27px);
+    min-width: 100%;
+}
+
+.cpu-flame-chart {
+    overflow: hidden;
+}
+
+.stack-frame-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.cpu-profile-spinner {
+    position: absolute;
+    margin-top: -16px;
+    margin-left: -16px;
+    top: 50%;
+    left: 50%;
+}
+
+.message {
     width: 100%;
     text-align: center;
-    color: green;
+    position: absolute;
+    margin-top: -10px;
+    top: 50%;
+    left: 0;
 }
