@@ -239,6 +239,7 @@ class EventDetailsTabNav extends PTabNav {
 
   @override
   void selectTab(PTabNavTab tab) {
+    assert(tab is EventDetailsTabNavTab);
     super.selectTab(tab);
     tab.onTabSelected();
   }
