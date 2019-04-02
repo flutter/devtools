@@ -49,7 +49,6 @@ class CpuProfileData {
       // [cpuProfile].
       cpuProfileRoot.addChild(stackFrame);
     } else {
-      assert(num.parse(parent.id) > num.parse(stackFrame.id));
       parent.addChild(stackFrame);
     }
   }
