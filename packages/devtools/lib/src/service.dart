@@ -8,9 +8,8 @@ import 'dart:typed_data';
 
 import 'vm_service_wrapper.dart';
 
-Future<VmServiceWrapper> connect(
-    String host, int port, Completer<Null> finishedCompleter) {
-  final WebSocket ws = WebSocket('ws://$host:$port/ws');
+Future<VmServiceWrapper> connect(Uri uri, Completer<Null> finishedCompleter) {
+  final WebSocket ws = WebSocket(uri.toString());
 
   final Completer<VmServiceWrapper> connectedCompleter =
       Completer<VmServiceWrapper>();

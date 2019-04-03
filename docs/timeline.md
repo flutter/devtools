@@ -51,12 +51,9 @@ More information on profiling the GPU thread can be found at
 
 ### Jank
 
-The frame rendering chart shows UI and GPU jank in shades of red. We consider a portion of the frame to be janky when
-it takes more than 8 ms to complete.
-
-To achieve a frame rendering rate of 60 FPS (frames per second), each frame must render in ~16 ms or less. Since there
-are two portions of work for each frame (UI and GPU), each portion should complete in 8 ms or less. When this target is
-missed, you may experience UI jank or dropped frames.
+The frame rendering chart shows jank with a red overlay. We consider a frame to be janky if it takes more than ~16 ms to
+complete. To achieve a frame rendering rate of 60 FPS (frames per second), each frame must render in ~16 ms or less.
+When this target is missed, you may experience UI jank or dropped frames.
 
 See [Flutter performance profiling](https://flutter.dev/docs/testing/ui-performance) for more detailed information on
 how to analyze your app's performance.

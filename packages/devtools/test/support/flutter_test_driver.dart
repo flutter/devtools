@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -46,7 +47,7 @@ abstract class FlutterTestDriver {
 
   Stream<String> get stdout => _stdout.stream;
 
-  int get vmServicePort => _vmServiceWsUri.port;
+  Uri get vmServiceUri => _vmServiceWsUri;
 
   bool get hasExited => _hasExited;
 
@@ -321,6 +322,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
+
+      // Map to WS URI.
+      _vmServiceWsUri = getVmServiceUriFromObservatoryUri(_vmServiceWsUri);
+
       vmService = VmServiceWrapper(
           await vmServiceConnectUri(_vmServiceWsUri.toString()));
       vmService.onSend.listen((String s) => _debugPrint('==> $s'));

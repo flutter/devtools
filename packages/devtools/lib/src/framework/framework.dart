@@ -161,12 +161,13 @@ class Framework {
     }
   }
 
-  void showInfo(String message, {String title}) {
-    _showMessage(message, title: title);
+  void showInfo({String message, String title, List<CoreElement> children}) {
+    _showMessage(message: message, title: title, children: children);
   }
 
-  void showWarning(String message, {String title}) {
-    _showMessage(message, title: title, warning: true);
+  void showWarning({String message, String title, List<CoreElement> children}) {
+    _showMessage(
+        message: message, title: title, children: children, warning: true);
   }
 
   void showError(String title, [dynamic error]) {
@@ -180,14 +181,15 @@ class Framework {
       }
     }
 
-    _showMessage(message, title: title, error: true);
+    _showMessage(message: message, title: title, error: true);
   }
 
-  void _showMessage(
-    String message, {
+  void _showMessage({
+    String message,
     String title,
     bool warning = false,
     bool error = false,
+    List<CoreElement> children,
   }) {
     final PFlash flash = PFlash();
     if (warning) {
@@ -204,6 +206,9 @@ class Framework {
       for (String text in message.split('\n\n')) {
         flash.add(div(text: text));
       }
+    }
+    if (children != null) {
+      children.forEach(flash.add);
     }
 
     final CoreElement errorContainer =
@@ -436,7 +441,7 @@ class ConnectDialog {
           CoreElement('dt')
             ..add([
               label(text: 'Connect to a running app')
-                ..setAttribute('for', 'port-field'),
+                ..setAttribute('for', 'uri-field'),
             ]),
           CoreElement('dd')
             ..add([
@@ -449,8 +454,8 @@ class ConnectDialog {
             ..add([
               textfield = CoreElement('input', classes: 'form-control input-sm')
                 ..setAttribute('type', 'text')
-                ..setAttribute('placeholder', 'Port')
-                ..id = 'port-field',
+                ..setAttribute('placeholder', 'Port or URL')
+                ..id = 'uri-field',
               connectButton = PButton('Connect')
                 ..small()
                 ..clazz('margin-left'),
@@ -488,9 +493,8 @@ class ConnectDialog {
 
   bool isVisible() => parent.display != 'none';
 
-  @visibleForTesting
-  void connectTo(int port) async {
-    await _connect(port);
+  void connectTo(Uri uri) async {
+    await _connect(uri);
   }
 
   void _tryConnect() {
@@ -505,14 +509,15 @@ class ConnectDialog {
     }
 
     if (port != null) {
-      _connect(port).catchError((dynamic error) {
+      _connect(Uri.parse('ws://localhost:$port/ws'))
+          .catchError((dynamic error) {
         handleConnectError();
       });
     } else {
       try {
         final Uri uri = Uri.parse(value);
-        if (uri.hasPort) {
-          _connect(uri.port).catchError((dynamic error) {
+        if (uri != null && uri.isAbsolute) {
+          _connect(uri).catchError((dynamic error) {
             handleConnectError();
           });
         } else {
@@ -525,22 +530,22 @@ class ConnectDialog {
     }
   }
 
-  Future _connect(int port) async {
+  Future _connect(Uri serviceUri) async {
     final bool connected = await FrameworkCore.initVmService(
-      explicitPort: port,
+      explicitUri: serviceUri,
       errorReporter: (String title, dynamic error) {
         // ignore - we report this in _tryConnect
       },
     );
 
     if (connected) {
-      // Re-write the url to include the new port. Keep existing query params.
+      // Re-write the url to include the new service uri. Keep existing query params.
       final Location location = window.location;
-      Uri uri = Uri.parse(location.href);
-      uri = uri.replace(
-          queryParameters: {'port': port.toString()}
-            ..addAll(uri.queryParameters));
-      window.history.pushState(null, null, uri.toString());
+      final uri = Uri.parse(location.href);
+      final newParams = Map.of(uri.queryParameters);
+      newParams['uri'] = serviceUri.toString();
+      window.history.pushState(
+          null, null, uri.replace(queryParameters: newParams).toString());
 
       // Hide the dialog
       hide();

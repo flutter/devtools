@@ -343,13 +343,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[R] root ]\n'
-                '  ▼[M] MyApp\n'
-                '    ▼[M] MaterialApp\n'
-                '      ▼[S] Scaffold\n'
-                '      ├───▼[C] Center\n'
-                '      │     ▼[/icons/inspector/textArea.png] Text\n'
-                '      └─▼[A] AppBar\n'
-                '          ▼[/icons/inspector/textArea.png] Text\n',
+            '  ▼[M] MyApp\n'
+            '    ▼[M] MaterialApp\n'
+            '      ▼[S] Scaffold\n'
+            '      ├───▼[C] Center\n'
+            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      └─▼[A] AppBar\n'
+            '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       expect(
@@ -464,13 +464,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[R] root ]\n'
-                '  ▼[M] MyApp\n'
-                '    ▼[M] MaterialApp\n'
-                '      ▼[S] Scaffold <-- selected\n'
-                '      ├───▼[C] Center\n'
-                '      │     ▼[/icons/inspector/textArea.png] Text\n'
-                '      └─▼[A] AppBar\n'
-                '          ▼[/icons/inspector/textArea.png] Text\n',
+            '  ▼[M] MyApp\n'
+            '    ▼[M] MaterialApp\n'
+            '      ▼[S] Scaffold <-- selected\n'
+            '      ├───▼[C] Center\n'
+            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      └─▼[A] AppBar\n'
+            '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
@@ -490,13 +490,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[R] root ]\n'
-                '  ▼[M] MyApp\n'
-                '    ▼[M] MaterialApp\n'
-                '      ▼[S] Scaffold\n'
-                '      ├───▼[C] Center <-- selected\n'
-                '      │     ▼[/icons/inspector/textArea.png] Text\n'
-                '      └─▼[A] AppBar\n'
-                '          ▼[/icons/inspector/textArea.png] Text\n',
+            '  ▼[M] MyApp\n'
+            '    ▼[M] MaterialApp\n'
+            '      ▼[S] Scaffold\n'
+            '      ├───▼[C] Center <-- selected\n'
+            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      └─▼[A] AppBar\n'
+            '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
@@ -513,13 +513,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[R] root ]\n'
-                '  ▼[M] MyApp\n'
-                '    ▼[M] MaterialApp\n'
-                '      ▼[S] Scaffold <-- selected\n'
-                '      ├───▼[C] Center\n'
-                '      │     ▼[/icons/inspector/textArea.png] Text\n'
-                '      └─▼[A] AppBar\n'
-                '          ▼[/icons/inspector/textArea.png] Text\n',
+            '  ▼[M] MyApp\n'
+            '    ▼[M] MaterialApp\n'
+            '      ▼[S] Scaffold <-- selected\n'
+            '      ├───▼[C] Center\n'
+            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      └─▼[A] AppBar\n'
+            '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // Verify that the details tree scrolled back as well.
@@ -552,13 +552,13 @@ void main() async {
           tree.toStringDeep(),
           equalsIgnoringHashCodes(
             '▼[R] root ]\n'
-                '  ▼[M] MyApp\n'
-                '    ▼[M] MaterialApp\n'
-                '      ▼[S] Scaffold\n'
-                '      ├───▼[C] Center\n'
-                '      │     ▼[/icons/inspector/textArea.png] Text\n'
-                '      └─▼[A] AppBar\n'
-                '          ▼[/icons/inspector/textArea.png] Text\n',
+            '  ▼[M] MyApp\n'
+            '    ▼[M] MaterialApp\n'
+            '      ▼[S] Scaffold\n'
+            '      ├───▼[C] Center\n'
+            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      └─▼[A] AppBar\n'
+            '          ▼[/icons/inspector/textArea.png] Text\n',
           ));
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot
