@@ -70,7 +70,6 @@ nav.menu .menu-item {
 .btn, .btn[disabled], .btn:hover, .btn.hover, .btn:active, .btn.selected {
     background-color: transparent;
     background-image: none;
-    border-radius: 2px;
     border-width: 1px;
     border: 1px solid #5f6368;
     box-shadow: none;
@@ -115,11 +114,11 @@ nav.menu .menu-item {
 }
 
 .btn.btn-primary:active, .btn.btn-primary.selected, .btn.btn-primary:hover, .btn.btn-primary.hover {
-    background-color: #7aa2de; /* Not picked from spec */
+    background-color: #7aa2de; /* Not picked from material design spec */
 }
 
 .btn.btn-primary:hover:active, .btn.btn-primary.hover:active, .btn.btn-primary.selected:hover, .btn.btn-primary.selected.hover {
-    background-color: #6c8fc4; /* Not picked from spec */
+    background-color: #6c8fc4; /* Not picked material design from spec */
 }
 
 .flash-warn {

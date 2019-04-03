@@ -129,7 +129,7 @@ class FlutterIcons {
   // Icons matching IntelliJ core icons.
   static const Icon locate = UrlIcon('/icons/general/locate.png');
   static const Icon forceRefresh = UrlIcon('/icons/actions/forceRefresh.svg');
-  // TODO: Do we want these dynamic? :/
+  // TODO(dantup): Make a ThemedIcon class to handle this.
   static Icon get refresh => isDarkTheme
       ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
       : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
