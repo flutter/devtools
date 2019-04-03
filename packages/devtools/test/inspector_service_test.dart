@@ -104,13 +104,13 @@ void main() async {
           treeToDebugString(root),
           equalsIgnoringHashCodes(
             '[root]\n'
-                ' └─MyApp\n'
-                '   └─MaterialApp\n'
-                '     └─Scaffold\n'
-                '       ├─Center\n'
-                '       │ └─Text\n'
-                '       └─AppBar\n'
-                '         └─Text\n',
+            ' └─MyApp\n'
+            '   └─MaterialApp\n'
+            '     └─Scaffold\n'
+            '       ├─Center\n'
+            '       │ └─Text\n'
+            '       └─AppBar\n'
+            '         └─Text\n',
           ),
         );
         RemoteDiagnosticsNode nodeInSummaryTree =
@@ -120,11 +120,11 @@ void main() async {
           treeToDebugString(nodeInSummaryTree),
           equalsIgnoringHashCodes(
             'MaterialApp\n'
-                ' └─Scaffold\n'
-                '   ├─Center\n'
-                '   │ └─Text\n'
-                '   └─AppBar\n'
-                '     └─Text\n',
+            ' └─Scaffold\n'
+            '   ├─Center\n'
+            '   │ └─Text\n'
+            '   └─AppBar\n'
+            '     └─Text\n',
           ),
         );
         RemoteDiagnosticsNode nodeInDetailsTree =
@@ -150,22 +150,22 @@ void main() async {
           treeToDebugString(nodeInDetailsTree),
           equalsIgnoringHashCodes(
             'Text\n'
-                ' │ data: "Hello, World!"\n'
-                ' │ textAlign: null\n'
-                ' │ textDirection: null\n'
-                ' │ locale: null\n'
-                ' │ softWrap: null\n'
-                ' │ overflow: null\n'
-                ' │ textScaleFactor: null\n'
-                ' │ maxLines: null\n'
-                ' │ dependencies: [MediaQuery, DefaultTextStyle]\n'
-                ' │\n'
-                ' └─RichText\n'
-                '     softWrap: wrapping at box width\n'
-                '     maxLines: unlimited\n'
-                '     text: "Hello, World!"\n'
-                '     dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
-                '     renderObject: RenderParagraph#00000 relayoutBoundary=up2\n',
+            ' │ data: "Hello, World!"\n'
+            ' │ textAlign: null\n'
+            ' │ textDirection: null\n'
+            ' │ locale: null\n'
+            ' │ softWrap: null\n'
+            ' │ overflow: null\n'
+            ' │ textScaleFactor: null\n'
+            ' │ maxLines: null\n'
+            ' │ dependencies: [MediaQuery, DefaultTextStyle]\n'
+            ' │\n'
+            ' └─RichText\n'
+            '     softWrap: wrapping at box width\n'
+            '     maxLines: unlimited\n'
+            '     text: "Hello, World!"\n'
+            '     dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
+            '     renderObject: RenderParagraph#00000 relayoutBoundary=up2\n',
           ),
         );
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
@@ -179,7 +179,7 @@ void main() async {
           treeToDebugString(selection),
           equalsIgnoringHashCodes(
             'Text\n'
-                ' └─RichText\n',
+            ' └─RichText\n',
           ),
         );
 
@@ -190,7 +190,7 @@ void main() async {
           treeToDebugString(selection),
           equalsIgnoringHashCodes(
             'RenderParagraph#00000 relayoutBoundary=up2\n'
-                ' └─text: TextSpan\n',
+            ' └─text: TextSpan\n',
           ),
         );
 
@@ -213,7 +213,7 @@ void main() async {
           treeToDebugString(root),
           equalsIgnoringHashCodes(
             'RenderView#00000\n'
-                ' └─child: RenderSemanticsAnnotations#00000\n',
+            ' └─child: RenderSemanticsAnnotations#00000\n',
           ),
         );
         final child = findNodeMatching(root, 'RenderSemanticsAnnotations');
@@ -223,21 +223,21 @@ void main() async {
           treeToDebugString(childDetailsSubtree),
           equalsIgnoringHashCodes(
             'child: RenderSemanticsAnnotations#00000\n'
-                ' │ parentData: <none>\n'
-                ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-                ' │ size: Size(800.0, 600.0)\n'
-                ' │\n'
-                ' └─child: RenderCustomPaint#00000\n'
-                '   │ parentData: <none> (can use size)\n'
-                '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-                '   │ size: Size(800.0, 600.0)\n'
-                '   │\n'
-                '   └─child: RenderPointerListener#00000\n'
-                '       parentData: <none> (can use size)\n'
-                '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
-                '       size: Size(800.0, 600.0)\n'
-                '       behavior: deferToChild\n'
-                '       listeners: down, up, cancel\n',
+            ' │ parentData: <none>\n'
+            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            ' │ size: Size(800.0, 600.0)\n'
+            ' │\n'
+            ' └─child: RenderCustomPaint#00000\n'
+            '   │ parentData: <none> (can use size)\n'
+            '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            '   │ size: Size(800.0, 600.0)\n'
+            '   │\n'
+            '   └─child: RenderPointerListener#00000\n'
+            '       parentData: <none> (can use size)\n'
+            '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            '       size: Size(800.0, 600.0)\n'
+            '       behavior: deferToChild\n'
+            '       listeners: down, up, cancel\n',
           ),
         );
 
@@ -250,7 +250,7 @@ void main() async {
           treeToDebugString(selection),
           equalsIgnoringHashCodes(
             'RenderSemanticsAnnotations#00000\n'
-                ' └─child: RenderCustomPaint#00000\n',
+            ' └─child: RenderCustomPaint#00000\n',
           ),
         );
       });
