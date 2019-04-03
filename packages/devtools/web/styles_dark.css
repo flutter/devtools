@@ -66,25 +66,25 @@ nav.menu .menu-item {
     fill-opacity: 0.6 !important;
 }
 
-/* Set defaults for buttons (mostly removing Primer styles) */
+/* Set defaults for buttons (inc removing Primer styles) */
 .btn, .btn[disabled], .btn:hover, .btn.hover, .btn:active, .btn.selected {
+    background-color: transparent;
+    background-image: none;
     border-radius: 2px;
     border-width: 1px;
-    border-color: rgba(var(--white-rgb), 0.08);
-    background-image: none;
+    border: 1px solid #5f6368;
     box-shadow: none;
+    color: #89b5f8;
+    font-weight: normal;
     position: relative;
 }
 
-.btn {
-    background-color: transparent;
-    border: 1px solid #5f6368;
-    font-weight: normal;
-    color: #89b5f8;
-}
-
 .btn[disabled] {
-    /* ??? */
+    /* !important to override all other states (like hover) */
+    opacity: 0.5 !important;
+    background-color: transparent !important;
+    border: 1px solid #5f6368 !important;
+    color: #89b5f8 !important;
 }
 
 .btn:active, .btn.selected {
@@ -93,14 +93,11 @@ nav.menu .menu-item {
 }
 
 .btn:hover, .btn.hover {
-    background-color: #3b3b3e;
-    border-color: #3b3b3e;
+    background-color: #3a4556;
 }
 
 .btn:hover:active, .btn.hover:active, .btn.selected:hover, .btn.selected.hover {
-    /* This needs a better colour - I made this one up and it's bad */
-    background-color: #394959;
-    border-color: #394959;
+    background-color: #3b3b3e;
 }
 
 .btn.btn-primary {
@@ -109,16 +106,20 @@ nav.menu .menu-item {
     color: #202124;
 }
 
-.btn.btn-primary:active, .btn.btn-primary.selected {
-    /* What should primary selected buttons look like (can we have them?) */
+.btn.btn-primary[disabled] {
+    /* !important to override all other states (like hover) */
+    opacity: 0.5 !important;
+    background-color: #89b5f8 !important;
+    border-color: #89b5f8 !important;
+    color: #202124 !important;
 }
 
-.btn.btn-primary:hover, .btn.btn-primary.hover {
-    /* What is the primary hover state? */
+.btn.btn-primary:active, .btn.btn-primary.selected, .btn.btn-primary:hover, .btn.btn-primary.hover {
+    background-color: #7aa2de; /* Not picked from spec */
 }
 
 .btn.btn-primary:hover:active, .btn.btn-primary.hover:active, .btn.btn-primary.selected:hover, .btn.btn-primary.selected.hover {
-    /* What should primary selected+hover buttons look like (can we have them?) */
+    background-color: #6c8fc4; /* Not picked from spec */
 }
 
 .flash-warn {
