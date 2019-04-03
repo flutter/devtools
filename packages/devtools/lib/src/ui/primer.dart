@@ -131,9 +131,16 @@ class PTabNav extends CoreElement {
     }
 
     for (PTabNavTab tab in tabs) {
-      tab.click(() => selectTab(tab));
+      tab.click(() {
+        selectTab(tab);
+      });
     }
   }
+
+  final StreamController<PTabNavTab> _selectedTabController =
+      StreamController<PTabNavTab>.broadcast();
+
+  Stream<PTabNavTab> get onTabSelected => _selectedTabController.stream;
 
   PTabNavTab selectedTab;
 
@@ -141,6 +148,7 @@ class PTabNav extends CoreElement {
     selectedTab?.toggleClass('selected', false);
     selectedTab = tab;
     selectedTab?.toggleClass('selected', true);
+    _selectedTabController.add(selectedTab);
   }
 }
 

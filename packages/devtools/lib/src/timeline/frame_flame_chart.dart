@@ -3,10 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
 import 'dart:math' as math;
-
-import 'package:meta/meta.dart';
 
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
@@ -14,6 +11,7 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
+import 'flame_chart.dart';
 import 'timeline.dart';
 import 'timeline_protocol.dart';
 
@@ -35,65 +33,28 @@ final gpuColorPalette = [
   const ThemedColor(Color(0xFF01579B), Color(0xFF1565C0)),
 ];
 
-/// Inset for the start/end of the flame chart.
-const flameChartInset = 70;
+final StreamController<FrameFlameChartItem>
+    _selectedFrameFlameChartItemController =
+    StreamController<FrameFlameChartItem>.broadcast();
 
-final StreamController<FlameChartItem> _selectedFlameChartItemController =
-    StreamController<FlameChartItem>.broadcast();
-
-Stream<FlameChartItem> get onSelectedFlameChartItem =>
-    _selectedFlameChartItemController.stream;
+Stream<FrameFlameChartItem> get onSelectedFrameFlameChartItem =>
+    _selectedFrameFlameChartItemController.stream;
 
 final DragScroll _dragScroll = DragScroll();
 
-class FrameFlameChart extends CoreElement {
+const _flameChartInset = 70;
+
+class FrameFlameChart extends FlameChart<TimelineFrame> {
   FrameFlameChart()
-      : super('div', classes: 'section-border flame-chart-container') {
-    flex();
-    layoutVertical();
+      : super(
+          onSelectedFlameChartItem: onSelectedFrameFlameChartItem,
+          dragScroll: _dragScroll,
+          classes: 'section-border flame-chart-container',
+          flameChartInset: _flameChartInset,
+        );
 
-    _dragScroll.enableDragScrolling(this);
-    element.onMouseWheel.listen(_handleMouseWheel);
+  static const int sectionSpacing = 15;
 
-    onSelectedFlameChartItem.listen((FlameChartItem item) {
-      // Unselect the previously selected item.
-      _selectedItem?.setSelected(false);
-
-      // Select the new item.
-      item.setSelected(true);
-      _selectedItem = item;
-    });
-  }
-
-  static const padding = 2;
-
-  /// All flame chart items currently drawn on the chart.
-  final List<FlameChartItem> _chartItems = [];
-
-  /// Maximum zoom level we should allow.
-  ///
-  /// Arbitrary large number to accommodate spacing for some of the shortest
-  /// events when zoomed in to [_maxZoomLevel].
-  final _maxZoomLevel = 150;
-  final _minZoomLevel = 1;
-  num _zoomLevel = 1;
-
-  /// Maximum scroll delta allowed for scrollwheel based zooming.
-  ///
-  /// This isn't really needed but is a reasonable for safety in case we
-  /// aren't handling some mouse based scroll wheel behavior well, etc.
-  final num maxScrollWheelDelta = 20;
-
-  num get _zoomMultiplier => _zoomLevel * 0.003;
-
-  // The DOM doesn't allow floating point scroll offsets so we track a
-  // theoretical floating point scroll offset corresponding to the current
-  // scroll offset to reduce floating point error when zooming.
-  num floatingPointScrollLeft = 0;
-
-  FlameChartItem _selectedItem;
-
-  TimelineFrame _frame;
   TimelineGrid _timelineGrid;
   CoreElement _flameChart;
   CoreElement _timelineBackground;
@@ -115,56 +76,32 @@ class FrameFlameChart extends CoreElement {
     return color;
   }
 
-  void updateFrameData(TimelineFrame frame) {
-    _frame = frame;
-    _resetChart();
-
-    if (debugTimeline && frame != null) {
-      final buf = StringBuffer();
-      buf.writeln('UI timeline event for frame ${frame.id}:');
-      frame.uiEventFlow.format(buf, '  ');
-      buf.writeln('\nUI trace for frame ${frame.id}');
-      frame.uiEventFlow.writeTraceToBuffer(buf);
-      buf.writeln('\nGPU timeline event frame ${frame.id}:');
-      frame.gpuEventFlow.format(buf, '  ');
-      buf.writeln('\nGPU trace for frame ${frame.id}');
-      frame.gpuEventFlow.writeTraceToBuffer(buf);
-      print(buf.toString());
-    }
-
-    if (frame != null) {
-      _render();
-    }
-  }
-
-  void _resetChart() {
-    clear();
-    element.scrollLeft = 0;
-    element.scrollTop = 0;
+  @override
+  void reset() {
+    super.reset();
     _uiColorOffset = 0;
     _gpuColorOffset = 0;
-    _zoomLevel = 1;
-    _chartItems.clear();
   }
 
-  void _render() {
-    const int rowHeight = 25;
-    const int sectionSpacing = 15;
+  @override
+  void render() {
+    final TimelineFrame frame = data;
 
     /// Pixels per microsecond in order to fit the entire frame in view.
     ///
     /// Subtract 2 * [sectionLabelOffset] to account for extra space at the
     /// beginning/end of the chart.
     final double pxPerMicro =
-        (element.clientWidth - 2 * flameChartInset) / _frame.duration;
+        (element.clientWidth - 2 * flameChartInset) / frame.duration;
 
-    final int frameStartOffset = _frame.startTime;
+    final int frameStartOffset = frame.startTime;
     final uiSectionHeight =
-        _frame.uiEventFlow.depth * rowHeight + sectionSpacing;
-    final gpuSectionHeight = _frame.gpuEventFlow.depth * rowHeight;
-    final flameChartHeight = 2 * rowHeight + uiSectionHeight + gpuSectionHeight;
+        frame.uiEventFlow.depth * FlameChart.rowHeight + sectionSpacing;
+    final gpuSectionHeight = frame.gpuEventFlow.depth * FlameChart.rowHeight;
+    final flameChartHeight =
+        2 * FlameChart.rowHeight + uiSectionHeight + gpuSectionHeight;
 
-    void drawRecursively(
+    void drawSubtree(
       TimelineEvent event,
       int row,
       CoreElement section, {
@@ -180,19 +117,19 @@ class FrameFlameChart extends CoreElement {
         event,
         startPx,
         endPx - startPx,
-        row * rowHeight + padding,
+        row * FlameChart.rowHeight + FlameChart.padding,
         section,
         includeDuration: includeDuration,
       );
 
       for (TimelineEvent child in event.children) {
-        drawRecursively(child, row + 1, section);
+        drawSubtree(child, row + 1, section);
       }
     }
 
     void drawTimelineBackground() {
       _timelineBackground = div(c: 'timeline-background')
-        ..element.style.height = '${rowHeight}px';
+        ..element.style.height = '${FlameChart.rowHeight}px';
       add(_timelineBackground);
     }
 
@@ -202,18 +139,18 @@ class FrameFlameChart extends CoreElement {
 
       _uiSection.element.style
         ..height = '${uiSectionHeight}px'
-        ..top = '${rowHeight}px';
+        ..top = '${FlameChart.rowHeight}px';
 
       final sectionTitle =
           div(text: 'UI', c: 'flame-chart-item flame-chart-title');
       sectionTitle.element.style
         ..background = colorToCss(mainUiColor)
-        ..left = '${padding}px'
-        ..top = '${padding}px';
+        ..left = '${FlameChart.padding}px'
+        ..top = '${FlameChart.padding}px';
       _uiSection.add(sectionTitle);
 
-      drawRecursively(
-        _frame.uiEventFlow,
+      drawSubtree(
+        frame.uiEventFlow,
         0,
         _uiSection,
         includeDuration: true,
@@ -226,18 +163,18 @@ class FrameFlameChart extends CoreElement {
 
       _gpuSection.element.style
         ..height = '${gpuSectionHeight}px'
-        ..top = '${rowHeight + uiSectionHeight}px';
+        ..top = '${FlameChart.rowHeight + uiSectionHeight}px';
 
       final sectionTitle =
           div(text: 'GPU', c: 'flame-chart-item flame-chart-title');
       sectionTitle.element.style
         ..background = colorToCss(mainGpuColor)
-        ..left = '${padding}px'
-        ..top = '${padding}px';
+        ..left = '${FlameChart.padding}px'
+        ..top = '${FlameChart.padding}px';
       _gpuSection.add(sectionTitle);
 
-      drawRecursively(
-        _frame.gpuEventFlow,
+      drawSubtree(
+        frame.gpuEventFlow,
         0,
         _gpuSection,
         includeDuration: true,
@@ -245,7 +182,7 @@ class FrameFlameChart extends CoreElement {
     }
 
     void drawTimelineGrid() {
-      _timelineGrid = TimelineGrid(_frame.duration, getFlameChartWidth());
+      _timelineGrid = TimelineGrid(frame.duration, getFlameChartWidth());
       _timelineGrid.element.style.height = '${flameChartHeight}px';
       add(_timelineGrid);
     }
@@ -272,17 +209,17 @@ class FrameFlameChart extends CoreElement {
     CoreElement section, {
     bool includeDuration = false,
   }) {
-    final item = FlameChartItem(
+    final item = FrameFlameChartItem(
       event,
       left,
       width,
       top,
       event.isUiEvent ? nextUiColor() : nextGpuColor(),
+      event.isUiEvent ? Colors.black : Colors.white,
+      Colors.black,
       includeDuration: includeDuration,
     );
-
-    _chartItems.add(item);
-    section.element.append(item.e);
+    addItemToFlameChart(item, section);
   }
 
   void _setSectionWidths() {
@@ -295,161 +232,63 @@ class FrameFlameChart extends CoreElement {
     _gpuSection.element.style.width = '${width}px';
   }
 
-  num getFlameChartWidth() {
-    num maxRight = 0;
-    for (FlameChartItem item in _chartItems) {
-      if ((item.currentLeft + item.currentWidth) > maxRight) {
-        maxRight = item.currentLeft + item.currentWidth;
-      }
-    }
-    // Subtract [flameChartInset] to account for spacing at the beginning of the
-    // chart.
-    return maxRight - flameChartInset;
-  }
+  @override
+  void updateChartForZoom() {
+    super.updateChartForZoom();
 
-  void _handleMouseWheel(WheelEvent e) {
-    e.preventDefault();
-
-    if (e.deltaY.abs() >= e.deltaX.abs()) {
-      final mouseX = e.client.x - element.getBoundingClientRect().left;
-      _handleZoom(e.deltaY, mouseX);
-    } else {
-      // Manually perform horizontal scrolling.
-      element.scrollLeft += e.deltaX.round();
-    }
-  }
-
-  void _handleZoom(num deltaY, num mouseX) {
-    assert(_frame != null);
-
-    deltaY = deltaY.clamp(-maxScrollWheelDelta, maxScrollWheelDelta);
-    num newZoomLevel = _zoomLevel + deltaY * _zoomMultiplier;
-    newZoomLevel = newZoomLevel.clamp(_minZoomLevel, _maxZoomLevel);
-
-    if (newZoomLevel == _zoomLevel) return;
-    // Store current scroll values for re-calculating scroll location on zoom.
-    num lastScrollLeft = element.scrollLeft;
-    // Test whether the scroll offset has changed by more than rounding error
-    // since the last time an exact scroll offset was calculated.
-    if ((floatingPointScrollLeft - lastScrollLeft).abs() < 0.5) {
-      lastScrollLeft = floatingPointScrollLeft;
-    }
-    // Position in the zoomable coordinate space that we want to keep fixed.
-    final num fixedX = mouseX + lastScrollLeft - flameChartInset;
-    // Calculate and set our new horizontal scroll position.
-    if (fixedX >= 0) {
-      floatingPointScrollLeft =
-          fixedX * newZoomLevel / _zoomLevel + flameChartInset - mouseX;
-    } else {
-      // No need to transform as we are in the fixed portion of the window.
-      floatingPointScrollLeft = lastScrollLeft;
-    }
-    _zoomLevel = newZoomLevel;
-
-    for (FlameChartItem item in _chartItems) {
-      item.updateHorizontalPosition(zoom: _zoomLevel);
-    }
     _setSectionWidths();
-
-    _timelineGrid.updateForZoom(_zoomLevel, getFlameChartWidth());
+    _timelineGrid.updateForZoom(zoomLevel, getFlameChartWidth());
 
     element.scrollLeft = math.max(0, floatingPointScrollLeft.round());
   }
 }
 
-class FlameChartItem {
-  FlameChartItem(
+class FrameFlameChartItem extends FlameChartItem {
+  FrameFlameChartItem(
     this._event,
-    this._startingLeft,
-    this._startingWidth,
-    this._top,
-    this._backgroundColor, {
-    bool includeDuration = false,
-  }) {
-    defaultTextColor = event.isUiEvent ? Colors.black : Colors.white;
-
-    final durationText = msText(Duration(microseconds: _event.duration));
-    e = Element.div()..className = 'flame-chart-item';
-    e.title = '${_event.name} ($durationText)';
-
-    _labelWrapper = Element.div()..className = 'flame-chart-item-label-wrapper';
-    String name = _event.name;
-    if (includeDuration) {
-      name = '$name ($durationText)';
-    }
-    _label = Element.span()
-      ..text = name
-      ..className = 'flame-chart-item-label'
-      ..style.color = colorToCss(defaultTextColor);
-    _labelWrapper.append(_label);
-    e.append(_labelWrapper);
-
-    e.style
-      ..background = colorToCss(_backgroundColor)
-      ..top = '${_top}px';
-    updateHorizontalPosition(zoom: 1);
-
-    e.onClick.listen((e) {
-      // Prevent clicks when the chart was being dragged.
-      if (!_dragScroll.wasDragged) {
-        _selectedFlameChartItemController.add(this);
-      }
-    });
-  }
-
-  static const selectedTextColor = Colors.black;
-  Color defaultTextColor;
-
-  // Pixels of padding to place on the right side of the label to ensure label
-  // text does not get too close to the right hand size of each bar.
-  static const labelPaddingRight = 4;
-
-  Element e;
-  Element _label;
-  Element _labelWrapper;
+    num startingLeft,
+    num startingWidth,
+    num top,
+    Color backgroundColor,
+    Color defaultTextColor,
+    Color selectedTextColor, {
+    this.includeDuration = false,
+  }) : super(
+          startingLeft: startingLeft,
+          startingWidth: startingWidth,
+          top: top,
+          backgroundColor: backgroundColor,
+          defaultTextColor: defaultTextColor,
+          selectedTextColor: selectedTextColor,
+          flameChartInset: _flameChartInset,
+        );
 
   TimelineEvent get event => _event;
   final TimelineEvent _event;
+  final bool includeDuration;
 
-  final num _top;
-  final Color _backgroundColor;
+  @override
+  void setText() {
+    final durationText = msText(Duration(microseconds: _event.duration));
 
-  // Left and width values for a flame chart item at zoom level 1;
-  final num _startingLeft;
-  final num _startingWidth;
+    String title = _event.name;
+    element.title = '$title ($durationText)';
 
-  num currentLeft;
-  num currentWidth;
-
-  Color get backgroundColor => _backgroundColor;
-
-  void updateHorizontalPosition({@required num zoom}) {
-    // Do not round these values. Rounding the left could cause us to have
-    // inaccurately placed events on the chart. Rounding the width could cause
-    // us to lose very small events if the width rounds to zero.
-    final newLeft = flameChartInset + _startingLeft * zoom;
-    final newWidth = _startingWidth * zoom;
-
-    e.style.left = '${newLeft}px';
-    if (_startingWidth != null) {
-      e.style.width = '${newWidth}px';
-      _labelWrapper.style.maxWidth =
-          '${math.max(0, newWidth - labelPaddingRight)}px';
+    if (includeDuration) {
+      title = '$title ($durationText)';
     }
-    currentLeft = newLeft;
-    currentWidth = newWidth;
+
+    itemLabel.text = title;
   }
 
-  void setSelected(bool selected) {
-    e.style
-      ..backgroundColor =
-          colorToCss(selected ? selectedFlameChartItemColor : _backgroundColor)
-      ..border = selected ? '1px solid' : 'none'
-      ..borderColor = selected
-          ? colorToCss(const Color(0x5A1B1F23))
-          : colorToCss(const Color(0x231B1F23));
-    _label.style.color =
-        colorToCss(selected ? selectedTextColor : defaultTextColor);
+  @override
+  void setOnClick() {
+    element.onClick.listen((e) {
+      // Prevent clicks when the chart was being dragged.
+      if (!_dragScroll.wasDragged) {
+        _selectedFrameFlameChartItemController.add(this);
+      }
+    });
   }
 }
 
@@ -470,7 +309,7 @@ class TimelineGrid extends CoreElement {
 
   num _flameChartWidth;
 
-  num get _flameChartWidthWithInsets => _flameChartWidth + 2 * flameChartInset;
+  num get _flameChartWidthWithInsets => _flameChartWidth + 2 * _flameChartInset;
 
   final List<TimelineGridItem> _gridItems = [];
 
@@ -478,11 +317,11 @@ class TimelineGrid extends CoreElement {
     // Draw the first grid item since it will have a different width than the
     // rest.
     final gridItem =
-        TimelineGridItem(0, flameChartInset, const Duration(microseconds: 0));
+        TimelineGridItem(0, _flameChartInset, const Duration(microseconds: 0));
     _gridItems.add(gridItem);
     add(gridItem);
 
-    num left = flameChartInset;
+    num left = _flameChartInset;
 
     while (left + interval < _flameChartWidthWithInsets) {
       // TODO(kenzie): Instead of calculating timestamp based on position, track
@@ -502,7 +341,9 @@ class TimelineGrid extends CoreElement {
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
   int getTimestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - flameChartInset) / _flameChartWidth * _frameDuration)
+    return ((gridItemEnd - _flameChartInset) /
+            _flameChartWidth *
+            _frameDuration)
         .round();
   }
 
@@ -530,7 +371,7 @@ class TimelineGrid extends CoreElement {
       for (int i = 1; i < _gridItems.length; i++) {
         final currentItem = _gridItems[i];
 
-        final newLeft = flameChartInset + zoomedGridIntervalPx * (i - 1);
+        final newLeft = _flameChartInset + zoomedGridIntervalPx * (i - 1);
         currentItem.setPosition(newLeft, zoomedGridIntervalPx);
       }
     } else {

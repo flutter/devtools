@@ -42,9 +42,6 @@ const Color selectedUiColor =
 const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
-const selectedFlameChartItemColor =
-    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
-
 const jankGlowInside =
     ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
 const jankGlowEdge =
@@ -155,7 +152,20 @@ class TimelineScreen extends Screen {
         flameChart.attribute('hidden', frame == null);
         eventDetails.attribute('hidden', frame == null);
 
-        flameChart.updateFrameData(frame);
+        if (debugTimeline && frame != null) {
+          final buf = StringBuffer();
+          buf.writeln('UI timeline event for frame ${frame.id}:');
+          frame.uiEventFlow.format(buf, '  ');
+          buf.writeln('\nUI trace for frame ${frame.id}');
+          frame.uiEventFlow.writeTraceToBuffer(buf);
+          buf.writeln('\nGPU timeline event frame ${frame.id}:');
+          frame.gpuEventFlow.format(buf, '  ');
+          buf.writeln('\nGPU trace for frame ${frame.id}');
+          frame.gpuEventFlow.writeTraceToBuffer(buf);
+          print(buf.toString());
+        }
+
+        flameChart.update(frame);
         eventDetails.reset();
 
         // Configure the flame chart / event details splitter if we haven't
@@ -166,14 +176,14 @@ class TimelineScreen extends Screen {
             horizontal: false,
             gutterSize: defaultSplitterWidth,
             sizes: [75, 25],
-            minSize: [200, 60],
+            minSize: [100, 140],
           );
           splitterConfigured = true;
         }
       }
     });
 
-    onSelectedFlameChartItem.listen(eventDetails.update);
+    onSelectedFrameFlameChartItem.listen(eventDetails.update);
 
     maybeShowDebugWarning(framework);
 
@@ -192,6 +202,7 @@ class TimelineScreen extends Screen {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
+    serviceManager.service.setFlag('profile_period', '50');
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
