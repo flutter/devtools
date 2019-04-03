@@ -22,8 +22,6 @@ import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 
-import 'dart:developer';
-
 // TODO(devoncarew): improve selection behavior in the left nav area
 
 // TODO(devoncarew): have the console area be collapsible

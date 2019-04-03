@@ -10,8 +10,6 @@ import 'html_icon_renderer.dart';
 import 'trees.dart';
 import 'trees_html.dart';
 
-import 'dart:developer';
-
 class ProgressElement extends CoreElement {
   ProgressElement() : super('div') {
     clazz('progress-element');
@@ -85,15 +83,15 @@ class SelectableList<T> extends CoreElement {
       final childrenElements = element.children;
       for (var i = 0; i < childrenElements.length; i++) {
         final elem = childrenElements[i];
-        if (elem.classes.contains('selected'))
-          return items[i];
+        if (elem.classes.contains('selected')) return items[i];
       }
     }
 
     return null;
   }
 
-  void setItems(List<T> items, {T selection, bool scrollSelectionIntoView = false}) {
+  void setItems(List<T> items,
+      {T selection, bool scrollSelectionIntoView = false}) {
     this.items = items;
 
     final bool hadSelection = _selectedElement != null;
@@ -162,8 +160,12 @@ class SelectableList<T> extends CoreElement {
     setItems(<T>[]);
   }
 
-  void _select(CoreElement element, T item,
-      {bool clear = false, bool clicked = false,}) {
+  void _select(
+    CoreElement element,
+    T item, {
+    bool clear = false,
+    bool clicked = false,
+  }) {
     _selectedElement?.toggleClass('selected', false);
 
     if (clear) {

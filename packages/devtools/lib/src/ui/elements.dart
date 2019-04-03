@@ -74,7 +74,8 @@ CoreElement td({String text, String c}) =>
 CoreElement form() => CoreElement('form');
 
 class CoreElement {
-  CoreElement(String tag, {String text, String html, String classes, String attributes})
+  CoreElement(String tag,
+      {String text, String html, String classes, String attributes})
       : element = Element.tag(tag) {
     if (text != null) {
       element.text = text;
