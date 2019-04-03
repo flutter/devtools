@@ -168,15 +168,17 @@ class VmServiceWrapper implements VmService {
   // share with the VM team and request that they be made public.
   Future<Response> getCpuProfileTimeline(
       String isolateId, int origin, int extent) async {
-    return _trackFuture(callMethod(
-      '_getCpuProfileTimeline',
-      isolateId: isolateId,
-      args: {
-        'tags': 'None',
-        'timeOriginMicros': origin,
-        'timeExtentMicros': extent,
-      },
-    ));
+    return _trackFuture(
+        'getCpuProfileTimeline',
+        callMethod(
+          '_getCpuProfileTimeline',
+          isolateId: isolateId,
+          args: {
+            'tags': 'None',
+            'timeOriginMicros': origin,
+            'timeExtentMicros': extent,
+          },
+        ));
   }
 
   @override
