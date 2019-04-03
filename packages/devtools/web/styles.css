@@ -546,6 +546,7 @@ div.tabnav-tab {
 .btn-group .btn:first-child:not(:last-child) {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    border-right-width: 0;
 }
 
 .btn-group .btn:not(:first-child):not(:last-child) {

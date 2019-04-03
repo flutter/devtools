@@ -13,6 +13,8 @@
 /// of code that uses icons can run on the Dart VM.
 library icons;
 
+import 'package:devtools/src/ui/material_icons.dart';
+import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 
 import 'fake_flutter/fake_flutter.dart';
@@ -127,6 +129,10 @@ class FlutterIcons {
   // Icons matching IntelliJ core icons.
   static const Icon locate = UrlIcon('/icons/general/locate.png');
   static const Icon forceRefresh = UrlIcon('/icons/actions/forceRefresh.svg');
+  // TODO(dantup): Make a ThemedIcon class to handle this.
+  static Icon get refresh => isDarkTheme
+      ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
+      : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
   static const Icon performanceOverlay =
       UrlIcon('/icons/general/performance_overlay.svg');
   static const Icon debugPaint = UrlIcon('/icons/debug_paint.png');
@@ -144,19 +150,17 @@ class FlutterIcons {
       UrlIcon('/icons/general/pause_white@2x.png', invertDark: true);
   static const UrlIcon pause_white_disabled_2x =
       UrlIcon('/icons/general/pause_white_disabled@2x.png', invertDark: true);
+  static const UrlIcon resume_white_2x =
+      UrlIcon('/icons/general/resume_white@2x.png', invertDark: true);
+  static const UrlIcon resume_white_disabled_2x =
+      UrlIcon('/icons/general/resume_white_disabled@2x.png', invertDark: true);
 
   /// Used on "primary" buttons that have colored backgrounds, so is not
   /// inverted for Dark theme.
-  static const UrlIcon pause_white_2x_primary =
-      UrlIcon('/icons/general/pause_white@2x.png');
   static const UrlIcon resume_black_2x =
       UrlIcon('/icons/general/resume_black@2x.png');
   static const UrlIcon resume_black_disabled_2x =
       UrlIcon('/icons/general/resume_black_disabled@2x.png');
-  static const UrlIcon resume_white_2x =
-      UrlIcon('/icons/general/resume_white@2x.png');
-  static const UrlIcon resume_white_disabled_2x =
-      UrlIcon('/icons/general/resume_white_disabled@2x.png');
 
   static const UrlIcon lightbulb =
       UrlIcon('/icons/general/lightbulb_outline.png');

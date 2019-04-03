@@ -63,7 +63,7 @@ class InspectorScreen extends Screen {
               extensions.toggleSelectWidgetMode,
             ).button,
             refreshTreeButton =
-                PButton.icon('Refresh Tree', FlutterIcons.forceRefresh)
+                PButton.icon('Refresh Tree', FlutterIcons.refresh)
                   ..small()
                   ..disabled = true
                   ..click(_refreshInspector),
