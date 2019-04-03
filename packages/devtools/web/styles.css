@@ -684,6 +684,10 @@ but a more subtle solution would be better. */
     opacity: 0.5;
 }
 
+::-webkit-scrollbar-corner {
+    background: var(--default-background);
+}
+
 /* Make sure content inside buttons is vertically centered. */
 .btn {
     display: inline-flex;
