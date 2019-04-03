@@ -22,6 +22,8 @@ import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 
+import 'dart:developer';
+
 // TODO(devoncarew): improve selection behavior in the left nav area
 
 // TODO(devoncarew): have the console area be collapsible
@@ -32,6 +34,13 @@ import '../utils.dart';
 // TODO(devoncarew): show toasts for some events (new isolate creation)
 
 // TODO(devoncarew): handle displaying large lists, maps, in the variables view
+
+enum ListDirection {
+  pageUp,
+  pageDown,
+  home,
+  end,
+}
 
 class DebuggerScreen extends Screen {
   DebuggerScreen({
@@ -64,6 +73,8 @@ class DebuggerScreen extends Screen {
   BreakpointsView breakpointsView;
   ScriptsView scriptsView;
   ConsoleArea consoleArea;
+
+  ScriptsMatcher _matcher;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -310,6 +321,30 @@ class DebuggerScreen extends Screen {
       consoleArea.appendText('${event.data}\n\n');
     });
 
+    // Handle shortcut keys
+    //
+    // All shortcut keys start with CTRL key plus another alphanumeric key.
+    //
+    // Shortcut keys supported:
+    //
+    //   O - open (letter O) a script file, sets focus to the script_name field
+    //       in the Scripts views list.
+    //
+    html.window.onKeyDown.listen((html.KeyboardEvent e) {
+      if (e.ctrlKey) {
+        switch (e.key) {
+          case 'o': // CTRL + o
+            // Open a file set focus to the 'script_name' textfield accepts key
+            // strokes.
+            final html.InputElement textfield =
+                html.document.getElementById('script_name');
+            textfield.focus();
+            e.preventDefault();
+            break;
+        }
+      }
+    });
+
     return screenDiv;
   }
 
@@ -393,9 +428,24 @@ class DebuggerScreen extends Screen {
       }
     });
 
-    CoreElement scriptCountDiv;
+    final CoreElement textfield =
+        CoreElement('input', classes: 'form-control input-sm')
+          ..setAttribute('type', 'text')
+          ..setAttribute('placeholder', 'script_name')
+          ..element.style.width = '75%'
+          ..element.style.marginLeft = '10px'
+          ..id = 'script_name';
+    final CoreElement scriptCountDiv = span(text: '-', c: 'counter');
+
     scriptsView = ScriptsView(debuggerState.getShortScriptName);
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
+      if (scriptsView._items.hadClicked &&
+          _matcher != null &&
+          _matcher.active) {
+        // User clicked while matcher was active then reset the matcher.
+        _matcher.reset();
+      }
+
       if (scriptRef == null) {
         _displaySource(null);
         return;
@@ -416,6 +466,8 @@ class DebuggerScreen extends Screen {
       scriptCountDiv.text = scriptsView.items.length.toString();
     });
 
+    scriptsView.onKeyDown.listen((html.KeyboardEvent e) {});
+
     final PNavMenu menu = PNavMenu(<CoreElement>[
       PNavMenuItem('Call stack')
         ..click(() => callStackView.element.toggleAttribute('hidden')),
@@ -428,9 +480,43 @@ class DebuggerScreen extends Screen {
         ..click(() => breakpointsView.element.toggleAttribute('hidden')),
       breakpointsView.element,
       PNavMenuItem('Scripts')
-        ..add(
-          scriptCountDiv = span(text: '-', c: 'counter'),
-        )
+        ..add([
+          textfield
+            ..click(() {
+              _matcher ??=
+                  ScriptsMatcher(scriptsView, textfield, debuggerState);
+              scriptsView.setMatcher(_matcher);
+            })
+            ..focus(() {
+              _matcher ??=
+                  ScriptsMatcher(scriptsView, textfield, debuggerState);
+              scriptsView.setMatcher(_matcher);
+            })
+            ..onKeyUp.listen((html.KeyboardEvent e) {
+              switch (e.keyCode) {
+                case DOM_VK_RETURN:
+                case DOM_VK_ESCAPE:
+                case DOM_VK_PAGE_UP:
+                case DOM_VK_PAGE_DOWN:
+                case DOM_VK_END:
+                case DOM_VK_HOME:
+                case DOM_VK_UP:
+                case DOM_VK_DOWN:
+                  return;
+                default:
+                  final html.InputElement inputElement = textfield.element;
+                  final String value = inputElement.value.trim();
+
+                  if (!_matcher.active) {
+                    _matcher.start();
+                  }
+                  _matcher.displayMatchingScripts(value);
+              }
+            })
+            ..onCut.listen((html.ClipboardEvent e) => e.preventDefault())
+            ..onPaste.listen((html.ClipboardEvent e) => e.preventDefault()),
+          scriptCountDiv,
+        ])
         ..click(() => scriptsView.element.toggleAttribute('hidden')),
       scriptsView.element,
     ], supportsSelection: false)
@@ -1071,6 +1157,15 @@ class BreakpointsView implements CoreElementView {
   }
 }
 
+const int DOM_VK_RETURN = 13;
+const int DOM_VK_ESCAPE = 27;
+const int DOM_VK_PAGE_UP = 33;
+const int DOM_VK_PAGE_DOWN = 34;
+const int DOM_VK_END = 35;
+const int DOM_VK_HOME = 36;
+const int DOM_VK_UP = 38;
+const int DOM_VK_DOWN = 40;
+
 class ScriptsView implements CoreElementView {
   ScriptsView(URIDescriber uriDescriber) {
     _items = SelectableList<ScriptRef>()
@@ -1079,16 +1174,97 @@ class ScriptsView implements CoreElementView {
     _items.setRenderer((ScriptRef scriptRef) {
       final String uri = scriptRef.uri;
       final String name = uriDescriber(uri);
-      final CoreElement element = li(text: name, c: 'list-item');
+
+      CoreElement element;
+      if (_matcherRendering != null && _matcherRendering.active) {
+        // InputElement's need to fetch the value not text/textContent property.
+        // The value and text are different, all nodes have a text. It the text
+        // content of the node itself along with its descendants. However, input
+        // elements have a value property - its the input data of the input
+        // element. Input elements may have a text/textContent but it is alway
+        // empty because they are void elements.
+        final html.InputElement inputElement =
+            (_matcherRendering._textfield.element as html.InputElement);
+        final String matchPart = inputElement.value;
+
+        // Bold the characters that match.
+        final int startIndex = name.indexOf(matchPart, 0);
+        final String firstPart = name.substring(0, startIndex);
+        final int endBoldIndex = startIndex + matchPart.length;
+        final String boldPart = name.substring(startIndex, endBoldIndex);
+        final String endPart = name.substring(endBoldIndex);
+        final String autoCompletePart = '$firstPart<b>$boldPart</b>$endPart';
+        element = li(html: autoCompletePart, c: 'list-item');
+      } else {
+        element = li(text: name, c: 'list-item');
+      }
+
       if (name != uri) {
         element.add(span(text: ' $uri', c: 'subtle'));
       }
+
       element.tooltip = uri;
       return element;
     });
   }
 
+  ScriptsMatcher _matcherRendering;
+
+  void setMatcher(_matcher) {
+    _matcherRendering = _matcher;
+  }
+
+  void reset() {
+    _highlightRef = null;
+  }
+
+  void scrollAndHilight(int row, {bool top = false}) {
+    // Highlight this row.
+    _highlightRef = items[row];
+
+    final CoreElement newElement = _items.renderer(_highlightRef);
+
+    _items.setReplace(row, _highlightRef);
+
+    newElement?.scrollIntoView(top: top);
+  }
+
+  /// Returns the row number of item to make visible.
+  int page(ListDirection direction) {
+    final int listHeight = element.element.clientHeight;
+    final int itemHeight = _items.element.children[0].clientHeight;
+
+    final int itemsVis = (listHeight / itemHeight).truncate();
+
+    final int listScrollTop = element.element.scrollTop;
+    final int topElement = (listScrollTop / itemHeight).truncate();
+
+    int childToScrollTo;
+    switch (direction) {
+      case ListDirection.pageDown:
+        int itemIndex = topElement + itemsVis;
+        if (itemIndex > _items.items.length - 1)
+          itemIndex = _items.items.length - 1;
+        childToScrollTo = itemIndex;
+        break;
+      case ListDirection.pageUp:
+        int itemIndex = topElement - itemsVis;
+        if (itemIndex < 0) itemIndex = 0;
+        childToScrollTo = itemIndex;
+        break;
+      case ListDirection.home:
+        childToScrollTo = 0;
+        break;
+      case ListDirection.end:
+        childToScrollTo = _items.items.length - 1;
+        break;
+    }
+
+    return childToScrollTo;
+  }
+
   SelectableList<ScriptRef> _items;
+  ScriptRef _highlightRef;
 
   String rootLib;
 
@@ -1097,15 +1273,24 @@ class ScriptsView implements CoreElementView {
   @override
   CoreElement get element => _items;
 
-  Stream<ScriptRef> get onSelectionChanged => _items.onSelectionChanged;
+  Stream<html.KeyboardEvent> get onKeyDown {
+    return _items.onKeyDown;
+  }
 
-  Stream<void> get onScriptsChanged => _items.onItemsChanged;
+  Stream<ScriptRef> get onSelectionChanged {
+    return _items.onSelectionChanged;
+  }
+
+  Stream<void> get onScriptsChanged {
+    return _items.onItemsChanged;
+  }
 
   void showScripts(
     List<ScriptRef> scripts,
     String rootLib,
     String commonPrefix, {
     bool selectRootScript = false,
+    ScriptRef selectScripRef,
   }) {
     this.rootLib = rootLib;
 
@@ -1138,8 +1323,12 @@ class ScriptsView implements CoreElementView {
     if (selectRootScript) {
       selection = scripts.firstWhere((script) => script.uri == rootLib,
           orElse: () => null);
+    } else if (selectScripRef != null) {
+      selection = selectScripRef;
     }
-    _items.setItems(scripts, selection: selection);
+
+    _items.setItems(scripts,
+        selection: selection, scrollSelectionIntoView: true);
   }
 
   String _convertDartInternalUris(String uri) {
@@ -1151,6 +1340,194 @@ class ScriptsView implements CoreElementView {
   }
 
   void clearScripts() => _items.clearItems();
+}
+
+class ScriptsMatcher {
+  ScriptsMatcher(this._scriptsView, this._textfield, this._debuggerState) {
+    start();
+  }
+
+  final ScriptsView _scriptsView;
+  final CoreElement _textfield;
+  final DebuggerState _debuggerState;
+
+  ScriptRef _originalScriptRef;
+  int _originalScrollTop;
+
+  Map<String, List<ScriptRef>> matchingState = {};
+
+  String _lastMatchingChars;
+  String get lastMatchingChars => _lastMatchingChars;
+
+  // Current Row via matching and navigation (up/down ARROW, up/down PAGE, HOME
+  // and END.
+  int _selectRow = -1;
+
+  StreamSubscription _subscription;
+  bool get active => _subscription != null;
+
+  void start() {
+    _startMatching();
+
+    // Start handling user's keystrokes to show matching list of files.
+    _subscription ??= _textfield.onKeyDown.listen((html.KeyboardEvent e) {
+      switch (e.keyCode) {
+        case DOM_VK_RETURN:
+          reset();
+          _scriptsView.reset();
+          e.preventDefault();
+          break;
+        case DOM_VK_ESCAPE:
+          // Clear selection
+          revert();
+          break;
+        case DOM_VK_PAGE_UP:
+          _selectRow = _scriptsView.page(ListDirection.pageUp);
+          _scriptsView.scrollAndHilight(_selectRow, top: true);
+          e.preventDefault();
+          break;
+        case DOM_VK_PAGE_DOWN:
+          _selectRow = _scriptsView.page(ListDirection.pageDown);
+          _scriptsView.scrollAndHilight(_selectRow, top: true);
+          e.preventDefault();
+          break;
+        case DOM_VK_END:
+          _selectRow = _scriptsView.page(ListDirection.end);
+          _scriptsView.scrollAndHilight(_selectRow);
+          e.preventDefault();
+          break;
+        case DOM_VK_HOME:
+          _selectRow = _scriptsView.page(ListDirection.home);
+          _scriptsView.scrollAndHilight(_selectRow);
+          e.preventDefault();
+          break;
+        case DOM_VK_UP:
+          // Set selection one item up.
+          if (_selectRow > 0) {
+            _selectRow -= 1;
+            _scriptsView.scrollAndHilight(_selectRow);
+          }
+          e.preventDefault();
+          break;
+        case DOM_VK_DOWN:
+          // Set selection one item down.
+          if (_selectRow < _scriptsView.items.length - 1) {
+            _selectRow += 1;
+            _scriptsView.scrollAndHilight(_selectRow);
+          }
+          e.preventDefault();
+          break;
+      }
+    });
+  }
+
+  // Finished matching - throw away all matching states.
+  void reset() {
+    ScriptRef selectedScriptRef;
+
+    if (_scriptsView._items.hadClicked) {
+      // Matcher was active but user clicked.  So remember the item clicked on -
+      // is the currently selected.
+      selectedScriptRef = _scriptsView._items.selectedItem();
+    } else {
+      // Use the ScriptRef we've highlighted from match navigation.
+      selectedScriptRef = _scriptsView._highlightRef;
+    }
+
+    if (_subscription != null) {
+      // No more event routing until user has clicked again the the textfield.
+      _subscription.cancel();
+      _subscription = null;
+    }
+
+    // Remember the whole set of ScriptRefs
+    final List<ScriptRef> originalRefs = matchingState[''];
+
+    _scriptsView.showScripts(
+      originalRefs,
+      _debuggerState.rootLib.uri,
+      _debuggerState.commonScriptPrefix,
+      selectScripRef: selectedScriptRef,
+    );
+
+    // Lose all other intermediate matches - we're done.
+    matchingState.clear();
+    matchingState.putIfAbsent('', () => originalRefs);
+
+    (_textfield.element as html.InputElement).value = '';
+
+    _scriptsView._highlightRef = null;
+  }
+
+  int rowPosition(int row) {
+    final int itemHeight = _scriptsView._items.element.children[0].clientHeight;
+    return row * itemHeight;
+  }
+
+  /// Revert list and selection back to before the matcher (first click in the
+  /// textfield.
+  void revert() {
+    if (_originalScriptRef != null) {
+      reset();
+
+      _scriptsView.showScripts(
+        matchingState[''],
+        _debuggerState.rootLib.uri,
+        _debuggerState.commonScriptPrefix,
+        selectScripRef: _originalScriptRef,
+      );
+
+      if (_scriptsView._items.selectedItem() != null) {
+        _scriptsView.element.scrollTop = _originalScrollTop;
+      }
+    }
+  }
+
+  void _startMatching() {
+    _originalScriptRef = _scriptsView._items.selectedItem();
+    _originalScrollTop = _scriptsView.element.scrollTop;
+
+    final html.InputElement element = _textfield.element;
+    if (element.value.isEmpty) {
+      // Save all the scripts.
+      matchingState.putIfAbsent('', () => _scriptsView.items);
+    }
+  }
+
+  /// Show the list of files matching the set of keystrokes typed.
+  void displayMatchingScripts(String charsToMatch) {
+    final List<ScriptRef> matchingRefs = [];
+    String previousMatch = '';
+
+    final charsMatchLen = charsToMatch.length;
+    if (charsMatchLen > 0) {
+      previousMatch = charsToMatch.substring(0, charsMatchLen - 1);
+    }
+
+    List<ScriptRef> lastMatchingRefs = matchingState[previousMatch];
+    lastMatchingRefs ??= matchingState[''];
+
+    for (ScriptRef ref in lastMatchingRefs) {
+      final RegExp exp = new RegExp('$charsToMatch');
+      final Iterable<Match> matches = exp.allMatches(ref.uri);
+      if (matches.isNotEmpty) {
+        matchingRefs.add(ref);
+      }
+    }
+
+    matchingState.putIfAbsent(charsToMatch, () => matchingRefs);
+
+    _scriptsView.clearScripts();
+    _scriptsView.showScripts(
+      matchingRefs,
+      _debuggerState.rootLib.uri,
+      _debuggerState.commonScriptPrefix,
+    );
+    _selectRow = -1;
+    _scriptsView._items.scrollTop = 0;
+
+    _lastMatchingChars = charsToMatch;
+  }
 }
 
 class CallStackView implements CoreElementView {

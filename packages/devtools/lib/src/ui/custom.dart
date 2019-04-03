@@ -10,6 +10,8 @@ import 'html_icon_renderer.dart';
 import 'trees.dart';
 import 'trees_html.dart';
 
+import 'dart:developer';
+
 class ProgressElement extends CoreElement {
   ProgressElement() : super('div') {
     clazz('progress-element');
@@ -57,6 +59,9 @@ class SelectableList<T> extends CoreElement {
   ListRenderer<T> renderer;
   CoreElement _selectedElement;
 
+  bool _hadClicked = false;
+  bool get hadClicked => _hadClicked;
+
   final StreamController<T> _selectionController = StreamController.broadcast();
   final StreamController<T> _doubleClickController =
       StreamController.broadcast();
@@ -75,44 +80,90 @@ class SelectableList<T> extends CoreElement {
     this.renderer = renderer;
   }
 
-  void setItems(List<T> items, {T selection}) {
+  T selectedItem() {
+    if (_selectedElement != null) {
+      final childrenElements = element.children;
+      for (var i = 0; i < childrenElements.length; i++) {
+        final elem = childrenElements[i];
+        if (elem.classes.contains('selected'))
+          return items[i];
+      }
+    }
+
+    return null;
+  }
+
+  void setItems(List<T> items, {T selection, bool scrollSelectionIntoView = false}) {
     this.items = items;
 
     final bool hadSelection = _selectedElement != null;
 
     _selectedElement = null;
 
+    if (selection == null) {
+      // Reset the clicked state.
+      _hadClicked = false;
+    }
+
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
 
     clear();
 
     add(items.map((T item) {
-      final CoreElement element = renderer(item);
-      element.click(() {
-        _select(element, item,
-            clear: canDeselect && element.hasClass('selected'));
-      });
-      element.dblclick(() {
-        _doubleClickController.add(item);
-      });
-      if (selection == item) {
-        _select(element, item);
+      final CoreElement element = _hookup(renderer, item, selection);
+      if (scrollSelectionIntoView && selection == item) {
+        _selectedElement = element;
       }
       return element;
     }).toList());
 
-    if (hadSelection && _selectedElement == null) {
-      _selectionController.add(null);
+    if (hadSelection) {
+      if (_selectedElement == null) {
+        _selectionController.add(null);
+      } else if (_selectedElement != null) {
+        _select(_selectedElement, selection);
+      }
     }
 
     _itemsChangedController.add(null);
+  }
+
+  CoreElement setReplace(int index, T item) {
+    _selectedElement?.toggleClass('selected', false);
+    _selectedElement = null;
+
+    final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
+
+    final CoreElement element = _hookup(renderer, item, item);
+
+    replace(index, element);
+
+    _select(element, item);
+
+    return element;
+  }
+
+  CoreElement _hookup(ListRenderer<T> renderer, T item, T selection) {
+    final CoreElement element = renderer(item);
+    element.click(() {
+      _select(element, item,
+          clear: canDeselect && element.hasClass('selected'), clicked: true);
+    });
+    element.dblclick(() {
+      _doubleClickController.add(item);
+    });
+    if (selection == item) {
+      _select(element, item);
+    }
+    return element;
   }
 
   void clearItems() {
     setItems(<T>[]);
   }
 
-  void _select(CoreElement element, T item, {bool clear = false}) {
+  void _select(CoreElement element, T item,
+      {bool clear = false, bool clicked = false,}) {
     _selectedElement?.toggleClass('selected', false);
 
     if (clear) {
@@ -124,6 +175,7 @@ class SelectableList<T> extends CoreElement {
     element?.toggleClass('selected', true);
     element?.scrollIntoView();
     _selectionController.add(item);
+    _hadClicked = clicked;
   }
 }
 

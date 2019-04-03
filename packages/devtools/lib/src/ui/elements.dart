@@ -55,8 +55,8 @@ CoreElement ol({String text, String c, String a}) =>
 CoreElement ul({String text, String c, String a}) =>
     CoreElement('ul', text: text, classes: c, attributes: a);
 
-CoreElement li({String text, String c, String a}) =>
-    CoreElement('li', text: text, classes: c, attributes: a);
+CoreElement li({String text, String html, String c, String a}) =>
+    CoreElement('li', text: text, html: html, classes: c, attributes: a);
 
 CoreElement para({String text, String c, String a}) =>
     CoreElement('p', text: text, classes: c, attributes: a);
@@ -74,10 +74,13 @@ CoreElement td({String text, String c}) =>
 CoreElement form() => CoreElement('form');
 
 class CoreElement {
-  CoreElement(String tag, {String text, String classes, String attributes})
+  CoreElement(String tag, {String text, String html, String classes, String attributes})
       : element = Element.tag(tag) {
     if (text != null) {
       element.text = text;
+    }
+    if (html != null) {
+      element.innerHtml = html;
     }
     if (classes != null) {
       element.classes.addAll(classes.split(' '));
@@ -164,6 +167,26 @@ class CoreElement {
     return child;
   }
 
+  /// Replace the given child/children to this element's list of children by the
+  /// childIndex. [child] must be either a `CoreElement` or an `Element`.
+  void replace(int childIndex, dynamic child) {
+    if (child is Iterable) {
+      // TODO(terry): Check begin index and end to ensure valid replace range.
+      int nextIndex = childIndex;
+      child.map<dynamic>((dynamic c) {
+        replace(nextIndex++, c);
+      });
+    } else if (child is CoreElement) {
+      element.children[childIndex] = child.element;
+    } else if (child is CoreElementView) {
+      element.children[childIndex] = child.element.element;
+    } else if (child is Element) {
+      element.children[childIndex] = child;
+    } else {
+      throw ArgumentError('argument type ${child.runtimeType} not supported');
+    }
+  }
+
   bool get isHidden => hasAttribute('hidden');
 
   void hidden([bool value]) => attribute('hidden', value);
@@ -245,10 +268,14 @@ class CoreElement {
   }
 
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
+  Stream<Event> get onFocus => element.onFocus.where((_) => !disabled);
 
   Stream<Event> get onScroll => element.onScroll;
 
   Stream<KeyboardEvent> get onKeyDown => element.onKeyDown;
+  Stream<KeyboardEvent> get onKeyUp => element.onKeyUp;
+  Stream<ClipboardEvent> get onCut => element.onCut;
+  Stream<ClipboardEvent> get onPaste => element.onPaste;
 
   /// Subscribe to the [onClick] event stream with a no-arg handler.
   StreamSubscription<Event> click(void handle(), [void shiftHandle()]) {
@@ -270,11 +297,21 @@ class CoreElement {
     });
   }
 
+  /// Subscribe to the [onClick] event stream with a no-arg handler.
+  StreamSubscription<Event> focus(void handle()) {
+    return onFocus.listen((Event e) {
+      e.stopImmediatePropagation();
+      handle();
+    });
+  }
+
   void clear() => element.children.clear();
 
-  void scrollIntoView({bool bottom = false}) {
+  void scrollIntoView({bool bottom = false, bool top = false}) {
     if (bottom) {
       element.scrollIntoView(ScrollAlignment.BOTTOM);
+    } else if (top) {
+      element.scrollIntoView(ScrollAlignment.TOP);
     } else {
       element.scrollIntoView();
     }
