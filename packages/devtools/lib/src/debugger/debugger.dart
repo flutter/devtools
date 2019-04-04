@@ -440,7 +440,7 @@ class DebuggerScreen extends Screen {
         CoreElement('input', classes: 'form-control input-sm')
           ..setAttribute('type', 'text')
           ..setAttribute('placeholder', 'script_name')
-          ..element.style.width = 'calc(100% - 90px)'
+          ..element.style.width = 'calc(100% - 95px)'
           ..element.style.marginLeft = '10px'
           ..id = 'script_name';
     final CoreElement scriptCountDiv = span(text: '-', c: 'counter');
