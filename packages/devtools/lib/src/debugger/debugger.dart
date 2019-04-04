@@ -1163,10 +1163,6 @@ class BreakpointsView implements CoreElementView {
   }
 }
 
-class NullTreeSanitizer implements html.NodeTreeSanitizer {
-  void sanitizeTree(html.Node node) {}
-}
-
 class ScriptsView implements CoreElementView {
   ScriptsView(URIDescriber uriDescriber) {
     _items = SelectableList<ScriptRef>()
@@ -1198,8 +1194,7 @@ class ScriptsView implements CoreElementView {
         // Construct the HTML with the bold tag and ensure that the HTML
         // constructed is safe from attacks e.g., XSS, etc.
         final String safeElement = html.Element.html(
-                '<div>$firstPart<strong class="strong-match">$boldPart</strong>$endPart</div>',
-                treeSanitizer: NullTreeSanitizer())
+                '<div>$firstPart<strong class="strong-match">$boldPart</strong>$endPart</div>')
             .innerHtml;
         element = li(html: safeElement, c: 'list-item');
       } else {
