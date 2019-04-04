@@ -437,13 +437,13 @@ class DebuggerScreen extends Screen {
     });
 
     final CoreElement textfield =
-        CoreElement('input', classes: 'form-control input-sm')
+        CoreElement('input', classes: 'form-control input-sm margin-left')
           ..setAttribute('type', 'text')
-          ..setAttribute('placeholder', 'script_name')
-          ..element.style.width = 'calc(100% - 95px)'
-          ..element.style.marginLeft = '10px'
+          ..setAttribute('placeholder', 'filter')
+          ..element.style.width = 'calc(100% - 105px)'
           ..id = 'script_name';
-    final CoreElement scriptCountDiv = span(text: '-', c: 'counter');
+    final CoreElement scriptCountDiv = span(text: '-', c: 'counter')
+      ..element.style.marginTop = '4px';
 
     scriptsView = ScriptsView(debuggerState.getShortScriptName);
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
@@ -487,7 +487,7 @@ class DebuggerScreen extends Screen {
         ..add(_breakpointsCountDiv)
         ..click(() => breakpointsView.element.toggleAttribute('hidden')),
       breakpointsView.element,
-      PNavMenuItem('Scripts')
+      PNavMenuItem('Libraries')
         ..add([
           textfield
             ..click(() {
@@ -1353,6 +1353,7 @@ class ScriptsMatcher {
   Map<String, List<ScriptRef>> matchingState = {};
 
   String _lastMatchingChars;
+
   String get lastMatchingChars => _lastMatchingChars;
 
   // Current Row via matching and navigation (up/down ARROW, up/down PAGE, HOME
@@ -1360,6 +1361,7 @@ class ScriptsMatcher {
   int _selectRow = -1;
 
   StreamSubscription _subscription;
+
   bool get active => _subscription != null;
 
   void start() {
