@@ -40,6 +40,16 @@ enum ListDirection {
   end,
 }
 
+/// Keycode definitions.
+const int DOM_VK_RETURN = 13;
+const int DOM_VK_ESCAPE = 27;
+const int DOM_VK_PAGE_UP = 33;
+const int DOM_VK_PAGE_DOWN = 34;
+const int DOM_VK_END = 35;
+const int DOM_VK_HOME = 36;
+const int DOM_VK_UP = 38;
+const int DOM_VK_DOWN = 40;
+
 class DebuggerScreen extends Screen {
   DebuggerScreen({
     bool disabled,
@@ -430,7 +440,7 @@ class DebuggerScreen extends Screen {
         CoreElement('input', classes: 'form-control input-sm')
           ..setAttribute('type', 'text')
           ..setAttribute('placeholder', 'script_name')
-          ..element.style.width = '75%'
+          ..element.style.width = 'calc(100% - 90px)'
           ..element.style.marginLeft = '10px'
           ..id = 'script_name';
     final CoreElement scriptCountDiv = span(text: '-', c: 'counter');
@@ -443,6 +453,8 @@ class DebuggerScreen extends Screen {
         // User clicked while matcher was active then reset the matcher.
         _matcher.reset();
       }
+
+      if (_matcher != null && _matcher.active) return;
 
       if (scriptRef == null) {
         _displaySource(null);
@@ -463,8 +475,6 @@ class DebuggerScreen extends Screen {
     scriptsView.onScriptsChanged.listen((_) {
       scriptCountDiv.text = scriptsView.items.length.toString();
     });
-
-    scriptsView.onKeyDown.listen((html.KeyboardEvent e) {});
 
     final PNavMenu menu = PNavMenu(<CoreElement>[
       PNavMenuItem('Call stack')
@@ -1155,14 +1165,9 @@ class BreakpointsView implements CoreElementView {
   }
 }
 
-const int DOM_VK_RETURN = 13;
-const int DOM_VK_ESCAPE = 27;
-const int DOM_VK_PAGE_UP = 33;
-const int DOM_VK_PAGE_DOWN = 34;
-const int DOM_VK_END = 35;
-const int DOM_VK_HOME = 36;
-const int DOM_VK_UP = 38;
-const int DOM_VK_DOWN = 40;
+class NullTreeSanitizer implements html.NodeTreeSanitizer {
+  void sanitizeTree(html.Node node) {}
+}
 
 class ScriptsView implements CoreElementView {
   ScriptsView(URIDescriber uriDescriber) {
@@ -1182,17 +1187,23 @@ class ScriptsView implements CoreElementView {
         // element. Input elements may have a text/textContent but it is alway
         // empty because they are void elements.
         final html.InputElement inputElement =
-            (_matcherRendering._textfield.element as html.InputElement);
+            _matcherRendering._textfield.element as html.InputElement;
         final String matchPart = inputElement.value;
 
-        // Bold the characters that match.
-        final int startIndex = name.indexOf(matchPart, 0);
+        // Compute the matched characters to be bolded.
+        final int startIndex = name.lastIndexOf(matchPart);
         final String firstPart = name.substring(0, startIndex);
         final int endBoldIndex = startIndex + matchPart.length;
         final String boldPart = name.substring(startIndex, endBoldIndex);
         final String endPart = name.substring(endBoldIndex);
-        final String autoCompletePart = '$firstPart<b>$boldPart</b>$endPart';
-        element = li(html: autoCompletePart, c: 'list-item');
+
+        // Construct the HTML with the bold tag and ensure that the HTML
+        // constructed is safe from attacks e.g., XSS, etc.
+        final String safeElement = html.Element.html(
+                '<div>$firstPart<strong class="strong-match">$boldPart</strong>$endPart</div>',
+                treeSanitizer: NullTreeSanitizer())
+            .innerHtml;
+        element = li(html: safeElement, c: 'list-item');
       } else {
         element = li(text: name, c: 'list-item');
       }
@@ -1419,6 +1430,11 @@ class ScriptsMatcher {
     });
   }
 
+  void selectFirstItem() {
+    _selectRow = 0;
+    _scriptsView.scrollAndHilight(_selectRow);
+  }
+
   // Finished matching - throw away all matching states.
   void reset() {
     ScriptRef selectedScriptRef;
@@ -1465,16 +1481,16 @@ class ScriptsMatcher {
   /// Revert list and selection back to before the matcher (first click in the
   /// textfield.
   void revert() {
+    reset();
+
+    _scriptsView.showScripts(
+      matchingState[''],
+      _debuggerState.rootLib.uri,
+      _debuggerState.commonScriptPrefix,
+      selectScripRef: _originalScriptRef,
+    );
+
     if (_originalScriptRef != null) {
-      reset();
-
-      _scriptsView.showScripts(
-        matchingState[''],
-        _debuggerState.rootLib.uri,
-        _debuggerState.commonScriptPrefix,
-        selectScripRef: _originalScriptRef,
-      );
-
       if (_scriptsView._items.selectedItem() != null) {
         _scriptsView.element.scrollTop = _originalScrollTop;
       }
@@ -1494,7 +1510,6 @@ class ScriptsMatcher {
 
   /// Show the list of files matching the set of keystrokes typed.
   void displayMatchingScripts(String charsToMatch) {
-    final List<ScriptRef> matchingRefs = [];
     String previousMatch = '';
 
     final charsMatchLen = charsToMatch.length;
@@ -1505,13 +1520,9 @@ class ScriptsMatcher {
     List<ScriptRef> lastMatchingRefs = matchingState[previousMatch];
     lastMatchingRefs ??= matchingState[''];
 
-    for (ScriptRef ref in lastMatchingRefs) {
-      final RegExp exp = new RegExp('$charsToMatch');
-      final Iterable<Match> matches = exp.allMatches(ref.uri);
-      if (matches.isNotEmpty) {
-        matchingRefs.add(ref);
-      }
-    }
+    final List<ScriptRef> matchingRefs = lastMatchingRefs
+        .where((ScriptRef ref) => ref.uri.lastIndexOf('$charsToMatch') >= 0)
+        .toList();
 
     matchingState.putIfAbsent(charsToMatch, () => matchingRefs);
 
@@ -1521,7 +1532,9 @@ class ScriptsMatcher {
       _debuggerState.rootLib.uri,
       _debuggerState.commonScriptPrefix,
     );
-    _selectRow = -1;
+
+    selectFirstItem();
+
     _scriptsView._items.scrollTop = 0;
 
     _lastMatchingChars = charsToMatch;
