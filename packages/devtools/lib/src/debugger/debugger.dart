@@ -1206,10 +1206,6 @@ class ScriptsView implements CoreElementView {
         element = li(text: name, c: 'list-item');
       }
 
-      if (name != uri) {
-        element.add(span(text: ' $uri', c: 'subtle'));
-      }
-
       element.tooltip = uri;
       return element;
     });
