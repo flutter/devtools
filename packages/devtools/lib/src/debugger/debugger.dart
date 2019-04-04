@@ -520,9 +520,7 @@ class DebuggerScreen extends Screen {
                   }
                   _matcher.displayMatchingScripts(value);
               }
-            })
-            ..onCut.listen((html.ClipboardEvent e) => e.preventDefault())
-            ..onPaste.listen((html.ClipboardEvent e) => e.preventDefault()),
+            }),
           scriptCountDiv,
         ])
         ..click(() => scriptsView.element.toggleAttribute('hidden')),
