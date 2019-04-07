@@ -7,7 +7,6 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
-
 import 'memory_protocol.dart';
 
 /// This class contains the business logic for [memory.dart].

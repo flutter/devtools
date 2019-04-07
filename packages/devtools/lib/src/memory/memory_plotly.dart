@@ -8,7 +8,6 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 import '../ui/theme.dart';
-
 import 'memory_chart.dart';
 
 class MemoryPlotly {
