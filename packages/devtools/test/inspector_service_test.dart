@@ -5,11 +5,10 @@
 @TestOn('vm')
 import 'dart:io';
 
-import 'package:test/test.dart';
-
 import 'package:devtools/src/inspector/diagnostics_node.dart';
 import 'package:devtools/src/inspector/flutter_widget.dart';
 import 'package:devtools/src/inspector/inspector_service.dart';
+import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
@@ -158,7 +157,7 @@ void main() async {
             ' │ overflow: null\n'
             ' │ textScaleFactor: null\n'
             ' │ maxLines: null\n'
-            ' │ dependencies: [MediaQuery, DefaultTextStyle]\n'
+            ' │ dependencies: [DefaultTextStyle, MediaQuery]\n'
             ' │\n'
             ' └─RichText\n'
             '     softWrap: wrapping at box width\n'
