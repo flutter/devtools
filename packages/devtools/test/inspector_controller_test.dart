@@ -6,19 +6,18 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
-
 import 'package:devtools/src/globals.dart';
 import 'package:devtools/src/inspector/flutter_widget.dart';
 import 'package:devtools/src/inspector/inspector_controller.dart';
-import 'package:devtools/src/inspector/inspector_tree.dart';
-import 'package:devtools/src/inspector/inspector_text_styles.dart' as styles;
 import 'package:devtools/src/inspector/inspector_service.dart';
+import 'package:devtools/src/inspector/inspector_text_styles.dart' as styles;
+import 'package:devtools/src/inspector/inspector_tree.dart';
 import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/src/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools/src/ui/icons.dart';
 import 'package:devtools/src/ui/material_icons.dart';
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
@@ -397,7 +396,7 @@ void main() async {
             '│   overflow: null [D]\n'
             '│   textScaleFactor: null [D]\n'
             '│   maxLines: null [D]\n'
-            '│   dependencies: [MediaQuery, DefaultTextStyle]\n'
+            '│   dependencies: [DefaultTextStyle, MediaQuery]\n'
             '└─▼[/icons/inspector/textArea.png] RichText\n'
             '    softWrap: wrapping at box width\n'
             '    maxLines: unlimited\n'
@@ -416,7 +415,8 @@ void main() async {
       simulateRowClick(detailsTree, rowIndex: 10);
       expect(
         detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes('▼[/icons/inspector/textArea.png] Text\n'
+        equalsIgnoringHashCodes(// dartfmt comment
+            '▼[/icons/inspector/textArea.png] Text\n'
             '│   "Hello, World!"\n'
             '│   textAlign: null [D]\n'
             '│   textDirection: null [D]\n'
@@ -425,7 +425,7 @@ void main() async {
             '│   overflow: null [D]\n'
             '│   textScaleFactor: null [D]\n'
             '│   maxLines: null [D]\n'
-            '│   dependencies: [MediaQuery, DefaultTextStyle]\n'
+            '│   dependencies: [DefaultTextStyle, MediaQuery]\n'
             '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
             '    softWrap: wrapping at box width\n'
             '    maxLines: unlimited\n'
