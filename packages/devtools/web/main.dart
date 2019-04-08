@@ -18,7 +18,7 @@ void main() {
       'ERROR: You are running DevTools on '
           '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
           'but DevTools only runs on Chrome.',
-      'Reopen this url in a Chrome broswer to use DevTools.',
+      'Reopen this url in a Chrome browser to use DevTools.',
     );
     return;
   }
