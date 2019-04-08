@@ -9,7 +9,7 @@ author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.1.0-dev <3.0.0'
+  sdk: '>=2.2.0-dev <3.0.0'
 
 dependencies:
   args: ^1.5.1
