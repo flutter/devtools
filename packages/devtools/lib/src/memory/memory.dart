@@ -16,7 +16,6 @@ import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../utils.dart';
-
 import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_detail.dart';

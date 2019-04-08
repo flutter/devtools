@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
-
-import 'package:devtools/src/ui/theme.dart';
 import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools/src/ui/flutter_html_shim.dart';
+import 'package:devtools/src/ui/theme.dart';
+import 'package:test/test.dart';
 
 void main() {
   const Color customLight = Color.fromARGB(200, 202, 191, 69);

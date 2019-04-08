@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:math' as math;
+
 import '../ui/drag_scroll.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import 'cpu_profile_protocol.dart';

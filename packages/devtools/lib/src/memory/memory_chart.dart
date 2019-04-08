@@ -6,7 +6,6 @@ import 'dart:html';
 
 import '../timeline/frames_bar_chart.dart';
 import '../ui/elements.dart';
-
 import 'memory_controller.dart';
 import 'memory_plotly.dart';
 import 'memory_protocol.dart';
