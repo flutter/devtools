@@ -327,7 +327,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _vmServiceWsUri = getVmServiceUriFromObservatoryUri(_vmServiceWsUri);
 
       vmService = VmServiceWrapper(
-          await vmServiceConnectUri(_vmServiceWsUri.toString()));
+        await vmServiceConnectUri(_vmServiceWsUri.toString()),
+        trackFutures: true,
+      );
       vmService.onSend.listen((String s) => _debugPrint('==> $s'));
       vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
       await Future.wait(<Future<Success>>[
