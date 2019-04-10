@@ -416,7 +416,7 @@ class FlameChartNode {
   bool selected = false;
 
   void paint(CanvasRenderingContext2D canvas) {
-    // Fill a rectangle with a border radius.
+    // Fill a rounded rectangle.
     canvas
       ..fillStyle =
           colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor)
@@ -467,6 +467,8 @@ class FlameChartNode {
     // TODO(kenzie): polish this. Sometimes we trim excessively. We should do
     // something smarter here to be more exact. 'm' is arbitrary - it was
     // selected after trial and error with different letter measurements.
+    // Measure the text and truncate based on the actual width of the available
+    // area.
     final singleLetterWidth = canvas.measureText('m').width;
     final maxLetters = math.min(
       (rect.width - horizontalPadding * 2) ~/ singleLetterWidth,
@@ -483,10 +485,13 @@ class FlameChartNode {
       displayText,
       rect.left + horizontalPadding,
       rect.top + _textOffsetY,
+      rect.width - horizontalPadding * 2, // maxWidth
     );
   }
 
   void updateForZoom({@required num zoom}) {
+    // TODO(kenzie): this comment may be dated now that we are drawing to
+    // canvas. Look into it and delete it if necessary.
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
@@ -501,18 +506,28 @@ class FlameChartNode {
 class TimelineGrid {
   TimelineGrid(this._duration, this._flameChartWidth);
 
-  static const baseGridInterval = 150;
+  static const baseGridIntervalPx = 150;
 
   /// Frame duration in micros.
   final num _duration;
 
-  num currentInterval = baseGridInterval;
+  num currentInterval = baseGridIntervalPx;
 
   num _flameChartWidth;
 
   num _zoomLevel = 1;
 
   void paint(CanvasRenderingContext2D canvas, Rect viewport, Rect visible) {
+    // Draw the background for the section that will contain the timestamps.
+    // This section will be sticky to the top of the viewport.
+    canvas.fillStyle = colorToCss(_shadedBackgroundColor);
+    canvas.fillRect(
+      visible.left,
+      viewport.top,
+      visible.width,
+      _rowHeight,
+    );
+
     // Draw the first grid item since it will have a different width than the
     // rest.
     final gridItem = TimelineGridNode(
@@ -558,7 +573,7 @@ class TimelineGrid {
     final log2NewZoomLevel = log2(newZoomLevel);
 
     final gridZoomFactor = math.pow(2, log2NewZoomLevel);
-    final gridIntervalPx = baseGridInterval / gridZoomFactor;
+    final gridIntervalPx = baseGridIntervalPx / gridZoomFactor;
 
     /// The physical pixel width of the grid interval at [newZoomLevel].
     currentInterval = gridIntervalPx * newZoomLevel;
@@ -567,6 +582,7 @@ class TimelineGrid {
   }
 }
 
+// TODO(kenzie): merge this class into TimelineGrid.
 class TimelineGridNode {
   TimelineGridNode(this.currentLeft, this.currentWidth, this.timestamp)
       : timestampText = msText(
@@ -594,36 +610,23 @@ class TimelineGridNode {
       return;
     }
 
-    // Draw the background for the section that will contain the timestamp. This
-    // section will be sticky to the top of the viewport. Make the background
-    // rectangles slightly larger than the current width to account for gaps
-    // that would be caused by rounding.
-    canvas.fillStyle = colorToCss(_shadedBackgroundColor);
-    canvas.fillRect(
-      currentLeft,
-      viewport.top,
-      currentWidth + 2,
-      _rowHeight,
-    );
-
     // Paint the timestamp. This will be sticky to the top of the viewport.
     canvas.font = fontStyleToCss(TextStyle(fontSize: _fontSize));
-    canvas.fillStyle = colorToCss(timestampColor);
 
     final timestampX = currentLeft +
         currentWidth -
         canvas.measureText(timestampText).width -
         timestampOffsetX;
 
-    canvas.fillText(timestampText, timestampX, viewport.top + _textOffsetY);
-
-    canvas.strokeStyle = colorToCss(gridLineColor);
-    canvas.lineWidth = gridLineWidth;
-
-    canvas.beginPath();
     canvas
+      ..fillStyle = colorToCss(timestampColor)
+      ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
+      ..strokeStyle = colorToCss(gridLineColor)
+      ..lineWidth = gridLineWidth
+      ..beginPath()
       ..moveTo(currentLeft + currentWidth, visible.top)
       ..lineTo(currentLeft + currentWidth, visible.bottom)
+      ..closePath()
       ..stroke();
   }
 }
