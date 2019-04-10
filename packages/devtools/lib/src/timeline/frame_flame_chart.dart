@@ -15,7 +15,7 @@ import 'flame_chart.dart';
 import 'timeline.dart';
 import 'timeline_protocol.dart';
 
-// TODO(kenzie): implement zoom functionality.
+// TODO(kenzie): port all of this code to use flame_chart_canvas.dart.
 
 // Light Blue 50 - 200-400 (light mode) or Blue 50 - 100-300 (dark mode) color
 // palette from https://material.io/design/color/the-color-system.html#tools-for-picking-colors.

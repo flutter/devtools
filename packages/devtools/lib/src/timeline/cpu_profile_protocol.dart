@@ -11,6 +11,7 @@ class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse)
       : sampleCount = cpuProfileResponse.json['sampleCount'],
         samplePeriod = cpuProfileResponse.json['samplePeriod'],
+        timeExtentMicros = cpuProfileResponse.json['timeExtentMicros'],
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
@@ -19,6 +20,7 @@ class CpuProfileData {
   final Response cpuProfileResponse;
   final int sampleCount;
   final int samplePeriod;
+  final int timeExtentMicros;
   final Map<String, dynamic> stackFramesJson;
 
   /// Trace events associated with the last stackFrame in each sample (i.e. the

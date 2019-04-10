@@ -12,13 +12,10 @@ import '../ui/primer.dart';
 import '../utils.dart';
 import 'cpu_bottom_up.dart';
 import 'cpu_call_tree.dart';
-import 'cpu_flame_chart.dart';
 import 'cpu_profile_protocol.dart';
+import 'flame_chart_canvas.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
-
-// TODO(kenzie): this should be removed once the cpu flame chart is optimized.
-const bool showCpuFlameChart = false;
 
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
@@ -146,10 +143,9 @@ class _UiEventDetails extends CoreElement {
     layoutVertical();
     flex();
 
-    if (showCpuFlameChart) {
-      flameChart = CpuFlameChart();
-    } else {
-      flameChart = div(c: 'ui-details-section');
+    flameChart = div(c: 'ui-details-section');
+
+    if (!showCpuFlameChart) {
       flameChart.add(div(text: 'CPU flame chart coming soon', c: 'message'));
     }
 
@@ -163,8 +159,6 @@ class _UiEventDetails extends CoreElement {
     if (showCpuFlameChart) {
       add(stackFrameDetails);
     }
-
-    onSelectedCpuFlameChartItem.listen(updateStackFrameDetails);
   }
 
   static const String stackFrameDetailsDefaultText = '[No function selected]';
@@ -174,15 +168,20 @@ class _UiEventDetails extends CoreElement {
   CpuCallTree callTree;
   CoreElement stackFrameDetails;
 
+  EventDetailsTabType selectedTab = EventDetailsTabType.flameChart;
+
+  bool showingFlameChartError = false;
+
   TimelineEvent event;
 
   CpuProfileData cpuProfileData;
 
   void showTab(EventDetailsTabType tabType) {
+    selectedTab = tabType;
     switch (tabType) {
       case EventDetailsTabType.flameChart:
         flameChart.attribute('hidden', false);
-        stackFrameDetails.attribute('hidden', false);
+        stackFrameDetails.attribute('hidden', showingFlameChartError);
         bottomUp.attribute('hidden', true);
         callTree.attribute('hidden', true);
         break;
@@ -201,6 +200,45 @@ class _UiEventDetails extends CoreElement {
     }
   }
 
+  Future<void> _drawFlameChart() async {
+    final Response response =
+        await serviceManager.service.getCpuProfileTimeline(
+      serviceManager.isolateManager.selectedIsolate.id,
+      event.startTime,
+      event.duration,
+    );
+
+    cpuProfileData = CpuProfileData(response);
+
+    if (cpuProfileData.stackFrames.isEmpty) {
+      _updateFlameChartForError(div(
+        text: 'CPU profile unavailable for time range'
+            ' [${event.startTime} - ${event.endTime}]',
+        c: 'message',
+      ));
+      return;
+    }
+
+    final flameChartCanvas = FlameChartCanvas(
+      data: cpuProfileData,
+      flameChartWidth: flameChart.element.clientWidth,
+      flameChartHeight:
+          cpuProfileData.cpuProfileRoot.depth * rowHeightWithPadding,
+    );
+
+    flameChartCanvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
+      _updateStackFrameDetails(stackFrame);
+    });
+
+    flameChart.add(flameChartCanvas.element);
+  }
+
+  void _updateFlameChartForError(CoreElement errorDiv) {
+    flameChart.add(errorDiv);
+    showingFlameChartError = true;
+    stackFrameDetails.attribute('hidden', true);
+  }
+
   Future<void> update(TimelineEvent event) async {
     if (event == this.event) {
       return;
@@ -212,17 +250,11 @@ class _UiEventDetails extends CoreElement {
     final Spinner spinner = Spinner()..clazz('cpu-profile-spinner');
     add(spinner);
 
-    final Response response =
-        await serviceManager.service.getCpuProfileTimeline(
-      serviceManager.isolateManager.selectedIsolate.id,
-      event.startTime,
-      event.duration,
-    );
-
-    cpuProfileData = CpuProfileData(response);
-
-    if (showCpuFlameChart) {
-      (flameChart as CpuFlameChart).update(cpuProfileData);
+    try {
+      await _drawFlameChart();
+    } catch (e) {
+      _updateFlameChartForError(div(
+          text: 'Error retrieving CPU profile: ${e.toString()}', c: 'message'));
     }
 
     spinner.element.remove();
@@ -233,11 +265,14 @@ class _UiEventDetails extends CoreElement {
   void reset() {
     flameChart.clear();
     stackFrameDetails.clear();
+    showingFlameChartError = false;
+    stackFrameDetails.attribute(
+        'hidden', selectedTab != EventDetailsTabType.flameChart);
     cpuProfileData = null;
   }
 
-  void updateStackFrameDetails(CpuFlameChartItem item) {
-    stackFrameDetails.text = item.stackFrame.toString();
+  void _updateStackFrameDetails(CpuStackFrame stackFrame) {
+    stackFrameDetails.text = stackFrame.toString();
   }
 }
 

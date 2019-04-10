@@ -175,7 +175,7 @@ class TimelineScreen extends Screen {
             horizontal: false,
             gutterSize: defaultSplitterWidth,
             sizes: [75, 25],
-            minSize: [100, 140],
+            minSize: [60, 160],
           );
           splitterConfigured = true;
         }
@@ -285,15 +285,15 @@ class TimelineScreen extends Screen {
           // Current status of our frame tracking elements (i.e. pendingEvents,
           // pendingFrames).
           final buf = StringBuffer();
-          buf.writeln(
-              'Pending events - ${timelineController.timelineData.pendingEvents.length}');
+          buf.writeln('Pending events: '
+              '${timelineController.timelineData.pendingEvents.length}');
           for (TimelineEvent event
               in timelineController.timelineData.pendingEvents) {
             event.format(buf, '    ');
             buf.writeln();
           }
-          buf.writeln(
-              '\nPending frames - ${timelineController.timelineData.pendingFrames.length}');
+          buf.writeln('\nPending frames: '
+              '${timelineController.timelineData.pendingFrames.length}');
           for (TimelineFrame frame
               in timelineController.timelineData.pendingFrames.values) {
             buf.writeln('${frame.toString()}');
