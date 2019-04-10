@@ -462,7 +462,7 @@ class FlameChartNode {
 
     canvas
       ..fillStyle = colorToCss(textColor)
-      ..font = fontStyleToCss(TextStyle(fontSize: _fontSize));
+      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
 
     // TODO(kenzie): polish this. Sometimes we trim excessively. We should do
     // something smarter here to be more exact. 'm' is arbitrary - it was
@@ -616,7 +616,7 @@ class TimelineGridNode {
     }
 
     // Paint the timestamp. This will be sticky to the top of the viewport.
-    canvas.font = fontStyleToCss(TextStyle(fontSize: _fontSize));
+    canvas.font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
 
     final timestampX = currentLeft +
         currentWidth -
