@@ -211,7 +211,12 @@ class _UiEventDetails extends CoreElement {
     cpuProfileData = CpuProfileData(response);
 
     if (cpuProfileData.stackFrames.isEmpty) {
-      throw EmptyCpuProfileException(event.startTime, event.endTime);
+      _updateFlameChartForError(div(
+        text: 'CPU profile unavailable for time range'
+            ' [${event.startTime} - ${event.endTime}]',
+        c: 'message',
+      ));
+      return;
     }
 
     final flameChartCanvas = FlameChartCanvas(
@@ -247,8 +252,6 @@ class _UiEventDetails extends CoreElement {
 
     try {
       await _drawFlameChart();
-    } on EmptyCpuProfileException catch (e) {
-      _updateFlameChartForError(div(text: e.message, c: 'message'));
     } catch (e) {
       _updateFlameChartForError(div(
           text: 'Error retrieving CPU profile: ${e.toString()}', c: 'message'));
@@ -283,12 +286,4 @@ class EventDetailsTabNavTab extends PTabNavTab {
   EventDetailsTabNavTab(String name, this.type) : super(name);
 
   final EventDetailsTabType type;
-}
-
-class EmptyCpuProfileException implements Exception {
-  EmptyCpuProfileException(this.startTime, this.endTime);
-  final num startTime;
-  final num endTime;
-  String get message =>
-      'CPU profile unavailable for time range [$startTime - $endTime]';
 }

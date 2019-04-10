@@ -481,11 +481,13 @@ class FlameChartNode {
       displayText += '...';
     }
 
+    final maxTextWidth = rect.width - horizontalPadding * 2;
+
     canvas.fillText(
       displayText,
       rect.left + horizontalPadding,
       rect.top + _textOffsetY,
-      rect.width - horizontalPadding * 2, // maxWidth
+      maxTextWidth,
     );
   }
 
@@ -595,8 +597,11 @@ class TimelineGridNode {
   final num currentWidth;
   final String timestampText;
 
-  static const gridLineWidth = 0.8;
-  static const gridLineColor = Color(0xFFCCCCCC);
+  static const gridLineWidth = 0.4;
+  static const gridLineColor = ThemedColor(
+    Color(0xFFCCCCCC),
+    Color(0xFF585858),
+  );
   static const timestampOffsetX = 6.0;
   static const timestampColor = ThemedColor(
     Color(0xFF24292E),

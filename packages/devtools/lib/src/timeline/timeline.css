@@ -187,6 +187,7 @@
 .ui-details-section.cpu-flame-chart {
     /* 100% height minus the height of stack-frame-details */
     height: calc(100% - 27px);
+    background-color: var(--shaded-background-lighter);
 }
 
 .stack-frame-details {
