@@ -10,6 +10,11 @@ class DragScroll {
   /// Whether the element was dragged on the previous click.
   bool wasDragged = false;
 
+  /// Callback that will be called on vertical drag scroll.
+  VoidCallback _onVerticalScroll;
+
+  set onVerticalScroll(VoidCallback callback) => _onVerticalScroll = callback;
+
   void enableDragScrolling(CoreElement element) {
     final dragged = element.element;
 
@@ -41,6 +46,10 @@ class DragScroll {
 
         dragged.scrollLeft += deltaX.round();
         dragged.scrollTop += deltaY.round();
+
+        if (_onVerticalScroll != null && deltaY.round() != 0) {
+          _onVerticalScroll();
+        }
 
         lastX = newX;
         lastY = newY;

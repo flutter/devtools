@@ -12,13 +12,10 @@ import '../ui/primer.dart';
 import '../utils.dart';
 import 'cpu_bottom_up.dart';
 import 'cpu_call_tree.dart';
-import 'cpu_flame_chart.dart';
 import 'cpu_profile_protocol.dart';
+import 'flame_chart_canvas.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
-
-// TODO(kenzie): this should be removed once the cpu flame chart is optimized.
-const bool showCpuFlameChart = false;
 
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
@@ -146,10 +143,9 @@ class _UiEventDetails extends CoreElement {
     layoutVertical();
     flex();
 
-    if (showCpuFlameChart) {
-      flameChart = CpuFlameChart();
-    } else {
-      flameChart = div(c: 'ui-details-section');
+    flameChart = div(c: 'ui-details-section');
+
+    if (!showCpuFlameChart) {
       flameChart.add(div(text: 'CPU flame chart coming soon', c: 'message'));
     }
 
@@ -163,8 +159,6 @@ class _UiEventDetails extends CoreElement {
     if (showCpuFlameChart) {
       add(stackFrameDetails);
     }
-
-    onSelectedCpuFlameChartItem.listen(updateStackFrameDetails);
   }
 
   static const String stackFrameDetailsDefaultText = '[No function selected]';
@@ -201,6 +195,29 @@ class _UiEventDetails extends CoreElement {
     }
   }
 
+  Future<void> drawFlameChart() async {
+    final Response response =
+        await serviceManager.service.getCpuProfileTimeline(
+      serviceManager.isolateManager.selectedIsolate.id,
+      event.startTime,
+      event.duration,
+    );
+    cpuProfileData = CpuProfileData(response);
+
+    final flameChartCanvas = FlameChartCanvas(
+      data: cpuProfileData,
+      flameChartWidth: flameChart.element.clientWidth,
+      flameChartHeight:
+          cpuProfileData.cpuProfileRoot.depth * rowHeightWithPadding,
+    );
+
+    flameChartCanvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
+      updateStackFrameDetails(stackFrame);
+    });
+
+    flameChart.add(flameChartCanvas.element);
+  }
+
   Future<void> update(TimelineEvent event) async {
     if (event == this.event) {
       return;
@@ -212,18 +229,7 @@ class _UiEventDetails extends CoreElement {
     final Spinner spinner = Spinner()..clazz('cpu-profile-spinner');
     add(spinner);
 
-    final Response response =
-        await serviceManager.service.getCpuProfileTimeline(
-      serviceManager.isolateManager.selectedIsolate.id,
-      event.startTime,
-      event.duration,
-    );
-
-    cpuProfileData = CpuProfileData(response);
-
-    if (showCpuFlameChart) {
-      (flameChart as CpuFlameChart).update(cpuProfileData);
-    }
+    await drawFlameChart();
 
     spinner.element.remove();
 
@@ -236,8 +242,8 @@ class _UiEventDetails extends CoreElement {
     cpuProfileData = null;
   }
 
-  void updateStackFrameDetails(CpuFlameChartItem item) {
-    stackFrameDetails.text = item.stackFrame.toString();
+  void updateStackFrameDetails(CpuStackFrame stackFrame) {
+    stackFrameDetails.text = stackFrame.toString();
   }
 }
 

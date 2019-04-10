@@ -14,6 +14,8 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import 'timeline.dart';
 
+// TODO(kenzie): delete this class once frame flame chart is ported to canvas.
+
 const selectedFlameChartItemColor =
     ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
 
@@ -256,9 +258,7 @@ class FlameChartItem {
       ..backgroundColor =
           colorToCss(selected ? selectedFlameChartItemColor : backgroundColor)
       ..border = selected ? '1px solid' : 'none'
-      ..borderColor = selected
-          ? colorToCss(const Color(0x5A1B1F23))
-          : colorToCss(const Color(0x231B1F23));
+      ..borderColor = colorToCss(const Color(0x5A1B1F23));
     itemLabel.style.color =
         colorToCss(selected ? selectedTextColor : defaultTextColor);
   }
