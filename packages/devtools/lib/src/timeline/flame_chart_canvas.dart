@@ -23,7 +23,7 @@ import 'timeline.dart';
 
 // TODO(kenzie): this should be removed once the cpu flame chart is optimized
 // and complete.
-const bool showCpuFlameChart = true;
+const bool showCpuFlameChart = false;
 
 const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
