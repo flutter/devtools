@@ -44,6 +44,9 @@ class Framework {
   final Map<Screen, CoreElement> _screenContents = {};
 
   void addScreen(Screen screen) {
+    if (allTabsEnabledByQuery()) {
+      screen.disabled = false;
+    }
     screens.add(screen);
   }
 
@@ -341,8 +344,8 @@ abstract class Screen {
   final String id;
   final String iconClass;
   final StatusItem helpStatus;
-  final bool disabled;
   final String disabledTooltip;
+  bool disabled;
 
   bool needsResizing = false;
 

@@ -255,13 +255,23 @@ class RegisteredServiceExtensionButton {
 }
 
 bool tabDisabledByQuery(String key) {
+  final hideQueryParam = _getHideQueryParam();
+  return hideQueryParam?.split(',')?.contains(key) ?? false;
+}
+
+bool allTabsEnabledByQuery() {
+  final hideQueryParam = _getHideQueryParam();
+  return hideQueryParam?.split(',')?.contains('none') ?? false;
+}
+
+String _getHideQueryParam() {
   final queryString = html.window.location.search;
   if (queryString == null || queryString.length <= 1) {
-    return false;
+    return null;
   }
 
   final qsParams = Uri.splitQueryString(queryString.substring(1));
-  return qsParams['hide']?.split(',')?.contains(key) ?? false;
+  return qsParams['hide'];
 }
 
 /// Creates a canvas scaled to match the device's devicePixelRatio.
