@@ -273,16 +273,6 @@ bool tabDisabledByQuery(String key) => hiddenPages.contains(key);
 
 bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 
-String _getHideQueryParam() {
-  final queryString = html.window.location.search;
-  if (queryString == null || queryString.length <= 1) {
-    return null;
-  }
-
-  final qsParams = Uri.splitQueryString(queryString.substring(1));
-  return qsParams['hide'];
-}
-
 /// Creates a canvas scaled to match the device's devicePixelRatio.
 ///
 /// A default canvas will look pixelated on high devicePixelRatio screens so it
