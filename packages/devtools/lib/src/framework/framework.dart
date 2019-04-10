@@ -44,9 +44,6 @@ class Framework {
   final Map<Screen, CoreElement> _screenContents = {};
 
   void addScreen(Screen screen) {
-    if (allTabsEnabledByQuery()) {
-      screen.disabled = false;
-    }
     screens.add(screen);
   }
 
@@ -330,22 +327,23 @@ abstract class Screen {
     @required this.name,
     @required this.id,
     this.iconClass,
-    this.disabled = false,
     this.disabledTooltip = 'This screen is not available',
-  }) : helpStatus = createLinkStatusItem(
+    bool disabled,
+  })  : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
             ..add(span(text: ' Docs')),
           href: 'https://flutter.github.io/devtools/$id',
           title: 'Documentation on using the $name page',
-        );
+        ),
+        disabled = allTabsEnabledByQuery ? false : disabled ?? false;
 
   final String name;
   final String id;
   final String iconClass;
   final StatusItem helpStatus;
   final String disabledTooltip;
-  bool disabled;
+  final bool disabled;
 
   bool needsResizing = false;
 

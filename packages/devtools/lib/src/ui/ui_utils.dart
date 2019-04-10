@@ -254,15 +254,24 @@ class RegisteredServiceExtensionButton {
   }
 }
 
-bool tabDisabledByQuery(String key) {
-  final hideQueryParam = _getHideQueryParam();
-  return hideQueryParam?.split(',')?.contains(key) ?? false;
+Set _hiddenPages;
+
+Set get hiddenPages {
+  return _hiddenPages ??= _lookupHiddenPages();
 }
 
-bool allTabsEnabledByQuery() {
-  final hideQueryParam = _getHideQueryParam();
-  return hideQueryParam?.split(',')?.contains('none') ?? false;
+Set _lookupHiddenPages() {
+  final queryString = html.window.location.search;
+  if (queryString == null || queryString.length <= 1) {
+    return null;
+  }
+  final qsParams = Uri.splitQueryString(queryString.substring(1));
+  return (qsParams['hide'] ?? '').split(',').toSet();
 }
+
+bool tabDisabledByQuery(String key) => hiddenPages.contains(key);
+
+bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 
 String _getHideQueryParam() {
   final queryString = html.window.location.search;
