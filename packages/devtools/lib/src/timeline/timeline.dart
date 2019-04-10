@@ -285,14 +285,14 @@ class TimelineScreen extends Screen {
           // Current status of our frame tracking elements (i.e. pendingEvents,
           // pendingFrames).
           final buf = StringBuffer();
-          buf.writeln('Pending events - '
+          buf.writeln('Pending events: '
               '${timelineController.timelineData.pendingEvents.length}');
           for (TimelineEvent event
               in timelineController.timelineData.pendingEvents) {
             event.format(buf, '    ');
             buf.writeln();
           }
-          buf.writeln('\nPending frames - '
+          buf.writeln('\nPending frames: '
               '${timelineController.timelineData.pendingFrames.length}');
           for (TimelineFrame frame
               in timelineController.timelineData.pendingFrames.values) {

@@ -168,15 +168,20 @@ class _UiEventDetails extends CoreElement {
   CpuCallTree callTree;
   CoreElement stackFrameDetails;
 
+  EventDetailsTabType selectedTab = EventDetailsTabType.flameChart;
+
+  bool showingFlameChartError = false;
+
   TimelineEvent event;
 
   CpuProfileData cpuProfileData;
 
   void showTab(EventDetailsTabType tabType) {
+    selectedTab = tabType;
     switch (tabType) {
       case EventDetailsTabType.flameChart:
         flameChart.attribute('hidden', false);
-        stackFrameDetails.attribute('hidden', false);
+        stackFrameDetails.attribute('hidden', showingFlameChartError);
         bottomUp.attribute('hidden', true);
         callTree.attribute('hidden', true);
         break;
@@ -195,14 +200,19 @@ class _UiEventDetails extends CoreElement {
     }
   }
 
-  Future<void> drawFlameChart() async {
+  Future<void> _drawFlameChart() async {
     final Response response =
         await serviceManager.service.getCpuProfileTimeline(
       serviceManager.isolateManager.selectedIsolate.id,
       event.startTime,
       event.duration,
     );
+
     cpuProfileData = CpuProfileData(response);
+
+    if (cpuProfileData.stackFrames.isEmpty) {
+      throw EmptyCpuProfileException(event.startTime, event.endTime);
+    }
 
     final flameChartCanvas = FlameChartCanvas(
       data: cpuProfileData,
@@ -212,10 +222,16 @@ class _UiEventDetails extends CoreElement {
     );
 
     flameChartCanvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
-      updateStackFrameDetails(stackFrame);
+      _updateStackFrameDetails(stackFrame);
     });
 
     flameChart.add(flameChartCanvas.element);
+  }
+
+  void _updateFlameChartForError(CoreElement errorDiv) {
+    flameChart.add(errorDiv);
+    showingFlameChartError = true;
+    stackFrameDetails.attribute('hidden', true);
   }
 
   Future<void> update(TimelineEvent event) async {
@@ -229,7 +245,14 @@ class _UiEventDetails extends CoreElement {
     final Spinner spinner = Spinner()..clazz('cpu-profile-spinner');
     add(spinner);
 
-    await drawFlameChart();
+    try {
+      await _drawFlameChart();
+    } on EmptyCpuProfileException catch (e) {
+      _updateFlameChartForError(div(text: e.message, c: 'message'));
+    } catch (e) {
+      _updateFlameChartForError(div(
+          text: 'Error retrieving CPU profile: ${e.toString()}', c: 'message'));
+    }
 
     spinner.element.remove();
 
@@ -239,10 +262,13 @@ class _UiEventDetails extends CoreElement {
   void reset() {
     flameChart.clear();
     stackFrameDetails.clear();
+    showingFlameChartError = false;
+    stackFrameDetails.attribute(
+        'hidden', selectedTab != EventDetailsTabType.flameChart);
     cpuProfileData = null;
   }
 
-  void updateStackFrameDetails(CpuStackFrame stackFrame) {
+  void _updateStackFrameDetails(CpuStackFrame stackFrame) {
     stackFrameDetails.text = stackFrame.toString();
   }
 }
@@ -257,4 +283,12 @@ class EventDetailsTabNavTab extends PTabNavTab {
   EventDetailsTabNavTab(String name, this.type) : super(name);
 
   final EventDetailsTabType type;
+}
+
+class EmptyCpuProfileException implements Exception {
+  EmptyCpuProfileException(this.startTime, this.endTime);
+  final num startTime;
+  final num endTime;
+  String get message =>
+      'CPU profile unavailable for time range [$startTime - $endTime]';
 }

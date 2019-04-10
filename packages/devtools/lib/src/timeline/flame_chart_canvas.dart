@@ -23,27 +23,28 @@ import 'timeline.dart';
 
 // TODO(kenzie): this should be removed once the cpu flame chart is optimized
 // and complete.
-const bool showCpuFlameChart = false;
+const bool showCpuFlameChart = true;
 
-final DragScroll _dragScroll = DragScroll();
-
-const selectedFlameChartNodeColor = ThemedColor(
+const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedDark,
 );
 
-const shadedBackgroundColor = Color(0xFFF6F6F6);
+const _shadedBackgroundColor =
+    ThemedColor(Color(0xFFF6F6F6), Color(0xFF202124));
 
-const defaultTextColor = Color(0xFF24292E);
-const fontSize = 14.0;
-const textOffsetY = 18.0;
-const rowHeightWithPadding = rowHeight + rowPadding;
-const flameChartTop = rowHeightWithPadding;
-const rowHeight = 25.0;
-const rowPadding = 2.0;
+const _fontSize = 14.0;
+const _textOffsetY = 18.0;
+const _flameChartTop = rowHeightWithPadding;
+const _rowHeight = 25.0;
+const _rowPadding = 2.0;
+const rowHeightWithPadding = _rowHeight + _rowPadding;
 
 const _flameChartInset = 70;
 
+// TODO(kenzie): move this class to flame_chart.dart once the frame flame chart
+// is ported to canvas and the current implementation in flame_chart.dart is
+// deleted.
 abstract class FlameChart {
   FlameChart({
     @required this.data,
@@ -70,6 +71,15 @@ abstract class FlameChart {
   List<FlameChartRow> rows = [];
 
   TimelineGrid timelineGrid;
+
+  num zoomLevel = 1;
+
+  num get _zoomMultiplier => zoomLevel * 0.003;
+
+  // The DOM doesn't allow floating point scroll offsets so we track a
+  // theoretical floating point scroll offset corresponding to the current
+  // scroll offset to reduce floating point error when zooming.
+  num floatingPointScrollLeft = 0;
 
   int _colorOffset = 0;
 
@@ -117,10 +127,10 @@ abstract class FlameChart {
       final double width =
           totalWidth * stackFrame.cpuConsumptionRatio - stackFramePadding;
       final left = calculateLeftForStackFrame(stackFrame);
-      final top = (row * rowHeightWithPadding + flameChartTop).toDouble();
+      final top = (row * rowHeightWithPadding + _flameChartTop).toDouble();
 
       final node = FlameChartNode(
-        Rect.fromLTRB(left, top, left + width, top + rowHeight),
+        Rect.fromLTRB(left, top, left + width, top + _rowHeight),
         nextColor(),
         Colors.black,
         Colors.black,
@@ -180,7 +190,7 @@ abstract class FlameChart {
       int min = 0;
       int max = nodes.length;
       while (min < max) {
-        int mid = min + ((max - min) >> 1);
+        final mid = min + ((max - min) >> 1);
         final node = nodes[mid];
         if (x >= node.rect.left && x <= node.rect.right) {
           return node;
@@ -199,10 +209,10 @@ abstract class FlameChart {
   }
 
   int getRowIndexForY(double y) {
-    if (y < flameChartTop) {
+    if (y < _flameChartTop) {
       return -1;
     }
-    return math.max((y - flameChartTop) ~/ rowHeightWithPadding, 0);
+    return math.max((y - _flameChartTop) ~/ rowHeightWithPadding, 0);
   }
 }
 
@@ -224,13 +234,15 @@ class FlameChartCanvas extends FlameChart {
 
     _viewportCanvas.setContentSize(flameChartWidth, flameChartHeight);
 
-    _dragScroll.enableDragScrolling(element);
+    _dragScroll.enableDragScrolling(_viewportCanvas.element);
     _dragScroll.onVerticalScroll = () {
       _viewportCanvas.rebuild(force: true);
     };
 
-    element.element.onMouseWheel.listen(_handleMouseWheel);
+    _viewportCanvas.element.element.onMouseWheel.listen(_handleMouseWheel);
   }
+
+  final DragScroll _dragScroll = DragScroll();
 
   ViewportCanvas _viewportCanvas;
 
@@ -248,14 +260,6 @@ class FlameChartCanvas extends FlameChart {
   /// events when zoomed in to [_maxZoomLevel].
   final _maxZoomLevel = 150;
   final _minZoomLevel = 1;
-  num zoomLevel = 1;
-
-  num get _zoomMultiplier => zoomLevel * 0.003;
-
-  // The DOM doesn't allow floating point scroll offsets so we track a
-  // theoretical floating point scroll offset corresponding to the current
-  // scroll offset to reduce floating point error when zooming.
-  num floatingPointScrollLeft = 0;
 
   // TODO(kenzie): optimize painting to canvas by grouping paints with the same
   // canvas settings.
@@ -269,11 +273,7 @@ class FlameChartCanvas extends FlameChart {
       paintRow(canvas, i, rect);
     }
 
-    paintTimelineGrid(canvas, rect);
-  }
-
-  void paintTimelineGrid(CanvasRenderingContext2D canvas, Rect visible) {
-    timelineGrid.paint(canvas, _viewportCanvas.viewport, visible);
+    timelineGrid.paint(canvas, _viewportCanvas.viewport, rect);
   }
 
   void paintRow(
@@ -305,11 +305,12 @@ class FlameChartCanvas extends FlameChart {
     e.preventDefault();
 
     if (e.deltaY.abs() >= e.deltaX.abs()) {
-      final mouseX = e.client.x - element.element.getBoundingClientRect().left;
+      final mouseX = e.client.x -
+          _viewportCanvas.element.element.getBoundingClientRect().left;
       _zoom(e.deltaY, mouseX);
     } else {
       // Manually perform horizontal scrolling.
-      element.element.scrollLeft += e.deltaX.round();
+      _viewportCanvas.element.element.scrollLeft += e.deltaX.round();
     }
   }
 
@@ -322,7 +323,7 @@ class FlameChartCanvas extends FlameChart {
 
     if (newZoomLevel == zoomLevel) return;
     // Store current scroll values for re-calculating scroll location on zoom.
-    num lastScrollLeft = element.element.scrollLeft;
+    num lastScrollLeft = _viewportCanvas.element.element.scrollLeft;
     // Test whether the scroll offset has changed by more than rounding error
     // since the last time an exact scroll offset was calculated.
     if ((floatingPointScrollLeft - lastScrollLeft).abs() < 0.5) {
@@ -346,7 +347,7 @@ class FlameChartCanvas extends FlameChart {
   void _updateChartForZoom() {
     for (FlameChartRow row in rows) {
       for (FlameChartNode node in row.nodes) {
-        node.updateHorizontalPosition(zoom: zoomLevel);
+        node.updateForZoom(zoom: zoomLevel);
       }
     }
 
@@ -358,7 +359,8 @@ class FlameChartCanvas extends FlameChart {
     );
     _viewportCanvas.rebuild(force: true);
 
-    element.element.scrollLeft = math.max(0, floatingPointScrollLeft.round());
+    _viewportCanvas.element.element.scrollLeft =
+        math.max(0, floatingPointScrollLeft.round());
   }
 }
 
@@ -388,7 +390,11 @@ class FlameChartNode {
   static const horizontalPadding = 4.0;
   static const borderRadius = 2.0;
   static const selectedBorderWidth = 1.0;
-  static const selectedBorderColor = Color(0x5A1B1F23);
+  static const selectedBorderColor = ThemedColor(
+    Color(0x5A1B1F23),
+    Color(0x5A1B1F23),
+  );
+  // TODO(kenzie): reassess this max when polishing text painting logic.
   static const maxDisplayTextLength = 20;
 
   Rect rect;
@@ -417,7 +423,7 @@ class FlameChartNode {
     // Fill a rectangle with a border radius.
     canvas
       ..fillStyle =
-          colorToCss(selected ? selectedFlameChartNodeColor : backgroundColor)
+          colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor)
       ..beginPath()
       ..moveTo(rect.left + borderRadius, rect.top)
       ..lineTo(rect.right - borderRadius, rect.top)
@@ -460,7 +466,7 @@ class FlameChartNode {
 
     canvas
       ..fillStyle = colorToCss(textColor)
-      ..font = fontStyleToCss(TextStyle(fontSize: fontSize));
+      ..font = fontStyleToCss(TextStyle(fontSize: _fontSize));
 
     // TODO(kenzie): polish this. Sometimes we trim excessively. We should do
     // something smarter here to be more exact. 'm' is arbitrary - it was
@@ -480,11 +486,11 @@ class FlameChartNode {
     canvas.fillText(
       displayText,
       rect.left + horizontalPadding,
-      rect.top + textOffsetY,
+      rect.top + _textOffsetY,
     );
   }
 
-  void updateHorizontalPosition({@required num zoom}) {
+  void updateForZoom({@required num zoom}) {
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
@@ -578,8 +584,12 @@ class TimelineGridNode {
   final String timestampText;
 
   static const gridLineWidth = 0.8;
-  static const gridLineColor = Color.fromRGBO(180, 180, 180, 0.5);
+  static const gridLineColor = Color(0xFFCCCCCC);
   static const timestampOffsetX = 6.0;
+  static const timestampColor = ThemedColor(
+    Color(0xFF24292E),
+    Color(0xFFFAFBFC),
+  );
 
   void paint(CanvasRenderingContext2D canvas, Rect viewport, Rect visible) {
     if (currentLeft + currentWidth < visible.left ||
@@ -592,24 +602,24 @@ class TimelineGridNode {
     // section will be sticky to the top of the viewport. Make the background
     // rectangles slightly larger than the current width to account for gaps
     // that would be caused by rounding.
-    canvas.fillStyle = colorToCss(shadedBackgroundColor);
+    canvas.fillStyle = colorToCss(_shadedBackgroundColor);
     canvas.fillRect(
       currentLeft,
       viewport.top,
       currentWidth + 2,
-      rowHeight,
+      _rowHeight,
     );
 
     // Paint the timestamp. This will be sticky to the top of the viewport.
-    canvas.font = fontStyleToCss(TextStyle(fontSize: fontSize));
-    canvas.fillStyle = colorToCss(defaultTextColor);
+    canvas.font = fontStyleToCss(TextStyle(fontSize: _fontSize));
+    canvas.fillStyle = colorToCss(timestampColor);
 
     final timestampX = currentLeft +
         currentWidth -
         canvas.measureText(timestampText).width -
         timestampOffsetX;
 
-    canvas.fillText(timestampText, timestampX, viewport.top + textOffsetY);
+    canvas.fillText(timestampText, timestampX, viewport.top + _textOffsetY);
 
     canvas.strokeStyle = colorToCss(gridLineColor);
     canvas.lineWidth = gridLineWidth;

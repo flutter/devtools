@@ -10,7 +10,9 @@ class DragScroll {
   /// Whether the element was dragged on the previous click.
   bool wasDragged = false;
 
-  /// Callback that will be called on vertical drag scroll.
+  // This callback can optionally be set to perform additional action on a
+  // vertical scroll. For example, the CPU flame chart sets this callback to
+  // force a canvas rebuild on vertical scroll.
   VoidCallback _onVerticalScroll;
 
   set onVerticalScroll(VoidCallback callback) => _onVerticalScroll = callback;
