@@ -281,16 +281,12 @@ class FlameChartCanvas extends FlameChart {
     int index,
     Rect visible,
   ) {
-    canvas.save();
-
     final row = rows[index];
     for (FlameChartNode node in row.nodes) {
       if (node.rect.left + node.rect.width < visible.left) continue;
       if (node.rect.left > visible.right) break;
       node.paint(canvas);
     }
-
-    canvas.restore();
   }
 
   void _onTap(Offset offset) {
