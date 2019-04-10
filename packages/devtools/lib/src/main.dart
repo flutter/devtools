@@ -152,7 +152,7 @@ class PerfToolFramework extends Framework {
           ? 'This screen is disabled because you are not running a Flutter '
               'application'
           : 'This screen is disabled because you are running a profile build '
-              'of your application',
+          'of your application',
     ));
     addScreen(TimelineScreen(
       disabled: !_isFlutterApp,
@@ -160,7 +160,7 @@ class PerfToolFramework extends Framework {
           ? 'This screen is disabled because it is not yet ready for Flutter'
               ' Web'
           : 'This screen is disabled because you are not running a '
-              'Flutter application',
+          'Flutter application',
     ));
     addScreen(MemoryScreen(
       disabled: _isFlutterWebApp,
@@ -172,8 +172,9 @@ class PerfToolFramework extends Framework {
       addScreen(PerformanceScreen());
     }
     addScreen(DebuggerScreen(
-      disabled:
-          _isFlutterWebApp || _isProfileBuild || isTabDisabledByQuery('debugger'),
+      disabled: _isFlutterWebApp ||
+          _isProfileBuild ||
+          isTabDisabledByQuery('debugger'),
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
