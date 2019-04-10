@@ -328,7 +328,7 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabledTooltip = 'This screen is not available',
-    bool disabled,
+    bool disabled = false,
   })  : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
@@ -336,7 +336,7 @@ abstract class Screen {
           href: 'https://flutter.github.io/devtools/$id',
           title: 'Documentation on using the $name page',
         ),
-        disabled = allTabsEnabledByQuery ? false : disabled ?? false;
+        disabled = allTabsEnabledByQuery ? false : disabled;
 
   final String name;
   final String id;

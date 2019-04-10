@@ -254,16 +254,16 @@ class RegisteredServiceExtensionButton {
   }
 }
 
-Set _hiddenPages;
+Set<String> _hiddenPages;
 
-Set get hiddenPages {
+Set<String> get hiddenPages {
   return _hiddenPages ??= _lookupHiddenPages();
 }
 
-Set _lookupHiddenPages() {
+Set<String> _lookupHiddenPages() {
   final queryString = html.window.location.search;
   if (queryString == null || queryString.length <= 1) {
-    return null;
+    return {};
   }
   final qsParams = Uri.splitQueryString(queryString.substring(1));
   return (qsParams['hide'] ?? '').split(',').toSet();
