@@ -173,7 +173,7 @@ class PerfToolFramework extends Framework {
     }
     addScreen(DebuggerScreen(
       disabled:
-          _isFlutterWebApp || _isProfileBuild || tabDisabledByQuery('debugger'),
+          _isFlutterWebApp || _isProfileBuild || isTabDisabledByQuery('debugger'),
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());

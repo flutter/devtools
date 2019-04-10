@@ -269,7 +269,7 @@ Set<String> _lookupHiddenPages() {
   return (qsParams['hide'] ?? '').split(',').toSet();
 }
 
-bool tabDisabledByQuery(String key) => hiddenPages.contains(key);
+bool isTabDisabledByQuery(String key) => hiddenPages.contains(key);
 
 bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 
