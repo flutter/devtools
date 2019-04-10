@@ -16,9 +16,9 @@ void main() {
   if (!browser.isChrome) {
     framework.disableAppWithError(
       'ERROR: You are running DevTools on '
-      '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
-      'but DevTools only runs on Chrome.',
-      'Reopen this url in a Chrome broswer to use DevTools.',
+          '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
+          'but DevTools only runs on Chrome.',
+      'Reopen this url in a Chrome browser to use DevTools.',
     );
     return;
   }

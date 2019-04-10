@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../tables.dart';
-
 import 'memory_protocol.dart';
 
 class MemoryRow {

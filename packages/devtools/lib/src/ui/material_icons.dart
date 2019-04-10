@@ -5,7 +5,6 @@
 library material_icons;
 
 import 'fake_flutter/fake_flutter.dart';
-
 import 'icons.dart';
 import 'theme.dart';
 

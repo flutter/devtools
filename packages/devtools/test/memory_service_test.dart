@@ -5,7 +5,6 @@
 @TestOn('vm')
 import 'package:devtools/src/memory/memory_controller.dart';
 import 'package:devtools/src/memory/memory_protocol.dart';
-
 import 'package:test/test.dart';
 
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;

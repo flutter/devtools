@@ -281,7 +281,7 @@ void main() {
     });
 
     tearDown(() async {
-      await service.allFuturesCompleted.future;
+      await service.allFuturesCompleted;
       await _flutter.stop();
     });
 
