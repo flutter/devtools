@@ -254,15 +254,24 @@ class RegisteredServiceExtensionButton {
   }
 }
 
-bool tabDisabledByQuery(String key) {
+Set<String> _hiddenPages;
+
+Set<String> get hiddenPages {
+  return _hiddenPages ??= _lookupHiddenPages();
+}
+
+Set<String> _lookupHiddenPages() {
   final queryString = html.window.location.search;
   if (queryString == null || queryString.length <= 1) {
-    return false;
+    return {};
   }
-
   final qsParams = Uri.splitQueryString(queryString.substring(1));
-  return qsParams['hide']?.split(',')?.contains(key) ?? false;
+  return (qsParams['hide'] ?? '').split(',').toSet();
 }
+
+bool isTabDisabledByQuery(String key) => hiddenPages.contains(key);
+
+bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 
 /// Creates a canvas scaled to match the device's devicePixelRatio.
 ///
