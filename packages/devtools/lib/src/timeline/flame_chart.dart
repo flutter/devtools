@@ -14,6 +14,8 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import 'timeline.dart';
 
+// TODO(kenzie): delete this file once frame_flame_chart is ported to canvas.
+
 const selectedFlameChartItemColor =
     ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
 
@@ -202,6 +204,11 @@ class FlameChartItem {
   /// text does not get too close to the right hand size of each div.
   static const labelPaddingRight = 4;
 
+  static const selectedBorderColor = ThemedColor(
+    Color(0x5A1B1F23),
+    Color(0x5A1B1F23),
+  );
+
   /// Left value for the flame chart item at zoom level 1.
   final num startingLeft;
 
@@ -256,9 +263,7 @@ class FlameChartItem {
       ..backgroundColor =
           colorToCss(selected ? selectedFlameChartItemColor : backgroundColor)
       ..border = selected ? '1px solid' : 'none'
-      ..borderColor = selected
-          ? colorToCss(const Color(0x5A1B1F23))
-          : colorToCss(const Color(0x231B1F23));
+      ..borderColor = colorToCss(selectedBorderColor);
     itemLabel.style.color =
         colorToCss(selected ? selectedTextColor : defaultTextColor);
   }

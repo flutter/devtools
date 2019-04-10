@@ -176,13 +176,18 @@
     position: absolute;
     top: 0;
     left: 0;
-    /* 100% height minus the height of stack-frame-details */
-    height: calc(100% - 27px);
-    min-width: 100%;
+    height: 100%;
+    width: 100%;
 }
 
 .cpu-flame-chart {
     overflow: hidden;
+}
+
+.ui-details-section.cpu-flame-chart {
+    /* 100% height minus the height of stack-frame-details */
+    height: calc(100% - 27px);
+    background-color: var(--shaded-background-lighter);
 }
 
 .stack-frame-details {
