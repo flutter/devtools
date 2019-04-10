@@ -16,7 +16,6 @@ import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
 import 'cpu_profile_protocol.dart';
-import 'flame_chart.dart';
 import 'frame_flame_chart.dart';
 import 'timeline.dart';
 
