@@ -208,7 +208,10 @@ class _UiEventDetails extends CoreElement {
       event.duration,
     );
 
-    cpuProfileData = CpuProfileData(response);
+    cpuProfileData = CpuProfileData(
+      response,
+      Duration(microseconds: event.duration),
+    );
 
     if (cpuProfileData.stackFrames.isEmpty) {
       _updateFlameChartForError(div(

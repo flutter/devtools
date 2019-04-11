@@ -9,7 +9,7 @@ void main() {
   CpuProfileData cpuProfileData;
 
   setUp(() {
-    cpuProfileData = CpuProfileData(sampleResponse);
+    cpuProfileData = CpuProfileData(sampleResponse, Duration(milliseconds: 10));
   });
 
   group('CpuProfileData', () {
