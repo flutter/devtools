@@ -380,7 +380,7 @@ class FlameChartNode {
     this.textColor,
     this.selectedTextColor,
     this.stackFrame, {
-    this.isRounded = false,
+    this.rounded = false,
   })  : startingLeft = rect.left,
         startingWidth = rect.width;
 
@@ -410,7 +410,7 @@ class FlameChartNode {
 
   final CpuStackFrame stackFrame;
 
-  final bool isRounded;
+  final bool rounded;
 
   String get text => stackFrame.name;
 
@@ -422,7 +422,7 @@ class FlameChartNode {
     canvas.fillStyle =
         colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor);
 
-    if (isRounded) {
+    if (rounded) {
       canvas
         ..beginPath()
         ..moveTo(rect.left + borderRadius, rect.top)
