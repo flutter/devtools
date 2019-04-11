@@ -9,7 +9,7 @@ import '../utils.dart';
 
 // TODO(kenzie): talk to VM team about why timeExtentMicros is different between
 // debug and profile builds. Do they use different clocks and does this also
-// affect the sampling rate?
+// affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
 
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
