@@ -688,6 +688,8 @@ class InspectorSourceLocation {
     if (fileName == null) {
       return parent != null ? parent.getFile() : null;
     }
+
+    return fileName;
   }
 
   int getLine() => JsonUtils.getIntMember(json, 'line');
