@@ -683,6 +683,13 @@ class InspectorSourceLocation {
 
   String get path => JsonUtils.getStringMember(json, 'file');
 
+  String getFile() {
+    final fileName = path;
+    if (fileName == null) {
+      return parent != null ? parent.getFile() : null;
+    }
+  }
+
   int getLine() => JsonUtils.getIntMember(json, 'line');
 
   String getName() => JsonUtils.getStringMember(json, 'name');
@@ -690,7 +697,8 @@ class InspectorSourceLocation {
   int getColumn() => JsonUtils.getIntMember(json, 'column');
 
   SourcePosition getXSourcePosition() {
-    if (path == null) {
+    final file = getFile();
+    if (file == null) {
       return null;
     }
     final int line = getLine();
@@ -698,7 +706,7 @@ class InspectorSourceLocation {
     if (line < 0 || column < 0) {
       return null;
     }
-    return SourcePosition(file: path, line: line - 1, column: column - 1);
+    return SourcePosition(file: file, line: line - 1, column: column - 1);
   }
 
   List<InspectorSourceLocation> getParameterLocations() {
