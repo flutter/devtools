@@ -36,9 +36,16 @@ class CpuProfileData {
 
   void _processStackFrames(Response response) {
     stackFramesJson.forEach((k, v) {
-      final stackFrame = CpuStackFrame(k, v['name'], v['category']);
-      final parent = stackFrames[v['parent']];
-      _processStackFrame(stackFrame, parent);
+      final String stackFrameName = v['name'];
+
+      // Do not process [Native] events. They do not provide any helpful
+      // profiling information to the user, and they distract from the important
+      // samples in the CPU flame chart.
+      if (!stackFrameName.startsWith('[Native]')) {
+        final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
+        final parent = stackFrames[v['parent']];
+        _processStackFrame(stackFrame, parent);
+      }
     });
   }
 
