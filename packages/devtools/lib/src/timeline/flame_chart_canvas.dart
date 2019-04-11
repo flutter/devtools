@@ -471,7 +471,7 @@ class FlameChartNode {
     // area.
     final singleLetterWidth = canvas.measureText('m').width;
     final maxLetters = math.min(
-      (rect.width - horizontalPadding * 2) ~/ singleLetterWidth,
+      math.max(0, (rect.width - horizontalPadding * 2) ~/ singleLetterWidth),
       selected ? text.length : math.min(text.length, maxDisplayTextLength),
     );
 
@@ -509,6 +509,16 @@ class TimelineGrid {
   TimelineGrid(this._duration, this._flameChartWidth);
 
   static const baseGridIntervalPx = 150;
+  static const gridLineWidth = 0.4;
+  static const gridLineColor = ThemedColor(
+    Color(0xFFCCCCCC),
+    Color(0xFF585858),
+  );
+  static const timestampOffsetX = 6.0;
+  static const timestampColor = ThemedColor(
+    Color(0xFF24292E),
+    Color(0xFFFAFBFC),
+  );
 
   /// Frame duration in micros.
   final num _duration;
@@ -530,32 +540,80 @@ class TimelineGrid {
       _rowHeight,
     );
 
-    // Draw the first grid item since it will have a different width than the
-    // rest.
-    final gridItem = TimelineGridNode(
-      0,
-      _flameChartInset,
-      const Duration(microseconds: 0),
-    );
-
-    gridItem.paint(canvas, viewport, visible);
-
     num left =
         (visible.left - _flameChartInset) ~/ currentInterval * currentInterval +
             _flameChartInset;
 
+    final firstGridNodeText = msText(
+      const Duration(microseconds: 0),
+      fractionDigits: 1,
+    );
+
+    canvas
+      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize))
+      ..fillStyle = colorToCss(timestampColor)
+      ..strokeStyle = colorToCss(gridLineColor)
+      ..lineWidth = gridLineWidth
+      ..beginPath()
+      // Handle the first grid node since it will have a different width than
+      // the rest.
+      ..fillText(
+        firstGridNodeText,
+        _getTimestampLeft(firstGridNodeText, 0, _flameChartInset, canvas),
+        viewport.top + _textOffsetY,
+      )
+      ..moveTo(_flameChartInset, visible.top)
+      ..lineTo(_flameChartInset, visible.bottom);
+
     while (left < visible.right) {
+      if (left + currentInterval < visible.left || left > visible.right) {
+        // We do not need to draw the grid node because it is out of view.
+        return;
+      }
+
       // TODO(kenzie): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
-      final Duration timestamp = Duration(
+      final timestamp = Duration(
           microseconds: getTimestampForPosition(left + currentInterval));
-      final gridItem = TimelineGridNode(left, currentInterval, timestamp);
 
-      gridItem.paint(canvas, viewport, visible);
+      final timestampText = msText(
+        timestamp,
+        fractionDigits: timestamp.inMicroseconds == 0 ? 1 : 3,
+      );
+
+      final timestampX = _getTimestampLeft(
+        timestampText,
+        left,
+        currentInterval,
+        canvas,
+      );
+
+      // Paint the timestamps and compute the line to stroke for the grid lines.
+      canvas
+        ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
+        ..moveTo(left + currentInterval, visible.top)
+        ..lineTo(left + currentInterval, visible.bottom);
 
       left += currentInterval;
     }
+
+    // Paint the grid lines.
+    canvas
+      ..closePath()
+      ..stroke();
+  }
+
+  num _getTimestampLeft(
+    String timestampText,
+    num left,
+    num width,
+    CanvasRenderingContext2D canvas,
+  ) {
+    return left +
+        width -
+        canvas.measureText(timestampText).width -
+        timestampOffsetX;
   }
 
   /// Returns the timestamp rounded to the nearest microsecond for the
@@ -581,57 +639,5 @@ class TimelineGrid {
     currentInterval = gridIntervalPx * newZoomLevel;
 
     _zoomLevel = newZoomLevel;
-  }
-}
-
-// TODO(kenzie): merge this class into TimelineGrid.
-class TimelineGridNode {
-  TimelineGridNode(this.currentLeft, this.currentWidth, this.timestamp)
-      : timestampText = msText(
-          timestamp,
-          fractionDigits: timestamp.inMicroseconds == 0 ? 1 : 3,
-        );
-
-  final Duration timestamp;
-  final num currentLeft;
-  final num currentWidth;
-  final String timestampText;
-
-  static const gridLineWidth = 0.4;
-  static const gridLineColor = ThemedColor(
-    Color(0xFFCCCCCC),
-    Color(0xFF585858),
-  );
-  static const timestampOffsetX = 6.0;
-  static const timestampColor = ThemedColor(
-    Color(0xFF24292E),
-    Color(0xFFFAFBFC),
-  );
-
-  void paint(CanvasRenderingContext2D canvas, Rect viewport, Rect visible) {
-    if (currentLeft + currentWidth < visible.left ||
-        currentLeft > visible.right) {
-      // We do not need to draw the grid node because it is out of view.
-      return;
-    }
-
-    // Paint the timestamp. This will be sticky to the top of the viewport.
-    canvas.font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
-
-    final timestampX = currentLeft +
-        currentWidth -
-        canvas.measureText(timestampText).width -
-        timestampOffsetX;
-
-    canvas
-      ..fillStyle = colorToCss(timestampColor)
-      ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
-      ..strokeStyle = colorToCss(gridLineColor)
-      ..lineWidth = gridLineWidth
-      ..beginPath()
-      ..moveTo(currentLeft + currentWidth, visible.top)
-      ..lineTo(currentLeft + currentWidth, visible.bottom)
-      ..closePath()
-      ..stroke();
   }
 }
