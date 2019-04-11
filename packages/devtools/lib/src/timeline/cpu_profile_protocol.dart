@@ -7,6 +7,11 @@ import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
 
+// TODO(kenzie): make this a user-toggle. If this is enabled, we should add a
+// top level stack frame called "[Native]" to parent all [Native] stack frames.
+/// Toggle this flag to include native samples in the CPU profile.
+bool includeNativeSamples = false;
+
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse)
       : sampleCount = cpuProfileResponse.json['sampleCount'],
@@ -41,7 +46,7 @@ class CpuProfileData {
       // Do not process [Native] events. They do not provide any helpful
       // profiling information to the user, and they distract from the important
       // samples in the CPU flame chart.
-      if (!stackFrameName.startsWith('[Native]')) {
+      if (includeNativeSamples || !stackFrameName.startsWith('[Native]')) {
         final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
         final parent = stackFrames[v['parent']];
         _processStackFrame(stackFrame, parent);
