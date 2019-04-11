@@ -529,8 +529,6 @@ class TimelineGrid {
 
   num _zoomLevel = 1;
 
-  final Map<String, num> _timestampMeasurements = {};
-
   void paint(CanvasRenderingContext2D canvas, Rect viewport, Rect visible) {
     // Draw the background for the section that will contain the timestamps.
     // This section will be sticky to the top of the viewport.
@@ -612,9 +610,10 @@ class TimelineGrid {
     num width,
     CanvasRenderingContext2D canvas,
   ) {
-    final textWidth = _timestampMeasurements[timestampText] ??=
-        canvas.measureText(timestampText).width;
-    return left + width - textWidth - timestampOffsetX;
+    return left +
+        width -
+        canvas.measureText(timestampText).width -
+        timestampOffsetX;
   }
 
   /// Returns the timestamp rounded to the nearest microsecond for the
