@@ -865,27 +865,6 @@ class ObjectGroup {
   }
 }
 
-// TODO(jacobr): can we get the host OS from VMService.
-// Ideally we don't need this.
-String getFileUriPrefix() {
-  // if (SystemInfo.isWindows) return 'file:///';
-  return 'file://';
-}
-
-// TODO(jacobr): remove this method as soon as the
-// track-widget-creation kernel transformer is fixed to return paths instead
-// of URIs.
-String toSourceLocationUri(String path) {
-  return getFileUriPrefix() + path;
-}
-
-String fromSourceLocationUri(String path) {
-  final String filePrefix = getFileUriPrefix();
-  return (path.startsWith(filePrefix))
-      ? path.substring(filePrefix.length)
-      : path;
-}
-
 enum FlutterTreeType {
   widget, // ('Widget'),
   renderObject // ('Render');
