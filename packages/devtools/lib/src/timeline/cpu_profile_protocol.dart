@@ -7,20 +7,23 @@ import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
 
+// TODO(kenzie): talk to VM team about why timeExtentMicros is different between
+// debug and profile builds. Do they use different clocks and does this also
+// affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
+
 class CpuProfileData {
-  CpuProfileData(this.cpuProfileResponse)
+  CpuProfileData(this.cpuProfileResponse, this.duration)
       : sampleCount = cpuProfileResponse.json['sampleCount'],
         samplePeriod = cpuProfileResponse.json['samplePeriod'],
-        timeExtentMicros = cpuProfileResponse.json['timeExtentMicros'],
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
   }
 
   final Response cpuProfileResponse;
+  final Duration duration;
   final int sampleCount;
   final int samplePeriod;
-  final int timeExtentMicros;
   final Map<String, dynamic> stackFramesJson;
 
   /// Trace events associated with the last stackFrame in each sample (i.e. the
@@ -30,7 +33,7 @@ class CpuProfileData {
   /// stack frame.
   final List<dynamic> stackTraceEvents;
 
-  var cpuProfileRoot = CpuStackFrame('cpuProfile', 'all', 'Dart');
+  final cpuProfileRoot = CpuStackFrame('cpuProfile', 'all', 'Dart');
 
   Map<String, CpuStackFrame> stackFrames = {};
 

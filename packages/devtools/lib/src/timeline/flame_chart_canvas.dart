@@ -50,7 +50,7 @@ abstract class FlameChart {
     @required this.data,
     @required this.flameChartWidth,
     @required this.flameChartHeight,
-  }) : timelineGrid = TimelineGrid(data.timeExtentMicros, flameChartWidth) {
+  }) : timelineGrid = TimelineGrid(data.duration, flameChartWidth) {
     _initRows();
   }
 
@@ -520,8 +520,7 @@ class TimelineGrid {
     Color(0xFFFAFBFC),
   );
 
-  /// Frame duration in micros.
-  final num _duration;
+  final Duration _duration;
 
   num currentInterval = baseGridIntervalPx;
 
@@ -619,7 +618,9 @@ class TimelineGrid {
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
   int getTimestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - _flameChartInset) / _flameChartWidth * _duration)
+    return ((gridItemEnd - _flameChartInset) /
+            _flameChartWidth *
+            _duration.inMicroseconds)
         .round();
   }
 
