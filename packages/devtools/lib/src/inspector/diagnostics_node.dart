@@ -689,13 +689,7 @@ class InspectorSourceLocation {
       return parent != null ? parent.getFile() : null;
     }
 
-    // We have to strip the file:// or file:/// prefix depending on the
-    // operating system to convert from paths stored as URIs to local operating
-    // system paths.
-    // TODO(jacobr): remove this workaround after the code in package:flutter
-    // is fixed to return operating system paths instead of URIs.
-    // https://github.com/flutter/flutter-intellij/issues/2217
-    return fromSourceLocationUri(fileName);
+    return fileName;
   }
 
   int getLine() => JsonUtils.getIntMember(json, 'line');

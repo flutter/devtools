@@ -50,7 +50,7 @@ abstract class FlameChart {
     @required this.data,
     @required this.flameChartWidth,
     @required this.flameChartHeight,
-  }) : timelineGrid = TimelineGrid(data.timeExtentMicros, flameChartWidth) {
+  }) : timelineGrid = TimelineGrid(data.duration, flameChartWidth) {
     _initRows();
   }
 
@@ -379,8 +379,9 @@ class FlameChartNode {
     this.backgroundColor,
     this.textColor,
     this.selectedTextColor,
-    this.stackFrame,
-  )   : startingLeft = rect.left,
+    this.stackFrame, {
+    this.rounded = false,
+  })  : startingLeft = rect.left,
         startingWidth = rect.width;
 
   static const horizontalPadding = 4.0;
@@ -409,6 +410,8 @@ class FlameChartNode {
 
   final CpuStackFrame stackFrame;
 
+  final bool rounded;
+
   String get text => stackFrame.name;
 
   String get tooltip => stackFrame.toString();
@@ -416,42 +419,46 @@ class FlameChartNode {
   bool selected = false;
 
   void paint(CanvasRenderingContext2D canvas) {
-    // Fill a rounded rectangle.
-    canvas
-      ..fillStyle =
-          colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor)
-      ..beginPath()
-      ..moveTo(rect.left + borderRadius, rect.top)
-      ..lineTo(rect.right - borderRadius, rect.top)
-      ..quadraticCurveTo(
-        rect.right,
-        rect.top,
-        rect.right,
-        rect.top + borderRadius,
-      )
-      ..lineTo(rect.right, rect.bottom - borderRadius)
-      ..quadraticCurveTo(
-        rect.right,
-        rect.bottom,
-        rect.right - borderRadius,
-        rect.bottom,
-      )
-      ..lineTo(rect.left + borderRadius, rect.bottom)
-      ..quadraticCurveTo(
-        rect.left,
-        rect.bottom,
-        rect.left,
-        rect.bottom - borderRadius,
-      )
-      ..lineTo(rect.left, rect.top + borderRadius)
-      ..quadraticCurveTo(
-        rect.left,
-        rect.top,
-        rect.left + borderRadius,
-        rect.top,
-      )
-      ..closePath()
-      ..fill();
+    canvas.fillStyle =
+        colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor);
+
+    if (rounded) {
+      canvas
+        ..beginPath()
+        ..moveTo(rect.left + borderRadius, rect.top)
+        ..lineTo(rect.right - borderRadius, rect.top)
+        ..quadraticCurveTo(
+          rect.right,
+          rect.top,
+          rect.right,
+          rect.top + borderRadius,
+        )
+        ..lineTo(rect.right, rect.bottom - borderRadius)
+        ..quadraticCurveTo(
+          rect.right,
+          rect.bottom,
+          rect.right - borderRadius,
+          rect.bottom,
+        )
+        ..lineTo(rect.left + borderRadius, rect.bottom)
+        ..quadraticCurveTo(
+          rect.left,
+          rect.bottom,
+          rect.left,
+          rect.bottom - borderRadius,
+        )
+        ..lineTo(rect.left, rect.top + borderRadius)
+        ..quadraticCurveTo(
+          rect.left,
+          rect.top,
+          rect.left + borderRadius,
+          rect.top,
+        )
+        ..closePath()
+        ..fill();
+    } else {
+      canvas.fillRect(rect.left, rect.top, rect.width, rect.height);
+    }
 
     if (selected) {
       canvas
@@ -520,8 +527,7 @@ class TimelineGrid {
     Color(0xFFFAFBFC),
   );
 
-  /// Frame duration in micros.
-  final num _duration;
+  final Duration _duration;
 
   num currentInterval = baseGridIntervalPx;
 
@@ -619,7 +625,9 @@ class TimelineGrid {
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
   int getTimestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - _flameChartInset) / _flameChartWidth * _duration)
+    return ((gridItemEnd - _flameChartInset) /
+            _flameChartWidth *
+            _duration.inMicroseconds)
         .round();
   }
 
