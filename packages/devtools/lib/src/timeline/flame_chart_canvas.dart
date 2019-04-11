@@ -420,38 +420,7 @@ class FlameChartNode {
     canvas
       ..fillStyle =
           colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor)
-      ..beginPath()
-      ..moveTo(rect.left + borderRadius, rect.top)
-      ..lineTo(rect.right - borderRadius, rect.top)
-      ..quadraticCurveTo(
-        rect.right,
-        rect.top,
-        rect.right,
-        rect.top + borderRadius,
-      )
-      ..lineTo(rect.right, rect.bottom - borderRadius)
-      ..quadraticCurveTo(
-        rect.right,
-        rect.bottom,
-        rect.right - borderRadius,
-        rect.bottom,
-      )
-      ..lineTo(rect.left + borderRadius, rect.bottom)
-      ..quadraticCurveTo(
-        rect.left,
-        rect.bottom,
-        rect.left,
-        rect.bottom - borderRadius,
-      )
-      ..lineTo(rect.left, rect.top + borderRadius)
-      ..quadraticCurveTo(
-        rect.left,
-        rect.top,
-        rect.left + borderRadius,
-        rect.top,
-      )
-      ..closePath()
-      ..fill();
+      ..fillRect(rect.left, rect.top, rect.width, rect.height);
 
     if (selected) {
       canvas
