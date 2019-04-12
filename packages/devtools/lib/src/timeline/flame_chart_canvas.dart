@@ -16,6 +16,7 @@ import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
 import 'cpu_profile_protocol.dart';
+import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'timeline.dart';
 
@@ -67,6 +68,8 @@ abstract class FlameChart {
       _stackFrameSelectedController.stream;
 
   FlameChartNode selectedNode;
+
+  bool shouldCollapseNativeSamples = true;
 
   List<FlameChartRow> rows = [];
 
@@ -240,6 +243,11 @@ class FlameChartCanvas extends FlameChart {
     };
 
     _viewportCanvas.element.element.onMouseWheel.listen(_handleMouseWheel);
+
+    onCollapseNativeSamplesEvent.listen((shouldCollapse) {
+      shouldCollapseNativeSamples = shouldCollapse;
+      _viewportCanvas.rebuild(force: true);
+    });
   }
 
   final DragScroll _dragScroll = DragScroll();
@@ -285,6 +293,12 @@ class FlameChartCanvas extends FlameChart {
     for (FlameChartNode node in row.nodes) {
       if (node.rect.left + node.rect.width < visible.left) continue;
       if (node.rect.left > visible.right) break;
+
+      // Do not paint native frames if 'Collapse native samples' is checked.
+      if (shouldCollapseNativeSamples && node.stackFrame.isNative) {
+        continue;
+      }
+
       node.paint(canvas);
     }
   }
