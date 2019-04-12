@@ -69,7 +69,7 @@ abstract class FlameChart {
 
   FlameChartNode selectedNode;
 
-  bool shouldHideNativeSamples = true;
+  bool shouldCollapseNativeSamples = true;
 
   List<FlameChartRow> rows = [];
 
@@ -244,8 +244,8 @@ class FlameChartCanvas extends FlameChart {
 
     _viewportCanvas.element.element.onMouseWheel.listen(_handleMouseWheel);
 
-    onHideNativeSamplesEvent.listen((shouldHide) {
-      shouldHideNativeSamples = shouldHide;
+    onCollapseNativeSamplesEvent.listen((shouldCollapse) {
+      shouldCollapseNativeSamples = shouldCollapse;
       _viewportCanvas.rebuild(force: true);
     });
   }
@@ -294,9 +294,8 @@ class FlameChartCanvas extends FlameChart {
       if (node.rect.left + node.rect.width < visible.left) continue;
       if (node.rect.left > visible.right) break;
 
-      // Do not paint native frames if 'Hide native samples' is checked.
-      if (shouldHideNativeSamples &&
-          node.stackFrame.hasAncestorWithId(CpuProfileData.nativeRootId)) {
+      // Do not paint native frames if 'Collapse native samples' is checked.
+      if (shouldCollapseNativeSamples && node.stackFrame.isNative) {
         continue;
       }
 

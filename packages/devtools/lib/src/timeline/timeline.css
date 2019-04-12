@@ -176,13 +176,13 @@
     display: flex;
 }
 
-.hide-native-container {
+.collapse-native-container {
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
 
-.hide-native-checkbox {
+.collapse-native-checkbox {
     margin-left: 4px;
     margin-right: 4px;
 }

@@ -20,10 +20,10 @@ import 'flame_chart_canvas.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
-final _hideNativeSamplesController = StreamController<bool>.broadcast();
+final _collapseNativeSamplesController = StreamController<bool>.broadcast();
 
-Stream<bool> get onHideNativeSamplesEvent =>
-    _hideNativeSamplesController.stream;
+Stream<bool> get onCollapseNativeSamplesEvent =>
+    _collapseNativeSamplesController.stream;
 
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
@@ -98,22 +98,23 @@ class EventDetails extends CoreElement {
     });
 
     // Add hide native checkbox to tab nav.
-    hideNativeCheckbox = CoreElement('input', classes: 'hide-native-checkbox')
-      ..setAttribute('type', 'checkbox');
+    hideNativeCheckbox =
+        CoreElement('input', classes: 'collapse-native-checkbox')
+          ..setAttribute('type', 'checkbox');
 
     final html.InputElement checkbox = hideNativeCheckbox.element;
     checkbox
       ..checked = true
-      ..onChange
-          .listen((_) => _hideNativeSamplesController.add(checkbox.checked));
+      ..onChange.listen(
+          (_) => _collapseNativeSamplesController.add(checkbox.checked));
 
     // Add checkbox and label to tab bar.
     tabNav.element.children.first.children.addAll([
-      (div(c: 'hide-native-container')
+      (div(c: 'collapse-native-container')
             ..flex()
             ..add([
               hideNativeCheckbox,
-              CoreElement('div', text: 'Hide native samples')
+              CoreElement('div', text: 'Collapse native samples')
             ]))
           .element,
     ]);

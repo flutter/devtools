@@ -20,8 +20,6 @@ class CpuProfileData {
     _processStackFrames(cpuProfileResponse);
   }
 
-  static const nativeRootId = 'nativeRoot';
-
   final Response cpuProfileResponse;
   final Duration duration;
   final int sampleCount;
@@ -40,7 +38,7 @@ class CpuProfileData {
   Map<String, CpuStackFrame> stackFrames = {};
 
   void _processStackFrames(Response response) {
-    final nativeRoot = CpuStackFrame(nativeRootId, '[Native]', 'Dart');
+    final nativeRoot = CpuStackFrame('nativeRoot', '[Native]', 'Dart');
 
     stackFramesJson.forEach((k, v) {
       final String stackFrameName = v['name'];
@@ -52,6 +50,7 @@ class CpuProfileData {
       // once we get file paths in the stack frame json.
       if (stackFrameName.startsWith('[Native]')) {
         parent ??= nativeRoot;
+        stackFrame.isNative = true;
       }
 
       _processStackFrame(stackFrame, parent);
@@ -89,6 +88,8 @@ class CpuStackFrame {
   int index = -1;
 
   bool get isLeaf => children.isEmpty;
+
+  bool isNative = false;
 
   /// Depth of this CpuStackFrame tree, including [this].
   ///
