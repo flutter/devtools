@@ -172,6 +172,21 @@
     height: calc(100% - 27px);
 }
 
+.tabnav-tabs {
+    display: flex;
+}
+
+.hide-native-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.hide-native-checkbox {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 .ui-details-section {
     position: absolute;
     top: 0;

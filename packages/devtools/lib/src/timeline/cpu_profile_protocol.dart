@@ -25,6 +25,8 @@ class CpuProfileData {
     _processStackFrames(cpuProfileResponse);
   }
 
+  static const nativeRootId = 'nativeRoot';
+
   final Response cpuProfileResponse;
   final Duration duration;
   final int sampleCount;
@@ -43,18 +45,26 @@ class CpuProfileData {
   Map<String, CpuStackFrame> stackFrames = {};
 
   void _processStackFrames(Response response) {
+    final nativeRoot = CpuStackFrame(nativeRootId, '[Native]', 'Dart');
+
     stackFramesJson.forEach((k, v) {
       final String stackFrameName = v['name'];
 
-      // Do not process [Native] events. They do not provide any helpful
-      // profiling information to the user, and they distract from the important
-      // samples in the CPU flame chart.
-      if (includeNativeSamples || !stackFrameName.startsWith('[Native]')) {
-        final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
-        final parent = stackFrames[v['parent']];
-        _processStackFrame(stackFrame, parent);
+      final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
+      CpuStackFrame parent = stackFrames[v['parent']];
+
+      // TODO(kenzie): detect other native frames like "syscall" and "malloc"
+      // once we get file paths in the stack frame json.
+      if (stackFrameName.startsWith('[Native]')) {
+        parent ??= nativeRoot;
       }
+
+      _processStackFrame(stackFrame, parent);
     });
+
+    if (nativeRoot.children.isNotEmpty) {
+      cpuProfileRoot.addChild(nativeRoot);
+    }
   }
 
   void _processStackFrame(CpuStackFrame stackFrame, CpuStackFrame parent) {
@@ -123,6 +133,17 @@ class CpuStackFrame {
       root = root.parent;
     }
     return root;
+  }
+
+  bool hasAncestorWithId(String id) {
+    CpuStackFrame currentStackFrame = this;
+    while (currentStackFrame.parent != null) {
+      currentStackFrame = currentStackFrame.parent;
+      if (currentStackFrame.id == id) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Returns the number of cpu samples this stack frame is a part of.
