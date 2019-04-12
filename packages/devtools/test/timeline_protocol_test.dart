@@ -96,8 +96,8 @@ void main() {
       const frameStartTime = 2000;
       const frameEndTime = 8000;
       final frame = TimelineFrame('frameId')
-        ..startTime = frameStartTime
-        ..endTime = frameEndTime;
+        ..pipelineItemStartTime = frameStartTime
+        ..pipelineItemEndTime = frameEndTime;
 
       final event = goldenUiTimelineEvent.deepCopy()
         ..startTime = frameStartTime

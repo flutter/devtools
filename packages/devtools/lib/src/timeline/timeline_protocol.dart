@@ -193,7 +193,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-      pendingFrame.startTime = event.timestampMicros;
+      pendingFrame.pipelineItemStartTime = event.timestampMicros;
 
       if (debugTimeline) {
         debugHandledTraceEvents.write('${jsonEncode(event.json)},');
@@ -210,7 +210,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-      pendingFrame.endTime = event.timestampMicros;
+      pendingFrame.pipelineItemEndTime = event.timestampMicros;
 
       if (debugTimeline) {
         debugHandledTraceEvents.write('${jsonEncode(event.json)},');
@@ -484,8 +484,10 @@ class TimelineData {
     final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
-    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon <= 0;
-    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon >= 0;
+    final bool fitsStartBoundary =
+        f.pipelineItemStartTime - e.startTime - epsilon <= 0;
+    final bool fitsEndBoundary =
+        f.pipelineItemEndTime - e.endTime + epsilon >= 0;
 
     // The [gpuEventFlow] should always start after the [uiEventFlow].
     bool satisfiesUiGpuOrder() {
@@ -510,7 +512,7 @@ class TimelineData {
     // Sort frames by their startTime. Sorting these frames ensures we will
     // handle the oldest frame first when iterating through the list.
     frames.sort((TimelineFrame a, TimelineFrame b) {
-      return a.startTime.compareTo(b.startTime);
+      return a.pipelineItemStartTime.compareTo(b.pipelineItemStartTime);
     });
 
     return frames;
@@ -580,67 +582,71 @@ class TimelineFrame {
   /// Whether the frame is ready for the timeline.
   ///
   /// A frame is ready once it has both required event flows as well as
-  /// [startTime] and [endTime].
+  /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
   bool get isReadyForTimeline {
     return uiEventFlow != null &&
         gpuEventFlow != null &&
-        _startTime != null &&
-        _endTime != null;
+        _pipelineItemStartTime != null &&
+        _pipelineItemEndTime != null;
   }
 
-  /// Frame start time in micros.
+  /// Pipeline item start time in micros.
   ///
-  /// We take the min of [uiStartTime] and [_startTime] because we use an
-  /// epsilon when determining if an event fits within frame boundaries.
-  /// Therefore, there is a chance that [uiStartTime] could be less than
-  /// [_startTime].
-  int get startTime => nullSafeMin(_startTime, uiStartTime);
-  int _startTime;
-  set startTime(int time) => _startTime = nullSafeMin(_startTime, time);
+  /// This stores the timestamp of the start pipeline event for this frame. We
+  /// use this value to determine whether a TimelineEvent fits within the
+  /// frame's time boundaries.
+  int get pipelineItemStartTime => _pipelineItemStartTime;
+  int _pipelineItemStartTime;
+  set pipelineItemStartTime(int time) =>
+      _pipelineItemStartTime = nullSafeMin(_pipelineItemStartTime, time);
+
+  /// Pipeline item end time in micros.
+  ///
+  /// This stores the timestamp of the end pipeline event for this frame. We use
+  /// this value to determine whether a TimelineEvent fits within the frame's
+  /// time boundaries.
+  int get pipelineItemEndTime => _pipelineItemEndTime;
+  int _pipelineItemEndTime;
+  set pipelineItemEndTime(int time) =>
+      _pipelineItemEndTime = nullSafeMax(_pipelineItemEndTime, time);
+
+  bool get isWellFormed =>
+      _pipelineItemStartTime != null && _pipelineItemEndTime != null;
+
+  /// Frame start time in micros.
+  int get startTime => _uiStartTime;
 
   /// Frame end time in micros.
-  ///
-  /// We take the max of [gpuEndTime] and [_endTime] because we use an epsilon
-  /// when determining if an event fits within frame boundaries. Therefore,
-  /// there is a chance that [gpuEndTime] could be greater than [_endTime].
-  int get endTime => nullSafeMax(_endTime, gpuEndTime);
-  int _endTime;
-  set endTime(int time) => _endTime = nullSafeMax(_endTime, time);
-
-  bool get isWellFormed => _startTime != null && _endTime != null;
+  int get endTime => _gpuEndTime;
 
   /// Duration the frame took to render in micros.
   int get duration =>
       endTime != null && startTime != null ? endTime - startTime : null;
 
   // Timing info for UI portion of the frame.
-  int get uiStartTime => uiEventFlow?.startTime;
+  int get _uiStartTime => uiEventFlow?.startTime;
 
-  int get uiEndTime => uiStartTime != null ? uiStartTime + uiDuration : null;
+  int get _uiEndTime => _uiStartTime != null ? _uiStartTime + uiDuration : null;
 
   int get uiDuration => uiEventFlow?.duration;
 
   double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
   // Timing info for GPU portion of the frame.
-  int get gpuStartTime => gpuEventFlow?.startTime;
+  int get _gpuStartTime => gpuEventFlow?.startTime;
 
-  int get gpuEndTime =>
-      gpuStartTime != null ? gpuStartTime + gpuDuration : null;
+  int get _gpuEndTime =>
+      _gpuStartTime != null ? _gpuStartTime + gpuDuration : null;
 
   int get gpuDuration => gpuEventFlow?.duration;
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
-  bool get isUiSlow => uiDurationMs > targetMaxDuration / 2;
-
-  bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
-
   @override
   String toString() {
     return 'Frame $id - [start: $startTime], [end: $endTime],'
-        'ui: [start $uiStartTime end $uiEndTime], gpu: [start: $gpuStartTime'
-        ' end $gpuEndTime]';
+        'ui: [start $_uiStartTime end $_uiEndTime], gpu: [start: $_gpuStartTime'
+        ' end $_gpuEndTime]';
   }
 }
 
