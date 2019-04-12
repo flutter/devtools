@@ -112,5 +112,22 @@ void main() {
       // can be increased if this test starts to flake.
       expect(end - start, lessThan(200));
     });
+
+    test('timeRange', () {
+      final timeRangeMicros = TimeRange(
+        start: const Duration(microseconds: 1000),
+        end: const Duration(microseconds: 8000),
+      );
+      expect(timeRangeMicros.duration.inMicroseconds, equals(7000));
+      expect(timeRangeMicros.toString(), equals('[1000 - 8000]'));
+
+      final timeRangeMillis = TimeRange(
+        unit: TimeUnit.milliseconds,
+        start: const Duration(microseconds: 1000),
+        end: const Duration(microseconds: 8000),
+      );
+      expect(timeRangeMillis.duration.inMicroseconds, equals(7000));
+      expect(timeRangeMillis.toString(), equals('[1 - 8]'));
+    });
   });
 }

@@ -82,7 +82,7 @@ class EventDetails extends CoreElement {
     _event = item.event;
 
     _title.text =
-        '${_event.name} - ${msText(Duration(microseconds: _event.duration))}';
+        '${_event.name} - ${msText(_event.timeRange.duration)}';
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)
       ..color = colorToCss(_event.isGpuEvent ? Colors.white : Colors.black);
@@ -205,12 +205,12 @@ class _UiEventDetails extends CoreElement {
         await serviceManager.service.getCpuProfileTimeline(
       serviceManager.isolateManager.selectedIsolate.id,
       event.startTime,
-      event.duration,
+      event.timeRange.duration.inMicroseconds,
     );
 
     cpuProfileData = CpuProfileData(
       response,
-      Duration(microseconds: event.duration),
+      event.timeRange.duration,
     );
 
     if (cpuProfileData.stackFrames.isEmpty) {

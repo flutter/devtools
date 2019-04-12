@@ -324,7 +324,7 @@ class TimelineData {
 
     previousDurationEndEvents[event.type.index] = event;
 
-    current.endTime = event.timestampMicros;
+    current.timeRange.end = Duration(microseconds: event.timestampMicros);
     current.traceEvents.add(eventWrapper);
 
     // Even if the event is well nested, we could still have a duplicate in the
@@ -356,7 +356,8 @@ class TimelineData {
     final TraceEvent event = eventWrapper.event;
     final TimelineEvent timelineEvent = TimelineEvent(eventWrapper);
 
-    timelineEvent.endTime = event.timestampMicros + event.duration;
+    timelineEvent.timeRange.end =
+        Duration(microseconds: event.timestampMicros + event.duration);
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
@@ -446,7 +447,7 @@ class TimelineData {
       return false;
     }
 
-    frame.eventFlows[event.type.index] = event;
+    frame.setEventFlow(event);
 
     if (debugTimeline) {
       debugFrameTracking
@@ -481,7 +482,10 @@ class TimelineData {
     // then we consider the event as fitting. If the event has a large duration,
     // consider it as fitting if it fits within [traceEventEpsilon] micros of
     // the frame bound.
-    final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
+    final int epsilon = min(
+      e.timeRange.duration.inMicroseconds ~/ 2,
+      traceEventEpsilon.inMicroseconds,
+    );
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
     final bool fitsStartBoundary =
@@ -586,67 +590,63 @@ class TimelineFrame {
   bool get isReadyForTimeline {
     return uiEventFlow != null &&
         gpuEventFlow != null &&
-        _pipelineItemStartTime != null &&
-        _pipelineItemEndTime != null;
+        pipelineItemStartTime != null &&
+        pipelineItemEndTime != null;
   }
 
-  /// Pipeline item start time in micros.
-  ///
-  /// This stores the timestamp of the start pipeline event for this frame. We
-  /// use this value to determine whether a TimelineEvent fits within the
-  /// frame's time boundaries.
-  int get pipelineItemStartTime => _pipelineItemStartTime;
-  int _pipelineItemStartTime;
-  set pipelineItemStartTime(int time) =>
-      _pipelineItemStartTime = nullSafeMin(_pipelineItemStartTime, time);
+  // Stores frame start time, end time, and duration.
+  final timeRange = TimeRange();
 
-  /// Pipeline item end time in micros.
+  /// Pipeline item time range in micros.
   ///
-  /// This stores the timestamp of the end pipeline event for this frame. We use
-  /// this value to determine whether a TimelineEvent fits within the frame's
-  /// time boundaries.
-  int get pipelineItemEndTime => _pipelineItemEndTime;
-  int _pipelineItemEndTime;
-  set pipelineItemEndTime(int time) =>
-      _pipelineItemEndTime = nullSafeMax(_pipelineItemEndTime, time);
+  /// This stores the start and end times for the pipeline item event for this
+  /// frame. We use this value to determine whether a TimelineEvent fits within
+  /// the frame's time boundaries.
+  final _pipelineItemTimeRange = TimeRange();
+
+  int get pipelineItemStartTime => _pipelineItemTimeRange.start?.inMicroseconds;
+
+  set pipelineItemStartTime(int time) => _pipelineItemTimeRange.start =
+      Duration(microseconds: nullSafeMin(pipelineItemStartTime, time));
+
+  int get pipelineItemEndTime => _pipelineItemTimeRange.end?.inMicroseconds;
+
+  set pipelineItemEndTime(int time) => _pipelineItemTimeRange.end =
+      Duration(microseconds: nullSafeMax(pipelineItemEndTime, time));
 
   bool get isWellFormed =>
-      _pipelineItemStartTime != null && _pipelineItemEndTime != null;
+      pipelineItemStartTime != null && pipelineItemEndTime != null;
 
-  /// Frame start time in micros.
-  int get startTime => _uiStartTime;
-
-  /// Frame end time in micros.
-  int get endTime => _gpuEndTime;
-
-  /// Duration the frame took to render in micros.
-  int get duration =>
-      endTime != null && startTime != null ? endTime - startTime : null;
-
-  // Timing info for UI portion of the frame.
-  int get _uiStartTime => uiEventFlow?.startTime;
-
-  int get _uiEndTime => _uiStartTime != null ? _uiStartTime + uiDuration : null;
-
-  int get uiDuration => uiEventFlow?.duration;
+  int get uiDuration => uiEventFlow != null
+      ? uiEventFlow.timeRange.duration.inMicroseconds
+      : null;
 
   double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
-  // Timing info for GPU portion of the frame.
-  int get _gpuStartTime => gpuEventFlow?.startTime;
-
-  int get _gpuEndTime =>
-      _gpuStartTime != null ? _gpuStartTime + gpuDuration : null;
-
-  int get gpuDuration => gpuEventFlow?.duration;
+  int get gpuDuration => gpuEventFlow != null
+      ? gpuEventFlow.timeRange.duration.inMicroseconds
+      : null;
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
+  void setEventFlow(TimelineEvent event, {TimelineEventType type}) {
+    type ??= event?.type;
+
+    eventFlows[type.index] = event;
+
+    if (type == TimelineEventType.ui) {
+      timeRange.start = event?.timeRange?.start;
+    }
+    if (type == TimelineEventType.gpu) {
+      timeRange.end = event?.timeRange?.end;
+    }
+  }
+
   @override
   String toString() {
-    return 'Frame $id - [start: $startTime], [end: $endTime],'
-        'ui: [start $_uiStartTime end $_uiEndTime], gpu: [start: $_gpuStartTime'
-        ' end $_gpuEndTime]';
+    return 'Frame $id - ${timeRange.toString()},'
+        ' ui: ${uiEventFlow.timeRange.toString()}, '
+        'gpu: ${gpuEventFlow.timeRange.toString()}';
   }
 }
 
@@ -654,7 +654,9 @@ class TimelineEvent {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type,
-        startTime = firstTraceEvent.event.timestampMicros;
+        timeRange = TimeRange(
+          start: Duration(microseconds: firstTraceEvent.event.timestampMicros),
+        );
 
   /// Trace events associated with this [TimelineEvent].
   ///
@@ -666,11 +668,11 @@ class TimelineEvent {
   @visibleForTesting
   TimelineEventType type;
 
-  /// Event start time in micros.
-  int startTime;
+  final TimeRange timeRange;
 
-  /// Event end time in micros.
-  int endTime;
+  int get startTime => timeRange.start.inMicroseconds;
+
+  int get endTime => timeRange.end?.inMicroseconds;
 
   TimelineEvent parent;
 
@@ -681,9 +683,6 @@ class TimelineEvent {
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
   Map<String, dynamic> get endTraceEventJson => traceEvents.last.json;
-
-  /// Event duration in micros.
-  int get duration => (endTime != null) ? endTime - startTime : null;
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
@@ -853,7 +852,7 @@ class TimelineEvent {
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name [start: $startTime] [end: $endTime]');
+    buf.writeln('$indent$name ${timeRange.toString()}');
     for (TimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
@@ -879,7 +878,7 @@ class TimelineEvent {
   @visibleForTesting
   TimelineEvent deepCopy() {
     final copy = TimelineEvent(traceEvents.first);
-    copy.endTime = endTime;
+    copy.timeRange.end = timeRange.end;
     copy.parent = parent;
     for (TimelineEvent child in children) {
       copy._addChild(child.deepCopy());
