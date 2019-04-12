@@ -131,17 +131,6 @@ class CpuStackFrame {
     return root;
   }
 
-  bool hasAncestorWithId(String id) {
-    CpuStackFrame currentStackFrame = this;
-    while (currentStackFrame.parent != null) {
-      currentStackFrame = currentStackFrame.parent;
-      if (currentStackFrame.id == id) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
   /// This will be equal to the number of leaf nodes in this stack frame.

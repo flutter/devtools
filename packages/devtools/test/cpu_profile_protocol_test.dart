@@ -58,13 +58,6 @@ void main() {
         equals(testStackFrame.toStringDeep()),
       );
     });
-
-    test('hasAncestorWithId', () {
-      expect(stackFrame_1.hasAncestorWithId('id_0'), isTrue);
-      expect(stackFrame_5.hasAncestorWithId('id_0'), isTrue);
-      expect(stackFrame_5.hasAncestorWithId('id_3'), isTrue);
-      expect(stackFrame_2.hasAncestorWithId('id_3'), isFalse);
-    });
   });
 }
 
