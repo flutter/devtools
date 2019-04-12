@@ -7,11 +7,6 @@ import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
 
-// TODO(kenzie): make this a user-toggle. If this is enabled, we should add a
-// top level stack frame called "[Native]" to parent all [Native] stack frames.
-/// Toggle this flag to include native samples in the CPU profile.
-bool includeNativeSamples = false;
-
 // TODO(kenzie): talk to VM team about why timeExtentMicros is different between
 // debug and profile builds. Do they use different clocks and does this also
 // affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
