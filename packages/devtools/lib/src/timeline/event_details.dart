@@ -81,8 +81,7 @@ class EventDetails extends CoreElement {
   Future<void> update(FrameFlameChartItem item) async {
     _event = item.event;
 
-    _title.text =
-        '${_event.name} - ${msText(_event.timeRange.duration)}';
+    _title.text = '${_event.name} - ${msText(_event.timeRange.duration)}';
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)
       ..color = colorToCss(_event.isGpuEvent ? Colors.white : Colors.black);
