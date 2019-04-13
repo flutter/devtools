@@ -403,7 +403,7 @@ class DebuggerScreen extends Screen {
 
             if (!_popupView.isPoppedUp) {
               _popupView.showPopup();
-              hookupListeners(_popupView.scriptsView);
+              _hookupListeners(_popupView.scriptsView);
             } else {
               _popupView.scriptsView.clearScripts();
               _popupView.scriptsView.element.element.style.display = 'inline';
@@ -444,7 +444,7 @@ class DebuggerScreen extends Screen {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
-  void hookupListeners(ScriptsView scriptsView) {
+  void _hookupListeners(ScriptsView scriptsView) {
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptsView._items.hadClicked &&
           _matcher != null &&
@@ -541,10 +541,10 @@ class DebuggerScreen extends Screen {
       ..element.style.marginTop = '4px';
 
     scriptsView = ScriptsView(debuggerState.getShortScriptName);
-    hookupListeners(scriptsView);
+    _hookupListeners(scriptsView);
 
     popupScriptsView = ScriptsView(debuggerState.getShortScriptName);
-    hookupListeners(popupScriptsView);
+    _hookupListeners(popupScriptsView);
 
     scriptsView.onScriptsChanged.listen((_) {
       scriptCountDiv.text = scriptsView.items.length.toString();
@@ -1265,9 +1265,9 @@ class PopupView extends CoreElement {
 
     final int sourceAreaWidth = _sourceArea.element.clientWidth;
 
-    _scriptsView.element.element.style.height =
-        '${element.getBoundingClientRect().height - 2}px';
-    _scriptsView.element.element.style.width = '${sourceAreaWidth / 2}px';
+    _scriptsView.element.element.style
+      ..height = '${element.getBoundingClientRect().height - 2}px'
+      ..width = '${sourceAreaWidth / 2}px';
 
     final html.Rectangle r = _sourceArea.element.getBoundingClientRect();
 
@@ -1280,6 +1280,8 @@ class PopupView extends CoreElement {
       final html.Element firstGutter = elems[0].firstChild as html.Element;
       if (firstGutter.style.display != 'none')
         // Compute total gutter width (parent has both BP and line # gutters).
+        // Offset left a little (5px) so it's not aligned to the gutter's edge
+        // (hard to visualize).
         leftPosition = firstGutter.parent.getBoundingClientRect().width + 5;
     }
 
@@ -1287,23 +1289,22 @@ class PopupView extends CoreElement {
     final String bgColor =
         _sourcePathDiv.element.getComputedStyle().backgroundColor;
     _oldSourceNameTextColor = _sourcePathDiv.element.getComputedStyle().color;
+
     _sourcePathDiv.element.style.color = bgColor;
 
-    _popupTextfield.element.style.height = '${nameHeight}px';
-    _popupTextfield.element.style.minHeight = '${nameHeight}px';
-    _popupTextfield.element.style.maxHeight = '${nameHeight}px';
-    _popupTextfield.element.style.width =
-        _scriptsView.element.element.style.width;
+    _popupTextfield.element.style
+      ..height = '${nameHeight}px'
+      ..minHeight = '${nameHeight}px'
+      ..maxHeight = '${nameHeight}px'
+      ..width = _scriptsView.element.element.style.width
+      ..top = '${r.top}px'
+      ..left = '${r.left + leftPosition}px'
+      ..display = 'inline';
 
-    _popupTextfield.element.style.top = '${r.top}px';
-    _popupTextfield.element.style.left = '${r.left + leftPosition}px';
-
-    _popupTextfield.element.style.display = 'inline';
-
-    element.style.top = '${r.top + nameHeight}px';
-    element.style.left = '${r.left + leftPosition}px';
-
-    element.style.display = 'inline';
+    element.style
+      ..top = '${r.top + nameHeight}px'
+      ..left = '${r.left + leftPosition}px'
+      ..display = 'inline';
   }
 
   void hidePopup() {

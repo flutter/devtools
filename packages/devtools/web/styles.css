@@ -30,9 +30,11 @@
     --hint-background: lightgoldenrodyellow;
     --light-background: #ccc;
     --light-text-color: #f5f5dc;
+    --list-background: #fff;
     --match-color: #fff;
     --masthead-background: #4078c0;
     --menu-item-border: #e1e4e8;
+    --popup-border-color: #d1d5da;
     --row-hover-background: #f2f4fa;
     --selected-background: #4078c0;
     --selected-border: #a2a2a2;
