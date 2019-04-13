@@ -14,6 +14,12 @@
     padding: 4px 8px;
 }
 
+.source-head-filter {
+    color: var(--header-color);
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--table-border);
+}
+
 .breakpoints {
     width: 1em;
 }
@@ -42,6 +48,29 @@
 
 .debugger-items-list {
     overflow-y: scroll;
+    cursor: pointer;
+}
+
+.open-popup {
+    z-index: 1000;
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    height: 200px;
+    background-color: white;
+    list-style: none;
+    border: 1px solid #d1d5da;
+    padding-left: 4px;
+    margin-vottrom: 2px;
+    cursor: pointer;
+    display: none;
+}
+
+.popup-textfield {
+    width: calc(100% - 105px);
+    zIndex: 1000;
+    display: none;
+    position: absolute;;
 }
 
 .flex-no-wrap {

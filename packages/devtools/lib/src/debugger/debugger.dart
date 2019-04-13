@@ -74,12 +74,15 @@ class DebuggerScreen extends Screen {
 
   CoreElement _breakpointsCountDiv;
   CoreElement _sourcePathDiv;
+  CoreElement _popupTextfield;
+  PopupView _popupView;
 
   SourceEditor sourceEditor;
   CallStackView callStackView;
   VariablesView variablesView;
   BreakpointsView breakpointsView;
   ScriptsView scriptsView;
+  ScriptsView popupScriptsView;
   ConsoleArea consoleArea;
 
   ScriptsMatcher _matcher;
@@ -140,6 +143,46 @@ class DebuggerScreen extends Screen {
     consoleArea = ConsoleArea();
     List<CoreElement> navEditorPanels;
 
+    _popupTextfield =
+        CoreElement('input', classes: 'form-control input-sm popup-textfield')
+          ..setAttribute('type', 'text')
+          ..setAttribute('placeholder', 'filter')
+          ..id = 'popup_script_name'
+          ..focus(() {
+            _matcher ??= ScriptsMatcher(debuggerState);
+            popupScriptsView.setMatcher(_matcher);
+          })
+          ..blur(() {
+            Timer(const Duration(milliseconds: 200),
+                () => _matcher?.finish()); // Hide/clear the popup.
+          })
+          ..onKeyUp.listen((html.KeyboardEvent e) {
+            switch (e.keyCode) {
+              case DOM_VK_RETURN:
+              case DOM_VK_ESCAPE:
+              case DOM_VK_PAGE_UP:
+              case DOM_VK_PAGE_DOWN:
+              case DOM_VK_END:
+              case DOM_VK_HOME:
+              case DOM_VK_UP:
+              case DOM_VK_DOWN:
+                return;
+              default:
+                final html.InputElement inputElement = _popupTextfield.element;
+                final String value = inputElement.value.trim();
+
+                if (!_matcher.active) {
+                  _matcher.start(
+                    sourceEditor.scriptRef,
+                    popupScriptsView,
+                    _popupTextfield,
+                    _popupView.hidePopup,
+                  );
+                }
+                _matcher.displayMatchingScripts(value);
+            }
+          });
+
     screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..flex()
@@ -182,6 +225,16 @@ class DebuggerScreen extends Screen {
                 ..add(consoleArea.element),
             ]),
         ]),
+    ]);
+
+    screenDiv.add([
+      _popupTextfield,
+      _popupView = PopupView(
+        popupScriptsView,
+        sourceArea,
+        _sourcePathDiv,
+        _popupTextfield,
+      )
     ]);
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
@@ -342,11 +395,24 @@ class DebuggerScreen extends Screen {
       if (e.ctrlKey) {
         switch (e.key) {
           case 'o': // CTRL + o
-            // Open a file set focus to the 'script_name' textfield accepts key
-            // strokes.
-            final html.InputElement textfield =
-                html.document.getElementById('script_name');
-            textfield.focus();
+            if (_matcher.active) {
+              _matcher.cancel();
+              _matcher = null;
+            }
+            _popupView.element.style.display = 'inline';
+
+            if (!_popupView.isPoppedUp) {
+              _popupView.showPopup();
+              hookupListeners(_popupView.scriptsView);
+            } else {
+              _popupView.scriptsView.clearScripts();
+              _popupView.scriptsView.element.element.style.display = 'inline';
+            }
+
+            // Open a file set focus to the 'popup_script_name' textfield
+            // accepts key strokes.
+            _popupView._popupTextfield.element.focus();
+
             e.preventDefault();
             break;
         }
@@ -376,6 +442,35 @@ class DebuggerScreen extends Screen {
     serviceManager.isolateManager.onSelectedIsolateChanged
         .listen(_handleIsolateChanged);
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+  }
+
+  void hookupListeners(ScriptsView scriptsView) {
+    scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
+      if (scriptsView._items.hadClicked &&
+          _matcher != null &&
+          _matcher.active) {
+        // User clicked while matcher was active then reset the matcher.
+        _matcher.reset();
+      }
+
+      if (_matcher != null && _matcher.active) return;
+
+      if (scriptRef == null) {
+        _displaySource(null);
+        return;
+      }
+
+      final IsolateRef isolateRef =
+          serviceManager.isolateManager.selectedIsolate;
+      final dynamic result =
+          await serviceManager.service.getObject(isolateRef.id, scriptRef.id);
+
+      if (result is Script) {
+        _displaySource(result, scriptRef);
+      } else {
+        _displaySource(null);
+      }
+    });
   }
 
   CoreElement _buildMenuNav() {
@@ -446,32 +541,11 @@ class DebuggerScreen extends Screen {
       ..element.style.marginTop = '4px';
 
     scriptsView = ScriptsView(debuggerState.getShortScriptName);
-    scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
-      if (scriptsView._items.hadClicked &&
-          _matcher != null &&
-          _matcher.active) {
-        // User clicked while matcher was active then reset the matcher.
-        _matcher.reset();
-      }
+    hookupListeners(scriptsView);
 
-      if (_matcher != null && _matcher.active) return;
+    popupScriptsView = ScriptsView(debuggerState.getShortScriptName);
+    hookupListeners(popupScriptsView);
 
-      if (scriptRef == null) {
-        _displaySource(null);
-        return;
-      }
-
-      final IsolateRef isolateRef =
-          serviceManager.isolateManager.selectedIsolate;
-      final dynamic result =
-          await serviceManager.service.getObject(isolateRef.id, scriptRef.id);
-
-      if (result is Script) {
-        _displaySource(result);
-      } else {
-        _displaySource(null);
-      }
-    });
     scriptsView.onScriptsChanged.listen((_) {
       scriptCountDiv.text = scriptsView.items.length.toString();
     });
@@ -491,13 +565,11 @@ class DebuggerScreen extends Screen {
         ..add([
           textfield
             ..click(() {
-              _matcher ??=
-                  ScriptsMatcher(scriptsView, textfield, debuggerState);
+              _matcher ??= ScriptsMatcher(debuggerState);
               scriptsView.setMatcher(_matcher);
             })
             ..focus(() {
-              _matcher ??=
-                  ScriptsMatcher(scriptsView, textfield, debuggerState);
+              _matcher ??= ScriptsMatcher(debuggerState);
               scriptsView.setMatcher(_matcher);
             })
             ..onKeyUp.listen((html.KeyboardEvent e) {
@@ -514,9 +586,12 @@ class DebuggerScreen extends Screen {
                 default:
                   final html.InputElement inputElement = textfield.element;
                   final String value = inputElement.value.trim();
-
                   if (!_matcher.active) {
-                    _matcher.start();
+                    _matcher.start(
+                      sourceEditor.scriptRef,
+                      scriptsView,
+                      textfield,
+                    );
                   }
                   _matcher.displayMatchingScripts(value);
               }
@@ -571,7 +646,7 @@ class DebuggerScreen extends Screen {
 
     serviceManager.service.getIsolate(isolateRef.id).then((dynamic result) {
       if (result is Isolate) {
-        _populateFromIsolate(result);
+        _populateFromIsolate(result, [scriptsView, popupScriptsView]);
       } else {
         scriptsView.clearScripts();
       }
@@ -589,7 +664,9 @@ class DebuggerScreen extends Screen {
     debuggerState.dispose();
   }
 
-  void _populateFromIsolate(Isolate isolate) async {
+  /// Populate the ScriptsViews - the library UI list and the file open pop-up.
+  void _populateFromIsolate(
+      Isolate isolate, List<ScriptsView> scriptsViewers) async {
     debuggerState.setRootLib(isolate.rootLib);
     debuggerState.updateFrom(isolate);
 
@@ -605,22 +682,25 @@ class DebuggerScreen extends Screen {
 
       debuggerState.scripts = scripts;
 
-      scriptsView.showScripts(
-        scripts,
-        debuggerState.rootLib.uri,
-        debuggerState.commonScriptPrefix,
-        selectRootScript: isRunning,
-      );
+      scriptsViewers.forEach((ScriptsView scriptsViewer) {
+        scriptsViewer.showScripts(
+          scripts,
+          debuggerState.rootLib.uri,
+          debuggerState.commonScriptPrefix,
+          selectRootScript: isRunning,
+        );
+      });
     }
   }
 
-  void _displaySource(Script script) {
+  /// scriptRef is the current displayed script file ScriptRef.
+  void _displaySource(Script script, [ScriptRef scriptRef]) {
     if (script == null) {
-      _sourcePathDiv.setInnerHtml('&nbsp;');
       sourceEditor.displayScript(script);
     } else {
       _sourcePathDiv.text = script.uri;
       sourceEditor.displayScript(script);
+      sourceEditor.scriptRef = scriptRef;
     }
   }
 
@@ -948,6 +1028,7 @@ class SourceEditor {
   final DebuggerState debuggerState;
 
   Script currentScript;
+  ScriptRef scriptRef;
   ScriptAndPosition executionPoint;
   List<Breakpoint> breakpoints = <Breakpoint>[];
   Map<int, List<Breakpoint>> linesToBreakpoints = <int, List<Breakpoint>>{};
@@ -1161,6 +1242,87 @@ class BreakpointsView implements CoreElementView {
   }
 }
 
+class PopupView extends CoreElement {
+  PopupView(this._scriptsView, this._sourceArea, this._sourcePathDiv,
+      this._popupTextfield)
+      : super('div', classes: 'open-popup');
+
+  CoreElement _sourceArea; // Top div area container of _sourcePathDiv
+  CoreElement _sourcePathDiv; // Text name of the source
+  CoreElement _popupTextfield; // Textfield to show while popup is active.
+
+  ScriptsView _scriptsView;
+
+  String _oldSourceNameTextColor;
+
+  bool _poppedUp = false;
+  bool get isPoppedUp => _poppedUp;
+
+  void showPopup() {
+    _poppedUp = true;
+
+    add(_scriptsView);
+
+    final int sourceAreaWidth = _sourceArea.element.clientWidth;
+
+    _scriptsView.element.element.style.height =
+        '${element.getBoundingClientRect().height - 2}px';
+    _scriptsView.element.element.style.width = '${sourceAreaWidth / 2}px';
+
+    final html.Rectangle r = _sourceArea.element.getBoundingClientRect();
+
+    final int nameHeight = _sourcePathDiv.element.clientHeight;
+
+    int leftPosition = 20; // Default left position.
+    final List<html.Node> elems =
+        html.document.getElementsByClassName('CodeMirror-gutters');
+    if (elems.length == 2) {
+      final html.Element firstGutter = elems[0].firstChild as html.Element;
+      if (firstGutter.style.display != 'none')
+        // Compute total gutter width (parent has both BP and line # gutters).
+        leftPosition = firstGutter.parent.getBoundingClientRect().width + 5;
+    }
+
+    // Set the sourcePathDiv text color to the background color (hide filename).
+    final String bgColor =
+        _sourcePathDiv.element.getComputedStyle().backgroundColor;
+    _oldSourceNameTextColor = _sourcePathDiv.element.getComputedStyle().color;
+    _sourcePathDiv.element.style.color = bgColor;
+
+    _popupTextfield.element.style.height = '${nameHeight}px';
+    _popupTextfield.element.style.minHeight = '${nameHeight}px';
+    _popupTextfield.element.style.maxHeight = '${nameHeight}px';
+    _popupTextfield.element.style.width =
+        _scriptsView.element.element.style.width;
+
+    _popupTextfield.element.style.top = '${r.top}px';
+    _popupTextfield.element.style.left = '${r.left + leftPosition}px';
+
+    _popupTextfield.element.style.display = 'inline';
+
+    element.style.top = '${r.top + nameHeight}px';
+    element.style.left = '${r.left + leftPosition}px';
+
+    element.style.display = 'inline';
+  }
+
+  void hidePopup() {
+    // Restore the text color to what it was (so the title can be seen).
+    _sourcePathDiv.element.style.color = _oldSourceNameTextColor;
+
+    element.style.display = 'none'; // Hide ScriptsView
+
+    // Hide textfield and reset it's value.
+    final html.InputElement inputElement = _popupTextfield.element;
+    inputElement.value = '';
+    inputElement.style.display = 'none';
+
+    _poppedUp = false;
+  }
+
+  ScriptsView get scriptsView => _scriptsView;
+}
+
 class ScriptsView implements CoreElementView {
   ScriptsView(URIDescriber uriDescriber) {
     _items = SelectableList<ScriptRef>()
@@ -1206,6 +1368,8 @@ class ScriptsView implements CoreElementView {
 
   ScriptsMatcher _matcherRendering;
 
+  ScriptsMatcher get matcher => _matcherRendering;
+
   void setMatcher(_matcher) {
     _matcherRendering = _matcher;
   }
@@ -1214,7 +1378,8 @@ class ScriptsView implements CoreElementView {
     _highlightRef = null;
   }
 
-  void scrollAndHilight(int row, {bool top = false}) {
+  void scrollAndHilight(int row, int topPosition,
+      {bool top = false, bool bottom = false}) {
     // Highlight this row.
     _highlightRef = items[row];
 
@@ -1222,37 +1387,44 @@ class ScriptsView implements CoreElementView {
 
     _items.setReplace(row, _highlightRef);
 
-    newElement?.scrollIntoView(top: top);
+    if (topPosition != -1) element.scrollTop = topPosition;
+
+    newElement?.scrollIntoView(top: top, bottom: bottom);
   }
 
   /// Returns the row number of item to make visible.
-  int page(ListDirection direction) {
+  int page(ListDirection direction, [int startRow = 0]) {
     final int listHeight = element.element.clientHeight;
     final int itemHeight = _items.element.children[0].clientHeight;
-
-    final int itemsVis = (listHeight / itemHeight).truncate();
-
-    final int listScrollTop = element.element.scrollTop;
-    final int topElement = (listScrollTop / itemHeight).truncate();
+    final int itemsVis = (listHeight / itemHeight).truncate() - 1;
 
     int childToScrollTo;
     switch (direction) {
       case ListDirection.pageDown:
-        int itemIndex = topElement + itemsVis;
+        int itemIndex = startRow + itemsVis;
         if (itemIndex > _items.items.length - 1)
           itemIndex = _items.items.length - 1;
         childToScrollTo = itemIndex;
+        final int scrollPosition = startRow > 0 ? startRow * itemHeight : 0;
+        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.pageUp:
-        int itemIndex = topElement - itemsVis;
+        int itemIndex = startRow - itemsVis;
         if (itemIndex < 0) itemIndex = 0;
         childToScrollTo = itemIndex;
+        final int scrollPosition =
+            childToScrollTo > 0 ? childToScrollTo * itemHeight : 0;
+        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.home:
         childToScrollTo = 0;
+        scrollAndHilight(childToScrollTo, childToScrollTo);
         break;
       case ListDirection.end:
         childToScrollTo = _items.items.length - 1;
+        final int scrollPosition =
+            childToScrollTo > 0 ? (childToScrollTo - itemsVis) * itemHeight : 0;
+        scrollAndHilight(childToScrollTo, scrollPosition);
         break;
     }
 
@@ -1339,12 +1511,10 @@ class ScriptsView implements CoreElementView {
 }
 
 class ScriptsMatcher {
-  ScriptsMatcher(this._scriptsView, this._textfield, this._debuggerState) {
-    start();
-  }
+  ScriptsMatcher(this._debuggerState);
 
-  final ScriptsView _scriptsView;
-  final CoreElement _textfield;
+  ScriptsView _scriptsView;
+  CoreElement _textfield;
   final DebuggerState _debuggerState;
 
   ScriptRef _originalScriptRef;
@@ -1364,8 +1534,21 @@ class ScriptsMatcher {
 
   bool get active => _subscription != null;
 
-  void start() {
-    _startMatching();
+  Function _finishCallback;
+
+  void finish() {
+    if (_finishCallback != null) _finishCallback();
+  }
+
+  void start(
+      ScriptRef revertScriptRef, ScriptsView scriptView, CoreElement textfield,
+      [Function finishCallback]) {
+    _scriptsView = scriptView;
+    _textfield = textfield;
+
+    if (finishCallback != null) _finishCallback = finishCallback;
+
+    _startMatching(revertScriptRef, true);
 
     // Start handling user's keystrokes to show matching list of files.
     _subscription ??= _textfield.onKeyDown.listen((html.KeyboardEvent e) {
@@ -1373,37 +1556,33 @@ class ScriptsMatcher {
         case DOM_VK_RETURN:
           reset();
           _scriptsView.reset();
+          finish();
           e.preventDefault();
           break;
         case DOM_VK_ESCAPE:
-          // Clear selection
-          revert();
+          cancel();
           break;
         case DOM_VK_PAGE_UP:
-          _selectRow = _scriptsView.page(ListDirection.pageUp);
-          _scriptsView.scrollAndHilight(_selectRow, top: true);
+          _selectRow = _scriptsView.page(ListDirection.pageUp, _selectRow);
           e.preventDefault();
           break;
         case DOM_VK_PAGE_DOWN:
-          _selectRow = _scriptsView.page(ListDirection.pageDown);
-          _scriptsView.scrollAndHilight(_selectRow, top: true);
+          _selectRow = _scriptsView.page(ListDirection.pageDown, _selectRow);
           e.preventDefault();
           break;
         case DOM_VK_END:
           _selectRow = _scriptsView.page(ListDirection.end);
-          _scriptsView.scrollAndHilight(_selectRow);
           e.preventDefault();
           break;
         case DOM_VK_HOME:
           _selectRow = _scriptsView.page(ListDirection.home);
-          _scriptsView.scrollAndHilight(_selectRow);
           e.preventDefault();
           break;
         case DOM_VK_UP:
           // Set selection one item up.
           if (_selectRow > 0) {
             _selectRow -= 1;
-            _scriptsView.scrollAndHilight(_selectRow);
+            _scriptsView.scrollAndHilight(_selectRow, -1);
           }
           e.preventDefault();
           break;
@@ -1411,7 +1590,7 @@ class ScriptsMatcher {
           // Set selection one item down.
           if (_selectRow < _scriptsView.items.length - 1) {
             _selectRow += 1;
-            _scriptsView.scrollAndHilight(_selectRow);
+            _scriptsView.scrollAndHilight(_selectRow, -1);
           }
           e.preventDefault();
           break;
@@ -1419,9 +1598,14 @@ class ScriptsMatcher {
     });
   }
 
+  void cancel() {
+    revert();
+    finish();
+  }
+
   void selectFirstItem() {
     _selectRow = 0;
-    _scriptsView.scrollAndHilight(_selectRow);
+    _scriptsView.scrollAndHilight(_selectRow, -1);
   }
 
   // Finished matching - throw away all matching states.
@@ -1471,7 +1655,6 @@ class ScriptsMatcher {
   /// textfield.
   void revert() {
     reset();
-
     _scriptsView.showScripts(
       matchingState[''],
       _debuggerState.rootLib.uri,
@@ -1486,12 +1669,12 @@ class ScriptsMatcher {
     }
   }
 
-  void _startMatching() {
-    _originalScriptRef = _scriptsView._items.selectedItem();
+  void _startMatching(ScriptRef originalScriptRef, [bool initialize = false]) {
+    _originalScriptRef = originalScriptRef;
     _originalScrollTop = _scriptsView.element.scrollTop;
 
     final html.InputElement element = _textfield.element;
-    if (element.value.isEmpty) {
+    if (initialize || element.value.isEmpty) {
       // Save all the scripts.
       matchingState.putIfAbsent('', () => _scriptsView.items);
     }
