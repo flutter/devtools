@@ -395,7 +395,7 @@ class DebuggerScreen extends Screen {
       if (e.ctrlKey) {
         switch (e.key) {
           case 'o': // CTRL + o
-            if (_matcher.active) {
+            if (_matcher != null && _matcher.active) {
               _matcher.cancel();
               _matcher = null;
             }
@@ -682,14 +682,14 @@ class DebuggerScreen extends Screen {
 
       debuggerState.scripts = scripts;
 
-      scriptsViewers.forEach((ScriptsView scriptsViewer) {
+      for (ScriptsView scriptsViewer in scriptsViewers) {
         scriptsViewer.showScripts(
           scripts,
           debuggerState.rootLib.uri,
           debuggerState.commonScriptPrefix,
           selectRootScript: isRunning,
         );
-      });
+      }
     }
   }
 

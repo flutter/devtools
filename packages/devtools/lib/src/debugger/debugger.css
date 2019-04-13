@@ -57,7 +57,8 @@
     top: 0px;
     left: 5px;
     height: 200px;
-    background-color: white;
+    color: var(--header-color);
+    background-color: var(--header-background);
     list-style: none;
     border: 1px solid #d1d5da;
     padding-left: 4px;
@@ -67,10 +68,12 @@
 }
 
 .popup-textfield {
-    width: calc(100% - 105px);
     zIndex: 1000;
-    display: none;
     position: absolute;;
+    color: var(--header-color);
+    background-color: var(--header-background);
+    width: calc(100% - 105px);
+    display: none;
 }
 
 .flex-no-wrap {
