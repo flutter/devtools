@@ -28,8 +28,10 @@ final argParser = new ArgParser()
     argPort,
     defaultsTo: '9100',
     abbr: 'p',
+    // ChromeOS exposed ports: 8000, 8008, 808, 8085, 8888, 9005, 3000, 4200, 5000
     help: 'Port to serve DevTools on. '
-        'Pass 0 to automatically assign an available port.',
+        'Pass 0 to automatically assign an available port. Pass a comma-'
+        'separated list to try multiple ports in order before failing.',
   )
   ..addFlag(
     argMachine,
@@ -50,7 +52,6 @@ void main(List<String> arguments) async {
   }
 
   final bool machineMode = args[argMachine];
-  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
   final Uri resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
@@ -76,7 +77,46 @@ void main(List<String> arguments) async {
         : buildHandler(request);
   };
 
-  final server = await shelf.serve(handler, '127.0.0.1', port);
+  final ports = args[argPort] != null
+      ? args[argPort].split(',').map((i) => int.tryParse(i) ?? 0)
+      : 0;
+
+  // Attempt to bind to each port in order.
+  HttpServer server;
+  for (final port in ports) {
+    try {
+      server = await shelf.serve(handler, '127.0.0.1', port);
+      break; // Don't try any more if we bound one.
+    } on SocketException catch (e) {
+      printOutput(
+        'Unable to bind to port $port: $e',
+        {
+          'method': 'server.log',
+          'params': {
+            'level': 'info',
+            'message': 'Unable to bind to port $port: $e'
+          },
+        },
+        machineMode: machineMode,
+      );
+    }
+  }
+
+  if (server == null) {
+    printOutput(
+      'Unable to bind to any of the supplied ports. Include 0 in the list of '
+      'ports to accept a randomly assign available port.',
+      {
+        'method': 'server.error',
+        'params': {
+          'message': 'Unable to bind to any of the supplied ports.',
+          'fatal': true,
+        }
+      },
+      machineMode: machineMode,
+    );
+    return;
+  }
 
   printOutput(
     'Serving DevTools at http://${server.address.host}:${server.port}',
