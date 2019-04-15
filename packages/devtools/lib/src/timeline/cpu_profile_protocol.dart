@@ -38,11 +38,27 @@ class CpuProfileData {
   Map<String, CpuStackFrame> stackFrames = {};
 
   void _processStackFrames(Response response) {
+    final nativeRoot = CpuStackFrame('nativeRoot', '[Native]', 'Dart');
+
     stackFramesJson.forEach((k, v) {
-      final stackFrame = CpuStackFrame(k, v['name'], v['category']);
-      final parent = stackFrames[v['parent']];
+      final String stackFrameName = v['name'];
+
+      final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
+      CpuStackFrame parent = stackFrames[v['parent']];
+
+      // TODO(kenzie): detect other native frames like "syscall" and "malloc"
+      // once we get file paths in the stack frame json.
+      if (stackFrameName.startsWith('[Native]')) {
+        parent ??= nativeRoot;
+        stackFrame.isNative = true;
+      }
+
       _processStackFrame(stackFrame, parent);
     });
+
+    if (nativeRoot.children.isNotEmpty) {
+      cpuProfileRoot.addChild(nativeRoot);
+    }
   }
 
   void _processStackFrame(CpuStackFrame stackFrame, CpuStackFrame parent) {
@@ -72,6 +88,8 @@ class CpuStackFrame {
   int index = -1;
 
   bool get isLeaf => children.isEmpty;
+
+  bool isNative = false;
 
   /// Depth of this CpuStackFrame tree, including [this].
   ///

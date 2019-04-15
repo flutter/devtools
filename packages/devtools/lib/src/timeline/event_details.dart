@@ -1,6 +1,9 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
+import 'dart:html' as html;
+
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../globals.dart';
@@ -17,15 +20,48 @@ import 'flame_chart_canvas.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
+final _collapseNativeSamplesController = StreamController<bool>.broadcast();
+
+Stream<bool> get onCollapseNativeSamplesEvent =>
+    _collapseNativeSamplesController.stream;
+
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
     flex();
     layoutVertical();
 
+    _initContent();
+
+    assert(tabNav != null);
+    assert(content != null);
+
+    add([tabNav, content]);
+  }
+
+  static const defaultTitleText = '[No event selected]';
+  static const defaultTitleBackground = Color(0xFFF6F6F6);
+
+  PTabNav tabNav;
+  CoreElement content;
+  CoreElement hideNativeCheckbox;
+
+  TimelineEvent _event;
+  CoreElement _title;
+  _Details _details;
+
+  void _initContent() {
     _title = div(text: defaultTitleText, c: 'event-details-heading')
       ..element.style.backgroundColor = colorToCss(defaultTitleBackground);
     _details = _Details()..attribute('hidden');
 
+    content = div(c: 'event-details-section section-border')
+      ..flex()
+      ..add(<CoreElement>[_title, _details]);
+
+    _initTabNav();
+  }
+
+  void _initTabNav() {
     final flameChartTab = EventDetailsTabNavTab(
       'CPU Flame Chart',
       EventDetailsTabType.flameChart,
@@ -61,22 +97,28 @@ class EventDetails extends CoreElement {
       }
     });
 
-    content = div(c: 'event-details-section section-border')..flex();
-    content.add(<CoreElement>[_title, _details]);
+    // Add hide native checkbox to tab nav.
+    hideNativeCheckbox =
+        CoreElement('input', classes: 'collapse-native-checkbox')
+          ..setAttribute('type', 'checkbox');
 
-    add(tabNav);
-    add(content);
+    final html.InputElement checkbox = hideNativeCheckbox.element;
+    checkbox
+      ..checked = true
+      ..onChange.listen(
+          (_) => _collapseNativeSamplesController.add(checkbox.checked));
+
+    // Add checkbox and label to tab bar.
+    tabNav.element.children.first.children.addAll([
+      (div(c: 'collapse-native-container')
+            ..flex()
+            ..add([
+              hideNativeCheckbox,
+              CoreElement('div', text: 'Collapse native samples')
+            ]))
+          .element,
+    ]);
   }
-
-  static const defaultTitleText = '[No event selected]';
-  static const defaultTitleBackground = Color(0xFFF6F6F6);
-
-  PTabNav tabNav;
-  CoreElement content;
-
-  TimelineEvent _event;
-  CoreElement _title;
-  _Details _details;
 
   Future<void> update(FrameFlameChartItem item) async {
     _event = item.event;
@@ -254,6 +296,8 @@ class _UiEventDetails extends CoreElement {
     add(spinner);
 
     try {
+      // TODO(kenzie): add a timeout here so we don't appear to have an
+      // infinite spinner.
       await _drawFlameChart();
     } catch (e) {
       _updateFlameChartForError(div(

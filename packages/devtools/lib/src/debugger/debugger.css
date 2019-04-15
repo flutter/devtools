@@ -14,6 +14,12 @@
     padding: 4px 8px;
 }
 
+.source-head-filter {
+    color: var(--header-color);
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--table-border);
+}
+
 .breakpoints {
     width: 1em;
 }
@@ -42,6 +48,30 @@
 
 .debugger-items-list {
     overflow-y: scroll;
+    cursor: pointer;
+}
+
+.open-popup {
+    z-index: 1000;
+    position: absolute;
+    height: calc(100% - 70%);
+    color: var(--header-color);
+    background-color: var(--list-background);
+    list-style: none;
+    border: 1px solid var(--popup-border-color);
+    padding-left: 4px;
+    margin-vottrom: 2px;
+    cursor: pointer;
+    display: none;
+}
+
+.popup-textfield {
+    zIndex: 1000;
+    position: absolute;;
+    color: var(--header-color);
+    background-color: var(--list-background);
+    width: calc(100% - 105px);
+    display: none;
 }
 
 .flex-no-wrap {
