@@ -565,6 +565,7 @@ class LogWhenColumn extends Column<LogData> {
 
   @override
   String render(dynamic value) {
+    if (timeFormat == null) return '';
     return timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
   }
 }
