@@ -95,7 +95,7 @@ void main() {
     test('event occurs within frame boundaries', () {
       const frameStartTime = 2000;
       const frameEndTime = 8000;
-      final frame = TimelineFrame('frameId')
+      TimelineFrame frame = TimelineFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
         ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
@@ -163,6 +163,10 @@ void main() {
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
       expect(
           timelineData.eventOccursWithinFrameBounds(gpuEvent, frame), isFalse);
+
+      frame = TimelineFrame('frameId')
+        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
+        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
