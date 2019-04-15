@@ -306,3 +306,48 @@ class RateLimiter {
     _activeTimer?.cancel();
   }
 }
+
+/// Time unit for displaying time ranges.
+///
+/// If the need arises, this enum can be expanded to include any of the
+/// remaining time units supported by [Duration] - (seconds, minutes, etc.). If
+/// you add a unit of time to this enum, modify the toString() method in
+/// [TimeRange] to handle the new case.
+enum TimeUnit {
+  microseconds,
+  milliseconds,
+}
+
+class TimeRange {
+  Duration get start => _start;
+
+  Duration _start;
+
+  set start(Duration value) {
+    assert(_start == null);
+    _start = value;
+  }
+
+  Duration get end => _end;
+
+  Duration _end;
+
+  set end(Duration value) {
+    assert(_end == null);
+    _end = value;
+  }
+
+  Duration get duration => end - start;
+
+  @override
+  String toString({TimeUnit unit}) {
+    unit ??= TimeUnit.microseconds;
+    switch (unit) {
+      case TimeUnit.microseconds:
+        return '[${_start.inMicroseconds} μs - ${end.inMicroseconds} μs]';
+      case TimeUnit.milliseconds:
+      default:
+        return '[${_start.inMilliseconds} ms - ${end.inMilliseconds} ms]';
+    }
+  }
+}

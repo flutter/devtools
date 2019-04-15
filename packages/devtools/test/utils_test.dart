@@ -112,5 +112,18 @@ void main() {
       // can be increased if this test starts to flake.
       expect(end - start, lessThan(200));
     });
+
+    test('timeRange', () {
+      final timeRangeMicros = TimeRange()
+        ..start = const Duration(microseconds: 1000)
+        ..end = const Duration(microseconds: 8000);
+
+      expect(timeRangeMicros.duration.inMicroseconds, equals(7000));
+      expect(timeRangeMicros.toString(), equals('[1000 μs - 8000 μs]'));
+      expect(
+        timeRangeMicros.toString(unit: TimeUnit.milliseconds),
+        equals('[1 ms - 8 ms]'),
+      );
+    });
   });
 }

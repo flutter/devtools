@@ -158,13 +158,17 @@ class TimelineData {
     // event node. Do not process these events.
     if (currentEventNodes[event.type.index] != null &&
         event.timestampMicros <
-            currentEventNodes[event.type.index].getRoot().startTime) {
+            currentEventNodes[event.type.index]
+                .getRoot()
+                .time
+                .start
+                .inMicroseconds) {
       return;
     }
 
     if (debugTimeline) {
       debugHandledTraceEvents.write('${jsonEncode(event.json)},');
-      debugFrameTracking.writeln('Handling - ${event.json.toString()}');
+      debugFrameTracking.writeln('Handling - ${event.json}');
     }
 
     switch (event.phase) {
@@ -193,12 +197,16 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-      pendingFrame.startTime = event.timestampMicros;
+      pendingFrame.pipelineItemTime.start = Duration(
+        microseconds: nullSafeMin(
+          pendingFrame.pipelineItemTime.start?.inMicroseconds,
+          event.timestampMicros,
+        ),
+      );
 
       if (debugTimeline) {
         debugHandledTraceEvents.write('${jsonEncode(event.json)},');
-        debugFrameTracking
-            .writeln('Frame Start: $id - ${event.json.toString()}');
+        debugFrameTracking.writeln('Frame Start: $id - ${event.json}');
       }
 
       _maybeAddPendingEvents();
@@ -210,7 +218,12 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
-      pendingFrame.endTime = event.timestampMicros;
+      pendingFrame.pipelineItemTime.end = Duration(
+        microseconds: nullSafeMax(
+          pendingFrame.pipelineItemTime.end?.inMicroseconds,
+          event.timestampMicros,
+        ),
+      );
 
       if (debugTimeline) {
         debugHandledTraceEvents.write('${jsonEncode(event.json)},');
@@ -314,8 +327,8 @@ class TimelineData {
         if (debugTimeline) {
           debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
           debugFrameTracking.writeln('Event: ${event.json}');
-          debugFrameTracking.writeln(
-              'Current: ${currentEventNodes[event.type.index].toString()}');
+          debugFrameTracking
+              .writeln('Current: ${currentEventNodes[event.type.index]}');
         }
         currentEventNodes[event.type.index] = null;
         return;
@@ -324,7 +337,7 @@ class TimelineData {
 
     previousDurationEndEvents[event.type.index] = event;
 
-    current.endTime = event.timestampMicros;
+    current.time.end = Duration(microseconds: event.timestampMicros);
     current.traceEvents.add(eventWrapper);
 
     // Even if the event is well nested, we could still have a duplicate in the
@@ -337,7 +350,8 @@ class TimelineData {
 
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
-    while (current.parent?.endTime != null) {
+    while (current.parent != null &&
+        current.parent.time.end?.inMicroseconds != null) {
       current = current.parent;
     }
     currentEventNodes[event.type.index] = current.parent;
@@ -356,7 +370,8 @@ class TimelineData {
     final TraceEvent event = eventWrapper.event;
     final TimelineEvent timelineEvent = TimelineEvent(eventWrapper);
 
-    timelineEvent.endTime = event.timestampMicros + event.duration;
+    timelineEvent.time.end =
+        Duration(microseconds: event.timestampMicros + event.duration);
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
@@ -382,7 +397,7 @@ class TimelineData {
     // Sort _pendingEvents by their startTime. This ensures we will add the
     // first matching event within the time boundary to the frame.
     pendingEvents.sort((TimelineEvent a, TimelineEvent b) {
-      return a.startTime.compareTo(b.startTime);
+      return a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds);
     });
 
     final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
@@ -428,9 +443,9 @@ class TimelineData {
 
     if (!eventAdded) {
       if (debugTimeline) {
-        debugFrameTracking
-            .writeln('Adding event [${event.name}: ${event.startTime} '
-                '- ${event.endTime}] to pendingEvents');
+        debugFrameTracking.writeln('Adding event [${event.name}: '
+            '${event.time.start.inMicroseconds} - '
+            '${event.time.end?.inMicroseconds}] to pendingEvents');
       }
       pendingEvents.add(event);
     }
@@ -446,12 +461,12 @@ class TimelineData {
       return false;
     }
 
-    frame.eventFlows[event.type.index] = event;
+    frame.setEventFlow(event);
 
     if (debugTimeline) {
-      debugFrameTracking
-          .writeln('Adding event [${event.name}: ${event.startTime} '
-              '- ${event.endTime}] to frame ${frame.id}');
+      debugFrameTracking.writeln(
+          'Adding event [${event.name}: ${event.time.start.inMicroseconds} '
+          '- ${event.time.end?.inMicroseconds}] to frame ${frame.id}');
     }
 
     // Adding event [e] could mean we have completed the frame. Check if we
@@ -481,18 +496,32 @@ class TimelineData {
     // then we consider the event as fitting. If the event has a large duration,
     // consider it as fitting if it fits within [traceEventEpsilon] micros of
     // the frame bound.
-    final int epsilon = min(e.duration ~/ 2, traceEventEpsilon.inMicroseconds);
+    final int epsilon = min(
+      e.time.duration.inMicroseconds ~/ 2,
+      traceEventEpsilon.inMicroseconds,
+    );
+
+    assert(f.pipelineItemTime.start != null);
+    assert(f.pipelineItemTime.end != null);
 
     // Allow the event to extend the frame boundaries by [epsilon] microseconds.
-    final bool fitsStartBoundary = f.startTime - e.startTime - epsilon <= 0;
-    final bool fitsEndBoundary = f.endTime - e.endTime + epsilon >= 0;
+    final bool fitsStartBoundary = f.pipelineItemTime.start.inMicroseconds -
+            e.time.start.inMicroseconds -
+            epsilon <=
+        0;
+    final bool fitsEndBoundary = f.pipelineItemTime.end.inMicroseconds -
+            e.time.end?.inMicroseconds +
+            epsilon >=
+        0;
 
     // The [gpuEventFlow] should always start after the [uiEventFlow].
     bool satisfiesUiGpuOrder() {
       if (e.isUiEventFlow && f.gpuEventFlow != null) {
-        return e.startTime < f.gpuEventFlow.startTime;
+        return e.time.start.inMicroseconds <
+            f.gpuEventFlow.time.start.inMicroseconds;
       } else if (e.isGpuEventFlow && f.uiEventFlow != null) {
-        return e.startTime > f.uiEventFlow.startTime;
+        return e.time.start.inMicroseconds >
+            f.uiEventFlow.time.start.inMicroseconds;
       }
       // We do not have enough information about the frame to compare UI and
       // GPU start times, so return true.
@@ -510,7 +539,8 @@ class TimelineData {
     // Sort frames by their startTime. Sorting these frames ensures we will
     // handle the oldest frame first when iterating through the list.
     frames.sort((TimelineFrame a, TimelineFrame b) {
-      return a.startTime.compareTo(b.startTime);
+      return a.pipelineItemTime.start.inMicroseconds
+          .compareTo(b.pipelineItemTime.start.inMicroseconds);
     });
 
     return frames;
@@ -580,75 +610,64 @@ class TimelineFrame {
   /// Whether the frame is ready for the timeline.
   ///
   /// A frame is ready once it has both required event flows as well as
-  /// [startTime] and [endTime].
+  /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
   bool get isReadyForTimeline {
     return uiEventFlow != null &&
         gpuEventFlow != null &&
-        _startTime != null &&
-        _endTime != null;
+        pipelineItemTime.start?.inMicroseconds != null &&
+        pipelineItemTime.end?.inMicroseconds != null;
   }
 
-  /// Frame start time in micros.
+  // Stores frame start time, end time, and duration.
+  final time = TimeRange();
+
+  /// Pipeline item time range in micros.
   ///
-  /// We take the min of [uiStartTime] and [_startTime] because we use an
-  /// epsilon when determining if an event fits within frame boundaries.
-  /// Therefore, there is a chance that [uiStartTime] could be less than
-  /// [_startTime].
-  int get startTime => nullSafeMin(_startTime, uiStartTime);
-  int _startTime;
-  set startTime(int time) => _startTime = nullSafeMin(_startTime, time);
+  /// This stores the start and end times for the pipeline item event for this
+  /// frame. We use this value to determine whether a TimelineEvent fits within
+  /// the frame's time boundaries.
+  final pipelineItemTime = TimeRange();
 
-  /// Frame end time in micros.
-  ///
-  /// We take the max of [gpuEndTime] and [_endTime] because we use an epsilon
-  /// when determining if an event fits within frame boundaries. Therefore,
-  /// there is a chance that [gpuEndTime] could be greater than [_endTime].
-  int get endTime => nullSafeMax(_endTime, gpuEndTime);
-  int _endTime;
-  set endTime(int time) => _endTime = nullSafeMax(_endTime, time);
+  bool get isWellFormed =>
+      pipelineItemTime.start?.inMicroseconds != null &&
+      pipelineItemTime.end?.inMicroseconds != null;
 
-  bool get isWellFormed => _startTime != null && _endTime != null;
-
-  /// Duration the frame took to render in micros.
-  int get duration =>
-      endTime != null && startTime != null ? endTime - startTime : null;
-
-  // Timing info for UI portion of the frame.
-  int get uiStartTime => uiEventFlow?.startTime;
-
-  int get uiEndTime => uiStartTime != null ? uiStartTime + uiDuration : null;
-
-  int get uiDuration => uiEventFlow?.duration;
+  int get uiDuration =>
+      uiEventFlow != null ? uiEventFlow.time.duration.inMicroseconds : null;
 
   double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
-  // Timing info for GPU portion of the frame.
-  int get gpuStartTime => gpuEventFlow?.startTime;
-
-  int get gpuEndTime =>
-      gpuStartTime != null ? gpuStartTime + gpuDuration : null;
-
-  int get gpuDuration => gpuEventFlow?.duration;
+  int get gpuDuration =>
+      gpuEventFlow != null ? gpuEventFlow.time.duration.inMicroseconds : null;
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
-  bool get isUiSlow => uiDurationMs > targetMaxDuration / 2;
+  void setEventFlow(TimelineEvent event, {TimelineEventType type}) {
+    type ??= event?.type;
 
-  bool get isGpuSlow => gpuDurationMs > targetMaxDuration / 2;
+    eventFlows[type.index] = event;
+
+    if (type == TimelineEventType.ui) {
+      time.start = event?.time?.start;
+    }
+    if (type == TimelineEventType.gpu) {
+      time.end = event?.time?.end;
+    }
+  }
 
   @override
   String toString() {
-    return 'Frame $id - [start: $startTime], [end: $endTime],'
-        'ui: [start $uiStartTime end $uiEndTime], gpu: [start: $gpuStartTime'
-        ' end $gpuEndTime]';
+    return 'Frame $id - $time, ui: ${uiEventFlow.time}, '
+        'gpu: ${gpuEventFlow.time}';
   }
 }
 
 class TimelineEvent {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
-        type = firstTraceEvent.event.type,
-        startTime = firstTraceEvent.event.timestampMicros;
+        type = firstTraceEvent.event.type {
+    time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
+  }
 
   /// Trace events associated with this [TimelineEvent].
   ///
@@ -660,11 +679,7 @@ class TimelineEvent {
   @visibleForTesting
   TimelineEventType type;
 
-  /// Event start time in micros.
-  int startTime;
-
-  /// Event end time in micros.
-  int endTime;
+  TimeRange time = TimeRange();
 
   TimelineEvent parent;
 
@@ -675,9 +690,6 @@ class TimelineEvent {
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
   Map<String, dynamic> get endTraceEventJson => traceEvents.last.json;
-
-  /// Event duration in micros.
-  int get duration => (endTime != null) ? endTime - startTime : null;
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
@@ -827,27 +839,32 @@ class TimelineEvent {
   }
 
   bool couldBeParentOf(TimelineEvent e) {
-    if (endTime != null && e.endTime != null) {
-      if (startTime == e.startTime && endTime == e.endTime) {
+    final startTime = time.start.inMicroseconds;
+    final endTime = time.end?.inMicroseconds;
+    final eStartTime = e.time.start.inMicroseconds;
+    final eEndTime = e.time.end?.inMicroseconds;
+
+    if (endTime != null && eEndTime != null) {
+      if (startTime == eStartTime && endTime == eEndTime) {
         return traceEvents.first.id < e.traceEvents.first.id;
       }
-      return startTime <= e.startTime && endTime >= e.endTime;
+      return startTime <= eStartTime && endTime >= eEndTime;
     } else if (endTime != null) {
       // We don't use >= to compare [endTime] and [e.startTime] here because we
       // don't want to falsely make [this] the parent of [e]. We do not know
       // [e.endTime], meaning [e] could start at [endTime] and end later than
       // [endTime] (unless e has a duration of 0). In this case, [this] would
       // not be the parent of [e].
-      return startTime <= e.startTime && endTime > e.startTime;
-    } else if (startTime == e.startTime) {
+      return startTime <= eStartTime && endTime > eStartTime;
+    } else if (startTime == eStartTime) {
       return traceEvents.first.id < e.traceEvents.first.id;
     } else {
-      return startTime < e.startTime;
+      return startTime < eStartTime;
     }
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name [start: $startTime] [end: $endTime]');
+    buf.writeln('$indent$name $time');
     for (TimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
@@ -873,7 +890,7 @@ class TimelineEvent {
   @visibleForTesting
   TimelineEvent deepCopy() {
     final copy = TimelineEvent(traceEvents.first);
-    copy.endTime = endTime;
+    copy.time.end = time.end;
     copy.parent = parent;
     for (TimelineEvent child in children) {
       copy._addChild(child.deepCopy());

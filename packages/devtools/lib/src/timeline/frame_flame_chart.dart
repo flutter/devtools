@@ -91,10 +91,10 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
     ///
     /// Subtract 2 * [sectionLabelOffset] to account for extra space at the
     /// beginning/end of the chart.
-    final double pxPerMicro =
-        (element.clientWidth - 2 * flameChartInset) / frame.duration;
+    final double pxPerMicro = (element.clientWidth - 2 * flameChartInset) /
+        frame.time.duration.inMicroseconds;
 
-    final int frameStartOffset = frame.startTime;
+    final int frameStartOffset = frame.time.start.inMicroseconds;
     final uiSectionHeight =
         frame.uiEventFlow.depth * FlameChart.rowHeight + sectionSpacing;
     final gpuSectionHeight = frame.gpuEventFlow.depth * FlameChart.rowHeight;
@@ -110,8 +110,10 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
-      final double startPx = (event.startTime - frameStartOffset) * pxPerMicro;
-      final double endPx = (event.endTime - frameStartOffset) * pxPerMicro;
+      final double startPx =
+          (event.time.start.inMicroseconds - frameStartOffset) * pxPerMicro;
+      final double endPx =
+          (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro;
 
       _drawFlameChartItem(
         event,
@@ -182,7 +184,10 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
     }
 
     void drawTimelineGrid() {
-      _timelineGrid = TimelineGrid(frame.duration, getFlameChartWidth());
+      _timelineGrid = TimelineGrid(
+        frame.time.duration,
+        getFlameChartWidth(),
+      );
       _timelineGrid.element.style.height = '${flameChartHeight}px';
       add(_timelineGrid);
     }
@@ -269,7 +274,7 @@ class FrameFlameChartItem extends FlameChartItem {
 
   @override
   void setText() {
-    final durationText = msText(Duration(microseconds: _event.duration));
+    final durationText = msText(event.time.duration);
 
     String title = _event.name;
     element.title = '$title ($durationText)';
@@ -302,8 +307,7 @@ class TimelineGrid extends CoreElement {
 
   static const baseGridInterval = 150;
 
-  /// Frame duration in micros.
-  final num _frameDuration;
+  final Duration _frameDuration;
 
   num _zoomLevel = 1;
 
@@ -343,7 +347,7 @@ class TimelineGrid extends CoreElement {
   int getTimestampForPosition(num gridItemEnd) {
     return ((gridItemEnd - _flameChartInset) /
             _flameChartWidth *
-            _frameDuration)
+            _frameDuration.inMicroseconds)
         .round();
   }
 
