@@ -114,20 +114,16 @@ void main() {
     });
 
     test('timeRange', () {
-      final timeRangeMicros = TimeRange(
-        start: const Duration(microseconds: 1000),
-        end: const Duration(microseconds: 8000),
-      );
-      expect(timeRangeMicros.duration.inMicroseconds, equals(7000));
-      expect(timeRangeMicros.toString(), equals('[1000 - 8000]'));
+      final timeRangeMicros = TimeRange()
+        ..start = const Duration(microseconds: 1000)
+        ..end = const Duration(microseconds: 8000);
 
-      final timeRangeMillis = TimeRange(
-        unit: TimeUnit.milliseconds,
-        start: const Duration(microseconds: 1000),
-        end: const Duration(microseconds: 8000),
+      expect(timeRangeMicros.duration.inMicroseconds, equals(7000));
+      expect(timeRangeMicros.toString(), equals('[1000 μs - 8000 μs]'));
+      expect(
+        timeRangeMicros.toString(unit: TimeUnit.milliseconds),
+        equals('[1 ms - 8 ms]'),
       );
-      expect(timeRangeMillis.duration.inMicroseconds, equals(7000));
-      expect(timeRangeMillis.toString(), equals('[1 - 8]'));
     });
   });
 }

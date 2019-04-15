@@ -96,54 +96,54 @@ void main() {
       const frameStartTime = 2000;
       const frameEndTime = 8000;
       final frame = TimelineFrame('frameId')
-        ..pipelineItemStartTime = frameStartTime
-        ..pipelineItemEndTime = frameEndTime;
+        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
+        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
       final event = goldenUiTimelineEvent.deepCopy()
-        ..timeRange.start = const Duration(microseconds: frameStartTime)
-        ..timeRange.end = const Duration(microseconds: 5000);
+        ..time.start = const Duration(microseconds: frameStartTime)
+        ..time.end = const Duration(microseconds: 5000);
 
       // Event fits within frame timestamps.
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event fits within epsilon of frame start.
-      event.timeRange.start = Duration(
+      event.time.start = Duration(
           microseconds: frameStartTime - traceEventEpsilon.inMicroseconds);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame start.
-      event.timeRange.start = Duration(
+      event.time.start = Duration(
           microseconds: frameStartTime - traceEventEpsilon.inMicroseconds - 1);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event with small duration uses smaller epsilon.
       event
-        ..timeRange.start = const Duration(microseconds: frameStartTime - 100)
-        ..timeRange.end = const Duration(microseconds: frameStartTime + 100);
+        ..time.start = const Duration(microseconds: frameStartTime - 100)
+        ..time.end = const Duration(microseconds: frameStartTime + 100);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       event
-        ..timeRange.start = const Duration(microseconds: frameStartTime - 101)
-        ..timeRange.end = const Duration(microseconds: frameStartTime + 100);
+        ..time.start = const Duration(microseconds: frameStartTime - 101)
+        ..time.end = const Duration(microseconds: frameStartTime + 100);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event fits within epsilon of frame end.
-      event.timeRange.end = Duration(
+      event.time.end = Duration(
           microseconds: frameEndTime + traceEventEpsilon.inMicroseconds);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame end.
-      event.timeRange.end = Duration(
+      event.time.end = Duration(
           microseconds: frameEndTime + traceEventEpsilon.inMicroseconds + 1);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Satisfies UI / GPU order.
       final uiEvent = event
-        ..timeRange.start = const Duration(microseconds: 5000)
-        ..timeRange.end = const Duration(microseconds: 6000);
+        ..time.start = const Duration(microseconds: 5000)
+        ..time.end = const Duration(microseconds: 6000);
       final gpuEvent = goldenGpuTimelineEvent.deepCopy()
-        ..timeRange.start = const Duration(microseconds: 4000)
-        ..timeRange.end = const Duration(microseconds: 8000);
+        ..time.start = const Duration(microseconds: 4000)
+        ..time.end = const Duration(microseconds: 8000);
 
       expect(timelineData.eventOccursWithinFrameBounds(uiEvent, frame), isTrue);
       expect(
@@ -358,7 +358,7 @@ void main() {
 
       // Add child [animate] to a leaf [engineBeginFrame].
       final animate = testTimelineEvent(_animateJson)
-        ..timeRange.end = const Duration(microseconds: 118039650871);
+        ..time.end = const Duration(microseconds: 118039650871);
       engineBeginFrame.addChild(animate);
       expect(engineBeginFrame.children.length, equals(1));
       expect(engineBeginFrame.children.first.name, equals(animateEvent.name));
@@ -366,14 +366,14 @@ void main() {
       // Add child [layout] where child is sibling of existing children
       // [animate].
       final layout = testTimelineEvent(_layoutJson)
-        ..timeRange.end = const Duration(microseconds: 118039651087);
+        ..time.end = const Duration(microseconds: 118039651087);
       engineBeginFrame.addChild(layout);
       expect(engineBeginFrame.children.length, equals(2));
       expect(engineBeginFrame.children.last.name, equals(layoutEvent.name));
 
       // Add child [build] where existing child [layout] is parent of child.
       final build = testTimelineEvent(_buildJson)
-        ..timeRange.end = const Duration(microseconds: 118039651017);
+        ..time.end = const Duration(microseconds: 118039651017);
       engineBeginFrame.addChild(build);
       expect(engineBeginFrame.children.length, equals(2));
       expect(layout.children.length, equals(1));
@@ -382,7 +382,7 @@ void main() {
       // Add child [frame] child is parent of existing children [animate] and
       // [layout].
       final frame = testTimelineEvent(_frameJson)
-        ..timeRange.end = const Duration(microseconds: 118039652334);
+        ..time.end = const Duration(microseconds: 118039652334);
       engineBeginFrame.addChild(frame);
       expect(engineBeginFrame.children.length, equals(1));
       expect(engineBeginFrame.children.first.name, equals(frameEvent.name));
@@ -440,59 +440,59 @@ final frameEndEvent = testTraceEvent({
 // None of the following data should be modified. If you have a need to modify
 // any of the below events for a test, make a copy and modify the copy.
 final TimelineEvent vsyncEvent = testTimelineEvent(_vsyncJson)
-  ..timeRange.end = const Duration(microseconds: 118039652422)
+  ..time.end = const Duration(microseconds: 118039652422)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent animatorBeginFrameEvent =
     testTimelineEvent(_animatorBeginFrameJson)
-      ..timeRange.end = const Duration(microseconds: 118039652421)
+      ..time.end = const Duration(microseconds: 118039652421)
       ..type = TimelineEventType.ui;
 
 final TimelineEvent frameworkWorkloadEvent =
     testTimelineEvent(_frameworkWorkloadJson)
-      ..timeRange.end = const Duration(microseconds: 118039652412)
+      ..time.end = const Duration(microseconds: 118039652412)
       ..type = TimelineEventType.ui;
 
 final TimelineEvent engineBeginFrameEvent =
     testTimelineEvent(_engineBeginFrameJson)
-      ..timeRange.end = const Duration(microseconds: 118039652411)
+      ..time.end = const Duration(microseconds: 118039652411)
       ..type = TimelineEventType.ui;
 
 final TimelineEvent frameEvent = testTimelineEvent(_frameJson)
-  ..timeRange.end = const Duration(microseconds: 118039652334)
+  ..time.end = const Duration(microseconds: 118039652334)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent animateEvent = testTimelineEvent(_animateJson)
-  ..timeRange.end = const Duration(microseconds: 118039650871)
+  ..time.end = const Duration(microseconds: 118039650871)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent layoutEvent = testTimelineEvent(_layoutJson)
-  ..timeRange.end = const Duration(microseconds: 118039651087)
+  ..time.end = const Duration(microseconds: 118039651087)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent buildEvent = testTimelineEvent(_buildJson)
-  ..timeRange.end = const Duration(microseconds: 118039651017)
+  ..time.end = const Duration(microseconds: 118039651017)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent compositingBitsEvent =
     testTimelineEvent(_compositingBitsJson)
-      ..timeRange.end = const Duration(microseconds: 118039651090)
+      ..time.end = const Duration(microseconds: 118039651090)
       ..type = TimelineEventType.ui;
 
 final TimelineEvent paintEvent = testTimelineEvent(_paintJson)
-  ..timeRange.end = const Duration(microseconds: 118039651165)
+  ..time.end = const Duration(microseconds: 118039651165)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent compositingEvent = testTimelineEvent(_compositingJson)
-  ..timeRange.end = const Duration(microseconds: 118039651460)
+  ..time.end = const Duration(microseconds: 118039651460)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent semanticsEvent = testTimelineEvent(_semanticsJson)
-  ..timeRange.end = const Duration(microseconds: 118039652210)
+  ..time.end = const Duration(microseconds: 118039652210)
   ..type = TimelineEventType.ui;
 
 final TimelineEvent finalizeTreeEvent = testTimelineEvent(_finalizeTreeJson)
-  ..timeRange.end = const Duration(microseconds: 118039652308)
+  ..time.end = const Duration(microseconds: 118039652308)
   ..type = TimelineEventType.ui;
 
 final goldenUiTimelineEvent = vsyncEvent
@@ -736,12 +736,12 @@ const Map<String, dynamic> _endEngineBeginFrameJson = {
 // any of the below events for a test, make a copy and modify the copy.
 final TimelineEvent gpuRasterizerDrawEvent =
     testTimelineEvent(_gpuRasterizerDrawJson)
-      ..timeRange.end = const Duration(microseconds: 118039679873)
+      ..time.end = const Duration(microseconds: 118039679873)
       ..type = TimelineEventType.gpu;
 
 final TimelineEvent pipelineConsumeEvent =
     testTimelineEvent(_pipelineConsumeJson)
-      ..timeRange.end = const Duration(microseconds: 118039679870)
+      ..time.end = const Duration(microseconds: 118039679870)
       ..type = TimelineEventType.gpu;
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent

@@ -9,6 +9,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -322,34 +323,47 @@ class RateLimiter {
   }
 }
 
-// If the need arises, this enum can be expanded to include any of the remaining
-// time units supported by [Duration] - (milliseconds, seconds, etc.). If you
-// add a unit of time to this enum, modify the toString() method in [TimeRange]
-// to handle the new case.
+/// Time unit for displaying time ranges.
+///
+/// If the need arises, this enum can be expanded to include any of the
+/// remaining time units supported by [Duration] - (seconds, minutes, etc.). If
+/// you add a unit of time to this enum, modify the toString() method in
+/// [TimeRange] to handle the new case.
 enum TimeUnit {
   microseconds,
   milliseconds,
 }
 
 class TimeRange {
-  TimeRange({this.unit = TimeUnit.microseconds, this.start, this.end});
+  Duration get start => _start;
 
-  final TimeUnit unit;
+  Duration _start;
 
-  Duration start;
-  Duration end;
+  set start(Duration value) {
+    assert(_start == null);
+    _start = value;
+  }
 
-  Duration get duration =>
-      Duration(microseconds: end.inMicroseconds - start.inMicroseconds);
+  Duration get end => _end;
+
+  Duration _end;
+
+  set end(Duration value) {
+    assert(_end == null);
+    _end = value;
+  }
+
+  Duration get duration => end - start;
 
   @override
-  String toString() {
+  String toString({TimeUnit unit}) {
+    unit ??= TimeUnit.microseconds;
     switch (unit) {
       case TimeUnit.microseconds:
-        return '[${start.inMicroseconds} - ${end.inMicroseconds}]';
+        return '[${_start.inMicroseconds} μs - ${end.inMicroseconds} μs]';
       case TimeUnit.milliseconds:
       default:
-        return '[${start.inMilliseconds} - ${end.inMilliseconds}]';
+        return '[${_start.inMilliseconds} ms - ${end.inMilliseconds} ms]';
     }
   }
 }

@@ -81,7 +81,7 @@ class EventDetails extends CoreElement {
   Future<void> update(FrameFlameChartItem item) async {
     _event = item.event;
 
-    _title.text = '${_event.name} - ${msText(_event.timeRange.duration)}';
+    _title.text = '${_event.name} - ${msText(_event.time.duration)}';
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)
       ..color = colorToCss(_event.isGpuEvent ? Colors.white : Colors.black);
@@ -203,19 +203,20 @@ class _UiEventDetails extends CoreElement {
     final Response response =
         await serviceManager.service.getCpuProfileTimeline(
       serviceManager.isolateManager.selectedIsolate.id,
-      event.startTime,
-      event.timeRange.duration.inMicroseconds,
+      event.time.start.inMicroseconds,
+      event.time.duration.inMicroseconds,
     );
 
     cpuProfileData = CpuProfileData(
       response,
-      event.timeRange.duration,
+      event.time.duration,
     );
 
     if (cpuProfileData.stackFrames.isEmpty) {
       _updateFlameChartForError(div(
         text: 'CPU profile unavailable for time range'
-            ' [${event.startTime} - ${event.endTime}]',
+            ' [${event.time.start.inMicroseconds} - '
+            '${event.time.end.inMicroseconds}]',
         c: 'message',
       ));
       return;

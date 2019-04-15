@@ -92,9 +92,9 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
     /// Subtract 2 * [sectionLabelOffset] to account for extra space at the
     /// beginning/end of the chart.
     final double pxPerMicro = (element.clientWidth - 2 * flameChartInset) /
-        frame.timeRange.duration.inMicroseconds;
+        frame.time.duration.inMicroseconds;
 
-    final int frameStartOffset = frame.timeRange.start.inMicroseconds;
+    final int frameStartOffset = frame.time.start.inMicroseconds;
     final uiSectionHeight =
         frame.uiEventFlow.depth * FlameChart.rowHeight + sectionSpacing;
     final gpuSectionHeight = frame.gpuEventFlow.depth * FlameChart.rowHeight;
@@ -110,8 +110,10 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
-      final double startPx = (event.startTime - frameStartOffset) * pxPerMicro;
-      final double endPx = (event.endTime - frameStartOffset) * pxPerMicro;
+      final double startPx =
+          (event.time.start.inMicroseconds - frameStartOffset) * pxPerMicro;
+      final double endPx =
+          (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro;
 
       _drawFlameChartItem(
         event,
@@ -183,7 +185,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
 
     void drawTimelineGrid() {
       _timelineGrid = TimelineGrid(
-        frame.timeRange.duration,
+        frame.time.duration,
         getFlameChartWidth(),
       );
       _timelineGrid.element.style.height = '${flameChartHeight}px';
@@ -272,7 +274,7 @@ class FrameFlameChartItem extends FlameChartItem {
 
   @override
   void setText() {
-    final durationText = msText(event.timeRange.duration);
+    final durationText = msText(event.time.duration);
 
     String title = _event.name;
     element.title = '$title ($durationText)';
