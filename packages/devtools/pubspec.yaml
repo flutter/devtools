@@ -15,6 +15,8 @@ dependencies:
   args: ^1.5.1
   codemirror: ^0.5.3
   collection: ^1.14.11
+  devtools_server:
+    path: ../devtools_server
   http: ^0.12.0+1
   intl: ^0.15.0
   js: ^0.6.1+1
