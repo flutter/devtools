@@ -4,13 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
@@ -136,19 +134,6 @@ class Property<T> {
   }
 
   Stream<T> get onValueChange => _changeController.stream;
-}
-
-/// The directory used to store per-user settings for Dart tooling.
-Directory getDartPrefsDirectory() {
-  return Directory(path.join(getUserHomeDir(), '.dart'));
-}
-
-/// Return the user's home directory.
-String getUserHomeDir() {
-  final String envKey =
-      Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  final String value = Platform.environment[envKey];
-  return value == null ? '.' : value;
 }
 
 /// Map the URI (which may already be Observatory web app) to a WebSocket URI
