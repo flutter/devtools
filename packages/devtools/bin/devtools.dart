@@ -5,5 +5,5 @@
 import 'package:devtools_server/devtools_server.dart';
 
 void main(List<String> arguments) async {
-  serveDevTools(arguments);
+  serveDevToolsWithArgs(arguments);
 }

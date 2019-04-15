@@ -38,9 +38,22 @@ final argParser = new ArgParser()
     help: 'Sets output format to JSON for consumption in tools.',
   );
 
-void serveDevTools(List<String> arguments) async {
+void serveDevToolsWithArgs(List<String> arguments) async {
   final args = argParser.parse(arguments);
-  if (args[argHelp]) {
+
+  final help = args[argHelp];
+  final bool machineMode = args[argMachine];
+  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
+
+  serveDevTools(help: help, machineMode: machineMode, port: port);
+}
+
+void serveDevTools({
+  bool help = false,
+  bool machineMode = false,
+  int port = 0,
+}) async {
+  if (help) {
     print('Dart DevTools version ${await _getVersion()}');
     print('');
     print('usage: devtools <options>');
@@ -49,29 +62,30 @@ void serveDevTools(List<String> arguments) async {
     return;
   }
 
-  final bool machineMode = args[argMachine];
-  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
-
   final Uri resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
   final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
 
   // Default static handler for all non-package requests.
   final String buildDir = path.join(packageDir, 'build');
-  final buildHandler =
-  createStaticHandler(buildDir, defaultDocument: 'index.html');
+  final buildHandler = createStaticHandler(
+    buildDir,
+    defaultDocument: 'index.html',
+  );
 
   // The packages folder is renamed in the pub package so this handler serves
   // out of the `pack` folder.
   final String packagesDir = path.join(packageDir, 'build', 'pack');
-  final packHandler =
-  createStaticHandler(packagesDir, defaultDocument: 'index.html');
+  final packHandler = createStaticHandler(
+    packagesDir,
+    defaultDocument: 'index.html',
+  );
 
   // Make a handler that delegates to the correct handler based on path.
   final handler = (shelf.Request request) {
     return request.url.path.startsWith('packages/')
-    // request.change here will strip the `packages` prefix from the path
-    // so it's relative to packHandler's root.
+        // request.change here will strip the `packages` prefix from the path
+        // so it's relative to packHandler's root.
         ? packHandler(request.change(path: 'packages'))
         : buildHandler(request);
   };
@@ -92,10 +106,10 @@ Future<String> _getVersion() async {
   final Uri resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
   final String packageDir =
-  path.dirname(path.dirname(resourceUri.toFilePath()));
+      path.dirname(path.dirname(resourceUri.toFilePath()));
   final File pubspecFile = File(path.join(packageDir, 'pubspec.yaml'));
   final String versionLine =
-  pubspecFile.readAsLinesSync().firstWhere((String line) {
+      pubspecFile.readAsLinesSync().firstWhere((String line) {
     return line.startsWith('version: ');
   }, orElse: () => null);
   return versionLine == null
@@ -104,9 +118,9 @@ Future<String> _getVersion() async {
 }
 
 void printOutput(
-    String message,
-    Object json, {
-      @required bool machineMode,
-    }) {
+  String message,
+  Object json, {
+  @required bool machineMode,
+}) {
   print(machineMode ? jsonEncode(json) : message);
 }
