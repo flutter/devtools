@@ -270,6 +270,7 @@ class CoreElement {
 
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
   Stream<Event> get onFocus => element.onFocus.where((_) => !disabled);
+  Stream<Event> get onBlur => element.onBlur.where((_) => !disabled);
 
   Stream<Event> get onScroll => element.onScroll;
 
@@ -298,9 +299,17 @@ class CoreElement {
     });
   }
 
-  /// Subscribe to the [onClick] event stream with a no-arg handler.
+  /// Subscribe to the [focus] event stream with a no-arg handler.
   StreamSubscription<Event> focus(void handle()) {
     return onFocus.listen((Event e) {
+      e.stopImmediatePropagation();
+      handle();
+    });
+  }
+
+  /// Subscribe to the [blur] event stream with a no-arg handler.
+  StreamSubscription<Event> blur(void handle()) {
+    return onBlur.listen((Event e) {
       e.stopImmediatePropagation();
       handle();
     });
