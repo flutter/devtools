@@ -665,10 +665,9 @@ class TimelineFrame {
 class TimelineEvent {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
-        type = firstTraceEvent.event.type,
-        time = TimeRange()
-          ..start =
-              Duration(microseconds: firstTraceEvent.event.timestampMicros);
+        type = firstTraceEvent.event.type {
+    time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
+  }
 
   /// Trace events associated with this [TimelineEvent].
   ///
@@ -680,7 +679,7 @@ class TimelineEvent {
   @visibleForTesting
   TimelineEventType type;
 
-  final TimeRange time;
+  TimeRange time = TimeRange();
 
   TimelineEvent parent;
 

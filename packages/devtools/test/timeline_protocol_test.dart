@@ -100,50 +100,61 @@ void main() {
         ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
 
       final event = goldenUiTimelineEvent.deepCopy()
-        ..time.start = const Duration(microseconds: frameStartTime)
-        ..time.end = const Duration(microseconds: 5000);
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: frameStartTime)
+          ..end = const Duration(microseconds: 5000));
 
       // Event fits within frame timestamps.
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event fits within epsilon of frame start.
-      event.time.start = Duration(
-          microseconds: frameStartTime - traceEventEpsilon.inMicroseconds);
+      event.time = TimeRange()
+        ..start = Duration(
+            microseconds: frameStartTime - traceEventEpsilon.inMicroseconds)
+        ..end = const Duration(microseconds: 5000);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame start.
-      event.time.start = Duration(
-          microseconds: frameStartTime - traceEventEpsilon.inMicroseconds - 1);
+      event.time = TimeRange()
+        ..start = Duration(
+            microseconds: frameStartTime - traceEventEpsilon.inMicroseconds - 1)
+        ..end = const Duration(microseconds: 5000);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event with small duration uses smaller epsilon.
-      event
-        ..time.start = const Duration(microseconds: frameStartTime - 100)
-        ..time.end = const Duration(microseconds: frameStartTime + 100);
+      event.time = TimeRange()
+        ..start = const Duration(microseconds: frameStartTime - 100)
+        ..end = const Duration(microseconds: frameStartTime + 100);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
-      event
-        ..time.start = const Duration(microseconds: frameStartTime - 101)
-        ..time.end = const Duration(microseconds: frameStartTime + 100);
+      event.time = TimeRange()
+        ..start = const Duration(microseconds: frameStartTime - 101)
+        ..end = const Duration(microseconds: frameStartTime + 100);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event fits within epsilon of frame end.
-      event.time.end = Duration(
-          microseconds: frameEndTime + traceEventEpsilon.inMicroseconds);
+      event.time = TimeRange()
+        ..start = const Duration(microseconds: frameStartTime - 101)
+        ..end = Duration(
+            microseconds: frameEndTime + traceEventEpsilon.inMicroseconds);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame end.
-      event.time.end = Duration(
-          microseconds: frameEndTime + traceEventEpsilon.inMicroseconds + 1);
+      event.time = TimeRange()
+        ..start = const Duration(microseconds: frameStartTime - 101)
+        ..end = Duration(
+            microseconds: frameEndTime + traceEventEpsilon.inMicroseconds + 1);
       expect(timelineData.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Satisfies UI / GPU order.
       final uiEvent = event
-        ..time.start = const Duration(microseconds: 5000)
-        ..time.end = const Duration(microseconds: 6000);
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 5000)
+          ..end = const Duration(microseconds: 6000));
       final gpuEvent = goldenGpuTimelineEvent.deepCopy()
-        ..time.start = const Duration(microseconds: 4000)
-        ..time.end = const Duration(microseconds: 8000);
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 4000)
+          ..end = const Duration(microseconds: 8000));
 
       expect(timelineData.eventOccursWithinFrameBounds(uiEvent, frame), isTrue);
       expect(
