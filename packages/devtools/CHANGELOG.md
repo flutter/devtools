@@ -1,4 +1,6 @@
 ## 0.0.15 - 2019-04-16
+* Warn users when they should be using a profile build of their application instead of a debug build.
+* Warn users using Microsoft browsers (IE and Edge) that they should be using Chrome to run DevTools.
 * Dark mode improvements
 * Open scripts in the debugger using ctrl + o
 
