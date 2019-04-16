@@ -1,0 +1,2 @@
+# Use the same analysis options that we use in package:devtools
+include: package:devtools/analysis_options.yaml
