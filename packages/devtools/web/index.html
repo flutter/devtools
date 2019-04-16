@@ -23,6 +23,17 @@
     <link rel="stylesheet" href="packages/devtools/src/timeline/timeline.css">
 
     <script type="text/javascript">
+        function supportsES6Classes() {
+          "use strict";
+          try { eval("class Foo {}"); }
+          catch (e) { return false; }
+          return true;
+        }
+
+        if (!supportsES6Classes()) {
+          window.location.href = '/unsupported-browser.html';
+        }
+
         (function() {
             var params = new URLSearchParams(window.location.search);
             if (params.get('theme') == 'dark') {
