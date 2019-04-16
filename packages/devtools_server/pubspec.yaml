@@ -1,5 +1,5 @@
 name: devtools_server
-description: A server for shared DevTools support.
+description: A server that supports Dart DevTools.
 
 version: 0.0.1
 
