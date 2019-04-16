@@ -14,9 +14,13 @@ void main() {
   final PerfToolFramework framework = PerfToolFramework();
 
   if (!browser.isChrome) {
+    final browserName =
+        // Edge shows up as IE, so we replace it's name to avoid confusion.
+        browser.isInternetExplorer || browser == Browser.UnknownBrowser
+            ? 'an unsupported browser'
+            : browser.name;
     framework.disableAppWithError(
-      'ERROR: You are running DevTools on '
-          '${browser.name == Browser.UnknownBrowser.name ? 'an unknown browswer' : browser.name}, '
+      'ERROR: You are running DevTools on $browserName, '
           'but DevTools only runs on Chrome.',
       'Reopen this url in a Chrome browser to use DevTools.',
     );
