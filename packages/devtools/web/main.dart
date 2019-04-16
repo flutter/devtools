@@ -15,7 +15,7 @@ void main() {
 
   if (!browser.isChrome) {
     final browserName =
-        // Edge shows up as IE, so we replace it's name too to avoid confusion.
+        // Edge shows up as IE, so we replace it's name to avoid confusion.
         browser.isInternetExplorer || browser == Browser.UnknownBrowser
             ? 'an unsupported browser'
             : browser.name;
