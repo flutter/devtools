@@ -1,5 +1,6 @@
-## 0.0.15 - Date TBD
-* Warn users when they should be using a profile build of their application instead of a debug build.
+## 0.0.15 - 2019-04-16
+* Dark mode improvements
+* Open scripts in the debugger using ctrl + o
 
 ## 0.0.14 - 2019-03-26
 * Dark mode is ready to use, add ```&theme=dark``` at the end of the URI used to open the DevTool in Chrome. We look forward to your feedback.
