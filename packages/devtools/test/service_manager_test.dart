@@ -198,7 +198,7 @@ void main() {
           const [];
       expect(registeredService, isNotEmpty);
 
-      await serviceManager.callMulticastService(
+      await serviceManager.callService(
         registrations.hotReload.service,
         isolateId: serviceManager.isolateManager.selectedIsolate.id,
       );

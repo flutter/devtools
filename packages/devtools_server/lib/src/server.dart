@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -12,10 +13,14 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:vm_service_lib/vm_service_lib.dart' hide Isolate;
+
+import 'chrome.dart';
 
 const argHelp = 'help';
 const argMachine = 'machine';
 const argPort = 'port';
+const launchDevToolsService = 'launchDevTools';
 
 final argParser = new ArgParser()
   ..addFlag(
@@ -92,14 +97,82 @@ void serveDevTools({
 
   final server = await shelf.serve(handler, '127.0.0.1', port);
 
+  final devtoolsUrl = 'http://${server.address.host}:${server.port}';
+
   printOutput(
-    'Serving DevTools at http://${server.address.host}:${server.port}',
+    'Serving DevTools at $devtoolsUrl',
     {
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
     },
     machineMode: machineMode,
   );
+
+  _listenForUris(devtoolsUrl);
+}
+
+void _listenForUris(String devtoolsUrl) {
+  final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+      .map<Map<String, dynamic>>((String line) {
+    line = line.substring(1, line.length - 1);
+    return json.decode(line) as Map<String, dynamic>;
+  });
+
+  // Example json input: [{"url":"ws://localhost:8888/ws"}]
+  _stdinCommandStream.listen((Map<String, dynamic> json) async {
+    final line = json['url'];
+
+    final uri = Uri.parse(line);
+
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
+    if (uri != null &&
+        uri.isAbsolute &&
+        (uri.isScheme('ws') ||
+            uri.isScheme('wss') ||
+            uri.isScheme('http') ||
+            uri.isScheme('https')))
+      try {
+        // Connect to the vm service and register a method to launch DevTools in
+        // chrome.
+        final VmService service = await _connectToVmService(uri);
+
+        service.registerServiceCallback(launchDevToolsService, (request) async {
+          String vmServicePort =
+              uri.toString().substring(uri.toString().lastIndexOf(':') + 1);
+          vmServicePort =
+              vmServicePort.substring(0, vmServicePort.indexOf('/'));
+
+          final url = '$devtoolsUrl/?port=$vmServicePort#';
+
+          // TODO(kenzie): depend on the browser_launcher package for this once
+          // it is complete.
+          await Chrome.start([url]);
+
+          return {'result': Success().toJson()};
+        });
+
+        await service.registerService(launchDevToolsService, 'DevTools Server');
+      } catch (e) {
+        print('Unable to connect to VM service at $uri: $e');
+        return;
+      }
+  });
+}
+
+Future<VmService> _connectToVmService(Uri uri) async {
+  final WebSocket ws = await WebSocket.connect(uri.toString());
+
+  final VmService service = VmService(
+    ws.asBroadcastStream(),
+    (String message) => ws.add(message),
+  );
+
+  return service;
 }
 
 Future<String> _getVersion() async {
