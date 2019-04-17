@@ -22,13 +22,13 @@ import 'timeline_protocol.dart';
 
 // Light mode is Light Blue 50 palette and Dark mode is Blue 50 palette.
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-const mainUiColorLight = Color(0xFF9EBEF9); // Blue 200 Material Dark
+const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
 const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
 
 const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
 const mainGpuColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
 
-const mainUiColorDark = Color(0xFFBBDEFB); // Blue 50 - 100
+const mainUiColorDark = Color(0xFF9EBEF9); // Blue 200 Material Dark
 const mainUiColorSelectedDark = Colors.white;
 
 const mainGpuColorDark = Color(0xFF336AEC); // Blue 500 Material Dark
@@ -42,7 +42,7 @@ const Color selectedUiColor =
 const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
-// Light is Red @ .2 opacity, Dark is Red 200 Marterial Dark @ .2 opacity.
+// Light is Red @ .2 opacity, Dark is Red 200 Material Dark @ .2 opacity.
 const jankGlowInside = ThemedColor(Color(0x33FF0000), Color(0x33F29C99));
 // Light is Red @ .5 opacity, Dark is Red 600 Material Dark @ .6 opacity.
 const jankGlowEdge = ThemedColor(Color(0x80FF0000), Color(0x99CE191C));

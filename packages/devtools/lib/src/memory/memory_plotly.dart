@@ -407,15 +407,19 @@ class MemoryPlotly {
 class EventTimeline {
   EventTimeline(this._domName, this._chart);
 
-  // Light blue and Dark Blue 600 dark mode colors see
+  // Light theme is Blue and dark theme is Dark Blue 600. See
   // https://standards.google/guidelines/google-material/color/dark-theme.html#style
-  static String snapshotColor =
-      colorToCss(const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1)));
-  static String resetColor =
-      colorToCss(const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1)));
-  // Light is Browser's 'lightblue' color, Dark is Blue 300 dark mode colors.
-  static String eventBgColor =
-      colorToCss(const ThemedColor(Color(0xFFABD2DF), Color(0xFF79B6F6)));
+  static ThemedColor snapshotColor =
+      const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1));
+  static ThemedColor resetColor =
+      const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1));
+  // Light theme is Browser's lightblue color, Dark theme is Dark Blue 300.
+  static ThemedColor eventBgColor =
+      const ThemedColor(Color(0xFFABD2DF), Color(0xFF79B6F6));
+
+  final String _snapshotColorCss = colorToCss(snapshotColor);
+  final String _resetColorCss = colorToCss(resetColor);
+  final String _eventBgColorCss = colorToCss(eventBgColor);
 
   final String _domName;
   dynamic _chart;
@@ -454,9 +458,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: resetColor,
+        color: _resetColorCss,
         line: Line(
-          color: eventBgColor,
+          color: _eventBgColorCss,
           width: 2,
         ),
         size: 5,
@@ -475,9 +479,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: snapshotColor,
+        color: _snapshotColorCss,
         line: Line(
-          color: eventBgColor,
+          color: _eventBgColorCss,
           width: 2,
         ),
         size: 10,
