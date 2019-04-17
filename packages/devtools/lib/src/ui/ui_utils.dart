@@ -263,7 +263,11 @@ Set<String> get hiddenPages {
 Set<String> _lookupHiddenPages() {
   final queryString = html.window.location.search;
   if (queryString == null || queryString.length <= 1) {
-    return {};
+    // TODO(dantup): Remove this ignore, change to `{}` and bump SDK requirements
+    // in pubspec.yaml (devtools + devtools_server) once Flutter stable includes
+    // Dart SDK >= v2.2.
+    // ignore: prefer_collection_literals
+    return Set();
   }
   final qsParams = Uri.splitQueryString(queryString.substring(1));
   return (qsParams['hide'] ?? '').split(',').toSet();
