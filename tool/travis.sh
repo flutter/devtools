@@ -25,13 +25,23 @@ pub global activate webdev
 
 if [ "$BOT" = "main" ]; then
 
-    # Verify that dartfmt has been run.
-    echo "Checking dartfmt..."
+    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
 
-    if [[ $(dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/) ]]; then
-        echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/ web/"
-        dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/
-        exit 1
+        echo "Skipping dartfmt on Stable, because if there's a change to the"
+        echo "formatter we won't be able to simultaneously pass on both"
+        echo "Stable+Dev, so we assume Dev is the one we're following"
+
+    else
+
+        # Verify that dartfmt has been run.
+        echo "Checking dartfmt..."
+
+        if [[ $(dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/) ]]; then
+            echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/ web/"
+            dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/
+            exit 1
+        fi
+
     fi
 
     # Make sure the app versions are in sync.
