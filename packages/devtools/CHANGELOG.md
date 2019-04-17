@@ -1,3 +1,6 @@
+## 0.0.16 - 2019-04-17
+* Reduce the minimum Dart SDK requirements for activating DevTools to cover Flutter v1.2.1 (Dart v2.1)
+
 ## 0.0.15 - 2019-04-16
 * Warn users when they should be using a profile build of their application instead of a debug build.
 * Warn users using Microsoft browsers (IE and Edge) that they should be using Chrome to run DevTools.
