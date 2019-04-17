@@ -9,6 +9,15 @@ dart:
 addons:
   chrome: stable
 
+matrix:
+  exclude:
+  # Skip main bot for Stable build since it does formatting/building checks;
+  # - Formatting will fail on old SDK if the formatter changed in latest.
+  # - Builds are always done by us on latest SDKs so we don't need to ensure
+  #     we can build on an older SDK.
+  - dart: stable
+    env: BOT=main
+
 env:
   - BOT=main
   - BOT=test_ddc
