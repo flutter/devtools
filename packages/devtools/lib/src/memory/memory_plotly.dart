@@ -53,9 +53,6 @@ class MemoryPlotly {
     AxisLayout getYAxis(List<num> range) {
       return AxisLayout(
         domain: range,
-        title: Title(
-          text: 'Heap',
-        ),
         titlefont: Font(
           family: fontFamily,
           color: colorToCss(defaultForeground),
@@ -114,6 +111,7 @@ class MemoryPlotly {
             text: 'Events',
             font: Font(
               family: fontFamily,
+              color: colorToCss(defaultForeground),
               size: 10,
             ),
           ),
@@ -409,6 +407,20 @@ class MemoryPlotly {
 class EventTimeline {
   EventTimeline(this._domName, this._chart);
 
+  // Light theme is Blue and dark theme is Dark Blue 600. See
+  // https://standards.google/guidelines/google-material/color/dark-theme.html#style
+  static ThemedColor snapshotColor =
+      const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1));
+  static ThemedColor resetColor =
+      const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1));
+  // Light theme is Browser's lightblue color, Dark theme is Dark Blue 300.
+  static ThemedColor eventBgColor =
+      const ThemedColor(Color(0xFFABD2DF), Color(0xFF79B6F6));
+
+  final String _snapshotColorCss = colorToCss(snapshotColor);
+  final String _resetColorCss = colorToCss(resetColor);
+  final String _eventBgColorCss = colorToCss(eventBgColor);
+
   final String _domName;
   dynamic _chart;
 
@@ -437,7 +449,6 @@ class EventTimeline {
   static const int SNAPSHOT_TRACE_INDEX = 1;
   List<Data> getEventTimelineTraces() {
     // Create traces for the event timeline subplot.
-
     final Data resetTrace = Data(
       // Null is needed so the trace legend entry appears w/o data.
       x: [Null],
@@ -447,9 +458,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: 'blue',
+        color: _resetColorCss,
         line: Line(
-          color: 'lightblue',
+          color: _eventBgColorCss,
           width: 2,
         ),
         size: 5,
@@ -468,9 +479,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: 'blue',
+        color: _snapshotColorCss,
         line: Line(
-          color: 'lightblue',
+          color: _eventBgColorCss,
           width: 2,
         ),
         size: 10,

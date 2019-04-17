@@ -28,10 +28,10 @@ const mainUiColorSelectedLight = Color(0xFFD4D7DA); // Lighter grey.
 const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
 const mainGpuColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
 
-const mainUiColorDark = Color(0xFFBBDEFB); // Blue 50 - 100
+const mainUiColorDark = Color(0xFF9EBEF9); // Blue 200 Material Dark
 const mainUiColorSelectedDark = Colors.white;
 
-const mainGpuColorDark = Color(0xFF1E88E5); // Blue 50 - 600
+const mainGpuColorDark = Color(0xFF336AEC); // Blue 500 Material Dark
 const mainGpuColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
@@ -42,15 +42,13 @@ const Color selectedUiColor =
 const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
-const jankGlowInside =
-    ThemedColor(Color.fromRGBO(255, 0, 0, .2), Color.fromRGBO(255, 0, 0, .2));
-const jankGlowEdge =
-    ThemedColor(Color.fromRGBO(255, 0, 0, .5), Color.fromRGBO(255, 0, 0, .6));
+// Light is Red @ .2 opacity, Dark is Red 200 Material Dark @ .2 opacity.
+const jankGlowInside = ThemedColor(Color(0x33FF0000), Color(0x33F29C99));
+// Light is Red @ .5 opacity, Dark is Red 600 Material Dark @ .6 opacity.
+const jankGlowEdge = ThemedColor(Color(0x80FF0000), Color(0x99CE191C));
 
-// Red 50 - 400 is light at 1/2 opacity, Red 500 - 600 is dark at full opacity.
-const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFE53935));
-
-const Color slowFrameColor = Color(0xFFE50C0C);
+// Red 50 - 400 is light at 1/2 opacity, Dark Red 500 Material Dark.
+const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFe02a28));
 
 const Color hoverTextHighContrastColor = Colors.white;
 const Color hoverTextColor = Colors.black;
