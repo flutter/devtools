@@ -5,9 +5,7 @@ os:
 language: dart
 dart:
   - "dev/raw/latest"
-# Disable testing on stable; it creates many more bots, and we generally only need
-# test coverage for the SDK version we're developing and distributing against.
-#  - stable
+  - stable
 addons:
   chrome: stable
 
