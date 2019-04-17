@@ -1,6 +1,10 @@
 ## How to release the next version of DevTools
 
-Create a branch for your release. Below we're creating release 0.0.15, with all the PRs. 
+**Note:** If you need to publish a new version of devtools_server, you will need
+to do that prior to performing these steps, and update the devtools pubspec.yaml
+to reference the new version of devtools_server.
+
+Create a branch for your release. Below we're creating release 0.0.15, with all the PRs.
 
 ## Update master branch and create a local release branch
 ```shell
