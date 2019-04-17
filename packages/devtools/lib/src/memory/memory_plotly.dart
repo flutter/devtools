@@ -53,9 +53,6 @@ class MemoryPlotly {
     AxisLayout getYAxis(List<num> range) {
       return AxisLayout(
         domain: range,
-        title: Title(
-          text: 'Heap',
-        ),
         titlefont: Font(
           family: fontFamily,
           color: colorToCss(defaultForeground),
@@ -114,6 +111,7 @@ class MemoryPlotly {
             text: 'Events',
             font: Font(
               family: fontFamily,
+              color: colorToCss(defaultForeground),
               size: 10,
             ),
           ),
@@ -409,6 +407,16 @@ class MemoryPlotly {
 class EventTimeline {
   EventTimeline(this._domName, this._chart);
 
+  // Light blue and Dark Blue 600 dark mode colors see
+  // https://standards.google/guidelines/google-material/color/dark-theme.html#style
+  static String snapshotColor =
+      colorToCss(const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1)));
+  static String resetColor =
+      colorToCss(const ThemedColor(Color(0xFF0000FF), Color(0xFF185AE1)));
+  // Light is Browser's 'lightblue' color, Dark is Blue 300 dark mode colors.
+  static String eventBgColor =
+      colorToCss(const ThemedColor(Color(0xFFABD2DF), Color(0xFF79B6F6)));
+
   final String _domName;
   dynamic _chart;
 
@@ -437,7 +445,6 @@ class EventTimeline {
   static const int SNAPSHOT_TRACE_INDEX = 1;
   List<Data> getEventTimelineTraces() {
     // Create traces for the event timeline subplot.
-
     final Data resetTrace = Data(
       // Null is needed so the trace legend entry appears w/o data.
       x: [Null],
@@ -447,9 +454,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: 'blue',
+        color: resetColor,
         line: Line(
-          color: 'lightblue',
+          color: eventBgColor,
           width: 2,
         ),
         size: 5,
@@ -468,9 +475,9 @@ class EventTimeline {
       mode: 'markers',
       yaxis: 'y2',
       marker: Marker(
-        color: 'blue',
+        color: snapshotColor,
         line: Line(
-          color: 'lightblue',
+          color: eventBgColor,
           width: 2,
         ),
         size: 10,
