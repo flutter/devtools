@@ -56,7 +56,13 @@ elif [ "$BOT" = "test_dart2js" ]; then
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # Get Flutter.
-    git clone https://github.com/flutter/flutter.git ../flutter
+    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+        echo "Cloning stable Flutter branch"
+        git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+    else
+        echo "Cloning master Flutter branch"
+        git clone https://github.com/flutter/flutter.git ../flutter
+    fi
     cd ..
     export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
     flutter config --no-analytics
