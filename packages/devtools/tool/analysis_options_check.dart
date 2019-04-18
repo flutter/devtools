@@ -22,6 +22,8 @@ void main() {
   final devToolsOptionsContent = devToolsOptions.readAsLinesSync();
   final devToolsServerOptionsContent = devToolsServerOptions.readAsLinesSync();
 
+  // Skip the first line. The first line of each file contains a reference to
+  // to the other file's path, so the first lines are expected to be different.
   for (int i = 1; i < devToolsOptionsContent.length; i++) {
     final devToolsLine = devToolsOptionsContent[i];
     final devToolsServerLine = devToolsServerOptionsContent[i];
