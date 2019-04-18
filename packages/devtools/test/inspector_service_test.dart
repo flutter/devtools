@@ -147,25 +147,8 @@ void main() async {
         nodeInDetailsTree = await group.getDetailsSubtree(nodeInSummaryTree);
         expect(
           treeToDebugString(nodeInDetailsTree),
-          equalsIgnoringHashCodes(
-            'Text\n'
-            ' │ data: "Hello, World!"\n'
-            ' │ textAlign: null\n'
-            ' │ textDirection: null\n'
-            ' │ locale: null\n'
-            ' │ softWrap: null\n'
-            ' │ overflow: null\n'
-            ' │ textScaleFactor: null\n'
-            ' │ maxLines: null\n'
-            ' │ dependencies: [DefaultTextStyle, MediaQuery]\n'
-            ' │\n'
-            ' └─RichText\n'
-            '     softWrap: wrapping at box width\n'
-            '     maxLines: unlimited\n'
-            '     text: "Hello, World!"\n'
-            '     dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
-            '     renderObject: RenderParagraph#00000 relayoutBoundary=up2\n',
-          ),
+          equalsGoldenIgnoringHashCodes(
+              'inspector_service_text_details_tree.txt'),
         );
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
