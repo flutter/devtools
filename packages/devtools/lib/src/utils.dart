@@ -117,6 +117,28 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+String longestFittingSubstring(
+  String originalText,
+  num maxWidth,
+  List<num> asciiMeasurements,
+) {
+  if (originalText.isEmpty) return originalText;
+
+  num currentWidth = 0;
+  int longestIndex = 0;
+  final charCodes = ascii.encode(originalText);
+  for (int i = 0; i < charCodes.length; i++) {
+    final charCodeWidth = asciiMeasurements[charCodes[i]];
+    if (currentWidth + charCodeWidth > maxWidth) {
+      break;
+    }
+    currentWidth += charCodeWidth;
+    longestIndex = i;
+  }
+
+  return longestIndex == 0 ? '' : originalText.substring(0, longestIndex + 1);
+}
+
 class Property<T> {
   Property(this._value);
 

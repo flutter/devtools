@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html';
 import 'dart:math' as math;
 
@@ -42,6 +43,8 @@ const _rowPadding = 2.0;
 const rowHeightWithPadding = _rowHeight + _rowPadding;
 
 const _flameChartInset = 70;
+
+List<num> _asciiMeasurements;
 
 // TODO(kenzie): move this class to flame_chart.dart once the frame flame chart
 // is ported to canvas and the current implementation in flame_chart.dart is
@@ -248,6 +251,14 @@ class FlameChartCanvas extends FlameChart {
       shouldCollapseNativeSamples = shouldCollapse;
       _viewportCanvas.rebuild(force: true);
     });
+
+    final measurementCanvas = CanvasElement().context2D
+      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+    _asciiMeasurements = List.generate(
+      128,
+      (i) => measurementCanvas.measureText(ascii.decode([i])).width,
+    );
+    print(_asciiMeasurements);
   }
 
   final DragScroll _dragScroll = DragScroll();
@@ -403,7 +414,7 @@ class FlameChartNode {
     Color(0x5A1B1F23),
   );
 
-  static const minimumRectWidthForText = 20;
+  static const minWidthForText = 20;
 
   /// Left value for the flame chart item at zoom level 1.
   final num startingLeft;
@@ -482,7 +493,7 @@ class FlameChartNode {
         ..stroke();
     }
 
-    if (rect.width > minimumRectWidthForText) {
+    if (rect.width > minWidthForText) {
       canvas
         ..fillStyle = colorToCss(selected ? selectedTextColor : textColor)
         ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
@@ -493,7 +504,11 @@ class FlameChartNode {
       // how much text can be measured each frame, and incrementally updating
       // the text in the UI.
       if (!_textFitsInRect(displayText, canvas)) {
-        displayText = longestFittingSubstring(text, maxTextWidth, canvas);
+        displayText = longestFittingSubstring(
+          text,
+          maxTextWidth,
+          _asciiMeasurements,
+        );
       }
 
       canvas.fillText(
@@ -508,38 +523,6 @@ class FlameChartNode {
   bool _textFitsInRect(String text, CanvasRenderingContext2D canvas) {
     final textWidth = textMeasurements[text] ??= canvas.measureText(text).width;
     return textWidth <= maxTextWidth;
-  }
-
-  String longestFittingSubstring(
-    String originalText,
-    num maxWidth,
-    CanvasRenderingContext2D canvas,
-  ) {
-    final firstLetter = originalText.substring(0, 1);
-    final firstLetterWidth =
-        textMeasurements[firstLetter] ??= canvas.measureText(firstLetter).width;
-    if (firstLetterWidth >= maxWidth) {
-      return '';
-    }
-
-    int binarySearchForLongestFittingIndex() {
-      int longest = 1;
-      int min = 0;
-      int max = originalText.length;
-      while (min < max) {
-        final mid = min + ((max - min) >> 1);
-        final str = originalText.substring(0, mid);
-        if (_textFitsInRect(str, canvas)) {
-          longest = math.max(longest, mid);
-          min = mid + 1;
-        } else {
-          max = mid;
-        }
-      }
-      return longest;
-    }
-
-    return originalText.substring(0, binarySearchForLongestFittingIndex());
   }
 
   void updateForZoom({@required num zoom}) {
