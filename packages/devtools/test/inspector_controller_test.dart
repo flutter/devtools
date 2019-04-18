@@ -386,23 +386,8 @@ void main() async {
       await detailsTree.nextUiFrame;
       expect(
         detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes(
-            '▼[/icons/inspector/textArea.png] Text <-- selected\n'
-            '│   "Hello, World!"\n'
-            '│   textAlign: null [D]\n'
-            '│   textDirection: null [D]\n'
-            '│   locale: null [D]\n'
-            '│   softWrap: null [D]\n'
-            '│   overflow: null [D]\n'
-            '│   textScaleFactor: null [D]\n'
-            '│   maxLines: null [D]\n'
-            '│   dependencies: [DefaultTextStyle, MediaQuery]\n'
-            '└─▼[/icons/inspector/textArea.png] RichText\n'
-            '    softWrap: wrapping at box width\n'
-            '    maxLines: unlimited\n'
-            '    text: "Hello, World!"\n'
-            '    dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
-            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
+        equalsGoldenIgnoringHashCodes(
+            'inspector_controller_text_details_tree.txt'),
       );
 
       expect(
@@ -415,23 +400,8 @@ void main() async {
       simulateRowClick(detailsTree, rowIndex: 10);
       expect(
         detailsTree.toStringDeep(),
-        equalsIgnoringHashCodes(// dartfmt comment
-            '▼[/icons/inspector/textArea.png] Text\n'
-            '│   "Hello, World!"\n'
-            '│   textAlign: null [D]\n'
-            '│   textDirection: null [D]\n'
-            '│   locale: null [D]\n'
-            '│   softWrap: null [D]\n'
-            '│   overflow: null [D]\n'
-            '│   textScaleFactor: null [D]\n'
-            '│   maxLines: null [D]\n'
-            '│   dependencies: [DefaultTextStyle, MediaQuery]\n'
-            '└─▼[/icons/inspector/textArea.png] RichText <-- selected\n'
-            '    softWrap: wrapping at box width\n'
-            '    maxLines: unlimited\n'
-            '    text: "Hello, World!"\n'
-            '    dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality]\n'
-            '    ▶renderObject: RenderParagraph#00000 relayoutBoundary=up2\n'),
+        equalsGoldenIgnoringHashCodes(
+            'inspector_controller_text_details_tree_richtext_selected.txt'),
       );
 
       // Test hovering over the icon shown when a property has its default
