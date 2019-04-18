@@ -22,7 +22,7 @@ void main() {
   final devToolsOptionsContent = devToolsOptions.readAsLinesSync();
   final devToolsServerOptionsContent = devToolsServerOptions.readAsLinesSync();
 
-  for (int i = 0; i < devToolsOptionsContent.length; i++) {
+  for (int i = 1; i < devToolsOptionsContent.length; i++) {
     final devToolsLine = devToolsOptionsContent[i];
     final devToolsServerLine = devToolsServerOptionsContent[i];
     if (devToolsLine != devToolsServerLine) {
