@@ -27,8 +27,9 @@ const ThemedColor defaultForeground =
 // Text color [defaultForeground] is too gray, making it hard to read the text
 // in dark theme. We should use a more white color for dark theme, but not
 // jarring white #FFFFFF.
+const Color contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
 const ThemedColor contrastForeground =
-    ThemedColor(Colors.black, Color.fromARGB(255, 240, 240, 240));
+    ThemedColor(Colors.black, contrastForegroundWhite);
 
 const ThemedColor grey = ThemedColor(
     Color.fromARGB(255, 128, 128, 128), Color.fromARGB(255, 128, 128, 128));

@@ -160,9 +160,7 @@
 }
 
 .event-details-heading {
-    background-color: var(--shaded-background-darker);
     padding: 3px 12px;
-    font-weight: bold;
     min-width: 100%;
 }
 

@@ -12,6 +12,7 @@ import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/primer.dart';
+import '../ui/theme.dart';
 import '../utils.dart';
 import 'cpu_bottom_up.dart';
 import 'cpu_call_tree.dart';
@@ -39,7 +40,10 @@ class EventDetails extends CoreElement {
   }
 
   static const defaultTitleText = '[No event selected]';
-  static const defaultTitleBackground = Color(0xFFF6F6F6);
+  static const defaultTitleBackground = ThemedColor(
+    Color(0xFFF6F6F6),
+    Color(0xFF323232),
+  );
 
   PTabNav tabNav;
   CoreElement content;
@@ -50,8 +54,10 @@ class EventDetails extends CoreElement {
   _Details _details;
 
   void _initContent() {
-    _title = div(text: defaultTitleText, c: 'event-details-heading')
-      ..element.style.backgroundColor = colorToCss(defaultTitleBackground);
+    _title = div(text: defaultTitleText, c: 'event-details-heading');
+    _title.element.style
+      ..color = colorToCss(contrastForeground)
+      ..backgroundColor = colorToCss(defaultTitleBackground);
     _details = _Details()..attribute('hidden');
 
     content = div(c: 'event-details-section section-border')
@@ -115,6 +121,7 @@ class EventDetails extends CoreElement {
             ..add([
               hideNativeCheckbox,
               CoreElement('div', text: 'Collapse native samples')
+                ..element.style.color = colorToCss(contrastForeground),
             ]))
           .element,
     ]);
@@ -126,15 +133,16 @@ class EventDetails extends CoreElement {
     _title.text = '${_event.name} - ${msText(_event.time.duration)}';
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)
-      ..color = colorToCss(_event.isGpuEvent ? Colors.white : Colors.black);
+      ..color = colorToCss(item.defaultTextColor);
 
     await _details.update(item.event);
   }
 
   void reset() {
     _title.text = defaultTitleText;
-    _title.element.style.color = colorToCss(Colors.black);
-    _title.element.style.backgroundColor = colorToCss(defaultTitleBackground);
+    _title.element.style
+      ..color = colorToCss(contrastForeground)
+      ..backgroundColor = colorToCss(defaultTitleBackground);
     _details.reset();
   }
 }

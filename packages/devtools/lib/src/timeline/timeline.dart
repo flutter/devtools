@@ -31,7 +31,7 @@ const mainGpuColorSelectedLight = Color(0xFFB5B5B5); // Darker grey.
 const mainUiColorDark = Color(0xFF9EBEF9); // Blue 200 Material Dark
 const mainUiColorSelectedDark = Colors.white;
 
-const mainGpuColorDark = Color(0xFF336AEC); // Blue 500 Material Dark
+const mainGpuColorDark = Color(0xFF1A73E8); // Blue 600 Material Dark
 const mainGpuColorSelectedDark = Color(0xFFC9C9C9); // Grey.
 
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
