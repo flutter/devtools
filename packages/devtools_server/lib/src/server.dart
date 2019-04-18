@@ -97,10 +97,10 @@ void serveDevTools({
 
   final server = await shelf.serve(handler, '127.0.0.1', port);
 
-  final devtoolsUrl = 'http://${server.address.host}:${server.port}';
+  final devToolsUrl = 'http://${server.address.host}:${server.port}';
 
   printOutput(
-    'Serving DevTools at $devtoolsUrl',
+    'Serving DevTools at $devToolsUrl',
     {
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
@@ -108,24 +108,39 @@ void serveDevTools({
     machineMode: machineMode,
   );
 
-  _listenForUris(devtoolsUrl);
-}
-
-void _listenForUris(String devtoolsUrl) {
   final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+      .where((String line) => line.startsWith('{') && line.endsWith('}'))
       .map<Map<String, dynamic>>((String line) {
-    line = line.substring(1, line.length - 1);
     return json.decode(line) as Map<String, dynamic>;
   });
 
-  // Example json input: [{"url":"ws://localhost:8888/ws"}]
+  // Example input:
+  // {
+  //   "id":0,
+  //   "method":"vm.register",
+  //   "params":{
+  //     "uri":"<vm-service-uri-here>",
+  //   }
+  // }
   _stdinCommandStream.listen((Map<String, dynamic> json) async {
-    final line = json['url'];
+    final int id = json['id'];
+    final Map<String, dynamic> params = json['params'];
 
-    final uri = Uri.parse(line);
+    if (!params.containsKey('uri')) {
+      printOutput(
+        'Invalid input: $params does not contain the key \'uri\'',
+        {
+          'id': id,
+          'error': 'Invalid input: $params does not contain the key \'uri\'',
+        },
+        machineMode: machineMode,
+      );
+    }
+
+    // json['uri'] should contain a vm service uri.
+    final uri = Uri.parse(params['uri']);
 
     // Lots of things are considered valid URIs (including empty strings
     // and single letters) since they can be relative, so we need to do some
@@ -136,32 +151,52 @@ void _listenForUris(String devtoolsUrl) {
             uri.isScheme('wss') ||
             uri.isScheme('http') ||
             uri.isScheme('https')))
-      try {
-        // Connect to the vm service and register a method to launch DevTools in
-        // chrome.
-        final VmService service = await _connectToVmService(uri);
-
-        service.registerServiceCallback(launchDevToolsService, (request) async {
-          String vmServicePort =
-              uri.toString().substring(uri.toString().lastIndexOf(':') + 1);
-          vmServicePort =
-              vmServicePort.substring(0, vmServicePort.indexOf('/'));
-
-          final url = '$devtoolsUrl/?port=$vmServicePort#';
-
-          // TODO(kenzie): depend on the browser_launcher package for this once
-          // it is complete.
-          await Chrome.start([url]);
-
-          return {'result': Success().toJson()};
-        });
-
-        await service.registerService(launchDevToolsService, 'DevTools Server');
-      } catch (e) {
-        print('Unable to connect to VM service at $uri: $e');
-        return;
-      }
+      await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
   });
+}
+
+Future<void> registerLaunchDevToolsService(
+  Uri uri,
+  int id,
+  String devToolsUrl,
+  bool machineMode,
+) async {
+  try {
+    // Connect to the vm service and register a method to launch DevTools in
+    // chrome.
+    final VmService service = await _connectToVmService(uri);
+
+    service.registerServiceCallback(launchDevToolsService, (request) async {
+      final url = '$devToolsUrl/url=${Uri.encodeComponent(uri.toString())}#';
+
+      // TODO(kenzie): depend on the browser_launcher package for this once it
+      // is complete.
+      await Chrome.start([url]);
+
+      return {'result': Success().toJson()};
+    });
+
+    await service.registerService(launchDevToolsService, 'DevTools Server');
+
+    printOutput(
+      'Successfully registered launchDevTools service',
+      {
+        'id': id,
+        'result': Success().toJson(),
+      },
+      machineMode: machineMode,
+    );
+  } catch (e) {
+    printOutput(
+      'Unable to connect to VM service at $uri: $e',
+      {
+        'id': id,
+        'error': 'Unable to connect to VM service at $uri: $e',
+      },
+      machineMode: machineMode,
+    );
+    return;
+  }
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {

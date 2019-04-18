@@ -31,19 +31,18 @@ var _currentCompleter = Completer<Chrome>();
 
 /// A class for managing an instance of Chrome.
 class Chrome {
+  Chrome._(
+    this.chromeConnection, {
+    this.debugPort,
+    Process process,
+    Directory dataDir,
+  })  : _process = process,
+        _dataDir = dataDir;
+
   final int debugPort;
   final Process _process;
   final Directory _dataDir;
-
   final ChromeConnection chromeConnection;
-
-  Chrome._(
-      this.debugPort,
-      this.chromeConnection, {
-        Process process,
-        Directory dataDir,
-      })  : _process = process,
-        _dataDir = dataDir;
 
   Future<void> close() async {
     if (_currentCompleter.isCompleted) _currentCompleter = Completer<Chrome>();
@@ -55,35 +54,35 @@ class Chrome {
 
   /// Connects to an instance of Chrome with an open debug port.
   static Future<Chrome> fromExisting(int port) async =>
-      _connect(Chrome._(port, ChromeConnection('localhost', port)));
+      _connect(Chrome._(ChromeConnection('localhost', port), debugPort: port));
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 
-  /// Starts Chrome with the remote debug port enabled.
+  /// Starts Chrome with the given arguments and a specific port.
   ///
   /// Each url in [urls] will be loaded in a separate tab.
-  static Future<Chrome> start(List<String> urls, {int port}) async {
-    var dataDir = Directory.systemTemp.createTempSync();
+  static Future<Chrome> startWithPort(
+    List<String> urls, {
+    List<String> args,
+    int port,
+  }) async {
     port = port == null || port == 0 ? await findUnusedPort() : port;
-    var args = [
-      // Using a tmp directory ensures that a new instance of chrome launches
-      // allowing for the remote debug port to be enabled.
-      '--user-data-dir=${dataDir.path}',
-      '--remote-debugging-port=$port',
-      // When the DevTools has focus we don't want to slow down the application.
-      '--disable-background-timer-throttling',
-      // Since we are using a temp profile, disable features that slow the
-      // Chrome launch.
-      '--disable-extensions',
-      '--disable-popup-blocking',
-      '--bwsi',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-default-apps',
-      '--disable-translate',
-    ]..addAll(urls);
+    return start(urls, args: args, port: port);
+  }
 
-    var process = await Process.start(_executable, args);
+  /// Starts Chrome with the given arguments.
+  ///
+  /// Each url in [urls] will be loaded in a separate tab.
+  static Future<Chrome> start(
+    List<String> urls, {
+    List<String> args,
+    int port,
+  }) async {
+    final dataDir = Directory.systemTemp.createTempSync();
+    args ??= [];
+    args.addAll(urls);
+
+    final process = await Process.start(_executable, args);
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
@@ -92,8 +91,8 @@ class Chrome {
         .firstWhere((line) => line.startsWith('DevTools listening'));
 
     return _connect(Chrome._(
-      port,
       ChromeConnection('localhost', port),
+      debugPort: port,
       process: process,
       dataDir: dataDir,
     ));
@@ -118,8 +117,9 @@ class Chrome {
 }
 
 class ChromeError extends Error {
-  final String details;
   ChromeError(this.details);
+
+  final String details;
 
   @override
   String toString() {
@@ -136,7 +136,7 @@ Future<int> findUnusedPort() async {
   ServerSocket socket;
   try {
     socket =
-    await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
+        await ServerSocket.bind(InternetAddress.loopbackIPv6, 0, v6Only: true);
   } on SocketException {
     socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   }
