@@ -4,9 +4,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+if [ $1 = "--stable" ]; then
+	export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true -DGOLDENS_SUFFIX=_stable"
+	echo "Make sure your flutter is the current live STABLE branch"
+else
+	export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+	echo "Make sure your flutter is the tip of trunk Flutter"
+fi
 
-echo "Make sure your flutter is the tip of trunk Flutter"
 
 set -x #echo on
 which flutter

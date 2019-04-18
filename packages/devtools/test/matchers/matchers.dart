@@ -44,11 +44,13 @@ String treeToDebugStringTruncated(RemoteDiagnosticsNode node, int maxLines) {
 ///
 /// Paths are assumed to reference files within the `test/goldens` directory.
 ///
-/// To rebaseline all golden files run tests with:
+/// To rebaseline all golden files run:
 /// ```
-/// export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
-/// pub run test test/your_vm_test.dart
-/// unset DART_VM_OPTIONS
+/// tool/update_goldens.sh
+/// ```
+/// or for the Stable goldens, switch to the Flutter stable branch and run:
+/// ```
+/// tool/update_goldens.sh --stable
 /// ```
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
@@ -64,7 +66,7 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/goldens/$pathWithinGoldenDirectory';
+    path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
     try {
       _value = io.File(path).readAsStringSync();
     } catch (e) {
@@ -77,6 +79,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   static final Object _mismatchedValueKey = Object();
 
   static bool _updateGoldens;
+  static const String _goldensSuffix =
+      String.fromEnvironment('GOLDENS_SUFFIX', defaultValue: '');
 
   static bool get updateGoldens {
     _updateGoldens ??=
@@ -126,9 +130,9 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
           .add('\nbut got\n  ')
           .addDescriptionOf(actualValue)
           .add('\nTo update golden files run:\n')
-          .add('export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"\n')
-          .add('pub run test test/\n')
-          .add('unset DART_VM_OPTIONS\n');
+          .add('  tool/update_goldens.sh"\n')
+          .add('or"\n')
+          .add('  tool/update_goldens.sh --stable"\n');
     }
     return null;
   }
