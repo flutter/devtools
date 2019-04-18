@@ -6,9 +6,11 @@
 
 if [ $1 = "--stable" ]; then
 	export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true -DGOLDENS_SUFFIX=_stable"
+	# TODO(dantup): We should try to automate a check for this
 	echo "Make sure your flutter is the current live STABLE branch"
 else
 	export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+	# TODO(dantup): We should try to automate a check for this
 	echo "Make sure your flutter is the tip of trunk Flutter"
 fi
 
