@@ -525,7 +525,7 @@ class FlameChartNode {
     int binarySearchForLongestFittingIndex() {
       int longest = 1;
       int min = 0;
-      int max = originalText.length - 1;
+      int max = originalText.length;
       while (min < max) {
         final mid = min + ((max - min) >> 1);
         final str = originalText.substring(0, mid);
