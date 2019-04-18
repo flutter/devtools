@@ -24,7 +24,7 @@ import 'timeline.dart';
 
 // TODO(kenzie): this should be removed once the cpu flame chart is optimized
 // and complete.
-const bool showCpuFlameChart = false;
+const bool showCpuFlameChart = true;
 
 const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
@@ -374,7 +374,6 @@ class FlameChartCanvas extends FlameChart {
   }
 }
 
-/// A row in the tree with all information required to render it.
 class FlameChartRow {
   const FlameChartRow({
     @required this.nodes,
@@ -385,8 +384,6 @@ class FlameChartRow {
   final int index;
 }
 
-// TODO Maybe pass an on selected listener to this so we don't have to pass the data
-// object around
 class FlameChartNode {
   FlameChartNode(
     this.rect,
@@ -405,10 +402,8 @@ class FlameChartNode {
     Color(0x5A1B1F23),
     Color(0x5A1B1F23),
   );
-  // TODO(kenzie): reassess this max when polishing text painting logic.
-  static const maxDisplayTextLength = 20;
 
-  Rect rect;
+  static const minimumRectWidthForText = 20;
 
   /// Left value for the flame chart item at zoom level 1.
   final num startingLeft;
@@ -426,9 +421,15 @@ class FlameChartNode {
 
   final bool rounded;
 
+  final Map<String, num> textMeasurements = {};
+
+  Rect rect;
+
   String get text => stackFrame.name;
 
   String get tooltip => stackFrame.toString();
+
+  num get maxTextWidth => rect.width - horizontalPadding * 2;
 
   bool selected = false;
 
@@ -481,35 +482,64 @@ class FlameChartNode {
         ..stroke();
     }
 
-    canvas
-      ..fillStyle = colorToCss(textColor)
-      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+    if (rect.width > minimumRectWidthForText) {
+      canvas
+        ..fillStyle = colorToCss(selected ? selectedTextColor : textColor)
+        ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
 
-    // TODO(kenzie): polish this. Sometimes we trim excessively. We should do
-    // something smarter here to be more exact. 'm' is arbitrary - it was
-    // selected after trial and error with different letter measurements.
-    // Measure the text and truncate based on the actual width of the available
-    // area.
-    final singleLetterWidth = canvas.measureText('m').width;
-    final maxLetters = math.min(
-      math.max(0, (rect.width - horizontalPadding * 2) ~/ singleLetterWidth),
-      selected ? text.length : math.min(text.length, maxDisplayTextLength),
-    );
+      String displayText = text;
 
-    String displayText = text.substring(0, maxLetters);
-    if (maxLetters == maxDisplayTextLength &&
-        text.length > maxDisplayTextLength) {
-      displayText += '...';
+      // TODO(kenzie): further optimize text painting by setting a budget for
+      // how much text can be measured each frame, and incrementally updating
+      // the text in the UI.
+      if (!_textFitsInRect(displayText, canvas)) {
+        displayText = longestFittingSubstring(text, maxTextWidth, canvas);
+      }
+
+      canvas.fillText(
+        displayText,
+        rect.left + horizontalPadding,
+        rect.top + _textOffsetY,
+        maxTextWidth,
+      );
+    }
+  }
+
+  bool _textFitsInRect(String text, CanvasRenderingContext2D canvas) {
+    final textWidth = textMeasurements[text] ??= canvas.measureText(text).width;
+    return textWidth <= maxTextWidth;
+  }
+
+  String longestFittingSubstring(
+    String originalText,
+    num maxWidth,
+    CanvasRenderingContext2D canvas,
+  ) {
+    final firstLetter = originalText.substring(0, 1);
+    final firstLetterWidth =
+        textMeasurements[firstLetter] ??= canvas.measureText(firstLetter).width;
+    if (firstLetterWidth >= maxWidth) {
+      return '';
     }
 
-    final maxTextWidth = rect.width - horizontalPadding * 2;
+    int binarySearchForLongestFittingIndex() {
+      int longest = 1;
+      int min = 0;
+      int max = originalText.length - 1;
+      while (min < max) {
+        final mid = min + ((max - min) >> 1);
+        final str = originalText.substring(0, mid);
+        if (_textFitsInRect(str, canvas)) {
+          longest = math.max(longest, mid);
+          min = mid + 1;
+        } else {
+          max = mid;
+        }
+      }
+      return longest;
+    }
 
-    canvas.fillText(
-      displayText,
-      rect.left + horizontalPadding,
-      rect.top + _textOffsetY,
-      maxTextWidth,
-    );
+    return originalText.substring(0, binarySearchForLongestFittingIndex());
   }
 
   void updateForZoom({@required num zoom}) {
@@ -569,21 +599,23 @@ class TimelineGrid {
       fractionDigits: 1,
     );
 
+    // Set canvas styles and handle the first grid node since it will have a
+    // different width than the rest.
     canvas
       ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize))
       ..fillStyle = colorToCss(timestampColor)
-      ..strokeStyle = colorToCss(gridLineColor)
-      ..lineWidth = gridLineWidth
-      ..beginPath()
-      // Handle the first grid node since it will have a different width than
-      // the rest.
       ..fillText(
         firstGridNodeText,
         _getTimestampLeft(firstGridNodeText, 0, _flameChartInset, canvas),
         viewport.top + _textOffsetY,
       )
+      ..strokeStyle = colorToCss(gridLineColor)
+      ..lineWidth = gridLineWidth
+      ..beginPath()
       ..moveTo(_flameChartInset, visible.top)
-      ..lineTo(_flameChartInset, visible.bottom);
+      ..lineTo(_flameChartInset, visible.bottom)
+      ..closePath()
+      ..stroke();
 
     while (left < visible.right) {
       if (left + currentInterval < visible.left || left > visible.right) {
@@ -612,16 +644,14 @@ class TimelineGrid {
       // Paint the timestamps and compute the line to stroke for the grid lines.
       canvas
         ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
+        ..beginPath()
         ..moveTo(left + currentInterval, visible.top)
-        ..lineTo(left + currentInterval, visible.bottom);
+        ..lineTo(left + currentInterval, visible.bottom)
+        ..closePath()
+        ..stroke();
 
       left += currentInterval;
     }
-
-    // Paint the grid lines.
-    canvas
-      ..closePath()
-      ..stroke();
   }
 
   num _getTimestampLeft(
