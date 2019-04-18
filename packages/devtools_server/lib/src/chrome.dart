@@ -52,16 +52,12 @@ class Chrome {
     await _dataDir?.delete(recursive: true);
   }
 
-  /// Connects to an instance of Chrome with an open debug port.
-  static Future<Chrome> fromExisting(int port) async =>
-      _connect(Chrome._(ChromeConnection('localhost', port), debugPort: port));
-
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 
   /// Starts Chrome with the given arguments and a specific port.
   ///
   /// Each url in [urls] will be loaded in a separate tab.
-  static Future<Chrome> startWithPort(
+  static Future<void> startWithPort(
     List<String> urls, {
     List<String> args,
     int port,
@@ -73,57 +69,15 @@ class Chrome {
   /// Starts Chrome with the given arguments.
   ///
   /// Each url in [urls] will be loaded in a separate tab.
-  static Future<Chrome> start(
+  static Future<void> start(
     List<String> urls, {
     List<String> args,
     int port,
   }) async {
-    final dataDir = Directory.systemTemp.createTempSync();
     args ??= [];
     args.addAll(urls);
 
-    final process = await Process.start(_executable, args);
-
-    // Wait until the DevTools are listening before trying to connect.
-    await process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .firstWhere((line) => line.startsWith('DevTools listening'));
-
-    return _connect(Chrome._(
-      ChromeConnection('localhost', port),
-      debugPort: port,
-      process: process,
-      dataDir: dataDir,
-    ));
-  }
-
-  static Future<Chrome> _connect(Chrome chrome) async {
-    if (_currentCompleter.isCompleted) {
-      throw ChromeError('Only one instance of chrome can be started.');
-    }
-    // The connection is lazy. Try a simple call to make sure the provided
-    // connection is valid.
-    try {
-      await chrome.chromeConnection.getTabs();
-    } catch (e) {
-      await chrome.close();
-      throw ChromeError(
-          'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
-    }
-    _currentCompleter.complete(chrome);
-    return chrome;
-  }
-}
-
-class ChromeError extends Error {
-  ChromeError(this.details);
-
-  final String details;
-
-  @override
-  String toString() {
-    return 'ChromeError: $details';
+    await Process.start(_executable, args);
   }
 }
 
