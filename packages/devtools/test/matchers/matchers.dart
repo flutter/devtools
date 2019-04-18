@@ -48,10 +48,6 @@ String treeToDebugStringTruncated(RemoteDiagnosticsNode node, int maxLines) {
 /// ```
 /// tool/update_goldens.sh
 /// ```
-/// or for the Stable goldens, switch to the Flutter stable branch and run:
-/// ```
-/// tool/update_goldens.sh --stable
-/// ```
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
 /// and is normalized to #00000.
@@ -130,9 +126,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
           .add('\nbut got\n  ')
           .addDescriptionOf(actualValue)
           .add('\nTo update golden files run:\n')
-          .add('  tool/update_goldens.sh"\n')
-          .add('or"\n')
-          .add('  tool/update_goldens.sh --stable"\n');
+          .add('  tool/update_goldens.sh"\n');
     }
     return null;
   }
