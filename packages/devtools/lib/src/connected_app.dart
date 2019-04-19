@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'eval_on_dart_library.dart';
 import 'globals.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
@@ -16,12 +15,15 @@ class ConnectedApp {
   ConnectedApp();
 
   Future<bool> get isFlutterApp async =>
-      _isFlutterApp ?? await _connectedToFlutterApp();
+      _isFlutterApp ?? await _libraryUriAvailable(flutterLibraryUri);
 
   bool _isFlutterApp;
 
+  // TODO(kenzie): change this if screens should still be disabled when
+  // flutter merges with flutter_web. See
+  // https://github.com/flutter/devtools/issues/466.
   Future<bool> get isFlutterWebApp async =>
-      _isFlutterWebApp ?? await _connectedToFlutterWebApp();
+      _isFlutterWebApp ?? await _libraryUriAvailable(flutterWebLibraryUri);
 
   bool _isFlutterWebApp;
 
@@ -32,41 +34,6 @@ class ConnectedApp {
 
   Future<bool> get isAnyFlutterApp async =>
       await isFlutterApp || await isFlutterWebApp;
-
-  Future<bool> _connectedToFlutterApp() async {
-    assert(serviceManager.serviceAvailable.isCompleted);
-
-    final flutterLibrary = EvalOnDartLibrary(
-      [flutterLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  Future<bool> _connectedToFlutterWebApp() async {
-    assert(serviceManager.serviceAvailable.isCompleted);
-
-    // TODO(kenzie): change this if screens should still be disabled when flutter
-    // merges with flutter_web. See
-    // https://github.com/flutter/devtools/issues/466.
-    final flutterWebLibrary = EvalOnDartLibrary(
-      [flutterWebLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterWebLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
-  }
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
@@ -90,5 +57,15 @@ class ConnectedApp {
     } on RPCError catch (_) {
       return true;
     }
+  }
+
+  Future<bool> _libraryUriAvailable(String uri) async {
+    assert(serviceManager.serviceAvailable.isCompleted);
+    await serviceManager.isolateManager.selectedIsolateAvailable.future;
+
+    return serviceManager.isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
+        .contains(uri);
   }
 }

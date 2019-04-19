@@ -223,6 +223,10 @@ class IsolateManager {
   final StreamController<IsolateRef> _selectedIsolateController =
       StreamController<IsolateRef>.broadcast();
 
+  Completer<Null> selectedIsolateAvailable = Completer();
+
+  List<LibraryRef> selectedIsolateLibraries;
+
   List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
 
   IsolateRef get selectedIsolate => _selectedIsolate;
@@ -277,6 +281,9 @@ class IsolateManager {
       _isolateExitedController.add(event.isolate);
       if (_selectedIsolate == event.isolate) {
         _selectedIsolate = _isolates.isEmpty ? null : _isolates.first;
+        if (_selectedIsolate == null) {
+          selectedIsolateAvailable = Completer();
+        }
         _selectedIsolateController.add(_selectedIsolate);
         _serviceExtensionManager.resetAvailableExtensions();
       }
@@ -314,11 +321,19 @@ class IsolateManager {
     _setSelectedIsolate(ref ?? isolates.first);
   }
 
-  void _setSelectedIsolate(IsolateRef ref) {
+  void _setSelectedIsolate(IsolateRef ref) async {
     if (_selectedIsolate == ref) {
       return;
     }
+
+    // Store the library uris for the selected isolate.
+    final Isolate isolate = await _service.getIsolate(ref.id);
+    selectedIsolateLibraries = isolate.libraries;
+
     _selectedIsolate = ref;
+    if (!selectedIsolateAvailable.isCompleted) {
+      selectedIsolateAvailable.complete();
+    }
     _selectedIsolateController.add(ref);
   }
 
