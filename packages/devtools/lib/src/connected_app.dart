@@ -35,37 +35,21 @@ class ConnectedApp {
 
   Future<bool> _connectedToFlutterApp() async {
     assert(serviceManager.serviceAvailable.isCompleted);
+    await serviceManager.isolateManager.selectedIsolateAvailable.future;
 
-    final flutterLibrary = EvalOnDartLibrary(
-      [flutterLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
+    return serviceManager.isolateManager.selectedIsolateLibraryUris
+        .contains(flutterLibraryUri);
   }
 
   Future<bool> _connectedToFlutterWebApp() async {
     assert(serviceManager.serviceAvailable.isCompleted);
+    await serviceManager.isolateManager.selectedIsolateAvailable.future;
 
-    // TODO(kenzie): change this if screens should still be disabled when flutter
-    // merges with flutter_web. See
+    // TODO(kenzie): change this if screens should still be disabled when
+    // flutter merges with flutter_web. See
     // https://github.com/flutter/devtools/issues/466.
-    final flutterWebLibrary = EvalOnDartLibrary(
-      [flutterWebLibraryUri],
-      serviceManager.service,
-    );
-
-    try {
-      await flutterWebLibrary.libraryRef;
-    } on LibraryNotFound catch (_) {
-      return false;
-    }
-    return true;
+    return serviceManager.isolateManager.selectedIsolateLibraryUris
+        .contains(flutterWebLibraryUri);
   }
 
   Future<bool> _connectedToProfileBuild() async {

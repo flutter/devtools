@@ -302,6 +302,13 @@ class ActionsContainer {
   final List<ActionButton> _actions = [];
 
   void addAction(ActionButton action) {
+    for (ActionButton _action in _actions) {
+      if (_action.tooltip == action.tooltip) {
+        // This action is a duplicate. Do not add it.
+        return;
+      }
+    }
+
     if (_actions.isEmpty) {
       // add a visual separator
       element.add(span(
