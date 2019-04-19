@@ -15,12 +15,15 @@ class ConnectedApp {
   ConnectedApp();
 
   Future<bool> get isFlutterApp async =>
-      _isFlutterApp ?? await _connectedToFlutterApp();
+      _isFlutterApp ?? await _libraryUriAvailable(flutterLibraryUri);
 
   bool _isFlutterApp;
 
+  // TODO(kenzie): change this if screens should still be disabled when
+  // flutter merges with flutter_web. See
+  // https://github.com/flutter/devtools/issues/466.
   Future<bool> get isFlutterWebApp async =>
-      _isFlutterWebApp ?? await _connectedToFlutterWebApp();
+      _isFlutterWebApp ?? await _libraryUriAvailable(flutterWebLibraryUri);
 
   bool _isFlutterWebApp;
 
@@ -31,29 +34,6 @@ class ConnectedApp {
 
   Future<bool> get isAnyFlutterApp async =>
       await isFlutterApp || await isFlutterWebApp;
-
-  Future<bool> _connectedToFlutterApp() async {
-    assert(serviceManager.serviceAvailable.isCompleted);
-    await serviceManager.isolateManager.selectedIsolateAvailable.future;
-
-    return serviceManager.isolateManager.selectedIsolateLibraries
-        .map((ref) => ref.uri)
-        .toList()
-        .contains(flutterLibraryUri);
-  }
-
-  Future<bool> _connectedToFlutterWebApp() async {
-    assert(serviceManager.serviceAvailable.isCompleted);
-    await serviceManager.isolateManager.selectedIsolateAvailable.future;
-
-    // TODO(kenzie): change this if screens should still be disabled when
-    // flutter merges with flutter_web. See
-    // https://github.com/flutter/devtools/issues/466.
-    return serviceManager.isolateManager.selectedIsolateLibraries
-        .map((ref) => ref.uri)
-        .toList()
-        .contains(flutterWebLibraryUri);
-  }
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
@@ -77,5 +57,15 @@ class ConnectedApp {
     } on RPCError catch (_) {
       return true;
     }
+  }
+
+  Future<bool> _libraryUriAvailable(String uri) async {
+    assert(serviceManager.serviceAvailable.isCompleted);
+    await serviceManager.isolateManager.selectedIsolateAvailable.future;
+
+    return serviceManager.isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
+        .contains(uri);
   }
 }
