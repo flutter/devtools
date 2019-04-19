@@ -69,7 +69,7 @@ class EventDetails extends CoreElement {
 
   void _initTabNav() {
     final flameChartTab = EventDetailsTabNavTab(
-      'CPU Flame Chart',
+      'CPU Flame Chart (preview)',
       EventDetailsTabType.flameChart,
     );
     final bottomUpTab = EventDetailsTabNavTab(
@@ -144,6 +144,9 @@ class EventDetails extends CoreElement {
       ..color = colorToCss(contrastForeground)
       ..backgroundColor = colorToCss(defaultTitleBackground);
     _details.reset();
+
+    final html.InputElement checkbox = hideNativeCheckbox.element;
+    checkbox.checked = true;
   }
 }
 

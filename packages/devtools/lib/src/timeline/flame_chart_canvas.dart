@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html';
 import 'dart:math' as math;
 
@@ -24,7 +25,7 @@ import 'timeline.dart';
 
 // TODO(kenzie): this should be removed once the cpu flame chart is optimized
 // and complete.
-const bool showCpuFlameChart = false;
+const bool showCpuFlameChart = true;
 
 const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
@@ -42,6 +43,8 @@ const _rowPadding = 2.0;
 const rowHeightWithPadding = _rowHeight + _rowPadding;
 
 const _flameChartInset = 70;
+
+List<num> _asciiMeasurements;
 
 // TODO(kenzie): move this class to flame_chart.dart once the frame flame chart
 // is ported to canvas and the current implementation in flame_chart.dart is
@@ -248,6 +251,8 @@ class FlameChartCanvas extends FlameChart {
       shouldCollapseNativeSamples = shouldCollapse;
       _viewportCanvas.rebuild(force: true);
     });
+
+    _initAsciiMeasurements();
   }
 
   final DragScroll _dragScroll = DragScroll();
@@ -268,6 +273,15 @@ class FlameChartCanvas extends FlameChart {
   /// events when zoomed in to [_maxZoomLevel].
   final _maxZoomLevel = 150;
   final _minZoomLevel = 1;
+
+  void _initAsciiMeasurements() {
+    final measurementCanvas = CanvasElement().context2D
+      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+    _asciiMeasurements = List.generate(
+      128,
+      (i) => measurementCanvas.measureText(ascii.decode([i])).width,
+    );
+  }
 
   // TODO(kenzie): optimize painting to canvas by grouping paints with the same
   // canvas settings.
@@ -374,7 +388,6 @@ class FlameChartCanvas extends FlameChart {
   }
 }
 
-/// A row in the tree with all information required to render it.
 class FlameChartRow {
   const FlameChartRow({
     @required this.nodes,
@@ -385,8 +398,6 @@ class FlameChartRow {
   final int index;
 }
 
-// TODO Maybe pass an on selected listener to this so we don't have to pass the data
-// object around
 class FlameChartNode {
   FlameChartNode(
     this.rect,
@@ -405,10 +416,8 @@ class FlameChartNode {
     Color(0x5A1B1F23),
     Color(0x5A1B1F23),
   );
-  // TODO(kenzie): reassess this max when polishing text painting logic.
-  static const maxDisplayTextLength = 20;
 
-  Rect rect;
+  static const minWidthForText = 20;
 
   /// Left value for the flame chart item at zoom level 1.
   final num startingLeft;
@@ -426,9 +435,15 @@ class FlameChartNode {
 
   final bool rounded;
 
+  final Map<String, num> textMeasurements = {};
+
+  Rect rect;
+
   String get text => stackFrame.name;
 
   String get tooltip => stackFrame.toString();
+
+  num get maxTextWidth => rect.width - horizontalPadding * 2;
 
   bool selected = false;
 
@@ -481,35 +496,37 @@ class FlameChartNode {
         ..stroke();
     }
 
-    canvas
-      ..fillStyle = colorToCss(textColor)
-      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+    if (rect.width > minWidthForText) {
+      canvas
+        ..fillStyle = colorToCss(selected ? selectedTextColor : textColor)
+        ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
 
-    // TODO(kenzie): polish this. Sometimes we trim excessively. We should do
-    // something smarter here to be more exact. 'm' is arbitrary - it was
-    // selected after trial and error with different letter measurements.
-    // Measure the text and truncate based on the actual width of the available
-    // area.
-    final singleLetterWidth = canvas.measureText('m').width;
-    final maxLetters = math.min(
-      math.max(0, (rect.width - horizontalPadding * 2) ~/ singleLetterWidth),
-      selected ? text.length : math.min(text.length, maxDisplayTextLength),
-    );
+      String displayText = text;
 
-    String displayText = text.substring(0, maxLetters);
-    if (maxLetters == maxDisplayTextLength &&
-        text.length > maxDisplayTextLength) {
-      displayText += '...';
+      // TODO(kenzie): further optimize text painting by setting a budget for
+      // how much text can be measured each frame, and incrementally updating
+      // the text in the UI.
+      if (!_textFitsInRect(displayText, canvas)) {
+        displayText = longestFittingSubstring(
+          text,
+          maxTextWidth,
+          _asciiMeasurements,
+          (int value) => canvas.measureText(String.fromCharCode(value)).width,
+        );
+      }
+
+      canvas.fillText(
+        displayText,
+        rect.left + horizontalPadding,
+        rect.top + _textOffsetY,
+        maxTextWidth,
+      );
     }
+  }
 
-    final maxTextWidth = rect.width - horizontalPadding * 2;
-
-    canvas.fillText(
-      displayText,
-      rect.left + horizontalPadding,
-      rect.top + _textOffsetY,
-      maxTextWidth,
-    );
+  bool _textFitsInRect(String text, CanvasRenderingContext2D canvas) {
+    final textWidth = textMeasurements[text] ??= canvas.measureText(text).width;
+    return textWidth <= maxTextWidth;
   }
 
   void updateForZoom({@required num zoom}) {
@@ -569,21 +586,23 @@ class TimelineGrid {
       fractionDigits: 1,
     );
 
+    // Set canvas styles and handle the first grid node since it will have a
+    // different width than the rest.
     canvas
       ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize))
       ..fillStyle = colorToCss(timestampColor)
-      ..strokeStyle = colorToCss(gridLineColor)
-      ..lineWidth = gridLineWidth
-      ..beginPath()
-      // Handle the first grid node since it will have a different width than
-      // the rest.
       ..fillText(
         firstGridNodeText,
         _getTimestampLeft(firstGridNodeText, 0, _flameChartInset, canvas),
         viewport.top + _textOffsetY,
       )
+      ..strokeStyle = colorToCss(gridLineColor)
+      ..lineWidth = gridLineWidth
+      ..beginPath()
       ..moveTo(_flameChartInset, visible.top)
-      ..lineTo(_flameChartInset, visible.bottom);
+      ..lineTo(_flameChartInset, visible.bottom)
+      ..closePath()
+      ..stroke();
 
     while (left < visible.right) {
       if (left + currentInterval < visible.left || left > visible.right) {
@@ -612,16 +631,14 @@ class TimelineGrid {
       // Paint the timestamps and compute the line to stroke for the grid lines.
       canvas
         ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
+        ..beginPath()
         ..moveTo(left + currentInterval, visible.top)
-        ..lineTo(left + currentInterval, visible.bottom);
+        ..lineTo(left + currentInterval, visible.bottom)
+        ..closePath()
+        ..stroke();
 
       left += currentInterval;
     }
-
-    // Paint the grid lines.
-    canvas
-      ..closePath()
-      ..stroke();
   }
 
   num _getTimestampLeft(

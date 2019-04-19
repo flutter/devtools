@@ -117,6 +117,34 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+String longestFittingSubstring(
+  String originalText,
+  num maxWidth,
+  List<num> asciiMeasurements,
+  num slowMeasureFallback(int value),
+) {
+  if (originalText.isEmpty) return originalText;
+
+  final runes = originalText.runes.toList();
+
+  num currentWidth = 0;
+
+  int i = 0;
+  while (i < runes.length) {
+    final rune = runes[i];
+    final charWidth =
+        rune < 128 ? asciiMeasurements[rune] : slowMeasureFallback(rune);
+    if (currentWidth + charWidth > maxWidth) {
+      break;
+    }
+    // [currentWidth] is approximate due to ignoring kerning.
+    currentWidth += charWidth;
+    i++;
+  }
+
+  return originalText.substring(0, i);
+}
+
 class Property<T> {
   Property(this._value);
 
