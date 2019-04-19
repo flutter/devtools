@@ -177,38 +177,7 @@ void main() {
     test('callService throws exception', () async {
       await env.setupEnvironment();
 
-      // Service with less than 1 registration.
-      await expectLater(
-          serviceManager.callService('fakeMethod'), throwsException);
-
-      // Service with more than 1 registration.
-      serviceManager.registeredMethodsForService.putIfAbsent('fakeMethod',
-          () => ['registration1.fakeMethod', 'registration2.fakeMethod']);
-      await expectLater(
-          serviceManager.callService('fakeMethod'), throwsException);
-
-      await env.tearDownEnvironment();
-    });
-
-    test('callMulticastService', () async {
-      await env.setupEnvironment();
-
-      final registeredService = serviceManager
-              .registeredMethodsForService[registrations.hotReload.service] ??
-          const [];
-      expect(registeredService, isNotEmpty);
-
-      await serviceManager.callMulticastService(
-        registrations.hotReload.service,
-        isolateId: serviceManager.isolateManager.selectedIsolate.id,
-      );
-
-      await env.tearDownEnvironment();
-    });
-
-    test('callMulticastService throws exception', () async {
-      await env.setupEnvironment();
-
+      // Service with 0 registrations.
       await expectLater(
           serviceManager.callService('fakeMethod'), throwsException);
 

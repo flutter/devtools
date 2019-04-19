@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -12,10 +13,14 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:vm_service_lib/vm_service_lib.dart' hide Isolate;
+
+import 'chrome.dart';
 
 const argHelp = 'help';
 const argMachine = 'machine';
 const argPort = 'port';
+const launchDevToolsService = 'launchDevTools';
 
 final argParser = new ArgParser()
   ..addFlag(
@@ -92,14 +97,118 @@ void serveDevTools({
 
   final server = await shelf.serve(handler, '127.0.0.1', port);
 
+  final devToolsUrl = 'http://${server.address.host}:${server.port}';
+
   printOutput(
-    'Serving DevTools at http://${server.address.host}:${server.port}',
+    'Serving DevTools at $devToolsUrl',
     {
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
     },
     machineMode: machineMode,
   );
+
+  final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .where((String line) => line.startsWith('{') && line.endsWith('}'))
+      .map<Map<String, dynamic>>((String line) {
+    return json.decode(line) as Map<String, dynamic>;
+  });
+
+  // Example input:
+  // {
+  //   "id":0,
+  //   "method":"vm.register",
+  //   "params":{
+  //     "uri":"<vm-service-uri-here>",
+  //   }
+  // }
+  _stdinCommandStream.listen((Map<String, dynamic> json) async {
+    final int id = json['id'];
+    final Map<String, dynamic> params = json['params'];
+
+    if (!params.containsKey('uri')) {
+      printOutput(
+        'Invalid input: $params does not contain the key \'uri\'',
+        {
+          'id': id,
+          'error': 'Invalid input: $params does not contain the key \'uri\'',
+        },
+        machineMode: machineMode,
+      );
+    }
+
+    // json['uri'] should contain a vm service uri.
+    final uri = Uri.parse(params['uri']);
+
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
+    if (uri != null &&
+        uri.isAbsolute &&
+        (uri.isScheme('ws') ||
+            uri.isScheme('wss') ||
+            uri.isScheme('http') ||
+            uri.isScheme('https')))
+      await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
+  });
+}
+
+Future<void> registerLaunchDevToolsService(
+  Uri uri,
+  int id,
+  String devToolsUrl,
+  bool machineMode,
+) async {
+  try {
+    // Connect to the vm service and register a method to launch DevTools in
+    // chrome.
+    final VmService service = await _connectToVmService(uri);
+
+    service.registerServiceCallback(launchDevToolsService, (request) async {
+      // TODO(kenzie): modify this to append arguments (i.e. theme=dark). This
+      // likely will require passing in args.
+      final url = '$devToolsUrl/?uri=${Uri.encodeComponent(uri.toString())}';
+
+      // TODO(kenzie): depend on the browser_launcher package for this once it
+      // is complete.
+      await Chrome.start([url]);
+
+      return {'result': Success().toJson()};
+    });
+
+    await service.registerService(launchDevToolsService, 'DevTools Server');
+
+    printOutput(
+      'Successfully registered launchDevTools service',
+      {
+        'id': id,
+        'result': Success().toJson(),
+      },
+      machineMode: machineMode,
+    );
+  } catch (e) {
+    printOutput(
+      'Unable to connect to VM service at $uri: $e',
+      {
+        'id': id,
+        'error': 'Unable to connect to VM service at $uri: $e',
+      },
+      machineMode: machineMode,
+    );
+  }
+}
+
+Future<VmService> _connectToVmService(Uri uri) async {
+  final WebSocket ws = await WebSocket.connect(uri.toString());
+
+  final VmService service = VmService(
+    ws.asBroadcastStream(),
+    (String message) => ws.add(message),
+  );
+
+  return service;
 }
 
 Future<String> _getVersion() async {

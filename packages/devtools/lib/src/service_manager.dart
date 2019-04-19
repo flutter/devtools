@@ -81,31 +81,14 @@ class ServiceConnectionManager {
     Map args,
   }) async {
     final registered = _registeredMethodsForService[name] ?? const [];
-    if (registered.length != 1) {
-      throw Exception('Expected one registered service for "$name" but found '
-          '${registered.length}');
-    }
-    return service.callMethod(registered.first,
-        isolateId: isolateId, args: args);
-  }
-
-  /// Call a service that may have been registered by multiple clients.
-  ///
-  /// For example, a service to navigate a code editor to a specific line and
-  /// column might be registered by multiple code editors.
-  Future<List<Response>> callMulticastService(
-    String name, {
-    String isolateId,
-    Map args,
-  }) async {
-    final registered = _registeredMethodsForService[name] ?? const [];
-    if (registered.isNotEmpty) {
-      return Future.wait(registered.map((String method) {
-        return service.callMethod(method, isolateId: isolateId, args: args);
-      }));
-    } else {
+    if (registered.isEmpty) {
       throw Exception('There are no registered methods for service "$name"');
     }
+    return service.callMethod(
+      registered.first,
+      isolateId: isolateId,
+      args: args,
+    );
   }
 
   StreamSubscription<bool> hasRegisteredService(
@@ -212,7 +195,7 @@ class ServiceConnectionManager {
 
   /// This can throw an [RPCError].
   Future<void> performHotReload() async {
-    await callMulticastService(
+    await callService(
       registrations.hotReload.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
@@ -220,7 +203,7 @@ class ServiceConnectionManager {
 
   /// This can throw an [RPCError].
   Future<void> performHotRestart() async {
-    await callMulticastService(
+    await callService(
       registrations.hotRestart.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
