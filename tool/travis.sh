@@ -67,6 +67,9 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
         echo "Cloning stable Flutter branch"
         git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+
+        # Set the suffix so we use stable goldens.
+        export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
     else
         echo "Cloning master Flutter branch"
         git clone https://github.com/flutter/flutter.git ../flutter
