@@ -45,8 +45,8 @@ class PerfToolFramework extends Framework {
   StatusItem connectionStatus;
   Status reloadStatus;
 
-  static const _reloadTooltip = 'Hot Reload';
-  static const _restartTooltip = 'Hot Restart';
+  static const _reloadActionId = 'reload-action';
+  static const _restartActionId = 'restart-action';
 
   void initGlobalUI() async {
     await serviceManager.serviceAvailable.future;
@@ -216,7 +216,7 @@ class PerfToolFramework extends Framework {
         if (reloadServiceAvailable) {
           _buildReloadButton();
         } else {
-          removeGlobalAction(_reloadTooltip);
+          removeGlobalAction(_reloadActionId);
         }
       },
     );
@@ -227,7 +227,7 @@ class PerfToolFramework extends Framework {
         if (reloadServiceAvailable) {
           _buildRestartButton();
         } else {
-          removeGlobalAction(_restartTooltip);
+          removeGlobalAction(_restartActionId);
         }
       },
     );
@@ -240,8 +240,11 @@ class PerfToolFramework extends Framework {
     // them in the UI. That will mean that our UI will update appropriately
     // even when other clients (the CLI, and IDE) initial the hot reload.
 
-    final ActionButton reloadAction =
-        ActionButton(FlutterIcons.hotReloadWhite, _reloadTooltip);
+    final ActionButton reloadAction = ActionButton(
+      _reloadActionId,
+      FlutterIcons.hotReloadWhite,
+      'Hot Reload',
+    );
     reloadAction.click(() async {
       // Hide any previous status related to / restart.
       reloadStatus?.dispose();
@@ -274,8 +277,11 @@ class PerfToolFramework extends Framework {
   }
 
   void _buildRestartButton() async {
-    final ActionButton restartAction =
-        ActionButton(FlutterIcons.hotRestartWhite, _restartTooltip);
+    final ActionButton restartAction = ActionButton(
+      _restartActionId,
+      FlutterIcons.hotRestartWhite,
+      'Hot Restart',
+    );
     restartAction.click(() async {
       // Hide any previous status related to reload / restart.
       reloadStatus?.dispose();

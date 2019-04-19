@@ -360,12 +360,13 @@ CoreElement _defaultRenderer<T>(T item) {
 }
 
 class ActionButton implements CoreElementView {
-  ActionButton(this.icon, this.tooltip) {
+  ActionButton(this.id, this.icon, this.tooltip) {
     _element = div(c: 'masthead-item action-button')
       ..tooltip = tooltip
       ..add(createIconElement(icon));
   }
 
+  final String id;
   final Icon icon;
   final String tooltip;
 

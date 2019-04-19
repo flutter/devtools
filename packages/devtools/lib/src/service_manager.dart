@@ -225,7 +225,7 @@ class IsolateManager {
 
   Completer<Null> selectedIsolateAvailable = Completer();
 
-  List<String> selectedIsolateLibraryUris;
+  List<LibraryRef> selectedIsolateLibraries;
 
   List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
 
@@ -328,8 +328,7 @@ class IsolateManager {
 
     // Store the library uris for the selected isolate.
     final Isolate isolate = await _service.getIsolate(ref.id);
-    selectedIsolateLibraryUris =
-        isolate.libraries.map((ref) => ref.uri).toList();
+    selectedIsolateLibraries = isolate.libraries;
 
     _selectedIsolate = ref;
     if (!selectedIsolateAvailable.isCompleted) {

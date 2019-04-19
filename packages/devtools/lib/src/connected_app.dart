@@ -37,7 +37,9 @@ class ConnectedApp {
     assert(serviceManager.serviceAvailable.isCompleted);
     await serviceManager.isolateManager.selectedIsolateAvailable.future;
 
-    return serviceManager.isolateManager.selectedIsolateLibraryUris
+    return serviceManager.isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
         .contains(flutterLibraryUri);
   }
 
@@ -48,7 +50,9 @@ class ConnectedApp {
     // TODO(kenzie): change this if screens should still be disabled when
     // flutter merges with flutter_web. See
     // https://github.com/flutter/devtools/issues/466.
-    return serviceManager.isolateManager.selectedIsolateLibraryUris
+    return serviceManager.isolateManager.selectedIsolateLibraries
+        .map((ref) => ref.uri)
+        .toList()
         .contains(flutterWebLibraryUri);
   }
 

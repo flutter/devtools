@@ -232,8 +232,8 @@ class Framework {
     globalActions.addAction(action);
   }
 
-  void removeGlobalAction(String name) {
-    globalActions.removeAction(name);
+  void removeGlobalAction(String id) {
+    globalActions.removeAction(id);
   }
 }
 
@@ -303,7 +303,7 @@ class ActionsContainer {
 
   void addAction(ActionButton action) {
     for (ActionButton _action in _actions) {
-      if (_action.tooltip == action.tooltip) {
+      if (_action.id == action.id) {
         // This action is a duplicate. Do not add it.
         return;
       }
@@ -319,8 +319,8 @@ class ActionsContainer {
     element.add(action.element);
   }
 
-  void removeAction(String name) {
-    _actions.removeWhere((ActionButton button) => button.tooltip == name);
+  void removeAction(String id) {
+    _actions.removeWhere((ActionButton button) => button.id == id);
   }
 
   void clearActions() {
