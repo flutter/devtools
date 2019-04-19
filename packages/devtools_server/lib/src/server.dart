@@ -167,7 +167,9 @@ Future<void> registerLaunchDevToolsService(
     final VmService service = await _connectToVmService(uri);
 
     service.registerServiceCallback(launchDevToolsService, (request) async {
-      final url = '$devToolsUrl/url=${Uri.encodeComponent(uri.toString())}#';
+      // TODO(kenzie): modify this to append arguments (i.e. theme=dark). This
+      // likely will require passing in args.
+      final url = '$devToolsUrl/?url=${Uri.encodeComponent(uri.toString())}#';
 
       // TODO(kenzie): depend on the browser_launcher package for this once it
       // is complete.
@@ -195,7 +197,6 @@ Future<void> registerLaunchDevToolsService(
       },
       machineMode: machineMode,
     );
-    return;
   }
 }
 

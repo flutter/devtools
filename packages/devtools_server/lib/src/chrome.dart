@@ -71,13 +71,11 @@ class Chrome {
   /// Each url in [urls] will be loaded in a separate tab.
   static Future<void> start(
     List<String> urls, {
-    List<String> args,
+    List<String> args = const [],
     int port,
   }) async {
-    args ??= [];
-    args.addAll(urls);
-
-    await Process.start(_executable, args);
+    final processArgs = List.from(urls)..addAll(args);
+    await Process.start(_executable, processArgs);
   }
 }
 
