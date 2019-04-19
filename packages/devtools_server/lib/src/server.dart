@@ -169,7 +169,7 @@ Future<void> registerLaunchDevToolsService(
     service.registerServiceCallback(launchDevToolsService, (request) async {
       // TODO(kenzie): modify this to append arguments (i.e. theme=dark). This
       // likely will require passing in args.
-      final url = '$devToolsUrl/?url=${Uri.encodeComponent(uri.toString())}#';
+      final url = '$devToolsUrl/?uri=${Uri.encodeComponent(uri.toString())}';
 
       // TODO(kenzie): depend on the browser_launcher package for this once it
       // is complete.

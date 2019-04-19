@@ -74,7 +74,7 @@ class Chrome {
     List<String> args = const [],
     int port,
   }) async {
-    final processArgs = List.from(urls)..addAll(args);
+    final processArgs = args.toList()..addAll(urls);
     await Process.start(_executable, processArgs);
   }
 }
