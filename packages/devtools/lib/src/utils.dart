@@ -121,22 +121,28 @@ String longestFittingSubstring(
   String originalText,
   num maxWidth,
   List<num> asciiMeasurements,
+  Function slowMeasureFallback,
 ) {
   if (originalText.isEmpty) return originalText;
 
+  final runes = originalText.runes.toList();
+
   num currentWidth = 0;
-  int longestIndex = 0;
-  final charCodes = ascii.encode(originalText);
-  for (int i = 0; i < charCodes.length; i++) {
-    final charCodeWidth = asciiMeasurements[charCodes[i]];
-    if (currentWidth + charCodeWidth > maxWidth) {
+
+  int i = 0;
+  while (i < runes.length) {
+    final rune = runes[i];
+    final charWidth =
+        rune < 128 ? asciiMeasurements[rune] : slowMeasureFallback(rune);
+    if (currentWidth + charWidth > maxWidth) {
       break;
     }
-    currentWidth += charCodeWidth;
-    longestIndex = i;
+    // [currentWidth] is approximate due to ignoring kerning.
+    currentWidth += charWidth;
+    i++;
   }
 
-  return longestIndex == 0 ? '' : originalText.substring(0, longestIndex + 1);
+  return originalText.substring(0, i);
 }
 
 class Property<T> {

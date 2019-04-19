@@ -127,23 +127,83 @@ void main() {
     });
 
     test('longestFittingSubstring', () {
-      const str = 'ComponentElement.performRebuild';
+      const asciiStr = 'ComponentElement.performRebuild';
+      const nonAsciiStr = 'ԪԪ';
+      void slowMeasureCallback(_) => 100;
 
       expect(
-        longestFittingSubstring(str, 0, asciiMeasurements),
+        longestFittingSubstring(
+          asciiStr,
+          0,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
         equals(''),
       );
       expect(
-        longestFittingSubstring(str, 50, asciiMeasurements),
+        longestFittingSubstring(
+          asciiStr,
+          50,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
         equals('Compo'),
       );
       expect(
-        longestFittingSubstring(str, 224, asciiMeasurements),
+        longestFittingSubstring(
+          asciiStr,
+          224,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
         equals('ComponentElement.performRebuild'),
       );
       expect(
-        longestFittingSubstring(str, 300, asciiMeasurements),
+        longestFittingSubstring(
+          asciiStr,
+          300,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
         equals('ComponentElement.performRebuild'),
+      );
+
+      expect(nonAsciiStr.codeUnitAt(0), greaterThanOrEqualTo(128));
+      expect(
+        longestFittingSubstring(
+          nonAsciiStr,
+          0,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
+        equals(''),
+      );
+      expect(
+        longestFittingSubstring(
+          nonAsciiStr,
+          100,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
+        equals('Ԫ'),
+      );
+      expect(
+        longestFittingSubstring(
+          nonAsciiStr,
+          199,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
+        equals('Ԫ'),
+      );
+      expect(
+        longestFittingSubstring(
+          nonAsciiStr,
+          200,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
+        equals('ԪԪ'),
       );
     });
   });

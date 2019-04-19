@@ -252,13 +252,7 @@ class FlameChartCanvas extends FlameChart {
       _viewportCanvas.rebuild(force: true);
     });
 
-    final measurementCanvas = CanvasElement().context2D
-      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
-    _asciiMeasurements = List.generate(
-      128,
-      (i) => measurementCanvas.measureText(ascii.decode([i])).width,
-    );
-    print(_asciiMeasurements);
+    _initAsciiMeasurements();
   }
 
   final DragScroll _dragScroll = DragScroll();
@@ -279,6 +273,15 @@ class FlameChartCanvas extends FlameChart {
   /// events when zoomed in to [_maxZoomLevel].
   final _maxZoomLevel = 150;
   final _minZoomLevel = 1;
+
+  void _initAsciiMeasurements() {
+    final measurementCanvas = CanvasElement().context2D
+      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+    _asciiMeasurements = List.generate(
+      128,
+      (i) => measurementCanvas.measureText(ascii.decode([i])).width,
+    );
+  }
 
   // TODO(kenzie): optimize painting to canvas by grouping paints with the same
   // canvas settings.
@@ -508,6 +511,7 @@ class FlameChartNode {
           text,
           maxTextWidth,
           _asciiMeasurements,
+          (int value) => canvas.measureText(String.fromCharCode(value)).width,
         );
       }
 
