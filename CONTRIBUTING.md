@@ -73,6 +73,13 @@ file output still looks reasonable and execute the following command to update t
 ./tool/update_goldens.sh
 ```
 
+To update the Stable versions of the Golden files, switch to Flutter's current stable
+branch and run with the `--stable` switch.
+
+```
+./tool/update_goldens.sh --stable
+```
+
 ### third_party dependencies
 
 All content not authored by the Flutter team must go in the third_party

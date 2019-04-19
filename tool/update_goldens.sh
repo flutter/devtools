@@ -4,9 +4,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+echo "Checking flutter version..."
+if flutter --version | tee /dev/tty | grep -q 'channel stable'; then
+  export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true -DGOLDENS_SUFFIX=_stable"
+  echo ""
+  echo "Updating STABLE goldens because you are on the Stable flutter channel"
+  echo ""
+else
+  export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+  echo ""
+  echo "Updating MASTER goldens"
+  echo ""
+fi
 
-echo "Make sure your flutter is the tip of trunk Flutter"
 
 set -x #echo on
 which flutter
