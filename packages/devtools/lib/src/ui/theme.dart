@@ -35,8 +35,10 @@ const ThemedColor grey = ThemedColor(
     Color.fromARGB(255, 128, 128, 128), Color.fromARGB(255, 128, 128, 128));
 
 // Background colors for charts.
-const ThemedColor chartBackground =
-    ThemedColor(Colors.white, Color.fromRGBO(47, 43, 43, 1));
+const ThemedColor chartBackground = ThemedColor(
+  Colors.white,
+  Color(0xFF2D2E31), // Material Dark Grey 900+2
+);
 
 /// Color that behaves differently depending on whether a light or dark theme
 /// is used.

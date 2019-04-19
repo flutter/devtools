@@ -42,7 +42,7 @@ class EventDetails extends CoreElement {
   static const defaultTitleText = '[No event selected]';
   static const defaultTitleBackground = ThemedColor(
     Color(0xFFF6F6F6),
-    Color(0xFF323232),
+    Color(0xFF2D2E31), // Material Dark Grey 900+2
   );
 
   PTabNav tabNav;
