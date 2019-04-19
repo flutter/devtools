@@ -37,9 +37,6 @@ if [ "$BOT" = "main" ]; then
     # Make sure the app versions are in sync.
     dart tool/version_check.dart
 
-    # Make sure devtools/analysis_options.yaml is in sync with devtools_server/analysis_options.yaml.
-    dart tool/analysis_options_check.dart
-
     # Analyze the source.
     pub global activate tuneup && tuneup check
 
