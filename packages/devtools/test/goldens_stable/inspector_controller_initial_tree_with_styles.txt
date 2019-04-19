@@ -1,0 +1,8 @@
+▼[R]<grayed> </grayed>root <grayed>]</grayed>
+  ▼[M]<grayed> </grayed>MyApp
+    ▼[M]<grayed> </grayed>MaterialApp
+      ▼[S]<grayed> </grayed>Scaffold
+      ├───▼[C]<grayed> </grayed>Center
+      │     ▼[/icons/inspector/textArea.png]<grayed> </grayed>Text
+      └─▼[A]<grayed> </grayed>AppBar
+          ▼[/icons/inspector/textArea.png]<grayed> </grayed>Text
