@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
-import 'eval_on_dart_library.dart';
 import 'globals.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
