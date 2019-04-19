@@ -17,7 +17,7 @@ import 'timeline.dart';
 // TODO(kenzie): delete this file once frame_flame_chart is ported to canvas.
 
 const selectedFlameChartItemColor =
-    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedDark);
+    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedLight);
 
 /// Flame chart superclass that houses zooming, scrolling, and selection logic,
 /// among other data handling methods like `update` and `reset`.

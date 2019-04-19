@@ -27,15 +27,18 @@ const ThemedColor defaultForeground =
 // Text color [defaultForeground] is too gray, making it hard to read the text
 // in dark theme. We should use a more white color for dark theme, but not
 // jarring white #FFFFFF.
+const Color contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
 const ThemedColor contrastForeground =
-    ThemedColor(Colors.black, Color.fromARGB(255, 240, 240, 240));
+    ThemedColor(Colors.black, contrastForegroundWhite);
 
 const ThemedColor grey = ThemedColor(
     Color.fromARGB(255, 128, 128, 128), Color.fromARGB(255, 128, 128, 128));
 
 // Background colors for charts.
-const ThemedColor chartBackground =
-    ThemedColor(Colors.white, Color.fromRGBO(47, 43, 43, 1));
+const ThemedColor chartBackground = ThemedColor(
+  Colors.white,
+  Color(0xFF2D2E31), // Material Dark Grey 900+2
+);
 
 /// Color that behaves differently depending on whether a light or dark theme
 /// is used.

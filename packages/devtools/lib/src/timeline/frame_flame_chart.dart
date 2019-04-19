@@ -17,20 +17,20 @@ import 'timeline_protocol.dart';
 
 // TODO(kenzie): port all of this code to use flame_chart_canvas.dart.
 
-// Light Blue 50 - 200-400 (light mode) or Blue 50 - 100-300 (dark mode) color
-// palette from https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Light Blue 50: 200-400 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Blue Material Dark: 200-400 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
 final uiColorPalette = [
   const ThemedColor(mainUiColorLight, mainUiColorDark),
-  const ThemedColor(Color(0xFF4FC3F7), Color(0xFF90CAF9)),
-  const ThemedColor(Color(0xFF29B6F6), Color(0xFF64B5F6)),
+  const ThemedColor(Color(0xFF4FC3F7), Color(0xFF8AB4F7)),
+  const ThemedColor(Color(0xFF29B6F6), Color(0xFF669CF6)),
 ];
 
-// Light Blue 50 - 700-900 (light mode) or Blue 50 - 600-800 (dark mode) color
-// palette from https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Light Blue 50: 700-900 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
+// Blue Material Dark: 500-700 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
 final gpuColorPalette = [
   const ThemedColor(mainGpuColorLight, mainGpuColorDark),
-  const ThemedColor(Color(0xFF0277BD), Color(0xFF1976D2)),
-  const ThemedColor(Color(0xFF01579B), Color(0xFF1565C0)),
+  const ThemedColor(Color(0xFF0277BD), Color(0xFF1966D2)),
+  const ThemedColor(Color(0xFF01579B), Color(0xFF1859BD)),
 ];
 
 final StreamController<FrameFlameChartItem>
@@ -220,7 +220,7 @@ class FrameFlameChart extends FlameChart<TimelineFrame> {
       width,
       top,
       event.isUiEvent ? nextUiColor() : nextGpuColor(),
-      event.isUiEvent ? Colors.black : Colors.white,
+      event.isUiEvent ? Colors.black : contrastForegroundWhite,
       Colors.black,
       includeDuration: includeDuration,
     );
@@ -415,7 +415,8 @@ class TimelineGridItem extends CoreElement {
     gridLine = div(c: 'grid-line');
     add(gridLine);
 
-    timestampLabel = div(c: 'timestamp');
+    timestampLabel = div(c: 'timestamp')
+      ..element.style.color = colorToCss(contrastForeground);
     // TODO(kenzie): add more advanced logic for rounding the timestamps. See
     // https://github.com/flutter/devtools/issues/329.
     timestampLabel.text = msText(
