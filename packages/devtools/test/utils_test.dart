@@ -128,8 +128,8 @@ void main() {
 
     test('longestFittingSubstring', () {
       const asciiStr = 'ComponentElement.performRebuild';
-      const nonAsciiStr = 'ԪԪ';
-      void slowMeasureCallback(_) => 100;
+      const nonAsciiStr = 'ԪElement.updateChildԪ';
+      num slowMeasureCallback(_) => 100;
 
       expect(
         longestFittingSubstring(
@@ -172,7 +172,7 @@ void main() {
       expect(
         longestFittingSubstring(
           nonAsciiStr,
-          0,
+          99,
           asciiMeasurements,
           slowMeasureCallback,
         ),
@@ -190,20 +190,29 @@ void main() {
       expect(
         longestFittingSubstring(
           nonAsciiStr,
-          199,
+          230,
           asciiMeasurements,
           slowMeasureCallback,
         ),
-        equals('Ԫ'),
+        equals('ԪElement.updateChild'),
       );
       expect(
         longestFittingSubstring(
           nonAsciiStr,
-          200,
+          329,
           asciiMeasurements,
           slowMeasureCallback,
         ),
-        equals('ԪԪ'),
+        equals('ԪElement.updateChild'),
+      );
+      expect(
+        longestFittingSubstring(
+          nonAsciiStr,
+          330,
+          asciiMeasurements,
+          slowMeasureCallback,
+        ),
+        equals('ԪElement.updateChildԪ'),
       );
     });
   });

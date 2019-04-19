@@ -121,7 +121,7 @@ String longestFittingSubstring(
   String originalText,
   num maxWidth,
   List<num> asciiMeasurements,
-  Function slowMeasureFallback,
+  num slowMeasureFallback(int value),
 ) {
   if (originalText.isEmpty) return originalText;
 
