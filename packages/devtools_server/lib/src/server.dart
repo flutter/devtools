@@ -184,7 +184,7 @@ Future<void> registerLaunchDevToolsService(
       'Successfully registered launchDevTools service',
       {
         'id': id,
-        'result': Success().toJson(),
+        'result': {'success': true},
       },
       machineMode: machineMode,
     );
