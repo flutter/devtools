@@ -102,6 +102,10 @@ void serveDevTools({
   printOutput(
     'Serving DevTools at $devToolsUrl',
     {
+      'event': 'server.started',
+      // TODO(dantup): Remove this `method` field when we're sure VS Code users
+      // are all on a newer version that uses `event`. We incorrectly used
+      // `method` for the original releases.
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
     },
