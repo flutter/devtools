@@ -129,6 +129,7 @@ void serveDevTools({
   //   }
   // }
   _stdinCommandStream.listen((Map<String, dynamic> json) async {
+    // ID can be String, int or null
     final dynamic id = json['id'];
     final Map<String, dynamic> params = json['params'];
 
