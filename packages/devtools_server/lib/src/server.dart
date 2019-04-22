@@ -128,31 +128,49 @@ void serveDevTools({
     final dynamic id = json['id'];
     final Map<String, dynamic> params = json['params'];
 
-    if (!params.containsKey('uri')) {
-      printOutput(
-        'Invalid input: $params does not contain the key \'uri\'',
-        {
-          'id': id,
-          'error': 'Invalid input: $params does not contain the key \'uri\'',
-        },
-        machineMode: machineMode,
-      );
+    switch (json['method']) {
+      case 'vm.register':
+        await _handleVmRegister(id, params, machineMode, devToolsUrl);
+        break;
+      default:
+        printOutput(
+          'Unknown command ${json['method']}',
+          {
+            'id': id,
+            'error': 'Unknown method ${json['method']}',
+          },
+          machineMode: machineMode,
+        );
     }
-
-    // json['uri'] should contain a vm service uri.
-    final uri = Uri.parse(params['uri']);
-
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    if (uri != null &&
-        uri.isAbsolute &&
-        (uri.isScheme('ws') ||
-            uri.isScheme('wss') ||
-            uri.isScheme('http') ||
-            uri.isScheme('https')))
-      await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
   });
+}
+
+Future _handleVmRegister(dynamic id, Map<String, dynamic> params,
+    bool machineMode, String devToolsUrl) async {
+  if (!params.containsKey('uri')) {
+    printOutput(
+      'Invalid input: $params does not contain the key \'uri\'',
+      {
+        'id': id,
+        'error': 'Invalid input: $params does not contain the key \'uri\'',
+      },
+      machineMode: machineMode,
+    );
+  }
+
+  // json['uri'] should contain a vm service uri.
+  final uri = Uri.parse(params['uri']);
+
+  // Lots of things are considered valid URIs (including empty strings
+  // and single letters) since they can be relative, so we need to do some
+  // extra checks.
+  if (uri != null &&
+      uri.isAbsolute &&
+      (uri.isScheme('ws') ||
+          uri.isScheme('wss') ||
+          uri.isScheme('http') ||
+          uri.isScheme('https')))
+    await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
 }
 
 Future<void> registerLaunchDevToolsService(
