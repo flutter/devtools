@@ -125,7 +125,7 @@ void serveDevTools({
   //   }
   // }
   _stdinCommandStream.listen((Map<String, dynamic> json) async {
-    final int id = json['id'];
+    final dynamic id = json['id'];
     final Map<String, dynamic> params = json['params'];
 
     if (!params.containsKey('uri')) {
@@ -157,7 +157,7 @@ void serveDevTools({
 
 Future<void> registerLaunchDevToolsService(
   Uri uri,
-  int id,
+  dynamic id,
   String devToolsUrl,
   bool machineMode,
 ) async {
