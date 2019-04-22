@@ -150,7 +150,7 @@ void serveDevTools({
   });
 }
 
-Future _handleVmRegister(dynamic id, Map<String, dynamic> params,
+Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
     bool machineMode, String devToolsUrl) async {
   if (!params.containsKey('uri')) {
     printOutput(
