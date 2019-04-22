@@ -201,6 +201,9 @@ Future<void> registerLaunchDevToolsService(
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {
+  // Fix up the various acceptable URI formats into a WebSocket URI to connect.
+  uri = getVmServiceUriFromObservatoryUri(uri);
+
   final WebSocket ws = await WebSocket.connect(uri.toString());
 
   final VmService service = VmService(
@@ -232,4 +235,18 @@ void printOutput(
   @required bool machineMode,
 }) {
   print(machineMode ? jsonEncode(json) : message);
+}
+
+/// Map the URI (which may already be Observatory web app) to a WebSocket URI
+/// for the VM service. If the URI is already a VM Service WebSocket URI it
+/// will not be modified.
+Uri getVmServiceUriFromObservatoryUri(Uri uri) {
+  final isSecure = uri.isScheme('wss') || uri.isScheme('https');
+  final scheme = isSecure ? 'wss' : 'ws';
+
+  final path = uri.path.endsWith('/ws')
+      ? uri.path
+      : (uri.path.endsWith('/') ? '${uri.path}ws' : '${uri.path}/ws');
+
+  return uri.replace(scheme: scheme, path: path);
 }
