@@ -271,8 +271,9 @@ void printOutput(
 }
 
 /// Map the URI (which may already be Observatory web app) to a WebSocket URI
-/// for the VM service. If the URI is already a VM Service WebSocket URI it
-/// will not be modified.
+/// for the VM service.
+///
+/// If the URI is already a VM Service WebSocket URI it will not be modified.
 Uri getVmServiceUriFromObservatoryUri(Uri uri) {
   final isSecure = uri.isScheme('wss') || uri.isScheme('https');
   final scheme = isSecure ? 'wss' : 'ws';
