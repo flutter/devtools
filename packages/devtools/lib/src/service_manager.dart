@@ -260,12 +260,12 @@ class IsolateManager {
     }
   }
 
-  void _handleIsolateEvent(Event event) async {
+  Future<void> _handleIsolateEvent(Event event) async {
     if (event.kind == 'IsolateStart') {
       _isolates.add(event.isolate);
       _isolateCreatedController.add(event.isolate);
       if (_selectedIsolate == null) {
-        _setSelectedIsolate(event.isolate);
+        await _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == 'ServiceExtensionAdded') {
       // On hot restart, service extensions are added from here.
@@ -274,7 +274,7 @@ class IsolateManager {
 
       // Check to see if there is a new isolate.
       if (_selectedIsolate == null && _isFlutterExtension(event.extensionRPC)) {
-        _setSelectedIsolate(event.isolate);
+        await _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == 'IsolateExit') {
       _isolates.remove(event.isolate);
@@ -305,7 +305,7 @@ class IsolateManager {
         if (isolate.extensionRPCs != null) {
           for (String extensionName in isolate.extensionRPCs) {
             if (_isFlutterExtension(extensionName)) {
-              _setSelectedIsolate(ref);
+              await _setSelectedIsolate(ref);
               return;
             }
           }
@@ -318,10 +318,10 @@ class IsolateManager {
       return ref.name.contains(':main(');
     }, orElse: () => null);
 
-    _setSelectedIsolate(ref ?? isolates.first);
+    await _setSelectedIsolate(ref ?? isolates.first);
   }
 
-  void _setSelectedIsolate(IsolateRef ref) async {
+  Future<void> _setSelectedIsolate(IsolateRef ref) async {
     if (_selectedIsolate == ref) {
       return;
     }
