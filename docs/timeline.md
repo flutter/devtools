@@ -70,18 +70,16 @@ The flame chart supports zooming and panning. Scroll up and down to zoom in and 
 can either click and drag the chart or scroll horizontally. You can also click an event to view CPU profiling information
 in the section below the chart.
 
-## CPU Profiler
+## CPU Profiler (preview)
 
 This section shows CPU profiling information for a specific event from the frame flame chart (Build, Layout, Paint, etc.).
 The CPU profiler is actively being worked on and is currently in a preview state.
 
-### CPU Flame Chart (Preview)
+### CPU Flame Chart
 This tab of the profiler shows CPU samples for the selected frame event (e.g. VSYNC in the example below). This chart
 should be viewed as a top-down stack trace, where the top-most stack frame calls the one below it, and so on and so forth.
 The width of each stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU
 time may be a good place to look for possible performance improvements.
-
-The flame chart supports zooming and panning, and it should be interacted with in the same manner as the Frame Flame Chart.
 
 <img src="images/timeline_cpu_profiler.png" width="800" />
 
