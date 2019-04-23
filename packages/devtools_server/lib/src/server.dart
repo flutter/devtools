@@ -275,6 +275,8 @@ void printOutput(
 ///
 /// If the URI is already a VM Service WebSocket URI it will not be modified.
 Uri getVmServiceUriFromObservatoryUri(Uri uri) {
+  // TODO(dantup): We have two copies of this and should move it to vm_service_lib
+  // then switch to that.
   final isSecure = uri.isScheme('wss') || uri.isScheme('https');
   final scheme = isSecure ? 'wss' : 'ws';
 
