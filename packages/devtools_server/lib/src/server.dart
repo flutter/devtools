@@ -164,7 +164,7 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
   }
 
   // json['uri'] should contain a vm service uri.
-  final uri = Uri.parse(params['uri']);
+  final uri = Uri.tryParse(params['uri']);
 
   // Lots of things are considered valid URIs (including empty strings
   // and single letters) since they can be relative, so we need to do some
@@ -174,8 +174,18 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
       (uri.isScheme('ws') ||
           uri.isScheme('wss') ||
           uri.isScheme('http') ||
-          uri.isScheme('https')))
+          uri.isScheme('https'))) {
     await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
+  } else {
+    printOutput(
+      'Uri must be absolute with a http, https, ws or wss scheme',
+      {
+        'id': id,
+        'error': 'Uri must be absolute with a http, https, ws or wss scheme',
+      },
+      machineMode: machineMode,
+    );
+  }
 }
 
 Future<void> registerLaunchDevToolsService(
