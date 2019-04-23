@@ -58,21 +58,33 @@ When this target is missed, you may experience UI jank or dropped frames.
 See [Flutter performance profiling](https://flutter.dev/docs/testing/ui-performance) for more detailed information on
 how to analyze your app's performance.
 
-## Flame Chart
+## Frame Flame Chart
 
-The flame chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on and so
+The frame flame chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on and so
 forth. The UI and GPU events are separate event flows, but they share a common timeline (displayed at the top of the
 flame chart). This timeline is strictly for the given frame. It does not reflect the clock shared by all frames.
 
-<img src="images/timeline_flame_chart.png" width="800" />
+<img src="images/timeline_frame_flame_chart.png" width="800" />
 
 The flame chart supports zooming and panning. Scroll up and down to zoom in and out, respectively. To pan around, you
-can either click and drag the chart or scroll horizontally. You can also click an event to view more details in the
-details section below the chart.
+can either click and drag the chart or scroll horizontally. You can also click an event to view CPU profiling information
+in the section below the chart.
 
-## Event Details
+## CPU Profiler (preview)
 
-This section shows details for a specific event. Currently, only the event name and duration are displayed. This feature
-is actively being worked on. We are planning to display CPU sampling data here in the future.
+This section shows CPU profiling information for a specific event from the frame flame chart (Build, Layout, Paint, etc.).
+The CPU profiler is actively being worked on and is currently in a preview state.
 
-<img src="images/timeline_event_details.png" width="800" />
+### CPU Flame Chart
+This tab of the profiler shows CPU samples for the selected frame event (e.g. VSYNC in the example below). This chart
+should be viewed as a top-down stack trace, where the top-most stack frame calls the one below it, and so on and so forth.
+The width of each stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU
+time may be a good place to look for possible performance improvements.
+
+<img src="images/timeline_cpu_profiler.png" width="800" />
+
+### Bottom Up
+Coming soon.
+
+### Call Tree
+Coming soon.
