@@ -320,7 +320,7 @@ class WebdevFixture {
       }
 
       // Serving `web` on http://localhost:8080
-      if (line.startsWith(r'Serving `web`')) {
+      if (line.contains('Serving `web`')) {
         final String url = line.substring(line.indexOf('http://'));
         hasUrl.complete(url);
       }
