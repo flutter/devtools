@@ -79,6 +79,15 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     flutter config --no-analytics
     flutter doctor
 
+    # Put the Flutter version into a variable.
+    # First awk extracts "Flutter x.y.z-pre.a":
+    #   -F '•'         uses the bullet as field separator
+    #   NR==1          says only take the first record (line)
+    #   { print $1}    prints just the first field
+    # Second awk splits on space (default) and takes the second field (the version)
+    export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
+    echo "Flutter version is '$FLUTTER_VERSION'"
+
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
 

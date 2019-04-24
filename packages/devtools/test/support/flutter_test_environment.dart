@@ -12,6 +12,8 @@ import 'package:devtools/src/vm_service_wrapper.dart';
 
 import 'flutter_test_driver.dart';
 
+final flutterVersion = Platform.environment['FLUTTER_VERSION'];
+
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
