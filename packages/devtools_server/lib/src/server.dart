@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:vm_service_lib/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide Isolate;
 
 import 'chrome.dart';
@@ -235,7 +236,7 @@ Future<void> registerLaunchDevToolsService(
 
 Future<VmService> _connectToVmService(Uri uri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
-  uri = getVmServiceUriFromObservatoryUri(uri);
+  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
   final WebSocket ws = await WebSocket.connect(uri.toString());
 
@@ -268,21 +269,4 @@ void printOutput(
   @required bool machineMode,
 }) {
   print(machineMode ? jsonEncode(json) : message);
-}
-
-/// Map the URI (which may already be Observatory web app) to a WebSocket URI
-/// for the VM service.
-///
-/// If the URI is already a VM Service WebSocket URI it will not be modified.
-Uri getVmServiceUriFromObservatoryUri(Uri uri) {
-  // TODO(dantup): We have two copies of this and should move it to vm_service_lib
-  // then switch to that.
-  final isSecure = uri.isScheme('wss') || uri.isScheme('https');
-  final scheme = isSecure ? 'wss' : 'ws';
-
-  final path = uri.path.endsWith('/ws')
-      ? uri.path
-      : (uri.path.endsWith('/') ? '${uri.path}ws' : '${uri.path}/ws');
-
-  return uri.replace(scheme: scheme, path: path);
 }

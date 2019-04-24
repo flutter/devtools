@@ -163,20 +163,6 @@ class Property<T> {
   Stream<T> get onValueChange => _changeController.stream;
 }
 
-/// Map the URI (which may already be Observatory web app) to a WebSocket URI
-/// for the VM service. If the URI is already a VM Service WebSocket URI it
-/// will not be modified.
-Uri getVmServiceUriFromObservatoryUri(Uri uri) {
-  final isSecure = uri.isScheme('wss') || uri.isScheme('https');
-  final scheme = isSecure ? 'wss' : 'ws';
-
-  final path = uri.path.endsWith('/ws')
-      ? uri.path
-      : (uri.path.endsWith('/') ? '${uri.path}ws' : '${uri.path}/ws');
-
-  return uri.replace(scheme: scheme, path: path);
-}
-
 /// A typedef to represent a function taking no arguments and with no return
 /// value.
 typedef VoidFunction = void Function();

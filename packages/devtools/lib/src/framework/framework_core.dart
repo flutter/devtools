@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
-import 'package:devtools/src/utils.dart';
+import 'package:vm_service_lib/utils.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../core/message_bus.dart';
@@ -45,7 +45,7 @@ class FrameworkCore {
 
       // Map the URI (which may be Observatory web app) to a WebSocket URI for
       // the VM service.
-      uri = getVmServiceUriFromObservatoryUri(uri);
+      uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
       try {
         final VmServiceWrapper service = await connect(uri, finishedCompleter);
