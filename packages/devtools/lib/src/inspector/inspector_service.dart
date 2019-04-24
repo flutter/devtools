@@ -805,7 +805,7 @@ class ObjectGroup {
     final instanceRef = await setSelectionResult;
     if (disposed) return;
     handleSetSelectionHelper(
-        'true' == instanceRef.valueAsString, uiAlreadyUpdated);
+        'true' == instanceRef?.valueAsString, uiAlreadyUpdated);
   }
 
   void handleSetSelectionHelper(bool selectionChanged, bool uiAlreadyUpdated) {
