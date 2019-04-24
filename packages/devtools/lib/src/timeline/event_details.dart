@@ -392,13 +392,17 @@ class _CpuFlameChart extends CoreElement {
     // Only update the canvas if the flame chart is visible and has data.
     // Otherwise, mark the canvas as needing a rebuild.
     if (!isHidden && cpuProfileData != null) {
+      // We need to rebuild the canvas with a new content size so that the
+      // canvas is always at least as tall as the container it is in. This
+      // ensures that the grid lines in the chart will extend all the way to the
+      // bottom of the container.
       canvas.forceRebuildForSize(
         canvas.flameChartWidthWithInsets,
         math.max(
-          // Subtract [rowHeightWithPadding] to account for size of
-          // [stackFrameDetails] section at bottom of chart.
+          // Subtract [rowHeightWithPadding] to account for the size of
+          // [stackFrameDetails] section at the bottom of the chart.
           element.scrollHeight.toDouble() - rowHeightWithPadding,
-          // Add 1 to account for a row of padding at bottom of chart.
+          // Add 1 to account for a row of padding at the bottom of the chart.
           (cpuProfileData.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
         ),
       );
