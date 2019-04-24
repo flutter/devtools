@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 // TODO(kenzie): move this code to dart-lang/browser_launcher. This code was
@@ -16,6 +16,11 @@ const _linuxExecutable = 'google-chrome';
 const _macOSExecutable =
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const _windowsExecutable = r'Google\Chrome\Application\chrome.exe';
+var _windowsPrefixes = [
+  Platform.environment['LOCALAPPDATA'],
+  Platform.environment['PROGRAMFILES'],
+  Platform.environment['PROGRAMFILES(X86)']
+];
 
 String get _executable {
   if (Platform.environment.containsKey(_chromeEnvironment)) {
@@ -23,7 +28,15 @@ String get _executable {
   }
   if (Platform.isLinux) return _linuxExecutable;
   if (Platform.isMacOS) return _macOSExecutable;
-  if (Platform.isWindows) return _windowsExecutable;
+  if (Platform.isWindows) {
+    return p.join(
+        _windowsPrefixes.firstWhere((prefix) {
+          if (prefix == null) return false;
+          final path = p.join(prefix, _windowsExecutable);
+          return File(path).existsSync();
+        }, orElse: () => '.'),
+        _windowsExecutable);
+  }
   throw StateError('Unexpected platform type.');
 }
 
