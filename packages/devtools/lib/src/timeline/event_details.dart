@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:math' as math;
 
+import 'package:js/js.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../globals.dart';
@@ -36,21 +38,36 @@ class EventDetails extends CoreElement {
     assert(tabNav != null);
     assert(content != null);
 
+    // The size of the event details section will change as the splitter is
+    // is moved. Observe resizing so that we can rebuild the flame chart canvas
+    // as necessary.
+    final observer = html.ResizeObserver(allowInterop((entries, _) {
+      _details.uiEventDetails.flameChart.updateForContainerResize();
+    }));
+    observer.observe(element);
+
     add([tabNav, content]);
   }
 
   static const defaultTitleText = '[No event selected]';
+
   static const defaultTitleBackground = ThemedColor(
     Color(0xFFF6F6F6),
     Color(0xFF2D2E31), // Material Dark Grey 900+2
   );
 
   PTabNav tabNav;
+
+  PTabNavTab _selectedTab;
+
   CoreElement content;
+
   CoreElement hideNativeCheckbox;
 
   TimelineEvent _event;
+
   CoreElement _title;
+
   _Details _details;
 
   void _initContent() {
@@ -88,7 +105,15 @@ class EventDetails extends CoreElement {
     ])
       ..element.style.borderBottom = '0';
 
+    _selectedTab = flameChartTab;
+
     tabNav.onTabSelected.listen((PTabNavTab tab) {
+      // Return early if this tab is already selected.
+      if (tab == _selectedTab) {
+        return;
+      }
+      _selectedTab = tab;
+
       assert(tab is EventDetailsTabNavTab);
       switch ((tab as EventDetailsTabNavTab).type) {
         case EventDetailsTabType.flameChart:
@@ -144,9 +169,6 @@ class EventDetails extends CoreElement {
       ..color = colorToCss(contrastForeground)
       ..backgroundColor = colorToCss(defaultTitleBackground);
     _details.reset();
-
-    final html.InputElement checkbox = hideNativeCheckbox.element;
-    checkbox.checked = true;
   }
 }
 
@@ -169,6 +191,7 @@ class _Details extends CoreElement {
   }
 
   CoreElement gpuEventDetails;
+
   _UiEventDetails uiEventDetails;
 
   Future<void> update(TimelineEvent event) async {
@@ -176,7 +199,7 @@ class _Details extends CoreElement {
     gpuEventDetails.attribute('hidden', event.isUiEvent);
     uiEventDetails.attribute('hidden', event.isGpuEvent);
 
-    if (event.isUiEvent && showCpuFlameChart) {
+    if (event.isUiEvent) {
       await uiEventDetails.update(event);
     }
   }
@@ -184,73 +207,105 @@ class _Details extends CoreElement {
   void reset() {
     gpuEventDetails.attribute('hidden', true);
     uiEventDetails.attribute('hidden', true);
-    if (showCpuFlameChart) {
-      uiEventDetails.reset();
-    }
+    uiEventDetails.reset();
   }
 }
 
 class _UiEventDetails extends CoreElement {
-  _UiEventDetails() : super('div', classes: 'ui-details') {
+  _UiEventDetails() : super('div') {
     layoutVertical();
     flex();
 
-    flameChart = div(c: 'ui-details-section');
-
-    if (!showCpuFlameChart) {
-      flameChart.add(div(text: 'CPU flame chart coming soon', c: 'message'));
-    }
-
     add([
-      flameChart,
+      flameChart = _CpuFlameChart(),
       bottomUp = CpuBottomUp()..attribute('hidden', true),
       callTree = CpuCallTree()..attribute('hidden', true),
     ]);
-
-    stackFrameDetails = div(c: 'event-details-heading stack-frame-details');
-    if (showCpuFlameChart) {
-      add(stackFrameDetails);
-    }
   }
 
-  static const String stackFrameDetailsDefaultText = '[No function selected]';
+  _CpuFlameChart flameChart;
 
-  CoreElement flameChart;
   CpuBottomUp bottomUp;
+
   CpuCallTree callTree;
-  CoreElement stackFrameDetails;
-
-  EventDetailsTabType selectedTab = EventDetailsTabType.flameChart;
-
-  bool showingFlameChartError = false;
 
   TimelineEvent event;
 
-  CpuProfileData cpuProfileData;
-
   void showTab(EventDetailsTabType tabType) {
-    selectedTab = tabType;
     switch (tabType) {
       case EventDetailsTabType.flameChart:
-        flameChart.attribute('hidden', false);
-        stackFrameDetails.attribute('hidden', showingFlameChartError);
+        flameChart.show();
         bottomUp.attribute('hidden', true);
         callTree.attribute('hidden', true);
         break;
       case EventDetailsTabType.bottomUp:
         flameChart.attribute('hidden', true);
-        stackFrameDetails.attribute('hidden', true);
         bottomUp.attribute('hidden', false);
         callTree.attribute('hidden', true);
         break;
       case EventDetailsTabType.callTree:
         flameChart.attribute('hidden', true);
-        stackFrameDetails.attribute('hidden', true);
         bottomUp.attribute('hidden', true);
         callTree.attribute('hidden', false);
         break;
     }
   }
+
+  Future<void> update(TimelineEvent event) async {
+    if (event == this.event) {
+      return;
+    }
+    reset();
+    this.event = event;
+
+    // TODO(kenzie): update call tree and bottom up views here once they are
+    // implemented.
+    await flameChart.update(event);
+  }
+
+  void reset() {
+    // TODO(kenzie): reset call tree and bottom up views here once they are
+    // implemented.
+    flameChart.reset();
+  }
+}
+
+class _CpuFlameChart extends CoreElement {
+  _CpuFlameChart() : super('div', classes: 'ui-details-section') {
+    error = div(c: 'message')..attribute('hidden', true);
+    stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
+      ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
+      ..attribute('hidden', true);
+
+    add([stackFrameDetails, error]);
+
+    onCollapseNativeSamplesEvent
+        .listen((value) => lastCollapseNativeSamplesValue = value);
+  }
+
+  static const String stackFrameDetailsDefaultText =
+      '[No stack frame selected]';
+
+  static const stackFrameDetailsBackground = ThemedColor(
+    Color(0xFFF6F6F6),
+    Color(0xFF202124),
+  );
+
+  FlameChartCanvas canvas;
+
+  CoreElement stackFrameDetails;
+
+  CoreElement error;
+
+  CpuProfileData cpuProfileData;
+
+  TimelineEvent event;
+
+  bool canvasNeedsRebuild = false;
+
+  bool lastCollapseNativeSamplesValue = true;
+
+  bool showingError = false;
 
   Future<void> _drawFlameChart() async {
     final Response response =
@@ -266,71 +321,120 @@ class _UiEventDetails extends CoreElement {
     );
 
     if (cpuProfileData.stackFrames.isEmpty) {
-      _updateFlameChartForError(div(
-        text: 'CPU profile unavailable for time range'
-            ' [${event.time.start.inMicroseconds} - '
-            '${event.time.end.inMicroseconds}]',
-        c: 'message',
-      ));
+      _updateChartWithError('CPU profile unavailable for time range'
+          ' [${event.time.start.inMicroseconds} - '
+          '${event.time.end.inMicroseconds}]');
       return;
     }
 
-    final flameChartCanvas = FlameChartCanvas(
+    canvas = FlameChartCanvas(
       data: cpuProfileData,
-      flameChartWidth: flameChart.element.clientWidth,
-      flameChartHeight:
-          cpuProfileData.cpuProfileRoot.depth * rowHeightWithPadding,
+      flameChartWidth: element.clientWidth,
+      flameChartHeight: math.max(
+        // Subtract [rowHeightWithPadding] to account for timeline at the top of
+        // the flame chart.
+        element.clientHeight - rowHeightWithPadding,
+        // Add 1 to account for a row of padding at the bottom of the chart.
+        (cpuProfileData.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
+      ),
     );
 
-    flameChartCanvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
-      _updateStackFrameDetails(stackFrame);
+    // Add the last known value to the stream so that the canvas reflects the
+    // persisted checkbox state.
+    _collapseNativeSamplesController.add(lastCollapseNativeSamplesValue);
+
+    canvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
+      stackFrameDetails.text = stackFrame.toString();
     });
 
-    flameChart.add(flameChartCanvas.element);
+    add(canvas.element);
   }
 
-  void _updateFlameChartForError(CoreElement errorDiv) {
-    flameChart.add(errorDiv);
-    showingFlameChartError = true;
+  void _updateChartWithError(String message) {
+    showingError = true;
+    error.text = message;
+    error.attribute('hidden', false);
     stackFrameDetails.attribute('hidden', true);
   }
 
   Future<void> update(TimelineEvent event) async {
-    if (event == this.event) {
-      return;
-    }
-
     reset();
     this.event = event;
 
-    final Spinner spinner = Spinner()..clazz('cpu-profile-spinner');
-    add(spinner);
+    // Update the canvas if the flame chart is visible. Otherwise, mark the
+    // canvas as needing a rebuild.
+    if (!isHidden) {
+      final Spinner spinner = Spinner()..clazz('cpu-profile-spinner');
+      add(spinner);
 
-    try {
-      // TODO(kenzie): add a timeout here so we don't appear to have an
-      // infinite spinner.
-      await _drawFlameChart();
-    } catch (e) {
-      _updateFlameChartForError(div(
-          text: 'Error retrieving CPU profile: ${e.toString()}', c: 'message'));
+      try {
+        await _drawFlameChart();
+
+        if (!showingError) {
+          stackFrameDetails.text = stackFrameDetailsDefaultText;
+          stackFrameDetails.attribute('hidden', false);
+        }
+      } catch (e) {
+        _updateChartWithError('Error retrieving CPU profile: ${e.toString()}');
+      }
+
+      spinner.element.remove();
+    } else {
+      canvasNeedsRebuild = true;
+    }
+  }
+
+  void updateForContainerResize() {
+    if (canvas == null) {
+      return;
     }
 
-    spinner.element.remove();
+    // Only update the canvas if the flame chart is visible and has data.
+    // Otherwise, mark the canvas as needing a rebuild.
+    if (!isHidden && cpuProfileData != null) {
+      // We need to rebuild the canvas with a new content size so that the
+      // canvas is always at least as tall as the container it is in. This
+      // ensures that the grid lines in the chart will extend all the way to the
+      // bottom of the container.
+      canvas.forceRebuildForSize(
+        canvas.flameChartWidthWithInsets,
+        math.max(
+          // Subtract [rowHeightWithPadding] to account for the size of
+          // [stackFrameDetails] section at the bottom of the chart.
+          element.scrollHeight.toDouble() - rowHeightWithPadding,
+          // Add 1 to account for a row of padding at the bottom of the chart.
+          (cpuProfileData.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
+        ),
+      );
+    } else {
+      canvasNeedsRebuild = true;
+    }
+  }
 
-    stackFrameDetails.text = stackFrameDetailsDefaultText;
+  Future<void> show() async {
+    attribute('hidden', false);
+
+    if (canvasNeedsRebuild) {
+      assert(event != null);
+      canvasNeedsRebuild = false;
+      await update(event);
+    }
   }
 
   void reset() {
-    flameChart.clear();
-    stackFrameDetails.clear();
-    showingFlameChartError = false;
-    stackFrameDetails.attribute(
-        'hidden', selectedTab != EventDetailsTabType.flameChart);
-    cpuProfileData = null;
-  }
+    if (canvas?.element?.element != null) {
+      canvas.element.element.remove();
+    }
+    canvas = null;
 
-  void _updateStackFrameDetails(CpuStackFrame stackFrame) {
-    stackFrameDetails.text = stackFrame.toString();
+    stackFrameDetails.text = stackFrameDetailsDefaultText;
+    stackFrameDetails.attribute('hidden', true);
+
+    error.clear();
+    error.attribute('hidden', true);
+    showingError = false;
+
+    cpuProfileData = null;
   }
 }
 
