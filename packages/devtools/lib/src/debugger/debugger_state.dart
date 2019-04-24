@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../debugger/debugger.dart';
+import '../ui/gtags.dart';
 
 class DebuggerState {
   VmService _service;
@@ -85,6 +86,8 @@ class DebuggerState {
   Future<Success> resume() => _service.resume(isolateRef.id);
 
   Future<Success> stepOver() {
+    gaSelect(gaDebugger, gaStepOver);
+
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final bool useAsyncStepping = lastEvent?.atAsyncSuspension == true;
     return _service.resume(isolateRef.id,
@@ -93,11 +96,17 @@ class DebuggerState {
             : StepOption.kOver);
   }
 
-  Future<Success> stepIn() =>
-      _service.resume(isolateRef.id, step: StepOption.kInto);
+  Future<Success> stepIn() {
+    gaSelect(gaDebugger, gaStepIn);
 
-  Future<Success> stepOut() =>
-      _service.resume(isolateRef.id, step: StepOption.kOut);
+    return _service.resume(isolateRef.id, step: StepOption.kInto);
+  }
+
+  Future<Success> stepOut() {
+    gaSelect(gaDebugger, gaStepOut);
+
+    return _service.resume(isolateRef.id, step: StepOption.kOut);
+  }
 
   Future<void> clearBreakpoints() async {
     final List<Breakpoint> breakpoints = _breakpoints.value.toList();

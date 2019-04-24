@@ -13,6 +13,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/gtags.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
@@ -153,6 +154,7 @@ class EventDetails extends CoreElement {
   }
 
   Future<void> update(FrameFlameChartItem item) async {
+    gaSelect(gaTimeline, gaTimelineFlame);
     _event = item.event;
 
     _title.text = '${_event.name} - ${msText(_event.time.duration)}';

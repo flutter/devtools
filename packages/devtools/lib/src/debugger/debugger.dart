@@ -21,6 +21,7 @@ import '../debugger/variables_view.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
+import '../ui/gtags.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -75,6 +76,8 @@ class DebuggerScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
+    gaScreen(gaDebugger);
+
     final CoreElement screenDiv = div()..layoutVertical();
 
     CoreElement sourceArea;
@@ -99,12 +102,14 @@ class DebuggerScreen extends Screen {
     }
 
     resumeButton.click(() async {
+      gaSelect(gaDebugger, gaResume);
       _updateResumeButton(disabled: true);
       await debuggerState.resume();
       _updateResumeButton(disabled: false);
     });
 
     pauseButton.click(() async {
+      gaSelect(gaDebugger, gaPause);
       _updatePauseButton(disabled: true);
       await debuggerState.pause();
       _updatePauseButton(disabled: false);
@@ -398,6 +403,8 @@ class DebuggerScreen extends Screen {
             // Open a file set focus to the 'popup_script_name' textfield
             // accepts key strokes.
             _popupView.popupTextfield.element.focus();
+
+            gaSelect(gaDebugger, gaOpenShortcut);
 
             e.preventDefault();
             break;

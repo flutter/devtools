@@ -9,6 +9,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/gtags.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
@@ -86,6 +87,8 @@ class TimelineScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
+    gaScreen(gaTimeline);
+
     final CoreElement screenDiv = div()..layoutVertical();
 
     FrameFlameChart flameChart;
@@ -217,12 +220,15 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
+    gaSelect(gaTimeline, gaPause);
+
     _updateButtons(paused: true);
     _paused = true;
     _updateListeningState();
   }
 
   void _resumeRecording() {
+    gaSelect(gaTimeline, gaResume);
     _updateButtons(paused: false);
     _paused = false;
     _updateListeningState();

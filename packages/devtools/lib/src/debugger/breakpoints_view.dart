@@ -11,6 +11,7 @@ import '../debugger/debugger.dart';
 import '../debugger/debugger_state.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
+import '../ui/gtags.dart';
 
 typedef URIDescriber = String Function(String uri);
 
@@ -130,10 +131,12 @@ class BreakOnExceptionControl extends CoreElement {
     ]);
 
     unhandledExceptionsElement.element.onChange.listen((_) {
+      gaSelect(gaDebugger, gaUnhandledExceptions);
       _pauseModeController.add(exceptionPauseMode);
     });
 
     allExceptionsElement.element.onChange.listen((_) {
+      gaSelect(gaDebugger, gaAllExceptions);
       if (_allElement.checked) {
         unhandledExceptionsElement.enabled = false;
         _unhandledElement.checked = true;

@@ -18,6 +18,7 @@ import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
 import '../ui/elements.dart';
+import '../ui/gtags.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../utils.dart';
@@ -57,6 +58,8 @@ class LoggingScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
+    gaScreen(gaLogging);
+
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     this.framework = framework;
@@ -152,6 +155,7 @@ class LoggingScreen extends Screen {
   }
 
   void _clear() {
+    gaSelect(gaLogging, gaClearLogs);
     data.clear();
     logDetailsUI?.setData(null);
     loggingTable.setRows(data);

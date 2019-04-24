@@ -831,6 +831,12 @@ html [full] {
     margin-left: 8px;
 }
 
+ga-dialog {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
 #connect-dialog {
     display: none;
     padding-bottom: 10px;

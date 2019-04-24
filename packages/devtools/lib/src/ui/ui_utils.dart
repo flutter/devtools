@@ -15,6 +15,7 @@ import '../utils.dart';
 import 'elements.dart';
 import 'environment.dart' as environment;
 import 'fake_flutter/dart_ui/dart_ui.dart';
+import 'gtags.dart';
 import 'html_icon_renderer.dart';
 import 'material_icons.dart';
 import 'primer.dart';
@@ -22,6 +23,26 @@ import 'primer.dart';
 const int defaultSplitterWidth = 10;
 const String runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
+
+// GA dimensions:
+String userAppType = ''; // dimension1
+String userBuildType = ''; // dimension2
+String userPlatformType = ''; // dimension3
+
+void computeApplicationState(
+  bool isAnyFlutterApp,
+  bool isFlutter,
+  bool isWebApp,
+  bool isProfile,
+  bool isAndroid,
+) {
+  if (isAnyFlutterApp) {
+    if (isFlutter) userAppType = gaAppTypeFlutter;
+    if (isWebApp) userAppType = gaAppTypeWeb;
+  }
+  userBuildType = isProfile ? gaBuildTypeProfile : gaBuildTypeDebug;
+  userPlatformType = isAndroid ? gaPlatformTypeAndroid : gaPlatformTypeIOS;
+}
 
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {
@@ -187,6 +208,36 @@ class ServiceExtensionButton {
   PButton button;
 
   void _click() {
+    switch (extensionDescription.extension) {
+      case 'ext.flutter.debugAllowBanner':
+        gaSelect(gaInspector, gaDebugBanner);
+        break;
+      case 'ext.flutter.debugPaint':
+        gaSelect(gaInspector, gaDebugPaint);
+        break;
+      case 'ext.flutter.debugPaintBaselinesEnabled':
+        gaSelect(gaInspector, gaPaintBaseline);
+        break;
+      case 'ext.flutter.showPerformanceOverlay':
+        gaSelect(gaInspector, gaPerformanceOverlay);
+        break;
+      case 'ext.flutter.profileWidgetBuilds':
+        gaSelect(gaInspector, gaTrackRebuilds);
+        break;
+      case 'ext.flutter.repaintRainbow':
+        gaSelect(gaInspector, gaRepaintRainbow);
+        break;
+      case 'ext.flutter.timeDilation':
+        gaSelect(gaInspector, gaSlowAnimation);
+        break;
+      case 'ext.flutter.platformOverride':
+        gaSelect(gaInspector, gaIOS);
+        break;
+      case 'ext.flutter.inspector.show':
+        gaSelect(gaInspector, gaSelectWidgeMode);
+        break;
+    }
+
     final bool wasSelected = button.element.classes.contains('selected');
     serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensionDescription.extension,

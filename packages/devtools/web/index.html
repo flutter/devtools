@@ -8,6 +8,154 @@
 
 <html>
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-33"></script>
+
+    <dialog open id="devtools_analytics" class="ga-dialog" style="width: 100%;">
+      <p>Welcome to Flutter DevTools</p>
+      <span class="ga-collection" disabled>
+        Flutter DevTools anonymously reports features usage statistics and basic crash reports to Google in order
+        to help Google contribute improvements to Flutter DevTools over time.
+        <br/>
+        See Google's private policy
+      </span>
+      <a id="devtools-ga-link" href="https://www.google.com/intl/en/policies/privacy" target="_blank" tabindex="1">https://www.google.com/intl/en/policies/privacy</a>
+      <br/><br/>
+      <p>Do you accept statistics collection for DevTools?</p>
+      <button id="devtools-ga-accept" value="accept" tabindex="2">I Accept</button>
+      <button id="devtools-ga-do-not-accept" value="do-not-accept" tabindex="3" autofocus>I Do Not Accept</button>
+    </dialog>
+
+    <script>
+      // URI parameter to control DevTools analytics collection:
+      //
+      //   &ga-confirm=?           // Displays the GA collection confirmation dialog, to change answer.
+      //   &ga-confirm=reset       // Resets/deletes user's collection answer in local storage.
+      //   &ga-confirm=true        // Analytics COLLECT opt-in answer from an outside application e.g., VSCode.
+      //   &ga-confirm=false       // Analytics DO NOT COLLECT opt-in answer from an outside application e.g., VSCode.
+
+// TODO(terry): Remove below line, UA-26406144-33 below is a GA property for testing ONLY.
+      const _GA_DEVTOOLS_PROPERTY = 'UA-26406144-33';
+// TODO(terry): Uncomment the below line, is the real GA property for DevTools collecting.
+//      const _GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+
+      let _initializedGA = false;
+      function isGaInitialized() {
+        return _initializedGA;
+      }
+
+      // InitializeGA with our dimensions.
+      function _initializeGA() {
+        if (!_initializedGA && gaCollectionAllowed()) {
+          gtag('js', new Date());
+          gtag('config', _GA_DEVTOOLS_PROPERTY, {
+            'custom_map': {
+              dimension1: 'app_type',
+              dimension2: 'build_type',
+              dimension3: 'platform_type',
+            }
+          });
+
+          _initializedGA = true;
+        }
+      }
+
+      const _GA_COLLECT = 'collect';
+      const _GA_DONT_COLLECT = 'do-not-collect';
+
+      function gaCollectionAllowed() {
+        return localStorage.getItem(_GA_DEVTOOLS_PROPERTY) == _GA_COLLECT;
+      }
+
+      function _getUrlVars() {
+        let allVars = {};
+        window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
+          allVars[key] = value;
+        });
+        return allVars;
+      }
+
+      // Add ? to ga-confirm URI parameter to display GA acceptance dialog e.g.,  &ga-confirm=?
+      let gaDialog = document.getElementById('devtools_analytics');
+      gaDialog.style.zIndex = '1000';
+      let gaConfirmation = _getUrlVars()['ga-confirm'];
+
+      if (gaConfirmation != null) {
+        console.log("GA &ga-confirm = " + gaConfirmation);
+      }
+      console.log("GA Dart DevTools Property " +_GA_DEVTOOLS_PROPERTY + " opt-in = " + localStorage.getItem(_GA_DEVTOOLS_PROPERTY));
+
+      if (gaConfirmation == '?' || localStorage.getItem(_GA_DEVTOOLS_PROPERTY) == null) {
+        let gaAcceptButton = document.getElementById('devtools-ga-accept');
+        gaAcceptButton.addEventListener('click', function (_) {
+          // Collect statistics.
+          localStorage.setItem(_GA_DEVTOOLS_PROPERTY, _GA_COLLECT);
+          gaDialog.close();
+          _initializeGA();
+        });
+
+        let gaDoNotAcceptButton = document.getElementById('devtools-ga-do-not-accept');
+        gaDoNotAcceptButton.addEventListener('click', function (_) {
+          // Do NOT collect statistics.
+          localStorage.setItem(_GA_DEVTOOLS_PROPERTY, _GA_DONT_COLLECT);
+          gaDialog.close();
+        });
+
+        // Ensure focus doesn't leave GA confirmation dialog.
+        gaDialog.addEventListener('focusout', function (e) {
+          // Collect statistics.
+          let cancelEvent = false;
+          let relatedTarget = e.relatedTarget;
+          if (relatedTarget != null) {
+            let id = relatedTarget.getAttribute('id');
+            cancelEvent = id == null || !id.startsWith('devtools-ga-');
+          } else {
+            cancelEvent = true;
+          }
+          if (cancelEvent) {
+            e.srcElement.focus();
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+          }
+        });
+      } else if (gaConfirmation == 'reset') {
+        // Delete the local storage value.
+        localStorage.removeItem(_GA_DEVTOOLS_PROPERTY);
+        gaDialog.style.display = 'none';
+        console.log("Reset localStorage = " + localStorage.getItem(_GA_DEVTOOLS_PROPERTY));
+      } else {
+        gaDialog.style.display = 'none';
+
+        // If gaConfirmation is passed in e.g., VSCode and DevTools GA Collection not defined then use VSCode's collection
+        // authorization.  Otherwise, DevTools GA collection, if explicitly defined use DevTools regardless if VSCode's
+        // is different.
+        if (gaConfirmation == 'true' && localStorage.getItem(_GA_DEVTOOLS_PROPERTY) == null) {
+          localStorage.setItem(_GA_DEVTOOLS_PROPERTY, gaConfirmation == 'true' ? _GA_COLLECT : _GA_DONT_COLLECT);
+        } else if (gaConfirmation == 'false') {
+          // If GA confirmation is to not collect statistics then immediately force no collection regardless of what
+          // DevTools GA Confirmation was always default to DO NOT COLLECT if anyone up the line has do not collect.
+          localStorage.setItem(_GA_DEVTOOLS_PROPERTY, _GA_DONT_COLLECT);
+        }
+      }
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      _initializeGA();
+
+      // Record when DevTools browser tab is selected (visible), not selected (hidden) or browser minimized.
+      document.addEventListener("visibilitychange", function (e) {
+        if (gaCollectionAllowed()) {
+          gtag('event', document.visibilityState, {
+            event_category: 'application',
+          });
+        }
+      });
+    </script>
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +169,7 @@
     <link rel="stylesheet" href="packages/devtools/src/inspector/inspector.css">
     <link rel="stylesheet" href="packages/devtools/src/logging/logging.css">
     <link rel="stylesheet" href="packages/devtools/src/timeline/timeline.css">
+
 
     <script type="text/javascript">
         function supportsES6Classes() {
@@ -220,7 +369,7 @@
 
 <div id="content" class="container" flex layout vertical style="overflow: auto;">
     <div class="blankslate">
-        <p>Loading…</p>
+        <p>Loading...</p>
     </div>
 </div>
 
