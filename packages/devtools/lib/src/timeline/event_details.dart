@@ -412,8 +412,8 @@ class _CpuFlameChart extends CoreElement {
 
     if (canvasNeedsRebuild) {
       assert(event != null);
-      await update(event);
       canvasNeedsRebuild = false;
+      await update(event);
     }
   }
 

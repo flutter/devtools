@@ -23,6 +23,8 @@ import 'timeline.dart';
 
 // TODO(kenzie): add tooltips to stack frames on hover.
 
+// We use the same color in light and dark mode because it aligns well with both
+// color schemes.
 const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedLight,
