@@ -208,7 +208,7 @@ Future<void> registerLaunchDevToolsService(
         params['queryParams']?.forEach((key, value) => uriParams[key] = value);
       }
 
-      // Plus the URI to the VM service
+      // Add the URI to the VM service
       uriParams['uri'] = vmServiceUri.toString();
 
       final uriToLaunch =
