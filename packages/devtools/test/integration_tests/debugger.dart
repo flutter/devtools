@@ -80,6 +80,8 @@ void debuggingTests() {
       return;
     }
 
+    await delay();
+
     // set and verify breakpoints
     for (int line in breakpointLines) {
       await debuggingManager.addBreakpoint(appFixture.appScriptPath, line);
@@ -91,7 +93,7 @@ void debuggingTests() {
     // wait for paused state
     await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-    await shortDelay();
+    await delay();
 
     // verify location
     expect(
@@ -152,6 +154,8 @@ void debuggingTests() {
       return;
     }
 
+    await delay();
+
     // set and verify breakpoint
     await debuggingManager.addBreakpoint(
         appFixture.appScriptPath, breakpointLine);
@@ -178,7 +182,7 @@ void debuggingTests() {
       // wait for paused state
       await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-      await shortDelay();
+      await delay();
 
       // verify location
       expect(
@@ -231,7 +235,7 @@ void debuggingTests() {
     // wait for paused state
     await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-    await shortDelay();
+    await delay();
 
     // verify location
     expect(
