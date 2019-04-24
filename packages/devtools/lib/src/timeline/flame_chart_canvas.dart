@@ -23,13 +23,9 @@ import 'timeline.dart';
 
 // TODO(kenzie): add tooltips to stack frames on hover.
 
-// TODO(kenzie): this should be removed once the cpu flame chart is optimized
-// and complete.
-const bool showCpuFlameChart = true;
-
 const _selectedFlameChartNodeColor = ThemedColor(
   mainUiColorSelectedLight,
-  mainUiColorSelectedDark,
+  mainUiColorSelectedLight,
 );
 
 const _shadedBackgroundColor =
@@ -61,8 +57,14 @@ abstract class FlameChart {
   static const stackFramePadding = 1;
 
   final CpuProfileData data;
-  final double flameChartWidth;
-  final double flameChartHeight;
+
+  // These values are not final because the flame chart viewport can change in
+  // size.
+  double flameChartWidth;
+  double flameChartHeight;
+
+  double get flameChartWidthWithInsets =>
+      getFlameChartWidth() + 2 * _flameChartInset;
 
   final _stackFrameSelectedController =
       StreamController<CpuStackFrame>.broadcast();
@@ -159,9 +161,12 @@ abstract class FlameChart {
   void selectNodeAtOffset(Offset offset) {
     final node = getNode(offset);
 
-    // Do nothing if the tap did not occur on any nodes or if the tap was to
-    // select the already selected node.
-    if (node == null || node == selectedNode) {
+    // Do nothing if the tap did not occur on any nodes, if the tap was to
+    // select the already selected node, or if the tap occurred on a collapsed
+    // node.
+    if (node == null ||
+        node == selectedNode ||
+        (shouldCollapseNativeSamples && node.stackFrame.isNative)) {
       return;
     }
 
@@ -377,14 +382,21 @@ class FlameChartCanvas extends FlameChart {
 
     timelineGrid.updateForZoom(zoomLevel, getFlameChartWidth());
 
-    _viewportCanvas.setContentSize(
-      getFlameChartWidth() + 2 * _flameChartInset,
+    forceRebuildForSize(
+      flameChartWidthWithInsets,
       flameChartHeight,
     );
-    _viewportCanvas.rebuild(force: true);
 
     _viewportCanvas.element.element.scrollLeft =
         math.max(0, floatingPointScrollLeft.round());
+  }
+
+  void forceRebuildForSize(double width, double height) {
+    flameChartWidth = width;
+    flameChartHeight = height;
+
+    _viewportCanvas.setContentSize(width, height);
+    _viewportCanvas.rebuild(force: true);
   }
 }
 
@@ -632,8 +644,8 @@ class TimelineGrid {
       canvas
         ..fillText(timestampText, timestampX, viewport.top + _textOffsetY)
         ..beginPath()
-        ..moveTo(left + currentInterval, visible.top)
-        ..lineTo(left + currentInterval, visible.bottom)
+        ..moveTo(left + currentInterval, viewport.top)
+        ..lineTo(left + currentInterval, viewport.bottom)
         ..closePath()
         ..stroke();
 
