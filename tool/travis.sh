@@ -19,11 +19,11 @@ export PATH=$PATH:~/.pub-cache/bin
 # We should be using dart from /Users/travis/dart-sdk/bin/dart.
 echo "which dart: " `which dart`
 
-# Provision our packages.
-pub get
-pub global activate webdev
-
 if [ "$BOT" = "main" ]; then
+
+    # Provision our packages.
+    pub get
+    pub global activate webdev
 
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
@@ -45,10 +45,18 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "test_ddc" ]; then
 
+    # Provision our packages.
+    pub get
+    pub global activate webdev
+
     pub run test --reporter expanded --exclude-tags useFlutterSdk
     pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "test_dart2js" ]; then
+
+    # Provision our packages.
+    pub get
+    pub global activate webdev
 
     WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk
     WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
@@ -56,17 +64,39 @@ elif [ "$BOT" = "test_dart2js" ]; then
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # Get Flutter.
-    git clone https://github.com/flutter/flutter.git ../flutter
+    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+        echo "Cloning stable Flutter branch"
+        git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+
+        # Set the suffix so we use stable goldens.
+        export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
+    else
+        echo "Cloning master Flutter branch"
+        git clone https://github.com/flutter/flutter.git ../flutter
+    fi
     cd ..
     export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
     flutter config --no-analytics
     flutter doctor
+
+    # Put the Flutter version into a variable.
+    # First awk extracts "Flutter x.y.z-pre.a":
+    #   -F '•'         uses the bullet as field separator
+    #   NR==1          says only take the first record (line)
+    #   { print $1}    prints just the first field
+    # Second awk splits on space (default) and takes the second field (the version)
+    export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
+    echo "Flutter version is '$FLUTTER_VERSION'"
 
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
 
     # Return to the devtools directory.
     cd devtools
+
+    # Provision our packages using Flutter's version of Dart.
+    pub get
+    pub global activate webdev
 
     # Run tests that require the Flutter SDK.
     pub run test -j1 --reporter expanded --tags useFlutterSdk

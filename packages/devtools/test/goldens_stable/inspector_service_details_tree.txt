@@ -1,0 +1,31 @@
+MaterialApp
+ │ state: _MaterialAppState#00000
+ │
+ └─ScrollConfiguration
+   │ behavior: _MaterialScrollBehavior
+   │
+   └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
+     │ state: _WidgetsAppState#00000
+     │
+     └─MediaQuery
+       │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
+       │   3.0, textScaleFactor: 1.0, platformBrightness:
+       │   Brightness.light, padding: EdgeInsets.zero, viewInsets:
+       │   EdgeInsets.zero, alwaysUse24HourFormat: false,
+       │   accessibleNavigation: falsedisableAnimations:
+       │   falseinvertColors: falseboldText: false)
+       │
+       └─Localizations
+         │ locale: en_US
+         │ delegates: DefaultMaterialLocalizations.delegate(en_US),
+         │   DefaultCupertinoLocalizations.delegate(en_US),
+         │   DefaultWidgetsLocalizations.delegate(en_US)
+         │ state: _LocalizationsState#00000
+         │
+         └─Semantics
+           │ container: false
+           │ properties: SemanticsProperties
+           │ label: null
+           │ value: null
+           │ hint: null
+...

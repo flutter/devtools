@@ -1,0 +1,29 @@
+▼[S]<grayed> </grayed><bold>Scaffold</bold> <-- selected
+└─▼[S]<grayed> </grayed>_ScaffoldScope
+    ▼[P]<grayed> </grayed>PrimaryScrollController
+    └─▼[M]<grayed> </grayed>Material
+      └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedPhysicalModel
+        └─▼[P]<grayed> </grayed>PhysicalModel
+          └─▼[N]<grayed> </grayed>NotificationListener <grayed><LayoutChangedNotification></grayed>
+              ▼[I]<grayed> </grayed>_InkFeatures <grayed>[GlobalKey#00000 ink renderer]</grayed>
+              └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedDefaultTextStyle
+                └─▼[/icons/inspector/textArea.png]<grayed> </grayed>DefaultTextStyle
+                  └─▼[/icons/inspector/resume.png]<grayed> </grayed>AnimatedBuilder
+                    └─▼[C]<grayed> </grayed>CustomMultiChildLayout
+                      ├───▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.body>]</grayed>
+                      │   └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
+                      │     └─▼[C]<grayed> </grayed><bold>Center</bold>
+                      │       └─▶[/icons/inspector/textArea.png]<grayed> </grayed><bold>Text</bold>
+                      ├───▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.appBar>]</grayed>
+                      │   └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
+                      │     └─▼[C]<grayed> </grayed>ConstrainedBox
+                      │       └─▼[F]<grayed> </grayed>FlexibleSpaceBarSettings
+                      │           ▶[A]<grayed> </grayed><bold>AppBar</bold>
+                      └─▼[L]<grayed> </grayed>LayoutId <grayed>[<_ScaffoldSlot.floatingActionButton>]</grayed>
+                        └─▼[/icons/inspector/atrule.png]<grayed> </grayed>MediaQuery
+                          └─▼[F]<grayed> </grayed>_FloatingActionButtonTransition
+                            └─▼[/icons/inspector/value.png]<grayed> </grayed>Stack
+                              └─▼[/icons/inspector/resume.png]<grayed> </grayed>ScaleTransition
+                                └─▼[/icons/inspector/colors.png]<grayed> </grayed>Transform
+                                  └─▼[/icons/inspector/resume.png]<grayed> </grayed>RotationTransition
+                                    └─▼[/icons/inspector/colors.png]<grayed> </grayed>Transform

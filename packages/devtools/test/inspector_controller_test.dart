@@ -514,6 +514,14 @@ void main() async {
     });
 
     test('hotReload', () async {
+      if (flutterVersion == '1.2.1') {
+        // This test can be flaky in Flutter 1.2.1 because of
+        // https://github.com/dart-lang/sdk/issues/33838
+        // so we just skip it. This block of code can be removed after the next
+        // stable flutter release.
+        // TODO(dantup): Remove this.
+        return;
+      }
       await env.setupEnvironment();
 
       await serviceManager.performHotReload();
