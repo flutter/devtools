@@ -26,9 +26,13 @@ import 'inspector_controller.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 
-/// Split text into two groups, word characters at the start of a string and all other
-/// characters. Skip an <code>-</code> or <code>#</code> between the two groups.
-final RegExp _primaryDescriptionPattern = RegExp('([\\w ]+)[-#]?(.*)');
+/// Split text into two groups, word characters at the start of a string and all
+/// other characters.
+final RegExp _primaryDescriptionPattern = RegExp(r'^([\w ]+)(.*)$');
+// TODO(jacobr): temporary workaround for missing structure from assertion thrown building
+// widget errors.
+final RegExp _assertionThrownBuildingError = RegExp(
+    r'^(The following assertion was thrown building [a-zA-Z]+)(\(.*\))(:)$');
 
 final ColorIconMaker _colorIconMaker = ColorIconMaker();
 final CustomIconMaker _customIconMaker = CustomIconMaker();
@@ -58,10 +62,9 @@ const Color defaultTreeLineColor = ThemedColor(
   Color.fromARGB(255, 150, 150, 150),
 );
 
-const double iconPadding = 3.0;
+const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
-const double horizontalPadding = 10.0;
 const double verticalPadding = 10.0;
 const double rowHeight = 24.0;
 const Color arrowColor = Colors.grey;
@@ -183,12 +186,13 @@ abstract class InspectorTreeNode {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
       final Map<String, Object> properties = diagnostic.valuePropertiesJson;
-      if (isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularItalic);
-      }
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
         builder.appendText('$name${diagnostic.separator} ', textStyle);
+      }
+
+      if (isCreatedByLocalProject) {
+        textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       String description = diagnostic.description;
@@ -235,7 +239,8 @@ abstract class InspectorTreeNode {
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
-      builder.appendText(description, textStyle);
+      _renderDescription(builder, description, textStyle, isProperty: true);
+
       if (diagnostic.level == DiagnosticLevel.fine &&
           diagnostic.hasDefaultValue) {
         builder.appendText(' ', textStyle);
@@ -253,8 +258,10 @@ abstract class InspectorTreeNode {
         if (diagnostic.showSeparator) {
           builder.appendText(
               diagnostic.separator, inspector_text_styles.unimportant);
-        } else {
-          builder.appendText(' ', inspector_text_styles.unimportant);
+          if (diagnostic.separator != ' ' &&
+              diagnostic.description.isNotEmpty) {
+            builder.appendText(' ', inspector_text_styles.unimportant);
+          }
         }
       }
 
@@ -262,19 +269,8 @@ abstract class InspectorTreeNode {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      final String description = diagnostic.description;
-      final match = _primaryDescriptionPattern.firstMatch(description);
-      if (match != null) {
-        builder.appendText(' ', inspector_text_styles.unimportant);
-        builder.appendText(match.group(1), textStyle);
-        if (match.group(2).isNotEmpty) {
-          builder.appendText(' ', textStyle);
-          builder.appendText(match.group(2), inspector_text_styles.unimportant);
-        }
-      } else if (diagnostic.description?.isNotEmpty == true) {
-        builder.appendText(' ', inspector_text_styles.unimportant);
-        builder.appendText(diagnostic.description, textStyle);
-      }
+      _renderDescription(builder, diagnostic.description, textStyle,
+          isProperty: false);
     }
     _renderObject = builder.build();
     return _renderObject;
@@ -390,6 +386,9 @@ abstract class InspectorTreeNode {
     int current = 0;
     int depth = 0;
     while (node != null) {
+      final style = node.diagnostic?.style;
+      final bool indented = style != DiagnosticsTreeStyle.flat &&
+          style != DiagnosticsTreeStyle.error;
       if (selection == node) {
         highlightDepth = depth;
       }
@@ -417,14 +416,18 @@ abstract class InspectorTreeNode {
           if (children.length > 1 &&
               i + 1 != children.length &&
               !children.last.isProperty) {
-            ticks.add(depth);
+            if (indented) {
+              ticks.add(depth);
+            }
           }
           break;
         }
         current += subtreeSize;
       }
       assert(i < children.length);
-      depth++;
+      if (indented) {
+        depth++;
+      }
     }
     assert(false); // internal error.
     return null;
@@ -447,6 +450,34 @@ abstract class InspectorTreeNode {
     _children.clear();
     dirty();
   }
+
+  void _renderDescription(
+    InspectorTreeNodeRenderBuilder<InspectorTreeNodeRender<PaintEntry>> builder,
+    String description,
+    TextStyle textStyle, {
+    bool isProperty,
+  }) {
+    if (diagnostic.isDiagnosticableValue) {
+      final match = _primaryDescriptionPattern.firstMatch(description);
+      if (match != null) {
+        builder.appendText(match.group(1), textStyle);
+        if (match.group(2).isNotEmpty) {
+          builder.appendText(match.group(2), inspector_text_styles.unimportant);
+        }
+        return;
+      }
+    } else if (diagnostic.type == 'ErrorDescription') {
+      final match = _assertionThrownBuildingError.firstMatch(description);
+      if (match != null) {
+        builder.appendText(match.group(1), textStyle);
+        builder.appendText(match.group(3), textStyle);
+        return;
+      }
+    }
+    if (description?.isNotEmpty == true) {
+      builder.appendText(description, textStyle);
+    }
+  }
 }
 
 /// A row in the tree with all information required to render it.
@@ -458,7 +489,7 @@ class InspectorTreeRow {
     @required this.depth,
     @required this.isSelected,
     @required this.highlightDepth,
-    this.lineToParent = true,
+    @required this.lineToParent,
   });
 
   final InspectorTreeNode node;
@@ -615,10 +646,7 @@ abstract class InspectorTree {
     _computingHover = false;
   }
 
-  /// Split text into two groups, word characters at the start of a string
-  /// and all other characters. Skip an <code>-</code> or <code>#</code> between
-  /// the two groups.
-  static final RegExp primaryDescriptionRegExp = RegExp(r'(\w+)[-#]?(.*)');
+  double get horizontalPadding => 10.0;
 
   double getDepthIndent(int depth) {
     return (depth + 1) * columnWidth + horizontalPadding;
@@ -687,7 +715,9 @@ abstract class InspectorTree {
     if (icon == expandArrow) {
       setState(() {
         row.node.isExpanded = true;
-        onExpand(row.node);
+        if (onExpand != null) {
+          onExpand(row.node);
+        }
       });
       return;
     }
@@ -705,9 +735,9 @@ abstract class InspectorTree {
     // This code matches the text style defaults for which styles are
     //  by default and which aren't.
     switch (style) {
+      case DiagnosticsTreeStyle.none:
       case DiagnosticsTreeStyle.singleLine:
-      case DiagnosticsTreeStyle.headerLine:
-      case DiagnosticsTreeStyle.indentedSingleLine:
+      case DiagnosticsTreeStyle.errorProperty:
         return false;
 
       case DiagnosticsTreeStyle.sparse:

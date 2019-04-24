@@ -21,6 +21,8 @@
     --default-color: #000;
     --disabled-background: #ddd;
     --error-background: #f97c7c;
+    --error-summary-color: #F44336;
+    --inspector-info-color: #24292e;
     --even-row-background: #f7f7f7;
     --footer-color: #7a7a7a;
     --footer-link-hover: #0366d6;
@@ -30,7 +32,8 @@
     --header-color: #586069;
     --header-item-rgb: 255, 255, 255;
     --header-item: rgba(var(--header-item-rgb), 1);
-    --hint-background: lightgoldenrodyellow;
+    --hint-background: #fffbdd;
+    --inspector-hint-color: #000;
     --light-background: #ccc;
     --light-text-color: #f5f5dc;
     --list-background: #fff;
@@ -405,6 +408,7 @@ table tr.selected {
     background-position: 50%;
     margin-left: 0;
     margin-right: 0;
+    flex-shrink: 0;
 }
 
 .gutter.gutter-horizontal {
@@ -426,6 +430,7 @@ table tr.selected {
     background-repeat: no-repeat;
     background-position: center;
     display: inline-block;
+    vertical-align: text-bottom;
 }
 
 input:disabled+label {
@@ -1182,4 +1187,9 @@ span.strong {
 
 .checkbox-text {
     margin-bottom: 1px;
+}
+
+.inspector-tree-html {
+  font: 14px arial;
+  line-height: 22px;
 }

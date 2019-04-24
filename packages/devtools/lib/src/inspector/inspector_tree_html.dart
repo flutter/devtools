@@ -20,6 +20,7 @@ import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'inspector_text_styles.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_web.dart';
 
@@ -100,9 +101,17 @@ class InspectorTreeNodeRenderHtmlBuilder
     }
     if (textStyle != lastStyle) {
       if (textStyle.color != lastStyle?.color) {
-        color = colorToCss(textStyle.color);
+        if (textStyle.color == regular.color) {
+          color = null;
+        } else {
+          color = colorToCss(textStyle.color);
+        }
       }
-      font = fontStyleToCss(textStyle);
+      if (textStyle == regular) {
+        font = null;
+      } else {
+        font = fontStyleToCss(textStyle);
+      }
       lastStyle = textStyle;
     }
     _entries.add(HtmlTextPaintEntry(text: text, color: color, font: font));
@@ -286,6 +295,11 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
   @override
   InspectorTreeNode createNode() => InspectorTreeNodeHtml();
 
+  // Horizontal padding is specified by CSS so including it here would throw
+  // off calculations.
+  @override
+  double get horizontalPadding => 0.0;
+
   Element paintRow(
     int index, {
     @required InspectorTreeNode selection,
@@ -368,7 +382,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
       if (renderObject == null) {
         return container;
       }
-      currentX = getDepthIndent(row.depth) - columnWidth;
+      currentX = getDepthIndent(row.depth - 1) - columnWidth;
       if (!row.node.showExpandCollapse) {
         currentX += columnWidth;
       }

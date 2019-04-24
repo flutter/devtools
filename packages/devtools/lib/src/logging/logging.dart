@@ -42,6 +42,21 @@ class LoggingScreen extends Screen {
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
 
+    const String structuredErrorsExtension =
+        'ext.flutter.inspector.structuredErrors';
+    serviceManager.serviceExtensionManager.hasServiceExtension(
+      structuredErrorsExtension,
+      (available) {
+        if (available) {
+          serviceManager.serviceExtensionManager.setServiceExtensionState(
+            structuredErrorsExtension,
+            true,
+            true,
+          );
+        }
+      },
+    );
+
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);

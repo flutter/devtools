@@ -182,6 +182,18 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.selectWidgetMode,
 );
 
+final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.inspector.structuredErrors',
+  description: 'Show structured errors',
+  icon: FlutterIcons.redError,
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Disable structured errors for Flutter framework issues',
+  disabledTooltip: 'Show structured errors for Flutter framework issues',
+  gaScreenName: ga.inspector,
+  gaItem: ga.structuredErrors,
+);
+
 // This extension should never be displayed as a button so does not need a
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';

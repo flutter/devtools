@@ -70,3 +70,4 @@ const String allExceptions = 'allExceptions';
 
 // Logging UX actions:
 const String clearLogs = 'clearLogs';
+const String structuredErrors = 'structuredErrors';
