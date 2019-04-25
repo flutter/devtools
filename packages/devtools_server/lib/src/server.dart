@@ -191,7 +191,7 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
 
 Future<void> registerLaunchDevToolsService(
   Uri vmServiceUri,
-  int id,
+  dynamic id,
   String devToolsUrl,
   bool machineMode,
 ) async {
