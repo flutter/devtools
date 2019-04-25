@@ -134,7 +134,7 @@ class EvalOnDartLibrary {
 
     switch (e.runtimeType) {
       case RPCError:
-        print('RPCError ${e.code}: ${e.details}');
+        print('RPCError: $e');
         break;
       case Error:
         print('${e.kind}: ${e.message}');
@@ -251,6 +251,8 @@ class EvalOnDartLibrary {
 
 class LibraryNotFound implements Exception {
   LibraryNotFound(this.candidateNames);
+
   Iterable<String> candidateNames;
+
   String get message => 'Library matchining one of $candidateNames not found';
 }
