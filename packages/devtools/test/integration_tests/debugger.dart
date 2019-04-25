@@ -205,6 +205,8 @@ void debuggingTests() {
     await debuggingManager.clearBreakpoints();
     await debuggingManager.resume();
 
+    await delay();
+
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
   });
