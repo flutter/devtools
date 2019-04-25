@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../core/message_bus.dart';
@@ -18,7 +19,6 @@ import '../inspector/inspector_tree_html.dart';
 import '../tables.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
-import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
@@ -89,7 +89,7 @@ class LoggingScreen extends Screen {
 
     // configure the table / details splitter
     split.flexSplitBidirectional(
-      [loggingTable.element, logDetailsUI],
+      [loggingTable.element.element, logDetailsUI.element],
       gutterSize: defaultSplitterWidth,
       horizontalSizes: [60, 40],
       verticalSizes: [70, 30],

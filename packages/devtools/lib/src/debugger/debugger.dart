@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'package:codemirror/codemirror.dart';
 import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
+import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../core/message_bus.dart';
@@ -22,7 +23,6 @@ import '../globals.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
-import '../ui/split.dart' as split;
 import '../ui/ui_utils.dart';
 
 // TODO(devoncarew): improve selection behavior in the left nav area
@@ -227,7 +227,7 @@ class DebuggerScreen extends Screen {
 
     // configure the navigation / editor splitter
     split.flexSplit(
-      navEditorPanels,
+      navEditorPanels.map((e) => e.element).toList(),
       gutterSize: defaultSplitterWidth,
       sizes: [22, 78],
       minSize: [200, 600],
@@ -235,7 +235,7 @@ class DebuggerScreen extends Screen {
 
     // configure the editor / console splitter
     split.flexSplit(
-      [sourceArea, consoleDiv],
+      [sourceArea.element, consoleDiv.element],
       horizontal: false,
       gutterSize: defaultSplitterWidth,
       sizes: [80, 20],

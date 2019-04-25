@@ -5,7 +5,9 @@
 library inspector;
 
 import 'dart:async';
+import 'dart:html' show Element;
 
+import 'package:split/split.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
@@ -15,7 +17,6 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
-import '../ui/split.dart';
 import '../ui/ui_utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
@@ -152,7 +153,7 @@ class InspectorScreen extends Screen {
     final InspectorTreeWeb detailsInspectorTree =
         inspectorController.details.inspectorTree;
 
-    final elements = [
+    final elements = <Element>[
       inspectorTree.element.element,
       detailsInspectorTree.element.element
     ];
