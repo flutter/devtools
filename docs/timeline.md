@@ -10,8 +10,8 @@ title: Using the Timeline View
 The timeline view displays information about Flutter frames. It consists of
  three parts, each increasing in granularity:
 - Frame Rendering Chart
-- Flame Chart
-- Event Details
+- Frame Flame Chart
+- CPU Profiler
 
 **Use a profile build of your application to analyze performance.** Frame rendering times are not indicative of release
 performance unless your application is run in profile mode.
