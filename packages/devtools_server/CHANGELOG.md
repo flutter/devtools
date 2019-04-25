@@ -1,3 +1,24 @@
+## 0.1.0
+- JSON-RPC commands are now accepted over stdin, the first method being `vm.register` which allows registering of VM services:
+  ```
+  {
+    "id":"1",
+    "method":"vm.register",
+    "params":{
+      "uri":"<vm-service-uri-here>",
+    }
+  }
+  ```
+  DevTools will connect to each registered VM and register a `launchDevTools` service that can then be called (via the VM service protocol). The arguments to this service can include a `queryParams` object that will be used to build the querystring:
+  ```
+  {
+    queryParams: {
+      hide: "debugger",
+      theme: "dark",
+    },
+  }
+  ```
+
 ## 0.0.2
 * Reduce the minimum Dart SDK requirements for activating DevTools to cover Flutter v1.2.1 (Dart v2.1)
 
