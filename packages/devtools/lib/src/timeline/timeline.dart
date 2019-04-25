@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
+import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
@@ -10,7 +11,6 @@ import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
-import '../ui/split.dart' as split;
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
@@ -169,7 +169,7 @@ class TimelineScreen extends Screen {
         // already.
         if (!splitterConfigured) {
           split.flexSplit(
-            [flameChart, eventDetails],
+            [flameChart.element, eventDetails.element],
             horizontal: false,
             gutterSize: defaultSplitterWidth,
             sizes: [75, 25],
