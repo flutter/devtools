@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:vm_service_lib/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
@@ -324,7 +324,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _vmServiceWsUri = Uri.parse(wsUriString);
 
       // Map to WS URI.
-      _vmServiceWsUri = getVmServiceUriFromObservatoryUri(_vmServiceWsUri);
+      _vmServiceWsUri =
+          convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
       vmService = VmServiceWrapper(
         await vmServiceConnectUri(_vmServiceWsUri.toString()),

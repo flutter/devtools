@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:vm_service_lib/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' hide Isolate;
 
 import 'chrome.dart';
@@ -102,6 +103,10 @@ void serveDevTools({
   printOutput(
     'Serving DevTools at $devToolsUrl',
     {
+      'event': 'server.started',
+      // TODO(dantup): Remove this `method` field when we're sure VS Code users
+      // are all on a newer version that uses `event`. We incorrectly used
+      // `method` for the original releases.
       'method': 'server.started',
       'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
     },
@@ -125,39 +130,68 @@ void serveDevTools({
   //   }
   // }
   _stdinCommandStream.listen((Map<String, dynamic> json) async {
-    final int id = json['id'];
+    // ID can be String, int or null
+    final dynamic id = json['id'];
     final Map<String, dynamic> params = json['params'];
 
-    if (!params.containsKey('uri')) {
-      printOutput(
-        'Invalid input: $params does not contain the key \'uri\'',
-        {
-          'id': id,
-          'error': 'Invalid input: $params does not contain the key \'uri\'',
-        },
-        machineMode: machineMode,
-      );
+    switch (json['method']) {
+      case 'vm.register':
+        await _handleVmRegister(id, params, machineMode, devToolsUrl);
+        break;
+      default:
+        printOutput(
+          'Unknown method ${json['method']}',
+          {
+            'id': id,
+            'error': 'Unknown method ${json['method']}',
+          },
+          machineMode: machineMode,
+        );
     }
-
-    // json['uri'] should contain a vm service uri.
-    final uri = Uri.parse(params['uri']);
-
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    if (uri != null &&
-        uri.isAbsolute &&
-        (uri.isScheme('ws') ||
-            uri.isScheme('wss') ||
-            uri.isScheme('http') ||
-            uri.isScheme('https')))
-      await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
   });
+}
+
+Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
+    bool machineMode, String devToolsUrl) async {
+  if (!params.containsKey('uri')) {
+    printOutput(
+      'Invalid input: $params does not contain the key \'uri\'',
+      {
+        'id': id,
+        'error': 'Invalid input: $params does not contain the key \'uri\'',
+      },
+      machineMode: machineMode,
+    );
+  }
+
+  // json['uri'] should contain a vm service uri.
+  final uri = Uri.tryParse(params['uri']);
+
+  // Lots of things are considered valid URIs (including empty strings
+  // and single letters) since they can be relative, so we need to do some
+  // extra checks.
+  if (uri != null &&
+      uri.isAbsolute &&
+      (uri.isScheme('ws') ||
+          uri.isScheme('wss') ||
+          uri.isScheme('http') ||
+          uri.isScheme('https'))) {
+    await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
+  } else {
+    printOutput(
+      'Uri must be absolute with a http, https, ws or wss scheme',
+      {
+        'id': id,
+        'error': 'Uri must be absolute with a http, https, ws or wss scheme',
+      },
+      machineMode: machineMode,
+    );
+  }
 }
 
 Future<void> registerLaunchDevToolsService(
   Uri uri,
-  int id,
+  dynamic id,
   String devToolsUrl,
   bool machineMode,
 ) async {
@@ -184,7 +218,7 @@ Future<void> registerLaunchDevToolsService(
       'Successfully registered launchDevTools service',
       {
         'id': id,
-        'result': Success().toJson(),
+        'result': {'success': true},
       },
       machineMode: machineMode,
     );
@@ -201,6 +235,9 @@ Future<void> registerLaunchDevToolsService(
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {
+  // Fix up the various acceptable URI formats into a WebSocket URI to connect.
+  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+
   final WebSocket ws = await WebSocket.connect(uri.toString());
 
   final VmService service = VmService(

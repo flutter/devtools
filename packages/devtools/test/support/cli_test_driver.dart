@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
+import 'package:vm_service_lib/utils.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
@@ -105,7 +105,7 @@ class CliAppFixture extends AppFixture {
     }
 
     // Map to WS URI.
-    uri = getVmServiceUriFromObservatoryUri(uri);
+    uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
     final VmServiceWrapper serviceConnection =
         VmServiceWrapper(await vmServiceConnectUri(uri.toString()));
