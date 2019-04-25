@@ -190,24 +190,33 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
 }
 
 Future<void> registerLaunchDevToolsService(
-  Uri uri,
-  dynamic id,
+  Uri vmServiceUri,
+  int id,
   String devToolsUrl,
   bool machineMode,
 ) async {
   try {
     // Connect to the vm service and register a method to launch DevTools in
     // chrome.
-    final VmService service = await _connectToVmService(uri);
+    final VmService service = await _connectToVmService(vmServiceUri);
 
-    service.registerServiceCallback(launchDevToolsService, (request) async {
-      // TODO(kenzie): modify this to append arguments (i.e. theme=dark). This
-      // likely will require passing in args.
-      final url = '$devToolsUrl/?uri=${Uri.encodeComponent(uri.toString())}';
+    service.registerServiceCallback(launchDevToolsService, (params) async {
+      final uriParams = <String, dynamic>{};
+
+      // Copy over queryParams passed by the client
+      if (params != null) {
+        params['queryParams']?.forEach((key, value) => uriParams[key] = value);
+      }
+
+      // Add the URI to the VM service
+      uriParams['uri'] = vmServiceUri.toString();
+
+      final uriToLaunch =
+          Uri.parse(devToolsUrl).replace(queryParameters: uriParams);
 
       // TODO(kenzie): depend on the browser_launcher package for this once it
       // is complete.
-      await Chrome.start([url]);
+      await Chrome.start([uriToLaunch.toString()]);
 
       return {'result': Success().toJson()};
     });
@@ -224,10 +233,10 @@ Future<void> registerLaunchDevToolsService(
     );
   } catch (e) {
     printOutput(
-      'Unable to connect to VM service at $uri: $e',
+      'Unable to connect to VM service at $vmServiceUri: $e',
       {
         'id': id,
-        'error': 'Unable to connect to VM service at $uri: $e',
+        'error': 'Unable to connect to VM service at $vmServiceUri: $e',
       },
       machineMode: machineMode,
     );
