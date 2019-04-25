@@ -80,6 +80,8 @@ void debuggingTests() {
       return;
     }
 
+    await delay();
+
     // set and verify breakpoints
     for (int line in breakpointLines) {
       await debuggingManager.addBreakpoint(appFixture.appScriptPath, line);
@@ -91,7 +93,7 @@ void debuggingTests() {
     // wait for paused state
     await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-    await shortDelay();
+    await delay();
 
     // verify location
     expect(
@@ -116,6 +118,8 @@ void debuggingTests() {
     // resume
     await debuggingManager.clearBreakpoints();
     await debuggingManager.resume();
+
+    await delay();
 
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
@@ -152,6 +156,8 @@ void debuggingTests() {
       return;
     }
 
+    await delay();
+
     // set and verify breakpoint
     await debuggingManager.addBreakpoint(
         appFixture.appScriptPath, breakpointLine);
@@ -178,7 +184,7 @@ void debuggingTests() {
       // wait for paused state
       await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-      await shortDelay();
+      await delay();
 
       // verify location
       expect(
@@ -200,6 +206,8 @@ void debuggingTests() {
     // resume
     await debuggingManager.clearBreakpoints();
     await debuggingManager.resume();
+
+    await delay();
 
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
@@ -231,7 +239,7 @@ void debuggingTests() {
     // wait for paused state
     await waitFor(() async => await debuggingManager.getState() == 'paused');
 
-    await shortDelay();
+    await delay();
 
     // verify location
     expect(
@@ -248,6 +256,8 @@ void debuggingTests() {
     // resume
     await debuggingManager.setExceptionPauseMode('Unhandled');
     await debuggingManager.resume();
+
+    await delay();
 
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
@@ -306,6 +316,8 @@ void debuggingTests() {
 
     // resume
     await debuggingManager.resume();
+
+    await delay();
 
     // verify state resumed
     expect(await debuggingManager.getState(), 'running');
