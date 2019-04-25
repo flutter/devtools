@@ -140,7 +140,7 @@ void serveDevTools({
         break;
       default:
         printOutput(
-          'Unknown command ${json['method']}',
+          'Unknown method ${json['method']}',
           {
             'id': id,
             'error': 'Unknown method ${json['method']}',
