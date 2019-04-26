@@ -8,7 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../debugger/debugger.dart';
-import '../ui/gtags.dart';
+import '../ui/analytics.dart' as ga;
 
 class DebuggerState {
   VmService _service;
@@ -86,7 +86,7 @@ class DebuggerState {
   Future<Success> resume() => _service.resume(isolateRef.id);
 
   Future<Success> stepOver() {
-    gaSelect(gaDebugger, gaStepOver);
+    ga.select(ga.debugger, ga.stepOver);
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final bool useAsyncStepping = lastEvent?.atAsyncSuspension == true;
@@ -97,13 +97,13 @@ class DebuggerState {
   }
 
   Future<Success> stepIn() {
-    gaSelect(gaDebugger, gaStepIn);
+    ga.select(ga.debugger, ga.stepIn);
 
     return _service.resume(isolateRef.id, step: StepOption.kInto);
   }
 
   Future<Success> stepOut() {
-    gaSelect(gaDebugger, gaStepOut);
+    ga.select(ga.debugger, ga.stepOut);
 
     return _service.resume(isolateRef.id, step: StepOption.kOut);
   }

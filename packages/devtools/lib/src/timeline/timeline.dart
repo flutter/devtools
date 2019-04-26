@@ -1,15 +1,16 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
-import '../ui/gtags.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
@@ -87,7 +88,7 @@ class TimelineScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    gaScreen(gaTimeline);
+    ga.screen(ga.timeline);
 
     final CoreElement screenDiv = div()..layoutVertical();
 
@@ -220,7 +221,7 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
-    gaSelect(gaTimeline, gaPause);
+    ga.select(ga.timeline, ga.pause);
 
     _updateButtons(paused: true);
     _paused = true;
@@ -228,7 +229,7 @@ class TimelineScreen extends Screen {
   }
 
   void _resumeRecording() {
-    gaSelect(gaTimeline, gaResume);
+    ga.select(ga.timeline, ga.resume);
     _updateButtons(paused: false);
     _paused = false;
     _updateListeningState();

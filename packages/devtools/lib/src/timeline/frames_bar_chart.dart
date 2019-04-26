@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import '../framework/framework.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
-import '../ui/gtags.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
 import 'timeline_controller.dart';
@@ -138,7 +138,7 @@ class PlotlyDivGraph extends CoreElement {
       if (_frames.containsKey(xPosition)) {
         final TimelineFrame timelineFrame = _frames[xPosition];
         framesBarChart.setSelected(timelineFrame);
-        gaSelect(gaTimeline, gaTimelineFrame);
+        ga.select(ga.timeline, ga.timelineFrame);
       }
     }
   }

@@ -13,9 +13,9 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
+import '../ui/analytics.dart' as ga;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
-import '../ui/gtags.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -53,7 +53,7 @@ class InspectorScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    gaScreen(gaInspector);
+    ga.screen(ga.inspector);
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar inspector-page')
       ..layoutVertical();
@@ -211,7 +211,7 @@ To fix this, relaunch your application by running 'flutter run
   }
 
   void _refreshInspector() async {
-    gaSelect(gaInspector, gaRefresh);
+    ga.select(ga.inspector, ga.refresh);
     refreshTreeButton.disabled = true;
     await inspectorController?.onForceRefresh();
     refreshTreeButton.disabled = false;

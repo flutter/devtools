@@ -5,14 +5,15 @@
 import 'dart:async';
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
-import 'package:devtools/src/ui/gtags.dart';
+import 'package:devtools/src/ui/analytics.dart' as ga;
 import 'package:platform_detect/platform_detect.dart';
 
 void _gAReportDartExceptions(Exception e, StackTrace stack) {
-  gaError('${e.toString()}\n${stack.toString()}', true);
+  ga.error('${e.toString()}\n${stack.toString()}', true);
 }
 
 void main() {
+  // Need to catch all Dart exceptions - done via an isolate.
   runZoned(() {
     // Initialize the core framework.
     FrameworkCore.init();
@@ -44,6 +45,7 @@ void main() {
 
     framework.loadScreenFromLocation();
   }, onError: (error, stack) {
+    // Report the exception to GA.
     _gAReportDartExceptions(error, stack);
   });
 }

@@ -9,9 +9,9 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../debugger/debugger.dart';
 import '../debugger/debugger_state.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
-import '../ui/gtags.dart';
 
 typedef URIDescriber = String Function(String uri);
 
@@ -131,12 +131,12 @@ class BreakOnExceptionControl extends CoreElement {
     ]);
 
     unhandledExceptionsElement.element.onChange.listen((_) {
-      gaSelect(gaDebugger, gaUnhandledExceptions);
+      ga.select(ga.debugger, ga.unhandledExceptions);
       _pauseModeController.add(exceptionPauseMode);
     });
 
     allExceptionsElement.element.onChange.listen((_) {
-      gaSelect(gaDebugger, gaAllExceptions);
+      ga.select(ga.debugger, ga.allExceptions);
       if (_allElement.checked) {
         unhandledExceptionsElement.enabled = false;
         _unhandledElement.checked = true;

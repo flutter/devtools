@@ -18,9 +18,9 @@ import 'model/model.dart';
 import 'performance/performance.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/timeline.dart';
+import 'ui/analytics.dart' as ga;
 import 'ui/custom.dart';
 import 'ui/elements.dart';
-import 'ui/gtags.dart';
 import 'ui/icons.dart';
 import 'ui/primer.dart';
 import 'ui/ui_utils.dart';
@@ -43,7 +43,7 @@ class PerfToolFramework extends Framework {
 
   void _gAReportExceptions(html.Event e) {
     final html.ErrorEvent errorEvent = e as html.ErrorEvent;
-    gaError(
+    ga.error(
         '${errorEvent.message}\n'
         '${errorEvent.filename}@${errorEvent.lineno}:${errorEvent.colno}\n'
         '${errorEvent.error}',
@@ -119,7 +119,7 @@ class PerfToolFramework extends Framework {
 
     // Listen for clicks on the 'send feedback' button.
     queryId('send-feedback-button').onClick.listen((_) {
-      gaSelect(gaDevTools, gaFeedback);
+      ga.select(ga.devToolsMain, ga.feedback);
       // TODO(devoncarew): Fill in useful product info here, like the Flutter
       // SDK version and the version of DevTools in use.
       html.window
@@ -159,13 +159,7 @@ class PerfToolFramework extends Framework {
           ' available in your code editor';
     }
 
-    computeApplicationState(
-      _isAnyFlutterApp,
-      _isFlutterApp,
-      _isFlutterWebApp,
-      _isProfileBuild,
-      true, // TODO(terry): Need iOS or Android
-    );
+    computeApplicationState();
 
     addScreen(InspectorScreen(
       disabled: !_isAnyFlutterApp || _isProfileBuild,
@@ -285,7 +279,7 @@ class PerfToolFramework extends Framework {
         messageBus.addEvent(BusEvent('reload.end', data: message));
         status.setText(message);
 
-        gaSelect(gaDevTools, gaHotReload, timer.elapsed.inMilliseconds);
+        ga.select(ga.devToolsMain, ga.hotReload, timer.elapsed.inMilliseconds);
       } catch (_) {
         const String message = 'error performing reload';
         messageBus.addEvent(BusEvent('reload.end', data: message));
@@ -323,7 +317,7 @@ class PerfToolFramework extends Framework {
         final String message = 'restarted in ${_renderDuration(timer.elapsed)}';
         messageBus.addEvent(BusEvent('restart.end', data: message));
         status.setText(message);
-        gaSelect(gaDevTools, gaHotRestart, timer.elapsed.inMilliseconds);
+        ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
       } catch (_) {
         const String message = 'error performing restart';
         messageBus.addEvent(BusEvent('restart.end', data: message));

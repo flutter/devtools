@@ -12,10 +12,10 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-33"></script>
 
     <dialog open id="devtools_analytics" class="ga-dialog" style="width: 100%;">
-      <p>Welcome to Flutter DevTools</p>
+      <p>Welcome to Dart DevTools</p>
       <span class="ga-collection" disabled>
-        Flutter DevTools anonymously reports features usage statistics and basic crash reports to Google in order
-        to help Google contribute improvements to Flutter DevTools over time.
+        Dart DevTools anonymously reports features usage statistics and basic crash reports to Google in order
+        to help Google contribute improvements to Dart DevTools over time.
         <br/>
         See Google's private policy
       </span>
@@ -44,15 +44,18 @@
         return _initializedGA;
       }
 
-      // InitializeGA with our dimensions.
+      // InitializeGA with our dimensions. Both the name and order (dimension #) should match the those in gtags.dart
       function _initializeGA() {
         if (!_initializedGA && gaCollectionAllowed()) {
           gtag('js', new Date());
           gtag('config', _GA_DEVTOOLS_PROPERTY, {
             'custom_map': {
-              dimension1: 'app_type',
-              dimension2: 'build_type',
-              dimension3: 'platform_type',
+              dimension1: 'user_app',
+              dimension2: 'user_build',
+              dimension3: 'user_platform',
+              dimension4: 'devtools_platform',
+              dimension5: 'devtools_chrome',
+              dimension6: 'devtools_version',
             }
           });
 

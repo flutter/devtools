@@ -2,20 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:meta/meta.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../eval_on_dart_library.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
 import '../service_registrations.dart';
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';
+import 'analytics.dart' as ga;
 import 'elements.dart';
 import 'environment.dart' as environment;
 import 'fake_flutter/dart_ui/dart_ui.dart';
-import 'gtags.dart';
 import 'html_icon_renderer.dart';
 import 'material_icons.dart';
 import 'primer.dart';
@@ -29,19 +33,86 @@ String userAppType = ''; // dimension1
 String userBuildType = ''; // dimension2
 String userPlatformType = ''; // dimension3
 
-void computeApplicationState(
-  bool isAnyFlutterApp,
-  bool isFlutter,
-  bool isWebApp,
-  bool isProfile,
-  bool isAndroid,
-) {
-  if (isAnyFlutterApp) {
-    if (isFlutter) userAppType = gaAppTypeFlutter;
-    if (isWebApp) userAppType = gaAppTypeWeb;
+String devtoolsPlatformType = ''; // dimension4 MacIntel/Linux/Windows/Android_n
+String devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
+const String devtoolsVersion = devtools.version; //dimension6 n.n.n
+
+bool get isDimensionsComputed =>
+    (userAppType.length +
+        userBuildType.length +
+        userPlatformType.length +
+        devtoolsPlatformType.length +
+        devtoolsChrome.length) >
+    0;
+
+/// Computes the DevTools application. Fills in the devtoolsPlatformType and
+/// devtoolsChrome.
+void computeDevToolsState() {
+  // Platform
+  final String platform = html.window.navigator.platform;
+  platform.replaceAll(' ', '_');
+  devtoolsPlatformType = platform;
+
+  final String appVersion = html.window.navigator.appVersion;
+  final List<String> splits = appVersion.split(' ');
+  final len = splits.length;
+  for (int index = 0; index < len; index++) {
+    final String value = splits[index];
+    // Chrome or Chrome iOS
+    if (value.startsWith(ga.devToolsChrome) ||
+        value.startsWith(ga.devToolsChromeIos)) {
+      devtoolsChrome = value;
+    } else if (value.startsWith('Android')) {
+      // appVersion for Android is 'Android n.n.n'
+      devtoolsPlatformType =
+          '${ga.devToolsPlatformTypeAndroid}${splits[index + 1]}';
+    }
   }
-  userBuildType = isProfile ? gaBuildTypeProfile : gaBuildTypeDebug;
-  userPlatformType = isAndroid ? gaPlatformTypeAndroid : gaPlatformTypeIOS;
+}
+
+// Computes the running application.
+void computeApplicationState() async {
+  final isFlutter = await serviceManager.connectedApp.isFlutterApp;
+  final isWebApp = await serviceManager.connectedApp.isFlutterWebApp;
+  final isProfile = await serviceManager.connectedApp.isProfileBuild;
+  final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
+
+  if (isDimensionsComputed) return;
+
+  if (isFlutter) {
+    // Compute the Flutter platform for the user's running application.
+    final VmService vmService = serviceManager.service;
+    final io = EvalOnDartLibrary(['dart:io'], vmService);
+
+    // eval user's Platform for all possible values.
+    final android = await io.eval('Platform.isAndroid', isAlive: null);
+    final iOS = await io.eval('Platform.isIOS', isAlive: null);
+    final fuchsia = await io.eval('Platform.isFuchsia', isAlive: null);
+    final linux = await io.eval('Platform.isLinux', isAlive: null);
+    final macOS = await io.eval('Platform.isMacOS', isAlive: null);
+    final windows = await io.eval('Platform.isWindows', isAlive: null);
+
+    if (android.valueAsString == 'true')
+      userPlatformType = ga.platformTypeAndroid;
+    else if (iOS.valueAsString == 'true')
+      userPlatformType = ga.platformTypeIOS;
+    else if (fuchsia.valueAsString == 'true')
+      userPlatformType = ga.platformTypeFuchsia;
+    else if (linux.valueAsString == 'true')
+      userPlatformType = ga.platformTypeLinux;
+    else if (macOS.valueAsString == 'true')
+      userPlatformType = ga.platformTypeMac;
+    else if (windows.valueAsString == 'true')
+      userPlatformType = ga.platformTypeWindows;
+  }
+
+  if (isAnyFlutterApp) {
+    if (isFlutter) userAppType = ga.appTypeFlutter;
+    if (isWebApp) userAppType = ga.appTypeWeb;
+  }
+  userBuildType = isProfile ? ga.buildTypeProfile : ga.buildTypeDebug;
+
+  computeDevToolsState();
 }
 
 CoreElement createExtensionCheckBox(
@@ -210,31 +281,31 @@ class ServiceExtensionButton {
   void _click() {
     switch (extensionDescription.extension) {
       case 'ext.flutter.debugAllowBanner':
-        gaSelect(gaInspector, gaDebugBanner);
+        ga.select(ga.inspector, ga.debugBanner);
         break;
       case 'ext.flutter.debugPaint':
-        gaSelect(gaInspector, gaDebugPaint);
+        ga.select(ga.inspector, ga.debugPaint);
         break;
       case 'ext.flutter.debugPaintBaselinesEnabled':
-        gaSelect(gaInspector, gaPaintBaseline);
+        ga.select(ga.inspector, ga.paintBaseline);
         break;
       case 'ext.flutter.showPerformanceOverlay':
-        gaSelect(gaInspector, gaPerformanceOverlay);
+        ga.select(ga.inspector, ga.performanceOverlay);
         break;
       case 'ext.flutter.profileWidgetBuilds':
-        gaSelect(gaInspector, gaTrackRebuilds);
+        ga.select(ga.inspector, ga.trackRebuilds);
         break;
       case 'ext.flutter.repaintRainbow':
-        gaSelect(gaInspector, gaRepaintRainbow);
+        ga.select(ga.inspector, ga.repaintRainbow);
         break;
       case 'ext.flutter.timeDilation':
-        gaSelect(gaInspector, gaSlowAnimation);
+        ga.select(ga.inspector, ga.slowAnimation);
         break;
       case 'ext.flutter.platformOverride':
-        gaSelect(gaInspector, gaIOS);
+        ga.select(ga.inspector, ga.iOS);
         break;
       case 'ext.flutter.inspector.show':
-        gaSelect(gaInspector, gaSelectWidgeMode);
+        ga.select(ga.inspector, ga.selectWidgetMode);
         break;
     }
 

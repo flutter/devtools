@@ -10,9 +10,9 @@ import 'package:meta/meta.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../tables.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
-import '../ui/gtags.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -78,7 +78,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   CoreElement createContent(Framework framework) {
-    gaScreen(gaMemory);
+    ga.screen(ga.memory);
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
@@ -113,7 +113,7 @@ class MemoryScreen extends Screen with SetStateMixin {
           ..disabled = true;
 
     resumeButton.click(() {
-      gaSelect(gaMemory, gaResume);
+      ga.select(ga.memory, ga.resume);
 
       updateResumeButton(disabled: true);
       updatePauseButton(disabled: false);
@@ -122,7 +122,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     });
 
     pauseButton.click(() {
-      gaSelect(gaMemory, gaPause);
+      ga.select(ga.memory, ga.pause);
 
       updatePauseButton(disabled: true);
       updateResumeButton(disabled: false);
@@ -199,7 +199,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<void> _resetAllocatorCounts() async {
-    gaSelect(gaMemory, gaReset);
+    ga.select(ga.memory, ga.reset);
 
     memoryChart.plotReset();
 
@@ -222,7 +222,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<void> _loadAllocationProfile({bool reset = false}) async {
-    gaSelect(gaMemory, gaSnapshot);
+    ga.select(ga.memory, ga.snapshot);
 
     memoryChart.plotSnapshot();
 
@@ -245,7 +245,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<Null> _gcNow() async {
-    gaSelect(gaMemory, gaGC);
+    ga.select(ga.memory, ga.gC);
 
     gcNowButton.disabled = true;
 
@@ -304,7 +304,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.setSortColumn(table.columns.first);
 
     table.onSelect.listen((ClassHeapDetailStats row) async {
-      gaSelect(gaMemory, gaInspectClass);
+      ga.select(ga.memory, ga.inspectClass);
 
       final Table<InstanceSummary> newTable =
           row == null ? null : await _createInstanceListTableView(row);
@@ -333,7 +333,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
 
     table.onSelect.listen((InstanceSummary row) async {
-      gaSelect(gaMemory, gaInspectInstance);
+      ga.select(ga.memory, ga.inspectInstance);
       // TODO(terry): Handle clicking on an instance bring up variable inspector
     });
 
