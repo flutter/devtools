@@ -1,6 +1,6 @@
 ▼[S] Scaffold <-- selected
 │   dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality, _InheritedTheme, MediaQuery]
-│   ▶state: ScaffoldState#00000(tickers: tracking 1 ticker)
+│   ▶state: ScaffoldState#00000(tickers: tracking 2 tickers)
 └─▼[S] _ScaffoldScope
     ▼[P] PrimaryScrollController
     │   ScrollController#00000(no clients)
@@ -77,7 +77,7 @@
                         └─▼[/icons/inspector/atrule.png] MediaQuery
                           │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: falsedisableAnimations: falseinvertColors: falseboldText: false)
                           └─▼[F] _FloatingActionButtonTransition
-                            │   ▶state: _FloatingActionButtonTransitionState#00000(tickers: tracking 2 tickers)
+                            │   ▶state: _FloatingActionButtonTransitionState#00000(tickers: tracking 1 ticker)
                             └─▼[/icons/inspector/value.png] Stack
                               │   alignment: centerRight
                               │   fit: loose
