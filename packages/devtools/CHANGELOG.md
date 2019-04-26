@@ -1,4 +1,4 @@
-## 0.0.17-dev-01
+## 0.0.17-dev.1 - 2019-04-26
 * Add CPU profiler (preview) to timeline page.
 * Dark mode improvements.
 
