@@ -1,3 +1,7 @@
+## 0.0.17-dev-01
+* Add CPU profiler (preview) to timeline page.
+* Dark mode improvements.
+
 ## 0.0.16 - 2019-04-17
 * Reduce the minimum Dart SDK requirements for activating DevTools to cover Flutter v1.2.1 (Dart v2.1)
 
