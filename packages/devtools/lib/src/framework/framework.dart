@@ -8,6 +8,7 @@ import 'dart:html' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../main.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
@@ -48,6 +49,7 @@ class Framework {
   }
 
   void navigateTo(String id) {
+    ga.screen(id);
     final Screen screen = getScreen(id);
     assert(screen != null);
 

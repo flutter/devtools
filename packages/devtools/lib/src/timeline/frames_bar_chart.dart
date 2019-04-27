@@ -60,6 +60,13 @@ class FramesBarChart extends CoreElement with SetStateMixin {
 
     selectedFrame = frame;
     _selectedFrameController.add(frame);
+
+    ga.selectFrame(
+      ga.timeline,
+      ga.timelineFrame,
+      frame.gpuDuration,
+      frame.uiDuration,
+    );
   }
 }
 
@@ -138,7 +145,6 @@ class PlotlyDivGraph extends CoreElement {
       if (_frames.containsKey(xPosition)) {
         final TimelineFrame timelineFrame = _frames[xPosition];
         framesBarChart.setSelected(timelineFrame);
-        ga.select(ga.timeline, ga.timelineFrame);
       }
     }
   }

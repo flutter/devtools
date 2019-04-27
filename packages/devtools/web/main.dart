@@ -8,7 +8,7 @@ import 'package:devtools/src/main.dart';
 import 'package:devtools/src/ui/analytics.dart' as ga;
 import 'package:platform_detect/platform_detect.dart';
 
-void _gAReportDartExceptions(Exception e, StackTrace stack) {
+void _gaReportDartExceptions(Exception e, StackTrace stack) {
   ga.error('${e.toString()}\n${stack.toString()}', true);
 }
 
@@ -46,6 +46,6 @@ void main() {
     framework.loadScreenFromLocation();
   }, onError: (error, stack) {
     // Report the exception to GA.
-    _gAReportDartExceptions(error, stack);
+    _gaReportDartExceptions(error, stack);
   });
 }

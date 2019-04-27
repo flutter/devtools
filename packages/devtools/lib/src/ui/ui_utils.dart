@@ -3,13 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:html';
 
-import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
 
-import '../eval_on_dart_library.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
@@ -28,93 +25,6 @@ const int defaultSplitterWidth = 10;
 const String runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
 
-// GA dimensions:
-String userAppType = ''; // dimension1
-String userBuildType = ''; // dimension2
-String userPlatformType = ''; // dimension3
-
-String devtoolsPlatformType = ''; // dimension4 MacIntel/Linux/Windows/Android_n
-String devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
-const String devtoolsVersion = devtools.version; //dimension6 n.n.n
-
-bool get isDimensionsComputed =>
-    (userAppType.length +
-        userBuildType.length +
-        userPlatformType.length +
-        devtoolsPlatformType.length +
-        devtoolsChrome.length) >
-    0;
-
-/// Computes the DevTools application. Fills in the devtoolsPlatformType and
-/// devtoolsChrome.
-void computeDevToolsState() {
-  // Platform
-  final String platform = html.window.navigator.platform;
-  platform.replaceAll(' ', '_');
-  devtoolsPlatformType = platform;
-
-  final String appVersion = html.window.navigator.appVersion;
-  final List<String> splits = appVersion.split(' ');
-  final len = splits.length;
-  for (int index = 0; index < len; index++) {
-    final String value = splits[index];
-    // Chrome or Chrome iOS
-    if (value.startsWith(ga.devToolsChrome) ||
-        value.startsWith(ga.devToolsChromeIos)) {
-      devtoolsChrome = value;
-    } else if (value.startsWith('Android')) {
-      // appVersion for Android is 'Android n.n.n'
-      devtoolsPlatformType =
-          '${ga.devToolsPlatformTypeAndroid}${splits[index + 1]}';
-    }
-  }
-}
-
-// Computes the running application.
-void computeApplicationState() async {
-  final isFlutter = await serviceManager.connectedApp.isFlutterApp;
-  final isWebApp = await serviceManager.connectedApp.isFlutterWebApp;
-  final isProfile = await serviceManager.connectedApp.isProfileBuild;
-  final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
-
-  if (isDimensionsComputed) return;
-
-  if (isFlutter) {
-    // Compute the Flutter platform for the user's running application.
-    final VmService vmService = serviceManager.service;
-    final io = EvalOnDartLibrary(['dart:io'], vmService);
-
-    // eval user's Platform for all possible values.
-    final android = await io.eval('Platform.isAndroid', isAlive: null);
-    final iOS = await io.eval('Platform.isIOS', isAlive: null);
-    final fuchsia = await io.eval('Platform.isFuchsia', isAlive: null);
-    final linux = await io.eval('Platform.isLinux', isAlive: null);
-    final macOS = await io.eval('Platform.isMacOS', isAlive: null);
-    final windows = await io.eval('Platform.isWindows', isAlive: null);
-
-    if (android.valueAsString == 'true')
-      userPlatformType = ga.platformTypeAndroid;
-    else if (iOS.valueAsString == 'true')
-      userPlatformType = ga.platformTypeIOS;
-    else if (fuchsia.valueAsString == 'true')
-      userPlatformType = ga.platformTypeFuchsia;
-    else if (linux.valueAsString == 'true')
-      userPlatformType = ga.platformTypeLinux;
-    else if (macOS.valueAsString == 'true')
-      userPlatformType = ga.platformTypeMac;
-    else if (windows.valueAsString == 'true')
-      userPlatformType = ga.platformTypeWindows;
-  }
-
-  if (isAnyFlutterApp) {
-    if (isFlutter) userAppType = ga.appTypeFlutter;
-    if (isWebApp) userAppType = ga.appTypeWeb;
-  }
-  userBuildType = isProfile ? ga.buildTypeProfile : ga.buildTypeDebug;
-
-  computeDevToolsState();
-}
-
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {
   final extensionName = extensionDescription.extension;
@@ -126,13 +36,13 @@ CoreElement createExtensionCheckBox(
   serviceManager.serviceExtensionManager.getServiceExtensionState(
     extensionName,
     (state) {
-      final html.InputElement e = input.element;
+      final InputElement e = input.element;
       e.checked = state.value;
     },
   );
 
   input.element.onChange.listen((_) {
-    final html.InputElement e = input.element;
+    final InputElement e = input.element;
     serviceManager.serviceExtensionManager
         .setServiceExtensionState(extensionName, e.checked, e.checked);
   });
@@ -279,35 +189,7 @@ class ServiceExtensionButton {
   PButton button;
 
   void _click() {
-    switch (extensionDescription.extension) {
-      case 'ext.flutter.debugAllowBanner':
-        ga.select(ga.inspector, ga.debugBanner);
-        break;
-      case 'ext.flutter.debugPaint':
-        ga.select(ga.inspector, ga.debugPaint);
-        break;
-      case 'ext.flutter.debugPaintBaselinesEnabled':
-        ga.select(ga.inspector, ga.paintBaseline);
-        break;
-      case 'ext.flutter.showPerformanceOverlay':
-        ga.select(ga.inspector, ga.performanceOverlay);
-        break;
-      case 'ext.flutter.profileWidgetBuilds':
-        ga.select(ga.inspector, ga.trackRebuilds);
-        break;
-      case 'ext.flutter.repaintRainbow':
-        ga.select(ga.inspector, ga.repaintRainbow);
-        break;
-      case 'ext.flutter.timeDilation':
-        ga.select(ga.inspector, ga.slowAnimation);
-        break;
-      case 'ext.flutter.platformOverride':
-        ga.select(ga.inspector, ga.iOS);
-        break;
-      case 'ext.flutter.inspector.show':
-        ga.select(ga.inspector, ga.selectWidgetMode);
-        break;
-    }
+    ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
 
     final bool wasSelected = button.element.classes.contains('selected');
     serviceManager.serviceExtensionManager.setServiceExtensionState(
@@ -383,7 +265,7 @@ Set<String> get hiddenPages {
 }
 
 Set<String> _lookupHiddenPages() {
-  final queryString = html.window.location.search;
+  final queryString = window.location.search;
   if (queryString == null || queryString.length <= 1) {
     // TODO(dantup): Remove this ignore, change to `{}` and bump SDK requirements
     // in pubspec.yaml (devtools + devtools_server) once Flutter stable includes
@@ -407,14 +289,14 @@ bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 ///
 /// There are some complicated edge cases for non-integer devicePixelRatios as
 /// found on Windows 10 so always use this method instead of rolling your own.
-html.CanvasElement createHighDpiCanvas(int width, int height) {
+CanvasElement createHighDpiCanvas(int width, int height) {
   // If the size has to be rounded, we choose to err towards a higher resolution
   // image instead of a lower resolution one. The cost of a higher resolution
   // image is generally only slightly higher memory usage while a lower
   // resolution image could introduce rendering artifacts.
   final int scaledWidth = (width * environment.devicePixelRatio).ceil();
   final int scaledHeight = (height * environment.devicePixelRatio).ceil();
-  final canvas = html.CanvasElement(width: scaledWidth, height: scaledHeight);
+  final canvas = CanvasElement(width: scaledWidth, height: scaledHeight);
   canvas.style
     ..width = '${width}px'
     ..height = '${height}px';
@@ -430,11 +312,11 @@ html.CanvasElement createHighDpiCanvas(int width, int height) {
 }
 
 void downloadFile(String src, String filename) {
-  final element = html.document.createElement('a');
-  element.setAttribute('href', html.Url.createObjectUrl(html.Blob([src])));
+  final element = document.createElement('a');
+  element.setAttribute('href', Url.createObjectUrl(Blob([src])));
   element.setAttribute('download', filename);
   element.style.display = 'none';
-  html.document.body.append(element);
+  document.body.append(element);
   element.click();
   element.remove();
 }

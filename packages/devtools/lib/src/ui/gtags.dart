@@ -10,10 +10,6 @@ import 'package:js/js.dart';
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".
 
-/// Analytic's DevTools Property ID 'UA-nnn'.
-//@JS('_GA_DEVTOOLS_PROPERTY')
-//external String get gaDevToolsPropertyTrackingID;
-
 @JS('gtag')
 external void _gTagCommandName(String command, String name, [dynamic params]);
 
@@ -70,7 +66,7 @@ class GtagEvent {
   // ignore: non_constant_identifier_names
   external bool get non_interaction;
   // ignore: non_constant_identifier_names
-  external dynamic get custom_map;
+  external dynamic get custom_map; // Custom metrics
 }
 
 @JS()

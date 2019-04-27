@@ -159,7 +159,7 @@ class PerfToolFramework extends Framework {
           ' available in your code editor';
     }
 
-    computeApplicationState();
+    ga.computeUserApplicationCustomGTagData();
 
     addScreen(InspectorScreen(
       disabled: !_isAnyFlutterApp || _isProfileBuild,

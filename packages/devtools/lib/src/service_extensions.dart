@@ -4,6 +4,7 @@
 
 library service_extensions;
 
+import 'ui/analytics.dart' as ga;
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
@@ -16,6 +17,8 @@ class ToggleableServiceExtensionDescription<T> {
     this.disabledValue,
     this.enabledTooltip,
     this.disabledTooltip,
+    this.gaScreenName,
+    this.gaItem,
   });
 
   final String extension;
@@ -25,6 +28,8 @@ class ToggleableServiceExtensionDescription<T> {
   final T disabledValue;
   final String enabledTooltip;
   final String disabledTooltip;
+  final String gaScreenName;  // Analytics screen (screen name where item lives).
+  final String gaItem;  // Analytics item name (toggleable item's name).
 }
 
 const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -35,6 +40,8 @@ const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
   disabledTooltip: 'Show Debug Banner',
+  gaScreenName: ga.inspector,
+  gaItem: ga.debugBanner,
 );
 
 const debugPaint = ToggleableServiceExtensionDescription<bool>._(
@@ -45,6 +52,8 @@ const debugPaint = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Debug Paint',
   disabledTooltip: 'Show Debug Paint',
+  gaScreenName: ga.inspector,
+  gaItem: ga.debugPaint,
 );
 
 const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -55,6 +64,8 @@ const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Paint Baselines',
   disabledTooltip: 'Show Paint Baselines',
+  gaScreenName: ga.inspector,
+  gaItem: ga.paintBaseline,
 );
 
 const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -65,6 +76,8 @@ const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Performance Overlay',
   disabledTooltip: 'Show Performance Overlay',
+  gaScreenName: ga.inspector,
+  gaItem: ga.performanceOverlay,
 );
 
 const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -75,6 +88,8 @@ const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Do Not Track Widget Rebuilds',
   disabledTooltip: 'Track Widget Rebuilds',
+  gaScreenName: ga.inspector,
+  gaItem: ga.trackRebuilds,
 );
 
 const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -85,6 +100,8 @@ const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Repaint Rainbow',
   disabledTooltip: 'Show Repaint Rainbow',
+  gaScreenName: ga.inspector,
+  gaItem: ga.repaintRainbow,
 );
 
 const slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -95,6 +112,8 @@ const slowAnimations = ToggleableServiceExtensionDescription<num>._(
   disabledValue: 1.0,
   enabledTooltip: 'Disable Slow Animations',
   disabledTooltip: 'Enable Slow Animations',
+  gaScreenName: ga.inspector,
+  gaItem: ga.slowAnimation,
 );
 
 const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
@@ -105,6 +124,8 @@ const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
   disabledValue: 'android',
   enabledTooltip: 'Toggle iOS Platform',
   disabledTooltip: 'Toggle iOS Platform',
+  gaScreenName: ga.inspector,
+  gaItem: ga.toggleIoS,
 );
 
 const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
@@ -115,6 +136,8 @@ const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Disable Select Widget Mode',
   disabledTooltip: 'Enable Select Widget Mode',
+  gaScreenName: ga.inspector,
+  gaItem: ga.selectWidgetMode,
 );
 
 // This extension should never be displayed as a button so does not need a

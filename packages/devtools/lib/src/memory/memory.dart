@@ -337,7 +337,6 @@ class MemoryScreen extends Screen with SetStateMixin {
       // TODO(terry): Handle clicking on an instance bring up variable inspector
     });
 
-
     return table;
   }
 
