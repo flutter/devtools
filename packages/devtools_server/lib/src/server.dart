@@ -217,7 +217,7 @@ Future<void> registerLaunchDevToolsService(
         // quietly replace the IP with "penguin.linux.test". This is not valid
         // for us since the server isn't bound to the containers IP (it's bound
         // to the containers loopback IP).
-        path: devToolsUri.path ?? '/',
+        path: devToolsUri.path == '' ? '/' : devToolsUri.path,
         queryParameters: uriParams,
       );
 
