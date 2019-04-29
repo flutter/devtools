@@ -41,6 +41,8 @@ class EventDetails extends CoreElement {
     // The size of the event details section will change as the splitter is
     // is moved. Observe resizing so that we can rebuild the flame chart canvas
     // as necessary.
+    // TODO(kenzie): clean this code up when
+    // https://github.com/dart-lang/html/issues/102 is fixed.
     final observer =
         html.ResizeObserver(allowInterop((List<dynamic> entries, _) {
       _details.uiEventDetails.flameChart.updateForContainerResize();
