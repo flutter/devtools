@@ -210,12 +210,29 @@ Future<void> registerLaunchDevToolsService(
       // Add the URI to the VM service
       uriParams['uri'] = vmServiceUri.toString();
 
-      final uriToLaunch =
-          Uri.parse(devToolsUrl).replace(queryParameters: uriParams);
+      final devToolsUri = Uri.parse(devToolsUrl);
+      final uriToLaunch = devToolsUri.replace(
+        // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
+        // ChromeOS fails to detect that it's a port that's tunneled, and will
+        // quietly replace the IP with "penguin.linux.test". This is not valid
+        // for us since the server isn't bound to the containers IP (it's bound
+        // to the containers loopback IP).
+        path: devToolsUri.path ?? '/',
+        queryParameters: uriParams,
+      );
 
-      // TODO(kenzie): depend on the browser_launcher package for this once it
-      // is complete.
-      await Chrome.start([uriToLaunch.toString()]);
+      // TODO(dantup): When ChromeOS has support for tunneling all ports we
+      // can change this to always use the native browser for ChromeOS
+      // and may wish to handle this inside `browser_launcher`.
+      //   https://crbug.com/848063
+      final useNativeBrowser = _isChromeOS &&
+          _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
+          _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+      if (useNativeBrowser) {
+        await Process.start('x-www-browser', [uriToLaunch.toString()]);
+      } else {
+        await Chrome.start([uriToLaunch.toString()]);
+      }
 
       return {'result': Success().toJson()};
     });
@@ -240,6 +257,25 @@ Future<void> registerLaunchDevToolsService(
       machineMode: machineMode,
     );
   }
+}
+
+final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
+
+bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
+  // TODO(dantup): Change to Set literal when supported.
+  const tunneledPorts = {
+    8000: true,
+    8008: true,
+    8080: true,
+    8085: true,
+    8888: true,
+    9005: true,
+    3000: true,
+    4200: true,
+    5000: true,
+  };
+
+  return uri != null && uri.hasPort && tunneledPorts[uri.port] == true;
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {
