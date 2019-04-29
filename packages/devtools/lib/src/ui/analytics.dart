@@ -56,7 +56,7 @@ external String storageCollectValue();
 external String storageDontCollectValue();
 
 bool isAnalyticsAllowed() =>
-  html.window.localStorage[devToolsProperty()] == storageCollectValue();
+    html.window.localStorage[devToolsProperty()] == storageCollectValue();
 
 void setAllowAnalytics() {
   html.window.localStorage[devToolsProperty()] = storageCollectValue();
