@@ -1,3 +1,9 @@
+## 0.1.1
+- When running on ChromeOS, the `launchDevTools` service will now launch the native
+  ChromeOS browser (instead of the Linux version of Chrome installed in the Linux
+  container) if both the DevTools and VM Service ports are accessible (tunneled)
+  to the ChromeOS browser.
+
 ## 0.1.0
 - JSON-RPC commands are now accepted over stdin, the first method being `vm.register` which allows registering of VM services:
   ```
