@@ -210,8 +210,16 @@ Future<void> registerLaunchDevToolsService(
       // Add the URI to the VM service
       uriParams['uri'] = vmServiceUri.toString();
 
-      final uriToLaunch =
-          Uri.parse(devToolsUrl).replace(queryParameters: uriParams);
+      final devToolsUri = Uri.parse(devToolsUrl);
+      final uriToLaunch = devToolsUri.replace(
+        // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
+        // ChromeOS fails to detect that it's a port that's tunneled, and will
+        // quietly replace the IP with "penguin.linux.test". This is not valid
+        // for us since the server isn't bound to the containers IP (it's bound
+        // to the containers loopback IP).
+        path: devToolsUri.path ?? '/',
+        queryParameters: uriParams,
+      );
 
       // TODO(dantup): When ChromeOS has support for tunneling all ports we
       // can change this to always use the native browser for ChromeOS
