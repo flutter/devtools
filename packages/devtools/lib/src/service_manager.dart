@@ -179,7 +179,7 @@ class ServiceConnectionManager {
       } catch (e) {
         // Don't complain about '_Logging' or 'Logging' events (newer VMs don't
         // support '_Logging' and older VMs don't support 'Logging').
-        // TODO(devoncarew): Remove this check on or after approx. 10/1/2019.
+        // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
         if (!id.endsWith('Logging')) {
           print("Service client stream not supported: '$id'\n  $e");
         }
