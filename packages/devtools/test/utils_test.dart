@@ -223,7 +223,7 @@ void main() {
       );
       expect(
         getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=').toString(),
-        equals('http://127.0.0.1:60667/72K34Xmq0X0='),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
       );
       expect(
         getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ').toString(),

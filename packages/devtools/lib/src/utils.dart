@@ -152,31 +152,18 @@ String longestFittingSubstring(
 Uri getTrimmedUri(String value) {
   final startingUri = Uri.parse(value);
 
-  // Path should be of the form "/72K34Xmq0X0=/", but it could have trailing
-  // characters that we should trim.
-  final path = startingUri.path;
-
-  // Find the end of token index (index of the second slash).
-  int endOfTokenIndex = -1;
-  int slashCount = 0;
-  for (int i = 0; i < path.length; i++) {
-    if (path[i] == '/') {
-      slashCount++;
-    }
-    if (slashCount == 2) {
-      endOfTokenIndex = i;
-      break;
-    }
-  }
-
-  if (endOfTokenIndex == -1) {
+  // [startingUri.path] should be of the form "/72K34Xmq0X0=/", but it could
+  // have trailing characters. Trim any excess chars beyond the second slash in
+  // the uri path.
+  final pathParts = startingUri.path.split('/');
+  if (pathParts.length < 2) {
     return Uri.parse(value);
   }
-
-  // Trim any excess chars beyond the second slash in the uri path.
-  final newPath = path.substring(0, endOfTokenIndex + 1);
+  final newPath = pathParts.take(2).join('/');
   final indexOfPath = value.indexOf(newPath);
-  return Uri.parse(value.substring(0, indexOfPath + newPath.length));
+
+  // Add a trailing slash to the path.
+  return Uri.parse(value.substring(0, indexOfPath + newPath.length) + '/');
 }
 
 class Property<T> {
