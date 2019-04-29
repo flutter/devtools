@@ -1,7 +1,7 @@
 name: devtools_server
 description: A server that supports Dart DevTools.
 
-version: 0.1.0
+version: 0.1.1
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
