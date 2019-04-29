@@ -65,14 +65,14 @@ class Splitter {
 /// The underlying split.js library supports splitting elements that use layout
 /// schemes other than flexbox but we don't need that flexibility.
 Splitter flexSplit(
-  List parts, {
+  List<Element> parts, {
   bool horizontal = true,
   gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
 }) {
   return _split(
-    parts.toList(),
+    parts,
     _SplitOptions(
       elementStyle: allowInterop((dimension, size, gutterSize, index) {
         return js_util.jsify({
@@ -100,7 +100,7 @@ Splitter flexSplit(
 /// To avoid memory leaks, cancel the stream subscription when the splitter is
 /// no longer being used.
 StreamSubscription<Object> flexSplitBidirectional(
-  List parts, {
+  List<Element> parts, {
   gutterSize = 5,
   List<num> verticalSizes,
   List<num> horizontalSizes,
