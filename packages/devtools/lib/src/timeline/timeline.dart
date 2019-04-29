@@ -184,7 +184,20 @@ class TimelineScreen extends Screen {
       }
     });
 
-    onSelectedFrameFlameChartItem.listen(eventDetails.update);
+    onSelectedFrameFlameChartItem.listen((FrameFlameChartItem item) async {
+      final TimelineEvent event = item.event;
+
+      String gaTimeLineFlame;
+      if (event.isGpuEvent) {
+        gaTimeLineFlame = ga.timelineFlameGpu;
+      } else {
+        gaTimeLineFlame = ga.timelineFlameUi;
+      }
+      ga.select(
+          ga.timeline, gaTimeLineFlame, event.time.duration.inMilliseconds);
+
+      await eventDetails.update(item);
+    });
 
     maybeShowDebugWarning(framework);
 

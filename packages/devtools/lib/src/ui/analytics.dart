@@ -5,6 +5,8 @@
 @JS()
 library gtags;
 
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:async';
 import 'dart:html' as html;
 
@@ -70,77 +72,52 @@ void setDontAllowAnalytics() {
 @anonymous
 class GtagEventDevTools extends GtagEvent {
   external factory GtagEventDevTools({
-    // ignore: non_constant_identifier_names
     String event_category,
-    // ignore: non_constant_identifier_names
     String event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
-    // ignore: non_constant_identifier_names
     String send_to, // UA ID of target GA property to receive event data.
 
     int value,
-
-    // ignore: non_constant_identifier_names
     bool non_interaction,
-
-    // ignore: non_constant_identifier_names
     dynamic custom_map,
-
-    // ignore: non_constant_identifier_names
     String user_app, // dimension1 (flutter or web)
-    // ignore: non_constant_identifier_names
     String user_build, // dimension2 (debug or profile)
-    // ignore: non_constant_identifier_names
     String user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
-    // ignore: non_constant_identifier_names
     String devtools_platform, // dimension4 linux/android/mac/windows
-    // ignore: non_constant_identifier_names
     String devtools_chrome, // dimension5 Chrome version #
-    // ignore: non_constant_identifier_names
     String devtools_version, // dimension6 DevTools version #
 
-    // ignore: non_constant_identifier_names
     int gpu_duration,
-    // ignore: non_constant_identifier_names
     int ui_duration,
   });
 
   @override
-  // ignore: non_constant_identifier_names
   external String get event_category;
+
   @override
-  // ignore: non_constant_identifier_names
   external String get event_label;
+
   @override
-  // ignore: non_constant_identifier_names
   external String get send_to;
+
   @override
-  // ignore: non_constant_identifier_names
   external int get value; // Positive number.
+
   @override
-  // ignore: non_constant_identifier_names
   external bool get non_interaction;
+
   @override
-  // ignore: non_constant_identifier_names
   external dynamic get custom_map;
 
   // Custom dimensions:
-  // ignore: non_constant_identifier_names
   external String get user_app;
-  // ignore: non_constant_identifier_names
   external String get user_build;
-  // ignore: non_constant_identifier_names
   external String get user_platform;
-  // ignore: non_constant_identifier_names
   external String get devtools_platform;
-  // ignore: non_constant_identifier_names
   external String get devtools_chrome;
-  // ignore: non_constant_identifier_names
   external String get devtools_version;
 
   // Custom metrics:
-  // ignore: non_constant_identifier_names
   external int get gpu_duration;
-  // ignore: non_constant_identifier_names
   external int get ui_duration;
 }
 
@@ -150,18 +127,11 @@ class GtagExceptionDevTools extends GtagException {
   external factory GtagExceptionDevTools({
     String description,
     bool fatal,
-
-    // ignore: non_constant_identifier_names
     String user_app, // dimension1 (flutter or web)
-    // ignore: non_constant_identifier_names
     String user_build, // dimension2 (debug or profile)
-    // ignore: non_constant_identifier_names
     String user_platform, // dimension3 (android or ios)
-    // ignore: non_constant_identifier_names
     String devtools_platform, // dimension4 linux/android/mac/windows
-    // ignore: non_constant_identifier_names
     String devtools_chrome, // dimension5 Chrome version #
-    // ignore: non_constant_identifier_names
     String devtools_version, // dimension6 DevTools version #
   });
 
@@ -171,17 +141,11 @@ class GtagExceptionDevTools extends GtagException {
   external bool get fatal; // Fatal error.
 
   // Custom dimensions:
-  // ignore: non_constant_identifier_names
   external String get user_app;
-  // ignore: non_constant_identifier_names
   external String get user_build;
-  // ignore: non_constant_identifier_names
   external String get user_platform;
-  // ignore: non_constant_identifier_names
   external String get devtools_platform;
-  // ignore: non_constant_identifier_names
   external String get devtools_chrome;
-  // ignore: non_constant_identifier_names
   external String get devtools_version;
 }
 

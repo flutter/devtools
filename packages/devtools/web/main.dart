@@ -22,7 +22,7 @@ void main() {
     // Load the web app framework.
     final PerfToolFramework framework = PerfToolFramework();
 
-    // Show the opt-in dialog?
+    // Show the opt-in dialog for collection analytics?
     if (ga.isGtagsEnabled() &
         (!window.localStorage.containsKey(ga.devToolsProperty()) ||
             window.localStorage[ga.devToolsProperty()].isEmpty))
@@ -52,7 +52,8 @@ void main() {
 
     framework.loadScreenFromLocation();
   }, onError: (error, stack) {
-    // Report the exception to GA.
+    // Report exceptions with DevTools to GA, any user's Flutter app exceptions
+    // are not collected.
     _gaReportDartExceptions(error, stack);
   });
 }

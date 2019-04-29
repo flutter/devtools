@@ -5,6 +5,8 @@
 @JS()
 library gtags;
 
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:js/js.dart';
 
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
@@ -39,33 +41,20 @@ class GTag {
 @anonymous
 class GtagEvent {
   external factory GtagEvent({
-    // ignore: non_constant_identifier_names
     String event_category,
-    // ignore: non_constant_identifier_names
     String event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
-    // ignore: non_constant_identifier_names
     String send_to, // UA ID of target GA property to receive event data.
 
     int value,
-
-    // ignore: non_constant_identifier_names
     bool non_interaction,
-
-    // ignore: non_constant_identifier_names
     dynamic custom_map,
   });
 
-  // ignore: non_constant_identifier_names
   external String get event_category;
-  // ignore: non_constant_identifier_names
   external String get event_label;
-  // ignore: non_constant_identifier_names
   external String get send_to;
-  // ignore: non_constant_identifier_names
   external int get value; // Positive number.
-  // ignore: non_constant_identifier_names
   external bool get non_interaction;
-  // ignore: non_constant_identifier_names
   external dynamic get custom_map; // Custom metrics
 }
 

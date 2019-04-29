@@ -156,15 +156,6 @@ class EventDetails extends CoreElement {
   Future<void> update(FrameFlameChartItem item) async {
     _event = item.event;
 
-    String gaTimeLineFlame;
-    if (_event.isGpuEvent) {
-      gaTimeLineFlame = ga.timelineFlameGpu;
-    } else {
-      gaTimeLineFlame = ga.timelineFlameUi;
-    }
-    ga.select(
-        ga.timeline, gaTimeLineFlame, _event.time.duration.inMilliseconds);
-
     _title.text = '${_event.name} - ${msText(_event.time.duration)}';
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)

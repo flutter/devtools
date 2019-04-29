@@ -20,9 +20,9 @@ function gtag() {
 // Parse the URI parameters.
 let _gtagsValue = new URLSearchParams(window.location.search).get('gtags');
 let _gtagsReset = _gtagsValue == 'reset';
-let _gtagsEnabled = _gtagsValue == 'enabled' ? true : false;
+let _gtagsEnabled = _gtagsValue == 'enabled';
 // Default is disabled if &gtags= is not specified
-let _gtagsDisabled = _gtagsValue == null || _gtagsValue == 'disabled' ? true : false;
+let _gtagsDisabled = _gtagsValue == null || _gtagsValue == 'disabled';
 
 // Disabled or resetting we're disabled.
 if (_gtagsDisabled | _gtagsReset) {
