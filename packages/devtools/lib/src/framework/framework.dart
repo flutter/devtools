@@ -523,7 +523,7 @@ class ConnectDialog {
       });
     } else {
       try {
-        final Uri uri = Uri.parse(value);
+        final uri = getTrimmedUri(value);
         if (uri != null && uri.isAbsolute) {
           _connect(uri).catchError((dynamic error) {
             handleConnectError();

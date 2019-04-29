@@ -145,6 +145,40 @@ String longestFittingSubstring(
   return originalText.substring(0, i);
 }
 
+/// Returns a trimmed vm service uri without any trailing characters.
+///
+/// For example, given a [value] of http://127.0.0.1:60667/72K34Xmq0X0=/#/vm,
+/// this method will return the URI http://127.0.0.1:60667/72K34Xmq0X0=/.
+Uri getTrimmedUri(String value) {
+  final startingUri = Uri.parse(value);
+
+  // Path should be of the form "/72K34Xmq0X0=/", but it could have trailing
+  // characters that we should trim.
+  final path = startingUri.path;
+
+  // Find the end of token index (index of the second slash).
+  int endOfTokenIndex = -1;
+  int slashCount = 0;
+  for (int i = 0; i < path.length; i++) {
+    if (path[i] == '/') {
+      slashCount++;
+    }
+    if (slashCount == 2) {
+      endOfTokenIndex = i;
+      break;
+    }
+  }
+
+  if (endOfTokenIndex == -1) {
+    return Uri.parse(value);
+  }
+
+  // Trim any excess chars beyond the second slash in the uri path.
+  final newPath = path.substring(0, endOfTokenIndex + 1);
+  final indexOfPath = value.indexOf(newPath);
+  return Uri.parse(value.substring(0, indexOfPath + newPath.length));
+}
+
 class Property<T> {
   Property(this._value);
 
