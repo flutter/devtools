@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
 import 'package:devtools/src/ui/analytics.dart' as ga;
@@ -20,6 +21,12 @@ void main() {
 
     // Load the web app framework.
     final PerfToolFramework framework = PerfToolFramework();
+
+    // Show the opt-in dialog?
+    if (ga.isGtagsEnabled() &
+        (!window.localStorage.containsKey(ga.devToolsProperty()) ||
+            window.localStorage[ga.devToolsProperty()].isEmpty))
+      framework.showAnalyticsDialog();
 
     if (!browser.isChrome) {
       final browserName =

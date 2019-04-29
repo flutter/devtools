@@ -11,27 +11,19 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script>
       // TODO(terry): Remove below line, UA-26406144-33 below is a GA property for testing ONLY.
-      const _GA_DEVTOOLS_PROPERTY = 'UA-26406144-33';
+      const GA_DEVTOOLS_PROPERTY = 'UA-26406144-33';
       // TODO(terry): Uncomment the below line, is the real GA property for DevTools collecting.
-      //      const _GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+      //      const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+
+      function getDevToolsPropertyID() {
+        return GA_DEVTOOLS_PROPERTY;
+      }
     </script>
     <!-- TODO(terry): Below URI id query must match the GA_DEVTOOLS_PROPERTY above. -->
+<!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>
+-->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-33"></script>
-
-    <dialog open id="devtools_analytics" class="ga-dialog" style="width: 100%;">
-      <p>Welcome to Dart DevTools</p>
-      <span class="ga-collection" disabled>
-        Dart DevTools anonymously reports features usage statistics and basic crash reports to Google in order
-        to help Google contribute improvements to Dart DevTools over time.
-        <br/>
-        See Google's private policy
-      </span>
-      <a id="devtools-ga-link" href="https://www.google.com/intl/en/policies/privacy" target="_blank" tabindex="1">https://www.google.com/intl/en/policies/privacy</a>
-      <br/><br/>
-      <p>Do you accept statistics collection for DevTools?</p>
-      <button id="devtools-ga-accept" value="accept" tabindex="2">I Accept</button>
-      <button id="devtools-ga-do-not-accept" value="do-not-accept" tabindex="3" autofocus>I Do Not Accept</button>
-    </dialog>
 
     <script type="text/javascript" src="devtools_analytics.js"></script>
 
@@ -80,7 +72,9 @@
                 )
             }
         })();
+    </script>
 
+    <script type="text/javascript">
         // Plotly wrappers.
         // TODO(terry): Remove JS code move to Dart JS interop.
         function hookupPlotlyClick(domName, jsFunction) {
@@ -246,6 +240,7 @@
 
 <div id="messages-container" class="container"></div>
 
+<form id="ga-dialog" class="container"></form>
 <form id="connect-dialog" class="container"></form>
 
 <div id="content" class="container" flex layout vertical style="overflow: auto;">

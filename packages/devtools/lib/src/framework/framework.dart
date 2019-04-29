@@ -28,6 +28,8 @@ class Framework {
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
     connectDialog = new ConnectDialog(this);
+
+    analyticsDialog = AnalyticsOptInDialog(this);
   }
 
   final List<Screen> screens = <Screen>[];
@@ -41,6 +43,7 @@ class Framework {
   StatusLine auxiliaryStatus;
   ActionsContainer globalActions;
   ConnectDialog connectDialog;
+  AnalyticsOptInDialog analyticsDialog;
 
   final Map<Screen, CoreElement> _screenContents = {};
 
@@ -58,6 +61,10 @@ class Framework {
     window.history.pushState(null, screen.name, ref);
 
     load(screen);
+  }
+
+  void showAnalyticsDialog() {
+    analyticsDialog.show();
   }
 
   void showConnectionDialog() {
@@ -563,4 +570,80 @@ class ConnectDialog {
       throw 'not connected';
     }
   }
+}
+
+class AnalyticsOptInDialog {
+  AnalyticsOptInDialog(this.framework) {
+    parent = CoreElement.from(queryId('ga-dialog'));
+    parent.layoutVertical();
+
+    parent.add([
+      h2(text: 'Analytics Data Collection'),
+      CoreElement('dl', classes: 'form-group')
+        ..add([
+          CoreElement('dt')
+            ..add([
+              label(text: 'Welcome to Dart DevTools')
+                ..setAttribute('for', 'uri-field'),
+            ]),
+          CoreElement('dd')
+            ..add([
+              p(
+                text: 'Dart DevTools anonymously reports features usage '
+                    'statistics and basic crash reports to Google in order '
+                    'to help Google contribute improvements to Dart DevTools '
+                    'over time.',
+              )..add([
+                  br(),
+                  a(
+                      text: 'See Google\'s privacy policy',
+                      c: 'note',
+                      href: 'https://www.google.com/intl/en/policies/privacy',
+                      target: '_blank'),
+                ]),
+            ]),
+          CoreElement('dd')
+            ..add([
+              p(text: 'Do you accept statistics collection for Dart DevTools?'),
+              acceptButton = PButton('I Accept')
+                ..small()
+                ..clazz('margin-left'),
+              dontAcceptButton = PButton('I Do Not Accept')
+                ..small()
+                ..clazz('margin-left')
+                ..setAttribute('tabindex', '0'),
+            ]),
+        ]),
+    ]);
+
+    acceptButton.click(() {
+      ga.setAllowAnalytics();
+      hide();
+      ga.initializeGA();
+    });
+
+    dontAcceptButton.click(() {
+      ga.setDontAllowAnalytics();
+      hide();
+    });
+
+    hide();
+  }
+
+  final Framework framework;
+
+  CoreElement parent;
+  CoreElement acceptButton;
+  CoreElement dontAcceptButton;
+
+  void show() {
+    parent.display = 'initial';
+    dontAcceptButton.element.focus();
+  }
+
+  void hide() {
+    parent.display = 'none';
+  }
+
+  bool isVisible() => parent.display != 'none';
 }

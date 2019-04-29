@@ -40,6 +40,32 @@ const String devToolsChrome = 'Chrome/'; // starts with and ends with n.n.n
 const String devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
 // Dimension6 devToolsVersion
 
+@JS('gtagsEnabled')
+external bool isGtagsEnabled();
+
+@JS('getDevToolsPropertyID')
+external String devToolsProperty();
+
+@JS('_initializeGA')
+external void initializeGA();
+
+@JS('gaStorageCollect')
+external String storageCollectValue();
+
+@JS('gaStorageDontCollect')
+external String storageDontCollectValue();
+
+bool isAnalyticsAllowed() =>
+  html.window.localStorage[devToolsProperty()] == storageCollectValue();
+
+void setAllowAnalytics() {
+  html.window.localStorage[devToolsProperty()] = storageCollectValue();
+}
+
+void setDontAllowAnalytics() {
+  html.window.localStorage[devToolsProperty()] = storageDontCollectValue();
+}
+
 @JS()
 @anonymous
 class GtagEventDevTools extends GtagEvent {
@@ -173,9 +199,10 @@ const String exceptionEvent = 'exception'; // Any Dart exception in DevTools
 const String devToolsMain = 'main';
 const String debugger = 'debugger';
 const String inspector = 'inspector';
-const String memory = 'memory';
-const String timeline = 'timeline';
 const String logging = 'logging';
+const String memory = 'memory';
+const String performance = 'performance';
+const String timeline = 'timeline';
 
 // DevTools UI action selected (clicked).
 

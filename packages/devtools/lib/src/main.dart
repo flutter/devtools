@@ -28,7 +28,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-const bool showMemoryPage = false;
 const bool showPerformancePage = false;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';

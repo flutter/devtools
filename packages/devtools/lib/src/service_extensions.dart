@@ -4,6 +4,8 @@
 
 library service_extensions;
 
+import 'package:meta/meta.dart';
+
 import 'ui/analytics.dart' as ga;
 import 'ui/icons.dart';
 
@@ -17,8 +19,8 @@ class ToggleableServiceExtensionDescription<T> {
     this.disabledValue,
     this.enabledTooltip,
     this.disabledTooltip,
-    this.gaScreenName,
-    this.gaItem,
+    @required this.gaScreenName,
+    @required this.gaItem,
   });
 
   final String extension;
@@ -28,8 +30,8 @@ class ToggleableServiceExtensionDescription<T> {
   final T disabledValue;
   final String enabledTooltip;
   final String disabledTooltip;
-  final String gaScreenName;  // Analytics screen (screen name where item lives).
-  final String gaItem;  // Analytics item name (toggleable item's name).
+  final String gaScreenName; // Analytics screen (screen name where item lives).
+  final String gaItem; // Analytics item name (toggleable item's name).
 }
 
 const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -88,7 +90,7 @@ const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Do Not Track Widget Rebuilds',
   disabledTooltip: 'Track Widget Rebuilds',
-  gaScreenName: ga.inspector,
+  gaScreenName: ga.performance,
   gaItem: ga.trackRebuilds,
 );
 
