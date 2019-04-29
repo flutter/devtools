@@ -260,18 +260,20 @@ Future<void> registerLaunchDevToolsService(
 }
 
 final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
-const tunneledPorts = {
-  8000: true,
-  8008: true,
-  8080: true,
-  8085: true,
-  8888: true,
-  9005: true,
-  3000: true,
-  4200: true,
-  5000: true,
-};
+
 bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
+  const tunneledPorts = {
+    8000: true,
+    8008: true,
+    8080: true,
+    8085: true,
+    8888: true,
+    9005: true,
+    3000: true,
+    4200: true,
+    5000: true,
+  };
+
   return uri != null && uri.hasPort && tunneledPorts[uri.port] == true;
 }
 
