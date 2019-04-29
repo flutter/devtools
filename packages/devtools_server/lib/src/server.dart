@@ -213,9 +213,18 @@ Future<void> registerLaunchDevToolsService(
       final uriToLaunch =
           Uri.parse(devToolsUrl).replace(queryParameters: uriParams);
 
-      // TODO(kenzie): depend on the browser_launcher package for this once it
-      // is complete.
-      await Chrome.start([uriToLaunch.toString()]);
+      // TODO(dantup): When ChromeOS has support for tunneling all ports we
+      // can change this to always use the native browser for ChromeOS
+      // and may wish to handle this inside `browser_launcher`.
+      //   https://crbug.com/848063
+      final useNativeBrowser = _isChromeOS &&
+          _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
+          _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+      if (useNativeBrowser) {
+        await Process.start('x-www-browser', [uriToLaunch.toString()]);
+      } else {
+        await Chrome.start([uriToLaunch.toString()]);
+      }
 
       return {'result': Success().toJson()};
     });
@@ -240,6 +249,22 @@ Future<void> registerLaunchDevToolsService(
       machineMode: machineMode,
     );
   }
+}
+
+final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
+const tunneledPorts = {
+  8000: true,
+  8008: true,
+  8080: true,
+  8085: true,
+  8888: true,
+  9005: true,
+  3000: true,
+  4200: true,
+  5000: true,
+};
+bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
+  return uri != null && uri.hasPort && tunneledPorts[uri.port] == true;
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {
