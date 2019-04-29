@@ -194,7 +194,10 @@ class TimelineScreen extends Screen {
         gaTimeLineFlame = ga.timelineFlameUi;
       }
       ga.select(
-          ga.timeline, gaTimeLineFlame, event.time.duration.inMilliseconds);
+        ga.timeline,
+        gaTimeLineFlame,
+        event.time.duration.inMicroseconds,
+      );
 
       await eventDetails.update(item);
     });
