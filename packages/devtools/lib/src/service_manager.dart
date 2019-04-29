@@ -170,15 +170,19 @@ class ServiceConnectionManager {
 
     // The following streams are not yet supported by Flutter Web.
     if (!await connectedApp.isFlutterWebApp) {
-      streamIds.addAll(['_Graph', '_Logging']);
+      streamIds.addAll(['_Graph', '_Logging', 'Logging']);
     }
 
     await Future.wait(streamIds.map((String id) async {
       try {
         await service.streamListen(id);
       } catch (e) {
-        print("Service client stream not supported: '$id'");
-        print('  $e');
+        // Don't complain about '_Logging' or 'Logging' events (newer VMs don't
+        // support '_Logging' and older VMs don't support 'Logging').
+        // TODO(devoncarew): Remove this check on or after approx. 10/1/2019.
+        if (!id.endsWith('Logging')) {
+          print("Service client stream not supported: '$id'\n  $e");
+        }
       }
     }));
   }

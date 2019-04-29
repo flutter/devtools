@@ -172,7 +172,9 @@ class LoggingScreen extends Screen {
     service.onGCEvent.listen(_handleGCEvent);
 
     // Log `dart:developer` `log` events.
+    // TODO(devoncarew): Remove `_Logging` support on or after approx. 10/1/2019.
     service.onEvent('_Logging').listen(_handleDeveloperLogEvent);
+    service.onEvent('Logging').listen(_handleDeveloperLogEvent);
 
     // Log Flutter extension events.
     service.onExtensionEvent.listen(_handleExtensionEvent);

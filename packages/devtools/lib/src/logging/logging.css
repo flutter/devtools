@@ -2,7 +2,7 @@
 /* Use of this source code is governed by a BSD-style license that can be */
 /* found in the LICENSE file. */
 
-td.log-label-column {
+.table-virtual td.log-label-column {
     text-align: right;
     max-width: 148px;
 }
