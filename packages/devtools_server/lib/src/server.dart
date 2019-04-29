@@ -262,6 +262,7 @@ Future<void> registerLaunchDevToolsService(
 final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
 
 bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
+  // TODO(dantup): Change to Set literal when supported.
   const tunneledPorts = {
     8000: true,
     8008: true,
