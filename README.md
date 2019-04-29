@@ -17,3 +17,7 @@ For documentation on installing and trying out DevTools, please see our
 Contributions welcome! See our
 [contributing page](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
 for an overview of how to build and contribute to the project.
+
+## Terms and Privacy
+
+By using Dart DevTools, you agree to the [Google Terms of Service](https://policies.google.com/terms).
