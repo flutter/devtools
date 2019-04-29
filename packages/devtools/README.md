@@ -14,3 +14,7 @@ For documentation on installing and trying out DevTools, please see our
 
 Feedback and issues are best reported at https://github.com/flutter/devtools/issues. Thanks for
 trying out DevTools!
+
+## Terms and Privacy
+
+By using Dart DevTools, you agree to the [Google Terms of Service](https://policies.google.com/terms).
