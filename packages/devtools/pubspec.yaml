@@ -14,7 +14,7 @@ environment:
 dependencies:
   codemirror: ^0.5.3
   collection: ^1.14.11
-  devtools_server: 0.1.0
+  devtools_server: 0.1.1
 #    path: ../devtools_server
   http: ^0.12.0+1
   intl: ^0.15.0
