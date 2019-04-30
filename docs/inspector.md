@@ -50,15 +50,6 @@ tree in a manner similar to how the UI was defined in your source code. Without 
 the tree of nodes in the widget tree are much deeper, and it can be more difficult to
 understand how the runtime widget hierarchy corresponds to your application's UI.
 
-Here is an example of what your widget tree may look like with and without track widget
-creation enabled.
-
-Track widget creation enabled (recommended):
-<img src="images/track_widget_creation_enabled.png" width="800" />
-
-Track widget creation disabled (not recommended):
-<img src="images/track_widget_creation_disabled.png" width="800" />
-
 When an application is launched from IDEs, the source instrumentation happens
 by default. For command line launches, you need to opt-into the source instrumentation.
 To do this, run Flutter app's with the `--track-widget-creation` flag:
@@ -69,3 +60,12 @@ flutter run --track-widget-creation
 
 If you launch without the flag, you can still use the inspector; you'll see an in-line,
 dismissible reminder message about using the source instrumentation flag.
+
+Here is an example of what your widget tree may look like with and without track widget
+creation enabled.
+
+Track widget creation enabled (recommended):
+<img src="images/track_widget_creation_enabled.png" width="800" />
+
+Track widget creation disabled (not recommended):
+<img src="images/track_widget_creation_disabled.png" width="800" />
