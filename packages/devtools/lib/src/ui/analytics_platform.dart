@@ -71,7 +71,7 @@ void waitForDimensionsComputed(String screenName) {
       if (_stillWaiting++ < 50)
         waitForDimensionsComputed(screenName);
       else
-        print("Cancel waiting for dimensions.");
+        print('Cancel waiting for dimensions.');
     }
   });
 }

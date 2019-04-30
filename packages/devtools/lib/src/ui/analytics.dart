@@ -321,7 +321,7 @@ void dimensionsComputed() {
 }
 
 // Computes the running application.
-void computeUserApplicationCustomGTagData() async {
+Future<void> computeUserApplicationCustomGTagData() async {
   if (isDimensionsComputed) return;
 
   final isFlutter = await serviceManager.connectedApp.isFlutterApp;
