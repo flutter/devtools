@@ -205,11 +205,12 @@ class InspectorScreen extends Screen {
                     your source code. Without it, the tree of nodes in the 
                     widget tree are much deeper, and it can be more difficult to
                     understand how the runtime widget hierarchy corresponds to 
-                    your application\’s UI.
-
-                    To fix this, relaunch your application by running 'flutter 
+                    your application\’s UI.''')),
+          div(
+              text:
+                  '''To fix this, relaunch your application by running 'flutter 
                     run --track-widget-creation' (or run your application from 
-                    VS Code or IntelliJ).''')),
+                    VS Code or IntelliJ).'''),
         ]);
       });
     }
