@@ -60,3 +60,12 @@ flutter run --track-widget-creation
 
 If you launch without the flag, you can still use the inspector; you'll see an in-line,
 dismissible reminder message about using the source instrumentation flag.
+
+Here is an example of what your widget tree may look like with and without track widget
+creation enabled.
+
+Track widget creation enabled (recommended):
+<img src="images/track_widget_creation_enabled.png" width="800" />
+
+Track widget creation disabled (not recommended):
+<img src="images/track_widget_creation_disabled.png" width="800" />
