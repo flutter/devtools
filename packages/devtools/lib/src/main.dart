@@ -19,6 +19,7 @@ import 'performance/performance.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/timeline.dart';
 import 'ui/analytics.dart' as ga;
+import 'ui/analytics_platform.dart' as ga_platform;
 import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'ui/icons.dart';
@@ -158,7 +159,9 @@ class PerfToolFramework extends Framework {
           ' available in your code editor';
     }
 
-    ga.computeUserApplicationCustomGTagData();
+    // Collect all platform information flutter, web, chrome, versions, etc. for
+    // possible GA collection.
+    ga_platform.setupDimensions();
 
     addScreen(InspectorScreen(
       disabled: !_isAnyFlutterApp || _isProfileBuild,

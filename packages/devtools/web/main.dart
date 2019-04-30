@@ -7,11 +7,8 @@ import 'dart:html';
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
 import 'package:devtools/src/ui/analytics.dart' as ga;
+import 'package:devtools/src/ui/analytics_platform.dart' as ga_platform;
 import 'package:platform_detect/platform_detect.dart';
-
-void _gaReportDartExceptions(Exception e, StackTrace stack) {
-  ga.error('${e.toString()}\n${stack.toString()}', true);
-}
 
 void main() {
   // Need to catch all Dart exceptions - done via an isolate.
@@ -24,8 +21,8 @@ void main() {
 
     // Show the opt-in dialog for collection analytics?
     if (ga.isGtagsEnabled() &
-        (!window.localStorage.containsKey(ga.devToolsProperty()) ||
-            window.localStorage[ga.devToolsProperty()].isEmpty))
+        (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
+            window.localStorage[ga_platform.devToolsProperty()].isEmpty))
       framework.showAnalyticsDialog();
 
     if (!browser.isChrome) {
@@ -54,6 +51,6 @@ void main() {
   }, onError: (error, stack) {
     // Report exceptions with DevTools to GA, any user's Flutter app exceptions
     // are not collected.
-    _gaReportDartExceptions(error, stack);
+    ga.error('${error.toString()}\n$stack.toString()', true);
   });
 }

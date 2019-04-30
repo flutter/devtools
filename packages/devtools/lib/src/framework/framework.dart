@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../main.dart';
 import '../ui/analytics.dart' as ga;
+import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
@@ -83,6 +84,7 @@ class Framework {
       Screen screen = getScreen(id, onlyEnabled: true);
       screen ??= screens.first;
       if (screen != null) {
+        ga_platform.setupAndGaScreen(id);
         load(screen);
       } else {
         load(NotFoundScreen());
@@ -617,13 +619,13 @@ class AnalyticsOptInDialog {
     ]);
 
     acceptButton.click(() {
-      ga.setAllowAnalytics();
+      ga_platform.setAllowAnalytics();
       hide();
       ga.initializeGA();
     });
 
     dontAcceptButton.click(() {
-      ga.setDontAllowAnalytics();
+      ga_platform.setDontAllowAnalytics();
       hide();
     });
 

@@ -9,6 +9,7 @@ import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
+import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
@@ -88,7 +89,7 @@ class TimelineScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    ga.screen(ga.timeline);
+    ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div()..layoutVertical();
 
@@ -186,17 +187,10 @@ class TimelineScreen extends Screen {
 
     onSelectedFrameFlameChartItem.listen((FrameFlameChartItem item) async {
       final TimelineEvent event = item.event;
-
-      String gaTimeLineFlame;
-      if (event.isGpuEvent) {
-        gaTimeLineFlame = ga.timelineFlameGpu;
-      } else {
-        gaTimeLineFlame = ga.timelineFlameUi;
-      }
       ga.select(
         ga.timeline,
-        gaTimeLineFlame,
-        event.time.duration.inMicroseconds,
+        event.isGpuEvent ? ga.timelineFlameGpu : ga.timelineFlameUi,
+        event.time.duration.inMicroseconds, // No inMilliseconds loses precision
       );
 
       await eventDetails.update(item);

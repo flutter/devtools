@@ -11,6 +11,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../tables.dart';
 import '../ui/analytics.dart' as ga;
+import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
@@ -78,7 +79,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   CoreElement createContent(Framework framework) {
-    ga.screen(ga.memory);
+    ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 

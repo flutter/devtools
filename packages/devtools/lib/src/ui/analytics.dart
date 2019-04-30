@@ -7,9 +7,6 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:async';
-import 'dart:html' as html;
-
 import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:js/js.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -38,35 +35,15 @@ const String devToolsPlatformTypeWindows = 'Windows';
 // Start with Android_n.n.n
 const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
-const String devToolsChrome = 'Chrome/'; // starts with and ends with n.n.n
+const String devToolsChromeName = 'Chrome/'; // starts with and ends with n.n.n
 const String devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
 // Dimension6 devToolsVersion
 
 @JS('gtagsEnabled')
 external bool isGtagsEnabled();
 
-@JS('getDevToolsPropertyID')
-external String devToolsProperty();
-
 @JS('_initializeGA')
 external void initializeGA();
-
-@JS('gaStorageCollect')
-external String storageCollectValue();
-
-@JS('gaStorageDontCollect')
-external String storageDontCollectValue();
-
-bool isAnalyticsAllowed() =>
-    html.window.localStorage[devToolsProperty()] == storageCollectValue();
-
-void setAllowAnalytics() {
-  html.window.localStorage[devToolsProperty()] = storageCollectValue();
-}
-
-void setDontAllowAnalytics() {
-  html.window.localStorage[devToolsProperty()] = storageDontCollectValue();
-}
 
 @JS()
 @anonymous
@@ -217,7 +194,7 @@ const String allExceptions = 'allExceptions';
 // Logging UX actions:
 const String clearLogs = 'clearLogs';
 
-void _screen(
+void screen(
   String screenName, [
   int value = 0,
 ]) {
@@ -226,27 +203,12 @@ void _screen(
       GtagEventDevTools(
           event_category: screenViewEvent,
           value: value,
-          user_app: _userAppType,
-          user_build: _userBuildType,
-          user_platform: _userPlatformType,
-          devtools_platform: _devtoolsPlatformType,
-          devtools_chrome: _devtoolsChrome,
+          user_app: userAppType,
+          user_build: userBuildType,
+          user_platform: userPlatformType,
+          devtools_platform: devtoolsPlatformType,
+          devtools_chrome: devtoolsChrome,
           devtools_version: devtoolsVersion));
-}
-
-void screen(
-  String screenName, [
-  int value = 0,
-]) {
-  if (!isDimensionsComputed) {
-    // While spinning up DevTools first time wait until dimensions data is
-    // available before first GA event sent.
-    Timer(const Duration(milliseconds: 1000), () {
-      computeUserApplicationCustomGTagData();
-      _screen(screenName, value);
-    });
-  } else
-    _screen(screenName, value);
 }
 
 void select(
@@ -260,11 +222,11 @@ void select(
           event_category: selectEvent,
           event_label: selectedItem,
           value: value,
-          user_app: _userAppType,
-          user_build: _userBuildType,
-          user_platform: _userPlatformType,
-          devtools_platform: _devtoolsPlatformType,
-          devtools_chrome: _devtoolsChrome,
+          user_app: userAppType,
+          user_build: userBuildType,
+          user_platform: userPlatformType,
+          devtools_platform: devtoolsPlatformType,
+          devtools_chrome: devtoolsChrome,
           devtools_version: devtoolsVersion));
 }
 
@@ -282,11 +244,11 @@ void selectFrame(
           event_label: selectedItem,
           gpu_duration: gpuDuration,
           ui_duration: uiDuration,
-          user_app: _userAppType,
-          user_build: _userBuildType,
-          user_platform: _userPlatformType,
-          devtools_platform: _devtoolsPlatformType,
-          devtools_chrome: _devtoolsChrome,
+          user_app: userAppType,
+          user_build: userBuildType,
+          user_platform: userPlatformType,
+          devtools_platform: devtoolsPlatformType,
+          devtools_chrome: devtoolsChrome,
           devtools_version: devtoolsVersion));
 }
 
@@ -303,11 +265,11 @@ void error(
   GTag.exception(GtagExceptionDevTools(
       description: errorMessage,
       fatal: fatal,
-      user_app: _userAppType,
-      user_build: _userBuildType,
-      user_platform: _userPlatformType,
-      devtools_platform: _devtoolsPlatformType,
-      devtools_chrome: _devtoolsChrome,
+      user_app: userAppType,
+      user_build: userBuildType,
+      user_platform: userPlatformType,
+      devtools_platform: devtoolsPlatformType,
+      devtools_chrome: devtoolsChrome,
       devtools_version: devtoolsVersion));
 }
 
@@ -323,64 +285,43 @@ String _userPlatformType = ''; // dimension3
 String _devtoolsPlatformType =
     ''; // dimension4 MacIntel/Linux/Windows/Android_n
 String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
+
 const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
-String get userAppType {
-  if (!isDimensionsComputed) computeUserApplicationCustomGTagData();
-  return _userAppType;
+String get userAppType => _userAppType;
+set userAppType(String __userAppType) {
+  _userAppType = __userAppType;
 }
 
-String get userBuildType {
-  if (!isDimensionsComputed) computeUserApplicationCustomGTagData();
-  return _userBuildType;
+String get userBuildType => _userBuildType;
+set userBuildType(String __userBuildType) {
+  _userBuildType = __userBuildType;
 }
 
-String get userPlatformType {
-  if (!isDimensionsComputed) computeUserApplicationCustomGTagData();
-  return _userPlatformType;
+String get userPlatformType => _userPlatformType;
+set userPlatformType(String __userPlatformType) {
+  _userPlatformType = __userPlatformType;
 }
 
-String get devtoolsPlatformType {
-  if (!isDimensionsComputed) computeUserApplicationCustomGTagData();
-  return _devtoolsPlatformType;
+String get devtoolsPlatformType => _devtoolsPlatformType;
+set devtoolsPlatformType(String __devtoolsPlatformType) {
+  _devtoolsPlatformType = __devtoolsPlatformType;
 }
 
-String get devtoolsChrome {
-  if (!isDimensionsComputed) computeUserApplicationCustomGTagData();
-  return _devtoolsChrome;
+String get devtoolsChrome => _devtoolsChrome;
+set devtoolsChrome(String __devtoolsChrome) {
+  _devtoolsChrome = __devtoolsChrome;
 }
 
 bool _analyticsComputed = false;
 bool get isDimensionsComputed => _analyticsComputed;
-
-/// Computes the DevTools application. Fills in the devtoolsPlatformType and
-/// devtoolsChrome.
-void _computeDevToolsCustomGTagsData() {
-  // Platform
-  final String platform = html.window.navigator.platform;
-  platform.replaceAll(' ', '_');
-  _devtoolsPlatformType = platform;
-
-  final String appVersion = html.window.navigator.appVersion;
-  final List<String> splits = appVersion.split(' ');
-  final len = splits.length;
-  for (int index = 0; index < len; index++) {
-    final String value = splits[index];
-    // Chrome or Chrome iOS
-    if (value.startsWith(devToolsChrome) ||
-        value.startsWith(devToolsChromeIos)) {
-      _devtoolsChrome = value;
-    } else if (value.startsWith('Android')) {
-      // appVersion for Android is 'Android n.n.n'
-      _devtoolsPlatformType =
-          '$devToolsPlatformTypeAndroid${splits[index + 1]}';
-    }
-  }
+void dimensionsComputed() {
+  _analyticsComputed = true;
 }
 
 // Computes the running application.
 void computeUserApplicationCustomGTagData() async {
-  if (_analyticsComputed) return;
+  if (isDimensionsComputed) return;
 
   final isFlutter = await serviceManager.connectedApp.isFlutterApp;
   final isWebApp = await serviceManager.connectedApp.isFlutterWebApp;
@@ -401,26 +342,24 @@ void computeUserApplicationCustomGTagData() async {
     final windows = await io.eval('Platform.isWindows', isAlive: null);
 
     if (android.valueAsString == 'true')
-      _userPlatformType = platformTypeAndroid;
+      userPlatformType = platformTypeAndroid;
     else if (iOS.valueAsString == 'true')
-      _userPlatformType = platformTypeIOS;
+      userPlatformType = platformTypeIOS;
     else if (fuchsia.valueAsString == 'true')
-      _userPlatformType = platformTypeFuchsia;
+      userPlatformType = platformTypeFuchsia;
     else if (linux.valueAsString == 'true')
-      _userPlatformType = platformTypeLinux;
+      userPlatformType = platformTypeLinux;
     else if (macOS.valueAsString == 'true')
-      _userPlatformType = platformTypeMac;
+      userPlatformType = platformTypeMac;
     else if (windows.valueAsString == 'true')
-      _userPlatformType = platformTypeWindows;
+      userPlatformType = platformTypeWindows;
   }
 
   if (isAnyFlutterApp) {
-    if (isFlutter) _userAppType = appTypeFlutter;
-    if (isWebApp) _userAppType = appTypeWeb;
+    if (isFlutter) userAppType = appTypeFlutter;
+    if (isWebApp) userAppType = appTypeWeb;
   }
-  _userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
-
-  _computeDevToolsCustomGTagsData();
+  userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
 
   _analyticsComputed = true;
 }

@@ -21,6 +21,7 @@ import '../debugger/variables_view.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
+import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
@@ -76,7 +77,7 @@ class DebuggerScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    ga.screen(ga.debugger);
+    ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div()..layoutVertical();
 
