@@ -591,7 +591,7 @@ class AnalyticsOptInDialog {
           CoreElement('dd')
             ..add([
               p(
-                text: 'Dart DevTools anonymously reports features usage '
+                text: 'Dart DevTools reports features usage '
                     'statistics and basic crash reports to Google in order '
                     'to help Google contribute improvements to Dart DevTools '
                     'over time.',
