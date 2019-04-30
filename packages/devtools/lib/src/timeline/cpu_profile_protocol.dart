@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:vm_service_lib/vm_service_lib.dart' show Response;
@@ -11,6 +12,17 @@ import '../utils.dart';
 // debug and profile builds. Do they use different clocks and does this also
 // affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
 
+// Switch this flag to true collect debug info from the latest cpu profile. This
+// will also add a button to the timeline page that will download the debug info
+// on click.
+const bool debugCpuProfile = true;
+
+/// Buffer that will store the latest cpu profile response json.
+///
+/// This buffer is for debug purposes. When [debugCpuProfile] is true, we will
+/// be able to dump this buffer to a downloadable json file.
+StringBuffer debugCpuProfileResponse = StringBuffer();
+
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
       : sampleCount = cpuProfileResponse.json['sampleCount'],
@@ -18,6 +30,17 @@ class CpuProfileData {
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
+
+    if (debugCpuProfile) {
+      debugCpuProfileResponse.clear();
+      if (cpuProfileRoot.sampleCount != sampleCount) {
+        print('duplicates');
+        debugCpuProfileResponse.writeln('Sample count from response '
+            '($sampleCount) != sample count from root stack frame '
+            '(${cpuProfileRoot.sampleCount})\n');
+      }
+      debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
+    }
   }
 
   final Response cpuProfileResponse;

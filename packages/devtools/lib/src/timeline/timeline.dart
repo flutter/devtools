@@ -17,6 +17,7 @@ import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
+import 'cpu_profile_protocol.dart';
 import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'frames_bar_chart.dart';
@@ -277,7 +278,7 @@ class TimelineScreen extends Screen {
   /// is true.
   void _maybeAddDebugDumpButton() {
     if (debugTimeline) {
-      upperButtonSection.add(PButton('Debug dump')
+      upperButtonSection.add(PButton('Debug dump timeline')
         ..small()
         ..click(() {
           // Trace event json in the order we received the events.
@@ -348,6 +349,14 @@ class TimelineScreen extends Screen {
             }
           }
           downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
+        }));
+    }
+    if (debugCpuProfile) {
+      upperButtonSection.add(PButton('Debug dump CPU profile')
+        ..small()
+        ..click(() {
+          // Download the current cpu profile as a json file.
+          downloadFile(debugCpuProfileResponse.toString(), 'cpu_profile.json');
         }));
     }
   }
