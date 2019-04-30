@@ -1,9 +1,9 @@
 ## 0.0.18 - 2019-04-30
 * Fix release bug (0.0.17-dev.1 did not include build folder)
 * Add CPU profiler (preview) to timeline page.
-* CPU flame chart UI improvement and bug fixes.
-* Fixed DevTools working correctly in Chrome on Windows.
-* DevTools server released and support to launch Chrome automatically.
+* CPU flame chart UI improvements and bug fixes.
+* Bug fixes for DevTools on Windows.
+* DevTools server released with support for launching DevTools in Chrome.
 * Dark mode improvements.
 
 ## 0.0.16 - 2019-04-17
