@@ -26,6 +26,9 @@ import 'inspector_tree_canvas.dart';
 import 'inspector_tree_html.dart';
 import 'inspector_tree_web.dart';
 
+const trackWidgetCreationDocsUrl =
+    'https://flutter.github.io/devtools/inspector#track-widget-creation';
+
 // Generally the canvas tree renderer is a better fit for the inspector.
 // The html renderer is more appropriate for small static trees such as those
 // generated in the logging view.
@@ -187,15 +190,27 @@ class InspectorScreen extends Screen {
 
         displayedWidgetTrackingNotice = true;
 
-        framework.showWarning(
-            message: '''The widget creation tracking feature is not enabled;
-this feature allows the Flutter inspector to present the widget tree in a manner
-similar to how the UI was defined in your source code. Without it, the tree of
-nodes in the widget tree are much deeper, and it can be more difficult to
-understand how the runtime widget hierarchy corresponds to your application’s UI.
+        framework.showWarning(children: <CoreElement>[
+          div()
+            ..add(span(text: 'The '))
+            ..add(a(
+                text: 'widget creation tracking feature',
+                href: trackWidgetCreationDocsUrl,
+                target: '_blank;'))
+            ..add(span(text: ' is not enabled. '))
+            ..add(span(
+                text:
+                    '''This feature allows the Flutter inspector to present the 
+                    widget tree in a manner similar to how the UI was defined in
+                    your source code. Without it, the tree of nodes in the 
+                    widget tree are much deeper, and it can be more difficult to
+                    understand how the runtime widget hierarchy corresponds to 
+                    your application\’s UI.
 
-To fix this, relaunch your application by running 'flutter run
---track-widget-creation' (or run your application from VS Code or IntelliJ).''');
+                    To fix this, relaunch your application by running 'flutter 
+                    run --track-widget-creation' (or run your application from 
+                    VS Code or IntelliJ).''')),
+        ]);
       });
     }
   }
