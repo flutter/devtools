@@ -609,11 +609,12 @@ class AnalyticsOptInDialog {
               p(text: 'Do you accept analytics collection for Dart DevTools?'),
               acceptButton = PButton('I Accept')
                 ..small()
-                ..clazz('margin-left'),
+                ..clazz('margin-left')
+                ..setAttribute('tabindex', '1'),
               dontAcceptButton = PButton('I Do Not Accept')
                 ..small()
                 ..clazz('margin-left')
-                ..setAttribute('tabindex', '0'),
+                ..setAttribute('tabindex', '2'),
             ]),
         ]),
     ]);
@@ -640,7 +641,7 @@ class AnalyticsOptInDialog {
 
   void show() {
     parent.display = 'initial';
-    dontAcceptButton.element.focus();
+    acceptButton.element.focus();
   }
 
   void hide() {
