@@ -2,38 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:html';
 import 'package:devtools/src/framework/framework_core.dart';
 import 'package:devtools/src/main.dart';
+import 'package:devtools/src/ui/analytics.dart' as ga;
+import 'package:devtools/src/ui/analytics_platform.dart' as ga_platform;
 import 'package:platform_detect/platform_detect.dart';
 
 void main() {
-  // Initialize the core framework.
-  FrameworkCore.init();
+  // Need to catch all Dart exceptions - done via an isolate.
+  runZoned(() {
+    // Initialize the core framework.
+    FrameworkCore.init();
 
-  // Load the web app framework.
-  final PerfToolFramework framework = PerfToolFramework();
+    // Load the web app framework.
+    final PerfToolFramework framework = PerfToolFramework();
 
-  if (!browser.isChrome) {
-    final browserName =
-        // Edge shows up as IE, so we replace it's name to avoid confusion.
-        browser.isInternetExplorer || browser == Browser.UnknownBrowser
-            ? 'an unsupported browser'
-            : browser.name;
-    framework.disableAppWithError(
-      'ERROR: You are running DevTools on $browserName, '
-          'but DevTools only runs on Chrome.',
-      'Reopen this url in a Chrome browser to use DevTools.',
-    );
-    return;
-  }
+    // Show the opt-in dialog for collection analytics?
+    if (ga.isGtagsEnabled() &
+        (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
+            window.localStorage[ga_platform.devToolsProperty()].isEmpty))
+      framework.showAnalyticsDialog();
 
-  FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
-    framework.showError(title, error);
-  }).then((bool connected) {
-    if (!connected) {
-      framework.showConnectionDialog();
+    if (!browser.isChrome) {
+      final browserName =
+          // Edge shows up as IE, so we replace it's name to avoid confusion.
+          browser.isInternetExplorer || browser == Browser.UnknownBrowser
+              ? 'an unsupported browser'
+              : browser.name;
+      framework.disableAppWithError(
+        'ERROR: You are running DevTools on $browserName, '
+            'but DevTools only runs on Chrome.',
+        'Reopen this url in a Chrome browser to use DevTools.',
+      );
+      return;
     }
-  });
 
-  framework.loadScreenFromLocation();
+    FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
+      framework.showError(title, error);
+    }).then((bool connected) {
+      if (!connected) {
+        framework.showConnectionDialog();
+      }
+    });
+
+    framework.loadScreenFromLocation();
+  }, onError: (error, stack) {
+    // Report exceptions with DevTools to GA, any user's Flutter app exceptions
+    // are not collected.
+    ga.error('${error.toString()}\n$stack.toString()', true);
+  });
 }

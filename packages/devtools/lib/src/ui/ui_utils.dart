@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:async';
+import 'dart:html';
 
 import 'package:meta/meta.dart';
 
@@ -12,6 +13,7 @@ import '../service_extensions.dart';
 import '../service_registrations.dart';
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';
+import 'analytics.dart' as ga;
 import 'elements.dart';
 import 'environment.dart' as environment;
 import 'fake_flutter/dart_ui/dart_ui.dart';
@@ -34,13 +36,13 @@ CoreElement createExtensionCheckBox(
   serviceManager.serviceExtensionManager.getServiceExtensionState(
     extensionName,
     (state) {
-      final html.InputElement e = input.element;
+      final InputElement e = input.element;
       e.checked = state.value;
     },
   );
 
   input.element.onChange.listen((_) {
-    final html.InputElement e = input.element;
+    final InputElement e = input.element;
     serviceManager.serviceExtensionManager
         .setServiceExtensionState(extensionName, e.checked, e.checked);
   });
@@ -187,6 +189,8 @@ class ServiceExtensionButton {
   PButton button;
 
   void _click() {
+    ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
+
     final bool wasSelected = button.element.classes.contains('selected');
     serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensionDescription.extension,
@@ -261,7 +265,7 @@ Set<String> get hiddenPages {
 }
 
 Set<String> _lookupHiddenPages() {
-  final queryString = html.window.location.search;
+  final queryString = window.location.search;
   if (queryString == null || queryString.length <= 1) {
     // TODO(dantup): Remove this ignore, change to `{}` and bump SDK requirements
     // in pubspec.yaml (devtools + devtools_server) once Flutter stable includes
@@ -285,14 +289,14 @@ bool get allTabsEnabledByQuery => hiddenPages.contains('none');
 ///
 /// There are some complicated edge cases for non-integer devicePixelRatios as
 /// found on Windows 10 so always use this method instead of rolling your own.
-html.CanvasElement createHighDpiCanvas(int width, int height) {
+CanvasElement createHighDpiCanvas(int width, int height) {
   // If the size has to be rounded, we choose to err towards a higher resolution
   // image instead of a lower resolution one. The cost of a higher resolution
   // image is generally only slightly higher memory usage while a lower
   // resolution image could introduce rendering artifacts.
   final int scaledWidth = (width * environment.devicePixelRatio).ceil();
   final int scaledHeight = (height * environment.devicePixelRatio).ceil();
-  final canvas = html.CanvasElement(width: scaledWidth, height: scaledHeight);
+  final canvas = CanvasElement(width: scaledWidth, height: scaledHeight);
   canvas.style
     ..width = '${width}px'
     ..height = '${height}px';
@@ -308,11 +312,11 @@ html.CanvasElement createHighDpiCanvas(int width, int height) {
 }
 
 void downloadFile(String src, String filename) {
-  final element = html.document.createElement('a');
-  element.setAttribute('href', html.Url.createObjectUrl(html.Blob([src])));
+  final element = document.createElement('a');
+  element.setAttribute('href', Url.createObjectUrl(Blob([src])));
   element.setAttribute('download', filename);
   element.style.display = 'none';
-  html.document.body.append(element);
+  document.body.append(element);
   element.click();
   element.remove();
 }

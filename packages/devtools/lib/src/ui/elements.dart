@@ -13,6 +13,8 @@ CoreElement a({String text, String c, String a, String href, String target}) =>
       ..setAttribute('href', href)
       ..setAttribute('target', target);
 
+CoreElement br() => CoreElement('br');
+
 CoreElement button({String text, String c, String a}) =>
     CoreElement('button', text: text, classes: c, attributes: a);
 

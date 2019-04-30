@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../framework/framework.dart';
+import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
@@ -59,6 +60,13 @@ class FramesBarChart extends CoreElement with SetStateMixin {
 
     selectedFrame = frame;
     _selectedFrameController.add(frame);
+
+    ga.selectFrame(
+      ga.timeline,
+      ga.timelineFrame,
+      frame.gpuDuration,
+      frame.uiDuration,
+    );
   }
 }
 

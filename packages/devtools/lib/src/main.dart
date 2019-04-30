@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' hide Screen;
+import 'dart:html' as html;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
@@ -18,6 +18,8 @@ import 'model/model.dart';
 import 'performance/performance.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/timeline.dart';
+import 'ui/analytics.dart' as ga;
+import 'ui/analytics_platform.dart' as ga_platform;
 import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'ui/icons.dart';
@@ -27,7 +29,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-const bool showMemoryPage = false;
 const bool showPerformancePage = false;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
@@ -35,8 +36,18 @@ const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
+    html.window.onError.listen(_gAReportExceptions);
     initGlobalUI();
     initTestingModel();
+  }
+
+  void _gAReportExceptions(html.Event e) {
+    final html.ErrorEvent errorEvent = e as html.ErrorEvent;
+    ga.error(
+        '${errorEvent.message}\n'
+        '${errorEvent.filename}@${errorEvent.lineno}:${errorEvent.colno}\n'
+        '${errorEvent.error}',
+        true);
   }
 
   StatusItem isolateSelectStatus;
@@ -65,7 +76,7 @@ class PerfToolFramework extends Framework {
         ]);
       if (screen.disabled) {
         link
-          ..onClick.listen((MouseEvent e) {
+          ..onClick.listen((html.MouseEvent e) {
             e.preventDefault();
             toast(link.tooltip);
           })
@@ -74,7 +85,7 @@ class PerfToolFramework extends Framework {
       } else {
         link
           ..attributes['href'] = screen.ref
-          ..onClick.listen((MouseEvent e) {
+          ..onClick.listen((html.MouseEvent e) {
             e.preventDefault();
             navigateTo(screen.id);
           });
@@ -108,9 +119,11 @@ class PerfToolFramework extends Framework {
 
     // Listen for clicks on the 'send feedback' button.
     queryId('send-feedback-button').onClick.listen((_) {
+      ga.select(ga.devToolsMain, ga.feedback);
       // TODO(devoncarew): Fill in useful product info here, like the Flutter
       // SDK version and the version of DevTools in use.
-      window.open('https://github.com/flutter/devtools/issues', '_feedback');
+      html.window
+          .open('https://github.com/flutter/devtools/issues', '_feedback');
     });
   }
 
@@ -119,11 +132,11 @@ class PerfToolFramework extends Framework {
   }
 
   void disableAppWithError(String title, [dynamic error]) {
-    document
+    html.document
         .getElementById('header')
         .children
         .removeWhere((e) => e.id != 'title');
-    document.getElementById('content').children.clear();
+    html.document.getElementById('content').children.clear();
     showError(title, error);
   }
 
@@ -145,6 +158,10 @@ class PerfToolFramework extends Framework {
       return 'This screen is disabled because it provides functionality already'
           ' available in your code editor';
     }
+
+    // Collect all platform information flutter, web, chrome, versions, etc. for
+    // possible GA collection.
+    ga_platform.setupDimensions();
 
     addScreen(InspectorScreen(
       disabled: !_isAnyFlutterApp || _isProfileBuild,
@@ -263,6 +280,8 @@ class PerfToolFramework extends Framework {
         final String message = 'reloaded in ${_renderDuration(timer.elapsed)}';
         messageBus.addEvent(BusEvent('reload.end', data: message));
         status.setText(message);
+
+        ga.select(ga.devToolsMain, ga.hotReload, timer.elapsed.inMilliseconds);
       } catch (_) {
         const String message = 'error performing reload';
         messageBus.addEvent(BusEvent('reload.end', data: message));
@@ -300,6 +319,7 @@ class PerfToolFramework extends Framework {
         final String message = 'restarted in ${_renderDuration(timer.elapsed)}';
         messageBus.addEvent(BusEvent('restart.end', data: message));
         status.setText(message);
+        ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
       } catch (_) {
         const String message = 'error performing restart';
         messageBus.addEvent(BusEvent('restart.end', data: message));
@@ -334,7 +354,7 @@ class NotFoundScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    return p(text: 'Page not found: ${window.location.pathname}');
+    return p(text: 'Page not found: ${html.window.location.pathname}');
   }
 }
 

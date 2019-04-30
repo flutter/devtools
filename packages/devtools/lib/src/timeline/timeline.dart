@@ -1,12 +1,15 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../ui/analytics.dart' as ga;
+import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
@@ -86,6 +89,8 @@ class TimelineScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
+    ga_platform.setupDimensions();
+
     final CoreElement screenDiv = div()..layoutVertical();
 
     FrameFlameChart flameChart;
@@ -180,7 +185,16 @@ class TimelineScreen extends Screen {
       }
     });
 
-    onSelectedFrameFlameChartItem.listen(eventDetails.update);
+    onSelectedFrameFlameChartItem.listen((FrameFlameChartItem item) async {
+      final TimelineEvent event = item.event;
+      ga.select(
+        ga.timeline,
+        event.isGpuEvent ? ga.timelineFlameGpu : ga.timelineFlameUi,
+        event.time.duration.inMicroseconds, // No inMilliseconds loses precision
+      );
+
+      await eventDetails.update(item);
+    });
 
     maybeShowDebugWarning(framework);
 
@@ -217,12 +231,15 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
+    ga.select(ga.timeline, ga.pause);
+
     _updateButtons(paused: true);
     _paused = true;
     _updateListeningState();
   }
 
   void _resumeRecording() {
+    ga.select(ga.timeline, ga.resume);
     _updateButtons(paused: false);
     _paused = false;
     _updateListeningState();
