@@ -151,14 +151,16 @@ String longestFittingSubstring(
 /// this method will return the URI http://127.0.0.1:60667/72K34Xmq0X0=/.
 Uri getTrimmedUri(String value) {
   final startingUri = Uri.parse(value);
+  final startingPath = startingUri.path;
 
-  // [startingUri.path] should be of the form "/72K34Xmq0X0=/", but it could
-  // have trailing characters. Trim any excess chars beyond the second slash in
-  // the uri path.
-  final pathParts = startingUri.path.split('/');
-  if (pathParts.length < 2) {
+  if (startingPath == '' || startingPath == '/') {
     return Uri.parse(value);
   }
+
+  // [startingPath] should be of the form "/72K34Xmq0X0=/", but it could have
+  // trailing characters. Trim any excess chars beyond the second slash in the
+  // uri path.
+  final pathParts = startingPath.split('/');
   final newPath = pathParts.take(2).join('/');
   final indexOfPath = value.indexOf(newPath);
 
