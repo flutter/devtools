@@ -13,7 +13,10 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
+import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
+
+export '../ui/analytics_constants.dart';
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
@@ -126,74 +129,6 @@ class GtagExceptionDevTools extends GtagException {
   external String get devtools_chrome;
   external String get devtools_version;
 }
-
-// Type of events (event_category):
-const String applicationEvent = 'application'; // visible/hidden
-const String screenViewEvent = 'screen'; // Active screen (tab selected).
-const String selectEvent = 'select'; // User selected something.
-
-const String errorError = 'onerror'; // Browser onError detected in DevTools
-const String exceptionEvent = 'exception'; // Any Dart exception in DevTools
-
-// DevTools GA screenNames:
-
-// GA events not associated with a any screen e.g., hotReload, hotRestart, etc
-const String devToolsMain = 'main';
-const String debugger = 'debugger';
-const String inspector = 'inspector';
-const String logging = 'logging';
-const String memory = 'memory';
-const String performance = 'performance';
-const String timeline = 'timeline';
-
-// DevTools UI action selected (clicked).
-
-// Main bar UX actions:
-const String hotReload = 'hotReload';
-const String hotRestart = 'hotRestart';
-const String feedback = 'feedback';
-
-// Common UX actions:
-const String pause = 'pause'; // Memory, Timeline, Debugger
-const String resume = 'resume'; // Memory, Timeline, Debugger
-
-// Inspector UX actions:
-const String widgetMode = 'widgetMode';
-const String refresh = 'refresh';
-const String performanceOverlay = 'performanceOverlay';
-const String debugPaint = 'debugPaint';
-const String paintBaseline = 'paintBaseline';
-const String slowAnimation = 'slowAnimation';
-const String repaintRainbow = 'repaintRainbow';
-const String debugBanner = 'debugBanner';
-const String trackRebuilds = 'trackRebuilds';
-const String toggleIoS = 'iOS';
-const String selectWidgetMode = 'selectWidgetMode';
-
-// Timeline UX actions:
-const String timelineFrame = 'frame'; // Frame selected in frame chart
-const String timelineFlameGpu = 'flameGPU'; // Selected a GPU flame
-const String timelineFlameUi = 'flameUI'; // Selected a UI flame
-
-// Memory UX actions:
-const String snapshot = 'snapshot';
-const String reset = 'reset';
-const String gC = 'gc';
-const String inspectClass = 'inspectClass'; // inspect a class from snapshot
-const String inspectInstance = 'inspectInstance'; // inspect an instance
-const String inspectData = 'inspectData'; // inspect data of the instance
-
-// Debugger UX actions:
-const String openShortcut = 'openShortcut';
-const String stepIn = 'stepIn';
-const String stepOver = 'stepOver';
-const String stepOut = 'stepOut';
-const String bP = 'bp';
-const String unhandledExceptions = 'unhandledExceptions';
-const String allExceptions = 'allExceptions';
-
-// Logging UX actions:
-const String clearLogs = 'clearLogs';
 
 void screen(
   String screenName, [
