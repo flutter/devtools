@@ -606,7 +606,7 @@ class AnalyticsOptInDialog {
             ]),
           CoreElement('dd')
             ..add([
-              p(text: 'Do you accept statistics collection for Dart DevTools?'),
+              p(text: 'Do you accept analytics collection for Dart DevTools?'),
               acceptButton = PButton('I Accept')
                 ..small()
                 ..clazz('margin-left'),

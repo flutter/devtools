@@ -53,6 +53,9 @@ void computeDevToolsCustomGTagsData() {
       // appVersion for Android is 'Android n.n.n'
       ga.devtoolsPlatformType =
           '${ga.devToolsPlatformTypeAndroid}${splits[index + 1]}';
+    } else if (value == ga.devToolsChromeOS) {
+      // Chrome OS will return a platform e.g., CrOS_Linux_x86_64
+      ga.devtoolsPlatformType = '${ga.devToolsChromeOS}_$platform';
     }
   }
 }

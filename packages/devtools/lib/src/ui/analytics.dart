@@ -37,6 +37,7 @@ const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
 const String devToolsChromeName = 'Chrome/'; // starts with and ends with n.n.n
 const String devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
+const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension6 devToolsVersion
 
 @JS('gtagsEnabled')
