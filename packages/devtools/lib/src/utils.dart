@@ -153,7 +153,7 @@ Uri getTrimmedUri(String value) {
   final startingUri = Uri.parse(value);
   final startingPath = startingUri.path;
 
-  if (startingPath == '' || startingPath == '/') {
+  if (startingPath.isEmpty || startingPath == '/') {
     return Uri.parse(value);
   }
 
