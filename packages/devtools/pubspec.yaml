@@ -3,7 +3,7 @@ description: A suite of web-based performance tooling for Dart and Flutter.
 
 # Note: when updating this version, please update the corresponding entry in
 # lib/devtools.dart.
-version: 0.0.18
+version: 0.0.19-dev
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
@@ -14,7 +14,7 @@ environment:
 dependencies:
   codemirror: ^0.5.3
   collection: ^1.14.11
-  devtools_server: 0.1.1
+  devtools_server: 0.1.2
 #    path: ../devtools_server
   http: ^0.12.0+1
   intl: ^0.15.0
