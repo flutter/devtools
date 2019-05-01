@@ -16,8 +16,9 @@ import '../utils.dart';
 /// Switch this flag to true collect debug info from the latest cpu profile.
 ///
 /// This will add a button to the timeline page that will download the debug
-/// info on click.
-const bool debugCpuProfile = false;
+/// info on click. At runtime, this flag can be enabled by adding the query
+/// parameter 'debugCpu=true'.
+bool debugCpuProfile = false;
 
 /// Buffer that will store the latest cpu profile response json.
 ///
@@ -37,7 +38,8 @@ class CpuProfileData {
 
     if (debugCpuProfile) {
       _debugCpuProfileResponse.clear();
-      if (cpuProfileRoot.sampleCount != sampleCount) {
+      if (cpuProfileRoot.sampleCount != sampleCount &&
+          stackFramesJson.isNotEmpty) {
         _debugCpuProfileResponse.writeln('Sample count from response '
             '($sampleCount) != sample count from root stack frame '
             '(${cpuProfileRoot.sampleCount})\n');

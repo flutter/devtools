@@ -87,6 +87,7 @@ class TimelineScreen extends Screen {
   PButton pauseButton;
   PButton resumeButton;
   CoreElement upperButtonSection;
+  CoreElement debugButtonSection;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -127,9 +128,10 @@ class TimelineScreen extends Screen {
             resumeButton,
           ]),
         div()..flex(),
+        debugButtonSection = div(c: 'btn-group'),
       ]);
 
-    _maybeAddDebugDumpButton();
+    _maybeAddDebugButtons();
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
@@ -273,12 +275,12 @@ class TimelineScreen extends Screen {
     }
   }
 
-  /// Adds a button to the timeline that will dump debug information to text
-  /// files and download them. This will only appear if the [debugTimeline] flag
-  /// is true.
-  void _maybeAddDebugDumpButton() {
+  /// Adds buttons to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if either the
+  /// [debugTimeline] flag is true or the [debugCpuProfile] flag is true.
+  void _maybeAddDebugButtons() {
     if (debugTimeline) {
-      upperButtonSection.add(PButton('Debug dump timeline')
+      debugButtonSection.add(PButton('Debug dump timeline')
         ..small()
         ..click(() {
           // Trace event json in the order we received the events.
@@ -352,7 +354,7 @@ class TimelineScreen extends Screen {
         }));
     }
     if (debugCpuProfile) {
-      upperButtonSection.add(PButton('Debug dump CPU profile')
+      debugButtonSection.add(PButton('Debug dump CPU profile')
         ..small()
         ..click(() {
           // Download the current cpu profile as a json file.
