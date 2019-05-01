@@ -173,8 +173,11 @@ class CpuStackFrame {
   }
 
   @override
-  String toString() {
-    return '$name ($sampleCount samples, '
-        '${percent2(cpuConsumptionRatio)})';
+  String toString({Duration duration}) {
+    String str = '$name ';
+    if (duration != null) {
+      str += '- ${msText(duration, fractionDigits: 2)} ';
+    }
+    return str += '($sampleCount samples, ${percent2(cpuConsumptionRatio)})';
   }
 }
