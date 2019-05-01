@@ -16,7 +16,7 @@ import '../utils.dart';
 // Switch this flag to true collect debug info from the latest cpu profile. This
 // will also add a button to the timeline page that will download the debug info
 // on click.
-const bool debugCpuProfile = true;
+const bool debugCpuProfile = false;
 
 /// Buffer that will store the latest cpu profile response json.
 ///
