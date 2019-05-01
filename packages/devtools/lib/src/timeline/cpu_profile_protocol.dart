@@ -162,10 +162,16 @@ class CpuStackFrame {
 
   @override
   String toString({Duration duration}) {
-    String str = '$name ';
+    final buf = StringBuffer();
+    buf.write('$name ');
     if (duration != null) {
-      str += '- ${msText(duration, fractionDigits: 2)} ';
+      // TODO(kenzie): use a number of fractionDigits that better matches the
+      // resolution of the stack frame.
+      buf.write('- ${msText(duration, fractionDigits: 2)} ');
     }
-    return str += '($sampleCount samples, ${percent2(cpuConsumptionRatio)})';
+    buf.write('($sampleCount ');
+    buf.write(sampleCount == 1 ? 'sample' : 'samples');
+    buf.write(', ${percent2(cpuConsumptionRatio)})');
+    return buf.toString();
   }
 }
