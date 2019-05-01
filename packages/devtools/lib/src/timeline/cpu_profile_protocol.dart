@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
@@ -33,29 +34,56 @@ class CpuProfileData {
   /// stack frame.
   final List<dynamic> stackTraceEvents;
 
-  final cpuProfileRoot = CpuStackFrame('cpuProfile', 'all', 'Dart');
+  final cpuProfileRoot = CpuStackFrame(
+    id: 'cpuProfile',
+    name: 'all',
+    category: 'Dart',
+  );
 
   Map<String, CpuStackFrame> stackFrames = {};
 
   void _processStackFrames(Response response) {
-    final nativeRoot = CpuStackFrame('nativeRoot', '[Native]', 'Dart');
+    const nativeName = '[Native]';
+    const truncatedName = '[Truncated]';
+
+    final nativeRoot = CpuStackFrame(
+      id: 'nativeRoot',
+      name: nativeName,
+      category: 'Dart',
+    );
+    final nativeTruncatedRoot = CpuStackFrame(
+      id: 'nativeTruncatedRoot',
+      name: truncatedName,
+      category: 'Dart',
+    );
 
     stackFramesJson.forEach((k, v) {
       final String stackFrameName = v['name'];
 
-      final stackFrame = CpuStackFrame(k, stackFrameName, v['category']);
+      final stackFrame = CpuStackFrame(
+        id: k,
+        name: stackFrameName,
+        category: v['category'],
+      );
       CpuStackFrame parent = stackFrames[v['parent']];
 
       // TODO(kenzie): detect other native frames like "syscall" and "malloc"
       // once we get file paths in the stack frame json.
-      if (stackFrameName.startsWith('[Native]')) {
-        parent ??= nativeRoot;
+      if (stackFrameName.startsWith(nativeName)) {
+        if (parent?.name == truncatedName) {
+          parent = nativeTruncatedRoot;
+        } else {
+          parent ??= nativeRoot;
+        }
         stackFrame.isNative = true;
       }
 
       _processStackFrame(stackFrame, parent);
     });
 
+    if (nativeTruncatedRoot.children.isNotEmpty) {
+      nativeRoot.addChild(nativeTruncatedRoot);
+    }
     if (nativeRoot.children.isNotEmpty) {
       cpuProfileRoot.addChild(nativeRoot);
     }
@@ -75,7 +103,11 @@ class CpuProfileData {
 }
 
 class CpuStackFrame {
-  CpuStackFrame(this.id, this.name, this.category);
+  CpuStackFrame({
+    @required this.id,
+    @required this.name,
+    @required this.category,
+  });
 
   final String id;
   final String name;
