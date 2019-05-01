@@ -240,6 +240,11 @@ Future<void> registerLaunchDevToolsService(
 
         return {'result': Success().toJson()};
       } catch (e, s) {
+        // Note: It's critical that we return responses in exactly the right format
+        // or the VM will unregister the service. The objects must match JSON-RPC
+        // however a successful response must also have a "type" field in its result.
+        // Otherwise, we can return an error object (instead of result) that includes
+        // code + message.
         return {
           'error': {
             'code': errorLaunchingBrowserCode,
