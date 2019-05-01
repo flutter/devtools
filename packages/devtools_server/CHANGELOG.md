@@ -1,3 +1,7 @@
+## 0.1.2
+- The `launchDevTools` service will now return well-formed errors if it fails to
+  launch the browser for any reason.
+
 ## 0.1.1
 - When running on ChromeOS, the `launchDevTools` service will now launch the native
   ChromeOS browser (instead of the Linux version of Chrome installed in the Linux
