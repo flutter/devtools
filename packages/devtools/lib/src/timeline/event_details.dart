@@ -25,6 +25,8 @@ import 'timeline_protocol.dart';
 
 final _collapseNativeSamplesController = StreamController<bool>.broadcast();
 
+bool _defaultCollapseNativeSamplesValue = false;
+
 Stream<bool> get onCollapseNativeSamplesEvent =>
     _collapseNativeSamplesController.stream;
 
@@ -65,7 +67,7 @@ class EventDetails extends CoreElement {
 
   CoreElement content;
 
-  CoreElement hideNativeCheckbox;
+  CoreElement collapseNativeCheckbox;
 
   TimelineEvent _event;
 
@@ -131,14 +133,14 @@ class EventDetails extends CoreElement {
       }
     });
 
-    // Add hide native checkbox to tab nav.
-    hideNativeCheckbox =
+    // Add collapse native checkbox to tab nav.
+    collapseNativeCheckbox =
         CoreElement('input', classes: 'collapse-native-checkbox')
           ..setAttribute('type', 'checkbox');
 
-    final html.InputElement checkbox = hideNativeCheckbox.element;
+    final html.InputElement checkbox = collapseNativeCheckbox.element;
     checkbox
-      ..checked = true
+      ..checked = _defaultCollapseNativeSamplesValue
       ..onChange.listen(
           (_) => _collapseNativeSamplesController.add(checkbox.checked));
 
@@ -147,7 +149,7 @@ class EventDetails extends CoreElement {
       (div(c: 'collapse-native-container')
             ..flex()
             ..add([
-              hideNativeCheckbox,
+              collapseNativeCheckbox,
               CoreElement('div', text: 'Collapse native samples')
                 ..element.style.color = colorToCss(contrastForeground),
             ]))
@@ -306,7 +308,7 @@ class _CpuFlameChart extends CoreElement {
 
   bool canvasNeedsRebuild = false;
 
-  bool lastCollapseNativeSamplesValue = true;
+  bool lastCollapseNativeSamplesValue = _defaultCollapseNativeSamplesValue;
 
   bool showingError = false;
 
