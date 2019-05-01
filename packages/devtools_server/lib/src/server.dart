@@ -22,6 +22,8 @@ const argMachine = 'machine';
 const argPort = 'port';
 const launchDevToolsService = 'launchDevTools';
 
+const errorLaunchingBrowserCode = 500;
+
 final argParser = new ArgParser()
   ..addFlag(
     argHelp,
@@ -200,41 +202,56 @@ Future<void> registerLaunchDevToolsService(
     final VmService service = await _connectToVmService(vmServiceUri);
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
-      final uriParams = <String, dynamic>{};
+      try {
+        final uriParams = <String, dynamic>{};
 
-      // Copy over queryParams passed by the client
-      if (params != null) {
-        params['queryParams']?.forEach((key, value) => uriParams[key] = value);
+        // Copy over queryParams passed by the client
+        if (params != null) {
+          params['queryParams']
+              ?.forEach((key, value) => uriParams[key] = value);
+        }
+
+        // Add the URI to the VM service
+        uriParams['uri'] = vmServiceUri.toString();
+
+        final devToolsUri = Uri.parse(devToolsUrl);
+        final uriToLaunch = devToolsUri.replace(
+          // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
+          // ChromeOS fails to detect that it's a port that's tunneled, and will
+          // quietly replace the IP with "penguin.linux.test". This is not valid
+          // for us since the server isn't bound to the containers IP (it's bound
+          // to the containers loopback IP).
+          path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
+          queryParameters: uriParams,
+        );
+
+        // TODO(dantup): When ChromeOS has support for tunneling all ports we
+        // can change this to always use the native browser for ChromeOS
+        // and may wish to handle this inside `browser_launcher`.
+        //   https://crbug.com/848063
+        final useNativeBrowser = _isChromeOS &&
+            _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
+            _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+        if (useNativeBrowser) {
+          await Process.start('x-www-browser', [uriToLaunch.toString()]);
+        } else {
+          await Chrome.start([uriToLaunch.toString()]);
+        }
+
+        return {'result': Success().toJson()};
+      } catch (e, s) {
+        // Note: It's critical that we return responses in exactly the right format
+        // or the VM will unregister the service. The objects must match JSON-RPC
+        // however a successful response must also have a "type" field in its result.
+        // Otherwise, we can return an error object (instead of result) that includes
+        // code + message.
+        return {
+          'error': {
+            'code': errorLaunchingBrowserCode,
+            'message': 'Failed to launch browser: $e\n$s',
+          },
+        };
       }
-
-      // Add the URI to the VM service
-      uriParams['uri'] = vmServiceUri.toString();
-
-      final devToolsUri = Uri.parse(devToolsUrl);
-      final uriToLaunch = devToolsUri.replace(
-        // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
-        // ChromeOS fails to detect that it's a port that's tunneled, and will
-        // quietly replace the IP with "penguin.linux.test". This is not valid
-        // for us since the server isn't bound to the containers IP (it's bound
-        // to the containers loopback IP).
-        path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
-        queryParameters: uriParams,
-      );
-
-      // TODO(dantup): When ChromeOS has support for tunneling all ports we
-      // can change this to always use the native browser for ChromeOS
-      // and may wish to handle this inside `browser_launcher`.
-      //   https://crbug.com/848063
-      final useNativeBrowser = _isChromeOS &&
-          _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
-          _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
-      if (useNativeBrowser) {
-        await Process.start('x-www-browser', [uriToLaunch.toString()]);
-      } else {
-        await Chrome.start([uriToLaunch.toString()]);
-      }
-
-      return {'result': Success().toJson()};
     });
 
     await service.registerService(launchDevToolsService, 'DevTools Server');
