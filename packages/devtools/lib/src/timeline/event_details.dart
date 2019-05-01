@@ -347,11 +347,7 @@ class _CpuFlameChart extends CoreElement {
     _collapseNativeSamplesController.add(lastCollapseNativeSamplesValue);
 
     canvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
-      final frameDuration = Duration(
-          microseconds: (stackFrame.cpuConsumptionRatio *
-                  event.time.duration.inMicroseconds)
-              .round());
-      stackFrameDetails.text = stackFrame.toString(duration: frameDuration);
+      stackFrameDetails.text = stackFrame.toString();
     });
 
     add(canvas.element);
