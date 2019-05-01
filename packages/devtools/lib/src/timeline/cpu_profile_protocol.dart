@@ -13,16 +13,19 @@ import '../utils.dart';
 // debug and profile builds. Do they use different clocks and does this also
 // affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
 
-// Switch this flag to true collect debug info from the latest cpu profile. This
-// will also add a button to the timeline page that will download the debug info
-// on click.
 const bool debugCpuProfile = false;
+/// Switch this flag to true collect debug info from the latest cpu profile.
+///
+/// This will add a button to the timeline page that will download the debug
+/// info on click.
 
 /// Buffer that will store the latest cpu profile response json.
 ///
 /// This buffer is for debug purposes. When [debugCpuProfile] is true, we will
 /// be able to dump this buffer to a downloadable json file.
-StringBuffer debugCpuProfileResponse = StringBuffer();
+StringBuffer _debugCpuProfileResponse = StringBuffer();
+
+String get debugCpuProfileResponse => _debugCpuProfileResponse.toString();
 
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
@@ -33,13 +36,13 @@ class CpuProfileData {
     _processStackFrames(cpuProfileResponse);
 
     if (debugCpuProfile) {
-      debugCpuProfileResponse.clear();
+      _debugCpuProfileResponse.clear();
       if (cpuProfileRoot.sampleCount != sampleCount) {
-        debugCpuProfileResponse.writeln('Sample count from response '
+        _debugCpuProfileResponse.writeln('Sample count from response '
             '($sampleCount) != sample count from root stack frame '
             '(${cpuProfileRoot.sampleCount})\n');
       }
-      debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
+      _debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
     }
   }
 
