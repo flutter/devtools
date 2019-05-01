@@ -5,7 +5,7 @@
 ## 0.0.19 - 2019-05-01
 * Update DevTools server to better handle failures when launching browsers.
 * Support additional formats for VM service uris.
-* Link to documentation from --track-widget-creation warning.
+* Link to documentation from --track-widget-creation warning in the Inspector.
 
 ## 0.0.18 - 2019-04-30
 * Fix release bug (0.0.17-dev.1 did not include build folder).
