@@ -39,6 +39,11 @@ class CpuProfileData {
 
   void _processStackFrames(Response response) {
     final nativeRoot = CpuStackFrame('nativeRoot', '[Native]', 'Dart');
+    final nativeTruncatedRoot = CpuStackFrame(
+      'nativeTruncatedRoot',
+      '[Truncated]',
+      'Dart',
+    );
 
     stackFramesJson.forEach((k, v) {
       final String stackFrameName = v['name'];
@@ -49,13 +54,20 @@ class CpuProfileData {
       // TODO(kenzie): detect other native frames like "syscall" and "malloc"
       // once we get file paths in the stack frame json.
       if (stackFrameName.startsWith('[Native]')) {
-        parent ??= nativeRoot;
+        if (parent?.name == '[Truncated]') {
+          parent = nativeTruncatedRoot;
+        } else {
+          parent ??= nativeRoot;
+        }
         stackFrame.isNative = true;
       }
 
       _processStackFrame(stackFrame, parent);
     });
 
+    if (nativeTruncatedRoot.children.isNotEmpty) {
+      nativeRoot.addChild(nativeTruncatedRoot);
+    }
     if (nativeRoot.children.isNotEmpty) {
       cpuProfileRoot.addChild(nativeRoot);
     }
