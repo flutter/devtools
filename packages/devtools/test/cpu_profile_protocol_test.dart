@@ -42,8 +42,16 @@ void main() {
     });
 
     test('add child', () {
-      final parent = CpuStackFrame('id_0', 'parent', 'Dart');
-      final child = CpuStackFrame('id_1', 'child', 'Dart');
+      final parent = CpuStackFrame(
+        id: 'id_0',
+        name: 'parent',
+        category: 'Dart',
+      );
+      final child = CpuStackFrame(
+        id: 'id_1',
+        name: 'child',
+        category: 'Dart',
+      );
       expect(parent.children, isEmpty);
       expect(child.parent, isNull);
       parent.addChild(child);
@@ -61,12 +69,36 @@ void main() {
   });
 }
 
-final CpuStackFrame stackFrame_0 = CpuStackFrame('id_0', '0', 'Dart');
-final CpuStackFrame stackFrame_1 = CpuStackFrame('id_1', '1', 'Dart');
-final CpuStackFrame stackFrame_2 = CpuStackFrame('id_2', '2', 'Dart');
-final CpuStackFrame stackFrame_3 = CpuStackFrame('id_3', '3', 'Dart');
-final CpuStackFrame stackFrame_4 = CpuStackFrame('id_4', '4', 'Dart');
-final CpuStackFrame stackFrame_5 = CpuStackFrame('id_5', '5', 'Dart');
+final CpuStackFrame stackFrame_0 = CpuStackFrame(
+  id: 'id_0',
+  name: '0',
+  category: 'Dart',
+);
+final CpuStackFrame stackFrame_1 = CpuStackFrame(
+  id: 'id_1',
+  name: '1',
+  category: 'Dart',
+);
+final CpuStackFrame stackFrame_2 = CpuStackFrame(
+  id: 'id_2',
+  name: '2',
+  category: 'Dart',
+);
+final CpuStackFrame stackFrame_3 = CpuStackFrame(
+  id: 'id_3',
+  name: '3',
+  category: 'Dart',
+);
+final CpuStackFrame stackFrame_4 = CpuStackFrame(
+  id: 'id_4',
+  name: '4',
+  category: 'Dart',
+);
+final CpuStackFrame stackFrame_5 = CpuStackFrame(
+  id: 'id_5',
+  name: '5',
+  category: 'Dart',
+);
 
 final testStackFrame = stackFrame_0
   ..children = [

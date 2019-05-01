@@ -1,4 +1,4 @@
-## 0.0.19 - 2019-05-?? (in progress)
+## 0.0.19 - 2019-05-01
 * Update DevTools server to better handle failures when launching browsers.
 * Support additional formats for VM service uris.
 
@@ -39,7 +39,7 @@
 - initial (pre-release) release
 
 <!--
-List of possible sections to use for areas that have changed. 
+List of possible sections to use for areas that have changed.
 ### Documentation
 ### Debugger
 ### Inspector
