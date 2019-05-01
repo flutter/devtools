@@ -110,6 +110,15 @@ class CpuProfileData {
 
     if (nativeTruncatedRoot.children.isNotEmpty) {
       nativeRoot.addChild(nativeTruncatedRoot);
+
+      // If we moved some samples over to [nativeTruncatedRoot], we could have
+      // a "[Truncated]" child under the "all" event that does not have any
+      // children. If so, remove the "[Truncated]" child.
+      final truncated = cpuProfileRoot.children
+          .firstWhere((frame) => frame.name == truncatedName);
+      if (truncated != null && truncated.children.isEmpty) {
+        cpuProfileRoot.children.remove(truncated);
+      }
     }
     if (nativeRoot.children.isNotEmpty) {
       cpuProfileRoot.addChild(nativeRoot);
