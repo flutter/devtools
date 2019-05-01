@@ -1,4 +1,4 @@
-## 0.0.20 - 2019-05-??
+## 0.0.20-dev.1 - 2019-05-01
 * Timeline debug information is available to supplement issue reports. Add query parameter `&debugCpu=true` or `&debugTimeline=true` to download debug files for the CPU profiler and frame timeline, respectively.
 * CPU profiler bug fixes and improvements.
 
