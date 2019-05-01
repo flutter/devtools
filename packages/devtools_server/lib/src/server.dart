@@ -239,11 +239,11 @@ Future<void> registerLaunchDevToolsService(
         }
 
         return {'result': Success().toJson()};
-      } catch (e) {
+      } catch (e, s) {
         return {
           'error': {
             'code': errorLaunchingBrowserCode,
-            'message': 'Failed to launch browser: $e',
+            'message': 'Failed to launch browser: $e\n$s',
           },
         };
       }
