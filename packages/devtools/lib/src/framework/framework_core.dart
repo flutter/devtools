@@ -47,14 +47,8 @@ class FrameworkCore {
     // If we could automate this into some sort of bug report, we can probably
     // remove this query param all together, but for now enabling manual dumps
     // is fine.
-    final _debugTimeline = queryParams['debugTimeline'];
-    if (_debugTimeline != null && _debugTimeline == 'true') {
-      debugTimeline = true;
-    }
-    final _debugCpuProfile = queryParams['debugCpu'];
-    if (_debugCpuProfile != null && _debugCpuProfile == 'true') {
-      debugCpuProfile = true;
-    }
+    debugTimeline = queryParams['debugTimeline'] == 'true';
+    debugCpuProfile = queryParams['debugCpu'] == 'true';
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
