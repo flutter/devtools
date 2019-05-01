@@ -17,6 +17,7 @@ import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
+import 'cpu_profile_protocol.dart';
 import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'frames_bar_chart.dart';
@@ -86,6 +87,7 @@ class TimelineScreen extends Screen {
   PButton pauseButton;
   PButton resumeButton;
   CoreElement upperButtonSection;
+  CoreElement debugButtonSection;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -126,9 +128,10 @@ class TimelineScreen extends Screen {
             resumeButton,
           ]),
         div()..flex(),
+        debugButtonSection = div(c: 'btn-group'),
       ]);
 
-    _maybeAddDebugDumpButton();
+    _maybeAddDebugButtons();
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
@@ -272,12 +275,12 @@ class TimelineScreen extends Screen {
     }
   }
 
-  /// Adds a button to the timeline that will dump debug information to text
-  /// files and download them. This will only appear if the [debugTimeline] flag
-  /// is true.
-  void _maybeAddDebugDumpButton() {
+  /// Adds buttons to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if either the
+  /// [debugTimeline] flag is true or the [debugCpuProfile] flag is true.
+  void _maybeAddDebugButtons() {
     if (debugTimeline) {
-      upperButtonSection.add(PButton('Debug dump')
+      debugButtonSection.add(PButton('Debug dump timeline')
         ..small()
         ..click(() {
           // Trace event json in the order we received the events.
@@ -348,6 +351,14 @@ class TimelineScreen extends Screen {
             }
           }
           downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
+        }));
+    }
+    if (debugCpuProfile) {
+      debugButtonSection.add(PButton('Debug dump CPU profile')
+        ..small()
+        ..click(() {
+          // Download the current cpu profile as a json file.
+          downloadFile(debugCpuProfileResponse, 'cpu_profile.json');
         }));
     }
   }

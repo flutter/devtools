@@ -1,3 +1,6 @@
+## 0.0.20 - 2019-05-??
+* Timeline debug information is available to supplement issue reports. Add query parameter `&debugCpu=true` or `&debugTimeline=true` to download debug files for the CPU profiler and frame timeline, respectively.
+
 ## 0.0.19 - 2019-05-01
 * Update DevTools server to better handle failures when launching browsers.
 * Support additional formats for VM service uris.

@@ -17,9 +17,11 @@ import '../utils.dart';
 // engine. That dependency is tracked at
 // https://github.com/flutter/flutter/issues/27609.
 
-// Switch this flag to true collect debug info from the timeline protocol. This
-// will also add a button to the timeline page that will download files with
-// debug info on click.
+/// Switch this flag to true collect debug info from the timeline protocol.
+///
+/// This will add a button to the timeline page that will download files with
+/// debug info on click. At runtime, this flag can be enabled by adding the
+/// query parameter 'debugTimeline=true'.
 bool debugTimeline = false;
 
 /// Buffer that will store trace event json in the order we receive the events.

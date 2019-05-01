@@ -12,6 +12,8 @@ import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
 import '../service_manager.dart';
+import '../timeline/cpu_profile_protocol.dart';
+import '../timeline/timeline_protocol.dart';
 import '../ui/theme.dart' as theme;
 import '../vm_service_wrapper.dart';
 
@@ -26,11 +28,27 @@ class FrameworkCore {
     theme.initializeTheme(uri.queryParameters['theme']);
 
     _setGlobals();
+    _setDebugFlags();
   }
 
   static void _setGlobals() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
+  }
+
+  static void _setDebugFlags() {
+    if (window.location.search.isEmpty) {
+      return;
+    }
+    final queryParams = Uri.parse(window.location.toString()).queryParameters;
+
+    // TODO(kenzie): register a service on the devtools server that will dump
+    // all debug files behind the [debugTimeline] and [debugCpuProfile] flags.
+    // If we could automate this into some sort of bug report, we can probably
+    // remove this query param all together, but for now enabling manual dumps
+    // is fine.
+    debugTimeline = queryParams['debugTimeline'] == 'true';
+    debugCpuProfile = queryParams['debugCpu'] == 'true';
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
