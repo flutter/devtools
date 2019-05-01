@@ -356,7 +356,7 @@ class TimelineScreen extends Screen {
         ..small()
         ..click(() {
           // Download the current cpu profile as a json file.
-          downloadFile(debugCpuProfileResponse.toString(), 'cpu_profile.json');
+          downloadFile(debugCpuProfileResponse, 'cpu_profile.json');
         }));
     }
   }
