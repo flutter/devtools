@@ -150,22 +150,10 @@ String longestFittingSubstring(
 /// For example, given a [value] of http://127.0.0.1:60667/72K34Xmq0X0=/#/vm,
 /// this method will return the URI http://127.0.0.1:60667/72K34Xmq0X0=/.
 Uri getTrimmedUri(String value) {
-  final startingUri = Uri.parse(value);
-  final startingPath = startingUri.path;
-
-  if (startingPath.isEmpty || startingPath == '/') {
-    return Uri.parse(value);
-  }
-
-  // [startingPath] should be of the form "/72K34Xmq0X0=/", but it could have
-  // trailing characters. Trim any excess chars beyond the second slash in the
-  // uri path.
-  final pathParts = startingPath.split('/');
-  final newPath = pathParts.take(2).join('/');
-  final indexOfPath = value.indexOf(newPath);
-
-  // Add a trailing slash to the path.
-  return Uri.parse(value.substring(0, indexOfPath + newPath.length) + '/');
+  final uri = Uri.parse(value.trim());
+  return uri
+      .removeFragment()
+      .replace(path: uri.path.endsWith('/') ? uri.path : '${uri.path}/');
 }
 
 class Property<T> {
