@@ -1,3 +1,6 @@
+## 0.0.19 - 2019-05-?? (in progress)
+* Update DevTools server to better handle failures when launching browsers
+
 ## 0.0.18 - 2019-04-30
 * Fix release bug (0.0.17-dev.1 did not include build folder)
 * Add CPU profiler (preview) to timeline page.
