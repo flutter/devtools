@@ -35,7 +35,6 @@ class CpuProfileData {
     if (debugCpuProfile) {
       debugCpuProfileResponse.clear();
       if (cpuProfileRoot.sampleCount != sampleCount) {
-        print('duplicates');
         debugCpuProfileResponse.writeln('Sample count from response '
             '($sampleCount) != sample count from root stack frame '
             '(${cpuProfileRoot.sampleCount})\n');
