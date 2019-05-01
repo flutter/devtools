@@ -13,11 +13,11 @@ import '../utils.dart';
 // debug and profile builds. Do they use different clocks and does this also
 // affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
 
-const bool debugCpuProfile = false;
 /// Switch this flag to true collect debug info from the latest cpu profile.
 ///
 /// This will add a button to the timeline page that will download the debug
 /// info on click.
+const bool debugCpuProfile = false;
 
 /// Buffer that will store the latest cpu profile response json.
 ///
