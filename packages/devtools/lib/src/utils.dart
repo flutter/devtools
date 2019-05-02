@@ -369,10 +369,10 @@ class TimeRange {
     unit ??= TimeUnit.microseconds;
     switch (unit) {
       case TimeUnit.microseconds:
-        return '[${_start.inMicroseconds} μs - ${end.inMicroseconds} μs]';
+        return '[${_start?.inMicroseconds} μs - ${end?.inMicroseconds} μs]';
       case TimeUnit.milliseconds:
       default:
-        return '[${_start.inMilliseconds} ms - ${end.inMilliseconds} ms]';
+        return '[${_start?.inMilliseconds} ms - ${end?.inMilliseconds} ms]';
     }
   }
 }
