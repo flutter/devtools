@@ -40,6 +40,14 @@ class Chrome {
       if (FileSystemEntity.isFileSync(defaultPath)) {
         return Chrome.from(defaultPath);
       }
+    } else if (Platform.isWindows) {
+      final String progFiles = Platform.environment['PROGRAMFILES(X86)'];
+      final String chromeInstall = '$progFiles\\Google\\Chrome';
+      final String defaultPath = '$chromeInstall\\Application\\chrome.exe';
+
+      if (FileSystemEntity.isFileSync(defaultPath)) {
+        return Chrome.from(defaultPath);
+      }
     }
 
     // TODO(devoncarew): check default install locations for linux

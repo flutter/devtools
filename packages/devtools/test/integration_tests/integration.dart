@@ -283,7 +283,7 @@ class WebdevFixture {
   }) async {
     // 'pub run webdev serve web'
 
-    final List<String> cliArgs = ['serve', 'web'];
+    final List<String> cliArgs = ['global', 'run', 'webdev', 'serve', 'web'];
     if (release) {
       cliArgs.add('--release');
     }
@@ -298,7 +298,7 @@ class WebdevFixture {
     }
 
     final Process process = await Process.start(
-      'webdev',
+      Platform.isWindows ? 'pub.bat' : 'pub',
       cliArgs,
       environment: environment,
     );
