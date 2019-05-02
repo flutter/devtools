@@ -1,5 +1,6 @@
-## 0.0.20-dev.1 - 2019-05-01
-* Timeline debug information is available to supplement issue reports. Add query parameter `&debugCpu=true` or `&debugTimeline=true` to download debug files for the CPU profiler and frame timeline, respectively.
+## 0.1.0 - 2019-05-02
+* Expose functionality to export timeline trace and CPU profiles.
+* Add "Clear" button to the timeline page.
 * CPU profiler bug fixes and improvements.
 
 ## 0.0.19 - 2019-05-01
