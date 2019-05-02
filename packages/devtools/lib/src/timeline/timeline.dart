@@ -69,7 +69,7 @@ const Color hoverTextColor = Colors.black;
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
 // area associated with the selected frame.
 
-const Icon _clear = MaterialIcon('clear', defaultButtonIconColor);
+const Icon _clear = MaterialIcon('block', defaultButtonIconColor);
 
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
