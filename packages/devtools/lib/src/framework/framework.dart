@@ -527,6 +527,9 @@ class ConnectDialog {
       framework.toast("Unable to connect to '$value'.");
     }
 
+    // Clear existing messages as the existing messages are about the previous
+    // VMService or the previous failure to connect to the VM Service.
+    framework.clearMessages();
     if (port != null) {
       _connect(Uri.parse('ws://localhost:$port/ws'))
           .catchError((dynamic error) {
