@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
@@ -13,11 +15,11 @@ import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
+import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
-import 'cpu_profile_protocol.dart';
 import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'frames_bar_chart.dart';
@@ -57,6 +59,19 @@ const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFe02a28));
 const Color hoverTextHighContrastColor = Colors.white;
 const Color hoverTextColor = Colors.black;
 
+// Matches our default button colors for light and dark theme.
+const exportTimelineButtonColor = ThemedColor(
+  Color(0xFF24292E),
+  Color(0xFF89B5F8),
+);
+
+const Icon exportTimeline = MaterialIcon(
+  'file_download',
+  exportTimelineButtonColor,
+  fontSize: 32,
+  iconWidth: 18,
+);
+
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
 // TODO(devoncarew): show the list of widgets re-drawn during a frame
@@ -82,6 +97,8 @@ class TimelineScreen extends Screen {
 
   FramesBarChart framesBarChart;
 
+  EventDetails eventDetails;
+
   bool _paused = false;
 
   PButton pauseButton;
@@ -96,7 +113,6 @@ class TimelineScreen extends Screen {
     final CoreElement screenDiv = div()..layoutVertical();
 
     FrameFlameChart flameChart;
-    EventDetails eventDetails;
 
     bool splitterConfigured = false;
 
@@ -129,6 +145,11 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
+        PButton.icon('', exportTimeline)
+          ..small()
+          ..clazz('margin-left')
+          ..setAttribute('title', 'Export timeline')
+          ..click(_exportTimeline),
       ]);
 
     _maybeAddDebugButtons();
@@ -275,30 +296,43 @@ class TimelineScreen extends Screen {
     }
   }
 
-  /// Adds buttons to the timeline that will dump debug information to text
-  /// files and download them. This will only appear if either the
-  /// [debugTimeline] flag is true or the [debugCpuProfile] flag is true.
+  void _exportTimeline() {
+    // TODO(kenzie): add analytics for this. It would be helpful to know how
+    // complex the problems are that users are trying to solve.
+    final Map<String, dynamic> json = {
+      'traceEvents': timelineTraceEvents,
+      'cpuProfile': eventDetails.cpuProfileData != null
+          ? eventDetails.cpuProfileData.cpuProfileResponse.json
+          : {},
+    };
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    downloadFile(jsonEncode(json), 'timeline_$timestamp.json');
+  }
+
+  /// Adds a button to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if the [debugTimeline] flag
+  /// is true.
   void _maybeAddDebugButtons() {
     if (debugTimeline) {
       debugButtonSection.add(PButton('Debug dump timeline')
         ..small()
         ..click(() {
-          // Trace event json in the order we received the events.
-          String traceEvents = debugTraceEvents.toString();
-          traceEvents = traceEvents.replaceRange(
-              traceEvents.length - 1, traceEvents.length, ']}');
-          downloadFile(traceEvents, 'trace_output.json');
-
           // Trace event json in the order we handled the events.
-          String handledTraceEvents = debugTraceEvents.toString();
-          handledTraceEvents = handledTraceEvents.replaceRange(
-              handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
+          final handledTraceEventsJson = {
+            'traceEvents': debugHandledTraceEvents
+          };
           downloadFile(
-              handledTraceEvents.toString(), 'handled_trace_output.json');
+            jsonEncode(handledTraceEventsJson),
+            'handled_trace_output.json',
+          );
 
           // Significant events in the frame tracking process.
           downloadFile(
-              debugFrameTracking.toString(), 'frame_tracking_output.txt');
+            debugFrameTracking.toString(),
+            'frame_tracking_output.txt',
+          );
 
           // Current status of our frame tracking elements (i.e. pendingEvents,
           // pendingFrames).
@@ -351,14 +385,6 @@ class TimelineScreen extends Screen {
             }
           }
           downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
-        }));
-    }
-    if (debugCpuProfile) {
-      debugButtonSection.add(PButton('Debug dump CPU profile')
-        ..small()
-        ..click(() {
-          // Download the current cpu profile as a json file.
-          downloadFile(debugCpuProfileResponse, 'cpu_profile.json');
         }));
     }
   }
