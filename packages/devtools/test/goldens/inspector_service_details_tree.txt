@@ -12,8 +12,8 @@ MaterialApp
        │   3.0, textScaleFactor: 1.0, platformBrightness:
        │   Brightness.light, padding: EdgeInsets.zero, viewInsets:
        │   EdgeInsets.zero, alwaysUse24HourFormat: false,
-       │   accessibleNavigation: falsedisableAnimations:
-       │   falseinvertColors: falseboldText: false)
+       │   accessibleNavigation: false, disableAnimations: false,
+       │   invertColors: false, boldText: false)
        │
        └─Localizations
          │ locale: en_US

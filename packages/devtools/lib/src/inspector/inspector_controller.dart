@@ -487,6 +487,10 @@ class InspectorController implements InspectorServiceClient {
   }
 
   Future<void> updateSelectionFromService({@required bool firstFrame}) async {
+    if (_selectionGroups == null) {
+      // Already disposed. Ignore this requested to update selection.
+      return;
+    }
     treeLoadStarted = true;
     _selectionGroups.cancelNext();
 
@@ -697,7 +701,9 @@ class InspectorController implements InspectorServiceClient {
     if (inspectorService != null) {
       shutdownTree(false);
     }
+    _treeGroups?.clear(false);
     _treeGroups = null;
+    _selectionGroups?.clear(false);
     _selectionGroups = null;
     details?.dispose();
   }
