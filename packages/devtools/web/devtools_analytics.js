@@ -21,13 +21,9 @@ function gtag() {
 let _gtagsValue = new URLSearchParams(window.location.search).get('gtags');
 let _gtagsReset = _gtagsValue == 'reset';
 let _gtagsEnabled = _gtagsValue == 'enabled';
+
 // Default is disabled if &gtags= is not specified
 let _gtagsDisabled = _gtagsValue == null || _gtagsValue == 'disabled';
-
-// Disabled or resetting we're disabled.
-if (_gtagsDisabled | _gtagsReset) {
-  console.log("Google Analytics DevTools is disabled.")
-}
 
 function gtagsEnabled() {
   return _gtagsEnabled
@@ -35,7 +31,6 @@ function gtagsEnabled() {
 
 if (_gtagsReset) {
   localStorage.removeItem(GA_DEVTOOLS_PROPERTY);
-  console.log("Google Analytics DevTools opt-in has been reset.");
 }
 
 // Values in local storage:
@@ -78,9 +73,6 @@ function _initializeGA() {
          });
 
     _initializedGA = true;
-    console.log("Google Analytics collecting DevTools " + GA_DEVTOOLS_PROPERTY);
-  } else if (gaCollectionAllowed) {
-    console.log("Google Analytics NOT collecting DevTools " + GA_DEVTOOLS_PROPERTY);
   }
 }
 
