@@ -13,6 +13,7 @@ import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
+import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
@@ -57,6 +58,19 @@ const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFe02a28));
 const Color hoverTextHighContrastColor = Colors.white;
 const Color hoverTextColor = Colors.black;
 
+// Matches our default button colors for light and dark theme.
+const exportTimelineButtonColor = ThemedColor(
+  Color(0xFF24292E),
+  Color(0xFF89B5F8),
+);
+
+const Icon exportTimeline = MaterialIcon(
+  'file_download',
+  exportTimelineButtonColor,
+  fontSize: 32,
+  iconWidth: 18,
+);
+
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
 // TODO(devoncarew): show the list of widgets re-drawn during a frame
@@ -82,6 +96,8 @@ class TimelineScreen extends Screen {
 
   FramesBarChart framesBarChart;
 
+  EventDetails eventDetails;
+
   bool _paused = false;
 
   PButton pauseButton;
@@ -96,7 +112,6 @@ class TimelineScreen extends Screen {
     final CoreElement screenDiv = div()..layoutVertical();
 
     FrameFlameChart flameChart;
-    EventDetails eventDetails;
 
     bool splitterConfigured = false;
 
@@ -129,6 +144,11 @@ class TimelineScreen extends Screen {
           ]),
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
+        PButton.icon('', exportTimeline)
+          ..small()
+          ..clazz('margin-left')
+          ..setAttribute('title', 'Export timeline')
+          ..click(_exportTimeline),
       ]);
 
     _maybeAddDebugButtons();
@@ -275,22 +295,28 @@ class TimelineScreen extends Screen {
     }
   }
 
-  /// Adds buttons to the timeline that will dump debug information to text
-  /// files and download them. This will only appear if either the
-  /// [debugTimeline] flag is true or the [debugCpuProfile] flag is true.
+  void _exportTimeline() {
+    // There will be a trailing comma on [debugTraceEvents]. Remove so that we
+    // do not have to deal with json formatting errors later.
+    final traceEvents = debugTraceEvents
+        .toString()
+        .replaceRange(debugTraceEvents.length - 1, debugTraceEvents.length, '');
+    final String json = '{'
+        '"traceEvents":[$traceEvents],'
+        '"cpuProfile":[${debugCpuProfileResponse.toString()}]}';
+    downloadFile(json, 'timeline_${DateTime.now().toString()}.json');
+  }
+
+  /// Adds a button to the timeline that will dump debug information to text
+  /// files and download them. This will only appear if the [debugTimeline] flag
+  /// is true.
   void _maybeAddDebugButtons() {
     if (debugTimeline) {
       debugButtonSection.add(PButton('Debug dump timeline')
         ..small()
         ..click(() {
-          // Trace event json in the order we received the events.
-          String traceEvents = debugTraceEvents.toString();
-          traceEvents = traceEvents.replaceRange(
-              traceEvents.length - 1, traceEvents.length, ']}');
-          downloadFile(traceEvents, 'trace_output.json');
-
           // Trace event json in the order we handled the events.
-          String handledTraceEvents = debugTraceEvents.toString();
+          String handledTraceEvents = debugHandledTraceEvents.toString();
           handledTraceEvents = handledTraceEvents.replaceRange(
               handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
           downloadFile(
@@ -351,14 +377,6 @@ class TimelineScreen extends Screen {
             }
           }
           downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');
-        }));
-    }
-    if (debugCpuProfile) {
-      debugButtonSection.add(PButton('Debug dump CPU profile')
-        ..small()
-        ..click(() {
-          // Download the current cpu profile as a json file.
-          downloadFile(debugCpuProfileResponse, 'cpu_profile.json');
         }));
     }
   }

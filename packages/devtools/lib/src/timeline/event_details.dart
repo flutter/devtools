@@ -444,6 +444,7 @@ class _CpuFlameChart extends CoreElement {
     showingError = false;
 
     cpuProfileData = null;
+    debugCpuProfileResponse.clear();
   }
 }
 

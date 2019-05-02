@@ -26,9 +26,8 @@ bool debugTimeline = false;
 
 /// Buffer that will store trace event json in the order we receive the events.
 ///
-/// This buffer is for debug purposes. When [debugTimeline] is true, we will
-/// be able to dump this buffer to a downloadable text file.
-StringBuffer debugTraceEvents = StringBuffer()..write('{"traceEvents":[');
+/// When the export timeline button is clicked, this will be part of the output.
+StringBuffer debugTraceEvents = StringBuffer();
 
 /// Buffer that will store trace event json in the order we handle the events.
 ///
@@ -105,9 +104,7 @@ class TimelineData {
 
     if (!_shouldProcessTraceEvent(event)) return;
 
-    if (debugTimeline) {
-      debugTraceEvents.write('${jsonEncode(event.json)},');
-    }
+    debugTraceEvents.write('${jsonEncode(event.json)},');
 
     // Process flow events now. Process Duration events after a delay. Only
     // process flow events whose name is PipelineItem, as these events mark the

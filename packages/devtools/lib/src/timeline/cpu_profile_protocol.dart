@@ -9,24 +9,14 @@ import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
 
-// TODO(kenzie): talk to VM team about why timeExtentMicros is different between
-// debug and profile builds. Do they use different clocks and does this also
-// affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
-
-/// Switch this flag to true collect debug info from the latest cpu profile.
-///
-/// This will add a button to the timeline page that will download the debug
-/// info on click. At runtime, this flag can be enabled by adding the query
-/// parameter 'debugCpu=true'.
-bool debugCpuProfile = false;
+// TODO(kenzie): once the sample count mismatch bug is fixed, remove this string
+// buffer entirely, and access [cpuProfileResponse.json] for exporting the
+// timeline.
 
 /// Buffer that will store the latest cpu profile response json.
 ///
-/// This buffer is for debug purposes. When [debugCpuProfile] is true, we will
-/// be able to dump this buffer to a downloadable json file.
-StringBuffer _debugCpuProfileResponse = StringBuffer();
-
-String get debugCpuProfileResponse => _debugCpuProfileResponse.toString();
+/// When the export timeline button is clicked, this will be part of the output.
+StringBuffer debugCpuProfileResponse = StringBuffer();
 
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
@@ -36,16 +26,14 @@ class CpuProfileData {
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
 
-    if (debugCpuProfile) {
-      _debugCpuProfileResponse.clear();
-      if (cpuProfileRoot.sampleCount != sampleCount &&
-          stackFramesJson.isNotEmpty) {
-        _debugCpuProfileResponse.writeln('Sample count from response '
-            '($sampleCount) != sample count from root stack frame '
-            '(${cpuProfileRoot.sampleCount})\n');
-      }
-      _debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
+    debugCpuProfileResponse.clear();
+    if (cpuProfileRoot.sampleCount != sampleCount &&
+        stackFramesJson.isNotEmpty) {
+      debugCpuProfileResponse.writeln('Sample count from response '
+          '($sampleCount) != sample count from root stack frame '
+          '(${cpuProfileRoot.sampleCount})\n');
     }
+    debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
   }
 
   final Response cpuProfileResponse;
