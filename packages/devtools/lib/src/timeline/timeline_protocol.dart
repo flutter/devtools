@@ -26,7 +26,7 @@ bool debugTimeline = false;
 /// List that will store trace events in the order we receive them.
 ///
 /// When the export timeline button is clicked, this will be part of the output.
-List<Map<String, dynamic>> debugTraceEvents = [];
+List<Map<String, dynamic>> timelineTraceEvents = [];
 
 /// List that will store trace event json in the order we handle the events.
 ///
@@ -102,7 +102,7 @@ class TimelineData {
 
     if (!_shouldProcessTraceEvent(event)) return;
 
-    debugTraceEvents.add(event.json);
+    timelineTraceEvents.add(event.json);
 
     // Process flow events now. Process Duration events after a delay. Only
     // process flow events whose name is PipelineItem, as these events mark the

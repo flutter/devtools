@@ -297,8 +297,10 @@ class TimelineScreen extends Screen {
   }
 
   void _exportTimeline() {
+    // TODO(kenzie): add analytics for this. It would be helpful to know how
+    // complex the problems are that users are trying to solve.
     final Map<String, dynamic> json = {
-      'traceEvents': debugTraceEvents,
+      'traceEvents': timelineTraceEvents,
       'cpuProfile': eventDetails.cpuProfileData != null
           ? eventDetails.cpuProfileData.cpuProfileResponse.json
           : {},
