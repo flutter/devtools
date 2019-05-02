@@ -13,7 +13,6 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
-import 'util.dart';
 
 const bool verboseTesting = false;
 
@@ -36,6 +35,14 @@ Future<void> waitFor(
   }
 
   throw timeoutMessage;
+}
+
+Future delay() {
+  return Future.delayed(const Duration(milliseconds: 500));
+}
+
+Future shortDelay() {
+  return Future.delayed(const Duration(milliseconds: 100));
 }
 
 class DevtoolsManager {
