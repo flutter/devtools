@@ -538,6 +538,34 @@ div.tabnav {
     min-width: 500px;
 }
 
+.memory-inspector {
+    padding: 3px;
+    box-sizing: border-box;
+    font-weight: 600;
+    color: var(--header-color);
+    background-color: var(--header-background);
+    white-space: nowrap;
+    font-size: 14px;
+    border: 1px solid var(--table-border);
+    border-radius: 3px;
+}
+
+.memory-inspector-items-list {
+    background-color: var(--shaded-background-lighter);
+}
+
+.memory-instance-data-list-item {
+    background-color: var(--shaded-background-lighter);
+    color: var(--default-color);
+    padding-top: 6px;
+    padding-left: 6px;
+    white-space: nowrap;
+}
+
+.memory-instance-data-list-item .subtle {
+    color: var(--header-color);
+}
+
 div.tabnav-tab {
     cursor: pointer;
 }

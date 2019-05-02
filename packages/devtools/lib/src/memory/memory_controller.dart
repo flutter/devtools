@@ -94,7 +94,7 @@ class MemoryController {
   }
 
   Future<List<InstanceSummary>> getInstances(
-      String classRef, int maxInstances) async {
+      String classRef, String className, int maxInstances) async {
     final List<InstanceSummary> result = [];
 
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
@@ -113,10 +113,23 @@ class MemoryController {
 
     for (Map instance in instances) {
       final String objectRef = instance['id'];
-      result.add(InstanceSummary(classRef, objectRef));
+      result.add(InstanceSummary(classRef, className, objectRef));
     }
 
     return result;
+  }
+
+  Future<Instance> getObject(String objectRef) async {
+    final Map params = {
+      'objectId': objectRef,
+    };
+    final Response response = await serviceManager.service.callMethod(
+      'getObject',
+      isolateId: _isolateId,
+      args: params,
+    );
+
+    return Instance.parse(response.json);
   }
 
   Future<void> gc() async {
