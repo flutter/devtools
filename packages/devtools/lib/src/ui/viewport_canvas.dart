@@ -176,9 +176,7 @@ class ViewportCanvas extends Object with SetStateMixin {
     // TODO(jacobr): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
     final observer = ResizeObserver(allowInterop((List<dynamic> entries, _) {
-      // XXX _scheduleRebuild();
-      _hasPendingRebuild = false;
-      rebuild(force: false);
+      _scheduleRebuild();
     }));
     observer.observe(_element.element);
 
