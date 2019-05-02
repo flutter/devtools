@@ -10,7 +10,7 @@ import 'package:devtools/src/ui/elements.dart';
 import 'package:devtools/src/ui/trees.dart';
 import 'package:test/test.dart';
 
-import 'integration_tests/util.dart';
+import 'integration_tests/integration.dart';
 
 void main() {
   group('tree views', () {

@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/src/globals.dart';
 import 'package:devtools/src/inspector/flutter_widget.dart';
 import 'package:devtools/src/inspector/inspector_controller.dart';
 import 'package:devtools/src/inspector/inspector_service.dart';
@@ -513,6 +512,9 @@ void main() async {
       await env.tearDownEnvironment();
     });
 
+    // TODO(jacobr): uncomment hotReload test once the hot reload test is not
+    // flaky. https://github.com/flutter/devtools/issues/642
+    /*
     test('hotReload', () async {
       if (flutterVersion == '1.2.1') {
         // This test can be flaky in Flutter 1.2.1 because of
@@ -544,6 +546,7 @@ void main() async {
 
       await env.tearDownEnvironment();
     });
+    */
 // TODO(jacobr): uncomment out the hotRestart tests once
 // https://github.com/flutter/devtools/issues/337 is fixed.
 /*
