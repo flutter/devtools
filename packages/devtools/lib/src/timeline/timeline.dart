@@ -20,7 +20,6 @@ import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
-import 'cpu_profile_protocol.dart';
 import 'event_details.dart';
 import 'frame_flame_chart.dart';
 import 'frames_bar_chart.dart';
