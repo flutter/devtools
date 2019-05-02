@@ -298,9 +298,10 @@ class TimelineScreen extends Screen {
   void _exportTimeline() {
     // There will be a trailing comma on [debugTraceEvents]. Remove so that we
     // do not have to deal with json formatting errors later.
-    final traceEvents = debugTraceEvents
-        .toString()
-        .replaceRange(debugTraceEvents.length - 1, debugTraceEvents.length, '');
+    final traceEvents = debugTraceEvents.isEmpty
+        ? ''
+        : debugTraceEvents.toString().replaceRange(
+            debugTraceEvents.length - 1, debugTraceEvents.length, '');
     final String json = '{'
         '"traceEvents":[$traceEvents],'
         '"cpuProfile":[${debugCpuProfileResponse.toString()}]}';
