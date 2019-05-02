@@ -437,9 +437,9 @@ void main() async {
             '    ▼[M] MaterialApp\n'
             '      ▼[S] Scaffold <-- selected\n'
             '      ├───▼[C] Center\n'
-            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      │     [/icons/inspector/textArea.png] Text\n'
             '      └─▼[A] AppBar\n'
-            '          ▼[/icons/inspector/textArea.png] Text\n',
+            '          [/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
@@ -463,9 +463,9 @@ void main() async {
             '    ▼[M] MaterialApp\n'
             '      ▼[S] Scaffold\n'
             '      ├───▼[C] Center <-- selected\n'
-            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      │     [/icons/inspector/textArea.png] Text\n'
             '      └─▼[A] AppBar\n'
-            '          ▼[/icons/inspector/textArea.png] Text\n',
+            '          [/icons/inspector/textArea.png] Text\n',
           ));
 
       await detailsTree.nextUiFrame;
@@ -486,9 +486,9 @@ void main() async {
             '    ▼[M] MaterialApp\n'
             '      ▼[S] Scaffold <-- selected\n'
             '      ├───▼[C] Center\n'
-            '      │     ▼[/icons/inspector/textArea.png] Text\n'
+            '      │     [/icons/inspector/textArea.png] Text\n'
             '      └─▼[A] AppBar\n'
-            '          ▼[/icons/inspector/textArea.png] Text\n',
+            '          [/icons/inspector/textArea.png] Text\n',
           ));
 
       // Verify that the details tree scrolled back as well.
