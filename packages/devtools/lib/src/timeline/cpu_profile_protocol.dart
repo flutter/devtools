@@ -1,32 +1,12 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
-
-// TODO(kenzie): talk to VM team about why timeExtentMicros is different between
-// debug and profile builds. Do they use different clocks and does this also
-// affect the sampling rate? See https://github.com/dart-lang/sdk/issues/36583.
-
-/// Switch this flag to true collect debug info from the latest cpu profile.
-///
-/// This will add a button to the timeline page that will download the debug
-/// info on click. At runtime, this flag can be enabled by adding the query
-/// parameter 'debugCpu=true'.
-bool debugCpuProfile = false;
-
-/// Buffer that will store the latest cpu profile response json.
-///
-/// This buffer is for debug purposes. When [debugCpuProfile] is true, we will
-/// be able to dump this buffer to a downloadable json file.
-StringBuffer _debugCpuProfileResponse = StringBuffer();
-
-String get debugCpuProfileResponse => _debugCpuProfileResponse.toString();
 
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
@@ -35,17 +15,6 @@ class CpuProfileData {
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
-
-    if (debugCpuProfile) {
-      _debugCpuProfileResponse.clear();
-      if (cpuProfileRoot.sampleCount != sampleCount &&
-          stackFramesJson.isNotEmpty) {
-        _debugCpuProfileResponse.writeln('Sample count from response '
-            '($sampleCount) != sample count from root stack frame '
-            '(${cpuProfileRoot.sampleCount})\n');
-      }
-      _debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
-    }
   }
 
   final Response cpuProfileResponse;
