@@ -129,25 +129,31 @@ typedef CanvasPaintCallback = void Function(
 
 typedef MouseCallback = void Function(Offset offset);
 
+/// The callback returns whether the content needs to be rebuilt to reflect
+/// the new size.
+typedef SizeChangeCallback = void Function(Size size);
+
 /// Class that enables efficient rendering of an arbitrarily large canvas by
 /// managing a set of [chunkSize] x [chunkSize] tiles and only rendering tiles
 /// for content within the current viewport.
 ///
 /// This class is only compatible with browsers that support
-/// [IntersectionObserver].
-/// https://caniuse.com/#feat=intersectionobserver
+/// [ResizeObserver].
+/// https://caniuse.com/#feat=resizeobserver
 class ViewportCanvas extends Object with SetStateMixin {
   ViewportCanvas({
     @required CanvasPaintCallback paintCallback,
     MouseCallback onTap,
     MouseCallback onMouseMove,
     VoidCallback onMouseLeave,
+    SizeChangeCallback onSizeChange,
     String classes,
     this.addBuffer = true,
   })  : _paintCallback = paintCallback,
         _onTap = onTap,
         _onMouseMove = onMouseMove,
         _onMouseLeave = onMouseLeave,
+        _onSizeChange = onSizeChange,
         _element = div(
           a: 'flex',
           c: classes,
@@ -167,47 +173,14 @@ class ViewportCanvas extends Object with SetStateMixin {
       ..overflow = 'hidden';
     _element.add(_content);
 
-    final spacers = <CoreElement>[
-      _spaceTop,
-      _spaceBottom,
-      _spaceLeft,
-      _spaceRight
-    ];
-    for (var spacer in spacers) {
-      spacer.element.style
-        ..position = 'absolute'
-        ..overflow = 'hidden';
-    }
-    _spaceLeft.element.style
-      ..top = '0'
-      ..bottom = '0'
-      ..left = '0'
-      ..width = '0';
-    _spaceRight.element.style
-      ..top = '0'
-      ..bottom = '0'
-      ..right = '0'
-      ..width = '0';
-    _spaceTop.element.style
-      ..top = '0'
-      ..left = '0'
-      ..right = '0'
-      ..height = '0';
-    _spaceBottom.element.style
-      ..bottom = '0'
-      ..left = '0'
-      ..right = '0'
-      ..height = '0';
-
-    _content.add(spacers);
-
-    // TODO(jacobr): remove call to allowInterop once
-    // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver = IntersectionObserver(
-        allowInterop(_onVisibilityChange), {'root': _element.element});
-    for (var spacer in spacers) {
-      _visibilityObserver.observe(spacer.element);
-    }
+    // TODO(jacobr): clean this code up when
+    // https://github.com/dart-lang/html/issues/104 is fixed.
+    final observer = ResizeObserver(allowInterop((List<dynamic> entries, _) {
+      // XXX _scheduleRebuild();
+      _hasPendingRebuild = false;
+      rebuild(force: false);
+    }));
+    observer.observe(_element.element);
 
     element.onScroll.listen((_) {
       if (_currentMouseHover != null) {
@@ -243,6 +216,7 @@ class ViewportCanvas extends Object with SetStateMixin {
   final MouseCallback _onTap;
   final MouseCallback _onMouseMove;
   final VoidCallback _onMouseLeave;
+  final SizeChangeCallback _onSizeChange;
   final Map<_ChunkPosition, _CanvasChunk> _chunks = {};
 
   static const int maxChunks = 50;
@@ -298,10 +272,6 @@ class ViewportCanvas extends Object with SetStateMixin {
     _visibilityObserver.disconnect();
   }
 
-  void _onVisibilityChange(List entries, IntersectionObserver observer) {
-    _scheduleRebuild();
-  }
-
   void _scheduleRebuild() {
     if (!_hasPendingRebuild) {
       // Set a flag to ensure we don't schedule rebuilds if there's already one
@@ -325,6 +295,10 @@ class ViewportCanvas extends Object with SetStateMixin {
       rawElement.offsetWidth.toDouble(),
       rawElement.offsetHeight.toDouble(),
     );
+
+    if (_viewport.size != lastViewport.size && _onSizeChange != null) {
+      _onSizeChange(_viewport.size);
+    }
 
     if (addBuffer) {
       // Expand the viewport by a chunk in each direction to reduce flicker on

@@ -4,6 +4,7 @@
 
 import 'dart:html';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:meta/meta.dart';
 
@@ -219,8 +220,14 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       onTap: onTap,
       onMouseMove: onMouseMove,
       onMouseLeave: onMouseLeave,
+      onSizeChange: _updateForContainerResize,
       classes: 'inspector-tree inspector-tree-container',
     );
+  }
+
+  void _updateForContainerResize(Size size) {
+    _viewportCanvas.setContentSize(_computeContentWidth(size),
+        (rowHeight * numRows + verticalPadding * 2).toDouble());
   }
 
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
@@ -244,14 +251,22 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     }
   }
 
+  double _computeContentWidth(Size size) {
+    double maxIndent = 0;
+    for (int i = 0; i < numRows; i++) {
+      final InspectorTreeRow row = root?.getRow(i, selection: selection);
+      if (row != null) {
+        maxIndent = max(maxIndent, getDepthIndent(row.depth));
+      }
+    }
+    return maxIndent + size.width;
+  }
+
   void _rebuildData() {
     if (_recomputeRows) {
       _recomputeRows = false;
       if (root != null) {
-        const contentWidth = 2000.0 +
-            horizontalPadding * 2; // TODO(jacobr): calculate max subtree depth
-        _viewportCanvas.setContentSize(contentWidth,
-            (rowHeight * numRows + verticalPadding * 2).toDouble());
+        _updateForContainerResize(_viewportCanvas.viewport.size);
       } else {
         _viewportCanvas.setContentSize(0, 0);
       }
