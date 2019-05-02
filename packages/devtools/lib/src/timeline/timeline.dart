@@ -83,6 +83,8 @@ const Icon exportTimeline = MaterialIcon(
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
 // area associated with the selected frame.
 
+const Icon _clear = MaterialIcon('block', defaultButtonIconColor);
+
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
       : super(
@@ -96,6 +98,8 @@ class TimelineScreen extends Screen {
   TimelineController timelineController = TimelineController();
 
   FramesBarChart framesBarChart;
+
+  FrameFlameChart flameChart;
 
   EventDetails eventDetails;
 
@@ -111,8 +115,6 @@ class TimelineScreen extends Screen {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div()..layoutVertical();
-
-    FrameFlameChart flameChart;
 
     bool splitterConfigured = false;
 
@@ -143,6 +145,11 @@ class TimelineScreen extends Screen {
             pauseButton,
             resumeButton,
           ]),
+        PButton.icon('Clear', _clear)
+          ..small()
+          ..clazz('margin-left')
+          ..setAttribute('title', 'Clear timeline')
+          ..click(_clearTimeline),
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         PButton.icon('', exportTimeline)
@@ -294,6 +301,13 @@ class TimelineScreen extends Screen {
       await serviceManager.service.setVMTimelineFlags(<String>[]);
       timelineController.pause();
     }
+  }
+
+  void _clearTimeline() {
+    framesBarChart.frameUIgraph.reset();
+    flameChart.attribute('hidden', true);
+    eventDetails.attribute('hidden', true);
+    eventDetails.reset();
   }
 
   void _exportTimeline() {

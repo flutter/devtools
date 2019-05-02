@@ -30,13 +30,13 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     // Make sure DIV exist.
     setState(() {
       if (!_createdPlot) {
-        frameUIgraph.createPlot(timelineController, frameUIgraph.element);
+        frameUIgraph.createPlot(frameUIgraph.element);
         _createdPlot = true;
       }
     });
 
     timelineController.onFrameAdded.listen((TimelineFrame frame) {
-      frameUIgraph.process(timelineController, frame);
+      frameUIgraph.process(frame);
     });
   }
 
@@ -71,8 +71,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
 }
 
 class PlotlyDivGraph extends CoreElement {
-  PlotlyDivGraph(this.framesBarChart, TimelineController timelineController)
-      : super('div') {
+  PlotlyDivGraph(this.framesBarChart, this.timelineController) : super('div') {
     element.id = frameGraph;
     element.style
       ..height = '100%'
@@ -81,9 +80,10 @@ class PlotlyDivGraph extends CoreElement {
 
   static const String frameGraph = 'graph_frame_timeline';
 
-  Timer timer;
   final FramesBarChart framesBarChart;
-  TimelineFrame frame;
+
+  final TimelineController timelineController;
+
   final Map<int, TimelineFrame> _frames = {};
 
   List<int> dataIndexes = [];
@@ -99,7 +99,7 @@ class PlotlyDivGraph extends CoreElement {
 
   /// These lists are batch updated to the plotly chart to reduce chart lag
   /// relative to updating every frame.
-  void plotData(TimelineController timelineController) {
+  void plotData() {
     final int dataLength = dataIndexes.length;
     if (dataLength > 0) {
       plotlyChart.plotFPSDataList(
@@ -166,7 +166,7 @@ class PlotlyDivGraph extends CoreElement {
     plotFXHover(frameGraph, hoverDisplay);
   }
 
-  void createPlot(TimelineController timelineController, dynamic element) {
+  void createPlot(dynamic element) {
     plotlyChart = new FramesBarPlotly(frameGraph, element);
     plotlyChart.plotFPS();
 
@@ -176,23 +176,16 @@ class PlotlyDivGraph extends CoreElement {
 
     // Only update data 6 times a second.
     // TODO(jacobr): only run the timer when there is actual work to do.
-    timer = Timer.periodic(const Duration(milliseconds: 166), (Timer t) {
+    Timer.periodic(const Duration(milliseconds: 166), (Timer t) {
       // Skip if there is no new data.
       if (_lastPlottedFrameIndex == _frameIndex) return;
       _lastPlottedFrameIndex = _frameIndex;
-      plotData(timelineController); // Plot the chunks of data collected.
+      plotData(); // Plot the chunks of data collected.
     });
   }
 
   // Add current frame data to chunks of data for later plotting.
-  void process(
-      TimelineController timelineController, TimelineFrame frame) async {
-    // TODO(terry): Eventually, below failure can happen, then onFrameAdded
-    //              events may not be received or the data can go negative
-    //              add sentry to detect bad values.
-    //
-    //    Error - already set endTime ### for frame 1650.
-    //    TraceEvent - {name: PipelineItem, cat: Embedder, tid: ###, pid: ###, ts: ###, ph: f, bp: e, id: ##, args: {}}
+  void process(TimelineFrame frame) async {
     if (frame.uiDurationMs > 0 && frame.gpuDurationMs > 0) {
       dataIndexes.add(_frameIndex);
       uiDurations.add(frame.uiDurationMs);
@@ -206,5 +199,15 @@ class PlotlyDivGraph extends CoreElement {
       print('WARNING: Ignored onFrameAdded - bad data.\n [uiDuration: '
           '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}');
     }
+  }
+
+  void reset() {
+    dataIndexes.clear();
+    uiDurations.clear();
+    gpuDurations.clear();
+    _frames.clear();
+    _frameIndex = FramesBarPlotly.xCoordFirst;
+    _lastPlottedFrameIndex = -1;
+    createPlot(element);
   }
 }

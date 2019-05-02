@@ -40,6 +40,11 @@ const ThemedColor chartBackground = ThemedColor(
   Color(0xFF2D2E31), // Material Dark Grey 900+2
 );
 
+const defaultButtonIconColor = ThemedColor(
+  Color(0xFF24292E),
+  Color(0xFF89B5F8),
+);
+
 /// Color that behaves differently depending on whether a light or dark theme
 /// is used.
 ///
