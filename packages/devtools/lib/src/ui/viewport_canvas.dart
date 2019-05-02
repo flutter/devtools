@@ -158,11 +158,7 @@ class ViewportCanvas extends Object with SetStateMixin {
           a: 'flex',
           c: classes,
         ),
-        _content = div(),
-        _spaceTop = div(),
-        _spaceBottom = div(),
-        _spaceLeft = div(),
-        _spaceRight = div() {
+        _content = div() {
     // This styling is added directly instead of via CSS as it is critical for
     // correctness of the viewport calculations.
     _element.element.style..overflow = 'scroll';
@@ -175,10 +171,10 @@ class ViewportCanvas extends Object with SetStateMixin {
 
     // TODO(jacobr): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
-    final observer = ResizeObserver(allowInterop((List<dynamic> entries, _) {
+    _resizeObserver = ResizeObserver(allowInterop((List<dynamic> entries, _) {
       _scheduleRebuild();
     }));
-    observer.observe(_element.element);
+    _resizeObserver.observe(_element.element);
 
     element.onScroll.listen((_) {
       if (_currentMouseHover != null) {
@@ -219,23 +215,15 @@ class ViewportCanvas extends Object with SetStateMixin {
 
   static const int maxChunks = 50;
 
-  /// Intersection observer used to detect when the viewport needs to be
+  /// Resize observer used to detect when the viewport needs to be
   /// recomputed.
-  IntersectionObserver _visibilityObserver;
+  ResizeObserver _resizeObserver;
 
   CoreElement get element => _element;
   final CoreElement _element;
 
   /// Element containing all content that scrolls within the viewport.
   final CoreElement _content;
-
-  // Fixed sized divs placed around the the content that is currently rendered.
-  // These divs only exist to ensure that [_visibilityObserver] fires
-  // fire when content that was outside the viewport moves inside the viewport.
-  final CoreElement _spaceTop;
-  final CoreElement _spaceBottom;
-  final CoreElement _spaceLeft;
-  final CoreElement _spaceRight;
 
   double _contentWidth = 0;
   double _contentHeight = 0;
@@ -267,7 +255,7 @@ class ViewportCanvas extends Object with SetStateMixin {
   }
 
   void dispose() {
-    _visibilityObserver.disconnect();
+    _resizeObserver.disconnect();
   }
 
   void _scheduleRebuild() {
@@ -313,26 +301,6 @@ class ViewportCanvas extends Object with SetStateMixin {
 
     // TODO(jacobr): round viewport to the nearest chunk multiple so we
     // don't get notifications until we actually need them.
-    // TODO(jacobr): consider using the _renderedViewport to display the spacers
-    // instead of the client viewport.
-
-    // Position spacers to take up all the space around the viewport so we are
-    // notified when the viewport changes.
-    if (lastViewport.left != _renderedViewport.left || _contentSizeChanged) {
-      _spaceLeft.element.style.width = '${_renderedViewport.left - 1}px';
-    }
-    if (lastViewport.right != _renderedViewport.right || _contentSizeChanged) {
-      _spaceRight.element.style.width =
-          '${_contentWidth - _renderedViewport.right - 1}px';
-    }
-    if (lastViewport.top != _renderedViewport.top || _contentSizeChanged) {
-      _spaceTop.element.style.height = '${_renderedViewport.top - 1}px';
-    }
-    if (lastViewport.bottom != _renderedViewport.bottom ||
-        _contentSizeChanged) {
-      _spaceBottom.element.style.height =
-          '${_contentHeight - _renderedViewport.bottom - 1}px';
-    }
     _contentSizeChanged = false;
 
     _render(force);
