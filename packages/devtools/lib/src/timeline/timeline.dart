@@ -13,6 +13,7 @@ import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/icons.dart';
+import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
@@ -68,6 +69,8 @@ const Color hoverTextColor = Colors.black;
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
 // area associated with the selected frame.
 
+const Icon _clear = MaterialIcon('clear', defaultButtonIconColor);
+
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
       : super(
@@ -82,6 +85,10 @@ class TimelineScreen extends Screen {
 
   FramesBarChart framesBarChart;
 
+  FrameFlameChart flameChart;
+
+  EventDetails eventDetails;
+
   bool _paused = false;
 
   PButton pauseButton;
@@ -94,9 +101,6 @@ class TimelineScreen extends Screen {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div()..layoutVertical();
-
-    FrameFlameChart flameChart;
-    EventDetails eventDetails;
 
     bool splitterConfigured = false;
 
@@ -127,6 +131,11 @@ class TimelineScreen extends Screen {
             pauseButton,
             resumeButton,
           ]),
+        PButton.icon('Clear', _clear)
+          ..small()
+          ..clazz('margin-left')
+          ..setAttribute('title', 'Clear timeline')
+          ..click(_clearTimeline),
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
       ]);
@@ -273,6 +282,13 @@ class TimelineScreen extends Screen {
       await serviceManager.service.setVMTimelineFlags(<String>[]);
       timelineController.pause();
     }
+  }
+
+  void _clearTimeline() {
+    framesBarChart.frameUIgraph.reset();
+    flameChart.attribute('hidden', true);
+    eventDetails.attribute('hidden', true);
+    eventDetails.reset();
   }
 
   /// Adds buttons to the timeline that will dump debug information to text
