@@ -9,15 +9,6 @@ import 'package:vm_service_lib/vm_service_lib.dart' show Response;
 
 import '../utils.dart';
 
-// TODO(kenzie): once the sample count mismatch bug is fixed, remove this string
-// buffer entirely, and access [cpuProfileResponse.json] for exporting the
-// timeline.
-
-/// Buffer that will store the latest cpu profile response json.
-///
-/// When the export timeline button is clicked, this will be part of the output.
-StringBuffer debugCpuProfileResponse = StringBuffer();
-
 class CpuProfileData {
   CpuProfileData(this.cpuProfileResponse, this.duration)
       : sampleCount = cpuProfileResponse.json['sampleCount'],
@@ -25,15 +16,6 @@ class CpuProfileData {
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
-
-    debugCpuProfileResponse.clear();
-    if (cpuProfileRoot.sampleCount != sampleCount &&
-        stackFramesJson.isNotEmpty) {
-      debugCpuProfileResponse.writeln('Sample count from response '
-          '($sampleCount) != sample count from root stack frame '
-          '(${cpuProfileRoot.sampleCount})\n');
-    }
-    debugCpuProfileResponse.writeln(jsonEncode(cpuProfileResponse.json));
   }
 
   final Response cpuProfileResponse;

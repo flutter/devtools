@@ -75,6 +75,9 @@ class EventDetails extends CoreElement {
 
   _Details _details;
 
+  CpuProfileData get cpuProfileData =>
+      _details.uiEventDetails.flameChart.cpuProfileData;
+
   void _initContent() {
     _title = div(text: defaultTitleText, c: 'event-details-heading');
     _title.element.style
@@ -444,7 +447,6 @@ class _CpuFlameChart extends CoreElement {
     showingError = false;
 
     cpuProfileData = null;
-    debugCpuProfileResponse.clear();
   }
 }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
@@ -296,16 +298,16 @@ class TimelineScreen extends Screen {
   }
 
   void _exportTimeline() {
-    // There will be a trailing comma on [debugTraceEvents]. Remove so that we
-    // do not have to deal with json formatting errors later.
-    final traceEvents = debugTraceEvents.isEmpty
-        ? ''
-        : debugTraceEvents.toString().replaceRange(
-            debugTraceEvents.length - 1, debugTraceEvents.length, '');
-    final String json = '{'
-        '"traceEvents":[$traceEvents],'
-        '"cpuProfile":[${debugCpuProfileResponse.toString()}]}';
-    downloadFile(json, 'timeline_${DateTime.now().toString()}.json');
+    final Map<String, dynamic> json = {
+      'traceEvents': debugTraceEvents,
+      'cpuProfile': eventDetails.cpuProfileData != null
+          ? eventDetails.cpuProfileData.cpuProfileResponse.json
+          : {},
+    };
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    downloadFile(jsonEncode(json), 'timeline_$timestamp.json');
   }
 
   /// Adds a button to the timeline that will dump debug information to text
