@@ -319,15 +319,19 @@ class TimelineScreen extends Screen {
         ..small()
         ..click(() {
           // Trace event json in the order we handled the events.
-          String handledTraceEvents = debugHandledTraceEvents.toString();
-          handledTraceEvents = handledTraceEvents.replaceRange(
-              handledTraceEvents.length - 1, handledTraceEvents.length, ']}');
+          final handledTraceEventsJson = {
+            'traceEvents': debugHandledTraceEvents
+          };
           downloadFile(
-              handledTraceEvents.toString(), 'handled_trace_output.json');
+            jsonEncode(handledTraceEventsJson),
+            'handled_trace_output.json',
+          );
 
           // Significant events in the frame tracking process.
           downloadFile(
-              debugFrameTracking.toString(), 'frame_tracking_output.txt');
+            debugFrameTracking.toString(),
+            'frame_tracking_output.txt',
+          );
 
           // Current status of our frame tracking elements (i.e. pendingEvents,
           // pendingFrames).
