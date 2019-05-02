@@ -29,4 +29,3 @@ script: ./tool/travis.sh
 cache:
   directories:
   - $HOME/.pub-cache
-  - packages/devtools/.dart_tool/build

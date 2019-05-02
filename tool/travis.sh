@@ -50,7 +50,7 @@ elif [ "$BOT" = "test_ddc" ]; then
     pub global activate webdev
 
     pub run test --reporter expanded --exclude-tags useFlutterSdk
-    pub run build_runner test -- --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
@@ -59,7 +59,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
     pub global activate webdev
 
     WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk
-    pub run build_runner test -r -- --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    WEBDEV_RELEASE=true pub run test --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 

@@ -6,7 +6,6 @@ import 'package:test/test.dart';
 
 import '../support/cli_test_driver.dart';
 import 'integration.dart';
-import 'util.dart';
 
 void debuggingTests() {
   CliAppFixture appFixture;

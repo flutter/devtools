@@ -60,7 +60,7 @@ pub run test -j1 --tags useFlutterSdk
 ```
 cd packages/devtools
 pub run test --exclude-tags useFlutterSdk
-pub run build_runner test -- --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+pub run test --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 ```
 
 ### Updating golden files

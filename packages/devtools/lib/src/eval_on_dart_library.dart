@@ -119,6 +119,9 @@ class EvalOnDartLibrary {
         expression,
         scope: scope,
       );
+      if (result is Sentinel) {
+        return null;
+      }
       if (result is ErrorRef) {
         throw result;
       }
@@ -192,14 +195,14 @@ class EvalOnDartLibrary {
         return;
       }
       try {
-        final T value = await request();
-        if (!_disposed) {
+        final Object value = await request();
+        if (!_disposed && value is! Sentinel) {
           response.complete(value);
         } else {
           response.complete(null);
         }
       } catch (e) {
-        if (_disposed) {
+        if (_disposed || isAlive?.disposed == true) {
           response.complete(null);
         } else {
           response.completeError(e);
