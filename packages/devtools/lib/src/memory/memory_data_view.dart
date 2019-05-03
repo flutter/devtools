@@ -50,6 +50,7 @@ class MemoryDataView implements CoreElementView {
           valueStr = '[${value.length}] $valueStr';
         }
       } else if (value is Sentinel) {
+        // TODO(terry): Validate this returns a useful name, check debugger too.
         valueStr = value.valueAsString;
       } else if (value is TypeArgumentsRef) {
         valueStr = value.name;
@@ -66,6 +67,7 @@ class MemoryDataView implements CoreElementView {
       StreamSubscription sub;
 
       sub = element.element.onMouseOver.listen((e) {
+        // TODO(terry): Copied from debugger consolidate and fix Devon's TODO.
         // TODO(devoncarew): Call toString() only after a short dwell.
         sub.cancel();
         variableDescriber(field).then((String desc) {
@@ -109,15 +111,13 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
     final BoundField field = item;
 
     if (field.value != null && field.value is InstanceRef) {
+      final Instance instance =
+          await _memoryController.getObject(field.value.id);
       switch (field.value.kind) {
         case InstanceKind.kPlainInstance:
-          final Instance instance =
-              await _memoryController.getObject(field.value.id);
           return instance.fields;
           break;
         case InstanceKind.kList:
-          final Instance instance =
-              await _memoryController.getObject(field.value.id);
           final List<BoundField> result = [];
 
           int index = 0;
@@ -130,9 +130,6 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
           return result;
           break;
         case InstanceKind.kMap:
-          final Instance instance =
-          await _memoryController.getObject(field.value.id);
-
           final List<BoundField> result = [];
           for (dynamic value in instance.associations) {
             result.add(new BoundField()
@@ -143,10 +140,10 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
           return result;
           break;
         case InstanceKind.kStackTrace:
-          print('TODO(terry): Handle StackTrace type.');
+          // TODO(terry): Handle StackTrace type.
           break;
         case InstanceKind.kClosure:
-          print('TODO(terry): Handle Closure type.');
+          // TODO(terry): Handle Closure type.
           break;
         // TODO(terry): Do we need to handle WeakProperty, Type, TypeParameter,
         // TODO(terry): TypeDef or BoundedType?

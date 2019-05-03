@@ -119,18 +119,11 @@ class MemoryController {
     return result;
   }
 
-  Future<Instance> getObject(String objectRef) async {
-    final Map params = {
-      'objectId': objectRef,
-    };
-    final Response response = await serviceManager.service.callMethod(
-      'getObject',
-      isolateId: _isolateId,
-      args: params,
-    );
-
-    return Instance.parse(response.json);
-  }
+  Future<Instance> getObject(String objectRef) async =>
+      await serviceManager.service.getObject(
+        _isolateId,
+        objectRef,
+      );
 
   Future<void> gc() async {
     await serviceManager.service.callMethod(

@@ -7,7 +7,7 @@
 }
 
 .source-head {
-    font-weight: 600;
+    font-weight: bold;
     color: var(--header-color);
     background-color: var(--header-background);
     border-bottom: 1px solid var(--table-border);

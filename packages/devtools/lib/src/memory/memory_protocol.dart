@@ -198,14 +198,14 @@ class ClassHeapDetailStats {
 class InstanceSummary {
   InstanceSummary(this._classRef, this._className, this._objectRef);
 
-  String _classRef;
   String get classRef => _classRef;
+  String _classRef;
 
-  String _objectRef;
   String get objectRef => _objectRef;
+  String _objectRef;
 
-  String _className;
   String get className => _className;
+  String _className;
 
   @override
   String toString() => '[InstanceSummary id: $objectRef, class: $classRef]';
@@ -217,11 +217,11 @@ class InstanceData {
   InstanceSummary _instance;
   InstanceSummary get instance => _instance;
 
-  String _name;
   String get name => _name;
+  String _name;
 
-  dynamic _value;
   dynamic get value => _value;
+  dynamic _value;
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';

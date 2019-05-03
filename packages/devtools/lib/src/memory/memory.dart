@@ -28,7 +28,7 @@ import 'memory_protocol.dart';
 
 class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen({bool disabled, String disabledTooltip})
-      : debuggerState = DebuggerState(),
+      : _debuggerState = DebuggerState(),
         super(
           name: 'Memory',
           id: 'memory',
@@ -60,7 +60,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryChart memoryChart;
   CoreElement tableContainer;
 
-  DebuggerState debuggerState;
+  final DebuggerState _debuggerState;
   MemoryDataView memoryDataView;
 
   MemoryTracker memoryTracker;
@@ -314,7 +314,9 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.onSelect.listen((ClassHeapDetailStats row) async {
       ga.select(ga.memory, ga.inspectClass);
 
-      if (tableContainer.element.children.length > 2) {
+      // User selected a new class from the list of classes so the instance view
+      // which would be the third child needs to be removed.
+      if (tableContainer.element.children.length == 3) {
         tableContainer.element.children.removeLast();
       }
 
@@ -351,18 +353,23 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.onSelect.listen((InstanceSummary row) async {
       ga.select(ga.memory, ga.inspectInstance);
 
+      // User selected a new instance from the list of class instances so the
+      // instance view which would be the third child needs to be removed.
+      if (tableContainer.element.children.length == 3) {
+        tableContainer.element.children.removeLast();
+      }
+
+      Instance instance;
       try {
-        final Instance instance =
-            await memoryController.getObject(row.objectRef);
-
-        if (tableContainer.element.children.length > 2) {
-          tableContainer.element.children.removeLast();
-        }
-
+        instance = await memoryController.getObject(row.objectRef);
+      } catch (e) {
+        instance = null; // Signal a problem
+      } finally {
         tableContainer.add(_createInstanceView(
-          row.objectRef,
+          instance != null
+              ? row.objectRef
+              : 'Unable to fetch instance ${row.objectRef}',
           row.className,
-          instance.fields,
         ));
 
         tableContainer.element.scrollTo(<String, dynamic>{
@@ -372,23 +379,14 @@ class MemoryScreen extends Screen with SetStateMixin {
         });
 
         // Allow inspection of the memory object.
-        memoryDataView.showFields(instance.fields);
-      } catch (e) {
-        framework.toast(
-          'Problem fetching instance ${row.objectRef} $e',
-          title: 'Error',
-        );
+        memoryDataView.showFields(instance != null ? instance.fields : []);
       }
     });
 
     return table;
   }
 
-  CoreElement _createInstanceView(
-    String objectRef,
-    String className,
-    List<BoundField> fields,
-  ) {
+  CoreElement _createInstanceView(String objectRef, String className) {
     final MemoryDescriber describer = (BoundField field) async {
       if (field == null) {
         return null;
@@ -410,7 +408,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         return ref.valueAsString;
       } else {
         final dynamic result = await serviceManager.service.invoke(
-          debuggerState.isolateRef.id,
+          _debuggerState.isolateRef.id,
           ref.id,
           'toString',
           <String>[],
@@ -432,21 +430,25 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..layoutVertical()
       ..add(<CoreElement>[
         div(
-          text: '$objectRef of $className',
+          text: '$className instance $objectRef',
           c: 'memory-inspector',
         ),
         memoryDataView.element,
       ]);
   }
 
+  // TODO(terry): Move to common file shared by debugger and memory.
   Future<String> _retrieveFullStringValue(InstanceRef stringRef) async {
     if (stringRef.valueAsStringIsTruncated != true) {
       return stringRef.valueAsString;
     }
 
     final dynamic result = await serviceManager.service.getObject(
-        debuggerState.isolateRef.id, stringRef.id,
-        offset: 0, count: stringRef.length);
+      _debuggerState.isolateRef.id,
+      stringRef.id,
+      offset: 0,
+      count: stringRef.length,
+    );
     if (result is Instance) {
       final Instance obj = result;
       return obj.valueAsString;
