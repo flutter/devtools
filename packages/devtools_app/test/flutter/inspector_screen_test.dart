@@ -168,5 +168,9 @@ void main() {
       // TODO(jacobr): also verify that the service extension buttons look
       // visually disabled.
     });
+
+    // TODO(jacobr): add screenshot tests that connect to a test application
+    // in the same way the inspector_controller test does today and take golden
+    // images.
   });
 }

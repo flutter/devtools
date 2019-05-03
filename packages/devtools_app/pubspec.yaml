@@ -85,6 +85,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - web/widgets.json
     - web/icons/
     - web/icons/actions/
     - web/icons/custom/
