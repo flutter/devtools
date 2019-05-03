@@ -298,6 +298,12 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryChart.disabled = true;
   }
 
+  void _removeInstanceView() {
+    if (tableContainer.element.children.length == 3) {
+      tableContainer.element.children.removeLast();
+    }
+  }
+
   Table<ClassHeapDetailStats> _createHeapStatsTableView() {
     final Table<ClassHeapDetailStats> table =
         Table<ClassHeapDetailStats>.virtual()
@@ -316,9 +322,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       // User selected a new class from the list of classes so the instance view
       // which would be the third child needs to be removed.
-      if (tableContainer.element.children.length == 3) {
-        tableContainer.element.children.removeLast();
-      }
+      _removeInstanceView();
 
       final Table<InstanceSummary> newTable =
           row == null ? null : await _createInstanceListTableView(row);
@@ -336,7 +340,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     try {
       final List<InstanceSummary> instanceRows =
           await memoryController.getInstances(
-              row.classRef.id, row.classRef.name, row.instancesCurrent);
+        row.classRef.id,
+        row.classRef.name,
+        row.instancesCurrent,
+      );
 
       table.addColumn(new MemoryColumnSimple<InstanceSummary>(
           '${instanceRows.length} Instances of ${row.classRef.name}',
@@ -345,7 +352,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       table.setRows(instanceRows);
     } catch (e) {
       framework.toast(
-        'Problem fetching instances of ${row.classRef.name} $e',
+        'Problem fetching instances of ${row.classRef.name}: $e',
         title: 'Error',
       );
     }
@@ -355,9 +362,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       // User selected a new instance from the list of class instances so the
       // instance view which would be the third child needs to be removed.
-      if (tableContainer.element.children.length == 3) {
-        tableContainer.element.children.removeLast();
-      }
+      _removeInstanceView();
 
       Instance instance;
       try {
@@ -394,6 +399,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       final dynamic value = field.value;
 
+      // TODO(terry): Replace two if's with switch (value.runtimeType)
       if (value is Sentinel) {
         return value.valueAsString;
       }

@@ -20,7 +20,7 @@ class MemoryDataView implements CoreElementView {
       ..clazz('debugger-items-list')
       ..clazz('memory-inspector-items-list');
 
-    _items.setChildProvider(new MemoryDataChildProvider(_memoryController));
+    _items.setChildProvider(MemoryDataChildProvider(_memoryController));
 
     _items.setRenderer((BoundField field) {
       final String name = field.decl.name;
@@ -28,6 +28,7 @@ class MemoryDataView implements CoreElementView {
 
       String valueStr;
 
+      // TODO(terry): switch on value.runtimeType
       if (value is InstanceRef) {
         if (value.valueAsString == null) {
           valueStr = value.classRef.name;
@@ -116,29 +117,26 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
       switch (field.value.kind) {
         case InstanceKind.kPlainInstance:
           return instance.fields;
-          break;
         case InstanceKind.kList:
           final List<BoundField> result = [];
 
           int index = 0;
           for (dynamic value in instance.elements) {
-            result.add(new BoundField()
+            result.add(BoundField()
               ..decl = (FieldRef()..name = '[$index]')
               ..value = value);
             index++;
           }
           return result;
-          break;
         case InstanceKind.kMap:
           final List<BoundField> result = [];
           for (dynamic value in instance.associations) {
-            result.add(new BoundField()
+            result.add(BoundField()
               // TODO(terry): Need to handle nested objects for keys/values.
-              ..decl = (FieldRef()..name = '[${value.key.valueAsString}]')
+              ..decl = (FieldRef()..name = '\'${value.key.valueAsString}\'')
               ..value = value.value.valueAsString);
           }
           return result;
-          break;
         case InstanceKind.kStackTrace:
           // TODO(terry): Handle StackTrace type.
           break;
