@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools/src/debugger/debugger_state.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
@@ -20,12 +22,14 @@ import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_data_view.dart';
 import 'memory_detail.dart';
 import 'memory_protocol.dart';
 
 class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen({bool disabled, String disabledTooltip})
-      : super(
+      : _debuggerState = DebuggerState(),
+        super(
           name: 'Memory',
           id: 'memory',
           iconClass: 'octicon-package',
@@ -55,6 +59,9 @@ class MemoryScreen extends Screen with SetStateMixin {
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
   MemoryChart memoryChart;
   CoreElement tableContainer;
+
+  final DebuggerState _debuggerState;
+  MemoryDataView memoryDataView;
 
   MemoryTracker memoryTracker;
   ProgressElement progressElement;
@@ -291,6 +298,12 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryChart.disabled = true;
   }
 
+  void _removeInstanceView() {
+    if (tableContainer.element.children.length == 3) {
+      tableContainer.element.children.removeLast();
+    }
+  }
+
   Table<ClassHeapDetailStats> _createHeapStatsTableView() {
     final Table<ClassHeapDetailStats> table =
         Table<ClassHeapDetailStats>.virtual()
@@ -307,6 +320,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.onSelect.listen((ClassHeapDetailStats row) async {
       ga.select(ga.memory, ga.inspectClass);
 
+      // User selected a new class from the list of classes so the instance view
+      // which would be the third child needs to be removed.
+      _removeInstanceView();
+
       final Table<InstanceSummary> newTable =
           row == null ? null : await _createInstanceListTableView(row);
       _pushNextTable(table, newTable);
@@ -321,8 +338,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..element.clazz('memory-table');
 
     try {
-      final List<InstanceSummary> instanceRows = await memoryController
-          .getInstances(row.classRef.id, row.instancesCurrent);
+      final List<InstanceSummary> instanceRows =
+          await memoryController.getInstances(
+        row.classRef.id,
+        row.classRef.name,
+        row.instancesCurrent,
+      );
 
       table.addColumn(new MemoryColumnSimple<InstanceSummary>(
           '${instanceRows.length} Instances of ${row.classRef.name}',
@@ -330,15 +351,116 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       table.setRows(instanceRows);
     } catch (e) {
-      framework.toast('Problem fetching instances $e', title: 'Error');
+      framework.toast(
+        'Problem fetching instances of ${row.classRef.name}: $e',
+        title: 'Error',
+      );
     }
 
     table.onSelect.listen((InstanceSummary row) async {
       ga.select(ga.memory, ga.inspectInstance);
-      // TODO(terry): Handle clicking on an instance bring up variable inspector
+
+      // User selected a new instance from the list of class instances so the
+      // instance view which would be the third child needs to be removed.
+      _removeInstanceView();
+
+      Instance instance;
+      try {
+        instance = await memoryController.getObject(row.objectRef);
+      } catch (e) {
+        instance = null; // Signal a problem
+      } finally {
+        tableContainer.add(_createInstanceView(
+          instance != null
+              ? row.objectRef
+              : 'Unable to fetch instance ${row.objectRef}',
+          row.className,
+        ));
+
+        tableContainer.element.scrollTo(<String, dynamic>{
+          'left': tableContainer.element.scrollWidth,
+          'top': 0,
+          'behavior': 'smooth',
+        });
+
+        // Allow inspection of the memory object.
+        memoryDataView.showFields(instance != null ? instance.fields : []);
+      }
     });
 
     return table;
+  }
+
+  CoreElement _createInstanceView(String objectRef, String className) {
+    final MemoryDescriber describer = (BoundField field) async {
+      if (field == null) {
+        return null;
+      }
+
+      final dynamic value = field.value;
+
+      // TODO(terry): Replace two if's with switch (value.runtimeType)
+      if (value is Sentinel) {
+        return value.valueAsString;
+      }
+
+      if (value is TypeArgumentsRef) {
+        return value.name;
+      }
+
+      final Instance ref = value;
+
+      if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
+        return ref.valueAsString;
+      } else {
+        final dynamic result = await serviceManager.service.invoke(
+          _debuggerState.isolateRef.id,
+          ref.id,
+          'toString',
+          <String>[],
+          disableBreakpoints: true,
+        );
+        if (result is ErrorRef) {
+          return '${result.kind} ${result.message}';
+        } else if (result is InstanceRef) {
+          final String str = await _retrieveFullStringValue(result);
+          return str;
+        }
+      }
+    };
+
+    memoryDataView = MemoryDataView(memoryController, describer);
+
+    return div(
+        c: 'table-border table-virtual memory-table margin-left debugger-menu')
+      ..layoutVertical()
+      ..add(<CoreElement>[
+        div(
+          text: '$className instance $objectRef',
+          c: 'memory-inspector',
+        ),
+        memoryDataView.element,
+      ]);
+  }
+
+  // TODO(terry): Move to common file shared by debugger and memory.
+  Future<String> _retrieveFullStringValue(InstanceRef stringRef) async {
+    if (stringRef.valueAsStringIsTruncated != true) {
+      return stringRef.valueAsString;
+    }
+
+    final dynamic result = await serviceManager.service.getObject(
+      _debuggerState.isolateRef.id,
+      stringRef.id,
+      offset: 0,
+      count: stringRef.length,
+    );
+    if (result is Instance) {
+      final Instance obj = result;
+      return obj.valueAsString;
+    } else {
+      return '${stringRef.valueAsString}...';
+    }
   }
 
   void _updateStatus(List<ClassHeapDetailStats> data) {
