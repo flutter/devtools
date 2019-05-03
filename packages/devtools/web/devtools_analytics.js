@@ -20,7 +20,7 @@ function gtag() {
 // Parse the URI parameters.
 let _gtagsValue = new URLSearchParams(window.location.search).get('gtags');
 let _gtagsReset = _gtagsValue == 'reset';
-// Default is enabled if &gtags= is not specified
+// By default GA is enabled, if &gtags= is not specified. GA is ONLY collected if user's opt-in was accepted.
 let _gtagsEnabled = _gtagsValue == null || _gtagsValue == 'enabled';
 let _gtagsDisabled = _gtagsValue == 'disabled';
 
