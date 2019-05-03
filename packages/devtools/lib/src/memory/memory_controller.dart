@@ -119,7 +119,7 @@ class MemoryController {
     return result;
   }
 
-  Future<Instance> getObject(String objectRef) async =>
+  Future<dynamic> getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
         objectRef,
@@ -133,5 +133,50 @@ class MemoryController {
         'gc': 'full',
       },
     );
+  }
+
+  static const int _chunkSize = 20;
+  static const int _maxBytes = 200;
+  static const int _maxChunks = _maxBytes ~/ _chunkSize;
+
+  static List<BoundField> displayBytes(List<int> bytes) {
+    void _displayByte(StringBuffer buff, int index) {
+      final byteStr = '${bytes[index]}';
+      buff.write(byteStr);
+      buff.write('    '.substring(0, 4 - byteStr.length));
+    }
+
+    final List<BoundField> result = [];
+
+    final int listSize = bytes.length;
+    final int maxItems = listSize > _maxBytes ? _maxBytes : listSize;
+    final int numChunks = maxItems ~/ _chunkSize;
+    final int totalChunks = numChunks * _chunkSize;
+    final int lastChunk = numChunks < _maxChunks ? totalChunks : -1;
+
+    final StringBuffer buff = StringBuffer();
+    for (int index = 0; index < totalChunks; index += _chunkSize) {
+      buff.clear();
+      for (int subIndex = 0; subIndex < _chunkSize; subIndex++)
+        _displayByte(buff, index + subIndex);
+      result.add(BoundField()
+        ..decl = (FieldRef()..name = '[$index]')
+        ..value = buff.toString());
+    }
+
+    if (lastChunk >= 0) {
+      buff.clear();
+      for (int index = lastChunk; index < maxItems; index++)
+        _displayByte(buff, index);
+      result.add(BoundField()
+        ..decl = (FieldRef()..name = '[$totalChunks]')
+        ..value = buff.toString());
+    } else {
+      result.add(BoundField()
+        ..decl = (FieldRef()..name = '...$listSize ')
+        ..value = 'more...');
+    }
+
+    return result;
   }
 }

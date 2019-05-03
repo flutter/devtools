@@ -117,39 +117,70 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
     final BoundField field = item;
 
     if (field.value != null && field.value is InstanceRef) {
-      final Instance instance =
-          await _memoryController.getObject(field.value.id);
-      switch (field.value.kind) {
-        case InstanceKind.kPlainInstance:
-          return instance.fields;
-        case InstanceKind.kList:
-          final List<BoundField> result = [];
+      Instance instance;
+      try {
+        final dynamic theObject = await _memoryController.getObject(
+          field.value.id,
+        );
+        if (theObject is Sentinel) {
+          return [
+            BoundField()
+              ..decl = (FieldRef()..name = '${field.value.id}')
+              ..value = '[sentinel]'
+          ];
+        } else {
+          instance = theObject;
+        }
+        switch (field.value.kind) {
+          case InstanceKind.kPlainInstance:
+            return instance.fields;
+          case InstanceKind.kList:
+            final List<BoundField> result = [];
 
-          int index = 0;
-          for (dynamic value in instance.elements) {
-            result.add(BoundField()
-              ..decl = (FieldRef()..name = '[$index]')
-              ..value = value);
-            index++;
-          }
-          return result;
-        case InstanceKind.kMap:
-          final List<BoundField> result = [];
-          for (dynamic value in instance.associations) {
-            result.add(BoundField()
-              // TODO(terry): Need to handle nested objects for keys/values.
-              ..decl = (FieldRef()..name = '[\'${value.key.valueAsString}\']')
-              ..value = value.value.valueAsString);
-          }
-          return result;
-        case InstanceKind.kStackTrace:
-          // TODO(terry): Handle StackTrace type.
-          break;
-        case InstanceKind.kClosure:
-          // TODO(terry): Handle Closure type.
-          break;
-        // TODO(terry): Do we need to handle WeakProperty, Type, TypeParameter,
-        // TODO(terry): TypeDef or BoundedType?
+            int index = 0;
+            for (dynamic value in instance.elements) {
+              result.add(BoundField()
+                ..decl = (FieldRef()..name = '[$index]')
+                ..value = value);
+              index++;
+            }
+            return result;
+          case InstanceKind.kMap:
+            final List<BoundField> result = [];
+            for (dynamic value in instance.associations) {
+              result.add(BoundField()
+                // TODO(terry): Need to handle nested objects for keys/values.
+                ..decl = (FieldRef()..name = '[\'${value.key.valueAsString}\']')
+                ..value = value.value.valueAsString);
+            }
+            return result;
+          case InstanceKind.kUint8ClampedList:
+          case InstanceKind.kUint8List:
+          case InstanceKind.kUint16List:
+          case InstanceKind.kUint32List:
+          case InstanceKind.kUint64List:
+          case InstanceKind.kInt8List:
+          case InstanceKind.kInt16List:
+          case InstanceKind.kInt32List:
+          case InstanceKind.kInt64List:
+          case InstanceKind.kFloat32List:
+          case InstanceKind.kFloat64List:
+          case InstanceKind.kInt32x4List:
+          case InstanceKind.kFloat32x4List:
+          case InstanceKind.kFloat64x2List:
+            return MemoryController.displayBytes(instance.bytes.codeUnits);
+          case InstanceKind.kStackTrace:
+            // TODO(terry): Handle StackTrace type.
+            break;
+          case InstanceKind.kClosure:
+            // TODO(terry): Handle Closure type.
+            break;
+          // TODO(terry): Do we need to handle WeakProperty, Type, TypeParameter,
+          // TODO(terry): TypeDef or BoundedType?
+        }
+      } catch (e) {
+        // TODO(terry): Cleanup when above TODO cleaned up.
+        print('Internal ERROR getChildren: $e');
       }
     }
 

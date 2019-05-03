@@ -162,8 +162,8 @@ class MemoryScreen extends Screen with SetStateMixin {
         ]),
       memoryChart = MemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
+        ..flex()
         ..layoutHorizontal()
-        ..flex(),
     ]);
 
     memoryController.onDisconnect.listen((__) {
@@ -365,15 +365,22 @@ class MemoryScreen extends Screen with SetStateMixin {
       _removeInstanceView();
 
       Instance instance;
+      String instanceMessage;
       try {
-        instance = await memoryController.getObject(row.objectRef);
+        final dynamic theObject =
+            await memoryController.getObject(row.objectRef);
+        if (theObject is Instance) {
+          instance = theObject;
+        } else if (theObject is Sentinel) {
+          instance = null;
+          instanceMessage = '${row.objectRef} [sentinel]';
+        }
       } catch (e) {
         instance = null; // Signal a problem
+        instanceMessage = 'Unable to fetch instance ${row.objectRef}';
       } finally {
         tableContainer.add(_createInstanceView(
-          instance != null
-              ? row.objectRef
-              : 'Unable to fetch instance ${row.objectRef}',
+          instance != null ? row.objectRef : instanceMessage,
           row.className,
         ));
 
@@ -384,7 +391,16 @@ class MemoryScreen extends Screen with SetStateMixin {
         });
 
         // Allow inspection of the memory object.
-        memoryDataView.showFields(instance != null ? instance.fields : []);
+        List<BoundField> theData = []; // fields or bytes
+        if (instance != null) {
+          if (instance.bytes != null) {
+            theData = MemoryController.displayBytes(instance.bytes.codeUnits);
+          } else if (instance.fields.isNotEmpty) {
+            theData = instance.fields;
+          }
+        }
+
+        memoryDataView.showFields(theData);
       }
     });
 
@@ -433,6 +449,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     return div(
         c: 'table-border table-virtual memory-table margin-left debugger-menu')
+      ..flex()
       ..layoutVertical()
       ..add(<CoreElement>[
         div(
