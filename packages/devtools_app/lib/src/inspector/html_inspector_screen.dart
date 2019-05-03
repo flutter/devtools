@@ -25,6 +25,7 @@ import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
+import 'inspector_tree.dart';
 import 'inspector_tree_canvas.dart';
 import 'inspector_tree_html.dart';
 import 'inspector_tree_web.dart';
@@ -150,34 +151,15 @@ class HtmlInspectorScreen extends HtmlScreen {
     // TODO(jacobr): support the Render tree, Layer tree, and Semantic trees as
     // well as the widget tree.
 
+    InspectorTreeController createTree() {
+      return _useHtmlInspectorTreeRenderer
+          ? InspectorTreeHtml()
+          : InspectorTreeCanvas();
+    }
+
     inspectorController = InspectorController(
-      inspectorTreeFactory: ({
-        summaryTree,
-        treeType,
-        onNodeAdded,
-        onSelectionChange,
-        onExpand,
-        onHover,
-      }) {
-        if (_useHtmlInspectorTreeRenderer) {
-          return InspectorTreeHtml(
-            summaryTree: summaryTree,
-            treeType: treeType,
-            onNodeAdded: onNodeAdded,
-            onSelectionChange: onSelectionChange,
-            onExpand: onExpand,
-            onHover: onHover,
-          );
-        }
-        return InspectorTreeCanvas(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
-      },
+      inspectorTree: createTree(),
+      detailsTree: createTree(),
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,

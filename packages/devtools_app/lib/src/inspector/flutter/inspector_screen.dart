@@ -2,12 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/screen.dart';
+import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
+import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
+import '../../ui/icons.dart';
+import '../flutter_widget.dart';
+import '../inspector_controller.dart';
+import '../inspector_service.dart';
+import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen() : super('Info');
@@ -25,42 +36,231 @@ class InspectorScreen extends Screen {
 }
 
 class InspectorScreenBody extends StatefulWidget {
+  const InspectorScreenBody();
+
   @override
   _InspectorScreenBodyState createState() => _InspectorScreenBodyState();
 }
 
 class _InspectorScreenBodyState extends State<InspectorScreenBody> {
+  bool actionInProgress = false;
+  bool _expandCollapseSupported = false;
+  bool connectionInProgress = false;
+  InspectorService inspectorService;
+
+  InspectorController inspectorController;
+  InspectorTreeControllerFlutter summaryTreeController;
+  InspectorTreeControllerFlutter detailsTreeController;
+  bool displayedWidgetTrackingNotice = false;
+
+  final List<StreamSubscription> subscriptions = [];
+
+  bool get enableButtons =>
+      actionInProgress == false && connectionInProgress == false;
+
   @override
   void initState() {
     super.initState();
+    // TODO(jacobr): support analytics.
+    // ga_platform.setupDimensions();
     // TODO(jacobr): actually add the Inspector Controller.
+
+    subscriptions.add(
+        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
+    if (serviceManager.hasConnection) {
+      _handleConnectionStart(serviceManager.service);
+    }
+    subscriptions
+        .add(serviceManager.onConnectionClosed.listen(_handleConnectionStop));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    inspectorService.dispose();
+    inspectorService = null;
+    for (StreamSubscription subscription in subscriptions) {
+      subscription.cancel();
+    }
+    subscriptions.clear();
+  }
+
+  void _onExpandClick() {
+    blockWhileInProgress(inspectorController.expandAllNodesInDetailsTree);
+  }
+
+  void _onResetClick() {
+    blockWhileInProgress(inspectorController.collapseDetailsToSelected);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+    return Column(
+      children: <Widget>[
         Row(
-          children: <Widget>[
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
             ServiceExtensionButtonGroup(
               extensions: [extensions.toggleSelectWidgetMode],
             ),
+            OutlineButton(
+              child: ButtonContent(FlutterIcons.refresh, 'Refresh Tree'),
+              onPressed: _refreshInspector,
+            ),
+            const Spacer(),
+            ...getServiceExtensionWidgets(),
           ],
-          // TODO(jacobr): add the refresh tree button here.
-          /*
-          RaisedButton(
-              child: IconAndText('Refresh Tree', FlutterIcons.refresh)
-            onClick: _refreshInspector
-          ),
-
-           */
         ),
-        Row(
-          children: getServiceExtensionWidgets(),
-        )
+        Expanded(
+          child: Row(
+//          crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                  child: InspectorTree(
+                controller: summaryTreeController,
+              )),
+              Expanded(
+                child: Stack(
+                  children: [
+                    InspectorTree(
+                      controller: detailsTreeController,
+                    ),
+                    if (_expandCollapseSupported)
+                      Row(
+                        children: <Widget>[
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            // Workaround as outline buttons are transparent by
+                            // default.
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            child: Row(
+                              children: [
+                                OutlineButton(
+                                  onPressed:
+                                      enableButtons ? _onExpandClick : null,
+                                  child: const Text('Expand all'),
+                                ),
+                                OutlineButton(
+                                  onPressed:
+                                      enableButtons ? _onResetClick : null,
+                                  child: const Text('Collapse to selected'),
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  void _onExpandCollapseSupported() {
+    setState(() {
+      _expandCollapseSupported = true;
+    });
+  }
+
+  void _handleConnectionStart(VmService service) async {
+    setState(() {
+      connectionInProgress = true;
+    });
+
+    try {
+      // TODO(jacobr): move this rootBundle loading code into
+      // InspectorController once the dart:html app is removed.
+      if (Catalog.instance == null) {
+        final json = await rootBundle.loadString('web/widgets.json');
+        // ignore: invalid_use_of_visible_for_testing_member
+        Catalog.setCatalog(Catalog.decode(json));
+      }
+      await ensureInspectorServiceDependencies();
+
+      // Init the inspector service, or return null.
+      inspectorService =
+          await InspectorService.create(service).catchError((e) => null);
+    } finally {
+      setState(() {
+        connectionInProgress = false;
+      });
+    }
+
+    if (inspectorService == null) {
+      return;
+    }
+
+    setState(() {
+      summaryTreeController = InspectorTreeControllerFlutter();
+      detailsTreeController = InspectorTreeControllerFlutter();
+      inspectorController = InspectorController(
+        inspectorTree: summaryTreeController,
+        detailsTree: detailsTreeController,
+        inspectorService: inspectorService,
+        treeType: FlutterTreeType.widget,
+        onExpandCollapseSupported: _onExpandCollapseSupported,
+      );
+
+      // TODO(jacobr): update visibility based on whether the screen is visible.
+      // That will reduce memory usage on the device running a Flutter application
+      // when the inspector panel is not visible.
+      inspectorController.setVisibleToUser(true);
+      inspectorController.setActivate(true);
+
+      // TODO(devoncarew): Move this notice display to once a day.
+      if (!displayedWidgetTrackingNotice) {
+        // ignore: unawaited_futures
+        inspectorService.isWidgetCreationTracked().then((bool value) {
+          if (value) {
+            return;
+          }
+
+          displayedWidgetTrackingNotice = true;
+          // TODO(jacobr): implement showMessage
+          /*
+          framework.showMessage(
+            message: trackWidgetCreationWarning,
+            screenId: inspectorScreenId,
+          );
+           */
+        });
+      }
+    });
+  }
+
+  void _handleConnectionStop(dynamic event) {
+    inspectorController?.setActivate(false);
+    inspectorController?.dispose();
+    setState(() {
+      inspectorController = null;
+    });
+  }
+
+  void _refreshInspector() {
+    // TODO(jacobr): support analytics.
+    // ga.select(ga.inspector, ga.refresh);
+    blockWhileInProgress(() async {
+      await inspectorController?.onForceRefresh();
+    });
+  }
+
+  void blockWhileInProgress(Future callback()) async {
+    setState(() {
+      actionInProgress = true;
+    });
+    try {
+      // TODO(jacobr): also support timing out.
+      await callback();
+    } finally {
+      setState(() {
+        actionInProgress = false;
+      });
+    }
   }
 }

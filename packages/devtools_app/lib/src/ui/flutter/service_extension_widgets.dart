@@ -11,6 +11,7 @@ import '../../service_extensions.dart';
 import '../../service_registrations.dart';
 import '../../utils.dart';
 import 'flutter_icon_renderer.dart';
+import 'label.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -113,18 +114,10 @@ class _ServiceExtensionButtonGroupState
   }
 
   Widget _buildExtension(ExtensionState extensionState, bool showLabels) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          getIconWidget(extensionState.description.icon),
-          if (showLabels)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(extensionState.description.description),
-            )
-        ],
-      ),
+    return ButtonContent(
+      extensionState.description.icon,
+      extensionState.description.description,
+      showText: showLabels,
     );
   }
 

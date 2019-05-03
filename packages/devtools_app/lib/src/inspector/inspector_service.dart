@@ -885,7 +885,7 @@ class ObjectGroup {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     final json = await setSelectionResult;
     if (disposed) return;
-    handleSetSelectionHelper(json, uiAlreadyUpdated);
+    handleSetSelectionHelper(json == true, uiAlreadyUpdated);
   }
 
   Future<Map<String, InstanceRef>> getEnumPropertyValues(

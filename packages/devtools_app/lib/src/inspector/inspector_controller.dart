@@ -54,7 +54,8 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
 class InspectorController implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorService,
-    @required InspectorTreeFactory inspectorTreeFactory,
+    @required this.inspectorTree,
+    InspectorTreeController detailsTree,
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
@@ -64,7 +65,8 @@ class InspectorController implements InspectorServiceClient {
             InspectorObjectGroupManager(inspectorService, 'selection') {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
-    inspectorTree = inspectorTreeFactory(
+    assert(inspectorTree != null);
+    inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
       treeType: treeType,
       onNodeAdded: _onNodeAdded,
@@ -75,7 +77,7 @@ class InspectorController implements InspectorServiceClient {
     if (isSummaryTree) {
       details = InspectorController(
         inspectorService: inspectorService,
-        inspectorTreeFactory: inspectorTreeFactory,
+        inspectorTree: detailsTree,
         treeType: treeType,
         parent: this,
         isSummaryTree: false,
@@ -115,8 +117,7 @@ class InspectorController implements InspectorServiceClient {
 
   InspectorController details;
 
-  InspectorTree inspectorTree;
-
+  InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
   final InspectorService inspectorService;
@@ -764,9 +765,9 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> expandAllNodesInDetailsTree() async {
     await details.recomputeTreeRoot(
-      inspectorTree.selection.diagnostic,
+      inspectorTree.selection?.diagnostic,
       details.inspectorTree.selection?.diagnostic ??
-          details.inspectorTree.root.diagnostic,
+          details.inspectorTree.root?.diagnostic,
       false,
       subtreeDepth: maxJsInt,
     );

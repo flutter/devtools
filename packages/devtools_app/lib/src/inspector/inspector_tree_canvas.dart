@@ -14,7 +14,6 @@ import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import '../ui/viewport_canvas.dart';
-import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_web.dart';
 
@@ -63,11 +62,12 @@ class IconPaintEntry extends CanvasPaintEntry {
   double get right => x + icon.iconWidth;
 
   @override
-  void attach(InspectorTree owner) {
+  void attach(InspectorTreeController owner) {
     final image = iconRenderer.image;
     if (image == null) {
       iconRenderer.loadImage().then((_) {
         // TODO(jacobr): only repaint what is needed.
+        // ignore: invalid_use_of_protected_member
         owner.setState(() {});
       });
     }
@@ -155,7 +155,7 @@ class InspectorTreeNodeRenderCanvasBuilder
 }
 
 class InspectorTreeNodeCanvasRender
-    extends InspectorTreeNodeRender<CanvasPaintEntry> {
+    extends InspectorTreeNodeRendererLegacy<CanvasPaintEntry> {
   InspectorTreeNodeCanvasRender(List<CanvasPaintEntry> entries, Size size)
       : super(entries, size);
 
@@ -198,23 +198,12 @@ class InspectorTreeNodeCanvas extends InspectorTreeNode {
   }
 }
 
-class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
-    with InspectorTreeWeb {
-  InspectorTreeCanvas({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  }) : super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        ) {
+class InspectorTreeCanvas
+    with
+        InspectorTreeController,
+        InspectorTreeWeb,
+        InspectorTreeFixedRowHeightController {
+  InspectorTreeCanvas() {
     _viewportCanvas = ViewportCanvas(
       paintCallback: _paintCallback,
       onTap: onTap,
@@ -244,10 +233,10 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
   bool _recomputeRows = false;
 
   @override
-  void setState(VoidCallback modifyState) {
+  void setState(VoidCallback fn) {
     // More closely match Flutter semantics where state is set immediately
     // instead of after a frame.
-    modifyState();
+    fn();
     if (!_recomputeRows) {
       _recomputeRows = true;
       window.requestAnimationFrame((_) => _rebuildData());

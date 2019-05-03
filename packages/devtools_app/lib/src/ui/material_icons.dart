@@ -29,12 +29,17 @@ class MaterialIcon extends DevToolsIcon {
   const MaterialIcon(
     this.text,
     this.color, {
+    this.codePoint,
     this.fontSize = 18,
     this.iconWidth = 18,
     this.angle = 0.0,
   });
 
   final String text;
+
+  /// If the codePoint is specified, it is used directly on platforms that
+  /// can run Flutter natively.
+  final int codePoint;
   final Color color;
   final int fontSize;
   final double angle;
@@ -50,6 +55,6 @@ class FlutterMaterialIcons {
   static DevToolsIcon getIconForCodePoint(int charCode) {
     final String code = String.fromCharCode(charCode);
     return _iconCache.putIfAbsent(
-        code, () => MaterialIcon(code, defaultForeground));
+        code, () => MaterialIcon(code, defaultForeground, codePoint: charCode));
   }
 }

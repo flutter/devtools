@@ -7,6 +7,8 @@ library icon_renderer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_icons/flutter_icons.dart' as flutter_icons;
+
 import '../icons.dart';
 import '../material_icons.dart';
 import '../theme.dart';
@@ -126,16 +128,35 @@ Widget _computeIconWidget(DevToolsIcon icon) {
           Text(
             icon.text,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 8, color: Color(0xFF231F20)),
+            style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
           ),
         ],
       ),
     );
   } else if (icon is MaterialIcon) {
-    return Icon(
-      IconData(icon.text.runes.first),
+    // TODO(jacobr): once the dart:html legacy version of this application is
+    // removed, start using the regular Flutter material icons directly.
+    final iconWidget = Icon(
+      icon.codePoint != null
+          ? IconData(
+              icon.codePoint,
+              fontFamily: 'MaterialIcons',
+            )
+          : flutter_icons.MaterialIcons.getIconData(
+              icon.text.replaceAll('_', '-')),
       size: icon.iconHeight,
       color: icon.color,
+    );
+    if (icon.angle != 0) {
+      return Transform.rotate(
+        angle: icon.angle,
+        child: iconWidget,
+      );
+    }
+    return SizedBox(
+      width: icon.iconWidth,
+      height: icon.iconHeight,
+      child: iconWidget,
     );
   } else {
     throw UnimplementedError(

@@ -25,8 +25,8 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
   Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
   InspectorController inspectorController;
-  FakeInspectorTree tree;
-  FakeInspectorTree detailsTree;
+  FakeInspectorTreeState tree;
+  FakeInspectorTreeState detailsTree;
 
   env.afterNewSetup = () async {
     await ensureInspectorServiceDependencies();
@@ -48,23 +48,8 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     await inspectorService.inferPubRootDirectoryIfNeeded();
 
     inspectorController = InspectorController(
-      inspectorTreeFactory: ({
-        summaryTree,
-        treeType,
-        onNodeAdded,
-        onSelectionChange,
-        onExpand,
-        onHover,
-      }) {
-        return FakeInspectorTree(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
-      },
+      inspectorTree: FakeInspectorTreeState(),
+      detailsTree: FakeInspectorTreeState(),
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
     );
@@ -519,7 +504,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
   }, timeout: const Timeout.factor(8));
 }
 
-void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
+void simulateRowClick(FakeInspectorTreeState tree, {@required int rowIndex}) {
   // The x coordinate does not matter as any tap in the row counts.
   tree.onTap(Offset(0, tree.getRowY(rowIndex)));
 }

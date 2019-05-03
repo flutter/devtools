@@ -149,7 +149,7 @@ class HtmlLogDetails extends CoreElement {
   CoreElement content;
   CoreElement message;
 
-  void onShowDetails({String text, InspectorTree tree}) {
+  void onShowDetails({String text, InspectorTreeController tree}) {
     // Reset the vertical scroll value if any.
     content.element.scrollTop = 0;
     message.clear();
@@ -162,16 +162,19 @@ class HtmlLogDetails extends CoreElement {
   }
 
   InspectorTreeWeb createLoggingTree({VoidCallback onSelectionChange}) {
-    return InspectorTreeHtml(
+    final tree = InspectorTreeHtml();
+    tree.config = InspectorTreeConfig(
       summaryTree: false,
+      onNodeAdded: null,
       treeType: FlutterTreeType.widget,
+      onSelectionChange: onSelectionChange,
       onHover: (node, icon) {
         element.style.cursor = (node?.diagnostic?.isDiagnosticableValue == true)
             ? 'pointer'
             : 'auto';
       },
-      onSelectionChange: onSelectionChange,
     );
+    return tree;
   }
 }
 
