@@ -129,34 +129,36 @@ typedef CanvasPaintCallback = void Function(
 
 typedef MouseCallback = void Function(Offset offset);
 
+/// The callback returns whether the content needs to be rebuilt to reflect
+/// the new size.
+typedef SizeChangeCallback = void Function(Size size);
+
 /// Class that enables efficient rendering of an arbitrarily large canvas by
 /// managing a set of [chunkSize] x [chunkSize] tiles and only rendering tiles
 /// for content within the current viewport.
 ///
 /// This class is only compatible with browsers that support
-/// [IntersectionObserver].
-/// https://caniuse.com/#feat=intersectionobserver
+/// [ResizeObserver].
+/// https://caniuse.com/#feat=resizeobserver
 class ViewportCanvas extends Object with SetStateMixin {
   ViewportCanvas({
     @required CanvasPaintCallback paintCallback,
     MouseCallback onTap,
     MouseCallback onMouseMove,
     VoidCallback onMouseLeave,
+    SizeChangeCallback onSizeChange,
     String classes,
     this.addBuffer = true,
   })  : _paintCallback = paintCallback,
         _onTap = onTap,
         _onMouseMove = onMouseMove,
         _onMouseLeave = onMouseLeave,
+        _onSizeChange = onSizeChange,
         _element = div(
           a: 'flex',
           c: classes,
         ),
-        _content = div(),
-        _spaceTop = div(),
-        _spaceBottom = div(),
-        _spaceLeft = div(),
-        _spaceRight = div() {
+        _content = div() {
     // This styling is added directly instead of via CSS as it is critical for
     // correctness of the viewport calculations.
     _element.element.style..overflow = 'scroll';
@@ -167,47 +169,12 @@ class ViewportCanvas extends Object with SetStateMixin {
       ..overflow = 'hidden';
     _element.add(_content);
 
-    final spacers = <CoreElement>[
-      _spaceTop,
-      _spaceBottom,
-      _spaceLeft,
-      _spaceRight
-    ];
-    for (var spacer in spacers) {
-      spacer.element.style
-        ..position = 'absolute'
-        ..overflow = 'hidden';
-    }
-    _spaceLeft.element.style
-      ..top = '0'
-      ..bottom = '0'
-      ..left = '0'
-      ..width = '0';
-    _spaceRight.element.style
-      ..top = '0'
-      ..bottom = '0'
-      ..right = '0'
-      ..width = '0';
-    _spaceTop.element.style
-      ..top = '0'
-      ..left = '0'
-      ..right = '0'
-      ..height = '0';
-    _spaceBottom.element.style
-      ..bottom = '0'
-      ..left = '0'
-      ..right = '0'
-      ..height = '0';
-
-    _content.add(spacers);
-
-    // TODO(jacobr): remove call to allowInterop once
-    // https://github.com/dart-lang/sdk/issues/35484 is fixed.
-    _visibilityObserver = IntersectionObserver(
-        allowInterop(_onVisibilityChange), {'root': _element.element});
-    for (var spacer in spacers) {
-      _visibilityObserver.observe(spacer.element);
-    }
+    // TODO(jacobr): clean this code up when
+    // https://github.com/dart-lang/html/issues/104 is fixed.
+    _resizeObserver = ResizeObserver(allowInterop((List<dynamic> entries, _) {
+      _scheduleRebuild();
+    }));
+    _resizeObserver.observe(_element.element);
 
     element.onScroll.listen((_) {
       if (_currentMouseHover != null) {
@@ -243,27 +210,20 @@ class ViewportCanvas extends Object with SetStateMixin {
   final MouseCallback _onTap;
   final MouseCallback _onMouseMove;
   final VoidCallback _onMouseLeave;
+  final SizeChangeCallback _onSizeChange;
   final Map<_ChunkPosition, _CanvasChunk> _chunks = {};
 
   static const int maxChunks = 50;
 
-  /// Intersection observer used to detect when the viewport needs to be
+  /// Resize observer used to detect when the viewport needs to be
   /// recomputed.
-  IntersectionObserver _visibilityObserver;
+  ResizeObserver _resizeObserver;
 
   CoreElement get element => _element;
   final CoreElement _element;
 
   /// Element containing all content that scrolls within the viewport.
   final CoreElement _content;
-
-  // Fixed sized divs placed around the the content that is currently rendered.
-  // These divs only exist to ensure that [_visibilityObserver] fires
-  // fire when content that was outside the viewport moves inside the viewport.
-  final CoreElement _spaceTop;
-  final CoreElement _spaceBottom;
-  final CoreElement _spaceLeft;
-  final CoreElement _spaceRight;
 
   double _contentWidth = 0;
   double _contentHeight = 0;
@@ -295,11 +255,7 @@ class ViewportCanvas extends Object with SetStateMixin {
   }
 
   void dispose() {
-    _visibilityObserver.disconnect();
-  }
-
-  void _onVisibilityChange(List entries, IntersectionObserver observer) {
-    _scheduleRebuild();
+    _resizeObserver.disconnect();
   }
 
   void _scheduleRebuild() {
@@ -326,6 +282,10 @@ class ViewportCanvas extends Object with SetStateMixin {
       rawElement.offsetHeight.toDouble(),
     );
 
+    if (_viewport.size != lastViewport.size && _onSizeChange != null) {
+      _onSizeChange(_viewport.size);
+    }
+
     if (addBuffer) {
       // Expand the viewport by a chunk in each direction to reduce flicker on
       // mouse wheel scroll.
@@ -341,26 +301,6 @@ class ViewportCanvas extends Object with SetStateMixin {
 
     // TODO(jacobr): round viewport to the nearest chunk multiple so we
     // don't get notifications until we actually need them.
-    // TODO(jacobr): consider using the _renderedViewport to display the spacers
-    // instead of the client viewport.
-
-    // Position spacers to take up all the space around the viewport so we are
-    // notified when the viewport changes.
-    if (lastViewport.left != _renderedViewport.left || _contentSizeChanged) {
-      _spaceLeft.element.style.width = '${_renderedViewport.left - 1}px';
-    }
-    if (lastViewport.right != _renderedViewport.right || _contentSizeChanged) {
-      _spaceRight.element.style.width =
-          '${_contentWidth - _renderedViewport.right - 1}px';
-    }
-    if (lastViewport.top != _renderedViewport.top || _contentSizeChanged) {
-      _spaceTop.element.style.height = '${_renderedViewport.top - 1}px';
-    }
-    if (lastViewport.bottom != _renderedViewport.bottom ||
-        _contentSizeChanged) {
-      _spaceBottom.element.style.height =
-          '${_contentHeight - _renderedViewport.bottom - 1}px';
-    }
     _contentSizeChanged = false;
 
     _render(force);

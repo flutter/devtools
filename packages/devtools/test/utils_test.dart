@@ -114,14 +114,18 @@ void main() {
     });
 
     test('timeRange', () {
-      final timeRangeMicros = TimeRange()
+      final timeRange = TimeRange();
+
+      expect(timeRange.toString(), equals('[null μs - null μs]'));
+
+      timeRange
         ..start = const Duration(microseconds: 1000)
         ..end = const Duration(microseconds: 8000);
 
-      expect(timeRangeMicros.duration.inMicroseconds, equals(7000));
-      expect(timeRangeMicros.toString(), equals('[1000 μs - 8000 μs]'));
+      expect(timeRange.duration.inMicroseconds, equals(7000));
+      expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
       expect(
-        timeRangeMicros.toString(unit: TimeUnit.milliseconds),
+        timeRange.toString(unit: TimeUnit.milliseconds),
         equals('[1 ms - 8 ms]'),
       );
     });

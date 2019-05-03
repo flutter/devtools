@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -24,18 +23,16 @@ import '../utils.dart';
 /// query parameter 'debugTimeline=true'.
 bool debugTimeline = false;
 
-/// Buffer that will store trace event json in the order we receive the events.
+/// List that will store trace events in the order we receive them.
 ///
-/// This buffer is for debug purposes. When [debugTimeline] is true, we will
-/// be able to dump this buffer to a downloadable text file.
-StringBuffer debugTraceEvents = StringBuffer()..write('{"traceEvents":[');
+/// When the export timeline button is clicked, this will be part of the output.
+List<Map<String, dynamic>> timelineTraceEvents = [];
 
-/// Buffer that will store trace event json in the order we handle the events.
+/// List that will store trace event json in the order we handle the events.
 ///
-/// This buffer is for debug purposes. When [debugTimeline] is true, we will
-/// be able to dump this buffer to a downloadable text file.
-StringBuffer debugHandledTraceEvents = StringBuffer()
-  ..write('{"traceEvents":[');
+/// This list is for debug purposes. When [debugTimeline] is true, we will be
+/// able to dump this data to a downloadable text file.
+List<Map<String, dynamic>> debugHandledTraceEvents = [];
 
 /// Buffer that will store significant events in the frame tracking process.
 ///
@@ -105,9 +102,7 @@ class TimelineData {
 
     if (!_shouldProcessTraceEvent(event)) return;
 
-    if (debugTimeline) {
-      debugTraceEvents.write('${jsonEncode(event.json)},');
-    }
+    timelineTraceEvents.add(event.json);
 
     // Process flow events now. Process Duration events after a delay. Only
     // process flow events whose name is PipelineItem, as these events mark the
@@ -169,7 +164,7 @@ class TimelineData {
     }
 
     if (debugTimeline) {
-      debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+      debugHandledTraceEvents.add(event.json);
       debugFrameTracking.writeln('Handling - ${event.json}');
     }
 
@@ -207,7 +202,7 @@ class TimelineData {
       );
 
       if (debugTimeline) {
-        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+        debugHandledTraceEvents.add(event.json);
         debugFrameTracking.writeln('Frame Start: $id - ${event.json}');
       }
 
@@ -228,7 +223,7 @@ class TimelineData {
       );
 
       if (debugTimeline) {
-        debugHandledTraceEvents.write('${jsonEncode(event.json)},');
+        debugHandledTraceEvents.add(event.json);
         debugFrameTracking.writeln('Frame End: $id');
       }
 

@@ -425,11 +425,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Map<String, Object> get valuePropertiesJson => json['valueProperties'];
 
   bool get hasChildren {
-    if (getBooleanMember('hasChildren', false)) {
-      return true;
-    }
+    // In the summary tree, json['hasChildren']==true when the node has details
+    // tree children so we need to first check whether the list of children for
+    // the node in the tree was specified. If there is an empty list of children
+    // that indicates the node should have no children in the tree while if the
+    // 'children' property is not specified it means we do not know whether
+    // there is a list of children and need to query the server to find out.
     final List children = json['children'];
-    return children?.isNotEmpty == true;
+    if (children != null) {
+      return children.isNotEmpty;
+    }
+    return getBooleanMember('hasChildren', false);
   }
 
   bool get isCreatedByLocalProject {
