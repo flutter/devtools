@@ -4,6 +4,8 @@
 * CPU profiler bug fixes and improvements.
 * Inspector polish bug fixes. Handle very deep inspector trees and only show expand-collapse arrows on tree nodes where needed.
 * Fix case where error messages remained on the startup screen after the error had been fixed.
+* Add ability to inspect an instance of a memory object in the memory profiler page after a snapshot of active memory objects.
+* First time DevTools is launched, prompt with an opt-in dialog to report DevTools usage statistics and crash reports of DevTools to Google. 
 
 ## 0.0.19 - 2019-05-01
 * Update DevTools server to better handle failures when launching browsers.
