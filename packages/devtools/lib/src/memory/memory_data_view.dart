@@ -42,13 +42,18 @@ class MemoryDataView implements CoreElementView {
           }
         }
 
-        if (value.kind == InstanceKind.kList) {
-          valueStr = '[${value.length}] $valueStr';
-        } else if (value.kind == InstanceKind.kMap) {
-          valueStr = '{ ${value.length} } $valueStr';
-        } else if (value.kind != null && value.kind.endsWith('List')) {
-          // Uint8List, Uint16List, ...
-          valueStr = '[${value.length}] $valueStr';
+        switch (value.kind) {
+          case InstanceKind.kList:
+            valueStr = '[${value.length}] $valueStr';
+            break;
+          case InstanceKind.kMap:
+            valueStr = '{ ${value.length} } $valueStr';
+            break;
+          default:
+            if (value.kind != null && value.kind.endsWith('List')) {
+              // Uint8List, Uint16List, ...
+              valueStr = '[${value.length}] $valueStr';
+            }
         }
       } else if (value is Sentinel) {
         // TODO(terry): Validate this returns a useful name, check debugger too.
@@ -133,7 +138,7 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
           for (dynamic value in instance.associations) {
             result.add(BoundField()
               // TODO(terry): Need to handle nested objects for keys/values.
-              ..decl = (FieldRef()..name = '\'${value.key.valueAsString}\'')
+              ..decl = (FieldRef()..name = '[\'${value.key.valueAsString}\']')
               ..value = value.value.valueAsString);
           }
           return result;
