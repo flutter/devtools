@@ -15,13 +15,6 @@ class CpuProfileData {
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
-    _setLeafCounts();
-
-    assert(
-      sampleCount != cpuProfileRoot.sampleCount,
-      'SampleCount from response ($sampleCount) != sample count from root'
-      ' (${cpuProfileRoot.sampleCount})',
-    );
   }
 
   final Response cpuProfileResponse;
@@ -112,13 +105,6 @@ class CpuProfileData {
       parent.addChild(stackFrame);
     }
   }
-
-  void _setLeafCounts() {
-    for (Map<String, dynamic> traceEvent in stackTraceEvents) {
-      final leafId = traceEvent['sf'];
-      stackFrames[leafId].leafCount++;
-    }
-  }
 }
 
 class CpuStackFrame {
@@ -138,8 +124,7 @@ class CpuStackFrame {
   /// Index in [parent.children].
   int index = -1;
 
-  /// How many samples this frame is a leaf for.
-  int leafCount = 0;
+  bool get isLeaf => children.isEmpty;
 
   bool isNative = false;
 
@@ -185,28 +170,30 @@ class CpuStackFrame {
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
-  /// This will be equal to the number of leaf nodes under this stack frame.
+  /// This will be equal to the number of leaf nodes in this stack frame.
   int calculateSampleCount() {
-    int count = leafCount;
-    for (CpuStackFrame child in children) {
-      count += child.sampleCount;
+    if (isLeaf) {
+      _sampleCount = 1;
+    } else {
+      int count = 0;
+      for (CpuStackFrame child in children) {
+        count += child.sampleCount;
+      }
+      _sampleCount = count;
     }
-    _sampleCount = count;
     return _sampleCount;
   }
 
-  void _format(StringBuffer buf, String indent) {
-    buf.writeln(
-        '$indent$id - children: ${children.length} - leafCount: $leafCount');
+  void format(StringBuffer buf, String indent) {
+    buf.writeln('$indent$id - children: ${children.length}');
     for (CpuStackFrame child in children) {
-      child._format(buf, '  $indent');
+      child.format(buf, '  $indent');
     }
   }
 
-  @visibleForTesting
   String toStringDeep() {
     final buf = StringBuffer();
-    _format(buf, '  ');
+    format(buf, '  ');
     return buf.toString();
   }
 
