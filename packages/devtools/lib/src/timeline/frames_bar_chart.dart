@@ -40,7 +40,7 @@ class FramesBarChart extends CoreElement with SetStateMixin {
     });
   }
 
-  static const int chartHeight = 170;
+  static const int chartHeight = 140;
   static const int maxFrames = 500;
   static const topPadding = 2;
 
@@ -167,7 +167,12 @@ class PlotlyDivGraph extends CoreElement {
   }
 
   void createPlot(dynamic element) {
-    plotlyChart = new FramesBarPlotly(frameGraph, element);
+    plotlyChart = new FramesBarPlotly(
+      frameGraph,
+      element,
+      useLogScale: false,
+      showRangeSlider: false,
+    );
     plotlyChart.plotFPS();
 
     // Hookup events in the plotly chart.

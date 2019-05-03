@@ -53,10 +53,9 @@ class MemoryChart extends CoreElement {
 
         gcTimeStamp = newSample.timestamp;
         // TODO(terry): Sometimes 2 GCs events arrive within 500 ms only record
-        // TODO:        one to reducing chatter in the chart.  Filed isssue:
+        // TODO:        one to reducing chatter in the chart.  Filed issue:
         // TODO:        https://github.com/dart-lang/sdk/issues/36167
         if (gcTimeStamp - lastGcTimestamp > 500) {
-          print('GC plotting $gcTimeStamp');
           gcValue = newSample.capacity;
           _plotlyChart.plotMarkersDataList([gcTimeStamp], [gcValue]);
         }

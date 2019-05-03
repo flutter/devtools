@@ -49,12 +49,12 @@ const Color selectedGpuColor =
     ThemedColor(mainGpuColorSelectedLight, mainGpuColorSelectedDark);
 
 // Light is Red @ .2 opacity, Dark is Red 200 Material Dark @ .2 opacity.
-const jankGlowInside = ThemedColor(Color(0x33FF0000), Color(0x33F29C99));
+const Color jankGlowInside = ThemedColor(Color(0x66FF0000), Color(0x66F29C99));
 // Light is Red @ .5 opacity, Dark is Red 600 Material Dark @ .6 opacity.
-const jankGlowEdge = ThemedColor(Color(0x80FF0000), Color(0x99CE191C));
+const Color jankGlowEdge = ThemedColor(Color(0x80FF0000), Color(0x99CE191C));
 
 // Red 50 - 400 is light at 1/2 opacity, Dark Red 500 Material Dark.
-const highwater16msColor = ThemedColor(Color(0x7FEF5350), Color(0xFFe02a28));
+const Color highwater16msColor = mainUiColorSelectedLight;
 
 const Color hoverTextHighContrastColor = Colors.white;
 const Color hoverTextColor = Colors.black;
@@ -117,13 +117,6 @@ class TimelineScreen extends Screen {
     final CoreElement screenDiv = div()..layoutVertical();
 
     bool splitterConfigured = false;
-
-    // TODO(kenzie): uncomment these tabs once they are implemented.
-//    final PTabNav frameTabNav = PTabNav(<PTabNavTab>[
-//      PTabNavTab('Frame Timeline'),
-//      PTabNavTab('Widget build info'),
-//      PTabNavTab('Skia picture'),
-//    ]);
 
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()

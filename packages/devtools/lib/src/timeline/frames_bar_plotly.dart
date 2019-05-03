@@ -10,15 +10,21 @@ import '../ui/plotly.dart';
 import '../ui/theme.dart';
 
 class FramesBarPlotly {
-  FramesBarPlotly(this._domName, this._chart, [this.useLogScale = true]);
+  FramesBarPlotly(
+    this._domName,
+    this._chart, {
+    this.useLogScale = true,
+    this.showRangeSlider = true,
+  });
 
   // Any duration of ui/gpu greater than 8 ms is a jank.
-  static const int jankMs = 16;
+  static const double jankthresholdMs = 1000.0 / 60.0;
 
   static const int gpuGoodTraceIndex = 0;
   static const int gpuSelectTraceIndex = 1;
   static const int uiGoodTraceIndex = 2;
   static const int uiSelectTraceIndex = 3;
+
   // IMPORTANT: Last trace need to update numberOfTraces constant below.
 
   // Compute total number of traces in graph.
@@ -43,6 +49,7 @@ class FramesBarPlotly {
   final String _domName;
   final dynamic _chart;
   final bool useLogScale;
+  final bool showRangeSlider;
 
   final _yAxisLogScale = AxisLayout(
     title: Title(
@@ -51,11 +58,9 @@ class FramesBarPlotly {
     tickformat: '.0f',
     type: 'log',
     range: [0, 2],
-    nticks: 3,
+    nticks: 10,
     titlefont: Font(color: colorToCss(defaultForeground)),
-    tickfont: Font(
-      color: colorToCss(defaultForeground),
-    ),
+    tickfont: Font(color: colorToCss(defaultForeground)),
     tickmode: 'array',
     tickvals: [
       1,
@@ -84,7 +89,7 @@ class FramesBarPlotly {
       paper_bgcolor: colorToCss(chartBackground),
       legend: Legend(font: Font(color: colorToCss(defaultForeground))),
       xaxis: AxisLayout(
-        rangeslider: RangeSlider(),
+        rangeslider: showRangeSlider ? RangeSlider() : null,
         // Hide ticks by using font color of bgColor.
         tickfont: Font(
           color: colorToCss(chartBackground),
@@ -99,19 +104,16 @@ class FramesBarPlotly {
       barmode: 'stack',
       dragmode: 'pan',
       shapes: [
-        // TODO(terry): Display somewhere what the lines are showing (8/16 ms).
-        // TODO(terry): Unable to place in legend directly.
         Shape(
           type: 'line',
           xref: 'paper',
-          // TOD(terry): Verify do we like the line above or below the bars.
-          // layer: 'below',
+          layer: 'below',
           x0: 0,
-          y0: 16,
+          y0: jankthresholdMs,
           x1: 1,
-          y1: 16,
+          y1: jankthresholdMs,
           line: Line(
-            dash: 'longdash',
+            dash: 'dot',
             color: colorToCss(highwater16msColor),
             width: 1,
           ),
@@ -120,9 +122,9 @@ class FramesBarPlotly {
       margin: Margin(
         l: 60,
         r: 0,
-        b: 5,
+        b: 8,
         t: 5,
-        pad: 5,
+        pad: 8,
       ),
     );
   }
@@ -272,7 +274,7 @@ class FramesBarPlotly {
       gpuGoodX.add(dataIndexes[dataIndex]);
       gpuGoodTrace.add(gpuDuration);
 
-      if (uiDuration + gpuDuration > jankMs) {
+      if (uiDuration + gpuDuration > jankthresholdMs) {
         glowBarFrame(dataIndexes[dataIndex], uiDuration + gpuDuration);
       }
     }
@@ -297,10 +299,7 @@ class FramesBarPlotly {
       gpuGoodX,
       uiGoodTrace,
       gpuGoodTrace,
-      [
-        uiGoodTraceIndex,
-        gpuGoodTraceIndex,
-      ],
+      [uiGoodTraceIndex, gpuGoodTraceIndex],
     );
 
     if (!paused) rangeSliderToLast(dataIndexes.last + 1);
@@ -313,21 +312,18 @@ class FramesBarPlotly {
       Layout(
         xaxis: AxisLayout(
           // Hide ticks by using font color of bgColor as we slide.
-          tickfont: Font(
-            color: colorToCss(chartBackground),
-          ),
+          tickfont: Font(color: colorToCss(chartBackground)),
           rangemode: 'nonnegative',
           range: [dataIndex - ticksInRangeSlider, dataIndex],
-          rangeslider: RangeSlider(
-            rangemode: 'nonnegative',
-            autorange: true,
-          ),
+          rangeslider: showRangeSlider
+              ? RangeSlider(rangemode: 'nonnegative', autorange: true)
+              : null,
         ),
       ),
     );
   }
 
-  void glowBarFrame(num x, num y) {
+  void glowBarFrame(num x, num height) {
     final Layout layout = getProperty(_chart, 'layout');
     final List<Shape> shapes = layout.shapes;
 
@@ -336,7 +332,7 @@ class FramesBarPlotly {
     final jsShape = createGlowShape(
       nextShape,
       x,
-      y,
+      height,
       colorToCss(jankGlowInside),
       colorToCss(jankGlowEdge),
     );
