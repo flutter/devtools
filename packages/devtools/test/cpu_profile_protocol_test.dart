@@ -41,8 +41,8 @@ void main() {
     });
 
     test('sampleCount', () {
-      expect(testStackFrame.sampleCount, equals(3));
-      expect(cpuProfileData.cpuProfileRoot.sampleCount, equals(8));
+      expect(testStackFrame.inclusiveSampleCount, equals(3));
+      expect(cpuProfileData.cpuProfileRoot.inclusiveSampleCount, equals(8));
     });
 
     test('cpuConsumptionRatio', () {
@@ -82,32 +82,32 @@ final CpuStackFrame stackFrame_0 = CpuStackFrame(
   id: 'id_0',
   name: '0',
   category: 'Dart',
-)..leafCount = 0;
+)..exclusiveSampleCount = 0;
 final CpuStackFrame stackFrame_1 = CpuStackFrame(
   id: 'id_1',
   name: '1',
   category: 'Dart',
-)..leafCount = 0;
+)..exclusiveSampleCount = 0;
 final CpuStackFrame stackFrame_2 = CpuStackFrame(
   id: 'id_2',
   name: '2',
   category: 'Dart',
-)..leafCount = 1;
+)..exclusiveSampleCount = 1;
 final CpuStackFrame stackFrame_3 = CpuStackFrame(
   id: 'id_3',
   name: '3',
   category: 'Dart',
-)..leafCount = 0;
+)..exclusiveSampleCount = 0;
 final CpuStackFrame stackFrame_4 = CpuStackFrame(
   id: 'id_4',
   name: '4',
   category: 'Dart',
-)..leafCount = 1;
+)..exclusiveSampleCount = 1;
 final CpuStackFrame stackFrame_5 = CpuStackFrame(
   id: 'id_5',
   name: '5',
   category: 'Dart',
-)..leafCount = 1;
+)..exclusiveSampleCount = 1;
 
 final testStackFrame = stackFrame_0
   ..children = [
@@ -125,24 +125,24 @@ final testStackFrame = stackFrame_0
   ];
 
 const goldenCpuProfile = '''
-  cpuProfile - children: 2 - leafCount: 0
-    140357727781376-1 - children: 1 - leafCount: 0
-      140357727781376-2 - children: 1 - leafCount: 0
-        140357727781376-3 - children: 2 - leafCount: 0
-          140357727781376-4 - children: 1 - leafCount: 0
-            140357727781376-5 - children: 0 - leafCount: 1
-          140357727781376-6 - children: 1 - leafCount: 0
-            140357727781376-7 - children: 1 - leafCount: 0
-              140357727781376-8 - children: 0 - leafCount: 1
-    140357727781376-9 - children: 2 - leafCount: 0
-      140357727781376-10 - children: 1 - leafCount: 0
-        140357727781376-11 - children: 0 - leafCount: 1
-      140357727781376-12 - children: 1 - leafCount: 0
-        140357727781376-13 - children: 1 - leafCount: 0
-          140357727781376-14 - children: 2 - leafCount: 3
-            140357727781376-15 - children: 0 - leafCount: 1
-            140357727781376-16 - children: 1 - leafCount: 0
-              140357727781376-17 - children: 0 - leafCount: 1
+  cpuProfile - children: 2 - exclusiveSampleCount: 0
+    140357727781376-1 - children: 1 - exclusiveSampleCount: 0
+      140357727781376-2 - children: 1 - exclusiveSampleCount: 0
+        140357727781376-3 - children: 2 - exclusiveSampleCount: 0
+          140357727781376-4 - children: 1 - exclusiveSampleCount: 0
+            140357727781376-5 - children: 0 - exclusiveSampleCount: 1
+          140357727781376-6 - children: 1 - exclusiveSampleCount: 0
+            140357727781376-7 - children: 1 - exclusiveSampleCount: 0
+              140357727781376-8 - children: 0 - exclusiveSampleCount: 1
+    140357727781376-9 - children: 2 - exclusiveSampleCount: 0
+      140357727781376-10 - children: 1 - exclusiveSampleCount: 0
+        140357727781376-11 - children: 0 - exclusiveSampleCount: 1
+      140357727781376-12 - children: 1 - exclusiveSampleCount: 0
+        140357727781376-13 - children: 1 - exclusiveSampleCount: 0
+          140357727781376-14 - children: 2 - exclusiveSampleCount: 3
+            140357727781376-15 - children: 0 - exclusiveSampleCount: 1
+            140357727781376-16 - children: 1 - exclusiveSampleCount: 0
+              140357727781376-17 - children: 0 - exclusiveSampleCount: 1
 ''';
 
 final sampleResponse = Response.parse({
@@ -327,14 +327,14 @@ final sampleResponse = Response.parse({
 });
 
 const goldenCpuProfileWithNativeFrames = '''
-  cpuProfile - children: 2 - leafCount: 0
-    140357727781376-1 - children: 1 - leafCount: 0
-      140357727781376-2 - children: 0 - leafCount: 1
-    nativeRoot - children: 2 - leafCount: 0
-      140357727781376-6 - children: 0 - leafCount: 1
-      nativeTruncatedRoot - children: 1 - leafCount: 0
-        140357727781376-4 - children: 1 - leafCount: 0
-          140357727781376-5 - children: 0 - leafCount: 1
+  cpuProfile - children: 2 - exclusiveSampleCount: 0
+    140357727781376-1 - children: 1 - exclusiveSampleCount: 0
+      140357727781376-2 - children: 0 - exclusiveSampleCount: 1
+    nativeRoot - children: 2 - exclusiveSampleCount: 0
+      140357727781376-6 - children: 0 - exclusiveSampleCount: 1
+      nativeTruncatedRoot - children: 1 - exclusiveSampleCount: 0
+        140357727781376-4 - children: 1 - exclusiveSampleCount: 0
+          140357727781376-5 - children: 0 - exclusiveSampleCount: 1
 ''';
 
 final sampleResponseWithNativeFrames = Response.parse({

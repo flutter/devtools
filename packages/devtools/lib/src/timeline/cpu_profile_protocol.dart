@@ -15,12 +15,13 @@ class CpuProfileData {
         stackFramesJson = cpuProfileResponse.json['stackFrames'],
         stackTraceEvents = cpuProfileResponse.json['traceEvents'] {
     _processStackFrames(cpuProfileResponse);
-    _setLeafCounts();
+    _setExclusiveSampleCounts();
 
-    // This should not happen, but if it does, print to console so we can catch
-    // the bug and investigate.
-    print('SampleCount from response ($sampleCount) != sample count from root'
-        ' (${cpuProfileRoot.sampleCount})');
+    assert(
+      sampleCount == cpuProfileRoot.inclusiveSampleCount,
+      'SampleCount from response ($sampleCount) != sample count from root'
+      ' (${cpuProfileRoot.inclusiveSampleCount})',
+    );
   }
 
   // Key fields from the response JSON.
@@ -118,10 +119,10 @@ class CpuProfileData {
     }
   }
 
-  void _setLeafCounts() {
+  void _setExclusiveSampleCounts() {
     for (Map<String, dynamic> traceEvent in stackTraceEvents) {
       final leafId = traceEvent[stackFrameId];
-      stackFrames[leafId].leafCount++;
+      stackFrames[leafId].exclusiveSampleCount++;
     }
   }
 }
@@ -143,8 +144,8 @@ class CpuStackFrame {
   /// Index in [parent.children].
   int index = -1;
 
-  /// How many samples this frame is a leaf for.
-  int leafCount = 0;
+  /// How many cpu samples for which this frame is a leaf.
+  int exclusiveSampleCount = 0;
 
   bool isNative = false;
 
@@ -165,12 +166,14 @@ class CpuStackFrame {
 
   int _depth = 0;
 
-  int get sampleCount => _sampleCount ?? calculateSampleCount();
+  int get inclusiveSampleCount =>
+      _inclusiveSampleCount ?? calculateInclusiveSampleCount();
 
-  int _sampleCount;
+  /// How many cpu samples this frame is included in.
+  int _inclusiveSampleCount;
 
-  double get cpuConsumptionRatio =>
-      _cpuConsumptionRatio ??= sampleCount / getRoot().sampleCount;
+  double get cpuConsumptionRatio => _cpuConsumptionRatio ??=
+      inclusiveSampleCount / getRoot().inclusiveSampleCount;
 
   double _cpuConsumptionRatio;
 
@@ -191,18 +194,19 @@ class CpuStackFrame {
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
   /// This will be equal to the number of leaf nodes under this stack frame.
-  int calculateSampleCount() {
-    int count = leafCount;
+  int calculateInclusiveSampleCount() {
+    int count = exclusiveSampleCount;
     for (CpuStackFrame child in children) {
-      count += child.sampleCount;
+      count += child.inclusiveSampleCount;
     }
-    _sampleCount = count;
-    return _sampleCount;
+    _inclusiveSampleCount = count;
+    return _inclusiveSampleCount;
   }
 
   void _format(StringBuffer buf, String indent) {
     buf.writeln(
-        '$indent$id - children: ${children.length} - leafCount: $leafCount');
+        '$indent$id - children: ${children.length} - exclusiveSampleCount: '
+        '$exclusiveSampleCount');
     for (CpuStackFrame child in children) {
       child._format(buf, '  $indent');
     }
@@ -224,8 +228,8 @@ class CpuStackFrame {
       // resolution of the stack frame.
       buf.write('- ${msText(duration, fractionDigits: 2)} ');
     }
-    buf.write('($sampleCount ');
-    buf.write(sampleCount == 1 ? 'sample' : 'samples');
+    buf.write('($inclusiveSampleCount ');
+    buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
     buf.write(', ${percent2(cpuConsumptionRatio)})');
     return buf.toString();
   }
