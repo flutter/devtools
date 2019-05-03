@@ -32,9 +32,9 @@ bool _verboseDebugging = false;
 
 typedef OnLogCountStatusChanged = void Function(String status);
 
-typedef OnShowDetails = void Function({String text, InspectorTree tree});
+typedef OnShowDetails = void Function({String text, InspectorTreeState tree});
 
-typedef CreateLoggingTree = InspectorTree Function(
+typedef CreateLoggingTree = InspectorTreeState Function(
     {VoidCallback onSelectionChange});
 
 class LoggingDetailsController {
@@ -58,7 +58,7 @@ class LoggingDetailsController {
   /// type.
   final CreateLoggingTree createLoggingTree;
 
-  InspectorTree tree;
+  InspectorTreeState tree;
 
   void setData(LogData data) {
     this.data = data;

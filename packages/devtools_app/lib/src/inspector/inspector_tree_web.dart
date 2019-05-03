@@ -8,7 +8,7 @@ import '../ui/html_elements.dart';
 import 'inspector_tree.dart';
 
 /// Base class for all inspector tree classes that can be used on the web.
-mixin InspectorTreeWeb implements InspectorTree, CoreElementView {
+mixin InspectorTreeWebState implements InspectorTreeState, CoreElementView {
   void addKeyboardListeners(CoreElement element) {
     element.onKeyDown.listen((KeyboardEvent e) {
       // TODO(jacobr): PgUp/PgDown/Home/End?

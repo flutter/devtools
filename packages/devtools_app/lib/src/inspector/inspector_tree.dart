@@ -94,7 +94,7 @@ abstract class PaintEntry {
 
   DevToolsIcon get icon;
 
-  void attach(InspectorTree owner) {}
+  void attach(InspectorTreeState owner) {}
 }
 
 abstract class InspectorTreeNodeRenderBuilder<
@@ -112,13 +112,21 @@ abstract class InspectorTreeNodeRenderBuilder<
   InspectorTreeNodeRender build();
 }
 
-abstract class InspectorTreeNodeRender<E extends PaintEntry> {
-  InspectorTreeNodeRender(this.entries, this.size);
+abstract class InspectorTreeNodeRender<E> {
+  InspectorTreeNodeRender(this.entries);
 
   final List<E> entries;
+
+  PaintEntry hitTest(Offset location);
+}
+
+abstract class InspectorTreeNodeRendererLegacy<E extends PaintEntry>
+    extends InspectorTreeNodeRender<E> {
+  InspectorTreeNodeRendererLegacy(List<E> entries, this.size) : super(entries);
+
   final Size size;
 
-  void attach(InspectorTree owner, Offset offset) {
+  void attach(InspectorTreeState owner, Offset offset) {
     if (_owner != owner) {
       _owner = owner;
     }
@@ -134,11 +142,9 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
   Offset get offset => _offset;
   Offset _offset;
 
-  InspectorTree _owner;
-
   Rect get paintBounds => _offset & size;
 
-  PaintEntry hitTest(Offset location);
+  InspectorTreeState _owner;
 }
 
 /// This class could be refactored out to be a reasonable generic collapsible
@@ -508,38 +514,34 @@ class InspectorTreeRow {
   bool get isSelected => node.selected;
 }
 
-typedef InspectorTreeFactory = InspectorTree Function({
-  @required bool summaryTree,
-  @required FlutterTreeType treeType,
-  @required NodeAddedCallback onNodeAdded,
-  VoidCallback onSelectionChange,
-  TreeEventCallback onExpand,
-  TreeHoverEventCallback onHover,
-});
-
 /// Callback issued every time a node is added to the tree.
 typedef NodeAddedCallback = void Function(
     InspectorTreeNode node, RemoteDiagnosticsNode diagnosticsNode);
 
-abstract class InspectorTree {
-  InspectorTree({
+class InspectorTreeConfig {
+  InspectorTreeConfig({
     @required this.summaryTree,
     @required this.treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
+    @required this.onNodeAdded,
+    this.onSelectionChange,
     this.onExpand,
-    TreeHoverEventCallback onHover,
-  })  : _onHoverCallback = onHover,
-        _onSelectionChange = onSelectionChange,
-        _onNodeAdded = onNodeAdded;
+    this.onHover,
+  });
 
-  final TreeHoverEventCallback _onHoverCallback;
-
+  final bool summaryTree;
+  final FlutterTreeType treeType;
+  final NodeAddedCallback onNodeAdded;
+  final VoidCallback onSelectionChange;
   final TreeEventCallback onExpand;
+  final TreeHoverEventCallback onHover;
+}
 
-  final VoidCallback _onSelectionChange;
-
-  final NodeAddedCallback _onNodeAdded;
+// TODO(jacobr): make this class just extend the Flutter State class once the
+// move to Flutter is complete.
+mixin InspectorTreeState {
+  // Abstract method defined to avoid a direct Flutter dependency.
+  @protected
+  void setState(VoidCallback fn);
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
@@ -554,6 +556,14 @@ abstract class InspectorTree {
   InspectorTreeNode get selection => _selection;
   InspectorTreeNode _selection;
 
+  InspectorTreeConfig get config => _config;
+  InspectorTreeConfig _config;
+  set config(InspectorTreeConfig value) {
+    // Only allow setting config once.
+    assert(_config == null);
+    _config = value;
+  }
+
   set selection(InspectorTreeNode node) {
     if (node == _selection) return;
 
@@ -561,8 +571,8 @@ abstract class InspectorTree {
       _selection?.selected = false;
       _selection = node;
       _selection?.selected = true;
-      if (_onSelectionChange != null) {
-        _onSelectionChange();
+      if (config.onSelectionChange != null) {
+        config.onSelectionChange();
       }
     });
   }
@@ -570,13 +580,8 @@ abstract class InspectorTree {
   InspectorTreeNode get hover => _hover;
   InspectorTreeNode _hover;
 
-  final bool summaryTree;
-
-  final FlutterTreeType treeType;
-
   double lastContentWidth;
 
-  void setState(VoidCallback modifyState);
   InspectorTreeNode createNode();
 
   final List<InspectorTreeRow> cachedRows = [];
@@ -676,8 +681,8 @@ abstract class InspectorTree {
   }
 
   Future<void> onHover(InspectorTreeNode node, PaintEntry entry) async {
-    if (_onHoverCallback != null) {
-      _onHoverCallback(node, entry?.icon);
+    if (config.onHover != null) {
+      config.onHover(node, entry?.icon);
     }
 
     final diagnostic = node?.diagnostic;
@@ -823,8 +828,8 @@ abstract class InspectorTree {
     if (icon == expandArrow) {
       setState(() {
         row.node.isExpanded = true;
-        if (onExpand != null) {
-          onExpand(row.node);
+        if (config.onExpand != null) {
+          config.onExpand(row.node);
         }
       });
       return;
@@ -872,8 +877,8 @@ abstract class InspectorTree {
     assert(expandChildren != null);
     assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
-    if (_onNodeAdded != null) {
-      _onNodeAdded(node, diagnosticsNode);
+    if (config.onNodeAdded != null) {
+      config.onNodeAdded(node, diagnosticsNode);
     }
 
     if (diagnosticsNode.hasChildren ||
@@ -970,23 +975,7 @@ abstract class InspectorTree {
   }
 }
 
-abstract class InspectorTreeFixedRowHeight extends InspectorTree {
-  InspectorTreeFixedRowHeight({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  }) : super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
-
+mixin InspectorTreeFixedRowHeightState on InspectorTreeState {
   Rect getBoundingBox(InspectorTreeRow row);
 
   void scrollToRect(Rect targetRect);

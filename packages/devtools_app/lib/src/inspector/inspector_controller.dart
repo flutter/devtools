@@ -54,7 +54,8 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
 class InspectorController implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorService,
-    @required InspectorTreeFactory inspectorTreeFactory,
+    @required this.inspectorTree,
+    InspectorTreeState detailsTree,
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
@@ -64,7 +65,7 @@ class InspectorController implements InspectorServiceClient {
             InspectorObjectGroupManager(inspectorService, 'selection') {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
-    inspectorTree = inspectorTreeFactory(
+    inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
       treeType: treeType,
       onNodeAdded: _onNodeAdded,
@@ -75,7 +76,7 @@ class InspectorController implements InspectorServiceClient {
     if (isSummaryTree) {
       details = InspectorController(
         inspectorService: inspectorService,
-        inspectorTreeFactory: inspectorTreeFactory,
+        inspectorTree: detailsTree,
         treeType: treeType,
         parent: this,
         isSummaryTree: false,
@@ -115,8 +116,7 @@ class InspectorController implements InspectorServiceClient {
 
   InspectorController details;
 
-  InspectorTree inspectorTree;
-
+  InspectorTreeState inspectorTree;
   final FlutterTreeType treeType;
 
   final InspectorService inspectorService;
