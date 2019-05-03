@@ -17,12 +17,17 @@ class CpuProfileData {
     _processStackFrames(cpuProfileResponse);
     _setLeafCounts();
 
-    assert(
-      sampleCount != cpuProfileRoot.sampleCount,
-      'SampleCount from response ($sampleCount) != sample count from root'
-      ' (${cpuProfileRoot.sampleCount})',
-    );
+    // This should not happen, but if it does, print to console so we can catch
+    // the bug and investigate.
+    print('SampleCount from response ($sampleCount) != sample count from root'
+        ' (${cpuProfileRoot.sampleCount})');
   }
+
+  // Key fields from the response JSON.
+  static const name = 'name';
+  static const category = 'category';
+  static const parentId = 'parent';
+  static const stackFrameId = 'sf';
 
   final Response cpuProfileResponse;
   final Duration duration;
@@ -61,14 +66,14 @@ class CpuProfileData {
     );
 
     stackFramesJson.forEach((k, v) {
-      final String stackFrameName = v['name'];
+      final String stackFrameName = v[name];
 
       final stackFrame = CpuStackFrame(
         id: k,
         name: stackFrameName,
-        category: v['category'],
+        category: v[category],
       );
-      CpuStackFrame parent = stackFrames[v['parent']];
+      CpuStackFrame parent = stackFrames[v[parentId]];
 
       // TODO(kenzie): detect other native frames like "syscall" and "malloc"
       // once we get file paths in the stack frame json.
@@ -115,7 +120,7 @@ class CpuProfileData {
 
   void _setLeafCounts() {
     for (Map<String, dynamic> traceEvent in stackTraceEvents) {
-      final leafId = traceEvent['sf'];
+      final leafId = traceEvent[stackFrameId];
       stackFrames[leafId].leafCount++;
     }
   }
