@@ -80,6 +80,8 @@ class FramesBarPlotly {
     title: Title(
       text: 'Milliseconds',
     ),
+    titlefont: Font(color: colorToCss(defaultForeground)),
+    tickfont: Font(color: colorToCss(defaultForeground)),
     fixedrange: true,
   );
 
