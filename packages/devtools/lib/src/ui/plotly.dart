@@ -307,10 +307,10 @@ class Shape {
     String xref,
     String yref,
     String layer,
-    int x0,
-    int y0,
-    int x1,
-    int y1,
+    num x0,
+    num y0,
+    num x1,
+    num y1,
     Line line,
     String fillcolor,
     num opacity,
@@ -320,10 +320,10 @@ class Shape {
   external String get xref;
   external String get yref;
   external String get layer;
-  external int get x0;
-  external int get y0;
-  external int get x1;
-  external int get y1;
+  external num get x0;
+  external num get y0;
+  external num get x1;
+  external num get y1;
   external Line get line;
   external String get fillcolor;
   external num get opacity;
