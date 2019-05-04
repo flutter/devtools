@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../framework/framework.dart';
 import '../memory/memory_controller.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
@@ -168,6 +169,10 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
           case InstanceKind.kInt32x4List:
           case InstanceKind.kFloat32x4List:
           case InstanceKind.kFloat64x2List:
+            // TODO(terry): Display as lists of the relevant type not just bytes.
+            // TODO(terry): The display of data needs to be more structured on
+            // TODO(terry): how its displayed and navigated like DevConsole e.g.
+            // TODO(terry): [0..249],[250..499],[500..749],etc.
             return MemoryController.displayBytes(instance.bytes.codeUnits);
           case InstanceKind.kStackTrace:
             // TODO(terry): Handle StackTrace type.
@@ -175,12 +180,14 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
           case InstanceKind.kClosure:
             // TODO(terry): Handle Closure type.
             break;
-          // TODO(terry): Do we need to handle WeakProperty, Type, TypeParameter,
-          // TODO(terry): TypeDef or BoundedType?
+          default:
+            // TODO(terry): Need to handle WeakProperty, Type, TypeParameter,
+            // TODO(terry): TypeDef or BoundedType?
+            Framework.debugPrint('Unhandled InstanceKind ${field.value.kind}');
         }
       } catch (e) {
-        // TODO(terry): Cleanup when above TODO cleaned up.
-        print('Internal ERROR getChildren: $e');
+        // TODO(terry): Eliminate when above TODOs cleaned up.
+        Framework.debugPrint('getChildren: $e');
       }
     }
 

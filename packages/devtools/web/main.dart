@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html';
 import 'package:devtools/src/framework/framework_core.dart';
+import 'package:devtools/src/framework/framework.dart';
 import 'package:devtools/src/main.dart';
 import 'package:devtools/src/ui/analytics.dart' as ga;
 import 'package:devtools/src/ui/analytics_platform.dart' as ga_platform;
@@ -57,6 +58,7 @@ void main() {
   }, onError: (error, stack) {
     // Report exceptions with DevTools to GA, any user's Flutter app exceptions
     // are not collected.
+    Framework.debugPrint('${error.toString()}\n$stack.toString()');
     ga.error('${error.toString()}\n$stack.toString()', true);
   });
 }

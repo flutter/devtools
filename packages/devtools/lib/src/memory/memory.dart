@@ -415,18 +415,23 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       final dynamic value = field.value;
 
-      // TODO(terry): Replace two if's with switch (value.runtimeType)
-      if (value is Sentinel) {
-        return value.valueAsString;
-      }
-
-      if (value is TypeArgumentsRef) {
-        return value.name;
+      switch (value.runtimeType) {
+        case Sentinel:
+        case InstanceRef:
+          // TODO(terry): Sentinel returns <expired> need to be consistent label
+          // TODO(terry): we return for Sentinel type.
+          return value.valueAsString;
+        case TypeArgumentsRef:
+          return value.name;
+        case String:
+          return value;
       }
 
       final Instance ref = value;
 
-      if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
+      if (ref != null &&
+          ref.valueAsString != null &&
+          !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
       } else {
         final dynamic result = await serviceManager.service.invoke(

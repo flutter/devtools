@@ -20,6 +20,8 @@ import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
+typedef DebugPrintCallback = void Function(String message, {int wrapWidth});
+
 class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
@@ -41,6 +43,8 @@ class Framework {
 
     analyticsDialog = AnalyticsOptInDialog(this);
   }
+
+  static DebugPrintCallback debugPrint = Framework._debugPrint;
 
   final List<Screen> screens = <Screen>[];
 
@@ -294,6 +298,15 @@ class Framework {
       final bool isCurrent = current.ref == element.attributes['href'];
       e.toggleClass('active', isCurrent);
     }
+  }
+
+  // default debugPrint.
+  static void _debugPrint(String message, {int wrapWidth}) {
+    // TODO(terry): Only display when DevTools running and not isProfileBuild
+    //              (or debug).
+    // TODO(terry): Need to take message and inject newline after wrap width,
+    //              if we don't emit to console.
+    print('DevTools Debug: $message');
   }
 
   void showInfo({String message, String title, List<CoreElement> children}) {

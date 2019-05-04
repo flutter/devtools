@@ -138,7 +138,6 @@ class MemoryController {
   static const int _chunkSize = 20;
   static const int _maxBytes = 200;
   static const int _maxChunks = _maxBytes ~/ _chunkSize;
-
   static List<BoundField> displayBytes(List<int> bytes) {
     void _displayByte(StringBuffer buff, int index) {
       final byteStr = '${bytes[index]}';
