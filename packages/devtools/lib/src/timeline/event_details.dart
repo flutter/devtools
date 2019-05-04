@@ -386,6 +386,8 @@ class _CpuFlameChart extends CoreElement {
           stackFrameDetails.text = stackFrameDetailsDefaultText;
           stackFrameDetails.attribute('hidden', false);
         }
+      } on AssertionError catch (e) {
+        _updateChartWithError(e.toString());
       } catch (e) {
         _updateChartWithError('Error retrieving CPU profile: ${e.toString()}');
       }
