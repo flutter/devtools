@@ -32,8 +32,9 @@ class GTag {
   }
 
   static void exception(GtagException gaException) {
-    if (_gaCollectionAllowed())
+    if (_gaCollectionAllowed()) {
       _gTagCommandName(_event, _exception, gaException);
+    }
   }
 }
 

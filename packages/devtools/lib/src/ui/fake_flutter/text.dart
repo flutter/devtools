@@ -354,8 +354,9 @@ class TextStyle {
   }) {
     String newDebugLabel;
     assert(() {
-      if (this.debugLabel != null)
+      if (this.debugLabel != null) {
         newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      }
       return true;
     }());
     return TextStyle(
@@ -490,9 +491,10 @@ class TextStyle {
 
     String mergedDebugLabel;
     assert(() {
-      if (other.debugLabel != null || debugLabel != null)
+      if (other.debugLabel != null || debugLabel != null) {
         mergedDebugLabel =
             '(${debugLabel ?? _kDefaultDebugLabel}).merge(${other.debugLabel ?? _kDefaultDebugLabel})';
+      }
       return true;
     }());
 

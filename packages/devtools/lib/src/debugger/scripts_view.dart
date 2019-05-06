@@ -68,11 +68,12 @@ class PopupView extends CoreElement {
         html.document.getElementsByClassName('CodeMirror-gutters');
     if (elems.length == 2) {
       final html.Element firstGutter = elems[0].firstChild as html.Element;
-      if (firstGutter.style.display != 'none')
+      if (firstGutter.style.display != 'none') {
         // Compute total gutter width (parent has both BP and line # gutters).
         // Offset left a little (5px) so it's not aligned to the gutter's edge
         // (hard to visualize).
         leftPosition = firstGutter.parent.getBoundingClientRect().width + 5;
+      }
     }
 
     // Set the sourcePathDiv text color to the background color (hide filename).
@@ -193,8 +194,9 @@ class ScriptsView implements CoreElementView {
     switch (direction) {
       case ListDirection.pageDown:
         int itemIndex = startRow + itemsVis;
-        if (itemIndex > _items.items.length - 1)
+        if (itemIndex > _items.items.length - 1) {
           itemIndex = _items.items.length - 1;
+        }
         childToScrollTo = itemIndex;
         final int scrollPosition = startRow > 0 ? startRow * itemHeight : 0;
         scrollAndHilight(childToScrollTo, scrollPosition, top: true);
