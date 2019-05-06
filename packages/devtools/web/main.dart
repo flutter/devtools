@@ -22,8 +22,9 @@ void main() {
     // Show the opt-in dialog for collection analytics?
     if (ga.isGtagsEnabled() &
         (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
-            window.localStorage[ga_platform.devToolsProperty()].isEmpty))
+            window.localStorage[ga_platform.devToolsProperty()].isEmpty)) {
       framework.showAnalyticsDialog();
+    }
 
     if (!browser.isChrome) {
       final browserName =

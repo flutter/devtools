@@ -175,25 +175,29 @@ class _HasGoodToStringDeep extends Matcher {
       issues.add('Not terminated with a line break.');
     }
 
-    if (description.trim() != description)
+    if (description.trim() != description) {
       issues.add('Has trailing whitespace.');
+    }
 
     final List<String> lines = description.split('\n');
     if (lines.length < 2) issues.add('Does not have multiple lines.');
 
-    if (description.contains('Instance of '))
+    if (description.contains('Instance of ')) {
       issues.add('Contains text "Instance of ".');
+    }
 
     for (int i = 0; i < lines.length; ++i) {
       final String line = lines[i];
       if (line.isEmpty) issues.add('Line ${i + 1} is empty.');
 
-      if (line.trimRight() != line)
+      if (line.trimRight() != line) {
         issues.add('Line ${i + 1} has trailing whitespace.');
+      }
     }
 
-    if (_isAllTreeConnectorCharacters(lines.last))
+    if (_isAllTreeConnectorCharacters(lines.last)) {
       issues.add('Last line is all tree connector characters.');
+    }
 
     // If a toStringDeep method doesn't properly handle nested values that
     // contain line breaks it can fail to add the required prefixes to all
@@ -210,12 +214,14 @@ class _HasGoodToStringDeep extends Matcher {
           0, descriptionWithPrefixes.length - 1);
     }
     final List<String> linesWithPrefixes = descriptionWithPrefixes.split('\n');
-    if (!linesWithPrefixes.first.startsWith(prefixLineOne))
+    if (!linesWithPrefixes.first.startsWith(prefixLineOne)) {
       prefixIssues.add('First line does not contain expected prefix.');
+    }
 
     for (int i = 1; i < linesWithPrefixes.length; ++i) {
-      if (!linesWithPrefixes[i].startsWith(prefixOtherLines))
+      if (!linesWithPrefixes[i].startsWith(prefixOtherLines)) {
         prefixIssues.add('Line ${i + 1} does not contain the expected prefix.');
+      }
     }
 
     final StringBuffer errorDescription = StringBuffer();

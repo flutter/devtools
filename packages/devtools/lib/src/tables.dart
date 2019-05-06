@@ -302,8 +302,9 @@ class Table<T> extends Object with SetStateMixin {
         currentRowIndex < _tbody.element.children.length) {
       // removeRange doesn't work in dart:html (UnimplementedError) so we have
       // to remove them one at a time.
-      while (_tbody.element.children.length >= currentRowIndex)
+      while (_tbody.element.children.length >= currentRowIndex) {
         _tbody.element.children.removeLast();
+      }
     }
     // Set the "after" spacer to the correct height to keep the scroll size
     // correct for the number of rows to come after.

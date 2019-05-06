@@ -65,13 +65,14 @@ bool _computing = false;
 int _stillWaiting = 0;
 void waitForDimensionsComputed(String screenName) {
   Timer(const Duration(milliseconds: 100), () async {
-    if (ga.isDimensionsComputed)
+    if (ga.isDimensionsComputed) {
       ga.screen(screenName);
-    else {
-      if (_stillWaiting++ < 50)
+    } else {
+      if (_stillWaiting++ < 50) {
         waitForDimensionsComputed(screenName);
-      else
+      } else {
         print('Cancel waiting for dimensions.');
+      }
     }
   });
 }
@@ -83,8 +84,9 @@ void setupAndGaScreen(String screenName) async {
     if (!ga.isDimensionsComputed) {
       _stillWaiting++;
       waitForDimensionsComputed(screenName);
-    } else
+    } else {
       ga.screen(screenName);
+    }
   }
 }
 
