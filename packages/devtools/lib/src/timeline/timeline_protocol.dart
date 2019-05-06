@@ -19,8 +19,7 @@ import '../utils.dart';
 /// Switch this flag to true collect debug info from the timeline protocol.
 ///
 /// This will add a button to the timeline page that will download files with
-/// debug info on click. At runtime, this flag can be enabled by adding the
-/// query parameter 'debugTimeline=true'.
+/// debug info on click.
 bool debugTimeline = false;
 
 /// List that will store trace events in the order we receive them.
@@ -59,6 +58,12 @@ const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 class TimelineData {
   TimelineData({this.uiThreadId, this.gpuThreadId});
+
+  static const durationBeginPhase = 'B';
+  static const durationEndPhase = 'E';
+  static const durationCompletePhase = 'X';
+  static const flowStartPhase = 's';
+  static const flowEndPhase = 'f';
 
   // TODO(kenzie): Remove the following members once ui/gpu distinction changes
   //  and frame ids are available in the engine.
@@ -110,12 +115,12 @@ class TimelineData {
     // lead to us creating Timeline frames where we shouldn't and therefore
     // showing bad data to the user.
     switch (event.phase) {
-      case 's':
+      case flowStartPhase:
         if (event.name.contains('PipelineItem')) {
           _handleFrameStartEvent(event);
         }
         break;
-      case 'f':
+      case flowEndPhase:
         if (event.name.contains('PipelineItem')) {
           _handleFrameEndEvent(event);
         }
@@ -169,13 +174,13 @@ class TimelineData {
     }
 
     switch (event.phase) {
-      case 'B':
+      case durationBeginPhase:
         _handleDurationBeginEvent(eventWrapper);
         break;
-      case 'E':
+      case durationEndPhase:
         _handleDurationEndEvent(eventWrapper);
         break;
-      case 'X':
+      case durationCompletePhase:
         _handleDurationCompleteEvent(eventWrapper);
         break;
       // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
@@ -555,7 +560,13 @@ class TimelineData {
 
   bool _shouldProcessTraceEvent(TraceEvent event) {
     // ignore: prefer_collection_literals
-    final Set<String> phaseWhitelist = Set.of(['s', 'f', 'B', 'E', 'X']);
+    final Set<String> phaseWhitelist = Set.of([
+      flowStartPhase,
+      flowEndPhase,
+      durationBeginPhase,
+      durationEndPhase,
+      durationCompletePhase,
+    ]);
     return phaseWhitelist.contains(event.phase) &&
         // Do not process Garbage Collection events.
         event.category != 'GC' &&
@@ -872,15 +883,12 @@ class TimelineEvent {
   }
 
   void writeTraceToBuffer(StringBuffer buf) {
-    if (traceEvents.isNotEmpty) {
-      buf.writeln(beginTraceEventJson.toString());
-      for (TimelineEvent child in children) {
-        child.writeTraceToBuffer(buf);
-      }
-      for (var traceEvent in traceEvents.where(
-          (event) => !collectionEquals(event.json, beginTraceEventJson))) {
-        buf.writeln(traceEvent.json.toString());
-      }
+    buf.writeln(beginTraceEventJson);
+    for (TimelineEvent child in children) {
+      child.writeTraceToBuffer(buf);
+    }
+    if (!collectionEquals(beginTraceEventJson, endTraceEventJson)) {
+      buf.writeln(endTraceEventJson);
     }
   }
 
