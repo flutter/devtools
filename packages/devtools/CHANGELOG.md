@@ -1,3 +1,8 @@
+## 0.1.1 - Date TBD
+* Make timeline export format compatible with trace viewers such as chrome://tracing.
+* Memory instance viewer handles all InstanceKind lists.
+* CPU profiler bug fixes and improvements.
+
 ## 0.1.0 - 2019-05-02
 * Expose functionality to export timeline trace and CPU profiles.
 * Add "Clear" button to the timeline page.
