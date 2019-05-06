@@ -1,4 +1,4 @@
-## 0.1.1 - sTBD
+## 0.1.1 - TBD
 * Make timeline export format compatible with trace viewers such as chrome://tracing.
 * Memory instance viewer handles all InstanceKind lists.
 * CPU profiler bug fixes and improvements.
