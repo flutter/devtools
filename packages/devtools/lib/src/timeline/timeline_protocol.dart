@@ -698,7 +698,8 @@ class TimelineEvent {
 
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
-  Map<String, dynamic> get endTraceEventJson => traceEvents.last.json;
+  Map<String, dynamic> get endTraceEventJson =>
+      traceEvents.length > 1 ? traceEvents.last.json : null;
 
   bool get isUiEvent => type == TimelineEventType.ui;
 
@@ -888,7 +889,7 @@ class TimelineEvent {
     for (TimelineEvent child in children) {
       child.writeTraceToBuffer(buf);
     }
-    if (!collectionEquals(beginTraceEventJson, endTraceEventJson)) {
+    if (endTraceEventJson != null) {
       buf.writeln(endTraceEventJson);
     }
   }
@@ -898,7 +899,7 @@ class TimelineEvent {
     for (TimelineEvent event in children) {
       event.recordTrace();
     }
-    if (!collectionEquals(beginTraceEventJson, endTraceEventJson)) {
+    if (endTraceEventJson != null) {
       timelineTraceEvents.add(endTraceEventJson);
     }
   }
