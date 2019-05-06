@@ -214,12 +214,14 @@ class _HasGoodToStringDeep extends Matcher {
           0, descriptionWithPrefixes.length - 1);
     }
     final List<String> linesWithPrefixes = descriptionWithPrefixes.split('\n');
-    if (!linesWithPrefixes.first.startsWith(prefixLineOne))
+    if (!linesWithPrefixes.first.startsWith(prefixLineOne)) {
       prefixIssues.add('First line does not contain expected prefix.');
+    }
 
     for (int i = 1; i < linesWithPrefixes.length; ++i) {
-      if (!linesWithPrefixes[i].startsWith(prefixOtherLines))
+      if (!linesWithPrefixes[i].startsWith(prefixOtherLines)) {
         prefixIssues.add('Line ${i + 1} does not contain the expected prefix.');
+      }
     }
 
     final StringBuffer errorDescription = StringBuffer();
