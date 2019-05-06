@@ -405,9 +405,12 @@ class Size extends OffsetBase {
   /// left-hand-side operand minus the [Offset.dy] dimension of the
   /// right-hand-side operand.
   OffsetBase operator -(OffsetBase other) {
-    if (other is Size)
+    if (other is Size) {
       return Offset(width - other.width, height - other.height);
-    if (other is Offset) return Size(width - other.dx, height - other.dy);
+    }
+    if (other is Offset) {
+      return Size(width - other.dx, height - other.dy);
+    }
     throw ArgumentError(other);
   }
 
@@ -831,8 +834,9 @@ class Rect {
   static Rect lerp(Rect a, Rect b, double t) {
     assert(t != null);
     if (a == null && b == null) return null;
-    if (a == null)
+    if (a == null) {
       return Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+    }
     if (b == null) {
       final double k = 1.0 - t;
       return Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
@@ -1122,7 +1126,9 @@ class RRect {
   }
 
   RRect._fromList(List<double> list) {
-    for (int i = 0; i < _kDataSize; i += 1) _value[i] = list[i];
+    for (int i = 0; i < _kDataSize; i += 1) {
+      _value[i] = list[i];
+    }
   }
 
   static const int _kDataSize = 12;
@@ -1340,7 +1346,9 @@ class RRect {
       scale = _getMin(scale, scaled[8], scaled[10], width);
 
       if (scale < 1.0) {
-        for (int i = 4; i < _kDataSize; i += 1) scaled[i] *= scale;
+        for (int i = 4; i < _kDataSize; i += 1) {
+          scaled[i] *= scale;
+        }
       }
 
       _scaled = RRect._fromList(scaled);
@@ -1491,8 +1499,9 @@ class RRect {
         '${right.toStringAsFixed(1)}, '
         '${bottom.toStringAsFixed(1)}';
     if (tlRadius == trRadius && trRadius == brRadius && brRadius == blRadius) {
-      if (tlRadius.x == tlRadius.y)
+      if (tlRadius.x == tlRadius.y) {
         return 'RRect.fromLTRBR($rect, ${tlRadius.x.toStringAsFixed(1)})';
+      }
       return 'RRect.fromLTRBXY($rect, ${tlRadius.x.toStringAsFixed(1)}, ${tlRadius.y.toStringAsFixed(1)})';
     }
     return 'RRect.fromLTRBAndCorners('

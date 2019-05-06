@@ -133,12 +133,16 @@ Iterable<String> debugWordWrap(String message, int width,
     switch (mode) {
       case _WordWrapParseMode
           .inSpace: // at start of break point (or start of line); can't break until next break
-        while ((index < message.length) && (message[index] == ' ')) index += 1;
+        while ((index < message.length) && (message[index] == ' ')) {
+          index += 1;
+        }
         lastWordStart = index;
         mode = _WordWrapParseMode.inWord;
         break;
       case _WordWrapParseMode.inWord: // looking for a good break point
-        while ((index < message.length) && (message[index] != ' ')) index += 1;
+        while ((index < message.length) && (message[index] != ' ')) {
+          index += 1;
+        }
         mode = _WordWrapParseMode.atBreak;
         break;
       case _WordWrapParseMode.atBreak: // at start of break point
@@ -162,8 +166,9 @@ Iterable<String> debugWordWrap(String message, int width,
           if (lastWordEnd == index) {
             // we broke at current position
             // eat all the spaces, then set our start point
-            while ((index < message.length) && (message[index] == ' '))
+            while ((index < message.length) && (message[index] == ' ')) {
               index += 1;
+            }
             start = index;
             mode = _WordWrapParseMode.inWord;
           } else {

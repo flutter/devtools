@@ -974,8 +974,9 @@ class TextRenderer {
     }
 
     final TextTreeConfiguration config = node.textTreeConfiguration;
-    if (prefixOtherLines.isEmpty)
+    if (prefixOtherLines.isEmpty) {
       prefixOtherLines += config.prefixOtherLinesRootNode;
+    }
 
     if (node.style == DiagnosticsTreeStyle.truncateChildren) {
       // This style is different enough that it isn't worthwhile to reuse the
@@ -1035,8 +1036,9 @@ class TextRenderer {
         builder.write(
             config.isNameOnOwnLine || description.contains('\n') ? '\n' : ' ');
         if (description.contains('\n') &&
-            node.style == DiagnosticsTreeStyle.singleLine)
+            node.style == DiagnosticsTreeStyle.singleLine) {
           builder.prefixOtherLines += '  ';
+        }
       }
       builder.prefixOtherLines += children.isEmpty
           ? config.propertyPrefixNoChildren
@@ -1055,8 +1057,9 @@ class TextRenderer {
     builder.write(config.afterDescription);
     if (properties.isNotEmpty ||
         children.isNotEmpty ||
-        node.emptyBodyDescription != null)
+        node.emptyBodyDescription != null) {
       builder.write(config.afterDescriptionIfBody);
+    }
 
     if (config.lineBreakProperties) builder.write(config.lineBreak);
 
@@ -1343,10 +1346,12 @@ abstract class DiagnosticsNode {
     if (!showSeparator) data['showSeparator'] = showSeparator;
     if (level != DiagnosticLevel.info) data['level'] = describeEnum(level);
     if (showName == false) data['showName'] = showName;
-    if (emptyBodyDescription != null)
+    if (emptyBodyDescription != null) {
       data['emptyBodyDescription'] = emptyBodyDescription;
-    if (style != DiagnosticsTreeStyle.sparse)
+    }
+    if (style != DiagnosticsTreeStyle.sparse) {
       data['style'] = describeEnum(style);
+    }
 
     final bool hasChildren = getChildren().isNotEmpty;
     if (hasChildren) data['hasChildren'] = hasChildren;
@@ -1371,9 +1376,10 @@ abstract class DiagnosticsNode {
   }) {
     assert(style != null);
     assert(minLevel != null);
-    if (style == DiagnosticsTreeStyle.singleLine)
+    if (style == DiagnosticsTreeStyle.singleLine) {
       return toStringDeep(
           parentConfiguration: parentConfiguration, minLevel: minLevel);
+    }
 
     final String description =
         toDescription(parentConfiguration: parentConfiguration);
@@ -2307,8 +2313,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   Map<String, Object> toJsonMap() {
     final Map<String, Object> json = super.toJsonMap();
-    if (defaultValue != kNoDefaultValue)
+    if (defaultValue != kNoDefaultValue) {
       json['defaultValue'] = defaultValue.toString();
+    }
     if (ifEmpty != null) json['ifEmpty'] = ifEmpty;
     if (ifNull != null) json['ifNull'] = ifNull;
     if (tooltip != null) json['tooltip'] = tooltip;
@@ -2316,8 +2323,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (exception != null) json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (T is Diagnosticable || T is DiagnosticsNode)
+    if (T is Diagnosticable || T is DiagnosticsNode) {
       json['isDiagnosticableValue'] = true;
+    }
     if (!allowWrap) json['allowWrap'] = allowWrap;
     return json;
   }
@@ -2468,8 +2476,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (value == null && missingIfNull) return DiagnosticLevel.warning;
 
     // Use a low level when the value matches the default value.
-    if (defaultValue != kNoDefaultValue && value == defaultValue)
+    if (defaultValue != kNoDefaultValue && value == defaultValue) {
       return DiagnosticLevel.fine;
+    }
 
     return _defaultLevel;
   }

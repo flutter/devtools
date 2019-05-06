@@ -109,9 +109,10 @@ void main() async {
         else if (classStat.classRef.name == 'AppBar')
           checkHeapStat(classStat, 'AppBar',
               instanceCount: 1, accumulatorCount: 2);
-        else if (classStat.classRef.name == 'Center')
+        else if (classStat.classRef.name == 'Center') {
           checkHeapStat(classStat, 'Center',
               instanceCount: 1, accumulatorCount: 2);
+        }
       }
 
       await env.tearDownEnvironment();
@@ -135,9 +136,10 @@ void main() async {
         else if (classStat.classRef.name == 'AppBar')
           checkHeapStat(classStat, 'AppBar',
               instanceCount: 1, accumulatorCount: 0);
-        else if (classStat.classRef.name == 'Center')
+        else if (classStat.classRef.name == 'Center') {
           checkHeapStat(classStat, 'Center',
               instanceCount: 1, accumulatorCount: 0);
+        }
       }
 
       await env.tearDownEnvironment();

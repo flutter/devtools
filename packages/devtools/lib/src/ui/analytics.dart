@@ -277,23 +277,28 @@ Future<void> computeUserApplicationCustomGTagData() async {
     final macOS = await io.eval('Platform.isMacOS', isAlive: null);
     final windows = await io.eval('Platform.isWindows', isAlive: null);
 
-    if (android.valueAsString == 'true')
+    if (android.valueAsString == 'true') {
       userPlatformType = platformTypeAndroid;
-    else if (iOS.valueAsString == 'true')
+    } else if (iOS.valueAsString == 'true') {
       userPlatformType = platformTypeIOS;
-    else if (fuchsia.valueAsString == 'true')
+    } else if (fuchsia.valueAsString == 'true') {
       userPlatformType = platformTypeFuchsia;
-    else if (linux.valueAsString == 'true')
+    } else if (linux.valueAsString == 'true') {
       userPlatformType = platformTypeLinux;
-    else if (macOS.valueAsString == 'true')
+    } else if (macOS.valueAsString == 'true') {
       userPlatformType = platformTypeMac;
-    else if (windows.valueAsString == 'true')
+    } else if (windows.valueAsString == 'true') {
       userPlatformType = platformTypeWindows;
+    }
   }
 
   if (isAnyFlutterApp) {
-    if (isFlutter) userAppType = appTypeFlutter;
-    if (isWebApp) userAppType = appTypeWeb;
+    if (isFlutter) {
+      userAppType = appTypeFlutter;
+    }
+    if (isWebApp) {
+      userAppType = appTypeWeb;
+    }
   }
   userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
 

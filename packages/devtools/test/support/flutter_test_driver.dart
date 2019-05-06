@@ -369,8 +369,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> hotReload() => _restart(fullRestart: false);
 
   Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
-    if (_currentRunningAppId == null)
+    if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
+    }
 
     final dynamic hotReloadResp = await _sendRequest(
       'app.restart',
@@ -381,9 +382,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       },
     );
 
-    if (hotReloadResp == null || hotReloadResp['code'] != 0)
+    if (hotReloadResp == null || hotReloadResp['code'] != 0) {
       _throwErrorResponse(
           'Hot ${fullRestart ? 'restart' : 'reload'} request failed');
+    }
   }
 
   Future<int> detach() async {
@@ -461,8 +463,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _proc.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 
-    if (response['error'] != null || response['result'] == null)
+    if (response['error'] != null || response['result'] == null) {
       _throwErrorResponse('Unexpected error response');
+    }
 
     return response['result'];
   }
