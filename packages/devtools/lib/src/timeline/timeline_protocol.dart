@@ -23,11 +23,6 @@ import '../utils.dart';
 /// query parameter 'debugTimeline=true'.
 bool debugTimeline = false;
 
-/// List that will store trace events in the order we receive them.
-///
-/// When the export timeline button is clicked, this will be part of the output.
-List<Map<String, dynamic>> timelineTraceEvents = [];
-
 /// List that will store trace event json in the order we handle the events.
 ///
 /// This list is for debug purposes. When [debugTimeline] is true, we will be
@@ -39,6 +34,13 @@ List<Map<String, dynamic>> debugHandledTraceEvents = [];
 /// This buffer is for debug purposes. When [debugTimeline] is true, we will
 /// be able to dump this buffer to a downloadable text file.
 StringBuffer debugFrameTracking = StringBuffer();
+
+/// List that will store trace events in the order we process them.
+///
+/// These events are scrubbed so that bad data from the engine does not hinder
+/// event processing or trace viewing. When the export timeline button is
+/// clicked, this will be part of the output.
+List<Map<String, dynamic>> timelineTraceEvents = [];
 
 enum TimelineEventType {
   ui,
@@ -101,8 +103,6 @@ class TimelineData {
     event.type = _inferEventType(event);
 
     if (!_shouldProcessTraceEvent(event)) return;
-
-    timelineTraceEvents.add(event.json);
 
     // Process flow events now. Process Duration events after a delay. Only
     // process flow events whose name is PipelineItem, as these events mark the
@@ -478,6 +478,9 @@ class TimelineData {
       if (debugTimeline) {
         debugFrameTracking.writeln('Completing ${frame.id}');
       }
+      frame.uiEventFlow.recordTrace();
+      frame.gpuEventFlow.recordTrace();
+
       _frameCompleteController.add(frame);
       pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
@@ -881,6 +884,16 @@ class TimelineEvent {
           (event) => !collectionEquals(event.json, beginTraceEventJson))) {
         buf.writeln(traceEvent.json.toString());
       }
+    }
+  }
+
+  void recordTrace() {
+    timelineTraceEvents.add(beginTraceEventJson);
+    for (TimelineEvent event in children) {
+      event.recordTrace();
+    }
+    if (!collectionEquals(beginTraceEventJson, endTraceEventJson)) {
+      timelineTraceEvents.add(endTraceEventJson);
     }
   }
 

@@ -406,6 +406,45 @@ void main() {
       expect(frame.children.last.name, equals(layoutEvent.name));
     });
   });
+
+  test('recordTrace', () {
+    timelineTraceEvents.clear();
+    goldenUiTimelineEvent.recordTrace();
+    expect(
+      timelineTraceEvents,
+      equals([
+        _vsyncJson,
+        _animatorBeginFrameJson,
+        _frameworkWorkloadJson,
+        _engineBeginFrameJson,
+        _frameJson,
+        _animateJson,
+        _layoutJson,
+        _buildJson,
+        _compositingBitsJson,
+        _paintJson,
+        _compositingJson,
+        _semanticsJson,
+        _finalizeTreeJson,
+        _endEngineBeginFrameJson,
+        _endFrameworkWorkloadJson,
+        _endAnimatorBeginFrameJson,
+        _endVsyncJson,
+      ]),
+    );
+
+    timelineTraceEvents.clear();
+    goldenGpuTimelineEvent.recordTrace();
+    expect(
+      timelineTraceEvents,
+      equals([
+        _gpuRasterizerDrawJson,
+        _pipelineConsumeJson,
+        _endPipelineConsumeJson,
+        _endGpuRasterizerDrawJson,
+      ]),
+    );
+  });
 }
 
 Future<void> delayForEventProcessing() async {
