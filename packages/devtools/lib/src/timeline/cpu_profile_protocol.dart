@@ -122,7 +122,7 @@ class CpuProfileData {
   void _setExclusiveSampleCounts() {
     for (Map<String, dynamic> traceEvent in stackTraceEvents) {
       final leafId = traceEvent[stackFrameId];
-      stackFrames[leafId].exclusiveSampleCount++;
+      stackFrames[leafId]?.exclusiveSampleCount++;
     }
   }
 }
