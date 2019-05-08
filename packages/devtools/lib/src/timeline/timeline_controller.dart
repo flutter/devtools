@@ -5,7 +5,6 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
-import '../framework/framework.dart';
 import '../globals.dart';
 import 'timeline_protocol.dart';
 

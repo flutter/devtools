@@ -20,10 +20,6 @@ import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
-bool get importMode => _importMode;
-
-bool _importMode = false;
-
 class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
@@ -108,7 +104,7 @@ class Framework {
           }
           connectDialog.hide();
           importMessage.hide();
-          _importMode = true;
+          importMode = true;
           navigateTo(timelineScreenId);
           timelineScreen.loadFromImport(import);
           break;
@@ -131,7 +127,7 @@ class Framework {
   }
 
   void exitImportMode() {
-    _importMode = false;
+    importMode = false;
     if (serviceManager.connectedApp == null) {
       showConnectionDialog();
       showImportMessage();
