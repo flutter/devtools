@@ -48,7 +48,7 @@ class Framework {
 
   Screen current;
 
-  Screen previous;
+  Screen _previous;
 
   StatusLine globalStatus;
   StatusLine pageStatus;
@@ -134,7 +134,7 @@ class Framework {
       mainElement.clear();
       screens.removeWhere((screen) => screen.id == timelineScreenId);
     } else {
-      navigateTo(previous.id);
+      navigateTo(_previous.id);
     }
   }
 
@@ -205,14 +205,14 @@ class Framework {
     }
 
     if (current != null) {
-      previous = current;
+      _previous = current;
       current = null;
-      previous.exiting();
-      previous.visible = false;
+      _previous.exiting();
+      _previous.visible = false;
 
       pageStatus.removeAll();
 
-      _screenContents[previous].hidden(true);
+      _screenContents[_previous].hidden(true);
     }
 
     current = screen;
