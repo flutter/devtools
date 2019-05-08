@@ -14,6 +14,8 @@ import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'vm_service_wrapper.dart';
 
+// TODO(kenzie): add an offline service manager implementation.
+
 class ServiceConnectionManager {
   ServiceConnectionManager() {
     final isolateManager = IsolateManager();

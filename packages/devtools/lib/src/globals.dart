@@ -5,6 +5,10 @@
 import 'core/message_bus.dart';
 import 'service_manager.dart';
 
+/// Import mode is an offline mode where DevTools can operate on an imported
+/// data file.
+bool importMode = false;
+
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
 ServiceConnectionManager get serviceManager =>
