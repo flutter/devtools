@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
@@ -259,12 +258,6 @@ class TimelineScreen extends Screen {
   }
 
   void loadFromImport(Map<String, dynamic> json) {
-    pauseButton.attribute('hidden', true);
-    resumeButton.attribute('hidden', true);
-    clearButton.attribute('hidden', true);
-    exportButton.attribute('hidden', true);
-    exitImportModeButton.attribute('hidden', false);
-
     final List<dynamic> events = json['traceEvents'] ?? [];
     final traceEvents = events
         .cast<Map<String, dynamic>>()
@@ -278,6 +271,7 @@ class TimelineScreen extends Screen {
       return;
     }
 
+    _updateButtonStates();
     _clearTimeline();
 
     if (traceEvents.isNotEmpty) {
@@ -294,25 +288,12 @@ class TimelineScreen extends Screen {
   }
 
   void _exitImportMode() {
-    pauseButton.attribute('hidden', false);
-    resumeButton.attribute('hidden', false);
-    clearButton.attribute('hidden', false);
-    exportButton.attribute('hidden', false);
-    exitImportModeButton.attribute('hidden', true);
-
+    _updateButtonStates();
     _clearTimeline();
     _destroySplitter();
 
     timelineController.exitImportMode();
-
-    if (serviceManager.connectedApp == null) {
-      framework.showConnectionDialog();
-      framework.showImportMessage();
-      framework.mainElement.clear();
-      framework.screens.removeWhere((screen) => screen.id == timelineScreenId);
-    } else {
-      framework.navigateTo(framework.previous.id);
-    }
+    framework.exitImportMode();
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -336,20 +317,27 @@ class TimelineScreen extends Screen {
   void _pauseRecording() {
     timelineController.pause();
     ga.select(ga.timeline, ga.pause);
-    _updateButtons(paused: true);
+    _updateButtonStates();
     _updateListeningState();
   }
 
   void _resumeRecording() {
     timelineController.resume();
     ga.select(ga.timeline, ga.resume);
-    _updateButtons(paused: false);
+    _updateButtonStates();
     _updateListeningState();
   }
 
-  void _updateButtons({@required bool paused}) {
-    pauseButton.disabled = paused;
-    resumeButton.disabled = !paused;
+  void _updateButtonStates() {
+    pauseButton
+      ..disabled = timelineController.paused
+      ..attribute('hidden', importMode);
+    resumeButton
+      ..disabled = !timelineController.paused
+      ..attribute('hidden', importMode);
+    clearButton.attribute('hidden', importMode);
+    exportButton.attribute('hidden', importMode);
+    exitImportModeButton.attribute('hidden', !importMode);
   }
 
   void _updateListeningState() async {

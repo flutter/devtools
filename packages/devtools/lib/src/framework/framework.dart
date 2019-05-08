@@ -8,6 +8,7 @@ import 'dart:html' hide Screen;
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart';
 import '../main.dart';
 import '../timeline/timeline.dart';
 import '../ui/analytics.dart' as ga;
@@ -18,6 +19,10 @@ import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
+
+bool get importMode => _importMode;
+
+bool _importMode = false;
 
 class Framework {
   Framework() {
@@ -41,6 +46,8 @@ class Framework {
 
   final List<Screen> screens = <Screen>[];
 
+  final Map<Screen, CoreElement> _screenContents = {};
+
   final Completer<void> screensReady = Completer();
 
   Screen current;
@@ -55,29 +62,15 @@ class Framework {
   ImportMessage importMessage;
   AnalyticsOptInDialog analyticsDialog;
 
-  final Map<Screen, CoreElement> _screenContents = {};
-
   void _initDragDrop() {
-    window.addEventListener('dragenter', (e) => _onDragEnter(e), false);
     window.addEventListener('dragover', (e) => _onDragOver(e), false);
-    window.addEventListener('dragleave', (e) => _onDragLeave(e), false);
     window.addEventListener('drop', (e) => _onDrop(e), false);
-  }
-
-  void _onDragEnter(MouseEvent event) {
-    final Element dropTarget = event.target;
-    dropTarget.classes.add('over');
   }
 
   void _onDragOver(MouseEvent event) {
     // This is necessary to allow us to drop.
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
-  }
-
-  void _onDragLeave(MouseEvent event) {
-    final Element dropTarget = event.target;
-    dropTarget.classes.remove('over');
   }
 
   void _onDrop(MouseEvent event) async {
@@ -115,20 +108,37 @@ class Framework {
           }
           connectDialog.hide();
           importMessage.hide();
+          _importMode = true;
           navigateTo(timelineScreenId);
           timelineScreen.loadFromImport(import);
           break;
         default:
-          toast('The imported file is from an unrecognized source page: '
-              '$source.');
-          break;
+          toast(
+            'The imported file is from an unrecognized source page: $source. '
+            'All DevTools imports should contain a "source" field in the json '
+            'indicating which DevTools page the file was exported from (i.e. '
+            '"timeline", "inspector", etc.).',
+            hideDelay: const Duration(seconds: 10),
+          );
       }
     });
 
     try {
       reader.readAsText(droppedFile);
     } catch (e) {
-      toast('Could not load timeline from import: $e');
+      toast('Could not import file: $e');
+    }
+  }
+
+  void exitImportMode() {
+    _importMode = false;
+    if (serviceManager.connectedApp == null) {
+      showConnectionDialog();
+      showImportMessage();
+      mainElement.clear();
+      screens.removeWhere((screen) => screen.id == timelineScreenId);
+    } else {
+      navigateTo(previous.id);
     }
   }
 
@@ -319,12 +329,16 @@ class Framework {
     queryId('messages-container').children.clear();
   }
 
-  void toast(String message, {String title}) {
+  void toast(
+    String message, {
+    String title,
+    Duration hideDelay = Toast.defaultHideDelay,
+  }) {
     final Toast toast = Toast(title: title, message: message);
     final CoreElement toastContainer =
         CoreElement.from(queryId('toast-container'));
     toastContainer.add(toast);
-    toast.show();
+    toast.show(hideDelay: hideDelay);
   }
 
   void addGlobalAction(ActionButton action) {
@@ -510,13 +524,13 @@ class Toast extends CoreElement {
   }
 
   static const Duration animationDelay = Duration(milliseconds: 500);
-  static const Duration hideDelay = Duration(seconds: 4);
+  static const Duration defaultHideDelay = Duration(seconds: 4);
 
   final String title;
   @required
   final String message;
 
-  void show() async {
+  void show({Duration hideDelay = defaultHideDelay}) async {
     await window.animationFrame;
 
     element.style.left = '0px';
@@ -686,6 +700,8 @@ class ImportMessage {
           CoreElement('dd')
             ..add([
               p(
+                  // TODO(kenzie): support other generic chrome:trace files and
+                  // note their support here.
                   text: 'Supported file formats include any files exported from'
                       ' DevTools, such as the timeline export.',
                   c: 'note'),

@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:vm_service_lib/vm_service_lib.dart' hide TimelineEvent;
 
+import '../framework/framework.dart';
 import '../globals.dart';
 import 'timeline_protocol.dart';
 
@@ -27,8 +28,6 @@ class TimelineController {
   bool get paused => _paused;
 
   bool _paused = false;
-
-  bool _viewingTimelineImport = false;
 
   void pause() {
     _paused = true;
@@ -76,7 +75,7 @@ class TimelineController {
     );
 
     timelineData.onFrameCompleted.listen((frame) {
-      if (!_viewingTimelineImport) {
+      if (!importMode) {
         _frameAddedController.add(frame);
       }
     });
@@ -88,8 +87,6 @@ class TimelineController {
     List<TraceEvent> traceEvents,
     Map<String, dynamic> cpuProfile,
   ) {
-    _viewingTimelineImport = true;
-
     // TODO(kenzie): once each trace event has a ui/gpu distinction bit added to
     // the trace, we will not need to infer thread ids. Since we control the
     // format of the input, this is okay for now.
@@ -106,7 +103,7 @@ class TimelineController {
       // connected to a Flutter app, interacting with the app will attempt to
       // add frames to the timeline. This check prevents us from adding
       // unrelated frames to a timeline import.
-      if (traceEvents.contains(frame.pipelineItemStartTrace)) {
+      if (importMode && traceEvents.contains(frame.pipelineItemStartTrace)) {
         _frameAddedController.add(frame);
       }
     });
@@ -122,7 +119,10 @@ class TimelineController {
   }
 
   void exitImportMode() {
-    _viewingTimelineImport = false;
-    startTimeline();
+    // If the timeline controller had previously been started, restart it
+    // because [_timelineData] has changed since we entered import mode.
+    if (hasStarted) {
+      startTimeline();
+    }
   }
 }
