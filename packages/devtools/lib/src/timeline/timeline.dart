@@ -59,19 +59,6 @@ const Color highwater16msColor = mainUiColorSelectedLight;
 const Color hoverTextHighContrastColor = Colors.white;
 const Color hoverTextColor = Colors.black;
 
-// Matches our default button colors for light and dark theme.
-const exportTimelineButtonColor = ThemedColor(
-  Color(0xFF24292E),
-  Color(0xFF89B5F8),
-);
-
-const Icon exportTimeline = MaterialIcon(
-  'file_download',
-  exportTimelineButtonColor,
-  fontSize: 32,
-  iconWidth: 18,
-);
-
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 
 // TODO(devoncarew): show the list of widgets re-drawn during a frame
@@ -83,13 +70,24 @@ const Icon exportTimeline = MaterialIcon(
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
 // area associated with the selected frame.
 
+const Icon _exportTimelineIcon = MaterialIcon(
+  'file_download',
+  defaultButtonIconColor,
+  fontSize: 32,
+  iconWidth: 18,
+);
+
 const Icon _clear = MaterialIcon('block', defaultButtonIconColor);
+
+const Icon _exitImportModeIcon = MaterialIcon('clear', defaultButtonIconColor);
+
+const String timelineScreenId = 'timeline';
 
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
       : super(
           name: 'Timeline',
-          id: 'timeline',
+          id: timelineScreenId,
           iconClass: 'octicon-pulse',
           disabled: disabled,
           disabledTooltip: disabledTooltip,
@@ -103,20 +101,22 @@ class TimelineScreen extends Screen {
 
   EventDetails eventDetails;
 
-  bool _paused = false;
-
   PButton pauseButton;
   PButton resumeButton;
+  PButton clearButton;
+  PButton exportButton;
+  PButton exitImportModeButton;
   CoreElement upperButtonSection;
   CoreElement debugButtonSection;
+
+  split.Splitter splitter;
+  bool splitterConfigured = false;
 
   @override
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div()..layoutVertical();
-
-    bool splitterConfigured = false;
 
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
@@ -130,6 +130,24 @@ class TimelineScreen extends Screen {
           ..disabled = true
           ..click(_resumeRecording);
 
+    exportButton = PButton.icon('', _exportTimelineIcon)
+      ..small()
+      ..clazz('margin-left')
+      ..setAttribute('title', 'Export timeline')
+      ..click(_exportTimeline);
+
+    clearButton = PButton.icon('Clear', _clear)
+      ..small()
+      ..clazz('margin-left')
+      ..setAttribute('title', 'Clear timeline')
+      ..click(_clearTimeline);
+
+    exitImportModeButton = PButton.icon('Exit import mode', _exitImportModeIcon)
+      ..small()
+      ..setAttribute('title', 'Exit import mode to connect to a VM Service.')
+      ..setAttribute('hidden', 'true')
+      ..click(_exitImportMode);
+
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
@@ -138,18 +156,11 @@ class TimelineScreen extends Screen {
             pauseButton,
             resumeButton,
           ]),
-        PButton.icon('Clear', _clear)
-          ..small()
-          ..clazz('margin-left')
-          ..setAttribute('title', 'Clear timeline')
-          ..click(_clearTimeline),
+        clearButton,
+        exitImportModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
-        PButton.icon('', exportTimeline)
-          ..small()
-          ..clazz('margin-left')
-          ..setAttribute('title', 'Export timeline')
-          ..click(_exportTimeline),
+        exportButton,
       ]);
 
     _maybeAddDebugButtons();
@@ -194,18 +205,7 @@ class TimelineScreen extends Screen {
         flameChart.update(frame);
         eventDetails.reset();
 
-        // Configure the flame chart / event details splitter if we haven't
-        // already.
-        if (!splitterConfigured) {
-          split.flexSplit(
-            [flameChart.element, eventDetails.element],
-            horizontal: false,
-            gutterSize: defaultSplitterWidth,
-            sizes: [75, 25],
-            minSize: [60, 160],
-          );
-          splitterConfigured = true;
-        }
+        _configureSplitter();
       }
     });
 
@@ -225,6 +225,28 @@ class TimelineScreen extends Screen {
     return screenDiv;
   }
 
+  void _configureSplitter() {
+    // Configure the flame chart / event details splitter if we haven't
+    // already.
+    if (!splitterConfigured) {
+      splitter = split.flexSplit(
+        [flameChart.element, eventDetails.element],
+        horizontal: false,
+        gutterSize: defaultSplitterWidth,
+        sizes: [75, 25],
+        minSize: [60, 160],
+      );
+      splitterConfigured = true;
+    }
+  }
+
+  void _destroySplitter() {
+    if (splitterConfigured) {
+      splitter.destroy();
+      splitterConfigured = false;
+    }
+  }
+
   @override
   void entering() {
     _updateListeningState();
@@ -234,6 +256,63 @@ class TimelineScreen extends Screen {
   void exiting() {
     framework.clearMessages();
     _updateListeningState();
+  }
+
+  void loadFromImport(Map<String, dynamic> json) {
+    pauseButton.attribute('hidden', true);
+    resumeButton.attribute('hidden', true);
+    clearButton.attribute('hidden', true);
+    exportButton.attribute('hidden', true);
+    exitImportModeButton.attribute('hidden', false);
+
+    final List<dynamic> events = json['traceEvents'] ?? [];
+    final traceEvents = events
+        .cast<Map<String, dynamic>>()
+        .map((trace) => TraceEvent(trace))
+        .toList();
+    final Map<String, dynamic> cpuProfile = json['cpuProfile'] ?? {};
+
+    if (traceEvents.isEmpty && cpuProfile.isEmpty) {
+      framework.toast('Imported file does not contain timeline data.');
+      _exitImportMode();
+      return;
+    }
+
+    _clearTimeline();
+
+    if (traceEvents.isNotEmpty) {
+      timelineController.loadTimelineFromImport(traceEvents, cpuProfile);
+    } else {
+      framesBarChart.attribute('hidden', true);
+    }
+
+    if (cpuProfile.isNotEmpty) {
+      // TODO(kenzie): load CPU profile.
+    } else {
+      _destroySplitter();
+    }
+  }
+
+  void _exitImportMode() {
+    pauseButton.attribute('hidden', false);
+    resumeButton.attribute('hidden', false);
+    clearButton.attribute('hidden', false);
+    exportButton.attribute('hidden', false);
+    exitImportModeButton.attribute('hidden', true);
+
+    _clearTimeline();
+    _destroySplitter();
+
+    timelineController.exitImportMode();
+
+    if (serviceManager.connectedApp == null) {
+      framework.showConnectionDialog();
+      framework.showImportMessage();
+      framework.mainElement.clear();
+      framework.screens.removeWhere((screen) => screen.id == timelineScreenId);
+    } else {
+      framework.navigateTo(framework.previous.id);
+    }
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -255,17 +334,16 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
+    timelineController.pause();
     ga.select(ga.timeline, ga.pause);
-
     _updateButtons(paused: true);
-    _paused = true;
     _updateListeningState();
   }
 
   void _resumeRecording() {
+    timelineController.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtons(paused: false);
-    _paused = false;
     _updateListeningState();
   }
 
@@ -277,7 +355,7 @@ class TimelineScreen extends Screen {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    final bool shouldBeRunning = !_paused && isCurrentScreen;
+    final bool shouldBeRunning = !timelineController.paused && isCurrentScreen;
     final bool isRunning = !timelineController.paused;
 
     if (shouldBeRunning && isRunning && !timelineController.hasStarted) {
@@ -297,6 +375,9 @@ class TimelineScreen extends Screen {
   }
 
   void _clearTimeline() {
+    timelineTraceEvents.clear();
+    debugHandledTraceEvents.clear();
+    debugFrameTracking.clear();
     framesBarChart.frameUIgraph.reset();
     flameChart.attribute('hidden', true);
     eventDetails.attribute('hidden', true);
@@ -311,6 +392,7 @@ class TimelineScreen extends Screen {
       'cpuProfile': eventDetails.cpuProfileData != null
           ? eventDetails.cpuProfileData.cpuProfileResponse.json
           : {},
+      'source': timelineScreenId,
     };
     final now = DateTime.now();
     final timestamp =

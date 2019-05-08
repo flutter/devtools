@@ -144,7 +144,8 @@ CoreElement createHotRestartButton(Framework framework) {
 }
 
 Future<void> maybeShowDebugWarning(Framework framework) async {
-  if (!await serviceManager.connectedApp.isProfileBuild) {
+  if (serviceManager.connectedApp != null &&
+      !await serviceManager.connectedApp.isProfileBuild) {
     framework.showWarning(children: <CoreElement>[
       div(
           text: 'You are running your app in debug mode. Debug mode frame '

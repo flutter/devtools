@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' hide Screen;
 
 import 'package:meta/meta.dart';
 
 import '../main.dart';
+import '../timeline/timeline.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -21,6 +23,8 @@ class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
 
+    _initDragDrop();
+
     globalStatus = StatusLine(CoreElement.from(queryId('global-status')));
     pageStatus = StatusLine(CoreElement.from(queryId('page-status')));
     auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')));
@@ -29,6 +33,8 @@ class Framework {
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
     connectDialog = new ConnectDialog(this);
+
+    importMessage = new ImportMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
   }
@@ -39,14 +45,92 @@ class Framework {
 
   Screen current;
 
+  Screen previous;
+
   StatusLine globalStatus;
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
   ActionsContainer globalActions;
   ConnectDialog connectDialog;
+  ImportMessage importMessage;
   AnalyticsOptInDialog analyticsDialog;
 
   final Map<Screen, CoreElement> _screenContents = {};
+
+  void _initDragDrop() {
+    window.addEventListener('dragenter', (e) => _onDragEnter(e), false);
+    window.addEventListener('dragover', (e) => _onDragOver(e), false);
+    window.addEventListener('dragleave', (e) => _onDragLeave(e), false);
+    window.addEventListener('drop', (e) => _onDrop(e), false);
+  }
+
+  void _onDragEnter(MouseEvent event) {
+    final Element dropTarget = event.target;
+    dropTarget.classes.add('over');
+  }
+
+  void _onDragOver(MouseEvent event) {
+    // This is necessary to allow us to drop.
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  void _onDragLeave(MouseEvent event) {
+    final Element dropTarget = event.target;
+    dropTarget.classes.remove('over');
+  }
+
+  void _onDrop(MouseEvent event) async {
+    // Stop the browser from redirecting.
+    event.preventDefault();
+
+    final List<File> files = event.dataTransfer.files;
+    if (files.length > 1) {
+      toast('You cannot import more than one file.');
+      return;
+    }
+
+    final droppedFile = files.first;
+    if (droppedFile.type != 'application/json') {
+      toast('${droppedFile.type} is not a supported file type.\n Please import '
+          'a .json file.');
+      return;
+    }
+
+    final FileReader reader = FileReader();
+    reader.onLoad.listen((_) {
+      final Map<String, dynamic> import = jsonDecode(reader.result);
+      final source = import['source'];
+
+      // TODO(jacobr): add the inspector handling case here once the inspector
+      // can be exported.
+      switch (source) {
+        case timelineScreenId:
+          TimelineScreen timelineScreen = screens.firstWhere(
+            (screen) => screen.id == timelineScreenId,
+            orElse: () => null,
+          );
+          if (timelineScreen == null) {
+            addScreen(timelineScreen = TimelineScreen(disabled: false));
+          }
+          connectDialog.hide();
+          importMessage.hide();
+          navigateTo(timelineScreenId);
+          timelineScreen.loadFromImport(import);
+          break;
+        default:
+          toast('The imported file is from an unrecognized source page: '
+              '$source.');
+          break;
+      }
+    });
+
+    try {
+      reader.readAsText(droppedFile);
+    } catch (e) {
+      toast('Could not load timeline from import: $e');
+    }
+  }
 
   void addScreen(Screen screen) {
     screens.add(screen);
@@ -70,6 +154,10 @@ class Framework {
 
   void showConnectionDialog() {
     connectDialog.show();
+  }
+
+  void showImportMessage() {
+    importMessage.show();
   }
 
   void loadScreenFromLocation() async {
@@ -111,14 +199,14 @@ class Framework {
     }
 
     if (current != null) {
-      final Screen oldScreen = current;
+      previous = current;
       current = null;
-      oldScreen.exiting();
-      oldScreen.visible = false;
+      previous.exiting();
+      previous.visible = false;
 
       pageStatus.removeAll();
 
-      _screenContents[oldScreen].hidden(true);
+      _screenContents[previous].hidden(true);
     }
 
     current = screen;
@@ -571,10 +659,56 @@ class ConnectDialog {
 
       // Hide the dialog
       hide();
+
+      // Hide the import message.
+      framework.importMessage.hide();
     } else {
       throw 'not connected';
     }
   }
+}
+
+class ImportMessage {
+  ImportMessage(this.framework) {
+    parent = CoreElement.from(queryId('import-message'));
+    parent.layoutVertical();
+
+    parent.add([
+      h2(text: 'Load DevTools Snapshot'),
+      CoreElement('dl', classes: 'form-group')
+        ..add([
+          CoreElement('dt')
+            ..add([label(text: 'Load a DevTools snapshot from a local file.')]),
+          CoreElement('dd')
+            ..add([
+              p(text: 'Drag and drop a file anywhere on the page.', c: 'note'),
+            ]),
+          CoreElement('dd')
+            ..add([
+              p(
+                  text: 'Supported file formats include any files exported from'
+                      ' DevTools, such as the timeline export.',
+                  c: 'note'),
+            ]),
+        ])
+    ]);
+
+    hide();
+  }
+
+  final Framework framework;
+
+  CoreElement parent;
+
+  void show() {
+    parent.display = 'initial';
+  }
+
+  void hide() {
+    parent.display = 'none';
+  }
+
+  bool isVisible() => parent.display != 'none';
 }
 
 class AnalyticsOptInDialog {

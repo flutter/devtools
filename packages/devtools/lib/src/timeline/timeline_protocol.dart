@@ -102,7 +102,7 @@ class TimelineData {
     (_) => HeapPriorityQueue(),
   );
 
-  void processTraceEvent(TraceEvent event) {
+  void processTraceEvent(TraceEvent event, {bool immediate = false}) {
     // TODO(kenzie): stop manually setting the type once we have that data from
     // the engine.
     event.type = _inferEventType(event);
@@ -126,18 +126,25 @@ class TimelineData {
         }
         break;
       default:
-        // Add trace event to respective heap.
-        final heap = heaps[event.type.index];
-        heap.add(TraceEventWrapper(
-          event,
-          DateTime.now().millisecondsSinceEpoch,
-        ));
-        // Process duration events with a delay.
-        executeWithDelay(
-          Duration(milliseconds: traceEventDelay.inMilliseconds),
-          () => _processDurationEvents(heap),
-          executeNow: shouldProcessTopEvent(heap),
-        );
+        if (immediate) {
+          _processDurationEvent(TraceEventWrapper(
+            event,
+            DateTime.now().millisecondsSinceEpoch,
+          ));
+        } else {
+          // Add trace event to respective heap.
+          final heap = heaps[event.type.index];
+          heap.add(TraceEventWrapper(
+            event,
+            DateTime.now().millisecondsSinceEpoch,
+          ));
+          // Process duration events with a delay.
+          executeWithDelay(
+            Duration(milliseconds: traceEventDelay.inMilliseconds),
+            () => _processDurationEvents(heap),
+            executeNow: shouldProcessTopEvent(heap),
+          );
+        }
     }
   }
 
@@ -199,6 +206,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+
       pendingFrame.pipelineItemTime.start = Duration(
         microseconds: nullSafeMin(
           pendingFrame.pipelineItemTime.start?.inMicroseconds,
@@ -206,12 +214,17 @@ class TimelineData {
         ),
       );
 
+      if (pendingFrame.pipelineItemTime.start.inMicroseconds ==
+          event.timestampMicros) {
+        pendingFrame.pipelineItemStartTrace = event;
+      }
+
       if (debugTimeline) {
         debugHandledTraceEvents.add(event.json);
         debugFrameTracking.writeln('Frame Start: $id - ${event.json}');
       }
 
-      _maybeAddPendingEvents();
+      maybeAddPendingEvents();
     }
   }
 
@@ -220,6 +233,7 @@ class TimelineData {
       final String id = _getFrameId(event);
       final pendingFrame =
           pendingFrames.putIfAbsent(id, () => TimelineFrame(id));
+
       pendingFrame.pipelineItemTime.end = Duration(
         microseconds: nullSafeMax(
           pendingFrame.pipelineItemTime.end?.inMicroseconds,
@@ -227,12 +241,17 @@ class TimelineData {
         ),
       );
 
+      if (pendingFrame.pipelineItemTime.end.inMicroseconds ==
+          event.timestampMicros) {
+        pendingFrame.pipelineItemEndTrace = event;
+      }
+
       if (debugTimeline) {
         debugHandledTraceEvents.add(event.json);
         debugFrameTracking.writeln('Frame End: $id');
       }
 
-      _maybeAddPendingEvents();
+      maybeAddPendingEvents();
     }
   }
 
@@ -393,7 +412,7 @@ class TimelineData {
 
   /// Looks through [pendingEvents] and attempts to add events to frames in
   /// [pendingFrames].
-  void _maybeAddPendingEvents() {
+  void maybeAddPendingEvents() {
     if (pendingEvents.isEmpty || pendingFrames.isEmpty) return;
 
     // Sort _pendingEvents by their startTime. This ensures we will add the
@@ -438,7 +457,7 @@ class TimelineData {
     for (TimelineFrame frame in frames) {
       eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
-        _maybeAddPendingEvents();
+        maybeAddPendingEvents();
         break;
       }
     }
@@ -483,8 +502,12 @@ class TimelineData {
       if (debugTimeline) {
         debugFrameTracking.writeln('Completing ${frame.id}');
       }
+
+      // Record the trace events for this timeline frame.
+      timelineTraceEvents.add(frame.pipelineItemStartTrace.json);
       frame.uiEventFlow.recordTrace();
       frame.gpuEventFlow.recordTrace();
+      timelineTraceEvents.add(frame.pipelineItemEndTrace.json);
 
       _frameCompleteController.add(frame);
       pendingFrames.remove(frame.id);
@@ -636,6 +659,10 @@ class TimelineFrame {
   /// frame. We use this value to determine whether a TimelineEvent fits within
   /// the frame's time boundaries.
   final pipelineItemTime = TimeRange();
+
+  TraceEvent pipelineItemStartTrace;
+
+  TraceEvent pipelineItemEndTrace;
 
   bool get isWellFormed =>
       pipelineItemTime.start?.inMicroseconds != null &&

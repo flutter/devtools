@@ -19,11 +19,16 @@ class TimelineController {
   Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
 
   TimelineData _timelineData;
+
   TimelineData get timelineData => _timelineData;
+
   bool get hasStarted => timelineData != null;
 
   bool get paused => _paused;
+
   bool _paused = false;
+
+  bool _viewingTimelineImport = false;
 
   void pause() {
     _paused = true;
@@ -34,6 +39,7 @@ class TimelineController {
   }
 
   Future<void> startTimeline() async {
+    await serviceManager.serviceAvailable.future;
     await serviceManager.service
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     await serviceManager.service.clearVMTimeline();
@@ -64,13 +70,59 @@ class TimelineController {
       }
     }
 
-    final TimelineData timelineData =
-        TimelineData(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
+    final TimelineData timelineData = TimelineData(
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+    );
 
     timelineData.onFrameCompleted.listen((frame) {
-      _frameAddedController.add(frame);
+      if (!_viewingTimelineImport) {
+        _frameAddedController.add(frame);
+      }
     });
 
     _timelineData = timelineData;
+  }
+
+  void loadTimelineFromImport(
+    List<TraceEvent> traceEvents,
+    Map<String, dynamic> cpuProfile,
+  ) {
+    _viewingTimelineImport = true;
+
+    // TODO(kenzie): once each trace event has a ui/gpu distinction bit added to
+    // the trace, we will not need to infer thread ids. Since we control the
+    // format of the input, this is okay for now.
+    final uiThreadId = traceEvents.first.threadId;
+    final gpuThreadId = traceEvents.last.threadId;
+
+    final TimelineData timelineData = TimelineData(
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+    );
+
+    timelineData.onFrameCompleted.listen((frame) {
+      // Only add frames from the imported file. If DevTools is already
+      // connected to a Flutter app, interacting with the app will attempt to
+      // add frames to the timeline. This check prevents us from adding
+      // unrelated frames to a timeline import.
+      if (traceEvents.contains(frame.pipelineItemStartTrace)) {
+        _frameAddedController.add(frame);
+      }
+    });
+
+    _timelineData = timelineData;
+
+    for (TraceEvent event in traceEvents) {
+      timelineData.processTraceEvent(event, immediate: true);
+    }
+    // Make a final call to [maybeAddPendingEvents] so that we complete the
+    // processing for every frame in the import.
+    timelineData.maybeAddPendingEvents();
+  }
+
+  void exitImportMode() {
+    _viewingTimelineImport = false;
+    startTimeline();
   }
 }
