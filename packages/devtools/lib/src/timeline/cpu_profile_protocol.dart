@@ -122,10 +122,6 @@ class CpuProfileData {
   void _setExclusiveSampleCounts() {
     for (Map<String, dynamic> traceEvent in stackTraceEvents) {
       final leafId = traceEvent[stackFrameId];
-      print('cpuProfileResponse == ${cpuProfileResponse.json}');
-      print('stackTraceEvents.length == ${stackTraceEvents.length}');
-      print('stackFrames.length == ${stackFrames.length}');
-      print('stackFrames[$leafId] == null? ${stackFrames[leafId] == null}');
       assert(
         stackFrames[leafId] != null,
         'No StackFrame found for id $leafId. If you see this assertion, please '
