@@ -122,6 +122,13 @@ class CpuProfileData {
   void _setExclusiveSampleCounts() {
     for (Map<String, dynamic> traceEvent in stackTraceEvents) {
       final leafId = traceEvent[stackFrameId];
+      assert(
+        stackFrames[leafId] != null,
+        'No StackFrame found for id $leafId. If you see this assertion, please '
+        'export the timeline trace and send to kenzieschmoll@google.com. Note: '
+        'you must export the timeline immediately after the AssertionError is '
+        'thrown.',
+      );
       stackFrames[leafId]?.exclusiveSampleCount++;
     }
   }
