@@ -112,16 +112,18 @@ class Framework {
             break;
           default:
             toast(
-              'Could not import file. The imported file is from an unrecognized'
-              ' DevTools screen: $devToolsScreen.',
+              'Could not import file. The imported file is from '
+              '"$devToolsScreen", which is not supported by this version of '
+              'Dart DevTools. You may need to upgrade your version of Dart '
+              'DevTools to view this file.',
               hideDelay: Toast.extendedHideDelay,
             );
         }
       } on FormatException catch (e) {
         toast(
-          'SyntaxError in imported file: "$e". Please make sure the imported '
-          'file is a Dart DevTools file, and check that it has not been '
-          'modified.',
+          'JSON syntax error in imported file: "$e". Please make sure the '
+          'imported file is a Dart DevTools file, and check that it has not '
+          'been modified.',
           hideDelay: Toast.extendedHideDelay,
         );
         return;
@@ -549,7 +551,7 @@ class Toast extends CoreElement {
 
   static const Duration animationDelay = Duration(milliseconds: 500);
   static const Duration defaultHideDelay = Duration(seconds: 4);
-  static const Duration extendedHideDelay = Duration(seconds: 8);
+  static const Duration extendedHideDelay = Duration(seconds: 10);
 
   final String title;
   @required
