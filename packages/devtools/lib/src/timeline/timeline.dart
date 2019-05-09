@@ -101,14 +101,23 @@ class TimelineScreen extends Screen {
   EventDetails eventDetails;
 
   PButton pauseButton;
+
   PButton resumeButton;
+
   PButton clearButton;
+
   PButton exportButton;
+
   PButton exitImportModeButton;
+
   CoreElement upperButtonSection;
+
   CoreElement debugButtonSection;
 
+  bool _manuallyPaused = false;
+
   split.Splitter splitter;
+
   bool splitterConfigured = false;
 
   @override
@@ -249,12 +258,14 @@ class TimelineScreen extends Screen {
   @override
   void entering() {
     _updateListeningState();
+    _updateButtonStates();
   }
 
   @override
   void exiting() {
     framework.clearMessages();
     _updateListeningState();
+    _updateButtonStates();
   }
 
   void loadFromImport(Map<String, dynamic> json) {
@@ -288,12 +299,17 @@ class TimelineScreen extends Screen {
   }
 
   void _exitImportMode() {
-    _updateButtonStates();
+    // This needs to be called first because [framework.exitImportMode()] will
+    // remove all elements from the dom if we are not connected to an app.
+    // Performing operations from [_clearTimeline()] on elements that have been
+    // removed will throw exceptions, so we need to maintain this order.
     _clearTimeline();
-    _destroySplitter();
-
     timelineController.exitImportMode();
+    // This needs to be called before we update the button states because it
+    // changes the value of [importMode], which the button states depend on.
     framework.exitImportMode();
+    _updateButtonStates();
+    _destroySplitter();
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -303,9 +319,11 @@ class TimelineScreen extends Screen {
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
 
-      for (Map<String, dynamic> json in events) {
-        final TraceEvent e = TraceEvent(json);
-        timelineController.timelineData?.processTraceEvent(e);
+      if (!importMode && !_manuallyPaused && !timelineController.paused) {
+        for (Map<String, dynamic> json in events) {
+          final TraceEvent e = TraceEvent(json);
+          timelineController.timelineData?.processTraceEvent(e);
+        }
       }
     });
   }
@@ -315,6 +333,7 @@ class TimelineScreen extends Screen {
   }
 
   void _pauseRecording() {
+    _manuallyPaused = true;
     timelineController.pause();
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
@@ -322,6 +341,7 @@ class TimelineScreen extends Screen {
   }
 
   void _resumeRecording() {
+    _manuallyPaused = false;
     timelineController.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
@@ -330,10 +350,10 @@ class TimelineScreen extends Screen {
 
   void _updateButtonStates() {
     pauseButton
-      ..disabled = timelineController.paused
+      ..disabled = _manuallyPaused
       ..attribute('hidden', importMode);
     resumeButton
-      ..disabled = !timelineController.paused
+      ..disabled = !_manuallyPaused
       ..attribute('hidden', importMode);
     clearButton.attribute('hidden', importMode);
     exportButton.attribute('hidden', importMode);
@@ -343,7 +363,7 @@ class TimelineScreen extends Screen {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    final bool shouldBeRunning = !timelineController.paused && isCurrentScreen;
+    final bool shouldBeRunning = !_manuallyPaused && isCurrentScreen;
     final bool isRunning = !timelineController.paused;
 
     if (shouldBeRunning && isRunning && !timelineController.hasStarted) {
@@ -370,6 +390,7 @@ class TimelineScreen extends Screen {
     flameChart.attribute('hidden', true);
     eventDetails.attribute('hidden', true);
     eventDetails.reset();
+    _destroySplitter();
   }
 
   void _exportTimeline() {
@@ -380,7 +401,7 @@ class TimelineScreen extends Screen {
       'cpuProfile': eventDetails.cpuProfileData != null
           ? eventDetails.cpuProfileData.cpuProfileResponse.json
           : {},
-      'source': timelineScreenId,
+      'dartDevToolsScreen': timelineScreenId,
     };
     final now = DateTime.now();
     final timestamp =

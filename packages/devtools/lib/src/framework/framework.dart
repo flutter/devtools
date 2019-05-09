@@ -33,6 +33,8 @@ class Framework {
     globalActions =
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
+    // TODO(kenzie): refactor [connectDialog] and [importMessage] to be in their
+    // own screen.
     connectDialog = new ConnectDialog(this);
 
     importMessage = new ImportMessage(this);
@@ -82,18 +84,28 @@ class Framework {
     final droppedFile = files.first;
     if (droppedFile.type != 'application/json') {
       toast('${droppedFile.type} is not a supported file type.\n Please import '
-          'a .json file.');
+          'a .json file that was exported from Dart DevTools.');
       return;
     }
 
     final FileReader reader = FileReader();
     reader.onLoad.listen((_) {
       final Map<String, dynamic> import = jsonDecode(reader.result);
-      final source = import['source'];
+      final devToolsScreen = import['dartDevToolsScreen'];
+
+      if (devToolsScreen == null) {
+        toast(
+          'The imported file is not a Dart DevTools file. At this time, '
+          'DevTools only supports importing files that were originally exported'
+          ' from DevTools.',
+          hideDelay: Toast.extendedHideDelay,
+        );
+        return;
+      }
 
       // TODO(jacobr): add the inspector handling case here once the inspector
       // can be exported.
-      switch (source) {
+      switch (devToolsScreen) {
         case timelineScreenId:
           TimelineScreen timelineScreen = screens.firstWhere(
             (screen) => screen.id == timelineScreenId,
@@ -110,11 +122,9 @@ class Framework {
           break;
         default:
           toast(
-            'The imported file is from an unrecognized source page: $source. '
-            'All DevTools imports should contain a "source" field in the json '
-            'indicating which DevTools page the file was exported from (i.e. '
-            '"timeline", "inspector", etc.).',
-            hideDelay: const Duration(seconds: 10),
+            'Could not import file. The imported file is from an unrecognized '
+            'DevTools screen: $devToolsScreen.',
+            hideDelay: Toast.extendedHideDelay,
           );
       }
     });
@@ -521,6 +531,7 @@ class Toast extends CoreElement {
 
   static const Duration animationDelay = Duration(milliseconds: 500);
   static const Duration defaultHideDelay = Duration(seconds: 4);
+  static const Duration extendedHideDelay = Duration(seconds: 8);
 
   final String title;
   @required

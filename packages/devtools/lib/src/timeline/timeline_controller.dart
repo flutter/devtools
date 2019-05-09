@@ -74,9 +74,7 @@ class TimelineController {
     );
 
     timelineData.onFrameCompleted.listen((frame) {
-      if (!importMode) {
-        _frameAddedController.add(frame);
-      }
+      _frameAddedController.add(frame);
     });
 
     _timelineData = timelineData;
@@ -98,13 +96,7 @@ class TimelineController {
     );
 
     timelineData.onFrameCompleted.listen((frame) {
-      // Only add frames from the imported file. If DevTools is already
-      // connected to a Flutter app, interacting with the app will attempt to
-      // add frames to the timeline. This check prevents us from adding
-      // unrelated frames to a timeline import.
-      if (importMode && traceEvents.contains(frame.pipelineItemStartTrace)) {
-        _frameAddedController.add(frame);
-      }
+      _frameAddedController.add(frame);
     });
 
     _timelineData = timelineData;
