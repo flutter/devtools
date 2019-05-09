@@ -83,49 +83,50 @@ class Framework {
 
     final droppedFile = files.first;
     if (droppedFile.type != 'application/json') {
-      toast('${droppedFile.type} is not a supported file type.\n Please import '
+      toast('${droppedFile.type} is not a supported file type. Please import '
           'a .json file that was exported from Dart DevTools.');
       return;
     }
 
     final FileReader reader = FileReader();
     reader.onLoad.listen((_) {
-      final Map<String, dynamic> import = jsonDecode(reader.result);
-      final devToolsScreen = import['dartDevToolsScreen'];
+      try {
+        final Map<String, dynamic> import = jsonDecode(reader.result);
+        final devToolsScreen = import['dartDevToolsScreen'];
 
-      if (devToolsScreen == null) {
+        if (devToolsScreen == null) {
+          toast(
+            'The imported file is not a Dart DevTools file. At this time, '
+            'DevTools only supports importing files that were originally '
+            'exported from DevTools.',
+            hideDelay: Toast.extendedHideDelay,
+          );
+          return;
+        }
+
+        // TODO(jacobr): add the inspector handling case here once the inspector
+        // can be exported.
+        switch (devToolsScreen) {
+          case timelineScreenId:
+            _importTimeline(import);
+            break;
+          default:
+            toast(
+              'Could not import file. The imported file is from '
+              '"$devToolsScreen", which is not supported by this version of '
+              'Dart DevTools. You may need to upgrade your version of Dart '
+              'DevTools to view this file.',
+              hideDelay: Toast.extendedHideDelay,
+            );
+        }
+      } on FormatException catch (e) {
         toast(
-          'The imported file is not a Dart DevTools file. At this time, '
-          'DevTools only supports importing files that were originally exported'
-          ' from DevTools.',
+          'JSON syntax error in imported file: "$e". Please make sure the '
+          'imported file is a Dart DevTools file, and check that it has not '
+          'been modified.',
           hideDelay: Toast.extendedHideDelay,
         );
         return;
-      }
-
-      // TODO(jacobr): add the inspector handling case here once the inspector
-      // can be exported.
-      switch (devToolsScreen) {
-        case timelineScreenId:
-          TimelineScreen timelineScreen = screens.firstWhere(
-            (screen) => screen.id == timelineScreenId,
-            orElse: () => null,
-          );
-          if (timelineScreen == null) {
-            addScreen(timelineScreen = TimelineScreen(disabled: false));
-          }
-          connectDialog.hide();
-          importMessage.hide();
-          importMode = true;
-          navigateTo(timelineScreenId);
-          timelineScreen.loadFromImport(import);
-          break;
-        default:
-          toast(
-            'Could not import file. The imported file is from an unrecognized '
-            'DevTools screen: $devToolsScreen.',
-            hideDelay: Toast.extendedHideDelay,
-          );
       }
     });
 
@@ -134,6 +135,25 @@ class Framework {
     } catch (e) {
       toast('Could not import file: $e');
     }
+  }
+
+  void _importTimeline(Map<String, dynamic> import) {
+    TimelineScreen timelineScreen = screens.firstWhere(
+      (screen) => screen.id == timelineScreenId,
+      orElse: () => null,
+    );
+    if (timelineScreen == null) {
+      addScreen(timelineScreen = TimelineScreen(disabled: false));
+    }
+    _enterImportMode();
+    navigateTo(timelineScreenId);
+    timelineScreen.loadFromImport(import);
+  }
+
+  void _enterImportMode() {
+    connectDialog.hide();
+    importMessage.hide();
+    importMode = true;
   }
 
   void exitImportMode() {
@@ -531,7 +551,7 @@ class Toast extends CoreElement {
 
   static const Duration animationDelay = Duration(milliseconds: 500);
   static const Duration defaultHideDelay = Duration(seconds: 4);
-  static const Duration extendedHideDelay = Duration(seconds: 8);
+  static const Duration extendedHideDelay = Duration(seconds: 10);
 
   final String title;
   @required
