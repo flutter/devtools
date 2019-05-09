@@ -344,12 +344,18 @@ enum TimeUnit {
 }
 
 class TimeRange {
+  TimeRange({this.singleAssignment = true});
+
+  final bool singleAssignment;
+
   Duration get start => _start;
 
   Duration _start;
 
   set start(Duration value) {
-    assert(_start == null);
+    if (singleAssignment) {
+      assert(_start == null);
+    }
     _start = value;
   }
 
@@ -358,7 +364,9 @@ class TimeRange {
   Duration _end;
 
   set end(Duration value) {
-    assert(_end == null);
+    if (singleAssignment) {
+      assert(_end == null);
+    }
     _end = value;
   }
 
