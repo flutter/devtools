@@ -344,16 +344,16 @@ enum TimeUnit {
 }
 
 class TimeRange {
-  TimeRange({this.immutable = true});
+  TimeRange({this.singleAssignment = true});
 
-  final bool immutable;
+  final bool singleAssignment;
 
   Duration get start => _start;
 
   Duration _start;
 
   set start(Duration value) {
-    if (immutable) {
+    if (singleAssignment) {
       assert(_start == null);
     }
     _start = value;
@@ -364,7 +364,7 @@ class TimeRange {
   Duration _end;
 
   set end(Duration value) {
-    if (immutable) {
+    if (singleAssignment) {
       assert(_end == null);
     }
     _end = value;
