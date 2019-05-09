@@ -10,6 +10,7 @@ import 'dart:html' as html;
 
 import 'package:js/js.dart';
 
+import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 
 @JS('getDevToolsPropertyID')
@@ -91,7 +92,10 @@ void setupAndGaScreen(String screenName) async {
 }
 
 void setupDimensions() async {
-  if (ga.isGtagsEnabled() && !ga.isDimensionsComputed && !_computing) {
+  if (serviceManager.connectedApp != null &&
+      ga.isGtagsEnabled() &&
+      !ga.isDimensionsComputed &&
+      !_computing) {
     _computing = true;
     // While spinning up DevTools first time wait until dimensions data is
     // available before first GA event sent.

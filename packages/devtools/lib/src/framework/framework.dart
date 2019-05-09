@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' hide Screen;
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart';
 import '../main.dart';
+import '../timeline/timeline.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -21,6 +24,8 @@ class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
 
+    _initDragDrop();
+
     globalStatus = StatusLine(CoreElement.from(queryId('global-status')));
     pageStatus = StatusLine(CoreElement.from(queryId('page-status')));
     auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')));
@@ -28,25 +33,120 @@ class Framework {
     globalActions =
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
+    // TODO(kenzie): refactor [connectDialog] and [importMessage] to be in their
+    // own screen.
     connectDialog = new ConnectDialog(this);
+
+    importMessage = new ImportMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
   }
 
   final List<Screen> screens = <Screen>[];
 
+  final Map<Screen, CoreElement> _screenContents = {};
+
   final Completer<void> screensReady = Completer();
 
   Screen current;
+
+  Screen _previous;
 
   StatusLine globalStatus;
   StatusLine pageStatus;
   StatusLine auxiliaryStatus;
   ActionsContainer globalActions;
   ConnectDialog connectDialog;
+  ImportMessage importMessage;
   AnalyticsOptInDialog analyticsDialog;
 
-  final Map<Screen, CoreElement> _screenContents = {};
+  void _initDragDrop() {
+    window.addEventListener('dragover', (e) => _onDragOver(e), false);
+    window.addEventListener('drop', (e) => _onDrop(e), false);
+  }
+
+  void _onDragOver(MouseEvent event) {
+    // This is necessary to allow us to drop.
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  void _onDrop(MouseEvent event) async {
+    // Stop the browser from redirecting.
+    event.preventDefault();
+
+    final List<File> files = event.dataTransfer.files;
+    if (files.length > 1) {
+      toast('You cannot import more than one file.');
+      return;
+    }
+
+    final droppedFile = files.first;
+    if (droppedFile.type != 'application/json') {
+      toast('${droppedFile.type} is not a supported file type.\n Please import '
+          'a .json file that was exported from Dart DevTools.');
+      return;
+    }
+
+    final FileReader reader = FileReader();
+    reader.onLoad.listen((_) {
+      final Map<String, dynamic> import = jsonDecode(reader.result);
+      final devToolsScreen = import['dartDevToolsScreen'];
+
+      if (devToolsScreen == null) {
+        toast(
+          'The imported file is not a Dart DevTools file. At this time, '
+          'DevTools only supports importing files that were originally exported'
+          ' from DevTools.',
+          hideDelay: Toast.extendedHideDelay,
+        );
+        return;
+      }
+
+      // TODO(jacobr): add the inspector handling case here once the inspector
+      // can be exported.
+      switch (devToolsScreen) {
+        case timelineScreenId:
+          TimelineScreen timelineScreen = screens.firstWhere(
+            (screen) => screen.id == timelineScreenId,
+            orElse: () => null,
+          );
+          if (timelineScreen == null) {
+            addScreen(timelineScreen = TimelineScreen(disabled: false));
+          }
+          connectDialog.hide();
+          importMessage.hide();
+          importMode = true;
+          navigateTo(timelineScreenId);
+          timelineScreen.loadFromImport(import);
+          break;
+        default:
+          toast(
+            'Could not import file. The imported file is from an unrecognized '
+            'DevTools screen: $devToolsScreen.',
+            hideDelay: Toast.extendedHideDelay,
+          );
+      }
+    });
+
+    try {
+      reader.readAsText(droppedFile);
+    } catch (e) {
+      toast('Could not import file: $e');
+    }
+  }
+
+  void exitImportMode() {
+    importMode = false;
+    if (serviceManager.connectedApp == null) {
+      showConnectionDialog();
+      showImportMessage();
+      mainElement.clear();
+      screens.removeWhere((screen) => screen.id == timelineScreenId);
+    } else {
+      navigateTo(_previous.id);
+    }
+  }
 
   void addScreen(Screen screen) {
     screens.add(screen);
@@ -70,6 +170,10 @@ class Framework {
 
   void showConnectionDialog() {
     connectDialog.show();
+  }
+
+  void showImportMessage() {
+    importMessage.show();
   }
 
   void loadScreenFromLocation() async {
@@ -111,14 +215,14 @@ class Framework {
     }
 
     if (current != null) {
-      final Screen oldScreen = current;
+      _previous = current;
       current = null;
-      oldScreen.exiting();
-      oldScreen.visible = false;
+      _previous.exiting();
+      _previous.visible = false;
 
       pageStatus.removeAll();
 
-      _screenContents[oldScreen].hidden(true);
+      _screenContents[_previous].hidden(true);
     }
 
     current = screen;
@@ -231,12 +335,16 @@ class Framework {
     queryId('messages-container').children.clear();
   }
 
-  void toast(String message, {String title}) {
+  void toast(
+    String message, {
+    String title,
+    Duration hideDelay = Toast.defaultHideDelay,
+  }) {
     final Toast toast = Toast(title: title, message: message);
     final CoreElement toastContainer =
         CoreElement.from(queryId('toast-container'));
     toastContainer.add(toast);
-    toast.show();
+    toast.show(hideDelay: hideDelay);
   }
 
   void addGlobalAction(ActionButton action) {
@@ -422,13 +530,14 @@ class Toast extends CoreElement {
   }
 
   static const Duration animationDelay = Duration(milliseconds: 500);
-  static const Duration hideDelay = Duration(seconds: 4);
+  static const Duration defaultHideDelay = Duration(seconds: 4);
+  static const Duration extendedHideDelay = Duration(seconds: 8);
 
   final String title;
   @required
   final String message;
 
-  void show() async {
+  void show({Duration hideDelay = defaultHideDelay}) async {
     await window.animationFrame;
 
     element.style.left = '0px';
@@ -571,10 +680,58 @@ class ConnectDialog {
 
       // Hide the dialog
       hide();
+
+      // Hide the import message.
+      framework.importMessage.hide();
     } else {
       throw 'not connected';
     }
   }
+}
+
+class ImportMessage {
+  ImportMessage(this.framework) {
+    parent = CoreElement.from(queryId('import-message'));
+    parent.layoutVertical();
+
+    parent.add([
+      h2(text: 'Load DevTools Snapshot'),
+      CoreElement('dl', classes: 'form-group')
+        ..add([
+          CoreElement('dt')
+            ..add([label(text: 'Load a DevTools snapshot from a local file.')]),
+          CoreElement('dd')
+            ..add([
+              p(text: 'Drag and drop a file anywhere on the page.', c: 'note'),
+            ]),
+          CoreElement('dd')
+            ..add([
+              p(
+                  // TODO(kenzie): support other generic chrome:trace files and
+                  // note their support here.
+                  text: 'Supported file formats include any files exported from'
+                      ' DevTools, such as the timeline export.',
+                  c: 'note'),
+            ]),
+        ])
+    ]);
+
+    hide();
+  }
+
+  final Framework framework;
+
+  CoreElement parent;
+
+  void show() {
+    parent.display = 'initial';
+  }
+
+  void hide() {
+    parent.display = 'none';
+  }
+
+  bool isVisible() => parent.display != 'none';
 }
 
 class AnalyticsOptInDialog {
