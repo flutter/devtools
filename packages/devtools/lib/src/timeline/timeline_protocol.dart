@@ -635,7 +635,7 @@ class TimelineFrame {
   /// This stores the start and end times for the pipeline item event for this
   /// frame. We use this value to determine whether a TimelineEvent fits within
   /// the frame's time boundaries.
-  final pipelineItemTime = TimeRange();
+  final pipelineItemTime = TimeRange(immutable: false);
 
   bool get isWellFormed =>
       pipelineItemTime.start?.inMicroseconds != null &&

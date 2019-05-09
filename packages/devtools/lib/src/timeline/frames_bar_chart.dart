@@ -213,6 +213,7 @@ class PlotlyDivGraph extends CoreElement {
     _frames.clear();
     _frameIndex = FramesBarPlotly.xCoordFirst;
     _lastPlottedFrameIndex = -1;
+    currentSelection = null;
     createPlot(element);
   }
 }
