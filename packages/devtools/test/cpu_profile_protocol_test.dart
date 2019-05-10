@@ -32,6 +32,27 @@ void main() {
         equals(goldenCpuProfileWithNativeFrames),
       );
     });
+
+    test('process response with missing leaf frame', () async {
+      bool _runTest() {
+        expect(
+          () {
+            CpuProfileData(
+              sampleResponseWithMissingLeafFrame,
+              const Duration(milliseconds: 10), // 10 is arbitrary.
+            );
+          },
+          // TODO(kenzie): replace with [isAssertionError] once
+          // https://github.com/dart-lang/matcher/pull/112 lands and is available
+          // in version of dart-lang/matcher we use.
+          throwsA(const TypeMatcher<AssertionError>()),
+        );
+        return true;
+      }
+
+      // Only run this test if asserts are enabled.
+      assert(_runTest());
+    });
   });
 
   group('CpuStackFrame', () {
@@ -408,6 +429,69 @@ final sampleResponseWithNativeFrames = Response.parse({
       'cat': 'Dart',
       'args': {'mode': 'basic'},
       'sf': '140357727781376-6'
+    },
+  ]
+});
+
+final sampleResponseWithMissingLeafFrame = Response.parse({
+  'type': '_CpuProfileTimeline',
+  'samplePeriod': 1000,
+  'stackDepth': 128,
+  'sampleCount': 3,
+  'timeSpan': 0.003678,
+  'timeOriginMicros': 47377796685,
+  'timeExtentMicros': 3678,
+  'stackFrames': {
+    // Missing stack frame 140357727781376-0
+    '140357727781376-1': {
+      'category': 'Dart',
+      'name': 'thread_start',
+    },
+    '140357727781376-2': {
+      'category': 'Dart',
+      'name': '_pthread_start',
+      'parent': '140357727781376-1',
+    },
+    '140357727781376-3': {
+      'category': 'Dart',
+      'name': '_WidgetsFlutterBinding&BindingBase',
+    },
+    '140357727781376-4': {
+      'category': 'Dart',
+      'name': 'BuildOwner.buildScope',
+      'parent': '140357727781376-3',
+    },
+  },
+  'traceEvents': [
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377796685,
+      'cat': 'Dart',
+      'args': {'mode': 'basic'},
+      'sf': '140357727781376-0'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377797975,
+      'cat': 'Dart',
+      'args': {'mode': 'basic'},
+      'sf': '140357727781376-2'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377799063,
+      'cat': 'Dart',
+      'args': {'mode': 'basic'},
+      'sf': '140357727781376-4'
     },
   ]
 });
