@@ -34,18 +34,24 @@ void main() {
     });
 
     test('process response with missing leaf frame', () async {
-      expect(
-        () {
-          CpuProfileData(
-            sampleResponseWithMissingLeafFrame,
-            const Duration(milliseconds: 10), // 10 is arbitrary.
-          );
-        },
-        // TODO(kenzie): replace with [isAssertionError] once
-        // https://github.com/dart-lang/matcher/pull/112 lands and is available
-        // in version of dart-lang/matcher we use.
-        throwsA(const TypeMatcher<AssertionError>()),
-      );
+      bool _runTest() {
+        expect(
+          () {
+            CpuProfileData(
+              sampleResponseWithMissingLeafFrame,
+              const Duration(milliseconds: 10), // 10 is arbitrary.
+            );
+          },
+          // TODO(kenzie): replace with [isAssertionError] once
+          // https://github.com/dart-lang/matcher/pull/112 lands and is available
+          // in version of dart-lang/matcher we use.
+          throwsA(const TypeMatcher<AssertionError>()),
+        );
+        return true;
+      }
+
+      // Only run this test if asserts are enabled.
+      assert(_runTest());
     });
   });
 
