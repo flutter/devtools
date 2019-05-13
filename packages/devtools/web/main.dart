@@ -45,7 +45,7 @@ void main() {
     }).then((bool connected) {
       if (!connected) {
         framework.showConnectionDialog();
-        framework.showImportMessage();
+        framework.showSnapshotMessage();
         // Clear the main element so it stops displaying "Loading..."
         // TODO(jacobr): display a message explaining how to launch a Flutter
         // application from the command line and connect to it with DevTools.

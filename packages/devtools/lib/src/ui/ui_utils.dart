@@ -144,7 +144,7 @@ CoreElement createHotRestartButton(Framework framework) {
 }
 
 Future<void> maybeShowDebugWarning(Framework framework) async {
-  if (!importMode &&
+  if (!snapshotMode &&
       serviceManager.connectedApp != null &&
       !await serviceManager.connectedApp.isProfileBuild) {
     framework.showWarning(children: <CoreElement>[

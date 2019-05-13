@@ -225,3 +225,9 @@
     top: 50%;
     left: 0;
 }
+
+#flame-chart-error .error-action {
+    color: var(--clickable-text) !important;
+    text-decoration: underline;
+    cursor: pointer;
+}

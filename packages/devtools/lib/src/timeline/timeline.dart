@@ -78,9 +78,8 @@ const Icon _exportTimelineIcon = MaterialIcon(
 
 const Icon _clear = MaterialIcon('block', defaultButtonIconColor);
 
-const Icon _exitImportModeIcon = MaterialIcon('clear', defaultButtonIconColor);
-
-const String timelineScreenId = 'timeline';
+const Icon _exitSnapshotModeIcon =
+    MaterialIcon('clear', defaultButtonIconColor);
 
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
@@ -90,7 +89,12 @@ class TimelineScreen extends Screen {
           iconClass: 'octicon-pulse',
           disabled: disabled,
           disabledTooltip: disabledTooltip,
-        );
+        ) {
+    onLoadTimelineSnapshot.listen((snapshot) {
+      _updateButtonStates();
+      _clearTimeline();
+    });
+  }
 
   TimelineController timelineController = TimelineController();
 
@@ -108,7 +112,7 @@ class TimelineScreen extends Screen {
 
   PButton exportButton;
 
-  PButton exitImportModeButton;
+  PButton exitSnapshotModeButton;
 
   CoreElement upperButtonSection;
 
@@ -150,11 +154,14 @@ class TimelineScreen extends Screen {
       ..setAttribute('title', 'Clear timeline')
       ..click(_clearTimeline);
 
-    exitImportModeButton = PButton.icon('Exit import mode', _exitImportModeIcon)
+    exitSnapshotModeButton = PButton.icon(
+      'Exit snapshot mode',
+      _exitSnapshotModeIcon,
+    )
       ..small()
-      ..setAttribute('title', 'Exit import mode to connect to a VM Service.')
+      ..setAttribute('title', 'Exit snapshot mode to connect to a VM Service.')
       ..setAttribute('hidden', 'true')
-      ..click(_exitImportMode);
+      ..click(_exitSnapshotMode);
 
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
@@ -165,7 +172,7 @@ class TimelineScreen extends Screen {
             resumeButton,
           ]),
         clearButton,
-        exitImportModeButton,
+        exitSnapshotModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         exportButton,
@@ -268,46 +275,17 @@ class TimelineScreen extends Screen {
     _updateButtonStates();
   }
 
-  void loadFromImport(Map<String, dynamic> json) {
-    final List<dynamic> events = json['traceEvents'] ?? [];
-    final traceEvents = events
-        .cast<Map<String, dynamic>>()
-        .map((trace) => TraceEvent(trace))
-        .toList();
-    final Map<String, dynamic> cpuProfile = json['cpuProfile'] ?? {};
-
-    if (traceEvents.isEmpty && cpuProfile.isEmpty) {
-      framework.toast('Imported file does not contain timeline data.');
-      _exitImportMode();
-      return;
-    }
-
-    _updateButtonStates();
-    _clearTimeline();
-
-    if (traceEvents.isNotEmpty) {
-      timelineController.loadTimelineFromImport(traceEvents, cpuProfile);
-    } else {
-      framesBarChart.attribute('hidden', true);
-    }
-
-    if (cpuProfile.isNotEmpty) {
-      // TODO(kenzie): load CPU profile.
-    } else {
-      _destroySplitter();
-    }
-  }
-
-  void _exitImportMode() {
-    // This needs to be called first because [framework.exitImportMode()] will
+  void _exitSnapshotMode() {
+    // This needs to be called first because [framework.exitSnapshotMode()] will
     // remove all elements from the dom if we are not connected to an app.
     // Performing operations from [_clearTimeline()] on elements that have been
     // removed will throw exceptions, so we need to maintain this order.
     _clearTimeline();
-    timelineController.exitImportMode();
+    eventDetails.clearCurrentSnapshot();
+    timelineController.exitSnapshotMode();
     // This needs to be called before we update the button states because it
-    // changes the value of [importMode], which the button states depend on.
-    framework.exitImportMode();
+    // changes the value of [snapshotMode], which the button states depend on.
+    framework.exitSnapshotMode();
     _updateButtonStates();
     _destroySplitter();
   }
@@ -319,7 +297,7 @@ class TimelineScreen extends Screen {
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
 
-      if (!importMode && !_manuallyPaused && !timelineController.paused) {
+      if (!snapshotMode && !_manuallyPaused && !timelineController.paused) {
         for (Map<String, dynamic> json in events) {
           final TraceEvent e = TraceEvent(json);
           timelineController.timelineData?.processTraceEvent(e);
@@ -351,13 +329,13 @@ class TimelineScreen extends Screen {
   void _updateButtonStates() {
     pauseButton
       ..disabled = _manuallyPaused
-      ..attribute('hidden', importMode);
+      ..attribute('hidden', snapshotMode);
     resumeButton
       ..disabled = !_manuallyPaused
-      ..attribute('hidden', importMode);
-    clearButton.attribute('hidden', importMode);
-    exportButton.attribute('hidden', importMode);
-    exitImportModeButton.attribute('hidden', !importMode);
+      ..attribute('hidden', snapshotMode);
+    clearButton.attribute('hidden', snapshotMode);
+    exportButton.attribute('hidden', snapshotMode);
+    exitSnapshotModeButton.attribute('hidden', !snapshotMode);
   }
 
   void _updateListeningState() async {
@@ -396,17 +374,15 @@ class TimelineScreen extends Screen {
   void _exportTimeline() {
     // TODO(kenzie): add analytics for this. It would be helpful to know how
     // complex the problems are that users are trying to solve.
-    final Map<String, dynamic> json = {
-      'traceEvents': timelineTraceEvents,
-      'cpuProfile': eventDetails.cpuProfileData != null
-          ? eventDetails.cpuProfileData.cpuProfileResponse.json
-          : {},
-      'dartDevToolsScreen': timelineScreenId,
-    };
+    final snapshot = TimelineSnapshot.from(
+      timelineTraceEvents,
+      eventDetails.cpuProfileData?.cpuProfileResponse?.json,
+      eventDetails.event,
+    );
     final now = DateTime.now();
     final timestamp =
         '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    downloadFile(jsonEncode(json), 'timeline_$timestamp.json');
+    downloadFile(snapshot.encodedJson, 'timeline_$timestamp.json');
   }
 
   /// Adds a button to the timeline that will dump debug information to text
