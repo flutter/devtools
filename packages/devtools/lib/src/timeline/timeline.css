@@ -226,8 +226,8 @@
     left: 0;
 }
 
-#flame-chart-error .error-action {
-    color: var(--clickable-text) !important;
+#flame-chart-message .message-action {
+    color: var(--link-color) !important;
     text-decoration: underline;
     cursor: pointer;
 }

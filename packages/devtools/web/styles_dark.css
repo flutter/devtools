@@ -8,7 +8,7 @@
     --border-color-dark: #484848;
     --border-color: #484848;
     --counter-color: #999;
-    --clickable-text: #9ebef9;
+    --link-color: #9ebef9;
     --dark-shadow-color: #999;
     --default-background-rgb: 32, 33, 36;
     --default-background: rgba(var(--default-background-rgb), 1);

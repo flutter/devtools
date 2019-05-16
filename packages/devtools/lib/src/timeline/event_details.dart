@@ -32,11 +32,13 @@ bool _defaultCollapseNativeSamplesValue = false;
 Stream<bool> get onCollapseNativeSamplesEvent =>
     _collapseNativeSamplesController.stream;
 
-final _loadCpuProfileSnapshotController =
+/// StreamController that handles loading a CPU profile from snapshot.
+final StreamController<TimelineSnapshot> _loadProfileSnapshotController =
     StreamController<TimelineSnapshot>.broadcast();
 
-Stream<TimelineSnapshot> get _onLoadCpuProfileSnapshot =>
-    _loadCpuProfileSnapshotController.stream;
+/// Stream for CPU profile snapshot loads.
+Stream<TimelineSnapshot> get _onLoadProfileSnapshot =>
+    _loadProfileSnapshotController.stream;
 
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
@@ -64,11 +66,11 @@ class EventDetails extends CoreElement {
     onLoadTimelineSnapshot.listen((snapshot) {
       clearCurrentSnapshot();
       if (snapshot.hasCpuProfile) {
-        _loadCpuProfileSnapshotController.add(snapshot);
+        _loadProfileSnapshotController.add(snapshot);
       }
     });
 
-    _onLoadCpuProfileSnapshot.listen((snapshot) {
+    _onLoadProfileSnapshot.listen((snapshot) {
       attribute('hidden', false);
       _setTitleText(
         snapshot.selectedEvent.name,
@@ -101,7 +103,9 @@ class EventDetails extends CoreElement {
 
   CoreElement collapseNativeCheckbox;
 
-  TimelineEvent event;
+  TimelineEvent get event => _event;
+
+  TimelineEvent _event;
 
   CoreElement _title;
 
@@ -197,9 +201,9 @@ class EventDetails extends CoreElement {
   }
 
   Future<void> update(FrameFlameChartItem item) async {
-    event = item.event;
+    _event = item.event;
 
-    _setTitleText(event.name, event.time.duration);
+    _setTitleText(_event.name, _event.time.duration);
     _title.element.style
       ..backgroundColor = colorToCss(item.backgroundColor)
       ..color = colorToCss(item.defaultTextColor);
@@ -355,7 +359,7 @@ class _CpuFlameChart extends CoreElement {
 
   bool lastCollapseNativeSamplesValue = _defaultCollapseNativeSamplesValue;
 
-  bool showingError = false;
+  bool showingMessage = false;
 
   Future<void> _getCpuProfile() async {
     final Response response =
@@ -373,29 +377,29 @@ class _CpuFlameChart extends CoreElement {
 
   void _drawFlameChart() {
     if (cpuProfileData.stackFrames.isEmpty) {
-      final snapshotModeError = div()
+      final snapshotModeMessage = div()
         ..add(span(
             text:
                 'CPU profiling is not yet available for snapshots. You can only'
                 ' view '));
       if (snapshot != null && snapshot.hasCpuProfile) {
-        snapshotModeError
+        snapshotModeMessage
           ..add(span(text: 'the '))
-          ..add(span(text: 'CPU profile', c: 'error-action')
-            ..click(() => _loadCpuProfileSnapshotController.add(snapshot)))
+          ..add(span(text: 'CPU profile', c: 'message-action')
+            ..click(() => _loadProfileSnapshotController.add(snapshot)))
           ..add(span(text: ' included in the snapshot.'));
       } else {
-        snapshotModeError.add(span(
+        snapshotModeMessage.add(span(
             text:
                 'a CPU profile if it is included in the imported snapshot file.'));
       }
 
-      final generalError = div(
-          text: 'CPU profile unavailable for time range'
-              ' [${event.time.start.inMicroseconds} -'
-              ' ${event.time.end.inMicroseconds}]');
-
-      _updateChartWithError(snapshotMode ? snapshotModeError : generalError);
+      _updateChartWithMessage(snapshotMode
+          ? snapshotModeMessage
+          : div(
+              text: 'CPU profile unavailable for time range'
+                  ' [${event.time.start.inMicroseconds} -'
+                  ' ${event.time.end.inMicroseconds}]'));
       return;
     }
 
@@ -425,16 +429,17 @@ class _CpuFlameChart extends CoreElement {
 
     add(canvas.element);
 
-    if (!showingError) {
-      stackFrameDetails.text = stackFrameDetailsDefaultText;
-      stackFrameDetails.attribute('hidden', false);
+    if (!showingMessage) {
+      stackFrameDetails
+        ..text = stackFrameDetailsDefaultText
+        ..attribute('hidden', false);
     }
   }
 
-  void _updateChartWithError(CoreElement error) {
-    showingError = true;
-    add(error
-      ..id = 'flame-chart-error'
+  void _updateChartWithMessage(CoreElement message) {
+    showingMessage = true;
+    add(message
+      ..id = 'flame-chart-message'
       ..clazz('message'));
     stackFrameDetails.attribute('hidden', true);
   }
@@ -453,9 +458,9 @@ class _CpuFlameChart extends CoreElement {
         await _getCpuProfile();
         _drawFlameChart();
       } on AssertionError catch (e) {
-        _updateChartWithError(div(text: e.toString()));
+        _updateChartWithMessage(div(text: e.toString()));
       } catch (e) {
-        _updateChartWithError(
+        _updateChartWithMessage(
             div(text: 'Error retrieving CPU profile: ${e.toString()}'));
       }
 
@@ -511,18 +516,18 @@ class _CpuFlameChart extends CoreElement {
     stackFrameDetails.text = stackFrameDetailsDefaultText;
     stackFrameDetails.attribute('hidden', true);
 
-    _removeError();
+    _removeMessage();
 
     cpuProfileData = null;
   }
 
-  void _removeError() {
-    element.children.removeWhere((e) => e.id == 'flame-chart-error');
-    showingError = false;
+  void _removeMessage() {
+    element.children.removeWhere((e) => e.id == 'flame-chart-message');
+    showingMessage = false;
   }
 
   void _loadFromSnapshot(TimelineSnapshot snapshot) {
-    _removeError();
+    _removeMessage();
     this.snapshot = snapshot;
     event = snapshot.selectedEvent;
     cpuProfileData = CpuProfileData(
