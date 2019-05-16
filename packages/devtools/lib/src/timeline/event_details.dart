@@ -23,13 +23,6 @@ import 'flame_chart_canvas.dart';
 import 'frame_flame_chart.dart';
 import 'timeline_protocol.dart';
 
-final _collapseNativeSamplesController = StreamController<bool>.broadcast();
-
-bool _defaultCollapseNativeSamplesValue = false;
-
-Stream<bool> get onCollapseNativeSamplesEvent =>
-    _collapseNativeSamplesController.stream;
-
 class EventDetails extends CoreElement {
   EventDetails() : super('div') {
     flex();
@@ -66,8 +59,6 @@ class EventDetails extends CoreElement {
   PTabNavTab _selectedTab;
 
   CoreElement content;
-
-  CoreElement collapseNativeCheckbox;
 
   TimelineEvent _event;
 
@@ -135,29 +126,6 @@ class EventDetails extends CoreElement {
           break;
       }
     });
-
-    // Add collapse native checkbox to tab nav.
-    collapseNativeCheckbox =
-        CoreElement('input', classes: 'collapse-native-checkbox')
-          ..setAttribute('type', 'checkbox');
-
-    final html.InputElement checkbox = collapseNativeCheckbox.element;
-    checkbox
-      ..checked = _defaultCollapseNativeSamplesValue
-      ..onChange.listen(
-          (_) => _collapseNativeSamplesController.add(checkbox.checked));
-
-    // Add checkbox and label to tab bar.
-    tabNav.element.children.first.children.addAll([
-      (div(c: 'collapse-native-container')
-            ..flex()
-            ..add([
-              collapseNativeCheckbox,
-              CoreElement('div', text: 'Collapse native samples')
-                ..element.style.color = colorToCss(contrastForeground),
-            ]))
-          .element,
-    ]);
   }
 
   Future<void> update(FrameFlameChartItem item) async {
@@ -286,9 +254,6 @@ class _CpuFlameChart extends CoreElement {
       ..attribute('hidden', true);
 
     add([stackFrameDetails, error]);
-
-    onCollapseNativeSamplesEvent
-        .listen((value) => lastCollapseNativeSamplesValue = value);
   }
 
   static const String stackFrameDetailsDefaultText =
@@ -310,8 +275,6 @@ class _CpuFlameChart extends CoreElement {
   TimelineEvent event;
 
   bool canvasNeedsRebuild = false;
-
-  bool lastCollapseNativeSamplesValue = _defaultCollapseNativeSamplesValue;
 
   bool showingError = false;
 
@@ -346,10 +309,6 @@ class _CpuFlameChart extends CoreElement {
         (cpuProfileData.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
       ),
     );
-
-    // Add the last known value to the stream so that the canvas reflects the
-    // persisted checkbox state.
-    _collapseNativeSamplesController.add(lastCollapseNativeSamplesValue);
 
     canvas.onStackFrameSelected.listen((CpuStackFrame stackFrame) {
       final frameDuration = Duration(
