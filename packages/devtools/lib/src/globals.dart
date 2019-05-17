@@ -5,9 +5,9 @@
 import 'core/message_bus.dart';
 import 'service_manager.dart';
 
-/// Import mode is an offline mode where DevTools can operate on an imported
+/// Snapshot mode is an offline mode where DevTools can operate on an imported
 /// data file.
-bool importMode = false;
+bool snapshotMode = false;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 

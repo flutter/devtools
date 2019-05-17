@@ -12,6 +12,7 @@
     --border-color: #eee;
     --chart-bar-color: #4078c0;
     --counter-color: #666;
+    --link-color: #2188ff;
     --dark-shadow-color: #666;
     --default-background-rgb: 255, 255, 255;
     --default-background: rgba(var(--default-background-rgb), 1);

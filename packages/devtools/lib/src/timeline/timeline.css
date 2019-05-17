@@ -225,3 +225,9 @@
     top: 50%;
     left: 0;
 }
+
+#flame-chart-message .message-action {
+    color: var(--link-color) !important;
+    text-decoration: underline;
+    cursor: pointer;
+}

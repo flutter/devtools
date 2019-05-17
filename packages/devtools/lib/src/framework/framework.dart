@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import '../globals.dart';
 import '../main.dart';
 import '../timeline/timeline.dart';
+import '../timeline/timeline_controller.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -33,11 +34,11 @@ class Framework {
     globalActions =
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
-    // TODO(kenzie): refactor [connectDialog] and [importMessage] to be in their
+    // TODO(kenzie): refactor [connectDialog] and [snapshotMessage] to be in their
     // own screen.
     connectDialog = new ConnectDialog(this);
 
-    importMessage = new ImportMessage(this);
+    snapshotMessage = new SnapshotMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
   }
@@ -57,7 +58,7 @@ class Framework {
   StatusLine auxiliaryStatus;
   ActionsContainer globalActions;
   ConnectDialog connectDialog;
-  ImportMessage importMessage;
+  SnapshotMessage snapshotMessage;
   AnalyticsOptInDialog analyticsDialog;
 
   void _initDragDrop() {
@@ -138,6 +139,13 @@ class Framework {
   }
 
   void _importTimeline(Map<String, dynamic> import) {
+    final snapshot = TimelineSnapshot.parse(import);
+    if (snapshot.isEmpty) {
+      toast('Imported file does not contain timeline data.');
+      exitSnapshotMode();
+      return;
+    }
+
     TimelineScreen timelineScreen = screens.firstWhere(
       (screen) => screen.id == timelineScreenId,
       orElse: () => null,
@@ -145,22 +153,22 @@ class Framework {
     if (timelineScreen == null) {
       addScreen(timelineScreen = TimelineScreen(disabled: false));
     }
-    _enterImportMode();
+    _enterSnapshotMode();
     navigateTo(timelineScreenId);
-    timelineScreen.loadFromImport(import);
+    loadTimelineSnapshotController.add(snapshot);
   }
 
-  void _enterImportMode() {
+  void _enterSnapshotMode() {
     connectDialog.hide();
-    importMessage.hide();
-    importMode = true;
+    snapshotMessage.hide();
+    snapshotMode = true;
   }
 
-  void exitImportMode() {
-    importMode = false;
+  void exitSnapshotMode() {
+    snapshotMode = false;
     if (serviceManager.connectedApp == null) {
       showConnectionDialog();
-      showImportMessage();
+      showSnapshotMessage();
       mainElement.clear();
       screens.removeWhere((screen) => screen.id == timelineScreenId);
     } else {
@@ -192,8 +200,8 @@ class Framework {
     connectDialog.show();
   }
 
-  void showImportMessage() {
-    importMessage.show();
+  void showSnapshotMessage() {
+    snapshotMessage.show();
   }
 
   void loadScreenFromLocation() async {
@@ -701,17 +709,17 @@ class ConnectDialog {
       // Hide the dialog
       hide();
 
-      // Hide the import message.
-      framework.importMessage.hide();
+      // Hide the snapshot message.
+      framework.snapshotMessage.hide();
     } else {
       throw 'not connected';
     }
   }
 }
 
-class ImportMessage {
-  ImportMessage(this.framework) {
-    parent = CoreElement.from(queryId('import-message'));
+class SnapshotMessage {
+  SnapshotMessage(this.framework) {
+    parent = CoreElement.from(queryId('snapshot-message'));
     parent.layoutVertical();
 
     parent.add([
