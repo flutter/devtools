@@ -192,26 +192,30 @@ final sampleResponse = Response.parse({
       'category': 'Dart',
       'name': '_WidgetsFlutterBinding.draw',
       'parent': '140357727781376-3',
-      'resolvedUrl': 'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
     },
     '140357727781376-5': {
       'category': 'Dart',
       'name': 'RendererBinding.drawFrame',
       'parent': '140357727781376-4',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
     },
     // Branches off to different sample.
     '140357727781376-6': {
       'category': 'Dart',
       'name': '_RenderProxyBox.paint',
       'parent': '140357727781376-3',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
     },
     '140357727781376-7': {
       'category': 'Dart',
       'name': 'PaintingContext.paintChild',
       'parent': '140357727781376-6',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     },
     '140357727781376-8': {
       'category': 'Dart',
@@ -229,44 +233,51 @@ final sampleResponse = Response.parse({
       'category': 'Dart',
       'name': 'RenderObject._getSemanticsForParent.<anonymous closure>',
       'parent': '140357727781376-9',
-      'resolvedUrl': 'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     },
     '140357727781376-11': {
       'category': 'Dart',
       'name': 'RenderObject._getSemanticsForParent',
       'parent': '140357727781376-10',
-      'resolvedUrl': 'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     },
     // Branches off to different sample.
     '140357727781376-12': {
       'category': 'Dart',
       'name': 'RenderPhysicalModel.paint',
       'parent': '140357727781376-9',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
     },
     '140357727781376-13': {
       'category': 'Dart',
       'name': 'RenderCustomMultiChildLayoutBox.paint',
       'parent': '140357727781376-12',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
     },
     '140357727781376-14': {
       'category': 'Dart',
       'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
       'parent': '140357727781376-13',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/box.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/box.dart',
     },
     '140357727781376-15': {
       'category': 'Dart',
       'name': 'RenderObject._paintWithContext',
       'parent': '140357727781376-14',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     },
     '140357727781376-16': {
       'category': 'Dart',
       'name': 'RenderStack.paintStack',
       'parent': '140357727781376-14',
-      'resolvedUrl': 'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
     },
     '140357727781376-17': {
       'category': '[Stub] OneArgCheckInlineCache',
@@ -390,7 +401,8 @@ final sampleResponseWithMissingLeafFrame = Response.parse({
       'category': 'Dart',
       'name': '_WidgetsFlutterBinding&BindingBase',
       'parent': '140357727781376-3',
-      'resolvedUrl': 'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
     },
   },
   'traceEvents': [
