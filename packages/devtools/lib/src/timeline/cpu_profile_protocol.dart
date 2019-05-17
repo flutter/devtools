@@ -52,20 +52,6 @@ class CpuProfileData {
   Map<String, CpuStackFrame> stackFrames = {};
 
   void _processStackFrames(Response response) {
-    const nativeName = '[Native]';
-    const truncatedName = '[Truncated]';
-
-    final nativeRoot = CpuStackFrame(
-      id: 'nativeRoot',
-      name: nativeName,
-      category: 'Dart',
-    );
-    final nativeTruncatedRoot = CpuStackFrame(
-      id: 'nativeTruncatedRoot',
-      name: truncatedName,
-      category: 'Dart',
-    );
-
     stackFramesJson.forEach((k, v) {
       final String stackFrameName = v[name];
 
@@ -74,37 +60,8 @@ class CpuProfileData {
         name: stackFrameName,
         category: v[category],
       );
-      CpuStackFrame parent = stackFrames[v[parentId]];
-
-      // TODO(kenzie): detect other native frames like "syscall" and "malloc"
-      // once we get file paths in the stack frame json.
-      if (stackFrameName.startsWith(nativeName)) {
-        if (parent?.name == truncatedName) {
-          parent = nativeTruncatedRoot;
-        } else {
-          parent ??= nativeRoot;
-        }
-        stackFrame.isNative = true;
-      }
-
-      _processStackFrame(stackFrame, parent);
+      _processStackFrame(stackFrame, stackFrames[v[parentId]]);
     });
-
-    if (nativeTruncatedRoot.children.isNotEmpty) {
-      nativeRoot.addChild(nativeTruncatedRoot);
-
-      // If we moved some samples over to [nativeTruncatedRoot], we could have
-      // a "[Truncated]" child under the "all" event that does not have any
-      // children. If so, remove the "[Truncated]" child.
-      final truncated = cpuProfileRoot.children
-          .firstWhere((frame) => frame.name == truncatedName);
-      if (truncated != null && truncated.children.isEmpty) {
-        cpuProfileRoot.children.remove(truncated);
-      }
-    }
-    if (nativeRoot.children.isNotEmpty) {
-      cpuProfileRoot.addChild(nativeRoot);
-    }
   }
 
   void _processStackFrame(CpuStackFrame stackFrame, CpuStackFrame parent) {
@@ -153,8 +110,6 @@ class CpuStackFrame {
 
   /// How many cpu samples for which this frame is a leaf.
   int exclusiveSampleCount = 0;
-
-  bool isNative = false;
 
   /// Depth of this CpuStackFrame tree, including [this].
   ///

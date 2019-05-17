@@ -20,19 +20,6 @@ void main() {
       );
     });
 
-    test('process [Native] frames', () {
-      final cpuProfileDataWithNative = CpuProfileData(
-        sampleResponseWithNativeFrames,
-        const Duration(milliseconds: 10), // 10 is arbitrary.
-      );
-
-      expect(cpuProfileDataWithNative.sampleCount, equals(3));
-      expect(
-        cpuProfileDataWithNative.cpuProfileRoot.toStringDeep(),
-        equals(goldenCpuProfileWithNativeFrames),
-      );
-    });
-
     test('process response with missing leaf frame', () async {
       bool _runTest() {
         expect(
@@ -344,92 +331,6 @@ final sampleResponse = Response.parse({
       'args': {'mode': 'basic'},
       'sf': '140357727781376-17'
     }
-  ]
-});
-
-const goldenCpuProfileWithNativeFrames = '''
-  cpuProfile - children: 2 - exclusiveSampleCount: 0
-    140357727781376-1 - children: 1 - exclusiveSampleCount: 0
-      140357727781376-2 - children: 0 - exclusiveSampleCount: 1
-    nativeRoot - children: 2 - exclusiveSampleCount: 0
-      140357727781376-6 - children: 0 - exclusiveSampleCount: 1
-      nativeTruncatedRoot - children: 1 - exclusiveSampleCount: 0
-        140357727781376-4 - children: 1 - exclusiveSampleCount: 0
-          140357727781376-5 - children: 0 - exclusiveSampleCount: 1
-''';
-
-final sampleResponseWithNativeFrames = Response.parse({
-  'type': '_CpuProfileTimeline',
-  'samplePeriod': 1000,
-  'stackDepth': 128,
-  'sampleCount': 3,
-  'timeSpan': 0.003678,
-  'timeOriginMicros': 47377796685,
-  'timeExtentMicros': 3678,
-  'stackFrames': {
-    // Root of new sample.
-    '140357727781376-1': {
-      'category': 'Dart',
-      'name': 'thread_start',
-    },
-    '140357727781376-2': {
-      'category': 'Dart',
-      'name': '_pthread_start',
-      'parent': '140357727781376-1',
-    },
-    // Root of new sample.
-    '140357727781376-3': {
-      'category': 'Dart',
-      'name': '[Truncated]',
-    },
-    '140357727781376-4': {
-      'category': 'Dart',
-      'name':
-          '[Native] RenderObject._getSemanticsForParent.<anonymous closure>',
-      'parent': '140357727781376-3',
-    },
-    '140357727781376-5': {
-      'category': 'Dart',
-      'name': '[Native] RenderObject._getSemanticsForParent',
-      'parent': '140357727781376-4',
-    },
-    // Root of new native sample.
-    '140357727781376-6': {
-      'category': 'Dart',
-      'name': '[Native] syscall',
-    },
-  },
-  'traceEvents': [
-    {
-      'ph': 'P',
-      'name': '',
-      'pid': 77616,
-      'tid': 42247,
-      'ts': 47377796685,
-      'cat': 'Dart',
-      'args': {'mode': 'basic'},
-      'sf': '140357727781376-2'
-    },
-    {
-      'ph': 'P',
-      'name': '',
-      'pid': 77616,
-      'tid': 42247,
-      'ts': 47377797975,
-      'cat': 'Dart',
-      'args': {'mode': 'basic'},
-      'sf': '140357727781376-5'
-    },
-    {
-      'ph': 'P',
-      'name': '',
-      'pid': 77616,
-      'tid': 42247,
-      'ts': 47377799063,
-      'cat': 'Dart',
-      'args': {'mode': 'basic'},
-      'sf': '140357727781376-6'
-    },
   ]
 });
 
