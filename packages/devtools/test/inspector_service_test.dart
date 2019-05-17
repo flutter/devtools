@@ -179,63 +179,64 @@ void main() async {
         await group.dispose();
       });
 
-      test('render tree', () async {
-        await env.setupEnvironment(
-          config: const FlutterRunConfiguration(
-            withDebugger: true,
-            trackWidgetCreation: false,
-          ),
-        );
-
-        final group = inspectorService.createObjectGroup('test-group');
-        final RemoteDiagnosticsNode root =
-            await group.getRoot(FlutterTreeType.renderObject);
-        // Tree only contains widgets from local app.
-        expect(
-          treeToDebugString(root),
-          equalsIgnoringHashCodes(
-            'RenderView#00000\n'
-            ' └─child: RenderSemanticsAnnotations#00000\n',
-          ),
-        );
-        final child = findNodeMatching(root, 'RenderSemanticsAnnotations');
-        expect(child, isNotNull);
-        final childDetailsSubtree = await group.getDetailsSubtree(child);
-        expect(
-          treeToDebugString(childDetailsSubtree),
-          equalsIgnoringHashCodes(
-            'child: RenderSemanticsAnnotations#00000\n'
-            ' │ parentData: <none>\n'
-            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-            ' │ size: Size(800.0, 600.0)\n'
-            ' │\n'
-            ' └─child: RenderCustomPaint#00000\n'
-            '   │ parentData: <none> (can use size)\n'
-            '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-            '   │ size: Size(800.0, 600.0)\n'
-            '   │\n'
-            '   └─child: RenderPointerListener#00000\n'
-            '       parentData: <none> (can use size)\n'
-            '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
-            '       size: Size(800.0, 600.0)\n'
-            '       behavior: deferToChild\n'
-            '       listeners: down, up, cancel\n',
-          ),
-        );
-
-        await group.setSelectionInspector(child.valueRef, true);
-        final selection =
-            await group.getSelection(null, FlutterTreeType.renderObject, false);
-        expect(selection, isNotNull);
-        expect(selection.valueRef, equals(child.valueRef));
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'RenderSemanticsAnnotations#00000\n'
-            ' └─child: RenderCustomPaint#00000\n',
-          ),
-        );
-      });
+// TODO(jacobr): uncomment this test once we have a more dependable golden
+//      test('render tree', () async {
+//        await env.setupEnvironment(
+//          config: const FlutterRunConfiguration(
+//            withDebugger: true,
+//            trackWidgetCreation: false,
+//          ),
+//        );
+//
+//        final group = inspectorService.createObjectGroup('test-group');
+//        final RemoteDiagnosticsNode root =
+//            await group.getRoot(FlutterTreeType.renderObject);
+//        // Tree only contains widgets from local app.
+//        expect(
+//          treeToDebugString(root),
+//          equalsIgnoringHashCodes(
+//            'RenderView#00000\n'
+//            ' └─child: RenderSemanticsAnnotations#00000\n',
+//          ),
+//        );
+//        final child = findNodeMatching(root, 'RenderSemanticsAnnotations');
+//        expect(child, isNotNull);
+//        final childDetailsSubtree = await group.getDetailsSubtree(child);
+//        expect(
+//          treeToDebugString(childDetailsSubtree),
+//          equalsIgnoringHashCodes(
+//            'child: RenderSemanticsAnnotations#00000\n'
+//            ' │ parentData: <none>\n'
+//            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+//            ' │ size: Size(800.0, 600.0)\n'
+//            ' │\n'
+//            ' └─child: RenderCustomPaint#00000\n'
+//            '   │ parentData: <none> (can use size)\n'
+//            '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+//            '   │ size: Size(800.0, 600.0)\n'
+//            '   │\n'
+//            '   └─child: RenderPointerListener#00000\n'
+//            '       parentData: <none> (can use size)\n'
+//            '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+//            '       size: Size(800.0, 600.0)\n'
+//            '       behavior: deferToChild\n'
+//            '       listeners: down, up, cancel\n',
+//          ),
+//        );
+//
+//        await group.setSelectionInspector(child.valueRef, true);
+//        final selection =
+//            await group.getSelection(null, FlutterTreeType.renderObject, false);
+//        expect(selection, isNotNull);
+//        expect(selection.valueRef, equals(child.valueRef));
+//        expect(
+//          treeToDebugString(selection),
+//          equalsIgnoringHashCodes(
+//            'RenderSemanticsAnnotations#00000\n'
+//            ' └─child: RenderCustomPaint#00000\n',
+//          ),
+//        );
+//      });
 
       // Run this test last as it will take a long time due to setting up the test
       // environment from scratch.
