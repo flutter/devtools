@@ -29,6 +29,7 @@ class CpuProfileData {
   static const category = 'category';
   static const parentId = 'parent';
   static const stackFrameId = 'sf';
+  static const resolvedUrl = 'resolvedUrl';
 
   final Response cpuProfileResponse;
   final Duration duration;
@@ -61,7 +62,7 @@ class CpuProfileData {
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
-        url: v['resolvedUrl'],
+        url: v[resolvedUrl],
       );
       _processStackFrame(stackFrame, stackFrames[v[parentId]]);
     });
