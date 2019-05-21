@@ -13,7 +13,7 @@ If you have `pub` on your path, you can run:
 
 If you have `flutter` on your path, you can run:
 
-- `flutter packages pub global activate devtools`
+- `flutter pub global activate devtools`
 
 That will install (or update) DevTools on your machine.
 
@@ -24,7 +24,7 @@ To do that, run one of the following two commands:
 
 - `pub global run devtools` (if you have `pub` on your path)
 
-- `flutter packages pub global run devtools` (if you have `flutter` on your path)
+- `flutter pub global run devtools` (if you have `flutter` on your path)
 
 On the command-line, you should see output that looks something like:
 
