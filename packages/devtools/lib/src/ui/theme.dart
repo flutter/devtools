@@ -54,6 +54,10 @@ const defaultButtonIconColor = ThemedColor(
 class ThemedColor implements Color {
   const ThemedColor(this._light, this._dark);
 
+  static ThemedColor fromSingleColor(Color color) {
+    return ThemedColor(color, color);
+  }
+
   final Color _light;
   final Color _dark;
 

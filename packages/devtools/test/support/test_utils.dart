@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import 'package:devtools/src/timeline/timeline_protocol.dart';
+import 'package:devtools/src/timeline/timeline_model.dart';
 
 TimelineEvent testTimelineEvent(Map<String, dynamic> json) =>
     TimelineEvent(testTraceEventWrapper(json));

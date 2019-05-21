@@ -6,12 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Screen;
 
+import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../main.dart';
-import '../timeline/timeline.dart';
 import '../timeline/timeline_controller.dart';
+import '../timeline/timeline_screen.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -139,12 +140,13 @@ class Framework {
   }
 
   void _importTimeline(Map<String, dynamic> import) {
-    final snapshot = TimelineSnapshot.parse(import);
-    if (snapshot.isEmpty) {
+    final offlineData = OfflineTimelineData.parse(import);
+    if (offlineData.isEmpty) {
       toast('Imported file does not contain timeline data.');
-      exitSnapshotMode();
       return;
     }
+
+    _enterOfflineMode();
 
     TimelineScreen timelineScreen = screens.firstWhere(
       (screen) => screen.id == timelineScreenId,
@@ -153,26 +155,27 @@ class Framework {
     if (timelineScreen == null) {
       addScreen(timelineScreen = TimelineScreen(disabled: false));
     }
-    _enterSnapshotMode();
     navigateTo(timelineScreenId);
-    loadTimelineSnapshotController.add(snapshot);
+
+    timelineScreen.clearTimeline();
+    timelineScreen.timelineController.loadOfflineData(offlineData);
   }
 
-  void _enterSnapshotMode() {
+  void _enterOfflineMode() {
     connectDialog.hide();
     snapshotMessage.hide();
-    snapshotMode = true;
+    offlineMode = true;
   }
 
-  void exitSnapshotMode() {
-    snapshotMode = false;
+  void exitOfflineMode() {
+    offlineMode = false;
     if (serviceManager.connectedApp == null) {
       showConnectionDialog();
       showSnapshotMessage();
       mainElement.clear();
       screens.removeWhere((screen) => screen.id == timelineScreenId);
     } else {
-      navigateTo(_previous.id);
+      navigateTo((_previous ?? current).id);
     }
   }
 

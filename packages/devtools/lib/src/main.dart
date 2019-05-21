@@ -17,7 +17,7 @@ import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance.dart';
 import 'service_registrations.dart' as registrations;
-import 'timeline/timeline.dart';
+import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
 import 'ui/custom.dart';
