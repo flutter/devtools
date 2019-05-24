@@ -428,7 +428,7 @@ class MemoryScreen extends Screen with SetStateMixin {
           return str;
         } else {
           // TODO: Improve the return value for this case.
-          return  null;
+          return null;
         }
       }
     };
