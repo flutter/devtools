@@ -495,11 +495,15 @@ class DebuggerScreen extends Screen {
           <String>[],
           disableBreakpoints: true,
         );
+
         if (result is ErrorRef) {
           return '${result.kind} ${result.message}';
         } else if (result is InstanceRef) {
           final String str = await _retrieveFullStringValue(result);
           return str;
+        } else {
+          // TODO: Improve the return value for this case.
+          return null;
         }
       }
     };

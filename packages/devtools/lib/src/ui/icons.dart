@@ -95,7 +95,7 @@ class FlutterIcons {
       UrlIcon('/icons/inspector/balloonInformation.png');
   static const Icon animation = UrlIcon('/icons/inspector/resume.png');
   static const Icon assets = UrlIcon('/icons/inspector/any_type.png');
-  static const Icon async = UrlIcon('/icons/inspector/threads.png');
+  static const Icon asyncUrlIcon = UrlIcon('/icons/inspector/threads.png');
   static const Icon diagram = UrlIcon('/icons/inspector/diagram.png');
   static const Icon input = UrlIcon('/icons/inspector/renderer.png');
   static const Icon painting = UrlIcon('/icons/inspector/colors.png');

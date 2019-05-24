@@ -21,7 +21,8 @@ class Category {
       Category('Animation and Motion', FlutterIcons.animation);
   static const Category assetsImagesAndIcons =
       Category('Assets, Images, and Icons', FlutterIcons.assets);
-  static const Category async = Category('Async', FlutterIcons.async);
+  static const Category asyncCategory =
+      Category('Async', FlutterIcons.asyncUrlIcon);
   static const Category basics =
       Category('Basics', null); // TODO(jacobr): add an icon.
   static const Category cupertino = Category(
@@ -39,7 +40,7 @@ class Category {
     accessibility,
     animationAndMotion,
     assetsImagesAndIcons,
-    async,
+    asyncCategory,
     basics,
     cupertino,
     input,
