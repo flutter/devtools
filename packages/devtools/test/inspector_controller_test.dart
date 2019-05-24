@@ -322,7 +322,7 @@ void main() async {
     await tree.nextUiFrame;
   };
 
-  env.beforeTearDown = () {
+  env.beforeTearDown = () async {
     inspectorController.dispose();
     inspectorController = null;
     inspectorService.dispose();
