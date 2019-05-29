@@ -37,6 +37,7 @@ class VmServiceWrapper implements VmService {
     // futures but someone tries to wait on [allFuturesCompleted] they don't
     // hang. The first tracked future will replace this with a new completer.
     ..complete(true);
+
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
   @override
@@ -251,6 +252,10 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Version> getVersion() =>
       _trackFuture('getVersion', _vmService.getVersion());
+
+  @override
+  Future<dynamic> getMemoryUsage(String isolateId) =>
+      _trackFuture('getMemoryUsage', _vmService.getMemoryUsage(isolateId));
 
   @override
   Future invoke(
