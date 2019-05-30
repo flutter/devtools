@@ -35,7 +35,7 @@ void main() async {
     }
   };
 
-  env.beforeTearDown = () {
+  env.beforeTearDown = () async {
     inspectorService.dispose();
     inspectorService = null;
   };

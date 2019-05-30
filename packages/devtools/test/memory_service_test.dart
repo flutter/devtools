@@ -100,16 +100,16 @@ void main() async {
       while (iterator.moveNext()) {
         final ClassHeapDetailStats classStat = iterator.current;
 
-        if (classStat.classRef.name == 'MyApp')
+        if (classStat.classRef.name == 'MyApp') {
           checkHeapStat(classStat, 'MyApp',
               instanceCount: 1, accumulatorCount: 2);
-        else if (classStat.classRef.name == 'ThemeData')
+        } else if (classStat.classRef.name == 'ThemeData') {
           checkHeapStat(classStat, 'ThemeData',
               instanceCount: 2, accumulatorCount: 4);
-        else if (classStat.classRef.name == 'AppBar')
+        } else if (classStat.classRef.name == 'AppBar') {
           checkHeapStat(classStat, 'AppBar',
               instanceCount: 1, accumulatorCount: 2);
-        else if (classStat.classRef.name == 'Center') {
+        } else if (classStat.classRef.name == 'Center') {
           checkHeapStat(classStat, 'Center',
               instanceCount: 1, accumulatorCount: 2);
         }
@@ -127,16 +127,16 @@ void main() async {
       while (iterator.moveNext()) {
         final ClassHeapDetailStats classStat = iterator.current;
 
-        if (classStat.classRef.name == 'MyApp')
+        if (classStat.classRef.name == 'MyApp') {
           checkHeapStat(classStat, 'MyApp',
               instanceCount: 1, accumulatorCount: 0);
-        else if (classStat.classRef.name == 'ThemeData')
+        } else if (classStat.classRef.name == 'ThemeData') {
           checkHeapStat(classStat, 'ThemeData',
               instanceCount: 2, accumulatorCount: 0);
-        else if (classStat.classRef.name == 'AppBar')
+        } else if (classStat.classRef.name == 'AppBar') {
           checkHeapStat(classStat, 'AppBar',
               instanceCount: 1, accumulatorCount: 0);
-        else if (classStat.classRef.name == 'Center') {
+        } else if (classStat.classRef.name == 'Center') {
           checkHeapStat(classStat, 'Center',
               instanceCount: 1, accumulatorCount: 0);
         }
