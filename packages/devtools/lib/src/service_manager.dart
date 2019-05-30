@@ -132,7 +132,7 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
-    service.onServiceEvent.listen((e) {
+    service.onEvent('_Service').listen((e) {
       if (e.kind == EventKind.kServiceRegistered) {
         if (!_registeredMethodsForService.containsKey(e.service)) {
           _registeredMethodsForService[e.service] = [e.method];
@@ -159,20 +159,20 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     final streamIds = [
-      'Stdout',
-      'Stderr',
-      'VM',
-      'Isolate',
-      'Debug',
-      'GC',
-      'Timeline',
-      'Extension',
+      EventStreams.kStdout,
+      EventStreams.kStderr,
+      EventStreams.kVM,
+      EventStreams.kIsolate,
+      EventStreams.kDebug,
+      EventStreams.kGC,
+      EventStreams.kTimeline,
+      EventStreams.kExtension,
       '_Service',
     ];
 
     // The following streams are not yet supported by Flutter Web.
     if (!await connectedApp.isFlutterWebApp) {
-      streamIds.addAll(['_Graph', '_Logging', 'Logging']);
+      streamIds.addAll(['_Graph', '_Logging', EventStreams.kLogging]);
     }
 
     await Future.wait(streamIds.map((String id) async {

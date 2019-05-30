@@ -294,19 +294,19 @@ class VmServiceWrapper implements VmService {
   Stream<Event> get onGCEvent => _vmService.onGCEvent;
 
   @override
-  Stream<Event> get onGraphEvent => _vmService.onGraphEvent;
+  Stream<Event> get onIsolateEvent => _vmService.onIsolateEvent;
 
   @override
-  Stream<Event> get onIsolateEvent => _vmService.onIsolateEvent;
+  Stream<Event> get onLoggingEvent => _vmService.onLoggingEvent;
+
+  @override
+  Stream<Event> get onTimelineEvent => _vmService.onTimelineEvent;
 
   @override
   Stream<String> get onReceive => _vmService.onReceive;
 
   @override
   Stream<String> get onSend => _vmService.onSend;
-
-  @override
-  Stream<Event> get onServiceEvent => _vmService.onServiceEvent;
 
   @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
