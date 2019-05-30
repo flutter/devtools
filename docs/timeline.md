@@ -16,8 +16,8 @@ The timeline view displays information about Flutter frames. It consists of
 **Use a profile build of your application to analyze performance.** Frame rendering times are not indicative of release
 performance unless your application is run in profile mode.
 
-The timeline view also supports import and export. See the
-[Import and Export](https://flutter.github.io/devtools/timeline#import-and-export) section below for details.
+The timeline view also supports import and export. See the [Import and Export](#import-and-export) section below for
+details.
 
 ## Frame Rendering Chart
 
