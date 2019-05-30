@@ -24,7 +24,7 @@ class AppFixture {
     // "starting app"
     _onAppStarted = lines.first;
 
-    serviceConnection.streamListen('Isolate');
+    serviceConnection.streamListen(EventStreams.kIsolate);
     serviceConnection.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateExit) {
         isolates.remove(event.isolate);
