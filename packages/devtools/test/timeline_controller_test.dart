@@ -41,7 +41,6 @@ void main() {
       expect(timelineController.timelineData.cpuProfileData, isNull);
       timelineController.selectTimelineEvent(vsyncEvent);
       expect(timelineController.timelineData.selectedEvent, equals(vsyncEvent));
-      expect(timelineController.timelineData.cpuProfileData, isNotNull);
 
       // Select a different frame.
       final frame_1 = TimelineFrame('id_1');
@@ -97,8 +96,15 @@ void main() {
 
       final offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
       timelineController.loadOfflineData(offlineData);
-      expect(timelineController.timelineData, equals(offlineData));
-      expect(timelineController.offlineTimelineData, equals(offlineData));
+      expect(
+        isTimelineDataEqual(timelineController.timelineData, offlineData),
+        isTrue,
+      );
+      expect(
+        isTimelineDataEqual(
+            timelineController.offlineTimelineData, offlineData),
+        isTrue,
+      );
       expect(
         timelineController.timelineProtocol.uiThreadId,
         equals(testUiThreadId),
@@ -111,4 +117,12 @@ void main() {
       await env.tearDownEnvironment();
     });
   }, tags: 'useFlutterSdk');
+}
+
+bool isTimelineDataEqual(TimelineData a, TimelineData b) {
+  return a.traceEvents == b.traceEvents &&
+      a.frames == b.frames &&
+      a.selectedFrame == b.selectedFrame &&
+      a.selectedEvent == b.selectedEvent &&
+      a.cpuProfileData == b.cpuProfileData;
 }
