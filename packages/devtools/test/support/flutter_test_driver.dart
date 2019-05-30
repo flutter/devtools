@@ -334,8 +334,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       vmService.onSend.listen((String s) => _debugPrint('==> $s'));
       vmService.onReceive.listen((String s) => _debugPrint('<== $s'));
       await Future.wait(<Future<Success>>[
-        vmService.streamListen('Isolate'),
-        vmService.streamListen('Debug'),
+        vmService.streamListen(EventStreams.kIsolate),
+        vmService.streamListen(EventStreams.kDebug),
       ]);
 
       // On hot restarts, the isolate ID we have for the Flutter thread will
