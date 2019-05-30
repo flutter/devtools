@@ -120,6 +120,8 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     @required Future<void> onClosed,
   }) async {
+    const kServiceStream = '_Service';
+
     final vm = await service.getVM();
     this.vm = vm;
     sdkVersion = vm.version;
@@ -132,7 +134,7 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
-    service.onEvent('_Service').listen((e) {
+    service.onEvent(kServiceStream).listen((e) {
       if (e.kind == EventKind.kServiceRegistered) {
         if (!_registeredMethodsForService.containsKey(e.service)) {
           _registeredMethodsForService[e.service] = [e.method];
@@ -167,7 +169,7 @@ class ServiceConnectionManager {
       EventStreams.kGC,
       EventStreams.kTimeline,
       EventStreams.kExtension,
-      '_Service',
+      kServiceStream,
     ];
 
     // The following streams are not yet supported by Flutter Web.
