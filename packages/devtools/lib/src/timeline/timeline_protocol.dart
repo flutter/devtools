@@ -46,6 +46,8 @@ const Duration traceEventEpsilon = Duration(microseconds: 1000);
 /// Delay in ms for processing trace events.
 const Duration traceEventDelay = Duration(milliseconds: 1000);
 
+/// Protocol for processing trace events and composing them into
+/// [TimelineEvents] and [TimelineFrames].
 class TimelineProtocol {
   TimelineProtocol({
     @required this.uiThreadId,

@@ -13,6 +13,7 @@ import 'timeline_controller.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
 
+/// Manages interactions between the Timeline and the VmService.
 class TimelineService {
   TimelineService(this.timelineController) {
     _initListeners();

@@ -12,6 +12,11 @@ const String timelineScreenId = 'timeline';
 
 /// This class contains the business logic for [timeline_screen.dart].
 ///
+/// The controller manages the timeline data model and communicates with the
+/// view to give and receive data updates. It also manages data processing via
+/// protocols [TimelineProtocol] and [CpuProfileProtocol], and it communicates
+/// with [TimelineService].
+///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.

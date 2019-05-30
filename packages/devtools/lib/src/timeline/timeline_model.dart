@@ -10,6 +10,7 @@ import '../utils.dart';
 import 'cpu_profile_model.dart';
 import 'timeline_controller.dart';
 
+/// Data model for DevTools Timeline.
 class TimelineData {
   TimelineData({
     List<Map<String, dynamic>> traceEvents,

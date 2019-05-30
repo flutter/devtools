@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 import 'cpu_profile_model.dart';
 
+/// Protocol for processing [CpuProfileData] and composing it into a structured
+/// tree of [CpuStackFrame]'s.
 class CpuProfileProtocol {
   void processData(CpuProfileData cpuProfileData) {
     // Do not process this data if it has already been processed.

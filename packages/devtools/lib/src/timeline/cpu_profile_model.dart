@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../utils.dart';
 
+/// Data model for DevTools CPU profile.
 class CpuProfileData {
   CpuProfileData._({
     this.stackFramesJson,
