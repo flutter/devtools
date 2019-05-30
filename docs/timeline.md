@@ -16,10 +16,8 @@ The timeline view displays information about Flutter frames. It consists of
 **Use a profile build of your application to analyze performance.** Frame rendering times are not indicative of release
 performance unless your application is run in profile mode.
 
-The timeline view also supports import and export. Clicking the export button (upper-right corner above the frame
-rendering chart) will download a snapshot of the current timeline state. To import a timeline snapshot, you can drag and
-drop the snapshot into DevTools from any page. **DevTools only supports importing files that were originally exported
-from DevTools.**
+The timeline view also supports import and export. See the
+[Import and Export](https://flutter.github.io/devtools/timeline#import-and-export) section below for details.
 
 ## Frame Rendering Chart
 
@@ -93,3 +91,9 @@ Coming soon.
 
 ### Call Tree
 Coming soon.
+
+## Import and Export
+DevTools supports importing and exporting timeline snapshots. Clicking the export button (upper-right corner above the
+frame rendering chart) will download a snapshot of the current timeline state. To import a timeline snapshot, you can
+drag and drop the snapshot into DevTools from any page. **DevTools only supports importing files that were originally
+exported from DevTools.**
