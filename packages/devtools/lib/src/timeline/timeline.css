@@ -209,14 +209,6 @@
     left: 0;
 }
 
-.cpu-profile-spinner {
-    position: absolute;
-    margin-top: -16px;
-    margin-left: -16px;
-    top: 50%;
-    left: 50%;
-}
-
 .message {
     width: 100%;
     text-align: center;

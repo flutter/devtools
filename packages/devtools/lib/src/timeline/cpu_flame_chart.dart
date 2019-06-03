@@ -127,7 +127,7 @@ class CpuFlameChart extends CoreElement {
     // Update the canvas if the flame chart is visible. Otherwise, mark the
     // canvas as needing a rebuild.
     if (!isHidden) {
-      final Spinner spinner = Spinner(classes: ['cpu-profile-spinner']);
+      final Spinner spinner = Spinner.centered();
       add(spinner);
 
       try {
