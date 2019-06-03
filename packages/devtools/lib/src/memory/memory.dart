@@ -213,8 +213,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     resetAccumulatorsButton.disabled = true;
     tableStack.first.element.display = null;
-    final Spinner spinner =
-        tableStack.first.element.add(Spinner.centered());
+    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
 
     try {
       final List<ClassHeapDetailStats> heapStats =
@@ -236,8 +235,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
-    final Spinner spinner =
-        tableStack.first.element.add(Spinner.centered());
+    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
 
     try {
       final List<ClassHeapDetailStats> heapStats =
