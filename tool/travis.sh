@@ -20,7 +20,7 @@ export PATH=$PATH:~/.pub-cache/bin
 echo "which dart: " `which dart`
 
 # Provision a specific version of webdev (github.com/flutter/devtools/pull/666).
-export WEBDEV_VERSION=2.0.4
+export WEBDEV_VERSION=2.0.6
 
 if [ "$BOT" = "main" ]; then
 
