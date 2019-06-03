@@ -10,11 +10,14 @@ title: Using the Timeline View
 The timeline view displays information about Flutter frames. It consists of
  three parts, each increasing in granularity:
 - Frame Rendering Chart
-- Frame Flame Chart
+- Frame Events Chart
 - CPU Profiler
 
 **Use a profile build of your application to analyze performance.** Frame rendering times are not indicative of release
 performance unless your application is run in profile mode.
+
+The timeline view also supports import and export. See the [Import and Export](#import-and-export) section below for
+details.
 
 ## Frame Rendering Chart
 
@@ -58,28 +61,28 @@ When this target is missed, you may experience UI jank or dropped frames.
 See [Flutter performance profiling](https://flutter.dev/docs/testing/ui-performance) for more detailed information on
 how to analyze your app's performance.
 
-## Frame Flame Chart
+## Frame Events Chart
 
-The frame flame chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on and so
-forth. The UI and GPU events are separate event flows, but they share a common timeline (displayed at the top of the
-flame chart). This timeline is strictly for the given frame. It does not reflect the clock shared by all frames.
+The frame events chart shows the event trace for a single frame. The top-most event spawns the event below it, and so on
+and so forth. The UI and GPU events are separate event flows, but they share a common timeline (displayed at the top of
+the flame chart). This timeline is strictly for the given frame. It does not reflect the clock shared by all frames.
 
-<img src="images/timeline_frame_flame_chart.png" width="800" />
+<img src="images/timeline_frame_events_chart.png" width="800" />
 
 The flame chart supports zooming and panning. Scroll up and down to zoom in and out, respectively. To pan around, you
-can either click and drag the chart or scroll horizontally. You can also click an event to view CPU profiling information
-in the section below the chart.
+can either click and drag the chart or scroll horizontally. You can click an event to view CPU profiling information
+in the CPU profiler below this section.
 
 ## CPU Profiler (preview)
 
-This section shows CPU profiling information for a specific event from the frame flame chart (Build, Layout, Paint, etc.).
+This section shows CPU profiling information for a specific event from the frame events chart (Build, Layout, Paint, etc.).
 The CPU profiler is actively being worked on and is currently in a preview state.
 
 ### CPU Flame Chart
-This tab of the profiler shows CPU samples for the selected frame event (e.g. VSYNC in the example below). This chart
-should be viewed as a top-down stack trace, where the top-most stack frame calls the one below it, and so on and so forth.
-The width of each stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU
-time may be a good place to look for possible performance improvements.
+This tab of the profiler shows CPU samples for the selected frame event (e.g. Layout in the example below). This chart
+should be viewed as a top-down stack trace, where the top-most stack frame calls the one below it. The width of each
+stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU time may be a good
+place to look for possible performance improvements.
 
 <img src="images/timeline_cpu_profiler.png" width="800" />
 
@@ -88,3 +91,9 @@ Coming soon.
 
 ### Call Tree
 Coming soon.
+
+## Import and Export
+DevTools supports importing and exporting timeline snapshots. Clicking the export button (upper-right corner above the
+frame rendering chart) will download a snapshot of the current timeline state. To import a timeline snapshot, you can
+drag and drop the snapshot into DevTools from any page. **Note that DevTools only supports importing files that were
+originally exported from DevTools.**

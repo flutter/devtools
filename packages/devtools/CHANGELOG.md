@@ -1,4 +1,4 @@
-## 0.1.1 - TBD
+## 0.1.1 - 2019-05-30
 * Make timeline snapshot format compatible with trace viewers such as chrome://tracing.
 * Add ability to import timeline snapshots via drag-and-drop.
 * Memory instance viewer handles all InstanceKind lists.
