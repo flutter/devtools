@@ -19,14 +19,11 @@ export PATH=$PATH:~/.pub-cache/bin
 # We should be using dart from /Users/travis/dart-sdk/bin/dart.
 echo "which dart: " `which dart`
 
-# Provision a specific version of webdev (github.com/flutter/devtools/pull/666).
-export WEBDEV_VERSION=2.0.4
-
 if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     pub get
-    pub global activate webdev $WEBDEV_VERSION
+    pub global activate webdev
 
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
@@ -50,7 +47,7 @@ elif [ "$BOT" = "test_ddc" ]; then
 
     # Provision our packages.
     pub get
-    pub global activate webdev $WEBDEV_VERSION
+    pub global activate webdev
 
     pub run test --reporter expanded --exclude-tags useFlutterSdk
     pub run build_runner test -- --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
@@ -59,7 +56,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
     # Provision our packages.
     pub get
-    pub global activate webdev $WEBDEV_VERSION
+    pub global activate webdev
 
     WEBDEV_RELEASE=true pub run --enable-asserts test --reporter expanded --exclude-tags useFlutterSdk
     pub run build_runner test -r -- --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
@@ -99,7 +96,7 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # Provision our packages using Flutter's version of Dart.
     pub get
-    pub global activate webdev $WEBDEV_VERSION
+    pub global activate webdev
 
     # Run tests that require the Flutter SDK.
     pub run test -j1 --reporter expanded --tags useFlutterSdk
