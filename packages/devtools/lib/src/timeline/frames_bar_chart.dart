@@ -10,10 +10,10 @@ import '../ui/elements.dart';
 import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
 import 'timeline_controller.dart';
-import 'timeline_protocol.dart';
+import 'timeline_model.dart';
 
 class FramesBarChart extends CoreElement with SetStateMixin {
-  FramesBarChart(TimelineController timelineController)
+  FramesBarChart(this.timelineController)
       : super('div', classes: 'timeline-frames') {
     // No frame around component, so data spikes can appear to go through the
     // roof (highest horizontal line is 100 ms).
@@ -44,6 +44,8 @@ class FramesBarChart extends CoreElement with SetStateMixin {
   static const int maxFrames = 500;
   static const topPadding = 2;
 
+  final TimelineController timelineController;
+
   TimelineFrame selectedFrame;
   PlotlyDivGraph frameUIgraph;
   bool _createdPlot = false;
@@ -54,19 +56,8 @@ class FramesBarChart extends CoreElement with SetStateMixin {
   Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
 
   void setSelected(TimelineFrame frame) {
-    if (selectedFrame == frame) {
-      return;
-    }
-
     selectedFrame = frame;
     _selectedFrameController.add(frame);
-
-    ga.selectFrame(
-      ga.timeline,
-      ga.timelineFrame,
-      frame.gpuDuration,
-      frame.uiDuration,
-    );
   }
 }
 
@@ -144,7 +135,13 @@ class PlotlyDivGraph extends CoreElement {
 
       if (_frames.containsKey(xPosition)) {
         final TimelineFrame timelineFrame = _frames[xPosition];
-        framesBarChart.setSelected(timelineFrame);
+        timelineController.selectFrame(timelineFrame);
+        ga.selectFrame(
+          ga.timeline,
+          ga.timelineFrame,
+          timelineFrame.gpuDuration,
+          timelineFrame.uiDuration,
+        );
       }
     }
   }

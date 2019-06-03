@@ -16,9 +16,9 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
-import 'cpu_profile_protocol.dart';
-import 'frame_flame_chart.dart';
-import 'timeline.dart';
+import 'cpu_profile_model.dart';
+import 'frame_events_chart.dart';
+import 'timeline_screen.dart';
 
 // TODO(kenzie): add tooltips to stack frames on hover.
 
@@ -51,7 +51,7 @@ abstract class FlameChart {
     @required this.data,
     @required this.flameChartWidth,
     @required this.flameChartHeight,
-  }) : timelineGrid = TimelineGrid(data.duration, flameChartWidth) {
+  }) : timelineGrid = TimelineGrid(data.time.duration, flameChartWidth) {
     _initRows();
   }
 

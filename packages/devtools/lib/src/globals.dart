@@ -7,7 +7,7 @@ import 'service_manager.dart';
 
 /// Snapshot mode is an offline mode where DevTools can operate on an imported
 /// data file.
-bool snapshotMode = false;
+bool offlineMode = false;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
