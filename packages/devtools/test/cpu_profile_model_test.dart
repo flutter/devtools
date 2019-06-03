@@ -111,17 +111,7 @@ final CpuStackFrame stackFrame_5 = CpuStackFrame(
   url: 'url',
 )..exclusiveSampleCount = 1;
 
-final testStackFrame = stackFrame_0
-  ..children = [
-    (stackFrame_1
-      ..parent = stackFrame_0
-      ..children = [
-        (stackFrame_2..parent = stackFrame_1),
-        (stackFrame_3
-          ..parent = stackFrame_1
-          ..children = [
-            stackFrame_4..parent = stackFrame_3,
-            stackFrame_5..parent = stackFrame_3
-          ])
-      ])
-  ];
+final CpuStackFrame testStackFrame = stackFrame_0
+  ..addChild(stackFrame_1
+    ..addChild(stackFrame_2)
+    ..addChild(stackFrame_3..addChild(stackFrame_4)..addChild(stackFrame_5)));

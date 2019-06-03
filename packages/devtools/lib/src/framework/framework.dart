@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Screen;
 
-import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../main.dart';
 import '../timeline/timeline_controller.dart';
+import '../timeline/timeline_model.dart';
 import '../timeline/timeline_screen.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;

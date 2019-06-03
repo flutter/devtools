@@ -104,7 +104,7 @@ class InspectorScreen extends Screen {
   void _handleConnectionStart(VmService service) async {
     refreshTreeButton.disabled = false;
 
-    final Spinner spinner = Spinner()..clazz('padded');
+    final Spinner spinner = Spinner(classes: ['padded']);
     inspectorContainer.add(spinner);
 
     try {
@@ -114,7 +114,7 @@ class InspectorScreen extends Screen {
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);
     } finally {
-      spinner.element.remove();
+      spinner.remove();
       refreshTreeButton.disabled = false;
     }
 

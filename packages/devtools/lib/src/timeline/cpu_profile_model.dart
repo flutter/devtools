@@ -11,11 +11,11 @@ import '../utils.dart';
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
   CpuProfileData._({
-    this.stackFramesJson,
-    this.stackTraceEvents,
-    this.sampleCount,
-    this.samplePeriod,
-    this.time,
+    @required this.stackFramesJson,
+    @required this.stackTraceEvents,
+    @required this.sampleCount,
+    @required this.samplePeriod,
+    @required this.time,
   });
 
   static CpuProfileData parse(Map<String, dynamic> json) {
@@ -94,13 +94,16 @@ class CpuStackFrame {
   });
 
   final String id;
+
   final String name;
+
   final String category;
+
   final String url;
 
-  CpuStackFrame parent;
+  final List<CpuStackFrame> children = [];
 
-  List<CpuStackFrame> children = [];
+  CpuStackFrame parent;
 
   /// Index in [parent.children].
   int index = -1;
