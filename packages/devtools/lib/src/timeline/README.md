@@ -1,6 +1,4 @@
----
-title: Timeline Code Architecture
----
+## Timeline Code Architecture
 
 <img src="timeline_architecture.png" width="800" />
 
