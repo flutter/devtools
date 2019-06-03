@@ -43,9 +43,14 @@ class ProgressElement extends CoreElement {
 }
 
 class Spinner extends CoreElement {
-  Spinner() : super('div') {
+  Spinner._({List<String> classes = const []}) : super('div') {
     clazz('spinner');
+    classes.forEach(clazz);
   }
+
+  static Spinner centered() => Spinner._(classes: ['centered']);
+
+  void remove() => element.remove();
 }
 
 typedef ListRenderer<T> = CoreElement Function(T item);

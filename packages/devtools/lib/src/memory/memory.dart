@@ -214,14 +214,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     resetAccumulatorsButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-        tableStack.first.element.add(Spinner()..clazz('padded'));
+        tableStack.first.element.add(Spinner.centered());
 
     try {
       final List<ClassHeapDetailStats> heapStats =
           await memoryController.resetAllocationProfile();
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
-      spinner.element.remove();
+      spinner.remove();
     } catch (e) {
       framework.toast('Reset failed ${e.toString()}', title: 'Error');
     } finally {
@@ -237,14 +237,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     vmMemorySnapshotButton.disabled = true;
     tableStack.first.element.display = null;
     final Spinner spinner =
-        tableStack.first.element.add(Spinner()..clazz('padded'));
+        tableStack.first.element.add(Spinner.centered());
 
     try {
       final List<ClassHeapDetailStats> heapStats =
           await memoryController.getAllocationProfile();
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
-      spinner.element.remove();
+      spinner.remove();
     } catch (e) {
       framework.toast('Snapshot failed ${e.toString()}', title: 'Error');
     } finally {

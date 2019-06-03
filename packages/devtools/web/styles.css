@@ -199,6 +199,7 @@ span.label.gc {
 }
 
 .table-virtual {
+    position: relative;
     overflow-anchor: none;
 }
 
@@ -207,6 +208,7 @@ span.label.gc {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 table thead {
@@ -594,8 +596,12 @@ div.tabnav-tab {
     border-bottom-left-radius: 0;
 }
 
-.spinner.padded {
-    margin: 5px;
+.spinner.centered {
+    position: absolute;
+    margin-top: -16px;
+    margin-left: -16px;
+    top: 50%;
+    left: 50%;
 }
 
 .spinner {
