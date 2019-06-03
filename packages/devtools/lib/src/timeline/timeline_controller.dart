@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'cpu_profile_model.dart';
 import 'cpu_profile_protocol.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
@@ -124,12 +125,15 @@ class TimelineController {
     _selectedTimelineEventController.add(event);
   }
 
-  Future<void> fetchCpuProfileForSelectedEvent() async {
+  Future<void> getCpuProfileForSelectedEvent() async {
     if (!timelineData.selectedEvent.isUiEvent) return;
 
-    timelineData.cpuProfileData = await timelineService.getCpuProfile(
-      startMicros: timelineData.selectedEvent.time.start.inMicroseconds,
-      extentMicros: timelineData.selectedEvent.time.duration.inMicroseconds,
+    assert(timelineData.selectedEvent.frameId == timelineData.selectedFrame.id);
+    await timelineData.selectedFrame.cpuProfileReady.future;
+
+    timelineData.cpuProfileData = CpuProfileData.subProfile(
+      timelineData.selectedFrame.cpuProfileData,
+      timelineData.selectedEvent.time,
     );
     cpuProfileProtocol.processData(timelineData.cpuProfileData);
   }

@@ -363,6 +363,8 @@ class TimeRange {
 
   Duration _end;
 
+  bool contains(Duration target) => target >= start && target <= end;
+
   set end(Duration value) {
     if (singleAssignment) {
       assert(_end == null);

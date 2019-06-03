@@ -4,6 +4,7 @@
 import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/timeline/timeline_protocol.dart';
+import 'package:devtools/src/timeline/timeline_service.dart';
 import 'package:devtools/src/utils.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -37,10 +38,14 @@ void main() {
     TimelineProtocol timelineProtocol;
 
     setUp(() {
+      final timelineController = MockTimelineController();
+      when(timelineController.timelineService)
+          .thenReturn(MockTimelineService());
+
       timelineProtocol = TimelineProtocol(
         uiThreadId: testUiThreadId,
         gpuThreadId: testGpuThreadId,
-        timelineController: MockTimelineController(),
+        timelineController: timelineController,
       );
     });
 
@@ -212,6 +217,7 @@ void main() {
       expect(frame.uiEventFlow.toString(), equals(goldenUiString()));
       expect(frame.gpuEventFlow.toString(), equals(goldenGpuString()));
       expect(frame.addedToTimeline, isTrue);
+      expect(frame.cpuProfileReady.isCompleted, isTrue);
     });
 
     test('handles out of order timestamps', () async {
@@ -311,3 +317,5 @@ Future<void> delayForEventProcessing() async {
 }
 
 class MockTimelineController extends Mock implements TimelineController {}
+
+class MockTimelineService extends Mock implements TimelineService {}

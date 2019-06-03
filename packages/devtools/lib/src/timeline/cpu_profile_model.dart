@@ -1,12 +1,14 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:meta/meta.dart';
 
 import '../utils.dart';
+import 'timeline_model.dart';
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
@@ -31,6 +33,45 @@ class CpuProfileData {
             ..end = Duration(
                 microseconds: json[timeOriginKey] + json[timeExtentKey]))
           : null,
+    );
+  }
+
+  static CpuProfileData subProfile(
+    CpuProfileData superProfile,
+    TimeRange subTimeRange,
+  ) {
+    // Each trace event in [subTraceEvents] will have the leaf stack frame id
+    // for a cpu sample within [subTimeRange].
+    final subTraceEvents = superProfile.stackTraceEvents
+        .where((trace) => subTimeRange
+            .contains(Duration(microseconds: trace[TraceEvent.timestampKey])))
+        .toList();
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    final SplayTreeMap<String, Map<String, dynamic>> subStackFramesJson =
+        SplayTreeMap();
+    for (Map<String, dynamic> traceEvent in subTraceEvents) {
+      // Add leaf frame.
+      final String leafId = traceEvent[stackFrameIdKey];
+      final Map<String, dynamic> leafFrameJson =
+          superProfile.stackFramesJson[leafId];
+      subStackFramesJson[leafId] = leafFrameJson;
+
+      // Add leaf frame's ancestors.
+      String parentId = leafFrameJson[parentIdKey];
+      while (parentId != null) {
+        final parentFrameJson = superProfile.stackFramesJson[parentId];
+        subStackFramesJson[parentId] = parentFrameJson;
+        parentId = parentFrameJson[parentIdKey];
+      }
+    }
+
+    return CpuProfileData._(
+      stackFramesJson: subStackFramesJson,
+      stackTraceEvents: subTraceEvents,
+      sampleCount: subTraceEvents.length,
+      samplePeriod: superProfile.samplePeriod,
+      time: subTimeRange,
     );
   }
 

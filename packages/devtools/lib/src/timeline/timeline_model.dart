@@ -1,7 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import 'dart:async';
 import 'dart:math';
 
 import 'package:meta/meta.dart';
@@ -135,10 +135,10 @@ class OfflineTimelineEvent extends TimelineEvent {
       String name, String eventType, int startMicros, int durationMicros)
       : super(TraceEventWrapper(
           TraceEvent({
-            'name': name,
-            'ts': startMicros,
-            'dur': durationMicros,
-            'args': {'type': 'ui'},
+            TraceEvent.nameKey: name,
+            TraceEvent.timestampKey: startMicros,
+            TraceEvent.durationKey: durationMicros,
+            TraceEvent.argsKey: {TraceEvent.typeKey: 'ui'},
           }),
           0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
         )) {
@@ -157,16 +157,18 @@ class OfflineTimelineEvent extends TimelineEvent {
 class TimelineFrame {
   TimelineFrame(this.id);
 
-  final String id;
-
   // TODO(kenzie): we should query the device for targetFps at some point.
   static const targetFps = 60.0;
+
   static const targetMaxDuration = 1000.0 / targetFps;
+
+  final String id;
 
   /// Marks whether this frame has been added to the timeline.
   ///
   /// This should only be set once.
   bool get addedToTimeline => _addedToTimeline;
+
   bool _addedToTimeline;
 
   set addedToTimeline(v) {
@@ -197,6 +199,8 @@ class TimelineFrame {
   // Stores frame start time, end time, and duration.
   final time = TimeRange();
 
+  final Completer cpuProfileReady = Completer();
+
   /// Pipeline item time range in micros.
   ///
   /// This stores the start and end times for the pipeline item event for this
@@ -222,17 +226,18 @@ class TimelineFrame {
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
+  CpuProfileData cpuProfileData;
+
   void setEventFlow(TimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
-
-    eventFlows[type.index] = event;
-
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
     }
     if (type == TimelineEventType.gpu) {
       time.end = event?.time?.end;
     }
+    eventFlows[type.index] = event;
+    event?.frameId = id;
   }
 
   @override
@@ -274,6 +279,12 @@ class TimelineEvent {
   TimelineEvent parent;
 
   List<TimelineEvent> children = [];
+
+  String get frameId => _frameId ?? getRoot()._frameId;
+
+  String _frameId;
+
+  set frameId(String id) => _frameId = id;
 
   String get name => traceEvents.first.event.name;
 
@@ -510,14 +521,26 @@ class TimelineEvent {
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
   TraceEvent(this.json)
-      : name = json['name'],
-        category = json['cat'],
-        phase = json['ph'],
-        processId = json['pid'],
-        threadId = json['tid'],
-        duration = json['dur'],
-        timestampMicros = json['ts'],
-        args = json['args'];
+      : name = json[nameKey],
+        category = json[categoryKey],
+        phase = json[phaseKey],
+        processId = json[processIdKey],
+        threadId = json[threadIdKey],
+        duration = json[durationKey],
+        timestampMicros = json[timestampKey],
+        args = json[argsKey];
+
+  static const nameKey = 'name';
+  static const categoryKey = 'cat';
+  static const phaseKey = 'ph';
+  static const processIdKey = 'pid';
+  static const threadIdKey = 'tid';
+  static const durationKey = 'dur';
+  static const timestampKey = 'ts';
+  static const argsKey = 'args';
+  static const typeKey = 'type';
+  static const idKey = 'id';
+  static const scopeKey = 'scope';
 
   /// The original event JSON.
   final Map<String, dynamic> json;
@@ -550,12 +573,12 @@ class TraceEvent {
 
   /// Each async event has an additional required parameter id. We consider the
   /// events with the same category and id as events from the same event tree.
-  dynamic get id => json['id'];
+  dynamic get id => json[idKey];
 
   /// An optional scope string can be specified to avoid id conflicts, in which
   /// case we consider events with the same category, scope, and id as events
   /// from the same event tree.
-  String get scope => json['scope'];
+  String get scope => json[scopeKey];
 
   /// The duration of the event, in microseconds.
   ///
@@ -583,9 +606,9 @@ class TraceEvent {
 
   TimelineEventType get type {
     if (_type == null) {
-      if (args['type'] == 'ui') {
+      if (args[typeKey] == 'ui') {
         _type = TimelineEventType.ui;
-      } else if (args['type'] == 'gpu') {
+      } else if (args[typeKey] == 'gpu') {
         _type = TimelineEventType.gpu;
       } else {
         _type = TimelineEventType.unknown;
@@ -601,8 +624,8 @@ class TraceEvent {
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   @override
-  String toString() => '$type event [id: $id] [cat: $category] [ph: $phase] '
-      '$name - [timestamp: $timestampMicros] [duration: $duration]';
+  String toString() => '$type event [$idKey: $id] [$phaseKey: $phase] '
+      '$name - [$timestampKey: $timestampMicros] [$durationKey: $duration]';
 }
 
 int _traceEventWrapperId = 0;
