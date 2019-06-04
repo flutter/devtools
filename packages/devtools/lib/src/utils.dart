@@ -145,6 +145,10 @@ String longestFittingSubstring(
   return originalText.substring(0, i);
 }
 
+/// Whether a given code unit is a letter (A-Z or a-z).
+bool isLetter(int codeUnit) =>
+    (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
+
 /// Returns a trimmed vm service uri without any trailing characters.
 ///
 /// For example, given a [value] of http://127.0.0.1:60667/72K34Xmq0X0=/#/vm,
