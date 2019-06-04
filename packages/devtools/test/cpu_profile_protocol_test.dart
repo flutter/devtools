@@ -39,6 +39,35 @@ void main() {
       // Only run this test if asserts are enabled.
       assert(_runTest());
     });
+
+    test('getSimpleStackFrameName', () {
+      // Ampersand and period cases.
+      String name =
+          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
+          'SchedulerBinding.handleBeginFrame';
+      expect(
+        cpuProfileProtocol.getSimpleStackFrameName(name),
+        equals('_WidgetsFlutterBinding.handleBeginFrame'),
+      );
+
+      name =
+          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
+          'SchedulerBinding.handleBeginFrame.<anonymous closure>';
+      expect(
+        cpuProfileProtocol.getSimpleStackFrameName(name),
+        equals('_WidgetsFlutterBinding.handleBeginFrame.<anonymous closure>'),
+      );
+
+      // Ampersand and no period.
+      name =
+          'dart::DartEntry::InvokeFunction(dart::Function const&, dart::Array '
+          'const&, dart::Array const&, unsigned long)';
+      expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
+
+      // No ampersand and no period.
+      name = '_CustomZone.run';
+      expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
+    });
   });
 }
 

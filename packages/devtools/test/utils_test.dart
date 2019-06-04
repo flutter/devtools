@@ -220,6 +220,17 @@ void main() {
       );
     });
 
+    test('isLetter', () {
+      expect(isLetter('@'.codeUnitAt(0)), isFalse);
+      expect(isLetter('['.codeUnitAt(0)), isFalse);
+      expect(isLetter('`'.codeUnitAt(0)), isFalse);
+      expect(isLetter('{'.codeUnitAt(0)), isFalse);
+      expect(isLetter('A'.codeUnitAt(0)), isTrue);
+      expect(isLetter('Z'.codeUnitAt(0)), isTrue);
+      expect(isLetter('a'.codeUnitAt(0)), isTrue);
+      expect(isLetter('z'.codeUnitAt(0)), isTrue);
+    });
+
     test('getTrimmedUri', () {
       expect(
         getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm').toString(),
