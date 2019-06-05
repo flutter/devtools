@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools/src/timeline/cpu_profile_model.dart';
+import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
 import 'support/timeline_test_data.dart';
@@ -23,6 +24,25 @@ void main() {
       expect(cpuProfileData.samplePeriod, equals(50));
       expect(cpuProfileData.time.start.inMicroseconds, equals(47377796685));
       expect(cpuProfileData.time.end.inMicroseconds, equals(47377799685));
+    });
+
+    test('subProfile', () {
+      final subProfile = CpuProfileData.subProfile(
+          cpuProfileData,
+          TimeRange()
+            ..start = const Duration(microseconds: 47377796685)
+            ..end = const Duration(microseconds: 47377799063));
+
+      expect(
+        subProfile.stackFramesJson,
+        equals(subProfileStackFrames),
+      );
+      expect(
+        subProfile.stackTraceEvents,
+        equals(subProfileTraceEvents),
+      );
+      expect(subProfile.sampleCount, equals(3));
+      expect(subProfile.samplePeriod, equals(cpuProfileData.samplePeriod));
     });
 
     test('to json', () {

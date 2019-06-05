@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:js/js.dart';
@@ -119,7 +118,7 @@ class EventDetails extends CoreElement {
 
     _selectedTab = flameChartTab;
 
-    tabNav.onTabSelected.listen((PTabNavTab tab) {
+    tabNav.onTabSelected.listen((PTabNavTab tab) async {
       // Return early if this tab is already selected.
       if (tab == _selectedTab) {
         return;
@@ -129,13 +128,13 @@ class EventDetails extends CoreElement {
       assert(tab is EventDetailsTabNavTab);
       switch ((tab as EventDetailsTabNavTab).type) {
         case EventDetailsTabType.flameChart:
-          uiEventDetails.showTab(EventDetailsTabType.flameChart);
+          await uiEventDetails.showTab(EventDetailsTabType.flameChart);
           break;
         case EventDetailsTabType.bottomUp:
-          uiEventDetails.showTab(EventDetailsTabType.bottomUp);
+          await uiEventDetails.showTab(EventDetailsTabType.bottomUp);
           break;
         case EventDetailsTabType.callTree:
-          uiEventDetails.showTab(EventDetailsTabType.callTree);
+          await uiEventDetails.showTab(EventDetailsTabType.callTree);
           break;
       }
     });
@@ -149,7 +148,8 @@ class EventDetails extends CoreElement {
       titleTextColor = item.defaultTextColor;
     });
 
-    timelineController.onSelectedTimelineEvent.listen((_) => update());
+    timelineController.onSelectedTimelineEvent
+        .listen((_) async => await update());
 
     timelineController.onLoadOfflineData.listen((_) async {
       if (timelineController.timelineData.selectedEvent != null) {
@@ -204,10 +204,10 @@ class _UiEventDetails extends CoreElement {
 
   CpuCallTree callTree;
 
-  void showTab(EventDetailsTabType tabType) {
+  Future<void> showTab(EventDetailsTabType tabType) async {
     switch (tabType) {
       case EventDetailsTabType.flameChart:
-        flameChart.show();
+        await flameChart.show();
         bottomUp.attribute('hidden', true);
         callTree.attribute('hidden', true);
         break;

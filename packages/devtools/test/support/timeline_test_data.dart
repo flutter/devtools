@@ -419,8 +419,54 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'traceEvents': goldenCpuProfileTraceEvents,
 };
 
-const Map<String, dynamic> goldenCpuProfileStackFrames = {
-// Root of new sample.
+final Map<String, dynamic> goldenCpuProfileStackFrames =
+    Map.from(subProfileStackFrames)
+      ..addAll({
+        '140357727781376-12': {
+          'category': 'Dart',
+          'name': 'RenderPhysicalModel.paint',
+          'parent': '140357727781376-9',
+          'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+        },
+        '140357727781376-13': {
+          'category': 'Dart',
+          'name': 'RenderCustomMultiChildLayoutBox.paint',
+          'parent': '140357727781376-12',
+          'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+        },
+        '140357727781376-14': {
+          'category': 'Dart',
+          'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
+          'parent': '140357727781376-13',
+          'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/box.dart',
+        },
+        '140357727781376-15': {
+          'category': 'Dart',
+          'name': 'RenderObject._paintWithContext',
+          'parent': '140357727781376-14',
+          'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+        },
+        '140357727781376-16': {
+          'category': 'Dart',
+          'name': 'RenderStack.paintStack',
+          'parent': '140357727781376-14',
+          'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+        },
+        '140357727781376-17': {
+          'category': '[Stub] OneArgCheckInlineCache',
+          'name':
+              '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
+          'parent': '140357727781376-16',
+          'resolvedUrl': '',
+        }
+      });
+
+final subProfileStackFrames = {
   '140357727781376-1': {
     'category': 'Dart',
     'name': 'thread_start',
@@ -452,7 +498,6 @@ const Map<String, dynamic> goldenCpuProfileStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
   },
-// Branches off to different sample.
   '140357727781376-6': {
     'category': 'Dart',
     'name': '_RenderProxyBox.paint',
@@ -473,7 +518,6 @@ const Map<String, dynamic> goldenCpuProfileStackFrames = {
     'parent': '140357727781376-7',
     'resolvedUrl': '',
   },
-// Root of new sample.
   '140357727781376-9': {
     'category': 'Dart',
     'name': '[Truncated]',
@@ -493,51 +537,64 @@ const Map<String, dynamic> goldenCpuProfileStackFrames = {
     'resolvedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
-// Branches off to different sample.
-  '140357727781376-12': {
-    'category': 'Dart',
-    'name': 'RenderPhysicalModel.paint',
-    'parent': '140357727781376-9',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
-  },
-  '140357727781376-13': {
-    'category': 'Dart',
-    'name': 'RenderCustomMultiChildLayoutBox.paint',
-    'parent': '140357727781376-12',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
-  },
-  '140357727781376-14': {
-    'category': 'Dart',
-    'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
-    'parent': '140357727781376-13',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/box.dart',
-  },
-  '140357727781376-15': {
-    'category': 'Dart',
-    'name': 'RenderObject._paintWithContext',
-    'parent': '140357727781376-14',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-  },
-  '140357727781376-16': {
-    'category': 'Dart',
-    'name': 'RenderStack.paintStack',
-    'parent': '140357727781376-14',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
-  },
-  '140357727781376-17': {
-    'category': '[Stub] OneArgCheckInlineCache',
-    'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
-    'parent': '140357727781376-16',
-    'resolvedUrl': '',
-  }
 };
 
-const List<Map<String, dynamic>> goldenCpuProfileTraceEvents = [
+final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
+    List.from(subProfileTraceEvents)
+      ..addAll([
+        {
+          'ph': 'P',
+          'name': '',
+          'pid': 77616,
+          'tid': 42247,
+          'ts': 47377800363,
+          'cat': 'Dart',
+          'args': {'mode': 'basic'},
+          'sf': '140357727781376-14'
+        },
+        {
+          'ph': 'P',
+          'name': '',
+          'pid': 77616,
+          'tid': 42247,
+          'ts': 47377800463,
+          'cat': 'Dart',
+          'args': {'mode': 'basic'},
+          'sf': '140357727781376-14'
+        },
+        {
+          'ph': 'P',
+          'name': '',
+          'pid': 77616,
+          'tid': 42247,
+          'ts': 47377800563,
+          'cat': 'Dart',
+          'args': {'mode': 'basic'},
+          'sf': '140357727781376-14'
+        },
+        {
+          'ph': 'P',
+          'name': '',
+          'pid': 77616,
+          'tid': 42247,
+          'ts': 47377800663,
+          'cat': 'Dart',
+          'args': {'mode': 'basic'},
+          'sf': '140357727781376-15'
+        },
+        {
+          'ph': 'P',
+          'name': '',
+          'pid': 77616,
+          'tid': 42247,
+          'ts': 47377800763,
+          'cat': 'Dart',
+          'args': {'mode': 'basic'},
+          'sf': '140357727781376-17'
+        }
+      ]);
+
+final subProfileTraceEvents = [
   {
     'ph': 'P',
     'name': '',
@@ -568,56 +625,6 @@ const List<Map<String, dynamic>> goldenCpuProfileTraceEvents = [
     'args': {'mode': 'basic'},
     'sf': '140357727781376-11'
   },
-  {
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800363,
-    'cat': 'Dart',
-    'args': {'mode': 'basic'},
-    'sf': '140357727781376-14'
-  },
-  {
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800463,
-    'cat': 'Dart',
-    'args': {'mode': 'basic'},
-    'sf': '140357727781376-14'
-  },
-  {
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800563,
-    'cat': 'Dart',
-    'args': {'mode': 'basic'},
-    'sf': '140357727781376-14'
-  },
-  {
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800663,
-    'cat': 'Dart',
-    'args': {'mode': 'basic'},
-    'sf': '140357727781376-15'
-  },
-  {
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800763,
-    'cat': 'Dart',
-    'args': {'mode': 'basic'},
-    'sf': '140357727781376-17'
-  }
 ];
 
 // Mark: OfflineTimelineData.
