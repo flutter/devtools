@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:html' show Element;
 
 import 'package:devtools/src/debugger/debugger_state.dart';
 import 'package:meta/meta.dart';
@@ -46,33 +47,51 @@ class MemoryScreen extends Screen with SetStateMixin {
   final MemoryController memoryController = MemoryController();
 
   StatusItem classCountStatus;
+
   StatusItem objectCountStatus;
 
   PButton pauseButton;
+
   PButton resumeButton;
 
   PButton vmMemorySnapshotButton;
+
   PButton resetAccumulatorsButton;
+
   PButton filterLibrariesButton;
+
   PButton gcNowButton;
 
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+
   MemoryChart memoryChart;
+
   CoreElement tableContainer;
 
   final DebuggerState _debuggerState;
+
   MemoryDataView memoryDataView;
 
   MemoryTracker memoryTracker;
+
   ProgressElement progressElement;
+
+  List<Element> memoryMessages = [];
 
   @override
   void entering() {
     _updateListeningState();
+    if (memoryMessages.isNotEmpty) {
+      final messagesToRestore = memoryMessages
+          .where((message) => !framework.dismissedMessages.contains(message.id))
+          .toList();
+      framework.restoreMessages(messagesToRestore);
+    }
   }
 
   @override
   void exiting() {
+    memoryMessages = List.from(framework.messages);
     framework.clearMessages();
   }
 

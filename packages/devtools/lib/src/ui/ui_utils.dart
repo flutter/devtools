@@ -147,20 +147,23 @@ Future<void> maybeShowDebugWarning(Framework framework) async {
   if (!offlineMode &&
       serviceManager.connectedApp != null &&
       !await serviceManager.connectedApp.isProfileBuild) {
-    framework.showWarning(children: <CoreElement>[
-      div(
-          text: 'You are running your app in debug mode. Debug mode frame '
-              'rendering times are not indicative of release performance.'),
-      div()
-        ..add(span(
-            text:
-                '''Relaunch your application with the '--profile' argument, or '''))
-        ..add(a(
-            text: 'relaunch in profile mode from VS Code or IntelliJ',
-            href: runInProfileModeDocsUrl,
-            target: '_blank;'))
-        ..add(span(text: '.')),
-    ]);
+    framework.showWarning(
+      debugWarning,
+      children: <CoreElement>[
+        div(
+            text: 'You are running your app in debug mode. Debug mode frame '
+                'rendering times are not indicative of release performance.'),
+        div()
+          ..add(span(
+              text:
+                  '''Relaunch your application with the '--profile' argument, or '''))
+          ..add(a(
+              text: 'relaunch in profile mode from VS Code or IntelliJ',
+              href: runInProfileModeDocsUrl,
+              target: '_blank;'))
+          ..add(span(text: '.')),
+      ],
+    );
   }
 }
 

@@ -61,19 +61,30 @@ class DebuggerScreen extends Screen {
   StatusItem deviceStatus;
 
   CoreElement _breakpointsCountDiv;
+
   CoreElement _sourcePathDiv;
+
   CoreElement _popupTextfield;
+
   PopupView _popupView;
 
   SourceEditor sourceEditor;
+
   CallStackView callStackView;
+
   VariablesView variablesView;
+
   BreakpointsView breakpointsView;
+
   ScriptsView scriptsView;
+
   ScriptsView popupScriptsView;
+
   ConsoleArea consoleArea;
 
   ScriptsMatcher _matcher;
+
+  List<html.Element> debuggerMessages = [];
 
   @override
   CoreElement createContent(Framework framework) {
@@ -421,9 +432,21 @@ class DebuggerScreen extends Screen {
     if (!_initialized) {
       _initialize();
     }
+    if (debuggerMessages.isNotEmpty) {
+      final messagesToRestore = debuggerMessages
+          .where((message) => !framework.dismissedMessages.contains(message.id))
+          .toList();
+      framework.restoreMessages(messagesToRestore);
+    }
 
     // TODO(devoncarew): On restoring the page, the execution point marker can
     // get out of position
+  }
+
+  @override
+  void exiting() {
+    debuggerMessages = List.from(framework.messages);
+    framework.clearMessages();
   }
 
   void _initialize() {

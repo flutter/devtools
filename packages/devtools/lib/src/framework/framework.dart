@@ -22,6 +22,10 @@ import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
+const trackWidgetCreationWarning = 'trackWidgetCreationWarning';
+
+const debugWarning = 'debugWarning';
+
 class Framework {
   Framework() {
     window.onPopState.listen(handlePopState);
@@ -50,16 +54,29 @@ class Framework {
 
   final Completer<void> screensReady = Completer();
 
+  final List<String> dismissedMessages = [];
+
+  List<Element> get messages => queryId('messages-container').children;
+
+  set messages(List<Element> messages) =>
+      queryId('messages-container').children = messages;
+
   Screen current;
 
   Screen _previous;
 
   StatusLine globalStatus;
+
   StatusLine pageStatus;
+
   StatusLine auxiliaryStatus;
+
   ActionsContainer globalActions;
+
   ConnectDialog connectDialog;
+
   SnapshotMessage snapshotMessage;
+
   AnalyticsOptInDialog analyticsDialog;
 
   void _initDragDrop() {
@@ -307,13 +324,33 @@ class Framework {
     }
   }
 
-  void showInfo({String message, String title, List<CoreElement> children}) {
-    _showMessage(message: message, title: title, children: children);
+  void showInfo(
+    String messageId, {
+    String message,
+    String title,
+    List<CoreElement> children,
+  }) {
+    _showMessage(
+      messageId: messageId,
+      message: message,
+      title: title,
+      children: children,
+    );
   }
 
-  void showWarning({String message, String title, List<CoreElement> children}) {
+  void showWarning(
+    String messageId, {
+    String message,
+    String title,
+    List<CoreElement> children,
+  }) {
     _showMessage(
-        message: message, title: title, children: children, warning: true);
+      messageId: messageId,
+      message: message,
+      title: title,
+      children: children,
+      warning: true,
+    );
   }
 
   void showError(String title, [dynamic error]) {
@@ -331,12 +368,15 @@ class Framework {
   }
 
   void _showMessage({
+    String messageId,
     String message,
     String title,
     bool warning = false,
     bool error = false,
     List<CoreElement> children,
   }) {
+    if (dismissedMessages.contains(messageId)) return;
+
     final PFlash flash = PFlash();
     if (warning) {
       flash.warning();
@@ -344,7 +384,12 @@ class Framework {
     if (error) {
       flash.error();
     }
-    flash.addClose().click(clearMessages);
+    if (messageId != null) {
+      flash.id = messageId;
+      flash.addClose().click(() => _dismissMessageWithId(messageId));
+    } else {
+      flash.addClose().click(clearMessages);
+    }
     if (title != null) {
       flash.add(label(text: title));
     }
@@ -357,14 +402,17 @@ class Framework {
       children.forEach(flash.add);
     }
 
-    final CoreElement errorContainer =
-        CoreElement.from(queryId('messages-container'));
-    errorContainer.add(flash);
+    CoreElement.from(queryId('messages-container')).add(flash);
   }
 
-  void clearMessages() {
-    queryId('messages-container').children.clear();
+  void _dismissMessageWithId(String id) {
+    messages.removeWhere((e) => e.id == id);
+    dismissedMessages.add(id);
   }
+
+  void clearMessages() => messages.clear();
+
+  void restoreMessages(List<Element> _messages) => messages = _messages;
 
   void toast(
     String message, {

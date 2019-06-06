@@ -45,15 +45,24 @@ class InspectorScreen extends Screen {
           disabled: disabled,
           disabledTooltip: disabledTooltip,
         );
+
   PButton refreshTreeButton;
 
   SetStateMixin inspectorStateMixin = SetStateMixin();
+
   InspectorService inspectorService;
+
   InspectorController inspectorController;
+
   ProgressElement progressElement;
+
   CoreElement inspectorContainer;
+
   StreamSubscription<Object> splitterSubscription;
+
   bool displayedWidgetTrackingNotice = false;
+
+  List<Element> inspectorMessages = [];
 
   @override
   CoreElement createContent(Framework framework) {
@@ -97,7 +106,18 @@ class InspectorScreen extends Screen {
   }
 
   @override
+  void entering() {
+    if (inspectorMessages.isNotEmpty) {
+      final messagesToRestore = inspectorMessages
+          .where((message) => !framework.dismissedMessages.contains(message.id))
+          .toList();
+      framework.restoreMessages(messagesToRestore);
+    }
+  }
+
+  @override
   void exiting() {
+    inspectorMessages = List.from(framework.messages);
     framework.clearMessages();
   }
 
@@ -190,24 +210,27 @@ class InspectorScreen extends Screen {
 
         displayedWidgetTrackingNotice = true;
 
-        framework.showWarning(children: <CoreElement>[
-          div()
-            ..add(span(text: 'The '))
-            ..add(a(
-                text: 'widget creation tracking feature',
-                href: trackWidgetCreationDocsUrl,
-                target: '_blank;'))
-            ..add(span(text: ' is not enabled. '))
-            ..add(span(
-                text: '''This feature allows the Flutter inspector to present 
+        framework.showWarning(
+          trackWidgetCreationWarning,
+          children: <CoreElement>[
+            div()
+              ..add(span(text: 'The '))
+              ..add(a(
+                  text: 'widget creation tracking feature',
+                  href: trackWidgetCreationDocsUrl,
+                  target: '_blank;'))
+              ..add(span(text: ' is not enabled. '))
+              ..add(span(
+                  text: '''This feature allows the Flutter inspector to present 
 the widget tree in a manner similar to how the UI was defined in your source
 code. Without it, the tree of nodes in the widget tree are much deeper, and it
 can be more difficult to understand how the runtime widget hierarchy corresponds
 to your application\’s UI.''')),
-          div(text: '''To fix this, relaunch your application by running 
+            div(text: '''To fix this, relaunch your application by running 
 'flutter run --track-widget-creation' (or run your application from VS Code or
 IntelliJ).'''),
-        ]);
+          ],
+        );
       });
     }
   }

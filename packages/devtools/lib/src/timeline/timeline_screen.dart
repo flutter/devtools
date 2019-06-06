@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:html' show Element;
 
 import 'package:split/split.dart' as split;
 
@@ -117,6 +118,8 @@ class TimelineScreen extends Screen {
 
   bool splitterConfigured = false;
 
+  List<Element> timelineMessages = [];
+
   @override
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
@@ -226,10 +229,17 @@ class TimelineScreen extends Screen {
   void entering() {
     _updateListeningState();
     _updateButtonStates();
+    if (timelineMessages.isNotEmpty) {
+      final messagesToRestore = timelineMessages
+          .where((message) => !framework.dismissedMessages.contains(message.id))
+          .toList();
+      framework.restoreMessages(messagesToRestore);
+    }
   }
 
   @override
   void exiting() {
+    timelineMessages = List.from(framework.messages);
     framework.clearMessages();
     _updateListeningState();
     _updateButtonStates();
