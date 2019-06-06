@@ -60,6 +60,15 @@ class PerfToolFramework extends Framework {
   static const _restartActionId = 'restart-action';
 
   void initGlobalUI() async {
+    // Listen for clicks on the 'send feedback' button.
+    queryId('send-feedback-button').onClick.listen((_) {
+      ga.select(ga.devToolsMain, ga.feedback);
+      // TODO(devoncarew): Fill in useful product info here, like the Flutter
+      // SDK version and the version of DevTools in use.
+      html.window
+          .open('https://github.com/flutter/devtools/issues', '_feedback');
+    });
+
     await serviceManager.serviceAvailable.future;
     await addScreens();
     sortScreens();
@@ -115,15 +124,6 @@ class PerfToolFramework extends Framework {
       if (!serviceManager.hasConnection) {
         toast('Device connection lost.');
       }
-    });
-
-    // Listen for clicks on the 'send feedback' button.
-    queryId('send-feedback-button').onClick.listen((_) {
-      ga.select(ga.devToolsMain, ga.feedback);
-      // TODO(devoncarew): Fill in useful product info here, like the Flutter
-      // SDK version and the version of DevTools in use.
-      html.window
-          .open('https://github.com/flutter/devtools/issues', '_feedback');
     });
   }
 
