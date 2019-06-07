@@ -189,7 +189,7 @@ class TimelineScreen extends Screen {
 
     _initListeners();
 
-    maybeAddDebugMessage(framework.messageManager, timelineScreenId);
+    maybeAddDebugMessage(framework, timelineScreenId);
 
     return screenDiv;
   }

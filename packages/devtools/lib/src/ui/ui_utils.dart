@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
-import '../message_manager.dart';
 import '../messages.dart';
 import '../service_extensions.dart';
 import '../service_registrations.dart';
@@ -104,12 +103,11 @@ StatusItem createLinkStatusItem(
   return StatusItem()..element.add(element);
 }
 
-Future<void> maybeAddDebugMessage(
-  MessageManager messageManager,
-  String screenId,
-) async {
-  if (await shouldShowDebugWarning()) {
-    messageManager.addMessage(debugWarning, screenId: screenId);
+Future<void> maybeAddDebugMessage(Framework framework, String screenId) async {
+  if (!offlineMode &&
+      serviceManager.connectedApp != null &&
+      !await serviceManager.connectedApp.isProfileBuild) {
+    framework.showMessage(message: debugWarning, screenId: screenId);
   }
 }
 

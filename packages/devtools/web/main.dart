@@ -41,7 +41,7 @@ void main() {
     }
 
     FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
-      framework.messageManager.showError(title, error);
+      framework.showError(title, error);
     }).then((bool connected) {
       if (!connected) {
         framework.showConnectionDialog();

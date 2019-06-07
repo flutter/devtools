@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'globals.dart';
 import 'ui/elements.dart';
 import 'ui/primer.dart';
 
+/// Used as a screen id for messages that do not pertain to a specific screen.
+const generalId = 'general';
+
 class MessageManager {
   MessageManager();
-
-  static const _generalId = 'general';
 
   final _container = CoreElement.from(queryId('messages-container'));
 
@@ -34,11 +34,11 @@ class MessageManager {
   void removeAll() {
     _container.clear();
     // Remove all error messages.
-    _messages[_generalId]
+    _messages[generalId]
         ?.removeWhere((m) => m.messageType == MessageType.error);
   }
 
-  void addMessage(Message message, {String screenId = _generalId}) {
+  void addMessage(Message message, String screenId) {
     message.onDismiss.listen((_message) {
       if (_message.id != null) {
         _dismissedMessageIds.add(_message.id);
@@ -47,25 +47,8 @@ class MessageManager {
     });
 
     // ignore: prefer_collection_literals
-    _messages[screenId] ??= Set()..add(message);
+    _messages.putIfAbsent(screenId, () => Set()).add(message);
     _showMessage(message);
-  }
-
-  void showError(String title, [dynamic error]) {
-    String message;
-    if (error != null) {
-      message = '$error';
-      // Only display the error object if it has a custom Dart toString.
-      if (message.startsWith('[object ') ||
-          message.startsWith('Instance of ')) {
-        message = null;
-      }
-    }
-    addMessage(Message(
-      MessageType.error,
-      message: message,
-      title: title,
-    ));
   }
 }
 
@@ -127,10 +110,4 @@ enum MessageType {
   info,
   warning,
   error,
-}
-
-Future<bool> shouldShowDebugWarning() async {
-  return !offlineMode &&
-      serviceManager.connectedApp != null &&
-      !await serviceManager.connectedApp.isProfileBuild;
 }

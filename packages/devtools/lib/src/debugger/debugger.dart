@@ -656,10 +656,7 @@ class DebuggerScreen extends Screen {
         scriptsView.clearScripts();
       }
     }).catchError((dynamic e) {
-      framework.messageManager.showError(
-        'Error retrieving isolate information',
-        e,
-      );
+      framework.showError('Error retrieving isolate information', e);
     });
   }
 

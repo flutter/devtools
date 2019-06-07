@@ -176,7 +176,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       serviceDisconnet();
     });
 
-    maybeAddDebugMessage(framework.messageManager, memoryScreenId);
+    maybeAddDebugMessage(framework, memoryScreenId);
 
     _pushNextTable(null, _createHeapStatsTableView());
 

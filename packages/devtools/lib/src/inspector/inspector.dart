@@ -191,8 +191,8 @@ class InspectorScreen extends Screen {
         }
 
         displayedWidgetTrackingNotice = true;
-        framework.messageManager.addMessage(
-          trackWidgetCreationWarning,
+        framework.showMessage(
+          message: trackWidgetCreationWarning,
           screenId: inspectorScreenId,
         );
       });

@@ -137,7 +137,7 @@ class PerfToolFramework extends Framework {
         .children
         .removeWhere((e) => e.id != 'title');
     html.document.getElementById('content').children.clear();
-    messageManager.showError(title, error);
+    showError(title, error);
   }
 
   Future<void> addScreens() async {

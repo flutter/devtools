@@ -318,6 +318,30 @@ class Framework {
     }
   }
 
+  void showMessage({@required Message message, String screenId = generalId}) {
+    messageManager.addMessage(message, screenId);
+  }
+
+  void showError(String title, [dynamic error]) {
+    String message;
+    if (error != null) {
+      message = '$error';
+      // Only display the error object if it has a custom Dart toString.
+      if (message.startsWith('[object ') ||
+          message.startsWith('Instance of ')) {
+        message = null;
+      }
+    }
+    messageManager.addMessage(
+      Message(MessageType.error, message: message, title: title),
+      generalId,
+    );
+  }
+
+  void clearMessages() {
+    messageManager.removeAll();
+  }
+
   void toast(
     String message, {
     String title,
@@ -621,7 +645,7 @@ class ConnectDialog {
 
     // Clear existing messages as the existing messages are about the previous
     // VMService or the previous failure to connect to the VM Service.
-    framework.messageManager.removeAll();
+    framework.clearMessages();
     if (port != null) {
       _connect(Uri.parse('ws://localhost:$port/ws'))
           .catchError((dynamic error) {
