@@ -43,8 +43,6 @@ class Framework {
     snapshotMessage = new SnapshotMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
-
-    messageManager = MessageManager(this);
   }
 
   final List<Screen> screens = <Screen>[];
@@ -52,6 +50,8 @@ class Framework {
   final Map<Screen, CoreElement> _screenContents = {};
 
   final Completer<void> screensReady = Completer();
+
+  final MessageManager messageManager = MessageManager();
 
   Screen current;
 
@@ -70,8 +70,6 @@ class Framework {
   SnapshotMessage snapshotMessage;
 
   AnalyticsOptInDialog analyticsDialog;
-
-  MessageManager messageManager;
 
   void _initDragDrop() {
     window.addEventListener('dragover', (e) => _onDragOver(e), false);

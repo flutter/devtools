@@ -3,24 +3,21 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'framework/framework.dart';
 import 'globals.dart';
 import 'ui/elements.dart';
 import 'ui/primer.dart';
 
 class MessageManager {
-  MessageManager(this.framework);
+  MessageManager();
 
-  static const generalId = 'general';
+  static const _generalId = 'general';
 
-  final Framework framework;
-
-  final container = CoreElement.from(queryId('messages-container'));
+  final _container = CoreElement.from(queryId('messages-container'));
 
   /// Maps screen ids to their respective messages.
   ///
   /// Messages that do not pertain to a specific screen will be stored under the
-  /// key [generalId].
+  /// key [_generalId].
   final Map<String, Set<Message>> _messages = {};
 
   final List<String> _dismissedMessageIds = [];
@@ -31,17 +28,17 @@ class MessageManager {
 
   void _showMessage(Message message) {
     if (_dismissedMessageIds.contains(message.id)) return;
-    container.add(message.flash);
+    _container.add(message.flash);
   }
 
   void removeAll() {
-    container.clear();
+    _container.clear();
     // Remove all error messages.
-    _messages[generalId]
+    _messages[_generalId]
         ?.removeWhere((m) => m.messageType == MessageType.error);
   }
 
-  void addMessage(Message message, {String screenId = generalId}) {
+  void addMessage(Message message, {String screenId = _generalId}) {
     message.onDismiss.listen((_message) {
       if (_message.id != null) {
         _dismissedMessageIds.add(_message.id);
