@@ -9,9 +9,10 @@ import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../message_manager.dart';
+import '../messages.dart';
 import '../service_extensions.dart';
 import '../service_registrations.dart';
-import '../service_registrations.dart' as registrations;
 import '../utils.dart';
 import 'analytics.dart' as ga;
 import 'elements.dart';
@@ -22,8 +23,6 @@ import 'material_icons.dart';
 import 'primer.dart';
 
 const int defaultSplitterWidth = 10;
-const String runInProfileModeDocsUrl =
-    'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
 
 CoreElement createExtensionCheckBox(
     ToggleableServiceExtensionDescription extensionDescription) {
@@ -105,65 +104,12 @@ StatusItem createLinkStatusItem(
   return StatusItem()..element.add(element);
 }
 
-CoreElement createHotReloadRestartGroup(Framework framework) {
-  return div(c: 'btn-group')
-    ..add([
-      createHotReloadButton(framework),
-      createHotRestartButton(framework),
-    ]);
-}
-
-CoreElement createHotReloadButton(Framework framework) {
-  final action = () async {
-    await serviceManager.performHotReload();
-  };
-  final errorAction = (e) {
-    framework.showError('Error performing hot reload', e);
-  };
-  return RegisteredServiceExtensionButton(
-    registrations.hotReload,
-    action,
-    errorAction,
-  ).button;
-}
-
-// TODO: move this button out of timeline if we decide to make a global button bar.
-CoreElement createHotRestartButton(Framework framework) {
-  final action = () async {
-    await serviceManager.performHotRestart();
-  };
-  final errorAction = (e) {
-    framework.showError('Error performing hot restart', e);
-  };
-
-  return RegisteredServiceExtensionButton(
-    registrations.hotRestart,
-    action,
-    errorAction,
-  ).button;
-}
-
-Future<void> maybeShowDebugWarning(Framework framework) async {
-  if (!offlineMode &&
-      serviceManager.connectedApp != null &&
-      !await serviceManager.connectedApp.isProfileBuild) {
-    framework.showWarning(
-      debugWarning,
-      children: <CoreElement>[
-        div(
-            text: 'You are running your app in debug mode. Debug mode frame '
-                'rendering times are not indicative of release performance.'),
-        div()
-          ..add(span(
-              text:
-                  '''Relaunch your application with the '--profile' argument, or '''))
-          ..add(a(
-              text: 'relaunch in profile mode from VS Code or IntelliJ',
-              href: runInProfileModeDocsUrl,
-              target: '_blank;'))
-          ..add(span(text: '.')),
-      ],
-    );
+Future<void> maybeAddDebugMessage(
+  MessageManager messageManager,
+  String screenId,
+) async {
+  if (await shouldShowDebugWarning()) {
+    messageManager.addMessage(debugWarning, screenId: screenId);
   }
 }
 

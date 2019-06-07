@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../main.dart';
+import '../message_manager.dart';
 import '../timeline/timeline_controller.dart';
 import '../timeline/timeline_model.dart';
 import '../timeline/timeline_screen.dart';
@@ -21,10 +22,6 @@ import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
-
-const trackWidgetCreationWarning = 'trackWidgetCreationWarning';
-
-const debugWarning = 'debugWarning';
 
 class Framework {
   Framework() {
@@ -46,6 +43,8 @@ class Framework {
     snapshotMessage = new SnapshotMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
+
+    messageManager = MessageManager(this);
   }
 
   final List<Screen> screens = <Screen>[];
@@ -53,13 +52,6 @@ class Framework {
   final Map<Screen, CoreElement> _screenContents = {};
 
   final Completer<void> screensReady = Completer();
-
-  final List<String> dismissedMessages = [];
-
-  List<Element> get messages => queryId('messages-container').children;
-
-  set messages(List<Element> messages) =>
-      queryId('messages-container').children = messages;
 
   Screen current;
 
@@ -78,6 +70,8 @@ class Framework {
   SnapshotMessage snapshotMessage;
 
   AnalyticsOptInDialog analyticsDialog;
+
+  MessageManager messageManager;
 
   void _initDragDrop() {
     window.addEventListener('dragover', (e) => _onDragOver(e), false);
@@ -269,6 +263,7 @@ class Framework {
       _previous.visible = false;
 
       pageStatus.removeAll();
+      messageManager.removeAll();
 
       _screenContents[_previous].hidden(true);
     }
@@ -310,6 +305,7 @@ class Framework {
     current.visible = true;
     current.entering();
     pageStatus.addAll(current.statusItems);
+    messageManager.showMessagesForScreen(current.id);
     auxiliaryStatus.defaultStatus = screen.helpStatus;
 
     updatePage();
@@ -323,96 +319,6 @@ class Framework {
       e.toggleClass('active', isCurrent);
     }
   }
-
-  void showInfo(
-    String messageId, {
-    String message,
-    String title,
-    List<CoreElement> children,
-  }) {
-    _showMessage(
-      messageId: messageId,
-      message: message,
-      title: title,
-      children: children,
-    );
-  }
-
-  void showWarning(
-    String messageId, {
-    String message,
-    String title,
-    List<CoreElement> children,
-  }) {
-    _showMessage(
-      messageId: messageId,
-      message: message,
-      title: title,
-      children: children,
-      warning: true,
-    );
-  }
-
-  void showError(String title, [dynamic error]) {
-    String message;
-    if (error != null) {
-      message = '$error';
-      // Only display the error object if it has a custom Dart toString.
-      if (message.startsWith('[object ') ||
-          message.startsWith('Instance of ')) {
-        message = null;
-      }
-    }
-
-    _showMessage(message: message, title: title, error: true);
-  }
-
-  void _showMessage({
-    String messageId,
-    String message,
-    String title,
-    bool warning = false,
-    bool error = false,
-    List<CoreElement> children,
-  }) {
-    if (dismissedMessages.contains(messageId)) return;
-
-    final PFlash flash = PFlash();
-    if (warning) {
-      flash.warning();
-    }
-    if (error) {
-      flash.error();
-    }
-    if (messageId != null) {
-      flash.id = messageId;
-      flash.addClose().click(() => _dismissMessageWithId(messageId));
-    } else {
-      flash.addClose().click(clearMessages);
-    }
-    if (title != null) {
-      flash.add(label(text: title));
-    }
-    if (message != null) {
-      for (String text in message.split('\n\n')) {
-        flash.add(div(text: text));
-      }
-    }
-    if (children != null) {
-      children.forEach(flash.add);
-    }
-
-    CoreElement.from(queryId('messages-container')).add(flash);
-  }
-
-  void _dismissMessageWithId(String id) {
-    messages.removeWhere((e) => e.id == id);
-    dismissedMessages.add(id);
-  }
-
-  void clearMessages() => messages.clear();
-
-  void restoreMessages(List<Element> _messages) => messages = _messages;
 
   void toast(
     String message, {
@@ -717,7 +623,7 @@ class ConnectDialog {
 
     // Clear existing messages as the existing messages are about the previous
     // VMService or the previous failure to connect to the VM Service.
-    framework.clearMessages();
+    framework.messageManager.removeAll();
     if (port != null) {
       _connect(Uri.parse('ws://localhost:$port/ws'))
           .catchError((dynamic error) {

@@ -12,6 +12,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../messages.dart';
 import '../service_extensions.dart' as extensions;
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
@@ -26,8 +27,7 @@ import 'inspector_tree_canvas.dart';
 import 'inspector_tree_html.dart';
 import 'inspector_tree_web.dart';
 
-const trackWidgetCreationDocsUrl =
-    'https://flutter.github.io/devtools/inspector#track-widget-creation';
+const inspectorScreenId = 'inspector';
 
 // Generally the canvas tree renderer is a better fit for the inspector.
 // The html renderer is more appropriate for small static trees such as those
@@ -40,7 +40,7 @@ class InspectorScreen extends Screen {
   InspectorScreen({bool disabled, String disabledTooltip})
       : super(
           name: 'Flutter Inspector',
-          id: 'inspector',
+          id: inspectorScreenId,
           iconClass: 'octicon-device-mobile',
           disabled: disabled,
           disabledTooltip: disabledTooltip,
@@ -61,8 +61,6 @@ class InspectorScreen extends Screen {
   StreamSubscription<Object> splitterSubscription;
 
   bool displayedWidgetTrackingNotice = false;
-
-  List<Element> inspectorMessages = [];
 
   @override
   CoreElement createContent(Framework framework) {
@@ -103,22 +101,6 @@ class InspectorScreen extends Screen {
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
     return screenDiv;
-  }
-
-  @override
-  void entering() {
-    if (inspectorMessages.isNotEmpty) {
-      final messagesToRestore = inspectorMessages
-          .where((message) => !framework.dismissedMessages.contains(message.id))
-          .toList();
-      framework.restoreMessages(messagesToRestore);
-    }
-  }
-
-  @override
-  void exiting() {
-    inspectorMessages = List.from(framework.messages);
-    framework.clearMessages();
   }
 
   void _handleConnectionStart(VmService service) async {
@@ -209,27 +191,9 @@ class InspectorScreen extends Screen {
         }
 
         displayedWidgetTrackingNotice = true;
-
-        framework.showWarning(
+        framework.messageManager.addMessage(
           trackWidgetCreationWarning,
-          children: <CoreElement>[
-            div()
-              ..add(span(text: 'The '))
-              ..add(a(
-                  text: 'widget creation tracking feature',
-                  href: trackWidgetCreationDocsUrl,
-                  target: '_blank;'))
-              ..add(span(text: ' is not enabled. '))
-              ..add(span(
-                  text: '''This feature allows the Flutter inspector to present 
-the widget tree in a manner similar to how the UI was defined in your source
-code. Without it, the tree of nodes in the widget tree are much deeper, and it
-can be more difficult to understand how the runtime widget hierarchy corresponds
-to your application\’s UI.''')),
-            div(text: '''To fix this, relaunch your application by running 
-'flutter run --track-widget-creation' (or run your application from VS Code or
-IntelliJ).'''),
-          ],
+          screenId: inspectorScreenId,
         );
       });
     }

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' show Element;
 
 import 'package:intl/intl.dart';
 import 'package:split/split.dart' as split;
@@ -60,8 +59,6 @@ class LoggingScreen extends Screen {
 
   /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
   Future<ObjectGroup> objectGroup;
-
-  List<Element> loggingMessages = [];
 
   @override
   CoreElement createContent(Framework framework) {
@@ -139,18 +136,6 @@ class LoggingScreen extends Screen {
 
       hasPendingDomUpdates = false;
     }
-    if (loggingMessages.isNotEmpty) {
-      final messagesToRestore = loggingMessages
-          .where((message) => !framework.dismissedMessages.contains(message.id))
-          .toList();
-      framework.restoreMessages(messagesToRestore);
-    }
-  }
-
-  @override
-  void exiting() {
-    loggingMessages = List.from(framework.messages);
-    framework.clearMessages();
   }
 
   CoreElement _createTableView() {

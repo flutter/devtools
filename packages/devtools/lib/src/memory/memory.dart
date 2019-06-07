@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:html' show Element;
 
 import 'package:devtools/src/debugger/debugger_state.dart';
 import 'package:meta/meta.dart';
@@ -27,12 +26,14 @@ import 'memory_data_view.dart';
 import 'memory_detail.dart';
 import 'memory_protocol.dart';
 
+const memoryScreenId = 'memory';
+
 class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen({bool disabled, String disabledTooltip})
       : _debuggerState = DebuggerState(),
         super(
           name: 'Memory',
-          id: 'memory',
+          id: memoryScreenId,
           iconClass: 'octicon-package',
           disabled: disabled,
           disabledTooltip: disabledTooltip,
@@ -76,23 +77,9 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   ProgressElement progressElement;
 
-  List<Element> memoryMessages = [];
-
   @override
   void entering() {
     _updateListeningState();
-    if (memoryMessages.isNotEmpty) {
-      final messagesToRestore = memoryMessages
-          .where((message) => !framework.dismissedMessages.contains(message.id))
-          .toList();
-      framework.restoreMessages(messagesToRestore);
-    }
-  }
-
-  @override
-  void exiting() {
-    memoryMessages = List.from(framework.messages);
-    framework.clearMessages();
   }
 
   void updateResumeButton({@required bool disabled}) {
@@ -189,7 +176,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       serviceDisconnet();
     });
 
-    maybeShowDebugWarning(framework);
+    maybeAddDebugMessage(framework.messageManager, memoryScreenId);
 
     _pushNextTable(null, _createHeapStatsTableView());
 

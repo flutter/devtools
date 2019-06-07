@@ -84,8 +84,6 @@ class DebuggerScreen extends Screen {
 
   ScriptsMatcher _matcher;
 
-  List<html.Element> debuggerMessages = [];
-
   @override
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
@@ -432,21 +430,9 @@ class DebuggerScreen extends Screen {
     if (!_initialized) {
       _initialize();
     }
-    if (debuggerMessages.isNotEmpty) {
-      final messagesToRestore = debuggerMessages
-          .where((message) => !framework.dismissedMessages.contains(message.id))
-          .toList();
-      framework.restoreMessages(messagesToRestore);
-    }
 
     // TODO(devoncarew): On restoring the page, the execution point marker can
     // get out of position
-  }
-
-  @override
-  void exiting() {
-    debuggerMessages = List.from(framework.messages);
-    framework.clearMessages();
   }
 
   void _initialize() {
@@ -670,7 +656,10 @@ class DebuggerScreen extends Screen {
         scriptsView.clearScripts();
       }
     }).catchError((dynamic e) {
-      framework.showError('Error retrieving isolate information', e);
+      framework.messageManager.showError(
+        'Error retrieving isolate information',
+        e,
+      );
     });
   }
 
