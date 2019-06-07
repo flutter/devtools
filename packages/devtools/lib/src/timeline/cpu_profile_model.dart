@@ -244,8 +244,19 @@ int _stackFrameIdCompare(String a, String b) {
   const dash = '-';
   final aDashIndex = a.indexOf(dash);
   final bDashIndex = b.indexOf(dash);
-  assert(aDashIndex != -1 && bDashIndex != -1);
-  final int aId = int.parse(a.substring(aDashIndex + 1));
-  final int bId = int.parse(b.substring(bDashIndex + 1));
-  return aId.compareTo(bId);
+  try {
+    final int aId = int.parse(a.substring(aDashIndex + 1));
+    final int bId = int.parse(b.substring(bDashIndex + 1));
+    return aId.compareTo(bId);
+  } catch (e) {
+    String error = 'invalid stack frame ';
+    if (aDashIndex == -1 && bDashIndex != -1) {
+      error += 'id [$a]';
+    } else if (aDashIndex != -1 && bDashIndex == -1) {
+      error += 'id [$b]';
+    } else {
+      error += 'ids [$a, $b]';
+    }
+    throw error;
+  }
 }
