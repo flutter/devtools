@@ -61,16 +61,25 @@ class DebuggerScreen extends Screen {
   StatusItem deviceStatus;
 
   CoreElement _breakpointsCountDiv;
+
   CoreElement _sourcePathDiv;
+
   CoreElement _popupTextfield;
+
   PopupView _popupView;
 
   SourceEditor sourceEditor;
+
   CallStackView callStackView;
+
   VariablesView variablesView;
+
   BreakpointsView breakpointsView;
+
   ScriptsView scriptsView;
+
   ScriptsView popupScriptsView;
+
   ConsoleArea consoleArea;
 
   ScriptsMatcher _matcher;

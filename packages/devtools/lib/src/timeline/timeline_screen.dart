@@ -189,7 +189,7 @@ class TimelineScreen extends Screen {
 
     _initListeners();
 
-    maybeShowDebugWarning(framework);
+    maybeAddDebugMessage(framework, timelineScreenId);
 
     return screenDiv;
   }
@@ -230,7 +230,6 @@ class TimelineScreen extends Screen {
 
   @override
   void exiting() {
-    framework.clearMessages();
     _updateListeningState();
     _updateButtonStates();
   }

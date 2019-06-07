@@ -48,8 +48,11 @@ class LoggingScreen extends Screen {
   }
 
   Table<LogData> loggingTable;
+
   LogDetailsUI logDetailsUI;
+
   StatusItem logCountStatus;
+
   SetStateMixin loggingStateMixin = SetStateMixin();
 
   bool hasPendingDomUpdates = false;

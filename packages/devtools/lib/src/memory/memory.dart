@@ -26,12 +26,14 @@ import 'memory_data_view.dart';
 import 'memory_detail.dart';
 import 'memory_protocol.dart';
 
+const memoryScreenId = 'memory';
+
 class MemoryScreen extends Screen with SetStateMixin {
   MemoryScreen({bool disabled, String disabledTooltip})
       : _debuggerState = DebuggerState(),
         super(
           name: 'Memory',
-          id: 'memory',
+          id: memoryScreenId,
           iconClass: 'octicon-package',
           disabled: disabled,
           disabledTooltip: disabledTooltip,
@@ -46,34 +48,38 @@ class MemoryScreen extends Screen with SetStateMixin {
   final MemoryController memoryController = MemoryController();
 
   StatusItem classCountStatus;
+
   StatusItem objectCountStatus;
 
   PButton pauseButton;
+
   PButton resumeButton;
 
   PButton vmMemorySnapshotButton;
+
   PButton resetAccumulatorsButton;
+
   PButton filterLibrariesButton;
+
   PButton gcNowButton;
 
   ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+
   MemoryChart memoryChart;
+
   CoreElement tableContainer;
 
   final DebuggerState _debuggerState;
+
   MemoryDataView memoryDataView;
 
   MemoryTracker memoryTracker;
+
   ProgressElement progressElement;
 
   @override
   void entering() {
     _updateListeningState();
-  }
-
-  @override
-  void exiting() {
-    framework.clearMessages();
   }
 
   void updateResumeButton({@required bool disabled}) {
@@ -170,7 +176,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       serviceDisconnet();
     });
 
-    maybeShowDebugWarning(framework);
+    maybeAddDebugMessage(framework, memoryScreenId);
 
     _pushNextTable(null, _createHeapStatsTableView());
 

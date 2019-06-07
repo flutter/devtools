@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../main.dart';
+import '../message_manager.dart';
 import '../timeline/timeline_controller.dart';
 import '../timeline/timeline_model.dart';
 import '../timeline/timeline_screen.dart';
@@ -50,16 +51,24 @@ class Framework {
 
   final Completer<void> screensReady = Completer();
 
+  final MessageManager messageManager = MessageManager();
+
   Screen current;
 
   Screen _previous;
 
   StatusLine globalStatus;
+
   StatusLine pageStatus;
+
   StatusLine auxiliaryStatus;
+
   ActionsContainer globalActions;
+
   ConnectDialog connectDialog;
+
   SnapshotMessage snapshotMessage;
+
   AnalyticsOptInDialog analyticsDialog;
 
   void _initDragDrop() {
@@ -252,6 +261,7 @@ class Framework {
       _previous.visible = false;
 
       pageStatus.removeAll();
+      messageManager.removeAll();
 
       _screenContents[_previous].hidden(true);
     }
@@ -293,6 +303,7 @@ class Framework {
     current.visible = true;
     current.entering();
     pageStatus.addAll(current.statusItems);
+    messageManager.showMessagesForScreen(current.id);
     auxiliaryStatus.defaultStatus = screen.helpStatus;
 
     updatePage();
@@ -307,13 +318,8 @@ class Framework {
     }
   }
 
-  void showInfo({String message, String title, List<CoreElement> children}) {
-    _showMessage(message: message, title: title, children: children);
-  }
-
-  void showWarning({String message, String title, List<CoreElement> children}) {
-    _showMessage(
-        message: message, title: title, children: children, warning: true);
+  void showMessage({@required Message message, String screenId = generalId}) {
+    messageManager.addMessage(message, screenId);
   }
 
   void showError(String title, [dynamic error]) {
@@ -326,44 +332,14 @@ class Framework {
         message = null;
       }
     }
-
-    _showMessage(message: message, title: title, error: true);
-  }
-
-  void _showMessage({
-    String message,
-    String title,
-    bool warning = false,
-    bool error = false,
-    List<CoreElement> children,
-  }) {
-    final PFlash flash = PFlash();
-    if (warning) {
-      flash.warning();
-    }
-    if (error) {
-      flash.error();
-    }
-    flash.addClose().click(clearMessages);
-    if (title != null) {
-      flash.add(label(text: title));
-    }
-    if (message != null) {
-      for (String text in message.split('\n\n')) {
-        flash.add(div(text: text));
-      }
-    }
-    if (children != null) {
-      children.forEach(flash.add);
-    }
-
-    final CoreElement errorContainer =
-        CoreElement.from(queryId('messages-container'));
-    errorContainer.add(flash);
+    messageManager.addMessage(
+      Message(MessageType.error, message: message, title: title),
+      generalId,
+    );
   }
 
   void clearMessages() {
-    queryId('messages-container').children.clear();
+    messageManager.removeAll();
   }
 
   void toast(
