@@ -634,7 +634,7 @@ class ConnectDialog {
 
   void _tryConnect() {
     final InputElement inputElement = textfield.element;
-    final String value = inputElement.value.trim();
+    String value = inputElement.value.trim();
     final int port = int.tryParse(value);
 
     void handleConnectError() {
@@ -653,6 +653,11 @@ class ConnectDialog {
       });
     } else {
       try {
+        // Check to see if the user pasted in a urlencoded url ('://').
+        if (value.contains('%3A%2F%2F')) {
+          value = Uri.decodeFull(value);
+        }
+
         final uri = getTrimmedUri(value);
         if (uri != null && uri.isAbsolute) {
           _connect(uri).catchError((dynamic error) {
