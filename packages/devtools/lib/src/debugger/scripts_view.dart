@@ -46,6 +46,7 @@ class PopupView extends CoreElement {
   String _oldSourceNameTextColor;
 
   bool _poppedUp = false;
+
   bool get isPoppedUp => _poppedUp;
 
   void showPopup() {
@@ -130,7 +131,7 @@ class ScriptsView implements CoreElementView {
         // The value and text are different, all nodes have a text. It the text
         // content of the node itself along with its descendants. However, input
         // elements have a value property - its the input data of the input
-        // element. Input elements may have a text/textContent but it is alway
+        // element. Input elements may have a text/textContent but it is always
         // empty because they are void elements.
         final html.InputElement inputElement =
             _matcherRendering._textfield.element as html.InputElement;
@@ -170,8 +171,12 @@ class ScriptsView implements CoreElementView {
     _highlightRef = null;
   }
 
-  void scrollAndHilight(int row, int topPosition,
-      {bool top = false, bool bottom = false}) {
+  void scrollAndHighlight(
+    int row,
+    int topPosition, {
+    bool top = false,
+    bool bottom = false,
+  }) {
     // Highlight this row.
     _highlightRef = items[row];
 
@@ -199,7 +204,7 @@ class ScriptsView implements CoreElementView {
         }
         childToScrollTo = itemIndex;
         final int scrollPosition = startRow > 0 ? startRow * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
+        scrollAndHighlight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.pageUp:
         int itemIndex = startRow - itemsVis;
@@ -207,17 +212,17 @@ class ScriptsView implements CoreElementView {
         childToScrollTo = itemIndex;
         final int scrollPosition =
             childToScrollTo > 0 ? childToScrollTo * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
+        scrollAndHighlight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.home:
         childToScrollTo = 0;
-        scrollAndHilight(childToScrollTo, childToScrollTo);
+        scrollAndHighlight(childToScrollTo, childToScrollTo);
         break;
       case ListDirection.end:
         childToScrollTo = _items.items.length - 1;
         final int scrollPosition =
             childToScrollTo > 0 ? (childToScrollTo - itemsVis) * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition);
+        scrollAndHighlight(childToScrollTo, scrollPosition);
         break;
     }
 
@@ -253,7 +258,7 @@ class ScriptsView implements CoreElementView {
     String rootLib,
     String commonPrefix, {
     bool selectRootScript = false,
-    ScriptRef selectScripRef,
+    ScriptRef selectScriptRef,
   }) {
     this.rootLib = rootLib;
 
@@ -286,8 +291,8 @@ class ScriptsView implements CoreElementView {
     if (selectRootScript) {
       selection = scripts.firstWhere((script) => script.uri == rootLib,
           orElse: () => null);
-    } else if (selectScripRef != null) {
-      selection = selectScripRef;
+    } else if (selectScriptRef != null) {
+      selection = selectScriptRef;
     }
 
     _items.setItems(scripts,
@@ -377,7 +382,7 @@ class ScriptsMatcher {
           // Set selection one item up.
           if (_selectRow > 0) {
             _selectRow -= 1;
-            _scriptsView.scrollAndHilight(_selectRow, -1);
+            _scriptsView.scrollAndHighlight(_selectRow, -1);
           }
           e.preventDefault();
           break;
@@ -385,7 +390,7 @@ class ScriptsMatcher {
           // Set selection one item down.
           if (_selectRow < _scriptsView.items.length - 1) {
             _selectRow += 1;
-            _scriptsView.scrollAndHilight(_selectRow, -1);
+            _scriptsView.scrollAndHighlight(_selectRow, -1);
           }
           e.preventDefault();
           break;
@@ -400,7 +405,7 @@ class ScriptsMatcher {
 
   void selectFirstItem() {
     _selectRow = 0;
-    _scriptsView.scrollAndHilight(_selectRow, -1);
+    _scriptsView.scrollAndHighlight(_selectRow, -1);
   }
 
   // Finished matching - throw away all matching states.
@@ -429,7 +434,7 @@ class ScriptsMatcher {
       originalRefs,
       _debuggerState.rootLib.uri,
       _debuggerState.commonScriptPrefix,
-      selectScripRef: selectedScriptRef,
+      selectScriptRef: selectedScriptRef,
     );
 
     // Lose all other intermediate matches - we're done.
@@ -447,14 +452,15 @@ class ScriptsMatcher {
   }
 
   /// Revert list and selection back to before the matcher (first click in the
-  /// textfield.
+  /// textfield).
   void revert() {
     reset();
+
     _scriptsView.showScripts(
       matchingState[''],
       _debuggerState.rootLib.uri,
       _debuggerState.commonScriptPrefix,
-      selectScripRef: _originalScriptRef,
+      selectScriptRef: _originalScriptRef,
     );
 
     if (_originalScriptRef != null) {
