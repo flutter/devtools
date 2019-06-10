@@ -11,10 +11,10 @@ MaterialApp
        └─MediaQuery
          │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
          │   3.0, textScaleFactor: 1.0, platformBrightness:
-         │   Brightness.light, padding: EdgeInsets.zero, viewInsets:
-         │   EdgeInsets.zero, alwaysUse24HourFormat: false,
-         │   accessibleNavigation: false, disableAnimations: false,
-         │   invertColors: false, boldText: false)
+         │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
+         │   EdgeInsets.zero, viewInsets: EdgeInsets.zero,
+         │   alwaysUse24HourFormat: false, accessibleNavigation: false,
+         │   disableAnimations: false, invertColors: false, boldText: false)
          │
          └─Localizations
            │ locale: en_US
