@@ -140,13 +140,14 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.
+// TODO(kenzie): extend TreeNode class to share tree logic.
 abstract class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode parent,
     bool expandChildren = true,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
-        _expanded = expandChildren;
+        _isExpanded = expandChildren;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
@@ -171,7 +172,7 @@ abstract class InspectorTreeNode {
     final builder = createRenderBuilder();
     final icon = diagnostic.icon;
     if (showExpandCollapse) {
-      builder.addIcon(expanded ? collapseArrow : expandArrow);
+      builder.addIcon(isExpanded ? collapseArrow : expandArrow);
     }
     if (icon != null) {
       builder.addIcon(icon);
@@ -288,8 +289,8 @@ abstract class InspectorTreeNode {
   bool get isCreatedByLocalProject => _diagnostic.isCreatedByLocalProject;
   bool get isProperty => diagnostic == null || diagnostic.isProperty;
 
-  bool get expanded => _expanded;
-  bool _expanded;
+  bool get isExpanded => _isExpanded;
+  bool _isExpanded;
 
   bool allowExpandCollapse = true;
 
@@ -298,9 +299,9 @@ abstract class InspectorTreeNode {
         allowExpandCollapse;
   }
 
-  set expanded(bool value) {
-    if (value != _expanded) {
-      _expanded = value;
+  set isExpanded(bool value) {
+    if (value != _isExpanded) {
+      _isExpanded = value;
       dirty();
     }
   }
@@ -317,7 +318,7 @@ abstract class InspectorTreeNode {
 
   set diagnostic(RemoteDiagnosticsNode v) {
     _diagnostic = v;
-    _expanded = v.childrenReady;
+    _isExpanded = v.childrenReady;
     dirty();
   }
 
@@ -334,7 +335,7 @@ abstract class InspectorTreeNode {
   }
 
   int get childrenCount {
-    if (!expanded) {
+    if (!isExpanded) {
       _childrenCount = 0;
     }
     if (_childrenCount != null) {
@@ -649,8 +650,8 @@ abstract class InspectorTree {
   void expandPath(InspectorTreeNode node) {
     setState(() {
       while (node != null) {
-        if (!node.expanded) {
-          node.expanded = true;
+        if (!node.isExpanded) {
+          node.isExpanded = true;
         }
         node = node.parent;
       }
@@ -685,14 +686,14 @@ abstract class InspectorTree {
   void onTapIcon(InspectorTreeRow row, Icon icon) {
     if (icon == expandArrow) {
       setState(() {
-        row.node.expanded = true;
+        row.node.isExpanded = true;
         onExpand(row.node);
       });
       return;
     }
     if (icon == collapseArrow) {
       setState(() {
-        row.node.expanded = false;
+        row.node.isExpanded = false;
       });
       return;
     }
@@ -765,7 +766,7 @@ abstract class InspectorTree {
   }) {
     assert(expandChildren != null);
     assert(expandProperties != null);
-    treeNode.expanded = expandChildren;
+    treeNode.isExpanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
       assert(treeNode.children.length == 1);

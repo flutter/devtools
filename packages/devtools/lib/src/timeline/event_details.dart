@@ -16,6 +16,7 @@ import '../utils.dart';
 import 'cpu_bottom_up.dart';
 import 'cpu_call_tree.dart';
 import 'cpu_flame_chart.dart';
+import 'cpu_profiler_view.dart';
 import 'frame_events_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_screen.dart';
@@ -98,20 +99,20 @@ class EventDetails extends CoreElement {
   }
 
   void _initTabNav() {
-    final flameChartTab = EventDetailsTabNavTab(
+    final flameChartTab = CpuProfilerTab(
       'CPU Flame Chart (preview)',
-      EventDetailsTabType.flameChart,
+      CpuProfilerViewType.flameChart,
     );
-    final callTreeTab = EventDetailsTabNavTab(
+    final callTreeTab = CpuProfilerTab(
       'Call Tree',
-      EventDetailsTabType.callTree,
+      CpuProfilerViewType.callTree,
     );
-    final bottomUpTab = EventDetailsTabNavTab(
+    final bottomUpTab = CpuProfilerTab(
       'Bottom Up',
-      EventDetailsTabType.bottomUp,
+      CpuProfilerViewType.bottomUp,
     );
 
-    tabNav = PTabNav(<EventDetailsTabNavTab>[
+    tabNav = PTabNav(<CpuProfilerTab>[
       flameChartTab,
       callTreeTab,
       bottomUpTab,
@@ -126,7 +127,7 @@ class EventDetails extends CoreElement {
         return;
       }
       _selectedTab = tab;
-      uiEventDetails.showTab((tab as EventDetailsTabNavTab).type);
+      uiEventDetails.showView((tab as CpuProfilerTab).type);
     });
   }
 
@@ -165,7 +166,7 @@ class EventDetails extends CoreElement {
     uiEventDetails.attribute('hidden', selectedEvent?.isGpuEvent ?? true);
 
     if (selectedEvent != null && selectedEvent.isUiEvent) {
-      uiEventDetails.showTab((_selectedTab as EventDetailsTabNavTab).type);
+      uiEventDetails.showView((_selectedTab as CpuProfilerTab).type);
       await uiEventDetails.update();
     }
   }
@@ -182,10 +183,10 @@ class _UiEventDetails extends CoreElement {
     layoutVertical();
     flex();
 
-    add([
+    add(views = [
       flameChart = CpuFlameChart(_timelineController),
-      bottomUp = CpuBottomUp()..attribute('hidden', true),
-      callTree = CpuCallTree(_timelineController)..attribute('hidden', true),
+      bottomUp = CpuBottomUp(_timelineController)..hide(),
+      callTree = CpuCallTree(_timelineController)..hide(),
     ]);
   }
 
@@ -197,35 +198,27 @@ class _UiEventDetails extends CoreElement {
 
   CpuCallTree callTree;
 
+  List<CpuProfilerView> views;
+
   bool showingMessage = false;
 
-  void showTab(EventDetailsTabType tabType) {
+  void showView(CpuProfilerViewType showType) {
     // If we are showing a message, we do not want to show any other views.
     if (showingMessage) return;
 
-    switch (tabType) {
-      case EventDetailsTabType.flameChart:
-        flameChart.show();
-        bottomUp.hidden(true);
-        callTree.hidden(true);
-        break;
-      case EventDetailsTabType.bottomUp:
-        flameChart.hidden(true);
-        bottomUp.show();
-        callTree.hidden(true);
-        break;
-      case EventDetailsTabType.callTree:
-        flameChart.hidden(true);
-        bottomUp.hidden(true);
-        callTree.show();
-        break;
+    for (CpuProfilerView view in views) {
+      if (view.type == showType) {
+        view.show();
+      } else {
+        view.hide();
+      }
     }
   }
 
   void hideAll() {
-    flameChart.hidden(true);
-    bottomUp.hidden(true);
-    callTree.hidden(true);
+    for (CpuProfilerView view in views) {
+      view.hide();
+    }
   }
 
   Future<void> update() async {
@@ -302,14 +295,8 @@ class _UiEventDetails extends CoreElement {
   }
 }
 
-enum EventDetailsTabType {
-  flameChart,
-  bottomUp,
-  callTree,
-}
+class CpuProfilerTab extends PTabNavTab {
+  CpuProfilerTab(String name, this.type) : super(name);
 
-class EventDetailsTabNavTab extends PTabNavTab {
-  EventDetailsTabNavTab(String name, this.type) : super(name);
-
-  final EventDetailsTabType type;
+  final CpuProfilerViewType type;
 }

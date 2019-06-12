@@ -50,10 +50,6 @@ String escape(String text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
-String percent0(double d) => '${(d * 100).toStringAsFixed(0)}%';
-
-String percent1(double d) => '${(d * 100).toStringAsFixed(1)}%';
-
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
 String printMb(num bytes, [int fractionDigits = 1]) {

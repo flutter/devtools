@@ -2,28 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import '../tables.dart';
-import '../ui/elements.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
+import 'cpu_profiler_view.dart';
 import 'timeline_controller.dart';
 
 const _timeColumnWidth = 145;
 
-class CpuCallTree extends CoreElement {
-  CpuCallTree(this.timelineController)
-      : super('div', classes: 'ui-details-section') {
+class CpuCallTree extends CpuProfilerView {
+  CpuCallTree(TimelineController timelineController)
+      : super(timelineController, CpuProfilerViewType.callTree) {
     flex();
     layoutVertical();
 
     _init();
   }
 
-  final TimelineController timelineController;
-
   TreeTable<CpuStackFrame> callTreeTable;
-
-  bool tableNeedsRebuild = false;
 
   void _init() {
     final methodNameColumn = MethodNameColumn()
@@ -43,29 +39,15 @@ class CpuCallTree extends CoreElement {
     add(callTreeTable.element);
   }
 
-  void update() {
-    // Update the table if the call tree is visible. Otherwise, mark the table
-    // as needing a rebuild.
-    if (!isHidden) {
-      final CpuStackFrame root =
-          timelineController.timelineData.cpuProfileData.cpuProfileRoot;
+  @override
+  void rebuildView() {
+    final CpuStackFrame root =
+        timelineController.timelineData.cpuProfileData.cpuProfileRoot;
 
-      // Expand the root stack frame to start.
-      final List<CpuStackFrame> rows = [root..isExpanded = true]
-        ..addAll(root.children.cast());
-      callTreeTable.setRows(rows);
-    } else {
-      tableNeedsRebuild = true;
-    }
-  }
-
-  void show() async {
-    hidden(false);
-
-    if (tableNeedsRebuild) {
-      tableNeedsRebuild = false;
-      update();
-    }
+    // Expand the root stack frame to start.
+    final List<CpuStackFrame> rows = [root..isExpanded = true]
+      ..addAll(root.children.cast());
+    callTreeTable.setRows(rows);
   }
 }
 

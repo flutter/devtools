@@ -159,7 +159,7 @@ class Table<T> extends Object with SetStateMixin {
             if (column.fixedWidthPx != null) {
               header.element.style.width = '${column.fixedWidthPx}px';
             } else if (column.fractionWidth != null) {
-              header.element.style.width = percent0(column.fractionWidth);
+              header.element.style.width = '${(column.fractionWidth) * 100}%';
             }
             return header;
           })));
@@ -534,7 +534,7 @@ class Table<T> extends Object with SetStateMixin {
   }
 }
 
-class TreeTable<T extends TreeTableNode> extends Table<T> {
+class TreeTable<T extends TreeNode> extends Table<T> {
   TreeTable.virtual({double rowHeight = 29.0})
       : super.virtual(rowHeight: rowHeight, overflowAuto: true);
 
@@ -709,7 +709,7 @@ abstract class Column<T> {
   }
 }
 
-abstract class TreeColumn<T extends TreeTableNode> extends Column<T> {
+abstract class TreeColumn<T extends TreeNode> extends Column<T> {
   TreeColumn(
     title, {
     int fixedWidthPx,

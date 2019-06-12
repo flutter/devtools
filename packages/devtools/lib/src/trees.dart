@@ -71,10 +71,7 @@ class TreeNode {
     child.parent = this;
     child.index = children.length - 1;
   }
-}
 
-/// TreeNode with methods specific to displaying the tree in a tree UI.
-class TreeTableNode extends TreeNode {
   /// Whether the tree table node is expandable.
   bool get isExpandable => children.isNotEmpty;
 

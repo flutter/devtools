@@ -7,12 +7,13 @@ import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
+import 'cpu_profiler_view.dart';
 import 'flame_chart_canvas.dart';
 import 'timeline_controller.dart';
 
-class CpuFlameChart extends CoreElement {
-  CpuFlameChart(this.timelineController)
-      : super('div', classes: 'ui-details-section') {
+class CpuFlameChart extends CpuProfilerView {
+  CpuFlameChart(TimelineController timelineController)
+      : super(timelineController, CpuProfilerViewType.flameChart) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
       ..attribute('hidden', true);
@@ -28,15 +29,12 @@ class CpuFlameChart extends CoreElement {
     Color(0xFF202124),
   );
 
-  final TimelineController timelineController;
-
   FlameChartCanvas canvas;
 
   CoreElement stackFrameDetails;
 
-  bool canvasNeedsRebuild = false;
-
-  void _drawFlameChart() {
+  @override
+  void rebuildView() {
     canvas = FlameChartCanvas(
       data: timelineController.timelineData.cpuProfileData,
       flameChartWidth: element.clientWidth,
@@ -62,16 +60,10 @@ class CpuFlameChart extends CoreElement {
       ..attribute('hidden', false);
   }
 
+  @override
   void update() {
     reset();
-
-    // Update the canvas if the flame chart is visible. Otherwise, mark the
-    // canvas as needing a rebuild.
-    if (!isHidden) {
-      _drawFlameChart();
-    } else {
-      canvasNeedsRebuild = true;
-    }
+    super.update();
   }
 
   void updateForContainerResize() {
@@ -99,16 +91,7 @@ class CpuFlameChart extends CoreElement {
         ),
       );
     } else {
-      canvasNeedsRebuild = true;
-    }
-  }
-
-  void show() {
-    hidden(false);
-
-    if (canvasNeedsRebuild) {
-      canvasNeedsRebuild = false;
-      update();
+      viewNeedsRebuild = true;
     }
   }
 

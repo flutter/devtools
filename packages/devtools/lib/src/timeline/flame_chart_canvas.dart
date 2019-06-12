@@ -237,7 +237,7 @@ class FlameChartCanvas extends FlameChart {
     _viewportCanvas = ViewportCanvas(
       paintCallback: _paintCallback,
       onTap: _onTap,
-      classes: 'ui-details-section cpu-flame-chart',
+      classes: 'cpu-profiler-section cpu-flame-chart',
     )..element.element.style.overflow = 'hidden';
 
     _viewportCanvas.setContentSize(flameChartWidth, flameChartHeight);
