@@ -11,4 +11,12 @@ class CpuBottomUp extends CoreElement {
 
     add(div(text: 'Bottom up view coming soon', c: 'message'));
   }
+
+  void show() {
+    attribute('hidden', false);
+  }
+
+  void hide() {
+    attribute('hidden', true);
+  }
 }

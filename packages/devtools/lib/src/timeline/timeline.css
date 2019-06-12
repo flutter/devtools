@@ -218,7 +218,7 @@
     left: 0;
 }
 
-#flame-chart-message .message-action {
+#cpu-profiler-message .message-action {
     color: var(--link-color) !important;
     text-decoration: underline;
     cursor: pointer;

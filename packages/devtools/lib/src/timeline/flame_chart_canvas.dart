@@ -108,22 +108,23 @@ abstract class FlameChart {
     final Map<String, double> stackFrameLefts = {};
 
     double calculateLeftForStackFrame(CpuStackFrame stackFrame) {
+      final CpuStackFrame parent = stackFrame.parent;
       double left;
-      if (stackFrame.parent == null) {
+      if (parent == null) {
         left = _flameChartInset.toDouble();
       } else {
         final stackFrameIndex = stackFrame.index;
         if (stackFrameIndex == 0) {
           // This is the first child of parent. [left] should equal the left
           // value of [stackFrame]'s parent.
-          left = stackFrameLefts[stackFrame.parent.id];
+          left = stackFrameLefts[parent.id];
         } else {
           assert(stackFrameIndex != -1);
           // [stackFrame] is not the first child of its parent. [left] should
           // equal the right value of its previous sibling.
-          final previous = stackFrame.parent.children[stackFrameIndex - 1];
+          final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
           left = stackFrameLefts[previous.id] +
-              (totalWidth * previous.cpuConsumptionRatio);
+              (totalWidth * previous.totalTimeRatio);
         }
       }
       stackFrameLefts[stackFrame.id] = left;
@@ -132,7 +133,7 @@ abstract class FlameChart {
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
       final double width =
-          totalWidth * stackFrame.cpuConsumptionRatio - stackFramePadding;
+          totalWidth * stackFrame.totalTimeRatio - stackFramePadding;
       final left = calculateLeftForStackFrame(stackFrame);
       final top = (row * rowHeightWithPadding + _flameChartTop).toDouble();
 
