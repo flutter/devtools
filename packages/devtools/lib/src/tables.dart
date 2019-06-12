@@ -46,7 +46,14 @@ class Table<T> extends Object with SetStateMixin {
   int get rowCount => data?.length ?? 0;
 
   Column<T> _sortColumn;
+
   SortOrder _sortDirection;
+
+  set sortColumn(Column<T> column) {
+    _sortColumn = column;
+    _sortDirection =
+        column.numeric ? SortOrder.descending : SortOrder.ascending;
+  }
 
   final CoreElement _table = CoreElement('table')
     ..clazz('full-width')
@@ -151,8 +158,8 @@ class Table<T> extends Object with SetStateMixin {
                 th(c: 'sticky-top ${column.alignmentCss}')..add(s);
             if (column.fixedWidthPx != null) {
               header.element.style.width = '${column.fixedWidthPx}px';
-            } else if (column.percentWidth != null) {
-              header.element.style.width = percent0(column.percentWidth);
+            } else if (column.fractionWidth != null) {
+              header.element.style.width = percent0(column.fractionWidth);
             }
             return header;
           })));
@@ -169,7 +176,7 @@ class Table<T> extends Object with SetStateMixin {
       final Column<T> column = columns
           .firstWhere((Column<T> c) => c.supportsSorting, orElse: () => null);
       if (column != null) {
-        setSortColumn(column);
+        sortColumn = column;
       }
     }
 
@@ -232,26 +239,14 @@ class Table<T> extends Object with SetStateMixin {
     _sortData(column, direction);
   }
 
-  void _sortData(Column column, int direction) =>
-      data.sort((T a, T b) => _compareData(a, b, column, direction));
+  void _sortData(Column column, int direction) {
+    data.sort((T a, T b) => _compareData(a, b, column, direction));
+  }
 
   int _compareData(T a, T b, Column column, int direction) {
-    if (column.numeric) {
-      final num one = column.getValue(a);
-      final num two = column.getValue(b);
-      if (one == two) {
-        return 0;
-      }
-      if (_sortDirection == SortOrder.ascending) {
-        return one > two ? 1 : -1;
-      } else {
-        return one > two ? -1 : 1;
-      }
-    } else {
-      final String one = column.render(column.getValue(a));
-      final String two = column.render(column.getValue(b));
-      return one.compareTo(two) * direction;
-    }
+    final Comparable valueA = column.render(column.getValue(a));
+    final Comparable valueB = column.render(column.getValue(b));
+    return valueA.compareTo(valueB) * direction;
   }
 
   void _rebuildTable() {
@@ -521,12 +516,6 @@ class Table<T> extends Object with SetStateMixin {
 
   void _clearSelection() => _select(null, null, null);
 
-  void setSortColumn(Column<T> column) {
-    _sortColumn = column;
-    _sortDirection =
-        column.numeric ? SortOrder.descending : SortOrder.ascending;
-  }
-
   void _columnClicked(Column<T> column) {
     if (!column.supportsSorting) {
       return;
@@ -537,7 +526,7 @@ class Table<T> extends Object with SetStateMixin {
           ? SortOrder.descending
           : SortOrder.ascending;
     } else {
-      setSortColumn(column);
+      sortColumn = column;
     }
 
     _doSort();
@@ -636,23 +625,25 @@ abstract class Column<T> {
     this.title, {
     ColumnAlignment alignment = ColumnAlignment.left,
     this.fixedWidthPx,
-    this.percentWidth,
+    this.fractionWidth,
   }) : _alignment = alignment {
-    if (percentWidth != null) {
-      percentWidth.clamp(0.0, 1.0);
+    if (fractionWidth != null) {
+      fractionWidth.clamp(0.0, 1.0);
     }
   }
+
+  static const defaultWideColumnFraction = 1.0;
 
   final String title;
 
   /// Width of the column expressed as a fixed number of pixels.
   ///
-  /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
+  /// If both [fixedWidthPx] and [fractionWidth] are specified, [fixedWidthPx]
   /// will be used.
   int fixedWidthPx;
 
-  /// Width of the column expressed as a percent value between 0.0 and 1.0.
-  double percentWidth;
+  /// Width of the column expressed as a fraction value between 0.0 and 1.0.
+  double fractionWidth;
 
   String get alignmentCss => _getAlignmentCss(_alignment);
 
@@ -673,7 +664,7 @@ abstract class Column<T> {
   dynamic getDisplayValue(T dataObject) => getValue(dataObject);
 
   /// Get the cell's tooltip value from the given [dataObject].
-  dynamic getTooltip(T dataObject) => '';
+  String getTooltip(T dataObject) => '';
 
   /// Given a value from [getValue], render it to a String.
   String render(dynamic value) {
@@ -711,8 +702,9 @@ abstract class Column<T> {
       case ColumnAlignment.right:
         return 'right';
       case ColumnAlignment.center:
-      default:
         return 'center';
+      default:
+        throw Exception('Invalid column alignment: $alignment');
     }
   }
 }
@@ -721,8 +713,8 @@ abstract class TreeColumn<T extends TreeTableNode> extends Column<T> {
   TreeColumn(
     title, {
     int fixedWidthPx,
-    double percentWidth,
-  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
+    double fractionWidth,
+  }) : super(title, fixedWidthPx: fixedWidthPx, fractionWidth: fractionWidth);
 
   static const treeToggleWidth = 14;
 

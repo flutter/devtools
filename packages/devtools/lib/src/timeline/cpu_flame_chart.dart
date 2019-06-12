@@ -103,17 +103,13 @@ class CpuFlameChart extends CoreElement {
     }
   }
 
-  void show() async {
-    attribute('hidden', false);
+  void show() {
+    hidden(false);
 
     if (canvasNeedsRebuild) {
       canvasNeedsRebuild = false;
       update();
     }
-  }
-
-  void hide() {
-    attribute('hidden', true);
   }
 
   void reset() {

@@ -17,7 +17,11 @@ class MemoryRow {
 }
 
 class MemoryColumnClassName extends Column<ClassHeapDetailStats> {
-  MemoryColumnClassName() : super('Class', percentWidth: 0.8);
+  MemoryColumnClassName()
+      : super(
+          'Class',
+          fractionWidth: Column.defaultWideColumnFraction,
+        );
 
   @override
   dynamic getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;

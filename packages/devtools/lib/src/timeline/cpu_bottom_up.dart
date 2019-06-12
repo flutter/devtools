@@ -13,10 +13,6 @@ class CpuBottomUp extends CoreElement {
   }
 
   void show() {
-    attribute('hidden', false);
-  }
-
-  void hide() {
-    attribute('hidden', true);
+    hidden(false);
   }
 }

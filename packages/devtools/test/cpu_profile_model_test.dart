@@ -76,15 +76,6 @@ void main() {
       expect(stackFrame_5.selfTimeRatio, equals(0.4));
       expect(stackFrame_5.selfTime.inMicroseconds, equals(40));
     });
-
-    test('simplifiedUrl', () {
-      expect(stackFrame_0.simplifiedUrl, equals(''));
-      expect(stackFrame_1.simplifiedUrl, equals(stackFrame_1.url));
-      expect(
-        stackFrame_2.simplifiedUrl,
-        equals('package:flutter/lib/src/widgets/binding.dart'),
-      );
-    });
   });
 }
 

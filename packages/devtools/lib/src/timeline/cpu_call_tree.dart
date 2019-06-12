@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import '../tables.dart';
 import '../ui/elements.dart';
+import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 import 'timeline_controller.dart';
@@ -37,7 +38,7 @@ class CpuCallTree extends CoreElement {
       ..addColumn(methodNameColumn)
       ..addColumn(SourceColumn());
     callTreeTable
-      ..setSortColumn(callTreeTable.columns.first)
+      ..sortColumn = callTreeTable.columns.first
       ..setRows(<CpuStackFrame>[]);
     add(callTreeTable.element);
   }
@@ -59,16 +60,12 @@ class CpuCallTree extends CoreElement {
   }
 
   void show() async {
-    attribute('hidden', false);
+    hidden(false);
 
     if (tableNeedsRebuild) {
       tableNeedsRebuild = false;
       update();
     }
-  }
-
-  void hide() {
-    attribute('hidden', true);
   }
 }
 
@@ -82,9 +79,10 @@ class SelfTimeColumn extends Column<CpuStackFrame> {
   dynamic getValue(CpuStackFrame dataObject) => dataObject.selfTimeRatio;
 
   @override
-  String getDisplayValue(CpuStackFrame dataObject) =>
-      '${msText(dataObject.selfTime, fractionDigits: 2)} '
-      '(${percent2(dataObject.selfTimeRatio)})';
+  String getDisplayValue(CpuStackFrame dataObject) {
+    return '${msText(dataObject.selfTime, fractionDigits: 2)} '
+        '(${percent2(dataObject.selfTimeRatio)})';
+  }
 }
 
 class TotalTimeColumn extends Column<CpuStackFrame> {
@@ -97,9 +95,10 @@ class TotalTimeColumn extends Column<CpuStackFrame> {
   dynamic getValue(CpuStackFrame dataObject) => dataObject.totalTimeRatio;
 
   @override
-  String getDisplayValue(CpuStackFrame dataObject) =>
-      '${msText(dataObject.totalTime, fractionDigits: 2)} '
-      '(${percent2(dataObject.totalTimeRatio)})';
+  String getDisplayValue(CpuStackFrame dataObject) {
+    return '${msText(dataObject.totalTime, fractionDigits: 2)} '
+        '(${percent2(dataObject.totalTimeRatio)})';
+  }
 }
 
 class MethodNameColumn extends TreeColumn<CpuStackFrame> {
@@ -133,7 +132,9 @@ class SourceColumn extends Column<CpuStackFrame> {
   dynamic getValue(CpuStackFrame dataObject) => dataObject.url;
 
   @override
-  dynamic getDisplayValue(CpuStackFrame dataObject) => dataObject.simplifiedUrl;
+  dynamic getDisplayValue(CpuStackFrame dataObject) {
+    return getSimplePackageUrl(dataObject.url);
+  }
 
   @override
   String getTooltip(CpuStackFrame dataObject) => dataObject.url;

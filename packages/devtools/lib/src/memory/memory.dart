@@ -319,7 +319,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.addColumn(MemoryColumnInstanceAccumulatedCount());
     table.addColumn(MemoryColumnClassName());
 
-    table.setSortColumn(table.columns.first);
+    table.sortColumn = table.columns.first;
 
     table.onSelect.listen((ClassHeapDetailStats row) async {
       ga.select(ga.memory, ga.inspectClass);

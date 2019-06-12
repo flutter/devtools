@@ -134,7 +134,7 @@ class PerformanceScreen extends Screen {
     perfTable.addColumn(PerfColumnSelf());
     perfTable.addColumn(PerfColumnMethodName());
 
-    perfTable.setSortColumn(perfTable.columns.first);
+    perfTable.sortColumn = perfTable.columns.first;
 
     perfTable.setRows(<PerfData>[]);
 
@@ -332,7 +332,11 @@ class PerfColumnSelf extends Column<PerfData> {
 }
 
 class PerfColumnMethodName extends Column<PerfData> {
-  PerfColumnMethodName() : super('Method', percentWidth: 0.8);
+  PerfColumnMethodName()
+      : super(
+          'Method',
+          fractionWidth: Column.defaultWideColumnFraction,
+        );
 
   @override
   bool get usesHtml => true;

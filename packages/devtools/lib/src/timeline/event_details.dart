@@ -126,8 +126,6 @@ class EventDetails extends CoreElement {
         return;
       }
       _selectedTab = tab;
-
-      assert(tab is EventDetailsTabNavTab);
       uiEventDetails.showTab((tab as EventDetailsTabNavTab).type);
     });
   }
@@ -208,26 +206,26 @@ class _UiEventDetails extends CoreElement {
     switch (tabType) {
       case EventDetailsTabType.flameChart:
         flameChart.show();
-        bottomUp.hide();
-        callTree.hide();
+        bottomUp.hidden(true);
+        callTree.hidden(true);
         break;
       case EventDetailsTabType.bottomUp:
-        flameChart.hide();
+        flameChart.hidden(true);
         bottomUp.show();
-        callTree.hide();
+        callTree.hidden(true);
         break;
       case EventDetailsTabType.callTree:
-        flameChart.hide();
-        bottomUp.hide();
+        flameChart.hidden(true);
+        bottomUp.hidden(true);
         callTree.show();
         break;
     }
   }
 
   void hideAll() {
-    flameChart.hide();
-    bottomUp.hide();
-    callTree.hide();
+    flameChart.hidden(true);
+    bottomUp.hidden(true);
+    callTree.hidden(true);
   }
 
   Future<void> update() async {

@@ -182,17 +182,6 @@ class CpuStackFrame extends TreeTableNode {
 
   Duration _selfTime;
 
-  /// Returns a simplified version of the url with [path/to/flutter] removed.
-  String get simplifiedUrl {
-    const flutterPrefix = 'flutter/packages/';
-    final flutterPrefixIndex = url.indexOf(flutterPrefix);
-    if (flutterPrefixIndex != -1) {
-      return 'package:' +
-          url.substring(flutterPrefixIndex + flutterPrefix.length);
-    }
-    return url;
-  }
-
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
   /// This will be equal to the number of leaf nodes under this stack frame.

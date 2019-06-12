@@ -582,7 +582,11 @@ class LogWhenColumn extends Column<LogData> {
 }
 
 class LogMessageColumn extends Column<LogData> {
-  LogMessageColumn() : super('Message', percentWidth: 1.0);
+  LogMessageColumn()
+      : super(
+          'Message',
+          fractionWidth: Column.defaultWideColumnFraction,
+        );
 
   @override
   String get cssClass => 'pre-wrap monospace';
