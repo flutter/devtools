@@ -20,10 +20,16 @@ void main() {
     final PerfToolFramework framework = PerfToolFramework();
 
     // Show the opt-in dialog for collection analytics?
-    if (ga.isGtagsEnabled() &
-        (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
-            window.localStorage[ga_platform.devToolsProperty()].isEmpty)) {
-      framework.showAnalyticsDialog();
+    try {
+      if (ga.isGtagsEnabled() &
+          (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
+              window.localStorage[ga_platform.devToolsProperty()].isEmpty)) {
+        framework.showAnalyticsDialog();
+      }
+    } catch (e) {
+      // If there are errors setting up analytics, write them to the console
+      // but do not prevent DevTools from loading.
+      window.console.error(e);
     }
 
     if (!browser.isChrome) {
@@ -57,6 +63,9 @@ void main() {
   }, onError: (error, stack) {
     // Report exceptions with DevTools to GA, any user's Flutter app exceptions
     // are not collected.
-    ga.error('${error.toString()}\n$stack.toString()', true);
+    ga.error('${error.toString()}\n${stack.toString()}', true);
+    // Also write them to the console to aid debugging (rather than silently
+    // failing to load).
+    window.console.error(error);
   });
 }
