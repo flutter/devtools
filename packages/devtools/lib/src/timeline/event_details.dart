@@ -5,6 +5,8 @@ import 'dart:html' as html;
 
 import 'package:js/js.dart';
 
+import '../globals.dart';
+import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
@@ -100,25 +102,25 @@ class EventDetails extends CoreElement {
       'CPU Flame Chart (preview)',
       EventDetailsTabType.flameChart,
     );
-    final bottomUpTab = EventDetailsTabNavTab(
-      'Bottom Up',
-      EventDetailsTabType.bottomUp,
-    );
     final callTreeTab = EventDetailsTabNavTab(
       'Call Tree',
       EventDetailsTabType.callTree,
     );
+    final bottomUpTab = EventDetailsTabNavTab(
+      'Bottom Up',
+      EventDetailsTabType.bottomUp,
+    );
 
     tabNav = PTabNav(<EventDetailsTabNavTab>[
       flameChartTab,
-      bottomUpTab,
       callTreeTab,
+      bottomUpTab,
     ])
       ..element.style.borderBottom = '0';
 
     _selectedTab = flameChartTab;
 
-    tabNav.onTabSelected.listen((PTabNavTab tab) async {
+    tabNav.onTabSelected.listen((PTabNavTab tab) {
       // Return early if this tab is already selected.
       if (tab == _selectedTab) {
         return;
@@ -126,17 +128,7 @@ class EventDetails extends CoreElement {
       _selectedTab = tab;
 
       assert(tab is EventDetailsTabNavTab);
-      switch ((tab as EventDetailsTabNavTab).type) {
-        case EventDetailsTabType.flameChart:
-          await uiEventDetails.showTab(EventDetailsTabType.flameChart);
-          break;
-        case EventDetailsTabType.bottomUp:
-          await uiEventDetails.showTab(EventDetailsTabType.bottomUp);
-          break;
-        case EventDetailsTabType.callTree:
-          await uiEventDetails.showTab(EventDetailsTabType.callTree);
-          break;
-      }
+      uiEventDetails.showTab((tab as EventDetailsTabNavTab).type);
     });
   }
 
@@ -161,7 +153,7 @@ class EventDetails extends CoreElement {
   }
 
   Future<void> update({bool hide = false}) async {
-    final selectedEvent = timelineController.timelineData.selectedEvent;
+    final selectedEvent = timelineController.timelineData?.selectedEvent;
 
     _title.text = selectedEvent != null
         ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
@@ -175,6 +167,7 @@ class EventDetails extends CoreElement {
     uiEventDetails.attribute('hidden', selectedEvent?.isGpuEvent ?? true);
 
     if (selectedEvent != null && selectedEvent.isUiEvent) {
+      uiEventDetails.showTab((_selectedTab as EventDetailsTabNavTab).type);
       await uiEventDetails.update();
     }
   }
@@ -187,16 +180,18 @@ class EventDetails extends CoreElement {
 }
 
 class _UiEventDetails extends CoreElement {
-  _UiEventDetails(TimelineController timelineController) : super('div') {
+  _UiEventDetails(this._timelineController) : super('div') {
     layoutVertical();
     flex();
 
     add([
-      flameChart = CpuFlameChart(timelineController),
+      flameChart = CpuFlameChart(_timelineController),
       bottomUp = CpuBottomUp()..attribute('hidden', true),
-      callTree = CpuCallTree()..attribute('hidden', true),
+      callTree = CpuCallTree(_timelineController)..attribute('hidden', true),
     ]);
   }
+
+  final TimelineController _timelineController;
 
   CpuFlameChart flameChart;
 
@@ -204,37 +199,108 @@ class _UiEventDetails extends CoreElement {
 
   CpuCallTree callTree;
 
-  Future<void> showTab(EventDetailsTabType tabType) async {
+  bool showingMessage = false;
+
+  void showTab(EventDetailsTabType tabType) {
+    // If we are showing a message, we do not want to show any other views.
+    if (showingMessage) return;
+
     switch (tabType) {
       case EventDetailsTabType.flameChart:
-        await flameChart.show();
-        bottomUp.attribute('hidden', true);
-        callTree.attribute('hidden', true);
+        flameChart.show();
+        bottomUp.hide();
+        callTree.hide();
         break;
       case EventDetailsTabType.bottomUp:
-        flameChart.attribute('hidden', true);
-        bottomUp.attribute('hidden', false);
-        callTree.attribute('hidden', true);
+        flameChart.hide();
+        bottomUp.show();
+        callTree.hide();
         break;
       case EventDetailsTabType.callTree:
-        flameChart.attribute('hidden', true);
-        bottomUp.attribute('hidden', true);
-        callTree.attribute('hidden', false);
+        flameChart.hide();
+        bottomUp.hide();
+        callTree.show();
         break;
     }
   }
 
+  void hideAll() {
+    flameChart.hide();
+    bottomUp.hide();
+    callTree.hide();
+  }
+
   Future<void> update() async {
     reset();
-    // TODO(kenzie): update call tree and bottom up views here once they are
-    // implemented.
-    await flameChart.update();
+
+    final Spinner spinner = Spinner.centered();
+    try {
+      add(spinner);
+
+      // Only fetch a profile when we are not loading from offline.
+      if (!offlineMode || _timelineController.offlineTimelineData == null) {
+        await _timelineController.getCpuProfileForSelectedEvent();
+      }
+
+      if (offlineMode &&
+          _timelineController.timelineData.selectedEvent !=
+              _timelineController.offlineTimelineData?.selectedEvent) {
+        final offlineModeMessage = div()
+          ..add(span(
+              text:
+                  'CPU profiling is not yet available for snapshots. You can only'
+                  ' view '));
+        if (_timelineController.offlineTimelineData?.cpuProfileData != null) {
+          offlineModeMessage
+            ..add(span(text: 'the '))
+            ..add(span(text: 'CPU profile', c: 'message-action')
+              ..click(
+                  () => _timelineController.restoreCpuProfileFromOfflineData()))
+            ..add(span(text: ' included in the snapshot.'));
+        } else {
+          offlineModeMessage.add(span(
+              text:
+                  'a CPU profile if it is included in the imported snapshot file.'));
+        }
+        _updateDetailsWithMessage(offlineModeMessage);
+        return;
+      }
+
+      if (_timelineController.timelineData.cpuProfileData.stackFrames.isEmpty) {
+        _updateDetailsWithMessage(div(
+            text: 'CPU profile unavailable for time range'
+                ' [${_timelineController.timelineData.selectedEvent.time.start.inMicroseconds} -'
+                ' ${_timelineController.timelineData.selectedEvent.time.end.inMicroseconds}]'));
+        return;
+      }
+
+      // TODO(kenzie): update bottom up view here once it is implemented.
+      flameChart.update();
+      callTree.update();
+    } catch (e) {
+      _updateDetailsWithMessage(
+          div(text: 'Error retrieving CPU profile: ${e.toString()}'));
+    } finally {
+      spinner.remove();
+    }
   }
 
   void reset() {
-    // TODO(kenzie): reset call tree and bottom up views here once they are
-    // implemented.
     flameChart.reset();
+    _removeMessage();
+  }
+
+  void _updateDetailsWithMessage(CoreElement message) {
+    hideAll();
+    showingMessage = true;
+    add(message
+      ..id = 'cpu-profiler-message'
+      ..clazz('message'));
+  }
+
+  void _removeMessage() {
+    element.children.removeWhere((e) => e.id == 'cpu-profiler-message');
+    showingMessage = false;
   }
 }
 

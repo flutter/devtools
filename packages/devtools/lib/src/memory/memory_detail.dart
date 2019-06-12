@@ -17,10 +17,10 @@ class MemoryRow {
 }
 
 class MemoryColumnClassName extends Column<ClassHeapDetailStats> {
-  MemoryColumnClassName() : super('Class', wide: true);
+  MemoryColumnClassName() : super('Class', percentWidth: 0.8);
 
   @override
-  dynamic getValue(ClassHeapDetailStats item) => item.classRef.name;
+  dynamic getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
 }
 
 class MemoryColumnSize extends Column<ClassHeapDetailStats> {
@@ -32,7 +32,7 @@ class MemoryColumnSize extends Column<ClassHeapDetailStats> {
   //String get cssClass => 'monospace';
 
   @override
-  dynamic getValue(ClassHeapDetailStats item) => item.bytesCurrent;
+  dynamic getValue(ClassHeapDetailStats dataObject) => dataObject.bytesCurrent;
 
   @override
   String render(dynamic value) {
@@ -51,7 +51,8 @@ class MemoryColumnInstanceCount extends Column<ClassHeapDetailStats> {
   bool get numeric => true;
 
   @override
-  dynamic getValue(ClassHeapDetailStats item) => item.instancesCurrent;
+  dynamic getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.instancesCurrent;
 
   @override
   String render(dynamic value) => Column.fastIntl(value);
@@ -65,20 +66,20 @@ class MemoryColumnInstanceAccumulatedCount
   bool get numeric => true;
 
   @override
-  dynamic getValue(ClassHeapDetailStats item) => item.instancesAccumulated;
+  dynamic getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.instancesAccumulated;
 
   @override
   String render(dynamic value) => Column.fastIntl(value);
 }
 
 class MemoryColumnSimple<T> extends Column<T> {
-  MemoryColumnSimple(String name, this.getter, {bool wide = false})
-      : super(name, wide: wide);
+  MemoryColumnSimple(String name, this.getter) : super(name);
 
   String Function(T) getter;
 
   @override
-  String getValue(T item) => getter(item);
+  String getValue(T dataObject) => getter(dataObject);
 }
 
 //  void _loadHeapSnapshot() {

@@ -350,8 +350,9 @@ class MemoryScreen extends Screen with SetStateMixin {
       );
 
       table.addColumn(new MemoryColumnSimple<InstanceSummary>(
-          '${instanceRows.length} Instances of ${row.classRef.name}',
-          (InstanceSummary row) => row.objectRef));
+        '${instanceRows.length} Instances of ${row.classRef.name}',
+        (InstanceSummary row) => row.objectRef,
+      ));
 
       table.setRows(instanceRows);
     } catch (e) {
