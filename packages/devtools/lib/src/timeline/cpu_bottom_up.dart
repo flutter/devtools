@@ -3,12 +3,18 @@
 // found in the LICENSE file.
 
 import '../ui/elements.dart';
+import 'cpu_profiler_view.dart';
+import 'timeline_controller.dart';
 
-class CpuBottomUp extends CoreElement {
-  CpuBottomUp() : super('div', classes: 'ui-details-section') {
+class CpuBottomUp extends CpuProfilerView {
+  CpuBottomUp(TimelineController timelineController)
+      : super(timelineController, CpuProfilerViewType.bottomUp) {
     flex();
     layoutVertical();
 
     add(div(text: 'Bottom up view coming soon', c: 'message'));
   }
+
+  @override
+  void rebuildView() {}
 }

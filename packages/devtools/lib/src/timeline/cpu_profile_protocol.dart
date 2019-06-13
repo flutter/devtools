@@ -22,6 +22,7 @@ class CpuProfileProtocol {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         url: v[CpuProfileData.resolvedUrlKey],
+        profileTime: cpuProfileData.time,
       );
       _processStackFrame(
         stackFrame,

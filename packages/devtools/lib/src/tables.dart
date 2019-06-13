@@ -8,6 +8,8 @@ import 'dart:html';
 import 'package:meta/meta.dart';
 
 import 'framework/framework.dart';
+import 'trees.dart';
+import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'utils.dart';
 
@@ -18,8 +20,11 @@ class Table<T> extends Object with SetStateMixin {
     _init();
   }
 
-  Table.virtual({this.rowHeight = 29.0})
-      : element = div(a: 'flex', c: 'overflow-y table-border table-virtual'),
+  Table.virtual({this.rowHeight = 29.0, bool overflowAuto = false})
+      : element = div(
+            a: 'flex',
+            c: '${overflowAuto ? 'overflow-auto' : 'overflow-y'} '
+                'table-border table-virtual'),
         _isVirtual = true {
     _init();
 
@@ -41,7 +46,14 @@ class Table<T> extends Object with SetStateMixin {
   int get rowCount => data?.length ?? 0;
 
   Column<T> _sortColumn;
+
   SortOrder _sortDirection;
+
+  set sortColumn(Column<T> column) {
+    _sortColumn = column;
+    _sortDirection =
+        column.numeric ? SortOrder.descending : SortOrder.ascending;
+  }
 
   final CoreElement _table = CoreElement('table')
     ..clazz('full-width')
@@ -65,14 +77,25 @@ class Table<T> extends Object with SetStateMixin {
   void _init() {
     element.add(_table);
 
-    // handle hey events
+    // Handle key events.
     _table.onKeyDown.listen((KeyboardEvent e) {
       int indexOffset;
       // TODO(dantup): PgUp/PgDown/Home/End?
-      if (e.keyCode == KeyCode.UP) {
-        indexOffset = -1;
-      } else if (e.keyCode == KeyCode.DOWN) {
-        indexOffset = 1;
+      switch (e.keyCode) {
+        case KeyCode.UP:
+          indexOffset = -1;
+          break;
+        case KeyCode.DOWN:
+          indexOffset = 1;
+          break;
+        case KeyCode.LEFT:
+          _handleLeftKey();
+          break;
+        case KeyCode.RIGHT:
+          _handleRightKey();
+          break;
+        default:
+          break;
       }
 
       if (indexOffset == null) {
@@ -92,6 +115,12 @@ class Table<T> extends Object with SetStateMixin {
       selectByIndex(newIndex);
     });
   }
+
+  // Override this method if the table should handle left key strokes.
+  void _handleLeftKey() {}
+
+  // Override this method if the table should handle right key strokes.
+  void _handleRightKey() {}
 
   void dispose() {}
 
@@ -128,10 +157,11 @@ class Table<T> extends Object with SetStateMixin {
             s.click(() => _columnClicked(column));
             _spanForColumn[column] = s;
             final CoreElement header =
-                th(c: 'sticky-top ${column.numeric ? 'right' : 'left'}')
-                  ..add(s);
-            if (column.wide) {
-              header.clazz('wide');
+                th(c: 'sticky-top ${column.alignmentCss}')..add(s);
+            if (column.fixedWidthPx != null) {
+              header.element.style.width = '${column.fixedWidthPx}px';
+            } else if (column.percentWidth != null) {
+              header.element.style.width = '${column.percentWidth}%';
             }
             return header;
           })));
@@ -148,7 +178,7 @@ class Table<T> extends Object with SetStateMixin {
       final Column<T> column = columns
           .firstWhere((Column<T> c) => c.supportsSorting, orElse: () => null);
       if (column != null) {
-        setSortColumn(column);
+        sortColumn = column;
       }
     }
 
@@ -194,7 +224,6 @@ class Table<T> extends Object with SetStateMixin {
 
   void _doSort() {
     final Column<T> column = _sortColumn;
-    final bool numeric = column.numeric;
     final int direction = _sortDirection == SortOrder.ascending ? 1 : -1;
 
     // update the sort arrows
@@ -209,24 +238,17 @@ class Table<T> extends Object with SetStateMixin {
       }
     }
 
-    data.sort((T a, T b) {
-      if (numeric) {
-        final num one = column.getValue(a);
-        final num two = column.getValue(b);
-        if (one == two) {
-          return 0;
-        }
-        if (_sortDirection == SortOrder.ascending) {
-          return one > two ? 1 : -1;
-        } else {
-          return one > two ? -1 : 1;
-        }
-      } else {
-        final String one = column.render(column.getValue(a));
-        final String two = column.render(column.getValue(b));
-        return one.compareTo(two) * direction;
-      }
-    });
+    _sortData(column, direction);
+  }
+
+  void _sortData(Column column, int direction) {
+    data.sort((T a, T b) => _compareData(a, b, column, direction));
+  }
+
+  int _compareData(T a, T b, Column column, int direction) {
+    final Comparable valueA = column.render(column.getValue(a));
+    final Comparable valueB = column.render(column.getValue(b));
+    return valueA.compareTo(valueB) * direction;
   }
 
   void _rebuildTable() {
@@ -293,19 +315,22 @@ class Table<T> extends Object with SetStateMixin {
     }
 
     currentRowIndex = _buildTableRows(
-        firstRenderedRowInclusive: firstRenderedRowInclusive,
-        lastRenderedRowExclusive: lastRenderedRowExclusive,
-        currentRowIndex: currentRowIndex);
+      firstRenderedRowInclusive: firstRenderedRowInclusive,
+      lastRenderedRowExclusive: lastRenderedRowExclusive,
+      currentRowIndex: currentRowIndex,
+    );
 
     // Remove any additional rows that we had left that we didn't reuse above.
     if (currentRowIndex > 0 &&
         currentRowIndex < _tbody.element.children.length) {
-      // removeRange doesn't work in dart:html (UnimplementedError) so we have
-      // to remove them one at a time.
-      while (_tbody.element.children.length >= currentRowIndex) {
-        _tbody.element.children.removeLast();
-      }
+      _tbody.element.children.removeWhere((e) {
+        final rowElementsInUse =
+            _rowForIndex.values.map((CoreElement el) => el.element).toList();
+        return !rowElementsInUse.contains(e) &&
+            e != _spacerBeforeVisibleRows.element;
+      });
     }
+
     // Set the "after" spacer to the correct height to keep the scroll size
     // correct for the number of rows to come after.
     final double spacerAfterHeight =
@@ -394,9 +419,7 @@ class Table<T> extends Object with SetStateMixin {
           column.cssClass.split(' ').forEach(tableCell.clazz);
         }
 
-        if (column.numeric) {
-          tableCell.clazz('right');
-        }
+        tableCell.clazz(column.alignmentCss);
 
         column.renderToElement(tableCell, dataObject);
 
@@ -483,7 +506,7 @@ class Table<T> extends Object with SetStateMixin {
         .clamp(0, element.scrollHeight);
 
     element.element.scrollTo(<String, dynamic>{
-      'left': 0,
+      'left': element.element.scrollLeft,
       'top': newScrollTop,
       'behavior': scrollBehavior,
     });
@@ -495,12 +518,6 @@ class Table<T> extends Object with SetStateMixin {
 
   void _clearSelection() => _select(null, null, null);
 
-  void setSortColumn(Column<T> column) {
-    _sortColumn = column;
-    _sortDirection =
-        column.numeric ? SortOrder.descending : SortOrder.ascending;
-  }
-
   void _columnClicked(Column<T> column) {
     if (!column.supportsSorting) {
       return;
@@ -511,7 +528,7 @@ class Table<T> extends Object with SetStateMixin {
           ? SortOrder.descending
           : SortOrder.ascending;
     } else {
-      setSortColumn(column);
+      sortColumn = column;
     }
 
     _doSort();
@@ -519,11 +536,124 @@ class Table<T> extends Object with SetStateMixin {
   }
 }
 
+class TreeTable<T extends TreeNode> extends Table<T> {
+  TreeTable.virtual({double rowHeight = 29.0})
+      : super.virtual(rowHeight: rowHeight, overflowAuto: true);
+
+  @override
+  void _handleLeftKey() {
+    if (_selectedObject != null) {
+      if (_selectedObject.isExpanded) {
+        // Collapse node and preserve selection.
+        collapseNode(_selectedObject);
+      } else {
+        // Select the node's parent.
+        final parentIndex = data.indexOf(_selectedObject.parent);
+        if (parentIndex != null) {
+          selectByIndex(parentIndex);
+        }
+      }
+    }
+  }
+
+  @override
+  void _handleRightKey() {
+    if (_selectedObject != null) {
+      if (_selectedObject.isExpanded) {
+        // Select the node's first child.
+        final firstChildIndex = data.indexOf(_selectedObject.children.first);
+        selectByIndex(firstChildIndex);
+      } else if (_selectedObject.isExpandable) {
+        // Expand node and preserve selection.
+        expandNode(_selectedObject);
+      }
+    }
+  }
+
+  @override
+  void _sortData(Column column, int direction) {
+    final List<T> sortedData = [];
+
+    void _addToSortedData(T dataObject) {
+      sortedData.add(dataObject);
+      if (dataObject.isExpanded) {
+        dataObject.children.cast<T>().toList()
+          ..sort((T a, T b) => _compareData(a, b, column, direction))
+          ..forEach(_addToSortedData);
+      }
+    }
+
+    data.where((dataObject) => dataObject.level == 0).toList()
+      ..sort((T a, T b) => _compareData(a, b, column, direction))
+      ..forEach(_addToSortedData);
+
+    data = sortedData;
+  }
+
+  void collapseNode(T dataObject) {
+    void cascadingRemove(T _dataObject) {
+      if (!data.contains(_dataObject)) return;
+      data.remove(_dataObject);
+      (_dataObject.children.cast<T>()).forEach(cascadingRemove);
+    }
+
+    assert(data.contains(dataObject));
+    (dataObject.children.cast<T>()).forEach(cascadingRemove);
+    dataObject.isExpanded = false;
+    setRows(data);
+  }
+
+  void expandNode(T dataObject) {
+    void expand(T node) {
+      assert(data.contains(node));
+      int insertIndex = data.indexOf(node) + 1;
+      for (T child in node.children) {
+        data.insert(insertIndex, child);
+        if (child.isExpanded) {
+          expand(child);
+        }
+        insertIndex++;
+      }
+      node.isExpanded = true;
+    }
+
+    expand(dataObject);
+    setRows(data);
+  }
+}
+
 abstract class Column<T> {
-  Column(this.title, {this.wide = false});
+  Column(
+    this.title, {
+    ColumnAlignment alignment = ColumnAlignment.left,
+    this.fixedWidthPx,
+    this.percentWidth,
+  }) : _alignment = alignment {
+    if (percentWidth != null) {
+      percentWidth.clamp(0, 100);
+    }
+  }
+
+  Column.wide(this.title, {ColumnAlignment alignment = ColumnAlignment.left})
+      : _alignment = alignment,
+        percentWidth = defaultWideColumnPercentWidth;
+
+  static const defaultWideColumnPercentWidth = 100;
 
   final String title;
-  final bool wide;
+
+  /// Width of the column expressed as a fixed number of pixels.
+  ///
+  /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
+  /// will be used.
+  int fixedWidthPx;
+
+  /// Width of the column expressed as a percent value between 0 and 100.
+  int percentWidth;
+
+  String get alignmentCss => _getAlignmentCss(_alignment);
+
+  final ColumnAlignment _alignment;
 
   String get cssClass => null;
 
@@ -533,12 +663,18 @@ abstract class Column<T> {
 
   bool get usesHtml => false;
 
-  /// Get the cell's value from the given [item].
-  dynamic getValue(T item);
+  /// Get the cell's value from the given [dataObject].
+  dynamic getValue(T dataObject);
+
+  /// Get the cell's display value from the given [dataObject].
+  dynamic getDisplayValue(T dataObject) => getValue(dataObject);
+
+  /// Get the cell's tooltip value from the given [dataObject].
+  String getTooltip(T dataObject) => '';
 
   /// Given a value from [getValue], render it to a String.
   String render(dynamic value) {
-    if (numeric) {
+    if (value is num) {
       return fastIntl(value);
     }
     return value.toString();
@@ -556,13 +692,92 @@ abstract class Column<T> {
   String toString() => title;
 
   void renderToElement(CoreElement cell, T dataObject) {
-    final String content = render(getValue(dataObject));
+    final String content = render(getDisplayValue(dataObject));
     if (usesHtml) {
       cell.setInnerHtml(content);
     } else {
       cell.text = content;
     }
+    cell.tooltip = getTooltip(dataObject);
   }
+
+  String _getAlignmentCss(ColumnAlignment alignment) {
+    switch (alignment) {
+      case ColumnAlignment.left:
+        return 'left';
+      case ColumnAlignment.right:
+        return 'right';
+      case ColumnAlignment.center:
+        return 'center';
+      default:
+        throw Exception('Invalid column alignment: $alignment');
+    }
+  }
+}
+
+abstract class TreeColumn<T extends TreeNode> extends Column<T> {
+  TreeColumn(
+    title, {
+    int fixedWidthPx,
+    int percentWidth,
+  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
+
+  static const treeToggleWidth = 14;
+
+  final StreamController<T> _nodeExpandedController =
+      StreamController<T>.broadcast();
+
+  Stream<T> get onNodeExpanded => _nodeExpandedController.stream;
+
+  final StreamController<T> _nodeCollapsedController =
+      StreamController<T>.broadcast();
+
+  Stream<T> get onNodeCollapsed => _nodeCollapsedController.stream;
+
+  int _getNodeIndentPx(T dataObject) {
+    int indentWidth = dataObject.level * treeToggleWidth;
+    if (!dataObject.isExpandable) {
+      // If the object is not expandable, we need to increase the width of our
+      // spacer to account for the missing tree toggle.
+      indentWidth += TreeColumn.treeToggleWidth;
+    }
+    return indentWidth;
+  }
+
+  @override
+  void renderToElement(CoreElement cell, T dataObject) {
+    final container = div()
+      ..layoutHorizontal()
+      ..flex()
+      // Add spacer to beginning of element that reflects tree structure.
+      ..add(
+          div()..element.style.minWidth = '${_getNodeIndentPx(dataObject)}px');
+
+    if (dataObject.isExpandable) {
+      final TreeToggle treeToggle = TreeToggle(forceOpen: dataObject.isExpanded)
+        ..onOpen.listen((isOpen) {
+          if (isOpen) {
+            _nodeExpandedController.add(dataObject);
+          } else {
+            _nodeCollapsedController.add(dataObject);
+          }
+        });
+      container.add(treeToggle);
+    }
+
+    container.add(div(text: render(getDisplayValue(dataObject))));
+
+    cell
+      ..clear()
+      ..add(container)
+      ..tooltip = getTooltip(dataObject);
+  }
+}
+
+enum ColumnAlignment {
+  left,
+  right,
+  center,
 }
 
 enum SortOrder {

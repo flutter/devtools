@@ -289,7 +289,7 @@ class TimelineScreen extends Screen {
   void clearTimeline() {
     debugHandledTraceEvents.clear();
     debugFrameTracking.clear();
-    timelineController.timelineData.clear();
+    timelineController.timelineData?.clear();
     framesBarChart.frameUIgraph.reset();
     frameEventsChart.attribute('hidden', true);
     eventDetails.reset(hide: true);

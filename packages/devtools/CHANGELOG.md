@@ -1,3 +1,13 @@
+## 0.1.2 - TBD
+* Add Call Tree to CPU profiler.
+* Pre-fetch CPU profiles so that we have profiling information for every frame in the timeline.
+* Trim Mixins from class name reporting in the CPU profiler.
+* Allow DevTools feedback to be submitted when DevTools is not connected to an app.
+* Support URL encoded urls in the connection dialog.
+* Add error handling for analytics.
+* Cleanup warning message presentation.
+* Bug fixes and improvements.
+
 ## 0.1.1 - 2019-05-30
 * Make timeline snapshot format compatible with trace viewers such as chrome://tracing.
 * Add ability to import timeline snapshots via drag-and-drop.

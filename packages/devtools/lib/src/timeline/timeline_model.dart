@@ -253,6 +253,7 @@ enum TimelineEventType {
   unknown,
 }
 
+// TODO(kenzie): extend [TreeNode] class to take advantage of shared tree logic.
 class TimelineEvent {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],

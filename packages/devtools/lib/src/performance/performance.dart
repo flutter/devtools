@@ -134,7 +134,7 @@ class PerformanceScreen extends Screen {
     perfTable.addColumn(PerfColumnSelf());
     perfTable.addColumn(PerfColumnMethodName());
 
-    perfTable.setSortColumn(perfTable.columns.first);
+    perfTable.sortColumn = perfTable.columns.first;
 
     perfTable.setRows(<PerfData>[]);
 
@@ -312,7 +312,7 @@ class PerfColumnInclusive extends Column<PerfData> {
   bool get numeric => true;
 
   @override
-  dynamic getValue(PerfData item) => item.inclusive;
+  dynamic getValue(PerfData dataObject) => dataObject.inclusive;
 
   @override
   String render(dynamic value) => percent2(value);
@@ -325,24 +325,24 @@ class PerfColumnSelf extends Column<PerfData> {
   bool get numeric => true;
 
   @override
-  dynamic getValue(PerfData item) => item.self;
+  dynamic getValue(PerfData dataObject) => dataObject.self;
 
   @override
   String render(dynamic value) => percent2(value);
 }
 
 class PerfColumnMethodName extends Column<PerfData> {
-  PerfColumnMethodName() : super('Method', wide: true);
+  PerfColumnMethodName() : super.wide('Method');
 
   @override
   bool get usesHtml => true;
 
   @override
-  dynamic getValue(PerfData item) {
-    if (item.kind == 'Dart') {
-      return item.name;
+  dynamic getValue(PerfData dataObject) {
+    if (dataObject.kind == 'Dart') {
+      return dataObject.name;
     }
-    return '${item.name} <span class="function-kind ${item.kind}">${item.kind}</span>';
+    return '${dataObject.name} <span class="function-kind ${dataObject.kind}">${dataObject.kind}</span>';
   }
 }
 

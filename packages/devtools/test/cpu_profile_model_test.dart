@@ -51,85 +51,79 @@ void main() {
   });
 
   group('CpuStackFrame', () {
-    test('depth', () {
-      expect(testStackFrame.depth, equals(4));
-    });
-
     test('sampleCount', () {
-      expect(testStackFrame.inclusiveSampleCount, equals(3));
+      expect(testStackFrame.inclusiveSampleCount, equals(10));
     });
 
-    test('cpuConsumptionRatio', () {
-      expect(stackFrame_3.cpuConsumptionRatio, equals(0.6666666666666666));
-      expect(stackFrame_5.cpuConsumptionRatio, equals(0.3333333333333333));
-    });
+    test('totalTime and selfTime', () {
+      expect(testStackFrame.totalTimeRatio, equals(1.0));
+      expect(testStackFrame.totalTime.inMicroseconds, equals(100));
+      expect(testStackFrame.selfTimeRatio, equals(0.0));
+      expect(testStackFrame.selfTime.inMicroseconds, equals(0));
 
-    test('add child', () {
-      final parent = CpuStackFrame(
-        id: 'id_0',
-        name: 'parent',
-        category: 'Dart',
-        url: 'url',
-      );
-      final child = CpuStackFrame(
-        id: 'id_1',
-        name: 'child',
-        category: 'Dart',
-        url: 'url',
-      );
-      expect(parent.children, isEmpty);
-      expect(child.parent, isNull);
-      parent.addChild(child);
-      expect(parent.children, isNotEmpty);
-      expect(parent.children.first, equals(child));
-      expect(child.parent, equals(parent));
-    });
+      expect(stackFrame_2.totalTimeRatio, equals(0.3));
+      expect(stackFrame_2.totalTime.inMicroseconds, equals(30));
+      expect(stackFrame_2.selfTimeRatio, equals(0.3));
+      expect(stackFrame_2.selfTime.inMicroseconds, equals(30));
 
-    test('getRoot', () {
-      expect(
-        stackFrame_2.getRoot().toStringDeep(),
-        equals(testStackFrame.toStringDeep()),
-      );
+      expect(stackFrame_3.totalTimeRatio, equals(0.7));
+      expect(stackFrame_3.totalTime.inMicroseconds, equals(70));
+      expect(stackFrame_3.selfTimeRatio, equals(0.2));
+      expect(stackFrame_3.selfTime.inMicroseconds, equals(20));
+
+      expect(stackFrame_5.totalTimeRatio, equals(0.4));
+      expect(stackFrame_5.totalTime.inMicroseconds, equals(40));
+      expect(stackFrame_5.selfTimeRatio, equals(0.4));
+      expect(stackFrame_5.selfTime.inMicroseconds, equals(40));
     });
   });
 }
 
+final TimeRange profileTime = TimeRange()
+  ..start = const Duration(microseconds: 0)
+  ..end = const Duration(microseconds: 100);
 final CpuStackFrame stackFrame_0 = CpuStackFrame(
   id: 'id_0',
   name: '0',
   category: 'Dart',
-  url: 'url',
+  url: '',
+  profileTime: profileTime,
 )..exclusiveSampleCount = 0;
 final CpuStackFrame stackFrame_1 = CpuStackFrame(
   id: 'id_1',
   name: '1',
   category: 'Dart',
-  url: 'url',
+  url: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
+  profileTime: profileTime,
 )..exclusiveSampleCount = 0;
 final CpuStackFrame stackFrame_2 = CpuStackFrame(
   id: 'id_2',
   name: '2',
   category: 'Dart',
-  url: 'url',
-)..exclusiveSampleCount = 1;
+  url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  profileTime: profileTime,
+)..exclusiveSampleCount = 3;
 final CpuStackFrame stackFrame_3 = CpuStackFrame(
   id: 'id_3',
   name: '3',
   category: 'Dart',
   url: 'url',
-)..exclusiveSampleCount = 0;
+  profileTime: profileTime,
+)..exclusiveSampleCount = 2;
 final CpuStackFrame stackFrame_4 = CpuStackFrame(
   id: 'id_4',
   name: '4',
   category: 'Dart',
   url: 'url',
+  profileTime: profileTime,
 )..exclusiveSampleCount = 1;
 final CpuStackFrame stackFrame_5 = CpuStackFrame(
   id: 'id_5',
   name: '5',
   category: 'Dart',
   url: 'url',
-)..exclusiveSampleCount = 1;
+  profileTime: profileTime,
+)..exclusiveSampleCount = 4;
 
 final CpuStackFrame testStackFrame = stackFrame_0
   ..addChild(stackFrame_1

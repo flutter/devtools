@@ -125,6 +125,11 @@ class TimelineController {
     _selectedTimelineEventController.add(event);
   }
 
+  void addFrame(TimelineFrame frame) {
+    timelineData.frames.add(frame);
+    frameAddedController.add(frame);
+  }
+
   Future<void> getCpuProfileForSelectedEvent() async {
     if (!timelineData.selectedEvent.isUiEvent) return;
 
@@ -136,11 +141,6 @@ class TimelineController {
       timelineData.selectedEvent.time,
     );
     cpuProfileProtocol.processData(timelineData.cpuProfileData);
-  }
-
-  void addFrame(TimelineFrame frame) {
-    timelineData.frames.add(frame);
-    frameAddedController.add(frame);
   }
 
   void restoreCpuProfileFromOfflineData() {
@@ -189,7 +189,9 @@ class TimelineController {
     // processing for every frame in the snapshot.
     timelineProtocol.maybeAddPendingEvents();
 
-    cpuProfileProtocol.processData(timelineData.cpuProfileData);
+    if (timelineData.cpuProfileData != null) {
+      cpuProfileProtocol.processData(timelineData.cpuProfileData);
+    }
 
     _loadOfflineDataController.add(offlineData);
   }

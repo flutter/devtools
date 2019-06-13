@@ -551,10 +551,10 @@ class LogKindColumn extends Column<LogData> {
   String get cssClass => 'log-label-column';
 
   @override
-  dynamic getValue(LogData item) {
-    final String cssClass = getCssClassForEventKind(item);
+  dynamic getValue(LogData dataObject) {
+    final String cssClass = getCssClassForEventKind(dataObject);
 
-    return '<span class="label $cssClass">${item.kind}</span>';
+    return '<span class="label $cssClass">${dataObject.kind}</span>';
   }
 
   @override
@@ -571,7 +571,7 @@ class LogWhenColumn extends Column<LogData> {
   bool get supportsSorting => false;
 
   @override
-  dynamic getValue(LogData item) => item.timestamp;
+  dynamic getValue(LogData dataObject) => dataObject.timestamp;
 
   @override
   String render(dynamic value) {
@@ -582,7 +582,7 @@ class LogWhenColumn extends Column<LogData> {
 }
 
 class LogMessageColumn extends Column<LogData> {
-  LogMessageColumn() : super('Message', wide: true);
+  LogMessageColumn() : super.wide('Message');
 
   @override
   String get cssClass => 'pre-wrap monospace';
@@ -594,7 +594,7 @@ class LogMessageColumn extends Column<LogData> {
   bool get supportsSorting => false;
 
   @override
-  dynamic getValue(LogData item) => item;
+  dynamic getValue(LogData dataObject) => dataObject;
 
   @override
   String render(dynamic value) {

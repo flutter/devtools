@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:meta/meta.dart';
 
+import '../trees.dart';
 import '../utils.dart';
 import 'timeline_model.dart';
 
@@ -18,7 +18,15 @@ class CpuProfileData {
     @required this.sampleCount,
     @required this.samplePeriod,
     @required this.time,
-  });
+  }) {
+    _cpuProfileRoot = CpuStackFrame(
+      id: 'cpuProfile',
+      name: 'all',
+      category: 'Dart',
+      url: '',
+      profileTime: time,
+    );
+  }
 
   static CpuProfileData parse(Map<String, dynamic> json) {
     return CpuProfileData._(
@@ -106,12 +114,9 @@ class CpuProfileData {
 
   final TimeRange time;
 
-  final cpuProfileRoot = CpuStackFrame(
-    id: 'cpuProfile',
-    name: 'all',
-    category: 'Dart',
-    url: 'root',
-  );
+  CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
+
+  CpuStackFrame _cpuProfileRoot;
 
   Map<String, CpuStackFrame> stackFrames = {};
 
@@ -126,12 +131,13 @@ class CpuProfileData {
       };
 }
 
-class CpuStackFrame {
+class CpuStackFrame extends TreeNode {
   CpuStackFrame({
     @required this.id,
     @required this.name,
     @required this.category,
     @required this.url,
+    @required this.profileTime,
   });
 
   final String id;
@@ -142,32 +148,11 @@ class CpuStackFrame {
 
   final String url;
 
-  final List<CpuStackFrame> children = [];
-
-  CpuStackFrame parent;
-
-  /// Index in [parent.children].
-  int index = -1;
+  // Time data for stack frame's enclosing CPU profile.
+  final TimeRange profileTime;
 
   /// How many cpu samples for which this frame is a leaf.
   int exclusiveSampleCount = 0;
-
-  /// Depth of this CpuStackFrame tree, including [this].
-  ///
-  /// We assume that CpuStackFrame nodes are not modified after the first time
-  /// [depth] is accessed. We would need to clear the cache if this was
-  /// supported.
-  int get depth {
-    if (_depth != 0) {
-      return _depth;
-    }
-    for (CpuStackFrame child in children) {
-      _depth = max(_depth, child.depth);
-    }
-    return _depth = _depth + 1;
-  }
-
-  int _depth = 0;
 
   int get inclusiveSampleCount =>
       _inclusiveSampleCount ?? _calculateInclusiveSampleCount();
@@ -175,24 +160,27 @@ class CpuStackFrame {
   /// How many cpu samples this frame is included in.
   int _inclusiveSampleCount;
 
-  double get cpuConsumptionRatio => _cpuConsumptionRatio ??=
-      inclusiveSampleCount / getRoot().inclusiveSampleCount;
+  double get totalTimeRatio => _totalTimeRatio ??=
+      inclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
 
-  double _cpuConsumptionRatio;
+  double _totalTimeRatio;
 
-  void addChild(CpuStackFrame child) {
-    children.add(child);
-    child.parent = this;
-    child.index = children.length - 1;
-  }
+  Duration get totalTime => _totalTime ??= Duration(
+      microseconds:
+          (totalTimeRatio * profileTime.duration.inMicroseconds).round());
 
-  CpuStackFrame getRoot() {
-    CpuStackFrame root = this;
-    while (root.parent != null) {
-      root = root.parent;
-    }
-    return root;
-  }
+  Duration _totalTime;
+
+  double get selfTimeRatio => _selfTimeRatio ??=
+      exclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
+
+  double _selfTimeRatio;
+
+  Duration get selfTime => _selfTime ??= Duration(
+      microseconds:
+          (selfTimeRatio * profileTime.duration.inMicroseconds).round());
+
+  Duration _selfTime;
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
@@ -223,17 +211,17 @@ class CpuStackFrame {
   }
 
   @override
-  String toString({Duration duration}) {
+  String toString() {
     final buf = StringBuffer();
     buf.write('$name ');
-    if (duration != null) {
+    if (totalTime != null) {
       // TODO(kenzie): use a number of fractionDigits that better matches the
       // resolution of the stack frame.
-      buf.write('- ${msText(duration, fractionDigits: 2)} ');
+      buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
     }
     buf.write('($inclusiveSampleCount ');
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
-    buf.write(', ${percent2(cpuConsumptionRatio)})');
+    buf.write(', ${percent2(totalTimeRatio)})');
     return buf.toString();
   }
 }

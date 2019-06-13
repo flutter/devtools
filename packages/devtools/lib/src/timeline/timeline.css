@@ -185,7 +185,7 @@
     margin-right: 4px;
 }
 
-.ui-details-section {
+.cpu-profiler-section {
     position: absolute;
     top: 0;
     left: 0;
@@ -197,7 +197,7 @@
     overflow: hidden;
 }
 
-.ui-details-section.cpu-flame-chart {
+.cpu-profiler-section.cpu-flame-chart {
     /* 100% height minus the height of stack-frame-details */
     height: calc(100% - 27px);
     background-color: var(--shaded-background-lighter);
@@ -218,7 +218,7 @@
     left: 0;
 }
 
-#flame-chart-message .message-action {
+#cpu-profiler-message .message-action {
     color: var(--link-color) !important;
     text-decoration: underline;
     cursor: pointer;

@@ -319,7 +319,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     table.addColumn(MemoryColumnInstanceAccumulatedCount());
     table.addColumn(MemoryColumnClassName());
 
-    table.setSortColumn(table.columns.first);
+    table.sortColumn = table.columns.first;
 
     table.onSelect.listen((ClassHeapDetailStats row) async {
       ga.select(ga.memory, ga.inspectClass);
@@ -350,8 +350,9 @@ class MemoryScreen extends Screen with SetStateMixin {
       );
 
       table.addColumn(new MemoryColumnSimple<InstanceSummary>(
-          '${instanceRows.length} Instances of ${row.classRef.name}',
-          (InstanceSummary row) => row.objectRef));
+        '${instanceRows.length} Instances of ${row.classRef.name}',
+        (InstanceSummary row) => row.objectRef,
+      ));
 
       table.setRows(instanceRows);
     } catch (e) {

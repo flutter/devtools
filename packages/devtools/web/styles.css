@@ -204,11 +204,14 @@ span.label.gc {
 }
 
 .table-virtual td {
-    max-width: 500px; /* required for text-overflow to work? */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
+}
+
+.table-virtual.overflow-y td {
+    max-width: 500px; /* required for text-overflow to work? */
 }
 
 table thead {
@@ -229,10 +232,6 @@ table th {
   color: var(--header-color);
   background-color: var(--header-background);
   white-space: nowrap;
-}
-
-table th.wide {
-    width: 80%;
 }
 
 table td,
@@ -699,6 +698,10 @@ nav.menu li {
     list-style: none;
 }
 
+tr.selected .tree-toggle {
+    color: var(--header-background);
+}
+
 .tree-toggle {
     width: 14px;
     font-size: 14px;
@@ -706,6 +709,7 @@ nav.menu li {
     padding-bottom: 1px;
     color: var(--subtle);
     user-select: none;
+    align-self: center;
 }
 
 .tree-toggle.octicon-triangle-right {

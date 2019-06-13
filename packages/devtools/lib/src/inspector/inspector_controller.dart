@@ -570,7 +570,7 @@ class InspectorController implements InspectorServiceClient {
     for (InspectorTreeNode child in node.children) {
       final RemoteDiagnosticsNode diagnosticsNode = child.diagnostic;
       targets.add(child);
-      if (!child.isLeaf && child.expanded) {
+      if (!child.isLeaf && child.isExpanded) {
         // Stop if we get to expanded children as they might be too large
         // to try to scroll into view.
         break;
