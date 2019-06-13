@@ -126,14 +126,18 @@ class TimelineScreen extends Screen {
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
-      ..click(_pauseRecording);
+      ..click(() async {
+        await _pauseRecording();
+      });
 
     resumeButton =
         PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)
           ..small()
           ..clazz('margin-left')
           ..disabled = true
-          ..click(_resumeRecording);
+          ..click(() async {
+            await _resumeRecording();
+          });
 
     exportButton = PButton.icon('', _exportTimelineIcon)
       ..small()
@@ -249,20 +253,20 @@ class TimelineScreen extends Screen {
     _destroySplitter();
   }
 
-  void _pauseRecording() {
+  Future<void> _pauseRecording() async {
     _manuallyPaused = true;
     timelineController.pause();
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
-    _updateListeningState();
+    await _updateListeningState();
   }
 
-  void _resumeRecording() {
+  Future<void> _resumeRecording() async {
     _manuallyPaused = false;
     timelineController.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
-    _updateListeningState();
+    await _updateListeningState();
   }
 
   void _updateButtonStates() {
@@ -277,10 +281,11 @@ class TimelineScreen extends Screen {
     exitOfflineModeButton.attribute('hidden', !offlineMode);
   }
 
-  void _updateListeningState() async {
-    final bool shouldBeRunning = !_manuallyPaused && isCurrentScreen;
+  Future<void> _updateListeningState() async {
+    final bool shouldBeRunning =
+        !_manuallyPaused && !offlineMode && isCurrentScreen;
     final bool isRunning = !timelineController.paused;
-    timelineController.timelineService.updateListeningState(
+    await timelineController.timelineService.updateListeningState(
       shouldBeRunning: shouldBeRunning,
       isRunning: isRunning,
     );
