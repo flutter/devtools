@@ -332,11 +332,7 @@ class PerfColumnSelf extends Column<PerfData> {
 }
 
 class PerfColumnMethodName extends Column<PerfData> {
-  PerfColumnMethodName()
-      : super(
-          'Method',
-          fractionWidth: Column.defaultWideColumnFraction,
-        );
+  PerfColumnMethodName() : super.wide('Method');
 
   @override
   bool get usesHtml => true;

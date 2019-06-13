@@ -36,7 +36,7 @@ class EventDetails extends CoreElement {
     // https://github.com/dart-lang/html/issues/104 is fixed.
     final observer =
         html.ResizeObserver(allowInterop((List<dynamic> entries, _) {
-      uiEventDetails.flameChart.updateForContainerResize();
+      cpuProfiler.flameChart.updateForContainerResize();
     }));
     observer.observe(element);
 
@@ -63,7 +63,7 @@ class EventDetails extends CoreElement {
 
   CoreElement _title;
 
-  _UiEventDetails uiEventDetails;
+  _CpuProfiler cpuProfiler;
 
   CoreElement gpuEventDetails;
 
@@ -81,14 +81,13 @@ class EventDetails extends CoreElement {
       ..layoutVertical()
       ..flex()
       ..add([
-        uiEventDetails = _UiEventDetails(timelineController)
-          ..attribute('hidden'),
+        cpuProfiler = _CpuProfiler(timelineController)..hidden(true),
         // TODO(kenzie): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
         gpuEventDetails = div(
           text: 'CPU profiling is not available for GPU events.',
           c: 'message',
-        )..attribute('hidden'),
+        )..hidden(true),
       ]);
 
     content = div(c: 'event-details-section section-border')
@@ -127,7 +126,7 @@ class EventDetails extends CoreElement {
         return;
       }
       _selectedTab = tab;
-      uiEventDetails.showView((tab as CpuProfilerTab).type);
+      cpuProfiler.showView((tab as CpuProfilerTab).type);
     });
   }
 
@@ -161,13 +160,12 @@ class EventDetails extends CoreElement {
       ..backgroundColor = colorToCss(titleBackgroundColor)
       ..color = colorToCss(titleTextColor);
 
-    attribute('hidden', hide);
-    gpuEventDetails.attribute('hidden', selectedEvent?.isUiEvent ?? true);
-    uiEventDetails.attribute('hidden', selectedEvent?.isGpuEvent ?? true);
+    hidden(hide);
+    gpuEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
+    cpuProfiler.hidden(selectedEvent?.isGpuEvent ?? true);
 
     if (selectedEvent != null && selectedEvent.isUiEvent) {
-      uiEventDetails.showView((_selectedTab as CpuProfilerTab).type);
-      await uiEventDetails.update();
+      await cpuProfiler.update();
     }
   }
 
@@ -178,8 +176,8 @@ class EventDetails extends CoreElement {
   }
 }
 
-class _UiEventDetails extends CoreElement {
-  _UiEventDetails(this._timelineController) : super('div') {
+class _CpuProfiler extends CoreElement {
+  _CpuProfiler(this._timelineController) : super('div') {
     layoutVertical();
     flex();
 
@@ -200,9 +198,13 @@ class _UiEventDetails extends CoreElement {
 
   List<CpuProfilerView> views;
 
+  CpuProfilerViewType _selectedViewType = CpuProfilerViewType.flameChart;
+
   bool showingMessage = false;
 
   void showView(CpuProfilerViewType showType) {
+    _selectedViewType = showType;
+
     // If we are showing a message, we do not want to show any other views.
     if (showingMessage) return;
 
@@ -265,9 +267,12 @@ class _UiEventDetails extends CoreElement {
         return;
       }
 
-      // TODO(kenzie): update bottom up view here once it is implemented.
       flameChart.update();
       callTree.update();
+      bottomUp.update();
+
+      // Ensure we are showing the selected profiler view.
+      showView(_selectedViewType);
     } catch (e) {
       _updateDetailsWithMessage(
           div(text: 'Error retrieving CPU profile: ${e.toString()}'));

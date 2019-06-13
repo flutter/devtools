@@ -8,7 +8,7 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler_view.dart';
 import 'timeline_controller.dart';
 
-const _timeColumnWidth = 145;
+const _timeColumnWidthPx = 145;
 
 class CpuCallTree extends CpuProfilerView {
   CpuCallTree(TimelineController timelineController)
@@ -52,7 +52,7 @@ class CpuCallTree extends CpuProfilerView {
 }
 
 class SelfTimeColumn extends Column<CpuStackFrame> {
-  SelfTimeColumn() : super('Self Time', fixedWidthPx: _timeColumnWidth);
+  SelfTimeColumn() : super('Self Time', fixedWidthPx: _timeColumnWidthPx);
 
   @override
   bool get numeric => true;
@@ -68,7 +68,7 @@ class SelfTimeColumn extends Column<CpuStackFrame> {
 }
 
 class TotalTimeColumn extends Column<CpuStackFrame> {
-  TotalTimeColumn() : super('Total Time', fixedWidthPx: _timeColumnWidth);
+  TotalTimeColumn() : super('Total Time', fixedWidthPx: _timeColumnWidthPx);
 
   @override
   bool get numeric => true;

@@ -116,8 +116,10 @@ class Table<T> extends Object with SetStateMixin {
     });
   }
 
+  // Override this method if the table should handle left key strokes.
   void _handleLeftKey() {}
 
+  // Override this method if the table should handle right key strokes.
   void _handleRightKey() {}
 
   void dispose() {}
@@ -158,8 +160,8 @@ class Table<T> extends Object with SetStateMixin {
                 th(c: 'sticky-top ${column.alignmentCss}')..add(s);
             if (column.fixedWidthPx != null) {
               header.element.style.width = '${column.fixedWidthPx}px';
-            } else if (column.fractionWidth != null) {
-              header.element.style.width = '${(column.fractionWidth) * 100}%';
+            } else if (column.percentWidth != null) {
+              header.element.style.width = '${column.percentWidth}%';
             }
             return header;
           })));
@@ -625,25 +627,29 @@ abstract class Column<T> {
     this.title, {
     ColumnAlignment alignment = ColumnAlignment.left,
     this.fixedWidthPx,
-    this.fractionWidth,
+    this.percentWidth,
   }) : _alignment = alignment {
-    if (fractionWidth != null) {
-      fractionWidth.clamp(0.0, 1.0);
+    if (percentWidth != null) {
+      percentWidth.clamp(0, 100);
     }
   }
 
-  static const defaultWideColumnFraction = 1.0;
+  Column.wide(this.title, {ColumnAlignment alignment = ColumnAlignment.left})
+      : _alignment = alignment,
+        percentWidth = defaultWideColumnPercentWidth;
+
+  static const defaultWideColumnPercentWidth = 100;
 
   final String title;
 
   /// Width of the column expressed as a fixed number of pixels.
   ///
-  /// If both [fixedWidthPx] and [fractionWidth] are specified, [fixedWidthPx]
+  /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
   /// will be used.
   int fixedWidthPx;
 
-  /// Width of the column expressed as a fraction value between 0.0 and 1.0.
-  double fractionWidth;
+  /// Width of the column expressed as a percent value between 0 and 100.
+  int percentWidth;
 
   String get alignmentCss => _getAlignmentCss(_alignment);
 
@@ -713,8 +719,8 @@ abstract class TreeColumn<T extends TreeNode> extends Column<T> {
   TreeColumn(
     title, {
     int fixedWidthPx,
-    double fractionWidth,
-  }) : super(title, fixedWidthPx: fixedWidthPx, fractionWidth: fractionWidth);
+    int percentWidth,
+  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
 
   static const treeToggleWidth = 14;
 
