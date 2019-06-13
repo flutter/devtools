@@ -144,33 +144,23 @@ class HeapSample {
 
 // Heap Statistics
 
-// More detailed/simpler then the ClassHeapStats (for handling accumulators to
-// detect leaks and simpler then drilling into new/old which should be hidden
-// with a new protocol).
+// Wrapper for ClassHeapStats.
 //
 // {
 //   type: ClassHeapStats,
 //   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
-//   new: [0, 0, 0, 0, 0, 0, 0, 0],
-//   old: [3892, 809536, 3892, 809536, 0, 0, 0, 0],
-//   promotedInstances: 0,
-//   promotedBytes: 0
+//   accumulatedSize: 809536
+//   bytesCurrent: 809536
+//   instancesAccumulated: 3892
+//   instancesCurrent: 3892
 // }
 class ClassHeapDetailStats {
-  ClassHeapDetailStats(this.json) {
-    classRef = ClassRef.parse(json['class']);
-    _update(json['new']);
-    _update(json['old']);
-  }
-
-  static const int ALLOCATED_BEFORE_GC = 0;
-  static const int ALLOCATED_BEFORE_GC_SIZE = 1;
-  static const int LIVE_AFTER_GC = 2;
-  static const int LIVE_AFTER_GC_SIZE = 3;
-  static const int ALLOCATED_SINCE_GC = 4;
-  static const int ALLOCATED_SINCE_GC_SIZE = 5;
-  static const int ACCUMULATED = 6;
-  static const int ACCUMULATED_SIZE = 7;
+  ClassHeapDetailStats(this.json) :
+    classRef = ClassRef.parse(json['class']),
+    instancesCurrent = json['instancesCurrent'],
+    instancesAccumulated = json['instancesAccumulated'],
+    bytesCurrent = json['bytesCurrent'],
+    bytesAccumulated = json['bytesAccumulated'];
 
   final Map<String, dynamic> json;
 
@@ -182,13 +172,6 @@ class ClassHeapDetailStats {
   ClassRef classRef;
 
   String get type => json['type'];
-
-  void _update(List<dynamic> stats) {
-    instancesAccumulated += stats[ACCUMULATED];
-    bytesAccumulated += stats[ACCUMULATED_SIZE];
-    instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC];
-    bytesCurrent += stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE];
-  }
 
   @override
   String toString() =>

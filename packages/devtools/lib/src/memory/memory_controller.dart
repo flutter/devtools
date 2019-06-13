@@ -76,7 +76,7 @@ class MemoryController {
     final Map resetArg = reset ? {'reset': 'true'} : {};
 
     final Response response = await serviceManager.service.callMethod(
-      '_getAllocationProfile',
+      'getAllocationProfile',
       isolateId: _isolateId,
       args: resetArg,
     );
