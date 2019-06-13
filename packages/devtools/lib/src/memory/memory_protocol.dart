@@ -155,12 +155,12 @@ class HeapSample {
 //   instancesCurrent: 3892
 // }
 class ClassHeapDetailStats {
-  ClassHeapDetailStats(this.json) :
-    classRef = ClassRef.parse(json['class']),
-    instancesCurrent = json['instancesCurrent'],
-    instancesAccumulated = json['instancesAccumulated'],
-    bytesCurrent = json['bytesCurrent'],
-    bytesAccumulated = json['bytesAccumulated'];
+  ClassHeapDetailStats(this.json)
+      : classRef = ClassRef.parse(json['class']),
+        instancesCurrent = json['instancesCurrent'],
+        instancesAccumulated = json['instancesAccumulated'],
+        bytesCurrent = json['bytesCurrent'],
+        bytesAccumulated = json['bytesAccumulated'];
 
   final Map<String, dynamic> json;
 
