@@ -330,9 +330,9 @@ class ScriptsMatcher {
   // and END.
   int _selectRow = -1;
 
-  StreamSubscription _subscription;
+  StreamSubscription _keyEventSubscription;
 
-  bool get active => _subscription != null;
+  bool get active => _keyEventSubscription != null;
 
   Function _finishCallback;
 
@@ -351,7 +351,8 @@ class ScriptsMatcher {
     _startMatching(revertScriptRef, true);
 
     // Start handling user's keystrokes to show matching list of files.
-    _subscription ??= _textfield.onKeyDown.listen((html.KeyboardEvent e) {
+    _keyEventSubscription ??=
+        _textfield.onKeyDown.listen((html.KeyboardEvent e) {
       switch (e.keyCode) {
         case DOM_VK_RETURN:
           reset();
@@ -421,10 +422,10 @@ class ScriptsMatcher {
       selectedScriptRef = _scriptsView._highlightRef;
     }
 
-    if (_subscription != null) {
-      // No more event routing until user has clicked again the the textfield.
-      _subscription.cancel();
-      _subscription = null;
+    if (_keyEventSubscription != null) {
+      // No more event routing until user has clicked again in the textfield.
+      _keyEventSubscription.cancel();
+      _keyEventSubscription = null;
     }
 
     // Remember the whole set of ScriptRefs
