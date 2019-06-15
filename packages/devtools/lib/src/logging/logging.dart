@@ -778,17 +778,17 @@ class FrameInfo {
 }
 
 class NavigationInfo {
-  NavigationInfo(this.routeDescription);
+  NavigationInfo(this._route);
 
   static const String eventName = 'Flutter.Navigation';
 
   static NavigationInfo from(Map<String, dynamic> data) {
-    // TODO(devoncarew): Flutter.Navigation don't currently report the new route
-    // description; we'll need to either add this info or remove this code.
-    return NavigationInfo(data['routeDescription']);
+    return NavigationInfo(data['route']);
   }
 
-  final String routeDescription;
+  final Map<String, dynamic> _route;
+
+  String get routeDescription => _route == null ? null : _route['description'];
 }
 
 class ServiceExtensionStateChangedInfo {
