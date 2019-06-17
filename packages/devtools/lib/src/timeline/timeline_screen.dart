@@ -126,18 +126,14 @@ class TimelineScreen extends Screen {
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
-      ..click(() async {
-        await _pauseRecording();
-      });
+      ..click(_pauseRecording);
 
     resumeButton =
         PButton.icon('Resume recording', FlutterIcons.resume_black_disabled_2x)
           ..small()
           ..clazz('margin-left')
           ..disabled = true
-          ..click(() async {
-            await _resumeRecording();
-          });
+          ..click(_resumeRecording);
 
     exportButton = PButton.icon('', _exportTimelineIcon)
       ..small()
