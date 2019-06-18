@@ -78,7 +78,9 @@ class Chrome {
       '--user-data-dir=${getCreateChromeDataDir()}',
       '--remote-debugging-port=$debugPort'
     ];
-    if (_useChromeHeadless) {
+    // TODO(dantup): Chrome headless currently hangs on Windows (both Travis and
+    // locally), so use non-headless there until we have a fix.
+    if (_useChromeHeadless && !Platform.isWindows) {
       args.addAll(<String>[
         '--headless',
         '--disable-gpu',
