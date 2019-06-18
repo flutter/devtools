@@ -29,14 +29,17 @@ void main() async {
 
   env.afterNewSetup = () async {
     await ensureInspectorServiceDependencies();
+  };
+
+  env.afterEverySetup = () async {
     inspectorService = await InspectorService.create(env.service);
     if (env.runConfig.trackWidgetCreation) {
       await inspectorService.inferPubRootDirectoryIfNeeded();
     }
   };
 
-  env.beforeTearDown = () async {
-    inspectorService.dispose();
+  env.beforeEveryTearDown = () async {
+    inspectorService?.dispose();
     inspectorService = null;
   };
 
