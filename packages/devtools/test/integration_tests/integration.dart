@@ -307,6 +307,18 @@ class WebdevFixture {
         process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final Completer<String> hasUrl = Completer<String>();
 
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+      final err = 'error starting webdev: $line';
+      if (!hasUrl.isCompleted) {
+        hasUrl.completeError(err);
+      } else {
+        print(err);
+      }
+    });
+
     lines.listen((String line) {
       if (verbose) {
         print('webdev • ${line.trim()}');
