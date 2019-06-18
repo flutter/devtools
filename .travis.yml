@@ -17,6 +17,10 @@ matrix:
   #     we can build on an older SDK.
   - dart: stable
     env: BOT=main
+  # TODO(dantup): Temporarily skip stable DDC builds until the interop fix is
+  # live in stable (>= v2.3.3-dev).
+  - dart: stable
+    env: BOT=test_ddc
 
 env:
   - BOT=main
