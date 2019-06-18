@@ -71,6 +71,10 @@ void main() async {
   };
 
   group('MemoryController', () {
+    tearDownAll(() {
+      env.tearDownEnvironment(force: true);
+    });
+
     test('heap info', () async {
       await env.setupEnvironment();
 
