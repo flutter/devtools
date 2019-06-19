@@ -753,38 +753,30 @@ class AnalyticsOptInDialog {
     parent.layoutVertical();
 
     parent.add([
-      h2(text: 'Analytics Data Collection'),
+      h2(text: 'Welcome to Dart DevTools'),
       CoreElement('dl', classes: 'form-group')
         ..add([
-          CoreElement('dt')
+          CoreElement('dd')
             ..add([
-              label(text: 'Welcome to Dart DevTools')
-                ..setAttribute('for', 'uri-field'),
+              span(
+                text: 'DevTools reports feature usage statistics and basic '
+                    'crash reports to Google in order to help Google improve '
+                    "the tool over time. See Google's ",
+              ),
+              a(
+                  text: 'privacy policy',
+                  href: 'https://www.google.com/intl/en/policies/privacy',
+                  target: '_blank'),
+              span(text: '.'),
+              p(),
             ]),
           CoreElement('dd')
             ..add([
-              p(
-                text: 'Dart DevTools reports features usage '
-                    'statistics and basic crash reports to Google in order '
-                    'to help Google contribute improvements to Dart DevTools '
-                    'over time.',
-              )..add([
-                  br(),
-                  a(
-                      text: 'See Google\'s privacy policy',
-                      c: 'note',
-                      href: 'https://www.google.com/intl/en/policies/privacy',
-                      target: '_blank'),
-                ]),
-            ]),
-          CoreElement('dd')
-            ..add([
-              p(text: 'Do you accept analytics collection for Dart DevTools?'),
-              acceptButton = PButton('I Accept')
+              p(text: 'Send usage statistics for DevTools?'),
+              acceptButton = PButton('Sounds good!')
                 ..small()
-                ..clazz('margin-left')
                 ..setAttribute('tabindex', '1'),
-              dontAcceptButton = PButton('I Do Not Accept')
+              dontAcceptButton = PButton('No thanks')
                 ..small()
                 ..clazz('margin-left')
                 ..setAttribute('tabindex', '2'),
