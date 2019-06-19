@@ -71,7 +71,6 @@ class PerfToolFramework extends Framework {
 
     await serviceManager.serviceAvailable.future;
     await addScreens();
-    sortScreens();
     screensReady.complete();
 
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
@@ -195,16 +194,6 @@ class PerfToolFramework extends Framework {
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
-  }
-
-  void sortScreens() {
-    // Move disabled screens to the end, but otherwise preserve order.
-    final sortedScreens = screens
-        .where((screen) => !screen.disabled)
-        .followedBy(screens.where((screen) => screen.disabled))
-        .toList();
-    screens.clear();
-    screens.addAll(sortedScreens);
   }
 
   IsolateRef get currentIsolate =>
