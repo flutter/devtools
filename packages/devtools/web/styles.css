@@ -139,11 +139,11 @@ body {
 }
 
 .masthead a:hover:not([disabled]) {
-    color: var(--header-item) !important;;
+    color: var(--header-item) !important;
 }
 
 .masthead-nav .active {
-    color: var(--header-item) !important;;
+    color: var(--header-item) !important;
 }
 
 h2 {
@@ -870,7 +870,7 @@ html [full] {
     margin-left: 8px;
 }
 
-ga-dialog {
+#ga-dialog {
     background-color: var(--default-background);
     color: var(--default-color);
     padding-bottom: 10px;
