@@ -60,13 +60,13 @@
     list-style: none;
     border: 1px solid var(--popup-border-color);
     padding-left: 4px;
-    margin-vottrom: 2px;
+    margin-bottom: 2px;
     cursor: pointer;
     display: none;
 }
 
 .popup-textfield {
-    zIndex: 1000;
+    z-index: 1000;
     position: absolute;
     color: var(--header-color);
     background-color: var(--list-background);
