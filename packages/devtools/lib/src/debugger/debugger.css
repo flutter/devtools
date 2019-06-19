@@ -67,7 +67,7 @@
 
 .popup-textfield {
     zIndex: 1000;
-    position: absolute;;
+    position: absolute;
     color: var(--header-color);
     background-color: var(--list-background);
     width: calc(100% - 105px);
