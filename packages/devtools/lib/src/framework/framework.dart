@@ -758,7 +758,7 @@ class AnalyticsOptInDialog {
           CoreElement('dd')
             ..add([
               span(
-                text: 'DevTools reports features usage statistics and basic '
+                text: 'DevTools reports feature usage statistics and basic '
                     'crash reports to Google in order to help Google improve '
                     "the tool over time. See Google's ",
               ),
