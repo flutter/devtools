@@ -226,7 +226,8 @@ class Framework {
         id = id.substring(1);
       }
       Screen screen = getScreen(id, onlyEnabled: true);
-      screen ??= screens.first;
+      screen ??= screens.firstWhere((screen) => !screen.disabled,
+          orElse: () => screens.first);
       if (screen != null) {
         ga_platform.setupAndGaScreen(id);
         load(screen);
