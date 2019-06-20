@@ -26,3 +26,14 @@ String getSimplePackageUrl(String url) {
   }
   return url;
 }
+
+/// Returns a trimmed vm service uri without any trailing characters.
+///
+/// For example, given a [value] of http://127.0.0.1:60667/72K34Xmq0X0=/#/vm,
+/// this method will return the URI http://127.0.0.1:60667/72K34Xmq0X0=/.
+Uri getTrimmedUri(String value) {
+  final uri = Uri.parse(value.trim());
+  return uri
+      .removeFragment()
+      .replace(path: uri.path.endsWith('/') ? uri.path : '${uri.path}/');
+}
