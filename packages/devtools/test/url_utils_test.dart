@@ -26,23 +26,23 @@ void main() {
 
     test('getTrimmedUri', () {
       expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm').toString(),
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm').toString(),
         equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
       );
       expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=').toString(),
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=').toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0='),
+      );
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ').toString(),
         equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
       );
       expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ').toString(),
-        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
+        getNormalizedTrimmedUri('http://127.0.0.1:60667').toString(),
+        equals('http://127.0.0.1:60667'),
       );
       expect(
-        getTrimmedUri('http://127.0.0.1:60667').toString(),
-        equals('http://127.0.0.1:60667/'),
-      );
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667/').toString(),
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/').toString(),
         equals('http://127.0.0.1:60667/'),
       );
     });

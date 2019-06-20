@@ -660,7 +660,7 @@ class ConnectDialog {
           value = Uri.decodeFull(value);
         }
 
-        final uri = getTrimmedUri(value);
+        final uri = getNormalizedTrimmedUri(value);
         if (uri != null && uri.isAbsolute) {
           _connect(uri).catchError((dynamic error) {
             handleConnectError();
