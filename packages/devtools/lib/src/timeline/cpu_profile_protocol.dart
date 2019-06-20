@@ -89,7 +89,7 @@ class CpuProfileProtocol {
         firstAmpersandIndex < firstPeriodIndex &&
         name.length > firstAmpersandIndex + 1) {
       final nextCharCodeUnit = name[firstAmpersandIndex + 1].codeUnitAt(0);
-      if (isLetter(nextCharCodeUnit)) {
+      if (isLetter(nextCharCodeUnit) || nextCharCodeUnit == '_'.codeUnitAt(0)) {
         return name.substring(0, firstAmpersandIndex) +
             name.substring(firstPeriodIndex);
       }

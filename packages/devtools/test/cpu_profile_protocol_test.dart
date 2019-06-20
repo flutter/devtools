@@ -58,13 +58,20 @@ void main() {
         equals('_WidgetsFlutterBinding.handleBeginFrame.<anonymous closure>'),
       );
 
+      name = '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
+          'AndHashCode&SetMixin.toList';
+      expect(
+        cpuProfileProtocol.getSimpleStackFrameName(name),
+        equals('__CompactLinkedHashSet.toList'),
+      );
+
       // Ampersand and no period.
       name =
           'dart::DartEntry::InvokeFunction(dart::Function const&, dart::Array '
           'const&, dart::Array const&, unsigned long)';
       expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
 
-      // No ampersand and no period.
+      // Period and no ampersand.
       name = '_CustomZone.run';
       expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
     });
