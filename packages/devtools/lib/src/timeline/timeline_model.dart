@@ -334,13 +334,13 @@ class TimelineEvent extends TreeNode {
   }
 
   @override
-  void addChild(TreeNode childd) {
-    final TimelineEvent child = childd as TimelineEvent;
+  void addChild(TreeNode child) {
+    final TimelineEvent _child = child as TimelineEvent;
     // Places the child in it's correct position amongst the other children.
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
-        root._addChild(child);
+        root._addChild(_child);
         return;
       }
 
@@ -350,17 +350,17 @@ class TimelineEvent extends TreeNode {
       // those members will need to be reordered in the tree.
       final childrenToReorder = [];
       for (TimelineEvent otherChild in _children) {
-        if (child.couldBeParentOf(otherChild)) {
+        if (_child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
       }
 
       if (childrenToReorder.isNotEmpty) {
-        root._addChild(child);
+        root._addChild(_child);
 
         for (TimelineEvent otherChild in childrenToReorder) {
           // Link [otherChild] with its correct parent [child].
-          child._addChild(otherChild);
+          _child._addChild(otherChild);
 
           // Unlink [otherChild] from its incorrect parent [root].
           root.children.remove(otherChild);
@@ -373,7 +373,7 @@ class TimelineEvent extends TreeNode {
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
       for (TimelineEvent otherChild in _children.reversed) {
-        if (otherChild.couldBeParentOf(child)) {
+        if (otherChild.couldBeParentOf(_child)) {
           // Recurse on [otherChild]'s subtree.
           _putChildInTree(otherChild);
           return;
@@ -382,7 +382,7 @@ class TimelineEvent extends TreeNode {
 
       // If we have not returned at this point, [child] belongs in
       // [root.children].
-      root._addChild(child);
+      root._addChild(_child);
     }
 
     _putChildInTree(this);
