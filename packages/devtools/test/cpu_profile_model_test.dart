@@ -61,20 +61,20 @@ void main() {
       expect(testStackFrame.selfTimeRatio, equals(0.0));
       expect(testStackFrame.selfTime.inMicroseconds, equals(0));
 
-      expect(stackFrameC.totalTimeRatio, equals(0.3));
-      expect(stackFrameC.totalTime.inMicroseconds, equals(30));
-      expect(stackFrameC.selfTimeRatio, equals(0.3));
-      expect(stackFrameC.selfTime.inMicroseconds, equals(30));
+      expect(stackFrameC.totalTimeRatio, equals(0.2));
+      expect(stackFrameC.totalTime.inMicroseconds, equals(20));
+      expect(stackFrameC.selfTimeRatio, equals(0.2));
+      expect(stackFrameC.selfTime.inMicroseconds, equals(20));
 
-      expect(stackFrameD.totalTimeRatio, equals(0.7));
-      expect(stackFrameD.totalTime.inMicroseconds, equals(70));
+      expect(stackFrameD.totalTimeRatio, equals(0.8));
+      expect(stackFrameD.totalTime.inMicroseconds, equals(80));
       expect(stackFrameD.selfTimeRatio, equals(0.2));
       expect(stackFrameD.selfTime.inMicroseconds, equals(20));
 
-      expect(stackFrameF.totalTimeRatio, equals(0.4));
-      expect(stackFrameF.totalTime.inMicroseconds, equals(40));
-      expect(stackFrameF.selfTimeRatio, equals(0.3));
-      expect(stackFrameF.selfTime.inMicroseconds, equals(30));
+      expect(stackFrameF.totalTimeRatio, equals(0.1));
+      expect(stackFrameF.totalTime.inMicroseconds, equals(10));
+      expect(stackFrameF.selfTimeRatio, equals(0.0));
+      expect(stackFrameF.selfTime.inMicroseconds, equals(0));
     });
 
     test('shallowCopy', () {

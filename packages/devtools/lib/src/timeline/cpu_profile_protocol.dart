@@ -23,6 +23,7 @@ class CpuProfileProtocol {
         // frame, the this will be the empty string.
         url: v[CpuProfileData.resolvedUrlKey],
         profileTime: cpuProfileData.time,
+        profileSampleCount: cpuProfileData.sampleCount,
       );
       _processStackFrame(
         stackFrame,

@@ -25,6 +25,7 @@ class CpuProfileData {
       category: 'Dart',
       url: '',
       profileTime: time,
+      profileSampleCount: sampleCount,
     );
   }
 
@@ -138,6 +139,7 @@ class CpuStackFrame extends TreeNode {
     @required this.category,
     @required this.url,
     @required this.profileTime,
+    @required this.profileSampleCount,
   });
 
   final String id;
@@ -148,8 +150,11 @@ class CpuStackFrame extends TreeNode {
 
   final String url;
 
-  // Time data for stack frame's enclosing CPU profile.
+  /// Time data for the stack frame's enclosing CPU profile.
   final TimeRange profileTime;
+
+  /// Total sample count for the the stack frame's enclosing CPU profile.
+  final int profileSampleCount;
 
   /// How many cpu samples for which this frame is a leaf.
   int exclusiveSampleCount = 0;
@@ -162,8 +167,8 @@ class CpuStackFrame extends TreeNode {
 
   set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
 
-  double get totalTimeRatio => _totalTimeRatio ??=
-      inclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
+  double get totalTimeRatio =>
+      _totalTimeRatio ??= inclusiveSampleCount / profileSampleCount;
 
   double _totalTimeRatio;
 
@@ -173,8 +178,8 @@ class CpuStackFrame extends TreeNode {
 
   Duration _totalTime;
 
-  double get selfTimeRatio => _selfTimeRatio ??=
-      exclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
+  double get selfTimeRatio =>
+      _selfTimeRatio ??= exclusiveSampleCount / profileSampleCount;
 
   double _selfTimeRatio;
 
@@ -203,6 +208,7 @@ class CpuStackFrame extends TreeNode {
       category: category,
       url: url,
       profileTime: profileTime,
+      profileSampleCount: profileSampleCount,
     );
     if (copySampleCounts) {
       copy
