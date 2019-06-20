@@ -150,9 +150,9 @@ bool isLetter(int codeUnit) =>
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
-/// "_WidgetsFlutterBinding&BindingBase&GestureBinding.handleBeginFrame", this
+/// `_WidgetsFlutterBinding&BindingBase&GestureBinding.handleBeginFrame`, this
 /// method will strip off all the Mixin names and return
-/// "_WidgetsFlutterBinding.handleBeginFrame".
+/// `_WidgetsFlutterBinding.handleBeginFrame`.
 String getSimpleStackFrameName(String name) {
   final firstAmpersandIndex = name.indexOf('&');
   final firstPeriodIndex = name.indexOf('.');
