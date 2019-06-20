@@ -147,6 +147,30 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
+/// Returns a simplified version of a StackFrame name.
+///
+/// Given an input such as
+/// `_WidgetsFlutterBinding&BindingBase&GestureBinding.handleBeginFrame`, this
+/// method will strip off all the Mixin names and return
+/// `_WidgetsFlutterBinding.handleBeginFrame`.
+String getSimpleStackFrameName(String name) {
+  final firstAmpersandIndex = name.indexOf('&');
+  final firstPeriodIndex = name.indexOf('.');
+
+  if (firstAmpersandIndex != -1 &&
+      firstPeriodIndex != -1 &&
+      firstAmpersandIndex < firstPeriodIndex &&
+      name.length > firstAmpersandIndex + 1) {
+    final nextCharCodeUnit = name[firstAmpersandIndex + 1].codeUnitAt(0);
+    if (isLetter(nextCharCodeUnit) || nextCharCodeUnit == '_'.codeUnitAt(0)) {
+      return name.substring(0, firstAmpersandIndex) +
+          name.substring(firstPeriodIndex);
+    }
+  }
+
+  return name;
+}
+
 /// Returns a trimmed vm service uri without any trailing characters.
 ///
 /// For example, given a [value] of http://127.0.0.1:60667/72K34Xmq0X0=/#/vm,
