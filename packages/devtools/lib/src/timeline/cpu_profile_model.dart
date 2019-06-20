@@ -160,6 +160,8 @@ class CpuStackFrame extends TreeNode {
   /// How many cpu samples this frame is included in.
   int _inclusiveSampleCount;
 
+  set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
+
   double get totalTimeRatio => _totalTimeRatio ??=
       inclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
 
@@ -194,10 +196,39 @@ class CpuStackFrame extends TreeNode {
     return _inclusiveSampleCount;
   }
 
+  CpuStackFrame shallowCopy({bool copySampleCounts = false}) {
+    final copy = CpuStackFrame(
+      id: id,
+      name: name,
+      category: category,
+      url: url,
+      profileTime: profileTime,
+    );
+    if (copySampleCounts) {
+      copy
+        ..exclusiveSampleCount = exclusiveSampleCount
+        .._inclusiveSampleCount = _inclusiveSampleCount;
+    }
+    return copy;
+  }
+
+  /// Returns a deep copy from this stack frame down to the leaves of the tree.
+  ///
+  /// The returned copy stack frame will have a null parent.
+  CpuStackFrame deepCopy() {
+    final copy = shallowCopy(copySampleCounts: true);
+    for (CpuStackFrame child in children) {
+      copy.addChild(child.deepCopy());
+    }
+    return copy;
+  }
+
+  bool shallowEquals(CpuStackFrame other) =>
+      name == other.name && url == other.url && category == other.category;
+
   void _format(StringBuffer buf, String indent) {
-    buf.writeln(
-        '$indent$id - children: ${children.length} - exclusiveSampleCount: '
-        '$exclusiveSampleCount');
+    buf.writeln('$indent$name - children: ${children.length} - excl: '
+        '$exclusiveSampleCount - incl: $inclusiveSampleCount');
     for (CpuStackFrame child in children) {
       child._format(buf, '  $indent');
     }
