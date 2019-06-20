@@ -231,6 +231,40 @@ void main() {
       expect(isLetter('z'.codeUnitAt(0)), isTrue);
     });
 
+    test('getSimpleStackFrameName', () {
+      // Ampersand and period cases.
+      String name =
+          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
+          'SchedulerBinding.handleBeginFrame';
+      expect(
+        getSimpleStackFrameName(name),
+        equals('_WidgetsFlutterBinding.handleBeginFrame'),
+      );
+
+      name =
+          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
+          'SchedulerBinding.handleBeginFrame.<anonymous closure>';
+      expect(
+        getSimpleStackFrameName(name),
+        equals('_WidgetsFlutterBinding.handleBeginFrame.<anonymous closure>'),
+      );
+
+      name = '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
+          'AndHashCode&SetMixin.toList';
+      expect(getSimpleStackFrameName(name),
+          equals('__CompactLinkedHashSet.toList'));
+
+      // Ampersand and no period.
+      name =
+          'dart::DartEntry::InvokeFunction(dart::Function const&, dart::Array '
+          'const&, dart::Array const&, unsigned long)';
+      expect(getSimpleStackFrameName(name), equals(name));
+
+      // Period and no ampersand.
+      name = '_CustomZone.run';
+      expect(getSimpleStackFrameName(name), equals(name));
+    });
+
     test('getTrimmedUri', () {
       expect(
         getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm').toString(),

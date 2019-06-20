@@ -39,42 +39,6 @@ void main() {
       // Only run this test if asserts are enabled.
       assert(_runTest());
     });
-
-    test('getSimpleStackFrameName', () {
-      // Ampersand and period cases.
-      String name =
-          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
-          'SchedulerBinding.handleBeginFrame';
-      expect(
-        cpuProfileProtocol.getSimpleStackFrameName(name),
-        equals('_WidgetsFlutterBinding.handleBeginFrame'),
-      );
-
-      name =
-          '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
-          'SchedulerBinding.handleBeginFrame.<anonymous closure>';
-      expect(
-        cpuProfileProtocol.getSimpleStackFrameName(name),
-        equals('_WidgetsFlutterBinding.handleBeginFrame.<anonymous closure>'),
-      );
-
-      name = '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
-          'AndHashCode&SetMixin.toList';
-      expect(
-        cpuProfileProtocol.getSimpleStackFrameName(name),
-        equals('__CompactLinkedHashSet.toList'),
-      );
-
-      // Ampersand and no period.
-      name =
-          'dart::DartEntry::InvokeFunction(dart::Function const&, dart::Array '
-          'const&, dart::Array const&, unsigned long)';
-      expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
-
-      // Period and no ampersand.
-      name = '_CustomZone.run';
-      expect(cpuProfileProtocol.getSimpleStackFrameName(name), equals(name));
-    });
   });
 }
 
