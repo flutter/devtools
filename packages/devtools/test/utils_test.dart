@@ -264,29 +264,6 @@ void main() {
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
     });
-
-    test('getTrimmedUri', () {
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm').toString(),
-        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-      );
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=').toString(),
-        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-      );
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ').toString(),
-        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-      );
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667').toString(),
-        equals('http://127.0.0.1:60667/'),
-      );
-      expect(
-        getTrimmedUri('http://127.0.0.1:60667/').toString(),
-        equals('http://127.0.0.1:60667/'),
-      );
-    });
   });
 }
 
