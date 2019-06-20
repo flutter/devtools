@@ -34,6 +34,27 @@ void main() {
       expect(child.parent, equals(parent));
     });
   });
+
+  test('containsChildWithCondition', () {
+    expect(
+      treeNode0.containsChildWithCondition((TreeNode node) {
+        return node == treeNode1;
+      }),
+      isTrue,
+    );
+    expect(
+      treeNode0.containsChildWithCondition((TreeNode node) {
+        return node.children.length == 2;
+      }),
+      isTrue,
+    );
+    expect(
+      treeNode0.containsChildWithCondition((TreeNode node) {
+        return node.isExpanded;
+      }),
+      isFalse,
+    );
+  });
 }
 
 final treeNode0 = TreeNode();

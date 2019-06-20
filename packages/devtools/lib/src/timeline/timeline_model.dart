@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:math';
 
 import 'package:meta/meta.dart';
 
+import '../trees.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 import 'timeline_controller.dart';
@@ -253,8 +253,7 @@ enum TimelineEventType {
   unknown,
 }
 
-// TODO(kenzie): extend [TreeNode] class to take advantage of shared tree logic.
-class TimelineEvent {
+class TimelineEvent extends TreeNode {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
@@ -277,11 +276,7 @@ class TimelineEvent {
 
   TimeRange time = TimeRange();
 
-  TimelineEvent parent;
-
-  List<TimelineEvent> children = [];
-
-  String get frameId => _frameId ?? getRoot()._frameId;
+  String get frameId => _frameId ?? (root as TimelineEvent)._frameId;
 
   String _frameId;
 
@@ -298,55 +293,11 @@ class TimelineEvent {
 
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
-  bool get isUiEventFlow => containsChildWithCondition(
-      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
+  bool get isUiEventFlow => containsChildWithCondition((TreeNode node) =>
+      (node as TimelineEvent).name.contains('Engine::BeginFrame'));
 
-  bool get isGpuEventFlow => containsChildWithCondition(
-      (TimelineEvent event) => event.name.contains('PipelineConsume'));
-
-  /// Depth of this TimelineEvent tree, including [this].
-  ///
-  /// We assume that TimelineEvent nodes are not modified after the first time
-  /// [depth] is accessed. We would need to clear the cache if this was
-  /// supported.
-  int get depth {
-    if (_depth != 0) {
-      return _depth;
-    }
-    for (TimelineEvent child in children) {
-      _depth = max(_depth, child.depth);
-    }
-    return _depth = _depth + 1;
-  }
-
-  int _depth = 0;
-
-  TimelineEvent getRoot() {
-    TimelineEvent root = this;
-    while (root.parent != null) {
-      root = root.parent;
-    }
-    return root;
-  }
-
-  bool containsChildWithCondition(bool condition(TimelineEvent _)) {
-    bool _containsChildWithCondition(
-      TimelineEvent root,
-      bool condition(TimelineEvent _),
-    ) {
-      if (condition(root)) {
-        return true;
-      }
-      for (TimelineEvent newRoot in root.children) {
-        if (_containsChildWithCondition(newRoot, condition)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    return _containsChildWithCondition(this, condition);
-  }
+  bool get isGpuEventFlow => containsChildWithCondition((TreeNode node) =>
+      (node as TimelineEvent).name.contains('PipelineConsume'));
 
   void maybeRemoveDuplicate() {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
@@ -354,12 +305,12 @@ class TimelineEvent {
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
             parent.beginTraceEventJson,
-            parent.children.first.beginTraceEventJson,
+            parent.children.cast<TimelineEvent>().first.beginTraceEventJson,
           ) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
           collectionEquals(
             parent.endTraceEventJson,
-            parent.children.first.endTraceEventJson,
+            parent.children.cast<TimelineEvent>().first.endTraceEventJson,
           )) {
         parent.removeChild(children.first);
       }
@@ -382,7 +333,9 @@ class TimelineEvent {
     children.remove(childToRemove);
   }
 
-  void addChild(TimelineEvent child) {
+  @override
+  void addChild(TreeNode childd) {
+    final TimelineEvent child = childd as TimelineEvent;
     // Places the child in it's correct position amongst the other children.
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
@@ -474,7 +427,7 @@ class TimelineEvent {
   }
 
   void formatFromRoot(StringBuffer buf, String indent) {
-    getRoot().format(buf, indent);
+    (root as TimelineEvent).format(buf, indent);
   }
 
   void writeTraceToBuffer(StringBuffer buf) {

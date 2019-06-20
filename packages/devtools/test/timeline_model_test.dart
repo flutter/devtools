@@ -121,36 +121,6 @@ void main() {
   });
 
   group('TimelineEvent', () {
-    test('get depth', () {
-      expect(goldenUiTimelineEvent.depth, equals(7));
-    });
-
-    test('getRoot', () {
-      expect(goldenUiTimelineEvent.getRoot(), equals(vsyncEvent));
-      expect(buildEvent.getRoot(), equals(vsyncEvent));
-    });
-
-    test('containsChildWithCondition', () {
-      expect(
-        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
-          return event.name == 'Animate';
-        }),
-        isTrue,
-      );
-      expect(
-        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
-          return event.beginTraceEventJson == animateEvent.beginTraceEventJson;
-        }),
-        isTrue,
-      );
-      expect(
-        goldenUiTimelineEvent.containsChildWithCondition((TimelineEvent event) {
-          return event.name == 'FakeEventName';
-        }),
-        isFalse,
-      );
-    });
-
     test('maybeRemoveDuplicate', () {
       final goldenCopy = goldenUiTimelineEvent.deepCopy();
 
@@ -161,8 +131,12 @@ void main() {
       // Add a duplicate event in [goldenCopy]'s event tree.
       final duplicateEvent = goldenCopy.deepCopy();
       duplicateEvent.parent = goldenCopy;
-      duplicateEvent.children = goldenCopy.children;
-      goldenCopy.children = [duplicateEvent];
+      duplicateEvent.children
+        ..clear()
+        ..addAll(goldenCopy.children);
+      goldenCopy.children
+        ..clear()
+        ..add(duplicateEvent);
       expect(goldenCopy.toString(), isNot(equals(goldenUiString())));
 
       goldenCopy.maybeRemoveDuplicate();
@@ -177,7 +151,7 @@ void main() {
       //   Framework Workload
       //    Engine::BeginFrame <-- [goldenEvent], [copyEvent]
       //     Frame <-- event we will remove
-      final engineBeginFrameEvent =
+      final TimelineEvent engineBeginFrameEvent =
           goldenCopy.children.first.children.first.children.first;
       expect(engineBeginFrameEvent.name, equals('Engine::BeginFrame'));
 
@@ -198,42 +172,49 @@ void main() {
     });
 
     test('addChild', () {
-      final engineBeginFrame = testTimelineEvent(engineBeginFrameJson);
+      final TimelineEvent engineBeginFrame =
+          testTimelineEvent(engineBeginFrameJson);
       expect(engineBeginFrame.children.isEmpty, isTrue);
 
       // Add child [animate] to a leaf [engineBeginFrame].
-      final animate = testTimelineEvent(animateJson)
+      final TimelineEvent animate = testTimelineEvent(animateJson)
         ..time.end = const Duration(microseconds: 118039650871);
       engineBeginFrame.addChild(animate);
       expect(engineBeginFrame.children.length, equals(1));
-      expect(engineBeginFrame.children.first.name, equals(animateEvent.name));
+      expect(engineBeginFrame.children.cast<TimelineEvent>().first.name,
+          equals(animateEvent.name));
 
       // Add child [layout] where child is sibling of existing children
       // [animate].
-      final layout = testTimelineEvent(layoutJson)
+      final TimelineEvent layout = testTimelineEvent(layoutJson)
         ..time.end = const Duration(microseconds: 118039651087);
       engineBeginFrame.addChild(layout);
       expect(engineBeginFrame.children.length, equals(2));
-      expect(engineBeginFrame.children.last.name, equals(layoutEvent.name));
+      expect(engineBeginFrame.children.cast<TimelineEvent>().last.name,
+          equals(layoutEvent.name));
 
       // Add child [build] where existing child [layout] is parent of child.
-      final build = testTimelineEvent(buildJson)
+      final TimelineEvent build = testTimelineEvent(buildJson)
         ..time.end = const Duration(microseconds: 118039651017);
       engineBeginFrame.addChild(build);
       expect(engineBeginFrame.children.length, equals(2));
       expect(layout.children.length, equals(1));
-      expect(layout.children.first.name, equals(buildEvent.name));
+      expect(layout.children.cast<TimelineEvent>().first.name,
+          equals(buildEvent.name));
 
       // Add child [frame] child is parent of existing children [animate] and
       // [layout].
-      final frame = testTimelineEvent(frameJson)
+      final TimelineEvent frame = testTimelineEvent(frameJson)
         ..time.end = const Duration(microseconds: 118039652334);
       engineBeginFrame.addChild(frame);
       expect(engineBeginFrame.children.length, equals(1));
-      expect(engineBeginFrame.children.first.name, equals(frameEvent.name));
+      expect(engineBeginFrame.children.cast<TimelineEvent>().first.name,
+          equals(frameEvent.name));
       expect(frame.children.length, equals(2));
-      expect(frame.children.first.name, equals(animateEvent.name));
-      expect(frame.children.last.name, equals(layoutEvent.name));
+      expect(frame.children.cast<TimelineEvent>().first.name,
+          equals(animateEvent.name));
+      expect(frame.children.cast<TimelineEvent>().last.name,
+          equals(layoutEvent.name));
     });
   });
 }

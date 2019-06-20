@@ -94,36 +94,36 @@ final TimelineEvent finalizeTreeEvent = testTimelineEvent(finalizeTreeJson)
   ..type = TimelineEventType.ui;
 
 final goldenUiTimelineEvent = vsyncEvent
-  ..children = [
+  ..children.addAll([
     animatorBeginFrameEvent
       ..parent = vsyncEvent
-      ..children = [
+      ..children.addAll([
         frameworkWorkloadEvent
           ..parent = animatorBeginFrameEvent
-          ..children = [
+          ..children.addAll([
             engineBeginFrameEvent
               ..parent = frameworkWorkloadEvent
-              ..children = [
+              ..children.addAll([
                 frameEvent
                   ..parent = engineBeginFrameEvent
-                  ..children = [
+                  ..children.addAll([
                     animateEvent..parent = frameEvent,
                     layoutEvent
                       ..parent = frameEvent
-                      ..children = [buildEvent..parent = layoutEvent],
+                      ..children.add(buildEvent..parent = layoutEvent),
                     compositingBitsEvent..parent = frameEvent,
                     paintEvent..parent = frameEvent,
                     compositingEvent..parent = frameEvent,
                     semanticsEvent..parent = frameEvent,
                     finalizeTreeEvent..parent = frameEvent,
-                  ]
-              ]
+                  ])
+              ])
               ..traceEvents.add(testTraceEventWrapper(endEngineBeginFrameJson)),
-          ]
+          ])
           ..traceEvents.add(testTraceEventWrapper(endFrameworkWorkloadJson)),
-      ]
+      ])
       ..traceEvents.add(testTraceEventWrapper(endAnimatorBeginFrameJson)),
-  ]
+  ])
   ..traceEvents.add(testTraceEventWrapper(endVsyncJson));
 
 String goldenUiString() => goldenUiTimelineEvent.toString();
@@ -342,10 +342,10 @@ final TimelineEvent pipelineConsumeEvent =
       ..type = TimelineEventType.gpu;
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent
-  ..children = [
+  ..children.addAll([
     pipelineConsumeEvent
       ..traceEvents.add(testTraceEventWrapper(endPipelineConsumeJson))
-  ]
+  ])
   ..traceEvents.add(testTraceEventWrapper(endGpuRasterizerDrawJson));
 
 String goldenGpuString() => goldenGpuTimelineEvent.toString();

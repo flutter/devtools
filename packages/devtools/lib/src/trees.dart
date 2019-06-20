@@ -72,6 +72,18 @@ class TreeNode {
     child.index = children.length - 1;
   }
 
+  bool containsChildWithCondition(bool condition(TreeNode _), {TreeNode root}) {
+    root ??= this;
+
+    if (condition(root)) {
+      return true;
+    }
+    for (TreeNode newRoot in root.children) {
+      return containsChildWithCondition(condition, root: newRoot);
+    }
+    return false;
+  }
+
   /// Whether the tree table node is expandable.
   bool get isExpandable => children.isNotEmpty;
 

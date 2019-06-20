@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../trees.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -157,8 +158,7 @@ class TimelineProtocol {
     // event node. Do not process these events.
     if (currentEventNodes[event.type.index] != null &&
         event.timestampMicros <
-            currentEventNodes[event.type.index]
-                .getRoot()
+            (currentEventNodes[event.type.index].root as TimelineEvent)
                 .time
                 .start
                 .inMicroseconds) {
@@ -297,11 +297,11 @@ class TimelineProtocol {
         return;
       } else if (current.name ==
               previousDurationEndEvents[event.type.index]?.name &&
-          current.parent?.name == event.name &&
+          (current.parent as TimelineEvent)?.name == event.name &&
           current.children.length == 1 &&
           collectionEquals(
             current.beginTraceEventJson,
-            current.children.first.beginTraceEventJson,
+            current.children.cast<TimelineEvent>().first.beginTraceEventJson,
           )) {
         // There was a duplicate DurationBegin event associated with
         // [previousDurationEndEvent]. [event] is actually the DurationEnd event
@@ -320,7 +320,7 @@ class TimelineProtocol {
               'Duplicate duration begin event: ${current.beginTraceEventJson}');
         }
 
-        current.parent.removeChild(current);
+        (current.parent as TimelineEvent).removeChild(current);
         current = current.parent;
         currentEventNodes[event.type.index] = current;
       } else {
@@ -362,7 +362,7 @@ class TimelineProtocol {
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
     while (current.parent != null &&
-        current.parent.time.end?.inMicroseconds != null) {
+        (current.parent as TimelineEvent).time.end?.inMicroseconds != null) {
       current = current.parent;
     }
     currentEventNodes[event.type.index] = current.parent;
@@ -387,8 +387,8 @@ class TimelineProtocol {
     final current = currentEventNodes[event.type.index];
     if (current != null) {
       if (current
-          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
-                e.beginTraceEventJson,
+          .containsChildWithCondition((TreeNode node) => collectionEquals(
+                (node as TimelineEvent).beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
         // This is a duplicate DurationComplete event. Return early.
