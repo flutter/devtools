@@ -1,0 +1,12 @@
+.instruction-message {
+    justify-content: center;
+}
+
+.recording-message {
+    margin-top: -50px;
+}
+
+.profiler-container {
+    position: relative;
+    height: 100%;
+}

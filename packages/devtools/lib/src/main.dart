@@ -15,7 +15,7 @@ import 'inspector/inspector.dart';
 import 'logging/logging.dart';
 import 'memory/memory.dart';
 import 'model/model.dart';
-import 'performance/performance.dart';
+import 'performance/performance_screen.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;

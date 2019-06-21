@@ -595,6 +595,15 @@ div.tabnav-tab {
     border-bottom-left-radius: 0;
 }
 
+.message {
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    margin-top: -10px;
+    top: 50%;
+    left: 0;
+}
+
 .spinner.centered {
     position: absolute;
     margin-top: -16px;

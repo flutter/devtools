@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart' show Response, Event;
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
-import 'cpu_profile_model.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
@@ -108,18 +106,5 @@ class TimelineService {
       timelineController.pause();
       await serviceManager.service.setVMTimelineFlags(<String>[]);
     }
-  }
-
-  Future<CpuProfileData> getCpuProfile({
-    @required int startMicros,
-    @required int extentMicros,
-  }) async {
-    final Response response =
-        await serviceManager.service.getCpuProfileTimeline(
-      serviceManager.isolateManager.selectedIsolate.id,
-      startMicros,
-      extentMicros,
-    );
-    return CpuProfileData.parse(response.json);
   }
 }

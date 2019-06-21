@@ -45,6 +45,8 @@ const defaultButtonIconColor = ThemedColor(
   Color(0xFF89B5F8),
 );
 
+const defaultPrimaryButtonIconColor = defaultBackground;
+
 /// Color that behaves differently depending on whether a light or dark theme
 /// is used.
 ///

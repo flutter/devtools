@@ -5,9 +5,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../profiler/cpu_profile_model.dart';
 import '../trees.dart';
 import '../utils.dart';
-import 'cpu_profile_model.dart';
 import 'timeline_controller.dart';
 
 /// Data model for DevTools Timeline.

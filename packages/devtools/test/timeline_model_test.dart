@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import 'package:devtools/src/timeline/cpu_profile_model.dart';
+import 'package:devtools/src/profiler/cpu_profile_model.dart';
 import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/utils.dart';

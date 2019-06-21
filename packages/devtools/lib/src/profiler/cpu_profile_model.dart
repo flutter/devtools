@@ -6,9 +6,9 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import '../timeline/timeline_model.dart';
 import '../trees.dart';
 import '../utils.dart';
-import 'timeline_model.dart';
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {

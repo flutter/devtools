@@ -6,17 +6,16 @@ import 'dart:html' as html;
 import 'package:js/js.dart';
 
 import '../globals.dart';
+import '../profiler/cpu_profile_flame_chart.dart';
+import '../profiler/cpu_profile_model.dart';
+import '../profiler/cpu_profile_tables.dart';
+import '../profiler/cpu_profiler.dart';
 import '../ui/colors.dart';
-import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
-import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
-import 'cpu_profile_flame_chart.dart';
-import 'cpu_profile_tables.dart';
-import 'cpu_profiler_view.dart';
 import 'frame_events_chart.dart';
 import 'timeline_controller.dart';
 
@@ -42,7 +41,7 @@ class EventDetails extends CoreElement {
     assert(tabNav != null);
     assert(content != null);
 
-    add([tabNav, content]);
+    add([tabNav.element, content]);
   }
 
   static const defaultTitleText = '[No event selected]';
@@ -54,9 +53,7 @@ class EventDetails extends CoreElement {
 
   final TimelineController timelineController;
 
-  PTabNav tabNav;
-
-  PTabNavTab _selectedTab;
+  CpuProfilerTabNav tabNav;
 
   CoreElement content;
 
@@ -93,40 +90,14 @@ class EventDetails extends CoreElement {
       ..flex()
       ..add(<CoreElement>[_title, details]);
 
-    _initTabNav();
-  }
-
-  void _initTabNav() {
-    final flameChartTab = CpuProfilerTab(
-      'CPU Flame Chart',
-      CpuProfilerViewType.flameChart,
+    tabNav = CpuProfilerTabNav(
+      cpuProfiler,
+      CpuProfilerTabOrder(
+        first: CpuProfilerViewType.flameChart,
+        second: CpuProfilerViewType.callTree,
+        third: CpuProfilerViewType.bottomUp,
+      ),
     );
-    final callTreeTab = CpuProfilerTab(
-      'Call Tree',
-      CpuProfilerViewType.callTree,
-    );
-    final bottomUpTab = CpuProfilerTab(
-      'Bottom Up',
-      CpuProfilerViewType.bottomUp,
-    );
-
-    tabNav = PTabNav(<CpuProfilerTab>[
-      flameChartTab,
-      callTreeTab,
-      bottomUpTab,
-    ])
-      ..element.style.borderBottom = '0';
-
-    _selectedTab = flameChartTab;
-
-    tabNav.onTabSelected.listen((PTabNavTab tab) {
-      // Return early if this tab is already selected.
-      if (tab == _selectedTab) {
-        return;
-      }
-      _selectedTab = tab;
-      cpuProfiler.showView((tab as CpuProfilerTab).type);
-    });
   }
 
   void _initListeners() {
@@ -175,132 +146,90 @@ class EventDetails extends CoreElement {
   }
 }
 
-class _CpuProfiler extends CoreElement {
-  _CpuProfiler(this._timelineController) : super('div') {
-    layoutVertical();
-    flex();
-
-    add(views = [
-      flameChart = CpuFlameChart(_timelineController),
-      bottomUp = CpuBottomUp(_timelineController)..hide(),
-      callTree = CpuCallTree(_timelineController)..hide(),
-    ]);
-  }
+class _CpuProfiler extends CpuProfiler {
+  _CpuProfiler(this._timelineController)
+      : super(
+          _CpuFlameChart(_timelineController),
+          _CpuCallTree(_timelineController),
+          _CpuBottomUp(_timelineController),
+        );
 
   final TimelineController _timelineController;
 
-  CpuFlameChart flameChart;
+  @override
+  Future<void> prepareCpuProfile() async {
+    // Fetch a profile if we are not loading from offline.
+    if (!offlineMode || _timelineController.offlineTimelineData == null) {
+      await _timelineController.getCpuProfileForSelectedEvent();
+    }
+  }
 
-  CpuBottomUp bottomUp;
-
-  CpuCallTree callTree;
-
-  List<CpuProfilerView> views;
-
-  CpuProfilerViewType _selectedViewType = CpuProfilerViewType.flameChart;
-
-  bool showingMessage = false;
-
-  void showView(CpuProfilerViewType showType) {
-    _selectedViewType = showType;
-
-    // If we are showing a message, we do not want to show any other views.
-    if (showingMessage) return;
-
-    for (CpuProfilerView view in views) {
-      if (view.type == showType) {
-        view.show();
+  @override
+  bool maybeShowMessageOnUpdate() {
+    if (offlineMode &&
+        _timelineController.timelineData.selectedEvent !=
+            _timelineController.offlineTimelineData?.selectedEvent) {
+      final offlineModeMessage = div()
+        ..add(span(
+            text:
+                'CPU profiling is not yet available for snapshots. You can only'
+                ' view '));
+      if (_timelineController.offlineTimelineData?.cpuProfileData != null) {
+        offlineModeMessage
+          ..add(span(text: 'the '))
+          ..add(span(text: 'CPU profile', c: 'message-action')
+            ..click(
+                () => _timelineController.restoreCpuProfileFromOfflineData()))
+          ..add(span(text: ' included in the snapshot.'));
       } else {
-        view.hide();
+        offlineModeMessage.add(span(
+            text:
+                'a CPU profile if it is included in the imported snapshot file.'));
       }
+      showMessage(offlineModeMessage);
+      return true;
     }
-  }
 
-  void hideAll() {
-    for (CpuProfilerView view in views) {
-      view.hide();
+    if (_timelineController.timelineData.cpuProfileData.stackFrames.isEmpty) {
+      showMessage(div(
+          text: 'CPU profile unavailable for time range'
+              ' [${_timelineController.timelineData.selectedEvent.time.start.inMicroseconds} -'
+              ' ${_timelineController.timelineData.selectedEvent.time.end.inMicroseconds}]'));
+      return true;
     }
-  }
-
-  Future<void> update() async {
-    reset();
-
-    final Spinner spinner = Spinner.centered();
-    try {
-      add(spinner);
-
-      // Only fetch a profile when we are not loading from offline.
-      if (!offlineMode || _timelineController.offlineTimelineData == null) {
-        await _timelineController.getCpuProfileForSelectedEvent();
-      }
-
-      if (offlineMode &&
-          _timelineController.timelineData.selectedEvent !=
-              _timelineController.offlineTimelineData?.selectedEvent) {
-        final offlineModeMessage = div()
-          ..add(span(
-              text:
-                  'CPU profiling is not yet available for snapshots. You can only'
-                  ' view '));
-        if (_timelineController.offlineTimelineData?.cpuProfileData != null) {
-          offlineModeMessage
-            ..add(span(text: 'the '))
-            ..add(span(text: 'CPU profile', c: 'message-action')
-              ..click(
-                  () => _timelineController.restoreCpuProfileFromOfflineData()))
-            ..add(span(text: ' included in the snapshot.'));
-        } else {
-          offlineModeMessage.add(span(
-              text:
-                  'a CPU profile if it is included in the imported snapshot file.'));
-        }
-        _updateDetailsWithMessage(offlineModeMessage);
-        return;
-      }
-
-      if (_timelineController.timelineData.cpuProfileData.stackFrames.isEmpty) {
-        _updateDetailsWithMessage(div(
-            text: 'CPU profile unavailable for time range'
-                ' [${_timelineController.timelineData.selectedEvent.time.start.inMicroseconds} -'
-                ' ${_timelineController.timelineData.selectedEvent.time.end.inMicroseconds}]'));
-        return;
-      }
-
-      flameChart.update();
-      callTree.update();
-      bottomUp.update();
-
-      // Ensure we are showing the selected profiler view.
-      showView(_selectedViewType);
-    } catch (e) {
-      _updateDetailsWithMessage(
-          div(text: 'Error retrieving CPU profile: ${e.toString()}'));
-    } finally {
-      spinner.remove();
-    }
-  }
-
-  void reset() {
-    flameChart.reset();
-    _removeMessage();
-  }
-
-  void _updateDetailsWithMessage(CoreElement message) {
-    hideAll();
-    showingMessage = true;
-    add(message
-      ..id = 'cpu-profiler-message'
-      ..clazz('message'));
-  }
-
-  void _removeMessage() {
-    element.children.removeWhere((e) => e.id == 'cpu-profiler-message');
-    showingMessage = false;
+    return false;
   }
 }
 
-class CpuProfilerTab extends PTabNavTab {
-  CpuProfilerTab(String name, this.type) : super(name);
+class _CpuFlameChart extends CpuFlameChart {
+  _CpuFlameChart(this.timelineController);
 
-  final CpuProfilerViewType type;
+  TimelineController timelineController;
+
+  @override
+  CpuProfileData getProfileData() {
+    return timelineController.timelineData.cpuProfileData;
+  }
+}
+
+class _CpuCallTree extends CpuCallTree {
+  _CpuCallTree(this.timelineController);
+
+  TimelineController timelineController;
+
+  @override
+  CpuProfileData getProfileData() {
+    return timelineController.timelineData.cpuProfileData;
+  }
+}
+
+class _CpuBottomUp extends CpuBottomUp {
+  _CpuBottomUp(this.timelineController);
+
+  TimelineController timelineController;
+
+  @override
+  CpuProfileData getProfileData() {
+    return timelineController.timelineData.cpuProfileData;
+  }
 }
