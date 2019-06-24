@@ -63,9 +63,9 @@ void main() {
   }, onError: (error, stack) {
     // Report exceptions with DevTools to GA, any user's Flutter app exceptions
     // are not collected.
-    ga.error('${error.toString()}\n${stack.toString()}', true);
+    ga.error('$error\n$stack', true);
     // Also write them to the console to aid debugging (rather than silently
     // failing to load).
-    window.console.error(error);
+    print('$error\n$stack');
   });
 }

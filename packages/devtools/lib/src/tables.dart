@@ -13,6 +13,14 @@ import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'utils.dart';
 
+
+class HoverCellData<T> {
+  HoverCellData(this.cell, this.data);
+
+  final CoreElement cell;
+  final T data;
+}
+
 class Table<T> extends Object with SetStateMixin {
   Table()
       : element = div(a: 'flex', c: 'overflow-y table-border'),
@@ -74,6 +82,9 @@ class Table<T> extends Object with SetStateMixin {
   final StreamController<Null> _rowsChangedController =
       StreamController.broadcast();
 
+  final StreamController<HoverCellData<T>> _selectElementController =
+      StreamController<HoverCellData<T>>.broadcast();
+
   void _init() {
     element.add(_table);
 
@@ -128,6 +139,8 @@ class Table<T> extends Object with SetStateMixin {
 
   Stream<Null> get onRowsChanged => _rowsChangedController.stream;
 
+  Stream<HoverCellData<T>> get onCellHover => _selectElementController.stream;
+
   void addColumn(Column<T> column) {
     columns.add(column);
   }
@@ -139,7 +152,7 @@ class Table<T> extends Object with SetStateMixin {
       if (rowCount > 0) {
         _scrollToIndex(0, scrollBehavior: 'auto');
       }
-      _clearSelection();
+      clearSelection();
     }
 
     // Copy the list, so that changes to it don't affect us.
@@ -383,8 +396,12 @@ class Table<T> extends Object with SetStateMixin {
       // click handler attached when we created the row instead of rebinding
       // it when rows are reused as we scroll.
       _dataForRow[tableRow.element] = dataObject;
-      void selectRow(Element row, int index) {
+      void selectRow(CoreElement coreElement, Element row, int index) {
         _select(row, _dataForRow[row], index);
+      }
+
+      void hoverCell(CoreElement row, CoreElement cell, int rowIndex) {
+        _selectCoreElement(cell, _dataForRow[row.element], rowIndex);
       }
 
       // We also keep a lookup to get the row for the index of index to allow
@@ -393,7 +410,7 @@ class Table<T> extends Object with SetStateMixin {
       _rowForIndex[index] = tableRow;
 
       if (!isReusableRow) {
-        tableRow.click(() => selectRow(tableRow.element, index));
+        tableRow.click(() => selectRow(tableRow, tableRow.element, index));
       }
 
       if (rowHeight != null) {
@@ -411,6 +428,15 @@ class Table<T> extends Object with SetStateMixin {
             : td();
 
         currentColumnIndex++;
+
+        if (column.hover) {
+          if (tableCell.over != hoverCell) {
+            tableCell.over(() => hoverCell(tableRow, tableCell, index));
+          }
+          if (tableCell.leave != hoverCell) {
+            tableCell.leave(() => hoverCell(tableRow, null, index));
+          }
+        }
 
         // TODO(dantup): Should we make CoreElement expose ClassList instead of
         // having flat strings?
@@ -448,6 +474,8 @@ class Table<T> extends Object with SetStateMixin {
 
   int _selectedObjectIndex;
 
+  bool get hasSelection => _selectedObject != null;
+
   void _select(Element row, T object, int index) {
     if (_tbody != null) {
       for (Element row in _tbody.element.querySelectorAll('.selected')) {
@@ -467,13 +495,16 @@ class Table<T> extends Object with SetStateMixin {
     _selectedObjectIndex = index;
   }
 
+  void _selectCoreElement(CoreElement coreElement, T object, int index) {
+    _selectElementController.add(HoverCellData<T>(coreElement, object));
+  }
+
   /// Selects by index. Note: This is index of the row as it's rendered
   /// and not necessarily for rows[] since it may be being rendered in reverse.
   /// This way, +1 will always move down the visible table.
   /// scrollBehaviour is a string as defined for the HTML scrollTo() method
   /// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo (eg.
   /// `smooth`, `instance`, `auto`).
-  @visibleForTesting
   void selectByIndex(int newIndex,
       {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
     final CoreElement row = _rowForIndex[newIndex];
@@ -516,7 +547,7 @@ class Table<T> extends Object with SetStateMixin {
     return (rowIndex * rowHeight) + _thead.offsetHeight;
   }
 
-  void _clearSelection() => _select(null, null, null);
+  void clearSelection() => _select(null, null, null);
 
   void _columnClicked(Column<T> column) {
     if (!column.supportsSorting) {
@@ -628,13 +659,20 @@ abstract class Column<T> {
     ColumnAlignment alignment = ColumnAlignment.left,
     this.fixedWidthPx,
     this.percentWidth,
-  }) : _alignment = alignment {
+    this.wide = false,
+    this.usesHtml = false,
+    this.hover = false,
+    this.cssClass
+    }) : _alignment = alignment {
     if (percentWidth != null) {
       percentWidth.clamp(0, 100);
     }
   }
 
-  Column.wide(this.title, {ColumnAlignment alignment = ColumnAlignment.left})
+  Column.wide(this.title, {ColumnAlignment alignment = ColumnAlignment.left, this.wide = false,
+    this.usesHtml = false,
+    this.hover = false,
+    this.cssClass})
       : _alignment = alignment,
         percentWidth = defaultWideColumnPercentWidth;
 
@@ -655,13 +693,14 @@ abstract class Column<T> {
 
   final ColumnAlignment _alignment;
 
-  String get cssClass => null;
+  final bool wide;
+  final bool usesHtml;
+  final String cssClass;
+  final bool hover;
 
   bool get numeric => false;
 
   bool get supportsSorting => numeric;
-
-  bool get usesHtml => false;
 
   /// Get the cell's value from the given [dataObject].
   dynamic getValue(T dataObject);

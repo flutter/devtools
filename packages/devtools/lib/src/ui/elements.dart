@@ -270,11 +270,16 @@ class CoreElement {
     element.style.height = value;
   }
 
+  int get top => element.getBoundingClientRect().top.round();
+  int get left => element.getBoundingClientRect().left.round();
+
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
 
   Stream<Event> get onFocus => element.onFocus.where((_) => !disabled);
 
   Stream<Event> get onBlur => element.onBlur.where((_) => !disabled);
+  Stream<MouseEvent> get onMouseOver => element.onMouseOver.where((_) => !disabled);
+  Stream<MouseEvent> get onMouseLeave => element.onMouseLeave.where((_) => !disabled);
 
   Stream<Event> get onScroll => element.onScroll;
 
@@ -322,6 +327,21 @@ class CoreElement {
     });
   }
 
+  /// Subscribe to the [blur] event stream with a no-arg handler.
+  StreamSubscription<Event> over(void handle()) {
+    return onMouseOver.listen((Event e) {
+      e.stopImmediatePropagation();
+      handle();
+    });
+  }
+
+  /// Subscribe to the [blur] event stream with a no-arg handler.
+  StreamSubscription<Event> leave(void handle()) {
+    return onMouseLeave.listen((Event e) {
+      e.stopImmediatePropagation();
+      handle();
+    });
+  }
   void clear() => element.children.clear();
 
   void scrollIntoView({bool bottom = false, bool top = false}) {
