@@ -13,6 +13,8 @@ import 'dart:math';
 // ui/trees.dart, which houses generic tree types vs the base classes in this
 // file.
 
+typedef Condition = bool Function(TreeNode node);
+
 class TreeNode {
   TreeNode parent;
 
@@ -72,7 +74,7 @@ class TreeNode {
     child.index = children.length - 1;
   }
 
-  bool containsChildWithCondition(bool condition(TreeNode _), {TreeNode root}) {
+  bool containsChildWithCondition(Condition condition, {TreeNode root}) {
     root ??= this;
 
     if (condition(root)) {
