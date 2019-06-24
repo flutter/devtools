@@ -413,13 +413,13 @@ class MemoryScreen extends Screen with SetStateMixin {
         return value.name;
       }
 
-      final Instance ref = value;
+      final InstanceRef ref = value;
 
       if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
       } else {
         final dynamic result = await serviceManager.service.invoke(
-          _debuggerState.isolateRef.id,
+          _debuggerState.isolateRef?.id,
           ref.id,
           'toString',
           <String>[],

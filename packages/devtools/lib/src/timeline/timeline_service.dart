@@ -59,8 +59,9 @@ class TimelineService {
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
     await serviceManager.service.clearVMTimeline();
 
-    final Response response = await serviceManager.service.getVMTimeline();
-    final List<dynamic> list = response.json['traceEvents'];
+    final Timeline timeline =
+        await serviceManager.service.getVMTimeline(null, null);
+    final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
         list.cast<Map<String, dynamic>>();
 

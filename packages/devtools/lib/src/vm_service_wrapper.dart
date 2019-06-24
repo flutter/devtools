@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 class VmServiceWrapper implements VmService {
@@ -24,6 +25,7 @@ class VmServiceWrapper implements VmService {
   }
 
   VmService _vmService;
+  Version _protocolVersion;
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
@@ -102,7 +104,12 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> clearVMTimeline() {
+  Future<Success> clearVMTimeline() async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 19)) {
+      final response =
+          await _trackFuture('clearVMTimeline', callMethod('_clearVMTimeline'));
+      return response as Success;
+    }
     return _trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
   }
 
@@ -156,11 +163,27 @@ class VmServiceWrapper implements VmService {
   @override
   Future<AllocationProfile> getAllocationProfile(
     String isolateId, {
-    String gc,
     bool reset,
-  }) {
+    bool gc,
+  }) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 18)) {
+      final Map<String, dynamic> args = {};
+      if (gc != null && gc) {
+        args['gc'] = 'full';
+      }
+      if (reset != null && reset) {
+        args['reset'] = reset;
+      }
+      final response = await _trackFuture(
+        'getAllocationProfile',
+        callMethod('_getAllocationProfile', isolateId: isolateId, args: args),
+      );
+      return AllocationProfile.parse(response.json);
+    }
     return _trackFuture(
-        'getAllocationProfile', _vmService.getAllocationProfile(isolateId));
+      'getAllocationProfile',
+      _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
+    );
   }
 
   @override
@@ -191,9 +214,27 @@ class VmServiceWrapper implements VmService {
       _trackFuture('getFlagList', _vmService.getFlagList());
 
   @override
-  Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
+  Future<InstanceSet> getInstances(
+    String isolateId,
+    String objectId,
+    int limit, {
+    String classId,
+  }) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 20)) {
+      final response = await _trackFuture(
+        'getInstances',
+        callMethod('_getInstances', args: {
+          'isolateId': isolateId,
+          'classId': classId,
+          'limit': limit,
+        }),
+      );
+      return InstanceSet.parse(response.json);
+    }
     return _trackFuture(
-        'getInstances', _vmService.getInstances(isolateId, classId, limit));
+      'getInstances',
+      _vmService.getInstances(isolateId, objectId, limit),
+    );
   }
 
   @override
@@ -246,8 +287,23 @@ class VmServiceWrapper implements VmService {
   Future<VM> getVM() => _trackFuture('getVM', _vmService.getVM());
 
   @override
-  Future<Response> getVMTimeline() =>
-      _trackFuture('getVMTimeline', _vmService.getVMTimeline());
+  Future<Timeline> getVMTimeline(
+      int timeOriginMicros, int timeExtentMicros) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 19)) {
+      final Response response =
+          await _trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
+      return Timeline.parse(response.json);
+    }
+    return _trackFuture(
+      'getVMTimeline',
+      _vmService.getVMTimeline(timeOriginMicros, timeExtentMicros),
+    );
+  }
+
+  @override
+  Future<TimelineFlags> getVMTimelineFlags() async {
+    return _trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());
+  }
 
   @override
   Future<Version> getVersion() =>
@@ -406,9 +462,20 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setVMTimelineFlags(List<String> recordedStreams) {
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 19)) {
+      final response = await _trackFuture(
+          'setVMTimelineFlags',
+          callMethod(
+            '_setVMTimelineFlags',
+            args: {'recordedStreams': recordedStreams},
+          ));
+      return response as Success;
+    }
     return _trackFuture(
-        'setVMTimelineFlags', _vmService.setVMTimelineFlags(recordedStreams));
+      'setVMTimelineFlags',
+      _vmService.setVMTimelineFlags(recordedStreams),
+    );
   }
 
   @override
@@ -443,6 +510,24 @@ class VmServiceWrapper implements VmService {
     _allFuturesCompleter = Completer<bool>();
     _allFuturesCompleter.complete(true);
     activeFutures.clear();
+  }
+
+  Future<bool> isProtocolVersionLessThan({
+    @required int major,
+    @required int minor,
+  }) async {
+    _protocolVersion ??= await getVersion();
+    print(_protocolVersion);
+    return protocolVersionLessThan(major: major, minor: minor);
+  }
+
+  bool protocolVersionLessThan({
+    @required int major,
+    @required int minor,
+  }) {
+    assert(_protocolVersion != null);
+    return _protocolVersion.major < major ||
+        (_protocolVersion.major == major && _protocolVersion.minor < minor);
   }
 
   Future<T> _trackFuture<T>(String name, Future<T> future) {
