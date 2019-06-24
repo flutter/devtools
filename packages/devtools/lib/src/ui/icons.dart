@@ -13,11 +13,11 @@
 /// of code that uses icons can run on the Dart VM.
 library icons;
 
-import 'package:devtools/src/ui/material_icons.dart';
-import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 
 import 'fake_flutter/fake_flutter.dart';
+import 'material_icons.dart';
+import 'theme.dart';
 
 abstract class Icon {
   const Icon();

@@ -31,5 +31,5 @@ void main() {
     group('app', appTests);
     group('logging', loggingTests);
     group('debugging', debuggingTests);
-  }, timeout: const Timeout.factor(2));
+  }, timeout: const Timeout.factor(4));
 }

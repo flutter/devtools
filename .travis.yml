@@ -1,6 +1,7 @@
 os:
   - linux
   - osx
+  - windows
 
 language: dart
 dart:
@@ -28,5 +29,6 @@ script: ./tool/travis.sh
 
 cache:
   directories:
-  - $HOME/.pub-cache
+  - $HOME/.pub-cache # macOS / Linux
+  - $APPDATA/Roaming/Pub/Cache # Windows
   - packages/devtools/.dart_tool/build

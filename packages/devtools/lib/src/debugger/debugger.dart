@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:codemirror/codemirror.dart';
-import 'package:devtools/src/ui/theme.dart';
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -25,6 +24,7 @@ import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 
 // TODO(devoncarew): improve selection behavior in the left nav area
