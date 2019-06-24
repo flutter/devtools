@@ -517,7 +517,6 @@ class VmServiceWrapper implements VmService {
     @required int minor,
   }) async {
     _protocolVersion ??= await getVersion();
-    print(_protocolVersion);
     return protocolVersionLessThan(major: major, minor: minor);
   }
 
