@@ -99,13 +99,13 @@ meaning a method can be expanded to show its _callees_.
 
 ### Bottom Up
 
-The bottom up view also shows the method trace for the CPU profile, but as the name suggests, it is a bottom-up
+The bottom up view shows the method trace for the CPU profile, but as the name suggests, it is a bottom-up
 representation of the profile. This means each top level method in the table is actually the last method in the call
 stack for a given CPU sample (i.e. it is the leaf node for the sample). In this table, a method can be expanded to show
 its _callers_.
 - **Total Time**: time the method spent executing its own code as well as the code for its callee
 - **Self Time**: for top level methods in the bottom up tree (leaf stack frames in the profile), this is the time the 
-method spent executing only its own code; for the sub nodes (the callers in the CPU profile), this
+method spent executing only its own code; for sub nodes (the callers in the CPU profile), this
 is the self time of the callee when being called by the caller. Using the example below, the self time of the caller
 `Element.updateSlotForChild.visit` is equal to the self time of the callee `[Stub] OneArgCheckInlineCache` when being
  called by the caller.
