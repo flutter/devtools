@@ -294,10 +294,10 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   bool get isUiEventFlow => containsChildWithCondition(
-      (event) => event.name.contains('Engine::BeginFrame'));
+      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
 
   bool get isGpuEventFlow => containsChildWithCondition(
-      (event) => event.name.contains('PipelineConsume'));
+      (TimelineEvent event) => event.name.contains('PipelineConsume'));
 
   void maybeRemoveDuplicate() {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {

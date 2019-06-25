@@ -72,7 +72,7 @@ class TreeNode<T extends TreeNode<T>> {
     child.index = children.length - 1;
   }
 
-  bool containsChildWithCondition(bool condition(T), {T root}) {
+  bool containsChildWithCondition(bool condition(T node), {T root}) {
     root ??= this;
 
     if (condition(root)) {
