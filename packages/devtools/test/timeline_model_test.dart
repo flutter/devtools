@@ -182,8 +182,7 @@ void main() {
         ..time.end = const Duration(microseconds: 118039650871);
       engineBeginFrame.addChild(animate);
       expect(engineBeginFrame.children.length, equals(1));
-      expect(engineBeginFrame.children.cast<TimelineEvent>().first.name,
-          equals(animateEvent.name));
+      expect(engineBeginFrame.children.first.name, equals(animateEvent.name));
 
       // Add child [layout] where child is sibling of existing children
       // [animate].
@@ -191,8 +190,7 @@ void main() {
         ..time.end = const Duration(microseconds: 118039651087);
       engineBeginFrame.addChild(layout);
       expect(engineBeginFrame.children.length, equals(2));
-      expect(engineBeginFrame.children.cast<TimelineEvent>().last.name,
-          equals(layoutEvent.name));
+      expect(engineBeginFrame.children.last.name, equals(layoutEvent.name));
 
       // Add child [build] where existing child [layout] is parent of child.
       final TimelineEvent build = testTimelineEvent(buildJson)
@@ -200,8 +198,7 @@ void main() {
       engineBeginFrame.addChild(build);
       expect(engineBeginFrame.children.length, equals(2));
       expect(layout.children.length, equals(1));
-      expect(layout.children.cast<TimelineEvent>().first.name,
-          equals(buildEvent.name));
+      expect(layout.children.first.name, equals(buildEvent.name));
 
       // Add child [frame] child is parent of existing children [animate] and
       // [layout].
@@ -209,13 +206,10 @@ void main() {
         ..time.end = const Duration(microseconds: 118039652334);
       engineBeginFrame.addChild(frame);
       expect(engineBeginFrame.children.length, equals(1));
-      expect(engineBeginFrame.children.cast<TimelineEvent>().first.name,
-          equals(frameEvent.name));
+      expect(engineBeginFrame.children.first.name, equals(frameEvent.name));
       expect(frame.children.length, equals(2));
-      expect(frame.children.cast<TimelineEvent>().first.name,
-          equals(animateEvent.name));
-      expect(frame.children.cast<TimelineEvent>().last.name,
-          equals(layoutEvent.name));
+      expect(frame.children.first.name, equals(animateEvent.name));
+      expect(frame.children.last.name, equals(layoutEvent.name));
     });
   });
 }
