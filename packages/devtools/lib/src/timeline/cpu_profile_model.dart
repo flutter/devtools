@@ -164,7 +164,6 @@ class CpuStackFrame extends TreeNode {
 
   /// How many cpu samples this frame is included in.
   int _inclusiveSampleCount;
-
   set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
 
   double get totalTimeRatio =>
@@ -201,7 +200,7 @@ class CpuStackFrame extends TreeNode {
     return _inclusiveSampleCount;
   }
 
-  CpuStackFrame shallowCopy({bool copySampleCounts = false}) {
+  CpuStackFrame shallowCopy({bool resetInclusiveSampleCount = false}) {
     final copy = CpuStackFrame(
       id: id,
       name: name,
@@ -209,12 +208,10 @@ class CpuStackFrame extends TreeNode {
       url: url,
       profileTime: profileTime,
       profileSampleCount: profileSampleCount,
-    );
-    if (copySampleCounts) {
-      copy
-        ..exclusiveSampleCount = exclusiveSampleCount
-        .._inclusiveSampleCount = _inclusiveSampleCount;
-    }
+    )
+      ..exclusiveSampleCount = exclusiveSampleCount
+      ..inclusiveSampleCount =
+          resetInclusiveSampleCount ? null : inclusiveSampleCount;
     return copy;
   }
 
@@ -222,19 +219,24 @@ class CpuStackFrame extends TreeNode {
   ///
   /// The returned copy stack frame will have a null parent.
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(copySampleCounts: true);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
     return copy;
   }
 
-  bool shallowEquals(CpuStackFrame other) =>
+  /// Whether [this] stack frame matches another stack frame [other].
+  ///
+  /// Two stack frames are said to be matching if they share the following
+  /// properties.
+  bool matches(CpuStackFrame other) =>
       name == other.name && url == other.url && category == other.category;
 
   void _format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name - children: ${children.length} - excl: '
-        '$exclusiveSampleCount - incl: $inclusiveSampleCount');
+            '$exclusiveSampleCount - incl: $inclusiveSampleCount'
+        .trimRight());
     for (CpuStackFrame child in children) {
       child._format(buf, '  $indent');
     }

@@ -327,6 +327,7 @@ final responseWithMissingLeafFrame = {
 final TimeRange profileTime = TimeRange()
   ..start = const Duration(microseconds: 0)
   ..end = const Duration(microseconds: 100);
+
 final CpuStackFrame stackFrameA = CpuStackFrame(
   id: 'id_0',
   name: 'A',
@@ -335,6 +336,7 @@ final CpuStackFrame stackFrameA = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 0;
+
 final CpuStackFrame stackFrameB = CpuStackFrame(
   id: 'id_1',
   name: 'B',
@@ -343,6 +345,7 @@ final CpuStackFrame stackFrameB = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 0;
+
 final CpuStackFrame stackFrameC = CpuStackFrame(
   id: 'id_2',
   name: 'C',
@@ -359,6 +362,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 2;
+
 final CpuStackFrame stackFrameE = CpuStackFrame(
   id: 'id_4',
   name: 'E',
@@ -375,6 +379,7 @@ final CpuStackFrame stackFrameF = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 0;
+
 final CpuStackFrame stackFrameF2 = CpuStackFrame(
   id: 'id_6',
   name: 'F',
@@ -383,6 +388,7 @@ final CpuStackFrame stackFrameF2 = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 3;
+
 final CpuStackFrame stackFrameC2 = CpuStackFrame(
   id: 'id_7',
   name: 'C',
@@ -391,6 +397,7 @@ final CpuStackFrame stackFrameC2 = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 1;
+
 final CpuStackFrame stackFrameC3 = CpuStackFrame(
   id: 'id_8',
   name: 'C',
@@ -399,6 +406,7 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   profileTime: profileTime,
   profileSampleCount: 10,
 )..exclusiveSampleCount = 1;
+
 final CpuStackFrame stackFrameG = CpuStackFrame(
   id: 'id_9',
   name: 'G',

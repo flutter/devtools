@@ -87,7 +87,7 @@ class CpuBottomUp extends CpuProfilerView {
     final CpuStackFrame root =
         timelineController.timelineData.cpuProfileData.cpuProfileRoot;
     final List<CpuStackFrame> bottomUpRoots =
-        BottomUpProfileProtocol().processData(root);
+        BottomUpProfileProcessor().processData(root);
     bottomUpTable.setRows(bottomUpRoots);
   }
 }

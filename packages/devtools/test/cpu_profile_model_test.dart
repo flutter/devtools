@@ -80,9 +80,28 @@ void main() {
     test('shallowCopy', () {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      final copy = stackFrameD.shallowCopy();
+      CpuStackFrame copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
+      expect(
+        copy.exclusiveSampleCount,
+        equals(stackFrameD.exclusiveSampleCount),
+      );
+      expect(
+        copy.inclusiveSampleCount,
+        equals(stackFrameD.inclusiveSampleCount),
+      );
+
+      expect(stackFrameD.children.length, equals(2));
+      expect(stackFrameD.parent, equals(stackFrameB));
+      copy = stackFrameD.shallowCopy(resetInclusiveSampleCount: true);
+      expect(copy.children, isEmpty);
+      expect(copy.parent, isNull);
+      expect(
+        copy.exclusiveSampleCount,
+        equals(stackFrameD.exclusiveSampleCount),
+      );
+      expect(copy.inclusiveSampleCount, copy.exclusiveSampleCount);
     });
 
     test('deepCopy', () {
@@ -109,8 +128,8 @@ void main() {
     });
   });
 
-  test('shallowEquals', () {
-    expect(stackFrameC.shallowEquals(stackFrameC2), isTrue);
-    expect(stackFrameC.shallowEquals(stackFrameG), isFalse);
+  test('matches', () {
+    expect(stackFrameC.matches(stackFrameC2), isTrue);
+    expect(stackFrameC.matches(stackFrameG), isFalse);
   });
 }

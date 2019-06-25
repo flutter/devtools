@@ -70,8 +70,8 @@ void main() {
     });
   });
 
-  group('BottomUpProfileProtocol', () {
-    final bottomUpProtocol = BottomUpProfileProtocol();
+  group('BottomUpProfileProcessor', () {
+    final bottomUpProtocol = BottomUpProfileProcessor();
 
     test('setBottomUpSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {

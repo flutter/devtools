@@ -100,9 +100,9 @@ class CpuProfileProtocol {
   }
 }
 
-/// Protocol for processing a [CpuStackFrame] and converting it to a bottom-up
-/// representation of the CPU profile.
-class BottomUpProfileProtocol {
+/// Process for converting a [CpuStackFrame] into a bottom-up representation of
+/// the CPU profile.
+class BottomUpProfileProcessor {
   List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
     final List<CpuStackFrame> bottomUpRoots = getRoots(stackFrame, null, []);
 
@@ -129,8 +129,7 @@ class BottomUpProfileProtocol {
     CpuStackFrame currentBottomUpRoot,
     List<CpuStackFrame> bottomUpRoots,
   ) {
-    final copy = node.shallowCopy()
-      ..exclusiveSampleCount = node.exclusiveSampleCount;
+    final copy = node.shallowCopy(resetInclusiveSampleCount: true);
 
     if (currentBottomUpRoot != null) {
       copy.addChild(currentBottomUpRoot.deepCopy());
@@ -186,14 +185,13 @@ class BottomUpProfileProtocol {
         continue;
       }
 
-      final duplicates = roots
-          .where((other) => other.shallowEquals(root) && other != root)
-          .toList();
-      if (duplicates.isEmpty) {
+      final matchingRoots =
+          roots.where((other) => other.matches(root) && other != root).toList();
+      if (matchingRoots.isEmpty) {
         continue;
       }
 
-      for (CpuStackFrame duplicate in duplicates) {
+      for (CpuStackFrame duplicate in matchingRoots) {
         duplicate.children.forEach(root.addChild);
         root.exclusiveSampleCount += duplicate.exclusiveSampleCount;
         root.inclusiveSampleCount += duplicate.inclusiveSampleCount;
