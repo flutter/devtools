@@ -73,26 +73,49 @@ The flame chart supports zooming and panning. Scroll up and down to zoom in and 
 can either click and drag the chart or scroll horizontally. You can click an event to view CPU profiling information
 in the CPU profiler below this section.
 
-## CPU Profiler (preview)
+## CPU Profiler
 
 This section shows CPU profiling information for a specific event from the frame events chart (Build, Layout, Paint, etc.).
-The CPU profiler is actively being worked on and is currently in a preview state.
 
 ### CPU Flame Chart
+
 This tab of the profiler shows CPU samples for the selected frame event (e.g. Layout in the example below). This chart
 should be viewed as a top-down stack trace, where the top-most stack frame calls the one below it. The width of each
 stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU time may be a good
 place to look for possible performance improvements.
 
-<img src="images/timeline_cpu_profiler.png" width="800" />
-
-### Bottom Up
-Coming soon.
+<img src="images/cpu_profile_flame_chart.png" width="800" />
 
 ### Call Tree
-Coming soon.
+
+The call tree view shows the method trace for the CPU profile. This table is a top-down representation of the profile,
+meaning a method can be expanded to show its _callees_.
+- **Total Time**: time the method spent executing its own code as well as the code for its callees
+- **Self Time**: time the method spent executing only its own code
+- **Method**: name of the called method
+- **Source**: file path for the method call site
+
+<img src="images/cpu_profile_call_tree.png" width="800" />
+
+### Bottom Up
+
+The bottom up view shows the method trace for the CPU profile, but as the name suggests, it is a bottom-up
+representation of the profile. This means each top level method in the table is actually the last method in the call
+stack for a given CPU sample (i.e. it is the leaf node for the sample). In this table, a method can be expanded to show
+its _callers_.
+- **Total Time**: time the method spent executing its own code as well as the code for its callee
+- **Self Time**: for top level methods in the bottom up tree (leaf stack frames in the profile), this is the time the 
+method spent executing only its own code; for sub nodes (the callers in the CPU profile), this
+is the self time of the callee when being called by the caller. Using the example below, the self time of the caller
+`Element.updateSlotForChild.visit` is equal to the self time of the callee `[Stub] OneArgCheckInlineCache` when being
+ called by the caller.
+- **Method**: name of the called method
+- **Source**: file path for the method call site
+
+<img src="images/cpu_profile_bottom_up.png" width="800" />
 
 ## Import and Export
+
 DevTools supports importing and exporting timeline snapshots. Clicking the export button (upper-right corner above the
 frame rendering chart) will download a snapshot of the current timeline state. To import a timeline snapshot, you can
 drag and drop the snapshot into DevTools from any page. **Note that DevTools only supports importing files that were
