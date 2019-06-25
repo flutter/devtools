@@ -158,7 +158,8 @@ class TimelineProtocol {
     // event node. Do not process these events.
     if (currentEventNodes[event.type.index] != null &&
         event.timestampMicros <
-            (currentEventNodes[event.type.index].root as TimelineEvent)
+            currentEventNodes[event.type.index]
+                .root
                 .time
                 .start
                 .inMicroseconds) {
@@ -297,7 +298,7 @@ class TimelineProtocol {
         return;
       } else if (current.name ==
               previousDurationEndEvents[event.type.index]?.name &&
-          (current.parent as TimelineEvent)?.name == event.name &&
+          current.parent?.name == event.name &&
           current.children.length == 1 &&
           collectionEquals(
             current.beginTraceEventJson,
@@ -320,7 +321,7 @@ class TimelineProtocol {
               'Duplicate duration begin event: ${current.beginTraceEventJson}');
         }
 
-        (current.parent as TimelineEvent).removeChild(current);
+        current.parent.removeChild(current);
         current = current.parent;
         currentEventNodes[event.type.index] = current;
       } else {
@@ -362,7 +363,7 @@ class TimelineProtocol {
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
     while (current.parent != null &&
-        (current.parent as TimelineEvent).time.end?.inMicroseconds != null) {
+        current.parent.time.end?.inMicroseconds != null) {
       current = current.parent;
     }
     currentEventNodes[event.type.index] = current.parent;

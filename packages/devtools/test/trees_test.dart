@@ -24,8 +24,8 @@ void main() {
     });
 
     test('addChild', () {
-      final parent = TreeNode();
-      final child = TreeNode();
+      final parent = TestTreeNode();
+      final child = TestTreeNode();
       expect(parent.children, isEmpty);
       expect(child.parent, isNull);
       parent.addChild(child);
@@ -57,13 +57,15 @@ void main() {
   });
 }
 
-final treeNode0 = TreeNode();
-final treeNode1 = TreeNode();
-final treeNode2 = TreeNode();
-final treeNode3 = TreeNode();
-final treeNode4 = TreeNode();
-final treeNode5 = TreeNode();
+final treeNode0 = TestTreeNode();
+final treeNode1 = TestTreeNode();
+final treeNode2 = TestTreeNode();
+final treeNode3 = TestTreeNode();
+final treeNode4 = TestTreeNode();
+final treeNode5 = TestTreeNode();
 final TreeNode testTreeNode = treeNode0
   ..addChild(treeNode1
     ..addChild(treeNode2)
     ..addChild(treeNode3..addChild(treeNode4)..addChild(treeNode5)));
+
+class TestTreeNode extends TreeNode<TestTreeNode> {}

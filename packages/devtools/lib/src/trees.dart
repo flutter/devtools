@@ -15,10 +15,10 @@ import 'dart:math';
 
 typedef Condition = bool Function(TreeNode node);
 
-class TreeNode {
-  TreeNode parent;
+class TreeNode<T extends TreeNode<T>> {
+  T parent;
 
-  final List<TreeNode> children = [];
+  final List<T> children = [];
 
   /// Index in [parent.children].
   int index = -1;
@@ -31,7 +31,7 @@ class TreeNode {
     if (_depth != 0) {
       return _depth;
     }
-    for (TreeNode child in children) {
+    for (T child in children) {
       _depth = max(_depth, child.depth);
     }
     return _depth = _depth + 1;
@@ -39,25 +39,25 @@ class TreeNode {
 
   int _depth = 0;
 
-  TreeNode get root {
+  T get root {
     if (_root != null) {
       return _root;
     }
-    TreeNode root = this;
+    T root = this;
     while (root.parent != null) {
       root = root.parent;
     }
     return _root = root;
   }
 
-  TreeNode _root;
+  T _root;
 
   int get level {
     if (_level != null) {
       return _level;
     }
     int level = 0;
-    TreeNode current = this;
+    T current = this;
     while (current.parent != null) {
       current = current.parent;
       level++;
@@ -68,19 +68,19 @@ class TreeNode {
   /// The level (0-based) of this tree node in the tree.
   int _level;
 
-  void addChild(TreeNode child) {
+  void addChild(T child) {
     children.add(child);
     child.parent = this;
     child.index = children.length - 1;
   }
 
-  bool containsChildWithCondition(Condition condition, {TreeNode root}) {
+  bool containsChildWithCondition(Condition condition, {T root}) {
     root ??= this;
 
     if (condition(root)) {
       return true;
     }
-    for (TreeNode newRoot in root.children) {
+    for (T newRoot in root.children) {
       return containsChildWithCondition(condition, root: newRoot);
     }
     return false;

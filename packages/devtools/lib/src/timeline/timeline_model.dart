@@ -253,7 +253,7 @@ enum TimelineEventType {
   unknown,
 }
 
-class TimelineEvent extends TreeNode {
+class TimelineEvent extends TreeNode<TimelineEvent> {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
@@ -276,7 +276,7 @@ class TimelineEvent extends TreeNode {
 
   TimeRange time = TimeRange();
 
-  String get frameId => _frameId ?? (root as TimelineEvent)._frameId;
+  String get frameId => _frameId ?? root._frameId;
 
   String _frameId;
 
@@ -334,13 +334,12 @@ class TimelineEvent extends TreeNode {
   }
 
   @override
-  void addChild(TreeNode child) {
-    final TimelineEvent _child = child as TimelineEvent;
+  void addChild(TimelineEvent child) {
     // Places the child in it's correct position amongst the other children.
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
-        root._addChild(_child);
+        root._addChild(child);
         return;
       }
 
@@ -350,17 +349,17 @@ class TimelineEvent extends TreeNode {
       // those members will need to be reordered in the tree.
       final childrenToReorder = [];
       for (TimelineEvent otherChild in _children) {
-        if (_child.couldBeParentOf(otherChild)) {
+        if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
       }
 
       if (childrenToReorder.isNotEmpty) {
-        root._addChild(_child);
+        root._addChild(child);
 
         for (TimelineEvent otherChild in childrenToReorder) {
           // Link [otherChild] with its correct parent [child].
-          _child._addChild(otherChild);
+          child._addChild(otherChild);
 
           // Unlink [otherChild] from its incorrect parent [root].
           root.children.remove(otherChild);
@@ -373,7 +372,7 @@ class TimelineEvent extends TreeNode {
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
       for (TimelineEvent otherChild in _children.reversed) {
-        if (otherChild.couldBeParentOf(_child)) {
+        if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
           _putChildInTree(otherChild);
           return;
@@ -382,7 +381,7 @@ class TimelineEvent extends TreeNode {
 
       // If we have not returned at this point, [child] belongs in
       // [root.children].
-      root._addChild(_child);
+      root._addChild(child);
     }
 
     _putChildInTree(this);
@@ -427,7 +426,7 @@ class TimelineEvent extends TreeNode {
   }
 
   void formatFromRoot(StringBuffer buf, String indent) {
-    (root as TimelineEvent).format(buf, indent);
+    root.format(buf, indent);
   }
 
   void writeTraceToBuffer(StringBuffer buf) {

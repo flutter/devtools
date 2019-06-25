@@ -5,7 +5,7 @@ import 'package:devtools/src/timeline/cpu_profile_model.dart';
 import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
-import 'support/timeline_test_data.dart';
+import 'support/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -61,71 +61,75 @@ void main() {
       expect(testStackFrame.selfTimeRatio, equals(0.0));
       expect(testStackFrame.selfTime.inMicroseconds, equals(0));
 
-      expect(stackFrame_2.totalTimeRatio, equals(0.3));
-      expect(stackFrame_2.totalTime.inMicroseconds, equals(30));
-      expect(stackFrame_2.selfTimeRatio, equals(0.3));
-      expect(stackFrame_2.selfTime.inMicroseconds, equals(30));
+      expect(stackFrameC.totalTimeRatio, equals(0.2));
+      expect(stackFrameC.totalTime.inMicroseconds, equals(20));
+      expect(stackFrameC.selfTimeRatio, equals(0.2));
+      expect(stackFrameC.selfTime.inMicroseconds, equals(20));
 
-      expect(stackFrame_3.totalTimeRatio, equals(0.7));
-      expect(stackFrame_3.totalTime.inMicroseconds, equals(70));
-      expect(stackFrame_3.selfTimeRatio, equals(0.2));
-      expect(stackFrame_3.selfTime.inMicroseconds, equals(20));
+      expect(stackFrameD.totalTimeRatio, equals(0.8));
+      expect(stackFrameD.totalTime.inMicroseconds, equals(80));
+      expect(stackFrameD.selfTimeRatio, equals(0.2));
+      expect(stackFrameD.selfTime.inMicroseconds, equals(20));
 
-      expect(stackFrame_5.totalTimeRatio, equals(0.4));
-      expect(stackFrame_5.totalTime.inMicroseconds, equals(40));
-      expect(stackFrame_5.selfTimeRatio, equals(0.4));
-      expect(stackFrame_5.selfTime.inMicroseconds, equals(40));
+      expect(stackFrameF.totalTimeRatio, equals(0.1));
+      expect(stackFrameF.totalTime.inMicroseconds, equals(10));
+      expect(stackFrameF.selfTimeRatio, equals(0.0));
+      expect(stackFrameF.selfTime.inMicroseconds, equals(0));
+    });
+
+    test('shallowCopy', () {
+      expect(stackFrameD.children.length, equals(2));
+      expect(stackFrameD.parent, equals(stackFrameB));
+      CpuStackFrame copy = stackFrameD.shallowCopy();
+      expect(copy.children, isEmpty);
+      expect(copy.parent, isNull);
+      expect(
+        copy.exclusiveSampleCount,
+        equals(stackFrameD.exclusiveSampleCount),
+      );
+      expect(
+        copy.inclusiveSampleCount,
+        equals(stackFrameD.inclusiveSampleCount),
+      );
+
+      expect(stackFrameD.children.length, equals(2));
+      expect(stackFrameD.parent, equals(stackFrameB));
+      copy = stackFrameD.shallowCopy(resetInclusiveSampleCount: true);
+      expect(copy.children, isEmpty);
+      expect(copy.parent, isNull);
+      expect(
+        copy.exclusiveSampleCount,
+        equals(stackFrameD.exclusiveSampleCount),
+      );
+      expect(copy.inclusiveSampleCount, copy.exclusiveSampleCount);
+    });
+
+    test('deepCopy', () {
+      expect(testStackFrame.isExpanded, isFalse);
+      expect(testStackFrame.children.length, equals(1));
+      testStackFrame.isExpanded = true;
+      expect(testStackFrame.isExpanded, isTrue);
+
+      final copy = testStackFrame.deepCopy();
+      expect(copy.isExpanded, isFalse);
+      expect(copy.children.length, equals(1));
+      for (CpuStackFrame child in copy.children) {
+        expect(child.parent, equals(copy));
+      }
+      copy.addChild(stackFrameG);
+      expect(copy.children.length, equals(2));
+      expect(testStackFrame.children.length, equals(1));
+
+      final copyFromMidTree = stackFrameC.deepCopy();
+      expect(stackFrameC.parent, isNotNull);
+      expect(stackFrameC.level, equals(2));
+      expect(copyFromMidTree.parent, isNull);
+      expect(copyFromMidTree.level, equals(0));
     });
   });
+
+  test('matches', () {
+    expect(stackFrameC.matches(stackFrameC2), isTrue);
+    expect(stackFrameC.matches(stackFrameG), isFalse);
+  });
 }
-
-final TimeRange profileTime = TimeRange()
-  ..start = const Duration(microseconds: 0)
-  ..end = const Duration(microseconds: 100);
-final CpuStackFrame stackFrame_0 = CpuStackFrame(
-  id: 'id_0',
-  name: '0',
-  category: 'Dart',
-  url: '',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 0;
-final CpuStackFrame stackFrame_1 = CpuStackFrame(
-  id: 'id_1',
-  name: '1',
-  category: 'Dart',
-  url: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 0;
-final CpuStackFrame stackFrame_2 = CpuStackFrame(
-  id: 'id_2',
-  name: '2',
-  category: 'Dart',
-  url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 3;
-final CpuStackFrame stackFrame_3 = CpuStackFrame(
-  id: 'id_3',
-  name: '3',
-  category: 'Dart',
-  url: 'url',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 2;
-final CpuStackFrame stackFrame_4 = CpuStackFrame(
-  id: 'id_4',
-  name: '4',
-  category: 'Dart',
-  url: 'url',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 1;
-final CpuStackFrame stackFrame_5 = CpuStackFrame(
-  id: 'id_5',
-  name: '5',
-  category: 'Dart',
-  url: 'url',
-  profileTime: profileTime,
-)..exclusiveSampleCount = 4;
-
-final CpuStackFrame testStackFrame = stackFrame_0
-  ..addChild(stackFrame_1
-    ..addChild(stackFrame_2)
-    ..addChild(stackFrame_3..addChild(stackFrame_4)..addChild(stackFrame_5)));
