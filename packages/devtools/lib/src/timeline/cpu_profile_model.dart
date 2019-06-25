@@ -58,7 +58,7 @@ class CpuProfileData {
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
     final SplayTreeMap<String, Map<String, dynamic>> subStackFramesJson =
-        SplayTreeMap(_stackFrameIdCompare);
+        SplayTreeMap(stackFrameIdCompare);
     for (Map<String, dynamic> traceEvent in subTraceEvents) {
       // Add leaf frame.
       final String leafId = traceEvent[stackFrameIdKey];
@@ -265,7 +265,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
   }
 }
 
-int _stackFrameIdCompare(String a, String b) {
+@visibleForTesting
+int stackFrameIdCompare(String a, String b) {
   // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
   // (Android). We need to compare the number after the last dash to maintain
   // the correct order.
