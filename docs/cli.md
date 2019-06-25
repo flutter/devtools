@@ -28,7 +28,7 @@ To do that, run one of the following two commands:
 
 On the command-line, you should see output that looks something like:
 
-> Serving DevTools at http://127.0.0.1:9100
+> Serving DevTools at `http://127.0.0.1:9100`
 
 ## Start an application to debug
 
@@ -36,23 +36,33 @@ Next, start an app to connect to. This can be either a Flutter application or a 
 command-line application. The example below uses a Flutter app:
 
 - `cd path/to/flutter/app`
-- `flutter run --observatory-port=9200`
+- `flutter run`
 
 You'll need to have a device connected - or a simulator open - for `flutter run` to work.
-Once the app starts, you'll be able to connect to it from DevTools.
+Once the app starts, you'll see a message in your terminal that looks like:
+
+> An Observatory debugger and profiler on iPhone X is available at: `http://127.0.0.1:50976/Swm0bjIe0ks=/`
+
+Keep note of this uri, as you will use it to connect your app to DevTools.
 
 ## Opening DevTools and connecting to the target app
 
-Using DevTools now is as simple as opening a local browser window. If you used the same
-ports as the example above, you can either open `http://localhost:9100/?port=9200` in a
-browser, or run:
+Using DevTools now is as simple as opening a Chrome browser window. You can either open
+`http://localhost:9100` in Chrome, or run:
 
 ```
-open http://localhost:9100/?port=9200
+open http://localhost:9100
 ```
 
 from the command line.
 
-In the above url, the first port is for the local server serving the DevTools web UI. The
-second port tells DevTools itself which local app to connect to in order to debug and
-inspect the app.
+Once DevTools opens, you will see a connect dialog:
+
+<img src="images/connect_dialog.png" width="600" />
+
+Paste the uri you got from running your app (in this example, `http://127.0.0.1:50976/Swm0bjIe0ks=/`)
+into the connect dialog to connect your app to DevTools.
+
+This uri contains a security token, so the uri will be different for each run of your app.
+This means that if you stop your application and re-run it, you will need to connect to DevTools
+with the new uri.

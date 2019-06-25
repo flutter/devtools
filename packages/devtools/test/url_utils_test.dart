@@ -23,6 +23,32 @@ void main() {
         equals('package:flutter_web/lib/src/widgets/binding.dart'),
       );
     });
+
+    test('getTrimmedUri', () {
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm')
+            .toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
+      );
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=')
+            .toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0='),
+      );
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ')
+            .toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
+      );
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667').toString(),
+        equals('http://127.0.0.1:60667'),
+      );
+      expect(
+        getNormalizedTrimmedUri('http://127.0.0.1:60667/').toString(),
+        equals('http://127.0.0.1:60667/'),
+      );
+    });
   });
 }
 

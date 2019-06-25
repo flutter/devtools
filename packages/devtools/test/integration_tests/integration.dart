@@ -283,7 +283,7 @@ class WebdevFixture {
   }) async {
     // 'pub run webdev serve web'
 
-    final List<String> cliArgs = ['serve', 'web'];
+    final List<String> cliArgs = ['global', 'run', 'webdev', 'serve', 'web'];
     if (release) {
       cliArgs.add('--release');
     }
@@ -298,7 +298,7 @@ class WebdevFixture {
     }
 
     final Process process = await Process.start(
-      'webdev',
+      Platform.isWindows ? 'pub.bat' : 'pub',
       cliArgs,
       environment: environment,
     );
@@ -306,6 +306,18 @@ class WebdevFixture {
     final Stream<String> lines =
         process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final Completer<String> hasUrl = Completer<String>();
+
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+      final err = 'error starting webdev: $line';
+      if (!hasUrl.isCompleted) {
+        hasUrl.completeError(err);
+      } else {
+        print(err);
+      }
+    });
 
     lines.listen((String line) {
       if (verbose) {

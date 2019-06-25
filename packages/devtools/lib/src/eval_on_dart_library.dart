@@ -83,8 +83,8 @@ class EvalOnDartLibrary {
       }
       assert(!_libraryRef.isCompleted);
       _libraryRef.completeError(new LibraryNotFound(_candidateLibraryNames));
-    } catch (e) {
-      _handleError(e);
+    } catch (e, stack) {
+      _handleError(e, stack);
     }
   }
 
@@ -126,13 +126,13 @@ class EvalOnDartLibrary {
         throw result;
       }
       return result;
-    } catch (e) {
-      _handleError(e);
+    } catch (e, stack) {
+      _handleError(e, stack);
     }
     return null;
   }
 
-  void _handleError(dynamic e) {
+  void _handleError(dynamic e, StackTrace stack) {
     if (_disposed) return;
 
     switch (e.runtimeType) {
@@ -144,6 +144,9 @@ class EvalOnDartLibrary {
         break;
       default:
         print('Unrecognized error: $e');
+    }
+    if (stack != null) {
+      print(stack);
     }
   }
 

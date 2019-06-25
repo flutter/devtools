@@ -16,7 +16,7 @@ class CpuFlameChart extends CpuProfilerView {
       : super(timelineController, CpuProfilerViewType.flameChart) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
-      ..attribute('hidden', true);
+      ..hidden(true);
 
     add(stackFrameDetails);
   }
@@ -57,7 +57,7 @@ class CpuFlameChart extends CpuProfilerView {
 
     stackFrameDetails
       ..text = stackFrameDetailsDefaultText
-      ..attribute('hidden', false);
+      ..hidden(false);
   }
 
   @override
@@ -102,6 +102,6 @@ class CpuFlameChart extends CpuProfilerView {
     canvas = null;
 
     stackFrameDetails.text = stackFrameDetailsDefaultText;
-    stackFrameDetails.attribute('hidden', true);
+    stackFrameDetails.hidden(true);
   }
 }

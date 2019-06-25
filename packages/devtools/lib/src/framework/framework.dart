@@ -20,6 +20,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
+import '../url_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
@@ -659,7 +660,7 @@ class ConnectDialog {
           value = Uri.decodeFull(value);
         }
 
-        final uri = getTrimmedUri(value);
+        final uri = getNormalizedTrimmedUri(value);
         if (uri != null && uri.isAbsolute) {
           _connect(uri).catchError((dynamic error) {
             handleConnectError();
