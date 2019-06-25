@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+import '../globals.dart';
 import '../vm_service_wrapper.dart';
 
 class MemoryTracker {
@@ -144,10 +145,9 @@ class HeapSample {
 
 // Heap Statistics
 
-// More detailed/simpler then the ClassHeapStats (for handling accumulators to
-// detect leaks and simpler then drilling into new/old which should be hidden
-// with a new protocol).
+// Wrapper for ClassHeapStats.
 //
+// Pre VM Service Protocol 3.18:
 // {
 //   type: ClassHeapStats,
 //   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
@@ -156,11 +156,28 @@ class HeapSample {
 //   promotedInstances: 0,
 //   promotedBytes: 0
 // }
+//
+// VM Service Protocol 3.18 and later:
+// {
+//   type: ClassHeapStats,
+//   class: {type: @Class, fixedId: true, id: classes/5, name: Class},
+//   accumulatedSize: 809536
+//   bytesCurrent: 809536
+//   instancesAccumulated: 3892
+//   instancesCurrent: 3892
+// }
 class ClassHeapDetailStats {
   ClassHeapDetailStats(this.json) {
     classRef = ClassRef.parse(json['class']);
-    _update(json['new']);
-    _update(json['old']);
+    if (serviceManager.service.protocolVersionLessThan(major: 3, minor: 18)) {
+      _update(json['new']);
+      _update(json['old']);
+    } else {
+      instancesCurrent = json['instancesCurrent'];
+      instancesAccumulated = json['instancesAccumulated'];
+      bytesCurrent = json['bytesCurrent'];
+      bytesAccumulated = json['bytesAccumulated'];
+    }
   }
 
   static const int ALLOCATED_BEFORE_GC = 0;
@@ -191,8 +208,8 @@ class ClassHeapDetailStats {
   }
 
   @override
-  String toString() =>
-      '[ClassHeapStats type: $type, class: ${classRef.name}, count: $instancesCurrent, bytes: $bytesCurrent]';
+  String toString() => '[ClassHeapStats type: $type, class: ${classRef.name}, '
+      'count: $instancesCurrent, bytes: $bytesCurrent]';
 }
 
 class InstanceSummary {
