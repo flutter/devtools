@@ -9,6 +9,7 @@ import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/utils.dart';
 import 'package:test/test.dart';
 
+import 'support/cpu_profile_test_data.dart';
 import 'support/test_utils.dart';
 import 'support/timeline_test_data.dart';
 

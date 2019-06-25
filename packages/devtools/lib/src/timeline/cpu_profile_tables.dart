@@ -5,6 +5,7 @@ import '../tables.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
+import 'cpu_profile_protocol.dart';
 import 'cpu_profiler_view.dart';
 import 'timeline_controller.dart';
 
@@ -41,13 +42,53 @@ class CpuCallTree extends CpuProfilerView {
 
   @override
   void rebuildView() {
-    final CpuStackFrame root =
-        timelineController.timelineData.cpuProfileData.cpuProfileRoot;
+    final CpuStackFrame root = timelineController
+        .timelineData.cpuProfileData.cpuProfileRoot
+        .deepCopy();
 
     // Expand the root stack frame to start.
     final List<CpuStackFrame> rows = [root..isExpanded = true]
       ..addAll(root.children.cast());
     callTreeTable.setRows(rows);
+  }
+}
+
+class CpuBottomUp extends CpuProfilerView {
+  CpuBottomUp(TimelineController timelineController)
+      : super(timelineController, CpuProfilerViewType.bottomUp) {
+    flex();
+    layoutVertical();
+    _init();
+  }
+
+  TreeTable<CpuStackFrame> bottomUpTable;
+
+  void _init() {
+    final methodNameColumn = MethodNameColumn()
+      ..onNodeExpanded
+          .listen((stackFrame) => bottomUpTable.expandNode(stackFrame))
+      ..onNodeCollapsed
+          .listen((stackFrame) => bottomUpTable.collapseNode(stackFrame));
+    final selfTimeColumn = SelfTimeColumn();
+
+    bottomUpTable = TreeTable<CpuStackFrame>.virtual()
+      ..addColumn(TotalTimeColumn())
+      ..addColumn(selfTimeColumn)
+      ..addColumn(methodNameColumn)
+      ..addColumn(SourceColumn());
+    bottomUpTable
+      ..sortColumn = selfTimeColumn
+      ..setRows(<CpuStackFrame>[]);
+    add(bottomUpTable.element);
+  }
+
+  @override
+  void rebuildView() {
+    final CpuStackFrame root =
+        timelineController.timelineData.cpuProfileData.cpuProfileRoot;
+    final List<CpuStackFrame> bottomUpRoots =
+        BottomUpProfileProcessor().processData(root);
+    bottomUpTable.setRows(bottomUpRoots);
   }
 }
 

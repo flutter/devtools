@@ -25,6 +25,7 @@ class CpuProfileData {
       category: 'Dart',
       url: '',
       profileTime: time,
+      profileSampleCount: sampleCount,
     );
   }
 
@@ -131,13 +132,14 @@ class CpuProfileData {
       };
 }
 
-class CpuStackFrame extends TreeNode {
+class CpuStackFrame extends TreeNode<CpuStackFrame> {
   CpuStackFrame({
     @required this.id,
     @required this.name,
     @required this.category,
     @required this.url,
     @required this.profileTime,
+    @required this.profileSampleCount,
   });
 
   final String id;
@@ -148,8 +150,11 @@ class CpuStackFrame extends TreeNode {
 
   final String url;
 
-  // Time data for stack frame's enclosing CPU profile.
+  /// Time data for the stack frame's enclosing CPU profile.
   final TimeRange profileTime;
+
+  /// Total sample count for the the stack frame's enclosing CPU profile.
+  final int profileSampleCount;
 
   /// How many cpu samples for which this frame is a leaf.
   int exclusiveSampleCount = 0;
@@ -159,9 +164,10 @@ class CpuStackFrame extends TreeNode {
 
   /// How many cpu samples this frame is included in.
   int _inclusiveSampleCount;
+  set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
 
-  double get totalTimeRatio => _totalTimeRatio ??=
-      inclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
+  double get totalTimeRatio =>
+      _totalTimeRatio ??= inclusiveSampleCount / profileSampleCount;
 
   double _totalTimeRatio;
 
@@ -171,8 +177,8 @@ class CpuStackFrame extends TreeNode {
 
   Duration _totalTime;
 
-  double get selfTimeRatio => _selfTimeRatio ??=
-      exclusiveSampleCount / (root as CpuStackFrame).inclusiveSampleCount;
+  double get selfTimeRatio =>
+      _selfTimeRatio ??= exclusiveSampleCount / profileSampleCount;
 
   double _selfTimeRatio;
 
@@ -194,10 +200,43 @@ class CpuStackFrame extends TreeNode {
     return _inclusiveSampleCount;
   }
 
+  CpuStackFrame shallowCopy({bool resetInclusiveSampleCount = false}) {
+    final copy = CpuStackFrame(
+      id: id,
+      name: name,
+      category: category,
+      url: url,
+      profileTime: profileTime,
+      profileSampleCount: profileSampleCount,
+    )
+      ..exclusiveSampleCount = exclusiveSampleCount
+      ..inclusiveSampleCount =
+          resetInclusiveSampleCount ? null : inclusiveSampleCount;
+    return copy;
+  }
+
+  /// Returns a deep copy from this stack frame down to the leaves of the tree.
+  ///
+  /// The returned copy stack frame will have a null parent.
+  CpuStackFrame deepCopy() {
+    final copy = shallowCopy();
+    for (CpuStackFrame child in children) {
+      copy.addChild(child.deepCopy());
+    }
+    return copy;
+  }
+
+  /// Whether [this] stack frame matches another stack frame [other].
+  ///
+  /// Two stack frames are said to be matching if they share the following
+  /// properties.
+  bool matches(CpuStackFrame other) =>
+      name == other.name && url == other.url && category == other.category;
+
   void _format(StringBuffer buf, String indent) {
-    buf.writeln(
-        '$indent$id - children: ${children.length} - exclusiveSampleCount: '
-        '$exclusiveSampleCount');
+    buf.writeln('$indent$name - children: ${children.length} - excl: '
+            '$exclusiveSampleCount - incl: $inclusiveSampleCount'
+        .trimRight());
     for (CpuStackFrame child in children) {
       child._format(buf, '  $indent');
     }
