@@ -158,7 +158,7 @@ class TimelineProtocol {
     if (currentEventNodes[event.type.index] != null &&
         event.timestampMicros <
             currentEventNodes[event.type.index]
-                .getRoot()
+                .root
                 .time
                 .start
                 .inMicroseconds) {
@@ -387,8 +387,8 @@ class TimelineProtocol {
     final current = currentEventNodes[event.type.index];
     if (current != null) {
       if (current
-          .containsChildWithCondition((TimelineEvent e) => collectionEquals(
-                e.beginTraceEventJson,
+          .containsChildWithCondition((TimelineEvent event) => collectionEquals(
+                event.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
         // This is a duplicate DurationComplete event. Return early.
