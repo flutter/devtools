@@ -302,7 +302,7 @@ class TimelineProtocol {
           current.children.length == 1 &&
           collectionEquals(
             current.beginTraceEventJson,
-            current.children.cast<TimelineEvent>().first.beginTraceEventJson,
+            current.children.first.beginTraceEventJson,
           )) {
         // There was a duplicate DurationBegin event associated with
         // [previousDurationEndEvent]. [event] is actually the DurationEnd event

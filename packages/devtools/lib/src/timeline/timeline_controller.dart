@@ -157,7 +157,7 @@ class TimelineController {
 
   void recordTraceForTimelineEvent(TimelineEvent event) {
     recordTrace(event.beginTraceEventJson);
-    event.children.cast<TimelineEvent>().forEach(recordTraceForTimelineEvent);
+    event.children.forEach(recordTraceForTimelineEvent);
     if (event.endTraceEventJson != null) {
       recordTrace(event.endTraceEventJson);
     }

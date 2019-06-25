@@ -305,12 +305,12 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
             parent.beginTraceEventJson,
-            parent.children.cast<TimelineEvent>().first.beginTraceEventJson,
+            parent.children.first.beginTraceEventJson,
           ) &&
           // [parent]'s DurationEnd trace is equal to that of its only child.
           collectionEquals(
             parent.endTraceEventJson,
-            parent.children.cast<TimelineEvent>().first.endTraceEventJson,
+            parent.children.first.endTraceEventJson,
           )) {
         parent.removeChild(children.first);
       }
