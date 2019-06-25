@@ -91,8 +91,8 @@ void main() {
       expect(n, equals(2));
       expect(end, isNotNull);
 
-      // 100ms is arbitrary. This can be increased if this test starts to flake.
-      const epsilonMs = 100;
+      // 200ms is arbitrary. It was 100ms but flakes on Windows (175ms was seen).
+      const epsilonMs = 200;
       expect((end - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
