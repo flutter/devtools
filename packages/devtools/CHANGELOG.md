@@ -1,5 +1,5 @@
 ## 0.1.2 - TBD
-* Add Call Tree to CPU profiler.
+* Add Call Tree and Bottom Up views to CPU profiler.
 * Pre-fetch CPU profiles so that we have profiling information for every frame in the timeline.
 * Trim Mixins from class name reporting in the CPU profiler.
 * Allow DevTools feedback to be submitted when DevTools is not connected to an app.

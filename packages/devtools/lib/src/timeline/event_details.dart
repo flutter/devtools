@@ -98,7 +98,7 @@ class EventDetails extends CoreElement {
 
   void _initTabNav() {
     final flameChartTab = CpuProfilerTab(
-      'CPU Flame Chart (preview)',
+      'CPU Flame Chart',
       CpuProfilerViewType.flameChart,
     );
     final callTreeTab = CpuProfilerTab(
