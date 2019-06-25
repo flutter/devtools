@@ -40,6 +40,14 @@ class Chrome {
       if (FileSystemEntity.isFileSync(defaultPath)) {
         return Chrome.from(defaultPath);
       }
+    } else if (Platform.isWindows) {
+      final String progFiles = Platform.environment['PROGRAMFILES(X86)'];
+      final String chromeInstall = '$progFiles\\Google\\Chrome';
+      final String defaultPath = '$chromeInstall\\Application\\chrome.exe';
+
+      if (FileSystemEntity.isFileSync(defaultPath)) {
+        return Chrome.from(defaultPath);
+      }
     }
 
     // TODO(devoncarew): check default install locations for linux
@@ -70,7 +78,9 @@ class Chrome {
       '--user-data-dir=${getCreateChromeDataDir()}',
       '--remote-debugging-port=$debugPort'
     ];
-    if (_useChromeHeadless) {
+    // TODO(dantup): Chrome headless currently hangs on Windows (both Travis and
+    // locally), so use non-headless there until we have a fix.
+    if (_useChromeHeadless && !Platform.isWindows) {
       args.addAll(<String>[
         '--headless',
         '--disable-gpu',

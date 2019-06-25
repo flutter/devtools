@@ -181,9 +181,8 @@ class TimelineScreen extends Screen {
         ..layoutVertical()
         ..flex()
         ..add(<CoreElement>[
-          frameEventsChart = FrameEventsChart(timelineController)
-            ..attribute('hidden'),
-          eventDetails = EventDetails(timelineController)..attribute('hidden'),
+          frameEventsChart = FrameEventsChart(timelineController)..hidden(true),
+          eventDetails = EventDetails(timelineController)..hidden(true),
         ]),
     ]);
 
@@ -197,7 +196,7 @@ class TimelineScreen extends Screen {
   void _initListeners() {
     timelineController.onSelectedFrame.listen((_) => _configureSplitter());
     timelineController.onLoadOfflineData
-        .listen((_) => frameEventsChart.attribute('hidden', true));
+        .listen((_) => frameEventsChart..hidden(true));
   }
 
   void _configureSplitter() {
@@ -249,38 +248,39 @@ class TimelineScreen extends Screen {
     _destroySplitter();
   }
 
-  void _pauseRecording() {
+  Future<void> _pauseRecording() async {
     _manuallyPaused = true;
     timelineController.pause();
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
-    _updateListeningState();
+    await _updateListeningState();
   }
 
-  void _resumeRecording() {
+  Future<void> _resumeRecording() async {
     _manuallyPaused = false;
     timelineController.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
-    _updateListeningState();
+    await _updateListeningState();
   }
 
   void _updateButtonStates() {
     pauseButton
       ..disabled = _manuallyPaused
-      ..attribute('hidden', offlineMode);
+      ..hidden(offlineMode);
     resumeButton
       ..disabled = !_manuallyPaused
-      ..attribute('hidden', offlineMode);
-    clearButton.attribute('hidden', offlineMode);
-    exportButton.attribute('hidden', offlineMode);
-    exitOfflineModeButton.attribute('hidden', !offlineMode);
+      ..hidden(offlineMode);
+    clearButton.hidden(offlineMode);
+    exportButton.hidden(offlineMode);
+    exitOfflineModeButton.hidden(!offlineMode);
   }
 
-  void _updateListeningState() async {
-    final bool shouldBeRunning = !_manuallyPaused && isCurrentScreen;
+  Future<void> _updateListeningState() async {
+    final bool shouldBeRunning =
+        !_manuallyPaused && !offlineMode && isCurrentScreen;
     final bool isRunning = !timelineController.paused;
-    timelineController.timelineService.updateListeningState(
+    await timelineController.timelineService.updateListeningState(
       shouldBeRunning: shouldBeRunning,
       isRunning: isRunning,
     );
@@ -291,7 +291,7 @@ class TimelineScreen extends Screen {
     debugFrameTracking.clear();
     timelineController.timelineData?.clear();
     framesBarChart.frameUIgraph.reset();
-    frameEventsChart.attribute('hidden', true);
+    frameEventsChart.hidden(true);
     eventDetails.reset(hide: true);
     _destroySplitter();
   }

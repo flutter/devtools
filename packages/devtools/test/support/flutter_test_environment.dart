@@ -38,10 +38,17 @@ class FlutterTestEnvironment {
   VoidAsyncFunction _afterEverySetup;
   set afterEverySetup(VoidAsyncFunction f) => _afterEverySetup = f;
 
-  // The function will be called before tearing down the test and stopping the
-  // Flutter app.
-  VoidAsyncFunction _beforeTearDown;
-  set beforeTearDown(VoidAsyncFunction f) => _beforeTearDown = f;
+  // The function will be called before the each tear down, including those that
+  // skip work due to not being forced. This usually means for each individual
+  // test, but it will also run as part of a final forced tear down so should
+  // be tolerable to being called twice after a single test.
+  VoidAsyncFunction _beforeEveryTearDown;
+  set beforeEveryTearDown(VoidAsyncFunction f) => _beforeEveryTearDown = f;
+
+  // The function will be called before the final forced teardown at the end
+  // of the test suite (which will then stop the Flutter app).
+  VoidAsyncFunction _beforeFinalTearDown;
+  set beforeFinalTearDown(VoidAsyncFunction f) => _beforeFinalTearDown = f;
 
   bool _needsSetup = true;
 
@@ -85,11 +92,15 @@ class FlutterTestEnvironment {
       // _needsSetup=true means we've never run setup code or already cleaned up
       return;
     }
+
+    if (_beforeEveryTearDown != null) await _beforeEveryTearDown();
+
     if (!force && reuseTestEnvironment) {
       // Skip actually tearing down for better test performance.
       return;
     }
-    if (_beforeTearDown != null) await _beforeTearDown();
+
+    if (_beforeFinalTearDown != null) await _beforeFinalTearDown();
 
     await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
         onTimeout: () {

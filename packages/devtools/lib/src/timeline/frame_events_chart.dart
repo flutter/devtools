@@ -139,7 +139,7 @@ class FrameEventsChart extends CoreElement {
     _reset();
 
     if (frame != null) {
-      attribute('hidden', false);
+      hidden(false);
       _render(frame);
     }
   }

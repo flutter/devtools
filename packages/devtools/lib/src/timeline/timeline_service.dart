@@ -92,7 +92,7 @@ class TimelineService {
     );
   }
 
-  void updateListeningState({
+  Future<void> updateListeningState({
     @required bool shouldBeRunning,
     @required bool isRunning,
   }) async {
