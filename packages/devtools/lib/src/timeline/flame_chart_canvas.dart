@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
+import '../ui/colors.dart';
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
@@ -17,8 +18,6 @@ import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
-import 'frame_events_chart.dart';
-import 'timeline_screen.dart';
 
 // TODO(kenzie): add tooltips to stack frames on hover.
 

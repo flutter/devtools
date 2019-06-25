@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import '../ui/analytics.dart' as ga;
+import '../ui/colors.dart';
 import '../ui/drag_scroll.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
@@ -16,28 +17,8 @@ import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
-import 'timeline_screen.dart';
 
 // TODO(kenzie): port all of this code to use flame_chart_canvas.dart.
-
-// Light Blue 50: 200-400 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-// Blue Material Dark: 200-400 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
-final uiColorPalette = [
-  const ThemedColor(mainUiColorLight, mainUiColorDark),
-  const ThemedColor(Color(0xFF4FC3F7), Color(0xFF8AB4F7)),
-  const ThemedColor(Color(0xFF29B6F6), Color(0xFF669CF6)),
-];
-
-// Light Blue 50: 700-900 (light mode) - see https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
-// Blue Material Dark: 500-700 (dark mode) - see https://standards.google/guidelines/google-material/color/dark-theme.html#style.
-final gpuColorPalette = [
-  const ThemedColor(mainGpuColorLight, mainGpuColorDark),
-  const ThemedColor(Color(0xFF0277BD), Color(0xFF1966D2)),
-  const ThemedColor(Color(0xFF01579B), Color(0xFF1859BD)),
-];
-
-const selectedFlameChartItemColor =
-    ThemedColor(mainUiColorSelectedLight, mainUiColorSelectedLight);
 
 final StreamController<FrameFlameChartItem>
     _selectedFrameFlameChartItemController =
