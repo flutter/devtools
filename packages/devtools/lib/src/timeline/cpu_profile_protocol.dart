@@ -171,7 +171,7 @@ class BottomUpProfileProcessor {
         root.exclusiveSampleCount += duplicate.exclusiveSampleCount;
         root.inclusiveSampleCount += duplicate.inclusiveSampleCount;
         roots.remove(duplicate);
-        mergeRoots(root.children.cast<CpuStackFrame>());
+        mergeRoots(root.children);
       }
     }
   }

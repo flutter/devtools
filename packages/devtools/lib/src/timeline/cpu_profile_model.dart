@@ -132,7 +132,7 @@ class CpuProfileData {
       };
 }
 
-class CpuStackFrame extends TreeNode {
+class CpuStackFrame extends TreeNode<CpuStackFrame> {
   CpuStackFrame({
     @required this.id,
     @required this.name,

@@ -536,7 +536,7 @@ class Table<T> extends Object with SetStateMixin {
   }
 }
 
-class TreeTable<T extends TreeNode> extends Table<T> {
+class TreeTable<T extends TreeNode<T>> extends Table<T> {
   TreeTable.virtual({double rowHeight = 29.0})
       : super.virtual(rowHeight: rowHeight, overflowAuto: true);
 
@@ -577,7 +577,7 @@ class TreeTable<T extends TreeNode> extends Table<T> {
     void _addToSortedData(T dataObject) {
       sortedData.add(dataObject);
       if (dataObject.isExpanded) {
-        dataObject.children.cast<T>().toList()
+        dataObject.children
           ..sort((T a, T b) => _compareData(a, b, column, direction))
           ..forEach(_addToSortedData);
       }
@@ -594,11 +594,11 @@ class TreeTable<T extends TreeNode> extends Table<T> {
     void cascadingRemove(T _dataObject) {
       if (!data.contains(_dataObject)) return;
       data.remove(_dataObject);
-      (_dataObject.children.cast<T>()).forEach(cascadingRemove);
+      (_dataObject.children).forEach(cascadingRemove);
     }
 
     assert(data.contains(dataObject));
-    (dataObject.children.cast<T>()).forEach(cascadingRemove);
+    dataObject.children.forEach(cascadingRemove);
     dataObject.isExpanded = false;
     setRows(data);
   }
@@ -715,7 +715,7 @@ abstract class Column<T> {
   }
 }
 
-abstract class TreeColumn<T extends TreeNode> extends Column<T> {
+abstract class TreeColumn<T extends TreeNode<T>> extends Column<T> {
   TreeColumn(
     title, {
     int fixedWidthPx,
