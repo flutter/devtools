@@ -266,11 +266,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
 }
 
 int _stackFrameIdCompare(String a, String b) {
-  // Stack frame ids are structured as "140225212960768-24". We need to compare
-  // the number after the dash to maintain the correct order.
+  // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
+  // (Android). We need to compare the number after the last dash to maintain
+  // the correct order.
   const dash = '-';
-  final aDashIndex = a.indexOf(dash);
-  final bDashIndex = b.indexOf(dash);
+  final aDashIndex = a.lastIndexOf(dash);
+  final bDashIndex = b.lastIndexOf(dash);
   try {
     final int aId = int.parse(a.substring(aDashIndex + 1));
     final int bId = int.parse(b.substring(bDashIndex + 1));
