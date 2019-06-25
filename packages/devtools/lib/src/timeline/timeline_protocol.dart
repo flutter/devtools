@@ -7,7 +7,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-import '../trees.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -387,11 +386,10 @@ class TimelineProtocol {
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current
-          .containsChildWithCondition((TreeNode node) => collectionEquals(
-                (node as TimelineEvent).beginTraceEventJson,
-                timelineEvent.beginTraceEventJson,
-              ))) {
+      if (current.containsChildWithCondition((event) => collectionEquals(
+            event.beginTraceEventJson,
+            timelineEvent.beginTraceEventJson,
+          ))) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }

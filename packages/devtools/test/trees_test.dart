@@ -37,19 +37,19 @@ void main() {
 
   test('containsChildWithCondition', () {
     expect(
-      treeNode0.containsChildWithCondition((TreeNode node) {
+      treeNode0.containsChildWithCondition((node) {
         return node == treeNode1;
       }),
       isTrue,
     );
     expect(
-      treeNode0.containsChildWithCondition((TreeNode node) {
+      treeNode0.containsChildWithCondition((node) {
         return node.children.length == 2;
       }),
       isTrue,
     );
     expect(
-      treeNode0.containsChildWithCondition((TreeNode node) {
+      treeNode0.containsChildWithCondition((node) {
         return node.isExpanded;
       }),
       isFalse,
