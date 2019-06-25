@@ -287,8 +287,10 @@ class VmServiceWrapper implements VmService {
   Future<VM> getVM() => _trackFuture('getVM', _vmService.getVM());
 
   @override
-  Future<Timeline> getVMTimeline(
-      int timeOriginMicros, int timeExtentMicros) async {
+  Future<Timeline> getVMTimeline({
+    int timeOriginMicros,
+    int timeExtentMicros,
+  }) async {
     if (await isProtocolVersionLessThan(major: 3, minor: 19)) {
       final Response response =
           await _trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
@@ -296,7 +298,10 @@ class VmServiceWrapper implements VmService {
     }
     return _trackFuture(
       'getVMTimeline',
-      _vmService.getVMTimeline(timeOriginMicros, timeExtentMicros),
+      _vmService.getVMTimeline(
+        timeOriginMicros: timeOriginMicros,
+        timeExtentMicros: timeExtentMicros,
+      ),
     );
   }
 

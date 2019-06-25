@@ -60,7 +60,7 @@ class TimelineService {
     await serviceManager.service.clearVMTimeline();
 
     final Timeline timeline =
-        await serviceManager.service.getVMTimeline(null, null);
+        await serviceManager.service.getVMTimeline();
     final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
         list.cast<Map<String, dynamic>>();
