@@ -73,50 +73,31 @@ class MemoryController {
   // 'reset': true to reset the object allocation accumulators
   Future<List<ClassHeapDetailStats>> getAllocationProfile(
       {bool reset = false}) async {
-    final Map resetArg = reset ? {'reset': 'true'} : {};
-
-    final Response response = await serviceManager.service.callMethod(
-      '_getAllocationProfile',
-      isolateId: _isolateId,
-      args: resetArg,
+    final AllocationProfile allocationProfile =
+        await serviceManager.service.getAllocationProfile(
+      _isolateId,
+      reset: reset,
     );
-
-    final List<dynamic> members = response.json['members'];
-
-    final List<ClassHeapDetailStats> heapStats = members
-        .cast<Map<String, dynamic>>()
-        .map((Map<String, dynamic> d) => ClassHeapDetailStats(d))
+    return allocationProfile.members
+        .map((ClassHeapStats stats) => ClassHeapDetailStats(stats.json))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
     }).toList();
-
-    return heapStats;
   }
 
   Future<List<InstanceSummary>> getInstances(
       String classRef, String className, int maxInstances) async {
-    final List<InstanceSummary> result = [];
-
     // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
     // TODO(terry): of instances.
-    final Map params = {
-      'classId': classRef,
-      'limit': maxInstances,
-    };
-    final Response response = await serviceManager.service.callMethod(
-      '_getInstances',
-      isolateId: _isolateId,
-      args: params,
+    final InstanceSet instanceSet = await serviceManager.service.getInstances(
+      _isolateId,
+      classRef,
+      maxInstances,
+      classId: classRef,
     );
-
-    final List instances = response.json['samples'];
-
-    for (Map instance in instances) {
-      final String objectRef = instance['id'];
-      result.add(InstanceSummary(classRef, className, objectRef));
-    }
-
-    return result;
+    return instanceSet.instances
+        .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
+        .toList();
   }
 
   Future<Instance> getObject(String objectRef) async =>
@@ -126,12 +107,9 @@ class MemoryController {
       );
 
   Future<void> gc() async {
-    await serviceManager.service.callMethod(
-      '_getAllocationProfile',
-      isolateId: _isolateId,
-      args: {
-        'gc': 'full',
-      },
+    await serviceManager.service.getAllocationProfile(
+      _isolateId,
+      gc: true,
     );
   }
 }
