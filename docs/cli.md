@@ -47,15 +47,7 @@ Keep note of this uri, as you will use it to connect your app to DevTools.
 
 ## Opening DevTools and connecting to the target app
 
-Using DevTools now is as simple as opening a Chrome browser window. You can either open
-`http://localhost:9100` in Chrome, or run:
-
-```
-open http://localhost:9100
-```
-
-from the command line.
-
+Using DevTools now is as simple as opening a Chrome browser window to `http://localhost:9100`.
 Once DevTools opens, you will see a connect dialog:
 
 <img src="images/connect_dialog.png" width="600" />
