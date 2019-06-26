@@ -6,6 +6,7 @@ import 'dart:html' as html;
 import 'package:js/js.dart';
 
 import '../globals.dart';
+import '../ui/colors.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
@@ -18,7 +19,6 @@ import 'cpu_profile_tables.dart';
 import 'cpu_profiler_view.dart';
 import 'frame_events_chart.dart';
 import 'timeline_controller.dart';
-import 'timeline_screen.dart';
 
 class EventDetails extends CoreElement {
   EventDetails(this.timelineController) : super('div') {

@@ -4,7 +4,7 @@
 
 import 'package:js/js_util.dart';
 
-import '../timeline/timeline_screen.dart';
+import '../ui/colors.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/plotly.dart';
 import '../ui/theme.dart';
