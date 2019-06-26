@@ -44,22 +44,23 @@ class DevtoolsManager {
   final BrowserTabInstance tabInstance;
   final Uri baseUri;
 
-  Future<void> start(AppFixture appFixture, {Uri overrideUri}) async {
+  Future<void> start(
+    AppFixture appFixture, {
+    Uri overrideUri,
+    bool waitForConnection = true,
+  }) async {
     final Uri baseAppUri = baseUri.resolve(
         'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
-    await tabInstance.getBrowserChannel();
-
-    // TODO(dantup): Find a better way to wait for something here. This delay
-    // fixes the following tests on Windows (list scripts has also been seen to
-    // fail elsewhere).
-    //     integration logging displays log data [E]
-    //     integration logging log screen postpones write when offscreen [E]
-    //     integration debugging lists scripts [E]
-    // integration debugging pause [E]
-    await delay();
+    await Future.wait([
+      waitForConnection
+          ? tabInstance.onEvent
+              .firstWhere((msg) => msg.event == 'app.devToolsReady')
+          : Future.value(),
+      tabInstance.getBrowserChannel(),
+    ]);
   }
 
   Future<void> switchPage(String page) async {
