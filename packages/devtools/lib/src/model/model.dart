@@ -22,6 +22,7 @@ import '../main.dart';
 
 class App {
   App(this.framework) {
+    _register<void>('devToolsReady', devToolsReady);
     _register<void>('echo', echo);
     _register<void>('switchPage', switchPage);
     _register<String>('currentPageId', currentPageId);
@@ -54,9 +55,8 @@ class App {
         'debugger.getConsoleContents', debuggerGetConsoleContents);
   }
 
-  static void register(PerfToolFramework framework) {
-    final App app = App(framework);
-    app._bind();
+  static App register(PerfToolFramework framework) {
+    return App(framework).._bind();
   }
 
   final PerfToolFramework framework;
@@ -77,6 +77,10 @@ class App {
     };
 
     js.context['devtools'] = binding;
+  }
+
+  Future<void> devToolsReady(dynamic message) async {
+    _sendNotification('app.devToolsReady', message);
   }
 
   Future<void> echo(dynamic message) async {

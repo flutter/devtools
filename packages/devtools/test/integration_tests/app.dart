@@ -36,7 +36,11 @@ void appTests() {
     final Uri baseAppUri = webdevFixture.baseUri.resolve('index.html');
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
-    await tools.start(appFixture, overrideUri: baseAppUri);
+    await tools.start(
+      appFixture,
+      overrideUri: baseAppUri,
+      waitForConnection: false,
+    );
 
     final ConnectDialogManager connectDialog = ConnectDialogManager(tools);
 

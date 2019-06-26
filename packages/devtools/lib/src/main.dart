@@ -127,7 +127,8 @@ class PerfToolFramework extends Framework {
   }
 
   void initTestingModel() {
-    App.register(this);
+    final app = App.register(this);
+    screensReady.future.then(app.devToolsReady);
   }
 
   void disableAppWithError(String title, [dynamic error]) {
