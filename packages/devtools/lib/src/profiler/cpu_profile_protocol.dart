@@ -128,7 +128,7 @@ class BottomUpProfileProcessor {
   ///
   /// This is necessary for the transformation of a [CpuStackFrame] to its
   /// bottom-up representation. This is an intermediate step between
-  /// [getRoots] and [mergeProfiles].
+  /// [getRoots] and [mergeRoots].
   @visibleForTesting
   void cascadeSampleCounts(CpuStackFrame stackFrame) {
     stackFrame.inclusiveSampleCount = stackFrame.exclusiveSampleCount;
