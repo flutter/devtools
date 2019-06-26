@@ -58,10 +58,16 @@ const selectedFlameChartItemColor = ThemedColor(
 );
 
 // Light is Red @ .2 opacity, Dark is Red 200 Material Dark @ .2 opacity.
-const Color jankGlowInside = ThemedColor(Color(0x66FF0000), Color(0x66F29C99),);
+const Color jankGlowInside = ThemedColor(
+  Color(0x66FF0000),
+  Color(0x66F29C99),
+);
 
 // Light is Red @ .5 opacity, Dark is Red 600 Material Dark @ .6 opacity.
-const Color jankGlowEdge = ThemedColor(Color(0x80FF0000), Color(0x99CE191C),);
+const Color jankGlowEdge = ThemedColor(
+  Color(0x80FF0000),
+  Color(0x99CE191C),
+);
 
 // Red 50 - 400 is light at 1/2 opacity, Dark Red 500 Material Dark.
 const Color highwater16msColor = mainUiColorSelectedLight;
