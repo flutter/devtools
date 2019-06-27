@@ -25,7 +25,7 @@ const goldenCpuProfileString = '''
             PaintingContext.paintChild - children: 1 - excl: 0 - incl: 1
               _SyncBlock.finish - children: 0 - excl: 1 - incl: 1
     [Truncated] - children: 2 - excl: 0 - incl: 6
-      RenderObject._getSemanticsForParent.<anonymous closure> - children: 1 - excl: 0 - incl: 1
+      RenderObject._getSemanticsForParent.<closure> - children: 1 - excl: 0 - incl: 1
         RenderObject._getSemanticsForParent - children: 0 - excl: 1 - incl: 1
       RenderPhysicalModel.paint - children: 1 - excl: 0 - incl: 5
         RenderCustomMultiChildLayoutBox.paint - children: 1 - excl: 0 - incl: 5
@@ -153,7 +153,7 @@ final subProfileStackFrames = {
   },
   '140357727781376-10': {
     'category': 'Dart',
-    'name': 'RenderObject._getSemanticsForParent.<anonymous closure>',
+    'name': 'RenderObject._getSemanticsForParent.<closure>',
     'parent': '140357727781376-9',
     'resolvedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
