@@ -66,7 +66,9 @@ class InboundReference extends Response {
   }
 
   dynamic parentField;
+
   int parentListIndex;
+
   int parentWordOffset;
 
   bool get isFieldRef => parentField.runtimeType == FieldRef;

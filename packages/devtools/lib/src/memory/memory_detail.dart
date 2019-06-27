@@ -75,8 +75,16 @@ class MemoryColumnInstanceAccumulatedCount
 
 class MemoryColumnSimple<T> extends Column<T> {
   MemoryColumnSimple(String name, this.getter,
-      {bool wide = false, bool usesHtml = false, bool hover = false, String cssClass})
-      : super(name, wide: wide, usesHtml: usesHtml, cssClass: cssClass, hover: hover);
+      {bool wide = false,
+      bool usesHtml = false,
+      bool hover = false,
+      String cssClass})
+      : super(
+          name,
+          usesHtml: usesHtml,
+          cssClass: cssClass,
+          hover: hover,
+        );
 
   String Function(T) getter;
 

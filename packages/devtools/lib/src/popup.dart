@@ -139,10 +139,10 @@ class PopupListView<T> implements CoreElementView {
         // The value and text are different, all nodes have a text. It the text
         // content of the node itself along with its descendants. However, input
         // elements have a value property - its the input data of the input
-        // element. Input elements may have a text/textContent but it is alway
+        // element. Input elements may have a text/textContent but it is always
         // empty because they are void elements.
         final html.InputElement inputElement = _popupAutoCompleteView
-            .matcher.textfield.element as html.InputElement;
+            .matcher.textField.element as html.InputElement;
         final String matchPart = inputElement.value;
 
         // Compute the matched characters to be bolded.
@@ -175,7 +175,7 @@ class PopupListView<T> implements CoreElementView {
     highlightedItem = null;
   }
 
-  void scrollAndHilight(int row, int topPosition,
+  void scrollAndHighlight(int row, int topPosition,
       {bool top = false, bool bottom = false}) {
     // Highlight this row.
     highlightedItem = itemsAsList[row];
@@ -204,7 +204,7 @@ class PopupListView<T> implements CoreElementView {
         }
         childToScrollTo = itemIndex;
         final int scrollPosition = startRow > 0 ? startRow * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
+        scrollAndHighlight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.pageUp:
         int itemIndex = startRow - itemsVis;
@@ -212,17 +212,17 @@ class PopupListView<T> implements CoreElementView {
         childToScrollTo = itemIndex;
         final int scrollPosition =
             childToScrollTo > 0 ? childToScrollTo * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition, top: true);
+        scrollAndHighlight(childToScrollTo, scrollPosition, top: true);
         break;
       case ListDirection.home:
         childToScrollTo = 0;
-        scrollAndHilight(childToScrollTo, childToScrollTo);
+        scrollAndHighlight(childToScrollTo, childToScrollTo);
         break;
       case ListDirection.end:
         childToScrollTo = items.items.length - 1;
         final int scrollPosition =
             childToScrollTo > 0 ? (childToScrollTo - itemsVis) * itemHeight : 0;
-        scrollAndHilight(childToScrollTo, scrollPosition);
+        scrollAndHighlight(childToScrollTo, scrollPosition);
         break;
     }
 
@@ -240,17 +240,11 @@ class PopupListView<T> implements CoreElementView {
 
   bool get itemsHadClicked => items.hadClicked;
 
-  Stream<html.KeyboardEvent> get onKeyDown {
-    return items.onKeyDown;
-  }
+  Stream<html.KeyboardEvent> get onKeyDown => items.onKeyDown;
 
-  Stream<T> get onSelectionChanged {
-    return items.onSelectionChanged;
-  }
+  Stream<T> get onSelectionChanged => items.onSelectionChanged;
 
-  Stream<void> get onScriptsChanged {
-    return items.onItemsChanged;
-  }
+  Stream<void> get onScriptsChanged => items.onItemsChanged;
 
   void setList(
     List<T> theItems, {
@@ -272,9 +266,8 @@ class PopupListView<T> implements CoreElementView {
   void clearList() => items.clearItems();
 }
 
-/// This is the view that manages Input element (popupTextField) and the popup
-/// list being displayed (_listView).  Calling show() displays the popup list
-/// directly below the Input element (popupTextfield).
+// View manages Input element (popupTextField) / popup list displayed _listView.
+// show() displays popup list directly below the Input element (popupTextfield).
 class PopupAutoCompleteView extends CoreElement {
   PopupAutoCompleteView(
     this._listView,
@@ -285,6 +278,8 @@ class PopupAutoCompleteView extends CoreElement {
     _initialize();
   }
 
+  // Mimic used when the textField should mimic another field's background-color
+  // and color.
   PopupAutoCompleteView.mimic(
     this._listView,
     this._containerElement,
@@ -358,8 +353,8 @@ class PopupAutoCompleteView extends CoreElement {
   CoreElement _popupTextfield;
 
   // This is where all the incremental filter is done.
-  AutoCompleteMatcher _matcher;
   AutoCompleteMatcher get matcher => _matcher;
+  AutoCompleteMatcher _matcher;
 
   // Callback to user code to process an item selected (click or ENTER to
   // process the selected item).
@@ -367,8 +362,8 @@ class PopupAutoCompleteView extends CoreElement {
 
   CoreElement get popupTextfield => _popupTextfield;
 
-  bool _poppedUp = false;
   bool get isPoppedUp => _poppedUp;
+  bool _poppedUp = false;
 
   /// Handle explicit clicking in the popupList.
   void _hookupListeners() {
@@ -436,13 +431,14 @@ class PopupAutoCompleteView extends CoreElement {
 class AutoCompleteMatcher<T> {
   AutoCompleteMatcher();
 
-  PopupListView _listView;
   PopupListView get listView => _listView;
+  PopupListView _listView;
 
-  CoreElement _textfield; // Input element for keyboard input.
-  CoreElement get textfield => _textfield;
+  CoreElement get textField => _textField;
+  CoreElement _textField; // Input element for keyboard input.
 
   T _original;
+
   int _originalScrollTop;
 
   Map<String, List<T>> matchingState = {};
@@ -468,57 +464,56 @@ class AutoCompleteMatcher<T> {
   void start(T revert, PopupListView<T> listView, CoreElement textfield,
       [FinishFunction finishCallback]) {
     _listView = listView;
-    _textfield = textfield;
+    _textField = textfield;
 
     if (finishCallback != null) _finishCallback = finishCallback;
 
     _startMatching(revert, true);
 
     // Start handling user's keystrokes to show matching list of files.
-    _subscription ??= _textfield.onKeyDown.listen((html.KeyboardEvent e) {
+    _subscription ??= _textField.onKeyDown.listen((html.KeyboardEvent e) {
+      bool preventDefault = true;
       switch (e.keyCode) {
         case DOM_VK_RETURN:
           finish();
           reset();
           _listView.reset();
-          e.preventDefault();
           break;
         case DOM_VK_ESCAPE:
           cancel();
+          preventDefault = false;
           break;
         case DOM_VK_PAGE_UP:
           _selectRow = _listView.page(ListDirection.pageUp, _selectRow);
-          e.preventDefault();
           break;
         case DOM_VK_PAGE_DOWN:
           _selectRow = _listView.page(ListDirection.pageDown, _selectRow);
-          e.preventDefault();
           break;
         case DOM_VK_END:
           _selectRow = _listView.page(ListDirection.end);
-          e.preventDefault();
           break;
         case DOM_VK_HOME:
           _selectRow = _listView.page(ListDirection.home);
-          e.preventDefault();
           break;
         case DOM_VK_UP:
           // Set selection one item up.
           if (_selectRow > 0) {
             _selectRow -= 1;
-            _listView.scrollAndHilight(_selectRow, -1);
+            _listView.scrollAndHighlight(_selectRow, -1);
           }
-          e.preventDefault();
           break;
         case DOM_VK_DOWN:
           // Set selection one item down.
           if (_selectRow < listView.itemsAsList.length - 1) {
             _selectRow += 1;
-            _listView.scrollAndHilight(_selectRow, -1);
+            _listView.scrollAndHighlight(_selectRow, -1);
           }
-          e.preventDefault();
           break;
+        default:
+          // All other keys do normal processing.
+          preventDefault = false;
       }
+      if (preventDefault) e.preventDefault();
     });
   }
 
@@ -529,7 +524,7 @@ class AutoCompleteMatcher<T> {
 
   void selectFirstItem() {
     _selectRow = 0;
-    _listView.scrollAndHilight(_selectRow, -1);
+    _listView.scrollAndHighlight(_selectRow, -1);
   }
 
   // Finished matching - throw away all matching states.
@@ -546,7 +541,7 @@ class AutoCompleteMatcher<T> {
     }
 
     if (_subscription != null) {
-      // No more event routing until user has clicked again the the textfield.
+      // No more event routing until user has clicked again the the textField.
       _subscription.cancel();
       _subscription = null;
     }
@@ -563,7 +558,7 @@ class AutoCompleteMatcher<T> {
     matchingState.clear();
     matchingState.putIfAbsent('', () => originals);
 
-    (_textfield.element as html.InputElement).value = '';
+    (_textField.element as html.InputElement).value = '';
 
     listView.highlightedItem = null;
 
@@ -576,7 +571,7 @@ class AutoCompleteMatcher<T> {
   }
 
   /// Revert list and selection back to before the matcher (first click in the
-  /// textfield.
+  /// textField).
   void revert() {
     reset();
     _listView.setList(
@@ -595,7 +590,7 @@ class AutoCompleteMatcher<T> {
     _original = original;
     _originalScrollTop = _listView.element.scrollTop;
 
-    final html.InputElement element = _textfield.element;
+    final html.InputElement element = _textField.element;
     if (initialize || element.value.isEmpty) {
       // Save all the scripts.
       matchingState.putIfAbsent('', () => listView.itemsAsList);

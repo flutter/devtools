@@ -217,7 +217,20 @@ class Framework {
     snapshotMessage.show();
   }
 
+  // Hookup for any keyDown event to handle shortcut keys for a screen.
+  void _hookupShortcuts() {
+    window.onKeyDown.listen((KeyboardEvent e) {
+      if (current != null &&
+          e.key.isNotEmpty &&
+          current.shortcutCallback(e.ctrlKey, e.shiftKey, e.altKey, e.key)) {
+        e.preventDefault();
+      }
+    });
+  }
+
   void loadScreenFromLocation() async {
+    _hookupShortcuts();
+
     await screensReady.future.whenComplete(() {
       // Screens are identified by the hash as that works better with the webdev
       // server.
@@ -457,6 +470,10 @@ class ActionsContainer {
   }
 }
 
+// Each screen will get a chance to handle a shortcut key.
+typedef ShortCut = bool Function(
+    bool ctrlKey, bool shiftKey, bool altKey, String key);
+
 abstract class Screen {
   Screen({
     @required this.name,
@@ -464,6 +481,7 @@ abstract class Screen {
     this.iconClass,
     this.disabledTooltip = 'This screen is not available',
     bool disabled = false,
+    this.shortcutCallback,
   })  : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
@@ -479,6 +497,9 @@ abstract class Screen {
   final StatusItem helpStatus;
   final String disabledTooltip;
   final bool disabled;
+
+  // Set to handle short-cut keys for a particular screen.
+  ShortCut shortcutCallback;
 
   bool needsResizing = false;
 

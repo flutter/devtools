@@ -313,8 +313,7 @@ table th.wide {
     display: block;
 }
 
-.history-navigation-hidden {
-    padding-top: 1.5em;
+.history-navigation .hidden {
     display: none;
 }
 
@@ -657,7 +656,7 @@ div.tabnav {
     cursor: pointer;
     overflow-y: scroll;
     display: none;
-    width: 20em;  /* Matches width of search-test class, see above. */
+    width: 20em;  /* Matches width of search-text class, see above. */
 }
 
 .popup-items-list {

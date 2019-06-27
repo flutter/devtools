@@ -39,6 +39,9 @@ class MemoryScreen extends Screen with SetStateMixin {
           disabled: disabled,
           disabledTooltip: disabledTooltip,
         ) {
+    // Hookup for memory UI short-cut keys.
+    shortcutCallback = memoryShortcuts;
+
     classCountStatus = StatusItem();
     addStatusItem(classCountStatus);
 
@@ -59,7 +62,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   // The autocomplete view manages the textfield and popup list.
   CoreElement vmSearchField;
   PopupListView<String> heapPopupList;
-  PopupAutoCompleteView heapPopup;
+  PopupAutoCompleteView heapAutoCompletePopup;
 
   // Hover card shows where allocation occurred and references to instance.
   final CoreElement hoverPopup = div(c: 'allocation-hover-card');
@@ -78,9 +81,29 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryChart memoryChart;
 
   CoreElement tableContainer;
-  CoreElement history; // Memory navigation history.
 
+  // Memory navigation history. Driven from selecting items in the list of
+  // known classes, instances of a particular class and clicking on the class
+  // and field that allocated the instance (holds the reference).
+  // This list is displayed as a set of hyperlinks e.g.,
+  //
+  //     class1 (instance) > class2.extra > class3.mainHolder
+  //     -----------------   ------------   -----------------
+  //
+  // Clicking on one of the above links would select the class and instance that
+  // was associated with that hover navigation.  In this case:
+  //    [class3.mainHolder] - class3 called class2 constructor storing the
+  //                          reference to class2 in the field mainHolder.
+  //    [class2.extra]      - class2 called class1 constructor and stored the
+  //                          reference to class1 in field extra.
+  CoreElement history;
+
+  // This remembers how memory was navigated using the hover card to render the
+  // links in the history element (see above).
   NavigationPath memoryPath = NavigationPath();
+
+  // Signals if navigation is happening as a result of clicking in a hover card.
+  // If true, keep recording the navigation instead of resetting history.
   bool fromMemoryHover = false;
 
   MemoryDataView memoryDataView;
@@ -88,6 +111,15 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryTracker memoryTracker;
 
   ProgressElement progressElement;
+
+  // Handle shortcut keys
+  bool memoryShortcuts(bool ctrlKey, bool shiftKey, bool altKey, String key) {
+    if (ctrlKey && key == 'f') {
+      _search();
+      return true;
+    }
+    return false;
+  }
 
   @override
   void entering() {
@@ -108,17 +140,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
-    html.window.onKeyDown.listen((html.KeyboardEvent e) {
-      if (e.ctrlKey) {
-        switch (e.key) {
-          case 'f': // CTRL + f
-            _search();
-            e.preventDefault();
-            break;
-        }
-      }
-    });
-
     resumeButton = PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
       ..primary()
       ..small()
@@ -130,7 +151,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     vmSearchField = CoreElement('input', classes: 'search-text')
       ..setAttribute('type', 'text')
-      ..setAttribute('placeholder', 'filter')
+      ..setAttribute('placeholder', 'search')
       ..id = 'popup_search_memory';
     vmMemorySearchButton =
         PButton.icon('', FlutterIcons.search, title: 'Memory Search')
@@ -154,7 +175,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
           ..small()
           ..disabled = true;
-    heapPopup = PopupAutoCompleteView(
+    heapAutoCompletePopup = PopupAutoCompleteView(
       heapPopupList,
       screenDiv,
       vmSearchField,
@@ -194,7 +215,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       _mouseOutHover(evt);
     });
 
-    history = div(c: 'history-navigation-hidden');
+    history = div(c: 'history-navigation hidden');
 
     screenDiv.add(<CoreElement>[
       div(c: 'section')
@@ -220,7 +241,7 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      heapPopup, // Auto-complete popup
+      heapAutoCompletePopup,
       hoverPopup, // Hover card
       memoryChart = MemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
@@ -270,29 +291,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     framework.toast('Unable to find class $className', title: 'Error');
   }
 
-  // Show the spinner we're computing...
-  Spinner createSpinner(Table<Object> table) {
-//    final html.Rectangle r = table.element.element.getBoundingClientRect();
-//    final int topPosition = r.top + (r.height / 2).round();
-//    final int leftPosition = r.left + (r.width / 2).round();
-
-    final Spinner spinner = Spinner.centered();
-//TODO(terry): Cleanup
-    //final Spinner spinner = Spinner()..clazz('padded');
-/*
-    spinner.element.style
-      ..position = 'absolute'
-      ..top = '${topPosition}px'
-      ..left = '${leftPosition}px'
-      ..zIndex = '1000';
-*/
-    return spinner;
-  }
-
   Future<int> _selectInstanceInFieldHashCode(
       String fieldName, int instanceHashCode) async {
     final Table<Object> instanceTable = tableStack.elementAt(1);
-    final Spinner spinner = createSpinner(instanceTable);
+    final Spinner spinner = Spinner.centered();
     instanceTable.element.add(spinner);
 
     // There's an instances table up.
@@ -305,39 +307,42 @@ class MemoryScreen extends Screen with SetStateMixin {
       // TODO(terry): Enable below once expressions accessing private fields
       // TODO(terry): e.g., _extra.hashCode works again.  Better yet code that
       // TODO(terry): is more efficient that allows objectRef identity.
-/*
-      final evalResult = await evaluate(instance.objectRef, '$fieldName.hashCode');
-      int fieldHashCode =
-          evalResult != null ? int.parse(evalResult.valueAsString) : null;
+      //
+      // final evalResult = await evaluate(instance.objectRef, '$fieldName.hashCode');
+      // int fieldHashCode =
+      //     evalResult != null ? int.parse(evalResult.valueAsString) : null;
+      //
+      // if (fieldHashCode == instanceHashCode) {
+      //   // Found the object select the instance.
+      //   instanceTable.selectByIndex(row, scrollBehavior: 'auto');
+      //   spinner.remove();
+      //   return row;
+      // }
 
-      if (fieldHashCode == instanceHashCode) {
-        // Found the object select the instance.
-        instanceTable.selectByIndex(row, scrollBehavior: 'auto');
-        spinner.element.remove();
-        return row;
-      }
-*/
       // TODO(terry): Temporary workaround since evaluate fails on expressions
-      //  accessing a private field e.g., _extra.hashcode.
-      if (await memoryController.matchObject(instance.objectRef, fieldName, instanceHashCode)) {
+      // TODO(terry): accessing a private field e.g., _extra.hashcode.
+      if (await memoryController.matchObject(
+          instance.objectRef, fieldName, instanceHashCode)) {
         instanceTable.selectByIndex(row, scrollBehavior: 'auto');
-        spinner.element.remove();
+        spinner.remove();
         return row;
       }
 
       row++;
     }
 
-    spinner.element.remove();
+    spinner.remove();
 
-    framework.toast('Unable to find instance for field $fieldName [$hashCode]',
-        title: 'Error');
+    framework.toast(
+      'Unable to find instance for field $fieldName [$hashCode]',
+      title: 'Error',
+    );
 
     return -1;
   }
 
   void _resetHistory() {
-    history..clazz('history-navigation-hidden', removeOthers: true);
+    history..clazz('history-navigation', removeOthers: true)..clazz('hidden');
     history.clear();
     memoryPath = NavigationPath();
   }
@@ -345,19 +350,19 @@ class MemoryScreen extends Screen with SetStateMixin {
   /// Finish callback from search class selected (auto-complete).
   void _callbackPopupSelectClass([bool cancel]) {
     if (cancel) {
-      heapPopup.matcher.reset();
+      heapAutoCompletePopup.matcher.reset();
       heapPopupList.reset();
     } else {
       // Reset memory history selecting a class.
       _resetHistory();
 
       // Highlighted class is the class to select.
-      final String classSelected = heapPopupList.highlightedItem;
-      _selectClass(classSelected);
+      final String selectedClass = heapPopupList.highlightedItem;
+      _selectClass(selectedClass);
     }
 
     // Done with the popup.
-    heapPopup.hide();
+    heapAutoCompletePopup.hide();
   }
 
   Future<void> _selectInstanceByHashCode(int instanceHashCode) async {
@@ -384,6 +389,11 @@ class MemoryScreen extends Screen with SetStateMixin {
         title: 'Error');
   }
 
+  bool get _isClassSelectedAndInstancesReady =>
+      tableStack.first.hasSelection &&
+      tableStack.length == 2 &&
+      tableStack.last.data.isNotEmpty;
+
   void selectClassInstance(String className, int instanceHashCode) {
     // Remove selection in class list.
     tableStack.first.clearSelection();
@@ -401,9 +411,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
       // Wait until the class has been selected, 2 lists (class and instances
       // for the class exist) and the instances list has data.
-      if (tableStack.first.hasSelection &&
-          tableStack.length == 2 &&
-          tableStack.last.data.isNotEmpty) {
+      if (_isClassSelectedAndInstancesReady) {
         timer.cancel();
 
         await _selectInstanceByHashCode(instanceHashCode);
@@ -434,9 +442,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
       // Wait until the class has been selected, 2 lists (class and instances
       // for the class exist) and the instances list has data.
-      if (tableStack.first.hasSelection &&
-          tableStack.length == 2 &&
-          tableStack.last.data.isNotEmpty) {
+      if (_isClassSelectedAndInstancesReady) {
         timer.cancel();
 
         final int rowToSelect =
@@ -511,8 +517,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  List<String> _knownSnapshotClasses = [];
-  List<String> getAllClassesKnown() {
+  final List<String> _knownSnapshotClasses = [];
+  List<String> getKnownSnapshotClasses() {
     if (_knownSnapshotClasses.isEmpty) {
       final List<ClassHeapDetailStats> classesData = tableStack.first.data;
       for (ClassHeapDetailStats stat in classesData) {
@@ -529,15 +535,15 @@ class MemoryScreen extends Screen with SetStateMixin {
     // Subsequent snapshots will reset heapPopupList to empty.
     if (heapPopupList.isEmpty) {
       // Only fetch once between snapshots.
-      heapPopupList.setList(getAllClassesKnown());
+      heapPopupList.setList(getKnownSnapshotClasses());
     }
 
     if (vmSearchField.element.style.visibility != 'visible') {
       vmSearchField.element.style.visibility = 'visible';
       vmSearchField.element.focus();
-      heapPopup.show();
+      heapAutoCompletePopup.show();
     } else {
-      heapPopup.matcher.finish(false); // Cancel the popup auto-complete.
+      heapAutoCompletePopup.matcher.finish(false); // Cancel popup auto-complete
     }
   }
 
@@ -558,7 +564,7 @@ class MemoryScreen extends Screen with SetStateMixin {
           await memoryController.getAllocationProfile();
 
       // Reset known snapshot classes, just changed.
-      _knownSnapshotClasses = [];
+      _knownSnapshotClasses.clear();
 
       tableStack.first.setRows(heapStats);
       _updateStatus(heapStats);
@@ -728,7 +734,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       // Record this navigation.
       // TODO(terry): Is there something faster for identity compare?
-      final InstanceRef eval= await evaluate(row.objectRef, 'hashCode');
+      final InstanceRef eval = await evaluate(row.objectRef, 'hashCode');
       final int evalResult = int.parse(eval?.valueAsString);
 
       if (!fromMemoryHover &&
@@ -743,7 +749,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       if (memoryPath.isLastInBound) {
         // Re-construct memory navigation and display.
         history.clear();
-        memoryPath.addPathsLinks(history, _handleHistoryClicks);
+        memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
 
         history..clazz('history-navigation', removeOthers: true);
       }
@@ -752,7 +758,8 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   void _handleHistoryClicks(CoreElement element) {
     // Handle clicking in the history links.
-    if (element.tag == 'SPAN' && element.hasClass('history-link')) {
+    if (element.hasClass('history-link')) {
+      assert(element.tag == 'SPAN');
       final attrs = element.attributes;
 
       final int dataIndex = int.parse(attrs[NavigationState.dataIndex]);
@@ -791,9 +798,11 @@ class MemoryScreen extends Screen with SetStateMixin {
       history.clear();
       Timer(const Duration(milliseconds: 100), () {
         if (!memoryPath.isLastInBound) {
-          history..clazz('history-navigation-hidden', removeOthers: true);
+          history
+            ..clazz('history-navigation', removeOthers: true)
+            ..clazz('hidden');
         } else {
-          memoryPath.addPathsLinks(history, _handleHistoryClicks);
+          memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
         }
       });
     }
@@ -811,7 +820,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   // CSS :hover) as the mouse slides to the hover card. It gives the appearance
   // that hover is still active in the TD.
   void _mouseInHover(html.MouseEvent evt) {
-    CoreElement cell = _currentHoverSummary?.cell;
+    final CoreElement cell = _currentHoverSummary?.cell;
 
     if (cell != null) _tdCellHover = cell;
 
@@ -848,7 +857,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _maybeCloseHover() {
-    String hoverToClose = _currentHoverSummary?.data?.objectRef;
+    final String hoverToClose = _currentHoverSummary?.data?.objectRef;
     Timer(const Duration(milliseconds: 50), () {
       if (_tdCellHover == null &&
           hoverToClose == _currentHoverSummary?.data?.objectRef) {
@@ -857,6 +866,10 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
     });
   }
+
+  static const String dataHashCode = 'data-hashcode';
+  static const String dataOwningClass = 'data-owning-class';
+  static const String dataRef = 'data-ref';
 
   void hoverInstanceAllocations(HoverCellData<InstanceSummary> hover) async {
     if (hover.cell == null) {
@@ -879,7 +892,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         await getInboundReferences(hover.data.objectRef, 1000);
 
     if (refs == null) {
-      framework.toast("Instance ${hover.data.objectRef} - Sentinel/Expired.",
+      framework.toast('Instance ${hover.data.objectRef} - Sentinel/Expired.',
           title: 'Warning');
       return;
     }
@@ -982,24 +995,24 @@ class MemoryScreen extends Screen with SetStateMixin {
         // Get hashCode identity object id changes but hashCode is our identity.
         final hashCodeResult = await evaluate(hover.data.objectRef, 'hashCode');
 
-        liElem.setAttribute('data-hashcode', hashCodeResult?.valueAsString);
-        liElem.setAttribute('data-owning-class', owningAllocator);
-        liElem.setAttribute('data-ref', referenceName);
+        liElem.setAttribute(dataHashCode, hashCodeResult?.valueAsString);
+        liElem.setAttribute(dataOwningClass, owningAllocator);
+        liElem.setAttribute(dataRef, referenceName);
       }
       liElem.onClick.listen((evt) {
         final html.Element e = evt.currentTarget;
 
-        String className = e.getAttribute('data-owning-class');
+        String className = e.getAttribute(dataOwningClass);
         if (className == null || className.isEmpty) {
-          className = e.parent.getAttribute('data-owning-class');
+          className = e.parent.getAttribute(dataOwningClass);
         }
-        String refName = e.getAttribute('data-ref');
+        String refName = e.getAttribute(dataRef);
         if (refName == null || refName.isEmpty) {
-          refName = e.parent.getAttribute('data-ref');
+          refName = e.parent.getAttribute(dataRef);
         }
-        String objectHashCode = e.getAttribute('data-hashcode');
+        String objectHashCode = e.getAttribute(dataHashCode);
         if (objectHashCode == null || objectHashCode.isEmpty) {
-          objectHashCode = e.parent.getAttribute('data-hashcode');
+          objectHashCode = e.parent.getAttribute(dataHashCode);
         }
         final int instanceHashCode = int.parse(objectHashCode);
 
@@ -1165,6 +1178,9 @@ class NavigationState {
   CoreElement get separator => span(text: '>', c: 'history-separator');
 }
 
+// Used to manage all memory navigation from user clicks or hover card
+// navigation so user can visually understand the relationship of the current
+// memory object being displayed.
 class NavigationPath {
   final List<NavigationState> _path = [];
 
@@ -1221,7 +1237,8 @@ class NavigationPath {
 
   bool get isLastInstance => _path.isNotEmpty ? _path.last.isInstance : false;
 
-  void addPathsLinks(CoreElement parent, [clickHandler]) {
+  // Display all the NavigationStates in our _path as UI links.
+  void displayPathsAsLinks(CoreElement parent, [clickHandler]) {
     for (int index = 0; index < _path.length; index++) {
       final NavigationState state = _path[index];
       final bool lastLink = _path.length - 1 == index; // Last item in path?

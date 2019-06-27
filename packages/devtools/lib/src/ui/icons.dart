@@ -168,7 +168,6 @@ class FlutterIcons {
       UrlIcon('/icons/general/lightbulb_outline@2x.png');
 
   static const UrlIcon allocation = UrlIcon('/icons/memory/alloc_icon.png');
-
   static const UrlIcon search = UrlIcon('/icons/memory/ic_search.png');
   static const UrlIcon snapshot = UrlIcon('/icons/memory/snapshot_color.png');
   static const UrlIcon resetAccumulators =

@@ -50,6 +50,7 @@ class DebuggerScreen extends Screen {
           disabled: disabled,
           disabledTooltip: disabledTooltip,
         ) {
+    shortcutCallback = debuggerShortcuts;
     deviceStatus = StatusItem();
     addStatusItem(deviceStatus);
   }
@@ -83,6 +84,47 @@ class DebuggerScreen extends Screen {
   ConsoleArea consoleArea;
 
   ScriptsMatcher _matcher;
+
+  // Handle shortcut keys
+  //
+  // All shortcut keys start with CTRL key plus another alphanumeric key.
+  //
+  // Shortcut keys supported:
+  //
+  //   O - open (letter O) a script file, sets focus to the script_name field
+  //       in the Scripts views list.
+  //
+  bool debuggerShortcuts(bool ctrlKey, bool shiftKey, bool altKey, String key) {
+    if (ctrlKey) {
+      switch (key) {
+        case 'o': // CTRL + o
+          if (_matcher != null && _matcher.active) {
+            _matcher.cancel();
+            _matcher = null;
+          }
+          _popupView.element.style.display = 'inline';
+
+          if (!_popupView.isPoppedUp) {
+            _popupView.showPopup();
+            _hookupListeners(_popupView.scriptsView);
+          } else {
+            _popupView.scriptsView.clearScripts();
+            _popupView.scriptsView.element.element.style.display = 'inline';
+          }
+
+          // Open a file set focus to the 'popup_script_name' textfield
+          // accepts key strokes.
+          _popupView.popupTextfield.element.focus();
+
+          ga.select(ga.debugger, ga.openShortcut);
+
+          return true;
+          break;
+      }
+    }
+
+    return false;
+  }
 
   @override
   CoreElement createContent(Framework framework) {
@@ -147,7 +189,7 @@ class DebuggerScreen extends Screen {
     _popupTextfield =
         CoreElement('input', classes: 'form-control input-sm popup-textfield')
           ..setAttribute('type', 'text')
-          ..setAttribute('placeholder', 'filter')
+          ..setAttribute('placeholder', 'search')
           ..id = 'popup_script_name'
           ..focus(() {
             _matcher ??= ScriptsMatcher(debuggerState);
@@ -383,45 +425,6 @@ class DebuggerScreen extends Screen {
       consoleArea.appendText('${event.data}\n\n');
     });
 
-    // Handle shortcut keys
-    //
-    // All shortcut keys start with CTRL key plus another alphanumeric key.
-    //
-    // Shortcut keys supported:
-    //
-    //   O - open (letter O) a script file, sets focus to the script_name field
-    //       in the Scripts views list.
-    //
-    html.window.onKeyDown.listen((html.KeyboardEvent e) {
-      if (e.ctrlKey) {
-        switch (e.key) {
-          case 'o': // CTRL + o
-            if (_matcher != null && _matcher.active) {
-              _matcher.cancel();
-              _matcher = null;
-            }
-            _popupView.element.style.display = 'inline';
-
-            if (!_popupView.isPoppedUp) {
-              _popupView.showPopup();
-              _hookupListeners(_popupView.scriptsView);
-            } else {
-              _popupView.scriptsView.clearScripts();
-              _popupView.scriptsView.element.element.style.display = 'inline';
-            }
-
-            // Open a file set focus to the 'popup_script_name' textfield
-            // accepts key strokes.
-            _popupView.popupTextfield.element.focus();
-
-            ga.select(ga.debugger, ga.openShortcut);
-
-            e.preventDefault();
-            break;
-        }
-      }
-    });
-
     return screenDiv;
   }
 
@@ -539,7 +542,7 @@ class DebuggerScreen extends Screen {
     final CoreElement textfield =
         CoreElement('input', classes: 'form-control input-sm margin-left')
           ..setAttribute('type', 'text')
-          ..setAttribute('placeholder', 'filter')
+          ..setAttribute('placeholder', 'search')
           ..element.style.width = 'calc(100% - 105px)'
           ..id = 'script_name';
     final CoreElement scriptCountDiv = span(text: '-', c: 'counter')

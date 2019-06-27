@@ -395,7 +395,7 @@ class Table<T> extends Object with SetStateMixin {
       // click handler attached when we created the row instead of rebinding
       // it when rows are reused as we scroll.
       _dataForRow[tableRow.element] = dataObject;
-      void selectRow(CoreElement coreElement, Element row, int index) {
+      void selectRow(Element row, int index) {
         _select(row, _dataForRow[row], index);
       }
 
@@ -409,7 +409,7 @@ class Table<T> extends Object with SetStateMixin {
       _rowForIndex[index] = tableRow;
 
       if (!isReusableRow) {
-        tableRow.click(() => selectRow(tableRow, tableRow.element, index));
+        tableRow.click(() => selectRow(tableRow.element, index));
       }
 
       if (rowHeight != null) {
@@ -658,20 +658,20 @@ abstract class Column<T> {
     ColumnAlignment alignment = ColumnAlignment.left,
     this.fixedWidthPx,
     this.percentWidth,
-    this.wide = false,
     this.usesHtml = false,
     this.hover = false,
-    this.cssClass
-    }) : _alignment = alignment {
+    this.cssClass,
+  }) : _alignment = alignment {
     if (percentWidth != null) {
       percentWidth.clamp(0, 100);
     }
   }
 
-  Column.wide(this.title, {ColumnAlignment alignment = ColumnAlignment.left, this.wide = false,
-    this.usesHtml = false,
-    this.hover = false,
-    this.cssClass})
+  Column.wide(this.title,
+      {ColumnAlignment alignment = ColumnAlignment.left,
+      this.usesHtml = false,
+      this.hover = false,
+      this.cssClass})
       : _alignment = alignment,
         percentWidth = defaultWideColumnPercentWidth;
 
@@ -692,7 +692,6 @@ abstract class Column<T> {
 
   final ColumnAlignment _alignment;
 
-  final bool wide;
   final bool usesHtml;
   final String cssClass;
   final bool hover;

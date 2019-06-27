@@ -120,13 +120,13 @@ class MemoryController {
   // Used to find the object which allocated/references the object being viewd.
   Future<bool> matchObject(
       String objectRef, String fieldName, int instanceHashCode) async {
-    Instance instance = await getObject(objectRef);
-    List<BoundField> fields = instance.fields;
+    final Instance instance = await getObject(objectRef);
+    final List<BoundField> fields = instance.fields;
     for (var field in fields) {
       if (field.decl.name == fieldName) {
-        InstanceRef ref = field.value;
+        final InstanceRef ref = field.value;
         final evalResult = await evaluate(ref.id, 'hashCode');
-        int objHashCode = int.parse(evalResult?.valueAsString);
+        final int objHashCode = int.parse(evalResult?.valueAsString);
         if (objHashCode == instanceHashCode) {
           return true;
         }
