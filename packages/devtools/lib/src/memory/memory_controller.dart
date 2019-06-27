@@ -8,6 +8,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_protocol.dart';
+import 'memory_service.dart';
 
 /// This class contains the business logic for [memory.dart].
 ///
@@ -95,6 +96,7 @@ class MemoryController {
       maxInstances,
       classId: classRef,
     );
+
     return instanceSet.instances
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
@@ -111,5 +113,26 @@ class MemoryController {
       _isolateId,
       gc: true,
     );
+  }
+
+  // Temporary hack to allow accessing private fields(e.g., _extra) using eval
+  // of '_extra.hashCode' to fetch the hashCode of the object of that field.
+  // Used to find the object which allocated/references the object being viewd.
+  Future<bool> matchObject(
+      String objectRef, String fieldName, int instanceHashCode) async {
+    Instance instance = await getObject(objectRef);
+    List<BoundField> fields = instance.fields;
+    for (var field in fields) {
+      if (field.decl.name == fieldName) {
+        InstanceRef ref = field.value;
+        final evalResult = await evaluate(ref.id, 'hashCode');
+        int objHashCode = int.parse(evalResult?.valueAsString);
+        if (objHashCode == instanceHashCode) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

@@ -260,7 +260,13 @@ table th.wide {
     cursor: pointer;
 }
 
-.allocation-popup {
+.allocation-hover {
+    background-color: lightblue;;
+    cursor: pointer;
+    float: right;
+}
+
+.allocation-hover-card {
     display: none;
     height: 25%;
     position: absolute;
@@ -269,15 +275,16 @@ table th.wide {
     border: 4px solid #eee;
     overflow-y: scroll;
     width: 30em;
+    z-index: 101; /* Keep hover top-most. */
 }
 
-.allocation-popup ul {
+.allocation-hover-card ul {
     list-style-type: square;
     list-style-position: outside;
     list-style-image: none;
 }
 
-.allocation-popup ul li {
+.allocation-hover-card ul li {
     padding: 5px;
 }
 
@@ -638,7 +645,7 @@ div.tabnav {
 }
 
 .popup-view {
-    z-index: 1000;
+    z-index: 100;
     position: absolute;
     height: calc(30%);
     color: var(--header-color);

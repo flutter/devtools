@@ -13,7 +13,6 @@ import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'utils.dart';
 
-
 class HoverCellData<T> {
   HoverCellData(this.cell, this.data);
 

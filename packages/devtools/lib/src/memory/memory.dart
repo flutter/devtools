@@ -61,6 +61,9 @@ class MemoryScreen extends Screen with SetStateMixin {
   PopupListView<String> heapPopupList;
   PopupAutoCompleteView heapPopup;
 
+  // Hover card shows where allocation occurred and references to instance.
+  final CoreElement hoverPopup = div(c: 'allocation-hover-card');
+
   PButton vmMemorySearchButton;
   PButton vmMemorySnapshotButton;
 
@@ -181,6 +184,16 @@ class MemoryScreen extends Screen with SetStateMixin {
       memoryChart.pause();
     });
 
+    // Handle keeping card active while mouse in the hover card.
+    hoverPopup.onMouseOver.listen((html.MouseEvent evt) {
+      _mouseInHover(evt);
+    });
+
+    // Handle hiding card once mouse is outside of the hover card.
+    hoverPopup.onMouseLeave.listen((html.MouseEvent evt) {
+      _mouseOutHover(evt);
+    });
+
     history = div(c: 'history-navigation-hidden');
 
     screenDiv.add(<CoreElement>[
@@ -208,6 +221,7 @@ class MemoryScreen extends Screen with SetStateMixin {
             ]),
         ]),
       heapPopup, // Auto-complete popup
+      hoverPopup, // Hover card
       memoryChart = MemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
@@ -276,7 +290,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Future<int> _selectInstanceInFieldHashCode(
-      String field, String hashCode) async {
+      String fieldName, int instanceHashCode) async {
     final Table<Object> instanceTable = tableStack.elementAt(1);
     final Spinner spinner = createSpinner(instanceTable);
     instanceTable.element.add(spinner);
@@ -287,19 +301,36 @@ class MemoryScreen extends Screen with SetStateMixin {
     for (InstanceSummary instance in instances) {
       // Check the field in each instance looking to find the object being held
       // (the hashCode passed in matches the particular field's hashCode)
-      final evalResult = await evaluate(instance.objectRef, '$field.hashCode');
-      if (evalResult != null && evalResult.valueAsString == hashCode) {
+
+      // TODO(terry): Enable below once expressions accessing private fields
+      // TODO(terry): e.g., _extra.hashCode works again.  Better yet code that
+      // TODO(terry): is more efficient that allows objectRef identity.
+/*
+      final evalResult = await evaluate(instance.objectRef, '$fieldName.hashCode');
+      int fieldHashCode =
+          evalResult != null ? int.parse(evalResult.valueAsString) : null;
+
+      if (fieldHashCode == instanceHashCode) {
         // Found the object select the instance.
         instanceTable.selectByIndex(row, scrollBehavior: 'auto');
         spinner.element.remove();
         return row;
       }
+*/
+      // TODO(terry): Temporary workaround since evaluate fails on expressions
+      //  accessing a private field e.g., _extra.hashcode.
+      if (await memoryController.matchObject(instance.objectRef, fieldName, instanceHashCode)) {
+        instanceTable.selectByIndex(row, scrollBehavior: 'auto');
+        spinner.element.remove();
+        return row;
+      }
+
       row++;
     }
 
     spinner.element.remove();
 
-    framework.toast('Unable to find instance for field $field [$hashCode]',
+    framework.toast('Unable to find instance for field $fieldName [$hashCode]',
         title: 'Error');
 
     return -1;
@@ -329,27 +360,31 @@ class MemoryScreen extends Screen with SetStateMixin {
     heapPopup.hide();
   }
 
-  Future<void> _selectInstanceByHashCode(String objectHashCode) async {
+  Future<void> _selectInstanceByHashCode(int instanceHashCode) async {
     // There's an instances table up.
     final Table<Object> instanceTable = tableStack.last;
     final List<InstanceSummary> instances = instanceTable.data;
     int row = 0;
     for (InstanceSummary instance in instances) {
       // Check each instance looking to find a particular object.
-      final evalResult = await evaluate(instance.objectRef, 'hashCode');
-      if (evalResult != null && evalResult.valueAsString == objectHashCode) {
+      // TODO(terry): Is there something faster for objectRef identity check?
+      final eval = await evaluate(instance.objectRef, 'hashCode');
+      final int evalHashCode = int.parse(eval?.valueAsString);
+
+      if (evalHashCode == instanceHashCode) {
         // Found the object select the instance.
         instanceTable.selectByIndex(row, scrollBehavior: 'auto');
         return;
       }
+
       row++;
     }
 
-    framework.toast('Unable to find instance [$objectHashCode]',
+    framework.toast('Unable to find instance [$instanceHashCode]',
         title: 'Error');
   }
 
-  void selectClassInstance(String className, String objectHashCode) {
+  void selectClassInstance(String className, int instanceHashCode) {
     // Remove selection in class list.
     tableStack.first.clearSelection();
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
@@ -371,7 +406,7 @@ class MemoryScreen extends Screen with SetStateMixin {
           tableStack.last.data.isNotEmpty) {
         timer.cancel();
 
-        await _selectInstanceByHashCode(objectHashCode);
+        await _selectInstanceByHashCode(instanceHashCode);
       }
     });
   }
@@ -379,7 +414,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   void selectClassAndInstanceInField(
     String className,
     String field,
-    String hashCode,
+    int instanceHashCode,
   ) async {
     fromMemoryHover = true;
 
@@ -405,7 +440,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         timer.cancel();
 
         final int rowToSelect =
-            await _selectInstanceInFieldHashCode(field, hashCode);
+            await _selectInstanceInFieldHashCode(field, instanceHashCode);
         if (rowToSelect != -1) {
           // Found the instance that refs the object (hashCode passed). Mark the
           // field name (fieldReference).  When the next instance memory path is
@@ -617,9 +652,6 @@ class MemoryScreen extends Screen with SetStateMixin {
     return table;
   }
 
-  // Popup used to show where allocation occurred and references to instance.
-  final CoreElement instancePopup = div(c: 'allocation-popup');
-
   Future<Table<InstanceSummary>> _createInstanceListTableView(
       ClassHeapDetailStats row) async {
     final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
@@ -695,8 +727,9 @@ class MemoryScreen extends Screen with SetStateMixin {
       memoryDataView.showFields(instance != null ? instance.fields : []);
 
       // Record this navigation.
-      final InstanceRef hashCodeResult =
-          await evaluate(row.objectRef, 'hashCode');
+      // TODO(terry): Is there something faster for identity compare?
+      final InstanceRef eval= await evaluate(row.objectRef, 'hashCode');
+      final int evalResult = int.parse(eval?.valueAsString);
 
       if (!fromMemoryHover &&
           (memoryPath.isLastInBound || memoryPath.isLastInstance)) {
@@ -705,10 +738,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
 
       // Record the memory navigation.
-      memoryPath.add(NavigationState.instanceSelect(
-        row.className,
-        hashCodeResult.valueAsString,
-      ));
+      memoryPath.add(NavigationState.instanceSelect(row.className, evalResult));
 
       if (memoryPath.isLastInBound) {
         // Re-construct memory navigation and display.
@@ -731,17 +761,16 @@ class MemoryScreen extends Screen with SetStateMixin {
       final String dataField = attrs.containsKey(NavigationState.dataField)
           ? attrs[NavigationState.dataField]
           : '';
-      final String dataHashCode =
-          attrs.containsKey(NavigationState.dataHashCode)
-              ? attrs[NavigationState.dataHashCode]
-              : '';
+      final int dataHashCode = attrs.containsKey(NavigationState.dataHashCode)
+          ? int.parse(attrs[NavigationState.dataHashCode])
+          : null;
 
       final NavigationState state = memoryPath.get(dataIndex);
 
       // The clicked link's attributes and real NavigationState should match.
       assert(dataClass == state.className &&
           dataField == state.field &&
-          dataHashCode == state.objectHashCode);
+          dataHashCode == state.instanceHashCode);
 
       // Prune remove this state and to the end as well.
       memoryPath.remove(state);
@@ -749,12 +778,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       if (state.isClass) {
         _selectClass(state.className);
       } else if (state.isInstance) {
-        selectClassInstance(state.className, state.objectHashCode);
+        selectClassInstance(state.className, state.instanceHashCode);
       } else if (state.isInbound) {
         // Same as selecting the class instance but record the field, don't
         // need to match following the refs.
         memoryPath.fieldReference = state.field;
-        selectClassInstance(state.className, state.objectHashCode);
+        selectClassInstance(state.className, state.instanceHashCode);
       } else {
         assert(false, 'Unknown NavigationState');
       }
@@ -770,20 +799,91 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
+  // TD element used to simulate hover state when hover card is visible. When
+  // not null the mouse is actively in the hover card.
+  CoreElement _tdCellHover;
+
+  // InstanceSummary of the visible hover card.
+  HoverCellData<InstanceSummary> _currentHoverSummary;
+
+  // This is the listener for the hover card (hoverPopup's) onMouseOver, it's
+  // designed to keep the hover state (background-color for the TD same as the
+  // CSS :hover) as the mouse slides to the hover card. It gives the appearance
+  // that hover is still active in the TD.
+  void _mouseInHover(html.MouseEvent evt) {
+    CoreElement cell = _currentHoverSummary?.cell;
+
+    if (cell != null) _tdCellHover = cell;
+
+    // Simulate the :hover when the mouse in hover card.
+    _tdCellHover?.clazz('allocation-hover', removeOthers: true);
+    _tdCellHover?.clazz('left');
+  }
+
+  // This is the listener for the hover card (hoverPopup's) onMouseLeave, it's
+  // designed to end the hover state (background-color for the TD same as the
+  // CSS :hover) as the mouse slides out of the hover card.  It gives the
+  // appearance that the hover is not active.
+  void _mouseOutHover(html.MouseEvent evt) {
+    // Done simulating hover, hover card is closing.  Reset to CSS handling the
+    // :hover for the allocation class.
+    _tdCellHover?.clazz('allocation', removeOthers: true);
+    _tdCellHover?.clazz('left');
+
+    if (_tdCellHover != null) _tdCellHover = null;
+
+    _currentHoverSummary = null;
+
+    // We're really leaving hover so close it.
+    hoverPopup.clear(); // Remove all children.
+    hoverPopup.display = 'none';
+  }
+
+  void _closeHover(HoverCellData<InstanceSummary> newCurrent) {
+    // We're really leaving hover so close it.
+    hoverPopup.clear(); // Remove all children.
+    hoverPopup.display = 'none';
+
+    _currentHoverSummary = newCurrent;
+  }
+
+  void _maybeCloseHover() {
+    String hoverToClose = _currentHoverSummary?.data?.objectRef;
+    Timer(const Duration(milliseconds: 50), () {
+      if (_tdCellHover == null &&
+          hoverToClose == _currentHoverSummary?.data?.objectRef) {
+        // We're really leaving hover so close it.
+        _closeHover(null);
+      }
+    });
+  }
+
   void hoverInstanceAllocations(HoverCellData<InstanceSummary> hover) async {
     if (hover.cell == null) {
-      // Hover out.
-      instancePopup.clear(); // Remove all children.
-      instancePopup.display = 'none';
+      // Hover out of the cell.
+      _maybeCloseHover();
       return;
     }
 
+    // Hover in the cell.
+    if (hover.data != _currentHoverSummary?.data) {
+      // Selecting a different instance that what's current.
+      _closeHover(hover);
+    }
+
     // Entering Hover again?
-    if (instancePopup.element.children.isNotEmpty) return;
+    if (hoverPopup.element.children.isNotEmpty) return;
 
     final CoreElement ulElem = ul();
     final InboundReferences refs =
         await getInboundReferences(hover.data.objectRef, 1000);
+
+    if (refs == null) {
+      framework.toast("Instance ${hover.data.objectRef} - Sentinel/Expired.",
+          title: 'Warning');
+      return;
+    }
+
     ulElem.add(li(c: 'allocation-li-title')
       ..add([
         span(text: 'Allocated', c: 'allocated-by-class-title'),
@@ -878,11 +978,11 @@ class MemoryScreen extends Screen with SetStateMixin {
         liElem.clazz('li-allocation-abstract');
       }
       if (!owningAllocatorIsAbstract && owningAllocator.isNotEmpty) {
-        // TODO(terry): Expensive for each hover need better VMService identity.
+        // TODO(terry): Expensive need better VMService identity for objectRef.
         // Get hashCode identity object id changes but hashCode is our identity.
         final hashCodeResult = await evaluate(hover.data.objectRef, 'hashCode');
-        liElem.setAttribute('data-hashcode', hashCodeResult.valueAsString);
 
+        liElem.setAttribute('data-hashcode', hashCodeResult?.valueAsString);
         liElem.setAttribute('data-owning-class', owningAllocator);
         liElem.setAttribute('data-ref', referenceName);
       }
@@ -901,17 +1001,17 @@ class MemoryScreen extends Screen with SetStateMixin {
         if (objectHashCode == null || objectHashCode.isEmpty) {
           objectHashCode = e.parent.getAttribute('data-hashcode');
         }
+        final int instanceHashCode = int.parse(objectHashCode);
 
         // Done with the hover - close it down.
-        instancePopup.clear(); // Remove all children.
-        instancePopup.element.style.display = 'none';
+        _closeHover(null);
 
         // Make sure its a known class (not abstract).
         if (className.isNotEmpty &&
             refName.isNotEmpty &&
-            objectHashCode.isNotEmpty) {
+            instanceHashCode != null) {
           // Display just the instances of classes with ref
-          selectClassAndInstanceInField(className, refName, objectHashCode);
+          selectClassAndInstanceInField(className, refName, instanceHashCode);
         }
       });
       ulElem.add(liElem);
@@ -922,14 +1022,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       final int top = hover.cell.top + 10;
       final int left = hover.cell.left + 21;
 
-      instancePopup.clear(); // TODO(terry): Workaround multiple ULs?
+      hoverPopup.clear(); // TODO(terry): Workaround multiple ULs?
 
-      instancePopup.add(ulElem);
-
-      hover.cell.add(instancePopup);
+      hoverPopup.add(ulElem);
 
       // Display the popup.
-      instancePopup
+      hoverPopup
         ..display = 'block'
         ..element.style.top = '${top}px'
         ..element.style.left = '${left}px'
@@ -1009,10 +1107,8 @@ class MemoryScreen extends Screen with SetStateMixin {
 ///      _hashCode [hashCode of instance]
 ///      field [field of parent class that has ref]
 class NavigationState {
-  NavigationState._()
-      : _className = '',
-        _hashCode = '';
-  NavigationState.classSelect(this._className) : _hashCode = '';
+  NavigationState._() : _className = '';
+  NavigationState.classSelect(this._className);
   NavigationState.instanceSelect(this._className, this._hashCode);
 
   static const String dataIndex = 'data-index';
@@ -1021,19 +1117,19 @@ class NavigationState {
   static const String dataHashCode = 'data-hashcode';
 
   final String _className;
-  final String _hashCode;
+  int _hashCode;
 
   String field = '';
 
   String get className => _className;
-  String get objectHashCode => _hashCode;
+  int get instanceHashCode => _hashCode;
 
   bool get isClass =>
-      _className.isNotEmpty && field.isEmpty && _hashCode.isEmpty;
+      _className.isNotEmpty && field.isEmpty && _hashCode == null;
   bool get isInstance =>
-      _className.isNotEmpty && field.isEmpty && _hashCode.isNotEmpty;
+      _className.isNotEmpty && field.isEmpty && _hashCode != null;
   bool get isInbound =>
-      _className.isNotEmpty && field.isNotEmpty && _hashCode.isNotEmpty;
+      _className.isNotEmpty && field.isNotEmpty && _hashCode != null;
 
   // Create a span with all information to navigate through the class list and
   // instance list. The span element will look like:
@@ -1059,8 +1155,8 @@ class NavigationState {
     spanElem.setAttribute(dataIndex, '$index');
     spanElem.setAttribute(dataClass, className);
     if (field.isNotEmpty) spanElem.setAttribute(dataField, field);
-    if (objectHashCode.isNotEmpty) {
-      spanElem.setAttribute(dataHashCode, objectHashCode);
+    if (instanceHashCode != null) {
+      spanElem.setAttribute(dataHashCode, instanceHashCode.toString());
     }
 
     return spanElem;
@@ -1111,7 +1207,7 @@ class NavigationPath {
     for (int row = 0; row < _path.length; row++) {
       final NavigationState state = _path[row];
       if (stateToRemove == state) {
-        assert(state.objectHashCode == stateToRemove.objectHashCode &&
+        assert(state.instanceHashCode == stateToRemove.instanceHashCode &&
             state.className == stateToRemove.className &&
             state.field == stateToRemove.field);
         _path.removeRange(row, _path.length);

@@ -216,13 +216,13 @@ class InstanceSummary {
   InstanceSummary(this._classRef, this._className, this._objectRef);
 
   String get classRef => _classRef;
-  String _classRef;
+  final String _classRef;
 
   String get objectRef => _objectRef;
-  String _objectRef;
+  final String _objectRef;
 
   String get className => _className;
-  String _className;
+  final String _className;
 
   @override
   String toString() => '[InstanceSummary id: $objectRef, class: $classRef]';

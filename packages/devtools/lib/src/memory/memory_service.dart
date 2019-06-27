@@ -15,8 +15,10 @@ Future<InstanceRef> evaluate(String objectRef, String expression) async {
     case InstanceRef:
       return InstanceRef.parse(result.json);
       break;
+    case ErrorRef:
+      return null;
     default:
-      print('ERROR: Unknown evaluate type.');
+      print('ERROR: Unknown evaluate type ${result.runtimeType}.');
   }
 
   return null;
@@ -30,12 +32,13 @@ Future<InboundReferences> getInboundReferences(
     'targetId': objectRef,
     'limit': maxInstances,
   };
-
   final Response response = await serviceManager.service.callMethod(
     '_getInboundReferences',
     isolateId: _isolateId,
     args: params,
   );
+
+  if (response.type == 'Sentinel') return null;
 
   return InboundReferences(response.json);
 }
