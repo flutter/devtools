@@ -84,7 +84,7 @@ should be viewed as a top-down stack trace, where the top-most stack frame calls
 stack frame represents the amount of time it consumed the CPU. Stack frames that consume a lot of CPU time may be a good
 place to look for possible performance improvements.
 
-<img src="images/cpu_profile_flame_chart.png" width="800" />
+<img src="images/cpu_profiler_flame_chart.png" width="800" />
 
 ### Call Tree
 
@@ -95,7 +95,7 @@ meaning a method can be expanded to show its _callees_.
 - **Method**: name of the called method
 - **Source**: file path for the method call site
 
-<img src="images/cpu_profile_call_tree.png" width="800" />
+<img src="images/cpu_profiler_call_tree.png" width="800" />
 
 ### Bottom Up
 
@@ -112,7 +112,7 @@ is the self time of the callee when being called by the caller. Using the exampl
 - **Method**: name of the called method
 - **Source**: file path for the method call site
 
-<img src="images/cpu_profile_bottom_up.png" width="800" />
+<img src="images/cpu_profiler_bottom_up.png" width="800" />
 
 ## Import and Export
 

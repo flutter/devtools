@@ -232,13 +232,12 @@ void main() {
     });
 
     test('getSimpleStackFrameName', () {
-      // Ampersand and period cases.
       String name =
           '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
           'SchedulerBinding.handleBeginFrame';
       expect(
         getSimpleStackFrameName(name),
-        equals('_WidgetsFlutterBinding.handleBeginFrame'),
+        equals('SchedulerBinding.handleBeginFrame'),
       );
 
       name =
@@ -246,21 +245,23 @@ void main() {
           'SchedulerBinding.handleBeginFrame.<anonymous closure>';
       expect(
         getSimpleStackFrameName(name),
-        equals('_WidgetsFlutterBinding.handleBeginFrame.<anonymous closure>'),
+        equals('SchedulerBinding.handleBeginFrame.<closure>'),
       );
 
       name = '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
-          'AndHashCode&SetMixin.toList';
-      expect(getSimpleStackFrameName(name),
-          equals('__CompactLinkedHashSet.toList'));
+          'AndHashCode&_SetMixin.toList';
+      expect(getSimpleStackFrameName(name), equals('_SetMixin.toList'));
 
-      // Ampersand and no period.
+      name = 'ClassName&SuperClassName&\$BadClassName.method';
+      expect(getSimpleStackFrameName(name), equals('\$BadClassName.method'));
+
+      // Ampersand as C++ reference.
       name =
           'dart::DartEntry::InvokeFunction(dart::Function const&, dart::Array '
           'const&, dart::Array const&, unsigned long)';
       expect(getSimpleStackFrameName(name), equals(name));
 
-      // Period and no ampersand.
+      // No leading class names.
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
     });
