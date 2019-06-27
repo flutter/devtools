@@ -19,6 +19,18 @@ const Icon exportIcon = MaterialIcon(
   iconWidth: 18,
 );
 
+const Icon recordPrimary = MaterialIcon(
+  'fiber_manual_record',
+  defaultPrimaryButtonIconColor,
+);
+
+const Icon record = MaterialIcon(
+  'fiber_manual_record',
+  defaultButtonIconColor,
+);
+
+const Icon stop = MaterialIcon('stop', defaultButtonIconColor);
+
 /// Class for icons consistent with
 /// https://docs.flutter.io/flutter/material/Icons-class.html
 class MaterialIcon extends Icon {

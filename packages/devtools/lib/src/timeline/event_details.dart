@@ -82,7 +82,7 @@ class EventDetails extends CoreElement {
         // is useful for GPU events as well (tips, links to docs, etc).
         gpuEventDetails = div(
           text: 'CPU profiling is not available for GPU events.',
-          c: 'message',
+          c: 'centered-single-line-message',
         )..hidden(true),
       ]);
 

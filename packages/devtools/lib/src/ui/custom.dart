@@ -43,12 +43,13 @@ class ProgressElement extends CoreElement {
 }
 
 class Spinner extends CoreElement {
-  Spinner._({List<String> classes = const []}) : super('div') {
+  Spinner({List<String> classes = const []}) : super('div') {
     clazz('spinner');
     classes.forEach(clazz);
   }
 
-  static Spinner centered() => Spinner._(classes: ['centered']);
+  static Spinner centered({List<String> classes = const []}) =>
+      Spinner(classes: ['centered']..addAll(classes));
 
   void remove() => element.remove();
 }

@@ -113,7 +113,7 @@ abstract class CpuProfiler extends CoreElement {
     showingMessage = true;
     add(message
       ..id = 'cpu-profiler-message'
-      ..clazz('message'));
+      ..clazz('centered-single-line-message'));
   }
 
   void _removeMessage() {

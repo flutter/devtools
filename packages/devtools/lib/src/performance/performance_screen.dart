@@ -12,23 +12,9 @@ import '../profiler/cpu_profiler.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/html_icon_renderer.dart';
-import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
-import '../ui/theme.dart';
 import 'performance_controller.dart';
-
-const Icon record = MaterialIcon(
-  'fiber_manual_record',
-  defaultPrimaryButtonIconColor,
-);
-
-const Icon instructionsRecord = MaterialIcon(
-  'fiber_manual_record',
-  defaultButtonIconColor,
-);
-
-const Icon stop = MaterialIcon('stop', defaultButtonIconColor);
 
 class PerformanceScreen extends Screen {
   PerformanceScreen()
@@ -37,21 +23,21 @@ class PerformanceScreen extends Screen {
             id: 'performance',
             iconClass: 'octicon-dashboard');
 
-  PerformanceController performanceController = PerformanceController();
+  final PerformanceController _performanceController = PerformanceController();
 
-  PButton startRecordingButton;
+  PButton _startRecordingButton;
 
-  PButton stopRecordingButton;
+  PButton _stopRecordingButton;
 
-  PButton clearButton;
+  PButton _clearButton;
 
-  CoreElement profilingInstructions;
+  CoreElement _profilingInstructions;
 
-  CoreElement recordingMessage;
+  CoreElement _recordingMessage;
 
-  CpuProfilerTabNav tabNav;
+  CpuProfilerTabNav _tabNav;
 
-  _CpuProfiler cpuProfiler;
+  _CpuProfiler _cpuProfiler;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -66,45 +52,47 @@ class PerformanceScreen extends Screen {
         ..add([
           div(c: 'btn-group')
             ..add([
-              startRecordingButton,
-              stopRecordingButton,
+              _startRecordingButton,
+              _stopRecordingButton,
             ]),
-          clearButton,
+          _clearButton,
         ]),
       div(c: 'section')
         ..layoutVertical()
         ..flex()
         ..add([
-          tabNav.element..hidden(true),
+          _tabNav.element..hidden(true),
           div(c: 'profiler-container section-border')
-            ..add(cpuProfiler..hidden(true)),
+            ..add([
+              _cpuProfiler..hidden(true),
+              _profilingInstructions,
+              _recordingMessage..hidden(true)
+            ]),
         ]),
-      profilingInstructions,
-      recordingMessage..hidden(true),
     ]);
 
     return screenDiv;
   }
 
   void _initContent() {
-    startRecordingButton = PButton.icon('Record', record)
+    _startRecordingButton = PButton.icon('Record', recordPrimary)
       ..small()
       ..primary()
       ..click(_startRecording);
 
-    stopRecordingButton = PButton.icon('Stop', stop)
+    _stopRecordingButton = PButton.icon('Stop', stop)
       ..small()
       ..clazz('margin-left')
       ..disabled = true
       ..click(_stopRecording);
 
-    clearButton = PButton.icon('Clear', clearIcon)
+    _clearButton = PButton.icon('Clear', clearIcon)
       ..small()
       ..clazz('margin-left')
       ..setAttribute('title', 'Clear timeline')
       ..click(_clear);
 
-    profilingInstructions = div(c: 'message')
+    _profilingInstructions = div(c: 'center-in-parent instruction-container')
       ..layoutVertical()
       ..flex()
       ..add([
@@ -113,7 +101,7 @@ class PerformanceScreen extends Screen {
           ..flex()
           ..add([
             div(text: 'Click the record button '),
-            createIconElement(instructionsRecord),
+            createIconElement(record),
             div(text: 'to start recording a CPU profile.')
           ]),
         div(c: 'instruction-message')
@@ -126,18 +114,18 @@ class PerformanceScreen extends Screen {
           ]),
       ]);
 
-    recordingMessage = div(c: 'message')
+    _recordingMessage = div(c: 'center-in-parent')
       ..layoutVertical()
       ..flex()
       ..add([
         div(text: 'Recording', c: 'recording-message'),
-        Spinner.centered(),
+        Spinner.centered(classes: ['recording-spinner']),
       ]);
 
-    cpuProfiler = _CpuProfiler(performanceController);
+    _cpuProfiler = _CpuProfiler(_performanceController);
 
-    tabNav = CpuProfilerTabNav(
-      cpuProfiler,
+    _tabNav = CpuProfilerTabNav(
+      _cpuProfiler,
       CpuProfilerTabOrder(
         first: CpuProfilerViewType.callTree,
         second: CpuProfilerViewType.bottomUp,
@@ -147,36 +135,36 @@ class PerformanceScreen extends Screen {
   }
 
   void _startRecording() {
-    performanceController.startRecording();
+    _performanceController.startRecording();
     _updateCpuProfilerVisibility(hidden: true);
     _updateButtonStates();
-    profilingInstructions.hidden(true);
-    recordingMessage.hidden(false);
+    _profilingInstructions.hidden(true);
+    _recordingMessage.hidden(false);
   }
 
   void _stopRecording() async {
-    performanceController.stopRecording();
-    recordingMessage.hidden(true);
+    _performanceController.stopRecording();
+    _recordingMessage.hidden(true);
     _updateCpuProfilerVisibility(hidden: false);
     _updateButtonStates();
-    await cpuProfiler.update();
+    await _cpuProfiler.update();
   }
 
   void _clear() {
-    performanceController.reset();
+    _performanceController.reset();
     _updateCpuProfilerVisibility(hidden: true);
-    profilingInstructions.hidden(false);
+    _profilingInstructions.hidden(false);
   }
 
   void _updateButtonStates() {
-    startRecordingButton.disabled = performanceController.recording;
-    clearButton.disabled = performanceController.recording;
-    stopRecordingButton.disabled = !performanceController.recording;
+    _startRecordingButton.disabled = _performanceController.recording;
+    _clearButton.disabled = _performanceController.recording;
+    _stopRecordingButton.disabled = !_performanceController.recording;
   }
 
   void _updateCpuProfilerVisibility({@required bool hidden}) {
-    tabNav.element.hidden(hidden);
-    cpuProfiler.hidden(hidden);
+    _tabNav.element.hidden(hidden);
+    _cpuProfiler.hidden(hidden);
   }
 }
 
