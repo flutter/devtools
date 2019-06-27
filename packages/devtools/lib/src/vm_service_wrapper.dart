@@ -306,9 +306,13 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<TimelineFlags> getVMTimelineFlags() async {
+  Future<TimelineFlags> getVMTimelineFlags() {
     return _trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());
   }
+
+  @override
+  Future<Timestamp> getVMTimelineMicros() =>
+      _trackFuture('getVMTimelineMicros', _vmService.getVMTimelineMicros());
 
   @override
   Future<Version> getVersion() =>
