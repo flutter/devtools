@@ -10,8 +10,9 @@ import 'cpu_profiler.dart';
 
 const _timeColumnWidthPx = 145;
 
-abstract class CpuCallTree extends CpuProfilerView {
-  CpuCallTree() : super(CpuProfilerViewType.callTree) {
+class CpuCallTree extends CpuProfilerView {
+  CpuCallTree(CpuProfileDataProvider getProfileData)
+      : super(CpuProfilerViewType.callTree, getProfileData) {
     flex();
     layoutVertical();
 
@@ -50,8 +51,9 @@ abstract class CpuCallTree extends CpuProfilerView {
   }
 }
 
-abstract class CpuBottomUp extends CpuProfilerView {
-  CpuBottomUp() : super(CpuProfilerViewType.bottomUp) {
+class CpuBottomUp extends CpuProfilerView {
+  CpuBottomUp(CpuProfileDataProvider getProfileData)
+      : super(CpuProfilerViewType.bottomUp, getProfileData) {
     flex();
     layoutVertical();
     _init();

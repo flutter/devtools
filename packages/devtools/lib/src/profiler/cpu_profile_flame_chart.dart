@@ -11,8 +11,9 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
 import 'flame_chart_canvas.dart';
 
-abstract class CpuFlameChart extends CpuProfilerView {
-  CpuFlameChart() : super(CpuProfilerViewType.flameChart) {
+class CpuFlameChart extends CpuProfilerView {
+  CpuFlameChart(CpuProfileDataProvider getProfileData)
+      : super(CpuProfilerViewType.flameChart, getProfileData) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
       ..hidden(true);

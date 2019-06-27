@@ -122,14 +122,17 @@ abstract class CpuProfiler extends CoreElement {
   }
 }
 
+typedef CpuProfileDataProvider = CpuProfileData Function();
+
 abstract class CpuProfilerView extends CoreElement {
-  CpuProfilerView(this.type) : super('div', classes: 'cpu-profiler-section');
+  CpuProfilerView(this.type, this.getProfileData)
+      : super('div', classes: 'cpu-profiler-section');
 
   final CpuProfilerViewType type;
 
-  bool viewNeedsRebuild = false;
+  final CpuProfileDataProvider getProfileData;
 
-  CpuProfileData getProfileData();
+  bool viewNeedsRebuild = false;
 
   void rebuildView();
 

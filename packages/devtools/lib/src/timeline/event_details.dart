@@ -7,7 +7,6 @@ import 'package:js/js.dart';
 
 import '../globals.dart';
 import '../profiler/cpu_profile_flame_chart.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_tables.dart';
 import '../profiler/cpu_profiler.dart';
 import '../ui/colors.dart';
@@ -77,7 +76,10 @@ class EventDetails extends CoreElement {
       ..layoutVertical()
       ..flex()
       ..add([
-        cpuProfiler = _CpuProfiler(timelineController)..hidden(true),
+        cpuProfiler = _CpuProfiler(
+          timelineController,
+          () => timelineController.timelineData.cpuProfileData,
+        )..hidden(true),
         // TODO(kenzie): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
         gpuEventDetails = div(
@@ -147,11 +149,11 @@ class EventDetails extends CoreElement {
 }
 
 class _CpuProfiler extends CpuProfiler {
-  _CpuProfiler(this._timelineController)
+  _CpuProfiler(this._timelineController, CpuProfileDataProvider getProfileData)
       : super(
-          _CpuFlameChart(_timelineController),
-          _CpuCallTree(_timelineController),
-          _CpuBottomUp(_timelineController),
+          CpuFlameChart(getProfileData),
+          CpuCallTree(getProfileData),
+          CpuBottomUp(getProfileData),
         );
 
   final TimelineController _timelineController;
@@ -198,38 +200,5 @@ class _CpuProfiler extends CpuProfiler {
       return true;
     }
     return false;
-  }
-}
-
-class _CpuFlameChart extends CpuFlameChart {
-  _CpuFlameChart(this.timelineController);
-
-  TimelineController timelineController;
-
-  @override
-  CpuProfileData getProfileData() {
-    return timelineController.timelineData.cpuProfileData;
-  }
-}
-
-class _CpuCallTree extends CpuCallTree {
-  _CpuCallTree(this.timelineController);
-
-  TimelineController timelineController;
-
-  @override
-  CpuProfileData getProfileData() {
-    return timelineController.timelineData.cpuProfileData;
-  }
-}
-
-class _CpuBottomUp extends CpuBottomUp {
-  _CpuBottomUp(this.timelineController);
-
-  TimelineController timelineController;
-
-  @override
-  CpuProfileData getProfileData() {
-    return timelineController.timelineData.cpuProfileData;
   }
 }

@@ -27,6 +27,8 @@ class PerformanceController {
     reset();
     _recording = true;
 
+    // TODO(kenzie): ensure this code is backwards compatible. The first request
+    // will start at 0 and end at int max (2^52).
     // TODO(kenzie): uncomment this code once getVMTimelineMicros is available.
 //    const int timerDuration = 100;
 //    int startMicros =

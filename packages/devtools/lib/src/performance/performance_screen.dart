@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
 import '../profiler/cpu_profile_flame_chart.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_tables.dart';
 import '../profiler/cpu_profiler.dart';
 import '../ui/custom.dart';
@@ -122,7 +121,10 @@ class PerformanceScreen extends Screen {
         Spinner.centered(classes: ['recording-spinner']),
       ]);
 
-    _cpuProfiler = _CpuProfiler(_performanceController);
+    _cpuProfiler = _CpuProfiler(
+      _performanceController,
+      () => _performanceController.cpuProfileData,
+    );
 
     _tabNav = CpuProfilerTabNav(
       _cpuProfiler,
@@ -169,11 +171,13 @@ class PerformanceScreen extends Screen {
 }
 
 class _CpuProfiler extends CpuProfiler {
-  _CpuProfiler(this._performanceController)
-      : super(
-          _CpuFlameChart(_performanceController),
-          _CpuCallTree(_performanceController),
-          _CpuBottomUp(_performanceController),
+  _CpuProfiler(
+    this._performanceController,
+    CpuProfileDataProvider getProfileData,
+  ) : super(
+          CpuFlameChart(getProfileData),
+          CpuCallTree(getProfileData),
+          CpuBottomUp(getProfileData),
           defaultView: CpuProfilerViewType.callTree,
         );
 
@@ -192,31 +196,4 @@ class _CpuProfiler extends CpuProfiler {
     }
     return false;
   }
-}
-
-class _CpuFlameChart extends CpuFlameChart {
-  _CpuFlameChart(this._performanceController);
-
-  PerformanceController _performanceController;
-
-  @override
-  CpuProfileData getProfileData() => _performanceController.cpuProfileData;
-}
-
-class _CpuCallTree extends CpuCallTree {
-  _CpuCallTree(this._performanceController);
-
-  PerformanceController _performanceController;
-
-  @override
-  CpuProfileData getProfileData() => _performanceController.cpuProfileData;
-}
-
-class _CpuBottomUp extends CpuBottomUp {
-  _CpuBottomUp(this._performanceController);
-
-  PerformanceController _performanceController;
-
-  @override
-  CpuProfileData getProfileData() => _performanceController.cpuProfileData;
 }
