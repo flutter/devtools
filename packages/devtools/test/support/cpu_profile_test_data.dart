@@ -32,7 +32,7 @@ const goldenCpuProfileString = '''
           _RenderCustomMultiChildLayoutBox.defaultPaint - children: 2 - excl: 3 - incl: 5
             RenderObject._paintWithContext - children: 0 - excl: 1 - incl: 1
             RenderStack.paintStack - children: 1 - excl: 0 - incl: 1
-              _WidgetsFlutterBinding._invokeFrameCallback - children: 0 - excl: 1 - incl: 1
+              Gesture._invokeFrameCallback - children: 0 - excl: 1 - incl: 1
 ''';
 
 final Map<String, dynamic> cpuProfileResponseJson = {
