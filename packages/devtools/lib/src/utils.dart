@@ -151,24 +151,21 @@ bool isLetter(int codeUnit) =>
 ///
 /// Given an input such as
 /// `_WidgetsFlutterBinding&BindingBase&GestureBinding.handleBeginFrame`, this
-/// method will strip off all the Mixin names and return
-/// `_WidgetsFlutterBinding.handleBeginFrame`.
+/// method will strip off all the leading class names and return
+/// `GestureBinding.handleBeginFrame`.
+///
+/// See (https://github.com/dart-lang/sdk/issues/36999).
 String getSimpleStackFrameName(String name) {
-  final firstAmpersandIndex = name.indexOf('&');
-  final firstPeriodIndex = name.indexOf('.');
-
-  if (firstAmpersandIndex != -1 &&
-      firstPeriodIndex != -1 &&
-      firstAmpersandIndex < firstPeriodIndex &&
-      name.length > firstAmpersandIndex + 1) {
-    final nextCharCodeUnit = name[firstAmpersandIndex + 1].codeUnitAt(0);
-    if (isLetter(nextCharCodeUnit) || nextCharCodeUnit == '_'.codeUnitAt(0)) {
-      return name.substring(0, firstAmpersandIndex) +
-          name.substring(firstPeriodIndex);
-    }
+  final simpleName =
+      name.split('&').last.replaceAll('<anonymous closure>', '<closure>');
+  // If the class name contains a space, then it is not a valid Dart name. We
+  // throw out simplified names with spaces to prevent simplifying C++ class
+  // signatures, where the '&' char signifies a reference variable - not
+  // appended class names.
+  if (simpleName.contains(' ')) {
+    return name;
   }
-
-  return name;
+  return simpleName;
 }
 
 class Property<T> {
