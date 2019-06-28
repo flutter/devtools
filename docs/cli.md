@@ -23,6 +23,7 @@ Next, run the local web server, which serves the DevTools application itself.
 To do that, run one of the following two commands:
 
 - `pub global run devtools` (if you have `pub` on your path)
+- `pub global activate webdev` (webdev may need to be updated too)
 
 - `flutter pub global run devtools` (if you have `flutter` on your path)
 
