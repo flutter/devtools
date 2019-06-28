@@ -102,7 +102,7 @@ class MemoryController {
         .toList();
   }
 
-  Future<Instance> getObject(String objectRef) async =>
+  Future<dynamic> getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
         objectRef,
@@ -120,17 +120,25 @@ class MemoryController {
   // Used to find the object which allocated/references the object being viewd.
   Future<bool> matchObject(
       String objectRef, String fieldName, int instanceHashCode) async {
-    final Instance instance = await getObject(objectRef);
-    final List<BoundField> fields = instance.fields;
-    for (var field in fields) {
-      if (field.decl.name == fieldName) {
-        final InstanceRef ref = field.value;
-        final evalResult = await evaluate(ref.id, 'hashCode');
-        final int objHashCode = int.parse(evalResult?.valueAsString);
-        if (objHashCode == instanceHashCode) {
-          return true;
+    final dynamic object = await getObject(objectRef);
+    if (object is Instance) {
+      final Instance instance = object;
+      final List<BoundField> fields = instance.fields;
+      for (var field in fields) {
+        if (field.decl.name == fieldName) {
+          final InstanceRef ref = field.value;
+          final evalResult = await evaluate(ref.id, 'hashCode');
+          final int objHashCode = int.parse(evalResult?.valueAsString);
+          if (objHashCode == instanceHashCode) {
+            return true;
+          }
         }
       }
+    }
+
+    if (object is Sentinel) {
+      // TODO(terry): Need more graceful handling of sentinels.
+      print('Trying to matchObject with a Sentinel $objectRef');
     }
 
     return false;

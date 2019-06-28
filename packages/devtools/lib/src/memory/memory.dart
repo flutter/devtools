@@ -263,16 +263,9 @@ class MemoryScreen extends Screen with SetStateMixin {
     return screenDiv;
   }
 
-  ClassHeapDetailStats _searchClass(String className) {
-    final List<ClassHeapDetailStats> classesData = tableStack.first.data;
-    for (ClassHeapDetailStats stat in classesData) {
-      if (stat.classRef.name == className) {
-        return stat;
-      }
-    }
-
-    return null;
-  }
+  ClassHeapDetailStats _searchClass(String className) => tableStack.first.data
+      .firstWhere((dynamic stat) => stat.classRef.name == className,
+          orElse: () => null);
 
   void _selectClass(String className, [record = true]) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.data;
@@ -298,6 +291,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     instanceTable.element.add(spinner);
 
     // There's an instances table up.
+    // TODO(terry): Need more efficient way to match ObjectRefs than hashCodes.
     final List<InstanceSummary> instances = instanceTable.data;
     int row = 0;
     for (InstanceSummary instance in instances) {
@@ -397,6 +391,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   void selectClassInstance(String className, int instanceHashCode) {
     // Remove selection in class list.
     tableStack.first.clearSelection();
+    // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
       if (!tableStack.first.hasSelection) {
         // Wait until the class list has no selection.
@@ -408,6 +403,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     // memoryPath will be added by NavigationState.inboundSelect - see below.
     _selectClass(className, false);
 
+    // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
       // Wait until the class has been selected, 2 lists (class and instances
       // for the class exist) and the instances list has data.
@@ -428,6 +424,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Remove selection in class list.
     tableStack.first.clearSelection();
+    // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
       if (!tableStack.first.hasSelection) {
         // Wait until the class list has no selection.
@@ -439,6 +436,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     // memoryPath will be added by NavigationState.inboundSelect - see below.
     _selectClass(className, false);
 
+    // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
       // Wait until the class has been selected, 2 lists (class and instances
       // for the class exist) and the instances list has data.
@@ -455,6 +453,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         }
 
         // Wait for instance table, element 1, to have registered the selection.
+        // TODO(terry): Better solution is to await a Table event that tells us.
         Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
           if (tableStack.length == 2 && tableStack.elementAt(1).hasSelection) {
             timer.cancel();
@@ -538,7 +537,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       heapPopupList.setList(getKnownSnapshotClasses());
     }
 
-    if (vmSearchField.element.style.visibility != 'visible') {
+    if (!vmSearchField.isVisible) {
       vmSearchField.element.style.visibility = 'visible';
       vmSearchField.element.focus();
       heapAutoCompletePopup.show();
@@ -677,8 +676,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       ));
 
       table.addColumn(MemoryColumnSimple<InstanceSummary>(
-          '', (InstanceSummary expand) => '<div class="alloc-image"> </div>',
-          cssClass: 'allocation', usesHtml: true, hover: true));
+        '',
+        (InstanceSummary expand) => '<div class="alloc-image"> </div>',
+        cssClass: 'allocation',
+        usesHtml: true,
+        hover: true,
+      ));
 
       table.setRows(instanceRows);
     } catch (e) {
@@ -703,8 +706,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     Instance instance;
     try {
-      instance = await memoryController.getObject(row.objectRef);
-
       final dynamic theObject = await memoryController.getObject(row.objectRef);
       if (theObject is Instance) {
         instance = theObject;

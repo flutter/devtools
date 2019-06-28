@@ -153,6 +153,8 @@ class CoreElement {
     element.text = value;
   }
 
+  bool get isVisible => element.style.visibility == 'visible';
+
   /// Add the given child to this element's list of children. [child] must be
   /// either a `CoreElement` or an `Element`.
   dynamic add(dynamic child) {

@@ -67,7 +67,7 @@ import 'ui/elements.dart';
 ///       heapPopupList.setList(allItemsKnown());
 ///     }
 ///
-///     if (textField.element.style.visibility != 'visible') {
+///     if (!textField.isVisible) {
 ///       textField.element.style.visibility = 'visible';
 ///       textField.element.focus();
 ///
