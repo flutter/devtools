@@ -904,7 +904,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     final List<ClassHeapDetailStats> allClasses = tableStack.first.data;
 
-    memoryController.computeInboundRefs(
+    computeInboundRefs(
       allClasses,
       refs,
       (
