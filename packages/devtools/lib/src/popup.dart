@@ -103,7 +103,6 @@ import 'ui/elements.dart';
 ///     popupAutoComplete.hide();
 ///   }
 
-
 enum ListDirection {
   pageUp,
   pageDown,
@@ -310,7 +309,7 @@ class PopupAutoCompleteView extends CoreElement {
       })
       ..blur(() {
         Timer(const Duration(milliseconds: 200),
-                () => matcher?.finish(true)); // Hide/clear the popup.
+            () => matcher?.finish(true)); // Hide/clear the popup.
       })
       ..onKeyUp.listen((html.KeyboardEvent e) {
         switch (e.keyCode) {
@@ -391,15 +390,11 @@ class PopupAutoCompleteView extends CoreElement {
 
     int nameHeight;
     if (_elementToMimic == null) {
-      nameHeight = _popupTextfield.element
-          .getBoundingClientRect()
-          .height
-          .round();
+      nameHeight =
+          _popupTextfield.element.getBoundingClientRect().height.round();
     } else {
-      nameHeight = _elementToMimic.element
-          .getBoundingClientRect()
-          .height
-          .round();
+      nameHeight =
+          _elementToMimic.element.getBoundingClientRect().height.round();
     }
 
     final textFieldClientRect = _popupTextfield.element.getBoundingClientRect();
