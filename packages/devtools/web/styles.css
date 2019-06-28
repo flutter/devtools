@@ -294,6 +294,7 @@ table th.wide {
 
 .allocation-li:hover {
     background-color: var(--row-hover-background);
+    cursor: default;
 }
 
 .allocated-by-class-title {

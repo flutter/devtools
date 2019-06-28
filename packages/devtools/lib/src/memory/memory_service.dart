@@ -5,6 +5,7 @@
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
+import '../ui/analytics.dart' as ga;
 
 String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
@@ -18,7 +19,8 @@ Future<InstanceRef> evaluate(String objectRef, String expression) async {
     case ErrorRef:
       return null;
     default:
-      print('ERROR: Unknown evaluate type ${result.runtimeType}.');
+      ga.error(
+          'ERROR Memory evaluate: Unknown type ${result.runtimeType}.', false);
   }
 
   return null;

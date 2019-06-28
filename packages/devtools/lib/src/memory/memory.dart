@@ -352,7 +352,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       // Highlighted class is the class to select.
       final String selectedClass = heapPopupList.highlightedItem;
-      _selectClass(selectedClass);
+      if (selectedClass != null) _selectClass(selectedClass);
     }
 
     // Done with the popup.
@@ -715,6 +715,9 @@ class MemoryScreen extends Screen with SetStateMixin {
         framework.toast('Sentinel ${row.objectRef}', title: 'Warning');
       }
     } catch (e) {
+      // Log this problem not sure how it can really happen.
+      ga.error('Memory select: $e', false);
+
       instance = null; // Signal a problem
     } finally {
       tableContainer.add(_createInstanceView(
@@ -766,12 +769,9 @@ class MemoryScreen extends Screen with SetStateMixin {
       final int dataIndex = int.parse(attrs[NavigationState.dataIndex]);
 
       final String dataClass = attrs[NavigationState.dataClass];
-      final String dataField = attrs.containsKey(NavigationState.dataField)
-          ? attrs[NavigationState.dataField]
-          : '';
-      final int dataHashCode = attrs.containsKey(NavigationState.dataHashCode)
-          ? int.parse(attrs[NavigationState.dataHashCode])
-          : null;
+      String dataField = attrs[NavigationState.dataField];
+      dataField ??= '';
+      final int dataHashCode = int.parse(attrs[NavigationState.dataHashCode]);
 
       final NavigationState state = memoryPath.get(dataIndex);
 
@@ -881,7 +881,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Hover in the cell.
     if (hover.data != _currentHoverSummary?.data) {
-      // Selecting a different instance that what's current.
+      // Selecting a different instance then what's current.
       _closeHover(hover);
     }
 
@@ -940,46 +940,66 @@ class MemoryScreen extends Screen with SetStateMixin {
             case 'Library':
             case 'LibraryRef':
               final Library library = Library.parse(fieldRef.owner.json);
-              owningAllocator =
-                  'Library ${library != null ? library.name : ""}';
+              owningAllocator = 'Library ${library?.name ?? ""}';
               break;
           }
           break;
         case 'FuncRef':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final FuncRef funcRef = element.funcRef;
           break;
         case 'Instance':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              ' Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final Instance instance = element.instance;
           break;
         case 'InstanceRef':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final InstanceRef instanceRef = element.instanceRef;
           break;
         case 'Library':
         case 'LibraryRef':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final Library library = element.library;
           break;
         case 'NullVal':
         case 'NullValRef':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final NullVal nullValue = element.nullVal;
           break;
         case 'Obj':
         case 'ObjRef':
-          print('Error: Unhandled ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled ${element.parentField.runtimeType}',
+              false);
           // TODO(terry): TBD
           // final Obj obj = element.obj;
           break;
         default:
-          print('ERROR: Unhandled inbound ${element.parentField.runtimeType}');
+          ga.error(
+              'Error(hoverInstanceAllocations): '
+              'Unhandled inbound ${element.parentField.runtimeType}',
+              false);
       }
 
       final CoreElement liElem = li(c: 'allocation-li')
@@ -1071,9 +1091,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
       } else {
-        // TOOD(terry): Shouldn't happen but want to check - remove later.
-        return 'UNKNOWN BoundField value';
+        // Shouldn't happen but want to check - log to analytics.
+        ga.error(
+            'Memory _createInstanceView: UNKNOWN BoundField $objectRef', false);
       }
+
+      return null;
     };
 
     memoryDataView = MemoryDataView(memoryController, describer);
@@ -1125,18 +1148,19 @@ class NavigationState {
   NavigationState.classSelect(this._className);
   NavigationState.instanceSelect(this._className, this._hashCode);
 
+  // data attribute names.
   static const String dataIndex = 'data-index';
   static const String dataClass = 'data-class';
   static const String dataField = 'data-field';
   static const String dataHashCode = 'data-hashcode';
 
-  final String _className;
-  int _hashCode;
-
   String field = '';
 
   String get className => _className;
+  final String _className;
+
   int get instanceHashCode => _hashCode;
+  int _hashCode;
 
   bool get isClass =>
       _className.isNotEmpty && field.isEmpty && _hashCode == null;
@@ -1188,6 +1212,7 @@ class NavigationPath {
   // Global field name next add if state object isInstance then store the field
   // name in the state.
   String _inboundFieldName = '';
+
   set fieldReference(String field) => _inboundFieldName = field;
 
   bool get isEmpty => _path.isEmpty;
