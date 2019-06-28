@@ -234,6 +234,109 @@ table th {
   white-space: nowrap;
 }
 
+table th.wide {
+    width: 80%;
+}
+
+.allocation {
+    float: right;
+}
+
+.li-allocation-abstract {
+    font-style: italic;
+    color: lightgray;
+}
+
+.alloc-image {
+    background-image: url('icons/memory/alloc_icon.png');
+    width: 11px;
+    height: 12px;
+    margin-top: 5px;
+    margin-bottom: 4px;
+}
+
+.allocation:hover {
+    background-color: lightblue;
+    cursor: pointer;
+}
+
+.allocation-hover {
+    background-color: lightblue;;
+    cursor: pointer;
+    float: right;
+}
+
+.allocation-hover-card {
+    display: none;
+    height: 25%;
+    position: absolute;
+    background-color: white;
+    color: var(--title);
+    border: 4px solid #eee;
+    overflow-y: scroll;
+    width: 30em;
+    z-index: 101; /* Keep hover top-most. */
+}
+
+.allocation-hover-card ul {
+    list-style-type: square;
+    list-style-position: outside;
+    list-style-image: none;
+}
+
+.allocation-hover-card ul li {
+    padding: 5px;
+}
+
+.allocation-li-title {
+    background-color: #eee;
+}
+
+.allocation-li:hover {
+    background-color: var(--row-hover-background);
+    cursor: default;
+}
+
+.allocated-by-class-title {
+    float: left;
+    font-weight: bold;
+}
+.ref-by-title {
+    float: right;
+    font-weight: bold;
+}
+
+.allocated-by-class { float: left; }
+.ref-by { float: right; }
+
+.history-navigation {
+    padding-top: 1.5em;
+    display: block;
+}
+
+.history-navigation .hidden {
+    display: none;
+}
+
+.history-separator {
+    color: gray;
+    padding-left: 1em;
+    padding-right: .5em;
+}
+
+.history-link {
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}
+
+.history-link-last {
+    text-decoration: underline;
+    color: blue;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 table td,
 table th {
   padding: 4px 8px;
@@ -532,6 +635,38 @@ footer.align-items-center {
 
 div.tabnav {
     margin-bottom: 0;
+}
+
+.search-text {
+    visibility: hidden;
+    vertical-align: top;
+    height: 2.1em;
+    width: 20em; /* Matches width of popup-view, see below. */
+}
+
+.popup-view {
+    z-index: 100;
+    position: absolute;
+    height: calc(30%);
+    color: var(--header-color);
+    background-color: var(--list-background);
+    list-style: none;
+    border: 1px solid var(--popup-border-color);
+    padding-left: 4px;
+    margin-vottrom: 2px;
+    cursor: pointer;
+    overflow-y: scroll;
+    display: none;
+    width: 20em;  /* Matches width of search-text class, see above. */
+}
+
+.popup-items-list {
+    cursor: pointer;
+}
+
+.popup-list-item {
+    white-space: nowrap;
+    list-style-type: none;
 }
 
 .memory-table {

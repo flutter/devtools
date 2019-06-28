@@ -51,6 +51,7 @@ const String timelineFlameGpu = 'flameGPU'; // Selected a GPU flame
 const String timelineFlameUi = 'flameUI'; // Selected a UI flame
 
 // Memory UX actions:
+const String search = 'search';
 const String snapshot = 'snapshot';
 const String reset = 'reset';
 const String gC = 'gc';
