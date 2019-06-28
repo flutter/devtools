@@ -263,10 +263,6 @@ class MemoryScreen extends Screen with SetStateMixin {
     return screenDiv;
   }
 
-  ClassHeapDetailStats _searchClass(String className) => tableStack.first.data
-      .firstWhere((dynamic stat) => stat.classRef.name == className,
-          orElse: () => null);
-
   void _selectClass(String className, [record = true]) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.data;
     int row = 0;
@@ -893,8 +889,10 @@ class MemoryScreen extends Screen with SetStateMixin {
         await getInboundReferences(hover.data.objectRef, 1000);
 
     if (refs == null) {
-      framework.toast('Instance ${hover.data.objectRef} - Sentinel/Expired.',
-          title: 'Warning');
+      framework.toast(
+        'Instance ${hover.data.objectRef} - Sentinel/Expired.',
+        title: 'Warning',
+      );
       return;
     }
 
@@ -904,152 +902,67 @@ class MemoryScreen extends Screen with SetStateMixin {
         span(text: 'Referenced', c: 'ref-by-title')
       ]));
 
-    for (InboundReference element in refs.elements) {
-      // Could be a reference to an evaluate so this isn't known.
+    final List<ClassHeapDetailStats> allClasses = tableStack.first.data;
 
-      // Looks like an object created from an evaluate, ignore it.
-      if (element.parentField == null && element.json == null) continue;
+    memoryController.computeInboundRefs(
+      allClasses,
+      refs,
+      (
+        String referenceName,
+        String owningAllocator,
+        bool owningAllocatorIsAbstract,
+      ) async {
+        // Callback function to build each item in the hover card.
+        final CoreElement liElem = li(c: 'allocation-li')
+          ..add([
+            span(text: 'class $owningAllocator', c: 'allocated-by-class'),
+            span(text: 'field $referenceName', c: 'ref-by')
+          ]);
+        if (owningAllocatorIsAbstract) {
+          // Mark as grayed/italic
+          liElem.clazz('li-allocation-abstract');
+        }
+        if (!owningAllocatorIsAbstract && owningAllocator.isNotEmpty) {
+          // TODO(terry): Expensive need better VMService identity for objectRef.
+          // Get hashCode identity object id changes but hashCode is our identity.
+          final hashCodeResult =
+              await evaluate(hover.data.objectRef, 'hashCode');
 
-      // TODO(terry): Verify looks like internal class (maybe to C code).
-      if (element.parentField.owner != null &&
-          element.parentField.owner.name.contains('&')) continue;
+          liElem.setAttribute(dataHashCode, hashCodeResult?.valueAsString);
+          liElem.setAttribute(dataOwningClass, owningAllocator);
+          liElem.setAttribute(dataRef, referenceName);
+        }
+        liElem.onClick.listen((evt) {
+          final html.Element e = evt.currentTarget;
 
-      String referenceName;
-      String owningAllocator; // Class or library that allocated.
-      bool owningAllocatorIsAbstract;
-
-      switch (element.parentField.runtimeType.toString()) {
-        case 'ClassRef':
-          final ClassRef classRef = element.classRef;
-          owningAllocator = classRef.name;
-          // TODO(terry): Quick way to detect if class is probably abstract-
-          // TODO(terry): Does it exist in the class list table?
-          owningAllocatorIsAbstract = _searchClass(owningAllocator) == null;
-          break;
-        case 'FieldRef':
-          final FieldRef fieldRef = element.fieldRef;
-          referenceName = fieldRef.name;
-          switch (fieldRef.owner.runtimeType.toString()) {
-            case 'ClassRef':
-              final ClassRef classRef = ClassRef.parse(fieldRef.owner.json);
-              owningAllocator = classRef.name;
-              // TODO(terry): Quick way to detect if class is probably abstract-
-              // TODO(terry): Does it exist in the class list table?
-              owningAllocatorIsAbstract = _searchClass(owningAllocator) == null;
-              break;
-            case 'Library':
-            case 'LibraryRef':
-              final Library library = Library.parse(fieldRef.owner.json);
-              owningAllocator = 'Library ${library?.name ?? ""}';
-              break;
+          String className = e.getAttribute(dataOwningClass);
+          if (className == null || className.isEmpty) {
+            className = e.parent.getAttribute(dataOwningClass);
           }
-          break;
-        case 'FuncRef':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final FuncRef funcRef = element.funcRef;
-          break;
-        case 'Instance':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              ' Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final Instance instance = element.instance;
-          break;
-        case 'InstanceRef':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final InstanceRef instanceRef = element.instanceRef;
-          break;
-        case 'Library':
-        case 'LibraryRef':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final Library library = element.library;
-          break;
-        case 'NullVal':
-        case 'NullValRef':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final NullVal nullValue = element.nullVal;
-          break;
-        case 'Obj':
-        case 'ObjRef':
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled ${element.parentField.runtimeType}',
-              false);
-          // TODO(terry): TBD
-          // final Obj obj = element.obj;
-          break;
-        default:
-          ga.error(
-              'Error(hoverInstanceAllocations): '
-              'Unhandled inbound ${element.parentField.runtimeType}',
-              false);
-      }
+          String refName = e.getAttribute(dataRef);
+          if (refName == null || refName.isEmpty) {
+            refName = e.parent.getAttribute(dataRef);
+          }
+          String objectHashCode = e.getAttribute(dataHashCode);
+          if (objectHashCode == null || objectHashCode.isEmpty) {
+            objectHashCode = e.parent.getAttribute(dataHashCode);
+          }
+          final int instanceHashCode = int.parse(objectHashCode);
 
-      final CoreElement liElem = li(c: 'allocation-li')
-        ..add([
-          span(text: 'class $owningAllocator', c: 'allocated-by-class'),
-          span(text: 'field $referenceName', c: 'ref-by')
-        ]);
-      if (owningAllocatorIsAbstract) {
-        // Mark as grayed/italic
-        liElem.clazz('li-allocation-abstract');
-      }
-      if (!owningAllocatorIsAbstract && owningAllocator.isNotEmpty) {
-        // TODO(terry): Expensive need better VMService identity for objectRef.
-        // Get hashCode identity object id changes but hashCode is our identity.
-        final hashCodeResult = await evaluate(hover.data.objectRef, 'hashCode');
+          // Done with the hover - close it down.
+          _closeHover(null);
 
-        liElem.setAttribute(dataHashCode, hashCodeResult?.valueAsString);
-        liElem.setAttribute(dataOwningClass, owningAllocator);
-        liElem.setAttribute(dataRef, referenceName);
-      }
-      liElem.onClick.listen((evt) {
-        final html.Element e = evt.currentTarget;
-
-        String className = e.getAttribute(dataOwningClass);
-        if (className == null || className.isEmpty) {
-          className = e.parent.getAttribute(dataOwningClass);
-        }
-        String refName = e.getAttribute(dataRef);
-        if (refName == null || refName.isEmpty) {
-          refName = e.parent.getAttribute(dataRef);
-        }
-        String objectHashCode = e.getAttribute(dataHashCode);
-        if (objectHashCode == null || objectHashCode.isEmpty) {
-          objectHashCode = e.parent.getAttribute(dataHashCode);
-        }
-        final int instanceHashCode = int.parse(objectHashCode);
-
-        // Done with the hover - close it down.
-        _closeHover(null);
-
-        // Make sure its a known class (not abstract).
-        if (className.isNotEmpty &&
-            refName.isNotEmpty &&
-            instanceHashCode != null) {
-          // Display just the instances of classes with ref
-          selectClassAndInstanceInField(className, refName, instanceHashCode);
-        }
-      });
-      ulElem.add(liElem);
-    }
+          // Make sure its a known class (not abstract).
+          if (className.isNotEmpty &&
+              refName.isNotEmpty &&
+              instanceHashCode != null) {
+            // Display just the instances of classes with ref
+            selectClassAndInstanceInField(className, refName, instanceHashCode);
+          }
+        });
+        ulElem.add(liElem);
+      },
+    );
 
     if (hover.cell != null && hover.cell.hasClass('allocation')) {
       // Hover over
