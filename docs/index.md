@@ -7,6 +7,8 @@ title: Getting Started
 Dart DevTools is a suite of performance tools for Dart and Flutter. It's currently in
 preview release, but we're actively working on improvements and on shipping new versions.
 
+Please note that we primarily test with Chrome and using Brave requires turning off the shield.
+
 ## What can I do with it?
 
 DevTools supports inspecting the UI layout and state of a Flutter app, diagnosing UI
