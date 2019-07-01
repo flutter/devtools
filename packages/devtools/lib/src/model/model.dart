@@ -246,7 +246,7 @@ class App {
       map['params'] = params;
     }
     // TODO(terry): Shouldn't print to console by default.
-    // print('[${jsonEncode(map)}]');
+    print('[${jsonEncode(map)}]');
   }
 
   void _sendResponseResult(int id, [dynamic result]) {
@@ -257,7 +257,7 @@ class App {
       map['result'] = result;
     }
     // TODO(terry): Shouldn't print to console by default.
-    // print('[${jsonEncode(map)}]');
+    print('[${jsonEncode(map)}]');
   }
 
   void _sendReponseError(int id, dynamic error, StackTrace stackTrace) {
