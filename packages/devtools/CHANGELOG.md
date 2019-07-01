@@ -1,7 +1,10 @@
-## 0.1.2 - TBD
+## 0.1.2 - 2019-07-01
 * Add Call Tree and Bottom Up views to CPU profiler.
 * Pre-fetch CPU profiles so that we have profiling information for every frame in the timeline.
 * Trim Mixins from class name reporting in the CPU profiler.
+* Add searching for a particular class from all active classes in a Snapshot. After a snapshot, use the search button, located to left of snapshot button (or the shortcut CTRL+f ), to find and select the class in the classes list.
+* Add ability to find which class and field hold a reference to the current instance.  Hovering on an instance's allocation icon (right-most side of the instance).  Clicking on a class/field entry in the hover card will locate that particular class instance that has a reference to the original instance being hovered. 
+* Expose hover card navigation via a memory navigation history areas (group of links below the classes/instances lists).
 * Allow DevTools feedback to be submitted when DevTools is not connected to an app.
 * Support URL encoded urls in the connection dialog.
 * Add error handling for analytics.
