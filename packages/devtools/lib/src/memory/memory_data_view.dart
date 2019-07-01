@@ -85,7 +85,7 @@ class MemoryDataView implements CoreElementView {
     });
   }
 
-  MemoryController _memoryController;
+  final MemoryController _memoryController;
   SelectableTree<BoundField> _items;
 
   List<BoundField> get items => _items.items;

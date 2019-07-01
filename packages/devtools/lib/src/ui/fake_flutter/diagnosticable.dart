@@ -75,7 +75,6 @@ enum DiagnosticLevel {
   /// For example, a diagnostic describing the constraints applying to layout or
   /// invariants that must remain true to correctly compose objects.
   contract,
-
   violation,
 
   /// Diagnostics that indicate errors or unexpected conditions.
@@ -2455,7 +2454,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
-  DiagnosticLevel _defaultLevel;
+  final DiagnosticLevel _defaultLevel;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
