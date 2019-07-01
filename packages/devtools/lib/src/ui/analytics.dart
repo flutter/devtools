@@ -145,15 +145,15 @@ void screen(
   GTag.event(
       screenName,
       GtagEventDevTools(
-          event_category: screenViewEvent,
-          value: value,
-          user_app: userAppType,
-          user_build: userBuildType,
-          user_platform: userPlatformType,
-          devtools_platform: devtoolsPlatformType,
-          devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion,
-          ide_launched: ideLaunched,
+        event_category: screenViewEvent,
+        value: value,
+        user_app: userAppType,
+        user_build: userBuildType,
+        user_platform: userPlatformType,
+        devtools_platform: devtoolsPlatformType,
+        devtools_chrome: devtoolsChrome,
+        devtools_version: devtoolsVersion,
+        ide_launched: ideLaunched,
       ));
 }
 
@@ -165,16 +165,16 @@ void select(
   GTag.event(
       screenName,
       GtagEventDevTools(
-          event_category: selectEvent,
-          event_label: selectedItem,
-          value: value,
-          user_app: userAppType,
-          user_build: userBuildType,
-          user_platform: userPlatformType,
-          devtools_platform: devtoolsPlatformType,
-          devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion,
-          ide_launched: ideLaunched,
+        event_category: selectEvent,
+        event_label: selectedItem,
+        value: value,
+        user_app: userAppType,
+        user_build: userBuildType,
+        user_platform: userPlatformType,
+        devtools_platform: devtoolsPlatformType,
+        devtools_chrome: devtoolsChrome,
+        devtools_version: devtoolsVersion,
+        ide_launched: ideLaunched,
       ));
 }
 
@@ -188,17 +188,17 @@ void selectFrame(
   GTag.event(
       screenName,
       GtagEventDevTools(
-          event_category: selectEvent,
-          event_label: selectedItem,
-          gpu_duration: gpuDuration,
-          ui_duration: uiDuration,
-          user_app: userAppType,
-          user_build: userBuildType,
-          user_platform: userPlatformType,
-          devtools_platform: devtoolsPlatformType,
-          devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion,
-          ide_launched: ideLaunched,
+        event_category: selectEvent,
+        event_label: selectedItem,
+        gpu_duration: gpuDuration,
+        ui_duration: uiDuration,
+        user_app: userAppType,
+        user_build: userBuildType,
+        user_platform: userPlatformType,
+        devtools_platform: devtoolsPlatformType,
+        devtools_chrome: devtoolsChrome,
+        devtools_version: devtoolsVersion,
+        ide_launched: ideLaunched,
       ));
 }
 
@@ -213,15 +213,15 @@ void error(
   _lastGaError = errorMessage;
 
   GTag.exception(GtagExceptionDevTools(
-      description: errorMessage,
-      fatal: fatal,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
+    description: errorMessage,
+    fatal: fatal,
+    user_app: userAppType,
+    user_build: userBuildType,
+    user_platform: userPlatformType,
+    devtools_platform: devtoolsPlatformType,
+    devtools_chrome: devtoolsChrome,
+    devtools_version: devtoolsVersion,
+    ide_launched: ideLaunched,
   ));
 }
 
