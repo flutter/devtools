@@ -61,6 +61,17 @@ void computeDevToolsCustomGTagsData() {
   }
 }
 
+// Look at the query parameters '&ide=' and record in GA.
+void computeDevToolsQueryParams() {
+  ga.ideLaunched = ga.ideLaunchedCLI; // Default is Command Line launch.
+
+  final Uri uri = Uri.parse(html.window.location.toString());
+  final ideValue = uri.queryParameters[ga.ideLaunchedQuery];
+  if (ideValue != null) {
+    ga.ideLaunched = ideValue;
+  }
+}
+
 bool _computing = false;
 
 int _stillWaiting = 0;
@@ -101,6 +112,7 @@ void setupDimensions() async {
     // available before first GA event sent.
     await ga.computeUserApplicationCustomGTagData();
     computeDevToolsCustomGTagsData();
+    computeDevToolsQueryParams();
     ga.dimensionsComputed();
   }
 }

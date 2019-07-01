@@ -242,9 +242,13 @@ table th.wide {
     float: right;
 }
 
+.allocation-abstract {
+    text-decoration: line-through;
+    color: var(--dark-shadow-color);
+}
+
 .li-allocation-abstract {
     font-style: italic;
-    color: lightgray;
 }
 
 .alloc-image {
@@ -256,12 +260,12 @@ table th.wide {
 }
 
 .allocation:hover {
-    background-color: lightblue;
+    background-color: var(--selected-background);
     cursor: pointer;
 }
 
 .allocation-hover {
-    background-color: lightblue;;
+    background-color: var(--selected-background);
     cursor: pointer;
     float: right;
 }
@@ -270,9 +274,9 @@ table th.wide {
     display: none;
     height: 25%;
     position: absolute;
-    background-color: white;
+    background-color: var(--default-background);
     color: var(--title);
-    border: 4px solid #eee;
+    border: 4px solid var(--popup-border-color);
     overflow-y: scroll;
     width: 30em;
     z-index: 101; /* Keep hover top-most. */
@@ -289,7 +293,13 @@ table th.wide {
 }
 
 .allocation-li-title {
-    background-color: #eee;
+    background-color: var(--header-background);
+    color: var(--header-color);
+}
+
+.allocation-li {
+    background-color: var(--default-background);
+    color: var(--default-color)
 }
 
 .allocation-li:hover {
@@ -326,13 +336,13 @@ table th.wide {
 
 .history-link {
     text-decoration: underline;
-    color: blue;
+    color: var(--link-color);
     cursor: pointer;
 }
 
 .history-link-last {
     text-decoration: underline;
-    color: blue;
+    color: var(--link-color);
     font-weight: bold;
     cursor: pointer;
 }
@@ -641,6 +651,8 @@ div.tabnav {
     visibility: hidden;
     vertical-align: top;
     height: 2.1em;
+    background-color: var(--default-background);
+    color: var(--default-color);
     width: 20em; /* Matches width of popup-view, see below. */
 }
 
