@@ -245,7 +245,8 @@ class App {
     if (params != null) {
       map['params'] = params;
     }
-    print('[${jsonEncode(map)}]');
+    // TODO(terry): Shouldn't print to console by default.
+    // print('[${jsonEncode(map)}]');
   }
 
   void _sendResponseResult(int id, [dynamic result]) {
@@ -255,7 +256,8 @@ class App {
     if (result != null) {
       map['result'] = result;
     }
-    print('[${jsonEncode(map)}]');
+    // TODO(terry): Shouldn't print to console by default.
+    // print('[${jsonEncode(map)}]');
   }
 
   void _sendReponseError(int id, dynamic error, StackTrace stackTrace) {
@@ -266,6 +268,7 @@ class App {
         'stackTrace': stackTrace.toString(),
       },
     };
+    // TODO(terry): Better error message to user and log to GA too?
     print('[${jsonEncode(map)}]');
   }
 
