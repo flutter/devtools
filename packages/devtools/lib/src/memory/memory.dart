@@ -913,10 +913,23 @@ class MemoryScreen extends Screen with SetStateMixin {
         bool owningAllocatorIsAbstract,
       ) async {
         // Callback function to build each item in the hover card.
+        final classAllocation = owningAllocatorIsAbstract
+            ? 'allocation-abstract allocated-by-class'
+            : 'allocated-by-class';
+
+        final fieldAllocation =
+            owningAllocatorIsAbstract ? 'allocation-abstract ref-by' : 'ref-by';
+
         final CoreElement liElem = li(c: 'allocation-li')
           ..add([
-            span(text: 'class $owningAllocator', c: 'allocated-by-class'),
-            span(text: 'field $referenceName', c: 'ref-by')
+            span(
+              text: 'class $owningAllocator',
+              c: classAllocation,
+            ),
+            span(
+              text: 'field $referenceName',
+              c: fieldAllocation,
+            ),
           ]);
         if (owningAllocatorIsAbstract) {
           // Mark as grayed/italic

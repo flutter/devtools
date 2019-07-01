@@ -64,11 +64,12 @@ void computeDevToolsCustomGTagsData() {
 // Look at the query parameters '&ide=' and record in GA.
 void computeDevToolsQueryParams() {
   ga.ideLaunched = ga.ideLaunchedCLI; // Default is Command Line launch.
-  final searchParams = html.UrlSearchParams(html.window.location.search);
-  if (searchParams.has(ga.ideLaunchedQuery)) {
-    // IDE specified use that value.
-    ga.ideLaunched = searchParams.get(ga.ideLaunchedQuery);
-  }
+
+  final Uri uri = Uri.parse(html.window.location.toString());
+  final ideValue = uri.queryParameters[ga.ideLaunchedQuery];
+  if (ideValue != null) {
+    ga.ideLaunched = ideValue;
+  };
 }
 
 bool _computing = false;
