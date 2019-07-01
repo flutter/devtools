@@ -79,7 +79,9 @@ class App {
     js.context['devtools'] = binding;
   }
 
-  Future<void> devToolsReady(dynamic message) async {}
+  Future<void> devToolsReady(dynamic message) async {
+    _sendNotification('app.devToolsReady', message);
+  }
 
   Future<void> echo(dynamic message) async {
     _sendNotification('app.echo', message);
