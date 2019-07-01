@@ -69,7 +69,7 @@ void computeDevToolsQueryParams() {
   final ideValue = uri.queryParameters[ga.ideLaunchedQuery];
   if (ideValue != null) {
     ga.ideLaunched = ideValue;
-  };
+  }
 }
 
 bool _computing = false;
