@@ -64,6 +64,7 @@ function _initializeGA() {
              dimension4: 'devtools_platform',
              dimension5: 'devtools_chrome',
              dimension6: 'devtools_version',
+             dimension7: 'ide_launched',
 
              // Custom metrics:
              metric1: 'gpu_duration',

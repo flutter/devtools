@@ -43,6 +43,10 @@ const String devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
 const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension6 devToolsVersion
 
+// Dimension7 ideLaunched
+const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
+const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+
 @JS('gtagsEnabled')
 external bool isGtagsEnabled();
 
@@ -66,6 +70,7 @@ class GtagEventDevTools extends GtagEvent {
     String devtools_platform, // dimension4 linux/android/mac/windows
     String devtools_chrome, // dimension5 Chrome version #
     String devtools_version, // dimension6 DevTools version #
+    String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
 
     int gpu_duration,
     int ui_duration,
@@ -96,6 +101,7 @@ class GtagEventDevTools extends GtagEvent {
   external String get devtools_platform;
   external String get devtools_chrome;
   external String get devtools_version;
+  external String get ide_launched;
 
   // Custom metrics:
   external int get gpu_duration;
@@ -114,6 +120,7 @@ class GtagExceptionDevTools extends GtagException {
     String devtools_platform, // dimension4 linux/android/mac/windows
     String devtools_chrome, // dimension5 Chrome version #
     String devtools_version, // dimension6 DevTools version #
+    String ide_launched, // dimension7 IDE launched DevTools
   });
 
   @override
@@ -128,6 +135,7 @@ class GtagExceptionDevTools extends GtagException {
   external String get devtools_platform;
   external String get devtools_chrome;
   external String get devtools_version;
+  external String get ide_launched;
 }
 
 void screen(
@@ -144,7 +152,9 @@ void screen(
           user_platform: userPlatformType,
           devtools_platform: devtoolsPlatformType,
           devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion));
+          devtools_version: devtoolsVersion,
+          ide_launched: ideLaunched,
+      ));
 }
 
 void select(
@@ -163,7 +173,9 @@ void select(
           user_platform: userPlatformType,
           devtools_platform: devtoolsPlatformType,
           devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion));
+          devtools_version: devtoolsVersion,
+          ide_launched: ideLaunched,
+      ));
 }
 
 // Used only for Timeline Frame selection.
@@ -185,7 +197,9 @@ void selectFrame(
           user_platform: userPlatformType,
           devtools_platform: devtoolsPlatformType,
           devtools_chrome: devtoolsChrome,
-          devtools_version: devtoolsVersion));
+          devtools_version: devtoolsVersion,
+          ide_launched: ideLaunched,
+      ));
 }
 
 String _lastGaError;
@@ -206,7 +220,9 @@ void error(
       user_platform: userPlatformType,
       devtools_platform: devtoolsPlatformType,
       devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion));
+      devtools_version: devtoolsVersion,
+      ide_launched: ideLaunched,
+  ));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,6 +239,8 @@ String _devtoolsPlatformType =
 String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
 
 const String devtoolsVersion = devtools.version; //dimension6 n.n.n
+
+String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
 String get userAppType => _userAppType;
 set userAppType(String __userAppType) {
@@ -247,6 +265,11 @@ set devtoolsPlatformType(String __devtoolsPlatformType) {
 String get devtoolsChrome => _devtoolsChrome;
 set devtoolsChrome(String __devtoolsChrome) {
   _devtoolsChrome = __devtoolsChrome;
+}
+
+String get ideLaunched => _ideLaunched;
+set ideLaunched(String __ideLaunched) {
+  _ideLaunched = __ideLaunched;
 }
 
 bool _analyticsComputed = false;
