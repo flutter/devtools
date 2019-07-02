@@ -1,10 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:devtools/src/profiler/cpu_profile_service.dart';
 import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/timeline/timeline_protocol.dart';
-import 'package:devtools/src/timeline/timeline_service.dart';
 import 'package:devtools/src/utils.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -39,8 +39,8 @@ void main() {
 
     setUp(() {
       final timelineController = MockTimelineController();
-      when(timelineController.timelineService)
-          .thenReturn(MockTimelineService());
+      when(timelineController.cpuProfilerService)
+          .thenReturn(MockCpuProfilerService());
 
       timelineProtocol = TimelineProtocol(
         uiThreadId: testUiThreadId,
@@ -318,4 +318,4 @@ Future<void> delayForEventProcessing() async {
 
 class MockTimelineController extends Mock implements TimelineController {}
 
-class MockTimelineService extends Mock implements TimelineService {}
+class MockCpuProfilerService extends Mock implements CpuProfilerService {}
