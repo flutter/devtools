@@ -30,7 +30,9 @@ class MemoryTracker {
   Stream<Null> get onChange => _changeController.stream;
 
   int get currentCapacity => samples.last.capacity;
+
   int get currentUsed => samples.last.used;
+
   int get currentExternal => samples.last.external;
 
   void start() {
@@ -213,32 +215,22 @@ class ClassHeapDetailStats {
 }
 
 class InstanceSummary {
-  InstanceSummary(this._classRef, this._className, this._objectRef);
+  InstanceSummary(this.classRef, this.className, this.objectRef);
 
-  String get classRef => _classRef;
-  final String _classRef;
-
-  String get objectRef => _objectRef;
-  final String _objectRef;
-
-  String get className => _className;
-  final String _className;
+  final String classRef;
+  final String className;
+  final String objectRef;
 
   @override
   String toString() => '[InstanceSummary id: $objectRef, class: $classRef]';
 }
 
 class InstanceData {
-  InstanceData(this._instance, this._name, this._value);
+  InstanceData(this.instance, this.name, this.value);
 
-  InstanceSummary _instance;
-  InstanceSummary get instance => _instance;
-
-  String get name => _name;
-  String _name;
-
-  dynamic get value => _value;
-  dynamic _value;
+  final InstanceSummary instance;
+  final String name;
+  final dynamic value;
 
   @override
   String toString() => '[InstanceData name: $name, value: $value]';

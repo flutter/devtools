@@ -422,7 +422,7 @@ class EventTimeline {
   final String _eventBgColorCss = colorToCss(eventBgColor);
 
   final String _domName;
-  dynamic _chart;
+  final dynamic _chart;
 
   // Trace index within the traces passed to addEventTimelineTo
   int resetTraceIndex;

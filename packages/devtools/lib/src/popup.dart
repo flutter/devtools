@@ -166,6 +166,7 @@ class PopupListView<T> implements CoreElementView {
   }
 
   PopupAutoCompleteView _popupAutoCompleteView;
+
   set setPopupAutoCompleteView(PopupAutoCompleteView pacView) {
     _popupAutoCompleteView = pacView;
   }
@@ -232,6 +233,7 @@ class PopupListView<T> implements CoreElementView {
   T highlightedItem;
 
   List<T> get itemsAsList => items.items;
+
   bool get isEmpty => items.items.isEmpty;
 
   @override
@@ -337,19 +339,20 @@ class PopupAutoCompleteView extends CoreElement {
 
   // View of all items to display during auto-complete, this list will be pruned
   // during auto-complete matching.
-  PopupListView _listView;
+  final PopupListView _listView;
 
   // Container to display input element that accepts keyboard input during auto-
   // complete and the _listView (popup) is displayed in this container too.
-  CoreElement _containerElement; // Top div area container of _sourcePathDiv
+  final CoreElement
+      _containerElement; // Top div area container of _sourcePathDiv
 
-  // When creating or making visible the input element use this element to mimc
+  // When creating or making visible the input element use this element to mimic
   // the auto-complete input element background color and text color.
   CoreElement _elementToMimic;
 
   // Input element field to display while popup is active for keyboard input and
   // _listView navigation (page up/down, arrow up/down, escape, etc.)
-  CoreElement _popupTextfield;
+  final CoreElement _popupTextfield;
 
   // This is where all the incremental filter is done.
   AutoCompleteMatcher get matcher => _matcher;
@@ -357,7 +360,7 @@ class PopupAutoCompleteView extends CoreElement {
 
   // Callback to user code to process an item selected (click or ENTER to
   // process the selected item).
-  FinishFunction _completeAction;
+  final FinishFunction _completeAction;
 
   CoreElement get popupTextfield => _popupTextfield;
 

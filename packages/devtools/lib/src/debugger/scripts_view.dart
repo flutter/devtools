@@ -35,13 +35,13 @@ class PopupView extends CoreElement {
       this._popupTextfield)
       : super('div', classes: 'open-popup');
 
-  CoreElement _sourceArea; // Top div area container of _sourcePathDiv
-  CoreElement _sourcePathDiv; // Text name of the source
-  CoreElement _popupTextfield; // Textfield to show while popup is active.
+  final CoreElement _sourceArea; // Top div area container of _sourcePathDiv
+  final CoreElement _sourcePathDiv; // Text name of the source
+  final CoreElement _popupTextfield; // Textfield to show while popup is active.
 
   CoreElement get popupTextfield => _popupTextfield;
 
-  ScriptsView _scriptsView;
+  final ScriptsView _scriptsView;
 
   String _oldSourceNameTextColor;
 
