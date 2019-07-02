@@ -8,6 +8,29 @@ import 'fake_flutter/fake_flutter.dart';
 import 'icons.dart';
 import 'theme.dart';
 
+const Icon clearIcon = MaterialIcon('block', defaultButtonIconColor);
+
+const Icon exitIcon = MaterialIcon('clear', defaultButtonIconColor);
+
+const Icon exportIcon = MaterialIcon(
+  'file_download',
+  defaultButtonIconColor,
+  fontSize: 32,
+  iconWidth: 18,
+);
+
+const Icon recordPrimary = MaterialIcon(
+  'fiber_manual_record',
+  defaultPrimaryButtonIconColor,
+);
+
+const Icon record = MaterialIcon(
+  'fiber_manual_record',
+  defaultButtonIconColor,
+);
+
+const Icon stop = MaterialIcon('stop', defaultButtonIconColor);
+
 /// Class for icons consistent with
 /// https://docs.flutter.io/flutter/material/Icons-class.html
 class MaterialIcon extends Icon {

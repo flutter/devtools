@@ -14,7 +14,6 @@ import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
-import '../ui/theme.dart';
 import '../ui/ui_utils.dart';
 import 'event_details.dart';
 import 'frame_events_chart.dart';
@@ -33,17 +32,6 @@ import 'timeline_protocol.dart';
 
 // TODO(devoncarew): Switch to showing all timeline events, but highlighting the
 // area associated with the selected frame.
-
-const Icon _exportTimelineIcon = MaterialIcon(
-  'file_download',
-  defaultButtonIconColor,
-  fontSize: 32,
-  iconWidth: 18,
-);
-
-const Icon _clear = MaterialIcon('block', defaultButtonIconColor);
-
-const Icon _exitIcon = MaterialIcon('clear', defaultButtonIconColor);
 
 class TimelineScreen extends Screen {
   TimelineScreen({bool disabled, String disabledTooltip})
@@ -101,13 +89,13 @@ class TimelineScreen extends Screen {
           ..disabled = true
           ..click(_resumeRecording);
 
-    exportButton = PButton.icon('', _exportTimelineIcon)
+    exportButton = PButton.icon('', exportIcon)
       ..small()
       ..clazz('margin-left')
       ..setAttribute('title', 'Export timeline')
       ..click(_exportTimeline);
 
-    clearButton = PButton.icon('Clear', _clear)
+    clearButton = PButton.icon('Clear', clearIcon)
       ..small()
       ..clazz('margin-left')
       ..setAttribute('title', 'Clear timeline')
@@ -115,7 +103,7 @@ class TimelineScreen extends Screen {
 
     exitOfflineModeButton = PButton.icon(
       'Exit offline mode',
-      _exitIcon,
+      exitIcon,
     )
       ..small()
       ..setAttribute('title', 'Exit offline mode to connect to a VM Service.')

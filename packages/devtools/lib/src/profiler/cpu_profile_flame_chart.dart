@@ -7,13 +7,13 @@ import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
-import 'cpu_profiler_view.dart';
+import 'cpu_profile_model.dart';
+import 'cpu_profiler.dart';
 import 'flame_chart_canvas.dart';
-import 'timeline_controller.dart';
 
 class CpuFlameChart extends CpuProfilerView {
-  CpuFlameChart(TimelineController timelineController)
-      : super(timelineController, CpuProfilerViewType.flameChart) {
+  CpuFlameChart(CpuProfileDataProvider getProfileData)
+      : super(CpuProfilerViewType.flameChart, getProfileData) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
       ..hidden(true);
@@ -35,17 +35,16 @@ class CpuFlameChart extends CpuProfilerView {
 
   @override
   void rebuildView() {
+    final CpuProfileData data = getProfileData();
     canvas = FlameChartCanvas(
-      data: timelineController.timelineData.cpuProfileData,
+      data: data,
       flameChartWidth: element.clientWidth,
       flameChartHeight: math.max(
         // Subtract [rowHeightWithPadding] to account for timeline at the top of
         // the flame chart.
         element.clientHeight - rowHeightWithPadding,
         // Add 1 to account for a row of padding at the bottom of the chart.
-        (timelineController.timelineData.cpuProfileData.cpuProfileRoot.depth +
-                1) *
-            rowHeightWithPadding,
+        (data.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
       ),
     );
 
@@ -71,9 +70,11 @@ class CpuFlameChart extends CpuProfilerView {
       return;
     }
 
+    final data = getProfileData();
+
     // Only update the canvas if the flame chart is visible and has data.
     // Otherwise, mark the canvas as needing a rebuild.
-    if (!isHidden && timelineController.timelineData.cpuProfileData != null) {
+    if (!isHidden && data != null) {
       // We need to rebuild the canvas with a new content size so that the
       // canvas is always at least as tall as the container it is in. This
       // ensures that the grid lines in the chart will extend all the way to the
@@ -85,9 +86,7 @@ class CpuFlameChart extends CpuProfilerView {
           // [stackFrameDetails] section at the bottom of the chart.
           element.scrollHeight.toDouble() - rowHeightWithPadding,
           // Add 1 to account for a row of padding at the bottom of the chart.
-          (timelineController.timelineData.cpuProfileData.cpuProfileRoot.depth +
-                  1) *
-              rowHeightWithPadding,
+          (data.cpuProfileRoot.depth + 1) * rowHeightWithPadding,
         ),
       );
     } else {

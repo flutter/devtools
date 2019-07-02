@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'cpu_profile_model.dart';
-import 'cpu_profile_protocol.dart';
+import '../profiler/cpu_profile_model.dart';
+import '../profiler/cpu_profile_protocol.dart';
+import '../profiler/cpu_profile_service.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
 import 'timeline_service.dart';
@@ -76,6 +77,8 @@ class TimelineController {
   TimelineProtocol timelineProtocol;
 
   CpuProfileProtocol cpuProfileProtocol = CpuProfileProtocol();
+
+  CpuProfilerService cpuProfilerService = CpuProfilerService();
 
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;

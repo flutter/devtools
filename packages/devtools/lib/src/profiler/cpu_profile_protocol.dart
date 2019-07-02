@@ -166,11 +166,11 @@ class BottomUpProfileProcessor {
         continue;
       }
 
-      for (CpuStackFrame duplicate in matchingRoots) {
-        duplicate.children.forEach(root.addChild);
-        root.exclusiveSampleCount += duplicate.exclusiveSampleCount;
-        root.inclusiveSampleCount += duplicate.inclusiveSampleCount;
-        roots.remove(duplicate);
+      for (CpuStackFrame match in matchingRoots) {
+        match.children.forEach(root.addChild);
+        root.exclusiveSampleCount += match.exclusiveSampleCount;
+        root.inclusiveSampleCount += match.inclusiveSampleCount;
+        roots.remove(match);
         mergeRoots(root.children);
       }
     }

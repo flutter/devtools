@@ -388,7 +388,7 @@ table tr:nth-child(2n) {
 }
 
 table tr:hover {
-  background-color: var(--row-hover-background);
+    background-color: var(--row-hover-background);
 }
 
 table tr.selected {
@@ -740,6 +740,20 @@ div.tabnav-tab {
 .btn-group .btn:last-child:not(:first-child) {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+/* To truly center an object in its parent, give the object a negative top margin of half its height.
+ * See [centered-single-line-message] as an example (where the height of the single line is ~20px). */
+.center-in-parent, .centered-single-line-message {
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+}
+
+.centered-single-line-message {
+    margin-top: -10px;
 }
 
 .spinner.centered {

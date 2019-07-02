@@ -505,7 +505,7 @@ class TimelineProtocol {
 
       // Pre-fetch the cpu profile for this frame.
       frame.cpuProfileData =
-          await timelineController.timelineService.getCpuProfile(
+          await timelineController.cpuProfilerService.getCpuProfile(
         startMicros: frame.uiEventFlow.time.start.inMicroseconds,
         extentMicros: frame.uiEventFlow.time.duration.inMicroseconds,
       );
