@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 import 'package:split/split.dart' as split;
@@ -195,7 +196,13 @@ class LoggingScreen extends Screen {
   }
 
   void _handleExtensionEvent(Event e) async {
-    if (e.extensionKind == 'Flutter.Frame') {
+    // Events to show without a summary in the table.
+    final Set<String> untitledEvents = {
+      'Flutter.FirstFrame',
+      'Flutter.FrameworkInitialization',
+    };
+
+    if (e.extensionKind == FrameInfo.eventName) {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
       final String frameId = '#${frame.number}';
@@ -209,8 +216,35 @@ class LoggingScreen extends Screen {
         e.timestamp,
         summaryHtml: '$frameInfo$div',
       ));
-      // todo (pq): add tests for error extension handling once framework changes are landed.
+    } else if (e.extensionKind == NavigationInfo.eventName) {
+      final NavigationInfo navInfo = NavigationInfo.from(e.extensionData.data);
+
+      _log(LogData(
+        e.extensionKind.toLowerCase(),
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: navInfo.routeDescription,
+      ));
+    } else if (untitledEvents.contains(e.extensionKind)) {
+      _log(LogData(
+        e.extensionKind.toLowerCase(),
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: '',
+      ));
+    } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
+      final ServiceExtensionStateChangedInfo changedInfo =
+          ServiceExtensionStateChangedInfo.from(e.extensionData.data);
+
+      _log(LogData(
+        e.extensionKind.toLowerCase(),
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: '${changedInfo.extension}: ${changedInfo.value}',
+      ));
     } else if (e.extensionKind == 'Flutter.Error') {
+      // TODO(pq): add tests for error extension handling once framework changes
+      // are landed.
       final RemoteDiagnosticsNode node =
           RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
       if (_verboseDebugging) {
@@ -406,11 +440,13 @@ class LoggingScreen extends Screen {
   }
 
   String createFrameDivHtml(FrameInfo frame) {
+    const double maxFrameEventBarMs = 100.0;
     final String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs)
         ? 'frame-bar over-budget'
         : 'frame-bar';
 
-    final int pixelWidth = (frame.elapsedMs * 3).round();
+    final int pixelWidth =
+        (math.min(frame.elapsedMs, maxFrameEventBarMs) * 3).round();
     return '<div class="$classes" style="width: ${pixelWidth}px"/>';
   }
 }
@@ -724,6 +760,8 @@ class LogDetailsUI extends CoreElement {
 class FrameInfo {
   FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
 
+  static const String eventName = 'Flutter.Frame';
+
   static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
   static FrameInfo from(Map<String, dynamic> data) {
@@ -735,8 +773,33 @@ class FrameInfo {
   final num elapsedMs;
   final num startTimeMs;
 
-  num get endTimeMs => startTimeMs + elapsedMs;
-
   @override
   String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
+}
+
+class NavigationInfo {
+  NavigationInfo(this._route);
+
+  static const String eventName = 'Flutter.Navigation';
+
+  static NavigationInfo from(Map<String, dynamic> data) {
+    return NavigationInfo(data['route']);
+  }
+
+  final Map<String, dynamic> _route;
+
+  String get routeDescription => _route == null ? null : _route['description'];
+}
+
+class ServiceExtensionStateChangedInfo {
+  ServiceExtensionStateChangedInfo(this.extension, this.value);
+
+  static const String eventName = 'Flutter.ServiceExtensionStateChanged';
+
+  static ServiceExtensionStateChangedInfo from(Map<String, dynamic> data) {
+    return ServiceExtensionStateChangedInfo(data['extension'], data['value']);
+  }
+
+  final String extension;
+  final dynamic value;
 }
