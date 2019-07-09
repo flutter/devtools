@@ -742,6 +742,13 @@ div.tabnav-tab {
     border-bottom-left-radius: 0;
 }
 
+.form-select.toggle-platform {
+    background-color: #f9fbfc;
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+}
+
 /* To truly center an object in its parent, give the object a negative top margin of half its height.
  * See [centered-single-line-message] as an example (where the height of the single line is ~20px). */
 .center-in-parent, .centered-single-line-message {

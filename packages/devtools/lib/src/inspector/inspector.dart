@@ -88,7 +88,7 @@ class InspectorScreen extends Screen {
           ..display = 'none',
         div()..flex(),
       ]);
-    getServiceExtensionButtons().forEach(buttonSection.add);
+    getServiceExtensionElements().forEach(buttonSection.add);
 
     screenDiv.add(<CoreElement>[
       buttonSection,
