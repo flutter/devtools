@@ -30,13 +30,8 @@ Then, open a browser window to the local url specified by webdev. After the page
 `?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by
 the `flutter run` output.
 
-For more productive development, launch your Flutter application specifying
-`--observatory-port` so the observatory is available on a fixed port. This
-lets you avoid manually entering the observatory port parameter each time
-you launch the application.
-
-- `flutter run --observatory-port=8888`
-- `open http://localhost:8080/?port=8888`
+- `flutter run`
+- `open http://localhost:8080`
 
 `webdev` provides a fast development server that incrementally
 rebuilds the portion of the application that was edited each time you reload
