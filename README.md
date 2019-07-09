@@ -10,7 +10,7 @@ It’s currently in preview release, but we’re actively working on improvement
 ## Getting started
 
 For documentation on installing and trying out DevTools, please see our
-[docs](https://flutter.github.io/devtools/).
+[docs](https://flutter.dev/docs/development/tools/devtools/).
 
 ## Contributing and development
 
