@@ -18,8 +18,9 @@ matrix:
   #     we can build on an older SDK.
   - dart: stable
     env: BOT=main
-  # TODO(dantup): Temporarily skip dev DDC builds until a fix for windows ddc
+  # TODO(jacobr): Temporarily skip dev DDC builds until a fix for windows ddc
   # crasher bug in the dart sdk lands on dev.
+  # https://github.com/dart-lang/sdk/issues/37490
   - dart:  "dev/raw/latest"
     env: BOT=test_ddc
 
