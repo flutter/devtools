@@ -165,7 +165,7 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   icon: FlutterIcons.phone,
   values: ['iOS', 'android', 'fuchsia'],
   displayValues: ['Platform: iOS', 'Platform: Android', 'Platform: Fuchsia'],
-  tooltips: ['Override target platform'],
+  tooltips: ['Override Target Platform'],
   gaScreenName: ga.inspector,
   gaItem: ga.togglePlatform,
 );

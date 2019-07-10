@@ -170,7 +170,9 @@ class ServiceExtensionSelector {
     selector = PSelect()
       ..small()
       ..clazz('toggle-platform')
-      ..change(_handleSelect);
+      ..change(_handleSelect)
+      ..tooltip = extensionDescription.tooltips.first ??
+          extensionDescription.description;
 
     extensionDescription.displayValues.forEach(selector.option);
 
