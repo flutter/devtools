@@ -8,7 +8,7 @@ performance tools for Dart and Flutter.
 ## Getting started
 
 For documentation on installing and trying out DevTools, please see our
-[docs](https://flutter.github.io/devtools/).
+[docs](https://flutter.dev/docs/development/tools/devtools/).
 
 ## Feedback
 
