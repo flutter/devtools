@@ -26,6 +26,7 @@ IntelliJ).'''),
   ],
 );
 
+// fake comment
 const _trackWidgetCreationDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/inspector#track-widget-creation';
 
