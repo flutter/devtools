@@ -60,7 +60,8 @@ class InboundReferences extends Response {
 
 class InboundReference extends Response {
   InboundReference._fromJson(Map<String, dynamic> json) {
-    //source = json['source'],
+    //source = json['source']
+    // For vm_service_lib 3.21.1, use ['ObjRef']?
     parentField = createServiceObject(json['parentField']);
     parentListIndex = json['parentListIndex'];
     parentWordOffset = json['_parentWordOffset'];

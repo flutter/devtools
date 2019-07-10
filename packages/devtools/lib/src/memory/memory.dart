@@ -215,7 +215,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       _mouseOutHover(evt);
     });
 
-    history = div(c: 'history-navigation hidden');
+    history = div(c: 'history-navigation section', a: 'hidden');
 
     screenDiv.add(<CoreElement>[
       div(c: 'section')
@@ -241,13 +241,13 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      heapAutoCompletePopup,
-      hoverPopup, // Hover card
       memoryChart = MemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
         ..flex(),
       history,
+      heapAutoCompletePopup,
+      hoverPopup, // Hover card
     ]);
 
     memoryController.onDisconnect.listen((__) {
@@ -332,7 +332,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _resetHistory() {
-    history..clazz('history-navigation', removeOthers: true)..clazz('hidden');
+    history.attribute('hidden');
     history.clear();
     memoryPath = NavigationPath();
   }
@@ -513,6 +513,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   final List<String> _knownSnapshotClasses = [];
+
   List<String> getKnownSnapshotClasses() {
     if (_knownSnapshotClasses.isEmpty) {
       final List<ClassHeapDetailStats> classesData = tableStack.first.data;
@@ -680,11 +681,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       ));
 
       table.setRows(instanceRows);
-    } catch (e) {
+    } catch (e, st) {
       framework.toast(
         'Problem fetching instances of ${row.classRef.name}: $e',
         title: 'Error',
       );
+      print(st);
     }
 
     table.onCellHover.listen(hoverInstanceAllocations);
@@ -751,7 +753,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         history.clear();
         memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
 
-        history..clazz('history-navigation', removeOthers: true);
+        history.hidden(false);
       }
     }
   }
@@ -793,13 +795,13 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
 
       history.clear();
+
       Timer(const Duration(milliseconds: 100), () {
         if (!memoryPath.isLastInBound) {
-          history
-            ..clazz('history-navigation', removeOthers: true)
-            ..clazz('hidden');
+          history.hidden(true);
         } else {
           memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
+          history.hidden(false);
         }
       });
     }
@@ -1071,7 +1073,9 @@ class MemoryScreen extends Screen with SetStateMixin {
 ///      field [field of parent class that has ref]
 class NavigationState {
   NavigationState._() : _className = '';
+
   NavigationState.classSelect(this._className);
+
   NavigationState.instanceSelect(this._className, this._hashCode);
 
   // data attribute names.
@@ -1090,8 +1094,10 @@ class NavigationState {
 
   bool get isClass =>
       _className.isNotEmpty && field.isEmpty && _hashCode == null;
+
   bool get isInstance =>
       _className.isNotEmpty && field.isEmpty && _hashCode != null;
+
   bool get isInbound =>
       _className.isNotEmpty && field.isNotEmpty && _hashCode != null;
 
@@ -1142,6 +1148,7 @@ class NavigationPath {
   set fieldReference(String field) => _inboundFieldName = field;
 
   bool get isEmpty => _path.isEmpty;
+
   bool get isNotEmpty => _path.isNotEmpty;
 
   void add(NavigationState state) {
@@ -1184,7 +1191,7 @@ class NavigationPath {
     }
   }
 
-  // Last item in path an inBound NavigationState.
+  /// Is the last item in the path an inBound NavigationState.
   bool get isLastInBound => _path.isNotEmpty ? _path.last.isInbound : false;
 
   bool get isLastInstance => _path.isNotEmpty ? _path.last.isInstance : false;

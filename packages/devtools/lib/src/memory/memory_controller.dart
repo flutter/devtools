@@ -7,7 +7,6 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
-
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
@@ -23,13 +22,16 @@ class MemoryController {
 
   final StreamController<MemoryTracker> _memoryTrackerController =
       StreamController<MemoryTracker>.broadcast();
+
   Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
 
   final StreamController<void> _disconnectController =
       StreamController<void>.broadcast();
+
   Stream<void> get onDisconnect => _disconnectController.stream;
 
   MemoryTracker _memoryTracker;
+
   MemoryTracker get memoryTracker => _memoryTracker;
 
   bool get hasStarted => _memoryTracker != null;
@@ -118,7 +120,7 @@ class MemoryController {
 
   // Temporary hack to allow accessing private fields(e.g., _extra) using eval
   // of '_extra.hashCode' to fetch the hashCode of the object of that field.
-  // Used to find the object which allocated/references the object being viewd.
+  // Used to find the object which allocated/references the object being viewed.
   Future<bool> matchObject(
       String objectRef, String fieldName, int instanceHashCode) async {
     final dynamic object = await getObject(objectRef);
