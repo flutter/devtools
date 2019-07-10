@@ -110,7 +110,11 @@ void main() {
         'TargetPlatform.android',
         library,
       );
-      await _verifyInitialExtensionStateInServiceManager(extensionName);
+      await _verifyExtensionStateInServiceManager(
+        extensionName,
+        true,
+        'android',
+      );
 
       // Enable the service extension via ServiceExtensionManager.
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
@@ -257,20 +261,23 @@ void main() {
     /// Helper method to call an extension on the test device and verify that
     /// the device reflects the new extension state.
     Future<void> _enableExtensionOnTestDevice(
-      extensions.ToggleableServiceExtensionDescription extensionDescription,
+      extensions.ServiceExtensionDescription extensionDescription,
       Map<String, dynamic> args,
       String evalExpression,
       EvalOnDartLibrary library, {
-      String enabledValue,
-      String disabledValue,
+      String newValue,
+      String oldValue,
     }) async {
-      enabledValue ??= extensionDescription.enabledValue.toString();
-      disabledValue ??= extensionDescription.disabledValue.toString();
+      if (extensionDescription
+          is extensions.ToggleableServiceExtensionDescription) {
+        newValue ??= extensionDescription.enabledValue.toString();
+        oldValue ??= extensionDescription.disabledValue.toString();
+      }
 
       // Verify initial extension state on test device.
       await _verifyExtensionStateOnTestDevice(
         evalExpression,
-        disabledValue,
+        oldValue,
         library,
       );
 
@@ -284,14 +291,14 @@ void main() {
       // Verify extension state after calling the service extension.
       await _verifyExtensionStateOnTestDevice(
         evalExpression,
-        enabledValue,
+        newValue,
         library,
       );
     }
 
     test('all extension types', () async {
       // Enable a boolean extension on the test device.
-      const boolExtensionDescription = extensions.debugPaint;
+      final boolExtensionDescription = extensions.debugPaint;
       final boolArgs = {'enabled': true};
       const boolEvalExpression = 'debugPaintSizeEnabled';
       final boolLibrary = EvalOnDartLibrary(
@@ -310,8 +317,8 @@ void main() {
       );
 
       // Enable a String extension on the test device.
-      const stringExtensionDescription = extensions.togglePlatformMode;
-      final stringArgs = {'value': 'iOS'};
+      final stringExtensionDescription = extensions.togglePlatformMode;
+      final stringArgs = {'value': stringExtensionDescription.values[0]};
       const stringEvalExpression = 'defaultTargetPlatform.toString()';
       final stringLibrary = EvalOnDartLibrary(
         [
@@ -326,12 +333,12 @@ void main() {
         stringArgs,
         stringEvalExpression,
         stringLibrary,
-        enabledValue: 'TargetPlatform.iOS',
-        disabledValue: 'TargetPlatform.android',
+        newValue: 'TargetPlatform.iOS',
+        oldValue: 'TargetPlatform.android',
       );
 
       // Enable a numeric extension on the test device.
-      const numericExtensionDescription = extensions.slowAnimations;
+      final numericExtensionDescription = extensions.slowAnimations;
       final numericArgs = {
         numericExtensionDescription.extension.substring(
                 numericExtensionDescription.extension.lastIndexOf('.') + 1):
@@ -370,7 +377,7 @@ void main() {
       await _verifyExtensionStateInServiceManager(
         stringExtensionDescription.extension,
         true,
-        stringExtensionDescription.enabledValue,
+        stringExtensionDescription.values[0],
       );
       await _verifyExtensionStateInServiceManager(
         numericExtensionDescription.extension,

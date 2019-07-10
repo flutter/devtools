@@ -169,10 +169,10 @@ class ServiceExtensionSelector {
   ServiceExtensionSelector(this.extensionDescription) {
     selector = PSelect()
       ..small()
-      ..option(extensionDescription.enabledValue) // Index 0
-      ..option(extensionDescription.disabledValue) // Index 1
       ..clazz('toggle-platform')
       ..change(_handleSelect);
+
+    extensionDescription.displayValues.forEach(selector.option);
 
     final extensionName = extensionDescription.extension;
 
@@ -182,14 +182,10 @@ class ServiceExtensionSelector {
     serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName, (available) => selector.disabled = !available);
 
-    _selectedValue = selector.value;
+    _updateState();
   }
 
-  static const enabledValueIndex = 0;
-
-  static const disabledValueIndex = 1;
-
-  final ToggleableServiceExtensionDescription extensionDescription;
+  final ServiceExtensionDescription extensionDescription;
 
   PSelect selector;
 
@@ -200,13 +196,13 @@ class ServiceExtensionSelector {
 
     ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
 
-    final isEnabled = selector.value == extensionDescription.enabledValue;
+    final extensionValue = extensionDescription
+        .values[extensionDescription.displayValues.indexOf(selector.value)];
+
     serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensionDescription.extension,
-      isEnabled,
-      isEnabled
-          ? extensionDescription.enabledValue
-          : extensionDescription.disabledValue,
+      true,
+      extensionValue,
     );
 
     _selectedValue = selector.value;
@@ -216,9 +212,11 @@ class ServiceExtensionSelector {
     // Select option whose state is already enabled.
     serviceManager.serviceExtensionManager
         .getServiceExtensionState(extensionDescription.extension, (state) {
-      final extensionEnabled = state.value == extensionDescription.enabledValue;
-      selector.selectedIndex =
-          extensionEnabled ? enabledValueIndex : disabledValueIndex;
+      if (state.value != null) {
+        final selectedIndex = extensionDescription.values.indexOf(state.value);
+        selector.selectedIndex = selectedIndex;
+        _selectedValue = extensionDescription.displayValues[selectedIndex];
+      }
     });
   }
 }

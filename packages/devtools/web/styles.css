@@ -16,6 +16,7 @@
     --dark-shadow-color: #666;
     --default-background-rgb: 255, 255, 255;
     --default-background: rgba(var(--default-background-rgb), 1);
+    --default-button-text-color: #24292e;
     --default-color-thumb: #888;
     --default-color: #000;
     --disabled-background: #ddd;
@@ -24,6 +25,7 @@
     --footer-color: #7a7a7a;
     --footer-link-hover: #0366d6;
     --footer-strong: #333;
+    --form-select-background: #f9fbfc;
     --header-background: #f3f3f3;
     --header-color: #586069;
     --header-item-rgb: 255, 255, 255;
@@ -743,7 +745,8 @@ div.tabnav-tab {
 }
 
 .form-select.toggle-platform {
-    background-color: #f9fbfc;
+    background-color: var(--form-select-background);
+    color: var(--default-button-text-color);
     display: inline-flex;
     align-items: center;
     height: 30px;

@@ -10,31 +10,72 @@ import 'ui/analytics_constants.dart' as ga;
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
-class ToggleableServiceExtensionDescription<T> {
-  const ToggleableServiceExtensionDescription._({
-    this.extension,
-    this.description,
+class ToggleableServiceExtensionDescription<T>
+    extends ServiceExtensionDescription {
+  ToggleableServiceExtensionDescription._({
+    Icon icon,
+    @required String extension,
+    @required String description,
+    @required T enabledValue,
+    @required T disabledValue,
+    @required String enabledTooltip,
+    @required String disabledTooltip,
+    @required String gaScreenName,
+    @required String gaItem,
+  }) : super(
+          extension: extension,
+          description: description,
+          icon: icon,
+          values: [enabledValue, disabledValue],
+          tooltips: [enabledTooltip, disabledTooltip],
+          gaScreenName: gaScreenName,
+          gaItem: gaItem,
+        );
+
+  static const enabledValueIndex = 0;
+
+  static const disabledValueIndex = 1;
+
+  T get enabledValue => values[enabledValueIndex];
+
+  T get disabledValue => values[disabledValueIndex];
+
+  String get enabledTooltip => tooltips[enabledValueIndex];
+
+  String get disabledTooltip => tooltips[disabledValueIndex];
+}
+
+class ServiceExtensionDescription<T> {
+  ServiceExtensionDescription({
     this.icon,
-    this.enabledValue,
-    this.disabledValue,
-    this.enabledTooltip,
-    this.disabledTooltip,
+    List<String> displayValues,
+    @required this.extension,
+    @required this.description,
+    @required this.values,
+    @required this.tooltips,
     @required this.gaScreenName,
     @required this.gaItem,
-  });
+  }) : displayValues =
+            displayValues ?? values.map((v) => v.toString()).toList();
 
   final String extension;
+
   final String description;
+
   final Icon icon;
-  final T enabledValue;
-  final T disabledValue;
-  final String enabledTooltip;
-  final String disabledTooltip;
+
+  final List<T> values;
+
+  final List<String> displayValues;
+
+  final List<String> tooltips;
+
   final String gaScreenName; // Analytics screen (screen name where item lives).
+
   final String gaItem; // Analytics item name (toggleable item's name).
 }
 
-const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
+final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Debug Banner',
   icon: FlutterIcons.debugBanner,
@@ -46,7 +87,7 @@ const debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.debugBanner,
 );
 
-const debugPaint = ToggleableServiceExtensionDescription<bool>._(
+final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Debug Paint',
   icon: FlutterIcons.debugPaint,
@@ -58,7 +99,7 @@ const debugPaint = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.debugPaint,
 );
 
-const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
+final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Paint Baselines',
   icon: FlutterIcons.text,
@@ -70,7 +111,7 @@ const debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.paintBaseline,
 );
 
-const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
+final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance Overlay',
   icon: FlutterIcons.performanceOverlay,
@@ -82,7 +123,7 @@ const performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.performanceOverlay,
 );
 
-const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
+final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Rebuilds',
   icon: FlutterIcons.greyProgr,
@@ -94,7 +135,7 @@ const profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.trackRebuilds,
 );
 
-const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
+final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Repaint Rainbow',
   icon: FlutterIcons.repaintRainbow,
@@ -106,7 +147,7 @@ const repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   gaItem: ga.repaintRainbow,
 );
 
-const slowAnimations = ToggleableServiceExtensionDescription<num>._(
+final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
   icon: FlutterIcons.history,
@@ -118,19 +159,18 @@ const slowAnimations = ToggleableServiceExtensionDescription<num>._(
   gaItem: ga.slowAnimation,
 );
 
-const togglePlatformMode = ToggleableServiceExtensionDescription<String>._(
+final togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
-  description: 'iOS',
+  description: 'Override target platform',
   icon: FlutterIcons.phone,
-  enabledValue: 'iOS',
-  disabledValue: 'android',
-  enabledTooltip: 'Toggle iOS Platform',
-  disabledTooltip: 'Toggle iOS Platform',
+  values: ['iOS', 'android', 'fuchsia'],
+  displayValues: ['Platform: iOS', 'Platform: Android', 'Platform: Fuchsia'],
+  tooltips: ['Override target platform'],
   gaScreenName: ga.inspector,
-  gaItem: ga.toggleIoS,
+  gaItem: ga.togglePlatform,
 );
 
-const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
+final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.show',
   description: 'Select Widget Mode',
   icon: FlutterIcons.locate,
@@ -146,7 +186,7 @@ const toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
 
-const List<ToggleableServiceExtensionDescription> _extensionDescriptions = [
+final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,
   debugPaintBaselines,
   repaintRainbow,
@@ -158,8 +198,8 @@ const List<ToggleableServiceExtensionDescription> _extensionDescriptions = [
   slowAnimations,
 ];
 
-final Map<String, ToggleableServiceExtensionDescription>
-    toggleableExtensionsWhitelist = Map.fromIterable(
+final Map<String, ServiceExtensionDescription> serviceExtensionsWhitelist =
+    Map.fromIterable(
   _extensionDescriptions,
   key: (extension) => extension.extension,
   value: (extension) => extension,
