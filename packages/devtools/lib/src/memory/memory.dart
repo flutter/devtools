@@ -332,7 +332,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _resetHistory() {
-    history.attribute('hidden');
+    history.hidden(true);
     history.clear();
     memoryPath = NavigationPath();
   }
