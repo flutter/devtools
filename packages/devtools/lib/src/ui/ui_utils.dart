@@ -56,27 +56,25 @@ CoreElement createExtensionCheckBox(
   return outerDiv;
 }
 
-List<CoreElement> getServiceExtensionButtons() {
+List<CoreElement> getServiceExtensionElements() {
   return [
     div(c: 'btn-group collapsible-1200 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(performanceOverlay).button,
-        ServiceExtensionButton(togglePlatformMode).button,
+        ServiceExtensionButton(slowAnimations).button,
       ]),
     div(c: 'btn-group collapsible-1200 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(debugPaint).button,
         ServiceExtensionButton(debugPaintBaselines).button,
       ]),
-    div(c: 'btn-group collapsible-1200 nowrap margin-left')
-      ..add(<CoreElement>[
-        ServiceExtensionButton(slowAnimations).button,
-      ]),
     div(c: 'btn-group collapsible-1400 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(repaintRainbow).button,
         ServiceExtensionButton(debugAllowBanner).button,
       ]),
+    div(c: 'btn-group nowrap margin-left')
+      ..add(ServiceExtensionSelector(togglePlatformMode).selector)
   ];
 }
 
@@ -111,8 +109,9 @@ Future<void> maybeAddDebugMessage(Framework framework, String screenId) async {
   }
 }
 
-/// Button that calls a service extension. Service extensions can be found in
-/// [service_extensions.dart].
+/// Button that calls a service extension.
+///
+/// Service extensions can be found in [service_extensions.dart].
 class ServiceExtensionButton {
   ServiceExtensionButton(this.extensionDescription) {
     button = PButton.icon(
@@ -159,6 +158,67 @@ class ServiceExtensionButton {
       button.tooltip = extensionEnabled
           ? extensionDescription.enabledTooltip
           : extensionDescription.disabledTooltip;
+    });
+  }
+}
+
+/// Dropdown selector that calls a service extension.
+///
+/// Service extensions can be found in [service_extensions.dart].
+class ServiceExtensionSelector {
+  ServiceExtensionSelector(this.extensionDescription) {
+    selector = PSelect()
+      ..small()
+      ..clazz('toggle-platform')
+      ..change(_handleSelect)
+      ..tooltip = extensionDescription.tooltips.first ??
+          extensionDescription.description;
+
+    extensionDescription.displayValues.forEach(selector.option);
+
+    final extensionName = extensionDescription.extension;
+
+    // Disable selector for unavailable service extensions.
+    selector.disabled = !serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(extensionName);
+    serviceManager.serviceExtensionManager.hasServiceExtension(
+        extensionName, (available) => selector.disabled = !available);
+
+    _updateState();
+  }
+
+  final ServiceExtensionDescription extensionDescription;
+
+  PSelect selector;
+
+  String _selectedValue;
+
+  void _handleSelect() {
+    if (selector.value == _selectedValue) return;
+
+    ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
+
+    final extensionValue = extensionDescription
+        .values[extensionDescription.displayValues.indexOf(selector.value)];
+
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
+      extensionDescription.extension,
+      true,
+      extensionValue,
+    );
+
+    _selectedValue = selector.value;
+  }
+
+  void _updateState() {
+    // Select option whose state is already enabled.
+    serviceManager.serviceExtensionManager
+        .getServiceExtensionState(extensionDescription.extension, (state) {
+      if (state.value != null) {
+        final selectedIndex = extensionDescription.values.indexOf(state.value);
+        selector.selectedIndex = selectedIndex;
+        _selectedValue = extensionDescription.displayValues[selectedIndex];
+      }
     });
   }
 }

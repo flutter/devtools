@@ -393,10 +393,17 @@ class ServiceExtensionManager {
         final String valueFromJson =
             event.json['extensionData']['value'].toString();
 
-        final extension = extensions.toggleableExtensionsWhitelist[name];
+        final extension = extensions.serviceExtensionsWhitelist[name];
         if (extension != null) {
           final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
-          final bool enabled = value == extension.enabledValue;
+
+          final enabled =
+              extension is extensions.ToggleableServiceExtensionDescription
+                  ? value == extension.enabledValue
+                  // For extensions that have more than two states
+                  // (enabled / disabled), we will always consider them to be
+                  // enabled with the current value.
+                  : true;
 
           await setServiceExtensionState(
             name,
@@ -410,7 +417,7 @@ class ServiceExtensionManager {
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
+        extensions.serviceExtensionsWhitelist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -499,23 +506,25 @@ class ServiceExtensionManager {
     _serviceExtensions.add(name);
     streamController.add(true);
 
-    // Set any extensions that are already enabled on the device. This will
-    // enable extension states in DevTools on page refresh or initial start.
-    await _restoreExtensionFromDevice(name);
-
-    // Restore any previously enabled states by calling their service extension.
-    // This will restore extension states on the device after a hot restart.
     if (_enabledServiceExtensions.containsKey(name)) {
+      // Restore any previously enabled states by calling their service
+      // extension. This will restore extension states on the device after a hot
+      // restart. [_enabledServiceExtensions] will be empty on page refresh or
+      // initial start.
       await _callServiceExtension(name, _enabledServiceExtensions[name].value);
+    } else {
+      // Set any extensions that are already enabled on the device. This will
+      // enable extension states in DevTools on page refresh or initial start.
+      await _restoreExtensionFromDevice(name);
     }
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.toggleableExtensionsWhitelist.containsKey(name)) {
+    if (!extensions.serviceExtensionsWhitelist.containsKey(name)) {
       return;
     }
     final expectedValueType =
-        extensions.toggleableExtensionsWhitelist[name].enabledValue.runtimeType;
+        extensions.serviceExtensionsWhitelist[name].values.first.runtimeType;
 
     try {
       final response = await _service.callServiceExtension(
@@ -552,7 +561,13 @@ class ServiceExtensionManager {
   }
 
   Future<void> _maybeRestoreExtension(String name, dynamic value) async {
-    if (value == extensions.toggleableExtensionsWhitelist[name].enabledValue) {
+    final extensionDescription = extensions.serviceExtensionsWhitelist[name];
+    if (extensionDescription
+        is extensions.ToggleableServiceExtensionDescription) {
+      if (value == extensionDescription.enabledValue) {
+        await setServiceExtensionState(name, true, value, callExtension: false);
+      }
+    } else {
       await setServiceExtensionState(name, true, value, callExtension: false);
     }
   }

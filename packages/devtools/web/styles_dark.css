@@ -12,6 +12,7 @@
     --dark-shadow-color: #999;
     --default-background-rgb: 32, 33, 36;
     --default-background: rgba(var(--default-background-rgb), 1);
+    --default-button-text-color: #89b5f8;
     --default-color-thumb: #888;
     --default-color: #fff;
     --disabled-background: #555;
@@ -20,6 +21,7 @@
     --footer-color: #858585;
     --footer-link-hover: wheat;
     --footer-strong: #ccc;
+    --form-select-background: #202225;
     --header-background: #282828;
     --header-color: #ccc;
     --header-item-rgb: 255, 255, 255;
