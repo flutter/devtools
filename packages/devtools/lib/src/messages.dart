@@ -27,7 +27,7 @@ IntelliJ).'''),
 );
 
 const _trackWidgetCreationDocsUrl =
-    'https://flutter.github.io/devtools/inspector#track-widget-creation';
+    'https://flutter.dev/docs/development/tools/devtools/inspector#track-widget-creation';
 
 final debugWarning = Message(
   MessageType.warning,
