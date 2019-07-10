@@ -323,10 +323,6 @@ table th.wide {
     display: block;
 }
 
-.history-navigation .hidden {
-    display: none;
-}
-
 .history-separator {
     color: gray;
     padding-left: 1em;
