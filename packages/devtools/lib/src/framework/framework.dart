@@ -486,7 +486,7 @@ abstract class Screen {
           span()
             ..add(span(text: '$name', c: 'optional-700'))
             ..add(span(text: ' Docs')),
-          href: 'https://flutter.github.io/devtools/$id',
+          href: 'https://flutter.dev/docs/development/tools/devtools/$id',
           title: 'Documentation on using the $name page',
         ),
         disabled = allTabsEnabledByQuery ? false : disabled;
