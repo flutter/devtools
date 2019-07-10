@@ -686,7 +686,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         'Problem fetching instances of ${row.classRef.name}: $e',
         title: 'Error',
       );
-      print(st);
+      print('Problem fetching instances of ${row.classRef.name}: $e\n$st');
     }
 
     table.onCellHover.listen(hoverInstanceAllocations);
