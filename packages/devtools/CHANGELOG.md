@@ -1,3 +1,7 @@
+## 0.1.3 - 2019-07-11
+* Link to new flutter.dev hosted DevTools documentation.
+* Inspector UI improvements.
+
 ## 0.1.2 - 2019-07-01
 * Add Call Tree and Bottom Up views to CPU profiler.
 * Pre-fetch CPU profiles so that we have profiling information for every frame in the timeline.
