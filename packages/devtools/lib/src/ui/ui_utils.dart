@@ -104,6 +104,7 @@ StatusItem createLinkStatusItem(
 Future<void> maybeAddDebugMessage(Framework framework, String screenId) async {
   if (!offlineMode &&
       serviceManager.connectedApp != null &&
+      await serviceManager.connectedApp.isFlutterApp &&
       !await serviceManager.connectedApp.isProfileBuild) {
     framework.showMessage(message: debugWarning, screenId: screenId);
   }
