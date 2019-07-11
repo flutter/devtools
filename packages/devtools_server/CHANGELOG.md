@@ -1,3 +1,6 @@
+## 0.1.3
+- vm_service_lib dependency has been pinned to 3.21.0
+
 ## 0.1.2
 - The `launchDevTools` service will now return well-formed errors if it fails to
   launch the browser for any reason.
