@@ -22,11 +22,11 @@ cd packages/devtools
 ## Update the release number in two files:
 - **packages/devtools/pubspec.yaml**
 
-Change the ```version version: 0.0.14``` to ```version version: 0.0.15```
+Change ```version: 0.0.14``` to ```version: 0.0.15```
 
 - **packages/devtools/lib/devtools.dart**
 
-Change the ```const String version = '0.0.14';``` to ```const String version = '0.0.15';```
+Change ```const String version = '0.0.14';``` to ```const String version = '0.0.15';```
 
 ## Update the CHANGELOG.md
 - **packages/devtools/CHANGELOG.md**
