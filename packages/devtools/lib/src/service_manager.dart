@@ -120,7 +120,8 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     @required Future<void> onClosed,
   }) async {
-    const kServiceStream = '_Service';
+    const kServiceStreamOld = '_Service';
+    const kServiceStreamNew = 'Service';
 
     final vm = await service.getVM();
     this.vm = vm;
@@ -134,7 +135,7 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
-    service.onEvent(kServiceStream).listen((e) {
+    void handleServiceEvent(Event e) {
       if (e.kind == EventKind.kServiceRegistered) {
         if (!_registeredMethodsForService.containsKey(e.service)) {
           _registeredMethodsForService[e.service] = [e.method];
@@ -145,7 +146,10 @@ class ServiceConnectionManager {
           _registeredMethodsForService[e.service].add(e.method);
         }
       }
-    });
+    }
+
+    service.onEvent(kServiceStreamOld).listen(handleServiceEvent);
+    service.onEvent(kServiceStreamNew).listen(handleServiceEvent);
 
     _isolateManager._service = service;
     _serviceExtensionManager._service = service;
@@ -169,7 +173,8 @@ class ServiceConnectionManager {
       EventStreams.kGC,
       EventStreams.kTimeline,
       EventStreams.kExtension,
-      kServiceStream,
+      kServiceStreamNew,
+      kServiceStreamOld,
     ];
 
     // The following streams are not yet supported by Flutter Web.
@@ -181,10 +186,12 @@ class ServiceConnectionManager {
       try {
         await service.streamListen(id);
       } catch (e) {
-        // Don't complain about '_Logging' or 'Logging' events (newer VMs don't
-        // support '_Logging' and older VMs don't support 'Logging').
         // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
-        if (!id.endsWith('Logging')) {
+        if (id.endsWith('Logging') || id.endsWith('Service')) {
+          // Don't complain about '_Logging', 'Logging', '_Service', or 'Service'
+          // events (newer VMs don't the private names, and older ones don't
+          // support the public ones).
+        } else {
           print("Service client stream not supported: '$id'\n  $e");
         }
       }
