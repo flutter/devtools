@@ -125,6 +125,15 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
   }
 
   @override
+  double getRelativeYPosition(double absoluteY) {
+    final row = (absoluteY - flameChartTop) ~/ rowHeightWithPadding;
+    if (row >= gpuSectionStartRow) {
+      return absoluteY - flameChartTop - sectionSpacing;
+    }
+    return absoluteY - flameChartTop;
+  }
+
+  @override
   Color getColorForNode(dynamic node) {
     assert(node is TimelineEvent);
     return node.isUiEvent ? _nextUiColor() : _nextGpuColor();

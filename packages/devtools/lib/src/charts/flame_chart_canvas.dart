@@ -141,11 +141,15 @@ abstract class FlameChart<T> {
     return nodes.isEmpty ? null : binarySearchForNode();
   }
 
+  double getRelativeYPosition(double absoluteY) {
+    return absoluteY - flameChartTop;
+  }
+
   int getRowIndexForY(double y) {
     if (y < flameChartTop) {
       return -1;
     }
-    return math.max((y - flameChartTop) ~/ rowHeightWithPadding, 0);
+    return math.max((getRelativeYPosition(y)) ~/ rowHeightWithPadding, 0);
   }
 }
 
