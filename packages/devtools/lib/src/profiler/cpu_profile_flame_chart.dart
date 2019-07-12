@@ -3,13 +3,17 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
+import '../charts/flame_chart_canvas.dart';
+import '../ui/colors.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
-import 'flame_chart_canvas.dart';
 
 class CpuFlameChart extends CpuProfilerView {
   CpuFlameChart(CpuProfileDataProvider getProfileData)
@@ -36,7 +40,7 @@ class CpuFlameChart extends CpuProfilerView {
   @override
   void rebuildView() {
     final CpuProfileData data = getProfileData();
-    canvas = FlameChartCanvas(
+    canvas = CpuProfileFlameChart(
       data: data,
       flameChartWidth: element.clientWidth,
       flameChartHeight: math.max(
@@ -48,8 +52,9 @@ class CpuFlameChart extends CpuProfilerView {
       ),
     );
 
-    canvas.onStackFrameSelected.listen((stackFrame) {
-      stackFrameDetails.text = stackFrame.toString();
+    canvas.onNodeSelected.listen((node) {
+      assert(node.data is CpuStackFrame);
+      stackFrameDetails.text = node.data.toString();
     });
 
     add(canvas.element);
@@ -102,5 +107,100 @@ class CpuFlameChart extends CpuProfilerView {
 
     stackFrameDetails.text = stackFrameDetailsDefaultText;
     stackFrameDetails.hidden(true);
+  }
+}
+
+class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
+  CpuProfileFlameChart({
+    @required CpuProfileData data,
+    @required flameChartWidth,
+    @required flameChartHeight,
+  }) : super(
+          data: data,
+          duration: data.time.duration,
+          flameChartWidth: flameChartWidth,
+          flameChartHeight: flameChartHeight,
+          classes: 'cpu-flame-chart',
+        );
+
+  static const stackFramePadding = 1;
+
+  int _colorOffset = 0;
+
+  @override
+  void initRows() {
+    for (int i = 0; i < data.cpuProfileRoot.depth; i++) {
+      rows.add(FlameChartRow(nodes: [], index: i));
+    }
+
+    final totalWidth = flameChartWidth - 2 * flameChartInset;
+
+    final Map<String, double> stackFrameLefts = {};
+
+    double calculateLeftForStackFrame(CpuStackFrame stackFrame) {
+      final CpuStackFrame parent = stackFrame.parent;
+      double left;
+      if (parent == null) {
+        left = flameChartInset.toDouble();
+      } else {
+        final stackFrameIndex = stackFrame.index;
+        if (stackFrameIndex == 0) {
+          // This is the first child of parent. [left] should equal the left
+          // value of [stackFrame]'s parent.
+          left = stackFrameLefts[parent.id];
+        } else {
+          assert(stackFrameIndex != -1);
+          // [stackFrame] is not the first child of its parent. [left] should
+          // equal the right value of its previous sibling.
+          final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
+          left = stackFrameLefts[previous.id] +
+              (totalWidth * previous.totalTimeRatio);
+        }
+      }
+      stackFrameLefts[stackFrame.id] = left;
+      return left;
+    }
+
+    void createChartNodes(CpuStackFrame stackFrame, int row) {
+      final double width =
+          totalWidth * stackFrame.totalTimeRatio - stackFramePadding;
+      final left = calculateLeftForStackFrame(stackFrame);
+      final top = (row * rowHeightWithPadding + flameChartTop).toDouble();
+
+      final node = FlameChartNode<CpuStackFrame>(
+        Rect.fromLTRB(left, top, left + width, top + flameChartRowHeight),
+        getColorForNode(stackFrame),
+        Colors.black,
+        Colors.black,
+        stackFrame,
+        (_) => stackFrame.name,
+      );
+
+      rows[row].nodes.add(node);
+
+      for (CpuStackFrame child in stackFrame.children) {
+        createChartNodes(
+          child,
+          row + 1,
+        );
+      }
+    }
+
+    createChartNodes(data.cpuProfileRoot, 0);
+  }
+
+  // TODO(kenzie): base colors on categories (Widget, Render, Layer, User code,
+  // etc.)
+  @override
+  Color getColorForNode(dynamic node) {
+    assert(node is CpuStackFrame);
+    final color = uiColorPalette[_colorOffset % uiColorPalette.length];
+    _colorOffset++;
+    return color;
+  }
+
+  @override
+  double getFlameChartWidth() {
+    return rows[0].nodes[0].rect.right - flameChartInset;
   }
 }

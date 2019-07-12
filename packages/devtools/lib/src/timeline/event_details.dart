@@ -15,7 +15,6 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
-import 'frame_events_chart.dart';
 import 'timeline_controller.dart';
 
 class EventDetails extends CoreElement {
@@ -104,11 +103,6 @@ class EventDetails extends CoreElement {
 
   void _initListeners() {
     timelineController.onSelectedFrame.listen((_) => reset());
-
-    onSelectedFrameFlameChartItem.listen((item) async {
-      titleBackgroundColor = item.backgroundColor;
-      titleTextColor = item.defaultTextColor;
-    });
 
     timelineController.onSelectedTimelineEvent
         .listen((_) async => await update());

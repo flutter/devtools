@@ -538,6 +538,14 @@ form + form {
     border-bottom: 1px solid var(--border-color);
 }
 
+.fill-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
 .form-checkbox {
     user-select: none;
 }

@@ -28,7 +28,6 @@ abstract class CpuProfiler extends CoreElement {
 
     // Hide views that are not the default view.
     for (CpuProfilerView v in views.where((view) => view.type != defaultView)) {
-      print(v.type);
       v.hide();
     }
     _selectedViewType = defaultView;
