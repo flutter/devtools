@@ -188,8 +188,9 @@ class ServiceConnectionManager {
       } catch (e) {
         // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
         if (id.endsWith('Logging') || id.endsWith('Service')) {
-          // Don't complain about '_Logging' or 'Logging' events (newer VMs don't
-          // support '_Logging' and older VMs don't support 'Logging').
+          // Don't complain about '_Logging', 'Logging', '_Service', or 'Service'
+          // events (newer VMs don't the private names, and older ones don't
+          // support the public ones).
         } else {
           print("Service client stream not supported: '$id'\n  $e");
         }
