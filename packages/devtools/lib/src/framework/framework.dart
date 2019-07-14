@@ -222,6 +222,7 @@ class Framework {
     window.onKeyDown.listen((KeyboardEvent e) {
       if (current != null &&
           e.key.isNotEmpty &&
+          current.shortcutCallback != null &&
           current.shortcutCallback(e.ctrlKey, e.shiftKey, e.altKey, e.key)) {
         e.preventDefault();
       }
