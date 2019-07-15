@@ -11,8 +11,8 @@ import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/theme.dart';
 import 'timeline_model.dart';
 
-class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
-  TimelineFlameChart({
+class TimelineFlameChartCanvas extends FlameChartCanvas<TimelineFrame> {
+  TimelineFlameChartCanvas({
     @required TimelineFrame data,
     @required double width,
     @required double height,

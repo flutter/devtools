@@ -53,7 +53,7 @@ class TimelineScreen extends Screen {
 
   CoreElement flameChartContainer;
 
-  TimelineFlameChart flameChartCanvas;
+  TimelineFlameChartCanvas flameChartCanvas;
 
   EventDetails eventDetails;
 
@@ -165,7 +165,7 @@ class TimelineScreen extends Screen {
         ..clear()
         ..hidden(false);
       final TimelineFrame frame = timelineController.timelineData.selectedFrame;
-      flameChartCanvas = TimelineFlameChart(
+      flameChartCanvas = TimelineFlameChartCanvas(
         data: frame,
         width: flameChartContainer.element.clientWidth.toDouble(),
         height: math.max(
@@ -175,7 +175,7 @@ class TimelineScreen extends Screen {
           // Add 1 to account for a row of padding at the bottom of the chart.
           (frame.uiEventFlow.depth + frame.gpuEventFlow.depth + 1) *
                   rowHeightWithPadding +
-              TimelineFlameChart.sectionSpacing,
+              TimelineFlameChartCanvas.sectionSpacing,
         ),
       );
       flameChartCanvas.onNodeSelected.listen((node) {
@@ -210,7 +210,7 @@ class TimelineScreen extends Screen {
                           .timelineData.selectedFrame.gpuEventFlow.depth +
                       1) *
                   rowHeightWithPadding +
-              TimelineFlameChart.sectionSpacing,
+              TimelineFlameChartCanvas.sectionSpacing,
         ),
       );
     }));

@@ -33,14 +33,14 @@ class CpuFlameChart extends CpuProfilerView {
     Color(0xFF202124),
   );
 
-  FlameChartCanvas canvas;
+  CpuFlameChartCanvas canvas;
 
   CoreElement stackFrameDetails;
 
   @override
   void rebuildView() {
     final CpuProfileData data = profileData();
-    canvas = CpuProfileFlameChart(
+    canvas = CpuFlameChartCanvas(
       data: data,
       width: element.clientWidth,
       height: math.max(
@@ -110,8 +110,8 @@ class CpuFlameChart extends CpuProfilerView {
   }
 }
 
-class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
-  CpuProfileFlameChart({
+class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
+  CpuFlameChartCanvas({
     @required CpuProfileData data,
     @required width,
     @required height,
