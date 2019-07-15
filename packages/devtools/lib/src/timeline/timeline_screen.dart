@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:math' as math;
 
+import 'package:js/js.dart';
 import 'package:split/split.dart' as split;
 
+import '../charts/flame_chart_canvas.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
@@ -16,9 +20,9 @@ import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import 'event_details.dart';
-import 'frame_events_chart.dart';
 import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
+import 'timeline_flame_chart.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
 
@@ -47,7 +51,9 @@ class TimelineScreen extends Screen {
 
   FramesBarChart framesBarChart;
 
-  FrameEventsChart frameEventsChart;
+  CoreElement flameChartContainer;
+
+  TimelineFlameChartCanvas flameChartCanvas;
 
   EventDetails eventDetails;
 
@@ -135,22 +141,80 @@ class TimelineScreen extends Screen {
         ..layoutVertical()
         ..flex()
         ..add(<CoreElement>[
-          frameEventsChart = FrameEventsChart(timelineController)..hidden(true),
+          flameChartContainer =
+              div(c: 'timeline-flame-chart-container section-border')
+                ..flex()
+                ..layoutVertical()
+                ..hidden(true),
           eventDetails = EventDetails(timelineController)..hidden(true),
         ]),
     ]);
 
-    _initListeners();
+    _initListenersAndObservers();
 
     maybeAddDebugMessage(framework, timelineScreenId);
 
     return screenDiv;
   }
 
-  void _initListeners() {
-    timelineController.onSelectedFrame.listen((_) => _configureSplitter());
+  void _initListenersAndObservers() {
+    timelineController.onSelectedFrame.listen((_) {
+      _configureSplitter();
+
+      flameChartContainer
+        ..clear()
+        ..hidden(false);
+      final TimelineFrame frame = timelineController.timelineData.selectedFrame;
+      flameChartCanvas = TimelineFlameChartCanvas(
+        data: frame,
+        width: flameChartContainer.element.clientWidth.toDouble(),
+        height: math.max(
+          // Subtract [rowHeightWithPadding] to account for timeline at the top of
+          // the flame chart.
+          flameChartContainer.element.clientHeight.toDouble(),
+          // Add 1 to account for a row of padding at the bottom of the chart.
+          (frame.uiEventFlow.depth + frame.gpuEventFlow.depth + 1) *
+                  rowHeightWithPadding +
+              TimelineFlameChartCanvas.sectionSpacing,
+        ),
+      );
+      flameChartCanvas.onNodeSelected.listen((node) {
+        eventDetails.titleBackgroundColor = node.backgroundColor;
+        eventDetails.titleTextColor = node.textColor;
+        timelineController.selectTimelineEvent(node.data);
+      });
+      flameChartContainer.add(flameChartCanvas.element);
+    });
+
     timelineController.onLoadOfflineData
-        .listen((_) => frameEventsChart..hidden(true));
+        .listen((_) => flameChartContainer..hidden(true));
+
+    // The size of [flameChartContainer] will change as the splitter moved.
+    // Observe resizing so that we can rebuild the flame chart canvas as
+    // necessary.
+    // TODO(kenzie): clean this code up when
+    // https://github.com/dart-lang/html/issues/104 is fixed.
+    final observer =
+        html.ResizeObserver(allowInterop((List<dynamic> entries, _) {
+      if (flameChartCanvas == null) return;
+
+      flameChartCanvas.forceRebuildForSize(
+        flameChartCanvas.widthWithInsets,
+        math.max(
+          // Subtract [rowHeightWithPadding] to account for the size of
+          // [stackFrameDetails] section at the bottom of the chart.
+          flameChartContainer.element.scrollHeight.toDouble(),
+          // Add 1 to account for a row of padding at the bottom of the chart.
+          (timelineController.timelineData.selectedFrame.uiEventFlow.depth +
+                      timelineController
+                          .timelineData.selectedFrame.gpuEventFlow.depth +
+                      1) *
+                  rowHeightWithPadding +
+              TimelineFlameChartCanvas.sectionSpacing,
+        ),
+      );
+    }));
+    observer.observe(flameChartContainer.element);
   }
 
   void _configureSplitter() {
@@ -158,7 +222,7 @@ class TimelineScreen extends Screen {
     // already.
     if (!splitterConfigured) {
       splitter = split.flexSplit(
-        [frameEventsChart.element, eventDetails.element],
+        [flameChartContainer.element, eventDetails.element],
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: [75, 25],
@@ -245,7 +309,8 @@ class TimelineScreen extends Screen {
     debugFrameTracking.clear();
     timelineController.timelineData?.clear();
     framesBarChart.frameUIgraph.reset();
-    frameEventsChart.hidden(true);
+    flameChartContainer.hidden(true);
+    flameChartCanvas = null;
     eventDetails.reset(hide: true);
     _destroySplitter();
   }

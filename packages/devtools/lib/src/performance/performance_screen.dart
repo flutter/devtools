@@ -173,11 +173,11 @@ class PerformanceScreen extends Screen {
 class _CpuProfiler extends CpuProfiler {
   _CpuProfiler(
     this._performanceController,
-    CpuProfileDataProvider getProfileData,
+    CpuProfileDataProvider profileDataProvider,
   ) : super(
-          CpuFlameChart(getProfileData),
-          CpuCallTree(getProfileData),
-          CpuBottomUp(getProfileData),
+          CpuFlameChart(profileDataProvider),
+          CpuCallTree(profileDataProvider),
+          CpuBottomUp(profileDataProvider),
           defaultView: CpuProfilerViewType.callTree,
         );
 

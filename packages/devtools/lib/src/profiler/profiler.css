@@ -1,16 +1,8 @@
-.cpu-profiler-section {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-}
-
 .cpu-flame-chart {
     overflow: hidden;
 }
 
-.cpu-profiler-section.cpu-flame-chart {
+.fill-section.cpu-flame-chart {
     /* 100% height minus the height of stack-frame-details */
     height: calc(100% - 27px);
     background-color: var(--shaded-background-lighter);

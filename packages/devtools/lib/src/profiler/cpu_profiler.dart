@@ -28,7 +28,6 @@ abstract class CpuProfiler extends CoreElement {
 
     // Hide views that are not the default view.
     for (CpuProfilerView v in views.where((view) => view.type != defaultView)) {
-      print(v.type);
       v.hide();
     }
     _selectedViewType = defaultView;
@@ -125,12 +124,12 @@ abstract class CpuProfiler extends CoreElement {
 typedef CpuProfileDataProvider = CpuProfileData Function();
 
 abstract class CpuProfilerView extends CoreElement {
-  CpuProfilerView(this.type, this.getProfileData)
-      : super('div', classes: 'cpu-profiler-section');
+  CpuProfilerView(this.type, this.profileDataProvider)
+      : super('div', classes: 'fill-section');
 
   final CpuProfilerViewType type;
 
-  final CpuProfileDataProvider getProfileData;
+  final CpuProfileDataProvider profileDataProvider;
 
   bool viewNeedsRebuild = false;
 

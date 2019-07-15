@@ -17,13 +17,12 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
-import 'cpu_profile_model.dart';
 
-// TODO(kenzie): add tooltips to stack frames on hover.
+// TODO(kenzie): add tooltips to nodes on hover.
 
 // We use the same color in light and dark mode because it aligns well with both
 // color schemes.
-const _selectedFlameChartNodeColor = ThemedColor(
+const _selectedNodeColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedLight,
 );
@@ -31,46 +30,40 @@ const _selectedFlameChartNodeColor = ThemedColor(
 const _shadedBackgroundColor =
     ThemedColor(Color(0xFFF6F6F6), Color(0xFF202124));
 
-const _fontSize = 14.0;
-const _textOffsetY = 18.0;
-const _flameChartTop = rowHeightWithPadding;
-const _rowHeight = 25.0;
-const _rowPadding = 2.0;
-const rowHeightWithPadding = _rowHeight + _rowPadding;
-
-const _flameChartInset = 70;
+const double _fontSize = 14.0;
+const double _textOffsetY = 18.0;
+const double rowPadding = 2.0;
+const double rowHeight = 25.0;
+const double rowHeightWithPadding = rowHeight + rowPadding;
+const double topOffset = rowHeightWithPadding;
+const double sideInset = 70.0;
 
 List<num> _asciiMeasurements;
 
-// TODO(kenzie): move this class to flame_chart.dart once the frame flame chart
-// is ported to canvas and the current implementation in flame_chart.dart is
-// deleted.
-abstract class FlameChart {
+abstract class FlameChart<T> {
   FlameChart({
     @required this.data,
-    @required this.flameChartWidth,
-    @required this.flameChartHeight,
-  }) : timelineGrid = TimelineGrid(data.time.duration, flameChartWidth) {
-    _initRows();
+    @required this.duration,
+    @required this.width,
+    @required this.height,
+  }) : timelineGrid = TimelineGrid(duration, width) {
+    initRows();
   }
 
-  static const stackFramePadding = 1;
+  final T data;
 
-  final CpuProfileData data;
+  final Duration duration;
 
   // These values are not final because the flame chart viewport can change in
   // size.
-  double flameChartWidth;
-  double flameChartHeight;
+  double width;
+  double height;
 
-  double get flameChartWidthWithInsets =>
-      getFlameChartWidth() + 2 * _flameChartInset;
+  double get widthWithInsets => calculatedWidth + 2 * sideInset;
 
-  final _stackFrameSelectedController =
-      StreamController<CpuStackFrame>.broadcast();
+  final _nodeSelectedController = StreamController<FlameChartNode>.broadcast();
 
-  Stream<CpuStackFrame> get onStackFrameSelected =>
-      _stackFrameSelectedController.stream;
+  Stream<FlameChartNode> get onNodeSelected => _nodeSelectedController.stream;
 
   FlameChartNode selectedNode;
 
@@ -87,78 +80,12 @@ abstract class FlameChart {
   // scroll offset to reduce floating point error when zooming.
   num floatingPointScrollLeft = 0;
 
-  int _colorOffset = 0;
+  void initRows();
 
-  // TODO(kenzie): base colors on categories (Widget, Render, Layer, User code,
-  // etc.)
-  Color nextColor() {
-    final color = uiColorPalette[_colorOffset % uiColorPalette.length];
-    _colorOffset++;
-    return color;
-  }
-
-  void _initRows() {
-    for (int i = 0; i < data.cpuProfileRoot.depth; i++) {
-      rows.add(FlameChartRow(nodes: [], index: i));
-    }
-
-    final totalWidth = flameChartWidth - 2 * _flameChartInset;
-
-    final Map<String, double> stackFrameLefts = {};
-
-    double calculateLeftForStackFrame(CpuStackFrame stackFrame) {
-      final CpuStackFrame parent = stackFrame.parent;
-      double left;
-      if (parent == null) {
-        left = _flameChartInset.toDouble();
-      } else {
-        final stackFrameIndex = stackFrame.index;
-        if (stackFrameIndex == 0) {
-          // This is the first child of parent. [left] should equal the left
-          // value of [stackFrame]'s parent.
-          left = stackFrameLefts[parent.id];
-        } else {
-          assert(stackFrameIndex != -1);
-          // [stackFrame] is not the first child of its parent. [left] should
-          // equal the right value of its previous sibling.
-          final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
-          left = stackFrameLefts[previous.id] +
-              (totalWidth * previous.totalTimeRatio);
-        }
-      }
-      stackFrameLefts[stackFrame.id] = left;
-      return left;
-    }
-
-    void createChartNodes(CpuStackFrame stackFrame, int row) {
-      final double width =
-          totalWidth * stackFrame.totalTimeRatio - stackFramePadding;
-      final left = calculateLeftForStackFrame(stackFrame);
-      final top = (row * rowHeightWithPadding + _flameChartTop).toDouble();
-
-      final node = FlameChartNode(
-        Rect.fromLTRB(left, top, left + width, top + _rowHeight),
-        nextColor(),
-        Colors.black,
-        Colors.black,
-        stackFrame,
-      );
-
-      rows[row].nodes.add(node);
-
-      for (CpuStackFrame child in stackFrame.children) {
-        createChartNodes(
-          child,
-          row + 1,
-        );
-      }
-    }
-
-    createChartNodes(data.cpuProfileRoot, 0);
-  }
+  double get calculatedWidth;
 
   void selectNodeAtOffset(Offset offset) {
-    final node = getNode(offset);
+    final node = nodeAtOffset(offset);
 
     // Do nothing if the tap did not occur on any nodes, if the tap was to
     // select the already selected node.
@@ -174,22 +101,18 @@ abstract class FlameChart {
     node.selected = true;
     selectedNode = node;
 
-    _stackFrameSelectedController.add(node.stackFrame);
+    _nodeSelectedController.add(node);
   }
 
-  num getFlameChartWidth() {
-    return rows[0].nodes[0].rect.right - _flameChartInset;
-  }
-
-  FlameChartNode getNode(Offset offset) {
-    final int rowIndex = getRowIndexForY(offset.dy);
+  FlameChartNode nodeAtOffset(Offset offset) {
+    final int rowIndex = rowIndexForY(offset.dy);
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return null;
     }
-    return getNodeInRow(rowIndex, offset.dx);
+    return nodeInRow(rowIndex, offset.dx);
   }
 
-  FlameChartNode getNodeInRow(int rowIndex, double x) {
+  FlameChartNode nodeInRow(int rowIndex, double x) {
     final row = rows[rowIndex];
     final nodes = row.nodes;
 
@@ -215,31 +138,36 @@ abstract class FlameChart {
     return nodes.isEmpty ? null : binarySearchForNode();
   }
 
-  int getRowIndexForY(double y) {
-    if (y < _flameChartTop) {
+  double relativeYPosition(double absoluteY) => absoluteY - topOffset;
+
+  int rowIndexForY(double y) {
+    if (y < topOffset) {
       return -1;
     }
-    return math.max((y - _flameChartTop) ~/ rowHeightWithPadding, 0);
+    return math.max((relativeYPosition(y)) ~/ rowHeightWithPadding, 0);
   }
 }
 
-class FlameChartCanvas extends FlameChart {
+abstract class FlameChartCanvas<T> extends FlameChart {
   FlameChartCanvas({
-    @required CpuProfileData data,
-    @required flameChartWidth,
-    @required flameChartHeight,
+    @required T data,
+    @required Duration duration,
+    @required width,
+    @required height,
+    String classes,
   }) : super(
           data: data,
-          flameChartWidth: flameChartWidth,
-          flameChartHeight: flameChartHeight,
+          duration: duration,
+          width: width,
+          height: height,
         ) {
     _viewportCanvas = ViewportCanvas(
       paintCallback: _paintCallback,
       onTap: _onTap,
-      classes: 'cpu-profiler-section cpu-flame-chart',
+      classes: 'fill-section $classes',
     )..element.element.style.overflow = 'hidden';
 
-    _viewportCanvas.setContentSize(flameChartWidth, flameChartHeight);
+    _viewportCanvas.setContentSize(width, height);
 
     _dragScroll.enableDragScrolling(_viewportCanvas.element);
     _dragScroll.onVerticalScroll = () {
@@ -271,6 +199,9 @@ class FlameChartCanvas extends FlameChart {
   final _minZoomLevel = 1;
 
   void _initAsciiMeasurements() {
+    // We have already initialized the list of Ascii measurements.
+    if (_asciiMeasurements != null) return;
+
     final measurementCanvas = CanvasElement().context2D
       ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
     _asciiMeasurements = List.generate(
@@ -282,9 +213,9 @@ class FlameChartCanvas extends FlameChart {
   // TODO(kenzie): optimize painting to canvas by grouping paints with the same
   // canvas settings.
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
-    final int startRow = math.max(getRowIndexForY(rect.top), 0);
+    final int startRow = math.max(rowIndexForY(rect.top), 0);
     final int endRow = math.min(
-      getRowIndexForY(rect.bottom) + 1,
+      rowIndexForY(rect.bottom) + 1,
       rows.length - 1,
     );
     for (int i = startRow; i < endRow; i++) {
@@ -344,11 +275,11 @@ class FlameChartCanvas extends FlameChart {
       lastScrollLeft = floatingPointScrollLeft;
     }
     // Position in the zoomable coordinate space that we want to keep fixed.
-    final num fixedX = mouseX + lastScrollLeft - _flameChartInset;
+    final num fixedX = mouseX + lastScrollLeft - sideInset;
     // Calculate and set our new horizontal scroll position.
     if (fixedX >= 0) {
       floatingPointScrollLeft =
-          fixedX * newZoomLevel / zoomLevel + _flameChartInset - mouseX;
+          fixedX * newZoomLevel / zoomLevel + sideInset - mouseX;
     } else {
       // No need to transform as we are in the fixed portion of the window.
       floatingPointScrollLeft = lastScrollLeft;
@@ -365,20 +296,17 @@ class FlameChartCanvas extends FlameChart {
       }
     }
 
-    timelineGrid.updateForZoom(zoomLevel, getFlameChartWidth());
+    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
 
-    forceRebuildForSize(
-      flameChartWidthWithInsets,
-      flameChartHeight,
-    );
+    forceRebuildForSize(widthWithInsets, height);
 
     _viewportCanvas.element.element.scrollLeft =
         math.max(0, floatingPointScrollLeft.round());
   }
 
   void forceRebuildForSize(double width, double height) {
-    flameChartWidth = width;
-    flameChartHeight = height;
+    this.width = width;
+    this.height = height;
 
     _viewportCanvas.setContentSize(width, height);
     _viewportCanvas.rebuild(force: true);
@@ -395,13 +323,14 @@ class FlameChartRow {
   final int index;
 }
 
-class FlameChartNode {
+class FlameChartNode<T> {
   FlameChartNode(
     this.rect,
     this.backgroundColor,
     this.textColor,
     this.selectedTextColor,
-    this.stackFrame, {
+    this.data,
+    this.displayTextProvider, {
     this.rounded = false,
   })  : startingLeft = rect.left,
         startingWidth = rect.width;
@@ -428,7 +357,9 @@ class FlameChartNode {
 
   final Color selectedTextColor;
 
-  final CpuStackFrame stackFrame;
+  final T data;
+
+  final String Function(T) displayTextProvider;
 
   final bool rounded;
 
@@ -436,9 +367,9 @@ class FlameChartNode {
 
   Rect rect;
 
-  String get text => stackFrame.name;
+  String get text => displayTextProvider(data);
 
-  String get tooltip => stackFrame.toString();
+  String get tooltip => '$data';
 
   num get maxTextWidth => rect.width - horizontalPadding * 2;
 
@@ -446,7 +377,7 @@ class FlameChartNode {
 
   void paint(CanvasRenderingContext2D canvas) {
     canvas.fillStyle =
-        colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor);
+        colorToCss(selected ? _selectedNodeColor : backgroundColor);
 
     if (rounded) {
       canvas
@@ -532,7 +463,7 @@ class FlameChartNode {
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
-    final newLeft = (startingLeft - _flameChartInset) * zoom + _flameChartInset;
+    final newLeft = (startingLeft - sideInset) * zoom + sideInset;
     final newWidth = startingWidth * zoom;
 
     final updatedRect = Rect.fromLTWH(newLeft, rect.top, newWidth, rect.height);
@@ -571,12 +502,11 @@ class TimelineGrid {
       visible.left,
       viewport.top,
       visible.width,
-      _rowHeight,
+      rowHeight,
     );
 
-    num left =
-        (visible.left - _flameChartInset) ~/ currentInterval * currentInterval +
-            _flameChartInset;
+    num left = (visible.left - sideInset) ~/ currentInterval * currentInterval +
+        sideInset;
 
     final firstGridNodeText = msText(
       const Duration(microseconds: 0),
@@ -590,14 +520,14 @@ class TimelineGrid {
       ..fillStyle = colorToCss(timestampColor)
       ..fillText(
         firstGridNodeText,
-        _getTimestampLeft(firstGridNodeText, 0, _flameChartInset, canvas),
+        _timestampLeft(firstGridNodeText, 0, sideInset, canvas),
         viewport.top + _textOffsetY,
       )
       ..strokeStyle = colorToCss(gridLineColor)
       ..lineWidth = gridLineWidth
       ..beginPath()
-      ..moveTo(_flameChartInset, visible.top)
-      ..lineTo(_flameChartInset, visible.bottom)
+      ..moveTo(sideInset, visible.top)
+      ..lineTo(sideInset, visible.bottom)
       ..closePath()
       ..stroke();
 
@@ -610,15 +540,15 @@ class TimelineGrid {
       // TODO(kenzie): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
-      final timestamp = Duration(
-          microseconds: getTimestampForPosition(left + currentInterval));
+      final timestamp =
+          Duration(microseconds: timestampForPosition(left + currentInterval));
 
       final timestampText = msText(
         timestamp,
         fractionDigits: timestamp.inMicroseconds == 0 ? 1 : 3,
       );
 
-      final timestampX = _getTimestampLeft(
+      final timestampX = _timestampLeft(
         timestampText,
         left,
         currentInterval,
@@ -638,7 +568,7 @@ class TimelineGrid {
     }
   }
 
-  num _getTimestampLeft(
+  num _timestampLeft(
     String timestampText,
     num left,
     num width,
@@ -652,8 +582,8 @@ class TimelineGrid {
 
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
-  int getTimestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - _flameChartInset) /
+  int timestampForPosition(num gridItemEnd) {
+    return ((gridItemEnd - sideInset) /
             _flameChartWidth *
             _duration.inMicroseconds)
         .round();

@@ -55,8 +55,8 @@
     border-color: var(--selected-border);
 }
 
-.flame-chart-container {
-    background-color: var(--shaded-background-darker);
+.timeline-flame-chart-container {
+    min-height: 50px;
     position: relative;
     overflow: hidden;
 }
