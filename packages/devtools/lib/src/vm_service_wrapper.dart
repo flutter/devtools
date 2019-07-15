@@ -388,9 +388,25 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> registerService(String service, String alias) {
-    return _trackFuture(
-        'registerService $service', _vmService.registerService(service, alias));
+  Future<Success> registerService(String service, String alias) async {
+    // Handle registerService method name change based on protocol version.
+    final registerServiceMethodName =
+        await isProtocolVersionLessThan(major: 3, minor: 22)
+            ? '_registerService'
+            : 'registerService';
+
+    final response = await _trackFuture(
+      '$registerServiceMethodName $service',
+      callMethod(registerServiceMethodName,
+          args: {'service': service, 'alias': alias}),
+    );
+
+    return response as Success;
+
+    // TODO(dantup): Revert to this when we no longer need to support clients
+    // on old VMs that don't support public registerService.
+    // return _trackFuture(
+    //     'registerService $service', _vmService.registerService(service, alias));
   }
 
   @override
