@@ -14,13 +14,13 @@ import 'timeline_model.dart';
 class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
   TimelineFlameChart({
     @required TimelineFrame data,
-    @required flameChartWidth,
-    @required flameChartHeight,
+    @required double width,
+    @required double height,
   }) : super(
           data: data,
           duration: data.time.duration,
-          flameChartWidth: flameChartWidth,
-          flameChartHeight: flameChartHeight,
+          width: width,
+          height: height,
         );
 
   static const double sectionSpacing = 15.0;
@@ -34,7 +34,7 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
       (i) => FlameChartRow(nodes: [], index: i),
     );
 
-    final totalWidth = flameChartWidth - 2 * flameChartInset;
+    final totalWidth = width - 2 * sideInset;
 
     final int frameStartOffset = data.time.start.inMicroseconds;
 
@@ -43,14 +43,14 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
       // events.
       final additionalPadding =
           row >= gpuSectionStartRow ? sectionSpacing : 0.0;
-      return (row * rowHeightWithPadding + flameChartTop + additionalPadding)
+      return (row * rowHeightWithPadding + topOffset + additionalPadding)
           .toDouble();
     }
 
     // Add UI section label.
     const uiLabelWidth = 22.0 + rowPadding;
     final uiLabelTop = getTopForRow(0);
-    final uiLabelBottom = uiLabelTop + flameChartRowHeight;
+    final uiLabelBottom = uiLabelTop + rowHeight;
     final uiSectionLabel = FlameChartNode<TimelineEvent>(
       Rect.fromLTRB(rowPadding, uiLabelTop, uiLabelWidth, uiLabelBottom),
       mainUiColor,
@@ -64,7 +64,7 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
     // Add GPU section label.
     const gpuLabelWidth = 40.0 + rowPadding;
     final gpuLabelTop = getTopForRow(gpuSectionStartRow);
-    final gpuLabelBottom = gpuLabelTop + flameChartRowHeight;
+    final gpuLabelBottom = gpuLabelTop + rowHeight;
     final gpuSectionLabel = FlameChartNode<TimelineEvent>(
       Rect.fromLTRB(rowPadding, gpuLabelTop, gpuLabelWidth, gpuLabelBottom),
       mainGpuColor,
@@ -84,15 +84,17 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
       // us to lose very small events if the width rounds to zero.
       final double left =
           (event.time.start.inMicroseconds - frameStartOffset) * pxPerMicro +
-              flameChartInset;
+              sideInset;
       final double right =
           (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro +
-              flameChartInset;
+              sideInset;
       final top = getTopForRow(row);
+      final backgroundColor =
+          event.isUiEvent ? _nextUiColor() : _nextGpuColor();
 
       final node = FlameChartNode<TimelineEvent>(
-        Rect.fromLTRB(left, top, right, top + flameChartRowHeight),
-        getColorForNode(event),
+        Rect.fromLTRB(left, top, right, top + rowHeight),
+        backgroundColor,
         event.isUiEvent
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
@@ -116,27 +118,21 @@ class TimelineFlameChart extends FlameChartCanvas<TimelineFrame> {
   }
 
   @override
-  double getFlameChartWidth() {
+  double get calculatedWidth {
     // The farthest right node in the graph will either be the root UI event or
     // the root GPU event.
     return math.max(rows[gpuSectionStartRow].nodes.last.rect.right,
             rows[gpuSectionStartRow].nodes.last.rect.right) -
-        flameChartInset;
+        sideInset;
   }
 
   @override
-  double getRelativeYPosition(double absoluteY) {
-    final row = (absoluteY - flameChartTop) ~/ rowHeightWithPadding;
+  double relativeYPosition(double absoluteY) {
+    final row = (absoluteY - topOffset) ~/ rowHeightWithPadding;
     if (row >= gpuSectionStartRow) {
-      return absoluteY - flameChartTop - sectionSpacing;
+      return absoluteY - topOffset - sectionSpacing;
     }
-    return absoluteY - flameChartTop;
-  }
-
-  @override
-  Color getColorForNode(dynamic node) {
-    assert(node is TimelineEvent);
-    return node.isUiEvent ? _nextUiColor() : _nextGpuColor();
+    return absoluteY - topOffset;
   }
 
   int _uiColorOffset = 0;

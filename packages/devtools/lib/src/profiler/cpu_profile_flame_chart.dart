@@ -16,8 +16,8 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
 
 class CpuFlameChart extends CpuProfilerView {
-  CpuFlameChart(CpuProfileDataProvider getProfileData)
-      : super(CpuProfilerViewType.flameChart, getProfileData) {
+  CpuFlameChart(CpuProfileDataProvider profileData)
+      : super(CpuProfilerViewType.flameChart, profileData) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
       ..hidden(true);
@@ -39,11 +39,11 @@ class CpuFlameChart extends CpuProfilerView {
 
   @override
   void rebuildView() {
-    final CpuProfileData data = getProfileData();
+    final CpuProfileData data = profileData();
     canvas = CpuProfileFlameChart(
       data: data,
-      flameChartWidth: element.clientWidth,
-      flameChartHeight: math.max(
+      width: element.clientWidth,
+      height: math.max(
         // Subtract [rowHeightWithPadding] to account for timeline at the top of
         // the flame chart.
         element.clientHeight - rowHeightWithPadding,
@@ -75,7 +75,7 @@ class CpuFlameChart extends CpuProfilerView {
       return;
     }
 
-    final data = getProfileData();
+    final data = profileData();
 
     // Only update the canvas if the flame chart is visible and has data.
     // Otherwise, mark the canvas as needing a rebuild.
@@ -85,7 +85,7 @@ class CpuFlameChart extends CpuProfilerView {
       // ensures that the grid lines in the chart will extend all the way to the
       // bottom of the container.
       canvas.forceRebuildForSize(
-        canvas.flameChartWidthWithInsets,
+        canvas.widthWithInsets,
         math.max(
           // Subtract [rowHeightWithPadding] to account for the size of
           // [stackFrameDetails] section at the bottom of the chart.
@@ -113,13 +113,13 @@ class CpuFlameChart extends CpuProfilerView {
 class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
   CpuProfileFlameChart({
     @required CpuProfileData data,
-    @required flameChartWidth,
-    @required flameChartHeight,
+    @required width,
+    @required height,
   }) : super(
           data: data,
           duration: data.time.duration,
-          flameChartWidth: flameChartWidth,
-          flameChartHeight: flameChartHeight,
+          width: width,
+          height: height,
           classes: 'cpu-flame-chart',
         );
 
@@ -128,20 +128,23 @@ class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
   int _colorOffset = 0;
 
   @override
+  double get calculatedWidth => rows[0].nodes[0].rect.right - sideInset;
+
+  @override
   void initRows() {
     for (int i = 0; i < data.cpuProfileRoot.depth; i++) {
       rows.add(FlameChartRow(nodes: [], index: i));
     }
 
-    final totalWidth = flameChartWidth - 2 * flameChartInset;
+    final totalWidth = width - 2 * sideInset;
 
     final Map<String, double> stackFrameLefts = {};
 
-    double calculateLeftForStackFrame(CpuStackFrame stackFrame) {
+    double leftForStackFrame(CpuStackFrame stackFrame) {
       final CpuStackFrame parent = stackFrame.parent;
       double left;
       if (parent == null) {
-        left = flameChartInset.toDouble();
+        left = sideInset;
       } else {
         final stackFrameIndex = stackFrame.index;
         if (stackFrameIndex == 0) {
@@ -164,12 +167,13 @@ class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
     void createChartNodes(CpuStackFrame stackFrame, int row) {
       final double width =
           totalWidth * stackFrame.totalTimeRatio - stackFramePadding;
-      final left = calculateLeftForStackFrame(stackFrame);
-      final top = (row * rowHeightWithPadding + flameChartTop).toDouble();
+      final left = leftForStackFrame(stackFrame);
+      final top = row * rowHeightWithPadding + topOffset;
+      final backgroundColor = _colorForStackFrame(stackFrame);
 
       final node = FlameChartNode<CpuStackFrame>(
-        Rect.fromLTRB(left, top, left + width, top + flameChartRowHeight),
-        getColorForNode(stackFrame),
+        Rect.fromLTRB(left, top, left + width, top + rowHeight),
+        backgroundColor,
         Colors.black,
         Colors.black,
         stackFrame,
@@ -191,16 +195,9 @@ class CpuProfileFlameChart extends FlameChartCanvas<CpuProfileData> {
 
   // TODO(kenzie): base colors on categories (Widget, Render, Layer, User code,
   // etc.)
-  @override
-  Color getColorForNode(dynamic node) {
-    assert(node is CpuStackFrame);
+  Color _colorForStackFrame(CpuStackFrame stackFrame) {
     final color = uiColorPalette[_colorOffset % uiColorPalette.length];
     _colorOffset++;
     return color;
-  }
-
-  @override
-  double getFlameChartWidth() {
-    return rows[0].nodes[0].rect.right - flameChartInset;
   }
 }

@@ -22,7 +22,7 @@ import '../utils.dart';
 
 // We use the same color in light and dark mode because it aligns well with both
 // color schemes.
-const _selectedFlameChartNodeColor = ThemedColor(
+const _selectedNodeColor = ThemedColor(
   mainUiColorSelectedLight,
   mainUiColorSelectedLight,
 );
@@ -30,13 +30,13 @@ const _selectedFlameChartNodeColor = ThemedColor(
 const _shadedBackgroundColor =
     ThemedColor(Color(0xFFF6F6F6), Color(0xFF202124));
 
-const _fontSize = 14.0;
-const _textOffsetY = 18.0;
-const rowPadding = 2.0;
-const rowHeightWithPadding = flameChartRowHeight + rowPadding;
-const flameChartTop = rowHeightWithPadding;
-const flameChartRowHeight = 25.0;
-const flameChartInset = 70;
+const double _fontSize = 14.0;
+const double _textOffsetY = 18.0;
+const double rowPadding = 2.0;
+const double rowHeight = 25.0;
+const double rowHeightWithPadding = rowHeight + rowPadding;
+const double topOffset = rowHeightWithPadding;
+const double sideInset = 70.0;
 
 List<num> _asciiMeasurements;
 
@@ -44,9 +44,9 @@ abstract class FlameChart<T> {
   FlameChart({
     @required this.data,
     @required this.duration,
-    @required this.flameChartWidth,
-    @required this.flameChartHeight,
-  }) : timelineGrid = TimelineGrid(duration, flameChartWidth) {
+    @required this.width,
+    @required this.height,
+  }) : timelineGrid = TimelineGrid(duration, width) {
     initRows();
   }
 
@@ -56,11 +56,10 @@ abstract class FlameChart<T> {
 
   // These values are not final because the flame chart viewport can change in
   // size.
-  double flameChartWidth;
-  double flameChartHeight;
+  double width;
+  double height;
 
-  double get flameChartWidthWithInsets =>
-      getFlameChartWidth() + 2 * flameChartInset;
+  double get widthWithInsets => calculatedWidth + 2 * sideInset;
 
   final _nodeSelectedController = StreamController<FlameChartNode>.broadcast();
 
@@ -83,12 +82,10 @@ abstract class FlameChart<T> {
 
   void initRows();
 
-  double getFlameChartWidth();
-
-  Color getColorForNode(dynamic node);
+  double get calculatedWidth;
 
   void selectNodeAtOffset(Offset offset) {
-    final node = getNode(offset);
+    final node = nodeAtOffset(offset);
 
     // Do nothing if the tap did not occur on any nodes, if the tap was to
     // select the already selected node.
@@ -107,15 +104,15 @@ abstract class FlameChart<T> {
     _nodeSelectedController.add(node);
   }
 
-  FlameChartNode getNode(Offset offset) {
-    final int rowIndex = getRowIndexForY(offset.dy);
+  FlameChartNode nodeAtOffset(Offset offset) {
+    final int rowIndex = rowIndexForY(offset.dy);
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return null;
     }
-    return getNodeInRow(rowIndex, offset.dx);
+    return nodeInRow(rowIndex, offset.dx);
   }
 
-  FlameChartNode getNodeInRow(int rowIndex, double x) {
+  FlameChartNode nodeInRow(int rowIndex, double x) {
     final row = rows[rowIndex];
     final nodes = row.nodes;
 
@@ -141,15 +138,13 @@ abstract class FlameChart<T> {
     return nodes.isEmpty ? null : binarySearchForNode();
   }
 
-  double getRelativeYPosition(double absoluteY) {
-    return absoluteY - flameChartTop;
-  }
+  double relativeYPosition(double absoluteY) => absoluteY - topOffset;
 
-  int getRowIndexForY(double y) {
-    if (y < flameChartTop) {
+  int rowIndexForY(double y) {
+    if (y < topOffset) {
       return -1;
     }
-    return math.max((getRelativeYPosition(y)) ~/ rowHeightWithPadding, 0);
+    return math.max((relativeYPosition(y)) ~/ rowHeightWithPadding, 0);
   }
 }
 
@@ -157,14 +152,14 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   FlameChartCanvas({
     @required T data,
     @required Duration duration,
-    @required flameChartWidth,
-    @required flameChartHeight,
+    @required width,
+    @required height,
     String classes,
   }) : super(
           data: data,
           duration: duration,
-          flameChartWidth: flameChartWidth,
-          flameChartHeight: flameChartHeight,
+          width: width,
+          height: height,
         ) {
     _viewportCanvas = ViewportCanvas(
       paintCallback: _paintCallback,
@@ -172,7 +167,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
       classes: 'fill-section $classes',
     )..element.element.style.overflow = 'hidden';
 
-    _viewportCanvas.setContentSize(flameChartWidth, flameChartHeight);
+    _viewportCanvas.setContentSize(width, height);
 
     _dragScroll.enableDragScrolling(_viewportCanvas.element);
     _dragScroll.onVerticalScroll = () {
@@ -218,9 +213,9 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   // TODO(kenzie): optimize painting to canvas by grouping paints with the same
   // canvas settings.
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
-    final int startRow = math.max(getRowIndexForY(rect.top), 0);
+    final int startRow = math.max(rowIndexForY(rect.top), 0);
     final int endRow = math.min(
-      getRowIndexForY(rect.bottom) + 1,
+      rowIndexForY(rect.bottom) + 1,
       rows.length - 1,
     );
     for (int i = startRow; i < endRow; i++) {
@@ -280,11 +275,11 @@ abstract class FlameChartCanvas<T> extends FlameChart {
       lastScrollLeft = floatingPointScrollLeft;
     }
     // Position in the zoomable coordinate space that we want to keep fixed.
-    final num fixedX = mouseX + lastScrollLeft - flameChartInset;
+    final num fixedX = mouseX + lastScrollLeft - sideInset;
     // Calculate and set our new horizontal scroll position.
     if (fixedX >= 0) {
       floatingPointScrollLeft =
-          fixedX * newZoomLevel / zoomLevel + flameChartInset - mouseX;
+          fixedX * newZoomLevel / zoomLevel + sideInset - mouseX;
     } else {
       // No need to transform as we are in the fixed portion of the window.
       floatingPointScrollLeft = lastScrollLeft;
@@ -301,20 +296,17 @@ abstract class FlameChartCanvas<T> extends FlameChart {
       }
     }
 
-    timelineGrid.updateForZoom(zoomLevel, getFlameChartWidth());
+    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
 
-    forceRebuildForSize(
-      flameChartWidthWithInsets,
-      flameChartHeight,
-    );
+    forceRebuildForSize(widthWithInsets, height);
 
     _viewportCanvas.element.element.scrollLeft =
         math.max(0, floatingPointScrollLeft.round());
   }
 
   void forceRebuildForSize(double width, double height) {
-    flameChartWidth = width;
-    flameChartHeight = height;
+    this.width = width;
+    this.height = height;
 
     _viewportCanvas.setContentSize(width, height);
     _viewportCanvas.rebuild(force: true);
@@ -330,8 +322,6 @@ class FlameChartRow {
   final List<FlameChartNode> nodes;
   final int index;
 }
-
-typedef DisplayTextProvider<T> = String Function(T);
 
 class FlameChartNode<T> {
   FlameChartNode(
@@ -369,7 +359,7 @@ class FlameChartNode<T> {
 
   final T data;
 
-  DisplayTextProvider displayTextProvider;
+  final String Function(T) displayTextProvider;
 
   final bool rounded;
 
@@ -379,7 +369,7 @@ class FlameChartNode<T> {
 
   String get text => displayTextProvider(data);
 
-  String get tooltip => data.toString();
+  String get tooltip => '$data';
 
   num get maxTextWidth => rect.width - horizontalPadding * 2;
 
@@ -387,7 +377,7 @@ class FlameChartNode<T> {
 
   void paint(CanvasRenderingContext2D canvas) {
     canvas.fillStyle =
-        colorToCss(selected ? _selectedFlameChartNodeColor : backgroundColor);
+        colorToCss(selected ? _selectedNodeColor : backgroundColor);
 
     if (rounded) {
       canvas
@@ -473,7 +463,7 @@ class FlameChartNode<T> {
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
-    final newLeft = (startingLeft - flameChartInset) * zoom + flameChartInset;
+    final newLeft = (startingLeft - sideInset) * zoom + sideInset;
     final newWidth = startingWidth * zoom;
 
     final updatedRect = Rect.fromLTWH(newLeft, rect.top, newWidth, rect.height);
@@ -512,12 +502,11 @@ class TimelineGrid {
       visible.left,
       viewport.top,
       visible.width,
-      flameChartRowHeight,
+      rowHeight,
     );
 
-    num left =
-        (visible.left - flameChartInset) ~/ currentInterval * currentInterval +
-            flameChartInset;
+    num left = (visible.left - sideInset) ~/ currentInterval * currentInterval +
+        sideInset;
 
     final firstGridNodeText = msText(
       const Duration(microseconds: 0),
@@ -531,14 +520,14 @@ class TimelineGrid {
       ..fillStyle = colorToCss(timestampColor)
       ..fillText(
         firstGridNodeText,
-        _getTimestampLeft(firstGridNodeText, 0, flameChartInset, canvas),
+        _timestampLeft(firstGridNodeText, 0, sideInset, canvas),
         viewport.top + _textOffsetY,
       )
       ..strokeStyle = colorToCss(gridLineColor)
       ..lineWidth = gridLineWidth
       ..beginPath()
-      ..moveTo(flameChartInset, visible.top)
-      ..lineTo(flameChartInset, visible.bottom)
+      ..moveTo(sideInset, visible.top)
+      ..lineTo(sideInset, visible.bottom)
       ..closePath()
       ..stroke();
 
@@ -551,15 +540,15 @@ class TimelineGrid {
       // TODO(kenzie): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
-      final timestamp = Duration(
-          microseconds: getTimestampForPosition(left + currentInterval));
+      final timestamp =
+          Duration(microseconds: timestampForPosition(left + currentInterval));
 
       final timestampText = msText(
         timestamp,
         fractionDigits: timestamp.inMicroseconds == 0 ? 1 : 3,
       );
 
-      final timestampX = _getTimestampLeft(
+      final timestampX = _timestampLeft(
         timestampText,
         left,
         currentInterval,
@@ -579,7 +568,7 @@ class TimelineGrid {
     }
   }
 
-  num _getTimestampLeft(
+  num _timestampLeft(
     String timestampText,
     num left,
     num width,
@@ -593,8 +582,8 @@ class TimelineGrid {
 
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
-  int getTimestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - flameChartInset) /
+  int timestampForPosition(num gridItemEnd) {
+    return ((gridItemEnd - sideInset) /
             _flameChartWidth *
             _duration.inMicroseconds)
         .round();

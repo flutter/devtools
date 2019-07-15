@@ -11,8 +11,8 @@ import 'cpu_profiler.dart';
 const _timeColumnWidthPx = 145;
 
 class CpuCallTree extends CpuProfilerView {
-  CpuCallTree(CpuProfileDataProvider getProfileData)
-      : super(CpuProfilerViewType.callTree, getProfileData) {
+  CpuCallTree(CpuProfileDataProvider profileData)
+      : super(CpuProfilerViewType.callTree, profileData) {
     flex();
     layoutVertical();
 
@@ -41,7 +41,7 @@ class CpuCallTree extends CpuProfilerView {
 
   @override
   void rebuildView() {
-    final CpuProfileData data = getProfileData();
+    final CpuProfileData data = profileData();
     final CpuStackFrame root = data.cpuProfileRoot.deepCopy();
 
     // Expand the root stack frame to start.
@@ -52,8 +52,8 @@ class CpuCallTree extends CpuProfilerView {
 }
 
 class CpuBottomUp extends CpuProfilerView {
-  CpuBottomUp(CpuProfileDataProvider getProfileData)
-      : super(CpuProfilerViewType.bottomUp, getProfileData) {
+  CpuBottomUp(CpuProfileDataProvider profileData)
+      : super(CpuProfilerViewType.bottomUp, profileData) {
     flex();
     layoutVertical();
     _init();
@@ -82,7 +82,7 @@ class CpuBottomUp extends CpuProfilerView {
 
   @override
   void rebuildView() {
-    final CpuProfileData data = getProfileData();
+    final CpuProfileData data = profileData();
     final List<CpuStackFrame> bottomUpRoots =
         BottomUpProfileProcessor().processData(data.cpuProfileRoot);
     bottomUpTable.setRows(bottomUpRoots);

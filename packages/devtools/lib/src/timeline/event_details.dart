@@ -143,11 +143,11 @@ class EventDetails extends CoreElement {
 }
 
 class _CpuProfiler extends CpuProfiler {
-  _CpuProfiler(this._timelineController, CpuProfileDataProvider getProfileData)
+  _CpuProfiler(this._timelineController, CpuProfileDataProvider profileData)
       : super(
-          CpuFlameChart(getProfileData),
-          CpuCallTree(getProfileData),
-          CpuBottomUp(getProfileData),
+          CpuFlameChart(profileData),
+          CpuCallTree(profileData),
+          CpuBottomUp(profileData),
         );
 
   final TimelineController _timelineController;

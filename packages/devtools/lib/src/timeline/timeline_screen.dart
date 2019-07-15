@@ -167,11 +167,11 @@ class TimelineScreen extends Screen {
       final TimelineFrame frame = timelineController.timelineData.selectedFrame;
       flameChartCanvas = TimelineFlameChart(
         data: frame,
-        flameChartWidth: flameChartContainer.element.clientWidth,
-        flameChartHeight: math.max(
+        width: flameChartContainer.element.clientWidth.toDouble(),
+        height: math.max(
           // Subtract [rowHeightWithPadding] to account for timeline at the top of
           // the flame chart.
-          flameChartContainer.element.clientHeight - rowHeightWithPadding,
+          flameChartContainer.element.clientHeight.toDouble(),
           // Add 1 to account for a row of padding at the bottom of the chart.
           (frame.uiEventFlow.depth + frame.gpuEventFlow.depth + 1) *
                   rowHeightWithPadding +
@@ -199,12 +199,11 @@ class TimelineScreen extends Screen {
       if (flameChartCanvas == null) return;
 
       flameChartCanvas.forceRebuildForSize(
-        flameChartCanvas.flameChartWidthWithInsets,
+        flameChartCanvas.widthWithInsets,
         math.max(
           // Subtract [rowHeightWithPadding] to account for the size of
           // [stackFrameDetails] section at the bottom of the chart.
-          flameChartContainer.element.scrollHeight.toDouble() -
-              rowHeightWithPadding,
+          flameChartContainer.element.scrollHeight.toDouble(),
           // Add 1 to account for a row of padding at the bottom of the chart.
           (timelineController.timelineData.selectedFrame.uiEventFlow.depth +
                       timelineController
