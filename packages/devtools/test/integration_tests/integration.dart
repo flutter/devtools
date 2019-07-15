@@ -278,40 +278,20 @@ class AppError {
 class WebdevFixture {
   WebdevFixture._(this.process, this.url);
 
-  static Future<WebdevFixture> create({
+  static Future<WebdevFixture> serve({
     bool release = false,
     bool verbose = false,
   }) async {
-    // 'pub run webdev serve web'
-
-    final List<String> cliArgs = ['global', 'run', 'webdev', 'serve', 'web'];
+    final List<String> cliArgs = ['serve', 'web'];
     if (release) {
       cliArgs.add('--release');
     }
 
-    // Remove the DART_VM_OPTIONS env variable from the child process, so the
-    // Dart VM doesn't try and open a service protocol port if
-    // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
-    final Map<String, String> environment =
-        Map<String, String>.from(Platform.environment);
-    if (environment.containsKey('DART_VM_OPTIONS')) {
-      environment['DART_VM_OPTIONS'] = '';
-    }
+    final process = await _runWebdev(cliArgs);
 
-    final Process process = await Process.start(
-      Platform.isWindows ? 'pub.bat' : 'pub',
-      cliArgs,
-      environment: environment,
-    );
-
-    final Stream<String> lines =
-        process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     final Completer<String> hasUrl = Completer<String>();
 
-    process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
+    _toLines(process.stderr).listen((String line) {
       final err = 'error starting webdev: $line';
       if (!hasUrl.isCompleted) {
         hasUrl.completeError(err);
@@ -320,7 +300,7 @@ class WebdevFixture {
       }
     });
 
-    lines.listen((String line) {
+    _toLines(process.stdout).listen((String line) {
       if (verbose) {
         print('webdev • ${line.trim()}');
       }
@@ -339,6 +319,37 @@ class WebdevFixture {
     return WebdevFixture._(process, url);
   }
 
+  static Future<void> build({
+    bool verbose = false,
+  }) async {
+    final List<String> cliArgs = ['build'];
+
+    final process = await _runWebdev(cliArgs);
+
+    final Completer<void> buildFinished = Completer<void>();
+
+    _toLines(process.stderr).listen((String line) {
+      final err = 'error building with webdev: $line';
+      if (!buildFinished.isCompleted) {
+        buildFinished.completeError(err);
+      } else {
+        print(err);
+      }
+    });
+
+    _toLines(process.stdout).listen((String line) {
+      if (verbose) {
+        print('webdev • ${line.trim()}');
+      }
+
+      if (line.contains('[INFO] Succeeded')) {
+        buildFinished.complete();
+      }
+    });
+
+    await buildFinished.future;
+  }
+
   final Process process;
   final String url;
 
@@ -346,5 +357,29 @@ class WebdevFixture {
 
   Future<void> teardown() async {
     process.kill();
+    await process.exitCode;
   }
+
+  static Future<Process> _runWebdev(List<String> buildArgs) async {
+    // Remove the DART_VM_OPTIONS env variable from the child process, so the
+    // Dart VM doesn't try and open a service protocol port if
+    // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
+    final Map<String, String> environment =
+        Map<String, String>.from(Platform.environment);
+    if (environment.containsKey('DART_VM_OPTIONS')) {
+      environment['DART_VM_OPTIONS'] = '';
+    }
+
+    final List<String> cliArgs =
+        ['global', 'run', 'webdev'].followedBy(buildArgs).toList();
+
+    return Process.start(
+      Platform.isWindows ? 'pub.bat' : 'pub',
+      cliArgs,
+      environment: environment,
+    );
+  }
+
+  static Stream<String> _toLines(Stream<List<int>> stream) =>
+      stream.transform(utf8.decoder).transform(const LineSplitter());
 }
