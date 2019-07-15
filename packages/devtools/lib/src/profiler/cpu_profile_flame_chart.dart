@@ -16,8 +16,8 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
 
 class CpuFlameChart extends CpuProfilerView {
-  CpuFlameChart(CpuProfileDataProvider profileData)
-      : super(CpuProfilerViewType.flameChart, profileData) {
+  CpuFlameChart(CpuProfileDataProvider profileDataProvider)
+      : super(CpuProfilerViewType.flameChart, profileDataProvider) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)
       ..hidden(true);
@@ -39,7 +39,7 @@ class CpuFlameChart extends CpuProfilerView {
 
   @override
   void rebuildView() {
-    final CpuProfileData data = profileData();
+    final CpuProfileData data = profileDataProvider();
     canvas = CpuFlameChartCanvas(
       data: data,
       width: element.clientWidth,
@@ -75,7 +75,7 @@ class CpuFlameChart extends CpuProfilerView {
       return;
     }
 
-    final data = profileData();
+    final data = profileDataProvider();
 
     // Only update the canvas if the flame chart is visible and has data.
     // Otherwise, mark the canvas as needing a rebuild.
