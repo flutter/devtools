@@ -1,3 +1,7 @@
+## 0.1.4
+- vm_service_lib dependency has been pinned to 3.22.0
+- The `launchDevTools` service will now register with VMs using public APIs when available, falling back to private APIs otherwise.
+
 ## 0.1.3
 - vm_service_lib dependency has been pinned to 3.21.0
 

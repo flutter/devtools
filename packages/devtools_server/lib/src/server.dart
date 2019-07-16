@@ -254,7 +254,12 @@ Future<void> registerLaunchDevToolsService(
       }
     });
 
-    await service.registerService(launchDevToolsService, 'DevTools Server');
+    if (isVersionLessThan(await service.getVersion(), major: 3, minor: 22)) {
+      await service.callMethod('_registerService',
+          args: {'service': launchDevToolsService, 'alias': 'DevTools Server'});
+    } else {
+      await service.registerService(launchDevToolsService, 'DevTools Server');
+    }
 
     printOutput(
       'Successfully registered launchDevTools service',
@@ -274,6 +279,16 @@ Future<void> registerLaunchDevToolsService(
       machineMode: machineMode,
     );
   }
+}
+
+bool isVersionLessThan(
+  Version version, {
+  @required int major,
+  @required int minor,
+}) {
+  assert(version != null);
+  return version.major < major ||
+      (version.major == major && version.minor < minor);
 }
 
 final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
