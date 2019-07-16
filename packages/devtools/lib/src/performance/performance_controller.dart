@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/cpu_profile_service.dart';
+import '../profiler/cpu_profile_transformer.dart';
 import '../utils.dart';
 
 class PerformanceController {

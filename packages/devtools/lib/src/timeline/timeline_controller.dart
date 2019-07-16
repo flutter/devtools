@@ -4,8 +4,8 @@
 import 'dart:async';
 
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/cpu_profile_service.dart';
+import '../profiler/cpu_profile_transformer.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
 import 'timeline_service.dart';
