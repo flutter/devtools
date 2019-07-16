@@ -12,6 +12,7 @@ import 'package:split/split.dart' as split;
 import '../charts/flame_chart_canvas.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
+import '../service_extensions.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
@@ -95,7 +96,7 @@ class TimelineScreen extends Screen {
           ..disabled = true
           ..click(_resumeRecording);
 
-    exportButton = PButton.icon('', exportIcon)
+    exportButton = PButton.icon('Export', exportIcon)
       ..small()
       ..clazz('margin-left')
       ..setAttribute('title', 'Export timeline')
@@ -128,6 +129,10 @@ class TimelineScreen extends Screen {
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
+        div(c: 'btn-group')
+          ..add([
+            ServiceExtensionButton(performanceOverlay).button,
+          ]),
         exportButton,
       ]);
 

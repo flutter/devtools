@@ -12,22 +12,12 @@ const Icon clearIcon = MaterialIcon('block', defaultButtonIconColor);
 
 const Icon exitIcon = MaterialIcon('clear', defaultButtonIconColor);
 
-const Icon exportIcon = MaterialIcon(
-  'file_download',
-  defaultButtonIconColor,
-  fontSize: 32,
-  iconWidth: 18,
-);
+const Icon exportIcon = MaterialIcon('file_download', defaultButtonIconColor);
 
-const Icon recordPrimary = MaterialIcon(
-  'fiber_manual_record',
-  defaultPrimaryButtonIconColor,
-);
+const Icon recordPrimary =
+    MaterialIcon('fiber_manual_record', defaultPrimaryButtonIconColor);
 
-const Icon record = MaterialIcon(
-  'fiber_manual_record',
-  defaultButtonIconColor,
-);
+const Icon record = MaterialIcon('fiber_manual_record', defaultButtonIconColor);
 
 const Icon stop = MaterialIcon('stop', defaultButtonIconColor);
 
@@ -52,6 +42,7 @@ class MaterialIcon extends Icon {
 
 class FlutterMaterialIcons {
   FlutterMaterialIcons._();
+
   static final Map<String, MaterialIcon> _iconCache = {};
 
   static Icon getIconForCodePoint(int charCode) {
