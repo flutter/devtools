@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools/src/profiler/cpu_profile_service.dart';
 import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/timeline/timeline_protocol.dart';
@@ -38,14 +37,10 @@ void main() {
     TimelineProtocol timelineProtocol;
 
     setUp(() {
-      final timelineController = MockTimelineController();
-      when(timelineController.cpuProfilerService)
-          .thenReturn(MockCpuProfilerService());
-
       timelineProtocol = TimelineProtocol(
         uiThreadId: testUiThreadId,
         gpuThreadId: testGpuThreadId,
-        timelineController: timelineController,
+        timelineController: MockTimelineController(),
       );
     });
 
@@ -217,7 +212,6 @@ void main() {
       expect(frame.uiEventFlow.toString(), equals(goldenUiString()));
       expect(frame.gpuEventFlow.toString(), equals(goldenGpuString()));
       expect(frame.addedToTimeline, isTrue);
-      expect(frame.cpuProfileReady.isCompleted, isTrue);
     });
 
     test('handles out of order timestamps', () async {
@@ -317,5 +311,3 @@ Future<void> delayForEventProcessing() async {
 }
 
 class MockTimelineController extends Mock implements TimelineController {}
-
-class MockCpuProfilerService extends Mock implements CpuProfilerService {}

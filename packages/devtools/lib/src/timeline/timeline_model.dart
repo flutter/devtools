@@ -1,8 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../profiler/cpu_profile_model.dart';
@@ -198,8 +196,6 @@ class TimelineFrame {
 
   // Stores frame start time, end time, and duration.
   final time = TimeRange();
-
-  final Completer cpuProfileReady = Completer();
 
   /// Pipeline item time range in micros.
   ///

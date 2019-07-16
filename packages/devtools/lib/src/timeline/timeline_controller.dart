@@ -137,7 +137,14 @@ class TimelineController {
     if (!timelineData.selectedEvent.isUiEvent) return;
 
     assert(timelineData.selectedEvent.frameId == timelineData.selectedFrame.id);
-    await timelineData.selectedFrame.cpuProfileReady.future;
+
+    timelineData.selectedFrame.cpuProfileData ??=
+        await cpuProfilerService.getCpuProfile(
+      startMicros:
+          timelineData.selectedFrame.uiEventFlow.time.start.inMicroseconds,
+      extentMicros:
+          timelineData.selectedFrame.uiEventFlow.time.duration.inMicroseconds,
+    );
 
     timelineData.cpuProfileData = CpuProfileData.subProfile(
       timelineData.selectedFrame.cpuProfileData,

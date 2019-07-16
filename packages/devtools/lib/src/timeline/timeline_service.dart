@@ -28,7 +28,7 @@ class TimelineService {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    serviceManager.service.setFlag('profile_period', '50');
+    serviceManager.service.setFlag('profile_period', '250');
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
