@@ -122,7 +122,8 @@ class TimelineScreen extends Screen {
         clearButton,
         exitOfflineModeButton,
         div()..flex(),
-        debugButtonSection = div(c: 'btn-group')
+        debugButtonSection = div(c: 'btn-group'),
+        div(c: 'btn-group')
           ..add([
             ServiceExtensionButton(performanceOverlay).button,
           ]),
