@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_processor.dart';
+import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/cpu_profile_service.dart';
+import '../utils.dart';
 
 class PerformanceController {
   final CpuProfilerService cpuProfilerService = CpuProfilerService();
 
-  final CpuProfileProcessor cpuProfileProcessor = CpuProfileProcessor();
+  final CpuProfileTransformer cpuProfileTransformer = CpuProfileTransformer();
 
   /// Processed cpu profile data from the recorded performance profile.
   CpuProfileData cpuProfileData;
@@ -39,12 +39,10 @@ class PerformanceController {
   Future<void> stopRecording() async {
     _recording = false;
 
-    // 2^52 is the max int for dart2js. Using this as [extentMicros] for the
-    // getCpuProfile requests will give us all cpu samples we have available.
-    final maxJsInt = pow(2, 52);
-
     cpuProfileData = await cpuProfilerService.getCpuProfile(
       startMicros: _profileStartMicros,
+      // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
+      // give us all cpu samples we have available
       extentMicros: maxJsInt,
     );
   }

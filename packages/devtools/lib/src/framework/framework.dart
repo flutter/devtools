@@ -486,7 +486,11 @@ abstract class Screen {
           span()
             ..add(span(text: '$name', c: 'optional-700'))
             ..add(span(text: ' Docs')),
-          href: 'https://flutter.dev/docs/development/tools/devtools/$id',
+          // TODO(kenzie): remove this special case once performance docs are
+          // published on flutter.dev.
+          href: id == 'performance'
+              ? 'https://flutter.dev/docs/development/tools/devtools/timeline#cpu-flame-chart'
+              : 'https://flutter.dev/docs/development/tools/devtools/$id',
           title: 'Documentation on using the $name page',
         ),
         disabled = allTabsEnabledByQuery ? false : disabled;

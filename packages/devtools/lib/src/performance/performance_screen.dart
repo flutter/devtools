@@ -193,7 +193,7 @@ class _CpuProfiler extends CpuProfiler {
 
   @override
   Future<void> prepareCpuProfile() async {
-    _performanceController.cpuProfileProcessor
+    _performanceController.cpuProfileTransformer
         .processData(_performanceController.cpuProfileData);
   }
 

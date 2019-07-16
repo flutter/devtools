@@ -8,7 +8,7 @@ import 'cpu_profile_model.dart';
 
 /// Process for composing [CpuProfileData] into a structured tree of
 /// [CpuStackFrame]'s.
-class CpuProfileProcessor {
+class CpuProfileTransformer {
   void processData(CpuProfileData cpuProfileData) {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
@@ -77,7 +77,7 @@ class CpuProfileProcessor {
 
 /// Process for converting a [CpuStackFrame] into a bottom-up representation of
 /// the CPU profile.
-class BottomUpProfileProcessor {
+class BottomUpProfileTransformer {
   List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
     final List<CpuStackFrame> bottomUpRoots = getRoots(stackFrame, null, []);
 

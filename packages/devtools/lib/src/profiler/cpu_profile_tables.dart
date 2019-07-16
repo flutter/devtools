@@ -5,7 +5,7 @@ import '../tables.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profile_processor.dart';
+import 'cpu_profile_transformer.dart';
 import 'cpu_profiler.dart';
 
 const _timeColumnWidthPx = 145;
@@ -87,7 +87,7 @@ class CpuBottomUp extends CpuProfilerView {
   void rebuildView() {
     final CpuProfileData data = profileDataProvider();
     final List<CpuStackFrame> bottomUpRoots =
-        BottomUpProfileProcessor().processData(data.cpuProfileRoot);
+        BottomUpProfileTransformer().processData(data.cpuProfileRoot);
     bottomUpTable.setRows(bottomUpRoots);
   }
 

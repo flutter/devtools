@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools/src/profiler/cpu_profile_model.dart';
-import 'package:devtools/src/profiler/cpu_profile_processor.dart';
+import 'package:devtools/src/profiler/cpu_profile_transformer.dart';
 import 'package:test/test.dart';
 
 import 'support/cpu_profile_test_data.dart';
 
 void main() {
-  group('CpuProfileProcessor', () {
-    final cpuProfileProcessor = CpuProfileProcessor();
+  group('CpuProfileTransformer', () {
+    final cpuProfileTransformer = CpuProfileTransformer();
     final CpuProfileData cpuProfileData =
         CpuProfileData.parse(cpuProfileResponseJson);
 
     test('processCpuProfile', () {
       expect(cpuProfileData.processed, isFalse);
-      cpuProfileProcessor.processData(cpuProfileData);
+      cpuProfileTransformer.processData(cpuProfileData);
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -29,7 +29,7 @@ void main() {
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
           () {
-            cpuProfileProcessor.processData(cpuProfileDataWithMissingLeaf);
+            cpuProfileTransformer.processData(cpuProfileDataWithMissingLeaf);
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
@@ -41,8 +41,8 @@ void main() {
     });
   });
 
-  group('BottomUpProfileProcessor', () {
-    final bottomUpProcessor = BottomUpProfileProcessor();
+  group('BottomUpProfileTransformer', () {
+    final bottomUpTransformer = BottomUpProfileTransformer();
 
     test('setBottomUpSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
@@ -54,7 +54,7 @@ void main() {
       }
 
       final stackFrame = testStackFrame.deepCopy();
-      bottomUpProcessor.cascadeSampleCounts(stackFrame);
+      bottomUpTransformer.cascadeSampleCounts(stackFrame);
 
       verifySampleCount(stackFrame, 0);
     });
@@ -62,7 +62,7 @@ void main() {
     test('processData step by step', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpProcessor.getRoots(testStackFrame, null, []);
+          bottomUpTransformer.getRoots(testStackFrame, null, []);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
@@ -70,7 +70,7 @@ void main() {
       expect(bottomUpRoots.length, equals(6));
 
       // Set the bottom up sample counts for the roots.
-      bottomUpRoots.forEach(bottomUpProcessor.cascadeSampleCounts);
+      bottomUpRoots.forEach(bottomUpTransformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
@@ -93,7 +93,7 @@ void main() {
     test('processData', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpProcessor.processData(testStackFrame);
+          bottomUpTransformer.processData(testStackFrame);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));

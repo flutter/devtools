@@ -20,6 +20,9 @@ ultrices, tincidunt quam sit amet, cursus lectus. Integer justo turpis, vestibul
 sodales suscipit risus. Nullam consequat sit amet turpis vitae facilisis. Integer sit amet tempus arcu.
 ''';
 
+// 2^52 is the max int for dart2js.
+final int maxJsInt = pow(2, 52);
+
 String getLoremText([int paragraphCount = 1]) {
   String str = '';
   for (int i = 0; i < paragraphCount; i++) {
