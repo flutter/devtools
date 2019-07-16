@@ -4,7 +4,7 @@
 import 'dart:async';
 
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_protocol.dart';
+import '../profiler/cpu_profile_processor.dart';
 import '../profiler/cpu_profile_service.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
@@ -16,7 +16,7 @@ const String timelineScreenId = 'timeline';
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// protocols [TimelineProtocol] and [CpuProfileProtocol], and it communicates
+/// protocols [TimelineProtocol] and [CpuProfileProcessor], and it communicates
 /// with [TimelineService].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -76,7 +76,7 @@ class TimelineController {
 
   TimelineProtocol timelineProtocol;
 
-  CpuProfileProtocol cpuProfileProtocol = CpuProfileProtocol();
+  CpuProfileProcessor cpuProfileProtocol = CpuProfileProcessor();
 
   CpuProfilerService cpuProfilerService = CpuProfilerService();
 

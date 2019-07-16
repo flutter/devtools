@@ -65,9 +65,9 @@ class CpuFlameChart extends CpuProfilerView {
   }
 
   @override
-  void update() {
+  void update({bool showLoadingSpinner = false}) {
     reset();
-    super.update();
+    super.update(showLoadingSpinner: showLoadingSpinner);
   }
 
   void updateForContainerResize() {
@@ -99,6 +99,7 @@ class CpuFlameChart extends CpuProfilerView {
     }
   }
 
+  @override
   void reset() {
     if (canvas?.element?.element != null) {
       canvas.element.element.remove();

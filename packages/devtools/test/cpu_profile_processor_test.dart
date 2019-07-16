@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools/src/profiler/cpu_profile_model.dart';
-import 'package:devtools/src/profiler/cpu_profile_protocol.dart';
+import 'package:devtools/src/profiler/cpu_profile_processor.dart';
 import 'package:test/test.dart';
 
 import 'support/cpu_profile_test_data.dart';
 
 void main() {
-  group('CpuProfileProtocol', () {
-    final cpuProfileProtocol = CpuProfileProtocol();
+  group('CpuProfileProcessor', () {
+    final cpuProfileProcessor = CpuProfileProcessor();
     final CpuProfileData cpuProfileData =
         CpuProfileData.parse(cpuProfileResponseJson);
 
     test('processCpuProfile', () {
       expect(cpuProfileData.processed, isFalse);
-      cpuProfileProtocol.processData(cpuProfileData);
+      cpuProfileProcessor.processData(cpuProfileData);
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -29,7 +29,7 @@ void main() {
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
           () {
-            cpuProfileProtocol.processData(cpuProfileDataWithMissingLeaf);
+            cpuProfileProcessor.processData(cpuProfileDataWithMissingLeaf);
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
@@ -42,7 +42,7 @@ void main() {
   });
 
   group('BottomUpProfileProcessor', () {
-    final bottomUpProtocol = BottomUpProfileProcessor();
+    final bottomUpProcessor = BottomUpProfileProcessor();
 
     test('setBottomUpSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
@@ -54,7 +54,7 @@ void main() {
       }
 
       final stackFrame = testStackFrame.deepCopy();
-      bottomUpProtocol.cascadeSampleCounts(stackFrame);
+      bottomUpProcessor.cascadeSampleCounts(stackFrame);
 
       verifySampleCount(stackFrame, 0);
     });
@@ -62,7 +62,7 @@ void main() {
     test('processData step by step', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpProtocol.getRoots(testStackFrame, null, []);
+          bottomUpProcessor.getRoots(testStackFrame, null, []);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
@@ -70,7 +70,7 @@ void main() {
       expect(bottomUpRoots.length, equals(6));
 
       // Set the bottom up sample counts for the roots.
-      bottomUpRoots.forEach(bottomUpProtocol.cascadeSampleCounts);
+      bottomUpRoots.forEach(bottomUpProcessor.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
@@ -79,7 +79,7 @@ void main() {
       expect(buf.toString(), equals(bottomUpPreMergeGolden));
 
       // Merge the bottom up roots.
-      bottomUpProtocol.mergeRoots(bottomUpRoots);
+      mergeProfileRoots(bottomUpRoots);
 
       expect(bottomUpRoots.length, equals(4));
 
@@ -93,7 +93,7 @@ void main() {
     test('processData', () {
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
       final List<CpuStackFrame> bottomUpRoots =
-          bottomUpProtocol.processData(testStackFrame);
+          bottomUpProcessor.processData(testStackFrame);
 
       // Verify the original stack frame was not modified.
       expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));

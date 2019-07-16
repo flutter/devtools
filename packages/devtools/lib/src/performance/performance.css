@@ -6,11 +6,11 @@
     justify-content: center;
 }
 
-.recording-message {
+.profiler-status-message {
     margin-top: -34px; /* Full height of the text field plus padding for the spinner. */
 }
 
-.recording-spinner {
+.profiler-spinner {
     margin-top: 0 !important;
 }
 

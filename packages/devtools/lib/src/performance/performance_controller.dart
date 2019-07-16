@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import '../profiler/cpu_profile_model.dart';
+import '../profiler/cpu_profile_processor.dart';
 import '../profiler/cpu_profile_service.dart';
 
 class PerformanceController {
   final CpuProfilerService cpuProfilerService = CpuProfilerService();
 
-  /// Final cpu profile data after merging the recorded profiles.
-  CpuProfileData cpuProfileData;
+  final CpuProfileProcessor cpuProfileProcessor = CpuProfileProcessor();
 
-  /// Cpu profiles recorded on an interval during the time between starting and
-  /// stopping the recording.
-  List<CpuProfileData> recordedProfiles = [];
+  /// Processed cpu profile data from the recorded performance profile.
+  CpuProfileData cpuProfileData;
 
   Timer timer;
 
@@ -23,47 +23,34 @@ class PerformanceController {
 
   bool _recording = false;
 
-  void startRecording() async {
-    reset();
+  final int _profileStartMicros = 0;
+
+  Future<void> startRecording() async {
+    await reset();
     _recording = true;
 
-    // TODO(kenzie): ensure this code is backwards compatible. The first request
-    // will start at 0 and end at int max (2^52).
-    // TODO(kenzie): uncomment this code once getVMTimelineMicros is available.
-//    const int timerDuration = 100;
-//    int startMicros =
-//      (await serviceManager.service.getVMTimelineMicros()).timestamp;
-//    timer = Timer.periodic(
-//      const Duration(microseconds: timerDuration),
-//      (_) async {
-//        recordedProfiles.add(await cpuProfilerService.getCpuProfile(
-//          startMicros: startMicros,
-//          extentMicros: timerDuration,
-//        ));
-//        // Set [startMicros] to the end of the current profile. This will be the
-//        // start time in the request for the next sample.
-//        startMicros = cpuProfileData.time.end.inMicroseconds;
-//      },
-//    );
+    // TODO(kenzie): once [getVMTimelineMicros] is available, we can get the
+    // current timestamp here and set [_profileStartMicros] equal to it. We will
+    // use [_profileStartMicros] for [startMicros] in the [getCpuProfile]
+    // request. For backwards compatibility, we will let start micros default to
+    // 0.
   }
 
-  void stopRecording() {
-    // TODO(kenzie): uncomment this once getVMTimelineMicros is available.
-//    timer.cancel();
+  Future<void> stopRecording() async {
     _recording = false;
+
+    // 2^52 is the max int for dart2js. Using this as [extentMicros] for the
+    // getCpuProfile requests will give us all cpu samples we have available.
+    final maxJsInt = pow(2, 52);
+
+    cpuProfileData = await cpuProfilerService.getCpuProfile(
+      startMicros: _profileStartMicros,
+      extentMicros: maxJsInt,
+    );
   }
 
-  void reset() {
+  Future<void> reset() async {
     cpuProfileData = null;
-    recordedProfiles.clear();
-  }
-
-  void mergeRecordedProfiles() {
-    // TODO(kenzie): merge profiles from [recordedProfiles] and set
-    // cpuProfileData. We could do something smart here where we merge in the
-    // down time between `getCpuProfile` requests.
-
-    // Temporarily set equal to stub data.
-    cpuProfileData = debugStubCpuProfile;
+    await cpuProfilerService.clearCpuProfile();
   }
 }

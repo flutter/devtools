@@ -29,8 +29,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-const bool showPerformancePage = false;
-
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
@@ -185,9 +183,7 @@ class PerfToolFramework extends Framework {
           'This screen is disabled because it is not yet ready for Flutter'
           ' Web',
     ));
-    if (showPerformancePage) {
-      addScreen(PerformanceScreen());
-    }
+    addScreen(PerformanceScreen());
     addScreen(DebuggerScreen(
       disabled: _isFlutterWebApp ||
           _isProfileBuild ||
