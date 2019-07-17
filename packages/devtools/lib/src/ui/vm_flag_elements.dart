@@ -8,6 +8,8 @@ import '../globals.dart';
 import '../messages.dart';
 import 'primer.dart';
 
+// TODO(kenzie): handle the multi-client case for this selector.
+
 class ProfileGranularitySelector {
   ProfileGranularitySelector(this.framework) {
     selector = PSelect()
