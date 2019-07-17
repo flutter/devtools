@@ -136,7 +136,7 @@ class ServiceExtensionSelector {
   ServiceExtensionSelector(this.extensionDescription) {
     selector = PSelect()
       ..small()
-      ..clazz('button-bar-selector')
+      ..clazz('button-bar-dropdown')
       ..change(_handleSelect)
       ..tooltip = extensionDescription.tooltips.first ??
           extensionDescription.description;

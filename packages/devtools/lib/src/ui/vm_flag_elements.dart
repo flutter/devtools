@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:async';
 
 import '../framework/framework.dart';
@@ -18,17 +17,23 @@ class ProfileGranularitySelector {
       ..tooltip = 'Granularity of CPU profiling. For a finer-grained profile, '
           'choose "Profile granularity: high". Please read our documentation to'
           ' understand the trade-offs associated with this setting.'
-      ..option('Profile granularity: low', value: '1000')
-      ..option('Profile granularity: medium', value: '250')
+      ..option('Profile granularity: low', value: lowGranularityValue)
+      ..option('Profile granularity: medium', value: mediumGranularityValue)
       ..option('Profile granularity: high', value: highGranularityValue);
 
-    // Select 250 μs (the default profile period).
-    selector.selectedIndex = defaultSelectedIndex;
+    // Select medium granularity (250 μs) as the default.
+    selector.selectedIndex = mediumGranularityIndex;
   }
 
-  static const defaultSelectedIndex = 1;
+  static const profilePeriodFlagName = 'profile_period';
+
+  static const lowGranularityValue = '1000';
+
+  static const mediumGranularityValue = '250';
 
   static const highGranularityValue = '50';
+
+  static const mediumGranularityIndex = 1;
 
   final Framework framework;
 
@@ -37,7 +42,8 @@ class ProfileGranularitySelector {
   String _selectedValue;
 
   Future<void> setGranularity() async {
-    return serviceManager.service.setFlag('profile_period', selector.value);
+    return serviceManager.service
+        .setFlag(profilePeriodFlagName, selector.value);
   }
 
   void _handleSelect() async {
