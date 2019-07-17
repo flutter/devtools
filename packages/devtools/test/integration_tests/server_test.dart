@@ -34,7 +34,7 @@ void main() {
   });
 
   tearDown(() async {
-    server.kill();
+    server?.kill();
     await appFixture?.teardown();
     await webdevFixture?.teardown();
   });
