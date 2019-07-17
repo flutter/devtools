@@ -72,7 +72,7 @@ class TimelineScreen extends Screen {
 
   ServiceExtensionButton performanceOverlayButton;
 
-  SamplePeriodSelector _samplePeriodSelector;
+  ProfileGranularitySelector _profileGranularitySelector;
 
   CoreElement upperButtonSection;
 
@@ -116,7 +116,7 @@ class TimelineScreen extends Screen {
 
     performanceOverlayButton = ServiceExtensionButton(performanceOverlay);
 
-    _samplePeriodSelector = SamplePeriodSelector();
+    _profileGranularitySelector = ProfileGranularitySelector(framework);
 
     exitOfflineModeButton = PButton.icon(
       'Exit offline mode',
@@ -139,7 +139,7 @@ class TimelineScreen extends Screen {
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
-        _samplePeriodSelector.selector..clazz('margin-left'),
+        _profileGranularitySelector.selector..clazz('margin-left'),
         performanceOverlayButton.button..clazz('margin-left'),
         exportButton,
       ]);
@@ -256,7 +256,7 @@ class TimelineScreen extends Screen {
   void entering() {
     _updateListeningState();
     _updateButtonStates();
-    _samplePeriodSelector.setSamplePeriod();
+    _profileGranularitySelector.setGranularity();
   }
 
   @override
@@ -306,7 +306,7 @@ class TimelineScreen extends Screen {
     clearButton.hidden(offlineMode);
     exportButton.hidden(offlineMode);
     performanceOverlayButton.button.hidden(offlineMode);
-    _samplePeriodSelector.selector.hidden(offlineMode);
+    _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }
 

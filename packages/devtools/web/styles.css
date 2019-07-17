@@ -747,7 +747,7 @@ div.tabnav-tab {
     border-bottom-left-radius: 0;
 }
 
-.form-select.on-page-selector {
+.form-select.button-bar-selector {
     background-color: var(--form-select-background);
     color: var(--default-button-text-color);
     display: inline-flex;

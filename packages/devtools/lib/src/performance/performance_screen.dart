@@ -33,7 +33,7 @@ class PerformanceScreen extends Screen {
 
   PButton _clearButton;
 
-  SamplePeriodSelector _samplePeriodSelector;
+  ProfileGranularitySelector _profileGranularitySelector;
 
   CoreElement _profilerInstructions;
 
@@ -63,7 +63,7 @@ class PerformanceScreen extends Screen {
             ]),
           _clearButton,
           div()..flex(),
-          _samplePeriodSelector.selector,
+          _profileGranularitySelector.selector,
         ]),
       div(c: 'section')
         ..layoutVertical()
@@ -102,7 +102,7 @@ class PerformanceScreen extends Screen {
       ..setAttribute('title', 'Clear timeline')
       ..click(_clear);
 
-    _samplePeriodSelector = SamplePeriodSelector();
+    _profileGranularitySelector = ProfileGranularitySelector(framework);
 
     _profilerInstructions = div(c: 'center-in-parent instruction-container')
       ..layoutVertical()
@@ -151,7 +151,7 @@ class PerformanceScreen extends Screen {
 
   @override
   void entering() {
-    _samplePeriodSelector.setSamplePeriod();
+    _profileGranularitySelector.setGranularity();
   }
 
   Future<void> _startRecording() async {

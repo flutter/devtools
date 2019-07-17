@@ -136,7 +136,7 @@ class ServiceExtensionSelector {
   ServiceExtensionSelector(this.extensionDescription) {
     selector = PSelect()
       ..small()
-      ..clazz('on-page-selector')
+      ..clazz('button-bar-selector')
       ..change(_handleSelect)
       ..tooltip = extensionDescription.tooltips.first ??
           extensionDescription.description;

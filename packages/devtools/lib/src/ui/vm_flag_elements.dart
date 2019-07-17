@@ -4,45 +4,49 @@
 
 import 'dart:async';
 
+import '../framework/framework.dart';
 import '../globals.dart';
+import '../messages.dart';
 import 'primer.dart';
 
-class SamplePeriodSelector {
-  SamplePeriodSelector() {
+class ProfileGranularitySelector {
+  ProfileGranularitySelector(this.framework) {
     selector = PSelect()
       ..small()
-      ..clazz('on-page-selector')
+      ..clazz('button-bar-selector')
       ..change(_handleSelect)
-      ..tooltip = 'The frequency at which the VM will collect CPU samples. For '
-          'a finer-grained profile, choose a smaller sample period. Please '
-          'read our documentation to understand the trade-offs associated with '
-          'this setting.'
-      ..option('Sample period: 1000 μs', value: '1000')
-      ..option('Sample period: 500 μs', value: '500')
-      ..option('Sample period: 250 μs', value: '250')
-      ..option('Sample period: 150 μs', value: '150')
-      ..option('Sample period: 50 μs', value: '50');
+      ..tooltip = 'Granularity of CPU profiling. For a finer-grained profile, '
+          'choose "Profile granularity: high". Please read our documentation to'
+          ' understand the trade-offs associated with this setting.'
+      ..option('Profile granularity: low', value: '1000')
+      ..option('Profile granularity: medium', value: '250')
+      ..option('Profile granularity: high', value: highGranularityValue);
 
     // Select 250 μs (the default profile period).
     selector.selectedIndex = defaultSelectedIndex;
   }
 
-  static const defaultSelectedIndex = 2;
+  static const defaultSelectedIndex = 1;
 
-  static const profilePeriodFlagName = 'profile_period';
+  static const highGranularityValue = '50';
+
+  final Framework framework;
 
   PSelect selector;
 
   String _selectedValue;
 
-  Future<void> setSamplePeriod() async {
-    return serviceManager.service
-        .setFlag(profilePeriodFlagName, selector.value);
+  Future<void> setGranularity() async {
+    return serviceManager.service.setFlag('profile_period', selector.value);
   }
 
   void _handleSelect() async {
     if (selector.value == _selectedValue) return;
-    await setSamplePeriod();
+    await setGranularity();
     _selectedValue = selector.value;
+
+    if (selector.value == highGranularityValue) {
+      framework.showMessage(message: profileGranularityWarning);
+    }
   }
 }
