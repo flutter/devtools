@@ -344,6 +344,8 @@ class WebdevFixture {
 
       if (line.contains('[INFO] Succeeded')) {
         buildFinished.complete();
+      } else if (line.contains('[SEVERE]')) {
+        buildFinished.completeError(line);
       }
     });
 
