@@ -1,3 +1,7 @@
+## 0.1.4 - TBD
+* Add Performance page. This has a traditional CPU profiler for Dart applications.
+* Add ability to specify the profile granularity for the CPU profiler.
+
 ## 0.1.3 - 2019-07-11
 * Link to new flutter.dev hosted DevTools documentation.
 * Inspector UI improvements.

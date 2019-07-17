@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
+import '../profiler/cpu_profile_service.dart';
 import '../vm_service_wrapper.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -28,7 +29,7 @@ class TimelineService {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    serviceManager.service.setFlag('profile_period', '250');
+    serviceManager.service.setFlag('profile_period', '$defaultSamplePeriod');
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =

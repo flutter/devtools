@@ -13,6 +13,7 @@ import '../ui/html_icon_renderer.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
+import '../ui/vm_flag_elements.dart';
 import 'performance_controller.dart';
 
 const performanceScreenId = 'performance';
@@ -31,6 +32,8 @@ class PerformanceScreen extends Screen {
   PButton _stopRecordingButton;
 
   PButton _clearButton;
+
+  ProfileGranularitySelector _profileGranularitySelector;
 
   CoreElement _profilerInstructions;
 
@@ -59,6 +62,8 @@ class PerformanceScreen extends Screen {
               _stopRecordingButton,
             ]),
           _clearButton,
+          div()..flex(),
+          _profileGranularitySelector.selector,
         ]),
       div(c: 'section')
         ..layoutVertical()
@@ -96,6 +101,8 @@ class PerformanceScreen extends Screen {
       ..clazz('margin-left')
       ..setAttribute('title', 'Clear timeline')
       ..click(_clear);
+
+    _profileGranularitySelector = ProfileGranularitySelector(framework);
 
     _profilerInstructions = div(c: 'center-in-parent instruction-container')
       ..layoutVertical()
@@ -140,6 +147,11 @@ class PerformanceScreen extends Screen {
         third: CpuProfilerViewType.flameChart,
       ),
     );
+  }
+
+  @override
+  void entering() {
+    _profileGranularitySelector.setGranularity();
   }
 
   Future<void> _startRecording() async {

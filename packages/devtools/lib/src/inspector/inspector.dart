@@ -20,6 +20,7 @@ import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
+import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_service.dart';

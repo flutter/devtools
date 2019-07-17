@@ -19,7 +19,9 @@ import '../ui/elements.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
+import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
+import '../ui/vm_flag_elements.dart';
 import 'event_details.dart';
 import 'frames_bar_chart.dart';
 import 'timeline_controller.dart';
@@ -68,6 +70,10 @@ class TimelineScreen extends Screen {
 
   PButton exitOfflineModeButton;
 
+  ServiceExtensionButton performanceOverlayButton;
+
+  ProfileGranularitySelector _profileGranularitySelector;
+
   CoreElement upperButtonSection;
 
   CoreElement debugButtonSection;
@@ -108,6 +114,10 @@ class TimelineScreen extends Screen {
       ..setAttribute('title', 'Clear timeline')
       ..click(clearTimeline);
 
+    performanceOverlayButton = ServiceExtensionButton(performanceOverlay);
+
+    _profileGranularitySelector = ProfileGranularitySelector(framework);
+
     exitOfflineModeButton = PButton.icon(
       'Exit offline mode',
       exitIcon,
@@ -129,10 +139,8 @@ class TimelineScreen extends Screen {
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
-        div(c: 'btn-group')
-          ..add([
-            ServiceExtensionButton(performanceOverlay).button,
-          ]),
+        _profileGranularitySelector.selector..clazz('margin-left'),
+        performanceOverlayButton.button..clazz('margin-left'),
         exportButton,
       ]);
 
@@ -248,6 +256,7 @@ class TimelineScreen extends Screen {
   void entering() {
     _updateListeningState();
     _updateButtonStates();
+    _profileGranularitySelector.setGranularity();
   }
 
   @override
@@ -296,6 +305,8 @@ class TimelineScreen extends Screen {
       ..hidden(offlineMode);
     clearButton.hidden(offlineMode);
     exportButton.hidden(offlineMode);
+    performanceOverlayButton.button.hidden(offlineMode);
+    _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }
 

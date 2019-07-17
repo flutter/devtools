@@ -50,3 +50,24 @@ final debugWarning = Message(
 
 const String _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
+
+final profileGranularityWarning = Message(
+  MessageType.warning,
+  id: 'highSamplingRateWarning',
+  children: [
+    div(
+        text: 'You are opting in to a high CPU sampling rate. This may affect '
+            'the performance of your application.'),
+    div()
+      ..add(span(text: 'Please read our '))
+      ..add(a(
+          text: 'documentation',
+          href: _profileGranularityDocsUrl,
+          target: '_blank;'))
+      ..add(span(
+          text: ' to understand the trade-offs associated with this setting.'))
+  ],
+);
+
+const String _profileGranularityDocsUrl =
+    'https://flutter.dev/docs/development/tools/devtools/performance#sample-period';
