@@ -175,8 +175,14 @@ class PopupListView<T> implements CoreElementView {
     highlightedItem = null;
   }
 
-  void scrollAndHighlight(int row, int topPosition,
-      {bool top = false, bool bottom = false}) {
+  void scrollAndHighlight(
+    int row,
+    int topPosition, {
+    bool top = false,
+    bool bottom = false,
+  }) {
+    if (itemsAsList.isEmpty) return;
+
     // Highlight this row.
     highlightedItem = itemsAsList[row];
 

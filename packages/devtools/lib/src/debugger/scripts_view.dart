@@ -177,6 +177,8 @@ class ScriptsView implements CoreElementView {
     bool top = false,
     bool bottom = false,
   }) {
+    if (items.isEmpty) return;
+
     // Highlight this row.
     _highlightRef = items[row];
 
