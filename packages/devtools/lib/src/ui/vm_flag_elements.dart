@@ -14,7 +14,7 @@ class ProfileGranularitySelector {
   ProfileGranularitySelector(this.framework) {
     selector = PSelect()
       ..small()
-      ..clazz('button-bar-selector')
+      ..clazz('button-bar-dropdown')
       ..change(_handleSelect)
       ..tooltip = 'Granularity of CPU profiling. For a finer-grained profile, '
           'choose "Profile granularity: high". Please read our documentation to'
