@@ -232,7 +232,7 @@ class SamplePeriodSelector {
       ..change(_handleSelect)
       ..tooltip = 'The frequency at which the VM will collect CPU samples. For '
           'a finer-grained profile, choose a smaller sample period. Please '
-          'read our documentation to understand the tradeoffs associated with '
+          'read our documentation to understand the trade-offs associated with '
           'this setting.'
       ..option('Sample period: 1000 μs', value: '1000')
       ..option('Sample period: 500 μs', value: '500')

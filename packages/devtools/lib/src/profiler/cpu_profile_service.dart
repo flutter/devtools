@@ -10,7 +10,7 @@ import '../profiler/cpu_profile_model.dart';
 
 /// Default period at which the VM will collect CPU samples.
 ///
-/// This value will be applied to the profile_period VM flag.
+/// This value is applied to the profile_period VM flag.
 const int defaultSamplePeriod = 250;
 
 /// Manages interactions between the Cpu Profiler and the VmService.
