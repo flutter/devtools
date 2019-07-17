@@ -487,7 +487,7 @@ class TimelineProtocol {
     return true;
   }
 
-  void _maybeAddCompletedFrame(TimelineFrame frame) async {
+  void _maybeAddCompletedFrame(TimelineFrame frame) {
     if (frame.isReadyForTimeline && frame.addedToTimeline == null) {
       if (debugTimeline) {
         debugFrameTracking.writeln('Completing ${frame.id}');
@@ -503,13 +503,7 @@ class TimelineProtocol {
       pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
 
-      // Pre-fetch the cpu profile for this frame.
-      frame.cpuProfileData =
-          await timelineController.cpuProfilerService.getCpuProfile(
-        startMicros: frame.uiEventFlow.time.start.inMicroseconds,
-        extentMicros: frame.uiEventFlow.time.duration.inMicroseconds,
-      );
-      frame.cpuProfileReady.complete();
+      // TODO(kenzie): add cpu profile pre-fetching here when the app is idle.
     }
   }
 
