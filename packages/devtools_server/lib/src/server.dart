@@ -254,12 +254,13 @@ Future<void> registerLaunchDevToolsService(
       }
     });
 
-    if (isVersionLessThan(await service.getVersion(), major: 3, minor: 22)) {
-      await service.callMethod('_registerService',
-          args: {'service': launchDevToolsService, 'alias': 'DevTools Server'});
-    } else {
-      await service.registerService(launchDevToolsService, 'DevTools Server');
-    }
+    // Handle registerService method name change based on protocol version.
+    final registerServiceMethodName =
+        isVersionLessThan(await service.getVersion(), major: 3, minor: 22)
+            ? '_registerService'
+            : 'registerService';
+    await service.callMethod(registerServiceMethodName,
+        args: {'service': launchDevToolsService, 'alias': 'DevTools Server'});
 
     printOutput(
       'Successfully registered launchDevTools service',
