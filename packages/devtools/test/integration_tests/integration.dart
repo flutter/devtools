@@ -324,7 +324,7 @@ class WebdevFixture {
   }) async {
     final List<String> cliArgs = ['build'];
 
-    final process = await _runWebdev(cliArgs);
+    final process = await _runWebdev(cliArgs, verbose: verbose);
 
     final Completer<void> buildFinished = Completer<void>();
 
@@ -348,6 +348,8 @@ class WebdevFixture {
     });
 
     await buildFinished.future;
+
+    await process.exitCode;
   }
 
   final Process process;
@@ -360,7 +362,10 @@ class WebdevFixture {
     await process.exitCode;
   }
 
-  static Future<Process> _runWebdev(List<String> buildArgs) async {
+  static Future<Process> _runWebdev(
+    List<String> buildArgs, {
+    bool verbose = false,
+  }) async {
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
     // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
@@ -373,8 +378,14 @@ class WebdevFixture {
     final List<String> cliArgs =
         ['global', 'run', 'webdev'].followedBy(buildArgs).toList();
 
+    final executable = Platform.isWindows ? 'pub.bat' : 'pub';
+
+    if (verbose) {
+      print('Running "$executable" with args: ${cliArgs.join(' ')}');
+    }
+
     return Process.start(
-      Platform.isWindows ? 'pub.bat' : 'pub',
+      executable,
       cliArgs,
       environment: environment,
     );

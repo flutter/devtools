@@ -36,7 +36,6 @@ void main() {
   tearDown(() async {
     server?.kill();
     await appFixture?.teardown();
-    await webdevFixture?.teardown();
   });
 
   test('registers service', () async {
