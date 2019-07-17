@@ -502,6 +502,8 @@ class TimelineProtocol {
       timelineController.addFrame(frame);
       pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
+
+      // TODO(kenzie): add cpu profile pre-fetching here when the app is idle.
     }
   }
 
