@@ -170,7 +170,7 @@ class ServiceExtensionSelector {
   ServiceExtensionSelector(this.extensionDescription) {
     selector = PSelect()
       ..small()
-      ..clazz('toggle-platform')
+      ..clazz('on-page-selector')
       ..change(_handleSelect)
       ..tooltip = extensionDescription.tooltips.first ??
           extensionDescription.description;
@@ -221,6 +221,43 @@ class ServiceExtensionSelector {
         _selectedValue = extensionDescription.displayValues[selectedIndex];
       }
     });
+  }
+}
+
+class SamplePeriodSelector {
+  SamplePeriodSelector() {
+    selector = PSelect()
+      ..small()
+      ..clazz('on-page-selector')
+      ..change(_handleSelect)
+      ..tooltip = 'The frequency at which the VM will collect CPU samples. For '
+          'a finer-grained profile, choose a smaller sample period. Please '
+          'read our documentation to understand the tradeoffs associated with '
+          'this setting.'
+      ..option('Sample period: 1000 μs', value: '1000')
+      ..option('Sample period: 500 μs', value: '500')
+      ..option('Sample period: 250 μs', value: '250')
+      ..option('Sample period: 150 μs', value: '150')
+      ..option('Sample period: 50 μs', value: '50');
+
+    // Select 250 μs (the default profile period).
+    selector.selectedIndex = defaultSelectedIndex;
+  }
+
+  static const defaultSelectedIndex = 2;
+
+  PSelect selector;
+
+  String _selectedValue;
+
+  void setSamplePeriod() {
+    serviceManager.service.setFlag('profile_period', selector.value);
+  }
+
+  void _handleSelect() {
+    if (selector.value == _selectedValue) return;
+    setSamplePeriod();
+    _selectedValue = selector.value;
   }
 }
 

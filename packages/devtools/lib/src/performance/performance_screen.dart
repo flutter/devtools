@@ -32,6 +32,8 @@ class PerformanceScreen extends Screen {
 
   PButton _clearButton;
 
+  SamplePeriodSelector _samplePeriodSelector;
+
   CoreElement _profilerInstructions;
 
   CoreElement _profilerStatus;
@@ -59,6 +61,8 @@ class PerformanceScreen extends Screen {
               _stopRecordingButton,
             ]),
           _clearButton,
+          div()..flex(),
+          _samplePeriodSelector.selector,
         ]),
       div(c: 'section')
         ..layoutVertical()
@@ -96,6 +100,8 @@ class PerformanceScreen extends Screen {
       ..clazz('margin-left')
       ..setAttribute('title', 'Clear timeline')
       ..click(_clear);
+
+    _samplePeriodSelector = SamplePeriodSelector();
 
     _profilerInstructions = div(c: 'center-in-parent instruction-container')
       ..layoutVertical()
@@ -140,6 +146,11 @@ class PerformanceScreen extends Screen {
         third: CpuProfilerViewType.flameChart,
       ),
     );
+  }
+
+  @override
+  void entering() {
+    _samplePeriodSelector.setSamplePeriod();
   }
 
   Future<void> _startRecording() async {
