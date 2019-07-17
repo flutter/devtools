@@ -13,6 +13,7 @@ import '../ui/html_icon_renderer.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
+import '../ui/vm_flag_elements.dart';
 import 'performance_controller.dart';
 
 const performanceScreenId = 'performance';
