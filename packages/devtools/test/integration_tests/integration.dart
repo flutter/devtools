@@ -276,7 +276,7 @@ class AppError {
 }
 
 class WebdevFixture {
-  WebdevFixture._(this.process, this.url);
+  WebdevFixture._(this.process, this.url, this.verbose);
 
   static Future<WebdevFixture> serve({
     bool release = false,
@@ -316,7 +316,7 @@ class WebdevFixture {
 
     await delay();
 
-    return WebdevFixture._(process, url);
+    return WebdevFixture._(process, url, verbose);
   }
 
   static Future<void> build({
@@ -356,12 +356,16 @@ class WebdevFixture {
 
   final Process process;
   final String url;
+  final bool verbose;
 
   Uri get baseUri => Uri.parse(url);
 
   Future<void> teardown() async {
     process.kill();
-    await process.exitCode;
+    final exitCode = await process.exitCode;
+    if (verbose) {
+      print('webdev exited with code $exitCode');
+    }
   }
 
   static Future<Process> _runWebdev(
