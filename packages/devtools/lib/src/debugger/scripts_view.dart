@@ -177,6 +177,10 @@ class ScriptsView implements CoreElementView {
     bool top = false,
     bool bottom = false,
   }) {
+    // TODO(terry): this fixed a RangeError, but investigate why this method is
+    // called when the list is empty.
+    if (items.isEmpty) return;
+
     // Highlight this row.
     _highlightRef = items[row];
 

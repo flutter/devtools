@@ -175,8 +175,16 @@ class PopupListView<T> implements CoreElementView {
     highlightedItem = null;
   }
 
-  void scrollAndHighlight(int row, int topPosition,
-      {bool top = false, bool bottom = false}) {
+  void scrollAndHighlight(
+    int row,
+    int topPosition, {
+    bool top = false,
+    bool bottom = false,
+  }) {
+    // TODO(terry): this fixed a RangeError, but investigate why this method is
+    // called when the list is empty.
+    if (itemsAsList.isEmpty) return;
+
     // Highlight this row.
     highlightedItem = itemsAsList[row];
 
