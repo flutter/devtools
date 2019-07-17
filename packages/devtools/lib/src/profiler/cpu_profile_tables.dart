@@ -5,7 +5,7 @@ import '../tables.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profile_protocol.dart';
+import 'cpu_profile_transformer.dart';
 import 'cpu_profiler.dart';
 
 const _timeColumnWidthPx = 145;
@@ -49,6 +49,9 @@ class CpuCallTree extends CpuProfilerView {
       ..addAll(root.children.cast());
     callTreeTable.setRows(rows);
   }
+
+  @override
+  void reset() => callTreeTable.setRows(<CpuStackFrame>[]);
 }
 
 class CpuBottomUp extends CpuProfilerView {
@@ -84,9 +87,12 @@ class CpuBottomUp extends CpuProfilerView {
   void rebuildView() {
     final CpuProfileData data = profileDataProvider();
     final List<CpuStackFrame> bottomUpRoots =
-        BottomUpProfileProcessor().processData(data.cpuProfileRoot);
+        BottomUpProfileTransformer().processData(data.cpuProfileRoot);
     bottomUpTable.setRows(bottomUpRoots);
   }
+
+  @override
+  void reset() => bottomUpTable.setRows(<CpuStackFrame>[]);
 }
 
 class SelfTimeColumn extends Column<CpuStackFrame> {

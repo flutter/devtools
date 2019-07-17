@@ -1,7 +1,6 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:meta/meta.dart';
 
 import '../framework/framework.dart';
@@ -13,7 +12,10 @@ import '../ui/elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
+import '../ui/ui_utils.dart';
 import 'performance_controller.dart';
+
+const performanceScreenId = 'performance';
 
 class PerformanceScreen extends Screen {
   PerformanceScreen()
@@ -30,9 +32,11 @@ class PerformanceScreen extends Screen {
 
   PButton _clearButton;
 
-  CoreElement _profilingInstructions;
+  CoreElement _profilerInstructions;
 
-  CoreElement _recordingMessage;
+  CoreElement _profilerStatus;
+
+  CoreElement _profilerStatusMessage;
 
   CpuProfilerTabNav _tabNav;
 
@@ -64,11 +68,13 @@ class PerformanceScreen extends Screen {
           div(c: 'profiler-container section-border')
             ..add([
               _cpuProfiler..hidden(true),
-              _profilingInstructions,
-              _recordingMessage..hidden(true)
+              _profilerInstructions,
+              _profilerStatus..hidden(true)
             ]),
         ]),
     ]);
+
+    maybeAddDebugMessage(framework, performanceScreenId);
 
     return screenDiv;
   }
@@ -77,13 +83,13 @@ class PerformanceScreen extends Screen {
     _startRecordingButton = PButton.icon('Record', recordPrimary)
       ..small()
       ..primary()
-      ..click(_startRecording);
+      ..click(() async => await _startRecording());
 
     _stopRecordingButton = PButton.icon('Stop', stop)
       ..small()
       ..clazz('margin-left')
       ..disabled = true
-      ..click(_stopRecording);
+      ..click(() async => await _stopRecording());
 
     _clearButton = PButton.icon('Clear', clearIcon)
       ..small()
@@ -91,7 +97,7 @@ class PerformanceScreen extends Screen {
       ..setAttribute('title', 'Clear timeline')
       ..click(_clear);
 
-    _profilingInstructions = div(c: 'center-in-parent instruction-container')
+    _profilerInstructions = div(c: 'center-in-parent instruction-container')
       ..layoutVertical()
       ..flex()
       ..add([
@@ -113,12 +119,12 @@ class PerformanceScreen extends Screen {
           ]),
       ]);
 
-    _recordingMessage = div(c: 'center-in-parent')
+    _profilerStatus = div(c: 'center-in-parent')
       ..layoutVertical()
       ..flex()
       ..add([
-        div(text: 'Recording', c: 'recording-message'),
-        Spinner.centered(classes: ['recording-spinner']),
+        _profilerStatusMessage = div(c: 'profiler-status-message'),
+        Spinner.centered(classes: ['profiler-spinner']),
       ]);
 
     _cpuProfiler = _CpuProfiler(
@@ -136,17 +142,19 @@ class PerformanceScreen extends Screen {
     );
   }
 
-  void _startRecording() {
-    _performanceController.startRecording();
+  Future<void> _startRecording() async {
+    await _performanceController.startRecording();
     _updateCpuProfilerVisibility(hidden: true);
     _updateButtonStates();
-    _profilingInstructions.hidden(true);
-    _recordingMessage.hidden(false);
+    _profilerInstructions.hidden(true);
+    _profilerStatusMessage.text = 'Recording profile';
+    _profilerStatus.hidden(false);
   }
 
-  void _stopRecording() async {
-    _performanceController.stopRecording();
-    _recordingMessage.hidden(true);
+  Future<void> _stopRecording() async {
+    _profilerStatusMessage.text = 'Processing profile';
+    await _performanceController.stopRecording();
+    _profilerStatus.hidden(true);
     _updateCpuProfilerVisibility(hidden: false);
     _updateButtonStates();
     await _cpuProfiler.update();
@@ -155,7 +163,7 @@ class PerformanceScreen extends Screen {
   void _clear() {
     _performanceController.reset();
     _updateCpuProfilerVisibility(hidden: true);
-    _profilingInstructions.hidden(false);
+    _profilerInstructions.hidden(false);
   }
 
   void _updateButtonStates() {
@@ -185,7 +193,8 @@ class _CpuProfiler extends CpuProfiler {
 
   @override
   Future<void> prepareCpuProfile() async {
-    _performanceController.mergeRecordedProfiles();
+    _performanceController.cpuProfileTransformer
+        .processData(_performanceController.cpuProfileData);
   }
 
   @override

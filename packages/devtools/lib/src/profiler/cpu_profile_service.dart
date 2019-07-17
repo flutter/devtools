@@ -7,16 +7,6 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 
 import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_protocol.dart';
-
-// TODO(kenzie): remove once we no longer need stub data to build the
-// performance UI.
-/// When true, we will store the first cpu profile response we see as
-/// [debugStubCpuProfile].
-///
-/// This is a hack to aid in developing the performance page.
-bool debugStoreCpuProfile = false;
-CpuProfileData debugStubCpuProfile;
 
 /// Manages interactions between the Cpu Profiler and the VmService.
 class CpuProfilerService {
@@ -30,13 +20,11 @@ class CpuProfilerService {
       startMicros,
       extentMicros,
     );
-    // TODO(kenzie): remove this once we no longer need stub data to build the
-    // performance UI.
-    if (debugStoreCpuProfile && debugStubCpuProfile == null) {
-      debugStubCpuProfile = CpuProfileData.parse(response.json);
-      CpuProfileProtocol().processData(debugStubCpuProfile);
-    }
-
     return CpuProfileData.parse(response.json);
+  }
+
+  Future<Success> clearCpuProfile() async {
+    return serviceManager.service
+        .clearCpuProfile(serviceManager.isolateManager.selectedIsolate.id);
   }
 }

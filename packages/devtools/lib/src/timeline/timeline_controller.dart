@@ -4,8 +4,8 @@
 import 'dart:async';
 
 import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_protocol.dart';
 import '../profiler/cpu_profile_service.dart';
+import '../profiler/cpu_profile_transformer.dart';
 import 'timeline_model.dart';
 import 'timeline_protocol.dart';
 import 'timeline_service.dart';
@@ -16,7 +16,7 @@ const String timelineScreenId = 'timeline';
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// protocols [TimelineProtocol] and [CpuProfileProtocol], and it communicates
+/// protocols [TimelineProtocol] and [CpuProfileTransformer], and it communicates
 /// with [TimelineService].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -76,7 +76,7 @@ class TimelineController {
 
   TimelineProtocol timelineProtocol;
 
-  CpuProfileProtocol cpuProfileProtocol = CpuProfileProtocol();
+  CpuProfileTransformer cpuProfileTransformer = CpuProfileTransformer();
 
   CpuProfilerService cpuProfilerService = CpuProfilerService();
 
@@ -150,7 +150,7 @@ class TimelineController {
       timelineData.selectedFrame.cpuProfileData,
       timelineData.selectedEvent.time,
     );
-    cpuProfileProtocol.processData(timelineData.cpuProfileData);
+    cpuProfileTransformer.processData(timelineData.cpuProfileData);
   }
 
   void restoreCpuProfileFromOfflineData() {
@@ -200,7 +200,7 @@ class TimelineController {
     timelineProtocol.maybeAddPendingEvents();
 
     if (timelineData.cpuProfileData != null) {
-      cpuProfileProtocol.processData(timelineData.cpuProfileData);
+      cpuProfileTransformer.processData(timelineData.cpuProfileData);
     }
 
     _loadOfflineDataController.add(offlineData);

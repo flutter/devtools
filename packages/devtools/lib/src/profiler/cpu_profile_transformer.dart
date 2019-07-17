@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 
-/// Protocol for processing [CpuProfileData] and composing it into a structured
-/// tree of [CpuStackFrame]'s.
-class CpuProfileProtocol {
+/// Process for composing [CpuProfileData] into a structured tree of
+/// [CpuStackFrame]'s.
+class CpuProfileTransformer {
   void processData(CpuProfileData cpuProfileData) {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
@@ -77,7 +77,7 @@ class CpuProfileProtocol {
 
 /// Process for converting a [CpuStackFrame] into a bottom-up representation of
 /// the CPU profile.
-class BottomUpProfileProcessor {
+class BottomUpProfileTransformer {
   List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
     final List<CpuStackFrame> bottomUpRoots = getRoots(stackFrame, null, []);
 
@@ -86,7 +86,7 @@ class BottomUpProfileProcessor {
 
     // Merge samples when possible starting at the root (the leaf node of the
     // original CPU sample).
-    mergeRoots(bottomUpRoots);
+    mergeProfileRoots(bottomUpRoots);
 
     return bottomUpRoots;
   }
@@ -128,7 +128,7 @@ class BottomUpProfileProcessor {
   ///
   /// This is necessary for the transformation of a [CpuStackFrame] to its
   /// bottom-up representation. This is an intermediate step between
-  /// [getRoots] and [mergeRoots].
+  /// [getRoots] and [mergeProfileRoots].
   @visibleForTesting
   void cascadeSampleCounts(CpuStackFrame stackFrame) {
     stackFrame.inclusiveSampleCount = stackFrame.exclusiveSampleCount;
@@ -137,42 +137,45 @@ class BottomUpProfileProcessor {
       cascadeSampleCounts(child);
     }
   }
+}
 
-  /// Merges bottom up roots that share a common call stack (starting at the
-  /// root).
-  ///
-  /// Ex. C               C                     C
-  ///      -> B             -> B        -->      -> B
-  ///          -> A             -> D                 -> A
-  ///                                                -> D
-  ///
-  /// At the time this method is called, we assume we have a list of roots with
-  /// accurate bottom up sample counts.
-  @visibleForTesting
-  void mergeRoots(List<CpuStackFrame> roots) {
-    // Loop through a copy of [roots] so that we can remove nodes from [roots]
-    // once we have merged them.
-    final List<CpuStackFrame> rootsCopy = List.from(roots);
-    for (CpuStackFrame root in rootsCopy) {
-      if (!roots.contains(root)) {
-        // We have already merged [root] and removed it from [roots]. Do not
-        // attempt to merge again.
-        continue;
-      }
-
-      final matchingRoots =
-          roots.where((other) => other.matches(root) && other != root).toList();
-      if (matchingRoots.isEmpty) {
-        continue;
-      }
-
-      for (CpuStackFrame match in matchingRoots) {
-        match.children.forEach(root.addChild);
-        root.exclusiveSampleCount += match.exclusiveSampleCount;
-        root.inclusiveSampleCount += match.inclusiveSampleCount;
-        roots.remove(match);
-        mergeRoots(root.children);
-      }
+/// Merges CPU profile roots that share a common call stack (starting at the
+/// root).
+///
+/// Ex. C               C                     C
+///      -> B             -> B        -->      -> B
+///          -> A             -> D                 -> A
+///                                                -> D
+///
+/// At the time this method is called, we assume we have a list of roots with
+/// accurate inclusive/exclusive sample counts.
+void mergeProfileRoots(List<CpuStackFrame> roots) {
+  // Loop through a copy of [roots] so that we can remove nodes from [roots]
+  // once we have merged them.
+  final List<CpuStackFrame> rootsCopy = List.from(roots);
+  for (CpuStackFrame root in rootsCopy) {
+    if (!roots.contains(root)) {
+      // We have already merged [root] and removed it from [roots]. Do not
+      // attempt to merge again.
+      continue;
     }
+
+    final matchingRoots =
+        roots.where((other) => other.matches(root) && other != root).toList();
+    if (matchingRoots.isEmpty) {
+      continue;
+    }
+
+    for (CpuStackFrame match in matchingRoots) {
+      match.children.forEach(root.addChild);
+      root.exclusiveSampleCount += match.exclusiveSampleCount;
+      root.inclusiveSampleCount += match.inclusiveSampleCount;
+      roots.remove(match);
+      mergeProfileRoots(root.children);
+    }
+  }
+
+  for (CpuStackFrame root in roots) {
+    root.index = roots.indexOf(root);
   }
 }

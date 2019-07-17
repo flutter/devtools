@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math';
 
 /// Non-UI specific tree code should live in this file.
@@ -72,14 +73,14 @@ class TreeNode<T extends TreeNode<T>> {
     child.index = children.length - 1;
   }
 
-  bool containsChildWithCondition(bool condition(T node), {T root}) {
-    root ??= this;
-
-    if (condition(root)) {
-      return true;
-    }
-    for (T newRoot in root.children) {
-      return containsChildWithCondition(condition, root: newRoot);
+  bool containsChildWithCondition(bool condition(T node)) {
+    final Queue<T> queue = Queue.from([this]);
+    while (queue.isNotEmpty) {
+      final T node = queue.removeFirst();
+      if (condition(node)) {
+        return true;
+      }
+      node.children.forEach(queue.add);
     }
     return false;
   }

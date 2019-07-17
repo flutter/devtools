@@ -84,9 +84,9 @@ abstract class CpuProfiler extends CoreElement {
       final showingMessage = maybeShowMessageOnUpdate();
       if (showingMessage) return;
 
-      flameChart.update();
-      callTree.update();
-      bottomUp.update();
+      for (CpuProfilerView view in views) {
+        view.update();
+      }
 
       // Ensure we are showing the selected profiler view.
       showView(_selectedViewType);
@@ -98,7 +98,9 @@ abstract class CpuProfiler extends CoreElement {
   }
 
   void reset() {
-    flameChart.reset();
+    for (CpuProfilerView view in views) {
+      view.reset();
+    }
     _removeMessage();
   }
 
@@ -135,11 +137,28 @@ abstract class CpuProfilerView extends CoreElement {
 
   void rebuildView();
 
-  void update() {
+  void reset();
+
+  void update({bool showLoadingSpinner = false}) async {
+    if (profileDataProvider() == null) return;
+
     // Update the view if it is visible. Otherwise, mark the view as needing a
     // rebuild.
     if (!isHidden) {
-      rebuildView();
+      if (showLoadingSpinner) {
+        final Spinner spinner = Spinner.centered();
+        add(spinner);
+
+        // Awaiting this future ensures the spinner pops up in between switching
+        // profiler views. Without this, the UI is laggy and the spinner never
+        // appears.
+        await Future.delayed(const Duration(microseconds: 1));
+
+        rebuildView();
+        spinner.remove();
+      } else {
+        rebuildView();
+      }
     } else {
       viewNeedsRebuild = true;
     }
@@ -149,7 +168,7 @@ abstract class CpuProfilerView extends CoreElement {
     hidden(false);
     if (viewNeedsRebuild) {
       viewNeedsRebuild = false;
-      update();
+      update(showLoadingSpinner: true);
     }
   }
 

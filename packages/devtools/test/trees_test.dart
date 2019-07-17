@@ -9,8 +9,8 @@ void main() {
   group('TreeNode', () {
     test('depth', () {
       expect(testTreeNode.depth, equals(4));
-      expect(treeNode2.depth, equals(1));
-      expect(treeNode3.depth, equals(2));
+      expect(treeNode2.depth, equals(3));
+      expect(treeNode3.depth, equals(1));
     });
 
     test('root', () {
@@ -19,7 +19,7 @@ void main() {
 
     test('level', () {
       expect(testTreeNode.level, equals(0));
-      expect(treeNode2.level, equals(2));
+      expect(treeNode2.level, equals(1));
       expect(treeNode5.level, equals(3));
     });
 
@@ -64,8 +64,8 @@ final treeNode3 = TestTreeNode();
 final treeNode4 = TestTreeNode();
 final treeNode5 = TestTreeNode();
 final TreeNode testTreeNode = treeNode0
-  ..addChild(treeNode1
-    ..addChild(treeNode2)
-    ..addChild(treeNode3..addChild(treeNode4)..addChild(treeNode5)));
+  ..addChild(treeNode1)
+  ..addChild(
+      treeNode2..addChild(treeNode3)..addChild(treeNode4..addChild(treeNode5)));
 
 class TestTreeNode extends TreeNode<TestTreeNode> {}
