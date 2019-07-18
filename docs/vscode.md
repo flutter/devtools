@@ -1,3 +1,3 @@
 ---
-redirect_to: http://flutter.dev/docs/development/tools/devtools/vscode
+redirect_to: https://flutter.dev/docs/development/tools/devtools/vscode
 ---

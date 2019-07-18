@@ -1,3 +1,3 @@
 ---
-redirect_to: http://flutter.dev/docs/development/tools/devtools/cli
+redirect_to: https://flutter.dev/docs/development/tools/devtools/cli
 ---
