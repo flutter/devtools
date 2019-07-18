@@ -120,8 +120,7 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     @required Future<void> onClosed,
   }) async {
-    const kServiceStreamOld = '_Service';
-    const kServiceStreamNew = 'Service';
+    final serviceStreamName = await service.serviceStreamName;
 
     final vm = await service.getVM();
     this.vm = vm;
@@ -148,8 +147,7 @@ class ServiceConnectionManager {
       }
     }
 
-    service.onEvent(kServiceStreamOld).listen(handleServiceEvent);
-    service.onEvent(kServiceStreamNew).listen(handleServiceEvent);
+    service.onEvent(serviceStreamName).listen(handleServiceEvent);
 
     _isolateManager._service = service;
     _serviceExtensionManager._service = service;
@@ -173,8 +171,7 @@ class ServiceConnectionManager {
       EventStreams.kGC,
       EventStreams.kTimeline,
       EventStreams.kExtension,
-      kServiceStreamNew,
-      kServiceStreamOld,
+      serviceStreamName
     ];
 
     // The following streams are not yet supported by Flutter Web.
@@ -187,10 +184,9 @@ class ServiceConnectionManager {
         await service.streamListen(id);
       } catch (e) {
         // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
-        if (id.endsWith('Logging') || id.endsWith('Service')) {
-          // Don't complain about '_Logging', 'Logging', '_Service', or 'Service'
-          // events (newer VMs don't the private names, and older ones don't
-          // support the public ones).
+        if (id.endsWith('Logging')) {
+          // Don't complain about '_Logging' or 'Logging' events (new VMs don't
+          // have the private names, and older ones don't have the public ones).
         } else {
           print("Service client stream not supported: '$id'\n  $e");
         }
