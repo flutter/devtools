@@ -91,8 +91,10 @@ void main() {
       expect(n, equals(2));
       expect(end, isNotNull);
 
-      // 200ms is arbitrary. It was 100ms but flakes on Windows (175ms was seen).
-      const epsilonMs = 200;
+      // 1000ms is arbitrary. We want to ensure it doesn't run in less time than
+      // we requested (checked above), but we don't want to be too strict because
+      // shared CI CPUs can be slow.
+      const epsilonMs = 1000;
       expect((end - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
@@ -108,9 +110,9 @@ void main() {
       );
       expect(n, equals(3));
       expect(end, isNotNull);
-      // 200ms is arbitrary. It is less than 500, which is what matters. This
+      // 400ms is arbitrary. It is less than 500, which is what matters. This
       // can be increased if this test starts to flake.
-      expect(end - start, lessThan(200));
+      expect(end - start, lessThan(400));
     });
 
     test('timeRange', () {
