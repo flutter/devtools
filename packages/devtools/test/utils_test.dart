@@ -263,6 +263,10 @@ void main() {
           'const&, dart::Array const&, unsigned long)';
       expect(getSimpleStackFrameName(name), equals(name));
 
+      name =
+          'SkCanvas::drawTextBlob(SkTextBlob const*, float, float, SkPaint const&)';
+      expect(getSimpleStackFrameName(name), equals(name));
+
       // No leading class names.
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));

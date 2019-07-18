@@ -407,7 +407,11 @@ class Table<T> extends Object with SetStateMixin {
       _rowForIndex[index] = tableRow;
 
       if (!isReusableRow) {
-        tableRow.click(() => selectRow(tableRow.element, index));
+        tableRow.click(() {
+          final rowElement = tableRow.element;
+          final dataForRow = _dataForRow[rowElement];
+          selectRow(rowElement, data.indexOf(dataForRow));
+        });
       }
 
       if (rowHeight != null) {
@@ -580,7 +584,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       } else {
         // Select the node's parent.
         final parentIndex = data.indexOf(_selectedObject.parent);
-        if (parentIndex != null) {
+        if (parentIndex != null && parentIndex != -1) {
           selectByIndex(parentIndex);
         }
       }
