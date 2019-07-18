@@ -388,9 +388,27 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> registerService(String service, String alias) {
-    return _trackFuture(
-        'registerService $service', _vmService.registerService(service, alias));
+  Future<Success> registerService(String service, String alias) async {
+    // Handle registerService method name change based on protocol version.
+    final registerServiceMethodName =
+        await isProtocolVersionLessThan(major: 3, minor: 22)
+            ? '_registerService'
+            : 'registerService';
+
+    final response = await _trackFuture(
+      '$registerServiceMethodName $service',
+      callMethod(registerServiceMethodName,
+          args: {'service': service, 'alias': alias}),
+    );
+
+    return response as Success;
+
+    // TODO(dantup): When we no longer need to support clients on older VMs
+    // that don't support public registerService (added in July 2019, VM service
+    // v3.22) we can replace the above with a direct call to vm_service_lib's
+    // registerService (as long as we're pinned to version >= 3.22.0).
+    // return _trackFuture(
+    //     'registerService $service', _vmService.registerService(service, alias));
   }
 
   @override
@@ -537,6 +555,14 @@ class VmServiceWrapper implements VmService {
     return _protocolVersion.major < major ||
         (_protocolVersion.major == major && _protocolVersion.minor < minor);
   }
+
+  /// Gets the name of the service stream for the connected VM service. Pre-v3.22
+  /// this was a private API and named _Service and in v3.22 (July 2019) it was
+  /// made public ("Service").
+  Future<String> get serviceStreamName async =>
+      (await isProtocolVersionLessThan(major: 3, minor: 22))
+          ? '_Service'
+          : 'Service';
 
   Future<T> _trackFuture<T>(String name, Future<T> future) {
     if (!trackFutures) {
