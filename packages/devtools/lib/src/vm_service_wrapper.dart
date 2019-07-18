@@ -556,6 +556,14 @@ class VmServiceWrapper implements VmService {
         (_protocolVersion.major == major && _protocolVersion.minor < minor);
   }
 
+  /// Gets the name of the service stream for the connected VM service. Pre-v3.22
+  /// this was a private API and named _Service and in v3.22 (July 2019) it was
+  /// made public ("Service").
+  Future<String> get serviceStreamName async =>
+      (await isProtocolVersionLessThan(major: 3, minor: 22))
+          ? '_Service'
+          : 'Service';
+
   Future<T> _trackFuture<T>(String name, Future<T> future) {
     if (!trackFutures) {
       return future;

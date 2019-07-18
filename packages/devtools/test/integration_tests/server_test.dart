@@ -41,22 +41,17 @@ void main() {
   test('registers service', () async {
     // Track services as they're registered.
     final registeredServices = <String>{};
-    // TODO(dantup): Remove this loop and just use
-    // appFixture.serviceConnection.onServiceEvent
-    // directly once the VM Service makes it to stable.
-    for (final serviceId in ['Service', '_Service']) {
-      appFixture.serviceConnection
-          .onEvent(serviceId)
-          .where((e) => e.kind == EventKind.kServiceRegistered)
-          .listen((e) => registeredServices.add(e.service));
-      await appFixture.serviceConnection
-          .streamListen(serviceId)
-          .catchError((e, stack) {
-        // TODO(dantup): Remove this empty catch when removing the loop, as it
-        // will no longer be required. We currently need it because one of the
-        // streams will fail.
-      });
-    }
+
+    // TODO(dantup): When the stable versions of Dart + Flutter are >= v3.22
+    // of the VM Service (July 2019), the _Service option here can be removed.
+    final serviceName = await appFixture.serviceConnection.serviceStreamName;
+
+    appFixture.serviceConnection
+        .onEvent(serviceName)
+        .where((e) => e.kind == EventKind.kServiceRegistered)
+        .listen((e) => registeredServices.add(e.service));
+
+    await appFixture.serviceConnection.streamListen(serviceName);
 
     server.stderr.listen((text) => throw 'STDERR: $text');
 
