@@ -292,7 +292,7 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
   final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
-  if (isFlutter) {
+  if (isFlutter && !isProfile) {
     // Compute the Flutter platform for the user's running application.
     final VmService vmService = serviceManager.service;
     final io = EvalOnDartLibrary(['dart:io'], vmService);
