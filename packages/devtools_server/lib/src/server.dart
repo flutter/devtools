@@ -282,6 +282,8 @@ Future<void> registerLaunchDevToolsService(
   }
 }
 
+// TODO(dantup): This method was adapted from devtools and should be upstreamed
+// in some form into vm_service_lib.
 bool isVersionLessThan(
   Version version, {
   @required int major,
