@@ -70,4 +70,4 @@ final profileGranularityWarning = Message(
 );
 
 const String _profileGranularityDocsUrl =
-    'https://flutter.dev/docs/development/tools/devtools/performance#sample-period';
+    'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';

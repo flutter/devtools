@@ -47,7 +47,7 @@ class PerformanceScreen extends Screen {
 
   @override
   CoreElement createContent(Framework framework) {
-    final CoreElement screenDiv = div()..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     // Initialize screen content.
     _initContent();
@@ -211,7 +211,8 @@ class _CpuProfiler extends CpuProfiler {
 
   @override
   bool maybeShowMessageOnUpdate() {
-    if (_performanceController.cpuProfileData == null) {
+    if (_performanceController.cpuProfileData == null ||
+        _performanceController.cpuProfileData.sampleCount == 0) {
       showMessage(div(text: 'No CPU samples recorded.'));
       return true;
     }

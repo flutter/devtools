@@ -88,7 +88,7 @@ class TimelineScreen extends Screen {
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
 
-    final CoreElement screenDiv = div()..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()

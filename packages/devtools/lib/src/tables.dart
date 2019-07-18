@@ -596,6 +596,12 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       } else if (_selectedObject.isExpandable) {
         // Expand node and preserve selection.
         expandNode(_selectedObject);
+      } else {
+        // The node is not expandable. Select the next node in range.
+        final nextIndex = data.indexOf(_selectedObject) + 1;
+        if (nextIndex != data.length) {
+          selectByIndex(nextIndex);
+        }
       }
     }
   }
