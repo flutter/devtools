@@ -68,5 +68,8 @@ void main() {
 
     // Expect the VM service to see the launchDevTools service registered.
     expect(registeredServices, contains('launchDevTools'));
-  }, timeout: const Timeout.factor(10));
+    // Skipped on Windows due to webdev failing to start immediately after
+    // other tests fail.
+    // https://github.com/flutter/devtools/pull/802#issuecomment-512722437
+  }, timeout: const Timeout.factor(10), skip: Platform.isWindows);
 }
