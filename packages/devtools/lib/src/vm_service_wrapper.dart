@@ -403,8 +403,10 @@ class VmServiceWrapper implements VmService {
 
     return response as Success;
 
-    // TODO(dantup): Revert to this when we no longer need to support clients
-    // on old VMs that don't support public registerService.
+    // TODO(dantup): When we no longer need to support clients on older VMs
+    // that don't support public registerService (added in July 2019, VM service
+    // v3.22) we can replace the above with a direct call to vm_service_lib's
+    // registerService (as long as we're pinned to version >= 3.22.0).
     // return _trackFuture(
     //     'registerService $service', _vmService.registerService(service, alias));
   }
