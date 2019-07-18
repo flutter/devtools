@@ -7,3 +7,5 @@ title: DevTools (preview)
 repository: flutter/devtools
 kramdown:
   parse_block_html: true
+plugins:
+  - jekyll-redirect-from
