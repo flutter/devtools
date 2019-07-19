@@ -118,7 +118,7 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
     @required height,
   }) : super(
           data: data,
-          duration: data.time.duration,
+          duration: data.profileMetaData.time.duration,
           width: width,
           height: height,
           classes: 'cpu-flame-chart',

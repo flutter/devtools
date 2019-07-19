@@ -20,10 +20,16 @@ void main() {
         cpuProfileData.stackTraceEvents,
         equals(goldenCpuProfileTraceEvents),
       );
-      expect(cpuProfileData.sampleCount, equals(8));
-      expect(cpuProfileData.samplePeriod, equals(50));
-      expect(cpuProfileData.time.start.inMicroseconds, equals(47377796685));
-      expect(cpuProfileData.time.end.inMicroseconds, equals(47377799685));
+      expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
+      expect(cpuProfileData.profileMetaData.samplePeriod, equals(50));
+      expect(
+        cpuProfileData.profileMetaData.time.start.inMicroseconds,
+        equals(47377796685),
+      );
+      expect(
+        cpuProfileData.profileMetaData.time.end.inMicroseconds,
+        equals(47377799685),
+      );
     });
 
     test('subProfile', () {
@@ -41,8 +47,11 @@ void main() {
         subProfile.stackTraceEvents,
         equals(subProfileTraceEvents),
       );
-      expect(subProfile.sampleCount, equals(3));
-      expect(subProfile.samplePeriod, equals(cpuProfileData.samplePeriod));
+      expect(subProfile.profileMetaData.sampleCount, equals(3));
+      expect(
+        subProfile.profileMetaData.samplePeriod,
+        equals(cpuProfileData.profileMetaData.samplePeriod),
+      );
     });
 
     test('to json', () {

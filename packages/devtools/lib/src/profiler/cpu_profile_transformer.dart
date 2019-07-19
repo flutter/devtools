@@ -22,8 +22,7 @@ class CpuProfileTransformer {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         url: v[CpuProfileData.resolvedUrlKey],
-        profileTime: cpuProfileData.time,
-        profileSampleCount: cpuProfileData.sampleCount,
+        profileMetaData: cpuProfileData.profileMetaData,
       );
       _processStackFrame(
         stackFrame,
@@ -36,9 +35,9 @@ class CpuProfileTransformer {
     cpuProfileData.processed = true;
 
     assert(
-      cpuProfileData.sampleCount ==
+      cpuProfileData.profileMetaData.sampleCount ==
           cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
-      'SampleCount from response (${cpuProfileData.sampleCount})'
+      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
       ' != sample count from root '
       '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
     );

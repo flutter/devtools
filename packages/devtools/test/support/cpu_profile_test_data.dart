@@ -8,6 +8,7 @@ final Map<String, dynamic> goldenCpuProfileDataJson = {
   'type': '_CpuProfileTimeline',
   'samplePeriod': 50,
   'sampleCount': 8,
+  'stackDepth': 128,
   'timeOriginMicros': 47377796685,
   'timeExtentMicros': 3000,
   'stackFrames': goldenCpuProfileStackFrames,
@@ -324,17 +325,21 @@ final responseWithMissingLeafFrame = {
   ]
 };
 
-final TimeRange profileTime = TimeRange()
-  ..start = const Duration(microseconds: 0)
-  ..end = const Duration(microseconds: 100);
+final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
+  sampleCount: 10,
+  samplePeriod: 50,
+  stackDepth: 128,
+  time: TimeRange()
+    ..start = const Duration(microseconds: 0)
+    ..end = const Duration(microseconds: 100),
+);
 
 final CpuStackFrame stackFrameA = CpuStackFrame(
   id: 'id_0',
   name: 'A',
   category: 'Dart',
   url: '',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameB = CpuStackFrame(
@@ -342,8 +347,7 @@ final CpuStackFrame stackFrameB = CpuStackFrame(
   name: 'B',
   category: 'Dart',
   url: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameC = CpuStackFrame(
@@ -351,16 +355,14 @@ final CpuStackFrame stackFrameC = CpuStackFrame(
   name: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
 final CpuStackFrame stackFrameD = CpuStackFrame(
   id: 'id_3',
   name: 'D',
   category: 'Dart',
   url: 'url',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
 
 final CpuStackFrame stackFrameE = CpuStackFrame(
@@ -368,16 +370,14 @@ final CpuStackFrame stackFrameE = CpuStackFrame(
   name: 'E',
   category: 'Dart',
   url: 'url',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 final CpuStackFrame stackFrameF = CpuStackFrame(
   id: 'id_5',
   name: 'F',
   category: 'Dart',
   url: 'url',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameF2 = CpuStackFrame(
@@ -385,8 +385,7 @@ final CpuStackFrame stackFrameF2 = CpuStackFrame(
   name: 'F',
   category: 'Dart',
   url: 'url',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 3;
 
 final CpuStackFrame stackFrameC2 = CpuStackFrame(
@@ -394,8 +393,7 @@ final CpuStackFrame stackFrameC2 = CpuStackFrame(
   name: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameC3 = CpuStackFrame(
@@ -403,8 +401,7 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   name: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameG = CpuStackFrame(
@@ -412,8 +409,7 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   name: 'G',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  profileTime: profileTime,
-  profileSampleCount: 10,
+  profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame testStackFrame = stackFrameA
