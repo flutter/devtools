@@ -411,6 +411,7 @@ class Table<T> extends Object with SetStateMixin {
           final rowElement = tableRow.element;
           final dataForRow = _dataForRow[rowElement];
           selectRow(rowElement, data.indexOf(dataForRow));
+          // TODO(kenzie): we should do less work on selection.
           _scheduleRebuild();
         });
       }
