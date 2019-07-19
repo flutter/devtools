@@ -15,17 +15,14 @@ class CpuProfileData {
   CpuProfileData._({
     @required this.stackFramesJson,
     @required this.stackTraceEvents,
-    @required this.sampleCount,
-    @required this.samplePeriod,
-    @required this.time,
+    @required this.profileMetaData,
   }) {
     _cpuProfileRoot = CpuStackFrame(
       id: 'cpuProfile',
       name: 'all',
       category: 'Dart',
       url: '',
-      profileTime: time,
-      profileSampleCount: sampleCount,
+      profileMetaData: profileMetaData,
     );
   }
 
@@ -34,14 +31,17 @@ class CpuProfileData {
       stackFramesJson: jsonDecode(jsonEncode(json[stackFramesKey] ?? {})),
       stackTraceEvents:
           (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>(),
-      sampleCount: json[sampleCountKey],
-      samplePeriod: json[samplePeriodKey],
-      time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
-          ? (TimeRange()
-            ..start = Duration(microseconds: json[timeOriginKey])
-            ..end = Duration(
-                microseconds: json[timeOriginKey] + json[timeExtentKey]))
-          : null,
+      profileMetaData: CpuProfileMetaData(
+        sampleCount: json[sampleCountKey],
+        samplePeriod: json[samplePeriodKey],
+        stackDepth: json[stackDepthKey],
+        time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
+            ? (TimeRange()
+              ..start = Duration(microseconds: json[timeOriginKey])
+              ..end = Duration(
+                  microseconds: json[timeOriginKey] + json[timeExtentKey]))
+            : null,
+      ),
     );
   }
 
@@ -78,9 +78,12 @@ class CpuProfileData {
     return CpuProfileData._(
       stackFramesJson: subStackFramesJson,
       stackTraceEvents: subTraceEvents,
-      sampleCount: subTraceEvents.length,
-      samplePeriod: superProfile.samplePeriod,
-      time: subTimeRange,
+      profileMetaData: CpuProfileMetaData(
+        sampleCount: subTraceEvents.length,
+        samplePeriod: superProfile.profileMetaData.samplePeriod,
+        stackDepth: superProfile.profileMetaData.stackDepth,
+        time: subTimeRange,
+      ),
     );
   }
 
@@ -93,6 +96,7 @@ class CpuProfileData {
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
   static const sampleCountKey = 'sampleCount';
+  static const stackDepthKey = 'stackDepth';
   static const samplePeriodKey = 'samplePeriod';
   static const timeOriginKey = 'timeOriginMicros';
   static const timeExtentKey = 'timeExtentMicros';
@@ -109,11 +113,7 @@ class CpuProfileData {
   /// stack frame.
   final List<Map<String, dynamic>> stackTraceEvents;
 
-  final int sampleCount;
-
-  final int samplePeriod;
-
-  final TimeRange time;
+  final CpuProfileMetaData profileMetaData;
 
   CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
 
@@ -123,13 +123,31 @@ class CpuProfileData {
 
   Map<String, dynamic> get json => {
         'type': '_CpuProfileTimeline',
-        samplePeriodKey: samplePeriod,
-        sampleCountKey: sampleCount,
-        timeOriginKey: time.start.inMicroseconds,
-        timeExtentKey: time.duration.inMicroseconds,
+        samplePeriodKey: profileMetaData.samplePeriod,
+        sampleCountKey: profileMetaData.sampleCount,
+        stackDepthKey: profileMetaData.stackDepth,
+        timeOriginKey: profileMetaData.time.start.inMicroseconds,
+        timeExtentKey: profileMetaData.time.duration.inMicroseconds,
         stackFramesKey: stackFramesJson,
         traceEventsKey: stackTraceEvents,
       };
+}
+
+class CpuProfileMetaData {
+  CpuProfileMetaData({
+    @required this.sampleCount,
+    @required this.samplePeriod,
+    @required this.stackDepth,
+    @required this.time,
+  });
+
+  final int sampleCount;
+
+  final int samplePeriod;
+
+  final int stackDepth;
+
+  final TimeRange time;
 }
 
 class CpuStackFrame extends TreeNode<CpuStackFrame> {
@@ -138,8 +156,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
     @required this.name,
     @required this.category,
     @required this.url,
-    @required this.profileTime,
-    @required this.profileSampleCount,
+    @required this.profileMetaData,
   });
 
   final String id;
@@ -150,11 +167,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
 
   final String url;
 
-  /// Time data for the stack frame's enclosing CPU profile.
-  final TimeRange profileTime;
-
-  /// Total sample count for the the stack frame's enclosing CPU profile.
-  final int profileSampleCount;
+  final CpuProfileMetaData profileMetaData;
 
   /// How many cpu samples for which this frame is a leaf.
   int exclusiveSampleCount = 0;
@@ -167,24 +180,26 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
   set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
 
   double get totalTimeRatio =>
-      _totalTimeRatio ??= inclusiveSampleCount / profileSampleCount;
+      _totalTimeRatio ??= inclusiveSampleCount / profileMetaData.sampleCount;
 
   double _totalTimeRatio;
 
   Duration get totalTime => _totalTime ??= Duration(
       microseconds:
-          (totalTimeRatio * profileTime.duration.inMicroseconds).round());
+          (totalTimeRatio * profileMetaData.time.duration.inMicroseconds)
+              .round());
 
   Duration _totalTime;
 
   double get selfTimeRatio =>
-      _selfTimeRatio ??= exclusiveSampleCount / profileSampleCount;
+      _selfTimeRatio ??= exclusiveSampleCount / profileMetaData.sampleCount;
 
   double _selfTimeRatio;
 
   Duration get selfTime => _selfTime ??= Duration(
       microseconds:
-          (selfTimeRatio * profileTime.duration.inMicroseconds).round());
+          (selfTimeRatio * profileMetaData.time.duration.inMicroseconds)
+              .round());
 
   Duration _selfTime;
 
@@ -206,8 +221,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
       name: name,
       category: category,
       url: url,
-      profileTime: profileTime,
-      profileSampleCount: profileSampleCount,
+      profileMetaData: profileMetaData,
     )
       ..exclusiveSampleCount = exclusiveSampleCount
       ..inclusiveSampleCount =

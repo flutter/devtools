@@ -212,7 +212,8 @@ class _CpuProfiler extends CpuProfiler {
   @override
   bool maybeShowMessageOnUpdate() {
     if (_performanceController.cpuProfileData == null ||
-        _performanceController.cpuProfileData.sampleCount == 0) {
+        _performanceController.cpuProfileData.profileMetaData.sampleCount ==
+            0) {
       showMessage(div(text: 'No CPU samples recorded.'));
       return true;
     }
