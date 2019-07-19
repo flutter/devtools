@@ -102,7 +102,17 @@ class SelfTimeColumn extends Column<CpuStackFrame> {
   bool get numeric => true;
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) => dataObject.selfTimeRatio;
+  int compare(CpuStackFrame a, CpuStackFrame b) {
+    final int result = super.compare(a, b);
+    if (result == 0) {
+      return a.name.compareTo(b.name);
+    }
+    return result;
+  }
+
+  @override
+  dynamic getValue(CpuStackFrame dataObject) =>
+      dataObject.selfTime.inMicroseconds;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
@@ -118,7 +128,17 @@ class TotalTimeColumn extends Column<CpuStackFrame> {
   bool get numeric => true;
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) => dataObject.totalTimeRatio;
+  int compare(CpuStackFrame a, CpuStackFrame b) {
+    final int result = super.compare(a, b);
+    if (result == 0) {
+      return a.name.compareTo(b.name);
+    }
+    return result;
+  }
+
+  @override
+  dynamic getValue(CpuStackFrame dataObject) =>
+      dataObject.totalTime.inMicroseconds;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {

@@ -159,16 +159,16 @@ bool isLetter(int codeUnit) =>
 ///
 /// See (https://github.com/dart-lang/sdk/issues/36999).
 String getSimpleStackFrameName(String name) {
-  final simpleName =
-      name.split('&').last.replaceAll('<anonymous closure>', '<closure>');
+  final newName = name.replaceAll('<anonymous closure>', '<closure>');
+
   // If the class name contains a space, then it is not a valid Dart name. We
   // throw out simplified names with spaces to prevent simplifying C++ class
   // signatures, where the '&' char signifies a reference variable - not
   // appended class names.
-  if (simpleName.contains(' ')) {
-    return name;
+  if (newName.contains(' ')) {
+    return newName;
   }
-  return simpleName;
+  return newName.split('&').last;
 }
 
 class Property<T> {

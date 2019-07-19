@@ -258,9 +258,7 @@ class Table<T> extends Object with SetStateMixin {
   }
 
   int _compareData(T a, T b, Column column, int direction) {
-    final Comparable valueA = column.render(column.getValue(a));
-    final Comparable valueB = column.render(column.getValue(b));
-    return valueA.compareTo(valueB) * direction;
+    return column.compare(a, b) * direction;
   }
 
   void _rebuildTable() {
@@ -409,7 +407,11 @@ class Table<T> extends Object with SetStateMixin {
       _rowForIndex[index] = tableRow;
 
       if (!isReusableRow) {
-        tableRow.click(() => selectRow(tableRow.element, index));
+        tableRow.click(() {
+          final rowElement = tableRow.element;
+          final dataForRow = _dataForRow[rowElement];
+          selectRow(rowElement, data.indexOf(dataForRow));
+        });
       }
 
       if (rowHeight != null) {
@@ -504,8 +506,11 @@ class Table<T> extends Object with SetStateMixin {
   /// scrollBehaviour is a string as defined for the HTML scrollTo() method
   /// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo (eg.
   /// `smooth`, `instance`, `auto`).
-  void selectByIndex(int newIndex,
-      {bool keepVisible = true, String scrollBehavior = 'smooth'}) {
+  void selectByIndex(
+    int newIndex, {
+    bool keepVisible = true,
+    String scrollBehavior = 'smooth',
+  }) {
     final CoreElement row = _rowForIndex[newIndex];
     final T dataObject = data[newIndex];
     _select(row?.element, dataObject, newIndex);
@@ -579,7 +584,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       } else {
         // Select the node's parent.
         final parentIndex = data.indexOf(_selectedObject.parent);
-        if (parentIndex != null) {
+        if (parentIndex != null && parentIndex != -1) {
           selectByIndex(parentIndex);
         }
       }
@@ -596,6 +601,12 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       } else if (_selectedObject.isExpandable) {
         // Expand node and preserve selection.
         expandNode(_selectedObject);
+      } else {
+        // The node is not expandable. Select the next node in range.
+        final nextIndex = data.indexOf(_selectedObject) + 1;
+        if (nextIndex != data.length) {
+          selectByIndex(nextIndex);
+        }
       }
     }
   }
@@ -630,6 +641,8 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
     assert(data.contains(dataObject));
     dataObject.children.forEach(cascadingRemove);
     dataObject.isExpanded = false;
+
+    _selectedObject ??= dataObject;
     setRows(data);
   }
 
@@ -648,6 +661,8 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
     }
 
     expand(dataObject);
+
+    _selectedObject ??= dataObject;
     setRows(data);
   }
 }
@@ -699,6 +714,12 @@ abstract class Column<T> {
   bool get numeric => false;
 
   bool get supportsSorting => numeric;
+
+  int compare(T a, T b) {
+    final Comparable valueA = getValue(a);
+    final Comparable valueB = getValue(b);
+    return valueA.compareTo(valueB);
+  }
 
   /// Get the cell's value from the given [dataObject].
   dynamic getValue(T dataObject);
