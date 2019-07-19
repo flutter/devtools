@@ -111,7 +111,7 @@ class Catalog {
   }
 
   static Future<Catalog> _loadHelper() async {
-    // Local copy of: https\://github.com/flutter/website/tree/master/_data/catalog/widget.json
+    // Local copy of: https://github.com/flutter/website/blob/master/src/_data/catalog/widgets.json
     final Response response = await get('widgets.json');
     _instance = decode(response.body);
     return _instance;
