@@ -324,9 +324,7 @@ class WebdevFixture {
     bool verbose = false,
   }) async {
     final List<String> cliArgs = ['build'];
-    if (release) {
-      cliArgs.add('--release');
-    }
+    cliArgs.add(release ? '--release' : '--no-release');
 
     final process = await _runWebdev(cliArgs, verbose: verbose);
 
