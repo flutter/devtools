@@ -21,7 +21,7 @@ class CpuProfileTransformer {
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
-        url: v[CpuProfileData.resolvedUrlKey],
+        url: v[CpuProfileData.resolvedUrlKey] ?? '',
         profileMetaData: cpuProfileData.profileMetaData,
       );
       _processStackFrame(
