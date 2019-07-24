@@ -10,6 +10,9 @@ class DragScroll {
   /// Whether the element was dragged on the previous click.
   bool wasDragged = false;
 
+  /// Whether the element was dragged on the previous touch.
+  bool wasDraggedByTouch = false;
+
   // This callback can optionally be set to perform additional actions on a
   // vertical scroll. For example, the CPU flame chart sets this callback to
   // force a canvas rebuild on vertical scroll.
@@ -19,7 +22,11 @@ class DragScroll {
 
   void enableDragScrolling(CoreElement element) {
     final dragged = element.element;
+    _handleMouseDrags(dragged);
+    _handleTouchDrags(dragged);
+  }
 
+  void _handleMouseDrags(Element dragged) {
     num lastX;
     num lastY;
     bool clicked = false;
@@ -57,6 +64,59 @@ class DragScroll {
         lastY = newY;
 
         wasDragged = true;
+      }
+    });
+  }
+
+  void _handleTouchDrags(Element dragged) {
+    num lastX;
+    num lastY;
+    bool touched = false;
+
+    dragged.onTouchStart.listen((event) {
+      final TouchEvent t = event;
+      // If there are multiple touches, always use the first.
+      final Touch touch = t.touches.first;
+
+      touched = true;
+      wasDraggedByTouch = false;
+
+      lastX = touch.client.x;
+      lastY = touch.client.y;
+
+      t.preventDefault();
+    });
+
+    window.onTouchEnd.listen((event) {
+      final TouchEvent t = event;
+      if (t.touches.isEmpty) {
+        touched = false;
+      }
+    });
+
+    window.onTouchMove.listen((event) {
+      final TouchEvent t = event;
+      // If there are multiple touches, always use the first.
+      final Touch touch = t.touches.first;
+
+      if (touched) {
+        final num newX = touch.client.x;
+        final num newY = touch.client.y;
+
+        final num deltaX = lastX - newX;
+        final num deltaY = lastY - newY;
+
+        dragged.scrollLeft += deltaX.round();
+        dragged.scrollTop += deltaY.round();
+
+        if (_onVerticalScroll != null && deltaY.round() != 0) {
+          _onVerticalScroll();
+        }
+
+        lastX = newX;
+        lastY = newY;
+
+        wasDraggedByTouch = true;
       }
     });
   }
