@@ -893,7 +893,6 @@ class MemoryScreen extends Screen with SetStateMixin {
     if (refs == null) {
       framework.toast(
         'Instance ${hover.data.objectRef} - Sentinel/Expired.',
-        title: 'Warning',
       );
       return;
     }
