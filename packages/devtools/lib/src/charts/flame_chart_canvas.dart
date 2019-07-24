@@ -240,7 +240,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 
   void _onTap(Offset offset) {
     // Prevent clicks when the chart was being dragged.
-    if (!_dragScroll.wasDragged && !_dragScroll.wasDraggedByTouch) {
+    if (!_dragScroll.wasDragged) {
       selectNodeAtOffset(offset);
       _viewportCanvas.rebuild(force: true);
     }
