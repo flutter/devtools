@@ -35,13 +35,11 @@ class DragScroll {
   void _handleMouseDrags(Element dragged) {
     num lastX;
     num lastY;
-    bool clicked = false;
 
     dragged.onMouseDown.listen((event) {
       final MouseEvent m = event;
-      clicked = true;
-      wasDragged = false;
 
+      wasDragged = false;
       lastX = m.client.x;
       lastY = m.client.y;
 
@@ -49,29 +47,26 @@ class DragScroll {
 
       _mouseMoveListener = window.onMouseMove.listen((event) {
         final MouseEvent m = event;
-        if (clicked) {
-          final num newX = m.client.x;
-          final num newY = m.client.y;
+        final num newX = m.client.x;
+        final num newY = m.client.y;
 
-          final num deltaX = lastX - newX;
-          final num deltaY = lastY - newY;
+        final num deltaX = lastX - newX;
+        final num deltaY = lastY - newY;
 
-          dragged.scrollLeft += deltaX.round();
-          dragged.scrollTop += deltaY.round();
+        dragged.scrollLeft += deltaX.round();
+        dragged.scrollTop += deltaY.round();
 
-          if (_onVerticalScroll != null && deltaY.round() != 0) {
-            _onVerticalScroll();
-          }
-
-          lastX = newX;
-          lastY = newY;
-
-          wasDragged = true;
+        if (_onVerticalScroll != null && deltaY.round() != 0) {
+          _onVerticalScroll();
         }
+
+        lastX = newX;
+        lastY = newY;
+
+        wasDragged = true;
       });
 
       _mouseUpListener = window.onMouseUp.listen((event) {
-        clicked = false;
         _mouseUpListener.cancel();
         _mouseMoveListener.cancel();
       });
@@ -81,16 +76,13 @@ class DragScroll {
   void _handleTouchDrags(Element dragged) {
     num lastX;
     num lastY;
-    bool touched = false;
 
     dragged.onTouchStart.listen((event) {
       final TouchEvent t = event;
       // If there are multiple touches, always use the first.
       final Touch touch = t.touches.first;
 
-      touched = true;
       wasDragged = false;
-
       lastX = touch.client.x;
       lastY = touch.client.y;
 
@@ -101,31 +93,28 @@ class DragScroll {
         // If there are multiple touches, always use the first.
         final Touch touch = t.touches.first;
 
-        if (touched) {
-          final num newX = touch.client.x;
-          final num newY = touch.client.y;
+        final num newX = touch.client.x;
+        final num newY = touch.client.y;
 
-          final num deltaX = lastX - newX;
-          final num deltaY = lastY - newY;
+        final num deltaX = lastX - newX;
+        final num deltaY = lastY - newY;
 
-          dragged.scrollLeft += deltaX.round();
-          dragged.scrollTop += deltaY.round();
+        dragged.scrollLeft += deltaX.round();
+        dragged.scrollTop += deltaY.round();
 
-          if (_onVerticalScroll != null && deltaY.round() != 0) {
-            _onVerticalScroll();
-          }
-
-          lastX = newX;
-          lastY = newY;
-
-          wasDragged = true;
+        if (_onVerticalScroll != null && deltaY.round() != 0) {
+          _onVerticalScroll();
         }
+
+        lastX = newX;
+        lastY = newY;
+
+        wasDragged = true;
       });
 
       _touchEndListener = window.onTouchEnd.listen((event) {
         final TouchEvent t = event;
         if (t.touches.isEmpty) {
-          touched = false;
           _touchEndListener.cancel();
           _touchMoveListener.cancel();
         }
