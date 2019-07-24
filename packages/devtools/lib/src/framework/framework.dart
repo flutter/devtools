@@ -32,7 +32,8 @@ class Framework {
 
     globalStatus = StatusLine(CoreElement.from(queryId('global-status')));
     pageStatus = StatusLine(CoreElement.from(queryId('page-status')));
-    auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')));
+    auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')))
+      ..defaultStatus = defaultAuxiliaryStatus;
 
     globalActions =
         ActionsContainer(CoreElement.from(queryId('global-actions')));
@@ -71,6 +72,12 @@ class Framework {
   SnapshotMessage snapshotMessage;
 
   AnalyticsOptInDialog analyticsDialog;
+
+  final StatusItem defaultAuxiliaryStatus = createLinkStatusItem(
+    span()..add(span(text: 'DevTools Docs', c: 'optional-700')),
+    href: 'https://flutter.dev/docs/development/tools/devtools/overview',
+    title: 'Documentation on using Dart DevTools',
+  );
 
   void _initDragDrop() {
     window.addEventListener('dragover', (e) => _onDragOver(e), false);
@@ -184,6 +191,7 @@ class Framework {
       showSnapshotMessage();
       mainElement.clear();
       screens.removeWhere((screen) => screen.id == timelineScreenId);
+      auxiliaryStatus.defaultStatus = defaultAuxiliaryStatus;
     } else {
       navigateTo((_previous ?? current).id);
     }
