@@ -99,8 +99,8 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> clearCpuProfile(String isolateId) {
-    return _trackFuture(
-        'clearCpuProfile', _vmService.clearCpuProfile(isolateId));
+    return _trackFuture('clearCpuProfile',
+        callMethod('_clearCpuProfile', isolateId: isolateId));
   }
 
   @override
@@ -113,10 +113,10 @@ class VmServiceWrapper implements VmService {
     return _trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
   }
 
+  @deprecated
   @override
   Future<Success> collectAllGarbage(String isolateId) {
-    return _trackFuture(
-        'collectAllGarbage', _vmService.collectAllGarbage(isolateId));
+    throw UnsupportedError('Private service RPC');
   }
 
   @override
@@ -186,10 +186,10 @@ class VmServiceWrapper implements VmService {
     );
   }
 
+  @deprecated
   @override
   Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
-    return _trackFuture(
-        'getCpuProfile', _vmService.getCpuProfile(isolateId, tags));
+    throw UnsupportedError('Private service RPC');
   }
 
   // TODO(kenzie): keep track of all private methods we are currently using to
@@ -441,14 +441,14 @@ class VmServiceWrapper implements VmService {
         _vmService.removeBreakpoint(isolateId, breakpointId));
   }
 
+  @deprecated
   @override
   Future<Success> requestHeapSnapshot(
     String isolateId,
     String roots,
     bool collectGarbage,
   ) {
-    return _trackFuture('requestHeapSnapshot',
-        _vmService.requestHeapSnapshot(isolateId, roots, collectGarbage));
+    throw UnsupportedError('Private service RPC');
   }
 
   @override
