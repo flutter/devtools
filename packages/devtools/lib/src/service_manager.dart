@@ -607,6 +607,7 @@ class ServiceExtensionManager {
   void resetAvailableExtensions() {
     extensionStatesUpdated = Completer();
     _firstFrameEventReceived = false;
+    _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
     _serviceExtensionController
         .forEach((String name, StreamController<bool> stream) {
