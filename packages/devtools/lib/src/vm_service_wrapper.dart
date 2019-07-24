@@ -98,9 +98,10 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> clearCpuProfile(String isolateId) {
-    return _trackFuture('clearCpuProfile',
+  Future<Success> clearCpuProfile(String isolateId) async {
+    final response = await _trackFuture('clearCpuProfile',
         callMethod('_clearCpuProfile', isolateId: isolateId));
+    return response as Success;
   }
 
   @override
