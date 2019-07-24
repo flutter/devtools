@@ -23,6 +23,31 @@ void main() {
       expect(treeNode5.level, equals(3));
     });
 
+    test('expand and collapse', () {
+      expect(testTreeNode.isExpanded, isFalse);
+      testTreeNode.expand();
+      expect(testTreeNode.isExpanded, isTrue);
+      testTreeNode.collapse();
+      expect(testTreeNode.isExpanded, isFalse);
+
+      breadthFirstTraversal<TestTreeNode>(testTreeNode,
+          action: (TreeNode node) {
+        expect(node.isExpanded, isFalse);
+      });
+
+      testTreeNode.expandCascading();
+      breadthFirstTraversal<TestTreeNode>(testTreeNode,
+          action: (TreeNode node) {
+        expect(node.isExpanded, isTrue);
+      });
+
+      testTreeNode.collapseCascading();
+      breadthFirstTraversal<TestTreeNode>(testTreeNode,
+          action: (TreeNode node) {
+        expect(node.isExpanded, isFalse);
+      });
+    });
+
     test('addChild', () {
       final parent = TestTreeNode();
       final child = TestTreeNode();

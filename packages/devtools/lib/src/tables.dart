@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:devtools/src/ui/primer.dart';
 import 'package:meta/meta.dart';
 
 import 'framework/framework.dart';
@@ -642,7 +643,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
 
     assert(data.contains(dataObject));
     dataObject.children.forEach(cascadingRemove);
-    dataObject.isExpanded = false;
+    dataObject.collapse();
 
     _selectedObject ??= dataObject;
     setRows(data);
@@ -659,13 +660,51 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
         }
         insertIndex++;
       }
-      node.isExpanded = true;
+      node.expand();
     }
 
     expand(dataObject);
 
     _selectedObject ??= dataObject;
     setRows(data);
+  }
+
+  void expandAll() {
+    // Make a copy so that we are not concurrently modifying the tree data.
+    final List<T> dataCopy = data;
+
+    // Store visited nodes so that we do not expand the same root multiple
+    // times.
+    // ignore: prefer_collection_literals
+    final Set<T> visited = Set<T>();
+    for (T dataObject in dataCopy) {
+      final root = dataObject.root;
+      if (!visited.contains(root)) {
+        root.expandCascading();
+        visited.add(root);
+      }
+    }
+
+    setRows(dataCopy);
+  }
+
+  void collapseAll() {
+    // Make a copy so that we are not concurrently modifying the tree data.
+    final List<T> dataCopy = data;
+
+    // Store visited nodes so that we do not expand the same root multiple
+    // times.
+    // ignore: prefer_collection_literals
+    final Set<T> visited = Set<T>();
+    for (T dataObject in dataCopy) {
+      final root = dataObject.root;
+      if (!visited.contains(root)) {
+        root.collapseCascading();
+        visited.add(root);
+      }
+    }
+
+    setRows(dataCopy);
   }
 }
 
@@ -831,6 +870,31 @@ abstract class TreeColumn<T extends TreeNode<T>> extends Column<T> {
       ..clear()
       ..add(container)
       ..tooltip = getTooltip(dataObject);
+  }
+}
+
+class TreeTableToolbar<T extends TreeNode<T>> extends CoreElement {
+  TreeTableToolbar() : super('div') {
+    add(div(c: 'btn-group')
+      ..add([
+        PButton('Expand all')
+          ..small()
+          ..click(_expandAll),
+        PButton('Collapse all')
+          ..small()
+          ..click(_collapseAll),
+      ]));
+  }
+
+  TreeTable<T> _treeTable;
+  set treeTable(TreeTable table) => _treeTable = table;
+
+  void _expandAll() {
+    _treeTable.expandAll();
+  }
+
+  void _collapseAll() {
+    _treeTable.collapseAll();
   }
 }
 
