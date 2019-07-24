@@ -4,6 +4,7 @@
 
 import '../globals.dart';
 import '../service_extensions.dart';
+import '../service_manager.dart' show ServiceExtensionState;
 import '../service_registrations.dart';
 import '../utils.dart';
 import 'analytics.dart' as ga;
@@ -28,7 +29,7 @@ List<CoreElement> getServiceExtensionElements() {
         ServiceExtensionButton(debugAllowBanner).button,
       ]),
     div(c: 'btn-group nowrap margin-left')
-      ..add(ServiceExtensionSelector(togglePlatformMode).selector)
+      ..add(TogglePlatformSelector().selector)
   ];
 }
 
@@ -141,8 +142,6 @@ class ServiceExtensionSelector {
       ..tooltip = extensionDescription.tooltips.first ??
           extensionDescription.description;
 
-    extensionDescription.displayValues.forEach(selector.option);
-
     final extensionName = extensionDescription.extension;
 
     // Disable selector for unavailable service extensions.
@@ -151,7 +150,8 @@ class ServiceExtensionSelector {
     serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName, (available) => selector.disabled = !available);
 
-    _updateState();
+    addOptions();
+    updateState();
   }
 
   final ServiceExtensionDescription extensionDescription;
@@ -177,15 +177,49 @@ class ServiceExtensionSelector {
     _selectedValue = selector.value;
   }
 
-  void _updateState() {
+  void addOptions() {
+    extensionDescription.displayValues.forEach(selector.option);
+  }
+
+  void updateState() {
     // Select option whose state is already enabled.
     serviceManager.serviceExtensionManager
         .getServiceExtensionState(extensionDescription.extension, (state) {
-      if (state.value != null) {
-        final selectedIndex = extensionDescription.values.indexOf(state.value);
-        selector.selectedIndex = selectedIndex;
-        _selectedValue = extensionDescription.displayValues[selectedIndex];
+      updateSelection(state);
+    });
+  }
+
+  void updateSelection(ServiceExtensionState state) {
+    if (state.value != null) {
+      final selectedIndex = extensionDescription.values.indexOf(state.value);
+      selector.selectedIndex = selectedIndex;
+      _selectedValue = extensionDescription.displayValues[selectedIndex];
+    }
+  }
+}
+
+class TogglePlatformSelector extends ServiceExtensionSelector {
+  TogglePlatformSelector() : super(togglePlatformMode);
+
+  static const fuchsia = 'Fuchsia';
+
+  @override
+  void addOptions() {
+    extensionDescription.displayValues
+        .where((displayValue) => !displayValue.contains(fuchsia))
+        .forEach(selector.option);
+  }
+
+  @override
+  void updateState() {
+    // Select option whose state is already enabled.
+    serviceManager.serviceExtensionManager
+        .getServiceExtensionState(extensionDescription.extension, (state) {
+      if (state.value == fuchsia.toLowerCase()) {
+        selector.option(extensionDescription.displayValues
+            .firstWhere((displayValue) => displayValue.contains(fuchsia)));
       }
+      updateSelection(state);
     });
   }
 }
