@@ -1,4 +1,8 @@
-## 0.1.4 - TBD
+## 0.1.5 - TBD
+* Support touchscreen scrolling and selection in flame charts.
+* Link to Dart DevTools documentation from connect screen.
+
+## 0.1.4 - 2019-07-19
 * Add Performance page. This has a traditional CPU profiler for Dart applications.
 * Add ability to specify the profile granularity for the CPU profiler.
 * Bug fixes for DevTools tables, memory page, and cpu profiler.

@@ -277,6 +277,15 @@ class CoreElement {
 
   Stream<MouseEvent> get onClick => element.onClick.where((_) => !disabled);
 
+  Stream<TouchEvent> get onTouchStart =>
+      element.onTouchStart.where((_) => !disabled);
+
+  Stream<TouchEvent> get onTouchMove =>
+      element.onTouchMove.where((_) => !disabled);
+
+  Stream<TouchEvent> get onTouchEnd =>
+      element.onTouchEnd.where((_) => !disabled);
+
   Stream<Event> get onFocus => element.onFocus.where((_) => !disabled);
 
   Stream<Event> get onBlur => element.onBlur.where((_) => !disabled);

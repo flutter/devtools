@@ -184,11 +184,31 @@ class ViewportCanvas extends Object with SetStateMixin {
       // async so we risk flickering UI if we don't render with a buffer.
       rebuild(force: false);
     });
+
     if (_onTap != null) {
       _content.onClick.listen((e) {
         _onTap(_clientToGlobal(e.client));
       });
+
+      // We do not have a simple `onTouch` method to use, so we use
+      // `onTouchStart`, `onTouchMove`, and `onTouchEnd` to accomplish the same
+      // end as well as disambiguate between touch-drags and touches.
+      _content.onTouchStart.listen((e) {
+        // If there are multiple touches, always use the first.
+        _activeTouch = e.touches.first;
+      });
+      _content.onTouchMove.listen((_) {
+        _wasDraggedByTouch = true;
+      });
+      _content.onTouchEnd.listen((_) {
+        if (!_wasDraggedByTouch && _activeTouch != null) {
+          _onTap(_clientToGlobal(_activeTouch.client));
+        }
+        _wasDraggedByTouch = false;
+        _activeTouch = null;
+      });
     }
+
     _content.element.onMouseLeave.listen((_) {
       _currentMouseHover = null;
       if (_onMouseLeave != null) {
@@ -202,6 +222,10 @@ class ViewportCanvas extends Object with SetStateMixin {
   }
 
   Point _currentMouseHover;
+
+  Touch _activeTouch;
+
+  bool _wasDraggedByTouch = false;
 
   /// Id used to help debug what was rendered as part of the current frame.
   int _frameId = 0;
