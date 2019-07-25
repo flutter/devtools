@@ -131,6 +131,11 @@ class PopupListView<T> implements CoreElementView {
     items.setRenderer((T item) {
       // Renderer for the list show matching characters.
       final String name = item.toString();
+
+      // Name to match on. Convert to lowercase so that matching is not case
+      // sensitive.
+      final matchingName = name.toLowerCase();
+
       CoreElement element;
       if (_popupAutoCompleteView.matcher != null &&
           _popupAutoCompleteView.matcher.active) {
@@ -142,10 +147,11 @@ class PopupListView<T> implements CoreElementView {
         // empty because they are void elements.
         final html.InputElement inputElement = _popupAutoCompleteView
             .matcher.textField.element as html.InputElement;
-        final String matchPart = inputElement.value;
+        // Convert to lowercase so that matching is not case sensitive.
+        final String matchPart = inputElement.value.toLowerCase();
 
         // Compute the matched characters to be bolded.
-        final int startIndex = name.lastIndexOf(matchPart);
+        final int startIndex = matchingName.lastIndexOf(matchPart);
         final String firstPart = name.substring(0, startIndex);
         final int endBoldIndex = startIndex + matchPart.length;
         final String boldPart = name.substring(startIndex, endBoldIndex);
@@ -616,7 +622,14 @@ class AutoCompleteMatcher<T> {
     lastMatchingItems ??= matchingState[''];
 
     final List<T> matchingItems = lastMatchingItems
-        .where((T item) => item.toString().lastIndexOf('$charsToMatch') >= 0)
+        .where((T item) =>
+            item
+                .toString()
+                // Convert strings to lowercase so that matching is not case
+                // sensitive.
+                .toLowerCase()
+                .lastIndexOf('${charsToMatch.toLowerCase()}') >=
+            0)
         .toList();
 
     matchingState.putIfAbsent(charsToMatch, () => matchingItems);
