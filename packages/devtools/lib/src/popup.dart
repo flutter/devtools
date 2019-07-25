@@ -132,8 +132,7 @@ class PopupListView<T> implements CoreElementView {
       // Renderer for the list show matching characters.
       final String name = item.toString();
 
-      // Name to match on. Convert to lowercase so that matching is not case
-      // sensitive.
+      // Case insensitive matching.
       final matchingName = name.toLowerCase();
 
       CoreElement element;
@@ -147,7 +146,7 @@ class PopupListView<T> implements CoreElementView {
         // empty because they are void elements.
         final html.InputElement inputElement = _popupAutoCompleteView
             .matcher.textField.element as html.InputElement;
-        // Convert to lowercase so that matching is not case sensitive.
+        // Case insensitive matching.
         final String matchPart = inputElement.value.toLowerCase();
 
         // Compute the matched characters to be bolded.
@@ -625,8 +624,7 @@ class AutoCompleteMatcher<T> {
         .where((T item) =>
             item
                 .toString()
-                // Convert strings to lowercase so that matching is not case
-                // sensitive.
+                // Case insensitive matching.
                 .toLowerCase()
                 .lastIndexOf('${charsToMatch.toLowerCase()}') >=
             0)

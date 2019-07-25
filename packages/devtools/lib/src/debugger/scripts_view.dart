@@ -125,8 +125,7 @@ class ScriptsView implements CoreElementView {
       final String uri = scriptRef.uri;
       final String name = uriDescriber(uri);
 
-      // Name to match on. Convert to lowercase so that matching is not case
-      // sensitive.
+      // Case insensitive matching.
       final matchingName = name.toLowerCase();
 
       CoreElement element;
@@ -139,7 +138,7 @@ class ScriptsView implements CoreElementView {
         // empty because they are void elements.
         final html.InputElement inputElement =
             _matcherRendering._textfield.element as html.InputElement;
-        // Convert to lowercase so that matching is not case sensitive.
+        // Case insensitive matching.
         final String matchPart = inputElement.value.toLowerCase();
 
         // Compute the matched characters to be bolded.
@@ -507,8 +506,7 @@ class ScriptsMatcher {
         .where((ScriptRef ref) =>
             _debuggerState
                 .getShortScriptName(ref.uri)
-                // Convert strings to lowercase so that matching is not case
-                // sensitive.
+                // Case insensitive matching.
                 .toLowerCase()
                 .lastIndexOf('${charsToMatch.toLowerCase()}') >=
             0)
