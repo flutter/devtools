@@ -298,7 +298,7 @@ final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
 
 bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
   const tunneledPorts = {8000, 8008, 8080, 8085, 8888, 9005, 3000, 4200, 5000};
-  return uri != null && uri.hasPort && tunneledPorts.contains(uri.port) == true;
+  return uri != null && uri.hasPort && tunneledPorts.contains(uri.port);
 }
 
 Future<VmService> _connectToVmService(Uri uri) async {
