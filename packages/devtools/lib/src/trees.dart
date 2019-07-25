@@ -45,8 +45,7 @@ class TreeNode<T extends TreeNode<T>> {
 
     // Store nodes we have visited so we can cache the root value for each one
     // once we find the root.
-    // ignore: prefer_collection_literals
-    final Set<T> visited = Set.from([this]);
+    final Set<T> visited = {this};
 
     T root = this;
     while (root.parent != null) {
@@ -134,7 +133,7 @@ class TreeNode<T extends TreeNode<T>> {
 /// every single node, we would do this through the [action] param.
 T breadthFirstTraversal<T extends TreeNode<T>>(T root,
     {bool returnCondition(T node), void action(T node)}) {
-  final Queue<T> queue = Queue.from([root]);
+  final Queue<T> queue = Queue.of([root]);
   while (queue.isNotEmpty) {
     final T node = queue.removeFirst();
     if (returnCondition != null && returnCondition(node)) {

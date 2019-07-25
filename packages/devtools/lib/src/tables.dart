@@ -670,14 +670,10 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
   }
 
   void expandAll() {
-    // Make a copy so that we are not concurrently modifying the tree data.
-    final List<T> dataCopy = data;
-
     // Store visited nodes so that we do not expand the same root multiple
     // times.
-    // ignore: prefer_collection_literals
-    final Set<T> visited = Set<T>();
-    for (T dataObject in dataCopy) {
+    final Set<T> visited = {};
+    for (T dataObject in data) {
       final root = dataObject.root;
       if (!visited.contains(root)) {
         root.expandCascading();
@@ -685,18 +681,14 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       }
     }
 
-    setRows(dataCopy);
+    setRows(data);
   }
 
   void collapseAll() {
-    // Make a copy so that we are not concurrently modifying the tree data.
-    final List<T> dataCopy = data;
-
     // Store visited nodes so that we do not expand the same root multiple
     // times.
-    // ignore: prefer_collection_literals
-    final Set<T> visited = Set<T>();
-    for (T dataObject in dataCopy) {
+    final Set<T> visited = {};
+    for (T dataObject in data) {
       final root = dataObject.root;
       if (!visited.contains(root)) {
         root.collapseCascading();
@@ -704,7 +696,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       }
     }
 
-    setRows(dataCopy);
+    setRows(data);
   }
 }
 
@@ -886,15 +878,14 @@ class TreeTableToolbar<T extends TreeNode<T>> extends CoreElement {
       ]));
   }
 
-  TreeTable<T> _treeTable;
-  set treeTable(TreeTable table) => _treeTable = table;
+  TreeTable<T> treeTable;
 
   void _expandAll() {
-    _treeTable.expandAll();
+    treeTable.expandAll();
   }
 
   void _collapseAll() {
-    _treeTable.collapseAll();
+    treeTable.collapseAll();
   }
 }
 

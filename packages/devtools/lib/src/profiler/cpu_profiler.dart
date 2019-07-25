@@ -191,7 +191,7 @@ class CpuProfilerTabNav {
 
   final CpuProfilerTabOrder tabOrder;
 
-  final TreeTableToolbar treeTableToolbar = TreeTableToolbar<CpuStackFrame>();
+  final TreeTableToolbar<CpuStackFrame> treeTableToolbar = TreeTableToolbar();
 
   PTabNav get element => _tabNav;
 
@@ -240,8 +240,8 @@ class CpuProfilerTabNav {
     });
   }
 
-  void _updateToolbarForSelection(PTabNavTab selectedTab) {
-    switch ((selectedTab as CpuProfilerTab).type) {
+  void _updateToolbarForSelection(CpuProfilerTab selectedTab) {
+    switch (selectedTab.type) {
       case CpuProfilerViewType.flameChart:
         treeTableToolbar.hidden(true);
         break;
