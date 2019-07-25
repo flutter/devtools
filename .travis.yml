@@ -31,9 +31,3 @@ env:
   - BOT=flutter_sdk_tests
 
 script: ./tool/travis.sh
-
-cache:
-  directories:
-  - $HOME/.pub-cache # macOS / Linux
-  - $APPDATA/Roaming/Pub/Cache # Windows
-  - packages/devtools/.dart_tool/build
