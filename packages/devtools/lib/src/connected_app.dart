@@ -10,7 +10,7 @@ import 'globals.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
-const angularLibraryUri = 'package:angular';
+const dartHtmlLibraryUri = 'dart:html';
 
 class ConnectedApp {
   ConnectedApp();
@@ -36,10 +36,10 @@ class ConnectedApp {
   Future<bool> get isAnyFlutterApp async =>
       await isFlutterApp || await isFlutterWebApp;
 
-  Future<bool> get isAngularApp async =>
-      _isAngularApp ??= await _libraryUriAvailable(angularLibraryUri);
+  Future<bool> get isDartWebApp async =>
+      _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
 
-  bool _isAngularApp;
+  bool _isDartWebApp;
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
@@ -69,14 +69,9 @@ class ConnectedApp {
     assert(serviceManager.serviceAvailable.isCompleted);
     await serviceManager.isolateManager.selectedIsolateAvailable.future;
 
-    final uris = serviceManager.isolateManager.selectedIsolateLibraries
+    return serviceManager.isolateManager.selectedIsolateLibraries
         .map((ref) => ref.uri)
-        .toList();
-    for (String u in uris) {
-      if (u.startsWith(uri)) {
-        return true;
-      }
-    }
-    return false;
+        .toList()
+        .any((u) => u.startsWith(uri));
   }
 }

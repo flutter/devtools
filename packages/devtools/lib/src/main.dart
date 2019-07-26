@@ -143,7 +143,7 @@ class PerfToolFramework extends Framework {
     final _isFlutterWebApp = await serviceManager.connectedApp.isFlutterWebApp;
     final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
     final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
-    final _isAngularApp = await serviceManager.connectedApp.isAngularApp;
+    final _isDartWebApp = await serviceManager.connectedApp.isDartWebApp;
 
     const notRunningFlutterApp =
         'This screen is disabled because you are not running a Flutter '
@@ -156,8 +156,8 @@ class PerfToolFramework extends Framework {
     const duplicateDebuggerFunctionality =
         'This screen is disabled because it provides functionality already '
         'available in your code editor';
-    const runningAngular =
-        'This screen is disabled because you are running an Angular app';
+    const runningDartWeb =
+        'This screen is disabled because you are running a Dart web app';
 
     String getDebuggerDisabledTooltip() {
       if (_isFlutterWebApp) return runningFlutterWeb;
@@ -180,12 +180,12 @@ class PerfToolFramework extends Framework {
           _isFlutterWebApp ? runningFlutterWeb : notRunningFlutterApp,
     ));
     addScreen(MemoryScreen(
-      disabled: _isFlutterWebApp || _isAngularApp,
-      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningAngular,
+      disabled: _isFlutterWebApp || _isDartWebApp,
+      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningDartWeb,
     ));
     addScreen(PerformanceScreen(
-      disabled: _isFlutterWebApp || _isAngularApp,
-      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningAngular,
+      disabled: _isFlutterWebApp || _isDartWebApp,
+      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningDartWeb,
     ));
     addScreen(DebuggerScreen(
       disabled: _isFlutterWebApp ||
