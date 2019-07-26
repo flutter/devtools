@@ -144,10 +144,12 @@ class PerfToolFramework extends Framework {
     final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
     final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
+    const notReadyForFlutterWeb =
+        'This screen is disabled because it is not yet ready for Flutter Web';
+
     String getDebuggerDisabledTooltip() {
       if (_isFlutterWebApp) {
-        return 'This screen is disabled because it is not yet ready for Flutter'
-            ' Web';
+        return notReadyForFlutterWeb;
       }
       if (_isProfileBuild) {
         return 'This screen is disabled because you are running a profile build'
@@ -172,18 +174,18 @@ class PerfToolFramework extends Framework {
     addScreen(TimelineScreen(
       disabled: !_isFlutterApp,
       disabledTooltip: _isFlutterWebApp
-          ? 'This screen is disabled because it is not yet ready for Flutter'
-              ' Web'
+          ? notReadyForFlutterWeb
           : 'This screen is disabled because you are not running a '
               'Flutter application',
     ));
     addScreen(MemoryScreen(
       disabled: _isFlutterWebApp,
-      disabledTooltip:
-          'This screen is disabled because it is not yet ready for Flutter'
-          ' Web',
+      disabledTooltip: notReadyForFlutterWeb,
     ));
-    addScreen(PerformanceScreen());
+    addScreen(PerformanceScreen(
+      disabled: _isFlutterWebApp,
+      disabledTooltip: notReadyForFlutterWeb,
+    ));
     addScreen(DebuggerScreen(
       disabled: _isFlutterWebApp ||
           _isProfileBuild ||
