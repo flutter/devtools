@@ -125,6 +125,9 @@ class ScriptsView implements CoreElementView {
       final String uri = scriptRef.uri;
       final String name = uriDescriber(uri);
 
+      // Case insensitive matching.
+      final matchingName = name.toLowerCase();
+
       CoreElement element;
       if (_matcherRendering != null && _matcherRendering.active) {
         // InputElement's need to fetch the value not text/textContent property.
@@ -135,10 +138,11 @@ class ScriptsView implements CoreElementView {
         // empty because they are void elements.
         final html.InputElement inputElement =
             _matcherRendering._textfield.element as html.InputElement;
-        final String matchPart = inputElement.value;
+        // Case insensitive matching.
+        final String matchPart = inputElement.value.toLowerCase();
 
         // Compute the matched characters to be bolded.
-        final int startIndex = name.lastIndexOf(matchPart);
+        final int startIndex = matchingName.lastIndexOf(matchPart);
         final String firstPart = name.substring(0, startIndex);
         final int endBoldIndex = startIndex + matchPart.length;
         final String boldPart = name.substring(startIndex, endBoldIndex);
@@ -499,7 +503,13 @@ class ScriptsMatcher {
     lastMatchingRefs ??= matchingState[''];
 
     final List<ScriptRef> matchingRefs = lastMatchingRefs
-        .where((ScriptRef ref) => ref.uri.lastIndexOf('$charsToMatch') >= 0)
+        .where((ScriptRef ref) =>
+            _debuggerState
+                .getShortScriptName(ref.uri)
+                // Case insensitive matching.
+                .toLowerCase()
+                .lastIndexOf('${charsToMatch.toLowerCase()}') >=
+            0)
         .toList();
 
     matchingState.putIfAbsent(charsToMatch, () => matchingRefs);
