@@ -143,20 +143,26 @@ class PerfToolFramework extends Framework {
     final _isFlutterWebApp = await serviceManager.connectedApp.isFlutterWebApp;
     final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
     final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
+    final _isAngularApp = await serviceManager.connectedApp.isAngularApp;
 
-    const notReadyForFlutterWeb =
+    const notRunningFlutterApp =
+        'This screen is disabled because you are not running a Flutter '
+        'application';
+    const runningFlutterWeb =
         'This screen is disabled because it is not yet ready for Flutter Web';
+    const runningProfileBuild =
+        'This screen is disabled because you are running a profile build of '
+        'your application';
+    const duplicateDebuggerFunctionality =
+        'This screen is disabled because it provides functionality already '
+        'available in your code editor';
+    const runningAngular =
+        'This screen is disabled because you are running an Angular app';
 
     String getDebuggerDisabledTooltip() {
-      if (_isFlutterWebApp) {
-        return notReadyForFlutterWeb;
-      }
-      if (_isProfileBuild) {
-        return 'This screen is disabled because you are running a profile build'
-            ' of your application';
-      }
-      return 'This screen is disabled because it provides functionality already'
-          ' available in your code editor';
+      if (_isFlutterWebApp) return runningFlutterWeb;
+      if (_isProfileBuild) return runningProfileBuild;
+      return duplicateDebuggerFunctionality;
     }
 
     // Collect all platform information flutter, web, chrome, versions, etc. for
@@ -165,26 +171,21 @@ class PerfToolFramework extends Framework {
 
     addScreen(InspectorScreen(
       disabled: !_isAnyFlutterApp || _isProfileBuild,
-      disabledTooltip: !_isAnyFlutterApp
-          ? 'This screen is disabled because you are not running a Flutter '
-              'application'
-          : 'This screen is disabled because you are running a profile build '
-              'of your application',
+      disabledTooltip:
+          !_isAnyFlutterApp ? notRunningFlutterApp : runningProfileBuild,
     ));
     addScreen(TimelineScreen(
       disabled: !_isFlutterApp,
-      disabledTooltip: _isFlutterWebApp
-          ? notReadyForFlutterWeb
-          : 'This screen is disabled because you are not running a '
-              'Flutter application',
+      disabledTooltip:
+          _isFlutterWebApp ? runningFlutterWeb : notRunningFlutterApp,
     ));
     addScreen(MemoryScreen(
-      disabled: _isFlutterWebApp,
-      disabledTooltip: notReadyForFlutterWeb,
+      disabled: _isFlutterWebApp || _isAngularApp,
+      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningAngular,
     ));
     addScreen(PerformanceScreen(
-      disabled: _isFlutterWebApp,
-      disabledTooltip: notReadyForFlutterWeb,
+      disabled: _isFlutterWebApp || _isAngularApp,
+      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningAngular,
     ));
     addScreen(DebuggerScreen(
       disabled: _isFlutterWebApp ||
