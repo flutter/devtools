@@ -174,8 +174,9 @@ class ServiceConnectionManager {
       serviceStreamName
     ];
 
-    // The following streams are not yet supported by Flutter Web.
-    if (!await connectedApp.isFlutterWebApp) {
+    // The following streams are not yet supported by Flutter Web / Dart web
+    // apps.
+    if (!await connectedApp.isDartWebApp) {
       streamIds.addAll(['_Graph', '_Logging', EventStreams.kLogging]);
     }
 

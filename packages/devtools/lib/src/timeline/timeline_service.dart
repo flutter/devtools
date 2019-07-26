@@ -20,9 +20,11 @@ class TimelineService {
 
   final TimelineController timelineController;
 
-  void _initListeners() {
+  void _initListeners() async {
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
-    if (serviceManager.hasConnection) {
+    // Do not start the timeline for Dart web apps.
+    if (serviceManager.hasConnection &&
+        !await serviceManager.connectedApp.isDartWebApp) {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
