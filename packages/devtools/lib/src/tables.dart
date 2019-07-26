@@ -672,7 +672,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
   void expandAll() {
     // Store visited nodes so that we do not expand the same root multiple
     // times.
-    final Set<T> visited = {};
+    final visited = <T>{};
     for (T dataObject in data) {
       final root = dataObject.root;
       if (!visited.contains(root)) {
@@ -687,7 +687,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
   void collapseAll() {
     // Store visited nodes so that we do not expand the same root multiple
     // times.
-    final Set<T> visited = {};
+    final visited = <T>{};
     for (T dataObject in data) {
       final root = dataObject.root;
       if (!visited.contains(root)) {
