@@ -1151,3 +1151,19 @@ span.strong {
         flex-direction: row;
     }
 }
+
+.recording-instruction-container {
+    margin-top: -22px; /* Negative top margin of half of the container height. */
+}
+
+.recording-instruction-message {
+    justify-content: center;
+}
+
+.recording-status-message {
+    margin-top: -34px; /* Full height of the text field plus padding for the spinner. */
+}
+
+.recording-spinner {
+    margin-top: 0 !important;
+}

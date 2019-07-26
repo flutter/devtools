@@ -14,7 +14,7 @@ import 'timeline_model.dart';
 
 class FramesBarChart extends CoreElement with SetStateMixin {
   FramesBarChart(this.timelineController)
-      : super('div', classes: 'timeline-frames') {
+      : super('div', classes: 'timeline-frames section section-border') {
     // No frame around component, so data spikes can appear to go through the
     // roof (highest horizontal line is 100 ms).
     layoutHorizontal();

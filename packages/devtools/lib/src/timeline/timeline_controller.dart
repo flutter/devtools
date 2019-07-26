@@ -83,18 +83,34 @@ class TimelineController {
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
 
+  /// Whether the timeline is being recorded, which will only occur when the
+  /// timeline is not in display-by-frame mode.
+  bool recording = false;
+
   bool get hasStarted => timelineData != null;
 
   bool get paused => _paused;
 
   bool _paused = false;
 
-  void pause() {
+  void pause({bool manual = false}) {
+    manuallyPaused = manual;
     _paused = true;
   }
 
   void resume() {
+    manuallyPaused = false;
     _paused = false;
+  }
+
+  void startRecording() {
+    // TODO(kenzie): kick off timeline recording here.
+    recording = true;
+  }
+
+  void stopRecording() {
+    // TODO(kenzie): kick off trace event processing here.
+    recording = false;
   }
 
   void selectFrame(TimelineFrame frame) {

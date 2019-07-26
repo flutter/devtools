@@ -112,3 +112,27 @@ void downloadFile(String src, String filename) {
   element.click();
   element.remove();
 }
+
+CoreElement createRecordingInstructions({@required String recordingGoal}) {
+  return div(c: 'center-in-parent recording-instruction-container')
+    ..layoutVertical()
+    ..flex()
+    ..add([
+      div(c: 'recording-instruction-message')
+        ..layoutHorizontal()
+        ..flex()
+        ..add([
+          div(text: 'Click the record button '),
+          createIconElement(record),
+          div(text: recordingGoal)
+        ]),
+      div(c: 'recording-instruction-message')
+        ..layoutHorizontal()
+        ..flex()
+        ..add([
+          div(text: 'Click the stop button '),
+          createIconElement(stop),
+          div(text: 'to end the recording.')
+        ]),
+    ]);
+}
