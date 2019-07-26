@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
 
+import '../tables.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../ui/primer.dart';
@@ -190,6 +191,8 @@ class CpuProfilerTabNav {
 
   final CpuProfilerTabOrder tabOrder;
 
+  final TreeTableToolbar<CpuStackFrame> treeTableToolbar = TreeTableToolbar();
+
   PTabNav get element => _tabNav;
 
   PTabNav _tabNav;
@@ -217,7 +220,14 @@ class CpuProfilerTabNav {
       tabs.firstWhere((tab) => tab.type == tabOrder.second),
       tabs.firstWhere((tab) => tab.type == tabOrder.third),
     ])
-      ..element.style.borderBottom = '0';
+      ..element.style.borderBottom = '0'
+      ..layoutHorizontal()
+      ..add([
+        div()..flex(),
+        treeTableToolbar,
+      ]);
+
+    _updateToolbarForSelection(selectedTab);
 
     _tabNav.onTabSelected.listen((PTabNavTab tab) {
       // Return early if this tab is already selected.
@@ -225,8 +235,25 @@ class CpuProfilerTabNav {
         return;
       }
       selectedTab = tab;
+      _updateToolbarForSelection(selectedTab);
       cpuProfiler.showView((tab as CpuProfilerTab).type);
     });
+  }
+
+  void _updateToolbarForSelection(CpuProfilerTab selectedTab) {
+    switch (selectedTab.type) {
+      case CpuProfilerViewType.flameChart:
+        treeTableToolbar.hidden(true);
+        break;
+      case CpuProfilerViewType.callTree:
+        treeTableToolbar.hidden(false);
+        treeTableToolbar.treeTable = cpuProfiler.callTree.callTreeTable;
+        break;
+      case CpuProfilerViewType.bottomUp:
+        treeTableToolbar.hidden(false);
+        treeTableToolbar.treeTable = cpuProfiler.bottomUp.bottomUpTable;
+        break;
+    }
   }
 }
 

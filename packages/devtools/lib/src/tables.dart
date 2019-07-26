@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:devtools/src/ui/primer.dart';
 import 'package:meta/meta.dart';
 
 import 'framework/framework.dart';
@@ -642,7 +643,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
 
     assert(data.contains(dataObject));
     dataObject.children.forEach(cascadingRemove);
-    dataObject.isExpanded = false;
+    dataObject.collapse();
 
     _selectedObject ??= dataObject;
     setRows(data);
@@ -659,12 +660,42 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
         }
         insertIndex++;
       }
-      node.isExpanded = true;
+      node.expand();
     }
 
     expand(dataObject);
 
     _selectedObject ??= dataObject;
+    setRows(data);
+  }
+
+  void expandAll() {
+    // Store visited nodes so that we do not expand the same root multiple
+    // times.
+    final visited = <T>{};
+    for (T dataObject in data) {
+      final root = dataObject.root;
+      if (!visited.contains(root)) {
+        root.expandCascading();
+        visited.add(root);
+      }
+    }
+
+    setRows(data);
+  }
+
+  void collapseAll() {
+    // Store visited nodes so that we do not expand the same root multiple
+    // times.
+    final visited = <T>{};
+    for (T dataObject in data) {
+      final root = dataObject.root;
+      if (!visited.contains(root)) {
+        root.collapseCascading();
+        visited.add(root);
+      }
+    }
+
     setRows(data);
   }
 }
@@ -831,6 +862,30 @@ abstract class TreeColumn<T extends TreeNode<T>> extends Column<T> {
       ..clear()
       ..add(container)
       ..tooltip = getTooltip(dataObject);
+  }
+}
+
+class TreeTableToolbar<T extends TreeNode<T>> extends CoreElement {
+  TreeTableToolbar() : super('div') {
+    add(div(c: 'btn-group')
+      ..add([
+        PButton('Expand all')
+          ..small()
+          ..click(_expandAll),
+        PButton('Collapse all')
+          ..small()
+          ..click(_collapseAll),
+      ]));
+  }
+
+  TreeTable<T> treeTable;
+
+  void _expandAll() {
+    treeTable.expandAll();
+  }
+
+  void _collapseAll() {
+    treeTable.collapseAll();
   }
 }
 

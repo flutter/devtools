@@ -45,8 +45,10 @@ class CpuCallTree extends CpuProfilerView {
     final CpuStackFrame root = data.cpuProfileRoot.deepCopy();
 
     // Expand the root stack frame to start.
-    final List<CpuStackFrame> rows = [root..isExpanded = true]
-      ..addAll(root.children.cast());
+    final rows = <CpuStackFrame>[
+      root..expand(),
+      ...root.children.cast(),
+    ];
     callTreeTable.setRows(rows);
   }
 

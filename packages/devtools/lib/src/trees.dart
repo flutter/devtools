@@ -42,15 +42,28 @@ class TreeNode<T extends TreeNode<T>> {
     if (_root != null) {
       return _root;
     }
+
+    // Store nodes we have visited so we can cache the root value for each one
+    // once we find the root.
+    final visited = {this};
+
     T root = this;
     while (root.parent != null) {
+      visited.add(root);
       root = root.parent;
     }
-    return _root = root;
+
+    // Set [_root] for all nodes we visited.
+    for (T node in visited) {
+      node._root = root;
+    }
+
+    return root;
   }
 
   T _root;
 
+  /// The level (0-based) of this tree node in the tree.
   int get level {
     if (_level != null) {
       return _level;
@@ -64,8 +77,22 @@ class TreeNode<T extends TreeNode<T>> {
     return _level = level;
   }
 
-  /// The level (0-based) of this tree node in the tree.
   int _level;
+
+  /// Whether the tree table node is expandable.
+  bool get isExpandable => children.isNotEmpty;
+
+  /// Whether the node is currently expanded in the tree table.
+  bool get isExpanded => _isExpanded;
+  bool _isExpanded = false;
+
+  void expand() {
+    _isExpanded = true;
+  }
+
+  void collapse() {
+    _isExpanded = false;
+  }
 
   void addChild(T child) {
     children.add(child);
@@ -73,21 +100,49 @@ class TreeNode<T extends TreeNode<T>> {
     child.index = children.length - 1;
   }
 
-  bool containsChildWithCondition(bool condition(T node)) {
-    final Queue<T> queue = Queue.from([this]);
-    while (queue.isNotEmpty) {
-      final T node = queue.removeFirst();
-      if (condition(node)) {
-        return true;
-      }
-      node.children.forEach(queue.add);
-    }
-    return false;
+  /// Expands this node and all of its children (cascading).
+  void expandCascading() {
+    breadthFirstTraversal<T>(this, action: (T node) {
+      node.expand();
+    });
   }
 
-  /// Whether the tree table node is expandable.
-  bool get isExpandable => children.isNotEmpty;
+  /// Collapses this node and all of its children (cascading).
+  void collapseCascading() {
+    breadthFirstTraversal<T>(this, action: (T node) {
+      node.collapse();
+    });
+  }
 
-  /// Whether the node is currently expanded in the tree table.
-  bool isExpanded = false;
+  bool containsChildWithCondition(bool condition(T node)) {
+    final T childWithCondition = breadthFirstTraversal<T>(
+      this,
+      returnCondition: condition,
+    );
+    return childWithCondition != null;
+  }
+}
+
+/// Traverses a tree in breadth-first order.
+///
+/// [returnCondition] specifies the condition for which we should stop
+/// traversing the tree. For example, if we are calling this method to perform
+/// BFS, [returnCondition] would specify when we have found the node we are
+/// searching for. [action] specifies an action that we will execute on each
+/// node. For example, if we need to traverse a tree and change a property on
+/// every single node, we would do this through the [action] param.
+T breadthFirstTraversal<T extends TreeNode<T>>(T root,
+    {bool returnCondition(T node), void action(T node)}) {
+  final queue = Queue.of([root]);
+  while (queue.isNotEmpty) {
+    final node = queue.removeFirst();
+    if (returnCondition != null && returnCondition(node)) {
+      return node;
+    }
+    if (action != null) {
+      action(node);
+    }
+    node.children.forEach(queue.add);
+  }
+  return null;
 }

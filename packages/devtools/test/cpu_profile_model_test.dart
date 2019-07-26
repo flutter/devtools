@@ -130,7 +130,7 @@ void main() {
     test('deepCopy', () {
       expect(testStackFrame.isExpanded, isFalse);
       expect(testStackFrame.children.length, equals(1));
-      testStackFrame.isExpanded = true;
+      testStackFrame.expand();
       expect(testStackFrame.isExpanded, isTrue);
 
       final copy = testStackFrame.deepCopy();
