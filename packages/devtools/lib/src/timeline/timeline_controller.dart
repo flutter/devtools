@@ -80,6 +80,8 @@ class TimelineController {
 
   CpuProfilerService cpuProfilerService = CpuProfilerService();
 
+  bool frameBasedTimelineMode = false;
+
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
 
