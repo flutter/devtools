@@ -10,12 +10,13 @@ import 'globals.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
+const dartHtmlLibraryUri = 'dart:html';
 
 class ConnectedApp {
   ConnectedApp();
 
   Future<bool> get isFlutterApp async =>
-      _isFlutterApp ?? await _libraryUriAvailable(flutterLibraryUri);
+      _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
 
   bool _isFlutterApp;
 
@@ -23,17 +24,22 @@ class ConnectedApp {
   // flutter merges with flutter_web. See
   // https://github.com/flutter/devtools/issues/466.
   Future<bool> get isFlutterWebApp async =>
-      _isFlutterWebApp ?? await _libraryUriAvailable(flutterWebLibraryUri);
+      _isFlutterWebApp ??= await _libraryUriAvailable(flutterWebLibraryUri);
 
   bool _isFlutterWebApp;
 
   Future<bool> get isProfileBuild async =>
-      _isProfileBuild ?? await _connectedToProfileBuild();
+      _isProfileBuild ??= await _connectedToProfileBuild();
 
   bool _isProfileBuild;
 
   Future<bool> get isAnyFlutterApp async =>
       await isFlutterApp || await isFlutterWebApp;
+
+  Future<bool> get isDartWebApp async =>
+      _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
+
+  bool _isDartWebApp;
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
@@ -66,6 +72,6 @@ class ConnectedApp {
     return serviceManager.isolateManager.selectedIsolateLibraries
         .map((ref) => ref.uri)
         .toList()
-        .contains(uri);
+        .any((u) => u.startsWith(uri));
   }
 }
