@@ -1167,3 +1167,18 @@ span.strong {
 .recording-spinner {
     margin-top: 0 !important;
 }
+
+.checkbox-container {
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 6px;
+}
+
+.checkbox {
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.checkbox-text {
+    margin-bottom: 1px;
+}

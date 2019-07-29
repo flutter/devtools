@@ -109,7 +109,7 @@ class TimelineScreen extends Screen {
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
-      ..hidden(!timelineController.frameBasedTimelineMode)
+      ..hidden(timelineController.timelineMode == TimelineMode.full)
       ..click(_pauseFrameRecording);
 
     resumeButton =
@@ -117,20 +117,20 @@ class TimelineScreen extends Screen {
           ..small()
           ..clazz('margin-left')
           ..disabled = timelineController.manuallyPaused
-          ..hidden(!timelineController.frameBasedTimelineMode)
+          ..hidden(timelineController.timelineMode == TimelineMode.full)
           ..click(_resumeFrameRecording);
 
     _startRecordingButton = PButton.icon('Record', recordPrimary)
       ..small()
       ..primary()
-      ..hidden(timelineController.frameBasedTimelineMode)
+      ..hidden(timelineController.timelineMode == TimelineMode.frameBased)
       ..click(_startRecording);
 
     _stopRecordingButton = PButton.icon('Stop', stop)
       ..small()
       ..clazz('margin-left')
       ..disabled = !timelineController.recording
-      ..hidden(timelineController.frameBasedTimelineMode)
+      ..hidden(timelineController.timelineMode == TimelineMode.frameBased)
       ..click(_stopRecording);
 
     _recordingInstructions = createRecordingInstructions(
@@ -173,9 +173,10 @@ class TimelineScreen extends Screen {
       ..setAttribute('type', 'checkbox');
     final html.InputElement checkbox = _frameBasedTimelineCheckbox.element;
     checkbox
-      ..checked = timelineController.frameBasedTimelineMode
-      ..onChange.listen(
-          (_) => _setTimelineMode(frameBasedTimelineMode: checkbox.checked));
+      ..checked = timelineController.timelineMode == TimelineMode.frameBased
+      ..onChange.listen((_) => _setTimelineMode(
+          timelineMode:
+              checkbox.checked ? TimelineMode.frameBased : TimelineMode.full));
 
     _frameBasedTimelineSettingContainer = div(c: 'checkbox-container')
       ..layoutHorizontal()
@@ -274,7 +275,7 @@ class TimelineScreen extends Screen {
       // TODO(kenzie): observe resizing for recordedTimeline as well. Recorded
       // timeline will not have a selected frame.
       if (flameChartCanvas == null ||
-          !timelineController.frameBasedTimelineMode) {
+          timelineController.timelineMode == TimelineMode.full) {
         return;
       }
 
@@ -344,13 +345,12 @@ class TimelineScreen extends Screen {
     // changes the value of [offlineMode], which the button states depend on.
     framework.exitOfflineMode();
     // Revert to the previously selected mode on offline exit.
-    _setTimelineMode(
-        frameBasedTimelineMode: timelineController.frameBasedTimelineMode);
+    _setTimelineMode(timelineMode: timelineController.timelineMode);
     _updateButtonStates();
   }
 
   Future<void> _pauseFrameRecording() async {
-    assert(timelineController.frameBasedTimelineMode);
+    assert(timelineController.timelineMode == TimelineMode.frameBased);
     timelineController.pause(manual: true);
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
@@ -358,7 +358,7 @@ class TimelineScreen extends Screen {
   }
 
   Future<void> _resumeFrameRecording() async {
-    assert(timelineController.frameBasedTimelineMode);
+    assert(timelineController.timelineMode == TimelineMode.frameBased);
     timelineController.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
@@ -366,7 +366,7 @@ class TimelineScreen extends Screen {
   }
 
   void _startRecording() {
-    assert(!timelineController.frameBasedTimelineMode);
+    assert(timelineController.timelineMode == TimelineMode.full);
     timelineController.startRecording();
     _recordingInstructions.hidden(true);
     _recordingStatusMessage.text = 'Recording timeline trace';
@@ -375,41 +375,41 @@ class TimelineScreen extends Screen {
   }
 
   void _stopRecording() {
-    assert(!timelineController.frameBasedTimelineMode);
+    assert(timelineController.timelineMode == TimelineMode.full);
     _recordingStatusMessage.text = 'Processing timeline trace';
     timelineController.stopRecording();
     _recordingStatus.hidden(true);
     _updateButtonStates();
   }
 
-  void _setTimelineMode({@required bool frameBasedTimelineMode}) {
+  void _setTimelineMode({@required TimelineMode timelineMode}) {
     // TODO(kenzie): the two modes should be aware of one another and we should
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
     timelineController.timelineData.clear();
 
-    timelineController.frameBasedTimelineMode = frameBasedTimelineMode;
+    timelineController.timelineMode = timelineMode;
     _updateButtonStates();
 
     // Update visibility and then reset - the order matters here.
     framesBarChart
-      ..hidden(!frameBasedTimelineMode)
+      ..hidden(timelineMode == TimelineMode.full)
       ..frameUIgraph.reset();
 
     flameChartCanvas = null;
     flameChartContainer
       ..clear()
-      ..hidden(frameBasedTimelineMode);
-    if (!frameBasedTimelineMode) {
+      ..hidden(timelineMode == TimelineMode.frameBased);
+    if (timelineMode == TimelineMode.full) {
       flameChartContainer.add([
         _recordingInstructions..hidden(false),
         _recordingStatus..hidden(true),
       ]);
     }
 
-    eventDetails.reset(hide: frameBasedTimelineMode);
+    eventDetails.reset(hide: timelineMode == TimelineMode.frameBased);
 
-    if (frameBasedTimelineMode) {
+    if (timelineMode == TimelineMode.frameBased) {
       _destroySplitter();
     } else {
       _configureSplitter();
@@ -419,16 +419,20 @@ class TimelineScreen extends Screen {
   void _updateButtonStates() {
     pauseButton
       ..disabled = timelineController.manuallyPaused
-      ..hidden(offlineMode || !timelineController.frameBasedTimelineMode);
+      ..hidden(
+          offlineMode || timelineController.timelineMode == TimelineMode.full);
     resumeButton
       ..disabled = !timelineController.manuallyPaused
-      ..hidden(offlineMode || !timelineController.frameBasedTimelineMode);
+      ..hidden(
+          offlineMode || timelineController.timelineMode == TimelineMode.full);
     _startRecordingButton
       ..disabled = timelineController.recording
-      ..hidden(offlineMode || timelineController.frameBasedTimelineMode);
+      ..hidden(offlineMode ||
+          timelineController.timelineMode == TimelineMode.frameBased);
     _stopRecordingButton
       ..disabled = !timelineController.recording
-      ..hidden(offlineMode || timelineController.frameBasedTimelineMode);
+      ..hidden(offlineMode ||
+          timelineController.timelineMode == TimelineMode.frameBased);
     _frameBasedTimelineCheckbox.disabled = timelineController.recording;
 
     // TODO(kenzie): support loading offline data in both modes.
@@ -457,17 +461,21 @@ class TimelineScreen extends Screen {
 
   void clearTimeline() {
     timelineController.timelineData?.clear();
-    flameChartContainer.hidden(timelineController.frameBasedTimelineMode);
+    flameChartContainer
+        .hidden(timelineController.timelineMode == TimelineMode.frameBased);
     flameChartCanvas = null;
-    eventDetails.reset(hide: timelineController.frameBasedTimelineMode);
+    eventDetails.reset(
+        hide: timelineController.timelineMode == TimelineMode.frameBased);
 
-    if (timelineController.frameBasedTimelineMode) {
-      debugHandledTraceEvents.clear();
-      debugFrameTracking.clear();
-      framesBarChart.frameUIgraph.reset();
-      _destroySplitter();
-    } else {
-      _recordingInstructions.hidden(false);
+    switch (timelineController.timelineMode) {
+      case TimelineMode.frameBased:
+        debugHandledTraceEvents.clear();
+        debugFrameTracking.clear();
+        framesBarChart.frameUIgraph.reset();
+        _destroySplitter();
+        break;
+      case TimelineMode.full:
+        _recordingInstructions.hidden(false);
     }
   }
 

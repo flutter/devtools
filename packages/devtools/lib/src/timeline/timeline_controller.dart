@@ -80,7 +80,7 @@ class TimelineController {
 
   CpuProfilerService cpuProfilerService = CpuProfilerService();
 
-  bool frameBasedTimelineMode = false;
+  TimelineMode timelineMode = TimelineMode.frameBased;
 
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
@@ -228,4 +228,9 @@ class TimelineController {
     timelineData.clear();
     offlineTimelineData = null;
   }
+}
+
+enum TimelineMode {
+  frameBased,
+  full,
 }
