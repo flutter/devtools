@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 class HeapSpace {
-  HeapSpace._fromJson(this.json) :
-    avgCollectionPeriodMillis = json['avgCollectionPeriodMillis'],
-    capacity = json['capacity'],
-    collections = json['collections'],
-    external = json['external'],
-    name = json['name'],
-    time = json['time'],
-    used = json['used'];
+  HeapSpace._fromJson(this.json)
+      : avgCollectionPeriodMillis = json['avgCollectionPeriodMillis'],
+        capacity = json['capacity'],
+        collections = json['collections'],
+        external = json['external'],
+        name = json['name'],
+        time = json['time'],
+        used = json['used'];
 
   static HeapSpace parse(Map<String, dynamic> json) =>
       json == null ? null : new HeapSpace._fromJson(json);
