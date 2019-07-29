@@ -32,6 +32,10 @@ env:
 
 script: ./tool/travis.sh
 
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only: [master]
+
 cache:
   directories:
   - $HOME/.pub-cache # macOS / Linux
