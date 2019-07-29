@@ -130,7 +130,7 @@ class DebuggerScreen extends Screen {
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
 
-    final CoreElement screenDiv = div()..layoutVertical();
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     CoreElement sourceArea;
     CoreElement consoleDiv;
