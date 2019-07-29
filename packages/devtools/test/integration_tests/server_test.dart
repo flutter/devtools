@@ -6,7 +6,7 @@
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';

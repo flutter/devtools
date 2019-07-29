@@ -13,7 +13,7 @@ import 'package:devtools/src/service_manager.dart';
 import 'package:devtools/src/service_registrations.dart' as registrations;
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:test/test.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';

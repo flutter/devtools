@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';

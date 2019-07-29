@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
-import 'package:vm_service_lib/utils.dart';
+import 'package:vm_service/utils.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../core/message_bus.dart';

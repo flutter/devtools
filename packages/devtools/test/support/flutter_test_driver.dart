@@ -8,9 +8,9 @@ import 'dart:io';
 
 import 'package:devtools/src/vm_service_wrapper.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:vm_service_lib/utils.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
-import 'package:vm_service_lib/vm_service_lib_io.dart';
+import 'package:vm_service/utils.dart';
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its

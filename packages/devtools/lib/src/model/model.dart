@@ -12,7 +12,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js' as js;
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger.dart';
 import '../framework/framework.dart';

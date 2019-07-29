@@ -7,7 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
 import 'inspector/inspector_service.dart';

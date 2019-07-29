@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger_state.dart';
 import '../ui/custom.dart';

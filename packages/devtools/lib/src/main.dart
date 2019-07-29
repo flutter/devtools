@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';

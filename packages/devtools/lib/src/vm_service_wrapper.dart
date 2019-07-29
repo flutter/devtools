@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -97,7 +97,6 @@ class VmServiceWrapper implements VmService {
         ));
   }
 
-  @override
   Future<Success> clearCpuProfile(String isolateId) async {
     final response = await _trackFuture('clearCpuProfile',
         callMethod('_clearCpuProfile', isolateId: isolateId));
@@ -112,12 +111,6 @@ class VmServiceWrapper implements VmService {
       return response as Success;
     }
     return _trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
-  }
-
-  @deprecated
-  @override
-  Future<Success> collectAllGarbage(String isolateId) {
-    throw UnsupportedError('Private service RPC');
   }
 
   @override
@@ -185,12 +178,6 @@ class VmServiceWrapper implements VmService {
       'getAllocationProfile',
       _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
     );
-  }
-
-  @deprecated
-  @override
-  Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
-    throw UnsupportedError('Private service RPC');
   }
 
   // TODO(kenzie): keep track of all private methods we are currently using to
@@ -375,6 +362,9 @@ class VmServiceWrapper implements VmService {
   Stream<String> get onSend => _vmService.onSend;
 
   @override
+  Stream<Event> get onServiceEvent => _vmService.onServiceEvent;
+
+  @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
 
   @override
@@ -440,16 +430,6 @@ class VmServiceWrapper implements VmService {
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
     return _trackFuture('removeBreakpoint',
         _vmService.removeBreakpoint(isolateId, breakpointId));
-  }
-
-  @deprecated
-  @override
-  Future<Success> requestHeapSnapshot(
-    String isolateId,
-    String roots,
-    bool collectGarbage,
-  ) {
-    throw UnsupportedError('Private service RPC');
   }
 
   @override
