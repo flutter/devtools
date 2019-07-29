@@ -14,7 +14,7 @@ library inspector_tree;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';

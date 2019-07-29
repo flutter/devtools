@@ -8,7 +8,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 

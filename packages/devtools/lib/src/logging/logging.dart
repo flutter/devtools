@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 import 'package:split/split.dart' as split;
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../core/message_bus.dart';
 import '../framework/framework.dart';
@@ -17,6 +17,7 @@ import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_html.dart';
+import '../memory/heap_space.dart';
 import '../tables.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;

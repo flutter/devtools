@@ -5,10 +5,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
+import 'heap_space.dart';
 
 class MemoryTracker {
   MemoryTracker(this.service);

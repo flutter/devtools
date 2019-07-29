@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import 'memory_protocol.dart';
@@ -61,8 +61,7 @@ class InboundReferences extends Response {
 class InboundReference extends Response {
   InboundReference._fromJson(Map<String, dynamic> json) {
     //source = json['source']
-    // For vm_service_lib 3.21.1, use ['ObjRef']?
-    parentField = createServiceObject(json['parentField']);
+    parentField = createServiceObject(json['parentField'], ['FieldRef']);
     parentListIndex = json['parentListIndex'];
     parentWordOffset = json['_parentWordOffset'];
   }

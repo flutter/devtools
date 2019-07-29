@@ -9,7 +9,7 @@ library gtags;
 
 import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:js/js.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../eval_on_dart_library.dart';
 import '../globals.dart';

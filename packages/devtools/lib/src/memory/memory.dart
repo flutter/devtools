@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'dart:html' as html;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../framework/framework.dart';
 import '../globals.dart';
