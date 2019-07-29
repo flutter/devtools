@@ -1,5 +1,5 @@
 ## 0.1.5 - TBD
-* Support expand-all and collapse-all functionality in CPU profiler (Timeline and Performance page).
+* Support expanding or collapsing all values in the Call Tree and Bottom Up views (parts of the CPU profiler).
 * Support touchscreen scrolling and selection in flame charts.
 * Search and filter dialogs are now case-insensitive.
 * Link to Dart DevTools documentation from connect screen.
