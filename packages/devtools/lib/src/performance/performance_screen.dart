@@ -9,7 +9,6 @@ import '../profiler/cpu_profile_tables.dart';
 import '../profiler/cpu_profiler.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
-import '../ui/html_icon_renderer.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -38,11 +37,11 @@ class PerformanceScreen extends Screen {
 
   ProfileGranularitySelector _profileGranularitySelector;
 
-  CoreElement _profilerInstructions;
+  CoreElement _recordingInstructions;
 
-  CoreElement _profilerStatus;
+  CoreElement _recordingStatus;
 
-  CoreElement _profilerStatusMessage;
+  CoreElement _recordingStatusMessage;
 
   CpuProfilerTabNav _tabNav;
 
@@ -76,8 +75,8 @@ class PerformanceScreen extends Screen {
           div(c: 'profiler-container section-border')
             ..add([
               _cpuProfiler..hidden(true),
-              _profilerInstructions,
-              _profilerStatus..hidden(true)
+              _recordingInstructions,
+              _recordingStatus..hidden(true)
             ]),
         ]),
     ]);
@@ -107,34 +106,15 @@ class PerformanceScreen extends Screen {
 
     _profileGranularitySelector = ProfileGranularitySelector(framework);
 
-    _profilerInstructions = div(c: 'center-in-parent instruction-container')
-      ..layoutVertical()
-      ..flex()
-      ..add([
-        div(c: 'instruction-message')
-          ..layoutHorizontal()
-          ..flex()
-          ..add([
-            div(text: 'Click the record button '),
-            createIconElement(record),
-            div(text: 'to start recording a CPU profile.')
-          ]),
-        div(c: 'instruction-message')
-          ..layoutHorizontal()
-          ..flex()
-          ..add([
-            div(text: 'Click the stop button '),
-            createIconElement(stop),
-            div(text: 'to end the recording.')
-          ]),
-      ]);
+    _recordingInstructions = createRecordingInstructions(
+        recordingGoal: 'to start recording a CPU profile.');
 
-    _profilerStatus = div(c: 'center-in-parent')
+    _recordingStatus = div(c: 'center-in-parent')
       ..layoutVertical()
       ..flex()
       ..add([
-        _profilerStatusMessage = div(c: 'profiler-status-message'),
-        Spinner.centered(classes: ['profiler-spinner']),
+        _recordingStatusMessage = div(c: 'recording-status-message'),
+        Spinner.centered(classes: ['recording-spinner']),
       ]);
 
     _cpuProfiler = _CpuProfiler(
@@ -161,15 +141,15 @@ class PerformanceScreen extends Screen {
     await _performanceController.startRecording();
     _updateCpuProfilerVisibility(hidden: true);
     _updateButtonStates();
-    _profilerInstructions.hidden(true);
-    _profilerStatusMessage.text = 'Recording profile';
-    _profilerStatus.hidden(false);
+    _recordingInstructions.hidden(true);
+    _recordingStatusMessage.text = 'Recording profile';
+    _recordingStatus.hidden(false);
   }
 
   Future<void> _stopRecording() async {
-    _profilerStatusMessage.text = 'Processing profile';
+    _recordingStatusMessage.text = 'Processing profile';
     await _performanceController.stopRecording();
-    _profilerStatus.hidden(true);
+    _recordingStatus.hidden(true);
     _updateCpuProfilerVisibility(hidden: false);
     _updateButtonStates();
     await _cpuProfiler.update();
@@ -178,7 +158,7 @@ class PerformanceScreen extends Screen {
   void _clear() {
     _performanceController.reset();
     _updateCpuProfilerVisibility(hidden: true);
-    _profilerInstructions.hidden(false);
+    _recordingInstructions.hidden(false);
   }
 
   void _updateButtonStates() {
