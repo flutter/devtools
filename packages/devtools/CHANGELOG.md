@@ -1,6 +1,9 @@
 ## 0.1.5 - TBD
+* Support expand-all and collapse-all functionality in CPU profiler (Timeline and Performance page).
 * Support touchscreen scrolling and selection in flame charts.
+* Search and filter dialogs are now case-insensitive.
 * Link to Dart DevTools documentation from connect screen.
+* Disable unsupported DevTools pages for Dart web apps.
 
 ## 0.1.4 - 2019-07-19
 * Add Performance page. This has a traditional CPU profiler for Dart applications.
