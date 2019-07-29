@@ -28,19 +28,21 @@
     --header-item: rgba(var(--header-item-rgb), 1);
     --hint-background: #4b4b3f;
     --light-background: #585858;
+    --light-text-color: #fafbfc;
     --masthead-background: #394959;
-    --list-background: #3f3f3f;
+    --list-background: #2b2c2b;
     --list-color: #abb2ba;
     --match-color: #fff;
     --menu-item-border: #484541;
     --popup-border-color: #586069;
     --row-hover-background: #2b2d2e;
-    --selected-background: #545454;
+    --selected-background: #626d7a;
     --selected-line: #626d7b;
     --shadow-color: #585858;
     --shaded-background-lighter: #2d2e31;
     --shaded-background-darker: var(--default-background);
     --subtle: #888;
+    --subtle-selected: #151515;
     --table-border: #484848;
     --toast-background: #212121;
     --toast-border: #585551;
@@ -62,7 +64,7 @@ body {
 }
 
 nav.menu .menu-item {
-    color: wheat;
+    color: #89b5f8;
     font-weight: bold;
 }
 

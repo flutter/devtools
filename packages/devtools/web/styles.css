@@ -46,6 +46,7 @@
     --shaded-background-lighter: #fdfdfd;
     --shaded-background-darker: #f6f6f6;
     --subtle: #777;
+    --subtle-selected: var(--light-background);
     --table-border: #dfe2e5;
     --title: #555;
     --toast-background: #f9f9f9;
@@ -860,7 +861,7 @@ nav.menu li {
 }
 
 .list-item.selected .subtle {
-    color: var(--light-background);
+    color: var(--subtle-selected);
 }
 
 .list-item.selected .strong-match {
