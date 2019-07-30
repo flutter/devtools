@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js' as js;
 
+import 'package:devtools/src/logging/logging_controller.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger.dart';
@@ -110,12 +111,12 @@ class App {
 
   Future<void> logsClearLogs([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logging');
-    screen.loggingTable.setRows(<LogData>[]);
+    screen.controller.loggingTableModel.setRows(<LogData>[]);
   }
 
   Future<int> logsLogCount([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logging');
-    return screen.loggingTable.rowCount;
+    return screen.controller.loggingTableModel.rowCount;
   }
 
   Future<String> debuggerGetState([dynamic _]) async {

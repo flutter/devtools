@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../tables.dart';
+import '../table_data.dart';
 import 'memory_protocol.dart';
 
 class MemoryRow {
@@ -16,14 +16,14 @@ class MemoryRow {
   String toString() => name;
 }
 
-class MemoryColumnClassName extends Column<ClassHeapDetailStats> {
+class MemoryColumnClassName extends ColumnData<ClassHeapDetailStats> {
   MemoryColumnClassName() : super.wide('Class');
 
   @override
   dynamic getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
 }
 
-class MemoryColumnSize extends Column<ClassHeapDetailStats> {
+class MemoryColumnSize extends ColumnData<ClassHeapDetailStats> {
   MemoryColumnSize() : super('Size');
 
   @override
@@ -37,14 +37,14 @@ class MemoryColumnSize extends Column<ClassHeapDetailStats> {
   @override
   String render(dynamic value) {
     if (value < 1024) {
-      return ' ${Column.fastIntl(value)}';
+      return ' ${ColumnData.fastIntl(value)}';
     } else {
-      return ' ${Column.fastIntl(value ~/ 1024)}k';
+      return ' ${ColumnData.fastIntl(value ~/ 1024)}k';
     }
   }
 }
 
-class MemoryColumnInstanceCount extends Column<ClassHeapDetailStats> {
+class MemoryColumnInstanceCount extends ColumnData<ClassHeapDetailStats> {
   MemoryColumnInstanceCount() : super('Count');
 
   @override
@@ -55,11 +55,11 @@ class MemoryColumnInstanceCount extends Column<ClassHeapDetailStats> {
       dataObject.instancesCurrent;
 
   @override
-  String render(dynamic value) => Column.fastIntl(value);
+  String render(dynamic value) => ColumnData.fastIntl(value);
 }
 
 class MemoryColumnInstanceAccumulatedCount
-    extends Column<ClassHeapDetailStats> {
+    extends ColumnData<ClassHeapDetailStats> {
   MemoryColumnInstanceAccumulatedCount() : super('Accumulator');
 
   @override
@@ -70,10 +70,10 @@ class MemoryColumnInstanceAccumulatedCount
       dataObject.instancesAccumulated;
 
   @override
-  String render(dynamic value) => Column.fastIntl(value);
+  String render(dynamic value) => ColumnData.fastIntl(value);
 }
 
-class MemoryColumnSimple<T> extends Column<T> {
+class MemoryColumnSimple<T> extends ColumnData<T> {
   MemoryColumnSimple(String name, this.getter,
       {bool wide = false,
       bool usesHtml = false,

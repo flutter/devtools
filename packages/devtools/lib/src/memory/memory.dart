@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../popup.dart';
+import '../table_data.dart';
 import '../tables.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
@@ -264,7 +265,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _selectClass(String className, [record = true]) {
-    final List<ClassHeapDetailStats> classesData = tableStack.first.data;
+    final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
     int row = 0;
     for (ClassHeapDetailStats stat in classesData) {
       if (stat.classRef.name == className) {
@@ -288,7 +289,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // There's an instances table up.
     // TODO(terry): Need more efficient way to match ObjectRefs than hashCodes.
-    final List<InstanceSummary> instances = instanceTable.data;
+    final List<InstanceSummary> instances = instanceTable.model.data;
     int row = 0;
     for (InstanceSummary instance in instances) {
       // Check the field in each instance looking to find the object being held
@@ -358,7 +359,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   Future<void> _selectInstanceByHashCode(int instanceHashCode) async {
     // There's an instances table up.
     final Table<Object> instanceTable = tableStack.last;
-    final List<InstanceSummary> instances = instanceTable.data;
+    final List<InstanceSummary> instances = instanceTable.model.data;
     int row = 0;
     for (InstanceSummary instance in instances) {
       // Check each instance looking to find a particular object.
@@ -380,16 +381,16 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   bool get _isClassSelectedAndInstancesReady =>
-      tableStack.first.hasSelection &&
+      tableStack.first.model.hasSelection &&
       tableStack.length == 2 &&
-      tableStack.last.data.isNotEmpty;
+      tableStack.last.model.data.isNotEmpty;
 
   void selectClassInstance(String className, int instanceHashCode) {
     // Remove selection in class list.
     tableStack.first.clearSelection();
     // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
-      if (!tableStack.first.hasSelection) {
+      if (!tableStack.first.model.hasSelection) {
         // Wait until the class list has no selection.
         timer.cancel();
       }
@@ -422,7 +423,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     tableStack.first.clearSelection();
     // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
-      if (!tableStack.first.hasSelection) {
+      if (!tableStack.first.model.hasSelection) {
         // Wait until the class list has no selection.
         timer.cancel();
       }
@@ -451,7 +452,8 @@ class MemoryScreen extends Screen with SetStateMixin {
         // Wait for instance table, element 1, to have registered the selection.
         // TODO(terry): Better solution is to await a Table event that tells us.
         Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
-          if (tableStack.length == 2 && tableStack.elementAt(1).hasSelection) {
+          if (tableStack.length == 2 &&
+              tableStack.elementAt(1).model.hasSelection) {
             timer.cancel();
 
             // Done simulating all user UI actions as we navigate via hover thru
@@ -502,7 +504,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     try {
       final List<ClassHeapDetailStats> heapStats =
           await memoryController.resetAllocationProfile();
-      tableStack.first.setRows(heapStats);
+      tableStack.first.model.setRows(heapStats);
       _updateStatus(heapStats);
       spinner.remove();
     } catch (e) {
@@ -516,7 +518,8 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   List<String> getKnownSnapshotClasses() {
     if (_knownSnapshotClasses.isEmpty) {
-      final List<ClassHeapDetailStats> classesData = tableStack.first.data;
+      final List<ClassHeapDetailStats> classesData =
+          tableStack.first.model.data;
       for (ClassHeapDetailStats stat in classesData) {
         _knownSnapshotClasses.add(stat.classRef.name);
       }
@@ -562,7 +565,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       // Reset known snapshot classes, just changed.
       _knownSnapshotClasses.clear();
 
-      tableStack.first.setRows(heapStats);
+      tableStack.first.model.setRows(heapStats);
       _updateStatus(heapStats);
       spinner.remove();
     } catch (e) {
@@ -626,19 +629,19 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   Table<ClassHeapDetailStats> _createHeapStatsTableView() {
-    final Table<ClassHeapDetailStats> table =
-        Table<ClassHeapDetailStats>.virtual()
-          ..element.display = 'none'
-          ..element.clazz('memory-table');
+    final table = Table<ClassHeapDetailStats>.virtual()
+      ..element.display = 'none'
+      ..element.clazz('memory-table');
 
-    table.addColumn(MemoryColumnSize());
-    table.addColumn(MemoryColumnInstanceCount());
-    table.addColumn(MemoryColumnInstanceAccumulatedCount());
-    table.addColumn(MemoryColumnClassName());
+    table.model
+      ..addColumn(MemoryColumnSize())
+      ..addColumn(MemoryColumnInstanceCount())
+      ..addColumn(MemoryColumnInstanceAccumulatedCount())
+      ..addColumn(MemoryColumnClassName());
 
-    table.sortColumn = table.columns.first;
+    table.model.sortColumn = table.model.columns.first;
 
-    table.onSelect.listen((ClassHeapDetailStats row) async {
+    table.model.onSelect.listen((ClassHeapDetailStats row) async {
       ga.select(ga.memory, ga.inspectClass);
       // User selected a new class from the list of classes so the instance view
       // which would be the third child needs to be removed.
@@ -646,7 +649,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       if (!fromMemoryHover) _resetHistory();
 
-      final Table<InstanceSummary> newTable =
+      final newTable =
           row == null ? null : await _createInstanceListTableView(row);
       _pushNextTable(table, newTable);
     });
@@ -656,7 +659,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   Future<Table<InstanceSummary>> _createInstanceListTableView(
       ClassHeapDetailStats row) async {
-    final Table<InstanceSummary> table = new Table<InstanceSummary>.virtual()
+    final table = Table<InstanceSummary>.virtual()
       ..element.clazz('memory-table');
 
     try {
@@ -667,12 +670,12 @@ class MemoryScreen extends Screen with SetStateMixin {
         row.instancesCurrent,
       );
 
-      table.addColumn(new MemoryColumnSimple<InstanceSummary>(
+      table.model.addColumn(new MemoryColumnSimple<InstanceSummary>(
         '${instanceRows.length} Instances of ${row.classRef.name}',
         (InstanceSummary row) => row.objectRef,
       ));
 
-      table.addColumn(MemoryColumnSimple<InstanceSummary>(
+      table.model.addColumn(MemoryColumnSimple<InstanceSummary>(
         '',
         (InstanceSummary expand) => '<div class="alloc-image"> </div>',
         cssClass: 'allocation',
@@ -680,7 +683,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         hover: true,
       ));
 
-      table.setRows(instanceRows);
+      table.model.setRows(instanceRows);
     } catch (e, st) {
       framework.toast(
         'Problem fetching instances of ${row.classRef.name}: $e',
@@ -689,8 +692,8 @@ class MemoryScreen extends Screen with SetStateMixin {
       print('Problem fetching instances of ${row.classRef.name}: $e\n$st');
     }
 
-    table.onCellHover.listen(hoverInstanceAllocations);
-    table.onSelect.listen(select);
+    table.model.onCellHover.listen(hoverInstanceAllocations);
+    table.model.onSelect.listen(select);
 
     return table;
   }
@@ -812,7 +815,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   CoreElement _tdCellHover;
 
   // InstanceSummary of the visible hover card.
-  HoverCellData<InstanceSummary> _currentHoverSummary;
+  HoverCell<InstanceSummary> _currentHoverSummary;
 
   // This is the listener for the hover card (hoverPopup's) onMouseOver, it's
   // designed to keep the hover state (background-color for the TD same as the
@@ -847,7 +850,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     hoverPopup.display = 'none';
   }
 
-  void _closeHover(HoverCellData<InstanceSummary> newCurrent) {
+  void _closeHover(HoverCell<InstanceSummary> newCurrent) {
     // We're really leaving hover so close it.
     hoverPopup.clear(); // Remove all children.
     hoverPopup.display = 'none';
@@ -870,7 +873,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   static const String dataOwningClass = 'data-owning-class';
   static const String dataRef = 'data-ref';
 
-  void hoverInstanceAllocations(HoverCellData<InstanceSummary> hover) async {
+  void hoverInstanceAllocations(HoverCellData<InstanceSummary> data) async {
+    final HoverCell<InstanceSummary> hover = data;
     if (hover.cell == null) {
       // Hover out of the cell.
       _maybeCloseHover();
@@ -903,7 +907,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         span(text: 'Referenced', c: 'ref-by-title')
       ]));
 
-    final List<ClassHeapDetailStats> allClasses = tableStack.first.data;
+    final List<ClassHeapDetailStats> allClasses = tableStack.first.model.data;
 
     computeInboundRefs(
       allClasses,
