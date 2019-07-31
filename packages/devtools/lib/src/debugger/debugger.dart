@@ -322,7 +322,7 @@ class DebuggerScreen extends Screen {
         CodeMirror.fromElement(sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
-      codeMirror.setTheme('zenburn');
+      codeMirror.setTheme('darcula');
     }
     final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
     codeMirrorElement.setAttribute('flex', '');

@@ -20,7 +20,7 @@ class ConsoleArea implements CoreElementView {
     _editor = CodeMirror.fromElement(_container.element, options: options);
     _editor.setReadOnly(true);
     if (isDarkTheme) {
-      _editor.setTheme('zenburn');
+      _editor.setTheme('darcula');
     }
 
     final codeMirrorElement = _container.element.children[0];
