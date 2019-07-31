@@ -9,6 +9,7 @@ library splitter;
 import 'dart:async';
 import 'dart:html';
 
+import 'package:meta/meta.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 
@@ -27,6 +28,7 @@ class _SplitOptions {
     num gutterSize,
     List<num> sizes,
     List<num> minSize,
+    bool expandToMin,
   });
 
   external _ElementStyleCallback get elementStyle;
@@ -40,10 +42,21 @@ class _SplitOptions {
   external List<num> get sizes;
 
   external List<num> get minSize;
+
+  /// Whether to use the [minSize] property.
+  external bool get expandToMin;
 }
 
 @JS('Split')
 external Splitter _split(List parts, _SplitOptions options);
+
+typedef _SplitterBuilder = Splitter Function(
+  List<Element> parts, {
+  @required bool horizontal,
+  @required num gutterSize,
+  @required List<num> sizes,
+  @required List<num> minSize,
+});
 
 @JS()
 @anonymous
@@ -57,10 +70,14 @@ class Splitter {
   external void destroy([bool preserveStyles, bool preserveGutters]);
 }
 
-/// Splitter that splits multiple elements that must be styled with flexbox
-/// layout.
+/// Splitter that splits multiple elements using flex layout.
 ///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
+/// You should used this flex splitter instead of the fixed splitter if the
+/// size of the parent element of the element being split isn't fixed. Keep in
+/// mind that the children being split must be sized such that flex-shrink does
+/// not apply as otherwise flex-shrink will interact badly with the calculation
+/// for the size of the two split regions.
+/// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
 ///
 /// The underlying split.js library supports splitting elements that use layout
 /// schemes other than flexbox but we don't need that flexibility.
@@ -88,23 +105,76 @@ Splitter flexSplit(
       gutterSize: gutterSize,
       sizes: sizes,
       minSize: minSize,
+      expandToMin: minSize?.isNotEmpty ?? false,
     ),
   );
 }
 
-/// Creates a splitter that changes from horizontal to vertical depending on the
-/// window aspect ratio.
+/// Splitter that splits multiple elements that must have a parent of fixed
+/// size.
 ///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
+/// You should used this fixed splitter instead of flex splitter when the parent
+/// of the elements being split has a fixed size but one or more of the children
+/// may have arbitrary size resulting in flex-shrink causing problems for the
+/// flex calculations.
+/// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
 ///
-/// To avoid memory leaks, cancel the stream subscription when the splitter is
-/// no longer being used.
-StreamSubscription<Object> flexSplitBidirectional(
+/// The underlying split.js library supports splitting elements that use layout
+/// schemes other than flexbox but we don't need that flexibility.
+Splitter fixedSplit(
   List<Element> parts, {
+  bool horizontal = true,
   gutterSize = 5,
-  List<num> verticalSizes,
-  List<num> horizontalSizes,
+  List<num> sizes,
   List<num> minSize,
+}) {
+  return _split(
+    parts,
+    _SplitOptions(
+      elementStyle: allowInterop((dimension, size, gutterSize, index) {
+        Object o = js_util.newObject();
+        js_util.setProperty(
+          o,
+          horizontal ? 'width' : 'height',
+          'calc($size% - ${gutterSize}px)',
+        );
+        js_util.setProperty(
+          o,
+          horizontal ? 'height' : 'width',
+          '100%',
+        );
+        return o;
+      }),
+      gutterStyle: allowInterop((dimension, gutterSize, index) {
+        Object o = js_util.newObject();
+        js_util.setProperty(
+          o,
+          horizontal ? 'width' : 'height',
+          '${gutterSize}px',
+        );
+        js_util.setProperty(
+          o,
+          horizontal ? 'height' : 'width',
+          '100%',
+        );
+        return o;
+      }),
+      direction: horizontal ? 'horizontal' : 'vertical',
+      gutterSize: gutterSize,
+      sizes: sizes,
+      minSize: minSize,
+      expandToMin: minSize?.isNotEmpty ?? false,
+    ),
+  );
+}
+
+StreamSubscription<Object> _splitBidirectional(
+  List<Element> parts, {
+  @required gutterSize,
+  @required List<num> verticalSizes,
+  @required List<num> horizontalSizes,
+  @required List<num> minSize,
+  @required _SplitterBuilder splitterBuilder,
 }) {
   final mediaQueryList = window.matchMedia('(min-aspect-ratio: 1/1)');
   Splitter splitter;
@@ -112,7 +182,7 @@ StreamSubscription<Object> flexSplitBidirectional(
   // when the aspect ratio changes back.
   void createSplitter() {
     final bool horizontal = mediaQueryList.matches;
-    splitter = flexSplit(parts,
+    splitter = splitterBuilder(parts,
         horizontal: horizontal,
         gutterSize: gutterSize,
         minSize: minSize,
@@ -124,4 +194,61 @@ StreamSubscription<Object> flexSplitBidirectional(
     splitter.destroy(true, false);
     createSplitter();
   });
+}
+
+/// Creates a flex splitter that changes from horizontal to vertical depending
+/// on the window aspect ratio.
+///
+/// You should used this flex splitter instead of the fixed splitter if the
+/// size of the parent element of the element being split isn't fixed. Keep in
+/// mind that the children being split must be sized such that flex-shrink does
+/// not apply as otherwise flex-shrink will interact badly with the calculation
+/// for the size of the two split regions.
+/// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
+///
+/// To avoid memory leaks, cancel the stream subscription when the splitter is
+/// no longer being used.
+StreamSubscription<Object> flexSplitBidirectional(
+  List<Element> parts, {
+  gutterSize = 5,
+  List<num> verticalSizes,
+  List<num> horizontalSizes,
+  List<num> minSize,
+}) {
+  return _splitBidirectional(
+    parts,
+    gutterSize: gutterSize,
+    verticalSizes: verticalSizes,
+    horizontalSizes: horizontalSizes,
+    minSize: minSize,
+    splitterBuilder: flexSplit,
+  );
+}
+
+/// Creates a fixed splitter that changes from horizontal to vertical depending
+/// on the window aspect ratio.
+///
+/// You should used this fixed splitter instead of flex splitter when the parent
+/// of the elements being split has a fixed size but one or more of the children
+/// may have arbitrary size resulting in flex-shrink causing problems for the
+/// flex calculations.
+/// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
+///
+/// To avoid memory leaks, cancel the stream subscription when the splitter is
+/// no longer being used.
+StreamSubscription<Object> fixedSplitBidirectional(
+  List<Element> parts, {
+  gutterSize = 5,
+  List<num> verticalSizes,
+  List<num> horizontalSizes,
+  List<num> minSize,
+}) {
+  return _splitBidirectional(
+    parts,
+    gutterSize: gutterSize,
+    verticalSizes: verticalSizes,
+    horizontalSizes: horizontalSizes,
+    minSize: minSize,
+    splitterBuilder: fixedSplit,
+  );
 }
