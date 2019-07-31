@@ -79,8 +79,6 @@ class Splitter {
 /// for the size of the two split regions.
 /// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
 ///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
-///
 /// The underlying split.js library supports splitting elements that use layout
 /// schemes other than flexbox but we don't need that flexibility.
 Splitter flexSplit(
@@ -120,8 +118,6 @@ Splitter flexSplit(
 /// may have arbitrary size resulting in flex-shrink causing problems for the
 /// flex calculations.
 /// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
-///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
 ///
 /// The underlying split.js library supports splitting elements that use layout
 /// schemes other than flexbox but we don't need that flexibility.
@@ -210,8 +206,6 @@ StreamSubscription<Object> _splitBidirectional(
 /// for the size of the two split regions.
 /// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
 ///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
-///
 /// To avoid memory leaks, cancel the stream subscription when the splitter is
 /// no longer being used.
 StreamSubscription<Object> flexSplitBidirectional(
@@ -239,8 +233,6 @@ StreamSubscription<Object> flexSplitBidirectional(
 /// may have arbitrary size resulting in flex-shrink causing problems for the
 /// flex calculations.
 /// https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink
-///
-/// [parts] must be a list of [CoreElement], [Element], or query selectors.
 ///
 /// To avoid memory leaks, cancel the stream subscription when the splitter is
 /// no longer being used.
