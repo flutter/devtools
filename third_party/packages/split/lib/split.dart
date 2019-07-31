@@ -43,7 +43,7 @@ class _SplitOptions {
 
   external List<num> get minSize;
 
-  /// minSize is ignored unless this property is set.
+  /// Whether to use the [minSize] property.
   external bool get expandToMin;
 }
 
@@ -72,7 +72,7 @@ class Splitter {
 
 /// Splitter that splits multiple elements using flex layout.
 ///
-/// You should used this fixed splitter instead of the fixed splitter if the
+/// You should used this flex splitter instead of the fixed splitter if the
 /// size of the parent element of the element being split isn't fixed. Keep in
 /// mind that the children being split must be sized such that flex-shrink does
 /// not apply as otherwise flex-shrink will interact badly with the calculation
@@ -107,13 +107,13 @@ Splitter flexSplit(
       gutterSize: gutterSize,
       sizes: sizes,
       minSize: minSize,
-      expandToMin: minSize?.isNotEmpty == true,
+      expandToMin: minSize?.isNotEmpty ?? false,
     ),
   );
 }
 
 /// Splitter that splits multiple elements that must have a parent of fixed
-/// width.
+/// size.
 ///
 /// You should used this fixed splitter instead of flex splitter when the parent
 /// of the elements being split has a fixed size but one or more of the children
@@ -131,16 +131,22 @@ Splitter fixedSplit(
   gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
-  expandToMin: true,
 }) {
   return _split(
     parts,
     _SplitOptions(
       elementStyle: allowInterop((dimension, size, gutterSize, index) {
         Object o = js_util.newObject();
-        js_util.setProperty(o, horizontal ? 'width' : 'height',
-            'calc($size% - ${gutterSize}px)');
-        js_util.setProperty(o, horizontal ? 'height' : 'width', '100%');
+        js_util.setProperty(
+          o,
+          horizontal ? 'width' : 'height',
+          'calc($size% - ${gutterSize}px)',
+        );
+        js_util.setProperty(
+          o,
+          horizontal ? 'height' : 'width',
+          '100%',
+        );
         return o;
       }),
       gutterStyle: allowInterop((dimension, gutterSize, index) {
@@ -161,7 +167,7 @@ Splitter fixedSplit(
       gutterSize: gutterSize,
       sizes: sizes,
       minSize: minSize,
-      expandToMin: minSize?.isNotEmpty == true,
+      expandToMin: minSize?.isNotEmpty ?? false,
     ),
   );
 }
@@ -197,7 +203,7 @@ StreamSubscription<Object> _splitBidirectional(
 /// Creates a flex splitter that changes from horizontal to vertical depending
 /// on the window aspect ratio.
 ///
-/// You should used this fixed splitter instead of the fixed splitter if the
+/// You should used this flex splitter instead of the fixed splitter if the
 /// size of the parent element of the element being split isn't fixed. Keep in
 /// mind that the children being split must be sized such that flex-shrink does
 /// not apply as otherwise flex-shrink will interact badly with the calculation
@@ -225,7 +231,7 @@ StreamSubscription<Object> flexSplitBidirectional(
   );
 }
 
-/// Creates a flex splitter that changes from horizontal to vertical depending
+/// Creates a fixed splitter that changes from horizontal to vertical depending
 /// on the window aspect ratio.
 ///
 /// You should used this fixed splitter instead of flex splitter when the parent
