@@ -4,6 +4,7 @@
 * Search and filter dialogs are now case-insensitive.
 * Link to Dart DevTools documentation from connect screen.
 * Disable unsupported DevTools pages for Dart web apps.
+* Debugger dark mode improvements.
 
 ## 0.1.4 - 2019-07-19
 * Add Performance page. This has a traditional CPU profiler for Dart applications.
