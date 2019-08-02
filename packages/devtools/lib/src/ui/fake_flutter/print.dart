@@ -96,7 +96,6 @@ Future<void> get debugPrintDone =>
     _debugPrintCompleter?.future ?? Future<void>.value();
 
 final RegExp _indentPattern = RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
-enum _WordWrapParseMode { inSpace, inWord, atBreak }
 
 /// Wraps the given string at the given width.
 ///

@@ -16,17 +16,21 @@
     --default-color-thumb: #888;
     --default-color: #fff;
     --disabled-background: #555;
-    --error-background: #7c1c05;
+    --error-background: rgb(65, 33, 36);
+    --error-summary-color: #ff6b68;
+    --inspector-info-color: #909090;
+    --inspector-hint-color: #bbb;
+    --light-text-color: #aaaaaa;
     --even-row-background: #383636;
     --footer-color: #858585;
     --footer-link-hover: wheat;
     --footer-strong: #ccc;
     --form-select-background: #202225;
     --header-background: #282828;
-    --header-color: #ccc;
+    --header-color: #bbbbbb;
     --header-item-rgb: 255, 255, 255;
     --header-item: rgba(var(--header-item-rgb), 1);
-    --hint-background: #4b4b3f;
+    --hint-background: #383636;
     --light-background: #585858;
     --light-text-color: #fafbfc;
     --masthead-background: #394959;
@@ -132,4 +136,9 @@ nav.menu .menu-item {
 .flash-warn {
     background-color: #fffbdd;
     color: #735c0f;
+}
+
+/* The default body color for the primer dark theme is way too bright for a dark theme. */
+body {
+    color: #999999;
 }

@@ -126,6 +126,8 @@ class FlutterIcons {
   static const Icon redProgress = UrlIcon('/icons/perf/red_progress.gif');
   static const Icon yellowProgress = UrlIcon('/icons/perf/yellow_progress.gif');
 
+  static const Icon redError = UrlIcon('/icons/perf/RedExcl.png');
+
   // Icons matching IntelliJ core icons.
   static const Icon locate = UrlIcon('/icons/general/locate.png');
   static const Icon forceRefresh = UrlIcon('/icons/actions/forceRefresh.svg');

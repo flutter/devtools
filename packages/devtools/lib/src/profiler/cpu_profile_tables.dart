@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import '../table_data.dart';
 import '../tables.dart';
 import '../url_utils.dart';
 import '../utils.dart';
@@ -24,17 +25,18 @@ class CpuCallTree extends CpuProfilerView {
   void _init() {
     final methodNameColumn = MethodNameColumn()
       ..onNodeExpanded
-          .listen((stackFrame) => callTreeTable.expandNode(stackFrame))
+          .listen((stackFrame) => callTreeTable.model.expandNode(stackFrame))
       ..onNodeCollapsed
-          .listen((stackFrame) => callTreeTable.collapseNode(stackFrame));
+          .listen((stackFrame) => callTreeTable.model.collapseNode(stackFrame));
 
-    callTreeTable = TreeTable<CpuStackFrame>.virtual()
+    callTreeTable = TreeTable<CpuStackFrame>.virtual();
+    callTreeTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(SelfTimeColumn())
       ..addColumn(methodNameColumn)
       ..addColumn(SourceColumn());
-    callTreeTable
-      ..sortColumn = callTreeTable.columns.first
+    callTreeTable.model
+      ..sortColumn = callTreeTable.model.columns.first
       ..setRows(<CpuStackFrame>[]);
     add(callTreeTable.element);
   }
@@ -49,11 +51,11 @@ class CpuCallTree extends CpuProfilerView {
       root..expand(),
       ...root.children.cast(),
     ];
-    callTreeTable.setRows(rows);
+    callTreeTable.model.setRows(rows);
   }
 
   @override
-  void reset() => callTreeTable.setRows(<CpuStackFrame>[]);
+  void reset() => callTreeTable.model.setRows(<CpuStackFrame>[]);
 }
 
 class CpuBottomUp extends CpuProfilerView {
@@ -69,17 +71,17 @@ class CpuBottomUp extends CpuProfilerView {
   void _init() {
     final methodNameColumn = MethodNameColumn()
       ..onNodeExpanded
-          .listen((stackFrame) => bottomUpTable.expandNode(stackFrame))
+          .listen((stackFrame) => bottomUpTable.model.expandNode(stackFrame))
       ..onNodeCollapsed
-          .listen((stackFrame) => bottomUpTable.collapseNode(stackFrame));
+          .listen((stackFrame) => bottomUpTable.model.collapseNode(stackFrame));
     final selfTimeColumn = SelfTimeColumn();
 
-    bottomUpTable = TreeTable<CpuStackFrame>.virtual()
+    bottomUpTable = TreeTable<CpuStackFrame>.virtual();
+    bottomUpTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(selfTimeColumn)
       ..addColumn(methodNameColumn)
-      ..addColumn(SourceColumn());
-    bottomUpTable
+      ..addColumn(SourceColumn())
       ..sortColumn = selfTimeColumn
       ..setRows(<CpuStackFrame>[]);
     add(bottomUpTable.element);
@@ -90,14 +92,14 @@ class CpuBottomUp extends CpuProfilerView {
     final CpuProfileData data = profileDataProvider();
     final List<CpuStackFrame> bottomUpRoots =
         BottomUpProfileTransformer().processData(data.cpuProfileRoot);
-    bottomUpTable.setRows(bottomUpRoots);
+    bottomUpTable.model.setRows(bottomUpRoots);
   }
 
   @override
-  void reset() => bottomUpTable.setRows(<CpuStackFrame>[]);
+  void reset() => bottomUpTable.model.setRows(<CpuStackFrame>[]);
 }
 
-class SelfTimeColumn extends Column<CpuStackFrame> {
+class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   SelfTimeColumn() : super('Self Time', fixedWidthPx: _timeColumnWidthPx);
 
   @override
@@ -123,7 +125,7 @@ class SelfTimeColumn extends Column<CpuStackFrame> {
   }
 }
 
-class TotalTimeColumn extends Column<CpuStackFrame> {
+class TotalTimeColumn extends ColumnData<CpuStackFrame> {
   TotalTimeColumn() : super('Total Time', fixedWidthPx: _timeColumnWidthPx);
 
   @override
@@ -149,7 +151,7 @@ class TotalTimeColumn extends Column<CpuStackFrame> {
   }
 }
 
-class MethodNameColumn extends TreeColumn<CpuStackFrame> {
+class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   MethodNameColumn() : super('Method');
 
   static const maxMethodNameLength = 75;
@@ -173,7 +175,7 @@ class MethodNameColumn extends TreeColumn<CpuStackFrame> {
 }
 
 // TODO(kenzie): make these urls clickable once we can jump to source.
-class SourceColumn extends Column<CpuStackFrame> {
+class SourceColumn extends ColumnData<CpuStackFrame> {
   SourceColumn() : super('Source', alignment: ColumnAlignment.right);
 
   @override

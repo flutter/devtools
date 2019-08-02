@@ -2,7 +2,7 @@ import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/theme.dart';
 
 final TextStyle unimportant = TextStyle(
-  color: ThemedColor(Colors.grey.shade500, Colors.grey.shade400),
+  color: ThemedColor(Colors.grey.shade500, Colors.grey.shade600),
 );
 const TextStyle regular = TextStyle(color: defaultForeground);
 final TextStyle warning = TextStyle(
