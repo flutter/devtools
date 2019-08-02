@@ -59,6 +59,8 @@ class LoggingScreen extends Screen {
 
     logDetailsUI = LogDetailsUI();
 
+    final CoreElement structuredErrorsButton =
+        ServiceExtensionButton(structuredErrors).button;
     screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..add(<CoreElement>[
@@ -73,7 +75,7 @@ class LoggingScreen extends Screen {
                   controller.clear();
                 }),
               div()..flex(),
-              ServiceExtensionButton(structuredErrors).button,
+              structuredErrorsButton,
             ])
         ]),
       div(c: 'section log-area bidirectional')
