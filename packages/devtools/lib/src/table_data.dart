@@ -56,7 +56,9 @@ class TableData<T> extends Object {
   bool _hasPendingRebuild = false;
 
   List<ColumnData<T>> get columns => _columns;
+
   final List<ColumnData<T>> _columns = <ColumnData<T>>[];
+
   List<T> data = [];
 
   int get rowCount => data?.length ?? 0;
@@ -73,6 +75,7 @@ class TableData<T> extends Object {
 
   @protected
   final StreamController<T> selectController = StreamController<T>.broadcast();
+
   final StreamController<Null> _rowsChangedController =
       StreamController.broadcast();
 
@@ -354,24 +357,27 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
 }
 
 abstract class ColumnData<T> {
-  ColumnData(this.title,
-      {this.alignment = ColumnAlignment.left,
-      this.fixedWidthPx,
-      this.percentWidth,
-      this.usesHtml = false,
-      this.hover = false,
-      this.cssClass}) {
+  ColumnData(
+    this.title, {
+    this.alignment = ColumnAlignment.left,
+    this.fixedWidthPx,
+    this.percentWidth,
+    this.usesHtml = false,
+    this.hover = false,
+    this.cssClass,
+  }) {
     if (percentWidth != null) {
       percentWidth.clamp(0, 100);
     }
   }
 
-  ColumnData.wide(this.title,
-      {this.alignment = ColumnAlignment.left,
-      this.usesHtml = false,
-      this.hover = false,
-      this.cssClass})
-      : percentWidth = defaultWideColumnPercentWidth;
+  ColumnData.wide(
+    this.title, {
+    this.alignment = ColumnAlignment.left,
+    this.usesHtml = false,
+    this.hover = false,
+    this.cssClass,
+  }) : percentWidth = defaultWideColumnPercentWidth;
 
   static const defaultWideColumnPercentWidth = 100;
 
@@ -394,6 +400,7 @@ abstract class ColumnData<T> {
   final ColumnAlignment alignment;
 
   final bool usesHtml;
+
   final bool hover;
 
   bool get numeric => false;

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools/src/inspector/inspector_tree_web.dart';
-import 'package:devtools/src/service_extensions.dart';
-import 'package:devtools/src/ui/service_extension_elements.dart';
 import 'package:split/split.dart' as split;
 
 import '../framework/framework.dart';
@@ -12,12 +9,15 @@ import '../inspector/inspector.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_html.dart';
+import '../inspector/inspector_tree_web.dart';
+import '../service_extensions.dart';
 import '../tables.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/primer.dart';
+import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
 import 'logging_controller.dart';
 
@@ -59,8 +59,6 @@ class LoggingScreen extends Screen {
 
     logDetailsUI = LogDetailsUI();
 
-    final CoreElement structuredErrorsButton =
-        ServiceExtensionButton(structuredErrors).button;
     screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..add(<CoreElement>[
@@ -75,7 +73,7 @@ class LoggingScreen extends Screen {
                   controller.clear();
                 }),
               div()..flex(),
-              structuredErrorsButton,
+              ServiceExtensionCheckbox(structuredErrors).element,
             ])
         ]),
       div(c: 'section log-area bidirectional')

@@ -37,14 +37,17 @@ StreamController<LogData> logDataController;
 StreamController<void> detailsSelectionController;
 
 List<LogData> unhandledLogData = [];
+
 Stream<String> get logStatusStream => logStatusController.stream;
+
 Stream<LogData> get logDataStream => logDataController.stream;
 
 Stream<void> get detailsSelectionStream => detailsSelectionController.stream;
 
-// Current inspector tree displayed in the details view if any
+/// Current inspector tree displayed in the details view if any
 FakeInspectorTree currentDetailsTree;
-// Current details text shown in the details view if any.
+
+/// Current details text shown in the details view if any.
 String currentDetailsText;
 
 /// Returns a future after length new log data entries that are not GC events
@@ -175,10 +178,18 @@ void main() async {
       unhandledLogData.clear();
 
       final evalOnDartLibrary = EvalOnDartLibrary(
-          ['package:flutter_error_app/main.dart'], env.service);
+        ['package:flutter_error_app/main.dart'],
+        env.service,
+      );
 
-      await evalOnDartLibrary.eval('print("Example message A', isAlive: null);
-      await evalOnDartLibrary.eval('print("Example message B', isAlive: null);
+      await evalOnDartLibrary.eval(
+        'print("Example message A',
+        isAlive: null,
+      );
+      await evalOnDartLibrary.eval(
+        'print("Example message B',
+        isAlive: null,
+      );
 
       var logEntries = await waitForNextLogData(2);
       expect(logEntries[0].kind, equals('stdout'));
@@ -186,8 +197,10 @@ void main() async {
       expect(logEntries[1].kind, equals('stdout'));
       expect(logEntries[1].summary, equals('Example message B\n'));
 
-      await evalOnDartLibrary
-          .eval('navigateToScreen("Missing Material Example")', isAlive: null);
+      await evalOnDartLibrary.eval(
+        'navigateToScreen("Missing Material Example")',
+        isAlive: null,
+      );
 
       logEntries = await waitForNextLogData(4);
       // TODO(jacobr): why do we get two navigation events for this case?

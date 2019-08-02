@@ -190,7 +190,7 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Disable structured errors for Flutter framework issues',
   disabledTooltip: 'Show structured errors for Flutter framework issues',
-  gaScreenName: ga.inspector,
+  gaScreenName: ga.logging,
   gaItem: ga.structuredErrors,
 );
 
@@ -208,6 +208,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   toggleSelectWidgetMode,
   togglePlatformMode,
   slowAnimations,
+  structuredErrors,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsWhitelist =

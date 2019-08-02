@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:devtools/src/inspector/inspector_tree.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -15,6 +14,7 @@ import '../core/message_bus.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
+import '../inspector/inspector_tree.dart';
 import '../memory/heap_space.dart';
 import '../table_data.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
@@ -32,6 +32,7 @@ bool _verboseDebugging = false;
 typedef OnLogCountStatusChanged = void Function(String status);
 
 typedef OnShowDetails = void Function({String text, InspectorTree tree});
+
 typedef CreateLoggingTree = InspectorTree Function(
     {VoidCallback onSelectionChange});
 
@@ -189,11 +190,14 @@ class LoggingController {
     }
   }
 
-  // Callbacks to apply changes in the controller to other views.
+  /// Callbacks to apply changes in the controller to other views.
   final OnLogCountStatusChanged onLogCountStatusChanged;
+
+  /// Callback returning whether the logging screen is visible.
   final bool Function() isVisible;
 
   List<LogData> data = <LogData>[];
+
   final List<StreamSubscription> _subscriptions = [];
 
   DateTime _lastScrollTime;

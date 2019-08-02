@@ -12,13 +12,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js' as js;
 
-import 'package:devtools/src/logging/logging_controller.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../logging/logging.dart';
+import '../logging/logging_controller.dart';
 import '../main.dart';
 
 class App {
