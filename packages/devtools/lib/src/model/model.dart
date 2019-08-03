@@ -18,6 +18,7 @@ import '../debugger/debugger.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../logging/logging.dart';
+import '../logging/logging_controller.dart';
 import '../main.dart';
 
 class App {
@@ -110,12 +111,12 @@ class App {
 
   Future<void> logsClearLogs([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logging');
-    screen.loggingTable.setRows(<LogData>[]);
+    screen.controller.loggingTableModel.setRows(<LogData>[]);
   }
 
   Future<int> logsLogCount([dynamic _]) async {
     final LoggingScreen screen = framework.getScreen('logging');
-    return screen.loggingTable.rowCount;
+    return screen.controller.loggingTableModel.rowCount;
   }
 
   Future<String> debuggerGetState([dynamic _]) async {

@@ -5,6 +5,7 @@
 @TestOn('browser')
 import 'dart:html';
 
+import 'package:devtools/src/table_data.dart';
 import 'package:devtools/src/tables.dart';
 import 'package:test/test.dart';
 
@@ -22,9 +23,10 @@ void main() {
         ..overflow = 'scroll';
       document.body.append(table.element.element);
 
-      table.addColumn(TestColumn('Col One'));
-      table.addColumn(TestColumn('Col Two'));
-      table.setRows(oneThousandRows);
+      table.model
+        ..addColumn(TestColumn('Col One'))
+        ..addColumn(TestColumn('Col Two'))
+        ..setRows(oneThousandRows);
 
       await window.animationFrame;
     });
@@ -46,9 +48,10 @@ void main() {
         ..overflow = 'scroll';
       document.body.append(table.element.element);
 
-      table.addColumn(TestColumn('Col One'));
-      table.addColumn(TestColumn('Col Two'));
-      table.setRows(oneThousandRows);
+      table.model
+        ..addColumn(TestColumn('Col One'))
+        ..addColumn(TestColumn('Col Two'))
+        ..setRows(oneThousandRows);
 
       await window.animationFrame;
     });
@@ -145,7 +148,7 @@ class TestData {
   final String message;
 }
 
-class TestColumn extends Column<TestData> {
+class TestColumn extends ColumnData<TestData> {
   TestColumn(String name) : super(name);
 
   @override

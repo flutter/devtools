@@ -201,16 +201,21 @@ class Framework {
     screens.add(screen);
   }
 
-  void navigateTo(String id) {
-    ga.screen(id);
+  /// Returns false if the screen is disabled.
+  bool navigateTo(String id) {
     final Screen screen = getScreen(id);
     assert(screen != null);
+    if (screen.disabled) {
+      return false;
+    }
+    ga.screen(id);
 
     final String search = window.location.search;
     final String ref = search == null ? screen.ref : '$search${screen.ref}';
     window.history.pushState(null, screen.name, ref);
 
     load(screen);
+    return true;
   }
 
   void showAnalyticsDialog() {

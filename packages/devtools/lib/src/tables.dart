@@ -2,90 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:html';
 
 import 'package:devtools/src/ui/primer.dart';
 import 'package:meta/meta.dart';
 
 import 'framework/framework.dart';
+import 'table_data.dart';
 import 'trees.dart';
 import 'ui/custom.dart';
 import 'ui/elements.dart';
-import 'utils.dart';
 
-class HoverCellData<T> {
-  HoverCellData(this.cell, this.data);
+class HoverCell<T> extends HoverCellData<T> {
+  HoverCell(this.cell, T data) : super(data);
 
   final CoreElement cell;
-  final T data;
 }
 
-class Table<T> extends Object with SetStateMixin {
-  Table()
-      : element = div(a: 'flex', c: 'overflow-y table-border'),
-        _isVirtual = false {
-    _init();
-  }
+class Table<T> with SetStateMixin implements TableDataClient<T> {
+  factory Table() => Table._(TableData<T>(), null, false);
 
-  Table.virtual({this.rowHeight = 29.0, bool overflowAuto = false})
-      : element = div(
+  factory Table.virtual({double rowHeight = 29.0}) =>
+      Table._(TableData<T>(), rowHeight, true);
+
+  Table._(this.model, this.rowHeight, this.isVirtual)
+      : assert(model.client == null) {
+    model.client = this;
+    const bool overflowAuto = false;
+    element = isVirtual
+        ? div(
             a: 'flex',
             c: '${overflowAuto ? 'overflow-auto' : 'overflow-y'} '
-                'table-border table-virtual'),
-        _isVirtual = true {
-    _init();
-
-    _spacerBeforeVisibleRows = CoreElement('tr');
-    _spacerAfterVisibleRows = CoreElement('tr');
-
-    element.onScroll.listen((_) => _scheduleRebuild());
-  }
-
-  final CoreElement element;
-  final bool _isVirtual;
-
-  double rowHeight;
-  bool _hasPendingRebuild = false;
-
-  List<Column<T>> columns = <Column<T>>[];
-  List<T> data;
-
-  int get rowCount => data?.length ?? 0;
-
-  Column<T> _sortColumn;
-
-  SortOrder _sortDirection;
-
-  set sortColumn(Column<T> column) {
-    _sortColumn = column;
-    _sortDirection =
-        column.numeric ? SortOrder.descending : SortOrder.ascending;
-  }
-
-  final CoreElement _table = CoreElement('table')
-    ..clazz('full-width')
-    ..setAttribute('tabIndex', '0');
-  CoreElement _thead;
-  CoreElement _tbody;
-
-  CoreElement _spacerBeforeVisibleRows;
-  CoreElement _spacerAfterVisibleRows;
-  final CoreElement _dummyRowToForceAlternatingColor = CoreElement('tr')
-    ..display = 'none';
-
-  final Map<Column<T>, CoreElement> _spanForColumn = <Column<T>, CoreElement>{};
-  final Map<Element, T> _dataForRow = <Element, T>{};
-  final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
-
-  final StreamController<T> _selectController = StreamController<T>.broadcast();
-  final StreamController<Null> _rowsChangedController =
-      StreamController.broadcast();
-
-  final StreamController<HoverCellData<T>> _selectElementController =
-      StreamController<HoverCellData<T>>.broadcast();
-
-  void _init() {
+                'table-border table-virtual',
+          )
+        : div(a: 'flex', c: 'overflow-y table-border');
     element.add(_table);
 
     // Handle key events.
@@ -100,10 +50,10 @@ class Table<T> extends Object with SetStateMixin {
           indexOffset = 1;
           break;
         case KeyCode.LEFT:
-          _handleLeftKey();
+          model.handleLeftKey();
           break;
         case KeyCode.RIGHT:
-          _handleRightKey();
+          model.handleRightKey();
           break;
         default:
           break;
@@ -116,61 +66,67 @@ class Table<T> extends Object with SetStateMixin {
       e.preventDefault();
 
       // Get the index of the currently selected row.
-      final int currentIndex = _selectedObjectIndex;
+      final int currentIndex = model.selectedObjectIndex;
       // Offset it, or select index 0 if there was no prior selection.
       int newIndex = currentIndex == null ? 0 : (currentIndex + indexOffset);
       // Clamp to the first/last row.
-      final int maxRowIndex = (data?.length ?? 1) - 1;
+      final int maxRowIndex = (model.data?.length ?? 1) - 1;
       newIndex = newIndex.clamp(0, maxRowIndex);
 
       selectByIndex(newIndex);
     });
+
+    _spacerBeforeVisibleRows = CoreElement('tr');
+    _spacerAfterVisibleRows = CoreElement('tr');
+
+    element.onScroll.listen((_) => model.scheduleRebuild());
   }
 
-  // Override this method if the table should handle left key strokes.
-  void _handleLeftKey() {}
+  final double rowHeight;
+  final bool isVirtual;
 
-  // Override this method if the table should handle right key strokes.
-  void _handleRightKey() {}
-
-  void dispose() {}
-
-  Stream<T> get onSelect => _selectController.stream;
-
-  Stream<Null> get onRowsChanged => _rowsChangedController.stream;
-
-  Stream<HoverCellData<T>> get onCellHover => _selectElementController.stream;
-
-  void addColumn(Column<T> column) {
-    columns.add(column);
+  void dispose() {
+    model?.dispose();
   }
 
-  void setRows(List<T> data) {
-    // If the selected object is no longer valid, clear the selection and
-    // scroll to the top.
-    if (!data.contains(_selectedObject)) {
-      if (rowCount > 0) {
-        _scrollToIndex(0, scrollBehavior: 'auto');
-      }
-      clearSelection();
-    }
+  final TableData<T> model;
+  CoreElement element;
 
-    // Copy the list, so that changes to it don't affect us.
-    this.data = data.toList();
+  final CoreElement _table = CoreElement('table')
+    ..clazz('full-width')
+    ..setAttribute('tabIndex', '0');
+  CoreElement _thead;
+  CoreElement _tbody;
 
-    _rowsChangedController.add(null);
+  CoreElement _spacerBeforeVisibleRows;
+  CoreElement _spacerAfterVisibleRows;
+  final CoreElement _dummyRowToForceAlternatingColor = CoreElement('tr')
+    ..display = 'none';
 
+  final Map<ColumnData<T>, CoreElement> _spanForColumn =
+      <ColumnData<T>, CoreElement>{};
+  final Map<Element, T> _dataForRow = <Element, T>{};
+  final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
+
+  ColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
+    return ColumnRenderer(columnModel);
+  }
+
+  @override
+  void onSetRows() {
     if (_thead == null) {
       _thead = CoreElement('thead')
         ..add(tr()
-          ..add(columns.map((Column<T> column) {
+          ..add(model.columns.map((ColumnData<T> column) {
             final CoreElement s = span(
                 text: column.title,
                 c: 'interactable${column.supportsSorting ? ' sortable' : ''}');
-            s.click(() => _columnClicked(column));
+            s.click(() => model.onColumnClicked(column));
             _spanForColumn[column] = s;
+
             final CoreElement header =
-                th(c: 'sticky-top ${column.alignmentCss}')..add(s);
+                th(c: 'sticky-top ${getColumnRenderer(column).alignmentCss}')
+                  ..add(s);
             if (column.fixedWidthPx != null) {
               header.element.style.width = '${column.fixedWidthPx}px';
             } else if (column.percentWidth != null) {
@@ -186,90 +142,35 @@ class Table<T> extends Object with SetStateMixin {
       _tbody = CoreElement('tbody', classes: 'selectable');
       _table.add(_tbody);
     }
-
-    if (_sortColumn == null) {
-      final Column<T> column = columns
-          .firstWhere((Column<T> c) => c.supportsSorting, orElse: () => null);
-      if (column != null) {
-        sortColumn = column;
-      }
-    }
-
-    if (_sortColumn != null) {
-      _doSort();
-    }
-
-    _scheduleRebuild();
   }
 
-  void scrollTo(T row, {String scrollBehavior = 'smooth'}) {
-    final index = data.indexOf(row);
-    if (index == -1) {
-      return;
-    }
-    if (_hasPendingRebuild) {
-      // Wait for the content to be rendered before we scroll otherwise we may
-      // not be able to scroll far enough.
-      setState(() {
-        // We assume the index is still valid. Alternately we search for the
-        // index again. The one thing we should absolutely not do is call the
-        // scrollTo helper method again as there is a significant risk scrollTo
-        // would never be called if items are added to the table every frame.
-        _scrollToIndex(index, scrollBehavior: scrollBehavior);
-      });
-      return;
-    }
-    _scrollToIndex(index, scrollBehavior: scrollBehavior);
-  }
-
-  void _scheduleRebuild() {
-    if (!_hasPendingRebuild) {
-      // Set a flag to ensure we don't schedule rebuilds if there's already one
-      // in the queue.
-      _hasPendingRebuild = true;
-
-      setState(() {
-        _hasPendingRebuild = false;
-        _rebuildTable();
-      });
-    }
-  }
-
-  void _doSort() {
-    final Column<T> column = _sortColumn;
-    final int direction = _sortDirection == SortOrder.ascending ? 1 : -1;
+  @override
+  void onColumnSortChanged(ColumnData<T> column, SortOrder sortDirection) {
+    // Update the UI to reflect the new column sort order.
+    // The base class will sort the actual data.
 
     // update the sort arrows
-    for (Column<T> c in columns) {
+    for (ColumnData<T> c in model.columns) {
       final CoreElement s = _spanForColumn[c];
-      if (c == _sortColumn) {
-        s.toggleClass('up', _sortDirection == SortOrder.ascending);
-        s.toggleClass('down', _sortDirection != SortOrder.ascending);
+      if (c == column) {
+        s.toggleClass('up', sortDirection == SortOrder.ascending);
+        s.toggleClass('down', sortDirection != SortOrder.ascending);
       } else {
         s.toggleClass('up', false);
         s.toggleClass('down', false);
       }
     }
-
-    _sortData(column, direction);
   }
 
-  void _sortData(Column column, int direction) {
-    data.sort((T a, T b) => _compareData(a, b, column, direction));
-  }
-
-  int _compareData(T a, T b, Column column, int direction) {
-    return column.compare(a, b) * direction;
-  }
-
-  void _rebuildTable() {
+  @override
+  void rebuildTable() {
     // If we've never had any data set, we don't need to (and can't - since all
     // the elements aren't created) rebuild.
-    if (data == null) {
+    if (model.data == null) {
       return;
     }
 
-    if (_isVirtual) {
+    if (isVirtual) {
       _rebuildVirtualTable();
     } else {
       _rebuildStaticTable();
@@ -282,6 +183,8 @@ class Table<T> extends Object with SetStateMixin {
     // set of rows currently in the table are already correct. We also don't
     // need to build rows that are already in the table, just add and remove the
     // deltas.
+
+    final data = model.data;
 
     int firstRenderedRowInclusive = 0;
     int lastRenderedRowExclusive = data?.length ?? 0;
@@ -353,7 +256,7 @@ class Table<T> extends Object with SetStateMixin {
   void _rebuildStaticTable() {
     _buildTableRows(
         firstRenderedRowInclusive: 0,
-        lastRenderedRowExclusive: data?.length ?? 0);
+        lastRenderedRowExclusive: model.data?.length ?? 0);
   }
 
   int _buildTableRows({
@@ -379,7 +282,7 @@ class Table<T> extends Object with SetStateMixin {
     for (int index = firstRenderedRowInclusive;
         index < lastRenderedRowExclusive;
         index++) {
-      final T dataObject = data[index];
+      final T dataObject = model.data[index];
       final bool isReusableRow =
           currentRowIndex < _tbody.element.children.length;
       // Reuse a row if one already exists in the table.
@@ -411,9 +314,9 @@ class Table<T> extends Object with SetStateMixin {
         tableRow.click(() {
           final rowElement = tableRow.element;
           final dataForRow = _dataForRow[rowElement];
-          selectRow(rowElement, data.indexOf(dataForRow));
+          selectRow(rowElement, model.data.indexOf(dataForRow));
           // TODO(kenzie): we should do less work on selection.
-          _scheduleRebuild();
+          model.scheduleRebuild();
         });
       }
 
@@ -423,7 +326,7 @@ class Table<T> extends Object with SetStateMixin {
       }
 
       int currentColumnIndex = 0;
-      for (Column<T> column in columns) {
+      for (ColumnData<T> column in model.columns) {
         final bool isReusableColumn =
             currentColumnIndex < tableRow.element.children.length;
         // Reuse or create a cell.
@@ -449,9 +352,10 @@ class Table<T> extends Object with SetStateMixin {
           column.cssClass.split(' ').forEach(tableCell.clazz);
         }
 
-        tableCell.clazz(column.alignmentCss);
+        final columnRenderer = getColumnRenderer(column);
+        tableCell.clazz(columnRenderer.alignmentCss);
 
-        column.renderToElement(tableCell, dataObject);
+        columnRenderer.renderToElement(tableCell, dataObject);
 
         if (!isReusableColumn) {
           tableRow.add(tableCell);
@@ -459,8 +363,8 @@ class Table<T> extends Object with SetStateMixin {
       }
 
       // If this row represents our selected object, highlight it.
-      if (dataObject == _selectedObject) {
-        _select(tableRow.element, _selectedObject, index);
+      if (dataObject == model.selectedObject) {
+        _select(tableRow.element, model.selectedObject, index);
       } else {
         // Otherwise, ensure it's not marked as selected (the previous data
         // shown in this row may have been selected).
@@ -474,12 +378,6 @@ class Table<T> extends Object with SetStateMixin {
     return currentRowIndex;
   }
 
-  T _selectedObject;
-
-  int _selectedObjectIndex;
-
-  bool get hasSelection => _selectedObject != null;
-
   void _select(Element row, T object, int index) {
     if (_tbody != null) {
       for (Element row in _tbody.element.querySelectorAll('.selected')) {
@@ -491,16 +389,11 @@ class Table<T> extends Object with SetStateMixin {
       row.classes.add('selected');
     }
 
-    if (_selectedObject != object) {
-      _selectController.add(object);
-    }
-
-    _selectedObject = object;
-    _selectedObjectIndex = index;
+    model.setSelection(object, index);
   }
 
   void _selectCoreElement(CoreElement coreElement, T object, int index) {
-    _selectElementController.add(HoverCellData<T>(coreElement, object));
+    model.selectElementController.add(HoverCell<T>(coreElement, object));
   }
 
   /// Selects by index. Note: This is index of the row as it's rendered
@@ -509,21 +402,23 @@ class Table<T> extends Object with SetStateMixin {
   /// scrollBehaviour is a string as defined for the HTML scrollTo() method
   /// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo (eg.
   /// `smooth`, `instance`, `auto`).
+  @override
   void selectByIndex(
     int newIndex, {
     bool keepVisible = true,
     String scrollBehavior = 'smooth',
   }) {
     final CoreElement row = _rowForIndex[newIndex];
-    final T dataObject = data[newIndex];
+    final T dataObject = model.data[newIndex];
     _select(row?.element, dataObject, newIndex);
 
     if (keepVisible) {
-      _scrollToIndex(newIndex, scrollBehavior: scrollBehavior);
+      scrollToIndex(newIndex, scrollBehavior: scrollBehavior);
     }
   }
 
-  void _scrollToIndex(int rowIndex, {String scrollBehavior = 'smooth'}) {
+  @override
+  void scrollToIndex(int rowIndex, {String scrollBehavior = 'smooth'}) {
     final double rowOffsetPixels = _rowOffset(rowIndex);
     final int visibleStartOffsetPixels = element.scrollTop;
     final int visibleEndOffsetPixels = element.scrollTop + element.offsetHeight;
@@ -554,242 +449,25 @@ class Table<T> extends Object with SetStateMixin {
     return (rowIndex * rowHeight) + _thead.offsetHeight;
   }
 
+  @override
   void clearSelection() => _select(null, null, null);
-
-  void _columnClicked(Column<T> column) {
-    if (!column.supportsSorting) {
-      return;
-    }
-
-    if (_sortColumn == column) {
-      _sortDirection = _sortDirection == SortOrder.ascending
-          ? SortOrder.descending
-          : SortOrder.ascending;
-    } else {
-      sortColumn = column;
-    }
-
-    _doSort();
-    _scheduleRebuild();
-  }
 }
 
-class TreeTable<T extends TreeNode<T>> extends Table<T> {
-  TreeTable.virtual({double rowHeight = 29.0})
-      : super.virtual(rowHeight: rowHeight, overflowAuto: true);
+class ColumnRenderer<T> {
+  ColumnRenderer(this.model);
 
-  @override
-  void _handleLeftKey() {
-    if (_selectedObject != null) {
-      if (_selectedObject.isExpanded) {
-        // Collapse node and preserve selection.
-        collapseNode(_selectedObject);
-      } else {
-        // Select the node's parent.
-        final parentIndex = data.indexOf(_selectedObject.parent);
-        if (parentIndex != null && parentIndex != -1) {
-          selectByIndex(parentIndex);
-        }
-      }
-    }
-  }
+  final ColumnData<T> model;
 
-  @override
-  void _handleRightKey() {
-    if (_selectedObject != null) {
-      if (_selectedObject.isExpanded) {
-        // Select the node's first child.
-        final firstChildIndex = data.indexOf(_selectedObject.children.first);
-        selectByIndex(firstChildIndex);
-      } else if (_selectedObject.isExpandable) {
-        // Expand node and preserve selection.
-        expandNode(_selectedObject);
-      } else {
-        // The node is not expandable. Select the next node in range.
-        final nextIndex = data.indexOf(_selectedObject) + 1;
-        if (nextIndex != data.length) {
-          selectByIndex(nextIndex);
-        }
-      }
-    }
-  }
-
-  @override
-  void _sortData(Column column, int direction) {
-    final List<T> sortedData = [];
-
-    void _addToSortedData(T dataObject) {
-      sortedData.add(dataObject);
-      if (dataObject.isExpanded) {
-        dataObject.children
-          ..sort((T a, T b) => _compareData(a, b, column, direction))
-          ..forEach(_addToSortedData);
-      }
-    }
-
-    data.where((dataObject) => dataObject.level == 0).toList()
-      ..sort((T a, T b) => _compareData(a, b, column, direction))
-      ..forEach(_addToSortedData);
-
-    data = sortedData;
-  }
-
-  void collapseNode(T dataObject) {
-    void cascadingRemove(T _dataObject) {
-      if (!data.contains(_dataObject)) return;
-      data.remove(_dataObject);
-      (_dataObject.children).forEach(cascadingRemove);
-    }
-
-    assert(data.contains(dataObject));
-    dataObject.children.forEach(cascadingRemove);
-    dataObject.collapse();
-
-    _selectedObject ??= dataObject;
-    setRows(data);
-  }
-
-  void expandNode(T dataObject) {
-    void expand(T node) {
-      assert(data.contains(node));
-      int insertIndex = data.indexOf(node) + 1;
-      for (T child in node.children) {
-        data.insert(insertIndex, child);
-        if (child.isExpanded) {
-          expand(child);
-        }
-        insertIndex++;
-      }
-      node.expand();
-    }
-
-    expand(dataObject);
-
-    _selectedObject ??= dataObject;
-    setRows(data);
-  }
-
-  void expandAll() {
-    // Store visited nodes so that we do not expand the same root multiple
-    // times.
-    final visited = <T>{};
-    for (T dataObject in data) {
-      final root = dataObject.root;
-      if (!visited.contains(root)) {
-        root.expandCascading();
-        visited.add(root);
-      }
-    }
-
-    setRows(data);
-  }
-
-  void collapseAll() {
-    // Store visited nodes so that we do not expand the same root multiple
-    // times.
-    final visited = <T>{};
-    for (T dataObject in data) {
-      final root = dataObject.root;
-      if (!visited.contains(root)) {
-        root.collapseCascading();
-        visited.add(root);
-      }
-    }
-
-    setRows(data);
-  }
-}
-
-abstract class Column<T> {
-  Column(
-    this.title, {
-    ColumnAlignment alignment = ColumnAlignment.left,
-    this.fixedWidthPx,
-    this.percentWidth,
-    this.usesHtml = false,
-    this.hover = false,
-    this.cssClass,
-  }) : _alignment = alignment {
-    if (percentWidth != null) {
-      percentWidth.clamp(0, 100);
-    }
-  }
-
-  Column.wide(this.title,
-      {ColumnAlignment alignment = ColumnAlignment.left,
-      this.usesHtml = false,
-      this.hover = false,
-      this.cssClass})
-      : _alignment = alignment,
-        percentWidth = defaultWideColumnPercentWidth;
-
-  static const defaultWideColumnPercentWidth = 100;
-
-  final String title;
-
-  /// Width of the column expressed as a fixed number of pixels.
-  ///
-  /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
-  /// will be used.
-  int fixedWidthPx;
-
-  /// Width of the column expressed as a percent value between 0 and 100.
-  int percentWidth;
-
-  String get alignmentCss => _getAlignmentCss(_alignment);
-
-  final ColumnAlignment _alignment;
-
-  final bool usesHtml;
-  final String cssClass;
-  final bool hover;
-
-  bool get numeric => false;
-
-  bool get supportsSorting => numeric;
-
-  int compare(T a, T b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
-    return valueA.compareTo(valueB);
-  }
-
-  /// Get the cell's value from the given [dataObject].
-  dynamic getValue(T dataObject);
-
-  /// Get the cell's display value from the given [dataObject].
-  dynamic getDisplayValue(T dataObject) => getValue(dataObject);
-
-  /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => '';
-
-  /// Given a value from [getValue], render it to a String.
-  String render(dynamic value) {
-    if (value is num) {
-      return fastIntl(value);
-    }
-    return value.toString();
-  }
-
-  static String fastIntl(num value) {
-    if (value is int && value < 1000) {
-      return value.toString();
-    } else {
-      return nf.format(value);
-    }
-  }
-
-  @override
-  String toString() => title;
+  String get alignmentCss => _getAlignmentCss(model.alignment);
 
   void renderToElement(CoreElement cell, T dataObject) {
-    final String content = render(getDisplayValue(dataObject));
-    if (usesHtml) {
+    final String content = model.render(model.getDisplayValue(dataObject));
+    if (model.usesHtml) {
       cell.setInnerHtml(content);
     } else {
       cell.text = content;
     }
-    cell.tooltip = getTooltip(dataObject);
+    cell.tooltip = model.getTooltip(dataObject);
   }
 
   String _getAlignmentCss(ColumnAlignment alignment) {
@@ -806,34 +484,11 @@ abstract class Column<T> {
   }
 }
 
-abstract class TreeColumn<T extends TreeNode<T>> extends Column<T> {
-  TreeColumn(
-    title, {
-    int fixedWidthPx,
-    int percentWidth,
-  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
+class TreeColumnRenderer<T extends TreeNode<T>> extends ColumnRenderer<T> {
+  TreeColumnRenderer(TreeColumnData<T> model) : super(model);
 
-  static const treeToggleWidth = 14;
-
-  final StreamController<T> _nodeExpandedController =
-      StreamController<T>.broadcast();
-
-  Stream<T> get onNodeExpanded => _nodeExpandedController.stream;
-
-  final StreamController<T> _nodeCollapsedController =
-      StreamController<T>.broadcast();
-
-  Stream<T> get onNodeCollapsed => _nodeCollapsedController.stream;
-
-  int _getNodeIndentPx(T dataObject) {
-    int indentWidth = dataObject.level * treeToggleWidth;
-    if (!dataObject.isExpandable) {
-      // If the object is not expandable, we need to increase the width of our
-      // spacer to account for the missing tree toggle.
-      indentWidth += TreeColumn.treeToggleWidth;
-    }
-    return indentWidth;
-  }
+  @override
+  TreeColumnData<T> get model => super.model;
 
   @override
   void renderToElement(CoreElement cell, T dataObject) {
@@ -841,27 +496,47 @@ abstract class TreeColumn<T extends TreeNode<T>> extends Column<T> {
       ..layoutHorizontal()
       ..flex()
       // Add spacer to beginning of element that reflects tree structure.
-      ..add(
-          div()..element.style.minWidth = '${_getNodeIndentPx(dataObject)}px');
+      ..add(div()
+        ..element.style.minWidth = '${model.getNodeIndentPx(dataObject)}px');
 
     if (dataObject.isExpandable) {
       final TreeToggle treeToggle = TreeToggle(forceOpen: dataObject.isExpanded)
         ..onOpen.listen((isOpen) {
           if (isOpen) {
-            _nodeExpandedController.add(dataObject);
+            model.nodeExpandedController.add(dataObject);
           } else {
-            _nodeCollapsedController.add(dataObject);
+            model.nodeCollapsedController.add(dataObject);
           }
         });
       container.add(treeToggle);
     }
 
-    container.add(div(text: render(getDisplayValue(dataObject))));
+    container.add(div(text: model.render(model.getDisplayValue(dataObject))));
 
     cell
       ..clear()
       ..add(container)
-      ..tooltip = getTooltip(dataObject);
+      ..tooltip = model.getTooltip(dataObject);
+  }
+}
+
+class TreeTable<T extends TreeNode<T>> extends Table<T> {
+  factory TreeTable() => TreeTable._(TreeTableData<T>(), null, false);
+
+  factory TreeTable.virtual({double rowHeight = 29.0}) =>
+      TreeTable._(TreeTableData<T>(), rowHeight, true);
+
+  TreeTable._(TreeTableData<T> model, double rowHeight, bool isVirtual)
+      : super._(model, rowHeight, isVirtual);
+
+  @override
+  TreeTableData<T> get model => super.model;
+
+  @override
+  ColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
+    return columnModel is TreeColumnData<T>
+        ? TreeColumnRenderer(columnModel)
+        : ColumnRenderer(columnModel);
   }
 }
 
@@ -881,21 +556,10 @@ class TreeTableToolbar<T extends TreeNode<T>> extends CoreElement {
   TreeTable<T> treeTable;
 
   void _expandAll() {
-    treeTable.expandAll();
+    treeTable.model.expandAll();
   }
 
   void _collapseAll() {
-    treeTable.collapseAll();
+    treeTable.model.collapseAll();
   }
-}
-
-enum ColumnAlignment {
-  left,
-  right,
-  center,
-}
-
-enum SortOrder {
-  ascending,
-  descending,
 }

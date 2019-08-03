@@ -24,7 +24,6 @@
 
 .inspector-no-wrap {
     white-space: nowrap;
-    overflow: hidden;
 }
 
 .inspector-tree-row-content {
@@ -70,8 +69,12 @@ messages beautiful.
 
 .inspector-style-error {
     background-color: var(--error-background);
-    padding: 12px;
-    margin: 5px 0;
+    margin: 0px -5px;
+    padding: 5px;
+    color: var(--inspector-hint-color);
+    background-color: var(--error-background);
+    text-align: center;
+    font-weight: 700;
 }
 
 .inspector-style-flat {
@@ -109,28 +112,24 @@ messages beautiful.
 
 }
 .inspector-level-info {
-
+    color: var(--inspector-info-color);
 }
 .inspector-level-warning {
 
 }
 .inspector-level-hint {
     background-color: var(--hint-background);
+    color: var(--inspector-hint-color);
     padding: 8px;
     margin: 5px 0;
 }
-.inspector-level-fix {
 
+.inspector-level-summary {
+  font-weight: 700;
+  color: var(--error-summary-color);
+  font-size: 16px;
 }
-.inspector-level-contract {
 
-}
-.inspector-level-violation {
-
-}
-.inspector-level-error {
-
-}
 .inspector-level-off {
 
 }
