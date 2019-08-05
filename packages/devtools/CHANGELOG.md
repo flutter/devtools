@@ -1,7 +1,7 @@
 ## 0.1.5 - 2019-08-05
 * Support expanding or collapsing all values in the Call Tree and Bottom Up views (parts of the CPU profiler).
 * Support touchscreen scrolling and selection in flame charts.
-* Display structured error messages in the Logging view.
+* Display structured error messages in the Logging view when "show structured errors" is enabled.
 * Search and filter dialogs are now case-insensitive.
 * Link to Dart DevTools documentation from connect screen.
 * Disable unsupported DevTools pages for Dart web apps.
