@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../table_data.dart';
 import '../tables.dart';
 import '../trees.dart';
 import '../ui/custom.dart';
@@ -86,7 +87,7 @@ class InboundsTree extends InstanceRefsView {
                       instance, hashCodeResult?.valueAsString);
 
                   final List<ClassHeapDetailStats> allClasses =
-                      _memoryScreen.tableStack.first.data;
+                      _memoryScreen.tableStack.first.model.data;
 
                   computeInboundRefs(allClasses, refs, (
                     String referenceName,
@@ -108,19 +109,20 @@ class InboundsTree extends InstanceRefsView {
           }
         }
 
-        referencesTable.expandNode(inboundNode);
+        referencesTable.model.expandNode(inboundNode);
       })
-      ..onNodeCollapsed
-          .listen((inboundNode) => referencesTable.collapseNode(inboundNode));
+      ..onNodeCollapsed.listen(
+          (inboundNode) => referencesTable.model.collapseNode(inboundNode));
 
     referencesTable = TreeTable<InboundsTreeNode>.virtual()
-      ..addColumn(classNameColumn)
-      ..addColumn(FieldNameColumn())
       ..element.clazz('memory-table');
 
-    referencesTable..setRows(<InboundsTreeNode>[]);
+    referencesTable.model
+      ..addColumn(classNameColumn)
+      ..addColumn(FieldNameColumn())
+      ..setRows(<InboundsTreeNode>[]);
 
-    referencesTable.onSelect.listen(_memoryScreen.select);
+    referencesTable.model.onSelect.listen(_memoryScreen.select);
 
     add(referencesTable.element);
   }
@@ -137,11 +139,11 @@ class InboundsTree extends InstanceRefsView {
     // TODO(terry): the TreeTable won't render.
     for (InboundsTreeNode row in rows) row.parent = null;
 
-    referencesTable.setRows(rows);
+    referencesTable.model.setRows(rows);
   }
 
   @override
-  void reset() => referencesTable.setRows(<InboundsTreeNode>[]);
+  void reset() => referencesTable.model.setRows(<InboundsTreeNode>[]);
 }
 
 class InboundsTreeData {
@@ -293,7 +295,7 @@ abstract class InstanceRefsView extends CoreElement {
   void hide() => hidden(true);
 }
 
-class ClassNameColumn extends TreeColumn<InboundsTreeNode> {
+class ClassNameColumn extends TreeColumnData<InboundsTreeNode> {
   ClassNameColumn(String title) : super(title);
 
   static const maxClassNameLength = 75;
@@ -319,7 +321,7 @@ class ClassNameColumn extends TreeColumn<InboundsTreeNode> {
 }
 
 //class FieldNameColumn extends TreeColumn<InboundsTreeNode> {
-class FieldNameColumn extends Column<InboundsTreeNode> {
+class FieldNameColumn extends ColumnData<InboundsTreeNode> {
   FieldNameColumn() : super('Field Reference');
 
   static const maxFieldNameLength = 25;

@@ -130,6 +130,9 @@ class MemoryController {
       for (var field in fields) {
         if (field.decl.name == fieldName) {
           final InstanceRef ref = field.value;
+
+          if (ref == null) continue;
+
           final evalResult = await evaluate(ref.id, 'hashCode');
           final int objHashCode = int.parse(evalResult?.valueAsString);
           if (objHashCode == instanceHashCode) {
