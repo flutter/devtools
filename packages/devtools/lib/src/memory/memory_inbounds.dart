@@ -43,7 +43,7 @@ class InboundsTree extends InstanceRefsView {
           inboundNode.children.removeLast();
           // Make sure it's a known class (not abstract).
           if (!inboundNode.isEmpty) {
-            final Spinner spinner = Spinner.centered();
+            final spinner = Spinner.centered();
             referencesTable.element.add(spinner);
 
             if (inboundNode.instanceHashCode == null &&
@@ -58,7 +58,7 @@ class InboundsTree extends InstanceRefsView {
               inboundNode.instanceHashCode = instanceHashCode;
             }
 
-            final int instanceHashCode = _memoryScreen.isMemoryExperiment
+            final instanceHashCode = _memoryScreen.isMemoryExperiment
                 ? int.parse(inboundNode.instanceHashCode)
                 : -1;
 
@@ -70,8 +70,7 @@ class InboundsTree extends InstanceRefsView {
                 await _memoryScreen.findInstances(classStats);
             for (InstanceSummary instance in instances) {
               // Found the instance.
-              final InboundReferences refs =
-                  await getInboundReferences(instance.objectRef, 1000);
+              final refs = await getInboundReferences(instance.objectRef, 1000);
 
               if (_memoryScreen.isMemoryExperiment) {
                 // TODO(terry): Temporary workaround since evaluate fails on expressions
@@ -218,20 +217,20 @@ class InboundsTreeData {
 }
 
 class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
-  InboundsTreeNode(this._name, this._fieldName, [this.instanceHashCode]);
+  InboundsTreeNode(this._name, this.fieldName, [this.instanceHashCode]);
 
   InboundsTreeNode.instance(this._instance, [this.instanceHashCode])
       : _name = _instance.objectRef,
-        _fieldName = '';
+        fieldName = '';
 
   InboundsTreeNode.root()
       : _name = 'Instances',
-        _fieldName = '',
+        fieldName = '',
         instanceHashCode = null;
 
   InboundsTreeNode.empty()
       : _name = null,
-        _fieldName = null,
+        fieldName = null,
         instanceHashCode = null;
 
   String get name => _name;
@@ -240,9 +239,17 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
 
   InstanceSummary get instance => _instance;
 
-  /// isNew signals objectRef (object/###) has changed.
-  void setInstance(InstanceSummary theInstance, String hashCode,
-      [bool isNew = false]) {
+  /// Replaces the node's [instance], [instanceHashCode] and [name].  This is
+  /// can happen as a result of the objectRef id changing (as known by the VM).
+  /// It's matched to the propery objectRef (instance) by comparing hashCodes.
+  ///
+  /// [isNew] signals the objectRef (e.g., objects/123) changed to something
+  /// different (e.g., objects/245).
+  void setInstance(
+    InstanceSummary theInstance,
+    String hashCode, [
+    bool isNew = false,
+  ]) {
     _instance = theInstance;
     instanceHashCode = hashCode;
     _name = _name.split(' ')[0]; // Throw away instance objectRef name.
@@ -253,16 +260,14 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
 
   InstanceSummary _instance;
 
-  String get fieldName => _fieldName;
+  final String fieldName;
 
-  final String _fieldName;
-
-  bool get isInboundEntry => _fieldName?.isNotEmpty;
+  bool get isInboundEntry => fieldName?.isNotEmpty;
 
   String instanceHashCode;
 
   bool get isEmpty =>
-      _name == null && _fieldName == null && instanceHashCode == null;
+      _name == null && fieldName == null && instanceHashCode == null;
 }
 
 abstract class InstanceRefsView extends CoreElement {
@@ -283,7 +288,7 @@ abstract class InstanceRefsView extends CoreElement {
     // rebuild.
     if (!isHidden) {
       if (showLoadingSpinner) {
-        final Spinner spinner = Spinner.centered();
+        final spinner = Spinner.centered();
         add(spinner);
 
         // Awaiting this future ensures the spinner pops up in between switching

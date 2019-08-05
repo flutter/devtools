@@ -288,7 +288,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   ClassHeapDetailStats findClass(String className) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
     return classesData.firstWhere(
-      (ClassHeapDetailStats stat) => stat.classRef.name == className,
+      (stat) => stat.classRef.name == className,
       orElse: () => null,
     );
   }
@@ -341,7 +341,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   Future<int> _selectInstanceInFieldHashCode(
       String fieldName, int instanceHashCode) async {
     final Table<Object> instanceTable = tableStack.elementAt(1);
-    final Spinner spinner = Spinner.centered();
+    final spinner = Spinner.centered();
     instanceTable.element.add(spinner);
 
     // There's an instances table up.
@@ -730,8 +730,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   Future<InboundsTree> displayInboundReferences(
       ClassHeapDetailStats row) async {
-    final InboundsTreeData treeData = InboundsTreeData();
-    treeData.data = InboundsTreeNode.root();
+    final treeData = InboundsTreeData()..data = InboundsTreeNode.root();
 
     final List<InstanceSummary> instanceRows =
         await memoryController.getInstances(
@@ -741,23 +740,22 @@ class MemoryScreen extends Screen with SetStateMixin {
     );
 
     for (var instance in instanceRows) {
-      // Add the instance.
-      final InboundsTreeNode instanceNode = InboundsTreeNode.instance(instance);
+      final instanceNode = InboundsTreeNode.instance(instance);
       treeData.data.addChild(instanceNode);
+      // Place holder to lazily compute next child when parent node is expanded.
+      // Place holder to lazily compute next child when parent node is expanded.
       instanceNode.addChild(InboundsTreeNode.empty());
     }
 
     final inboundsTreeTable = InboundsTree(this, treeData, row.classRef.name);
-    inboundsTreeTable.update();
-
-    return inboundsTreeTable;
+    return inboundsTreeTable..update();
   }
 
   Future<String> computeInboundReference(
     String objectRef,
     InboundsTreeNode instanceNode,
   ) async {
-    final InboundReferences refs = await getInboundReferences(objectRef, 1000);
+    final refs = await getInboundReferences(objectRef, 1000);
 
     String instanceHashCode;
     if (isMemoryExperiment) {
@@ -960,8 +958,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     if (hoverPopup.element.children.isNotEmpty) return;
 
     final CoreElement ulElem = ul();
-    final InboundReferences refs =
-        await getInboundReferences(hover.data.objectRef, 1000);
+    final refs = await getInboundReferences(hover.data.objectRef, 1000);
 
     if (refs == null) {
       framework.toast(
