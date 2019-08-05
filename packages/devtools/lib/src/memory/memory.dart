@@ -14,6 +14,7 @@ import '../globals.dart';
 import '../popup.dart';
 import '../table_data.dart';
 import '../tables.dart';
+import '../trees.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -26,6 +27,7 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 import 'memory_data_view.dart';
 import 'memory_detail.dart';
+import 'memory_inbounds.dart';
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
@@ -48,6 +50,9 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     objectCountStatus = StatusItem();
     addStatusItem(objectCountStatus);
+
+    experimentStatus = StatusItem();
+    addStatusItem(experimentStatus);
   }
 
   final MemoryController memoryController = MemoryController();
@@ -55,6 +60,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   StatusItem classCountStatus;
 
   StatusItem objectCountStatus;
+
+  StatusItem experimentStatus;
 
   PButton pauseButton;
 
@@ -77,11 +84,18 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   PButton gcNowButton;
 
-  ListQueue<Table<Object>> tableStack = ListQueue<Table<Object>>();
+  ListQueue<Table<dynamic>> tableStack = ListQueue<Table<dynamic>>();
 
   MemoryChart memoryChart;
 
   CoreElement tableContainer;
+
+  bool isTreeTable(Table<dynamic> table) => (table is TreeTable) ? true : false;
+
+  TreeTable<dynamic> getTreeTable(Table table) =>
+      isTreeTable(table) ? table as TreeTable<dynamic> : null;
+
+  InboundsTree _inboundTree;
 
   // Memory navigation history. Driven from selecting items in the list of
   // known classes, instances of a particular class and clicking on the class
@@ -112,6 +126,11 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryTracker memoryTracker;
 
   ProgressElement progressElement;
+
+  // TODO(terry): Remove experiment after binary snapshot is added.
+  bool get isMemoryExperiment => _memoryExperiment;
+
+  bool _memoryExperiment = false;
 
   // Handle shortcut keys
   bool memoryShortcuts(bool ctrlKey, bool shiftKey, bool altKey, String key) {
@@ -164,7 +183,15 @@ class MemoryScreen extends Screen with SetStateMixin {
         title: 'Memory Snapshot')
       ..clazz('margin-left')
       ..small()
-      ..click(_loadAllocationProfile)
+      ..click(
+        _loadAllocationProfile,
+        () {
+          // TODO(terry): Disable when real binary snapshot is exposed.
+          // Shift key pressed while clicking on Snapshot button enables live
+          // memory inspection.
+          _loadAllocationProfile(memoryExperiment: true);
+        },
+      )
       ..disabled = true;
     resetAccumulatorsButton = PButton.icon(
         'Reset', FlutterIcons.resetAccumulators,
@@ -252,7 +279,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     ]);
 
     memoryController.onDisconnect.listen((__) {
-      serviceDisconnet();
+      serviceDisconnect();
     });
 
     maybeAddDebugMessage(framework, memoryScreenId);
@@ -262,6 +289,47 @@ class MemoryScreen extends Screen with SetStateMixin {
     _updateStatus(null);
 
     return screenDiv;
+  }
+
+  ClassHeapDetailStats findClass(String className) {
+    final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
+    int row = 0;
+    for (ClassHeapDetailStats stat in classesData) {
+      if (stat.classRef.name == className) {
+        return stat;
+      }
+    }
+
+    return null;
+  }
+
+  Future<List<InstanceSummary>> findInstances(ClassHeapDetailStats row) async {
+    try {
+      final List<InstanceSummary> instances =
+          await memoryController.getInstances(
+        row.classRef.id,
+        row.classRef.name,
+        row.instancesCurrent,
+      );
+
+      return instances;
+    } catch (e) {
+      print("findInstances ERROR: $e");
+    }
+
+    return [];
+  }
+
+  ClassHeapDetailStats findCLassDetails(String classRefId) {
+    final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
+    int row = 0;
+    for (ClassHeapDetailStats stat in classesData) {
+      if (stat.classRef.id == classRefId) {
+        return stat;
+      }
+    }
+
+    return null;
   }
 
   void _selectClass(String className, [record = true]) {
@@ -465,9 +533,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     });
   }
 
-  void _pushNextTable(Table<dynamic> current, Table<dynamic> next) {
+  void _pushNextTable(Table<dynamic> current, Table<dynamic> next,
+      [InboundsTree inboundTree = null]) {
     // Remove any tables to the right of current from the DOM and the stack.
     while (tableStack.length > 1 && tableStack.last != current) {
+      // TODO(terry): Hacky need to manage tables better.
+      if (tableStack.length == 2) {
+        _inboundTree = null;
+      }
       tableStack.removeLast()
         ..element.element.remove()
         ..dispose();
@@ -476,9 +549,11 @@ class MemoryScreen extends Screen with SetStateMixin {
     // Push the new table on to the stack and to the right of current.
     if (next != null) {
       final bool isFirst = tableStack.isEmpty;
-
       tableStack.addLast(next);
       tableContainer.add(next.element);
+
+      // TODO(terry): Hacky need to manage tables better.
+      if (inboundTree != null) _inboundTree = inboundTree;
 
       if (!isFirst) {
         next.element.clazz('margin-left');
@@ -546,8 +621,13 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  Future<void> _loadAllocationProfile({bool reset = false}) async {
+  Future<void> _loadAllocationProfile({
+    bool reset = false,
+    memoryExperiment = false,
+  }) async {
     ga.select(ga.memory, ga.snapshot);
+
+    _memoryExperiment = memoryExperiment;
 
     memoryChart.plotSnapshot();
 
@@ -610,7 +690,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   // VM Service has stopped (disconnected).
-  void serviceDisconnet() {
+  void serviceDisconnect() {
     pauseButton.disabled = true;
     resumeButton.disabled = true;
 
@@ -622,7 +702,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryChart.disabled = true;
   }
 
-  void _removeInstanceView() {
+  void removeInstanceView() {
     if (tableContainer.element.children.length == 3) {
       tableContainer.element.children.removeLast();
     }
@@ -645,120 +725,164 @@ class MemoryScreen extends Screen with SetStateMixin {
       ga.select(ga.memory, ga.inspectClass);
       // User selected a new class from the list of classes so the instance view
       // which would be the third child needs to be removed.
-      _removeInstanceView();
+      removeInstanceView();
 
-      if (!fromMemoryHover) _resetHistory();
-
-      final newTable =
-          row == null ? null : await _createInstanceListTableView(row);
-      _pushNextTable(table, newTable);
+      final InboundsTree inboundTree =
+          row == null ? null : await displayInboundReferences(row);
+      TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
+      _pushNextTable(table, tree, inboundTree);
     });
 
     return table;
   }
 
-  Future<Table<InstanceSummary>> _createInstanceListTableView(
+  Future<InboundsTree> displayInboundReferences(
       ClassHeapDetailStats row) async {
-    final table = Table<InstanceSummary>.virtual()
-      ..element.clazz('memory-table');
+    final InboundsTreeData treeData = InboundsTreeData();
+    treeData.data = InboundsTreeNode.root();
 
-    try {
-      final List<InstanceSummary> instanceRows =
-          await memoryController.getInstances(
-        row.classRef.id,
-        row.classRef.name,
-        row.instancesCurrent,
-      );
+    final List<InstanceSummary> instanceRows =
+        await memoryController.getInstances(
+      row.classRef.id,
+      row.classRef.name,
+      row.instancesCurrent,
+    );
 
-      table.model.addColumn(new MemoryColumnSimple<InstanceSummary>(
-        '${instanceRows.length} Instances of ${row.classRef.name}',
-        (InstanceSummary row) => row.objectRef,
-      ));
-
-      table.model.addColumn(MemoryColumnSimple<InstanceSummary>(
-        '',
-        (InstanceSummary expand) => '<div class="alloc-image"> </div>',
-        cssClass: 'allocation',
-        usesHtml: true,
-        hover: true,
-      ));
-
-      table.model.setRows(instanceRows);
-    } catch (e, st) {
-      framework.toast(
-        'Problem fetching instances of ${row.classRef.name}: $e',
-        title: 'Error',
-      );
-      print('Problem fetching instances of ${row.classRef.name}: $e\n$st');
+    for (var instance in instanceRows) {
+      // Add the instance.
+      final InboundsTreeNode instanceNode = InboundsTreeNode.instance(instance);
+      treeData.data.addChild(instanceNode);
+      instanceNode.addChild(InboundsTreeNode.empty());
     }
 
-    table.model.onCellHover.listen(hoverInstanceAllocations);
-    table.model.onSelect.listen(select);
+    final inboundsTreeTable = InboundsTree(this, treeData, row.classRef.name);
+    inboundsTreeTable.update();
 
-    return table;
+    return inboundsTreeTable;
   }
 
-  void select(InstanceSummary row) async {
-    ga.select(ga.memory, ga.inspectInstance);
+  Future<String> computeInboundReference(
+    String objectRef,
+    InboundsTreeNode instanceNode,
+  ) async {
+    final InboundReferences refs = await getInboundReferences(objectRef, 1000);
 
-    // User selected a new instance from the list of class instances so the
-    // instance view which would be the third child needs to be removed.
-    _removeInstanceView();
+    String instanceHashCode;
+    if (isMemoryExperiment) {
+      // TODO(terry): Expensive need better VMService identity for objectRef.
+      // Get hashCode identity object id changes but hashCode is our identity.
+      final hashCodeResult = await evaluate(objectRef, 'hashCode');
+      instanceHashCode = hashCodeResult?.valueAsString;
+    }
 
+    final List<ClassHeapDetailStats> allClasses = tableStack.first.model.data;
+
+    computeInboundRefs(allClasses, refs, (
+      String referenceName,
+      String owningAllocator,
+      bool owningAllocatorIsAbstract,
+    ) async {
+      if (!owningAllocatorIsAbstract && owningAllocator.isNotEmpty) {
+        final inboundNode =
+            InboundsTreeNode(owningAllocator, referenceName, instanceHashCode);
+        instanceNode.addChild(inboundNode);
+        inboundNode.addChild(InboundsTreeNode.empty());
+      }
+    });
+
+    return instanceHashCode;
+  }
+
+  Future<InstanceSummary> findLostObjectRef(
+    String classRef,
+    int instanceHashCode,
+  ) async {
+    final classDetails = findCLassDetails(classRef);
+    if (classDetails != null) {
+      final List<InstanceSummary> instances =
+          await memoryController.getInstances(
+        classDetails.classRef.id,
+        classDetails.classRef.name,
+        classDetails.instancesCurrent,
+      );
+      for (var instance in instances) {
+        final InstanceRef eval = await evaluate(instance.objectRef, 'hashCode');
+        final int evalResult = int.parse(eval?.valueAsString);
+        if (evalResult == instanceHashCode) {
+          // Found the instance.
+          return instance;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<Instance> getInstance(String objectRef) async {
     Instance instance;
     try {
-      final dynamic theObject = await memoryController.getObject(row.objectRef);
+      final dynamic theObject = await memoryController.getObject(objectRef);
       if (theObject is Instance) {
         instance = theObject;
       } else if (theObject is Sentinel) {
         instance = null;
         // TODO(terry): Tracking Sentinel's to be removed.
-        framework.toast('Sentinel ${row.objectRef}', title: 'Warning');
+        framework.toast('Sentinel ${objectRef}', title: 'Warning');
       }
     } catch (e) {
       // Log this problem not sure how it can really happen.
-      ga.error('Memory select: $e', false);
+      ga.error('Memory select (getInstance): $e', false);
 
       instance = null; // Signal a problem
-    } finally {
-      tableContainer.add(_createInstanceView(
-        instance != null
-            ? row.objectRef
-            : 'Unable to fetch instance ${row.objectRef}',
-        row.className,
-      ));
-
-      tableContainer.element.scrollTo(<String, dynamic>{
-        'left': tableContainer.element.scrollWidth,
-        'top': 0,
-        'behavior': 'smooth',
-      });
-
-      // Allow inspection of the memory object.
-      memoryDataView.showFields(instance != null ? instance.fields : []);
-
-      // Record this navigation.
-      // TODO(terry): Is there something faster for identity compare?
-      final InstanceRef eval = await evaluate(row.objectRef, 'hashCode');
-      final int evalResult = int.parse(eval?.valueAsString);
-
-      if (!fromMemoryHover &&
-          (memoryPath.isLastInBound || memoryPath.isLastInstance)) {
-        // User clicked an instance, start new history with this instance.
-        _resetHistory();
-      }
-
-      // Record the memory navigation.
-      memoryPath.add(NavigationState.instanceSelect(row.className, evalResult));
-
-      if (memoryPath.isLastInBound) {
-        // Re-construct memory navigation and display.
-        history.clear();
-        memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
-
-        history.hidden(false);
-      }
     }
+
+    return instance;
+  }
+
+  void select(InboundsTreeNode rowNode) async {
+    ga.select(ga.memory, ga.inspectInstance);
+
+    // User selected a new instance from the list of class instances so the
+    // instance view which would be the third child needs to be removed.
+    removeInstanceView();
+
+    if (rowNode == null) return;
+
+    Instance instance = await getInstance(rowNode.instance.objectRef);
+    if (instance == null) {
+      // TODO(terry): Eliminate for eval
+      // Eval objectRef ids have changed re-fetch objectRef ids.
+      var newInstance = await findLostObjectRef(
+          rowNode.instance.classRef, int.parse(rowNode.instanceHashCode));
+
+      framework.toast(
+          'Re-computed ${rowNode.instance.objectRef} -> '
+          '${newInstance.objectRef}',
+          title: 'Message');
+
+      // Update to a new objectRef id.
+      rowNode.setInstance(newInstance, rowNode.instanceHashCode, true);
+
+      instance = await getInstance(rowNode.instance.objectRef);
+
+      _inboundTree.update();
+    }
+
+    tableContainer.add(_createInstanceView(
+      instance != null
+          ? rowNode.instance.objectRef
+          : 'Unable to fetch instance ${rowNode.name}',
+      rowNode.instance.className,
+    ));
+
+    tableContainer.element.scrollTo(<String, dynamic>{
+      'left': tableContainer.element.scrollWidth,
+      'top': 0,
+      'behavior': 'smooth',
+    });
+
+    // Allow inspection of the memory object.
+    memoryDataView.showFields(instance != null ? instance.fields : []);
   }
 
   void _handleHistoryClicks(CoreElement element) {
@@ -1056,6 +1180,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
       objectCountStatus.element.text = '${nf.format(objectCount)} objects';
     }
+    experimentStatus.element.text = isMemoryExperiment ? 'Experiment' : 'Memory';
   }
 }
 

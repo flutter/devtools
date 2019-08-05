@@ -107,7 +107,7 @@ class InboundReference extends Response {
   bool get isSentinel => parentField.runtimeType == Sentinel;
 }
 
-typedef BuildHoverCard = void Function(
+typedef BuildInboundEntry = void Function(
   String referenceName,
   /* Field that owns reference to allocated memory */
   String owningAllocator,
@@ -127,7 +127,7 @@ ClassHeapDetailStats _searchClass(
 void computeInboundRefs(
   List<ClassHeapDetailStats> allClasses,
   InboundReferences refs,
-  BuildHoverCard buildCallback,
+  BuildInboundEntry buildCallback,
 ) {
   for (InboundReference element in refs.elements) {
     // Could be a reference to an evaluate so this isn't known.
