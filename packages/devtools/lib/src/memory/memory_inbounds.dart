@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart';
+
 import '../table_data.dart';
 import '../tables.dart';
 import '../trees.dart';
@@ -15,8 +17,11 @@ import 'memory_protocol.dart';
 import 'memory_service.dart';
 
 class InboundsTree extends InstanceRefsView {
-  InboundsTree(this._memoryScreen, InboundsTreeData theData, String className)
-      : super(theData) {
+  InboundsTree(
+    this._memoryScreen,
+    InboundsTreeData inboundsTree,
+    String className,
+  ) : super(inboundsTree) {
     flex();
     layoutVertical();
 
@@ -61,7 +66,7 @@ class InboundsTree extends InstanceRefsView {
                 _memoryScreen.findClass(inboundNode.name);
 
             // All instances of a class.
-            List<InstanceSummary> instances =
+            final List<InstanceSummary> instances =
                 await _memoryScreen.findInstances(classStats);
             for (InstanceSummary instance in instances) {
               // Found the instance.
@@ -72,36 +77,48 @@ class InboundsTree extends InstanceRefsView {
                 // TODO(terry): Temporary workaround since evaluate fails on expressions
                 // TODO(terry): accessing a private field e.g., _extra.hashcode.
                 if (await _memoryScreen.memoryController.matchObject(
-                    instance.objectRef,
-                    inboundNode.fieldName,
-                    instanceHashCode)) {
+                  instance.objectRef,
+                  inboundNode.fieldName,
+                  instanceHashCode,
+                )) {
                   // TODO(terry): Expensive need better VMService identity for objectRef.
                   // Get hashCode identity object id changes but hashCode is our identity.
-                  var hashCodeResult;
+                  InstanceRef hashCodeResult;
 
-                  hashCodeResult =
-                      await evaluate(instance.objectRef, 'hashCode');
+                  hashCodeResult = await evaluate(
+                    instance.objectRef,
+                    'hashCode',
+                  );
 
                   // Record we have a real instance too.
                   inboundNode.setInstance(
-                      instance, hashCodeResult?.valueAsString);
+                    instance,
+                    hashCodeResult?.valueAsString,
+                  );
 
                   final List<ClassHeapDetailStats> allClasses =
                       _memoryScreen.tableStack.first.model.data;
 
-                  computeInboundRefs(allClasses, refs, (
-                    String referenceName,
-                    String owningAllocator,
-                    bool owningAllocatorIsAbstract,
-                  ) async {
-                    if (!owningAllocatorIsAbstract &&
-                        owningAllocator.isNotEmpty) {
-                      var newRefNode = InboundsTreeNode(owningAllocator,
-                          referenceName, hashCodeResult?.valueAsString);
-                      inboundNode.addChild(newRefNode);
-                      newRefNode.addChild(InboundsTreeNode.empty());
-                    }
-                  });
+                  computeInboundRefs(
+                    allClasses,
+                    refs,
+                    (
+                      String referenceName,
+                      String owningAllocator,
+                      bool owningAllocatorIsAbstract,
+                    ) async {
+                      if (!owningAllocatorIsAbstract &&
+                          owningAllocator.isNotEmpty) {
+                        final newRefNode = InboundsTreeNode(
+                          owningAllocator,
+                          referenceName,
+                          hashCodeResult?.valueAsString,
+                        );
+                        inboundNode.addChild(newRefNode);
+                        newRefNode.addChild(InboundsTreeNode.empty());
+                      }
+                    },
+                  );
                 }
               }
             }
@@ -129,10 +146,7 @@ class InboundsTree extends InstanceRefsView {
 
   @override
   void rebuildView() {
-    final InboundsTreeData providerData = this.inboundsTree;
-
-// TODO(terry): Need root deepCopy?
-//    final CpuStackFrame root = data.cpuProfileRoot.deepCopy();
+    final InboundsTreeData providerData = inboundsTree;
 
     final List<InboundsTreeNode> rows = providerData.data.root.children.cast();
     // TODO(terry): Work around bug if children have a parent (which they do
@@ -205,25 +219,26 @@ class InboundsTreeData {
 
 class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
   InboundsTreeNode(this._name, this._fieldName, [this.instanceHashCode]);
+
   InboundsTreeNode.instance(this._instance, [this.instanceHashCode])
       : _name = _instance.objectRef,
         _fieldName = '';
+
   InboundsTreeNode.root()
       : _name = 'Instances',
         _fieldName = '',
         instanceHashCode = null;
+
   InboundsTreeNode.empty()
       : _name = null,
         _fieldName = null,
         instanceHashCode = null;
 
+  String get name => _name;
+
   String _name;
 
-  InstanceSummary _instance;
-
   InstanceSummary get instance => _instance;
-
-  String get name => _name;
 
   /// isNew signals objectRef (object/###) has changed.
   void setInstance(InstanceSummary theInstance, String hashCode,
@@ -236,9 +251,11 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
         : '$name (${instance.objectRef})';
   }
 
-  final String _fieldName;
+  InstanceSummary _instance;
 
   String get fieldName => _fieldName;
+
+  final String _fieldName;
 
   bool get isInboundEntry => _fieldName?.isNotEmpty;
 
@@ -270,7 +287,7 @@ abstract class InstanceRefsView extends CoreElement {
         add(spinner);
 
         // Awaiting this future ensures the spinner pops up in between switching
-        // profiler views. Without this, the UI is laggy and the spinner never
+        // table views. Without this, the UI is laggy and the spinner never
         // appears.
         await Future.delayed(const Duration(microseconds: 1));
 
@@ -305,7 +322,7 @@ class ClassNameColumn extends TreeColumnData<InboundsTreeNode> {
 
   @override
   String getDisplayValue(InboundsTreeNode dataObject) {
-    String name = dataObject.name;
+    final String name = dataObject.name;
     if (name.length > maxClassNameLength) {
       return name.substring(0, maxClassNameLength) + '...';
     }
@@ -331,7 +348,7 @@ class FieldNameColumn extends ColumnData<InboundsTreeNode> {
 
   @override
   String getDisplayValue(InboundsTreeNode dataObject) {
-    String fieldName = dataObject.fieldName;
+    final String fieldName = dataObject.fieldName;
     if (fieldName.length > maxFieldNameLength) {
       return fieldName.substring(0, maxFieldNameLength) + '...';
     }

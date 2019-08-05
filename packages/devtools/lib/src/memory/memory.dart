@@ -89,11 +89,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   CoreElement tableContainer;
 
-  bool isTreeTable(Table<dynamic> table) => (table is TreeTable) ? true : false;
-
-  TreeTable<dynamic> getTreeTable(Table table) =>
-      isTreeTable(table) ? table as TreeTable<dynamic> : null;
-
   InboundsTree _inboundTree;
 
   // Memory navigation history. Driven from selecting items in the list of
@@ -292,14 +287,10 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   ClassHeapDetailStats findClass(String className) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
-    int row = 0;
-    for (ClassHeapDetailStats stat in classesData) {
-      if (stat.classRef.name == className) {
-        return stat;
-      }
-    }
-
-    return null;
+    return classesData.firstWhere(
+      (ClassHeapDetailStats stat) => stat.classRef.name == className,
+      orElse: () => null,
+    );
   }
 
   Future<List<InstanceSummary>> findInstances(ClassHeapDetailStats row) async {
@@ -313,15 +304,14 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       return instances;
     } catch (e) {
-      print("findInstances ERROR: $e");
+      // TODO(terry): Cleanup error.
+      print('findInstances ERROR: $e');
+      return [];
     }
-
-    return [];
   }
 
   ClassHeapDetailStats findCLassDetails(String classRefId) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
-    int row = 0;
     for (ClassHeapDetailStats stat in classesData) {
       if (stat.classRef.id == classRefId) {
         return stat;
@@ -532,8 +522,11 @@ class MemoryScreen extends Screen with SetStateMixin {
     });
   }
 
-  void _pushNextTable(Table<dynamic> current, Table<dynamic> next,
-      [InboundsTree inboundTree = null]) {
+  void _pushNextTable(
+    Table<dynamic> current,
+    Table<dynamic> next, [
+    InboundsTree inboundTree,
+  ]) {
     // Remove any tables to the right of current from the DOM and the stack.
     while (tableStack.length > 1 && tableStack.last != current) {
       // TODO(terry): Hacky need to manage tables better.
@@ -728,7 +721,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       final InboundsTree inboundTree =
           row == null ? null : await displayInboundReferences(row);
-      TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
+      final TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
       _pushNextTable(table, tree, inboundTree);
     });
 
@@ -826,7 +819,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       } else if (theObject is Sentinel) {
         instance = null;
         // TODO(terry): Tracking Sentinel's to be removed.
-        framework.toast('Sentinel ${objectRef}', title: 'Warning');
+        framework.toast('Sentinel $objectRef', title: 'Warning');
       }
     } catch (e) {
       // Log this problem not sure how it can really happen.
@@ -851,8 +844,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     if (instance == null) {
       // TODO(terry): Eliminate for eval
       // Eval objectRef ids have changed re-fetch objectRef ids.
-      var newInstance = await findLostObjectRef(
-          rowNode.instance.classRef, int.parse(rowNode.instanceHashCode));
+      final newInstance = await findLostObjectRef(
+        rowNode.instance.classRef,
+        int.parse(rowNode.instanceHashCode),
+      );
 
       framework.toast(
           'Re-computed ${rowNode.instance.objectRef} -> '
@@ -882,55 +877,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Allow inspection of the memory object.
     memoryDataView.showFields(instance != null ? instance.fields : []);
-  }
-
-  void _handleHistoryClicks(CoreElement element) {
-    // Handle clicking in the history links.
-    if (element.hasClass('history-link')) {
-      assert(element.tag == 'SPAN');
-      final attrs = element.attributes;
-
-      final int dataIndex = int.parse(attrs[NavigationState.dataIndex]);
-
-      final String dataClass = attrs[NavigationState.dataClass];
-      String dataField = attrs[NavigationState.dataField];
-      dataField ??= '';
-      final int dataHashCode = int.parse(attrs[NavigationState.dataHashCode]);
-
-      final NavigationState state = memoryPath.get(dataIndex);
-
-      // The clicked link's attributes and real NavigationState should match.
-      assert(dataClass == state.className &&
-          dataField == state.field &&
-          dataHashCode == state.instanceHashCode);
-
-      // Prune remove this state and to the end as well.
-      memoryPath.remove(state);
-
-      if (state.isClass) {
-        _selectClass(state.className);
-      } else if (state.isInstance) {
-        selectClassInstance(state.className, state.instanceHashCode);
-      } else if (state.isInbound) {
-        // Same as selecting the class instance but record the field, don't
-        // need to match following the refs.
-        memoryPath.fieldReference = state.field;
-        selectClassInstance(state.className, state.instanceHashCode);
-      } else {
-        assert(false, 'Unknown NavigationState');
-      }
-
-      history.clear();
-
-      Timer(const Duration(milliseconds: 100), () {
-        if (!memoryPath.isLastInBound) {
-          history.hidden(true);
-        } else {
-          memoryPath.displayPathsAsLinks(history, _handleHistoryClicks);
-          history.hidden(false);
-        }
-      });
-    }
   }
 
   // TD element used to simulate hover state when hover card is visible. When
@@ -1179,7 +1125,8 @@ class MemoryScreen extends Screen with SetStateMixin {
       }
       objectCountStatus.element.text = '${nf.format(objectCount)} objects';
     }
-    experimentStatus.element.text = isMemoryExperiment ? 'Experiment' : 'Memory';
+    experimentStatus.element.text =
+        isMemoryExperiment ? 'Experiment' : 'Memory';
   }
 }
 
