@@ -14,7 +14,6 @@ import '../globals.dart';
 import '../popup.dart';
 import '../table_data.dart';
 import '../tables.dart';
-import '../trees.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';

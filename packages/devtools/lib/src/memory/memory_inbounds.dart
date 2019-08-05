@@ -23,6 +23,7 @@ class InboundsTree extends InstanceRefsView {
   }
 
   final MemoryScreen _memoryScreen;
+
   TreeTable<InboundsTreeNode> referencesTable;
 
   void _init(String className) {
