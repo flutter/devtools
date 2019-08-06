@@ -310,15 +310,12 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  ClassHeapDetailStats findCLassDetails(String classRefId) {
+  ClassHeapDetailStats findClassDetails(String classRefId) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
-    for (ClassHeapDetailStats stat in classesData) {
-      if (stat.classRef.id == classRefId) {
-        return stat;
-      }
-    }
-
-    return null;
+    return classesData.firstWhere(
+      (stat) => stat.classRef.id == classRefId,
+      orElse: () => null,
+    );
   }
 
   void _selectClass(String className, [record = true]) {
@@ -787,7 +784,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     String classRef,
     int instanceHashCode,
   ) async {
-    final classDetails = findCLassDetails(classRef);
+    final classDetails = findClassDetails(classRef);
     if (classDetails != null) {
       final List<InstanceSummary> instances =
           await memoryController.getInstances(
