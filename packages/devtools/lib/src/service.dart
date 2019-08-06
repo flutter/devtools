@@ -14,43 +14,43 @@ import 'vm_service_wrapper.dart';
 void _connectWithSse(
   Uri uri,
   Completer<VmServiceWrapper> connectedCompleter,
-  Completer<Null> finishedCompleter,
+  Completer<void> finishedCompleter,
 ) {
   uri = uri.scheme == 'sse'
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
-  final SseClient client = SseClient('$uri');
+  final client = SseClient('$uri');
+  final Stream<String> stream = client.stream.asBroadcastStream();
   client.onOpen.listen((_) {
-    final Stream<String> stream = client.stream.asBroadcastStream();
-    stream.listen((_) {}, onError: (error) {
-      if (!connectedCompleter.isCompleted) {
-        connectedCompleter.completeError(error);
-      }
-    });
-
-    final VmServiceWrapper service = VmServiceWrapper.fromNewVmService(
+    final service = VmServiceWrapper.fromNewVmService(
       stream,
-      (String message) => client.sink.add(message),
+      client.sink.add,
     );
 
-    client.sink.done.then((_) {
+    client.sink.done.whenComplete(() {
       finishedCompleter.complete();
       service.dispose();
     });
 
     connectedCompleter.complete(service);
   });
+
+  stream.drain().catchError((error) {
+    if (!connectedCompleter.isCompleted) {
+      connectedCompleter.completeError(error);
+    }
+  });
 }
 
 void _connectWithWebSocket(
   Uri uri,
   Completer<VmServiceWrapper> connectedCompleter,
-  Completer<Null> finishedCompleter,
+  Completer<void> finishedCompleter,
 ) {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
-  final WebSocket ws = WebSocket(uri.toString());
+  final ws = WebSocket(uri.toString());
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
@@ -59,7 +59,7 @@ void _connectWithWebSocket(
       if (e.data is String) {
         return e.data;
       } else {
-        final FileReader fileReader = FileReader();
+        final fileReader = FileReader();
         fileReader.readAsArrayBuffer(e.data);
         return fileReader.onLoadEnd.first.then<ByteData>((ProgressEvent _) {
           final Uint8List list = fileReader.result;
@@ -68,9 +68,9 @@ void _connectWithWebSocket(
       }
     });
 
-    final VmServiceWrapper service = VmServiceWrapper.fromNewVmService(
+    final service = VmServiceWrapper.fromNewVmService(
       inStream,
-      (String message) => ws.send(message),
+      ws.send,
     );
 
     ws.onClose.listen((_) {
@@ -88,9 +88,8 @@ void _connectWithWebSocket(
   });
 }
 
-Future<VmServiceWrapper> connect(Uri uri, Completer<Null> finishedCompleter) {
-  final Completer<VmServiceWrapper> connectedCompleter =
-      Completer<VmServiceWrapper>();
+Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
+  final connectedCompleter = Completer<VmServiceWrapper>();
   if (uri.scheme == 'sse' || uri.scheme == 'sses') {
     _connectWithSse(uri, connectedCompleter, finishedCompleter);
   } else {

@@ -20,7 +20,7 @@ class FrameworkCore {
     // Print the version number at startup.
     print('DevTools version ${devtools.version}.');
 
-    final Uri uri = Uri.parse(window.location.toString());
+    final uri = Uri.parse(window.location.toString());
     theme.initializeTheme(uri.queryParameters['theme']);
 
     _setGlobals();
