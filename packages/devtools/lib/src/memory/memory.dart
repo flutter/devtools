@@ -645,7 +645,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  Future<Null> _gcNow() async {
+  Future<void> _gcNow() async {
     ga.select(ga.memory, ga.gC);
 
     gcNowButton.disabled = true;

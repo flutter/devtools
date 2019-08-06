@@ -41,7 +41,7 @@ class FrameworkCore {
     var uri = explicitUri ?? _getUriFromQuerystring();
 
     if (uri != null) {
-      final Completer<Null> finishedCompleter = Completer<Null>();
+      final finishedCompleter = Completer<void>();
 
       // Map the URI (which may be Observatory web app) to a WebSocket URI for
       // the VM service.

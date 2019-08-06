@@ -26,14 +26,10 @@ class ServiceConnectionManager {
     _serviceExtensionManager = serviceExtensionManager;
   }
 
-  final StreamController<Null> _stateController =
-      StreamController<Null>.broadcast();
   final StreamController<VmServiceWrapper> _connectionAvailableController =
       StreamController<VmServiceWrapper>.broadcast();
-  final StreamController<Null> _connectionClosedController =
-      StreamController<Null>.broadcast();
 
-  final Completer<Null> serviceAvailable = Completer();
+  final serviceAvailable = Completer<void>();
 
   VmServiceCapabilities _serviceCapabilities;
 
@@ -69,12 +65,14 @@ class ServiceConnectionManager {
 
   bool get hasConnection => service != null;
 
-  Stream<Null> get onStateChange => _stateController.stream;
+  Stream<void> get onStateChange => _stateController.stream;
+  final _stateController = StreamController<void>.broadcast();
 
   Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
 
-  Stream<Null> get onConnectionClosed => _connectionClosedController.stream;
+  Stream<void> get onConnectionClosed => _connectionClosedController.stream;
+  final _connectionClosedController = StreamController<void>.broadcast();
 
   /// Call a service that is registered by exactly one client.
   Future<Response> callService(
@@ -235,7 +233,7 @@ class IsolateManager {
   final StreamController<IsolateRef> _selectedIsolateController =
       StreamController<IsolateRef>.broadcast();
 
-  Completer<Null> selectedIsolateAvailable = Completer();
+  void selectedIsolateAvailable = Completer<void>();
 
   List<LibraryRef> selectedIsolateLibraries;
 
@@ -384,7 +382,7 @@ class ServiceExtensionManager {
   // ignore: prefer_collection_literals
   final Set<String> _pendingServiceExtensions = Set<String>();
 
-  Completer<Null> extensionStatesUpdated = Completer();
+  var extensionStatesUpdated = Completer<void>();
 
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
