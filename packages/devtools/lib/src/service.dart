@@ -6,13 +6,51 @@ import 'dart:async';
 import 'dart:html' hide Event;
 import 'dart:typed_data';
 
+import 'package:sse/client/sse_client.dart';
+import 'package:vm_service/utils.dart';
+
 import 'vm_service_wrapper.dart';
 
-Future<VmServiceWrapper> connect(Uri uri, Completer<Null> finishedCompleter) {
-  final WebSocket ws = WebSocket(uri.toString());
+void _connectWithSse(
+  Uri uri,
+  Completer<VmServiceWrapper> connectedCompleter,
+  Completer<Null> finishedCompleter,
+) {
+  uri = uri.scheme == 'sse'
+      ? uri.replace(scheme: 'http')
+      : uri.replace(scheme: 'https');
+  final SseClient client = SseClient('$uri');
+  client.onOpen.listen((_) {
+    final Stream<String> stream = client.stream.asBroadcastStream();
+    stream.listen((_) {}, onError: (error) {
+      if (!connectedCompleter.isCompleted) {
+        connectedCompleter.completeError(error);
+      }
+    });
 
-  final Completer<VmServiceWrapper> connectedCompleter =
-      Completer<VmServiceWrapper>();
+    final VmServiceWrapper service = VmServiceWrapper.fromNewVmService(
+      stream,
+      (String message) => client.sink.add(message),
+    );
+
+    client.sink.done.then((_) {
+      finishedCompleter.complete();
+      service.dispose();
+    });
+
+    connectedCompleter.complete(service);
+  });
+}
+
+void _connectWithWebSocket(
+  Uri uri,
+  Completer<VmServiceWrapper> connectedCompleter,
+  Completer<Null> finishedCompleter,
+) {
+  // Map the URI (which may be Observatory web app) to a WebSocket URI for
+  // the VM service.
+  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  final WebSocket ws = WebSocket(uri.toString());
 
   ws.onOpen.listen((_) {
     final Stream<dynamic> inStream =
@@ -44,12 +82,20 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<Null> finishedCompleter) {
   });
 
   ws.onError.listen((dynamic e) {
-    //_logger.fine('Unable to connect to observatory, port ${port}', e);
     if (!connectedCompleter.isCompleted) {
       connectedCompleter.completeError(e);
     }
   });
+}
 
+Future<VmServiceWrapper> connect(Uri uri, Completer<Null> finishedCompleter) {
+  final Completer<VmServiceWrapper> connectedCompleter =
+      Completer<VmServiceWrapper>();
+  if (uri.scheme == 'sse' || uri.scheme == 'sses') {
+    _connectWithSse(uri, connectedCompleter, finishedCompleter);
+  } else {
+    _connectWithWebSocket(uri, connectedCompleter, finishedCompleter);
+  }
   return connectedCompleter.future;
 }
 
