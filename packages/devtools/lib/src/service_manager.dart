@@ -233,7 +233,7 @@ class IsolateManager {
   final StreamController<IsolateRef> _selectedIsolateController =
       StreamController<IsolateRef>.broadcast();
 
-  void selectedIsolateAvailable = Completer<void>();
+  var selectedIsolateAvailable = Completer<void>();
 
   List<LibraryRef> selectedIsolateLibraries;
 
