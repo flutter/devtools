@@ -76,9 +76,6 @@ class TableData<T> extends Object {
   @protected
   final StreamController<T> selectController = StreamController<T>.broadcast();
 
-  final StreamController<Null> _rowsChangedController =
-      StreamController.broadcast();
-
   final StreamController<HoverCellData<T>> selectElementController =
       StreamController<HoverCellData<T>>.broadcast();
 
@@ -89,7 +86,8 @@ class TableData<T> extends Object {
 
   Stream<T> get onSelect => selectController.stream;
 
-  Stream<Null> get onRowsChanged => _rowsChangedController.stream;
+  Stream<void> get onRowsChanged => _rowsChangedController.stream;
+  final _rowsChangedController = StreamController<void>.broadcast();
 
   Stream<HoverCellData<T>> get onCellHover => selectElementController.stream;
 

@@ -25,10 +25,8 @@ class MemoryController {
 
   Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
 
-  final StreamController<void> _disconnectController =
-      StreamController<void>.broadcast();
-
   Stream<void> get onDisconnect => _disconnectController.stream;
+  final _disconnectController = StreamController<void>.broadcast();
 
   MemoryTracker _memoryTracker;
 
@@ -46,7 +44,7 @@ class MemoryController {
     _memoryTracker = MemoryTracker(service);
     _memoryTracker.start();
 
-    _memoryTracker.onChange.listen((Null _) {
+    _memoryTracker.onChange.listen((_) {
       _memoryTrackerController.add(_memoryTracker);
     });
   }
@@ -55,7 +53,7 @@ class MemoryController {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
-    _disconnectController.add(Null);
+    _disconnectController.add(null);
     hasStopped = true;
   }
 

@@ -18,8 +18,6 @@ class MemoryTracker {
 
   VmServiceWrapper service;
   Timer _pollingTimer;
-  final StreamController<Null> _changeController =
-      StreamController<Null>.broadcast();
 
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
@@ -28,7 +26,8 @@ class MemoryTracker {
 
   bool get hasConnection => service != null;
 
-  Stream<Null> get onChange => _changeController.stream;
+  Stream<void> get onChange => _changeController.stream;
+  final _changeController = StreamController<void>.broadcast();
 
   int get currentCapacity => samples.last.capacity;
 
@@ -58,7 +57,7 @@ class MemoryTracker {
   }
 
   // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
-  Future<Null> _pollMemory() async {
+  Future<void> _pollMemory() async {
     if (!hasConnection) {
       return;
     }

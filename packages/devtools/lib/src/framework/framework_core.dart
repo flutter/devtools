@@ -39,7 +39,7 @@ class FrameworkCore {
     final Uri uri = explicitUri ?? _getUriFromQuerystring();
 
     if (uri != null) {
-      final Completer<Null> finishedCompleter = Completer<Null>();
+      final finishedCompleter = Completer<void>();
 
       try {
         final VmServiceWrapper service = await connect(uri, finishedCompleter);

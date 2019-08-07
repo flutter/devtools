@@ -172,8 +172,6 @@ class ChromeTab {
   final wip.ChromeTab wipTab;
   WipConnection _wip;
 
-  final StreamController<Null> _disconnectStream =
-      StreamController<Null>.broadcast();
   final StreamController<LogEntry> _entryAddedController =
       StreamController<LogEntry>.broadcast();
   final StreamController<ConsoleAPIEvent> _consoleAPICalledController =
@@ -241,7 +239,8 @@ class ChromeTab {
 
   bool get isConnected => _wip != null;
 
-  Stream<Null> get onDisconnect => _disconnectStream.stream;
+  Stream<void> get onDisconnect => _disconnectStream.stream;
+  final _disconnectStream = StreamController<void>.broadcast();
 
   Stream<LogEntry> get onLogEntryAdded => _entryAddedController.stream;
 
