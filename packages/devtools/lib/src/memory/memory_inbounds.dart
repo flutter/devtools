@@ -76,13 +76,12 @@ class InboundsTree extends InstanceRefsView {
                   await _memoryScreen.findInstances(classStats);
               int instanceIndex = 1;
               for (InstanceSummary instance in instances) {
-
                 // Give feedback on what is happening node name appended with
                 // ' (N of NNN)' instances of total instances being processed.
                 inboundNode.working(instanceIndex++, instances.length);
                 _memoryScreen.updateInstancesTree();
 
-                  // Found the instance.
+                // Found the instance.
                 final refs =
                     await getInboundReferences(instance.objectRef, 1000);
 
