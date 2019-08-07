@@ -1,7 +1,6 @@
 os:
   - linux
   - osx
-  - windows
 
 language: dart
 dart:
