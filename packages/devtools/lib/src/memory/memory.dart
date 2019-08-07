@@ -417,13 +417,15 @@ class MemoryScreen extends Screen with SetStateMixin {
     final Table<Object> instanceTable = tableStack.last;
     final List<InboundsTreeNode> nodes = instanceTable.model.data;
 
-    int row = 0;
-    for (var node in nodes) {
-      if (node.instance?.objectRef == objectRefToFind) {
-        instanceTable.selectByIndex(row, scrollBehavior: 'auto');
-        return;
-      }
-      row++;
+    var foundNode = nodes.firstWhere(
+      (node) => node.instance?.objectRef == objectRefToFind,
+      orElse: () => null,
+    );
+    if (foundNode != null) {
+      instanceTable.selectByIndex(
+        nodes.indexOf(foundNode),
+        scrollBehavior: 'auto',
+      );
     }
   }
 
@@ -854,7 +856,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     // instance view which would be the third child needs to be removed.
     removeInstanceView();
 
-    if (rowNode == null || rowNode.instance == null) return;
+    if (rowNode?.instance == null) return;
 
     Instance instance = await getInstance(rowNode.instance.objectRef);
     if (instance == null) {
@@ -1107,9 +1109,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       final InstanceRef ref = value;
 
-      if (ref != null &&
-          ref.valueAsString != null &&
-          !ref.valueAsStringIsTruncated) {
+      if (ref?.valueAsString != null && !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
       } else {
         // Shouldn't happen but want to check - log to analytics.
