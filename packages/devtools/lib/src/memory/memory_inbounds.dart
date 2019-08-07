@@ -32,18 +32,23 @@ class InboundsTree extends InstanceRefsView {
 
   TreeTable<InboundsTreeNode> referencesTable;
 
+  Spinner spinner;
+
   void _init(String className) {
     final title =
         '${inboundsTree.data.children.length} Instances of $className';
 
     final classNameColumn = ClassNameColumn(title)
       ..onNodeExpanded.listen((inboundNode) async {
+        // TODO(terry): Fix need to support simultaneous expansions.
+        if (spinner != null) return;
+
         if (inboundNode.children.length == 1 &&
             inboundNode.children[0].isEmpty) {
           inboundNode.children.removeLast();
           // Make sure it's a known class (not abstract).
           if (!inboundNode.isEmpty) {
-            final spinner = Spinner.centered();
+            spinner = Spinner.centered();
             referencesTable.element.add(spinner);
 
             if (inboundNode.instanceHashCode == null &&
@@ -65,14 +70,21 @@ class InboundsTree extends InstanceRefsView {
             final ClassHeapDetailStats classStats =
                 _memoryScreen.findClass(inboundNode.name);
 
-            // All instances of a class.
-            final List<InstanceSummary> instances =
-                await _memoryScreen.findInstances(classStats);
-            for (InstanceSummary instance in instances) {
-              // Found the instance.
-              final refs = await getInboundReferences(instance.objectRef, 1000);
+            if (_memoryScreen.isMemoryExperiment) {
+              // All instances of a class.
+              final List<InstanceSummary> instances =
+                  await _memoryScreen.findInstances(classStats);
+              int instanceIndex = 1;
+              for (InstanceSummary instance in instances) {
+                // Give feedback on what is happening node name appended with
+                // ' (N of NNN)' instances of total instances being processed.
+                inboundNode.working(instanceIndex++, instances.length);
+                _memoryScreen.updateInstancesTree();
 
-              if (_memoryScreen.isMemoryExperiment) {
+                // Found the instance.
+                final refs =
+                    await getInboundReferences(instance.objectRef, 1000);
+
                 // TODO(terry): Temporary workaround since evaluate fails on expressions
                 // TODO(terry): accessing a private field e.g., _extra.hashcode.
                 if (await _memoryScreen.memoryController.matchObject(
@@ -118,10 +130,14 @@ class InboundsTree extends InstanceRefsView {
                       }
                     },
                   );
+                  break;
                 }
               }
             }
+
             spinner.remove();
+            // TODO(terry): Make spinner local using as a sentry.
+            spinner = null;
           }
         }
 
@@ -253,9 +269,15 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
     _instance = theInstance;
     instanceHashCode = hashCode;
     _name = _name.split(' ')[0]; // Throw away instance objectRef name.
+
     _name = (isNew && !isInboundEntry)
         ? _instance.objectRef
         : '$name (${instance.objectRef})';
+  }
+
+  void working(int index, int total) {
+    _name = _name.split(' ')[0]; // Throw away instance objectRef name.
+    _name = '$name ($index of $total)';
   }
 
   InstanceSummary _instance;
