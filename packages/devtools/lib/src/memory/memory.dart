@@ -410,6 +410,23 @@ class MemoryScreen extends Screen with SetStateMixin {
     heapAutoCompletePopup.hide();
   }
 
+  void _selectInstanceByObjectRef(String objectRefToFind) {
+    removeInstanceView();
+
+    // There's an instances table up.
+    final Table<Object> instanceTable = tableStack.last;
+    final List<InboundsTreeNode> nodes = instanceTable.model.data;
+
+    int row = 0;
+    for (var node in nodes) {
+      if (node.instance?.objectRef == objectRefToFind) {
+        instanceTable.selectByIndex(row, scrollBehavior: 'auto');
+        return;
+      }
+      row++;
+    }
+  }
+
   Future<void> _selectInstanceByHashCode(int instanceHashCode) async {
     // There's an instances table up.
     final Table<Object> instanceTable = tableStack.last;
@@ -773,7 +790,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         final inboundNode =
             InboundsTreeNode(owningAllocator, referenceName, instanceHashCode);
         instanceNode.addChild(inboundNode);
-        inboundNode.addChild(InboundsTreeNode.empty());
+        if (_memoryExperiment) inboundNode.addChild(InboundsTreeNode.empty());
       }
     });
 
@@ -826,6 +843,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     return instance;
   }
 
+  void updateInstancesTree() {
+    _inboundTree.update();
+  }
+
   void select(InboundsTreeNode rowNode) async {
     ga.select(ga.memory, ga.inspectInstance);
 
@@ -833,7 +854,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     // instance view which would be the third child needs to be removed.
     removeInstanceView();
 
-    if (rowNode == null) return;
+    if (rowNode == null || rowNode.instance == null) return;
 
     Instance instance = await getInstance(rowNode.instance.objectRef);
     if (instance == null) {
@@ -845,16 +866,20 @@ class MemoryScreen extends Screen with SetStateMixin {
       );
 
       framework.toast(
-          'Re-computed ${rowNode.instance.objectRef} -> '
-          '${newInstance.objectRef}',
-          title: 'Message');
+        'Re-computed ${rowNode.instance.objectRef} -> ${newInstance.objectRef}',
+        title: 'Message',
+      );
 
-      // Update to a new objectRef id.
+      // Update to the new objectRef id.
       rowNode.setInstance(newInstance, rowNode.instanceHashCode, true);
 
       instance = await getInstance(rowNode.instance.objectRef);
 
       _inboundTree.update();
+
+      // Re-computing could cause instance in TableTree to move (change row).
+      // Find it and select it again.
+      _selectInstanceByObjectRef(rowNode.instance.objectRef);
     }
 
     tableContainer.add(_createInstanceView(
@@ -1082,7 +1107,9 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       final InstanceRef ref = value;
 
-      if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
+      if (ref != null &&
+          ref.valueAsString != null &&
+          !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
       } else {
         // Shouldn't happen but want to check - log to analytics.
