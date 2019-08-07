@@ -75,15 +75,28 @@ class TimelineService {
     // available in the engine.
     int uiThreadId;
     int gpuThreadId;
+
+    // Store the thread names for debugging purposes. If [uiThreadId] or
+    // [gpuThreadId] are null, we will print all the thread names we received
+    // to console.
+    final threadNames = [];
+
     for (TraceEvent event in events) {
-      // iOS - 'io.flutter.1.ui', Android - '1.ui'.
-      if (event.args['name'].contains('1.ui')) {
+      final name = event.args['name'];
+      threadNames.add(name);
+
+      // iOS - 'io.flutter.1.ui', Android - '1.ui', Other - io.flutter.ui
+      if (name.contains('1.ui') || name.contains('flutter.ui')) {
         uiThreadId = event.threadId;
       }
-      // iOS - 'io.flutter.1.gpu', Android - '1.gpu'.
-      if (event.args['name'].contains('1.gpu')) {
+      // iOS - 'io.flutter.1.gpu', Android - '1.gpu', Other - io.flutter.gpu
+      if (name.contains('1.gpu') || name.contains('flutter.gpu')) {
         gpuThreadId = event.threadId;
       }
+    }
+
+    if (uiThreadId == null || gpuThreadId == null) {
+      print('Possible threads: $threadNames');
     }
 
     timelineController.timelineProtocol = TimelineProtocol(
