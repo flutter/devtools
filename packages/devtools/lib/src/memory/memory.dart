@@ -417,7 +417,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     final Table<Object> instanceTable = tableStack.last;
     final List<InboundsTreeNode> nodes = instanceTable.model.data;
 
-    var foundNode = nodes.firstWhere(
+    final foundNode = nodes.firstWhere(
       (node) => node.instance?.objectRef == objectRefToFind,
       orElse: () => null,
     );
