@@ -86,11 +86,11 @@ class TimelineService {
       threadNames.add(name);
 
       // iOS - io.flutter.1.ui, Android - 1.ui, Dream (g3) - io.flutter.ui
-      if (name.contains('1.ui') || name.contains('flutter.ui')) {
+      if (name.endsWith('.ui')) {
         uiThreadId = event.threadId;
       }
       // iOS - io.flutter.1.gpu, Android - 1.gpu, Dream (g3) - io.flutter.gpu
-      if (name.contains('1.gpu') || name.contains('flutter.gpu')) {
+      if (name.endsWith('.gpu')) {
         gpuThreadId = event.threadId;
       }
     }
