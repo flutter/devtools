@@ -25,10 +25,8 @@ class MemoryController {
 
   Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
 
-  final StreamController<void> _disconnectController =
-      StreamController<void>.broadcast();
-
   Stream<void> get onDisconnect => _disconnectController.stream;
+  final _disconnectController = StreamController<void>.broadcast();
 
   MemoryTracker _memoryTracker;
 
@@ -46,7 +44,7 @@ class MemoryController {
     _memoryTracker = MemoryTracker(service);
     _memoryTracker.start();
 
-    _memoryTracker.onChange.listen((Null _) {
+    _memoryTracker.onChange.listen((_) {
       _memoryTrackerController.add(_memoryTracker);
     });
   }
@@ -55,7 +53,7 @@ class MemoryController {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
-    _disconnectController.add(Null);
+    _disconnectController.add(null);
     hasStopped = true;
   }
 
@@ -130,6 +128,9 @@ class MemoryController {
       for (var field in fields) {
         if (field.decl.name == fieldName) {
           final InstanceRef ref = field.value;
+
+          if (ref == null) continue;
+
           final evalResult = await evaluate(ref.id, 'hashCode');
           final int objHashCode = int.parse(evalResult?.valueAsString);
           if (objHashCode == instanceHashCode) {

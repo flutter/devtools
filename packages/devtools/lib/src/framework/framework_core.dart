@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:html' hide Screen;
 
-import 'package:vm_service/utils.dart';
-
 import '../../devtools.dart' as devtools show version;
 import '../core/message_bus.dart';
 import '../globals.dart';
@@ -22,7 +20,7 @@ class FrameworkCore {
     // Print the version number at startup.
     print('DevTools version ${devtools.version}.');
 
-    final Uri uri = Uri.parse(window.location.toString());
+    final uri = Uri.parse(window.location.toString());
     theme.initializeTheme(uri.queryParameters['theme']);
 
     _setGlobals();
@@ -38,14 +36,10 @@ class FrameworkCore {
     Uri explicitUri,
     ErrorReporter errorReporter,
   }) async {
-    var uri = explicitUri ?? _getUriFromQuerystring();
+    final Uri uri = explicitUri ?? _getUriFromQuerystring();
 
     if (uri != null) {
-      final Completer<Null> finishedCompleter = Completer<Null>();
-
-      // Map the URI (which may be Observatory web app) to a WebSocket URI for
-      // the VM service.
-      uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+      final finishedCompleter = Completer<void>();
 
       try {
         final VmServiceWrapper service = await connect(uri, finishedCompleter);
@@ -88,7 +82,9 @@ class FrameworkCore {
           (uri.isScheme('ws') ||
               uri.isScheme('wss') ||
               uri.isScheme('http') ||
-              uri.isScheme('https'))) {
+              uri.isScheme('https') ||
+              uri.isScheme('sse') ||
+              uri.isScheme('sses'))) {
         return uri;
       }
     }

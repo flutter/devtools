@@ -698,6 +698,10 @@ div.tabnav {
     min-width: 500px;
 }
 
+.memory-table table:focus {
+    outline: none;
+}
+
 .memory-inspector {
     padding: 3px;
     box-sizing: border-box;

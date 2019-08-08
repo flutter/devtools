@@ -1,6 +1,10 @@
-## 0.1.5 - TBD
+## 0.1.6 - 2019-08-06
+* Support `sse` and `sses` schemes for connection with a running app.
+
+## 0.1.5 - 2019-08-05
 * Support expanding or collapsing all values in the Call Tree and Bottom Up views (parts of the CPU profiler).
 * Support touchscreen scrolling and selection in flame charts.
+* Display structured error messages in the Logging view when "show structured errors" is enabled.
 * Search and filter dialogs are now case-insensitive.
 * Link to Dart DevTools documentation from connect screen.
 * Disable unsupported DevTools pages for Dart web apps.
@@ -20,7 +24,7 @@
 * Pre-fetch CPU profiles so that we have profiling information for every frame in the timeline.
 * Trim Mixins from class name reporting in the CPU profiler.
 * Add searching for a particular class from all active classes in a Snapshot. After a snapshot, use the search button, located to left of snapshot button (or the shortcut CTRL+f ), to find and select the class in the classes list.
-* Add ability to find which class and field hold a reference to the current instance.  Hovering on an instance's allocation icon (right-most side of the instance).  Clicking on a class/field entry in the hover card will locate that particular class instance that has a reference to the original instance being hovered. 
+* Add ability to find which class and field hold a reference to the current instance.  Hovering on an instance's allocation icon (right-most side of the instance).  Clicking on a class/field entry in the hover card will locate that particular class instance that has a reference to the original instance being hovered.
 * Expose hover card navigation via a memory navigation history areas (group of links below the classes/instances lists).
 * Allow DevTools feedback to be submitted when DevTools is not connected to an app.
 * Support URL encoded urls in the connection dialog.
@@ -41,7 +45,7 @@
 * Inspector polish bug fixes. Handle very deep inspector trees and only show expand-collapse arrows on tree nodes where needed.
 * Fix case where error messages remained on the startup screen after the error had been fixed.
 * Add ability to inspect an instance of a memory object in the memory profiler page after a snapshot of active memory objects.
-* First time DevTools is launched, prompt with an opt-in dialog to report DevTools usage statistics and crash reports of DevTools to Google. 
+* First time DevTools is launched, prompt with an opt-in dialog to report DevTools usage statistics and crash reports of DevTools to Google.
 
 ## 0.0.19 - 2019-05-01
 * Update DevTools server to better handle failures when launching browsers.
