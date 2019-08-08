@@ -96,7 +96,9 @@ class TimelineService {
     }
 
     if (uiThreadId == null || gpuThreadId == null) {
-      print('Possible threads: $threadNames');
+      timelineController.logNonFatalError(
+          'Could not find UI thread and / or GPU thread from names: '
+          '$threadNames');
     }
 
     timelineController.timelineProtocol = TimelineProtocol(

@@ -265,6 +265,10 @@ class TimelineScreen extends Screen {
       _destroySplitter();
     });
 
+    timelineController.onNonFatalError.listen((message) {
+      ga.error(message, false);
+    });
+
     // The size of [flameChartContainer] will change as the splitter moved.
     // Observe resizing so that we can rebuild the flame chart canvas as
     // necessary.

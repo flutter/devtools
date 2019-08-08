@@ -58,6 +58,10 @@ class TimelineController {
   final StreamController<OfflineTimelineData> _loadOfflineDataController =
       StreamController<OfflineTimelineData>.broadcast();
 
+  /// Stream controller that notifies the timeline screen when a non-fatal error
+  /// should be logged for the timeline.
+  final _nonFatalErrorController = StreamController<String>.broadcast();
+
   Stream<TimelineFrame> get onFrameAdded => frameAddedController.stream;
 
   Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
@@ -67,6 +71,8 @@ class TimelineController {
 
   Stream<OfflineTimelineData> get onLoadOfflineData =>
       _loadOfflineDataController.stream;
+
+  Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
 
   TimelineData timelineData;
 
@@ -227,6 +233,10 @@ class TimelineController {
   void exitOfflineMode() {
     timelineData.clear();
     offlineTimelineData = null;
+  }
+
+  void logNonFatalError(String message) {
+    _nonFatalErrorController.add(message);
   }
 }
 
