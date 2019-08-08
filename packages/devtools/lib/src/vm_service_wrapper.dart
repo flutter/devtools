@@ -568,6 +568,17 @@ class VmServiceWrapper implements VmService {
     );
     return future;
   }
+
+  @override
+  Future getInboundReferences(String isolateId, String targetId, int limit) =>
+      _trackFuture('getInboundReferences',
+          _vmService.getInboundReferences(isolateId, targetId, limit));
+
+  @override
+  Future<RetainingPath> getRetainingPath(
+          String isolateId, String targetId, int limit) =>
+      _trackFuture('getRetainingPath',
+          _vmService.getRetainingPath(isolateId, targetId, limit));
 }
 
 class TrackedFuture<T> {
