@@ -1093,24 +1093,64 @@ span.strong {
 
 @media all and (max-width: 550px) { .optional-550 { display: none; } }
 @media all and (max-width: 700px) { .optional-700 { display: none; } }
-@media all and (max-width: 850px) { .optional-850 { display: none; } }
-@media all and (max-width: 950px) { .optional-950 { display: none; } }
 @media all and (max-width: 1000px) { .optional-1000 { display: none; } }
-@media all and (max-width: 1200px) { .optional-1200 { display: none; } }
-@media all and (max-width: 1400px) { .optional-1400 { display: none; } }
-
+@media all and (max-width: 1060px) { .optional-1060 { display: none; } }
 
 /*
  * Support tagging btn-groups with collapsible that can have children tagged
  * with optional-text to be hidden when the page is below a certain threshold.
  */
 
-@media all and (max-width: 700px) {
-    .btn-group.collapsible-700 .optional-text span:not(.octicon) {
+@media all and (max-width: 685px) {
+    .btn-group.collapsible-685 .optional-text span:not(.octicon) {
         display: none;
     }
 
-    .btn-group.collapsible-700 .btn .flutter-icon {
+    .btn-group.collapsible-685 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 750px) {
+    .btn-group.collapsible-750 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-750 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 785px) {
+    .btn-group.collapsible-785 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-785 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 800px) {
+    .btn-group.collapsible-800 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-800 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 885px) {
+    .btn-group.collapsible-885 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-885 .btn .flutter-icon {
         margin-right: 0;
         box-sizing: content-box;
     }

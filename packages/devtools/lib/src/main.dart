@@ -78,7 +78,7 @@ class PerfToolFramework extends Framework {
       final CoreElement link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
-          span(text: ' ${screen.name}', c: 'optional-950')
+          span(text: ' ${screen.name}', c: 'optional-1060')
         ]);
       if (screen.disabled) {
         link

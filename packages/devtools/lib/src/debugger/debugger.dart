@@ -243,7 +243,7 @@ class DebuggerScreen extends Screen {
               div(c: 'section flex-wrap')
                 ..layoutHorizontal()
                 ..add(<CoreElement>[
-                  div(c: 'btn-group collapsible-700 flex-no-wrap')
+                  div(c: 'btn-group collapsible-785 flex-no-wrap')
                     ..add(<CoreElement>[
                       pauseButton,
                       resumeButton,

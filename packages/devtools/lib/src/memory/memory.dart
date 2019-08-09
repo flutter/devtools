@@ -246,13 +246,14 @@ class MemoryScreen extends Screen with SetStateMixin {
             ..layoutHorizontal()
             ..clazz('align-items-center')
             ..add(<CoreElement>[
-              div(c: 'btn-group flex-no-wrap')
+              div(c: 'btn-group collapsible-885 flex-no-wrap')
                 ..add(<CoreElement>[
                   pauseButton,
                   resumeButton,
                 ]),
               div()..flex(),
-              div(c: 'btn-group collapsible-700 flex-no-wrap margin-left')
+              div(c: 'btn-group collapsible-785 nowrap margin-left')
+                ..flex()
                 ..add(<CoreElement>[
                   vmSearchField,
                   vmMemorySearchButton,
