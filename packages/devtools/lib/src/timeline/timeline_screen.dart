@@ -185,24 +185,27 @@ class TimelineScreen extends Screen {
         div(text: 'Show frames', c: 'checkbox-text')
       ]);
 
+    // TODO(kenzie): once [enableMultiModeTimeline] is enabled by default,
+    // adjust collapsible-xxx CSS classes to account for timeline mode checkbox.
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group')
+        div(c: 'btn-group collapsible-885')
           ..add([
             pauseButton,
             resumeButton,
             _startRecordingButton,
             _stopRecordingButton,
           ]),
-        clearButton,
+        div(c: 'btn-group collapsible-685')..add(clearButton),
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         if (enableMultiModeTimeline) _frameBasedTimelineSettingContainer,
         _profileGranularitySelector.selector..clazz('margin-left'),
-        performanceOverlayButton.button..clazz('margin-left'),
-        exportButton,
+        div(c: 'btn-group collapsible-685 margin-left')
+          ..add(performanceOverlayButton.button),
+        div(c: 'btn-group collapsible-685')..add(exportButton),
       ]);
 
     _maybeAddDebugButtons();

@@ -73,7 +73,7 @@ class InspectorScreen extends Screen {
     final CoreElement buttonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group collapsible-700 nowrap')
+        div(c: 'btn-group collapsible-750 nowrap')
           ..add([
             ServiceExtensionButton(
               extensions.toggleSelectWidgetMode,
