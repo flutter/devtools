@@ -82,7 +82,7 @@ messages beautiful.
 }
 
 .inspector-style-singleLine {
-    
+    min-height: 1em;
 }
 
 .inspector-style-headerLine {
@@ -120,14 +120,14 @@ messages beautiful.
 .inspector-level-hint {
     background-color: var(--hint-background);
     color: var(--inspector-hint-color);
-    padding: 8px;
-    margin: 5px 0;
+    padding: 4px 0;
+    margin: 12px 0;
 }
 
 .inspector-level-summary {
   font-weight: 700;
   color: var(--error-summary-color);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .inspector-level-off {
