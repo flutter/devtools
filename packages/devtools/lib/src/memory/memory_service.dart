@@ -77,31 +77,42 @@ class InboundReference extends Response {
   int parentWordOffset;
 
   bool get isFieldRef => parentField.runtimeType == FieldRef;
+
   FieldRef get fieldRef => isFieldRef ? parentField as FieldRef : null;
 
   bool get isClassRef => parentField.runtimeType == ClassRef;
+
   ClassRef get classRef => isFieldRef ? parentField as ClassRef : null;
 
   bool get isFuncRef => parentField.runtimeType == FuncRef;
+
   FuncRef get funcRef => isFuncRef ? parentField as FuncRef : null;
 
   bool get isNullVal => parentField.runtimeType == NullVal;
+
   bool get isNullValRef => parentField.runtimeType == NullValRef;
+
   NullVal get nullVal => isInstanceRef ? parentField as NullVal : null;
 
   bool get isInstance => parentField.runtimeType == Instance;
+
   Instance get instance => isInstance ? parentField as Instance : null;
 
   bool get isInstanceRef => parentField.runtimeType == InstanceRef;
+
   InstanceRef get instanceRef =>
       isInstanceRef ? parentField as InstanceRef : null;
 
   bool get isLibrary => parentField.runtimeType == Library;
+
   bool get isLibraryRef => parentField.runtimeType == LibraryRef;
+
   Library get library => isLibrary ? parentField as Library : null;
 
   bool get isObj => parentField.runtimeType == Obj;
+
   bool get isObjRef => parentField.runtimeType == ObjRef;
+
   Obj get obj => isObj ? parentField as Obj : null;
 
   bool get isSentinel => parentField.runtimeType == Sentinel;
@@ -129,7 +140,8 @@ void computeInboundRefs(
   InboundReferences refs,
   BuildInboundEntry buildCallback,
 ) {
-  for (InboundReference element in refs.elements) {
+  final Iterable<InboundReference> elements = refs?.elements ?? [];
+  for (InboundReference element in elements) {
     // Could be a reference to an evaluate so this isn't known.
 
     // Looks like an object created from an evaluate, ignore it.
