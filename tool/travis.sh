@@ -154,6 +154,13 @@ elif [ "$BOT" = "packages" ]; then
     pub get
     pub global run tuneup check
 
+    # Analyze Dart code in tool.
+    popd
+    pushd tool
+    echo `pwd`
+
+    pub global run tuneup check
+
 else
 
     echo "unknown bot configuration"
