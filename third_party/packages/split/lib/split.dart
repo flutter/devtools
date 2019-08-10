@@ -132,7 +132,7 @@ Splitter fixedSplit(
     parts,
     _SplitOptions(
       elementStyle: allowInterop((dimension, size, gutterSize, index) {
-        Object o = js_util.newObject();
+        final Object o = js_util.newObject();
         js_util.setProperty(
           o,
           horizontal ? 'width' : 'height',
@@ -146,7 +146,7 @@ Splitter fixedSplit(
         return o;
       }),
       gutterStyle: allowInterop((dimension, gutterSize, index) {
-        Object o = js_util.newObject();
+        final Object o = js_util.newObject();
         js_util.setProperty(
           o,
           horizontal ? 'width' : 'height',
