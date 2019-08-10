@@ -11,18 +11,20 @@ addons:
 
 matrix:
   exclude:
-  # Skip main bot for Stable build since it does formatting/building checks;
-  # - Formatting will fail on old SDK if the formatter changed in latest.
-  # - Builds are always done by us on latest SDKs so we don't need to ensure
-  #     we can build on an older SDK.
-  - dart: stable
-    env: BOT=main
-  # TODO(jacobr): Temporarily skip dev DDC builds until a fix for windows ddc
-  # crasher bug in the dart sdk lands on dev.
-  # https://github.com/dart-lang/sdk/issues/37490
-  - dart:  "dev/raw/latest"
-    env: BOT=test_ddc
-
+    # Skip main bot for Stable build since it does formatting/building checks;
+    # - Formatting will fail on old SDK if the formatter changed in latest.
+    # - Builds are always done by us on latest SDKs so we don't need to ensure
+    #     we can build on an older SDK.
+    - dart: stable
+      env: BOT=main
+    # TODO(jacobr): Temporarily skip dev DDC builds until a fix for windows ddc
+    # crasher bug in the dart sdk lands on dev.
+    # https://github.com/dart-lang/sdk/issues/37490
+    - dart:  "dev/raw/latest"
+      env: BOT=test_ddc
+  include:
+    - dart: "dev/raw/latest"
+      env: BOT=packages
 env:
   - BOT=main
   - BOT=test_ddc

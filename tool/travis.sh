@@ -134,6 +134,26 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     # Run tests that require the Flutter SDK.
     pub run test -j1 --reporter expanded --tags useFlutterSdk
 
+elif [ "$BOT" = "packages" ]; then
+
+    pub global activate tuneup
+
+    # Analyze packages/devtools_server.
+    popd
+    pushd packages/devtools_server
+    echo `pwd`
+
+    pub get
+    pub global run tuneup check
+
+    # Analyze third_party/packages/split.
+    popd
+    pushd third_party/packages/split
+    echo `pwd`
+
+    pub get
+    pub global run tuneup check
+
 else
 
     echo "unknown bot configuration"
