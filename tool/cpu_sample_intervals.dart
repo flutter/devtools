@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,14 +18,17 @@ void main(List<String> arguments) async {
 
   final File file = File(arguments.first);
   final Map<String, dynamic> timelineDump =
-      jsonDecode(await file.readAsString());
-  final cpuSampleTraceEvents = timelineDump['cpuProfile']['traceEvents'];
+      (jsonDecode(await file.readAsString()) as Map).cast<String, dynamic>();
+  final List<dynamic> cpuSampleTraceEvents =
+      timelineDump['cpuProfile']['traceEvents'] as List;
 
   final List<int> deltas = [];
   for (int i = 0; i < cpuSampleTraceEvents.length - 1; i++) {
-    final Map<String, dynamic> current = cpuSampleTraceEvents[i];
-    final Map<String, dynamic> next = cpuSampleTraceEvents[i + 1];
-    deltas.add(next['ts'] - current['ts']);
+    final Map<String, dynamic> current =
+        (cpuSampleTraceEvents[i] as Map).cast<String, dynamic>();
+    final Map<String, dynamic> next =
+        (cpuSampleTraceEvents[i + 1] as Map).cast<String, dynamic>();
+    deltas.add((next['ts'] as int) - (current['ts'] as int));
   }
   print(deltas);
 }

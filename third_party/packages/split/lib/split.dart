@@ -84,7 +84,7 @@ class Splitter {
 Splitter flexSplit(
   List<Element> parts, {
   bool horizontal = true,
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
 }) {
@@ -124,7 +124,7 @@ Splitter flexSplit(
 Splitter fixedSplit(
   List<Element> parts, {
   bool horizontal = true,
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
 }) {
@@ -210,7 +210,7 @@ StreamSubscription<Object> _splitBidirectional(
 /// no longer being used.
 StreamSubscription<Object> flexSplitBidirectional(
   List<Element> parts, {
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> verticalSizes,
   List<num> horizontalSizes,
   List<num> minSize,
@@ -238,7 +238,7 @@ StreamSubscription<Object> flexSplitBidirectional(
 /// no longer being used.
 StreamSubscription<Object> fixedSplitBidirectional(
   List<Element> parts, {
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> verticalSizes,
   List<num> horizontalSizes,
   List<num> minSize,

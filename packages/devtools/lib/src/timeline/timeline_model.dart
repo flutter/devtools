@@ -169,7 +169,7 @@ class TimelineFrame {
 
   bool _addedToTimeline;
 
-  set addedToTimeline(v) {
+  set addedToTimeline(bool v) {
     assert(_addedToTimeline == null);
     _addedToTimeline = v;
   }
