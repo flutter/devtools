@@ -570,9 +570,22 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future getInboundReferences(String isolateId, String targetId, int limit) =>
-      _trackFuture('getInboundReferences',
-          _vmService.getInboundReferences(isolateId, targetId, limit));
+  Future getInboundReferences(
+      String isolateId, String targetId, int limit) async {
+    Future future;
+
+    if (await isProtocolVersionLessThan(major: 3, minor: 25)) {
+      future = _vmService.callMethod(
+        '_getInboundReferences',
+        isolateId: isolateId,
+        args: {'targetId': targetId, 'limit': limit},
+      );
+    } else {
+      future = _vmService.getInboundReferences(isolateId, targetId, limit);
+    }
+
+    return _trackFuture('getInboundReferences', future);
+  }
 
   @override
   Future<RetainingPath> getRetainingPath(

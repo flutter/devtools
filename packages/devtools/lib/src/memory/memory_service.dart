@@ -31,17 +31,10 @@ Future<InstanceRef> evaluate(String objectRef, String expression) async {
 
 Future<InboundReferences> getInboundReferences(
     String objectRef, int maxInstances) async {
-  // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
-  // TODO(terry): of instances.
-  final Map params = {
-    'targetId': objectRef,
-    'limit': maxInstances,
-  };
-  final Response response = await serviceManager.service.callMethod(
-    '_getInboundReferences',
-    isolateId: _isolateId,
-    args: params,
-  );
+  // TODO(terry): Expose as a stream to reduce stall when querying for 1000s of
+  // instances.
+  final Response response = await serviceManager.service
+      .getInboundReferences(_isolateId, objectRef, maxInstances);
 
   if (response.type == 'Sentinel') return null;
 
@@ -77,31 +70,42 @@ class InboundReference extends Response {
   int parentWordOffset;
 
   bool get isFieldRef => parentField.runtimeType == FieldRef;
+
   FieldRef get fieldRef => isFieldRef ? parentField as FieldRef : null;
 
   bool get isClassRef => parentField.runtimeType == ClassRef;
+
   ClassRef get classRef => isFieldRef ? parentField as ClassRef : null;
 
   bool get isFuncRef => parentField.runtimeType == FuncRef;
+
   FuncRef get funcRef => isFuncRef ? parentField as FuncRef : null;
 
   bool get isNullVal => parentField.runtimeType == NullVal;
+
   bool get isNullValRef => parentField.runtimeType == NullValRef;
+
   NullVal get nullVal => isInstanceRef ? parentField as NullVal : null;
 
   bool get isInstance => parentField.runtimeType == Instance;
+
   Instance get instance => isInstance ? parentField as Instance : null;
 
   bool get isInstanceRef => parentField.runtimeType == InstanceRef;
+
   InstanceRef get instanceRef =>
       isInstanceRef ? parentField as InstanceRef : null;
 
   bool get isLibrary => parentField.runtimeType == Library;
+
   bool get isLibraryRef => parentField.runtimeType == LibraryRef;
+
   Library get library => isLibrary ? parentField as Library : null;
 
   bool get isObj => parentField.runtimeType == Obj;
+
   bool get isObjRef => parentField.runtimeType == ObjRef;
+
   Obj get obj => isObj ? parentField as Obj : null;
 
   bool get isSentinel => parentField.runtimeType == Sentinel;
