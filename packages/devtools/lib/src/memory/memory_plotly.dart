@@ -277,7 +277,7 @@ class MemoryPlotly {
   // Resetting to live view, it's an autoscale back to full view.
   void _doubleClick(DataEvent data) => _memoryChart.resume();
 
-  void plotMemory([createEventTimeline = false]) {
+  void plotMemory([bool createEventTimeline = false]) {
     final List<Data> memoryTraces = createMemoryTraces();
 
     if (createEventTimeline) {

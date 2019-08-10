@@ -28,7 +28,7 @@ class Test {
     final List<int> numbers = List.generate(10, (index) => index * index);
     // ignore: unused_local_variable
     final Map<int, String> numberDescriptions =
-        Map.fromIterable(numbers, value: (key) => _toWord(key));
+        Map.fromIterable(numbers, value: (key) => _toWord(key as int));
 
     await bar(count++);
 
