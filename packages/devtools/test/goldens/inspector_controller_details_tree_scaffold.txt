@@ -61,12 +61,12 @@
                       ├───▼[L]LayoutId-[<_ScaffoldSlot.body>]
                       │   │   id: _ScaffoldSlot.body
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
-                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: 1.7976931348623157e+308, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
+                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
                       │     └─▶[C]Center
                       ├───▼[L]LayoutId-[<_ScaffoldSlot.appBar>]
                       │   │   id: _ScaffoldSlot.appBar
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
-                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: 1.7976931348623157e+308, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
+                      │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
                       │     └─▼[C]ConstrainedBox
                       │       │   BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)
                       │       │   ▶renderObject: RenderConstrainedBox#00000 relayoutBoundary=up1
@@ -75,7 +75,7 @@
                       └─▼[L]LayoutId-[<_ScaffoldSlot.floatingActionButton>]
                         │   id: _ScaffoldSlot.floatingActionButton
                         └─▼[/icons/inspector/atrule.png]MediaQuery
-                          │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: 1.7976931348623157e+308, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
+                          │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: false, disableAnimations: false, invertColors: false, boldText: false)
                           └─▼[F]_FloatingActionButtonTransition
                             │   ▶state: _FloatingActionButtonTransitionState#00000(tickers: tracking 1 ticker)
                             └─▼[/icons/inspector/value.png]Stack
