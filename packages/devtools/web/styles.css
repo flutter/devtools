@@ -676,7 +676,7 @@ div.tabnav {
     list-style: none;
     border: 1px solid var(--popup-border-color);
     padding-left: 4px;
-    margin-bottrom: 2px;
+    margin-bottom: 2px;
     cursor: pointer;
     overflow-y: scroll;
     display: none;
