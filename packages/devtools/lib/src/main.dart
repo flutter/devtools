@@ -17,6 +17,7 @@ import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance_screen.dart';
 import 'service_registrations.dart' as registrations;
+import 'settings/settings_screen.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
@@ -194,6 +195,9 @@ class PerfToolFramework extends Framework {
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
+    addScreen(SettingsScreen(
+      disabled: !_isFlutterApp,
+    ));
   }
 
   IsolateRef get currentIsolate =>
