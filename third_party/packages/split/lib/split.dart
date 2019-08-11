@@ -170,7 +170,7 @@ Splitter fixedSplit(
 
 StreamSubscription<Object> _splitBidirectional(
   List<Element> parts, {
-  @required gutterSize,
+  @required num gutterSize,
   @required List<num> verticalSizes,
   @required List<num> horizontalSizes,
   @required List<num> minSize,
