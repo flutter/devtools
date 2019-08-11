@@ -1293,7 +1293,8 @@ class NavigationPath {
   bool get isLastInstance => _path.isNotEmpty ? _path.last.isInstance : false;
 
   // Display all the NavigationStates in our _path as UI links.
-  void displayPathsAsLinks(CoreElement parent, {void Function(CoreElement) clickHandler}) {
+  void displayPathsAsLinks(CoreElement parent,
+      {void Function(CoreElement) clickHandler}) {
     for (int index = 0; index < _path.length; index++) {
       final NavigationState state = _path[index];
       final bool lastLink = _path.length - 1 == index; // Last item in path?
