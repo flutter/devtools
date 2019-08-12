@@ -442,7 +442,7 @@ abstract class ColumnData<T> {
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   TreeColumnData(
-    title, {
+    String title, {
     int fixedWidthPx,
     int percentWidth,
   }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);

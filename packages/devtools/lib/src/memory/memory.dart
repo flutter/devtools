@@ -319,7 +319,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     );
   }
 
-  void _selectClass(String className, [record = true]) {
+  void _selectClass(String className, {bool record = true}) {
     final List<ClassHeapDetailStats> classesData = tableStack.first.model.data;
     int row = 0;
     for (ClassHeapDetailStats stat in classesData) {
@@ -472,7 +472,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Select the class (don't record this select in memory history). The
     // memoryPath will be added by NavigationState.inboundSelect - see below.
-    _selectClass(className, false);
+    _selectClass(className, record: false);
 
     // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
@@ -505,7 +505,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // Select the class (don't record this select in memory history). The
     // memoryPath will be added by NavigationState.inboundSelect - see below.
-    _selectClass(className, false);
+    _selectClass(className, record: false);
 
     // TODO(terry): Better solution is to await a Table event that tells us.
     Timer.periodic(const Duration(milliseconds: 100), (Timer timer) async {
@@ -632,7 +632,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   Future<void> _loadAllocationProfile({
     bool reset = false,
-    memoryExperiment = false,
+    bool memoryExperiment = false,
   }) async {
     ga.select(ga.memory, ga.snapshot);
 
@@ -1293,7 +1293,10 @@ class NavigationPath {
   bool get isLastInstance => _path.isNotEmpty ? _path.last.isInstance : false;
 
   // Display all the NavigationStates in our _path as UI links.
-  void displayPathsAsLinks(CoreElement parent, [clickHandler]) {
+  void displayPathsAsLinks(
+    CoreElement parent, {
+    void Function(CoreElement) clickHandler,
+  }) {
     for (int index = 0; index < _path.length; index++) {
       final NavigationState state = _path[index];
       final bool lastLink = _path.length - 1 == index; // Last item in path?

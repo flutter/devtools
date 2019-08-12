@@ -42,7 +42,7 @@ class CpuFlameChart extends CpuProfilerView {
     final CpuProfileData data = profileDataProvider();
     canvas = CpuFlameChartCanvas(
       data: data,
-      width: element.clientWidth,
+      width: element.clientWidth.toDouble(),
       height: math.max(
         // Subtract [rowHeightWithPadding] to account for timeline at the top of
         // the flame chart.
@@ -114,8 +114,8 @@ class CpuFlameChart extends CpuProfilerView {
 class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
   CpuFlameChartCanvas({
     @required CpuProfileData data,
-    @required width,
-    @required height,
+    @required double width,
+    @required double height,
   }) : super(
           data: data,
           duration: data.profileMetaData.time.duration,

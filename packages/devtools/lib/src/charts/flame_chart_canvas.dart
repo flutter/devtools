@@ -152,8 +152,8 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   FlameChartCanvas({
     @required T data,
     @required Duration duration,
-    @required width,
-    @required height,
+    @required double width,
+    @required double height,
     String classes,
   }) : super(
           data: data,

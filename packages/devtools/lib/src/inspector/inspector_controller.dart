@@ -28,7 +28,7 @@ import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
-void _logError(error) {
+void _logError(Object error) {
   print(error);
 }
 
