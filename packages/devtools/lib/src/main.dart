@@ -72,10 +72,18 @@ class PerfToolFramework extends Framework {
     await addScreens();
     screensReady.complete();
 
+    final settingsScreen = getScreen('settings');
+    queryId('settings-button')
+      ..setAttribute('href', settingsScreen.ref)
+      ..onClick.listen((e) {
+        e.preventDefault();
+        navigateTo(settingsScreen.id);
+      });
+
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
 
-    for (Screen screen in screens) {
+    for (Screen screen in screens.where((screen) => screen.id != 'settings')) {
       final CoreElement link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
