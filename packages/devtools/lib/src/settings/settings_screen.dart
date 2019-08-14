@@ -22,7 +22,7 @@ class FlagDetailsUI extends CoreElement {
       ..layoutVertical()
       ..add(<CoreElement>[
         span(c: 'flag-value', text: flag.valueAsString),
-        span(c: 'flag-modified', text: 'Modified: ${flag.modified}')
+        span(c: 'flag-modified', text: flag.modified ? 'modified' : 'default')
       ]);
 
     add(<CoreElement>[
