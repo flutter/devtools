@@ -11,12 +11,11 @@ import '../ui/elements.dart';
 
 class FlagDetailsUI extends CoreElement {
   FlagDetailsUI(Flag flag) : super('div', classes: 'flag-details-container') {
-    final flagDescription =
-        div(c: 'flag-details-descriptions-container')
-          ..add(<CoreElement>[
-            CoreElement('h3', classes: 'flag-name', text: flag.name),
-            span(c: 'flag-description', text: flag.comment),
-          ]);
+    final flagDescription = div(c: 'flag-details-descriptions-container')
+      ..add(<CoreElement>[
+        CoreElement('h3', classes: 'flag-name', text: flag.name),
+        span(c: 'flag-description', text: flag.comment),
+      ]);
 
     final flagValues = div(c: 'flag-details-values-container')
       ..layoutVertical()
@@ -61,8 +60,7 @@ class SettingsScreen extends Screen {
         span(text: serviceManager.sdkVersion),
       ]);
 
-    final screenDiv = div(c: 'custom-scrollbar')
-      ..layoutVertical();
+    final screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
     final container = div(c: 'settings-container');
     _flagList = div(c: 'flag-list-container')
       ..layoutVertical()
