@@ -25,10 +25,13 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   factory Table.virtual({double rowHeight = 29.0}) =>
       Table._(TableData<T>(), rowHeight, true);
 
-  Table._(this.model, this.rowHeight, this.isVirtual)
-      : assert(model.client == null) {
+  Table._(
+    this.model,
+    this.rowHeight,
+    this.isVirtual, {
+    bool overflowAuto = false,
+  }) : assert(model.client == null) {
     model.client = this;
-    const bool overflowAuto = false;
     element = isVirtual
         ? div(
             a: 'flex',
@@ -527,7 +530,7 @@ class TreeTable<T extends TreeNode<T>> extends Table<T> {
       TreeTable._(TreeTableData<T>(), rowHeight, true);
 
   TreeTable._(TreeTableData<T> model, double rowHeight, bool isVirtual)
-      : super._(model, rowHeight, isVirtual);
+      : super._(model, rowHeight, isVirtual, overflowAuto: true);
 
   @override
   TreeTableData<T> get model => super.model;
