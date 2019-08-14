@@ -32,8 +32,16 @@ class FlagDetailsUI extends CoreElement {
 }
 
 class SettingsScreen extends Screen {
-  SettingsScreen() : super(name: '', id: 'settings', iconClass: 'octicon-gear');
+  SettingsScreen()
+      : super(
+    name: '',
+    id: 'settings',
+    iconClass: 'octicon-gear',
+    isPartOfMainNavigation: false,
+  );
 
+  CoreElement _screenDiv;
+  CoreElement _container;
   CoreElement _flagList;
 
   void _displayFlagList() {
@@ -42,31 +50,43 @@ class SettingsScreen extends Screen {
     });
   }
 
+  void _rebuild() {
+    _screenDiv
+      ..clear()
+      ..add(_container..clear());
+    if (serviceManager.hasConnection) {
+      final flutterVersion = div(c: 'flutter-version-container')
+        ..flex(2)
+        ..add(<CoreElement>[
+          CoreElement('h2', text: 'Flutter SDK Version: '),
+          span(text: serviceManager.sdkVersion),
+        ]);
+      _flagList = div(c: 'flag-list-container')
+        ..layoutVertical()
+        ..add(
+          CoreElement('h2', text: 'Dart VM Flag List'),
+        );
+      _container.add(flutterVersion);
+      _container.add(_flagList);
+      _displayFlagList();
+    } else {
+      _screenDiv.add(h2(text: 'Settings'));
+      _screenDiv.add(span(text: 'TODO'));
+    }
+  }
+
   @override
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
     this.framework = framework;
+    _screenDiv = div(c: 'custom-scrollbar')
+      ..layoutVertical();
+    _container = div(c: 'settings-container');
 
-    final flutterVersion = div(c: 'flutter-version-container')
-      ..flex(2)
-      ..add(<CoreElement>[
-        CoreElement('h2', text: 'Flutter SDK Version: '),
-        span(text: serviceManager.sdkVersion),
-      ]);
-
-    final screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
-    final container = div(c: 'settings-container');
-    _flagList = div(c: 'flag-list-container')
-      ..layoutVertical()
-      ..add(
-        CoreElement('h2', text: 'Dart VM Flag List'),
-      );
-
-    container.add(flutterVersion);
-    container.add(_flagList);
-
-    screenDiv.add(container);
-    _displayFlagList();
-    return screenDiv;
+    _rebuild();
+    serviceManager.onStateChange.listen((_) {
+      _rebuild();
+    });
+    return _screenDiv;
   }
 }

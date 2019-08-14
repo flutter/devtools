@@ -84,8 +84,8 @@ class PerfToolFramework extends Framework {
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
 
-    for (Screen screen in screens.where((screen) => screen.id != 'settings')) {
-      final CoreElement link = CoreElement('a')
+    for (Screen screen in getMainNavigationScreens()) {
+      final link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}', c: 'optional-1060')
