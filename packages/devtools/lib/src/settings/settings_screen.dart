@@ -32,13 +32,7 @@ class FlagDetailsUI extends CoreElement {
 }
 
 class SettingsScreen extends Screen {
-  SettingsScreen({bool disabled})
-      : super(
-          name: '',
-          id: 'settings',
-          iconClass: 'octicon-gear',
-          disabled: disabled,
-        );
+  SettingsScreen() : super(name: '', id: 'settings', iconClass: 'octicon-gear');
 
   CoreElement _flagList;
 

@@ -68,17 +68,18 @@ class PerfToolFramework extends Framework {
           .open('https://github.com/flutter/devtools/issues', '_feedback');
     });
 
-    await serviceManager.serviceAvailable.future;
-    await addScreens();
-    screensReady.complete();
-
-    final settingsScreen = getScreen('settings');
+    final settingsScreen = SettingsScreen();
+    addScreen(settingsScreen);
     queryId('settings-button')
       ..setAttribute('href', settingsScreen.ref)
       ..onClick.listen((e) {
         e.preventDefault();
         navigateTo(settingsScreen.id);
       });
+
+    await serviceManager.serviceAvailable.future;
+    await addScreens();
+    screensReady.complete();
 
     final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
     mainNav.clear();
@@ -203,9 +204,6 @@ class PerfToolFramework extends Framework {
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
-    addScreen(SettingsScreen(
-      disabled: !_isFlutterApp,
-    ));
   }
 
   IsolateRef get currentIsolate =>
