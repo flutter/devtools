@@ -11,14 +11,14 @@ import '../ui/elements.dart';
 
 class FlagDetailsUI extends CoreElement {
   FlagDetailsUI(Flag flag) : super('div', classes: 'flag-details-container') {
-    final CoreElement flagDescription =
+    final flagDescription =
         div(c: 'flag-details-descriptions-container')
           ..add(<CoreElement>[
             CoreElement('h3', classes: 'flag-name', text: flag.name),
             span(c: 'flag-description', text: flag.comment),
           ]);
 
-    final CoreElement flagValues = div(c: 'flag-details-values-container')
+    final flagValues = div(c: 'flag-details-values-container')
       ..layoutVertical()
       ..add(<CoreElement>[
         span(c: 'flag-value', text: flag.valueAsString),
@@ -44,7 +44,7 @@ class SettingsScreen extends Screen {
   CoreElement _flagList;
 
   void _displayFlagList() {
-    serviceManager.service.getFlagList().then((FlagList flags) {
+    serviceManager.service.getFlagList().then((flags) {
       _flagList.add(flags.flags.map((flag) => FlagDetailsUI(flag)));
     });
   }
@@ -53,16 +53,17 @@ class SettingsScreen extends Screen {
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
     this.framework = framework;
-    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
-    final CoreElement container = div(c: 'settings-container');
 
-    final CoreElement flutterVersion = div(c: 'flutter-version-container')
+    final flutterVersion = div(c: 'flutter-version-container')
       ..flex(2)
       ..add(<CoreElement>[
         CoreElement('h2', text: 'Flutter SDK Version: '),
         span(text: serviceManager.sdkVersion),
       ]);
 
+    final screenDiv = div(c: 'custom-scrollbar')
+      ..layoutVertical();
+    final container = div(c: 'settings-container');
     _flagList = div(c: 'flag-list-container')
       ..layoutVertical()
       ..add(
