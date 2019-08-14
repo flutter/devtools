@@ -108,7 +108,7 @@ class LoggingScreen extends Screen {
       split.flexSplit(
         [_loggingTable.element.element, logDetailsUI.element],
         gutterSize: defaultSplitterWidth,
-        horizontal: false,
+        horizontal: true,
         sizes: [70, 30],
         minSize: [200, 200],
       );
