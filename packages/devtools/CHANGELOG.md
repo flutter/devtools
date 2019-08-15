@@ -1,3 +1,6 @@
+## 0.1.6 - 2019-08-14
+* Bug fix: dependency on mockito is removed.
+
 ## 0.1.6 - 2019-08-06
 * Support `sse` and `sses` schemes for connection with a running app.
 
