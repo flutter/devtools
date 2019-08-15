@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:rxdart/rxdart.dart';
+import 'package:async/async.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger.dart';
@@ -20,29 +20,27 @@ class DebuggerState {
 
   final Map<String, Script> _scriptCache = <String, Script>{};
 
-  final BehaviorSubject<bool> _paused = BehaviorSubject<bool>.seeded(false);
-  final BehaviorSubject<bool> _supportsStepping =
-      BehaviorSubject<bool>.seeded(false);
+  final _paused = _Property<bool>(false);
+  final _supportsStepping = _Property<bool>(false);
 
   Event lastEvent;
 
-  final BehaviorSubject<List<Breakpoint>> _breakpoints =
-      BehaviorSubject<List<Breakpoint>>.seeded(<Breakpoint>[]);
+  final _breakpoints = _Property<List<Breakpoint>>([]);
 
-  final BehaviorSubject<String> _exceptionPauseMode = BehaviorSubject();
+  final _exceptionPauseMode = _Property<String>();
 
   InstanceRef _reportedException;
 
   bool get isPaused => _paused.value;
 
-  Stream<bool> get onPausedChanged => _paused;
+  Stream<bool> get onPausedChanged => _paused.stream;
 
   Stream<bool> get onSupportsStepping =>
-      Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
+      StreamGroup.merge([_paused.stream, _supportsStepping.stream]);
 
-  Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
+  Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints.stream;
 
-  Stream<String> get onExceptionPauseModeChanged => _exceptionPauseMode;
+  Stream<String> get onExceptionPauseModeChanged => _exceptionPauseMode.stream;
 
   List<Breakpoint> get breakpoints => _breakpoints.value;
 
@@ -291,4 +289,35 @@ class DebuggerState {
   void updateFrom(Isolate isolate) {
     _breakpoints.add(isolate.breakpoints);
   }
+}
+
+class _Property<T> implements StreamSink<T> {
+  _Property([T initialValue]) : _value = initialValue;
+
+  T _value;
+  T get value => _value;
+
+  final _controller = StreamController<T>.broadcast();
+  Stream<T> get stream => _controller.stream;
+
+  @override
+  void add(T value) {
+    _value = value;
+    _controller.add(value);
+  }
+
+  @override
+  void addError(Object error, [StackTrace stackTrace]) {
+    _controller.addError(error, stackTrace);
+  }
+
+  @override
+  Future addStream(Stream<T> stream) =>
+      stream.listen(add).asFuture().catchError(addError);
+
+  @override
+  Future close() => _controller.close();
+
+  @override
+  Future get done => _controller.done;
 }
