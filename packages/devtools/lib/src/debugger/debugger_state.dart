@@ -291,7 +291,7 @@ class DebuggerState {
   }
 }
 
-class _Property<T> implements StreamSink<T> {
+class _Property<T> {
   _Property([T initialValue]) : _value = initialValue;
 
   T _value;
@@ -300,24 +300,8 @@ class _Property<T> implements StreamSink<T> {
   final _controller = StreamController<T>.broadcast();
   Stream<T> get stream => _controller.stream;
 
-  @override
   void add(T value) {
     _value = value;
     _controller.add(value);
   }
-
-  @override
-  void addError(Object error, [StackTrace stackTrace]) {
-    _controller.addError(error, stackTrace);
-  }
-
-  @override
-  Future addStream(Stream<T> stream) =>
-      stream.listen(add).asFuture().catchError(addError);
-
-  @override
-  Future close() => _controller.close();
-
-  @override
-  Future get done => _controller.done;
 }
