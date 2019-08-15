@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
-import 'package:rxdart/rxdart.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger.dart';
 import '../ui/analytics.dart' as ga;
+import '../ui/fake_flutter/fake_flutter.dart'
+    show ValueNotifier, ValueListenable;
 
 class DebuggerState {
   VmService _service;
@@ -20,31 +21,33 @@ class DebuggerState {
 
   final Map<String, Script> _scriptCache = <String, Script>{};
 
-  final BehaviorSubject<bool> _paused = BehaviorSubject<bool>.seeded(false);
-  final BehaviorSubject<bool> _supportsStepping =
-      BehaviorSubject<bool>.seeded(false);
+  final _isPaused = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isPaused => _isPaused;
+
+  final _hasFrames = ValueNotifier<bool>(false);
+  ValueNotifier<bool> _supportsStepping;
+  ValueListenable<bool> get supportsStepping {
+    return _supportsStepping ??= () {
+      final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
+      void update() {
+        notifier.value = _isPaused.value && _hasFrames.value;
+      }
+
+      _isPaused.addListener(update);
+      _hasFrames.addListener(update);
+      return notifier;
+    }();
+  }
 
   Event lastEvent;
 
-  final BehaviorSubject<List<Breakpoint>> _breakpoints =
-      BehaviorSubject<List<Breakpoint>>.seeded(<Breakpoint>[]);
+  final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
+  ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
 
-  final BehaviorSubject<String> _exceptionPauseMode = BehaviorSubject();
+  final _exceptionPauseMode = ValueNotifier<String>(null);
+  ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
 
   InstanceRef _reportedException;
-
-  bool get isPaused => _paused.value;
-
-  Stream<bool> get onPausedChanged => _paused;
-
-  Stream<bool> get onSupportsStepping =>
-      Observable<bool>.concat(<Stream<bool>>[_paused, _supportsStepping]);
-
-  Stream<List<Breakpoint>> get onBreakpointsChanged => _breakpoints;
-
-  Stream<String> get onExceptionPauseModeChanged => _exceptionPauseMode;
-
-  List<Breakpoint> get breakpoints => _breakpoints.value;
 
   void setVmService(VmService service) {
     _service = service;
@@ -55,12 +58,12 @@ class DebuggerState {
   void switchToIsolate(IsolateRef ref) async {
     isolateRef = ref;
 
-    _updatePaused(false);
+    _isPaused.value = false;
 
     _clearCaches();
 
     if (ref == null) {
-      _breakpoints.add(<Breakpoint>[]);
+      _breakpoints.value = [];
       return;
     }
 
@@ -72,12 +75,12 @@ class DebuggerState {
           isolate.pauseEvent.kind != EventKind.kResume) {
         lastEvent = isolate.pauseEvent;
         _reportedException = isolate.pauseEvent.exception;
-        _updatePaused(true);
+        _isPaused.value = true;
       }
 
-      _breakpoints.add(isolate.breakpoints);
+      _breakpoints.value = isolate.breakpoints;
 
-      _exceptionPauseMode.add(isolate.exceptionPauseMode);
+      _exceptionPauseMode.value = isolate.exceptionPauseMode;
     }
   }
 
@@ -146,12 +149,12 @@ class DebuggerState {
       return;
     }
 
-    _supportsStepping.add(event.topFrame != null);
+    _hasFrames.value = event.topFrame != null;
     lastEvent = event;
 
     switch (event.kind) {
       case EventKind.kResume:
-        _updatePaused(false);
+        _isPaused.value = false;
         _reportedException = null;
         break;
       case EventKind.kPauseStart:
@@ -161,20 +164,21 @@ class DebuggerState {
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
         _reportedException = event.exception;
-        _updatePaused(true);
+        _isPaused.value = true;
         break;
       case EventKind.kBreakpointAdded:
-        _breakpoints.value.add(event.breakpoint);
-        _breakpoints.add(_breakpoints.value);
+        _breakpoints.value = [..._breakpoints.value, event.breakpoint];
         break;
       case EventKind.kBreakpointResolved:
-        _breakpoints.value.remove(event.breakpoint);
-        _breakpoints.value.add(event.breakpoint);
-        _breakpoints.add(_breakpoints.value);
+        _breakpoints.value = [
+          for (var b in _breakpoints.value) if (b != event.breakpoint) b,
+          event.breakpoint
+        ];
         break;
       case EventKind.kBreakpointRemoved:
-        _breakpoints.value.remove(event.breakpoint);
-        _breakpoints.add(_breakpoints.value);
+        _breakpoints.value = [
+          for (var b in _breakpoints.value) if (b != event.breakpoint) b
+        ];
         break;
     }
   }
@@ -187,12 +191,6 @@ class DebuggerState {
 
   void dispose() {
     _debugSubscription?.cancel();
-  }
-
-  void _updatePaused(bool value) {
-    if (_paused.value != value) {
-      _paused.add(value);
-    }
   }
 
   /// Get the populated [Instance] object, given an [InstanceRef].
@@ -289,6 +287,6 @@ class DebuggerState {
   }
 
   void updateFrom(Isolate isolate) {
-    _breakpoints.add(isolate.breakpoints);
+    _breakpoints.value = isolate.breakpoints;
   }
 }
