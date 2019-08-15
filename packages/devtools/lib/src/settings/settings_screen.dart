@@ -34,11 +34,11 @@ class FlagDetailsUI extends CoreElement {
 class SettingsScreen extends Screen {
   SettingsScreen()
       : super(
-    name: '',
-    id: 'settings',
-    iconClass: 'octicon-gear',
-    isPartOfMainNavigation: false,
-  );
+          name: '',
+          id: 'settings',
+          iconClass: 'octicon-gear',
+          isPartOfMainNavigation: false,
+        );
 
   CoreElement _screenDiv;
   CoreElement _container;
@@ -79,8 +79,7 @@ class SettingsScreen extends Screen {
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
     this.framework = framework;
-    _screenDiv = div(c: 'custom-scrollbar')
-      ..layoutVertical();
+    _screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
     _container = div(c: 'settings-container');
 
     _rebuild();
