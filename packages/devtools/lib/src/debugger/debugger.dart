@@ -167,6 +167,7 @@ class DebuggerScreen extends Screen {
       _updatePauseButton(disabled: false);
     });
 
+    // TODO(#926): Is this necessary?
     _updatePauseButton(disabled: debuggerState.isPaused.value);
     _updateResumeButton(disabled: !debuggerState.isPaused.value);
     debuggerState.isPaused.addListener(() {
@@ -181,6 +182,7 @@ class DebuggerScreen extends Screen {
     breakOnExceptionControl.onPauseModeChanged.listen((String mode) {
       debuggerState.setExceptionPauseMode(mode);
     });
+    // TODO(#926): Is this necessary?
     breakOnExceptionControl.exceptionPauseMode =
         debuggerState.exceptionPauseMode.value;
     debuggerState.exceptionPauseMode.addListener(() {
@@ -304,7 +306,7 @@ class DebuggerScreen extends Screen {
       minSize: [200, 60],
     );
 
-    debuggerState.supportsSteppingListenable.addListener(() {
+    void updateStepCapabilities() {
       final value = debuggerState.supportsSteppingListenable.value;
       stepIn.enabled = value;
 
@@ -313,7 +315,12 @@ class DebuggerScreen extends Screen {
       // meaningful.
       stepOver.enabled = value && (debuggerState.lastEvent.topFrame != null);
       stepOut.enabled = value && (debuggerState.lastEvent.topFrame != null);
-    });
+    }
+
+    // TODO(#926): Is this necessary?
+    updateStepCapabilities();
+    debuggerState.supportsSteppingListenable
+        .addListener(updateStepCapabilities);
 
     stepOver.click(() => debuggerState.stepOver());
     stepIn.click(() => debuggerState.stepIn());
@@ -335,11 +342,13 @@ class DebuggerScreen extends Screen {
 
     sourceEditor = SourceEditor(codeMirror, debuggerState);
 
+    // TODO(#926): Is this necessary?
+    sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
     debuggerState.breakpoints.addListener(() {
       sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
     });
 
-    debuggerState.isPaused.addListener(() async {
+    void updateFrames() async {
       if (debuggerState.isPaused.value) {
         // Check for async causal frames; fall back to using regular sync frames.
         final Stack stack = await debuggerState.getStack();
@@ -373,10 +382,13 @@ class DebuggerScreen extends Screen {
         callStackView.clearFrames();
         sourceEditor.clearExecutionPoint();
       }
-    });
+    }
 
-    // Update the status line.
-    debuggerState.isPaused.addListener(() async {
+    // TODO(#926): Is this necessary?
+    updateFrames();
+    debuggerState.isPaused.addListener(updateFrames);
+
+    void updateStatusLine() async {
       if (debuggerState.isPaused.value &&
           debuggerState.lastEvent.topFrame != null) {
         final Frame topFrame = debuggerState.lastEvent.topFrame;
@@ -393,7 +405,11 @@ class DebuggerScreen extends Screen {
       } else {
         deviceStatus.element.text = '';
       }
-    });
+    }
+
+    // TODO(#926): Is this necessary?
+    updateStatusLine();
+    debuggerState.isPaused.addListener(updateStatusLine);
 
     callStackView.onSelectionChanged.listen((Frame frame) async {
       if (frame == null) {
@@ -618,6 +634,8 @@ class DebuggerScreen extends Screen {
       ..flex()
       ..layoutVertical();
 
+    // TODO(#926): Is this necessary?
+    breakpointsView.showBreakpoints(debuggerState.breakpoints.value);
     debuggerState.breakpoints.addListener(() {
       breakpointsView.showBreakpoints(debuggerState.breakpoints.value);
     });
