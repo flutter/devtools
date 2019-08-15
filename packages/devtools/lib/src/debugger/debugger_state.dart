@@ -26,18 +26,18 @@ class DebuggerState {
 
   final _hasFrames = ValueNotifier<bool>(false);
   ValueNotifier<bool> _supportsStepping;
-  ValueListenable<bool> get supportsSteppingListenable =>
-      _supportsStepping ??= () {
-        final notifier =
-            ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
-        void update() {
-          notifier.value = _isPaused.value && _hasFrames.value;
-        }
+  ValueListenable<bool> get supportsSteppingListenable {
+    return _supportsStepping ??= () {
+      final notifier = ValueNotifier<bool>(_isPaused.value && _hasFrames.value);
+      void update() {
+        notifier.value = _isPaused.value && _hasFrames.value;
+      }
 
-        _isPaused.addListener(update);
-        _hasFrames.addListener(update);
-        return notifier;
-      }();
+      _isPaused.addListener(update);
+      _hasFrames.addListener(update);
+      return notifier;
+    }();
+  }
 
   Event lastEvent;
 
