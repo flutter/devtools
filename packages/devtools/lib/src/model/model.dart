@@ -121,7 +121,7 @@ class App {
 
   Future<String> debuggerGetState([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
-    return screen.debuggerState.isPaused ? 'paused' : 'running';
+    return screen.debuggerState.isPaused.value ? 'paused' : 'running';
   }
 
   Future<String> debuggerGetConsoleContents([dynamic _]) async {
@@ -162,9 +162,9 @@ class App {
 
   Future<List<String>> debuggerGetBreakpoints([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
-    return screen.debuggerState.breakpoints.map((Breakpoint breakpoint) {
-      return breakpoint.id;
-    }).toList();
+    return screen.debuggerState.breakpoints.value
+        .map((breakpoint) => breakpoint.id)
+        .toList();
   }
 
   Future<bool> debuggerSupportsScripts([dynamic _]) async {

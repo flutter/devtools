@@ -12,7 +12,6 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  async: ^2.0.0
   codemirror: ^0.5.3
   collection: ^1.14.11
   devtools_server: 0.1.5

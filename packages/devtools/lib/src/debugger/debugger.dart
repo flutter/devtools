@@ -167,9 +167,11 @@ class DebuggerScreen extends Screen {
       _updatePauseButton(disabled: false);
     });
 
-    debuggerState.onPausedChanged.listen((bool isPaused) {
-      _updatePauseButton(disabled: isPaused);
-      _updateResumeButton(disabled: !isPaused);
+    _updatePauseButton(disabled: debuggerState.isPaused.value);
+    _updateResumeButton(disabled: !debuggerState.isPaused.value);
+    debuggerState.isPaused.addListener(() {
+      _updatePauseButton(disabled: debuggerState.isPaused.value);
+      _updateResumeButton(disabled: !debuggerState.isPaused.value);
     });
 
     PButton stepOver, stepIn, stepOut;
@@ -179,8 +181,11 @@ class DebuggerScreen extends Screen {
     breakOnExceptionControl.onPauseModeChanged.listen((String mode) {
       debuggerState.setExceptionPauseMode(mode);
     });
-    debuggerState.onExceptionPauseModeChanged.listen((String mode) {
-      breakOnExceptionControl.exceptionPauseMode = mode;
+    breakOnExceptionControl.exceptionPauseMode =
+        debuggerState.exceptionPauseMode.value;
+    debuggerState.exceptionPauseMode.addListener(() {
+      breakOnExceptionControl.exceptionPauseMode =
+          debuggerState.exceptionPauseMode.value;
     });
 
     consoleArea = ConsoleArea();
@@ -299,7 +304,8 @@ class DebuggerScreen extends Screen {
       minSize: [200, 60],
     );
 
-    debuggerState.onSupportsStepping.listen((bool value) {
+    debuggerState.supportsSteppingListenable.addListener(() {
+      final value = debuggerState.supportsSteppingListenable.value;
       stepIn.enabled = value;
 
       // Only enable step over and step out if we're paused at a frame. When
@@ -329,13 +335,12 @@ class DebuggerScreen extends Screen {
 
     sourceEditor = SourceEditor(codeMirror, debuggerState);
 
-    debuggerState.onBreakpointsChanged
-        .listen((List<Breakpoint> breakpoints) async {
-      sourceEditor.setBreakpoints(breakpoints);
+    debuggerState.breakpoints.addListener(() {
+      sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
     });
 
-    debuggerState.onPausedChanged.listen((bool paused) async {
-      if (paused) {
+    debuggerState.isPaused.addListener(() async {
+      if (debuggerState.isPaused.value) {
         // Check for async causal frames; fall back to using regular sync frames.
         final Stack stack = await debuggerState.getStack();
         List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
@@ -371,8 +376,9 @@ class DebuggerScreen extends Screen {
     });
 
     // Update the status line.
-    debuggerState.onPausedChanged.listen((bool paused) async {
-      if (paused && debuggerState.lastEvent.topFrame != null) {
+    debuggerState.isPaused.addListener(() async {
+      if (debuggerState.isPaused.value &&
+          debuggerState.lastEvent.topFrame != null) {
         final Frame topFrame = debuggerState.lastEvent.topFrame;
 
         final ScriptRef scriptRef = topFrame.location.script;
@@ -612,8 +618,8 @@ class DebuggerScreen extends Screen {
       ..flex()
       ..layoutVertical();
 
-    debuggerState.onBreakpointsChanged.listen((List<Breakpoint> breakpoints) {
-      breakpointsView.showBreakpoints(breakpoints);
+    debuggerState.breakpoints.addListener(() {
+      breakpointsView.showBreakpoints(debuggerState.breakpoints.value);
     });
 
     return menu;
