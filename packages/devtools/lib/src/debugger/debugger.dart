@@ -307,7 +307,7 @@ class DebuggerScreen extends Screen {
     );
 
     void updateStepCapabilities() {
-      final value = debuggerState.supportsSteppingListenable.value;
+      final value = debuggerState.supportsStepping.value;
       stepIn.enabled = value;
 
       // Only enable step over and step out if we're paused at a frame. When
@@ -319,8 +319,7 @@ class DebuggerScreen extends Screen {
 
     // TODO(#926): Is this necessary?
     updateStepCapabilities();
-    debuggerState.supportsSteppingListenable
-        .addListener(updateStepCapabilities);
+    debuggerState.supportsStepping.addListener(updateStepCapabilities);
 
     stepOver.click(() => debuggerState.stepOver());
     stepIn.click(() => debuggerState.stepIn());
