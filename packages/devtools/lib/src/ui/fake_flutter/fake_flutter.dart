@@ -27,6 +27,7 @@ export 'collections.dart';
 export 'dart_ui/dart_ui.dart' hide TextStyle;
 
 part 'assertions.dart';
+part 'change_notifier.dart';
 part 'diagnosticable.dart';
 part 'foundation.dart';
 part 'print.dart';
