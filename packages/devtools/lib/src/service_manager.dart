@@ -122,6 +122,7 @@ class ServiceConnectionManager {
 
     final vm = await service.getVM();
     this.vm = vm;
+
     sdkVersion = vm.version;
     if (sdkVersion.contains(' ')) {
       sdkVersion = sdkVersion.substring(0, sdkVersion.indexOf(' '));

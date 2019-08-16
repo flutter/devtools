@@ -31,7 +31,14 @@ class TimelineService {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    serviceManager.service.setFlag('profile_period', '$defaultSamplePeriod');
+    serviceManager.service
+        .setFlag('profile_period', '$defaultSamplePeriod')
+        .catchError((e) {
+      print(
+        "Error calling setFlag('profile_period'): ${e.toString().split('\n').first}",
+      );
+    });
+
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
@@ -57,9 +64,18 @@ class TimelineService {
 
     await serviceManager.serviceAvailable.future;
     await serviceManager.service
-        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
-    await serviceManager.service.clearVMTimeline();
+        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']).catchError((e) {
+      print(
+        'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
+      );
+    });
+    await serviceManager.service.clearVMTimeline().catchError((e) {
+      print(
+        'Error from clearVMTimeline(): ${e.toString().split('\n').first}',
+      );
+    });
 
+    // todo: handle UnimplementedError
     final Timeline timeline = await serviceManager.service.getVMTimeline();
     final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
@@ -119,12 +135,21 @@ class TimelineService {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
       timelineController.resume();
-      await serviceManager.service
-          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']);
+      await serviceManager.service.setVMTimelineFlags(
+          <String>['GC', 'Dart', 'Embedder']).catchError((e) {
+        print(
+          'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
+        );
+      });
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       timelineController.pause();
-      await serviceManager.service.setVMTimelineFlags(<String>[]);
+      await serviceManager.service
+          .setVMTimelineFlags(<String>[]).catchError((e) {
+        print(
+          'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
+        );
+      });
     }
   }
 }

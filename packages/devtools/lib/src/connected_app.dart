@@ -17,36 +17,32 @@ class ConnectedApp {
 
   Future<bool> get isFlutterApp async =>
       _isFlutterApp ??= await _libraryUriAvailable(flutterLibraryUri);
-
   bool _isFlutterApp;
 
-  // TODO(kenzie): change this if screens should still be disabled when
-  // flutter merges with flutter_web. See
-  // https://github.com/flutter/devtools/issues/466.
-  Future<bool> get isFlutterWebApp async =>
-      _isFlutterWebApp ??= await _libraryUriAvailable(flutterWebLibraryUri);
-
-  bool _isFlutterWebApp;
+  Future<bool> get isPackageFlutterWeb async =>
+      _isPackageFlutterWeb ??= await _libraryUriAvailable(flutterWebLibraryUri);
+  bool _isPackageFlutterWeb;
 
   Future<bool> get isProfileBuild async =>
       _isProfileBuild ??= await _connectedToProfileBuild();
-
   bool _isProfileBuild;
 
   Future<bool> get isAnyFlutterApp async =>
-      await isFlutterApp || await isFlutterWebApp;
+      await isFlutterApp || await isPackageFlutterWeb;
 
   Future<bool> get isDartWebApp async =>
       _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
-
   bool _isDartWebApp;
+
+  bool get isDartCliApp => serviceManager.vm.name != 'ChromeDebugProxy';
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
 
     // Flutter web apps and CLI apps do not have profile and non-profile builds.
     // If this changes in the future (flutter web), we can modify this check.
-    if (!await isFlutterApp) return false;
+    if (isDartCliApp) return false;
+    if (!await isDartWebApp) return false;
 
     try {
       final Isolate isolate = await serviceManager.service

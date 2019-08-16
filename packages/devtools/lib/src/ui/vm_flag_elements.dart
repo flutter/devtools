@@ -45,7 +45,12 @@ class ProfileGranularitySelector {
 
   Future<void> setGranularity() async {
     return serviceManager.service
-        .setFlag(profilePeriodFlagName, selector.value);
+        .setFlag(profilePeriodFlagName, selector.value)
+        .catchError((e) {
+      print(
+        "Error calling setFlag('$profilePeriodFlagName'): ${e.toString().split('\n').first}",
+      );
+    });
   }
 
   void _handleSelect() async {

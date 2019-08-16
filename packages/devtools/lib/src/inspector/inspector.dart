@@ -38,12 +38,12 @@ bool _useHtmlInspectorTreeRenderer = false;
 // TODO(jacobr): add UI to view and configure the pub root directory.
 
 class InspectorScreen extends Screen {
-  InspectorScreen({bool disabled, String disabledTooltip})
+  InspectorScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Flutter Inspector',
           id: inspectorScreenId,
           iconClass: 'octicon-device-mobile',
-          disabled: disabled,
+          enabled: enabled,
           disabledTooltip: disabledTooltip,
         );
 

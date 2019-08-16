@@ -7,6 +7,7 @@ import 'dart:html' as html;
 
 import 'package:vm_service/vm_service.dart';
 
+import 'connected_app.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
@@ -139,60 +140,63 @@ class PerfToolFramework extends Framework {
   }
 
   Future<void> addScreens() async {
-    final _isFlutterApp = await serviceManager.connectedApp.isFlutterApp;
-    final _isFlutterWebApp = await serviceManager.connectedApp.isFlutterWebApp;
-    final _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
-    final _isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
-    final _isDartWebApp = await serviceManager.connectedApp.isDartWebApp;
+    // The types of platforms we support are:
+    //   Dart CLI apps
+    //   Dart web apps
+    //   Flutter VM apps, in debug and profile modes
+    //   Flutter web apps, using package:flutter_web
+    //   Flutter web apps, using package:flutter (the unforked code)
 
-    const notRunningFlutterApp =
+    final ConnectedApp app = serviceManager.connectedApp;
+
+    final bool isDartCliApp = app.isDartCliApp;
+    final bool isDartWebApp = await app.isDartWebApp;
+    final bool isFlutterApp = await app.isFlutterApp;
+    final bool isFlutterVmApp = isFlutterApp && !isDartWebApp;
+    final bool isFlutterVmProfileBuild =
+        isFlutterVmApp && (await app.isProfileBuild);
+    final bool isFlutterWebApp = isFlutterApp && isDartWebApp;
+
+    const notRunningFlutterMsg =
         'This screen is disabled because you are not running a Flutter '
         'application';
-    const runningFlutterWeb =
-        'This screen is disabled because it is not yet ready for Flutter Web';
-    const runningProfileBuild =
+    const runningProfileBuildMsg =
         'This screen is disabled because you are running a profile build of '
         'your application';
-    const duplicateDebuggerFunctionality =
+    const notFlutterWebMsg = 'This screen does not work with Flutter web apps';
+    const notDartWebMsg = 'This screen does not work with Dart web apps';
+    const duplicateDebuggerFunctionalityMsg =
         'This screen is disabled because it provides functionality already '
         'available in your code editor';
-    const runningDartWeb =
-        'This screen is disabled because you are running a Dart web app';
-
-    String getDebuggerDisabledTooltip() {
-      if (_isFlutterWebApp) return runningFlutterWeb;
-      if (_isProfileBuild) return runningProfileBuild;
-      return duplicateDebuggerFunctionality;
-    }
 
     // Collect all platform information flutter, web, chrome, versions, etc. for
     // possible GA collection.
     ga_platform.setupDimensions();
 
     addScreen(InspectorScreen(
-      disabled: !_isAnyFlutterApp || _isProfileBuild,
-      disabledTooltip:
-          !_isAnyFlutterApp ? notRunningFlutterApp : runningProfileBuild,
+      enabled: isFlutterApp && !isFlutterVmProfileBuild,
+      disabledTooltip: isFlutterVmProfileBuild
+          ? runningProfileBuildMsg
+          : notRunningFlutterMsg,
     ));
     addScreen(TimelineScreen(
-      disabled: !_isFlutterApp,
+      enabled: isFlutterApp && !isFlutterWebApp,
       disabledTooltip:
-          _isFlutterWebApp ? runningFlutterWeb : notRunningFlutterApp,
+          isFlutterWebApp ? notFlutterWebMsg : notRunningFlutterMsg,
     ));
     addScreen(MemoryScreen(
-      disabled: _isFlutterWebApp || _isDartWebApp,
-      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningDartWeb,
+      enabled: isFlutterVmApp || isDartCliApp,
+      disabledTooltip: isFlutterWebApp ? notFlutterWebMsg : notDartWebMsg,
     ));
     addScreen(PerformanceScreen(
-      disabled: _isFlutterWebApp || _isDartWebApp,
-      disabledTooltip: _isFlutterWebApp ? runningFlutterWeb : runningDartWeb,
+      enabled: isFlutterVmApp || isDartCliApp,
+      disabledTooltip: isFlutterWebApp ? notFlutterWebMsg : notDartWebMsg,
     ));
     addScreen(DebuggerScreen(
-      disabled: _isFlutterWebApp ||
-          _isProfileBuild ||
-          isTabDisabledByQuery('debugger'),
-      disabledTooltip: getDebuggerDisabledTooltip(),
-    ));
+        enabled: !isFlutterVmProfileBuild && !isTabDisabledByQuery('debugger'),
+        disabledTooltip: isFlutterVmProfileBuild
+            ? runningProfileBuildMsg
+            : duplicateDebuggerFunctionalityMsg));
     addScreen(LoggingScreen());
   }
 
@@ -244,7 +248,7 @@ class PerfToolFramework extends Framework {
     // is initialed, and react to those events in the UI. Going forward, we'll
     // want to instead have flutter_tools fire hot reload events, and react to
     // them in the UI. That will mean that our UI will update appropriately
-    // even when other clients (the CLI, and IDE) initial the hot reload.
+    // even when other clients (the CLI, and IDE) initiate the hot reload.
 
     final ActionButton reloadAction = ActionButton(
       _reloadActionId,

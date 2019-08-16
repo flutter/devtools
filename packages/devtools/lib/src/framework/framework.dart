@@ -170,7 +170,7 @@ class Framework {
       orElse: () => null,
     );
     if (timelineScreen == null) {
-      addScreen(timelineScreen = TimelineScreen(disabled: false));
+      addScreen(timelineScreen = TimelineScreen());
     }
     navigateTo(timelineScreenId);
 
@@ -494,7 +494,7 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabledTooltip = 'This screen is not available',
-    bool disabled = false,
+    bool enabled = true,
     this.shortcutCallback,
   })  : helpStatus = createLinkStatusItem(
           span()
@@ -503,7 +503,7 @@ abstract class Screen {
           href: 'https://flutter.dev/docs/development/tools/devtools/$id',
           title: 'Documentation on using the $name page',
         ),
-        disabled = allTabsEnabledByQuery ? false : disabled;
+        disabled = allTabsEnabledByQuery ? false : !(enabled ?? true);
 
   final String name;
   final String id;

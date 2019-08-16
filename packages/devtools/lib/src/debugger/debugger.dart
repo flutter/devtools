@@ -40,14 +40,14 @@ import '../ui/ui_utils.dart';
 
 class DebuggerScreen extends Screen {
   DebuggerScreen({
-    bool disabled,
+    bool enabled,
     String disabledTooltip,
   })  : debuggerState = DebuggerState(),
         super(
           name: 'Debugger',
           id: 'debugger',
           iconClass: 'octicon-bug',
-          disabled: disabled,
+          enabled: enabled,
           disabledTooltip: disabledTooltip,
         ) {
     shortcutCallback = debuggerShortcuts;
