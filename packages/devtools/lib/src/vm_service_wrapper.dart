@@ -29,11 +29,7 @@ class VmServiceWrapper implements VmService {
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
-  // TODO(dantup): Remove this ignore, change to `{}` and bump SDK requirements
-  // in pubspec.yaml (devtools + devtools_server) once Flutter stable includes
-  // Dart SDK >= v2.2.
-  // ignore: prefer_collection_literals
-  final Set<TrackedFuture<Object>> activeFutures = Set();
+  final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>()
     // Mark the future as completed by default so if we don't track any
     // futures but someone tries to wait on [allFuturesCompleted] they don't
