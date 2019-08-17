@@ -7,6 +7,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../messages.dart';
 import 'primer.dart';
+import 'ui_utils.dart';
 
 // TODO(kenzie): handle the multi-client case for this selector.
 
@@ -44,8 +45,8 @@ class ProfileGranularitySelector {
   String _selectedValue;
 
   Future<void> setGranularity() async {
-    return serviceManager.service
-        .setFlag(profilePeriodFlagName, selector.value);
+    return allowedError(
+        serviceManager.service.setFlag(profilePeriodFlagName, selector.value));
   }
 
   void _handleSelect() async {
