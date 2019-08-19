@@ -126,14 +126,15 @@ class DebuggerScreen extends Screen {
     return false;
   }
 
+  List<CoreElement> _navEditorPanels;
+  CoreElement _sourceArea;
+  CoreElement _consoleDiv;
+
   @override
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
-
-    CoreElement sourceArea;
-    CoreElement consoleDiv;
 
     final PButton resumeButton =
         PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
@@ -191,7 +192,6 @@ class DebuggerScreen extends Screen {
     });
 
     consoleArea = ConsoleArea();
-    List<CoreElement> navEditorPanels;
 
     _popupTextfield =
         CoreElement('input', classes: 'form-control input-sm popup-textfield')
@@ -237,7 +237,7 @@ class DebuggerScreen extends Screen {
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
-        ..add(navEditorPanels = <CoreElement>[
+        ..add(_navEditorPanels = <CoreElement>[
           div(c: 'debugger-menu')
             ..layoutVertical()
             ..add(<CoreElement>[
@@ -265,12 +265,12 @@ class DebuggerScreen extends Screen {
                   div(c: 'margin-right')..flex(),
                   breakOnExceptionControl,
                 ]),
-              sourceArea = div(c: 'section table-border')
+              _sourceArea = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(<CoreElement>[
                   _sourcePathDiv = div(c: 'source-head'),
                 ]),
-              consoleDiv = div(c: 'section table-border')
+              _consoleDiv = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(consoleArea.element),
             ]),
@@ -281,30 +281,13 @@ class DebuggerScreen extends Screen {
       _popupTextfield,
       _popupView = PopupView(
         popupScriptsView,
-        sourceArea,
+        _sourceArea,
         _sourcePathDiv,
         _popupTextfield,
       )
     ]);
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
-
-    // configure the navigation / editor splitter
-    split.flexSplit(
-      navEditorPanels.map((e) => e.element).toList(),
-      gutterSize: defaultSplitterWidth,
-      sizes: [22, 78],
-      minSize: [200, 600],
-    );
-
-    // configure the editor / console splitter
-    split.flexSplit(
-      [sourceArea.element, consoleDiv.element],
-      horizontal: false,
-      gutterSize: defaultSplitterWidth,
-      sizes: [80, 20],
-      minSize: [200, 60],
-    );
 
     void updateStepCapabilities() {
       final value = debuggerState.supportsStepping.value;
@@ -331,7 +314,7 @@ class DebuggerScreen extends Screen {
       'gutters': <String>['breakpoints'],
     };
     final CodeMirror codeMirror =
-        CodeMirror.fromElement(sourceArea.element, options: options);
+        CodeMirror.fromElement(_sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
@@ -447,6 +430,26 @@ class DebuggerScreen extends Screen {
     });
 
     return screenDiv;
+  }
+
+  @override
+  void onContentAttached() {
+    // configure the navigation / editor splitter
+    split.flexSplit(
+      _navEditorPanels.map((e) => e.element).toList(),
+      gutterSize: defaultSplitterWidth,
+      sizes: [22, 78],
+      minSize: [200, 600],
+    );
+
+    // configure the editor / console splitter
+    split.flexSplit(
+      [_sourceArea.element, _consoleDiv.element],
+      horizontal: false,
+      gutterSize: defaultSplitterWidth,
+      sizes: [80, 20],
+      minSize: [200, 60],
+    );
   }
 
   @override
