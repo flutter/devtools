@@ -70,6 +70,15 @@ class Splitter {
   external void destroy([bool preserveStyles, bool preserveGutters]);
 }
 
+bool _isAttachedToDocument(Element element) {
+  final target = document.body;
+  while (element != null) {
+    if (element == target) return true;
+    element = element.parent;
+  }
+  return false;
+}
+
 /// Splitter that splits multiple elements using flex layout.
 ///
 /// You should used this flex splitter instead of the fixed splitter if the
@@ -88,6 +97,10 @@ Splitter flexSplit(
   List<num> sizes,
   List<num> minSize,
 }) {
+  // The splitter library will generate nonsense split percentages if called
+  // on elements that are not yet attached to the document.
+  assert(parts.every(_isAttachedToDocument));
+
   return _split(
     parts,
     _SplitOptions(
@@ -128,6 +141,10 @@ Splitter fixedSplit(
   List<num> sizes,
   List<num> minSize,
 }) {
+  // The splitter library will generate nonsense split percentages if called
+  // on elements that are not yet attached to the document.
+  assert(parts.every(_isAttachedToDocument));
+
   return _split(
     parts,
     _SplitOptions(
