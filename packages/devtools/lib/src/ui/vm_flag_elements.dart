@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import '../config_specific/allowed_error.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../messages.dart';
 import 'primer.dart';
-import 'ui_utils.dart';
 
 // TODO(kenzie): handle the multi-client case for this selector.
 

@@ -5,9 +5,9 @@
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
-import '../ui/ui_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
