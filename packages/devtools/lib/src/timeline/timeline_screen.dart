@@ -310,7 +310,7 @@ class TimelineScreen extends Screen {
     if (!splitterConfigured) {
       // TODO(jacobr): we need to tweak this layout so there is more room to
       // display this UI. On typical devices, the space available is very
-      // limited making the UI harder to use than it would be otherwise./
+      // limited making the UI harder to use than it would be otherwise.
       splitter = split.flexSplit(
         [flameChartContainer.element, eventDetails.element],
         horizontal: false,

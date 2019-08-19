@@ -85,6 +85,12 @@ class DebuggerScreen extends Screen {
 
   ScriptsMatcher _matcher;
 
+  List<CoreElement> _navEditorPanels;
+
+  CoreElement _sourceArea;
+
+  CoreElement _consoleDiv;
+
   // Handle shortcut keys
   //
   // All shortcut keys start with CTRL key plus another alphanumeric key.
@@ -125,10 +131,6 @@ class DebuggerScreen extends Screen {
 
     return false;
   }
-
-  List<CoreElement> _navEditorPanels;
-  CoreElement _sourceArea;
-  CoreElement _consoleDiv;
 
   @override
   CoreElement createContent(Framework framework) {
