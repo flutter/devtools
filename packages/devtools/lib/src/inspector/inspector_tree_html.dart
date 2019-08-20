@@ -238,7 +238,7 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
   bool _recomputeRows = false;
 
   @override
-  void setState(modifyState) {
+  void setState(VoidCallback modifyState) {
     // More closely match Flutter semantics where state is set immediately
     // instead of after a frame.
     modifyState();

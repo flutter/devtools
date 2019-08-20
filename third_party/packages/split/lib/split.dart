@@ -70,6 +70,15 @@ class Splitter {
   external void destroy([bool preserveStyles, bool preserveGutters]);
 }
 
+bool _isAttachedToDocument(Element element) {
+  final target = document.body;
+  while (element != null) {
+    if (element == target) return true;
+    element = element.parent;
+  }
+  return false;
+}
+
 /// Splitter that splits multiple elements using flex layout.
 ///
 /// You should used this flex splitter instead of the fixed splitter if the
@@ -84,10 +93,14 @@ class Splitter {
 Splitter flexSplit(
   List<Element> parts, {
   bool horizontal = true,
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
 }) {
+  // The splitter library will generate nonsense split percentages if called
+  // on elements that are not yet attached to the document.
+  assert(parts.every(_isAttachedToDocument));
+
   return _split(
     parts,
     _SplitOptions(
@@ -124,15 +137,19 @@ Splitter flexSplit(
 Splitter fixedSplit(
   List<Element> parts, {
   bool horizontal = true,
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> sizes,
   List<num> minSize,
 }) {
+  // The splitter library will generate nonsense split percentages if called
+  // on elements that are not yet attached to the document.
+  assert(parts.every(_isAttachedToDocument));
+
   return _split(
     parts,
     _SplitOptions(
       elementStyle: allowInterop((dimension, size, gutterSize, index) {
-        Object o = js_util.newObject();
+        final Object o = js_util.newObject();
         js_util.setProperty(
           o,
           horizontal ? 'width' : 'height',
@@ -146,7 +163,7 @@ Splitter fixedSplit(
         return o;
       }),
       gutterStyle: allowInterop((dimension, gutterSize, index) {
-        Object o = js_util.newObject();
+        final Object o = js_util.newObject();
         js_util.setProperty(
           o,
           horizontal ? 'width' : 'height',
@@ -170,7 +187,7 @@ Splitter fixedSplit(
 
 StreamSubscription<Object> _splitBidirectional(
   List<Element> parts, {
-  @required gutterSize,
+  @required num gutterSize,
   @required List<num> verticalSizes,
   @required List<num> horizontalSizes,
   @required List<num> minSize,
@@ -210,7 +227,7 @@ StreamSubscription<Object> _splitBidirectional(
 /// no longer being used.
 StreamSubscription<Object> flexSplitBidirectional(
   List<Element> parts, {
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> verticalSizes,
   List<num> horizontalSizes,
   List<num> minSize,
@@ -238,7 +255,7 @@ StreamSubscription<Object> flexSplitBidirectional(
 /// no longer being used.
 StreamSubscription<Object> fixedSplitBidirectional(
   List<Element> parts, {
-  gutterSize = 5,
+  num gutterSize = 5,
   List<num> verticalSizes,
   List<num> horizontalSizes,
   List<num> minSize,

@@ -21,7 +21,7 @@ sodales suscipit risus. Nullam consequat sit amet turpis vitae facilisis. Intege
 ''';
 
 // 2^52 is the max int for dart2js.
-final int maxJsInt = pow(2, 52);
+final int maxJsInt = pow(2, 52) as int;
 
 String getLoremText([int paragraphCount = 1]) {
   String str = '';
@@ -101,7 +101,7 @@ String funcRefName(FuncRef ref) {
   } else if (ref.owner is ClassRef) {
     return '${ref.owner.name}.${ref.name}';
   } else if (ref.owner is FuncRef) {
-    return '${funcRefName(ref.owner)}.${ref.name}';
+    return '${funcRefName(ref.owner as FuncRef)}.${ref.name}';
   } else {
     return ref.name;
   }
@@ -249,20 +249,20 @@ class JsonUtils {
   static String getStringMember(Map<String, Object> json, String memberName) {
     // TODO(jacobr): should we handle non-string values with a reasonable
     // toString differently?
-    return json[memberName];
+    return json[memberName] as String;
   }
 
   static int getIntMember(Map<String, Object> json, String memberName) {
-    return json[memberName] ?? -1;
+    return json[memberName] as int ?? -1;
   }
 
   static List<String> getValues(Map<String, Object> json, String member) {
-    final List<Object> values = json[member];
+    final List<dynamic> values = json[member] as List;
     if (values == null || values.isEmpty) {
       return const [];
     }
 
-    return values.toList();
+    return values.cast();
   }
 
   static bool hasJsonData(String data) {

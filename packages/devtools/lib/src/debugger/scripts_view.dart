@@ -167,7 +167,7 @@ class ScriptsView implements CoreElementView {
 
   ScriptsMatcher get matcher => _matcherRendering;
 
-  void setMatcher(_matcher) {
+  void setMatcher(ScriptsMatcher _matcher) {
     _matcherRendering = _matcher;
   }
 

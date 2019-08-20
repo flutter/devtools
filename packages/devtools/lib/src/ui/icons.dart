@@ -252,7 +252,7 @@ class CustomIconMaker {
 }
 
 class IconKind {
-  const IconKind(this.name, this.icon, [abstractIcon])
+  const IconKind(this.name, this.icon, [Icon abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
   static const IconKind classIcon = IconKind(

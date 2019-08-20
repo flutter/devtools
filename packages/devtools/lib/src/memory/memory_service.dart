@@ -133,7 +133,8 @@ void computeInboundRefs(
   InboundReferences refs,
   BuildInboundEntry buildCallback,
 ) {
-  for (InboundReference element in refs.elements) {
+  final Iterable<InboundReference> elements = refs?.elements ?? [];
+  for (InboundReference element in elements) {
     // Could be a reference to an evaluate so this isn't known.
 
     // Looks like an object created from an evaluate, ignore it.

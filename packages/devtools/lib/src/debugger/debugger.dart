@@ -85,6 +85,12 @@ class DebuggerScreen extends Screen {
 
   ScriptsMatcher _matcher;
 
+  List<CoreElement> _navEditorPanels;
+
+  CoreElement _sourceArea;
+
+  CoreElement _consoleDiv;
+
   // Handle shortcut keys
   //
   // All shortcut keys start with CTRL key plus another alphanumeric key.
@@ -132,9 +138,6 @@ class DebuggerScreen extends Screen {
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
-    CoreElement sourceArea;
-    CoreElement consoleDiv;
-
     final PButton resumeButton =
         PButton.icon('Resume', FlutterIcons.resume_white_disabled_2x)
           ..primary()
@@ -167,9 +170,12 @@ class DebuggerScreen extends Screen {
       _updatePauseButton(disabled: false);
     });
 
-    debuggerState.onPausedChanged.listen((bool isPaused) {
-      _updatePauseButton(disabled: isPaused);
-      _updateResumeButton(disabled: !isPaused);
+    // TODO(#926): Is this necessary?
+    _updatePauseButton(disabled: debuggerState.isPaused.value);
+    _updateResumeButton(disabled: !debuggerState.isPaused.value);
+    debuggerState.isPaused.addListener(() {
+      _updatePauseButton(disabled: debuggerState.isPaused.value);
+      _updateResumeButton(disabled: !debuggerState.isPaused.value);
     });
 
     PButton stepOver, stepIn, stepOut;
@@ -179,12 +185,15 @@ class DebuggerScreen extends Screen {
     breakOnExceptionControl.onPauseModeChanged.listen((String mode) {
       debuggerState.setExceptionPauseMode(mode);
     });
-    debuggerState.onExceptionPauseModeChanged.listen((String mode) {
-      breakOnExceptionControl.exceptionPauseMode = mode;
+    // TODO(#926): Is this necessary?
+    breakOnExceptionControl.exceptionPauseMode =
+        debuggerState.exceptionPauseMode.value;
+    debuggerState.exceptionPauseMode.addListener(() {
+      breakOnExceptionControl.exceptionPauseMode =
+          debuggerState.exceptionPauseMode.value;
     });
 
     consoleArea = ConsoleArea();
-    List<CoreElement> navEditorPanels;
 
     _popupTextfield =
         CoreElement('input', classes: 'form-control input-sm popup-textfield')
@@ -230,7 +239,7 @@ class DebuggerScreen extends Screen {
       div(c: 'section')
         ..flex()
         ..layoutHorizontal()
-        ..add(navEditorPanels = <CoreElement>[
+        ..add(_navEditorPanels = <CoreElement>[
           div(c: 'debugger-menu')
             ..layoutVertical()
             ..add(<CoreElement>[
@@ -258,12 +267,12 @@ class DebuggerScreen extends Screen {
                   div(c: 'margin-right')..flex(),
                   breakOnExceptionControl,
                 ]),
-              sourceArea = div(c: 'section table-border')
+              _sourceArea = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(<CoreElement>[
                   _sourcePathDiv = div(c: 'source-head'),
                 ]),
-              consoleDiv = div(c: 'section table-border')
+              _consoleDiv = div(c: 'section table-border')
                 ..layoutVertical()
                 ..add(consoleArea.element),
             ]),
@@ -274,7 +283,7 @@ class DebuggerScreen extends Screen {
       _popupTextfield,
       _popupView = PopupView(
         popupScriptsView,
-        sourceArea,
+        _sourceArea,
         _sourcePathDiv,
         _popupTextfield,
       )
@@ -282,24 +291,8 @@ class DebuggerScreen extends Screen {
 
     _sourcePathDiv.setInnerHtml('&nbsp;');
 
-    // configure the navigation / editor splitter
-    split.flexSplit(
-      navEditorPanels.map((e) => e.element).toList(),
-      gutterSize: defaultSplitterWidth,
-      sizes: [22, 78],
-      minSize: [200, 600],
-    );
-
-    // configure the editor / console splitter
-    split.flexSplit(
-      [sourceArea.element, consoleDiv.element],
-      horizontal: false,
-      gutterSize: defaultSplitterWidth,
-      sizes: [80, 20],
-      minSize: [200, 60],
-    );
-
-    debuggerState.onSupportsStepping.listen((bool value) {
+    void updateStepCapabilities() {
+      final value = debuggerState.supportsStepping.value;
       stepIn.enabled = value;
 
       // Only enable step over and step out if we're paused at a frame. When
@@ -307,7 +300,11 @@ class DebuggerScreen extends Screen {
       // meaningful.
       stepOver.enabled = value && (debuggerState.lastEvent.topFrame != null);
       stepOut.enabled = value && (debuggerState.lastEvent.topFrame != null);
-    });
+    }
+
+    // TODO(#926): Is this necessary?
+    updateStepCapabilities();
+    debuggerState.supportsStepping.addListener(updateStepCapabilities);
 
     stepOver.click(() => debuggerState.stepOver());
     stepIn.click(() => debuggerState.stepIn());
@@ -319,7 +316,7 @@ class DebuggerScreen extends Screen {
       'gutters': <String>['breakpoints'],
     };
     final CodeMirror codeMirror =
-        CodeMirror.fromElement(sourceArea.element, options: options);
+        CodeMirror.fromElement(_sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
@@ -329,13 +326,14 @@ class DebuggerScreen extends Screen {
 
     sourceEditor = SourceEditor(codeMirror, debuggerState);
 
-    debuggerState.onBreakpointsChanged
-        .listen((List<Breakpoint> breakpoints) async {
-      sourceEditor.setBreakpoints(breakpoints);
+    // TODO(#926): Is this necessary?
+    sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
+    debuggerState.breakpoints.addListener(() {
+      sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
     });
 
-    debuggerState.onPausedChanged.listen((bool paused) async {
-      if (paused) {
+    void updateFrames() async {
+      if (debuggerState.isPaused.value) {
         // Check for async causal frames; fall back to using regular sync frames.
         final Stack stack = await debuggerState.getStack();
         List<Frame> frames = stack.asyncCausalFrames ?? stack.frames;
@@ -368,11 +366,15 @@ class DebuggerScreen extends Screen {
         callStackView.clearFrames();
         sourceEditor.clearExecutionPoint();
       }
-    });
+    }
 
-    // Update the status line.
-    debuggerState.onPausedChanged.listen((bool paused) async {
-      if (paused && debuggerState.lastEvent.topFrame != null) {
+    // TODO(#926): Is this necessary?
+    updateFrames();
+    debuggerState.isPaused.addListener(updateFrames);
+
+    void updateStatusLine() async {
+      if (debuggerState.isPaused.value &&
+          debuggerState.lastEvent.topFrame != null) {
         final Frame topFrame = debuggerState.lastEvent.topFrame;
 
         final ScriptRef scriptRef = topFrame.location.script;
@@ -387,7 +389,11 @@ class DebuggerScreen extends Screen {
       } else {
         deviceStatus.element.text = '';
       }
-    });
+    }
+
+    // TODO(#926): Is this necessary?
+    updateStatusLine();
+    debuggerState.isPaused.addListener(updateStatusLine);
 
     callStackView.onSelectionChanged.listen((Frame frame) async {
       if (frame == null) {
@@ -426,6 +432,26 @@ class DebuggerScreen extends Screen {
     });
 
     return screenDiv;
+  }
+
+  @override
+  void onContentAttached() {
+    // configure the navigation / editor splitter
+    split.flexSplit(
+      _navEditorPanels.map((e) => e.element).toList(),
+      gutterSize: defaultSplitterWidth,
+      sizes: [22, 78],
+      minSize: [200, 600],
+    );
+
+    // configure the editor / console splitter
+    split.flexSplit(
+      [_sourceArea.element, _consoleDiv.element],
+      horizontal: false,
+      gutterSize: defaultSplitterWidth,
+      sizes: [80, 20],
+      minSize: [200, 60],
+    );
   }
 
   @override
@@ -612,8 +638,10 @@ class DebuggerScreen extends Screen {
       ..flex()
       ..layoutVertical();
 
-    debuggerState.onBreakpointsChanged.listen((List<Breakpoint> breakpoints) {
-      breakpointsView.showBreakpoints(breakpoints);
+    // TODO(#926): Is this necessary?
+    breakpointsView.showBreakpoints(debuggerState.breakpoints.value);
+    debuggerState.breakpoints.addListener(() {
+      breakpointsView.showBreakpoints(debuggerState.breakpoints.value);
     });
 
     return menu;

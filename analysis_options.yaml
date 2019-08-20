@@ -1,6 +1,10 @@
 analyzer:
-  #  strong-mode:
-  #    implicit-casts: false
+  #strong-mode:
+    #implicit-casts: false # 367 issues
+    #implicit-dynamic: false # 169 issues
+  #language:
+    #strict-inference: true # 34 issues
+    #strict-raw-types: true # 103 issues
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
