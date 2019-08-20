@@ -311,6 +311,7 @@ class Framework {
       final CoreElement screenContent = current.createContent(this);
       screenContent.attribute('full');
       mainElement.add(screenContent);
+      current.onContentAttached();
 
       _screenContents[current] = screenContent;
 
@@ -551,6 +552,13 @@ abstract class Screen {
 
   @override
   String toString() => 'Screen($id)';
+
+  /// Callback invoked after the content for the screen has been added to the
+  /// DOM.
+  ///
+  /// Certain libraries such as package:split behave badly if invoked on
+  /// elements that are not yet attached to the DOM.
+  void onContentAttached() {}
 }
 
 class SetStateMixin {
