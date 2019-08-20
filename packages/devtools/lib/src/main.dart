@@ -72,10 +72,8 @@ class PerfToolFramework extends Framework {
     await addScreens();
     screensReady.complete();
 
-    final mainNav = CoreElement.from(queryId('main-nav'))
-      ..clear();
-    final iconNav = CoreElement.from(queryId('icon-nav'))
-      ..clear();
+    final mainNav = CoreElement.from(queryId('main-nav'))..clear();
+    final iconNav = CoreElement.from(queryId('icon-nav'))..clear();
 
     for (Screen screen in screens) {
       final link = CoreElement('a')
