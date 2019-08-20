@@ -266,29 +266,44 @@ void debuggingTests() {
 
   test('console output', () async {
     appFixture = await CliAppFixture.create(
-        'test/fixtures/debugging_app_exception.dart');
+        'test/fixtures/color_console_output_app.dart');
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webdevFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
-    // verify running state
+    // This test app must start paused so we don't have race conditions where
+    // we miss some console output that was emitted too early.
+    expect(await debuggingManager.getState(), 'paused');
+    await debuggingManager.resume();
     expect(await debuggingManager.getState(), 'running');
 
-    // wait until there's console output
-    await waitFor(
-        () async => (await debuggingManager.getConsoleContents()).isNotEmpty);
-
-    // verify the console contents
+    // Wait until there is enough console output.
+    await waitFor(() async =>
+        (await debuggingManager.getConsoleContents()).split('\n').length >= 13);
+    // Verify the console contents.
     expect(
       await debuggingManager.getConsoleContents(),
-      contains('1\n'),
+      startsWith(
+        'starting ansi color app\n'
+        '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'>0 <span style=\'color: rgb(0,0,0)\'> </span>0 <span style=\'background-color: rgb(187,0,0);color: rgb(255,255,255)\'>1</span> <span style=\'color: rgb(187,0,0)\'> </span>1 <span style=\'background-color: rgb(0,187,0);color: rgb(255,255,255)\'>2</span> <span style=\'color: rgb(0,187,0)\'> </span>2 <span style=\'background-color: rgb(187,187,0);color: rgb(255,255,255)\'>3</span> <span style=\'color: rgb(187,187,0)\'> </span>3 <span style=\'background-color: rgb(0,0,187);color: rgb(255,255,255)\'>4</span> <span style=\'color: rgb(0,0,187)\'> </span>4 <span style=\'background-color: rgb(187,0,187);color: rgb(255,255,255)\'>5</span> <span style=\'color: rgb(187,0,187)\'> </span>5 <span style=\'background-color: rgb(0,187,187);color: rgb(255,255,255)\'>6</span> <span style=\'color: rgb(0,187,187)\'> </span>6 <span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>7</span> <span style=\'color: rgb(255,255,255)\'> </span>7 \n'
+        '<span style=\'background-color: rgb(85,85,85);color: rgb(255,255,255)\'>8 <span style=\'color: rgb(85,85,85)\'> </span>8 <span style=\'background-color: rgb(255,85,85);color: rgb(255,255,255)\'>9</span> <span style=\'color: rgb(255,85,85)\'> </span>9 <span style=\'background-color: rgb(0,255,0);color: rgb(255,255,255)\'>1</span>0 <span style=\'color: rgb(0,255,0)\'> </span>10 <span style=\'background-color: rgb(255,255,85);color: rgb(255,255,255)\'>1</span>1 <span style=\'color: rgb(255,255,85)\'> </span>11 <span style=\'background-color: rgb(85,85,255);color: rgb(255,255,255)\'>1</span>2 <span style=\'color: rgb(85,85,255)\'> </span>12 <span style=\'background-color: rgb(255,85,255);color: rgb(255,255,255)\'>1</span>3 <span style=\'color: rgb(255,85,255)\'> </span>13 <span style=\'background-color: rgb(85,255,255);color: rgb(255,255,255)\'>1</span>4 <span style=\'color: rgb(85,255,255)\'> </span>14 <span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>1</span>5 <span style=\'color: rgb(255,255,255)\'> </span>15 \n'
+        '\n'
+        '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'> 16 <span style=\'color: rgb(0,0,0)\'> </span>16 <span style=\'background-color: rgb(0,0,175);color: rgb(255,255,255)\'> </span>19 <span style=\'color: rgb(0,0,175)\'> </span>19 \n'
+        '<span style=\'background-color: rgb(0,175,0);color: rgb(255,255,255)\'> 34 <span style=\'color: rgb(0,175,0)\'> </span>34 <span style=\'background-color: rgb(0,175,175);color: rgb(255,255,255)\'> </span>37 <span style=\'color: rgb(0,175,175)\'> </span>37 \n'
+        '\n'
+        '<span style=\'background-color: rgb(175,0,0);color: rgb(255,255,255)\'> 124 <span style=\'color: rgb(175,0,0)\'> </span>124 <span style=\'background-color: rgb(175,0,175);color: rgb(255,255,255)\'> </span>127 <span style=\'color: rgb(175,0,175)\'> </span>127 \n'
+        '<span style=\'background-color: rgb(175,175,0);color: rgb(255,255,255)\'> 142 <span style=\'color: rgb(175,175,0)\'> </span>142 <span style=\'background-color: rgb(175,175,175);color: rgb(255,255,255)\'> </span>145 <span style=\'color: rgb(175,175,175)\'> </span>145 \n'
+        '\n'
+        '<span style=\'background-color: rgb(8,8,8);color: rgb(255,255,255)\'> 232 <span style=\'color: rgb(8,8,8)\'> </span>232 <span style=\'background-color: rgb(18,18,18);color: rgb(255,255,255)\'> </span>233 <span style=\'color: rgb(18,18,18)\'> </span>233 <span style=\'background-color: rgb(28,28,28);color: rgb(255,255,255)\'> </span>234 <span style=\'color: rgb(28,28,28)\'> </span>234 <span style=\'background-color: rgb(38,38,38);color: rgb(255,255,255)\'> </span>235 <span style=\'color: rgb(38,38,38)\'> </span>235 <span style=\'background-color: rgb(48,48,48);color: rgb(255,255,255)\'> </span>236 <span style=\'color: rgb(48,48,48)\'> </span>236 <span style=\'background-color: rgb(58,58,58);color: rgb(255,255,255)\'> </span>237 <span style=\'color: rgb(58,58,58)\'> </span>237 <span style=\'background-color: rgb(68,68,68);color: rgb(255,255,255)\'> </span>238 <span style=\'color: rgb(68,68,68)\'> </span>238 <span style=\'background-color: rgb(78,78,78);color: rgb(255,255,255)\'> </span>239 <span style=\'color: rgb(78,78,78)\'> </span>239 \n'
+        '<span style=\'background-color: rgb(88,88,88);color: rgb(255,255,255)\'> 240 <span style=\'color: rgb(88,88,88)\'> </span>240 <span style=\'background-color: rgb(98,98,98);color: rgb(255,255,255)\'> </span>241 <span style=\'color: rgb(98,98,98)\'> </span>241 <span style=\'background-color: rgb(108,108,108);color: rgb(255,255,255)\'> </span>242 <span style=\'color: rgb(108,108,108)\'> </span>242 <span style=\'background-color: rgb(118,118,118);color: rgb(255,255,255)\'> </span>243 <span style=\'color: rgb(118,118,118)\'> </span>243 <span style=\'background-color: rgb(128,128,128);color: rgb(255,255,255)\'> </span>244 <span style=\'color: rgb(128,128,128)\'> </span>244 <span style=\'background-color: rgb(138,138,138);color: rgb(255,255,255)\'> </span>245 <span style=\'color: rgb(138,138,138)\'> </span>245 <span style=\'background-color: rgb(148,148,148);color: rgb(255,255,255)\'> </span>246 <span style=\'color: rgb(148,148,148)\'> </span>246 <span style=\'background-color: rgb(158,158,158);color: rgb(255,255,255)\'> </span>247 <span style=\'color: rgb(158,158,158)\'> </span>247 \n'
+        '<span style=\'background-color: rgb(168,168,168);color: rgb(255,255,255)\'> 248 <span style=\'color: rgb(168,168,168)\'> </span>248 <span style=\'background-color: rgb(178,178,178);color: rgb(255,255,255)\'> </span>249 <span style=\'color: rgb(178,178,178)\'> </span>249 <span style=\'background-color: rgb(188,188,188);color: rgb(255,255,255)\'> </span>250 <span style=\'color: rgb(188,188,188)\'> </span>250 <span style=\'background-color: rgb(198,198,198);color: rgb(255,255,255)\'> </span>251 <span style=\'color: rgb(198,198,198)\'> </span>251 <span style=\'background-color: rgb(208,208,208);color: rgb(255,255,255)\'> </span>252 <span style=\'color: rgb(208,208,208)\'> </span>252 <span style=\'background-color: rgb(218,218,218);color: rgb(255,255,255)\'> </span>253 <span style=\'color: rgb(218,218,218)\'> </span>253 <span style=\'background-color: rgb(228,228,228);color: rgb(255,255,255)\'> </span>254 <span style=\'color: rgb(228,228,228)\'> </span>254 <span style=\'background-color: rgb(238,238,238);color: rgb(255,255,255)\'> </span>255 <span style=\'color: rgb(238,238,238)\'> </span>255 \n',
+      ),
     );
   });
 
