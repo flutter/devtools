@@ -4,9 +4,10 @@
 
 /* If you add a CSS variable here, be sure to also add it to styles.css */
 :root {
-    --chart-bar-color: #4078c0;
     --border-color-dark: #484848;
     --border-color: #484848;
+    --button-selected-color: #3a4556;
+    --chart-bar-color: #4078c0;
     --counter-color: #999;
     --link-color: #9ebef9;
     --dark-shadow-color: #999;
@@ -99,12 +100,12 @@ nav.menu .menu-item {
 }
 
 .btn:active, .btn.selected {
-    background-color: #3a4556;
-    border-color: #3a4556;
+    background-color: var(--button-selected-color);
+    border-color: var(--button-selected-color);
 }
 
 .btn:hover, .btn.hover {
-    background-color: #3a4556;
+    background-color: var(--button-selected-color);
 }
 
 .btn:hover:active, .btn.hover:active, .btn.selected:hover, .btn.selected.hover {
