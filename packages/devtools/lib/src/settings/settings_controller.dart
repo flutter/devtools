@@ -12,7 +12,7 @@ class SettingsController {
   final Function(FlagList) onFlagListReady;
   final Function(bool) onIsAnyFlutterAppReady;
 
-  void entering() async {
+  Future<void> entering() async {
     onFlagListReady(await serviceManager.service.getFlagList());
     onIsAnyFlutterAppReady(await serviceManager.connectedApp.isAnyFlutterApp);
   }
