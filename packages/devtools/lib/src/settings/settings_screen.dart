@@ -48,16 +48,11 @@ class SettingsScreen extends Screen {
     _sdkVersion = div(c: 'sdk-version-container')..flex(2);
 
     _controller = SettingsController(
-      onFlagListReady: (FlagList flagList) {
+      onFlagListChange: (FlagList flagList) {
         _flagList.add(flagList.flags.map((flag) => FlagDetailsUI(flag)));
       },
-      onIsAnyFlutterAppReady: (bool isAnyFlutterApp) {
-        _sdkVersion
-          ..add(<CoreElement>[
-            CoreElement('h2',
-                text: '${isAnyFlutterApp ? 'Flutter' : 'Dart'} SDK Version: '),
-            span(text: serviceManager.sdkVersion),
-          ]);
+      onSdkVersionChange: (String sdkVersion) {
+        _sdkVersion.add(h2(text: sdkVersion));
       },
     );
   }

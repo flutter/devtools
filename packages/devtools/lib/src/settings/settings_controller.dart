@@ -7,13 +7,18 @@ import 'package:vm_service/vm_service.dart';
 import '../globals.dart';
 
 class SettingsController {
-  SettingsController({this.onFlagListReady, this.onIsAnyFlutterAppReady});
+  SettingsController({this.onFlagListChange, this.onSdkVersionChange});
 
-  final Function(FlagList) onFlagListReady;
-  final Function(bool) onIsAnyFlutterAppReady;
+  final Function(FlagList) onFlagListChange;
+  final Function(String) onSdkVersionChange;
+
+  Future<String> _getSdkVersion() async {
+    final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
+    return '${isAnyFlutterApp ? 'Flutter' : 'Dart'} SDK Version: ${serviceManager.sdkVersion}';
+  }
 
   Future<void> entering() async {
-    onFlagListReady(await serviceManager.service.getFlagList());
-    onIsAnyFlutterAppReady(await serviceManager.connectedApp.isAnyFlutterApp);
+    onFlagListChange(await serviceManager.service.getFlagList());
+    onSdkVersionChange(await _getSdkVersion());
   }
 }

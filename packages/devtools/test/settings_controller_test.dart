@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools/src/globals.dart';
 import 'package:devtools/src/settings/settings_controller.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -19,24 +20,25 @@ void main() async {
     test('entering', () async {
       await env.setupEnvironment();
 
-      bool isOnFlutter = false;
-      List<Flag> flags = [];
+      String sdkVersion;
+      List<Flag> flags;
       settingsController =
-          SettingsController(onIsAnyFlutterAppReady: (isAnyFlutterApp) {
-        isOnFlutter = isAnyFlutterApp;
-      }, onFlagListReady: (flagList) {
+          SettingsController(onSdkVersionChange: (isAnyFlutterApp) {
+        sdkVersion = isAnyFlutterApp;
+      }, onFlagListChange: (flagList) {
         flags = flagList.flags;
       });
-      expect(isOnFlutter, false);
-      expect(flags, []);
+      expect(sdkVersion, null);
+      expect(flags, null);
+
       await settingsController.entering();
-      expect(isOnFlutter, true);
+      expect(sdkVersion, 'Flutter SDK Version: ${serviceManager.sdkVersion}');
 
       final flagList = await env.service.getFlagList();
       for (var i = 0; i < flags.length; i++) {
         expect(flags[i].toString(), flagList.flags[i].toString());
       }
     });
-  }, tags: 'hehe');
+  }, tags: 'useFlutterSdk');
   // TODO: Add a test that uses DartVM instead of Flutter
 }
