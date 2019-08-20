@@ -390,10 +390,6 @@ class Framework {
   void removeGlobalAction(String id) {
     globalActions.removeAction(id);
   }
-
-  List<Screen> getMainNavigationScreens() {
-    return screens.where((screen) => screen.isPartOfMainNavigation).toList();
-  }
 }
 
 class StatusLine {
@@ -500,7 +496,7 @@ abstract class Screen {
     this.disabledTooltip = 'This screen is not available',
     bool disabled = false,
     this.shortcutCallback,
-    this.isPartOfMainNavigation = true,
+    this.showTab = true,
   })  : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
@@ -516,7 +512,7 @@ abstract class Screen {
   final StatusItem helpStatus;
   final String disabledTooltip;
   final bool disabled;
-  final bool isPartOfMainNavigation;
+  final bool showTab;
 
   // Set to handle short-cut keys for a particular screen.
   ShortCut shortcutCallback;

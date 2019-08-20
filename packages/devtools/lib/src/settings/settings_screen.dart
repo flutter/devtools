@@ -36,8 +36,8 @@ class SettingsScreen extends Screen {
       : super(
           name: '',
           id: 'settings',
-          iconClass: 'octicon-gear',
-          isPartOfMainNavigation: false,
+    iconClass: 'octicon-gear masthead-item action-button active',
+    showTab: false,
         );
 
   CoreElement _screenDiv;
