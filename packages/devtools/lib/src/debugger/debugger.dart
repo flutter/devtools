@@ -342,7 +342,7 @@ class DebuggerScreen extends Screen {
         callStackView.showFrames(frames, selectTop: true);
       } else {
         callStackView.clearFrames();
-        sourceEditor.clearExecutionPoint();
+        sourceEditor?.clearExecutionPoint();
       }
     }
 
@@ -436,8 +436,8 @@ class DebuggerScreen extends Screen {
       'lineNumbers': true,
       'gutters': <String>['breakpoints'],
     };
-    final CodeMirror codeMirror =
-    CodeMirror.fromElement(_sourceArea.element, options: options);
+    final codeMirror =
+        CodeMirror.fromElement(_sourceArea.element, options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
