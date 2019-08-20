@@ -6,7 +6,6 @@ import 'package:devtools/src/settings/settings_controller.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../framework/framework.dart';
-import '../globals.dart';
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 
