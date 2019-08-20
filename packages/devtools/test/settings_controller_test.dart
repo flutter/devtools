@@ -19,19 +19,17 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
   group('settings controller test', () {
-    test('test entering', () async {
+    test('entering', () async {
       await env.setupEnvironment();
 
       bool isOnFlutter = false;
       List<Flag> flags = [];
-      settingsController = SettingsController(
-        onIsAnyFlutterAppReady: (isAnyFlutterApp) {
-          isOnFlutter = isAnyFlutterApp;
-        },
-        onFlagListReady: (flagList) {
-          flags = flagList.flags;
-        }
-      );
+      settingsController =
+          SettingsController(onIsAnyFlutterAppReady: (isAnyFlutterApp) {
+        isOnFlutter = isAnyFlutterApp;
+      }, onFlagListReady: (flagList) {
+        flags = flagList.flags;
+      });
       expect(isOnFlutter, false);
       expect(flags, []);
       await settingsController.entering();
@@ -40,10 +38,8 @@ void main() async {
       final flagList = await env.service.getFlagList();
       expect(flags.length, flagList.flags.length);
       for (var i = 0; i < flags.length; i++) {
-       expect(flags[i].toString(), flagList.flags[i].toString());
+        expect(flags[i].toString(), flagList.flags[i].toString());
       }
     });
   }, tags: 'useFlutterSdk');
-
 }
-
