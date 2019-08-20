@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools/src/settings/settings_controller.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../framework/framework.dart';
@@ -38,17 +39,35 @@ class SettingsScreen extends Screen {
           id: 'settings',
           iconClass: 'octicon-gear masthead-item action-button active',
           showTab: false,
-        );
+        ) {
+    _flagList = div(c: 'flag-list-container')
+      ..layoutVertical()
+      ..add(
+        CoreElement('h2', text: 'Dart VM Flag List'),
+      );
+    _sdkVersion = div(c: 'sdk-version-container')..flex(2);
 
-  CoreElement _screenDiv;
+    _controller = SettingsController(
+      onFlagListReady: (FlagList flagList) {
+        _flagList.add(flagList.flags.map((flag) => FlagDetailsUI(flag)));
+      },
+      onIsAnyFlutterAppReady: (bool isAnyFlutterApp) {
+        _sdkVersion
+          ..add(<CoreElement>[
+            CoreElement('h2',
+                text: '${isAnyFlutterApp ? 'Flutter' : 'Dart'} SDK Version: '),
+            span(text: serviceManager.sdkVersion),
+          ]);
+      },
+    );
+  }
+
   CoreElement _container;
   CoreElement _flagList;
+  CoreElement _screenDiv;
+  CoreElement _sdkVersion;
 
-  void _displayFlagList() {
-    serviceManager.service.getFlagList().then((flags) {
-      _flagList.add(flags.flags.map((flag) => FlagDetailsUI(flag)));
-    });
-  }
+  SettingsController _controller;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -59,20 +78,10 @@ class SettingsScreen extends Screen {
     _screenDiv
       ..clear()
       ..add(_container..clear());
-    final flutterVersion = div(c: 'flutter-version-container')
-      ..flex(2)
-      ..add(<CoreElement>[
-        CoreElement('h2', text: 'Flutter SDK Version: '),
-        span(text: serviceManager.sdkVersion),
-      ]);
-    _flagList = div(c: 'flag-list-container')
-      ..layoutVertical()
-      ..add(
-        CoreElement('h2', text: 'Dart VM Flag List'),
-      );
-    _container.add(flutterVersion);
+    _container.add(_sdkVersion);
     _container.add(_flagList);
-    _displayFlagList();
+
+    _controller.entering();
     return _screenDiv;
   }
 }

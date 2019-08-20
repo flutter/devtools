@@ -8,7 +8,7 @@
     overflow: scroll;
 }
 
-.flutter-version-container {
+.sdk-version-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -16,21 +16,17 @@
     margin-bottom: 8px;
 }
 
-.flutter-version-container > h2 {
+.sdk-version-container > h2 {
     border: none;
 }
 
-.flutter-version-container > span {
+.sdk-version-container > span {
     opacity: 0.75;
     font-size: 14px;
 }
 
 .flag-list-container {
     padding: 8px 0;
-}
-
-.flag-list-container {
-
 }
 
 .flag-details-container {
