@@ -35,9 +35,29 @@ void main() async {
       expect(sdkVersion, 'Flutter SDK Version: ${serviceManager.sdkVersion}');
 
       final flagList = await env.service.getFlagList();
+      expect(flags.length, flagList.flags.length);
+      final expectedFlags = [
+        Flag.parse({
+          'name': 'causal_async_stacks',
+          'comment': 'Improved async stacks',
+          'modified': true,
+          'valueAsString': 'true'
+        }),
+        Flag.parse({
+          'name': 'async_debugger',
+          'comment': 'Debugger support async functions.',
+          'modified': false,
+          'valueAsString': 'true'
+        }),
+      ];
       for (var i = 0; i < flags.length; i++) {
         expect(flags[i].toString(), flagList.flags[i].toString());
+        if (expectedFlags.isNotEmpty &&
+            expectedFlags.last.toString() == flags[i].toString()) {
+          expectedFlags.removeLast();
+        }
       }
+      expect(expectedFlags.length, 0);
     });
   }, tags: 'useFlutterSdk');
   // TODO: Add a test that uses DartVM instead of Flutter
