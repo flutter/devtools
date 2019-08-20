@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:async';
-import 'dart:io';
-
 import 'package:devtools/src/settings/settings_controller.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
