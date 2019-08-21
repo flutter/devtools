@@ -10,6 +10,7 @@
 /* If you add a CSS variable here, be sure to also add it to styles_dart.css */
 :root {
     --border-color: #eee;
+    --button-selected-color: #eaeff4;
     --chart-bar-color: #4078c0;
     --counter-color: #666;
     --link-color: #2188ff;
@@ -324,6 +325,10 @@ table th.wide {
 
 .allocated-by-class { float: left; }
 .ref-by { float: right; }
+
+.memory-buttons {
+    text-align: right;
+}
 
 .history-navigation {
     display: block;
@@ -757,12 +762,24 @@ div.tabnav-tab {
     border-bottom-left-radius: 0;
 }
 
+.form-select {
+    cursor: pointer;
+}
+
 .form-select.button-bar-dropdown {
     background-color: var(--form-select-background);
     color: var(--default-button-text-color);
     display: inline-flex;
     align-items: center;
     height: 30px;
+}
+
+.form-select:hover {
+    background-color: var(--button-selected-color);
+}
+
+input {
+    cursor: pointer;
 }
 
 /* To truly center an object in its parent, give the object a negative top margin of half its height.
@@ -1024,6 +1041,7 @@ html [full] {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .action-button:hover {
