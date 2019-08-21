@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
+import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
@@ -383,10 +384,19 @@ class WebdevFixture {
       environment['DART_VM_OPTIONS'] = '';
     }
 
-    final List<String> cliArgs =
-        ['global', 'run', 'webdev'].followedBy(buildArgs).toList();
+    // Run the snapshot directly instead of going bia pub.bat so that on Windows
+    // when we send kill() it gets passed to Dart and doesn't sometimes terminate
+    // the shell and leave the Dart process behind.
+    final executable = Platform.executable;
+    final pubSnapshotPath = path.join(
+      File(executable).parent.path,
+      'snapshots',
+      'pub.dart.snapshot',
+    );
 
-    final executable = Platform.isWindows ? 'pub.bat' : 'pub';
+    final List<String> cliArgs = [pubSnapshotPath, 'global', 'run', 'webdev']
+        .followedBy(buildArgs)
+        .toList();
 
     if (verbose) {
       print('Running "$executable" with args: ${cliArgs.join(' ')}');
