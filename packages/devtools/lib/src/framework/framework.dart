@@ -497,6 +497,7 @@ abstract class Screen {
     this.disabledTooltip = 'This screen is not available',
     bool disabled = false,
     this.shortcutCallback,
+    this.showTab = true,
   })  : helpStatus = createLinkStatusItem(
           span()
             ..add(span(text: '$name', c: 'optional-700'))
@@ -512,6 +513,7 @@ abstract class Screen {
   final StatusItem helpStatus;
   final String disabledTooltip;
   final bool disabled;
+  final bool showTab;
 
   // Set to handle short-cut keys for a particular screen.
   ShortCut shortcutCallback;

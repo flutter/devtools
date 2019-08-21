@@ -17,6 +17,7 @@ import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance_screen.dart';
 import 'service_registrations.dart' as registrations;
+import 'settings/settings_screen.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
@@ -71,11 +72,11 @@ class PerfToolFramework extends Framework {
     await addScreens();
     screensReady.complete();
 
-    final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
-    mainNav.clear();
+    final mainNav = CoreElement.from(queryId('main-nav'))..clear();
+    final iconNav = CoreElement.from(queryId('icon-nav'))..clear();
 
     for (Screen screen in screens) {
-      final CoreElement link = CoreElement('a')
+      final link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}', c: 'optional-1060')
@@ -96,7 +97,7 @@ class PerfToolFramework extends Framework {
             navigateTo(screen.id);
           });
       }
-      mainNav.add(link);
+      (screen.showTab ? mainNav : iconNav).add(link);
     }
 
     isolateSelectStatus = StatusItem();
@@ -194,6 +195,7 @@ class PerfToolFramework extends Framework {
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
+    addScreen(SettingsScreen());
   }
 
   IsolateRef get currentIsolate =>
