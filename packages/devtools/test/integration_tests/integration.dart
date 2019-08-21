@@ -384,7 +384,7 @@ class WebdevFixture {
       environment['DART_VM_OPTIONS'] = '';
     }
 
-    // Run the snapshot directly instead of going bia pub.bat so that on Windows
+    // Run the snapshot directly instead of going via pub.bat so that on Windows
     // when we send kill() it gets passed to Dart and doesn't sometimes terminate
     // the shell and leave the Dart process behind.
     final executable = Platform.executable;
