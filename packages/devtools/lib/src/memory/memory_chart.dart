@@ -18,8 +18,7 @@ class MemoryChart extends CoreElement {
     element.id = _memoryGraph;
     element.style
       ..boxSizing = 'content-box' // border-box causes right/left border cut.
-      ..height = '${FramesBarChart.chartHeight}px'
-      ..width = '100%';
+      ..height = '${FramesBarChart.chartHeight}px';
 
     _memoryController.onMemory.listen((MemoryTracker memoryTracker) {
       if (_memoryController.memoryTracker.hasConnection) {

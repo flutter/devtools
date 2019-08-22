@@ -95,25 +95,19 @@ class LoggingScreen extends Screen {
     return screenDiv;
   }
 
-  bool _firstEnter = true;
+  @override
+  void onContentAttached() {
+    split.fixedSplitBidirectional(
+      [_loggingTable.element.element, logDetailsUI.element],
+      gutterSize: defaultSplitterWidth,
+      horizontalSizes: [60, 40],
+      verticalSizes: [70, 30],
+      minSize: [200, 200],
+    );
+  }
 
   @override
   void entering() {
-    if (_firstEnter) {
-      // configure the table / details splitter. Setting up this splitter works
-      // better once the UI is active in the DOM so we have to delay it until
-      // we get the entering event.
-      // TODO(devoncarew): Use fixedSplitBidirectional when we move to
-      // package:split v0.0.4.
-      split.flexSplit(
-        [_loggingTable.element.element, logDetailsUI.element],
-        gutterSize: defaultSplitterWidth,
-        horizontal: true,
-        sizes: [70, 30],
-        minSize: [200, 200],
-      );
-      _firstEnter = false;
-    }
     controller.entering();
   }
 

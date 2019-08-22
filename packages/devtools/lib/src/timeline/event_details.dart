@@ -189,10 +189,17 @@ class _CpuProfiler extends CpuProfiler {
     }
 
     if (_timelineController.timelineData.cpuProfileData.stackFrames.isEmpty) {
+      final frameOffset =
+          _timelineController.timelineData.selectedFrame.time.start;
+      final startTime =
+          _timelineController.timelineData.selectedEvent.time.start -
+              frameOffset;
+      final endTime =
+          _timelineController.timelineData.selectedEvent.time.end - frameOffset;
       showMessage(div(
           text: 'CPU profile unavailable for time range'
-              ' [${_timelineController.timelineData.selectedEvent.time.start.inMicroseconds} -'
-              ' ${_timelineController.timelineData.selectedEvent.time.end.inMicroseconds}]'));
+              ' [${msText(startTime, fractionDigits: 2)} -'
+              ' ${msText(endTime, fractionDigits: 2)}]'));
       return true;
     }
     return false;
