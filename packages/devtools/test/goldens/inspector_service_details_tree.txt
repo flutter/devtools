@@ -14,8 +14,9 @@ MaterialApp
          │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
          │   EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth:
          │   1.7976931348623157e+308, alwaysUse24HourFormat: false,
-         │   accessibleNavigation: false, disableAnimations: false,
-         │   invertColors: false, boldText: false)
+         │   accessibleNavigation: false, highContrast:
+         │   false,disableAnimations: false, invertColors: false, boldText:
+         │   false)
          │
          └─Localizations
            │ locale: en_US
@@ -27,5 +28,4 @@ MaterialApp
            └─Semantics
              │ container: false
              │ properties: SemanticsProperties
-             │ label: null
 ...
