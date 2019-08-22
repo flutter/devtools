@@ -18,6 +18,10 @@ import 'memory_service.dart';
 class MemoryController {
   MemoryController();
 
+  final FilteredLibraries libraryFilters = FilteredLibraries();
+
+  LibraryCollection libraryCollection;
+
   String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
 
   final StreamController<MemoryTracker> _memoryTrackerController =
@@ -103,6 +107,35 @@ class MemoryController {
         .toList();
   }
 
+  void initializeLibraryFilters() {}
+
+  Future computeLibraries() async {
+    if (libraryCollection == null) {
+      final VM vm = await serviceManager.service.getVM();
+      // TODO(terry): Need to handle a possible Sentinel being returned.
+      final List<Isolate> isolates =
+          await Future.wait(vm.isolates.map((IsolateRef ref) async {
+        return await serviceManager.service.getIsolate(ref.id);
+      }));
+
+      libraryCollection = LibraryCollection(libraryFilters);
+      for (LibraryRef libraryRef in isolates[0].libraries) {
+        final Library theLibrary =
+            await serviceManager.service.getObject(_isolateId, libraryRef.id);
+        libraryCollection.addLibrary(theLibrary);
+      }
+
+      libraryCollection.computeDisplayClasses();
+    }
+  }
+
+  List<String> sortLibrariesByNormalizedNames() {
+    final List<String> normalizedNames =
+        libraryCollection.librarires.keys.toList();
+    normalizedNames.sort((a, b) => a.compareTo(b));
+    return normalizedNames;
+  }
+
   Future<dynamic> getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
@@ -147,4 +180,172 @@ class MemoryController {
 
     return false;
   }
+}
+
+const String _dartLibraryUriPrefix = 'dart:';
+const String _flutterLibraryUriPrefix = 'package:flutter';
+
+class FilteredLibraries {
+  final List<String> _filteredLibraries = [
+    normalizedDartLibraryUri,
+    normalizedFlutterLibraryUri,
+  ];
+
+  static const String normalizedDartLibraryUri = 'Dart';
+  static const String normalizedFlutterLibraryUri = 'Flutter';
+
+  static String normalizeLibraryUri(Library library) {
+    final uriParts = library.uri.split('/');
+    final firstPart = uriParts[0];
+    if (firstPart.startsWith(_dartLibraryUriPrefix)) {
+      return FilteredLibraries.normalizedDartLibraryUri;
+    } else if (firstPart.startsWith(_flutterLibraryUriPrefix)) {
+      return FilteredLibraries.normalizedFlutterLibraryUri;
+    } else {
+      return firstPart;
+    }
+  }
+
+  List<String> get librariesFiltered => _filteredLibraries.toList();
+
+  bool get isDartLibraryFiltered =>
+      _filteredLibraries.contains(normalizedDartLibraryUri);
+
+  bool get isFlutterLibraryFiltered =>
+      _filteredLibraries.contains(normalizedFlutterLibraryUri);
+
+  void clearFilters() {
+    _filteredLibraries.clear();
+  }
+
+  void addFilter(String libraryUri) {
+    _filteredLibraries.add(libraryUri);
+  }
+
+  void removeFilter(String libraryUri) {
+    _filteredLibraries.remove(libraryUri);
+  }
+
+  bool isDartLibrary(Library library) =>
+      library.uri.startsWith(_dartLibraryUriPrefix);
+
+  bool isFlutterLibrary(Library library) =>
+      library.uri.startsWith(_flutterLibraryUriPrefix);
+
+  bool isLibraryFiltered(String normalizedLibraryUri) =>
+      _filteredLibraries.contains(normalizedLibraryUri);
+}
+
+class LibraryCollection {
+  LibraryCollection(FilteredLibraries filters) : _libraryFilters = filters;
+
+  final FilteredLibraries _libraryFilters;
+
+  /// <key, value> normalizeLibraryUri, Library
+  final Map<String, List<Library>> librarires = {};
+
+  /// Classes displayed in snapshot - <key, value> classId and libraryId.
+  final Map<String, String> displayClasses = {};
+
+  bool isDisplayClass(String classId) => displayClasses.containsKey(classId);
+
+  void addLibrary(Library library) {
+    final normalizedUri = FilteredLibraries.normalizeLibraryUri(library);
+    if (librarires[normalizedUri] == null) {
+      // Add first library to this normalizedUri.
+      librarires[normalizedUri] = [library];
+    } else {
+      // Add subsequent library to this normalizedUri.
+      librarires[normalizedUri].add(library);
+    }
+
+    _filterOrShowClasses(library);
+  }
+
+  void _filterOrShowClasses(Library library) {
+    final normalizedUri = FilteredLibraries.normalizeLibraryUri(library);
+    if (_libraryFilters.isLibraryFiltered(normalizedUri)) {
+      // We're filtering this library - nothing to show.
+      return;
+    }
+
+    // This library isn't being filtered so show all its classes.
+    for (ClassRef classRef in library.classes) {
+      showClass(classRef.id, library);
+    }
+  }
+
+  /// Called from filter dialog when "apply" is clicked.
+  void computeDisplayClasses([FilteredLibraries filters]) {
+    final librariesFiltered = filters == null ? _libraryFilters : filters;
+    displayClasses.clear();
+
+    librarires.forEach((String normalizedUri, List<Library> libraries) {
+      if (librariesFiltered.librariesFiltered.contains(normalizedUri)) {
+        for (var library in libraries) {
+          for (var theClass in library.classes) {
+            filterClass(theClass.id);
+          }
+        }
+      } else {
+        for (var library in libraries) {
+          for (var theClass in library.classes) {
+            showClass(theClass.id, library);
+          }
+        }
+      }
+    });
+  }
+
+  Library findDartLibrary(String libraryId) =>
+      librarires[FilteredLibraries.normalizedDartLibraryUri].firstWhere(
+          (Library library) => library.id == libraryId,
+          orElse: () => null);
+
+  Library findFlutterLibrary(String libraryId) =>
+      librarires[FilteredLibraries.normalizedFlutterLibraryUri].firstWhere(
+          (Library library) => library.id == libraryId,
+          orElse: () => null);
+
+  Library findOtherLibrary(String libraryId) {
+    for (var libraries in librarires.values) {
+      for (var library in libraries) {
+        if (libraryId == library.id) return library;
+      }
+    }
+
+    return null;
+  }
+
+  /// Class to actively display (otherwise class is filtered out of snapshot).
+  void showClass(String classId, Library library) {
+    displayClasses[classId] = library.id;
+  }
+
+  void filterClass(String classId) {
+    displayClasses.remove(classId);
+  }
+
+  bool isDartLibrary(String classId) {
+    final dartLibrary = findDartLibrary(displayClasses[classId]);
+    if (dartLibrary != null) {
+      assert(dartLibrary.uri.startsWith(_dartLibraryUriPrefix));
+      return true;
+    }
+
+    return false;
+  }
+
+  bool isFlutterLibrary(String classId) {
+    final flutterLibrary = findFlutterLibrary(displayClasses[classId]);
+    if (flutterLibrary != null) {
+      assert(flutterLibrary.uri.startsWith(_dartLibraryUriPrefix));
+      return true;
+    }
+
+    return false;
+  }
+
+  bool isOtherLibrary(String classId) =>
+      findOtherLibrary(displayClasses[classId]) != null;
 }

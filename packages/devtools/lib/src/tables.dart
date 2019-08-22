@@ -83,10 +83,29 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
     _spacerAfterVisibleRows = CoreElement('tr');
 
     element.onScroll.listen((_) => model.scheduleRebuild());
+
+    // Monitor the table changing size.
+    _resizeObserver = ResizeObserver(_resize);
+    _resizeObserver.observe(element.element);
   }
+
+  /// Detect of any table resize - rebuild the visible changes.
+  void _resize(List<ResizeObserverEntry> entries, ResizeObserver observer) {
+    // If table doesn't yet exist we're done.
+    if (_thead == null) return;
+
+    // Should be the table.
+    assert(entries[0].target == element.element);
+
+    // Update the visible rows when table resized (grown).
+    model.scheduleRebuild();
+  }
+
 
   final double rowHeight;
   final bool isVirtual;
+
+  ResizeObserver _resizeObserver;
 
   void dispose() {
     model?.dispose();
@@ -455,6 +474,8 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   @override
   void clearSelection() => _select(null, null, null);
 }
+
+
 
 class ColumnRenderer<T> {
   ColumnRenderer(this.model);
