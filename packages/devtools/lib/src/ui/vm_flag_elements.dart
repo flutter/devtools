@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import '../config_specific/allowed_error.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../messages.dart';
@@ -44,8 +45,8 @@ class ProfileGranularitySelector {
   String _selectedValue;
 
   Future<void> setGranularity() async {
-    return serviceManager.service
-        .setFlag(profilePeriodFlagName, selector.value);
+    return allowedError(
+        serviceManager.service.setFlag(profilePeriodFlagName, selector.value));
   }
 
   void _handleSelect() async {

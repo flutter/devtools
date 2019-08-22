@@ -36,17 +36,23 @@ const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
+
     initGlobalUI();
     initTestingModel();
   }
 
   void _gAReportExceptions(html.Event e) {
     final html.ErrorEvent errorEvent = e as html.ErrorEvent;
-    ga.error(
-        '${errorEvent.message}\n'
+
+    final message = '${errorEvent.message}\n'
         '${errorEvent.filename}@${errorEvent.lineno}:${errorEvent.colno}\n'
-        '${errorEvent.error}',
-        true);
+        '${errorEvent.error}';
+
+    // Report exceptions with DevTools to GA.
+    ga.error(message, true);
+
+    // Also write them to the console to aid debugging.
+    print(message);
   }
 
   StatusItem isolateSelectStatus;
@@ -246,7 +252,7 @@ class PerfToolFramework extends Framework {
     // is initialed, and react to those events in the UI. Going forward, we'll
     // want to instead have flutter_tools fire hot reload events, and react to
     // them in the UI. That will mean that our UI will update appropriately
-    // even when other clients (the CLI, and IDE) initial the hot reload.
+    // even when other clients (the CLI, and IDE) initiate the hot reload.
 
     final ActionButton reloadAction = ActionButton(
       _reloadActionId,
