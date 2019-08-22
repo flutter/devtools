@@ -14,8 +14,8 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
-import 'package:vm_service_lib/utils.dart';
-import 'package:vm_service_lib/vm_service_lib.dart' hide Isolate;
+import 'package:vm_service/utils.dart';
+import 'package:vm_service/vm_service.dart' hide Isolate;
 
 const argHelp = 'help';
 const argMachine = 'machine';
