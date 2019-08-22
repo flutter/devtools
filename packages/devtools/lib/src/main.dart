@@ -44,7 +44,7 @@ class PerfToolFramework extends Framework {
   void _gAReportExceptions(html.Event e) {
     final html.ErrorEvent errorEvent = e as html.ErrorEvent;
 
-    final String message = '${errorEvent.message}\n'
+    final message = '${errorEvent.message}\n'
         '${errorEvent.filename}@${errorEvent.lineno}:${errorEvent.colno}\n'
         '${errorEvent.error}';
 

@@ -85,7 +85,7 @@ void _handleUncaughtError(
   final Console console = window.console;
 
   // Also write them to the console to aid debugging.
-  final List<String> errorLines = error.toString().split('\n');
+  final errorLines = error.toString().split('\n');
   console.groupCollapsed(
       'DevTools exception: [${error.runtimeType}] ${errorLines.first}');
   console.log(errorLines.skip(1).join('\n'));

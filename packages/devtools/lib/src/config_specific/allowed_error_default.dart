@@ -7,7 +7,7 @@
 /// (i.e., they're not DevTools crashes).
 Future<T> allowedError<T>(Future<T> future) {
   return future.catchError((Object error) {
-    final List<String> errorLines = error.toString().split('\n');
+    final errorLines = error.toString().split('\n');
     print('[${error.runtimeType}] ${errorLines.first}');
     print(errorLines.skip(1).join('\n'));
     print('');

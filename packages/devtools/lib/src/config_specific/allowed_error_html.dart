@@ -9,7 +9,7 @@ import 'dart:html';
 /// (i.e., they're not DevTools crashes).
 Future<T> allowedError<T>(Future<T> future) {
   return future.catchError((Object error) {
-    final List<String> errorLines = error.toString().split('\n');
+    final errorLines = error.toString().split('\n');
     window.console.groupCollapsed('[${error.runtimeType}] ${errorLines.first}');
     window.console.log(errorLines.skip(1).join('\n'));
     window.console.groupEnd();
