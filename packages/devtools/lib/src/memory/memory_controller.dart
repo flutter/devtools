@@ -18,6 +18,8 @@ import 'memory_service.dart';
 class MemoryController {
   MemoryController();
 
+  final Settings settings = Settings();
+
   final FilteredLibraries libraryFilters = FilteredLibraries();
 
   LibraryCollection libraryCollection;
@@ -180,6 +182,12 @@ class MemoryController {
 
     return false;
   }
+}
+
+class Settings {
+  String pattern = '*';
+  bool showPrivateFields = true;
+  bool experiment = false;
 }
 
 const String _dartLibraryUriPrefix = 'dart:';

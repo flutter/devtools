@@ -101,7 +101,6 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
     model.scheduleRebuild();
   }
 
-
   final double rowHeight;
   final bool isVirtual;
 
@@ -474,8 +473,6 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   @override
   void clearSelection() => _select(null, null, null);
 }
-
-
 
 class ColumnRenderer<T> {
   ColumnRenderer(this.model);

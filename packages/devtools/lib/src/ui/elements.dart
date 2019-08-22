@@ -22,6 +22,10 @@ CoreElement checkbox({String text, String c, String a}) =>
     CoreElement('input', text: text, classes: c, attributes: a)
       ..setAttribute('type', 'checkbox');
 
+CoreElement text({String text, String c, String a}) =>
+    CoreElement('input', text: text, classes: c, attributes: a)
+      ..setAttribute('type', 'text');
+
 CoreElement label({String text, String c, String a}) =>
     CoreElement('label', text: text, classes: c, attributes: a);
 
@@ -408,6 +412,28 @@ class CoreElement {
 
 class CloseButton extends CoreElement {
   CloseButton() : super('div', classes: 'close-button');
+}
+
+class TextField extends CoreElement {
+  TextField({String c}) : super('input', classes: c) {
+    setAttribute('type', 'text');
+  }
+
+  String get value => (this.element as InputElement).value;
+
+  void set value(String value) {
+    (this.element as InputElement).value = value;
+  }
+
+  /// Subscribe to the [onKeyUp] event stream with a no-arg handler.
+  StreamSubscription<Event> changed(void handle(String value)) {
+    return onKeyUp.listen((KeyboardEvent e) {
+      e.stopImmediatePropagation();
+      if (e.target == element) {
+        handle((element as InputElement).value);
+      }
+    });
+  }
 }
 
 class TrustedHtmlTreeSanitizer implements NodeTreeSanitizer {
