@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../vm_service_wrapper.dart';
@@ -31,14 +32,8 @@ class TimelineService {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    serviceManager.service
-        .setFlag('profile_period', '$defaultSamplePeriod')
-        .catchError((e) {
-      print(
-        "Error calling setFlag('profile_period'): ${e.toString().split('\n').first}",
-      );
-    });
-
+    allowedError(serviceManager.service
+        .setFlag('profile_period', '$defaultSamplePeriod'));
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =
@@ -63,17 +58,9 @@ class TimelineService {
     timelineController.timelineData = TimelineData();
 
     await serviceManager.serviceAvailable.future;
-    await serviceManager.service
-        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']).catchError((e) {
-      print(
-        'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
-      );
-    });
-    await serviceManager.service.clearVMTimeline().catchError((e) {
-      print(
-        'Error from clearVMTimeline(): ${e.toString().split('\n').first}',
-      );
-    });
+    await allowedError(serviceManager.service
+        .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
+    await allowedError(serviceManager.service.clearVMTimeline());
 
     // todo: handle UnimplementedError
     final Timeline timeline = await serviceManager.service.getVMTimeline();
@@ -135,21 +122,12 @@ class TimelineService {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
       timelineController.resume();
-      await serviceManager.service.setVMTimelineFlags(
-          <String>['GC', 'Dart', 'Embedder']).catchError((e) {
-        print(
-          'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
-        );
-      });
+      await allowedError(serviceManager.service
+          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       timelineController.pause();
-      await serviceManager.service
-          .setVMTimelineFlags(<String>[]).catchError((e) {
-        print(
-          'Error from setVMTimelineFlags(): ${e.toString().split('\n').first}',
-        );
-      });
+      await allowedError(serviceManager.service.setVMTimelineFlags(<String>[]));
     }
   }
 }

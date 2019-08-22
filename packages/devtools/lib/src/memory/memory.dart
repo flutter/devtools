@@ -252,7 +252,9 @@ class MemoryScreen extends Screen with SetStateMixin {
                   resumeButton,
                 ]),
               div()..flex(),
-              div(c: 'btn-group collapsible-785 nowrap margin-left')
+              div(
+                  c: 'btn-group collapsible-785 nowrap margin-left '
+                      'memory-buttons')
                 ..flex()
                 ..add(<CoreElement>[
                   vmSearchField,
