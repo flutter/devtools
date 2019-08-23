@@ -90,12 +90,15 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   }
 
   /// Detect of any table resize - rebuild the visible changes.
-  void _resize(List<ResizeObserverEntry> entries, ResizeObserver observer) {
+  // TODO(terry): Enable when JSArray to entries as List in dart:html fixed.
+  //  void _resize(List<ResizeObserverEntry> entries, ResizeObserver observer) {
+  void _resize(var entries, ResizeObserver observer) {
     // If table doesn't yet exist we're done.
     if (_thead == null) return;
 
     // Should be the table.
-    assert(entries.first.target == element.element);
+    // TODO(terry): Enble when JSArray to List<ResizeObserverEntry> convert.
+    // assert(entries.first.target == element.element);
 
     // Update the visible rows when table resized (grown).
     model.scheduleRebuild();
