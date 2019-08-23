@@ -114,6 +114,7 @@ class MemoryController {
 
   Future computeLibraries() async {
     if (libraryCollection == null) {
+      // TODO(terry): Review why unawaited is necessary.
       unawaited(serviceManager.service.getVM().then((vm) {
         Future.wait(vm.isolates.map((IsolateRef ref) {
           return serviceManager.service.getIsolate(ref.id);
