@@ -95,7 +95,7 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
     if (_thead == null) return;
 
     // Should be the table.
-    assert(entries[0].target == element.element);
+    assert(entries.first.target == element.element);
 
     // Update the visible rows when table resized (grown).
     model.scheduleRebuild();
@@ -108,6 +108,7 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
 
   void dispose() {
     model?.dispose();
+    _resizeObserver?.disconnect();
   }
 
   final TableData<T> model;

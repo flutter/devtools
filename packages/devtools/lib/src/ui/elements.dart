@@ -419,19 +419,22 @@ class TextField extends CoreElement {
     setAttribute('type', 'text');
   }
 
-  String get value => (this.element as InputElement).value;
+  @override
+  InputElement get element => super.element;
 
-  void set value(String value) {
-    (this.element as InputElement).value = value;
+  String get value => element.value;
+
+  set value(String newValue) {
+    element.value = newValue;
   }
 
   /// Subscribe to the [onKeyUp] event stream with a no-arg handler.
   StreamSubscription<Event> changed(void handle(String value)) {
     return onKeyUp.listen((KeyboardEvent e) {
+      // Once this listener is called, stop other listeners from handling the
+      // event. We're firing the changed event - nothing can be cancelled now.
       e.stopImmediatePropagation();
-      if (e.target == element) {
-        handle((element as InputElement).value);
-      }
+      handle(value);
     });
   }
 }

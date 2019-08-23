@@ -294,8 +294,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     _updateStatus(null);
 
     vmMemorySnapshotButton.disabled = true;
+
     memoryController.computeLibraries().then((_) {
-      // Enable snapshot/setting buttons, all libraries/classses have been seen.
+      // Enable snapshot/setting buttons, all libraries and classses have been
+      // processed.
       vmMemorySnapshotButton.disabled = false;
       settingsButton.disabled = false;
     });
@@ -328,12 +330,13 @@ class MemoryScreen extends Screen with SetStateMixin {
                     div(c: 'filter-pattern-area')
                       ..add(<CoreElement>[
                         span(
-                          text: 'Class Name Pattern: ',
+                          text: 'Class Filter: ',
                           c: 'settings-class-pattern',
                         ),
                         classNameFilter = TextField(c: 'filter-class')
                           ..value = memoryController.settings.pattern
-                          ..changed(_classPatternChanged),
+                          ..changed(_classPatternChanged)
+                          ..setAttribute('placeholder', 'Any'),
                         br(),
                       ]),
                   ]
@@ -388,14 +391,11 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   // Update the classes table (if snapshot) live.
   void _liveUpdateFilters() {
-    final String pattern =
-        classNameFilter.value != null ? classNameFilter.value : '*';
+    final pattern = classNameFilter.value != null ? classNameFilter.value : '';
 
-    final html.InputElement checkbox = privateClasses[0].element;
-    bool hidePrivates = checkbox.checked;
+    final html.InputElement checkbox = privateClasses.first.element;
 
-    final FilteredLibraries temporaryFilters = FilteredLibraries()
-      ..clearFilters();
+    final tempFilters = FilteredLibraries()..clearFilters();
 
     final librariesChecked = librariesUi.element.children;
     for (final element in librariesChecked) {
@@ -403,15 +403,18 @@ class MemoryScreen extends Screen with SetStateMixin {
           element.attributes['type'] == 'checkbox') {
         final html.InputElement checkbox = element;
         if (!checkbox.checked) {
-          temporaryFilters.addFilter(checkbox.value);
+          tempFilters.addFilter(checkbox.value);
         }
       }
     }
 
     // Immediately re-compute classes to update the current classes snapshot.
-    memoryController.libraryCollection.computeDisplayClasses(temporaryFilters);
+    memoryController.libraryCollection.computeDisplayClasses(tempFilters);
 
-    _displayClassesSnapshot(classPattern: pattern, hidePrivates: hidePrivates);
+    _displayClassesSnapshot(
+      classPattern: pattern,
+      hidePrivates: checkbox.checked,
+    );
   }
 
   void _applySettings() {
@@ -876,26 +879,48 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
+  static const String _wildcard = '*';
+
+  /// Does the class name match a classPattern, where classPattern is:
+  ///    ''        - matches everything.
+  ///    '*'       - matches everything.
+  ///    'NNN*'    - matches a class name starting with NNN.
+  ///    '*NNN'    - matches a class name ending with NNN.
+  ///    'NNN*MMM' - matches a class name starting with NNN and ending with MMM.
+  ///    'NNN'     - matches a class name starting with NNN.
+  ///
   bool _matchPattern(String classPattern, String className) {
-    String pattern;
-
     classPattern = classPattern.trim();
-    if (classPattern.length == 1 && classPattern == '*') return true;
+    if (classPattern.isEmpty) return true; // Matches everything.
 
-    if (classPattern.startsWith('*')) {
+    // If no _wildcard in the pattern then default to prefix matching.
+    if (!classPattern.contains(_wildcard))
+      return className.startsWith(classPattern);
+
+    String pattern;
+    if (classPattern.startsWith(_wildcard)) {
       pattern = classPattern.substring(1);
       return className.endsWith(pattern);
-    } else if (classPattern.endsWith('*')) {
+    } else if (classPattern.endsWith(_wildcard)) {
       pattern = classPattern.substring(0, classPattern.length - 1);
       return className.startsWith(pattern);
     }
 
-    return false;
+    // Wildcard is in the middle of pattern. Match start pattern (left of
+    // wildcard) and end pattern (right of wildcard).
+    final index = classPattern.indexOf(_wildcard);
+    assert(index > 0 && index < classPattern.length);
+
+    final startMatch = classPattern.substring(0, index);
+    final endMatch = classPattern.substring(index + 1);
+    return className.startsWith(startMatch) && className.endsWith(endMatch);
   }
 
+  // Defaults to a classPattern of match everything and defaults to show class
+  // names that are private (begins with a underscore).
   void _displayClassesSnapshot({
-    String classPattern = '*',
-    bool hidePrivates: false,
+    String classPattern = '',
+    bool hidePrivates = false,
   }) {
     if (originalHeapStats == null) return;
 
@@ -948,7 +973,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       pauseButton.disabled = false;
       resumeButton.disabled = true;
 
-      vmMemorySnapshotButton.disabled = true;
+      vmMemorySnapshotButton.disabled = false;
       resetAccumulatorsButton.disabled = false;
       gcNowButton.disabled = false;
 

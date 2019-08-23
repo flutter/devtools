@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -18,7 +19,7 @@ import 'memory_service.dart';
 class MemoryController {
   MemoryController();
 
-  final Settings settings = Settings();
+  final SettingsModel settings = SettingsModel();
 
   final FilteredLibraries libraryFilters = FilteredLibraries();
 
@@ -113,32 +114,30 @@ class MemoryController {
 
   Future computeLibraries() async {
     if (libraryCollection == null) {
-      final VM vm = await serviceManager.service.getVM();
-      // TODO(terry): Need to handle a possible Sentinel being returned.
-      final List<Isolate> isolates =
-          await Future.wait(vm.isolates.map((IsolateRef ref) async {
-        return await serviceManager.service.getIsolate(ref.id);
+      unawaited(serviceManager.service.getVM().then((vm) {
+        Future.wait(vm.isolates.map((IsolateRef ref) {
+          return serviceManager.service.getIsolate(ref.id);
+        })).then((isolates) {
+          libraryCollection = LibraryCollection(libraryFilters);
+          for (LibraryRef libraryRef in isolates.first.libraries) {
+            serviceManager.service
+                .getObject(_isolateId, libraryRef.id)
+                .then((theLibrary) {
+              libraryCollection.addLibrary(theLibrary);
+            });
+          }
+
+          libraryCollection.computeDisplayClasses();
+        });
       }));
-
-      libraryCollection = LibraryCollection(libraryFilters);
-      for (LibraryRef libraryRef in isolates[0].libraries) {
-        final Library theLibrary =
-            await serviceManager.service.getObject(_isolateId, libraryRef.id);
-        libraryCollection.addLibrary(theLibrary);
-      }
-
-      libraryCollection.computeDisplayClasses();
     }
   }
 
-  List<String> sortLibrariesByNormalizedNames() {
-    final List<String> normalizedNames =
-        libraryCollection.librarires.keys.toList();
-    normalizedNames.sort((a, b) => a.compareTo(b));
-    return normalizedNames;
-  }
+  // Keys in the libraries map is a normalized library name.
+  List<String> sortLibrariesByNormalizedNames() =>
+      libraryCollection.librarires.keys.toList()..sort();
 
-  Future<dynamic> getObject(String objectRef) async =>
+  Future getObject(String objectRef) async =>
       await serviceManager.service.getObject(
         _isolateId,
         objectRef,
@@ -184,9 +183,20 @@ class MemoryController {
   }
 }
 
-class Settings {
-  String pattern = '*';
-  bool showPrivateFields = true;
+/// Settings dialog model.
+class SettingsModel {
+  // Pattern is of the form:
+  //    - empty string implies no matching.
+  //    - NNN* implies match anything starting with NNN.
+  //    - *NNN implies match anything ending with NNN.
+  String pattern = '';
+
+  // If true hide a Class name that starts with an underscore.
+  bool showPrivateClasses = true;
+
+  // If true enable the memory experiment that following a object instance via
+  // inbound references instances.  Compares hashCodes (using eval causing
+  // memory shaking).  Only works in debug mode.
   bool experiment = false;
 }
 
@@ -204,7 +214,7 @@ class FilteredLibraries {
 
   static String normalizeLibraryUri(Library library) {
     final uriParts = library.uri.split('/');
-    final firstPart = uriParts[0];
+    final firstPart = uriParts.first;
     if (firstPart.startsWith(_dartLibraryUriPrefix)) {
       return FilteredLibraries.normalizedDartLibraryUri;
     } else if (firstPart.startsWith(_flutterLibraryUriPrefix)) {
