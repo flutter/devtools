@@ -310,28 +310,6 @@ class DebuggerScreen extends Screen {
     stepIn.click(() => debuggerState.stepIn());
     stepOut.click(() => debuggerState.stepOut());
 
-    final Map<String, dynamic> options = <String, dynamic>{
-      'mode': 'dart',
-      'lineNumbers': true,
-      'gutters': <String>['breakpoints'],
-    };
-    final CodeMirror codeMirror =
-        CodeMirror.fromElement(_sourceArea.element, options: options);
-    codeMirror.setReadOnly(true);
-    if (isDarkTheme) {
-      codeMirror.setTheme('darcula');
-    }
-    final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
-    codeMirrorElement.setAttribute('flex', '');
-
-    sourceEditor = SourceEditor(codeMirror, debuggerState);
-
-    // TODO(#926): Is this necessary?
-    sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
-    debuggerState.breakpoints.addListener(() {
-      sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
-    });
-
     void updateFrames() async {
       if (debuggerState.isPaused.value) {
         // Check for async causal frames; fall back to using regular sync frames.
@@ -364,7 +342,7 @@ class DebuggerScreen extends Screen {
         callStackView.showFrames(frames, selectTop: true);
       } else {
         callStackView.clearFrames();
-        sourceEditor.clearExecutionPoint();
+        sourceEditor?.clearExecutionPoint();
       }
     }
 
@@ -452,6 +430,28 @@ class DebuggerScreen extends Screen {
       sizes: [80, 20],
       minSize: [200, 60],
     );
+
+    final options = <String, dynamic>{
+      'mode': 'dart',
+      'lineNumbers': true,
+      'gutters': <String>['breakpoints'],
+    };
+    final codeMirror =
+        CodeMirror.fromElement(_sourceArea.element, options: options);
+    codeMirror.setReadOnly(true);
+    if (isDarkTheme) {
+      codeMirror.setTheme('darcula');
+    }
+    final codeMirrorElement = _sourcePathDiv.element.parent.children[1];
+    codeMirrorElement.setAttribute('flex', '');
+
+    sourceEditor = SourceEditor(codeMirror, debuggerState);
+
+    // TODO(#926): Is this necessary?
+    sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
+    debuggerState.breakpoints.addListener(() {
+      sourceEditor.setBreakpoints(debuggerState.breakpoints.value);
+    });
   }
 
   @override
