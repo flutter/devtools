@@ -1,7 +1,9 @@
 os:
   - linux
   - osx
-  - windows
+# Skip windows bots until we find a way to make the windows tests less flaky.
+# https://github.com/flutter/devtools/issues/963
+#  - windows
 
 language: dart
 dart:
