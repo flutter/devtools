@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 
@@ -277,8 +276,7 @@ class TimelineScreen extends Screen {
     // necessary.
     // TODO(kenzie): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
-    final observer =
-        html.ResizeObserver(allowInterop((List<dynamic> entries, _) {
+    final observer = html.ResizeObserver((List<dynamic> entries, _) {
       // TODO(kenzie): observe resizing for recordedTimeline as well. Recorded
       // timeline will not have a selected frame.
       if (flameChartCanvas == null ||
@@ -301,7 +299,7 @@ class TimelineScreen extends Screen {
               TimelineFlameChartCanvas.sectionSpacing,
         ),
       );
-    }));
+    });
     observer.observe(flameChartContainer.element);
   }
 

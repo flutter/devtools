@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 import 'dart:html' as html;
 
-import 'package:js/js.dart';
-
 import '../globals.dart';
 import '../profiler/cpu_profile_flame_chart.dart';
 import '../profiler/cpu_profile_tables.dart';
@@ -31,9 +29,9 @@ class EventDetails extends CoreElement {
     // TODO(kenzie): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
     final observer =
-        html.ResizeObserver(allowInterop((List<dynamic> entries, _) {
+        html.ResizeObserver((List<dynamic> entries, _) {
       cpuProfiler.flameChart.updateForContainerResize();
-    }));
+    });
     observer.observe(element);
 
     assert(tabNav != null);

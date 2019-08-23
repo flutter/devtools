@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' hide VoidCallback;
-import 'dart:js';
 
 import 'package:meta/meta.dart';
 
@@ -171,9 +170,9 @@ class ViewportCanvas extends Object with SetStateMixin {
 
     // TODO(jacobr): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
-    _resizeObserver = ResizeObserver(allowInterop((List<dynamic> entries, _) {
+    _resizeObserver = ResizeObserver((List<dynamic> entries, _) {
       _scheduleRebuild();
-    }));
+    });
     _resizeObserver.observe(_element.element);
 
     element.onScroll.listen((_) {
