@@ -83,13 +83,35 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
     _spacerAfterVisibleRows = CoreElement('tr');
 
     element.onScroll.listen((_) => model.scheduleRebuild());
+
+    // Monitor the table changing size.
+    _resizeObserver = ResizeObserver(_resize);
+    _resizeObserver.observe(element.element);
+  }
+
+  /// Detect of any table resize - rebuild the visible changes.
+  // TODO(terry): Enable when JSArray to entries as List in dart:html fixed.
+  //  void _resize(List<ResizeObserverEntry> entries, ResizeObserver observer) {
+  void _resize(var entries, ResizeObserver observer) {
+    // If table doesn't yet exist we're done.
+    if (_thead == null) return;
+
+    // Should be the table.
+    // TODO(terry): Enble when JSArray to List<ResizeObserverEntry> convert.
+    // assert(entries.first.target == element.element);
+
+    // Update the visible rows when table resized (grown).
+    model.scheduleRebuild();
   }
 
   final double rowHeight;
   final bool isVirtual;
 
+  ResizeObserver _resizeObserver;
+
   void dispose() {
     model?.dispose();
+    _resizeObserver?.disconnect();
   }
 
   final TableData<T> model;
