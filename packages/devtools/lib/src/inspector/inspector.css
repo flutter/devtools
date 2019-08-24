@@ -5,6 +5,7 @@
 .inspector-tree-container {
     border: 1px solid var(--table-border);
     border-radius: 3px;
+    outline: none;
 }
 
 .inspector-tree {

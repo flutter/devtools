@@ -2,8 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
+
 import '../ui/elements.dart';
 import 'inspector_tree.dart';
 
 /// Base class for all inspector tree classes that can be used on the web.
-abstract class InspectorTreeWeb implements InspectorTree, CoreElementView {}
+mixin InspectorTreeWeb implements InspectorTree, CoreElementView {
+  void addKeyboardListeners(CoreElement element) {
+    element.onKeyDown.listen((KeyboardEvent e) {
+      // TODO(jacobr): PgUp/PgDown/Home/End?
+      switch (e.keyCode) {
+        case KeyCode.UP:
+          navigateUp();
+          e.preventDefault();
+          break;
+        case KeyCode.DOWN:
+          navigateDown();
+          e.preventDefault();
+          break;
+        case KeyCode.LEFT:
+          navigateLeft();
+          e.preventDefault();
+          break;
+        case KeyCode.RIGHT:
+          navigateRight();
+          e.preventDefault();
+          break;
+        default:
+          break;
+      }
+    });
+  }
+}

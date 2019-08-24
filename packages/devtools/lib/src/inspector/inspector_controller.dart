@@ -409,6 +409,7 @@ class InspectorController implements InspectorServiceClient {
   void syncTreeSelection() {
     programaticSelectionChangeInProgress = true;
     inspectorTree.selection = selectedNode;
+    inspectorTree.expandPath(selectedNode);
     programaticSelectionChangeInProgress = false;
     animateTo(selectedNode);
   }
@@ -629,7 +630,7 @@ class InspectorController implements InspectorServiceClient {
           selectedDiagnostic != null &&
           !details.hasDiagnosticsValue(selectedDiagnostic.valueRef);
       syncSelectionHelper(maybeReroot, null);
-      if (maybeReroot == false) {
+      if (!maybeReroot) {
         if (isSummaryTree && details != null) {
           details.selectAndShowNode(selectedDiagnostic);
         } else if (parent != null) {

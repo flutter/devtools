@@ -199,7 +199,7 @@ class InspectorTreeNodeCanvas extends InspectorTreeNode {
 }
 
 class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
-    implements InspectorTreeWeb {
+    with InspectorTreeWeb {
   InspectorTreeCanvas({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
@@ -223,6 +223,9 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       onSizeChange: _updateForContainerResize,
       classes: 'inspector-tree inspector-tree-container',
     );
+
+    _viewportCanvas.element.element.tabIndex = 0;
+    addKeyboardListeners(_viewportCanvas.element);
   }
 
   void _updateForContainerResize(Size size) {
