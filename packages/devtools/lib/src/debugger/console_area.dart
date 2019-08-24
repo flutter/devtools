@@ -59,7 +59,7 @@ class ConsoleArea implements CoreElementView {
     });
   }
 
-  Position _getDocumentEnd() {
+  Position _documentEnd() {
     final doc = _editor.getDoc();
     final lastLine = doc.lastLine();
     return Position(lastLine, doc.getLine(lastLine).length);
@@ -78,27 +78,27 @@ class ConsoleArea implements CoreElementView {
 
     final doc = _editor.getDoc();
     for (StyledText chunk in chunks) {
-      final startPosition = _getDocumentEnd();
+      final startPosition = _documentEnd();
       doc.replaceRange(chunk.text, startPosition);
 
       final style = chunk.style;
       if (style != null) {
-        doc.markText(startPosition, _getDocumentEnd(), css: style);
+        doc.markText(startPosition, _documentEnd(), css: style);
       }
     }
 
     if (scrollToEnd) {
-      final documentEnd = _getDocumentEnd();
+      final documentEnd = _documentEnd();
       _editor.scrollIntoView(documentEnd.line, documentEnd.ch);
     }
   }
 
-  /// This method returns a visualization of the contents of the console
-  /// suitable for integration tests.
+  /// Returns a visualization of the contents of the console suitable for
+  /// integration tests.
   ///
   /// TextMarkers in the content are visualized with pseudo HTML+CSS to make it
   /// easy to ensure that the styling of the content matches what was expected.
-  String getStyledContents() {
+  String styledContents() {
     final doc = _editor.getDoc();
     final marks = doc.getAllMarks();
     final startTags = <Position, StringBuffer>{};
@@ -134,7 +134,7 @@ class ConsoleArea implements CoreElementView {
           sb.write(endTag);
         }
       }
-      sb.write('\n');
+      sb.writeln();
     }
     return sb.toString();
   }

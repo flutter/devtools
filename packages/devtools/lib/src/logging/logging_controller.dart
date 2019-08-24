@@ -33,10 +33,6 @@ typedef OnLogCountStatusChanged = void Function(String status);
 
 typedef OnShowDetails = void Function({String text, InspectorTree tree});
 
-// TODO(jacobr): remove this typedef if we reimplement package:ansi_up
-// with dart code instead of js interop so that it can be used on the VM.
-typedef LogMessageToHtml = String Function(String);
-
 typedef CreateLoggingTree = InspectorTree Function(
     {VoidCallback onSelectionChange});
 
@@ -711,7 +707,7 @@ class LogWhenColumn extends ColumnData<LogData> {
 class LogMessageColumn extends ColumnData<LogData> {
   LogMessageColumn(this._logMessageToHtml) : super.wide('Message');
 
-  final LogMessageToHtml _logMessageToHtml;
+  final String Function(String) _logMessageToHtml;
 
   @override
   String get cssClass => 'pre-wrap monospace';

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+
 import 'package:ansicolor/ansicolor.dart';
 
 void main() {
@@ -28,13 +29,13 @@ void main() {
       ..xterm(c);
     sb.write(pen(' $c '));
     if (c == 7 || c == 15) {
-      sb.write('\n');
+      sb.writeln();
     }
   }
 
   // Test a few custom colors.
   for (int r = 0; r < 6; r += 3) {
-    sb.write('\n');
+    sb.writeln();
     for (int g = 0; g < 6; g += 3) {
       for (int b = 0; b < 6; b += 3) {
         final c = r * 36 + g * 6 + b + 16;
@@ -48,13 +49,13 @@ void main() {
           ..rgb(r: r / 5, g: g / 5, b: b / 5);
         sb.write(pen(' $c '));
       }
-      sb.write('\n');
+      sb.writeln();
     }
   }
 
   for (int c = 0; c < 24; c++) {
     if (0 == c % 8) {
-      sb.write('\n');
+      sb.writeln();
     }
     pen
       ..reset()
@@ -70,13 +71,7 @@ void main() {
 
   // Keep the app running indefinitely printing additional messages.
   int i = 0;
-  void run() {
-    Timer(const Duration(milliseconds: 1000), () {
-      print('Message ${i++}');
-
-      run();
-    });
-  }
-
-  run();
+  Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+    print('Message ${i++}');
+  });
 }

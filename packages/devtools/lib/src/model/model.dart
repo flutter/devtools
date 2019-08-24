@@ -126,7 +126,7 @@ class App {
 
   Future<String> debuggerGetConsoleContents([dynamic _]) async {
     final DebuggerScreen screen = framework.getScreen('debugger');
-    return screen.consoleArea.getStyledContents();
+    return screen.consoleArea.styledContents();
   }
 
   Future<String> debuggerGetLocation([dynamic _]) async {
