@@ -279,7 +279,7 @@ void debuggingTests() {
 
     // This test app must start paused so we don't have race conditions where
     // we miss some console output that was emitted too early.
-    expect(await debuggingManager.getState(), 'paused');
+    await waitFor(() async => await debuggingManager.getState() == 'paused');
     await debuggingManager.resume();
     expect(await debuggingManager.getState(), 'running');
 
