@@ -192,8 +192,8 @@ class SettingsModel {
   //    - *NNN implies match anything ending with NNN.
   String pattern = '';
 
-  // If true hide a Class name that starts with an underscore.
-  bool showPrivateClasses = true;
+  // If true hide Class names that begin with an underscore.
+  bool hidePrivateClasses = true;
 
   // If true enable the memory experiment that following a object instance via
   // inbound references instances.  Compares hashCodes (using eval causing
