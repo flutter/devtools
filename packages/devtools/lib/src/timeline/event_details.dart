@@ -28,8 +28,7 @@ class EventDetails extends CoreElement {
     // as necessary.
     // TODO(kenzie): clean this code up when
     // https://github.com/dart-lang/html/issues/104 is fixed.
-    final observer =
-        html.ResizeObserver((List<dynamic> entries, _) {
+    final observer = html.ResizeObserver((List<dynamic> entries, _) {
       cpuProfiler.flameChart.updateForContainerResize();
     });
     observer.observe(element);
