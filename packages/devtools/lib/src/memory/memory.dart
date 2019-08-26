@@ -127,9 +127,10 @@ class MemoryScreen extends Screen with SetStateMixin {
   ProgressElement progressElement;
 
   // TODO(terry): Remove experiment after binary snapshot is added.
-  bool get isMemoryExperiment => _memoryExperiment;
+  bool get isMemoryExperiment =>
+      memoryController.settings.experiment && !_isProfileBuild;
 
-  bool _memoryExperiment = false;
+  bool _isProfileBuild = false;
 
   // Handle shortcut keys
   bool memoryShortcuts(bool ctrlKey, bool shiftKey, bool altKey, String key) {
@@ -142,6 +143,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   void entering() {
+    _checkBuildState();
     _updateListeningState();
   }
 
@@ -151,6 +153,10 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   void updatePauseButton({@required bool disabled}) {
     pauseButton.disabled = disabled;
+  }
+
+  void _checkBuildState() async {
+    _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
   }
 
   @override
@@ -186,9 +192,11 @@ class MemoryScreen extends Screen with SetStateMixin {
         _loadAllocationProfile,
         () {
           // TODO(terry): Disable when real binary snapshot is exposed.
+          enableExperiment();
+
           // Shift key pressed while clicking on Snapshot button enables live
-          // memory inspection.
-          _loadAllocationProfile(memoryExperiment: true);
+          // memory inspection will not work in profile build.
+          _loadAllocationProfile();
         },
       )
       ..disabled = true;
@@ -306,7 +314,10 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   TextField classNameFilter;
+
   List<CoreElement> privateClasses;
+
+  List<CoreElement> experimentCheckbox;
 
   /// Create the settings dialog.
   void createSettingsDialog() {
@@ -342,7 +353,7 @@ class MemoryScreen extends Screen with SetStateMixin {
                   ]
                     ..addAll(privateClasses = createCheckBox(
                       'Hide Private Classes ',
-                      false,
+                      memoryController.settings.hidePrivateClasses,
                       _liveUpdateFilters,
                     ))
                     ..addAll([
@@ -352,7 +363,10 @@ class MemoryScreen extends Screen with SetStateMixin {
                     ])),
                 div(c: 'setttings-options-2')
                   ..add([
-                    createCheckBox('Navigation Experiment '),
+                    experimentCheckbox = createCheckBox(
+                      'Navigation Experiment ',
+                      memoryController.settings.experiment,
+                    ),
                     br(), // Settings Option 2 available
                     br(), // Settings Option 3 available
                     br(), // Settings Option 4 available
@@ -372,6 +386,15 @@ class MemoryScreen extends Screen with SetStateMixin {
               ]),
           ]),
       ]);
+
+    // The memory experiement is not available in profile mode.
+    experimentCheckbox.first.disabled = _isProfileBuild;
+  }
+
+  void enableExperiment() {
+    memoryController.settings.experiment = true;
+    final html.CheckboxInputElement cb = experimentCheckbox.first.element;
+    cb.checked = true;
   }
 
   void _displaySettingsDialog() {
@@ -437,6 +460,15 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryController.libraryCollection.computeDisplayClasses();
 
     librariesUi.element.children.clear();
+
+    // Is private class names _NNNN hidden
+    final html.CheckboxInputElement hidePrivate = privateClasses.first.element;
+    memoryController.settings.hidePrivateClasses = hidePrivate.checked;
+
+    // Record is memory experiment is on.
+    final html.CheckboxInputElement checkbox = experimentCheckbox.first.element;
+    memoryController.settings.experiment = checkbox.checked;
+
     _closeSettingsDialog();
   }
 
@@ -444,7 +476,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     // Undo the live updates user wants to cancel the what ifs.
     memoryController.libraryCollection
         .computeDisplayClasses(memoryController.libraryFilters);
-    _displayClassesSnapshot(classPattern: memoryController.settings.pattern);
+    _displayClassesSnapshot(
+      classPattern: memoryController.settings.pattern,
+      hidePrivates: memoryController.settings.hidePrivateClasses,
+    );
 
     librariesUi.element.children.clear();
     _closeSettingsDialog();
@@ -804,10 +839,13 @@ class MemoryScreen extends Screen with SetStateMixin {
     final Spinner spinner = tableStack.first.element.add(Spinner.centered());
 
     try {
-      final List<ClassHeapDetailStats> heapStats =
-          await memoryController.resetAllocationProfile();
-      tableStack.first.model.setRows(heapStats);
-      _updateStatus(heapStats);
+      originalHeapStats = await memoryController.resetAllocationProfile();
+
+      _displayClassesSnapshot(
+        classPattern: memoryController.settings.pattern,
+        hidePrivates: memoryController.settings.hidePrivateClasses,
+      );
+
       spinner.remove();
     } catch (e) {
       framework.toast('Reset failed ${e.toString()}', title: 'Error');
@@ -848,13 +886,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  Future<void> _loadAllocationProfile({
-    bool reset = false,
-    bool memoryExperiment = false,
-  }) async {
+  Future<void> _loadAllocationProfile() async {
     ga.select(ga.memory, ga.snapshot);
-
-    _memoryExperiment = memoryExperiment;
 
     memoryChart.plotSnapshot();
 
@@ -870,7 +903,10 @@ class MemoryScreen extends Screen with SetStateMixin {
 
       spinner.remove();
 
-      _displayClassesSnapshot(classPattern: memoryController.settings.pattern);
+      _displayClassesSnapshot(
+        classPattern: memoryController.settings.pattern,
+        hidePrivates: memoryController.settings.hidePrivateClasses,
+      );
     } catch (e) {
       framework.toast('Snapshot failed ${e.toString()}', title: 'Error');
     } finally {
@@ -1076,7 +1112,7 @@ class MemoryScreen extends Screen with SetStateMixin {
         final inboundNode =
             InboundsTreeNode(owningAllocator, referenceName, instanceHashCode);
         instanceNode.addChild(inboundNode);
-        if (_memoryExperiment) inboundNode.addChild(InboundsTreeNode.empty());
+        if (isMemoryExperiment) inboundNode.addChild(InboundsTreeNode.empty());
       }
     });
 
