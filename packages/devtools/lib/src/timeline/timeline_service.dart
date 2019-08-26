@@ -62,7 +62,6 @@ class TimelineService {
         .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     await allowedError(serviceManager.service.clearVMTimeline());
 
-    // todo: handle UnimplementedError
     final Timeline timeline = await serviceManager.service.getVMTimeline();
     final List<dynamic> list = timeline.json['traceEvents'];
     final List<Map<String, dynamic>> traceEvents =
