@@ -67,13 +67,23 @@ git checkout master
 
 git pull upstream master
 ```
+
 ### Prep to publish
 ```shell
 ./tool/publish.sh
 ``` 
+
 ### Publish
-- #### Verify the package works (DevTools)
-- #### Publish the package
+#### Verify the package works (DevTools)
+
+- cd packages/devtools
+- dart bin/devtools.dart
+- open the page in a browser
+- flutter run an application
+- connect to the running app from devtools, and verify that the pages
+  generally work, and there are no exceptions in the chrome devtools log
+
+#### Publish the package
 ```shell
 cd packages/devtools
 
@@ -81,11 +91,13 @@ pub publish
 ...
 Looks great! Are you ready to upload your package (y/n)? y
 ```
-- #### Revert the change to .gitignore
+
+#### Revert the change to .gitignore
 ```shell
 git checkout .gitignore
 ```
-- #### Create the tag for this release and push to the remote repository.
+
+#### Create the tag for this release and push to the remote repository.
 ```shell
 git tag -a v0.0.15 -m "DevTools 0.0.15"
 

@@ -705,7 +705,9 @@ class LogWhenColumn extends ColumnData<LogData> {
 }
 
 class LogMessageColumn extends ColumnData<LogData> {
-  LogMessageColumn() : super.wide('Message');
+  LogMessageColumn(this._logMessageToHtml) : super.wide('Message');
+
+  final String Function(String) _logMessageToHtml;
 
   @override
   String get cssClass => 'pre-wrap monospace';
@@ -726,7 +728,7 @@ class LogMessageColumn extends ColumnData<LogData> {
     if (log.summaryHtml != null) {
       return log.summaryHtml;
     } else {
-      return escape(log.summary ?? log.details);
+      return _logMessageToHtml(log.summary ?? log.details);
     }
   }
 }

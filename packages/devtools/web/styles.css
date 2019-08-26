@@ -735,6 +735,84 @@ div.tabnav {
     color: var(--header-color);
 }
 
+.settings-box {
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--border-color);
+}
+
+.settings-title {
+    margin-bottom: 10px;
+    padding: 5px 5px;
+}
+
+.settings-area {
+    padding-left: 5px;
+    padding-bottom: 10px;
+}
+
+.settings-left {
+    margin-left: 2em;
+}
+
+.settings-libraries {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100px;
+    width: 300px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--border-color);
+}
+
+.settings-libraries-checkbox {
+    vertical-align: text-bottom;
+    margin: 3px 8px 5px 8px;
+}
+
+.settings-libraries-label {
+    vertical-align: text-bottom;
+    margin-top: 2px;
+    font-weight: normal;
+}
+
+.filter-pattern-area {
+    margin-bottom: 1em;
+}
+
+.filter-class {
+    vertical-align: middle;
+    height: 2.1em;
+    background-color: var(--default-background);
+    color: var(--default-color);
+    width: 20em; /* Matches width of popup-view, see below. */
+}
+
+.setttings-options {
+    margin-left: 2em;
+    font-size: 10pt;
+}
+
+.setttings-options-2 {
+    border-left: solid lightgray 1px;
+    padding-left: 2em;
+    margin-left: 2em;
+    font-size: 10pt;
+}
+
+.settings-checkbox-option {
+    vertical-align: text-bottom;
+}
+
+.settings-checkbox-label-option {
+    margin-left: .5em;
+    font-weight: normal;
+}
+
+.settings-buttons {
+    margin-top: auto;
+}
+
 div.tabnav-tab {
     cursor: pointer;
 }

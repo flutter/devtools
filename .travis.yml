@@ -32,6 +32,10 @@ matrix:
   include:
     - dart: "dev/raw/latest"
       env: BOT=packages
+  # Skip windows bots until we find a way to make the windows tests less flaky.
+  # https://github.com/flutter/devtools/issues/963
+  allow_failures:
+    - os: windows
 env:
   - BOT=main
   - BOT=test_ddc

@@ -44,7 +44,7 @@ class InboundsTree extends InstanceRefsView {
         if (spinner != null) return;
 
         if (inboundNode.children.length == 1 &&
-            inboundNode.children[0].isEmpty) {
+            inboundNode.children.first.isEmpty) {
           inboundNode.children.removeLast();
           // Make sure it's a known class (not abstract).
           if (!inboundNode.isEmpty) {
@@ -268,7 +268,7 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
   ]) {
     _instance = theInstance;
     instanceHashCode = hashCode;
-    _name = _name.split(' ')[0]; // Throw away instance objectRef name.
+    _name = _name.split(' ').first; // Throw away instance objectRef name.
 
     _name = (isNew && !isInboundEntry)
         ? _instance.objectRef
@@ -276,7 +276,7 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
   }
 
   void working(int index, int total) {
-    _name = _name.split(' ')[0]; // Throw away instance objectRef name.
+    _name = _name.split(' ').first; // Throw away instance objectRef name.
     _name = '$name ($index of $total)';
   }
 

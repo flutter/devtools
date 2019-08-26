@@ -56,6 +56,9 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   final MemoryController memoryController = MemoryController();
 
+  CoreElement settings;
+  CoreElement librariesUi;
+
   StatusItem classCountStatus;
 
   StatusItem objectCountStatus;
@@ -79,7 +82,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   PButton resetAccumulatorsButton;
 
-  PButton filterLibrariesButton;
+  PButton settingsButton;
 
   PButton gcNowButton;
 
@@ -88,6 +91,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   MemoryChart memoryChart;
 
   CoreElement tableContainer;
+
+  List<ClassHeapDetailStats> originalHeapStats;
 
   InboundsTree _inboundTree;
 
@@ -193,10 +198,6 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..click(_resetAllocatorCounts)
       ..disabled = true;
-    filterLibrariesButton =
-        PButton.icon('Filter', FlutterIcons.filter, title: 'Filter')
-          ..small()
-          ..disabled = true;
     heapAutoCompletePopup = PopupAutoCompleteView(
       heapPopupList,
       screenDiv,
@@ -208,6 +209,10 @@ class MemoryScreen extends Screen with SetStateMixin {
           ..small()
           ..click(_gcNow)
           ..disabled = true;
+    settingsButton = PButton.icon('', FlutterIcons.settings, title: 'Settings')
+      ..small()
+      ..click(_displaySettingsDialog)
+      ..disabled = true;
 
     resumeButton.click(() {
       ga.select(ga.memory, ga.resume);
@@ -239,7 +244,10 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     history = div(c: 'history-navigation section', a: 'hidden');
 
+    createSettingsDialog();
+
     screenDiv.add(<CoreElement>[
+      settings..element.style.display = 'none',
       div(c: 'section')
         ..add(<CoreElement>[
           form()
@@ -261,8 +269,8 @@ class MemoryScreen extends Screen with SetStateMixin {
                   vmMemorySearchButton,
                   vmMemorySnapshotButton,
                   resetAccumulatorsButton,
-                  filterLibrariesButton,
                   gcNowButton,
+                  settingsButton,
                 ]),
             ]),
         ]),
@@ -285,7 +293,215 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     _updateStatus(null);
 
+    vmMemorySnapshotButton.disabled = true;
+
+    memoryController.computeLibraries().then((_) {
+      // Enable snapshot/setting buttons, all libraries and classses have been
+      // processed.
+      vmMemorySnapshotButton.disabled = false;
+      settingsButton.disabled = false;
+    });
+
     return screenDiv;
+  }
+
+  TextField classNameFilter;
+  List<CoreElement> privateClasses;
+
+  /// Create the settings dialog.
+  void createSettingsDialog() {
+    settings = div(c: 'section settings-box')
+      ..add(<CoreElement>[
+        h2(text: 'Settings', c: 'settings-title'),
+        div(c: 'settings-area')
+          ..add(<CoreElement>[
+            form()
+              ..layoutHorizontal()
+              ..clazz('align-items-center')
+              ..add(<CoreElement>[
+                div(
+                  text: 'Display Snapshot Classes from Library',
+                  c: 'collapsible-885 flex-no-wrap settings-left',
+                )..add([
+                    librariesUi = div(c: 'settings-libraries'),
+                  ]),
+                div(c: 'setttings-options')
+                  ..add([
+                    div(c: 'filter-pattern-area')
+                      ..add(<CoreElement>[
+                        span(
+                          text: 'Class Filter: ',
+                          c: 'settings-class-pattern',
+                        ),
+                        classNameFilter = TextField(c: 'filter-class')
+                          ..value = memoryController.settings.pattern
+                          ..changed(_classPatternChanged)
+                          ..setAttribute('placeholder', 'Any'),
+                        br(),
+                      ]),
+                  ]
+                    ..addAll(privateClasses = createCheckBox(
+                      'Hide Private Classes ',
+                      false,
+                      _liveUpdateFilters,
+                    ))
+                    ..addAll([
+                      br(), // Filter Option 3 available
+                      br(), // Filter Option 4 available
+                      br(), // Filter Option 5 available
+                    ])),
+                div(c: 'setttings-options-2')
+                  ..add([
+                    createCheckBox('Navigation Experiment '),
+                    br(), // Settings Option 2 available
+                    br(), // Settings Option 3 available
+                    br(), // Settings Option 4 available
+                    br(), // Settings Option 5 available
+                    br(), // Settings Option 6 available
+                  ]),
+                div()..flex(),
+                div(
+                  c: 'settings-buttons btn-group collapsible-785 '
+                      'nowrap margin-left text-right',
+                )
+                  ..flex()
+                  ..add(<CoreElement>[
+                    PButton('Apply')..click(_applySettings),
+                    PButton('Cancel')..click(_cancelSettings),
+                  ]),
+              ]),
+          ]),
+      ]);
+  }
+
+  void _displaySettingsDialog() {
+    // Gray Filter button while dialog is up - only apply/cancel can close.
+    settingsButton.disabled = true;
+
+    librariesUi.add(createLibrariesUi());
+    settings.element.style.display = 'block';
+
+    // Set focus to filter pattern field.
+    classNameFilter.element.focus();
+  }
+
+  void _classPatternChanged(String value) {
+    _liveUpdateFilters();
+  }
+
+  // Update the classes table (if snapshot) live.
+  void _liveUpdateFilters() {
+    final pattern = classNameFilter.value != null ? classNameFilter.value : '';
+
+    final html.InputElement checkbox = privateClasses.first.element;
+
+    final tempFilters = FilteredLibraries()..clearFilters();
+
+    final librariesChecked = librariesUi.element.children;
+    for (final element in librariesChecked) {
+      if (element.tagName == 'INPUT' &&
+          element.attributes['type'] == 'checkbox') {
+        final html.InputElement checkbox = element;
+        if (!checkbox.checked) {
+          tempFilters.addFilter(checkbox.value);
+        }
+      }
+    }
+
+    // Immediately re-compute classes to update the current classes snapshot.
+    memoryController.libraryCollection.computeDisplayClasses(tempFilters);
+
+    _displayClassesSnapshot(
+      classPattern: pattern,
+      hidePrivates: checkbox.checked,
+    );
+  }
+
+  void _applySettings() {
+    // Recompute the libraries that are filtered.
+    memoryController.libraryFilters.clearFilters();
+
+    final librariesChecked = librariesUi.element.children;
+    for (final element in librariesChecked) {
+      if (element.tagName == 'INPUT' &&
+          element.attributes['type'] == 'checkbox') {
+        final html.InputElement checkbox = element;
+        if (!checkbox.checked) {
+          memoryController.libraryFilters.addFilter(checkbox.value);
+        }
+      }
+    }
+
+    // Only update displayClasses no need to recompute the snapshot display.
+    // This was already done with live updating (as checkboxes were clicked).
+    memoryController.libraryCollection.computeDisplayClasses();
+
+    librariesUi.element.children.clear();
+    _closeSettingsDialog();
+  }
+
+  void _cancelSettings() {
+    // Undo the live updates user wants to cancel the what ifs.
+    memoryController.libraryCollection
+        .computeDisplayClasses(memoryController.libraryFilters);
+    _displayClassesSnapshot(classPattern: memoryController.settings.pattern);
+
+    librariesUi.element.children.clear();
+    _closeSettingsDialog();
+  }
+
+  void _closeSettingsDialog() {
+    settings.element.style.display = 'none';
+
+    settingsButton.disabled = false;
+  }
+
+  List<CoreElement> createCheckBox(String name,
+          [bool checked = false, void handle()]) =>
+      [
+        checkbox(
+          text: name,
+          c: 'settings-checkbox-option',
+          a: checked ? 'checked' : null,
+        )
+          ..setAttribute('name', name)
+          ..setAttribute('value', name)
+          ..click(handle),
+        label(text: name, c: 'settings-checkbox-label-option')
+          ..setAttribute('for', name),
+        br()
+      ];
+
+  List<CoreElement> createLibraryEntry(String name, [bool checked = true]) => [
+        checkbox(
+            text: name,
+            c: 'settings-libraries-checkbox',
+            a: checked ? 'checked' : null)
+          ..setAttribute('id', name)
+          ..setAttribute('value', name)
+          ..click(_liveUpdateFilters),
+        label(text: name, c: 'settings-libraries-label')
+          ..setAttribute('for', name),
+        br()
+      ];
+
+  /// Create all library entries in the list box.
+  List<CoreElement> createLibrariesUi() {
+    final List<CoreElement> libraryUiItems = [];
+
+    final sortedLibraries = memoryController.sortLibrariesByNormalizedNames();
+    String lastLibraryDisplayed = '';
+    for (var normalizedName in sortedLibraries) {
+      if (normalizedName != lastLibraryDisplayed) {
+        libraryUiItems.addAll(createLibraryEntry(
+            normalizedName,
+            !memoryController.libraryFilters
+                .isLibraryFiltered(normalizedName)));
+        lastLibraryDisplayed = normalizedName;
+      }
+    }
+
+    return libraryUiItems;
   }
 
   ClassHeapDetailStats findClass(String className) {
@@ -650,21 +866,86 @@ class MemoryScreen extends Screen with SetStateMixin {
     final Spinner spinner = tableStack.first.element.add(Spinner.centered());
 
     try {
-      final List<ClassHeapDetailStats> heapStats =
-          await memoryController.getAllocationProfile();
+      originalHeapStats = await memoryController.getAllocationProfile();
 
-      // Reset known snapshot classes, just changed.
-      _knownSnapshotClasses.clear();
-
-      tableStack.first.model.setRows(heapStats);
-      _updateStatus(heapStats);
       spinner.remove();
+
+      _displayClassesSnapshot(classPattern: memoryController.settings.pattern);
     } catch (e) {
       framework.toast('Snapshot failed ${e.toString()}', title: 'Error');
     } finally {
       vmMemorySnapshotButton.disabled = false;
       vmMemorySearchButton.disabled = false;
     }
+  }
+
+  static const String _wildcard = '*';
+
+  /// Does the class name match a classPattern, where classPattern is:
+  ///    ''        - matches everything.
+  ///    '*'       - matches everything.
+  ///    'NNN*'    - matches a class name starting with NNN.
+  ///    '*NNN'    - matches a class name ending with NNN.
+  ///    'NNN*MMM' - matches a class name starting with NNN and ending with MMM.
+  ///    'NNN'     - matches a class name starting with NNN.
+  ///
+  bool _matchPattern(String classPattern, String className) {
+    classPattern = classPattern.trim();
+    if (classPattern.isEmpty) return true; // Matches everything.
+
+    // If no _wildcard in the pattern then default to prefix matching.
+    if (!classPattern.contains(_wildcard))
+      return className.startsWith(classPattern);
+
+    String pattern;
+    if (classPattern.startsWith(_wildcard)) {
+      pattern = classPattern.substring(1);
+      return className.endsWith(pattern);
+    } else if (classPattern.endsWith(_wildcard)) {
+      pattern = classPattern.substring(0, classPattern.length - 1);
+      return className.startsWith(pattern);
+    }
+
+    // Wildcard is in the middle of pattern. Match start pattern (left of
+    // wildcard) and end pattern (right of wildcard).
+    final index = classPattern.indexOf(_wildcard);
+    assert(index > 0 && index < classPattern.length);
+
+    final startMatch = classPattern.substring(0, index);
+    final endMatch = classPattern.substring(index + 1);
+    return className.startsWith(startMatch) && className.endsWith(endMatch);
+  }
+
+  // Defaults to a classPattern of match everything and defaults to show class
+  // names that are private (begins with a underscore).
+  void _displayClassesSnapshot({
+    String classPattern = '',
+    bool hidePrivates = false,
+  }) {
+    if (originalHeapStats == null) return;
+
+    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
+
+    final List<ClassHeapDetailStats> heapStats = [];
+
+    for (var heapEntry in originalHeapStats) {
+      if (hidePrivates && heapEntry.classRef.name.startsWith('_')) continue;
+      if (_matchPattern(classPattern, heapEntry.classRef.name)) {
+        // Only display classes from libraries not being filtered.
+        if (memoryController.libraryCollection
+            .isDisplayClass(heapEntry.classRef.id)) {
+          heapStats.add(heapEntry);
+        }
+      }
+    }
+
+    // Reset known snapshot classes, just changed.
+    _knownSnapshotClasses.clear();
+
+    tableStack.first.model.setRows(heapStats);
+
+    _updateStatus(heapStats);
+    spinner.remove();
   }
 
   Future<void> _gcNow() async {
@@ -707,7 +988,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     vmMemorySnapshotButton.disabled = true;
     resetAccumulatorsButton.disabled = true;
-    filterLibrariesButton.disabled = true;
+    settingsButton.disabled = true;
     gcNowButton.disabled = true;
 
     memoryChart.disabled = true;

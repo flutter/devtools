@@ -356,10 +356,11 @@ class MemoryPlotly {
 
     if (liveUpdate) {
       // Display 2 minutes of collected data in the chart, all data is accessible.
-      final int startTime = DateTime.fromMillisecondsSinceEpoch(timestamps[0])
-          .subtract(const Duration(minutes: 2))
-          .millisecondsSinceEpoch;
-      rangeSliderToLast(startTime, timestamps[0]);
+      final int startTime =
+          DateTime.fromMillisecondsSinceEpoch(timestamps.first)
+              .subtract(const Duration(minutes: 2))
+              .millisecondsSinceEpoch;
+      rangeSliderToLast(startTime, timestamps.first);
     }
   }
 
