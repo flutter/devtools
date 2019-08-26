@@ -34,15 +34,15 @@ class ConnectedApp {
       _isDartWebApp ??= await _libraryUriAvailable(dartHtmlLibraryUri);
   bool _isDartWebApp;
 
-  bool get isDartCliApp => serviceManager.vm.name != 'ChromeDebugProxy';
+  bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
 
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
 
     // Flutter web apps and CLI apps do not have profile and non-profile builds.
     // If this changes in the future (flutter web), we can modify this check.
-    if (isDartCliApp) return false;
     if (!await isDartWebApp) return false;
+    if (!await isFlutterApp) return false;
 
     try {
       final Isolate isolate = await serviceManager.service

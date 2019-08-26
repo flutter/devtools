@@ -7,7 +7,6 @@ import 'dart:html' as html;
 
 import 'package:vm_service/vm_service.dart';
 
-import 'connected_app.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
@@ -154,15 +153,15 @@ class PerfToolFramework extends Framework {
     //   Flutter web apps, using package:flutter_web
     //   Flutter web apps, using package:flutter (the unforked code)
 
-    final ConnectedApp app = serviceManager.connectedApp;
+    final app = serviceManager.connectedApp;
 
-    final bool isDartCliApp = app.isDartCliApp;
-    final bool isDartWebApp = await app.isDartWebApp;
-    final bool isFlutterApp = await app.isFlutterApp;
-    final bool isFlutterVmApp = isFlutterApp && !isDartWebApp;
-    final bool isFlutterVmProfileBuild =
+    final isDartWebApp = await app.isDartWebApp;
+    final isFlutterApp = await app.isFlutterApp;
+    final isDartCliApp = app.isRunningOnDartVM && !isFlutterApp;
+    final isFlutterVmApp = isFlutterApp && !isDartWebApp;
+    final isFlutterVmProfileBuild =
         isFlutterVmApp && (await app.isProfileBuild);
-    final bool isFlutterWebApp = isFlutterApp && isDartWebApp;
+    final isFlutterWebApp = isFlutterApp && isDartWebApp;
 
     const notRunningFlutterMsg =
         'This screen is disabled because you are not running a Flutter '
