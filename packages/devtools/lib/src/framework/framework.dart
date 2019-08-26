@@ -311,13 +311,14 @@ class Framework {
       final CoreElement screenContent = current.createContent(this);
       screenContent.attribute('full');
       mainElement.add(screenContent);
+      current.onContentAttached();
 
       _screenContents[current] = screenContent;
 
       screenContent.element.onResize.listen((e) {
         // Need to stop event listeners, within the screen from getting the
         // resize event. This doesn't stop event listeners higher up in the tree
-        // from receiving the resize event.  Plotly can chart get's resized even
+        // from receiving the resize event. Plotly can chart get's resized even
         // though its in a div with a 'display:none' and will resize improperly.
         e.stopImmediatePropagation(); // Don't bubble up the resize event.
 
@@ -333,7 +334,7 @@ class Framework {
     current.entering();
     pageStatus.addAll(current.statusItems);
     messageManager.showMessagesForScreen(current.id);
-    auxiliaryStatus.defaultStatus = screen.helpStatus;
+    auxiliaryStatus.defaultStatus = screen._helpStatus;
 
     updatePage();
   }
@@ -496,21 +497,27 @@ abstract class Screen {
     this.disabledTooltip = 'This screen is not available',
     bool disabled = false,
     this.shortcutCallback,
-  })  : helpStatus = createLinkStatusItem(
-          span()
-            ..add(span(text: '$name', c: 'optional-700'))
-            ..add(span(text: ' Docs')),
-          href: 'https://flutter.dev/docs/development/tools/devtools/$id',
-          title: 'Documentation on using the $name page',
-        ),
-        disabled = allTabsEnabledByQuery ? false : disabled;
+    this.showTab = true,
+  }) : disabled = allTabsEnabledByQuery ? false : disabled {
+    if (name.isNotEmpty) {
+      _helpStatus = createLinkStatusItem(
+        span()
+          ..add(span(text: '$name', c: 'optional-700'))
+          ..add(span(text: ' Docs')),
+        href: 'https://flutter.dev/docs/development/tools/devtools/$id',
+        title: 'Documentation on using the $name page',
+      );
+    }
+  }
 
   final String name;
   final String id;
   final String iconClass;
-  final StatusItem helpStatus;
   final String disabledTooltip;
   final bool disabled;
+  final bool showTab;
+
+  StatusItem _helpStatus;
 
   // Set to handle short-cut keys for a particular screen.
   ShortCut shortcutCallback;
@@ -551,6 +558,13 @@ abstract class Screen {
 
   @override
   String toString() => 'Screen($id)';
+
+  /// Callback invoked after the content for the screen has been added to the
+  /// DOM.
+  ///
+  /// Certain libraries such as package:split behave badly if invoked on
+  /// elements that are not yet attached to the DOM.
+  void onContentAttached() {}
 }
 
 class SetStateMixin {

@@ -26,16 +26,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dart DevTools</title>
-    <link rel="icon" sizes="64x64" href="favicon.png">
+    <link href="favicon.png" rel="icon" sizes="64x64">
 
-    <link rel="stylesheet" href="packages/octicons_css/octicons_4.4.0.css">
-    <link rel="stylesheet" href="packages/polymer_css/flex.css">
-    <link rel="stylesheet" href="packages/devtools/src/debugger/debugger.css">
-    <link rel="stylesheet" href="packages/devtools/src/inspector/inspector.css">
-    <link rel="stylesheet" href="packages/devtools/src/logging/logging.css">
-    <link rel="stylesheet" href="packages/devtools/src/performance/performance.css">
-    <link rel="stylesheet" href="packages/devtools/src/profiler/profiler.css">
-    <link rel="stylesheet" href="packages/devtools/src/timeline/timeline.css">
+    <link href="packages/octicons_css/octicons_4.4.0.css" rel="stylesheet">
+    <link href="packages/polymer_css/flex.css" rel="stylesheet">
+    <link href="packages/devtools/src/debugger/debugger.css" rel="stylesheet">
+    <link href="packages/devtools/src/inspector/inspector.css" rel="stylesheet">
+    <link href="packages/devtools/src/logging/logging.css" rel="stylesheet">
+    <link href="packages/devtools/src/performance/performance.css" rel="stylesheet">
+    <link href="packages/devtools/src/profiler/profiler.css" rel="stylesheet">
+    <link href="packages/devtools/src/settings/settings.css" rel="stylesheet">
+    <link href="packages/devtools/src/timeline/timeline.css" rel="stylesheet">
 
     <script type="text/javascript">
         function supportsES6Classes() {
@@ -67,11 +68,12 @@
         })();
     </script>
 
-    <script src="packages/devtools/src/ui/plotly.js"></script>
+    <script src="packages/ansi_up/ansi_up.js"></script>
 
     <link href="packages/codemirror/codemirror.css" rel="stylesheet">
     <script src="packages/codemirror/codemirror.js"></script>
 
+    <script src="packages/devtools/src/ui/plotly.js"></script>
     <script type="text/javascript" src="packages/plotly_js/plotly.min.js"></script>
 
     <script type="text/javascript" src="packages/split/split.min.js"></script>
@@ -100,6 +102,9 @@
 
     <div class="masthead-nav">
         <span horiz-padding class="masthead-item">•</span>
+        <div id="icon-nav">
+            <a disabled><span class="octicon octicon-gear masthead-item active action-button"></span></a>
+        </div>
         <div class="masthead-item action-button active" id="send-feedback-button"
             title="Send Feedback">
             <span class="octicon octicon-comment"></span>

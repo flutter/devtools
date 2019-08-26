@@ -326,6 +326,14 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<Success> requestHeapSnapshot(String isolateId) {
+    return _trackFuture(
+      'requestHeapSnapshot',
+      _vmService.requestHeapSnapshot(isolateId),
+    );
+  }
+
+  @override
   Future<Success> kill(String isolateId) {
     return _trackFuture('kill', _vmService.kill(isolateId));
   }
@@ -368,6 +376,9 @@ class VmServiceWrapper implements VmService {
 
   @override
   Stream<Event> get onVMEvent => _vmService.onVMEvent;
+
+  @override
+  Stream<Event> get onHeapSnapshotEvent => _vmService.onHeapSnapshotEvent;
 
   @override
   Future<Success> pause(String isolateId) {

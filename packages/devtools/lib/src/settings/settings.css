@@ -1,0 +1,65 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+.settings-container {
+    width: 100%;
+    max-width: 700px;
+    align-self: center;
+    overflow: scroll;
+}
+
+.sdk-version-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.sdk-version-container > h2 {
+    border: none;
+}
+
+.sdk-version-container > span {
+    opacity: 0.75;
+    font-size: 14px;
+}
+
+.flag-list-container {
+    padding: 8px 0;
+}
+
+.flag-details-container {
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flag-details-descriptions-container {
+    flex: 1 1 auto;
+}
+
+.flag-details-values-container {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.flag-name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.flag-description {
+    opacity: 0.75
+}
+
+.flag-value {
+    color: var(--link-color);
+}
+
+.flag-modified {
+    color: var(--link-color);
+    opacity: 0.5;
+    font-size: 12px;
+}

@@ -225,17 +225,14 @@ class TimelineScreen extends Screen {
         ]),
     ]);
 
-    _initListenersAndObservers();
-
     maybeAddDebugMessage(framework, timelineScreenId);
 
     return screenDiv;
   }
 
-  void _initListenersAndObservers() {
+  @override
+  void onContentAttached() {
     timelineController.onSelectedFrame.listen((_) {
-      _configureSplitter();
-
       flameChartContainer
         ..clear()
         ..hidden(false);
@@ -259,6 +256,8 @@ class TimelineScreen extends Screen {
         timelineController.selectTimelineEvent(node.data);
       });
       flameChartContainer.add(flameChartCanvas.element);
+
+      _configureSplitter();
     });
 
     timelineController.onLoadOfflineData.listen((_) {
@@ -307,12 +306,15 @@ class TimelineScreen extends Screen {
     // Configure the flame chart / event details splitter if we haven't
     // already.
     if (!splitterConfigured) {
+      // TODO(jacobr): we need to tweak this layout so there is more room to
+      // display this UI. On typical devices, the space available is very
+      // limited making the UI harder to use than it would be otherwise.
       splitter = split.flexSplit(
         [flameChartContainer.element, eventDetails.element],
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: [75, 25],
-        minSize: [50, 160],
+        minSize: [50, 50],
       );
       splitterConfigured = true;
     }

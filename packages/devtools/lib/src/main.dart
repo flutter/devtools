@@ -17,6 +17,7 @@ import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance_screen.dart';
 import 'service_registrations.dart' as registrations;
+import 'settings/settings_screen.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
@@ -35,17 +36,23 @@ const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 class PerfToolFramework extends Framework {
   PerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
+
     initGlobalUI();
     initTestingModel();
   }
 
   void _gAReportExceptions(html.Event e) {
     final html.ErrorEvent errorEvent = e as html.ErrorEvent;
-    ga.error(
-        '${errorEvent.message}\n'
+
+    final message = '${errorEvent.message}\n'
         '${errorEvent.filename}@${errorEvent.lineno}:${errorEvent.colno}\n'
-        '${errorEvent.error}',
-        true);
+        '${errorEvent.error}';
+
+    // Report exceptions with DevTools to GA.
+    ga.error(message, true);
+
+    // Also write them to the console to aid debugging.
+    print(message);
   }
 
   StatusItem isolateSelectStatus;
@@ -71,11 +78,11 @@ class PerfToolFramework extends Framework {
     await addScreens();
     screensReady.complete();
 
-    final CoreElement mainNav = CoreElement.from(queryId('main-nav'));
-    mainNav.clear();
+    final mainNav = CoreElement.from(queryId('main-nav'))..clear();
+    final iconNav = CoreElement.from(queryId('icon-nav'))..clear();
 
     for (Screen screen in screens) {
-      final CoreElement link = CoreElement('a')
+      final link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
           span(text: ' ${screen.name}', c: 'optional-1060')
@@ -96,7 +103,7 @@ class PerfToolFramework extends Framework {
             navigateTo(screen.id);
           });
       }
-      mainNav.add(link);
+      (screen.showTab ? mainNav : iconNav).add(link);
     }
 
     isolateSelectStatus = StatusItem();
@@ -194,6 +201,7 @@ class PerfToolFramework extends Framework {
       disabledTooltip: getDebuggerDisabledTooltip(),
     ));
     addScreen(LoggingScreen());
+    addScreen(SettingsScreen());
   }
 
   IsolateRef get currentIsolate =>
@@ -244,7 +252,7 @@ class PerfToolFramework extends Framework {
     // is initialed, and react to those events in the UI. Going forward, we'll
     // want to instead have flutter_tools fire hot reload events, and react to
     // them in the UI. That will mean that our UI will update appropriately
-    // even when other clients (the CLI, and IDE) initial the hot reload.
+    // even when other clients (the CLI, and IDE) initiate the hot reload.
 
     final ActionButton reloadAction = ActionButton(
       _reloadActionId,

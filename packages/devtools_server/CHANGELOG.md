@@ -1,3 +1,7 @@
+## 0.1.6
+
+- Rev to using the latest version of `package:vm_service` (1.1.1).
+
 ## 0.1.4
 - The `launchDevTools` service will now register with VMs using public APIs when available, falling back to private APIs otherwise.
 

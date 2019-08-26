@@ -2,7 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The DevTools application version.
-// Note: when updating this, please update the corresponding version in the
-// pubspec.
-const String version = '0.1.6-dev.3';
+export 'allowed_error_default.dart'
+    if (dart.library.html) 'allowed_error_html.dart';

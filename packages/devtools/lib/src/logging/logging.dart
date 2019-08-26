@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ansi_up/ansi_up.dart';
 import 'package:split/split.dart' as split;
 
 import '../framework/framework.dart';
@@ -19,6 +20,7 @@ import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
+
 import 'logging_controller.dart';
 
 class LoggingScreen extends Screen {
@@ -95,25 +97,19 @@ class LoggingScreen extends Screen {
     return screenDiv;
   }
 
-  bool _firstEnter = true;
+  @override
+  void onContentAttached() {
+    split.fixedSplitBidirectional(
+      [_loggingTable.element.element, logDetailsUI.element],
+      gutterSize: defaultSplitterWidth,
+      horizontalSizes: [60, 40],
+      verticalSizes: [70, 30],
+      minSize: [200, 200],
+    );
+  }
 
   @override
   void entering() {
-    if (_firstEnter) {
-      // configure the table / details splitter. Setting up this splitter works
-      // better once the UI is active in the DOM so we have to delay it until
-      // we get the entering event.
-      // TODO(devoncarew): Use fixedSplitBidirectional when we move to
-      // package:split v0.0.4.
-      split.flexSplit(
-        [_loggingTable.element.element, logDetailsUI.element],
-        gutterSize: defaultSplitterWidth,
-        horizontal: true,
-        sizes: [70, 30],
-        minSize: [200, 200],
-      );
-      _firstEnter = false;
-    }
     controller.entering();
   }
 
@@ -122,7 +118,7 @@ class LoggingScreen extends Screen {
     table.model
       ..addColumn(LogWhenColumn())
       ..addColumn(LogKindColumn())
-      ..addColumn(LogMessageColumn());
+      ..addColumn(LogMessageColumn(logMessageToHtml));
     return table;
   }
 }
@@ -148,7 +144,7 @@ class LogDetailsUI extends CoreElement {
     content.element.scrollTop = 0;
     message.clear();
     if (text != null) {
-      message.text = text;
+      message.setInnerHtml(logMessageToHtml(text));
     }
     if (tree != null) {
       message.add((tree as InspectorTreeWeb).element);
@@ -166,5 +162,25 @@ class LogDetailsUI extends CoreElement {
       },
       onSelectionChange: onSelectionChange,
     );
+  }
+}
+
+String logMessageToHtml(String message) {
+  return (div()..add(logMessageToElements(message))).element.innerHtml;
+}
+
+Iterable<CoreElement> logMessageToElements(String message) sync* {
+  // We build up the log message using the DOM rather than string concatenation
+  // to avoid XSS attacks.
+  for (var part in decodeAnsiColorEscapeCodes(message, AnsiUp())) {
+    final style = part.style;
+
+    final element = part.url != null
+        ? a(text: part.text, href: part.url, target: '_blank;')
+        : span(text: part.text);
+    if (style?.isNotEmpty ?? false) {
+      element.element.setAttribute('style', style);
+    }
+    yield element;
   }
 }
