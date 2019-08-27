@@ -40,7 +40,7 @@ class InboundsTree extends InstanceRefsView {
 
     final classNameColumn = ClassNameColumn(title)
       ..onNodeExpanded.listen((inboundNode) async {
-        // TODO(terry): Fix need to support simultaneous expansions.
+        // TODO(terry): Spinner used as sentry. Support simultaneous expansions.
         if (spinner != null) return;
 
         if (inboundNode.children.length == 1 &&
@@ -142,6 +142,9 @@ class InboundsTree extends InstanceRefsView {
         }
 
         referencesTable.model.expandNode(inboundNode);
+
+        // Select the instance too.
+        _memoryScreen.select(inboundNode);
       })
       ..onNodeCollapsed.listen(
           (inboundNode) => referencesTable.model.collapseNode(inboundNode));

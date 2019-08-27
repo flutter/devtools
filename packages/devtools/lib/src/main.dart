@@ -193,6 +193,7 @@ class PerfToolFramework extends Framework {
     addScreen(MemoryScreen(
       enabled: isFlutterVmApp || isDartCliApp,
       disabledTooltip: isFlutterWebApp ? notFlutterWebMsg : notDartWebMsg,
+      isProfileBuild: isFlutterVmProfileBuild,
     ));
     addScreen(PerformanceScreen(
       enabled: isFlutterVmApp || isDartCliApp,

@@ -33,7 +33,7 @@ import 'memory_service.dart';
 const memoryScreenId = 'memory';
 
 class MemoryScreen extends Screen with SetStateMixin {
-  MemoryScreen({bool enabled, String disabledTooltip})
+  MemoryScreen({bool enabled, String disabledTooltip, this.isProfileBuild})
       : super(
           name: 'Memory',
           id: memoryScreenId,
@@ -69,15 +69,18 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   PButton resumeButton;
 
-  // The autocomplete view manages the textfield and popup list.
+  /// The autocomplete view manages the textfield and popup list.
   CoreElement vmSearchField;
+
   PopupListView<String> heapPopupList;
+
   PopupAutoCompleteView heapAutoCompletePopup;
 
-  // Hover card shows where allocation occurred and references to instance.
+  /// Hover card shows where allocation occurred and references to instance.
   final CoreElement hoverPopup = div(c: 'allocation-hover-card');
 
   PButton vmMemorySearchButton;
+
   PButton vmMemorySnapshotButton;
 
   PButton resetAccumulatorsButton;
@@ -96,28 +99,28 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   InboundsTree _inboundTree;
 
-  // Memory navigation history. Driven from selecting items in the list of
-  // known classes, instances of a particular class and clicking on the class
-  // and field that allocated the instance (holds the reference).
-  // This list is displayed as a set of hyperlinks e.g.,
-  //
-  //     class1 (instance) > class2.extra > class3.mainHolder
-  //     -----------------   ------------   -----------------
-  //
-  // Clicking on one of the above links would select the class and instance that
-  // was associated with that hover navigation.  In this case:
-  //    [class3.mainHolder] - class3 called class2 constructor storing the
-  //                          reference to class2 in the field mainHolder.
-  //    [class2.extra]      - class2 called class1 constructor and stored the
-  //                          reference to class1 in field extra.
+  /// Memory navigation history. Driven from selecting items in the list of
+  /// known classes, instances of a particular class and clicking on the class
+  /// and field that allocated the instance (holds the reference).
+  /// This list is displayed as a set of hyperlinks e.g.,
+  ///
+  ///     class1 (instance) > class2.extra > class3.mainHolder
+  ///     -----------------   ------------   -----------------
+  ///
+  /// Clicking on one of the above links would select the class and instance that
+  /// was associated with that hover navigation.  In this case:
+  ///    [class3.mainHolder] - class3 called class2 constructor storing the
+  ///                          reference to class2 in the field mainHolder.
+  ///    [class2.extra]      - class2 called class1 constructor and stored the
+  ///                          reference to class1 in field extra.
   CoreElement history;
 
-  // This remembers how memory was navigated using the hover card to render the
-  // links in the history element (see above).
+  /// This remembers how memory was navigated using the hover card to render the
+  /// links in the history element (see above).
   NavigationPath memoryPath = NavigationPath();
 
-  // Signals if navigation is happening as a result of clicking in a hover card.
-  // If true, keep recording the navigation instead of resetting history.
+  /// Signals if navigation is happening as a result of clicking in a hover card.
+  /// If true, keep recording the navigation instead of resetting history.
   bool fromMemoryHover = false;
 
   MemoryDataView memoryDataView;
@@ -128,11 +131,11 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   // TODO(terry): Remove experiment after binary snapshot is added.
   bool get isMemoryExperiment =>
-      memoryController.settings.experiment && !_isProfileBuild;
+      memoryController.settings.experiment && !isProfileBuild;
 
-  bool _isProfileBuild = false;
+  final bool isProfileBuild;
 
-  // Handle shortcut keys
+  /// Handle shortcut keys
   bool memoryShortcuts(bool ctrlKey, bool shiftKey, bool altKey, String key) {
     if (ctrlKey && key == 'f') {
       _search();
@@ -143,7 +146,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   @override
   void entering() {
-    _checkBuildState();
     _updateListeningState();
   }
 
@@ -153,10 +155,6 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   void updatePauseButton({@required bool disabled}) {
     pauseButton.disabled = disabled;
-  }
-
-  void _checkBuildState() async {
-    _isProfileBuild = await serviceManager.connectedApp.isProfileBuild;
   }
 
   @override
@@ -388,7 +386,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       ]);
 
     // The memory experiement is not available in profile mode.
-    experimentCheckbox.first.disabled = _isProfileBuild;
+    experimentCheckbox.first.disabled = isProfileBuild;
   }
 
   void enableExperiment() {
@@ -412,7 +410,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     _liveUpdateFilters();
   }
 
-  // Update the classes table (if snapshot) live.
+  /// Update the classes table (if snapshot) live.
   void _liveUpdateFilters() {
     final pattern = classNameFilter.value != null ? classNameFilter.value : '';
 
@@ -461,11 +459,13 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     librariesUi.element.children.clear();
 
+    memoryController.settings.pattern = classNameFilter.value;
+
     // Is private class names _NNNN hidden
     final html.CheckboxInputElement hidePrivate = privateClasses.first.element;
     memoryController.settings.hidePrivateClasses = hidePrivate.checked;
 
-    // Record is memory experiment is on.
+    // Display experiment checkbox, if the memory experiment is enabled.
     final html.CheckboxInputElement checkbox = experimentCheckbox.first.element;
     memoryController.settings.experiment = checkbox.checked;
 
@@ -665,7 +665,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _selectInstanceByObjectRef(String objectRefToFind) {
-    removeInstanceView();
+    removeInstanceTableView();
 
     // There's an instances table up.
     final Table<Object> instanceTable = tableStack.last;
@@ -841,6 +841,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     try {
       originalHeapStats = await memoryController.resetAllocationProfile();
 
+      removeAllButClassesTableView();
+
       _displayClassesSnapshot(
         classPattern: memoryController.settings.pattern,
         hidePrivates: memoryController.settings.hidePrivateClasses,
@@ -895,6 +897,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     heapPopupList.setList([]);
 
     vmMemorySnapshotButton.disabled = true;
+
     tableStack.first.element.display = null;
     final Spinner spinner = tableStack.first.element.add(Spinner.centered());
 
@@ -902,6 +905,8 @@ class MemoryScreen extends Screen with SetStateMixin {
       originalHeapStats = await memoryController.getAllocationProfile();
 
       spinner.remove();
+
+      removeAllButClassesTableView();
 
       _displayClassesSnapshot(
         classPattern: memoryController.settings.pattern,
@@ -952,8 +957,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     return className.startsWith(startMatch) && className.endsWith(endMatch);
   }
 
-  // Defaults to a classPattern of match everything and defaults to show class
-  // names that are private (begins with a underscore).
+  /// Defaults to a classPattern of match everything and defaults to show class
+  /// names that are private (begins with a underscore).
   void _displayClassesSnapshot({
     String classPattern = '',
     bool hidePrivates = false,
@@ -1017,7 +1022,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  // VM Service has stopped (disconnected).
+  /// VM Service has stopped (disconnected).
   void serviceDisconnect() {
     pauseButton.disabled = true;
     resumeButton.disabled = true;
@@ -1030,8 +1035,14 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryChart.disabled = true;
   }
 
-  void removeInstanceView() {
+  void removeInstanceTableView() {
     if (tableContainer.element.children.length == 3) {
+      tableContainer.element.children.removeLast();
+    }
+  }
+
+  void removeAllButClassesTableView() {
+    while (tableContainer.element.children.length > 1) {
       tableContainer.element.children.removeLast();
     }
   }
@@ -1053,12 +1064,14 @@ class MemoryScreen extends Screen with SetStateMixin {
       ga.select(ga.memory, ga.inspectClass);
       // User selected a new class from the list of classes so the instance view
       // which would be the third child needs to be removed.
-      removeInstanceView();
+      removeInstanceTableView();
 
       final InboundsTree inboundTree =
           row == null ? null : await displayInboundReferences(row);
-      final TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
-      _pushNextTable(table, tree, inboundTree);
+      if (inboundTree != null) {
+        final TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
+        _pushNextTable(table, tree, inboundTree);
+      }
     });
 
     return table;
@@ -1174,7 +1187,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     // User selected a new instance from the list of class instances so the
     // instance view which would be the third child needs to be removed.
-    removeInstanceView();
+    removeInstanceTableView();
 
     if (rowNode?.instance == null) return;
 
@@ -1221,17 +1234,17 @@ class MemoryScreen extends Screen with SetStateMixin {
     memoryDataView.showFields(instance != null ? instance.fields : []);
   }
 
-  // TD element used to simulate hover state when hover card is visible. When
-  // not null the mouse is actively in the hover card.
+  /// TD element used to simulate hover state when hover card is visible. When
+  /// not null the mouse is actively in the hover card.
   CoreElement _tdCellHover;
 
-  // InstanceSummary of the visible hover card.
+  /// InstanceSummary of the visible hover card.
   HoverCell<InstanceSummary> _currentHoverSummary;
 
-  // This is the listener for the hover card (hoverPopup's) onMouseOver, it's
-  // designed to keep the hover state (background-color for the TD same as the
-  // CSS :hover) as the mouse slides to the hover card. It gives the appearance
-  // that hover is still active in the TD.
+  /// This is the listener for the hover card (hoverPopup's) onMouseOver, it's
+  /// designed to keep the hover state (background-color for the TD same as the
+  /// CSS :hover) as the mouse slides to the hover card. It gives the appearance
+  /// that hover is still active in the TD.
   void _mouseInHover(html.MouseEvent evt) {
     final CoreElement cell = _currentHoverSummary?.cell;
 
@@ -1242,10 +1255,10 @@ class MemoryScreen extends Screen with SetStateMixin {
     _tdCellHover?.clazz('left');
   }
 
-  // This is the listener for the hover card (hoverPopup's) onMouseLeave, it's
-  // designed to end the hover state (background-color for the TD same as the
-  // CSS :hover) as the mouse slides out of the hover card.  It gives the
-  // appearance that the hover is not active.
+  /// This is the listener for the hover card (hoverPopup's) onMouseLeave, it's
+  /// designed to end the hover state (background-color for the TD same as the
+  /// CSS :hover) as the mouse slides out of the hover card.  It gives the
+  /// appearance that the hover is not active.
   void _mouseOutHover(html.MouseEvent evt) {
     // Done simulating hover, hover card is closing.  Reset to CSS handling the
     // :hover for the allocation class.
