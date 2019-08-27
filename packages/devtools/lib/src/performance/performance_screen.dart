@@ -18,12 +18,12 @@ import 'performance_controller.dart';
 const performanceScreenId = 'performance';
 
 class PerformanceScreen extends Screen {
-  PerformanceScreen({bool disabled, String disabledTooltip})
+  PerformanceScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Performance',
           id: 'performance',
           iconClass: 'octicon-dashboard',
-          disabled: disabled,
+          enabled: enabled,
           disabledTooltip: disabledTooltip,
         );
 

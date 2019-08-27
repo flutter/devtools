@@ -170,7 +170,7 @@ class Framework {
       orElse: () => null,
     );
     if (timelineScreen == null) {
-      addScreen(timelineScreen = TimelineScreen(disabled: false));
+      addScreen(timelineScreen = TimelineScreen());
     }
     navigateTo(timelineScreenId);
 
@@ -495,10 +495,10 @@ abstract class Screen {
     @required this.id,
     this.iconClass,
     this.disabledTooltip = 'This screen is not available',
-    bool disabled = false,
+    bool enabled = true,
     this.shortcutCallback,
     this.showTab = true,
-  }) : disabled = allTabsEnabledByQuery ? false : disabled {
+  }) : disabled = allTabsEnabledByQuery ? false : !(enabled ?? true) {
     if (name.isNotEmpty) {
       _helpStatus = createLinkStatusItem(
         span()

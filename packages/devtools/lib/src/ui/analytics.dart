@@ -96,15 +96,22 @@ class GtagEventDevTools extends GtagEvent {
 
   // Custom dimensions:
   external String get user_app;
+
   external String get user_build;
+
   external String get user_platform;
+
   external String get devtools_platform;
+
   external String get devtools_chrome;
+
   external String get devtools_version;
+
   external String get ide_launched;
 
   // Custom metrics:
   external int get gpu_duration;
+
   external int get ui_duration;
 }
 
@@ -130,11 +137,17 @@ class GtagExceptionDevTools extends GtagException {
 
   // Custom dimensions:
   external String get user_app;
+
   external String get user_build;
+
   external String get user_platform;
+
   external String get devtools_platform;
+
   external String get devtools_chrome;
+
   external String get devtools_version;
+
   external String get ide_launched;
 }
 
@@ -248,37 +261,45 @@ const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
 String get userAppType => _userAppType;
+
 set userAppType(String __userAppType) {
   _userAppType = __userAppType;
 }
 
 String get userBuildType => _userBuildType;
+
 set userBuildType(String __userBuildType) {
   _userBuildType = __userBuildType;
 }
 
 String get userPlatformType => _userPlatformType;
+
 set userPlatformType(String __userPlatformType) {
   _userPlatformType = __userPlatformType;
 }
 
 String get devtoolsPlatformType => _devtoolsPlatformType;
+
 set devtoolsPlatformType(String __devtoolsPlatformType) {
   _devtoolsPlatformType = __devtoolsPlatformType;
 }
 
 String get devtoolsChrome => _devtoolsChrome;
+
 set devtoolsChrome(String __devtoolsChrome) {
   _devtoolsChrome = __devtoolsChrome;
 }
 
 String get ideLaunched => _ideLaunched;
+
 set ideLaunched(String __ideLaunched) {
   _ideLaunched = __ideLaunched;
 }
 
 bool _analyticsComputed = false;
+
 bool get isDimensionsComputed => _analyticsComputed;
+
 void dimensionsComputed() {
   _analyticsComputed = true;
 }
@@ -288,7 +309,7 @@ Future<void> computeUserApplicationCustomGTagData() async {
   if (isDimensionsComputed) return;
 
   final isFlutter = await serviceManager.connectedApp.isFlutterApp;
-  final isWebApp = await serviceManager.connectedApp.isFlutterWebApp;
+  final isWebApp = await serviceManager.connectedApp.isDartWebApp;
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
   final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 

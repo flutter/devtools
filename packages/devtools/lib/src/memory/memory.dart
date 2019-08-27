@@ -33,12 +33,12 @@ import 'memory_service.dart';
 const memoryScreenId = 'memory';
 
 class MemoryScreen extends Screen with SetStateMixin {
-  MemoryScreen({bool disabled, String disabledTooltip})
+  MemoryScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Memory',
           id: memoryScreenId,
           iconClass: 'octicon-package',
-          disabled: disabled,
+          enabled: enabled,
           disabledTooltip: disabledTooltip,
         ) {
     // Hookup for memory UI short-cut keys.
