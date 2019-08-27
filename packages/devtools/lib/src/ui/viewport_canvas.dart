@@ -168,8 +168,8 @@ class ViewportCanvas extends Object with SetStateMixin {
       ..overflow = 'hidden';
     _element.add(_content);
 
-    // TODO(jacobr): clean this code up when
-    // https://github.com/dart-lang/html/issues/104 is fixed.
+    // TODO(jacobr): Change argument type when
+    // https://github.com/dart-lang/sdk/issues/36798 is fixed.
     _resizeObserver = ResizeObserver((List<dynamic> entries, _) {
       _scheduleRebuild();
     });

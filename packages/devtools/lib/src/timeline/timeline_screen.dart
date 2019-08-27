@@ -273,8 +273,8 @@ class TimelineScreen extends Screen {
     // The size of [flameChartContainer] will change as the splitter moved.
     // Observe resizing so that we can rebuild the flame chart canvas as
     // necessary.
-    // TODO(kenzie): clean this code up when
-    // https://github.com/dart-lang/html/issues/104 is fixed.
+    // TODO(jacobr): Change argument type when
+    // https://github.com/dart-lang/sdk/issues/36798 is fixed.
     final observer = html.ResizeObserver((List<dynamic> entries, _) {
       // TODO(kenzie): observe resizing for recordedTimeline as well. Recorded
       // timeline will not have a selected frame.
