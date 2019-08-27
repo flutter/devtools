@@ -15,7 +15,7 @@ import 'memory_service.dart';
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
-/// simplify porting this code to work with Hummingbird.
+/// simplify porting this code to work with Flutter Web.
 class MemoryController {
   MemoryController();
 
@@ -186,18 +186,18 @@ class MemoryController {
 
 /// Settings dialog model.
 class SettingsModel {
-  // Pattern is of the form:
-  //    - empty string implies no matching.
-  //    - NNN* implies match anything starting with NNN.
-  //    - *NNN implies match anything ending with NNN.
+  /// Pattern is of the form:
+  ///    - empty string implies no matching.
+  ///    - NNN* implies match anything starting with NNN.
+  ///    - *NNN implies match anything ending with NNN.
   String pattern = '';
 
-  // If true hide a Class name that starts with an underscore.
-  bool showPrivateClasses = true;
+  /// If true hide Class names that begin with an underscore.
+  bool hidePrivateClasses = true;
 
-  // If true enable the memory experiment that following a object instance via
-  // inbound references instances.  Compares hashCodes (using eval causing
-  // memory shaking).  Only works in debug mode.
+  /// If true enable the memory experiment that following a object instance via
+  /// inbound references instances.  Compares hashCodes (using eval causing
+  /// memory shaking).  Only works in debug mode.
   bool experiment = false;
 }
 
