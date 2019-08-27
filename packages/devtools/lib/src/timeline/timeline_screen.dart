@@ -44,12 +44,12 @@ import 'timeline_protocol.dart';
 const enableMultiModeTimeline = false;
 
 class TimelineScreen extends Screen {
-  TimelineScreen({bool disabled, String disabledTooltip})
+  TimelineScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Timeline',
           id: timelineScreenId,
           iconClass: 'octicon-pulse',
-          disabled: disabled,
+          enabled: enabled,
           disabledTooltip: disabledTooltip,
         );
 
