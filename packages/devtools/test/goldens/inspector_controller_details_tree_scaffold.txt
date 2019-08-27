@@ -62,7 +62,8 @@
                       │   │   id: _ScaffoldSlot.body
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
                       │     │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: 1.7976931348623157e+308, alwaysUse24HourFormat: false, accessibleNavigation: false, highContrast: false,disableAnimations: false, invertColors: false, boldText: false)
-                      │     └─▶[C]Center
+                      │     └─▼[B]_BodyBuilder
+                      │         ▶[C]Center
                       ├───▼[L]LayoutId-[<_ScaffoldSlot.appBar>]
                       │   │   id: _ScaffoldSlot.appBar
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
