@@ -133,6 +133,12 @@ body {
   font-size: 13px;
 }
 
+#icon-nav a {
+  padding-bottom: 5px;
+  padding-left: 2px;
+  color: var(--header-item) !important;
+}
+
 .masthead a,
 .masthead .masthead-item {
     color: rgba(var(--header-item-rgb), 0.5) !important;

@@ -36,7 +36,7 @@ class SettingsScreen extends Screen {
       : super(
           name: '',
           id: 'settings',
-          iconClass: 'octicon-gear masthead-item action-button active',
+          iconClass: 'octicon-gear',
           showTab: false,
         ) {
     _flagList = div(c: 'flag-list-container')
