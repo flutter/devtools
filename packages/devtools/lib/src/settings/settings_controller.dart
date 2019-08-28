@@ -13,8 +13,9 @@ class SettingsController {
   final Function(String) onSdkVersionChange;
 
   Future<String> _getSdkVersion() async {
-    final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
-    return '${isAnyFlutterApp ? 'Flutter' : 'Dart'} SDK Version: ${serviceManager.sdkVersion}';
+    // TODO(jacobr): fetch the Flutter version as well as the Dart version once
+    // https://github.com/flutter/devtools/issues/954 is fixed.
+    return 'Dart SDK Version: ${serviceManager.sdkVersion}';
   }
 
   Future<void> entering() async {

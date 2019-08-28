@@ -32,7 +32,7 @@ void main() async {
       expect(flags, null);
 
       await settingsController.entering();
-      expect(sdkVersion, 'Flutter SDK Version: ${serviceManager.sdkVersion}');
+      expect(sdkVersion, 'Dart SDK Version: ${serviceManager.sdkVersion}');
 
       final flagList = await env.service.getFlagList();
       expect(flags.length, flagList.flags.length);
