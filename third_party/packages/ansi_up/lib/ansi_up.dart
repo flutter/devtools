@@ -69,8 +69,13 @@ String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
 
 /// Chunk of styled text stored in a Dart friendly format.
 class StyledText {
-  const StyledText(this.text,
-      {this.fgColor, this.bgColor, this.bold = false, this.url,});
+  const StyledText(
+    this.text, {
+    this.fgColor,
+    this.bgColor,
+    this.bold = false,
+    this.url,
+  });
 
   factory StyledText.from(TextWithAttr fragment) {
     return StyledText(
@@ -103,7 +108,8 @@ class StyledText {
 ///
 /// An instance of ansiUp is passed in to maintain text styling state across
 /// multiple invocations of this method.
-Iterable<StyledText> decodeAnsiColorEscapeCodes(String text, AnsiUp ansiUp) sync* {
+Iterable<StyledText> decodeAnsiColorEscapeCodes(
+    String text, AnsiUp ansiUp) sync* {
   ansiUp.append_buffer(text);
 
   while (true) {
@@ -111,10 +117,11 @@ Iterable<StyledText> decodeAnsiColorEscapeCodes(String text, AnsiUp ansiUp) sync
 
     if ((packet.kind == PacketKind.EOS) ||
         (packet.kind == PacketKind.Incomplete)) {
-          break;
-        }
+      break;
+    }
     // Drop single ESC or Unknown CSI.
-    if ((packet.kind == PacketKind.ESC) || (packet.kind == PacketKind.Unknown)) {
+    if ((packet.kind == PacketKind.ESC) ||
+        (packet.kind == PacketKind.Unknown)) {
       continue;
     }
 

@@ -156,8 +156,8 @@ void main() async {
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
         await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        var selection =
-            await group.getSelection(null, FlutterTreeType.widget, isSummaryTree: false);
+        var selection = await group.getSelection(null, FlutterTreeType.widget,
+            isSummaryTree: false);
         expect(selection, isNotNull);
         expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
         expect(
@@ -169,8 +169,8 @@ void main() async {
         );
 
         // Get selection in the render tree.
-        selection =
-            await group.getSelection(null, FlutterTreeType.renderObject, isSummaryTree: false);
+        selection = await group.getSelection(null, FlutterTreeType.renderObject,
+            isSummaryTree: false);
         expect(
           treeToDebugString(selection),
           equalsIgnoringHashCodes(
