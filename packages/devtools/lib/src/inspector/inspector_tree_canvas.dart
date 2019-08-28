@@ -243,6 +243,26 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
 
   bool _recomputeRows = false;
 
+  final List<InspectorTreeRow> cachedRows = [];
+
+  void _maybeClearCache() {
+    if (root.isDirty) {
+      cachedRows.clear();
+      root.isDirty = false;
+      lastContentWidth = null;
+    }
+  }
+
+  @override
+  InspectorTreeRow getCachedRow(int index) {
+    _maybeClearCache();
+    while (cachedRows.length <= index) {
+      cachedRows.add(null);
+    }
+    cachedRows[index] ??= root.getRow(index);
+    return cachedRows[index];
+  }
+
   @override
   void setState(VoidCallback modifyState) {
     // More closely match Flutter semantics where state is set immediately
@@ -255,14 +275,20 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
   }
 
   double _computeContentWidth(Size size) {
-    double maxIndent = 0;
-    for (int i = 0; i < numRows; i++) {
-      final InspectorTreeRow row = root?.getRow(i, selection: selection);
-      if (row != null) {
-        maxIndent = max(maxIndent, getDepthIndent(row.depth));
+    // TODO: we should add a listener instead that clears the cache when the
+    // root is marked as dirty.
+    _maybeClearCache();
+    if (lastContentWidth == null) {
+      double maxIndent = 0;
+      for (int i = 0; i < numRows; i++) {
+        final row = getCachedRow(i);
+        if (row != null) {
+          maxIndent = max(maxIndent, getDepthIndent(row.depth));
+        }
       }
+      lastContentWidth = maxIndent + size.width;
     }
-    return maxIndent + size.width;
+    return lastContentWidth;
   }
 
   void _rebuildData() {
@@ -315,12 +341,12 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       return currentX <= visible.right && visible.left <= currentX + width;
     }
 
-    final InspectorTreeRow row = root?.getRow(index, selection: selection);
+    final row = getCachedRow(index);
     if (row == null) {
       return;
     }
-    final InspectorTreeNode node = row.node;
-    final bool showExpandCollapse = node.showExpandCollapse;
+    final node = row.node;
+    final showExpandCollapse = node.showExpandCollapse;
     final InspectorTreeNodeCanvasRender renderObject = node.renderObject;
 
     bool hasPath = false;
@@ -347,19 +373,17 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     for (int tick in row.ticks) {
       currentX = getDepthIndent(tick) - columnWidth * 0.5;
       if (isVisible(1.0)) {
-        final highlight = row.highlightDepth == tick;
-        _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+        _maybeStart(defaultTreeLineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight);
       }
     }
     if (row.lineToParent) {
-      final highlight = row.highlightDepth == row.depth - 1;
       currentX = getDepthIndent(row.depth - 1) - columnWidth * 0.5;
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       if (isVisible(width)) {
-        _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+        _maybeStart(defaultTreeLineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight * 0.5)

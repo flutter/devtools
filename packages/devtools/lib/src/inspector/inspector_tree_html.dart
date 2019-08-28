@@ -208,7 +208,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
     final parent = e.parent;
     final int index = parent.children.indexOf(e);
     assert(index >= 0 && index < numRows);
-    final row = root.getRow(index, selection: selection);
+    final row = getCachedRow(index);
     // TODO(jacobr): figure out why this assert is sometimes failing.
     // final InspectorTreeNodeHtmlRender render = row.node.renderObject;
     // assert(render.element.parent == e);
@@ -314,7 +314,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
       // Variables incremented as part of painting.
       double currentX = 0;
 
-      final InspectorTreeRow row = root?.getRow(index, selection: selection);
+      final row = getCachedRow(index);
       if (row == null) {
         return container;
       }

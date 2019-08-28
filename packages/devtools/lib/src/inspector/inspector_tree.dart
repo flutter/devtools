@@ -156,6 +156,10 @@ abstract class InspectorTreeNode {
     return _children.length > 1 && !_children.last.isProperty;
   }
 
+  bool isDirty = true;
+
+  bool selected = false;
+
   /// Override this method to define a tree node to build render objects
   /// appropriate for a specific platform.
   InspectorTreeNodeRenderBuilder createRenderBuilder();
@@ -320,6 +324,7 @@ abstract class InspectorTreeNode {
 
   void dirty() {
     _renderObject = null;
+    isDirty = true;
     if (_childrenCount == null) {
       // Already dirty.
       return;
@@ -376,9 +381,11 @@ abstract class InspectorTreeNode {
   }
 
   /// TODO(jacobr): move this method to the InspectorTree class.
-  InspectorTreeRow getRow(int index, {InspectorTreeNode selection}) {
+  // Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
+  // performance problems.
+  // TODO: optimize this method.
+  InspectorTreeRow getRow(int index) {
     final List<int> ticks = <int>[];
-    int highlightDepth;
     InspectorTreeNode node = this;
     if (subtreeSize <= index) {
       return null;
@@ -389,17 +396,12 @@ abstract class InspectorTreeNode {
       final style = node.diagnostic?.style;
       final bool indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
-      if (selection == node) {
-        highlightDepth = depth;
-      }
       if (current == index) {
         return InspectorTreeRow(
           node: node,
           index: index,
           ticks: ticks,
           depth: depth,
-          isSelected: selection == node,
-          highlightDepth: highlightDepth,
           lineToParent:
               !node.isProperty && index != 0 && node.parent.showLinesToChildren,
         );
@@ -487,8 +489,6 @@ class InspectorTreeRow {
     @required this.index,
     @required this.ticks,
     @required this.depth,
-    @required this.isSelected,
-    @required this.highlightDepth,
     @required this.lineToParent,
   });
 
@@ -499,8 +499,8 @@ class InspectorTreeRow {
   final int depth;
   final int index;
   final bool lineToParent;
-  final bool isSelected;
-  final int highlightDepth;
+
+  bool get isSelected => node.selected;
 }
 
 typedef InspectorTreeFactory = InspectorTree Function({
@@ -529,8 +529,11 @@ abstract class InspectorTree {
         _onNodeAdded = onNodeAdded;
 
   final TreeHoverEventCallback _onHoverCallback;
+
   final TreeEventCallback onExpand;
+
   final VoidCallback _onSelectionChange;
+
   final NodeAddedCallback _onNodeAdded;
 
   InspectorTreeNode get root => _root;
@@ -550,7 +553,9 @@ abstract class InspectorTree {
     if (node == _selection) return;
 
     setState(() {
+      _selection?.selected = false;
       _selection = node;
+      _selection?.selected = true;
       if (_onSelectionChange != null) {
         _onSelectionChange();
       }
@@ -561,13 +566,20 @@ abstract class InspectorTree {
   InspectorTreeNode _hover;
 
   final bool summaryTree;
+
   final FlutterTreeType treeType;
+
+  double lastContentWidth;
 
   void setState(VoidCallback modifyState);
   InspectorTreeNode createNode();
 
+  InspectorTreeRow getCachedRow(int index) {
+    return root.getRow(index);
+  }
+
   double getRowOffset(int index) {
-    return (root.getRow(index)?.depth ?? 0) * columnWidth;
+    return (getCachedRow(index)?.depth ?? 0) * columnWidth;
   }
 
   set hover(InspectorTreeNode node) {
@@ -748,13 +760,13 @@ abstract class InspectorTree {
   int getRowIndex(double y) => (y - verticalPadding) ~/ rowHeight;
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
-    return root.getRow(root.getRowIndex(node));
+    return getCachedRow(root.getRowIndex(node));
   }
 
   InspectorTreeRow getRow(Offset offset) {
     if (root == null) return null;
     final int row = getRowIndex(offset.dy);
-    return row < root.subtreeSize ? root.getRow(row) : null;
+    return row < root.subtreeSize ? getCachedRow(row) : null;
   }
 
   void animateToTargets(List<InspectorTreeNode> targets);

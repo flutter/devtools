@@ -7,6 +7,7 @@ library inspector;
 import 'dart:async';
 import 'dart:html' show Element;
 
+import 'package:devtools/src/version.dart';
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,6 +15,7 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../messages.dart';
 import '../service_extensions.dart' as extensions;
+import '../service_registrations.dart' as registrations;
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -59,6 +61,8 @@ class InspectorScreen extends Screen {
 
   CoreElement inspectorContainer;
 
+  CoreElement expandCollapseButtonGroup;
+
   StreamSubscription<Object> splitterSubscription;
 
   bool displayedWidgetTrackingNotice = false;
@@ -91,6 +95,24 @@ class InspectorScreen extends Screen {
       ]);
     getServiceExtensionElements().forEach(buttonSection.add);
 
+    final expandButton = PButton('Expand all')..small();
+    expandButton.click(() async {
+      expandButton.disabled = true;
+      await inspectorController.expandAllNodesInDetailsTree();
+      expandButton.disabled = false;
+    });
+
+    final resetButton = PButton('Collapse to selected')..small();
+    resetButton.click(() async {
+      resetButton.disabled = true;
+      await inspectorController.resetDetailsTree();
+      resetButton.disabled = false;
+    });
+
+    expandCollapseButtonGroup = div(c: 'btn-group')
+      ..add([expandButton, resetButton])
+      ..hidden(true);
+
     screenDiv.add(<CoreElement>[
       buttonSection,
       inspectorContainer = div(c: 'inspector-container bidirectional'),
@@ -101,6 +123,7 @@ class InspectorScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
     return screenDiv;
   }
 
@@ -162,6 +185,40 @@ class InspectorScreen extends Screen {
     final InspectorTreeWeb inspectorTree = inspectorController.inspectorTree;
     final InspectorTreeWeb detailsInspectorTree =
         inspectorController.details.inspectorTree;
+
+    serviceManager.hasRegisteredService(
+      registrations.flutterVersion.service,
+      (serviceAvailable) async {
+        if (serviceAvailable) {
+          final flutterVersion = FlutterVersion.parse(
+              (await serviceManager.getFlutterVersion()).json);
+          // TODO(kenzie): track the actual version of flutter that supports the
+          // [flutterVersion] service and check for that version or greater. For
+          // now, assume that the [flutterVersion] service will land in Flutter
+          // stable before a 2.0 launch.
+          if (flutterVersion.version.startsWith('2.')) {
+            inspectorController.onTreeNodeSelected.listen((_) {
+              expandCollapseButtonGroup.hidden(false);
+            });
+
+            final currentChild = CoreElement.from(
+                detailsInspectorTree.element.element.children.first);
+            detailsInspectorTree.element
+              ..clear()
+              ..add([
+                div(c: 'expand-collapse-container')
+                  ..layoutHorizontal()
+                  ..add([
+                    div()..flex(),
+                    expandCollapseButtonGroup,
+                  ]),
+                // Add negative margin to offset height of expand/reset button group.
+                currentChild..element.style.marginTop = '-30px',
+              ]);
+          }
+        }
+      },
+    );
 
     final elements = <Element>[
       inspectorTree.element.element,

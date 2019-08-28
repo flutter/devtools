@@ -100,14 +100,23 @@ class InspectorController implements InspectorServiceClient {
   /// for now mainly to minimize risk.
   static const double refreshFramesPerSecond = 5.0;
 
+  final _treeNodeSelectedController = StreamController<void>.broadcast();
+
+  Stream<void> get onTreeNodeSelected => _treeNodeSelectedController.stream;
+
   final bool isSummaryTree;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
+
   InspectorController details;
+
   InspectorTree inspectorTree;
+
   final FlutterTreeType treeType;
+
   final InspectorService inspectorService;
+
   StreamSubscription<IsolateRef> flutterIsolateSubscription;
 
   bool _disposed = false;
@@ -131,19 +140,26 @@ class InspectorController implements InspectorServiceClient {
   set currentShowNode(InspectorTreeNode node) => inspectorTree.hover = node;
 
   bool flutterAppFrameReady = false;
+
   bool treeLoadStarted = false;
+
   RemoteDiagnosticsNode subtreeRoot;
+
   bool programaticSelectionChangeInProgress = false;
 
   InspectorTreeNode selectedNode;
+
   InspectorTreeNode lastExpanded;
+
   bool isActive = false;
+
   final Map<InspectorInstanceRef, InspectorTreeNode> valueToInspectorTreeNode =
       {};
 
   /// When visibleToUser is false we should dispose all allocated objects and
   /// not perform any actions.
   bool visibleToUser = false;
+
   bool highlightNodesShownInBothTrees = false;
 
   bool get detailsSubtree => parent != null;
@@ -301,8 +317,12 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
-  Future<void> recomputeTreeRoot(RemoteDiagnosticsNode newSelection,
-      RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) async {
+  Future<void> recomputeTreeRoot(
+    RemoteDiagnosticsNode newSelection,
+    RemoteDiagnosticsNode detailsSelection,
+    bool setSubtreeRoot, {
+    int subtreeDepth = 2,
+  }) async {
     assert(!_disposed);
     if (_disposed) {
       return;
@@ -311,7 +331,7 @@ class InspectorController implements InspectorServiceClient {
     try {
       final group = _treeGroups.next;
       final node = await (detailsSubtree
-          ? group.getDetailsSubtree(subtreeRoot)
+          ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
           : group.getRoot(treeType));
       if (node == null || group.disposed) {
         return;
@@ -594,7 +614,10 @@ class InspectorController implements InspectorServiceClient {
       if (!detailsSubtree) {
         inspectorTree.nodeChanged(selectedNode.parent);
       }
+    } else {
+      _treeNodeSelectedController.add(null);
     }
+
     selectedNode = newSelection;
 
     lastExpanded = null; // New selected node takes precedence.
@@ -733,5 +756,28 @@ class InspectorController implements InspectorServiceClient {
       valueToInspectorTreeNode[valueRef] = node;
     }
     parent?.maybeUpdateValueUI(valueRef);
+  }
+
+  Future<void> expandAllNodesInDetailsTree() async {
+    await details.recomputeTreeRoot(
+      inspectorTree.selection.diagnostic,
+      details.inspectorTree.selection.diagnostic,
+      false,
+      subtreeDepth: maxJsInt,
+    );
+  }
+
+  Future<void> resetDetailsTree() async {
+    assert(details.inspectorTree.selection?.diagnostic != null);
+    details.inspectorTree.setState(() {
+      _collapseAllNodes(details.inspectorTree.root);
+    });
+    details.inspectorTree.expandPath(details.inspectorTree.selection);
+    details.animateTo(details.inspectorTree.selection);
+  }
+
+  void _collapseAllNodes(InspectorTreeNode root) {
+    root.isExpanded = false;
+    root.children.forEach(_collapseAllNodes);
   }
 }

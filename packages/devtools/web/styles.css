@@ -851,7 +851,7 @@ div.tabnav-tab {
 }
 
 .form-select.button-bar-dropdown {
-    background-color: var(--form-select-background);
+    background-color: var(--button-background);
     color: var(--default-button-text-color);
     display: inline-flex;
     align-items: center;
