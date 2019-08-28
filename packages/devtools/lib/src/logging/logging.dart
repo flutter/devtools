@@ -6,6 +6,7 @@ import 'package:ansi_up/ansi_up.dart';
 import 'package:split/split.dart' as split;
 
 import '../framework/framework.dart';
+import '../globals.dart';
 import '../inspector/inspector.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
@@ -60,6 +61,14 @@ class LoggingScreen extends Screen {
     // TODO(devoncarew): Add checkbox toggles to enable specific logging channels.
 
     logDetailsUI = LogDetailsUI();
+
+    // Enable structured errors by default as soon as the user opens the
+    // logging page.
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
+      structuredErrors.extension,
+      true,
+      true,
+    );
 
     screenDiv.add(<CoreElement>[
       div(c: 'section')
