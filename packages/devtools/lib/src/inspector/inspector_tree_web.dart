@@ -15,23 +15,20 @@ mixin InspectorTreeWeb implements InspectorTree, CoreElementView {
       switch (e.keyCode) {
         case KeyCode.UP:
           navigateUp();
-          e.preventDefault();
           break;
         case KeyCode.DOWN:
           navigateDown();
-          e.preventDefault();
           break;
         case KeyCode.LEFT:
           navigateLeft();
-          e.preventDefault();
           break;
         case KeyCode.RIGHT:
           navigateRight();
-          e.preventDefault();
           break;
         default:
-          break;
+          return;
       }
+      e.preventDefault();
     });
   }
 }

@@ -496,11 +496,14 @@ class InspectorController implements InspectorServiceClient {
     _selectionGroups.cancelNext();
 
     final group = _selectionGroups.next;
-    final pendingSelectionFuture =
-        group.getSelection(selectedDiagnostic, treeType, isSummaryTree);
+    final pendingSelectionFuture = group.getSelection(
+      selectedDiagnostic,
+      treeType,
+      isSummaryTree: isSummaryTree,
+    );
 
     final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(selectedDiagnostic, treeType, false)
+        ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
         : null;
 
     try {

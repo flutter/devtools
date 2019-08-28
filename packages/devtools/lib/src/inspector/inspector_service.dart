@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../eval_on_dart_library.dart';
@@ -124,7 +125,9 @@ class InspectorService {
   /// In general this heuristic based time should not matter but we keep it
   /// anyway so that in the unlikely event that package:flutter changes and we
   /// do not received all of the selection notification events we expect, we
-  /// will not be completely broken as if there is at least the following d
+  /// will not be impacted if there is at least the following delay between
+  /// when selection was set to exactly the same location by both the on device
+  /// inspector and DevTools.
   static const _maxTimeDelaySelectionNotification = 5000;
 
   void _trackClientSelfTriggeredSelection(InspectorInstanceRef ref) {
@@ -259,12 +262,14 @@ class InspectorService {
     return Future.wait(futures);
   }
 
-  InspectorObjectGroupManager _cachedSelectionGroups;
   RemoteDiagnosticsNode _currentSelection;
+
   InspectorObjectGroupManager get _selectionGroups {
     return _cachedSelectionGroups ??=
         InspectorObjectGroupManager(this, 'selection');
   }
+
+  InspectorObjectGroupManager _cachedSelectionGroups;
 
   void notifySelectionChanged() async {
     // The previous selection changed event is obsolete.
@@ -273,7 +278,7 @@ class InspectorService {
     final pendingSelection = await group.getSelection(
       _currentSelection,
       FlutterTreeType.widget,
-      false,
+      isSummaryTree: false,
     );
     if (!group.disposed &&
         !_isClientTriggeredSelectionChange(pendingSelection?.valueRef)) {
@@ -809,9 +814,10 @@ class ObjectGroup {
 
   Future<RemoteDiagnosticsNode> getSelection(
     RemoteDiagnosticsNode previousSelection,
-    FlutterTreeType treeType,
-    bool localOnly,
-  ) async {
+    FlutterTreeType treeType, {
+    @required bool isSummaryTree,
+  }) async {
+    assert(isSummaryTree != null);
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
     if (disposed) return null;
@@ -822,7 +828,7 @@ class ObjectGroup {
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-            localOnly ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
+            isSummaryTree ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
             previousSelectionRef);
         break;
       case FlutterTreeType.renderObject:

@@ -427,17 +427,18 @@ void main() async {
       await serviceManager.performHotReload();
       // Ensure the inspector does not fall over and die after a hot reload.
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold\n'
-            '      ├───▼[C]Center\n'
-            '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ),);
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.
