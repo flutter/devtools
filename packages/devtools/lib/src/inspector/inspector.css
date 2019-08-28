@@ -2,6 +2,10 @@
 /* Use of this source code is governed by a BSD-style license that can be */
 /* found in the LICENSE file. */
 
+:root {
+    --expand-collapse-container-height: 30px;
+}
+
 .inspector-tree-container {
     border: 1px solid var(--table-border);
     border-radius: 3px;
@@ -142,8 +146,13 @@ messages beautiful.
     padding-right: 8px;
     text-align: right;
     z-index: 1;
+    height: var(--expand-collapse-container-height);
 }
 
 .expand-collapse-container .btn {
     background-color: var(--button-background);
+}
+
+.expand-collapse-offset {
+    margin-top: calc(-1 * var(--expand-collapse-container-height));
 }

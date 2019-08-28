@@ -267,7 +267,7 @@ class InspectorScreen extends Screen {
             expandCollapseButtonGroup,
           ]),
         // Add negative margin to offset height of expand/reset button group.
-        currentChild..element.style.marginTop = '-30px',
+        currentChild..clazz('expand-collapse-offset'),
       ]);
   }
 }
