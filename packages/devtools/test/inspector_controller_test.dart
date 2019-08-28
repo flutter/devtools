@@ -99,22 +99,24 @@ void main() async {
       await env.setupEnvironment();
 
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold\n'
-            '      ├───▼[C]Center\n'
-            '      │     [/icons/inspector/textArea.png]Text\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ));
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       expect(
-          tree.toStringDeep(includeTextStyles: true),
-          equalsGoldenIgnoringHashCodes(
-              'inspector_controller_initial_tree_with_styles.txt'));
+        tree.toStringDeep(includeTextStyles: true),
+        equalsGoldenIgnoringHashCodes(
+            'inspector_controller_initial_tree_with_styles.txt'),
+      );
 
       expect(detailsTree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
 
@@ -191,17 +193,18 @@ void main() async {
       simulateRowClick(tree, rowIndex: 3);
 
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold <-- selected\n'
-            '      ├───▼[C]Center\n'
-            '      │     [/icons/inspector/textArea.png]Text\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ));
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold <-- selected\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       await detailsTree.nextUiFrame;
       // This tree is huge. If there is a change to package:flutter it may
@@ -217,17 +220,18 @@ void main() async {
       // details tree.
       simulateRowClick(tree, rowIndex: 4);
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold\n'
-            '      ├───▼[C]Center <-- selected\n'
-            '      │     [/icons/inspector/textArea.png]Text\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ));
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center <-- selected\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       await detailsTree.nextUiFrame;
       expect(
@@ -240,17 +244,18 @@ void main() async {
       // in the main tree.
       simulateRowClick(detailsTree, rowIndex: 0);
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold <-- selected\n'
-            '      ├───▼[C]Center\n'
-            '      │     [/icons/inspector/textArea.png]Text\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ));
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold <-- selected\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       // Verify that the details tree scrolled back as well.
       // However, now more nodes are expanded.
@@ -269,6 +274,138 @@ void main() async {
 
       // TODO(jacobr): add tests that verified that we scrolled the view to the
       // correct points on selection.
+
+      // Intentionally trigger multiple quick navigate action to ensure that
+      // multiple quick navigation commands in a row do not trigger race
+      // conditions getting out of order updates from the server.
+      tree.navigateDown();
+      tree.navigateDown();
+      tree.navigateDown();
+      await detailsTree.nextUiFrame;
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar <-- selected\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
+      // Make sure we don't go off the bottom of the tree.
+      tree.navigateDown();
+      tree.navigateDown();
+      tree.navigateDown();
+      tree.navigateDown();
+      tree.navigateDown();
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text <-- selected\n',
+        ),
+      );
+      tree.navigateUp();
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▼[A]AppBar <-- selected\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
+      tree.navigateLeft();
+      await detailsTree.nextUiFrame;
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▶[A]AppBar <-- selected\n',
+        ),
+      );
+      tree.navigateLeft();
+      // First navigate left goes to the parent.
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold <-- selected\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▶[A]AppBar\n',
+        ),
+      );
+      tree.navigateLeft();
+      // Next navigate left closes the parent.
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▶[S]Scaffold <-- selected\n',
+        ),
+      );
+
+      tree.navigateRight();
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold <-- selected\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▶[A]AppBar\n',
+        ),
+      );
+
+      // Node is already expanded so this is equivalent to navigate down.
+      tree.navigateRight();
+      expect(
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center <-- selected\n'
+          '      │     [/icons/inspector/textArea.png]Text\n'
+          '      └─▶[A]AppBar\n',
+        ),
+      );
+
+      await detailsTree.nextUiFrame;
+
+      // Make sure the details and main trees have not gotten out of sync.
+      expect(
+        detailsTree.toStringDeep(hidePropertyLines: true),
+        equalsIgnoringHashCodes('▼[C]Center <-- selected\n'
+            '└─▼[/icons/inspector/textArea.png]Text\n'
+            '  └─▼[/icons/inspector/textArea.png]RichText\n'),
+      );
 
       await env.tearDownEnvironment();
     });
@@ -290,17 +427,18 @@ void main() async {
       await serviceManager.performHotReload();
       // Ensure the inspector does not fall over and die after a hot reload.
       expect(
-          tree.toStringDeep(),
-          equalsIgnoringHashCodes(
-            '▼[R][root]\n'
-            '  ▼[M]MyApp\n'
-            '    ▼[M]MaterialApp\n'
-            '      ▼[S]Scaffold\n'
-            '      ├───▼[C]Center\n'
-            '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
-            '      └─▼[A]AppBar\n'
-            '          [/icons/inspector/textArea.png]Text\n',
-          ));
+        tree.toStringDeep(),
+        equalsIgnoringHashCodes(
+          '▼[R][root]\n'
+          '  ▼[M]MyApp\n'
+          '    ▼[M]MaterialApp\n'
+          '      ▼[S]Scaffold\n'
+          '      ├───▼[C]Center\n'
+          '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
+          '      └─▼[A]AppBar\n'
+          '          [/icons/inspector/textArea.png]Text\n',
+        ),
+      );
 
       // TODO(jacobr): would be nice to have some tests that trigger a hot
       // reload that actually changes app state in a meaningful way.

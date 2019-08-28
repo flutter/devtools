@@ -409,6 +409,7 @@ class InspectorController implements InspectorServiceClient {
   void syncTreeSelection() {
     programaticSelectionChangeInProgress = true;
     inspectorTree.selection = selectedNode;
+    inspectorTree.expandPath(selectedNode);
     programaticSelectionChangeInProgress = false;
     animateTo(selectedNode);
   }
@@ -495,11 +496,14 @@ class InspectorController implements InspectorServiceClient {
     _selectionGroups.cancelNext();
 
     final group = _selectionGroups.next;
-    final pendingSelectionFuture =
-        group.getSelection(selectedDiagnostic, treeType, isSummaryTree);
+    final pendingSelectionFuture = group.getSelection(
+      selectedDiagnostic,
+      treeType,
+      isSummaryTree: isSummaryTree,
+    );
 
     final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(selectedDiagnostic, treeType, false)
+        ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
         : null;
 
     try {
@@ -629,7 +633,7 @@ class InspectorController implements InspectorServiceClient {
           selectedDiagnostic != null &&
           !details.hasDiagnosticsValue(selectedDiagnostic.valueRef);
       syncSelectionHelper(maybeReroot, null);
-      if (maybeReroot == false) {
+      if (!maybeReroot) {
         if (isSummaryTree && details != null) {
           details.selectAndShowNode(selectedDiagnostic);
         } else if (parent != null) {

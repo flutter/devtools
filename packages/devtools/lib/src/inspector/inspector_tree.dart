@@ -545,10 +545,12 @@ abstract class InspectorTree {
 
   InspectorTreeNode get selection => _selection;
   InspectorTreeNode _selection;
+
   set selection(InspectorTreeNode node) {
+    if (node == _selection) return;
+
     setState(() {
       _selection = node;
-      expandPath(node);
       if (_onSelectionChange != null) {
         _onSelectionChange();
       }
@@ -583,6 +585,61 @@ abstract class InspectorTree {
 
   RemoteDiagnosticsNode _currentHoverDiagnostic;
   bool _computingHover = false;
+
+  void navigateUp() {
+    _navigateHelper(-1);
+  }
+
+  void navigateDown() {
+    _navigateHelper(1);
+  }
+
+  void navigateLeft() {
+    // This logic is consistent with how IntelliJ handles tree navigation on
+    // on left arrow key press.
+    if (selection == null) {
+      _navigateHelper(-1);
+      return;
+    }
+
+    if (selection.isExpanded) {
+      setState(() {
+        selection.isExpanded = false;
+      });
+      return;
+    }
+    if (selection.parent != null) {
+      selection = selection.parent;
+    }
+  }
+
+  void navigateRight() {
+    // This logic is consistent with how IntelliJ handles tree navigation on
+    // on right arrow key press.
+
+    if (selection == null || selection.isExpanded) {
+      _navigateHelper(1);
+      return;
+    }
+
+    setState(() {
+      selection.isExpanded = true;
+    });
+  }
+
+  void _navigateHelper(int indexOffset) {
+    if (numRows == 0) return;
+
+    if (selection == null) {
+      selection = root;
+      return;
+    }
+
+    selection = root
+        .getRow(
+            (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
+        ?.node;
+  }
 
   Future<void> onHover(InspectorTreeNode node, PaintEntry entry) async {
     if (_onHoverCallback != null) {
@@ -729,6 +786,7 @@ abstract class InspectorTree {
     }
     // TODO(jacobr): add other interactive elements here.
     selection = row.node;
+    expandPath(row.node);
   }
 
   bool expandPropertiesByDefault(DiagnosticsTreeStyle style) {

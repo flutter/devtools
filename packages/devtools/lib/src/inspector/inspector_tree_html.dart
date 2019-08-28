@@ -172,7 +172,7 @@ class InspectorTreeNodeHtml extends InspectorTreeNode {
   }
 }
 
-class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
+class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
   InspectorTreeHtml({
     @required bool summaryTree,
     @required FlutterTreeType treeType,
@@ -190,8 +190,12 @@ class InspectorTreeHtml extends InspectorTree implements InspectorTreeWeb {
           onHover: onHover,
         ) {
     _container.onClick.listen(onMouseClick);
-    _container.element.onMouseMove.listen(onMouseMove);
-    _container.element.onMouseLeave.listen(onMouseLeave);
+    _container.element..setAttribute('tabIndex', '0');
+
+    _container.element
+      ..onMouseMove.listen(onMouseMove)
+      ..onMouseLeave.listen(onMouseLeave);
+    // TODO(jacobr): support cursor based navigation.
   }
 
   InspectorTreeRow _resolveTreeRow(Element e) {

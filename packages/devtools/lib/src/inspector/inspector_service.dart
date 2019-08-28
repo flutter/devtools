@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../eval_on_dart_library.dart';
@@ -105,6 +106,64 @@ class InspectorService {
       inspectorLibrary,
       supportedServiceMethods,
     );
+  }
+
+  /// Map from InspectorInstanceRef to list of timestamps when a selection
+  /// change to that ref was triggered by this application.
+  ///
+  /// This is needed to handle the case where we may send multiple selection
+  /// change notifications to the device before we get a notification back that
+  /// the selection has actually changed. Without this fix it was rare but
+  /// possible to trigger an infinite loop ping-ponging back and forth between
+  /// selecting two different nodes in the inspector tree if the selection was
+  /// changed more rapidly than the running flutter app could update.
+  final Map<InspectorInstanceRef, List<int>> _expectedSelectionChanges = {};
+
+  /// Maximum time in milliseconds that we ever expect it will take for a
+  /// selection change to apply.
+  ///
+  /// In general this heuristic based time should not matter but we keep it
+  /// anyway so that in the unlikely event that package:flutter changes and we
+  /// do not received all of the selection notification events we expect, we
+  /// will not be impacted if there is at least the following delay between
+  /// when selection was set to exactly the same location by both the on device
+  /// inspector and DevTools.
+  static const _maxTimeDelaySelectionNotification = 5000;
+
+  void _trackClientSelfTriggeredSelection(InspectorInstanceRef ref) {
+    _expectedSelectionChanges
+        .putIfAbsent(ref, () => [])
+        .add(DateTime.now().millisecondsSinceEpoch);
+  }
+
+  /// Returns whether the selection change was originally triggered by this
+  /// application.
+  ///
+  /// This method is needed to avoid a race condition when there is a queue of
+  /// inspector selection changes due to extremely rapidly navigating through
+  /// the inspector tree such as when using the keyboard to navigate.
+  bool _isClientTriggeredSelectionChange(InspectorInstanceRef ref) {
+    // TODO(jacobr): once https://github.com/flutter/flutter/issues/39366 is
+    // fixed in all versions of flutter we support, remove this logic and
+    // determine the source of the inspector selection change directly from the
+    // inspector selection changed event.
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    if (ref != null) {
+      if (_expectedSelectionChanges.containsKey(ref)) {
+        final times = _expectedSelectionChanges.remove(ref);
+        while (times.isNotEmpty) {
+          final time = times.removeAt(0);
+          if (time + _maxTimeDelaySelectionNotification >= currentTime) {
+            // We triggered this selection change ourselves. This logic would
+            // work fine without the timestamps for the typical case but we use
+            // the timestamps to be safe in case there is a bug and selection
+            // change events were somehow lost.
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
@@ -203,9 +262,31 @@ class InspectorService {
     return Future.wait(futures);
   }
 
-  void notifySelectionChanged() {
-    for (InspectorServiceClient client in clients) {
-      client.onInspectorSelectionChanged();
+  RemoteDiagnosticsNode _currentSelection;
+
+  InspectorObjectGroupManager get _selectionGroups {
+    return _cachedSelectionGroups ??=
+        InspectorObjectGroupManager(this, 'selection');
+  }
+
+  InspectorObjectGroupManager _cachedSelectionGroups;
+
+  void notifySelectionChanged() async {
+    // The previous selection changed event is obsolete.
+    _selectionGroups.cancelNext();
+    final group = _selectionGroups.next;
+    final pendingSelection = await group.getSelection(
+      _currentSelection,
+      FlutterTreeType.widget,
+      isSummaryTree: false,
+    );
+    if (!group.disposed &&
+        !_isClientTriggeredSelectionChange(pendingSelection?.valueRef)) {
+      _currentSelection = pendingSelection;
+      _selectionGroups.promoteNext();
+      for (InspectorServiceClient client in clients) {
+        client.onInspectorSelectionChanged();
+      }
     }
   }
 
@@ -215,12 +296,6 @@ class InspectorService {
 
   void onDebugVmServiceReceived(Event event) {
     if (event.kind == EventKind.kInspect) {
-      // Make sure the WidgetInspector on the device switches to show the inspected object
-      // if the inspected object is a Widget or RenderObject.
-
-      // We create a dummy object group as this particular operation
-      // doesn't actually require an object group.
-      createObjectGroup('dummy').setSelection(event.inspectee, true);
       // Update the UI in IntelliJ.
       notifySelectionChanged();
     }
@@ -739,9 +814,10 @@ class ObjectGroup {
 
   Future<RemoteDiagnosticsNode> getSelection(
     RemoteDiagnosticsNode previousSelection,
-    FlutterTreeType treeType,
-    bool localOnly,
-  ) async {
+    FlutterTreeType treeType, {
+    @required bool isSummaryTree,
+  }) async {
+    assert(isSummaryTree != null);
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
     if (disposed) return null;
@@ -752,7 +828,7 @@ class ObjectGroup {
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-            localOnly ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
+            isSummaryTree ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
             previousSelectionRef);
         break;
       case FlutterTreeType.renderObject:
@@ -775,6 +851,7 @@ class ObjectGroup {
     if (disposed) {
       return Future.value(null);
     }
+    inspectorService._trackClientSelfTriggeredSelection(selection);
     if (useDaemonApi) {
       return handleSetSelectionDaemon(
           invokeServiceMethodDaemonInspectorRef('setSelectionById', selection),
@@ -785,17 +862,6 @@ class ObjectGroup {
               'setSelectionById', selection),
           uiAlreadyUpdated);
     }
-  }
-
-  /// Helper when we need to set selection given an observatory InstanceRef
-  /// instead of an InspectorInstanceRef.
-  void setSelection(InstanceRef selection, bool uiAlreadyUpdated) {
-    // There is no excuse for calling setSelection using a disposed ObjectGroup.
-    assert(!disposed);
-    // This call requires the observatory protocol as an observatory InstanceRef is specified.
-    handleSetSelectionObservatory(
-        invokeServiceMethodOnRefObservatory('setSelection', selection),
-        uiAlreadyUpdated);
   }
 
   Future<void> handleSetSelectionObservatory(
