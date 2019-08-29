@@ -622,7 +622,7 @@ class ServiceExtensionManager {
     dynamic value, {
     bool callExtension = true,
   }) async {
-    if (callExtension) {
+    if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
     }
 
