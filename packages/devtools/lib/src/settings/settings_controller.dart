@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../version.dart';
 
 class SettingsController {
   SettingsController({this.onFlagListChange, this.onSdkVersionChange});
@@ -13,9 +14,12 @@ class SettingsController {
   final Function(String) onSdkVersionChange;
 
   Future<String> _getSdkVersion() async {
-    // TODO(jacobr): fetch the Flutter version as well as the Dart version once
-    // https://github.com/flutter/devtools/issues/954 is fixed.
-    return 'Dart SDK Version: ${serviceManager.sdkVersion}';
+    return serviceManager.sdkVersion;
+  }
+
+  Future<FlutterVersion> getFlutterVersion() async {
+    return FlutterVersion.parse(
+        (await serviceManager.getFlutterVersion()).json);
   }
 
   Future<void> entering() async {
