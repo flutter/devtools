@@ -12,6 +12,9 @@
 * Polish button collapsing for small screen widths.
 * Adjust some of the logging flutter.error presentation.
 * Fix thread name bug.
+* Support Ansi color codes in logging views.
+* Add keyboard navigation to the inspector tree view.
+* Enable structured errors by default.
 
 ## 0.1.5 - 2019-08-05
 * Support expanding or collapsing all values in the Call Tree and Bottom Up views (parts of the CPU profiler).
