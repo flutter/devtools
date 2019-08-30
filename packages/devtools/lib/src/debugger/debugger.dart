@@ -522,6 +522,9 @@ class DebuggerScreen extends Screen {
       }
 
       final InstanceRef ref = value;
+      if (ref == null) {
+        return null;
+      }
 
       if (ref.valueAsString != null && !ref.valueAsStringIsTruncated) {
         return ref.valueAsString;
