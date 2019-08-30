@@ -19,17 +19,15 @@ class CpuProfilerService {
     @required int startMicros,
     @required int extentMicros,
   }) async {
-    final Response response =
-        await serviceManager.service.getCpuProfileTimeline(
+    return await serviceManager.service.getCpuProfileTimeline(
       serviceManager.isolateManager.selectedIsolate.id,
       startMicros,
       extentMicros,
     );
-    return CpuProfileData.parse(response.json);
   }
 
-  Future<Success> clearCpuProfile() async {
+  Future<Success> clearCpuSamples() async {
     return serviceManager.service
-        .clearCpuProfile(serviceManager.isolateManager.selectedIsolate.id);
+        .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
   }
 }
