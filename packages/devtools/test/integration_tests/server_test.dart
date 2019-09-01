@@ -24,10 +24,10 @@ void main() {
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
 
     // The packages folder needs to be renamed to `pack` for the server to work.
-    if (await Directory('build/pack').exists()) {
-      await Directory('build/pack').delete(recursive: true);
+    if (Directory('build/pack').existsSync()) {
+      Directory('build/pack').deleteSync(recursive: true);
     }
-    await Directory('build/packages').rename('build/pack');
+    Directory('build/packages').renameSync('build/pack');
 
     // Start the command-line server.
     server = await DevToolsServerDriver.create();
