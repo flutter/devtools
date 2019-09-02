@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'package:html_shim/html.dart' as html;
 
+import 'package:sse/client/sse_client.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
@@ -40,6 +41,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
     initGlobalUI();
     initTestingModel();
+    initSseConnection();
   }
 
   void _gAReportExceptions(html.Event e) {
@@ -135,6 +137,19 @@ class HtmlPerfToolFramework extends HtmlFramework {
   void initTestingModel() {
     final app = HtmlApp.register(this);
     screensReady.future.then(app.devToolsReady);
+  }
+
+  void initSseConnection() {
+    try {
+      print('Connecting to SSE endpoint...');
+      final channel = SseClient('/api/sse');
+      channel.onOpen.first.then((e) {
+        channel.stream.listen(print);
+        channel.sink.add('Test message from client');
+      });
+    } catch (e) {
+      print('Failed to connect to SSE API: $e');
+    }
   }
 
   void disableAppWithError(String title, [dynamic error]) {

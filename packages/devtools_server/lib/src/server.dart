@@ -10,6 +10,7 @@ import 'dart:isolate';
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:devtools_server/src/client_manager.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
@@ -26,6 +27,8 @@ const argPort = 'port';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
+
+final ClientManager clients = ClientManager();
 
 final argParser = ArgParser()
   ..addFlag(
@@ -102,7 +105,7 @@ Future<HttpServer> serveDevTools({
         'machineMode only works with enableStdinCommands.');
   }
 
-  handler ??= await defaultHandler();
+  handler ??= await defaultHandler(clients);
 
   final server = await HttpMultiServer.bind(hostname, port);
   shelf.serveRequests(server, handler);
@@ -219,6 +222,15 @@ Future<void> registerLaunchDevToolsService(
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
       try {
+        // First see if we have an existing DevTools client open that we can
+        // reuse.
+        final reusableClient = await clients.findReusableClient();
+        if (reusableClient != null) {
+          await reusableClient.connectToVmService(vmServiceUri);
+          // reusableClient.bringToFront() / Notify / whatever...
+          return {'result': Success().toJson()};
+        }
+
         final uriParams = <String, dynamic>{};
 
         // Copy over queryParams passed by the client
