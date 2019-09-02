@@ -4,37 +4,12 @@
 		{
 			"label": "Build Release Package",
 			"type": "shell",
-			"command": "pub",
-			"args": [
-				"global",
-				"run",
-				"webdev",
-				"build"
-			],
+			"options": {
+				"cwd": "${workspaceFolder}/../../",
+			},
+			"command": "tool/build_release.sh",
 			"group": "build",
 			"problemMatcher": []
-		},
-		{
-			"label": "Build + Serve Release Build",
-			"type": "shell",
-			"command": "dart",
-			"args": [
-				"bin/devtools.dart"
-			],
-			"group": "build",
-			"problemMatcher": {
-				"owner": "custom",
-				"pattern": {
-					"regexp": "_________________"
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "_________________",
-					"endsPattern": "^Serving DevTools"
-				}
-			},
-			"isBackground": true,
-			"dependsOn": "Build Release Package"
 		}
 	],
 }
