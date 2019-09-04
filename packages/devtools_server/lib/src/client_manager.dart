@@ -14,12 +14,14 @@ class ClientManager {
     connection.sink.done.then((_) => _clients.remove(client));
   }
 
+  List<DevToolsClient> get connectedClients => _clients.toList();
+
   /// Finds an active DevTools instance that is not already connecting to
   /// a VM service that we can reuse (for example if a user stopped debugging
   /// and it disconnected, then started debugging again, we want to reuse
   /// the open DevTools window).
   DevToolsClient findReusableClient() {
-    return _clients.firstWhere((c) => !c.isConnected, orElse: () => null);
+    return _clients.firstWhere((c) => !c.hasConnection, orElse: () => null);
   }
 
   /// Finds a client that may already be connected to this VM Service.
@@ -28,7 +30,7 @@ class ClientManager {
     // WS, so just check the host, port and first segment of path (token).
     return _clients.firstWhere(
         (c) =>
-            c.isConnected && _areSameVmServices(c.vmServiceUri, vmServiceUri),
+            c.hasConnection && _areSameVmServices(c.vmServiceUri, vmServiceUri),
         orElse: () => null);
   }
 
@@ -80,5 +82,5 @@ class DevToolsClient {
   final SseConnection _connection;
   Uri _vmServiceUri;
   Uri get vmServiceUri => _vmServiceUri;
-  bool get isConnected => _vmServiceUri != null;
+  bool get hasConnection => _vmServiceUri != null;
 }

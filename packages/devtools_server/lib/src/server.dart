@@ -155,6 +155,9 @@ Future<HttpServer> serveDevTools({
         case 'vm.register':
           await _handleVmRegister(id, params, machineMode, devToolsUrl);
           break;
+        case 'client.list':
+          await _handleClientsList(id, params, machineMode);
+          break;
         default:
           printOutput(
             'Unknown method ${json['method']}',
@@ -207,6 +210,29 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
       machineMode: machineMode,
     );
   }
+}
+
+Future<void> _handleClientsList(
+    dynamic id, Map<String, dynamic> params, bool machineMode) async {
+  final connectedClients = clients.connectedClients;
+  printOutput(
+    connectedClients
+        .map((c) =>
+            '${c.hasConnection.toString().padRight(5, ' ')} ${c.vmServiceUri.toString()}')
+        .join('\n'),
+    {
+      'id': id,
+      'result': {
+        'clients': connectedClients
+            .map((c) => {
+                  'hasConnection': c.hasConnection,
+                  'vmServiceUri': c.vmServiceUri.toString(),
+                })
+            .toList()
+      },
+    },
+    machineMode: machineMode,
+  );
 }
 
 Future<bool> _tryReuseExistingDevToolsInstance(Uri vmServiceUri) async {
