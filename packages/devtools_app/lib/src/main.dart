@@ -146,6 +146,18 @@ class HtmlPerfToolFramework extends HtmlFramework {
       print('Connecting to SSE endpoint...');
       apiClient = ServerApiClient(this);
 
+      // TODO(dantup): As a workaround for not being able to reconnect DevTools to
+      // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
+      // the page and pass a querystring variable to know that we need to notify
+      // the user.
+      final uri = Uri.parse(html.window.location.href);
+      if (uri.queryParameters.containsKey('notify')) {
+        final newParams = Map.of(uri.queryParameters)..remove('notify');
+        html.window.history.pushState(
+            null, null, uri.replace(queryParameters: newParams).toString());
+        apiClient.notify();
+      }
+
       serviceManager.onStateChange.listen((connected) {
         try {
           if (connected) {

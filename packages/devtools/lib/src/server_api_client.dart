@@ -55,9 +55,12 @@ class ServerApiClient {
 
   void connectToVm(dynamic requestParams) {
     // Reload the page with the new VM service URI in the querystring.
+    // TODO(dantup): Remove this code and replace with code that just reconnects
+    // when it's supported better (https://github.com/flutter/devtools/issues/989).
     final uri = Uri.parse(window.location.href);
     final newUriParams = Map.of(uri.queryParameters);
     newUriParams['uri'] = requestParams['uri'];
+    newUriParams['notify'] = 'true';
     window.location
         .replace(uri.replace(queryParameters: newUriParams).toString());
 
