@@ -15,7 +15,7 @@ class FlutterVersion {
     @required this.dartSdkVersion,
   });
 
-  static FlutterVersion parse(Map<String, dynamic> json) {
+  factory FlutterVersion.parse(Map<String, dynamic> json) {
     return FlutterVersion._(
       version: json['frameworkVersion'],
       channel: json['channel'],
@@ -41,12 +41,14 @@ class FlutterVersion {
 
   final String dartSdkVersion;
 
-  String get flutterDisplay =>
-      '${version == 'unknown' ? '' : version} • channel $channel • '
-      '${repositoryUrl ?? 'unknown source'}';
+  String get flutterVersionSummary => [
+        if (version != 'unknown') version,
+        'channel $channel',
+        repositoryUrl ?? 'unknown source',
+      ].join(' • ');
 
-  String get frameworkDisplay =>
+  String get frameworkVersionSummary =>
       'revision $frameworkRevision • $frameworkCommitDate';
 
-  String get engineDisplay => 'revision $engineRevision';
+  String get engineVersionSummary => 'revision $engineRevision';
 }

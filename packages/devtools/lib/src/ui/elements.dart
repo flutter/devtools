@@ -38,9 +38,6 @@ CoreElement span({String text, String c, String a}) =>
 CoreElement h2({String text, String c, String a}) =>
     CoreElement('h2', text: text, classes: c, attributes: a);
 
-CoreElement h5({String text, String c, String a}) =>
-    CoreElement('h5', text: text, classes: c, attributes: a);
-
 CoreElement p({String text, String c, String a}) =>
     CoreElement('p', text: text, classes: c, attributes: a);
 

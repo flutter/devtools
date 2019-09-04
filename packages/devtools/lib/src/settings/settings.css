@@ -2,14 +2,21 @@
 /* Use of this source code is governed by a BSD-style license that can be */
 /* found in the LICENSE file. */
 
+.setting-title {
+    font-weight: 600;
+}
+
 .version-container {
     padding: 8px;
     min-height: 40px;
     position: relative;
 }
 
+.version-margin {
+    margin-bottom: 4px;
+}
+
 .version-value {
-    font-weight: normal;
     margin-left: 4px;
 }
 

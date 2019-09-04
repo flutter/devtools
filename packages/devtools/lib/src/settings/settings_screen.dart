@@ -5,11 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools.dart' as devtools show version;
 import '../framework/framework.dart';
 import '../globals.dart';
-import '../service_registrations.dart' as registrations;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/custom.dart';
 import '../ui/elements.dart';
 import '../version.dart';
 import 'settings_controller.dart';
@@ -18,7 +17,7 @@ class FlagDetailsUI extends CoreElement {
   FlagDetailsUI(Flag flag) : super('div', classes: 'flag-details-container') {
     final flagDescription = div(c: 'flag-details-descriptions-container')
       ..add(<CoreElement>[
-        h5(text: flag.name),
+        div(c: 'setting-title', text: flag.name),
         span(c: 'flag-description', text: flag.comment),
       ]);
 
@@ -45,26 +44,22 @@ class SettingsScreen extends Screen {
           showTab: false,
         ) {
     _controller = SettingsController(
-      onFlagListChange: (FlagList flagList) {
-        _flagList.add(flagList.flags.map((flag) => FlagDetailsUI(flag)));
+      onFlagListChanged: (FlagList flagList) {
+        _flagList
+          ..clear()
+          ..add(flagList.flags.map((flag) => FlagDetailsUI(flag)));
       },
-      onSdkVersionChange: (String sdkVersion) {
-        _sdkVersion.text = sdkVersion;
+      onFlutterVersionChanged: (FlutterVersion version) {
+        _updateFlutterVersionUI(version);
       },
     );
   }
 
   CoreElement _flagList;
 
-  CoreElement _sdkVersionContainer;
-
-  CoreElement _sdkVersion;
-
   CoreElement _flutterVersionContainer;
 
   CoreElement _versionContainer;
-
-  Spinner _loadingVersionSpinner;
 
   SettingsController _controller;
 
@@ -72,11 +67,27 @@ class SettingsScreen extends Screen {
   CoreElement createContent(Framework framework) {
     ga_platform.setupDimensions();
     this.framework = framework;
-
-    _initContent();
-    _checkForFlutterVersionService();
-
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+
+    _versionContainer = div(c: 'version-container')
+      ..layoutVertical()
+      ..flex()
+      ..add([
+        _flutterVersionContainer = div()
+          ..layoutVertical()
+          ..hidden(true),
+        _versionDisplay(
+          title: 'Dart SDK:',
+          value: serviceManager.sdkVersion,
+        ),
+        _versionDisplay(
+          title: 'DevTools:',
+          value: devtools.version,
+          includeMargin: false,
+        ),
+      ]);
+
+    _flagList = div(c: 'flag-list')..layoutVertical();
 
     screenDiv
       ..add([
@@ -99,86 +110,40 @@ class SettingsScreen extends Screen {
     return screenDiv;
   }
 
-  void _initContent() {
-    _flagList = div(c: 'flag-list')..layoutVertical();
-
-    _versionContainer = div(c: 'version-container')
-      ..layoutVertical()
-      ..flex()
-      ..add([
-        _loadingVersionSpinner = Spinner.centered(),
-        _sdkVersionContainer = div()
-          ..layoutHorizontal()
-          ..add([
-            h5(text: 'Dart SDK:'),
-            _sdkVersion = h5(c: 'version-value'),
-          ])
-          ..hidden(true),
-        _flutterVersionContainer = div()
-          ..layoutVertical()
-          ..hidden(true)
-      ]);
-  }
-
-  void _checkForFlutterVersionService() async {
-    // Wait for a small delay to give DevTools a chance to pick up the
-    // registered service. This prevents the version UI from flickering.
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (await serviceManager.connectedApp.isAnyFlutterApp) {
-      serviceManager.hasRegisteredService(
-        registrations.flutterVersion.service,
-        (bool serviceAvailable) async {
-          if (serviceAvailable) {
-            final FlutterVersion version =
-                await _controller.getFlutterVersion();
-            _updateVersionUI(useFlutterVersionData: true, version: version);
-          } else {
-            _updateVersionUI(useFlutterVersionData: false);
-          }
-        },
-      );
-    } else {
-      _updateVersionUI(useFlutterVersionData: false);
-    }
-    _loadingVersionSpinner.remove();
-  }
-
-  void _updateVersionUI({
-    @required bool useFlutterVersionData,
-    FlutterVersion version,
-  }) {
-    if (useFlutterVersionData && version != null) {
+  void _updateFlutterVersionUI(FlutterVersion version) {
+    if (version != null) {
       _flutterVersionContainer
         ..clear()
         ..add([
-          div()
-            ..layoutHorizontal()
-            ..add([
-              h5(text: 'Flutter:'),
-              h5(c: 'version-value', text: version.flutterDisplay),
-            ]),
-          div()
-            ..layoutHorizontal()
-            ..add([
-              h5(text: 'Framework:'),
-              h5(c: 'version-value', text: version.frameworkDisplay),
-            ]),
-          div()
-            ..layoutHorizontal()
-            ..add([
-              h5(text: 'Engine:'),
-              h5(c: 'version-value', text: version.engineDisplay),
-            ]),
-          div()
-            ..layoutHorizontal()
-            ..add([
-              h5(text: 'Dart SDK:'),
-              h5(c: 'version-value', text: version.dartSdkVersion),
-            ]),
+          _versionDisplay(
+            title: 'Flutter:',
+            value: version.flutterVersionSummary,
+          ),
+          _versionDisplay(
+            title: 'Framework:',
+            value: version.frameworkVersionSummary,
+          ),
+          _versionDisplay(
+            title: 'Engine:',
+            value: version.engineVersionSummary,
+          ),
         ]);
     }
-    _sdkVersionContainer.hidden(useFlutterVersionData);
-    _flutterVersionContainer.hidden(!useFlutterVersionData);
+    _flutterVersionContainer.hidden(version == null);
+  }
+
+  CoreElement _versionDisplay({
+    @required String title,
+    @required String value,
+    bool includeMargin = true,
+  }) {
+    final versionDisplay = div()
+      ..layoutHorizontal()
+      ..add([
+        div(c: 'setting-title', text: title),
+        div(c: 'version-value', text: value),
+      ]);
+    if (includeMargin) versionDisplay.clazz('version-margin');
+    return versionDisplay;
   }
 }

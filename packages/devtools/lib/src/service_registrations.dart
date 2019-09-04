@@ -40,7 +40,7 @@ const RegisteredServiceDescription hotRestart = RegisteredServiceDescription._(
 /// the Flutter engine, and the Dart sdk.
 const RegisteredServiceDescription flutterVersion =
     RegisteredServiceDescription._(
-  service: 'getFlutterVersion',
+  service: 'flutterVersion',
   title: 'Flutter Version',
   icon: FlutterIcons.flutter,
 );

@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+
 import 'package:devtools/src/globals.dart';
 import 'package:devtools/src/settings/settings_controller.dart';
+import 'package:devtools/src/version.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -20,19 +22,40 @@ void main() async {
     test('entering', () async {
       await env.setupEnvironment();
 
-      String sdkVersion;
+      FlutterVersion flutterVersion;
       List<Flag> flags;
-      settingsController =
-          SettingsController(onSdkVersionChange: (isAnyFlutterApp) {
-        sdkVersion = isAnyFlutterApp;
-      }, onFlagListChange: (flagList) {
-        flags = flagList.flags;
-      });
-      expect(sdkVersion, null);
+      settingsController = SettingsController(
+        onFlutterVersionChanged: (version) {
+          flutterVersion = version;
+        },
+        onFlagListChanged: (flagList) {
+          flags = flagList.flags;
+        },
+      );
+
       expect(flags, null);
+      expect(flutterVersion, null);
 
       await settingsController.entering();
-      expect(sdkVersion, 'Dart SDK Version: ${serviceManager.sdkVersion}');
+
+      try {
+        final flutterVersionResponse = await serviceManager.getFlutterVersion();
+        final expectedFlutterVersion =
+            FlutterVersion.parse(flutterVersionResponse.json);
+        expect(
+          _flutterVersionEquals(flutterVersion, expectedFlutterVersion),
+          isTrue,
+        );
+      } catch (e) {
+        expect(flutterVersion, isNull);
+        expect(
+          e.toString(),
+          equals('Exception: There are no registered methods for service'
+              ' "flutterVersion"'),
+        );
+      }
+
+      expect(flags, isNotNull);
 
       final flagList = await env.service.getFlagList();
       expect(flags.length, flagList.flags.length);
@@ -58,7 +81,16 @@ void main() async {
         }
       }
       expect(expectedFlags.length, 0);
+
+      await env.tearDownEnvironment(force: true);
     });
-  }, tags: 'useFlutterSdk');
+  }, timeout: const Timeout.factor(8), tags: 'useFlutterSdk');
   // TODO: Add a test that uses DartVM instead of Flutter
+}
+
+bool _flutterVersionEquals(FlutterVersion a, FlutterVersion b) {
+  return a.flutterVersionSummary == b.flutterVersionSummary &&
+      a.frameworkVersionSummary == b.frameworkVersionSummary &&
+      a.engineVersionSummary == b.engineVersionSummary &&
+      a.dartSdkVersion == b.dartSdkVersion;
 }
