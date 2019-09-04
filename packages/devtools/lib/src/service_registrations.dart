@@ -16,18 +16,31 @@ class RegisteredServiceDescription {
   final Icon icon;
 }
 
-// Service registered by Flutter Tools. We call this service to perform hot
-// reload.
+/// Hot reload service registered by Flutter Tools.
+///
+/// We call this service to perform hot reload.
 const RegisteredServiceDescription hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
   icon: FlutterIcons.hotReload,
 );
 
-// Service registered by Flutter Tools. We call this service to perform hot
-// restart.
+/// Hot restart service registered by Flutter Tools.
+///
+/// We call this service to perform a hot restart.
 const RegisteredServiceDescription hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
   icon: FlutterIcons.hotRestart,
+);
+
+/// Flutter version service registered by Flutter Tools.
+///
+/// We call this service to get version information about the Flutter framework,
+/// the Flutter engine, and the Dart sdk.
+const RegisteredServiceDescription flutterVersion =
+    RegisteredServiceDescription._(
+  service: 'flutterVersion',
+  title: 'Flutter Version',
+  icon: FlutterIcons.flutter,
 );

@@ -219,6 +219,13 @@ class ServiceConnectionManager {
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
+
+  Future<Response> getFlutterVersion() async {
+    return await callService(
+      registrations.flutterVersion.service,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+  }
 }
 
 class IsolateManager {
