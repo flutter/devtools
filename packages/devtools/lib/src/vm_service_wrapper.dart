@@ -215,7 +215,7 @@ class VmServiceWrapper implements VmService {
     final traceObject = <String, dynamic>{
       CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
-      CpuProfileData.stackDepthKey: cpuSamples.stackDepth,
+      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
       CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
       CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
       CpuProfileData.stackFramesKey: {},
@@ -256,10 +256,6 @@ class VmServiceWrapper implements VmService {
         'tid': sample.tid,
         'ts': sample.timestamp,
         'cat': 'Dart',
-        'args': {
-          // TODO(bkonyi): !IsVMInteralIsolate only
-          'mode': 'basic',
-        },
         CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
       });
     }
@@ -682,18 +678,6 @@ class TrackedFuture<T> {
 }
 
 class _CpuProfileTimelineTree {
-  static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
-  static const kRootIndex = -1;
-  static const kNoFrameId = -1;
-  final CpuSamples samples;
-  final int index;
-  int frameId = kNoFrameId;
-
-  String get name => samples.functions[index].function.name;
-  String get resolvedUrl => samples.functions[index].resolvedUrl;
-
-  final children = <_CpuProfileTimelineTree>[];
-
   factory _CpuProfileTimelineTree.fromCpuSamples(CpuSamples cpuSamples) {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
@@ -710,6 +694,18 @@ class _CpuProfileTimelineTree {
   }
 
   _CpuProfileTimelineTree._fromIndex(this.samples, this.index);
+
+  static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
+  static const kRootIndex = -1;
+  static const kNoFrameId = -1;
+  final CpuSamples samples;
+  final int index;
+  int frameId = kNoFrameId;
+
+  String get name => samples.functions[index].function.name;
+  String get resolvedUrl => samples.functions[index].resolvedUrl;
+
+  final children = <_CpuProfileTimelineTree>[];
 
   static _CpuProfileTimelineTree getTreeFromSample(CpuSample sample) =>
       _timelineTreeExpando[sample];
