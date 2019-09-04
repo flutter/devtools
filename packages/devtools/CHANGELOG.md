@@ -5,7 +5,7 @@
 * CSS polish for cursors, hover, and misc.
 * Use frame time in CPU profile unavailable message.
 * Fixes to our splitter control.
-* Rev to the latest version of `package:vm_service`
+* Rev to the latest version of `package:vm_service`.
 * Remove the dependency on `package:mockito`.
 * Remove the dependency on `package:rxdart`.
 * Support `sse` and `sses` schemes for connection with a running app.
