@@ -1,5 +1,6 @@
 ## 0.1.6-dev
 * Add a page to show Flutter version and Dart VM flags details.
+* Add settings dialog to memory page that supports filtering snapshots and enabling experiments.
 * Various css fixes.
 * CSS polish for cursors, hover, and misc.
 * Use frame time in CPU profile unavailable message.
