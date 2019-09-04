@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'ui/fake_flutter/fake_flutter.dart';
+
 class FlutterVersion {
   FlutterVersion._({
     @required this.version,
@@ -51,4 +53,26 @@ class FlutterVersion {
       'revision $frameworkRevision • $frameworkCommitDate';
 
   String get engineVersionSummary => 'revision $engineRevision';
+
+  @override
+  bool operator ==(other) {
+    return version == other.version &&
+        channel == other.channel &&
+        repositoryUrl == other.repositoryUrl &&
+        frameworkRevision == other.frameworkRevision &&
+        frameworkCommitDate == other.frameworkCommitDate &&
+        engineRevision == other.engineRevision &&
+        dartSdkVersion == other.dartSdkVersion;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        version,
+        channel,
+        repositoryUrl,
+        frameworkRevision,
+        frameworkCommitDate,
+        engineRevision,
+        dartSdkVersion,
+      );
 }

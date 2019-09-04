@@ -38,14 +38,13 @@ void main() async {
 
       await settingsController.entering();
 
+      // TODO(kenzie): remove the try catch block once Flutter stable supports
+      // the flutterVersion service. Revisit this end of November 2019.
       try {
         final flutterVersionResponse = await serviceManager.getFlutterVersion();
         final expectedFlutterVersion =
             FlutterVersion.parse(flutterVersionResponse.json);
-        expect(
-          _flutterVersionEquals(flutterVersion, expectedFlutterVersion),
-          isTrue,
-        );
+        expect(flutterVersion, equals(expectedFlutterVersion));
       } catch (e) {
         expect(flutterVersion, isNull);
         expect(
@@ -86,11 +85,4 @@ void main() async {
     });
   }, timeout: const Timeout.factor(8), tags: 'useFlutterSdk');
   // TODO: Add a test that uses DartVM instead of Flutter
-}
-
-bool _flutterVersionEquals(FlutterVersion a, FlutterVersion b) {
-  return a.flutterVersionSummary == b.flutterVersionSummary &&
-      a.frameworkVersionSummary == b.frameworkVersionSummary &&
-      a.engineVersionSummary == b.engineVersionSummary &&
-      a.dartSdkVersion == b.dartSdkVersion;
 }

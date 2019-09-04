@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -27,6 +29,8 @@ class SettingsController {
 
   final OnFlagListChanged onFlagListChanged;
 
+  final flutterVersionServiceAvailable = Completer();
+
   Future<void> entering() async {
     onFlagListChanged(await serviceManager.service.getFlagList());
     await _onFlutterVersionChanged();
@@ -37,7 +41,8 @@ class SettingsController {
       serviceManager.hasRegisteredService(
         registrations.flutterVersion.service,
         (bool serviceAvailable) async {
-          if (serviceAvailable) {
+          if (serviceAvailable && !flutterVersionServiceAvailable.isCompleted) {
+            flutterVersionServiceAvailable.complete();
             final FlutterVersion version = FlutterVersion.parse(
                 (await serviceManager.getFlutterVersion()).json);
             onFlutterVersionChanged(version);
