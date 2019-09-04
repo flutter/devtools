@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
-import 'package:devtools/src/profiler/cpu_profile_model.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
+
+import 'profiler/cpu_profile_model.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -97,12 +98,19 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Success> clearCpuSamples(String isolateId) async {
     if (await isProtocolVersionLessThan(major: 3, minor: 27)) {
-      final response = await _trackFuture('clearCpuProfile',
-          callMethod('_clearCpuProfile', isolateId: isolateId));
+      final response = await _trackFuture(
+          'clearCpuSamples',
+          callMethod(
+            '_clearCpuProfile',
+            isolateId: isolateId,
+          ));
       return response as Success;
     }
     return _trackFuture(
-        'clearCpuSamples', _vmService.clearCpuSamples(isolateId));
+        'clearCpuSamples',
+        _vmService.clearCpuSamples(
+          isolateId,
+        ));
   }
 
   @override
@@ -188,7 +196,10 @@ class VmServiceWrapper implements VmService {
     return _trackFuture(
         'getCpuSamples',
         _vmService.getCpuSamples(
-            isolateId, timeOriginMicros, timeExtentMicros));
+          isolateId,
+          timeOriginMicros,
+          timeExtentMicros,
+        ));
   }
 
   Future<CpuProfileData> getCpuProfileTimeline(
@@ -222,10 +233,11 @@ class VmServiceWrapper implements VmService {
       CpuProfileData.traceEventsKey: [],
     };
 
-    void processStackFrame(
-        _CpuProfileTimelineTree current, _CpuProfileTimelineTree parent) {
-      final id = nextId;
-      ++nextId;
+    void processStackFrame({
+      @required _CpuProfileTimelineTree current,
+      @required _CpuProfileTimelineTree parent,
+    }) {
+      final id = nextId++;
       current.frameId = id;
 
       // Skip the root
@@ -239,12 +251,12 @@ class VmServiceWrapper implements VmService {
         };
       }
       for (final child in current.children) {
-        processStackFrame(child, current);
+        processStackFrame(current: child, parent: current);
       }
     }
 
     final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
-    processStackFrame(root, /* parent */ null);
+    processStackFrame(current: root, parent: null);
 
     // Build the trace events.
     for (final sample in cpuSamples.samples) {
@@ -681,7 +693,7 @@ class _CpuProfileTimelineTree {
   factory _CpuProfileTimelineTree.fromCpuSamples(CpuSamples cpuSamples) {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
-    // TODO handle truncated?
+    // TODO(bkonyi): handle truncated?
     for (final sample in cpuSamples.samples) {
       current = root;
       // Build an inclusive trie.
@@ -712,8 +724,8 @@ class _CpuProfileTimelineTree {
 
   _CpuProfileTimelineTree _getChild(int index) {
     final length = children.length;
-    int i = 0;
-    while (i < length) {
+    int i;
+    for (i = 0; i < length; ++i) {
       final child = children[i];
       final childIndex = child.index;
       if (childIndex == index) {
@@ -722,7 +734,6 @@ class _CpuProfileTimelineTree {
       if (childIndex > index) {
         break;
       }
-      ++i;
     }
     final child = _CpuProfileTimelineTree._fromIndex(samples, index);
     if (i < length) {
