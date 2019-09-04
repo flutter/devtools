@@ -11,10 +11,12 @@ import 'framework/framework.dart';
 
 class ServerApiClient {
   ServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
-    // We'll want to send notifications when a user tries to reuse an existing
-    // DevTools window, so pop up the notification dialog early while they're
-    // looking at the page (this won't pop up if they've already answered).
-    Notification.requestPermission();
+    _channel.onOpen.first.then((_) {
+      // We'll want to send notifications when a user tries to reuse an existing
+      // DevTools window, so pop up the notification dialog early while they're
+      // looking at the page (this won't pop up if they've already answered).
+      Notification.requestPermission();
+    });
 
     _channel.stream.listen((msg) {
       try {
