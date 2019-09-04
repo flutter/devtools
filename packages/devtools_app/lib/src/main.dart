@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'package:html_shim/html.dart' as html;
 
-import 'package:sse/client/sse_client.dart';
+import 'package:devtools/src/server_api_client.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
@@ -39,9 +39,9 @@ class HtmlPerfToolFramework extends HtmlFramework {
   HtmlPerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
 
+    initSseConnection();
     initGlobalUI();
     initTestingModel();
-    initSseConnection();
   }
 
   void _gAReportExceptions(html.Event e) {
@@ -66,6 +66,8 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
   static const _reloadActionId = 'reload-action';
   static const _restartActionId = 'restart-action';
+
+  ServerApiClient apiClient;
 
   void initGlobalUI() async {
     // Listen for clicks on the 'send feedback' button.
@@ -142,10 +144,18 @@ class HtmlPerfToolFramework extends HtmlFramework {
   void initSseConnection() {
     try {
       print('Connecting to SSE endpoint...');
-      final channel = SseClient('/api/sse');
-      channel.onOpen.first.then((e) {
-        channel.stream.listen(print);
-        channel.sink.add('Test message from client');
+      apiClient = ServerApiClient(this);
+
+      serviceManager.onStateChange.listen((connected) {
+        try {
+          if (connected) {
+            apiClient.notifyConnected(serviceManager.service.connectedUri);
+          } else {
+            apiClient.notifyDisconnected();
+          }
+        } catch (e) {
+          print('Failed to notify server of connection status: $e');
+        }
       });
     } catch (e) {
       print('Failed to connect to SSE API: $e');

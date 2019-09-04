@@ -25,6 +25,7 @@ void _connectWithSse(
     final service = VmServiceWrapper.fromNewVmService(
       stream,
       client.sink.add,
+      uri,
     );
 
     client.sink.done.whenComplete(() {
@@ -71,6 +72,7 @@ void _connectWithWebSocket(
     final service = VmServiceWrapper.fromNewVmService(
       inStream,
       ws.send,
+      uri,
     );
 
     ws.onClose.listen((_) {

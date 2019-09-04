@@ -108,7 +108,7 @@ class CliAppFixture extends AppFixture {
     uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
     final VmServiceWrapper serviceConnection =
-        VmServiceWrapper(await vmServiceConnectUri(uri.toString()));
+        VmServiceWrapper(await vmServiceConnectUri(uri.toString()), uri);
 
     final VM vm = await serviceConnection.getVM();
 

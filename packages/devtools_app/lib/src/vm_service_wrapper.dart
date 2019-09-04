@@ -11,13 +11,15 @@ import 'profiler/cpu_profile_model.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
-    this._vmService, {
+    this._vmService,
+    this.connectedUri, {
     this.trackFutures = false,
   });
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
-    void writeMessage(String message), {
+    void writeMessage(String message),
+    this.connectedUri, {
     Log log,
     DisposeHandler disposeHandler,
     this.trackFutures = false,
@@ -28,6 +30,7 @@ class VmServiceWrapper implements VmService {
 
   VmService _vmService;
   Version _protocolVersion;
+  final Uri connectedUri;
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
 
