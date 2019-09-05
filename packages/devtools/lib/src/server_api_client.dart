@@ -7,10 +7,8 @@ import 'dart:html';
 
 import 'package:sse/client/sse_client.dart';
 
-import 'framework/framework.dart';
-
 class ServerApiClient {
-  ServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
+  ServerApiClient() : _channel = SseClient('/api/sse') {
     _channel.onOpen.first.then((_) {
       // We'll want to send notifications when a user tries to reuse an existing
       // DevTools window, so pop up the notification dialog early while they're
@@ -37,7 +35,6 @@ class ServerApiClient {
     });
   }
 
-  final Framework _framework;
   final SseClient _channel;
 
   int _nextRequestId = 0;

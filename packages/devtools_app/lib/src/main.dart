@@ -144,7 +144,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
   void initSseConnection() {
     try {
       print('Connecting to SSE endpoint...');
-      apiClient = ServerApiClient(this);
+      apiClient = ServerApiClient();
 
       // TODO(dantup): As a workaround for not being able to reconnect DevTools to
       // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
