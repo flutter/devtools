@@ -15,9 +15,8 @@ import 'integration.dart';
 
 CliAppFixture appFixture;
 DevToolsServerDriver server;
-final Map<String, Completer<Map<String, dynamic>>> completers =
-    <String, Completer<Map<String, dynamic>>>{};
-final Map<String, String> registeredServices = <String, String>{};
+final Map<String, Completer<Map<String, dynamic>>> completers = {};
+final Map<String, String> registeredServices = {};
 
 void main() {
   setUp(() async {
