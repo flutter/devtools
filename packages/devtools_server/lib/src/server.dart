@@ -18,6 +18,7 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
 const argHelp = 'help';
+const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
 const launchDevToolsService = 'launchDevTools';
@@ -43,6 +44,12 @@ final argParser = new ArgParser()
     negatable: false,
     abbr: 'm',
     help: 'Sets output format to JSON for consumption in tools.',
+  )
+  ..addFlag(
+    argLaunchBrowser,
+    negatable: false,
+    abbr: 'b',
+    help: 'Launches DevTools in a browser immediately at start.',
   );
 
 void serveDevToolsWithArgs(List<String> arguments) async {
@@ -50,14 +57,20 @@ void serveDevToolsWithArgs(List<String> arguments) async {
 
   final help = args[argHelp];
   final bool machineMode = args[argMachine];
+  final bool launchBrowser = args[argLaunchBrowser];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
-  serveDevTools(help: help, machineMode: machineMode, port: port);
+  serveDevTools(
+      help: help,
+      machineMode: machineMode,
+      launchBrowser: launchBrowser,
+      port: port);
 }
 
 void serveDevTools({
   bool help = false,
   bool machineMode = false,
+  bool launchBrowser = false,
   int port = 0,
 }) async {
   if (help) {
@@ -113,6 +126,10 @@ void serveDevTools({
     },
     machineMode: machineMode,
   );
+
+  if (launchBrowser) {
+    await Chrome.start([devToolsUrl.toString()]);
+  }
 
   final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
       .transform<String>(utf8.decoder)

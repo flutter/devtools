@@ -8,14 +8,14 @@ set -x #echo on
 echo "Editing .gitignore to comment out build directory"
 
 pushd packages/devtools
-
 pub get
+popd
 
-rm -rf build
-pub run build_runner build -o web:build --release
-mv ./build/packages ./build/pack
+tool/build_release.sh
 
+pushd packages/devtools
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
+popd
 
 set +x
 echo "Ready to publish."
@@ -24,4 +24,3 @@ echo "Publish by:"
 echo "cd packages/devtools"
 echo "pub publish"
 echo "git checkout .gitignore"
-popd

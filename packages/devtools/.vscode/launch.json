@@ -10,12 +10,14 @@
 			"preLaunchTask": "pub: build_runner serve"
 		},
 		{
-			"type": "chrome",
+			"type": "dart",
 			"request": "launch",
-			"name": "Build+Run Release dart2js app",
-			"url": "http://localhost:9100",
-			"webRoot": "${workspaceFolder}/build",
-			"preLaunchTask": "Build + Serve Release Build",
+			"name": "Run Server with Release Build",
+			"program": "bin/devtools.dart",
+			"args": [
+				"--launch-browser"
+			],
+			"preLaunchTask": "Build Release Package"
 		},
-	],
+	]
 }
