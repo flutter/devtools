@@ -142,8 +142,13 @@ class HtmlPerfToolFramework extends HtmlFramework {
   }
 
   void initSseConnection() {
+    // When running the debug DDC Build, the server won't be running so we
+    // can't connect to its API (for now at least, the API is optional).
+    if (isDebugBuild()) {
+      return;
+    }
+
     try {
-      print('Connecting to SSE endpoint...');
       apiClient = ServerApiClient();
 
       // TODO(dantup): As a workaround for not being able to reconnect DevTools to
