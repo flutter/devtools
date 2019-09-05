@@ -17,6 +17,7 @@
     --default-color-thumb: #888;
     --default-color: #fff;
     --disabled-background: #555;
+    --disabled-button-color: 89b5f8;
     --error-background: rgb(65, 33, 36);
     --error-summary-color: #ff6b68;
     --inspector-info-color: #909090;
@@ -91,7 +92,7 @@ nav.menu .menu-item {
     position: relative;
 }
 
-.btn[disabled] {
+.btn[disabled], .form-select[disabled] {
     /* !important to override all other states (like hover) */
     opacity: 0.5 !important;
     background-color: transparent !important;
