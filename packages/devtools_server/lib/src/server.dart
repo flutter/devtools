@@ -226,7 +226,7 @@ Future<void> _handleClientsList(
         'clients': connectedClients
             .map((c) => {
                   'hasConnection': c.hasConnection,
-                  'vmServiceUri': c.vmServiceUri.toString(),
+                  'vmServiceUri': c.vmServiceUri?.toString(),
                 })
             .toList()
       },
@@ -281,7 +281,8 @@ Future<void> registerLaunchDevToolsService(
       try {
         // First see if we have an existing DevTools client open that we can
         // reuse.
-        final canReuse = params.containsKey('reuseWindows') &&
+        final canReuse = params != null &&
+            params.containsKey('reuseWindows') &&
             params['reuseWindows'] == true;
         if (canReuse && await _tryReuseExistingDevToolsInstance(vmServiceUri)) {
           return {'result': Success().toJson()};

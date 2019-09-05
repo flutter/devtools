@@ -13,13 +13,13 @@ import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
 
-void main() {
-  CliAppFixture appFixture;
-  DevToolsServerDriver server;
-  String serviceStreamName;
-  final Map<String, Completer<Map<String, dynamic>>> completers =
-      <String, Completer<Map<String, dynamic>>>{};
+CliAppFixture appFixture;
+DevToolsServerDriver server;
+final Map<String, Completer<Map<String, dynamic>>> completers =
+    <String, Completer<Map<String, dynamic>>>{};
+final Map<String, String> registeredServices = <String, String>{};
 
+void main() {
   setUp(() async {
     final bool testInReleaseMode =
         Platform.environment['WEBDEV_RELEASE'] == 'true';
@@ -58,12 +58,7 @@ void main() {
       }
     });
 
-    // Start a test app we can use to connect to.
-    appFixture = await CliAppFixture.create('test/fixtures/empty_app.dart');
-
-    // TODO(dantup): When the stable versions of Dart + Flutter are >= v3.22
-    // of the VM Service (July 2019), the _Service option here can be removed.
-    serviceStreamName = await appFixture.serviceConnection.serviceStreamName;
+    await _startApp();
   });
 
   tearDown(() async {
@@ -71,46 +66,7 @@ void main() {
     await appFixture?.teardown();
   });
 
-  int nextId = 0;
-  Future<Map<String, dynamic>> _send(String method,
-      [Map<String, dynamic> params]) {
-    final id = (nextId++).toString();
-    completers[id] = new Completer<Map<String, dynamic>>();
-    server.write({'id': id.toString(), 'method': method, 'params': params});
-    return completers[id].future;
-  }
-
-  // It may take time for the servers client list to be updated as the web app
-  // connects, so this helper just polls waiting for the expected state and
-  // then returns the client list.
-  Future<Map<String, dynamic>> _waitForClients(
-      {bool requiredConnectionState}) async {
-    Map<String, dynamic> serverResponse;
-    await waitFor(
-      () async {
-        serverResponse = await _send('clients.list');
-        final clients = serverResponse['clients'];
-        return clients is List &&
-            clients.isNotEmpty &&
-            (requiredConnectionState == null ||
-                clients[0]['hasConnection'] == requiredConnectionState);
-      },
-      timeout: Duration(seconds: 10),
-      timeoutMessage: 'Server did not return any known clients',
-      delay: Duration(seconds: 1),
-    );
-    return serverResponse;
-  }
-
   test('registers service', () async {
-    // Track services as they're registered.
-    final registeredServices = <String>{};
-    appFixture.serviceConnection
-        .onEvent(serviceStreamName)
-        .where((e) => e.kind == EventKind.kServiceRegistered)
-        .listen((e) => registeredServices.add(e.service));
-    await appFixture.serviceConnection.streamListen(serviceStreamName);
-
     final serverResponse =
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
     expect(serverResponse['success'], isTrue);
@@ -122,14 +78,6 @@ void main() {
   test(
       'DevTools connects back to server API and registers that it is connected',
       () async {
-    // Track services method names as they're registered.
-    final registeredServices = <String, String>{};
-    appFixture.serviceConnection
-        .onEvent(serviceStreamName)
-        .where((e) => e.kind == EventKind.kServiceRegistered)
-        .listen((e) => registeredServices[e.service] = e.method);
-    await appFixture.serviceConnection.streamListen(serviceStreamName);
-
     // Register the VM.
     await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
@@ -146,4 +94,153 @@ void main() {
     // TODO(dantup): This test will fail until the devtools pubspec.yaml
     // references a version of devtools_server that has this support!
   }, timeout: const Timeout.factor(10), skip: true);
+
+  test('DevTools reports disconnects from a VM', () async {
+    // Register the VM.
+    await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+    // Send a request to launch DevTools in a browser.
+    await appFixture.serviceConnection
+        .callMethod(registeredServices['launchDevTools'], args: {});
+
+    // Wait for the DevTools to inform server that it's connected.
+    await _waitForClients(requiredConnectionState: true);
+
+    // Terminate the VM.
+    await appFixture.teardown();
+
+    // Ensure the client is marked as disconnected.
+    final serverResponse =
+        await _waitForClients(requiredConnectionState: false);
+    expect(serverResponse['clients'], hasLength(1));
+    expect(serverResponse['clients'][0]['hasConnection'], isFalse);
+    expect(serverResponse['clients'][0]['vmServiceUri'], isNull);
+    // TODO(dantup): This test will fail until the devtools pubspec.yaml
+    // references a version of devtools_server that has this support!
+  }, timeout: const Timeout.factor(10), skip: true);
+
+  test('server removes clients that disconnect from the API', () async {
+    // TODO(dantup): This requires the ability for us to shut down Chrome,
+    // probably via a command to the server, which needs
+    // https://github.com/dart-lang/browser_launcher/pull/12
+  }, timeout: const Timeout.factor(10), skip: true);
+
+  test('Server reuses DevTools instance if already connected to same VM',
+      () async {
+    // Register the VM.
+    await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+    // Send a request to launch DevTools in a browser.
+    await appFixture.serviceConnection
+        .callMethod(registeredServices['launchDevTools'], args: {});
+
+    {
+      final serverResponse =
+          await _waitForClients(requiredConnectionState: true);
+      expect(serverResponse['clients'], hasLength(1));
+    }
+
+    // Request again, allowing reuse, and ensure that after a few seconds there
+    // was not a second client added.
+    await appFixture.serviceConnection.callMethod(
+        registeredServices['launchDevTools'],
+        args: {'reuseWindows': true});
+
+    // This delay needs to be long enough to allow DevTools to load and connect
+    // back. If it's too short, the test may pass only because we didn't wait
+    // long enough.
+    await Future.delayed(const Duration(seconds: 5));
+
+    // Ensure there's still only one connection (eg. we didn't spawn a new one
+    // we reused the existing one).
+    final serverResponse = await _waitForClients(requiredConnectionState: true);
+    expect(serverResponse['clients'], hasLength(1));
+    // TODO(dantup): This test will fail until the devtools pubspec.yaml
+    // references a version of devtools_server that has this support!
+  }, timeout: const Timeout.factor(10), skip: true);
+
+  test('Server reuses DevTools instance if not connected to a VM', () async {
+    // Register the VM.
+    await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+    // Send a request to launch DevTools in a browser.
+    await appFixture.serviceConnection
+        .callMethod(registeredServices['launchDevTools'], args: {});
+
+    // Wait for the DevTools to inform server that it's connected.
+    await _waitForClients(requiredConnectionState: true);
+
+    // Terminate the VM.
+    await appFixture.teardown();
+
+    // Ensure the client is marked as disconnected.
+    await _waitForClients(requiredConnectionState: false);
+
+    // Start up a new app.
+    await _startApp();
+    await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+    // Send a new request to launch.
+    await appFixture.serviceConnection.callMethod(
+        registeredServices['launchDevTools'],
+        args: {'reuseWindows': true});
+
+    // Ensure we now have a single connected client.
+    final serverResponse = await _waitForClients(requiredConnectionState: true);
+    expect(serverResponse['clients'], hasLength(1));
+    expect(serverResponse['clients'][0]['hasConnection'], isTrue);
+    expect(serverResponse['clients'][0]['vmServiceUri'],
+        equals(appFixture.serviceUri.toString()));
+
+    // TODO(dantup): This test will fail until the devtools pubspec.yaml
+    // references a version of devtools_server that has this support!
+  }, timeout: const Timeout.factor(10), skip: true);
+}
+
+Future<void> _startApp() async {
+  appFixture = await CliAppFixture.create('test/fixtures/empty_app.dart');
+
+  // TODO(dantup): When the stable versions of Dart + Flutter are >= v3.22
+  // of the VM Service (July 2019), the _Service option here can be removed.
+  final serviceStreamName =
+      await appFixture.serviceConnection.serviceStreamName;
+
+  // Track services method names as they're registered.
+  appFixture.serviceConnection
+      .onEvent(serviceStreamName)
+      .where((e) => e.kind == EventKind.kServiceRegistered)
+      .listen((e) => registeredServices[e.service] = e.method);
+  await appFixture.serviceConnection.streamListen(serviceStreamName);
+}
+
+int nextId = 0;
+Future<Map<String, dynamic>> _send(String method,
+    [Map<String, dynamic> params]) {
+  final id = (nextId++).toString();
+  completers[id] = new Completer<Map<String, dynamic>>();
+  server.write({'id': id.toString(), 'method': method, 'params': params});
+  return completers[id].future;
+}
+
+// It may take time for the servers client list to be updated as the web app
+// connects, so this helper just polls waiting for the expected state and
+// then returns the client list.
+Future<Map<String, dynamic>> _waitForClients(
+    {bool requiredConnectionState}) async {
+  Map<String, dynamic> serverResponse;
+  await waitFor(
+    () async {
+      serverResponse = await _send('clients.list');
+      final clients = serverResponse['clients'];
+      return clients is List &&
+          clients.isNotEmpty &&
+          (requiredConnectionState == null ||
+              clients
+                  .any((c) => c['hasConnection'] == requiredConnectionState));
+    },
+    timeout: const Duration(seconds: 10),
+    timeoutMessage: 'Server did not return any known clients',
+    delay: const Duration(seconds: 1),
+  );
+  return serverResponse;
 }
