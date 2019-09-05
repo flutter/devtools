@@ -142,8 +142,9 @@ void main() {
     // Request again, allowing reuse, and ensure that after a few seconds there
     // was not a second client added.
     await appFixture.serviceConnection.callMethod(
-        registeredServices['launchDevTools'],
-        args: {'reuseWindows': true});
+      registeredServices['launchDevTools'],
+      args: {'reuseWindows': true},
+    );
 
     // This delay needs to be long enough to allow DevTools to load and connect
     // back. If it's too short, the test may pass only because we didn't wait
@@ -181,8 +182,9 @@ void main() {
 
     // Send a new request to launch.
     await appFixture.serviceConnection.callMethod(
-        registeredServices['launchDevTools'],
-        args: {'reuseWindows': true});
+      registeredServices['launchDevTools'],
+      args: {'reuseWindows': true},
+    );
 
     // Ensure we now have a single connected client.
     final serverResponse = await _waitForClients(requiredConnectionState: true);
