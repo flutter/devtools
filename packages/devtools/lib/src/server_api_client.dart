@@ -56,16 +56,15 @@ class ServerApiClient {
     // Reload the page with the new VM service URI in the querystring.
     // TODO(dantup): Remove this code and replace with code that just reconnects
     // when it's supported better (https://github.com/flutter/devtools/issues/989).
+    //
+    // This currently doesn't work, as the app does not reinitialize correctly.
+    //_framework.connectDialog.connectTo(Uri.parse(requestParams['uri']));
     final uri = Uri.parse(window.location.href);
     final newUriParams = Map.of(uri.queryParameters);
     newUriParams['uri'] = requestParams['uri'];
     newUriParams['notify'] = 'true';
     window.location
         .replace(uri.replace(queryParameters: newUriParams).toString());
-
-    // TODO(dantup): Could we make devtools able to reconnect more gracefully?
-    // This currently doensdoesn't work, as the app does not reinitialize correctly.
-    //_framework.connectDialog.connectTo(Uri.parse(requestParams['uri']));
   }
 
   Future<void> notify() async {
