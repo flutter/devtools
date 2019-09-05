@@ -33,10 +33,10 @@ class SettingsController {
 
   Future<void> entering() async {
     onFlagListChanged(await serviceManager.service.getFlagList());
-    await _onFlutterVersionChanged();
+    await _listenForFlutterVersionChanges();
   }
 
-  Future<void> _onFlutterVersionChanged() async {
+  Future<void> _listenForFlutterVersionChanges() async {
     if (await serviceManager.connectedApp.isAnyFlutterApp) {
       serviceManager.hasRegisteredService(
         registrations.flutterVersion.service,

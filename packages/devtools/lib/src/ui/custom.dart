@@ -249,7 +249,7 @@ class SelectableTree<T> extends CoreElement
   TreeNode<SelectableTreeNodeItem<T>> _addItemToTree(
       CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
-    final obj = TreeNode(new SelectableTreeNodeItem(renderer(item), item));
+    final obj = TreeNode(SelectableTreeNodeItem(renderer(item), item));
     obj.data.element.click(() {
       select(obj, clear: obj.data.element.hasClass('selected'));
     });
@@ -258,7 +258,7 @@ class SelectableTree<T> extends CoreElement
     element.add(obj.data.element);
 
     if (childProvider.hasChildren(item)) {
-      final TreeToggle toggle = new TreeToggle();
+      final TreeToggle toggle = TreeToggle();
       obj.data.element.element.children.insert(0, toggle.element);
 
       bool hasPopulated = false;
@@ -287,7 +287,7 @@ class SelectableTree<T> extends CoreElement
       });
     } else {
       obj.data.element.element.children
-          .insert(0, new TreeToggle(empty: true).element);
+          .insert(0, TreeToggle(empty: true).element);
     }
 
     container.add(element);
@@ -359,8 +359,7 @@ class TreeToggle extends CoreElement {
 
   bool _isOpen = false;
 
-  final StreamController<bool> _openController =
-      new StreamController.broadcast();
+  final StreamController<bool> _openController = StreamController.broadcast();
 
   Stream<bool> get onOpen => _openController.stream;
 }

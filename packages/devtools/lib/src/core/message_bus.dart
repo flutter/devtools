@@ -20,7 +20,7 @@ class BusEvent {
 /// event listeners.
 class MessageBus {
   MessageBus() {
-    _controller = new StreamController.broadcast();
+    _controller = StreamController.broadcast();
   }
 
   StreamController<BusEvent> _controller;

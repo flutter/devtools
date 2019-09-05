@@ -17,7 +17,7 @@ void main() {
     TestStringTreeView tree;
 
     setUp(() async {
-      tree = new TestStringTreeView();
+      tree = TestStringTreeView();
       document.body.append(tree.element);
       await window.animationFrame;
       tree.element.focus();
@@ -371,7 +371,7 @@ void main() {
 
 class TestStringTreeView extends SelectableTree<String> {
   TestStringTreeView() {
-    setChildProvider(new StringChildProvider());
+    setChildProvider(StringChildProvider());
     setItems(['Item 1', 'Item 2', 'Item 3']);
     setRenderer((String value) => li(c: 'list-item')..add(span(text: value)));
   }

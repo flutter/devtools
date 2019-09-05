@@ -37,7 +37,7 @@ class ServiceConnectionManager {
     if (_serviceCapabilities == null) {
       await serviceAvailable.future;
       final version = await service.getVersion();
-      _serviceCapabilities = new VmServiceCapabilities(version);
+      _serviceCapabilities = VmServiceCapabilities(version);
     }
     return _serviceCapabilities;
   }

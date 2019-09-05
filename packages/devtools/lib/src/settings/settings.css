@@ -20,9 +20,13 @@
     margin-left: 4px;
 }
 
+.flag-section {
+    height: 100%;
+}
+
 .flag-list-container {
     position: relative;
-    height: 100%;
+    height: calc(100% - 36px); /* Subtract 36 to account for flag section title (28px) and margin (8px). */
 }
 
 .flag-list {

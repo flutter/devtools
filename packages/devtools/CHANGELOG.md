@@ -1,10 +1,11 @@
 ## 0.1.6-dev
-* Add a page to show Flutter SDK version and Dart VM flags details.
+* Add a page to show Flutter version and Dart VM flags details.
+* Add settings dialog to memory page that supports filtering snapshots and enabling experiments.
 * Various css fixes.
 * CSS polish for cursors, hover, and misc.
 * Use frame time in CPU profile unavailable message.
 * Fixes to our splitter control.
-* Rev to the latest version of `package:vm_service`
+* Rev to the latest version of `package:vm_service`.
 * Remove the dependency on `package:mockito`.
 * Remove the dependency on `package:rxdart`.
 * Support `sse` and `sses` schemes for connection with a running app.
@@ -15,6 +16,8 @@
 * Support Ansi color codes in logging views.
 * Add keyboard navigation to the inspector tree view.
 * Enable structured errors by default.
+* Fix NPE in the Debugger.
+* Improve testing on Windows.
 
 ## 0.1.5 - 2019-08-05
 * Support expanding or collapsing all values in the Call Tree and Bottom Up views (parts of the CPU profiler).

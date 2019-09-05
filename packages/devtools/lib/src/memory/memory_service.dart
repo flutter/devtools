@@ -59,7 +59,7 @@ class InboundReference extends Response {
   }
 
   static InboundReference parse(Map<String, dynamic> json) {
-    return json == null ? null : new InboundReference._fromJson(json);
+    return json == null ? null : InboundReference._fromJson(json);
   }
 
   dynamic parentField;

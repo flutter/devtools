@@ -38,6 +38,39 @@ rebuilds the portion of the application that was edited each time you reload
 the page in the browser. If initial app load times become slow as this tool
 grows, we can integrate with the hot restart support in `webdev`.
 
+### Developing with VS Code
+
+#### DevTools
+
+If you're using VS Code to work on DevTools you can run DevTools from the editor
+using the VS Code tasks without having to run `webdev serve` in a terminal window:
+
+- Open the root of the repository in VS Code
+- Press `F5`
+
+This will serve the application in the background and launch Google Chrome. Subsequent
+launches will just re-launch the browser since the task remains running in the background
+and rebuilding as necessary.
+
+#### DevTools Server
+
+To work on devtools_server you'll need to temporarily update the devtools pubspec to
+reference the local version of devtools_server and make release builds of devtools for
+the server to serve:
+
+- In `packages/devtools/pubspec.yaml` uncomment the `path: ../devtools_server` line
+  and comment out the version number on the line above.
+- In VS Code, on the Debug side bar switch to the `Run Server with Release Build` config
+- Press F5
+
+This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
+to serve it.
+
+If you need to make breaking changes to DevTools that require changes to the server
+(such that DevTools cannot run against the live Pub version of devtools_server) it's
+critical that the devtools_server is released first and the version number in pubspec
+is updated. Please make sure this is clear on any PRs you open.
+
 ## Testing
 
 ### Running tests that depend on the Flutter SDK
@@ -75,7 +108,7 @@ branch and run with the `--stable` switch.
 ./tool/update_goldens.sh --stable
 ```
 
-### third_party dependencies
+## third_party dependencies
 
 All content not authored by the Flutter team must go in the third_party
 directory. As an expedient to make the third_party code work well with our build scripts,
