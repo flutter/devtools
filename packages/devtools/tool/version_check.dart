@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:devtools/devtools.dart' as devtools show version;
 
 void main() {
-  final File pubspecFile = new File('pubspec.yaml');
+  final File pubspecFile = File('pubspec.yaml');
   if (!pubspecFile.existsSync()) {
     fail('${pubspecFile.path} not found.');
   }

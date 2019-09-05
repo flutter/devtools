@@ -14,8 +14,8 @@ void main() {
   print('starting ansi color app');
 
   // Print out text exercising a wide range of ansi color styles.
-  final sb = new StringBuffer();
-  final pen = new AnsiPen();
+  final sb = StringBuffer();
+  final pen = AnsiPen();
 
   // Test the 16 color defaults.
   for (int c = 0; c < 16; c++) {

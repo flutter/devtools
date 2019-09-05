@@ -13,7 +13,7 @@ class HeapSpace {
         used = json['used'];
 
   static HeapSpace parse(Map<String, dynamic> json) =>
-      json == null ? null : new HeapSpace._fromJson(json);
+      json == null ? null : HeapSpace._fromJson(json);
 
   final Map<String, dynamic> json;
 
