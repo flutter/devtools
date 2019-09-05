@@ -6,14 +6,15 @@
 			"request": "launch",
 			"name": "Serve DDC app",
 			"url": "http://localhost:8080",
-			"webRoot": "${workspaceFolder}/web",
-			"preLaunchTask": "pub: build_runner serve"
+			"webRoot": "${workspaceFolder}/packages/devtools/web",
+			"preLaunchTask": "Serve DDC"
 		},
 		{
 			"type": "dart",
 			"request": "launch",
 			"name": "Run Server with Release Build",
 			"program": "bin/devtools.dart",
+			"cwd": "packages/devtools",
 			"args": [
 				"--launch-browser"
 			],
