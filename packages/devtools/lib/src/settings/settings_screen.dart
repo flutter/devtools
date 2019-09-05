@@ -87,8 +87,6 @@ class SettingsScreen extends Screen {
         ),
       ]);
 
-    _flagList = div(c: 'flag-list')..layoutVertical();
-
     screenDiv
       ..add([
         div(c: 'section')
@@ -96,14 +94,13 @@ class SettingsScreen extends Screen {
             h2(text: 'Version Information'),
             _versionContainer,
           ]),
-        div(c: 'section')
-          ..flex()
+        div(c: 'section flag-section')
           ..add([
             h2(text: 'Dart VM Flag List'),
             div(c: 'flag-list-container')
               ..flex()
-              ..add(_flagList),
-          ])
+              ..add(_flagList = div(c: 'flag-list')..layoutVertical()),
+          ]),
       ]);
 
     _controller.entering();
