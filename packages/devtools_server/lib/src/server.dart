@@ -25,7 +25,7 @@ const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
 
-final argParser = new ArgParser()
+final argParser = ArgParser()
   ..addFlag(
     argHelp,
     negatable: false,
@@ -311,7 +311,7 @@ bool isVersionLessThan(
       (version.major == major && version.minor < minor);
 }
 
-final bool _isChromeOS = new File('/dev/.cros_milestone').existsSync();
+final bool _isChromeOS = File('/dev/.cros_milestone').existsSync();
 
 bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
   const tunneledPorts = {8000, 8008, 8080, 8085, 8888, 9005, 3000, 4200, 5000};

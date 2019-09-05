@@ -41,7 +41,7 @@ class DevToolsServerDriver {
       <String>['bin/devtools.dart', '--machine', '--port', '0'],
     );
 
-    return new DevToolsServerDriver._(
+    return DevToolsServerDriver._(
         process,
         process.stdin,
         process.stdout.transform(utf8.decoder).transform(const LineSplitter()),

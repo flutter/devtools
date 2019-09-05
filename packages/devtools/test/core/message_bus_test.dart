@@ -14,7 +14,7 @@ void main() {
 void defineTests() {
   group('message_bus', () {
     test('fire one event', () async {
-      final MessageBus bus = new MessageBus();
+      final MessageBus bus = MessageBus();
       final Future<List<BusEvent>> future =
           bus.onEvent(type: 'app.restart').toList();
       _fireEvents(bus);
@@ -24,7 +24,7 @@ void defineTests() {
     });
 
     test('fire two events', () async {
-      final MessageBus bus = new MessageBus();
+      final MessageBus bus = MessageBus();
       final Future<List<BusEvent>> future =
           bus.onEvent(type: 'file.saved').toList();
       _fireEvents(bus);
@@ -36,7 +36,7 @@ void defineTests() {
     });
 
     test('receive all events', () async {
-      final MessageBus bus = new MessageBus();
+      final MessageBus bus = MessageBus();
       final Future<List<BusEvent>> future = bus.onEvent().toList();
       _fireEvents(bus);
       bus.close();
@@ -47,7 +47,7 @@ void defineTests() {
 }
 
 void _fireEvents(MessageBus bus) {
-  bus.addEvent(new BusEvent('app.restart'));
-  bus.addEvent(new BusEvent('file.saved', data: 'foo.dart'));
-  bus.addEvent(new BusEvent('file.saved', data: 'bar.dart'));
+  bus.addEvent(BusEvent('app.restart'));
+  bus.addEvent(BusEvent('file.saved', data: 'foo.dart'));
+  bus.addEvent(BusEvent('file.saved', data: 'bar.dart'));
 }

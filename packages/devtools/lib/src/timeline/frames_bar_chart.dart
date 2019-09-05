@@ -164,7 +164,7 @@ class PlotlyDivGraph extends CoreElement {
   }
 
   void createPlot(dynamic element) {
-    plotlyChart = new FramesBarPlotly(
+    plotlyChart = FramesBarPlotly(
       frameGraph,
       element,
       useLogScale: false,

@@ -342,7 +342,7 @@ class PerfToolFramework extends Framework {
       }
     } else {
       if (connectionStatus == null) {
-        connectionStatus = new StatusItem();
+        connectionStatus = StatusItem();
         auxiliaryStatus.add(connectionStatus);
       }
       connectionStatus.element.text = 'no device connected';

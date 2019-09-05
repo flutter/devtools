@@ -40,9 +40,9 @@ class Framework {
 
     // TODO(kenzie): refactor [connectDialog] and [snapshotMessage] to be in their
     // own screen.
-    connectDialog = new ConnectDialog(this);
+    connectDialog = ConnectDialog(this);
 
-    snapshotMessage = new SnapshotMessage(this);
+    snapshotMessage = SnapshotMessage(this);
 
     analyticsDialog = AnalyticsOptInDialog(this);
   }
@@ -302,7 +302,7 @@ class Framework {
       if (screen.needsResizing) {
         // Fire a resize used to ensure a plotly chart (transitioning from one
         // screen to another uses display:none).
-        _screenContents[current].element.dispatchEvent(new Event('resize'));
+        _screenContents[current].element.dispatchEvent(Event('resize'));
         screen.needsResizing = false;
       }
     } else {

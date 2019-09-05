@@ -83,7 +83,7 @@ class MemoryChart extends CoreElement {
   void plotSnapshot() {
     if (element.style.height != '${_memoryGraphEventTimelineHeight}px') {
       element.style..height = '${_memoryGraphEventTimelineHeight}px';
-      element.dispatchEvent(new Event('resize'));
+      element.dispatchEvent(Event('resize'));
     }
     _plotlyChart.plotSnapshot();
   }
@@ -91,7 +91,7 @@ class MemoryChart extends CoreElement {
   void plotReset() {
     if (element.style.height != '${_memoryGraphEventTimelineHeight}px') {
       element.style..height = '${_memoryGraphEventTimelineHeight}px';
-      element.dispatchEvent(new Event('resize'));
+      element.dispatchEvent(Event('resize'));
     }
     _plotlyChart.plotReset();
   }

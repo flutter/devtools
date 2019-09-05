@@ -82,7 +82,7 @@ class EvalOnDartLibrary {
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError(new LibraryNotFound(_candidateLibraryNames));
+      _libraryRef.completeError(LibraryNotFound(_candidateLibraryNames));
     } catch (e, stack) {
       _handleError(e, stack);
     }

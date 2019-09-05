@@ -20,7 +20,7 @@ class VariablesView implements CoreElementView {
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
 
-    _items.setChildProvider(new VariablesChildProvider(debuggerState));
+    _items.setChildProvider(VariablesChildProvider(debuggerState));
 
     _items.setRenderer((BoundVariable variable) {
       final String name = variable.name;
@@ -129,7 +129,7 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
             assoc.key.kind == InstanceKind.kString) {
           keyString = "'$keyString'";
         }
-        return new BoundVariable()
+        return BoundVariable()
           ..name = '[$keyString]'
           ..value = assoc.value;
       }).toList();
@@ -138,7 +138,7 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
       int index = 0;
 
       for (dynamic value in instance.elements) {
-        result.add(new BoundVariable()
+        result.add(BoundVariable()
           ..name = '[$index]'
           ..value = value);
         index++;
@@ -147,7 +147,7 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
       return result;
     } else if (instance.fields != null) {
       return instance.fields.map((BoundField field) {
-        return new BoundVariable()
+        return BoundVariable()
           ..name = field.decl.name
           ..value = field.value;
       }).toList();
