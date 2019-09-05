@@ -1,0 +1,34 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve DDC",
+			"type": "shell",
+			"options": {
+				"cwd": "${workspaceFolder}/packages/devtools",
+			},
+			"command": "pub",
+			"args": [
+				"run",
+				"build_runner",
+				"serve",
+				"web"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$dart-pub-build_runner"
+			]
+		},
+		{
+			"label": "Build Release Package",
+			"type": "shell",
+			"options": {
+				"cwd": "${workspaceFolder}",
+			},
+			"command": "tool/build_release.sh",
+			"group": "build",
+			"problemMatcher": []
+		}
+	],
+}
