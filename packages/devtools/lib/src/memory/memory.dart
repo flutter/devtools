@@ -189,11 +189,12 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..click(
         _loadAllocationProfile,
         () {
+          // Shift key pressed while clicking on Snapshot button enables live
+          // memory inspection will not work in profile build.
+
           // TODO(terry): Disable when real binary snapshot is exposed.
           enableExperiment();
 
-          // Shift key pressed while clicking on Snapshot button enables live
-          // memory inspection will not work in profile build.
           _loadAllocationProfile();
         },
       )
@@ -362,9 +363,13 @@ class MemoryScreen extends Screen with SetStateMixin {
                 div(c: 'setttings-options-2')
                   ..add([
                     experimentCheckbox = createCheckBox(
-                      'Navigation Experiment ',
-                      memoryController.settings.experiment,
-                    ),
+                        'Navigation Experiment ',
+                        memoryController.settings.experiment, () {
+                      // TODO(terry): Brittle but experiments for now.
+                      final html.CheckboxInputElement cb =
+                          experimentCheckbox.first.element;
+                      memoryController.settings.experiment = cb.checked;
+                    }),
                     br(), // Settings Option 2 available
                     br(), // Settings Option 3 available
                     br(), // Settings Option 4 available
@@ -491,8 +496,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     settingsButton.disabled = false;
   }
 
-  List<CoreElement> createCheckBox(String name,
-          [bool checked = false, void handle()]) =>
+  List<CoreElement> createCheckBox(String name, bool checked, void handle()) =>
       [
         checkbox(
           text: name,
