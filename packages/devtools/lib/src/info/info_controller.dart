@@ -11,7 +11,7 @@ import '../globals.dart';
 import '../service_registrations.dart' as registrations;
 import '../version.dart';
 
-// TODO(kenzie): we should listen for flag value updates and update the settings
+// TODO(kenzie): we should listen for flag value updates and update the info
 // screen with the new flag values. See
 // https://github.com/flutter/devtools/issues/988.
 
@@ -19,8 +19,8 @@ typedef OnFlutterVersionChanged = void Function(FlutterVersion version);
 
 typedef OnFlagListChanged = void Function(FlagList flagList);
 
-class SettingsController {
-  SettingsController({
+class InfoController {
+  InfoController({
     @required this.onFlutterVersionChanged,
     @required this.onFlagListChanged,
   });

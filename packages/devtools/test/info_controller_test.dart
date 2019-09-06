@@ -5,7 +5,7 @@
 @TestOn('vm')
 
 import 'package:devtools/src/globals.dart';
-import 'package:devtools/src/settings/settings_controller.dart';
+import 'package:devtools/src/info/info_controller.dart';
 import 'package:devtools/src/version.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,17 +14,17 @@ import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
 
 void main() async {
-  SettingsController settingsController;
+  InfoController infoController;
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-  group('settings controller test', () {
+  group('info controller', () {
     test('entering', () async {
       await env.setupEnvironment();
 
       FlutterVersion flutterVersion;
       List<Flag> flags;
-      settingsController = SettingsController(
+      infoController = InfoController(
         onFlutterVersionChanged: (version) {
           flutterVersion = version;
         },
@@ -36,7 +36,7 @@ void main() async {
       expect(flags, null);
       expect(flutterVersion, null);
 
-      await settingsController.entering();
+      await infoController.entering();
 
       // TODO(kenzie): remove the try catch block once Flutter stable supports
       // the flutterVersion service. Revisit this end of November 2019.
@@ -79,7 +79,11 @@ void main() async {
           expectedFlags.removeLast();
         }
       }
-      expect(expectedFlags.length, 0);
+      expect(
+        expectedFlags.length,
+        0,
+        reason: 'Value of expectedFlags is $expectedFlags',
+      );
 
       await env.tearDownEnvironment(force: true);
     });
