@@ -11,13 +11,13 @@ import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
 import 'globals.dart';
+import 'info/info_screen.dart';
 import 'inspector/inspector.dart';
 import 'logging/logging.dart';
 import 'memory/memory.dart';
 import 'model/model.dart';
 import 'performance/performance_screen.dart';
 import 'service_registrations.dart' as registrations;
-import 'settings/settings_screen.dart';
 import 'timeline/timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
@@ -205,7 +205,7 @@ class PerfToolFramework extends Framework {
             ? runningProfileBuildMsg
             : duplicateDebuggerFunctionalityMsg));
     addScreen(LoggingScreen());
-    addScreen(SettingsScreen());
+    addScreen(InfoScreen());
   }
 
   IsolateRef get currentIsolate =>
