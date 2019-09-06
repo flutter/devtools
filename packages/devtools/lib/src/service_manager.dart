@@ -226,6 +226,34 @@ class ServiceConnectionManager {
       isolateId: _isolateManager.selectedIsolate.id,
     );
   }
+
+  Future<int> getDisplayRefreshRate() async {
+    final flutterViewListResponse = await service.callServiceExtension(
+      registrations.flutterListViews,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+    final List<dynamic> views =
+        flutterViewListResponse.json['views'].cast<Map<String, dynamic>>();
+
+    // TODO(kenzie): what do we do if there is more than one flutter view?
+    final flutterView = views.firstWhere(
+      (view) => view['type'] == 'FlutterView',
+      orElse: () => null,
+    );
+
+    if (flutterView == null) {
+      print('No Flutter Views to query: ${flutterViewListResponse.json}');
+    }
+
+    final viewId = flutterView['id'];
+    final displayRefreshRateResponse = await service.callServiceExtension(
+      registrations.displayRefreshRate,
+      isolateId: _isolateManager.selectedIsolate.id,
+      args: {'viewId': viewId},
+    );
+    final double fps = displayRefreshRateResponse.json['fps'];
+    return fps.round();
+  }
 }
 
 class IsolateManager {
