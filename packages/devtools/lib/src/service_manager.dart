@@ -235,7 +235,7 @@ class ServiceConnectionManager {
     final List<dynamic> views =
         flutterViewListResponse.json['views'].cast<Map<String, dynamic>>();
 
-    // TODO(kenzie): what do we do if there is more than one flutter view?
+    // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhere(
       (view) => view['type'] == 'FlutterView',
       orElse: () => null,
