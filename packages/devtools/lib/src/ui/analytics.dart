@@ -312,21 +312,11 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
   final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
-  if (isFlutter && !isProfile) {
-    // Compute the Flutter platform for the user's running application.
-    final vmService = serviceManager.service;
-
-    // Return values from operatingSystem can be:
-    //    android
-    //    linux
-    //    ios
-    //    macos
-    //    windows
-    //    fuchsia
-    userPlatformType =
-        (await vmService.isProtocolVersionLessThan(major: 3, minor: 24))
-            ? 'unknown'
-            : (await vmService.getVM()).operatingSystem;
+  if (isFlutter) {
+    userPlatformType = (await serviceManager.service
+            .isProtocolVersionLessThan(major: 3, minor: 24))
+        ? 'unknown'
+        : serviceManager.vm.operatingSystem;
   }
 
   if (isAnyFlutterApp) {
