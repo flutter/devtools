@@ -9,9 +9,7 @@ library gtags;
 
 import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:js/js.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -25,12 +23,13 @@ const String appTypeWeb = 'web';
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
 // Dimensions3 PlatformType values:
-const String platformTypeAndroid = 'android_flutter';
-const String platformTypeIOS = 'ios_flutter';
-const String platformTypeFuchsia = 'fuchsia';
-const String platformTypeLinux = 'linux';
-const String platformTypeMac = 'mac';
-const String platformTypeWindows = 'windows';
+//    android
+//    linux
+//    ios
+//    macos
+//    windows
+//    fuchsia
+//    unknown     VM Service before version 3.24
 // Dimension4 devToolsPlatformType values:
 const String devToolsPlatformTypeMac = 'MacIntel';
 const String devToolsPlatformTypeLinux = 'Linux';
@@ -313,32 +312,11 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isProfile = await serviceManager.connectedApp.isProfileBuild;
   final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
-  if (isFlutter && !isProfile) {
-    // Compute the Flutter platform for the user's running application.
-    final VmService vmService = serviceManager.service;
-    final io = EvalOnDartLibrary(['dart:io'], vmService);
-
-    // eval user's Platform for all possible values.
-    final android = await io.eval('Platform.isAndroid', isAlive: null);
-    final iOS = await io.eval('Platform.isIOS', isAlive: null);
-    final fuchsia = await io.eval('Platform.isFuchsia', isAlive: null);
-    final linux = await io.eval('Platform.isLinux', isAlive: null);
-    final macOS = await io.eval('Platform.isMacOS', isAlive: null);
-    final windows = await io.eval('Platform.isWindows', isAlive: null);
-
-    if (android.valueAsString == 'true') {
-      userPlatformType = platformTypeAndroid;
-    } else if (iOS.valueAsString == 'true') {
-      userPlatformType = platformTypeIOS;
-    } else if (fuchsia.valueAsString == 'true') {
-      userPlatformType = platformTypeFuchsia;
-    } else if (linux.valueAsString == 'true') {
-      userPlatformType = platformTypeLinux;
-    } else if (macOS.valueAsString == 'true') {
-      userPlatformType = platformTypeMac;
-    } else if (windows.valueAsString == 'true') {
-      userPlatformType = platformTypeWindows;
-    }
+  if (isFlutter) {
+    userPlatformType = (await serviceManager.service
+            .isProtocolVersionLessThan(major: 3, minor: 24))
+        ? 'unknown'
+        : serviceManager.vm.operatingSystem;
   }
 
   if (isAnyFlutterApp) {
