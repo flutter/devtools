@@ -575,41 +575,6 @@ form + form {
     margin-right: 20px;
 }
 
-.perf-chart {
-  height: 100px;
-
-  flex: none;
-}
-
-.perf-chart[disabled] {
-  background: var(--disabled-background);
-  opacity: 0.5;
-}
-
-.perf-chart .perf-label {
-    padding: 4px 8px;
-    position: absolute;
-    bottom: 0;
-    color: var(--footer-color);
-}
-
-.perf-chart .perf-label.top-right {
-    top: 0;
-    right: 0;
-    text-align: right;
-    height: 30px;
-}
-
-.perf-chart .perf-label.top-left {
-    top: 0;
-    left: 0;
-    height: 30px;
-}
-
-/* .perf-table {
-
-} */
-
 span.function-kind {
     background: #888;
     color: #fff;
@@ -856,6 +821,12 @@ div.tabnav-tab {
     display: inline-flex;
     align-items: center;
     height: 30px;
+}
+
+.form-select[disabled], .form-select[disabled]:hover {
+    color: rgba(36,41,46,0.4);
+    background-color: #eff3f6;
+    cursor: default;
 }
 
 .form-select:hover {
