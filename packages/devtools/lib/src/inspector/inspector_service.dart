@@ -86,7 +86,7 @@ class InspectorService {
       for (ClassRef classRef in library.classes) {
         if ('WidgetInspectorService' == classRef.name) {
           final classObj = await inspectorLibrary.getClass(classRef, null);
-          final Set<String> functionNames = {};
+          final functionNames = <String>{};
           for (FuncRef funcRef in classObj.functions) {
             functionNames.add(funcRef.name);
           }

@@ -243,26 +243,6 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
 
   bool _recomputeRows = false;
 
-  final List<InspectorTreeRow> cachedRows = [];
-
-  void _maybeClearCache() {
-    if (root.isDirty) {
-      cachedRows.clear();
-      root.isDirty = false;
-      lastContentWidth = null;
-    }
-  }
-
-  @override
-  InspectorTreeRow getCachedRow(int index) {
-    _maybeClearCache();
-    while (cachedRows.length <= index) {
-      cachedRows.add(null);
-    }
-    cachedRows[index] ??= root.getRow(index);
-    return cachedRows[index];
-  }
-
   @override
   void setState(VoidCallback modifyState) {
     // More closely match Flutter semantics where state is set immediately
@@ -275,9 +255,6 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
   }
 
   double _computeContentWidth(Size size) {
-    // TODO: we should add a listener instead that clears the cache when the
-    // root is marked as dirty.
-    _maybeClearCache();
     if (lastContentWidth == null) {
       double maxIndent = 0;
       for (int i = 0; i < numRows; i++) {

@@ -149,13 +149,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Hint for how the node should be displayed.
   DiagnosticsTreeStyle get style {
-    return _styleOverride ??=
-        getStyleMember('style', DiagnosticsTreeStyle.sparse);
+    return _style ??= getStyleMember('style', DiagnosticsTreeStyle.sparse);
   }
 
-  DiagnosticsTreeStyle _styleOverride;
+  DiagnosticsTreeStyle _style;
   set style(DiagnosticsTreeStyle style) {
-    _styleOverride = style;
+    _style = style;
   }
 
   /// Dart class defining the diagnostic node.

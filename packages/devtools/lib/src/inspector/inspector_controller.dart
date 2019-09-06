@@ -20,9 +20,11 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../service_registrations.dart' as registrations;
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
+import '../version.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
@@ -59,6 +61,7 @@ class InspectorController implements InspectorServiceClient {
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
+    this.onExpandCollapseSupported,
   })  : _treeGroups = InspectorObjectGroupManager(inspectorService, 'tree'),
         _selectionGroups =
             InspectorObjectGroupManager(inspectorService, 'selection') {
@@ -89,6 +92,8 @@ class InspectorController implements InspectorServiceClient {
       // Any time we have a new isolate it means the previous isolate stopped.
       onIsolateStopped();
     });
+
+    _checkForExpandCollapseSupport();
   }
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
@@ -105,6 +110,8 @@ class InspectorController implements InspectorServiceClient {
   Stream<void> get onTreeNodeSelected => _treeNodeSelectedController.stream;
 
   final bool isSummaryTree;
+
+  final VoidFunction onExpandCollapseSupported;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -761,23 +768,36 @@ class InspectorController implements InspectorServiceClient {
   Future<void> expandAllNodesInDetailsTree() async {
     await details.recomputeTreeRoot(
       inspectorTree.selection.diagnostic,
-      details.inspectorTree.selection.diagnostic,
+      details.inspectorTree.selection?.diagnostic ??
+          details.inspectorTree.root.diagnostic,
       false,
       subtreeDepth: maxJsInt,
     );
   }
 
-  Future<void> resetDetailsTree() async {
-    assert(details.inspectorTree.selection?.diagnostic != null);
-    details.inspectorTree.setState(() {
-      _collapseAllNodes(details.inspectorTree.root);
-    });
-    details.inspectorTree.expandPath(details.inspectorTree.selection);
+  void collapseDetailsToSelected() {
+    details.inspectorTree.collapseToSelected();
     details.animateTo(details.inspectorTree.selection);
   }
 
-  void _collapseAllNodes(InspectorTreeNode root) {
-    root.isExpanded = false;
-    root.children.forEach(_collapseAllNodes);
+  void _checkForExpandCollapseSupport() {
+    if (onExpandCollapseSupported == null) return;
+
+    serviceManager.hasRegisteredService(
+      registrations.flutterVersion.service,
+      (serviceAvailable) async {
+        if (serviceAvailable) {
+          final flutterVersion = FlutterVersion.parse(
+              (await serviceManager.getFlutterVersion()).json);
+          // TODO(kenzie): track the actual version of flutter that supports
+          // configurable subtree depth and check for that version or greater.
+          // For now, assume that configurable subtree depth will land in
+          // Flutter stable before a 2.0 launch.
+          if (flutterVersion.version.startsWith('2.')) {
+            onExpandCollapseSupported();
+          }
+        }
+      },
+    );
   }
 }

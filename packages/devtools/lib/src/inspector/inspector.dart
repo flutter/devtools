@@ -7,7 +7,6 @@ library inspector;
 import 'dart:async';
 import 'dart:html' show Element;
 
-import 'package:devtools/src/version.dart';
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -15,7 +14,6 @@ import '../framework/framework.dart';
 import '../globals.dart';
 import '../messages.dart';
 import '../service_extensions.dart' as extensions;
-import '../service_registrations.dart' as registrations;
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/custom.dart';
@@ -103,9 +101,9 @@ class InspectorScreen extends Screen {
     });
 
     final resetButton = PButton('Collapse to selected')..small();
-    resetButton.click(() async {
+    resetButton.click(() {
       resetButton.disabled = true;
-      await inspectorController.resetDetailsTree();
+      inspectorController.collapseDetailsToSelected();
       resetButton.disabled = false;
     });
 
@@ -181,44 +179,11 @@ class InspectorScreen extends Screen {
       },
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
+      onExpandCollapseSupported: _onExpandCollapseSupported,
     );
     final InspectorTreeWeb inspectorTree = inspectorController.inspectorTree;
     final InspectorTreeWeb detailsInspectorTree =
         inspectorController.details.inspectorTree;
-
-    serviceManager.hasRegisteredService(
-      registrations.flutterVersion.service,
-      (serviceAvailable) async {
-        if (serviceAvailable) {
-          final flutterVersion = FlutterVersion.parse(
-              (await serviceManager.getFlutterVersion()).json);
-          // TODO(kenzie): track the actual version of flutter that supports the
-          // [flutterVersion] service and check for that version or greater. For
-          // now, assume that the [flutterVersion] service will land in Flutter
-          // stable before a 2.0 launch.
-          if (flutterVersion.version.startsWith('2.')) {
-            inspectorController.onTreeNodeSelected.listen((_) {
-              expandCollapseButtonGroup.hidden(false);
-            });
-
-            final currentChild = CoreElement.from(
-                detailsInspectorTree.element.element.children.first);
-            detailsInspectorTree.element
-              ..clear()
-              ..add([
-                div(c: 'expand-collapse-container')
-                  ..layoutHorizontal()
-                  ..add([
-                    div()..flex(),
-                    expandCollapseButtonGroup,
-                  ]),
-                // Add negative margin to offset height of expand/reset button group.
-                currentChild..element.style.marginTop = '-30px',
-              ]);
-          }
-        }
-      },
-    );
 
     final elements = <Element>[
       inspectorTree.element.element,
@@ -273,5 +238,36 @@ class InspectorScreen extends Screen {
     refreshTreeButton.disabled = true;
     await inspectorController?.onForceRefresh();
     refreshTreeButton.disabled = false;
+  }
+
+  void _onExpandCollapseSupported() {
+    final InspectorTreeWeb detailsInspectorTree =
+        inspectorController.details.inspectorTree;
+
+    // Show the expand collapse buttons on initial load if the details tree is
+    // not empty.
+    if (detailsInspectorTree.root != null) {
+      expandCollapseButtonGroup.hidden(false);
+    }
+    // Ensure the expand collapse buttons are visible if we have a
+    // selected node.
+    inspectorController.onTreeNodeSelected.listen((_) {
+      expandCollapseButtonGroup.hidden(false);
+    });
+
+    final currentChild =
+        CoreElement.from(detailsInspectorTree.element.element.children.first);
+    detailsInspectorTree.element
+      ..clear()
+      ..add([
+        div(c: 'expand-collapse-container')
+          ..layoutHorizontal()
+          ..add([
+            div()..flex(),
+            expandCollapseButtonGroup,
+          ]),
+        // Add negative margin to offset height of expand/reset button group.
+        currentChild..element.style.marginTop = '-30px',
+      ]);
   }
 }

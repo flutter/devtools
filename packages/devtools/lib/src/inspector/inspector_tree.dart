@@ -380,10 +380,10 @@ abstract class InspectorTreeNode {
     return index;
   }
 
-  /// TODO(jacobr): move this method to the InspectorTree class.
-  // Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
-  // performance problems.
+  // TODO(jacobr): move this method to the InspectorTree class.
   // TODO: optimize this method.
+  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
+  /// performance problems.
   InspectorTreeRow getRow(int index) {
     final List<int> ticks = <int>[];
     InspectorTreeNode node = this;
@@ -574,8 +574,25 @@ abstract class InspectorTree {
   void setState(VoidCallback modifyState);
   InspectorTreeNode createNode();
 
+  final List<InspectorTreeRow> cachedRows = [];
+
+  // TODO: we should add a listener instead that clears the cache when the
+  // root is marked as dirty.
+  void _maybeClearCache() {
+    if (root.isDirty) {
+      cachedRows.clear();
+      root.isDirty = false;
+      lastContentWidth = null;
+    }
+  }
+
   InspectorTreeRow getCachedRow(int index) {
-    return root.getRow(index);
+    _maybeClearCache();
+    while (cachedRows.length <= index) {
+      cachedRows.add(null);
+    }
+    cachedRows[index] ??= root.getRow(index);
+    return cachedRows[index];
   }
 
   double getRowOffset(int index) {
@@ -746,13 +763,30 @@ abstract class InspectorTree {
 
   void expandPath(InspectorTreeNode node) {
     setState(() {
-      while (node != null) {
-        if (!node.isExpanded) {
-          node.isExpanded = true;
-        }
-        node = node.parent;
-      }
+      _expandPath(node);
     });
+  }
+
+  void _expandPath(InspectorTreeNode node) {
+    while (node != null) {
+      if (!node.isExpanded) {
+        node.isExpanded = true;
+      }
+      node = node.parent;
+    }
+  }
+
+  void collapseToSelected() {
+    setState(() {
+      _collapseAllNodes(root);
+      if (selection == null) return;
+      _expandPath(selection);
+    });
+  }
+
+  void _collapseAllNodes(InspectorTreeNode root) {
+    root.isExpanded = false;
+    root.children.forEach(_collapseAllNodes);
   }
 
   int get numRows => root != null ? root.subtreeSize : 0;
