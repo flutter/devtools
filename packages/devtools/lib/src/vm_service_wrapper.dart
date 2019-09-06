@@ -244,6 +244,7 @@ class VmServiceWrapper implements VmService {
       if (id != kRootId) {
         final key = '$isolateId-$id';
         traceObject[CpuProfileData.stackFramesKey][key] = {
+          CpuProfileData.categoryKey: 'Dart',
           CpuProfileData.nameKey: current.name,
           CpuProfileData.resolvedUrlKey: current.resolvedUrl,
           if (parent != null && parent.frameId != 0)
