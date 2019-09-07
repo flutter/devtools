@@ -1,3 +1,7 @@
+## 0.1.7
+
+- Rev to using the latest version of `package:vm_service` (1.2.0).
+
 ## 0.1.6
 
 - Rev to using the latest version of `package:vm_service` (1.1.1).
