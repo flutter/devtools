@@ -4,5 +4,5 @@
 
 /// The DevTools application version.
 // Note: when updating this, please update the corresponding version in the
-// pubspec.
+// pubspec...
 const String version = '0.1.6';
