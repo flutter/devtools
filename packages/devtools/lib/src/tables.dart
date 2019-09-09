@@ -4,7 +4,6 @@
 
 import 'dart:html';
 
-import 'package:devtools/src/ui/primer.dart';
 import 'package:meta/meta.dart';
 
 import 'framework/framework.dart';
@@ -12,6 +11,7 @@ import 'table_data.dart';
 import 'trees.dart';
 import 'ui/custom.dart';
 import 'ui/elements.dart';
+import 'ui/primer.dart';
 
 class HoverCell<T> extends HoverCellData<T> {
   HoverCell(this.cell, T data) : super(data);

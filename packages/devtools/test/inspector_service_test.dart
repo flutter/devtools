@@ -129,8 +129,10 @@ void main() async {
             '     └─Text\n',
           ),
         );
-        RemoteDiagnosticsNode nodeInDetailsTree =
-            await group.getDetailsSubtree(nodeInSummaryTree);
+        RemoteDiagnosticsNode nodeInDetailsTree = await group.getDetailsSubtree(
+          nodeInSummaryTree,
+          subtreeDepth: 2,
+        );
         // When flutter rolls, this string may sometimes change due to
         // implementation details.
         expect(
@@ -147,7 +149,10 @@ void main() async {
           ),
         );
 
-        nodeInDetailsTree = await group.getDetailsSubtree(nodeInSummaryTree);
+        nodeInDetailsTree = await group.getDetailsSubtree(
+          nodeInSummaryTree,
+          subtreeDepth: 2,
+        );
         expect(
           treeToDebugString(nodeInDetailsTree),
           equalsGoldenIgnoringHashCodes(
