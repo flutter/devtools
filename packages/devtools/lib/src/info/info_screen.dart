@@ -100,7 +100,8 @@ class InfoScreen extends Screen {
             div(c: 'flag-list-container')
               ..flex()
               ..add(_flagList = div(c: 'flag-list')..layoutVertical()),
-          ]),
+          ])
+          ..hidden(!serviceManager.connectedApp.isRunningOnDartVM)
       ]);
 
     _controller.entering();
