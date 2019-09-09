@@ -160,7 +160,16 @@ abstract class InspectorTreeNode {
   bool _isDirty = true;
   set isDirty(bool dirty) {
     if (dirty) {
-      this.dirty();
+      _renderObject = null;
+      _isDirty = true;
+      if (_childrenCount == null) {
+        // Already dirty.
+        return;
+      }
+      _childrenCount = null;
+      if (parent != null) {
+        parent.isDirty = true;
+      }
     } else {
       _isDirty = false;
     }
@@ -310,7 +319,7 @@ abstract class InspectorTreeNode {
   set isExpanded(bool value) {
     if (value != _isExpanded) {
       _isExpanded = value;
-      dirty();
+      isDirty = true;
     }
   }
 
@@ -319,7 +328,7 @@ abstract class InspectorTreeNode {
 
   set parent(InspectorTreeNode value) {
     _parent = value;
-    _parent?.dirty();
+    _parent?.isDirty = true;
   }
 
   RemoteDiagnosticsNode get diagnostic => _diagnostic;
@@ -327,20 +336,7 @@ abstract class InspectorTreeNode {
   set diagnostic(RemoteDiagnosticsNode v) {
     _diagnostic = v;
     _isExpanded = v.childrenReady;
-    dirty();
-  }
-
-  void dirty() {
-    _renderObject = null;
-    _isDirty = true;
-    if (_childrenCount == null) {
-      // Already dirty.
-      return;
-    }
-    _childrenCount = null;
-    if (parent != null) {
-      parent.dirty();
-    }
+    isDirty = true;
   }
 
   int get childrenCount {
@@ -447,18 +443,18 @@ abstract class InspectorTreeNode {
     child.parent = null;
     final removed = _children.remove(child);
     assert(removed != null);
-    dirty();
+    isDirty = true;
   }
 
   void appendChild(InspectorTreeNode child) {
     _children.add(child);
     child.parent = this;
-    dirty();
+    isDirty = true;
   }
 
   void clearChildren() {
     _children.clear();
-    dirty();
+    isDirty = true;
   }
 
   void _renderDescription(
@@ -753,7 +749,7 @@ abstract class InspectorTree {
   void nodeChanged(InspectorTreeNode node) {
     if (node == null) return;
     setState(() {
-      node.dirty();
+      node.isDirty = true;
     });
   }
 
