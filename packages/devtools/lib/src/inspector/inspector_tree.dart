@@ -156,7 +156,15 @@ abstract class InspectorTreeNode {
     return _children.length > 1 && !_children.last.isProperty;
   }
 
-  bool isDirty = true;
+  bool get isDirty => _isDirty;
+  bool _isDirty = true;
+  set isDirty(bool dirty) {
+    if (dirty) {
+      this.dirty();
+    } else {
+      _isDirty = false;
+    }
+  }
 
   bool selected = false;
 
@@ -324,7 +332,7 @@ abstract class InspectorTreeNode {
 
   void dirty() {
     _renderObject = null;
-    isDirty = true;
+    _isDirty = true;
     if (_childrenCount == null) {
       // Already dirty.
       return;

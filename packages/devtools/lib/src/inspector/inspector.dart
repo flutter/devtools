@@ -246,12 +246,12 @@ class InspectorScreen extends Screen {
 
     // Show the expand collapse buttons on initial load if the details tree is
     // not empty.
-    if (detailsInspectorTree.root != null) {
+    if (detailsInspectorTree.selection != null) {
       expandCollapseButtonGroup.hidden(false);
     }
     // Ensure the expand collapse buttons are visible if we have a
     // selected node.
-    inspectorController.onTreeNodeSelected.listen((_) {
+    inspectorController.details.onTreeNodeSelected.listen((_) {
       expandCollapseButtonGroup.hidden(false);
     });
 
