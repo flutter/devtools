@@ -64,11 +64,12 @@ class DevToolsClient {
     });
   }
 
-  Future<void> connectToVmService(Uri uri) async {
+  Future<void> connectToVmService(Uri uri, bool notifyUser) async {
     _connection.sink.add(jsonEncode({
       'method': 'connectToVm',
       'params': {
         'uri': uri.toString(),
+        'notify': notifyUser,
       },
     }));
   }

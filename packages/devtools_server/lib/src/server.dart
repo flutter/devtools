@@ -235,13 +235,16 @@ Future<void> _handleClientsList(
   );
 }
 
-Future<bool> _tryReuseExistingDevToolsInstance(Uri vmServiceUri) async {
+Future<bool> _tryReuseExistingDevToolsInstance(
+    Uri vmServiceUri, bool notifyUser) async {
   // First try to find a client that's already connected to this VM service,
   // and just send the user a notification for that one.
   final existingClient = clients.findExistingConnectedClient(vmServiceUri);
   if (existingClient != null) {
     try {
-      await existingClient.notify();
+      if (notifyUser) {
+        await existingClient.notify();
+      }
       return true;
     } catch (e) {
       print('Failed to reuse existing connected DevTools client');
@@ -252,11 +255,7 @@ Future<bool> _tryReuseExistingDevToolsInstance(Uri vmServiceUri) async {
   final reusableClient = clients.findReusableClient();
   if (reusableClient != null) {
     try {
-      await reusableClient.connectToVmService(vmServiceUri);
-      // TODO(dantup): Notify won't work properly until we're not reloading
-      // the page (otherwise clicking the notifiction spans a new tab, since
-      // it doesn't belong to the reloaded page).
-      // await reusableClient.notify();
+      await reusableClient.connectToVmService(vmServiceUri, notifyUser);
       return true;
     } catch (e) {
       print('Failed to reuse existing DevTools client');
@@ -284,7 +283,14 @@ Future<void> registerLaunchDevToolsService(
         final canReuse = params != null &&
             params.containsKey('reuseWindows') &&
             params['reuseWindows'] == true;
-        if (canReuse && await _tryReuseExistingDevToolsInstance(vmServiceUri)) {
+        final shouldNotify = params != null &&
+            params.containsKey('notify') &&
+            params['notify'] == true;
+        if (canReuse &&
+            await _tryReuseExistingDevToolsInstance(
+              vmServiceUri,
+              shouldNotify,
+            )) {
           return {'result': Success().toJson()};
         }
 

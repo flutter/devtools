@@ -218,7 +218,7 @@ int nextId = 0;
 Future<Map<String, dynamic>> _send(String method,
     [Map<String, dynamic> params]) {
   final id = (nextId++).toString();
-  completers[id] = new Completer<Map<String, dynamic>>();
+  completers[id] = Completer<Map<String, dynamic>>();
   server.write({'id': id.toString(), 'method': method, 'params': params});
   return completers[id].future;
 }
