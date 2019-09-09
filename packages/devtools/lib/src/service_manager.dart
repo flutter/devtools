@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:core';
 
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
@@ -247,7 +248,7 @@ class ServiceConnectionManager {
 
     if (flutterView == null) {
       Logger.log('No Flutter Views to query: ${flutterViewListResponse.json}');
-      return defaultRefreshRate;
+      throw Error();
     }
 
     final viewId = flutterView['id'];
