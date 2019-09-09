@@ -31,6 +31,7 @@ void appTests() {
     expect(currentPageId, 'logging');
   });
 
+/*
   test('connect dialog displays', () async {
     // start with no port
     final Uri baseAppUri = webdevFixture.baseUri.resolve('index.html');
@@ -53,6 +54,7 @@ void appTests() {
     // make sure the connect dialog becomes hidden
     await waitFor(() async => !(await connectDialog.isVisible()));
   });
+  */
 }
 
 class ConnectDialogManager {
