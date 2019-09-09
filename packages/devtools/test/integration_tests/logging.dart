@@ -22,23 +22,35 @@ void loggingTests() {
   });
 
   test('displays log data', () async {
+    print("XXX here 1");
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    print("XXX here 2");
     await tools.start(appFixture);
+    print("XXX here 3");
     await tools.switchPage('logging');
+    print("XXX here 4");
 
     final String currentPageId = await tools.currentPageId();
+    print("XXX here 5");
     expect(currentPageId, 'logging');
 
     // Cause app to log.
+    print("XXX here 6");
     final LoggingManager logs = LoggingManager(tools);
+    print("XXX here 7");
     await logs.clearLogs();
     expect(await logs.logCount(), 0);
+    print("XXX here 8");
     await appFixture.invoke('controller.emitLog()');
+    print("XXX here 9");
 
     // Verify the log data shows up in the UI.
+    print("XXX here 10");
     await waitFor(() async => await logs.logCount() > 0);
+    print("XXX here 11");
     expect(await logs.logCount(), greaterThan(0));
+    print("XXX here 12");
   });
 
   test('log screen postpones write when offscreen', () async {
