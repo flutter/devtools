@@ -14,7 +14,13 @@ void main() {
   log('starting logging app');
 
   // Don't exit until it's indicated we should by the controller.
-  Timer(const Duration(days: 1), () {});
+  int i = 0;
+  Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+    if (i > 1000000000000) {
+      print (i);
+    }
+    i++;
+  });
 }
 
 class Controller {

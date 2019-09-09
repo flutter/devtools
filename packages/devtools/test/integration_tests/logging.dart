@@ -22,10 +22,8 @@ void loggingTests() {
   });
 
   test('displays log data', () async {
-    print("XXX here 1");
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
-    print("XXX here 2");
     await tools.start(appFixture);
     print("XXX here 3");
     await tools.switchPage('logging');
