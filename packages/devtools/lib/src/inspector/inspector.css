@@ -134,3 +134,16 @@ messages beautiful.
 .inspector-level-off {
 
 }
+
+.expand-collapse-container {
+    position: sticky;
+    top: 8px;
+    left: 0;
+    padding-right: 8px;
+    text-align: right;
+    z-index: 1;
+}
+
+.expand-collapse-container .btn {
+    background-color: var(--button-background);
+}

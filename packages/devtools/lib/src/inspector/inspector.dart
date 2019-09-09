@@ -59,6 +59,8 @@ class InspectorScreen extends Screen {
 
   CoreElement inspectorContainer;
 
+  CoreElement expandCollapseButtonGroup;
+
   StreamSubscription<Object> splitterSubscription;
 
   bool displayedWidgetTrackingNotice = false;
@@ -91,6 +93,24 @@ class InspectorScreen extends Screen {
       ]);
     getServiceExtensionElements().forEach(buttonSection.add);
 
+    final expandButton = PButton('Expand all')..small();
+    expandButton.click(() async {
+      expandButton.disabled = true;
+      await inspectorController.expandAllNodesInDetailsTree();
+      expandButton.disabled = false;
+    });
+
+    final resetButton = PButton('Collapse to selected')..small();
+    resetButton.click(() {
+      resetButton.disabled = true;
+      inspectorController.collapseDetailsToSelected();
+      resetButton.disabled = false;
+    });
+
+    expandCollapseButtonGroup = div(c: 'btn-group')
+      ..add([expandButton, resetButton])
+      ..hidden(true);
+
     screenDiv.add(<CoreElement>[
       buttonSection,
       inspectorContainer = div(c: 'inspector-container bidirectional'),
@@ -101,6 +121,7 @@ class InspectorScreen extends Screen {
       _handleConnectionStart(serviceManager.service);
     }
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+
     return screenDiv;
   }
 
@@ -158,6 +179,7 @@ class InspectorScreen extends Screen {
       },
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
+      onExpandCollapseSupported: _onExpandCollapseSupported,
     );
     final InspectorTreeWeb inspectorTree = inspectorController.inspectorTree;
     final InspectorTreeWeb detailsInspectorTree =
@@ -216,5 +238,36 @@ class InspectorScreen extends Screen {
     refreshTreeButton.disabled = true;
     await inspectorController?.onForceRefresh();
     refreshTreeButton.disabled = false;
+  }
+
+  void _onExpandCollapseSupported() {
+    final InspectorTreeWeb detailsInspectorTree =
+        inspectorController.details.inspectorTree;
+
+    // Show the expand collapse buttons on initial load if the details tree is
+    // not empty.
+    if (detailsInspectorTree.selection != null) {
+      expandCollapseButtonGroup.hidden(false);
+    }
+    // Ensure the expand collapse buttons are visible if we have a
+    // selected node.
+    inspectorController.details.onTreeNodeSelected.listen((_) {
+      expandCollapseButtonGroup.hidden(false);
+    });
+
+    final currentChild =
+        CoreElement.from(detailsInspectorTree.element.element.children.first);
+    detailsInspectorTree.element
+      ..clear()
+      ..add([
+        div(c: 'expand-collapse-container')
+          ..layoutHorizontal()
+          ..add([
+            div()..flex(),
+            expandCollapseButtonGroup,
+          ]),
+        // Add negative margin to offset height of expand/reset button group.
+        currentChild..element.style.marginTop = '-30px',
+      ]);
   }
 }

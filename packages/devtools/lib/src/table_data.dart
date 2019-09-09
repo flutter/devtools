@@ -339,7 +339,7 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   }
 
   void collapseAll() {
-    // Store visited nodes so that we do not expand the same root multiple
+    // Store visited nodes so that we do not collapse the same root multiple
     // times.
     final visited = <T>{};
     for (T dataObject in data) {
