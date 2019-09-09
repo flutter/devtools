@@ -124,6 +124,9 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future get onDone => _vmService.onDone;
+
+  @override
   void dispose() => _vmService.dispose();
 
   @override
@@ -716,6 +719,7 @@ class _CpuProfileTimelineTree {
   int frameId = kNoFrameId;
 
   String get name => samples.functions[index].function.name;
+
   String get resolvedUrl => samples.functions[index].resolvedUrl;
 
   final children = <_CpuProfileTimelineTree>[];
