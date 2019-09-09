@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import '../config_specific/logger.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -140,7 +141,7 @@ class TimelineController {
       frame.gpuEventFlow.format(buf, '  ');
       buf.writeln('\nGPU trace for frame ${frame.id}');
       frame.gpuEventFlow.writeTraceToBuffer(buf);
-      print(buf.toString());
+      log(buf.toString());
     }
   }
 

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../config_specific/logger.dart';
 import '../framework/framework.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
@@ -198,8 +199,11 @@ class PlotlyDivGraph extends CoreElement {
       _frameIndex++;
     } else {
       // TODO(terry): HACK - Ignore the event.
-      print('WARNING: Ignored onFrameAdded - bad data.\n [uiDuration: '
-          '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}');
+      log(
+        'Ignored onFrameAdded - bad data.\n [uiDuration: '
+        '${frame.uiDuration}, gpuDuration: ${frame.gpuDuration}',
+        LogLevel.warning,
+      );
     }
   }
 

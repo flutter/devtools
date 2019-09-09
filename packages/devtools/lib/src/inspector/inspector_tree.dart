@@ -16,6 +16,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
@@ -963,7 +964,7 @@ abstract class InspectorTree {
           }
         }
       } catch (e) {
-        print(e);
+        log(e.toString(), LogLevel.error);
       }
     }
   }

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
 import 'memory_protocol.dart';
@@ -177,7 +178,10 @@ class MemoryController {
 
     if (object is Sentinel) {
       // TODO(terry): Need more graceful handling of sentinels.
-      print('Trying to matchObject with a Sentinel $objectRef');
+      log(
+        'Trying to matchObject with a Sentinel $objectRef',
+        LogLevel.error,
+      );
     }
 
     return false;

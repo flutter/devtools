@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../globals.dart';
 import 'memory_protocol.dart';
 
@@ -23,7 +24,10 @@ Future<InstanceRef> evaluate(String objectRef, String expression) async {
     case ErrorRef:
       return null;
     default:
-      print('ERROR Memory evaluate: Unknown type ${result.runtimeType}.');
+      log(
+        'Memory evaluate: Unknown type ${result.runtimeType}.',
+        LogLevel.error,
+      );
   }
 
   return null;
@@ -176,60 +180,67 @@ void computeInboundRefs(
         }
         break;
       case 'FuncRef':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final FuncRef funcRef = element.funcRef;
         break;
       case 'Instance':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           ' Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final Instance instance = element.instance;
         break;
       case 'InstanceRef':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final InstanceRef instanceRef = element.instanceRef;
         break;
       case 'Library':
       case 'LibraryRef':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final Library library = element.library;
         break;
       case 'NullVal':
       case 'NullValRef':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final NullVal nullValue = element.nullVal;
         break;
       case 'Obj':
       case 'ObjRef':
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
         // TODO(terry): TBD
         // final Obj obj = element.obj;
         break;
       default:
-        print(
+        log(
           'Error(hoverInstanceAllocations): '
           'Unhandled inbound ${element.parentField.runtimeType}',
+          LogLevel.error,
         );
     }
 

@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'logger.dart';
+
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics
 /// (i.e., they're not DevTools crashes).
 Future<T> allowedError<T>(Future<T> future) {
   return future.catchError((Object error) {
     final errorLines = error.toString().split('\n');
-    print('[${error.runtimeType}] ${errorLines.first}');
-    print(errorLines.skip(1).join('\n'));
-    print('');
+    log('[${error.runtimeType}] ${errorLines.first}', LogLevel.error);
+    log(errorLines.skip(1).join('\n'), LogLevel.error);
+    log('');
   });
 }

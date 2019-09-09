@@ -7,6 +7,7 @@ import 'dart:html' as html;
 
 import 'package:vm_service/vm_service.dart';
 
+import 'config_specific/logger.dart';
 import 'core/message_bus.dart';
 import 'debugger/debugger.dart';
 import 'framework/framework.dart';
@@ -51,8 +52,8 @@ class PerfToolFramework extends Framework {
     // Report exceptions with DevTools to GA.
     ga.error(message, true);
 
-    // Also write them to the console to aid debugging.
-    print(message);
+    // Also log them to the console to aid debugging.
+    log(message, LogLevel.error);
   }
 
   StatusItem isolateSelectStatus;

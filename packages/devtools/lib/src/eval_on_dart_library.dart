@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'config_specific/logger.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
 import 'vm_service_wrapper.dart';
@@ -137,16 +138,16 @@ class EvalOnDartLibrary {
 
     switch (e.runtimeType) {
       case RPCError:
-        print('RPCError: $e');
+        log('RPCError: $e', LogLevel.error);
         break;
       case Error:
-        print('${e.kind}: ${e.message}');
+        log('${e.kind}: ${e.message}', LogLevel.error);
         break;
       default:
-        print('Unrecognized error: $e');
+        log('Unrecognized error: $e', LogLevel.error);
     }
     if (stack != null) {
-      print(stack);
+      log(stack.toString(), LogLevel.error);
     }
   }
 
@@ -229,7 +230,7 @@ class EvalOnDartLibrary {
         await previousDone;
       } catch (e) {
         if (!_disposed) {
-          print(e);
+          log(e.toString(), LogLevel.error);
         }
       }
       wrappedRequest();

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html' hide Screen;
 
 import '../../devtools.dart' as devtools show version;
+import '../config_specific/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
@@ -18,7 +19,7 @@ typedef ErrorReporter = void Function(String title, dynamic error);
 class FrameworkCore {
   static void init() {
     // Print the version number at startup.
-    print('DevTools version ${devtools.version}.');
+    log('DevTools version ${devtools.version}.');
 
     final uri = Uri.parse(window.location.toString());
     theme.initializeTheme(uri.queryParameters['theme']);

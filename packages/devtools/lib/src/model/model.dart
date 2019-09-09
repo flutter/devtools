@@ -14,6 +14,7 @@ import 'dart:js' as js;
 
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../debugger/debugger.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
@@ -247,7 +248,7 @@ class App {
       map['params'] = params;
     }
     // TODO(terry): Shouldn't print to console by default.
-    print('[${jsonEncode(map)}]');
+    log('[${jsonEncode(map)}]');
   }
 
   void _sendResponseResult(int id, [dynamic result]) {
@@ -258,7 +259,7 @@ class App {
       map['result'] = result;
     }
     // TODO(terry): Shouldn't print to console by default.
-    print('[${jsonEncode(map)}]');
+    log('[${jsonEncode(map)}]');
   }
 
   void _sendReponseError(int id, dynamic error, StackTrace stackTrace) {
@@ -270,7 +271,7 @@ class App {
       },
     };
     // TODO(terry): Better error message to user and log to GA too?
-    print('[${jsonEncode(map)}]');
+    log('[${jsonEncode(map)}]', LogLevel.error);
   }
 
   dynamic _dispatch(String method, int id, dynamic arg) {
@@ -278,7 +279,7 @@ class App {
     if (handler != null) {
       return handler(arg);
     } else {
-      print('handler not found for $method()');
+      log('handler not found for $method()', LogLevel.error);
       throw 'no handler found for $method()';
     }
   }

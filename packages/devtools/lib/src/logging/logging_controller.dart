@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
@@ -315,7 +316,7 @@ class LoggingController {
       // style error.
       node.style = DiagnosticsTreeStyle.error;
       if (_verboseDebugging) {
-        print('node toStringDeep:######\n${node.toStringDeep()}\n###');
+        log('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;

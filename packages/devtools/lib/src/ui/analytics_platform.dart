@@ -10,6 +10,7 @@ import 'dart:html' as html;
 
 import 'package:js/js.dart';
 
+import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 
@@ -83,7 +84,7 @@ void waitForDimensionsComputed(String screenName) {
       if (_stillWaiting++ < 50) {
         waitForDimensionsComputed(screenName);
       } else {
-        print('Cancel waiting for dimensions.');
+        log('Cancel waiting for dimensions.', LogLevel.warning);
       }
     }
   });
