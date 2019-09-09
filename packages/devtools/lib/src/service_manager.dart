@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
-import 'logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'vm_service_wrapper.dart';
@@ -247,7 +246,8 @@ class ServiceConnectionManager {
     );
 
     if (flutterView == null) {
-      Logger.log('No Flutter Views to query: ${flutterViewListResponse.json}');
+      // TODO(kenzie): use devtools logger instead of printing.
+      print('No Flutter Views to query: ${flutterViewListResponse.json}');
       throw Error();
     }
 
