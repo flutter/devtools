@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Logger for DevTools.
+/// Handles console level logging for DevTools.
 class Logger {
   static void log(String message, {LogLevel level = LogLevel.debug}) {
     switch (level) {
