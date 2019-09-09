@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
+import 'logger.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'vm_service_wrapper.dart';
@@ -228,6 +229,9 @@ class ServiceConnectionManager {
   }
 
   Future<int> getDisplayRefreshRate() async {
+    const defaultRefreshRate = 60;
+    const unknownRefreshRate = 0.0;
+
     final flutterViewListResponse = await service.callServiceExtension(
       registrations.flutterListViews,
       isolateId: _isolateManager.selectedIsolate.id,
@@ -242,7 +246,8 @@ class ServiceConnectionManager {
     );
 
     if (flutterView == null) {
-      print('No Flutter Views to query: ${flutterViewListResponse.json}');
+      Logger.log('No Flutter Views to query: ${flutterViewListResponse.json}');
+      return defaultRefreshRate;
     }
 
     final viewId = flutterView['id'];
@@ -252,6 +257,13 @@ class ServiceConnectionManager {
       args: {'viewId': viewId},
     );
     final double fps = displayRefreshRateResponse.json['fps'];
+
+    // The Flutter engine returns 0.0 if the refresh rate is unknown. Return
+    // [defaultRefreshRate] instead.
+    if (fps == unknownRefreshRate) {
+      return defaultRefreshRate;
+    }
+
     return fps.round();
   }
 }
