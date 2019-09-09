@@ -8,6 +8,7 @@ import '../support/cli_test_driver.dart';
 import 'integration.dart';
 
 void loggingTests() {
+  // Bisect.
   CliAppFixture appFixture;
   BrowserTabInstance tabInstance;
 
