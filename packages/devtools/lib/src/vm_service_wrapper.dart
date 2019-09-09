@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'profiler/cpu_profile_model.dart';
+
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService, {
@@ -93,10 +95,22 @@ class VmServiceWrapper implements VmService {
         ));
   }
 
-  Future<Success> clearCpuProfile(String isolateId) async {
-    final response = await _trackFuture('clearCpuProfile',
-        callMethod('_clearCpuProfile', isolateId: isolateId));
-    return response as Success;
+  @override
+  Future<Success> clearCpuSamples(String isolateId) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 27)) {
+      final response = await _trackFuture(
+          'clearCpuSamples',
+          callMethod(
+            '_clearCpuProfile',
+            isolateId: isolateId,
+          ));
+      return response as Success;
+    }
+    return _trackFuture(
+        'clearCpuSamples',
+        _vmService.clearCpuSamples(
+          isolateId,
+        ));
   }
 
   @override
@@ -176,21 +190,89 @@ class VmServiceWrapper implements VmService {
     );
   }
 
-  // TODO(kenzie): keep track of all private methods we are currently using to
-  // share with the VM team and request that they be made public.
-  Future<Response> getCpuProfileTimeline(
-      String isolateId, int origin, int extent) async {
+  @override
+  Future<CpuSamples> getCpuSamples(
+      String isolateId, int timeOriginMicros, int timeExtentMicros) async {
     return _trackFuture(
-        'getCpuProfileTimeline',
-        callMethod(
-          '_getCpuProfileTimeline',
-          isolateId: isolateId,
-          args: {
-            'tags': 'None',
-            'timeOriginMicros': origin,
-            'timeExtentMicros': extent,
-          },
+        'getCpuSamples',
+        _vmService.getCpuSamples(
+          isolateId,
+          timeOriginMicros,
+          timeExtentMicros,
         ));
+  }
+
+  Future<CpuProfileData> getCpuProfileTimeline(
+      String isolateId, int origin, int extent) async {
+    if (await isProtocolVersionLessThan(major: 3, minor: 27)) {
+      return _trackFuture(
+          'getCpuProfileTimeline',
+          callMethod(
+            '_getCpuProfileTimeline',
+            isolateId: isolateId,
+            args: {
+              'tags': 'None',
+              'timeOriginMicros': origin,
+              'timeExtentMicros': extent,
+            },
+          )).then((Response response) => CpuProfileData.parse(response.json));
+    }
+    // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
+    // and has been replaced by getCpuSamples. We need to do some processing to
+    // get back to the format we expect.
+    final cpuSamples = await getCpuSamples(isolateId, origin, extent);
+    const int kRootId = 0;
+    int nextId = kRootId;
+    final traceObject = <String, dynamic>{
+      CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
+      CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
+      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
+      CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
+      CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
+      CpuProfileData.stackFramesKey: {},
+      CpuProfileData.traceEventsKey: [],
+    };
+
+    void processStackFrame({
+      @required _CpuProfileTimelineTree current,
+      @required _CpuProfileTimelineTree parent,
+    }) {
+      final id = nextId++;
+      current.frameId = id;
+
+      // Skip the root
+      if (id != kRootId) {
+        final key = '$isolateId-$id';
+        traceObject[CpuProfileData.stackFramesKey][key] = {
+          CpuProfileData.categoryKey: 'Dart',
+          CpuProfileData.nameKey: current.name,
+          CpuProfileData.resolvedUrlKey: current.resolvedUrl,
+          if (parent != null && parent.frameId != 0)
+            CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
+        };
+      }
+      for (final child in current.children) {
+        processStackFrame(current: child, parent: current);
+      }
+    }
+
+    final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
+    processStackFrame(current: root, parent: null);
+
+    // Build the trace events.
+    for (final sample in cpuSamples.samples) {
+      final tree = _CpuProfileTimelineTree.getTreeFromSample(sample);
+      traceObject[CpuProfileData.traceEventsKey].add({
+        'ph': 'P', // kind = sample event
+        'name': '', // Blank to keep about:tracing happy
+        'pid': cpuSamples.pid,
+        'tid': sample.tid,
+        'ts': sample.timestamp,
+        'cat': 'Dart',
+        CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
+      });
+    }
+    return CpuProfileData.parse(traceObject);
   }
 
   @override
@@ -606,4 +688,60 @@ class TrackedFuture<T> {
 
   final String name;
   final Future<T> future;
+}
+
+class _CpuProfileTimelineTree {
+  factory _CpuProfileTimelineTree.fromCpuSamples(CpuSamples cpuSamples) {
+    final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
+    _CpuProfileTimelineTree current;
+    // TODO(bkonyi): handle truncated?
+    for (final sample in cpuSamples.samples) {
+      current = root;
+      // Build an inclusive trie.
+      for (final index in sample.stack.reversed) {
+        current = current._getChild(index);
+      }
+      _timelineTreeExpando[sample] = current;
+    }
+    return root;
+  }
+
+  _CpuProfileTimelineTree._fromIndex(this.samples, this.index);
+
+  static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
+  static const kRootIndex = -1;
+  static const kNoFrameId = -1;
+  final CpuSamples samples;
+  final int index;
+  int frameId = kNoFrameId;
+
+  String get name => samples.functions[index].function.name;
+  String get resolvedUrl => samples.functions[index].resolvedUrl;
+
+  final children = <_CpuProfileTimelineTree>[];
+
+  static _CpuProfileTimelineTree getTreeFromSample(CpuSample sample) =>
+      _timelineTreeExpando[sample];
+
+  _CpuProfileTimelineTree _getChild(int index) {
+    final length = children.length;
+    int i;
+    for (i = 0; i < length; ++i) {
+      final child = children[i];
+      final childIndex = child.index;
+      if (childIndex == index) {
+        return child;
+      }
+      if (childIndex > index) {
+        break;
+      }
+    }
+    final child = _CpuProfileTimelineTree._fromIndex(samples, index);
+    if (i < length) {
+      children.insert(i, child);
+    } else {
+      children.add(child);
+    }
+    return child;
+  }
 }

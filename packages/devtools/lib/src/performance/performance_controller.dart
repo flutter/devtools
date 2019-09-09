@@ -49,6 +49,6 @@ class PerformanceController {
 
   Future<void> reset() async {
     cpuProfileData = null;
-    await cpuProfilerService.clearCpuProfile();
+    await cpuProfilerService.clearCpuSamples();
   }
 }
