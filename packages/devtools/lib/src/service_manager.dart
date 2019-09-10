@@ -246,9 +246,11 @@ class ServiceConnectionManager {
     );
 
     if (flutterView == null) {
+      final message =
+          'No Flutter Views to query: ${flutterViewListResponse.json}';
       // TODO(kenzie): use devtools logger instead of printing.
-      print('No Flutter Views to query: ${flutterViewListResponse.json}');
-      throw Error();
+      print(message);
+      throw Exception(message);
     }
 
     final viewId = flutterView['id'];
