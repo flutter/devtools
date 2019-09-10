@@ -19,6 +19,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../service_registrations.dart' as registrations;
 import '../ui/fake_flutter/fake_flutter.dart';
@@ -29,10 +30,6 @@ import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
-
-void _logError(Object error) {
-  print(error);
-}
 
 TextStyle textStyleForLevel(DiagnosticLevel level) {
   switch (level) {
@@ -361,7 +358,7 @@ class InspectorController implements InspectorServiceClient {
       }
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
     } catch (error) {
-      _logError(error);
+      log(error.toString(), LogLevel.error);
       _treeGroups.cancelNext();
       return;
     }
@@ -557,7 +554,7 @@ class InspectorController implements InspectorServiceClient {
       applyNewSelection(newSelection, detailsSelection, true);
     } catch (error) {
       if (_selectionGroups.next == group) {
-        _logError(error);
+        log(error.toString(), LogLevel.error);
         _selectionGroups.cancelNext();
       }
     }

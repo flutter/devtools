@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
+import 'config_specific/logger.dart';
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
@@ -189,7 +190,10 @@ class ServiceConnectionManager {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
           // have the private names, and older ones don't have the public ones).
         } else {
-          print("Service client stream not supported: '$id'\n  $e");
+          log(
+            "Service client stream not supported: '$id'\n  $e",
+            LogLevel.error,
+          );
         }
       }
     }));
@@ -248,8 +252,7 @@ class ServiceConnectionManager {
     if (flutterView == null) {
       final message =
           'No Flutter Views to query: ${flutterViewListResponse.json}';
-      // TODO(kenzie): use devtools logger instead of printing.
-      print(message);
+      log(message, LogLevel.error);
       throw Exception(message);
     }
 

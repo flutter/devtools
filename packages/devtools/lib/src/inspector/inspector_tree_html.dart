@@ -13,6 +13,7 @@ import 'dart:html';
 
 import 'package:meta/meta.dart';
 
+import '../config_specific/logger.dart';
 import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -402,7 +403,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
       // TODO(jacobr): handle row selected backgrounds using CSS classes.
       return container;
     } catch (e, s) {
-      print(s);
+      log(s.toString(), LogLevel.error);
       return Element.div()..text = 'Error: $e, $s';
     }
   }

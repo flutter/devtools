@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../memory/memory_controller.dart';
 import '../ui/custom.dart';
 import '../ui/elements.dart';
@@ -154,7 +155,7 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
         }
       } else if (object is Sentinel) {
         // TODO(terry): Need to handle more gracefully.
-        print('ERROR: Sentinel encountered ${field.value.id}.');
+        log('Sentinel encountered ${field.value.id}.', LogLevel.error);
       }
     }
 

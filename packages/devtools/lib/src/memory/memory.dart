@@ -9,6 +9,7 @@ import 'dart:html' as html;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../config_specific/logger.dart';
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../popup.dart';
@@ -563,7 +564,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       return instances;
     } catch (e) {
       // TODO(terry): Cleanup error.
-      print('findInstances ERROR: $e');
+      log('findInstances: $e', LogLevel.error);
       return [];
     }
   }
