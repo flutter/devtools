@@ -31,6 +31,5 @@ void main() {
     group('app', appTests);
     group('logging', loggingTests);
     group('debugging', debuggingTests);
-    // Temporarily skipped while tests are being debugged...
-  }, timeout: const Timeout.factor(4), skip: true);
+  }, timeout: const Timeout.factor(4));
 }
