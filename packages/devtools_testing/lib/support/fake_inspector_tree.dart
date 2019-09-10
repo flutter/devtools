@@ -148,7 +148,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     setStateCalled = null;
 
     for (int i = 0; i < numRows; i++) {
-      final row = root.getRow(i, selection: selection);
+      final row = getCachedRow(i);
       row?.node?.renderObject?.attach(
         this,
         Offset(row.depth * columnWidth, i * rowHeight),
@@ -164,7 +164,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
     // computation code will result in rendering artifacts in the text output.
     final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
-      final row = root.getRow(i, selection: selection);
+      final row = getCachedRow(i);
       if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
         continue;
       }

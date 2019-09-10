@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+
 import 'package:test/test.dart';
 
-import 'package:devtools_testing/settings_controller_test.dart';
+import 'package:devtools_testing/info_controller_test.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
@@ -15,5 +16,5 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  await runSettingsControllerTests(env);
+  await runInfoControllerTests(env);
 }

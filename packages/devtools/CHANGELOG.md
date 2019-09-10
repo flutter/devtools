@@ -1,4 +1,14 @@
-## 0.1.6-dev
+## 0.1.7 - 2019-09-09
+* Fix bug with profile mode detection.
+* Enable expand all / collapse to selected functionality in the inspector (will not be available until certain changes land in Flutter stable).
+* Fix analytics bug for apps running in profile mode.
+* Fix bug in memory experiment handling.
+* Hide Dart VM flags when the connected app is not running on the Dart VM (web apps).
+* Former "Settings" screen is now the "Info" screen - updated icon accordingly.
+* Various CSS fixes.
+* Code health improvements.
+
+## 0.1.6 - 2019-09-04
 * Add a page to show Flutter version and Dart VM flags details.
 * Add settings dialog to memory page that supports filtering snapshots and enabling experiments.
 * Various css fixes.

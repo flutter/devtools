@@ -27,10 +27,6 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
       await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
   InspectorService inspectorService;
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
-  );
-
   env.afterNewSetup = () async {
     await ensureInspectorServiceDependencies();
   };
@@ -133,8 +129,10 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
             '     └─Text\n',
           ),
         );
-        RemoteDiagnosticsNode nodeInDetailsTree =
-            await group.getDetailsSubtree(nodeInSummaryTree);
+        RemoteDiagnosticsNode nodeInDetailsTree = await group.getDetailsSubtree(
+          nodeInSummaryTree,
+          subtreeDepth: 2,
+        );
         // When flutter rolls, this string may sometimes change due to
         // implementation details.
         expect(
@@ -151,7 +149,10 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
           ),
         );
 
-        nodeInDetailsTree = await group.getDetailsSubtree(nodeInSummaryTree);
+        nodeInDetailsTree = await group.getDetailsSubtree(
+          nodeInSummaryTree,
+          subtreeDepth: 2,
+        );
         expect(
           treeToDebugString(nodeInDetailsTree),
           equalsGoldenIgnoringHashCodes(

@@ -1,6 +1,9 @@
-Exception Caught By rendering library
+Exception caught by rendering library
 The following assertion was thrown during layout:
 A RenderFlex overflowed by <NUMBER> pixels on the bottom.
+
+▼User-created ancestor of the error-causing widget was: 
+<STACK_TRACE_LINE>
 
 The overflowing RenderFlex has an orientation of Axis.vertical.
 The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and black striped pattern. This is usually caused by the contents being too big for the RenderFlex.

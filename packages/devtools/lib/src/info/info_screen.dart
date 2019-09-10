@@ -11,13 +11,13 @@ import '../globals.dart';
 import '../ui/analytics_platform.dart' as ga_platform;
 import '../ui/elements.dart';
 import '../version.dart';
-import 'settings_controller.dart';
+import 'info_controller.dart';
 
 class FlagDetailsUI extends CoreElement {
   FlagDetailsUI(Flag flag) : super('div', classes: 'flag-details-container') {
     final flagDescription = div(c: 'flag-details-descriptions-container')
       ..add(<CoreElement>[
-        div(c: 'setting-title', text: flag.name),
+        div(c: 'info-title', text: flag.name),
         span(c: 'flag-description', text: flag.comment),
       ]);
 
@@ -35,15 +35,15 @@ class FlagDetailsUI extends CoreElement {
   }
 }
 
-class SettingsScreen extends Screen {
-  SettingsScreen()
+class InfoScreen extends Screen {
+  InfoScreen()
       : super(
           name: '',
-          id: 'settings',
-          iconClass: 'octicon-gear',
+          id: 'info',
+          iconClass: 'octicon-info',
           showTab: false,
         ) {
-    _controller = SettingsController(
+    _controller = InfoController(
       onFlagListChanged: (FlagList flagList) {
         _flagList
           ..clear()
@@ -61,7 +61,7 @@ class SettingsScreen extends Screen {
 
   CoreElement _versionContainer;
 
-  SettingsController _controller;
+  InfoController _controller;
 
   @override
   CoreElement createContent(Framework framework) {
@@ -100,7 +100,8 @@ class SettingsScreen extends Screen {
             div(c: 'flag-list-container')
               ..flex()
               ..add(_flagList = div(c: 'flag-list')..layoutVertical()),
-          ]),
+          ])
+          ..hidden(!serviceManager.connectedApp.isRunningOnDartVM)
       ]);
 
     _controller.entering();
@@ -137,7 +138,7 @@ class SettingsScreen extends Screen {
     final versionDisplay = div()
       ..layoutHorizontal()
       ..add([
-        div(c: 'setting-title', text: title),
+        div(c: 'info-title', text: title),
         div(c: 'version-value', text: value),
       ]);
     if (includeMargin) versionDisplay.clazz('version-margin');

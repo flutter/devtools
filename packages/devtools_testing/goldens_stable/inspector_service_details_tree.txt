@@ -12,9 +12,10 @@ MaterialApp
          │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
          │   3.0, textScaleFactor: 1.0, platformBrightness:
          │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
-         │   EdgeInsets.zero, viewInsets: EdgeInsets.zero,
-         │   alwaysUse24HourFormat: false, accessibleNavigation: false,
-         │   disableAnimations: false, invertColors: false, boldText: false)
+         │   EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth:
+         │   1.7976931348623157e+308, alwaysUse24HourFormat: false,
+         │   accessibleNavigation: false, disableAnimations: false,
+         │   invertColors: false, boldText: false)
          │
          └─Localizations
            │ locale: en_US
@@ -27,5 +28,4 @@ MaterialApp
              │ container: false
              │ properties: SemanticsProperties
              │ label: null
-             │ value: null
 ...

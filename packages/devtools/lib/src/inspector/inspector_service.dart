@@ -86,8 +86,7 @@ class InspectorService {
       for (ClassRef classRef in library.classes) {
         if ('WidgetInspectorService' == classRef.name) {
           final classObj = await inspectorLibrary.getClass(classRef, null);
-          // ignore: prefer_collection_literals
-          final Set<String> functionNames = Set();
+          final functionNames = <String>{};
           for (FuncRef funcRef in classObj.functions) {
             functionNames.add(funcRef.name);
           }
@@ -923,11 +922,19 @@ class ObjectGroup {
   }
 
   Future<RemoteDiagnosticsNode> getDetailsSubtree(
-    RemoteDiagnosticsNode node,
-  ) async {
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 2,
+  }) async {
     if (node == null) return null;
-    return invokeServiceMethodReturningNodeInspectorRef(
-        'getDetailsSubtree', node.dartDiagnosticRef);
+    final args = {
+      'objectGroup': groupName,
+      'arg': node.dartDiagnosticRef.id,
+      'subtreeDepth': subtreeDepth.toString(),
+    };
+    return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemonParams(
+      'getDetailsSubtree',
+      args,
+    ));
   }
 }
 
