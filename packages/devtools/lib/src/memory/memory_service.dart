@@ -180,67 +180,53 @@ void computeInboundRefs(
         }
         break;
       case 'FuncRef':
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final FuncRef funcRef = element.funcRef;
         break;
       case 'Instance':
-        log(
-          'Error(hoverInstanceAllocations): '
-          ' Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final Instance instance = element.instance;
         break;
       case 'InstanceRef':
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final InstanceRef instanceRef = element.instanceRef;
         break;
       case 'Library':
       case 'LibraryRef':
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final Library library = element.library;
         break;
       case 'NullVal':
       case 'NullValRef':
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final NullVal nullValue = element.nullVal;
         break;
       case 'Obj':
       case 'ObjRef':
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
         // TODO(terry): TBD
         // final Obj obj = element.obj;
         break;
       default:
-        log(
-          'Error(hoverInstanceAllocations): '
-          'Unhandled inbound ${element.parentField.runtimeType}',
-          LogLevel.error,
+        _hoverInstanceAllocationsUnhandledTypeError(
+          element.parentField.runtimeType,
         );
     }
 
@@ -252,4 +238,8 @@ void computeInboundRefs(
         owningAllocatorIsAbstract,
       );
   }
+}
+
+void _hoverInstanceAllocationsUnhandledTypeError(Type runtimeType) {
+  log('hoverInstanceAllocations: Unhandled $runtimeType', LogLevel.error);
 }
