@@ -236,6 +236,14 @@ void main() {
       await env.tearDownEnvironment();
     });
     */
+
+    test('getDisplayRefreshRate', () async {
+      await env.setupEnvironment();
+
+      expect(await serviceManager.getDisplayRefreshRate(), equals(60));
+
+      await env.tearDownEnvironment();
+    });
   }, tags: 'useFlutterSdk', timeout: const Timeout.factor(4));
 
   group('serviceManagerTests - restoring device-enabled extension:', () {

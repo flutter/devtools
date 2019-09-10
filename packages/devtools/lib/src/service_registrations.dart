@@ -44,3 +44,7 @@ const RegisteredServiceDescription flutterVersion =
   title: 'Flutter Version',
   icon: FlutterIcons.flutter,
 );
+
+const flutterListViews = '_flutter.listViews';
+
+const displayRefreshRate = '_flutter.getDisplayRefreshRate';

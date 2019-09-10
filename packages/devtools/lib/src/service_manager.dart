@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:core';
 
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
@@ -225,6 +226,48 @@ class ServiceConnectionManager {
       registrations.flutterVersion.service,
       isolateId: _isolateManager.selectedIsolate.id,
     );
+  }
+
+  Future<int> getDisplayRefreshRate() async {
+    const defaultRefreshRate = 60;
+    const unknownRefreshRate = 0.0;
+
+    final flutterViewListResponse = await service.callServiceExtension(
+      registrations.flutterListViews,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+    final List<dynamic> views =
+        flutterViewListResponse.json['views'].cast<Map<String, dynamic>>();
+
+    // Each isolate should only have one FlutterView.
+    final flutterView = views.firstWhere(
+      (view) => view['type'] == 'FlutterView',
+      orElse: () => null,
+    );
+
+    if (flutterView == null) {
+      final message =
+          'No Flutter Views to query: ${flutterViewListResponse.json}';
+      // TODO(kenzie): use devtools logger instead of printing.
+      print(message);
+      throw Exception(message);
+    }
+
+    final viewId = flutterView['id'];
+    final displayRefreshRateResponse = await service.callServiceExtension(
+      registrations.displayRefreshRate,
+      isolateId: _isolateManager.selectedIsolate.id,
+      args: {'viewId': viewId},
+    );
+    final double fps = displayRefreshRateResponse.json['fps'];
+
+    // The Flutter engine returns 0.0 if the refresh rate is unknown. Return
+    // [defaultRefreshRate] instead.
+    if (fps == unknownRefreshRate) {
+      return defaultRefreshRate;
+    }
+
+    return fps.round();
   }
 }
 
