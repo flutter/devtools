@@ -1,7 +1,7 @@
 name: devtools_testing
 version: 1.0.0-dev
 environment:
-  sdk: ^2.2.0
+  sdk: '>=2.3.0 <3.0.0'
 dependencies:
   devtools: ^0.1.8
   meta: ^1.1.0
