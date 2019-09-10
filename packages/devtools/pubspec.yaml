@@ -54,6 +54,8 @@ dev_dependencies:
   mockito: ^4.0.0
   test: ^1.0.0
   webkit_inspection_protocol: ^0.5.0
+  devtools_testing:
+    path: ../devtools_testing
 
 executables:
   devtools:

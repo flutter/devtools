@@ -1,6 +1,9 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// ignore_for_file: implementation_imports
+
 import 'package:devtools/src/profiler/cpu_profile_model.dart';
 import 'package:devtools/src/utils.dart';
 

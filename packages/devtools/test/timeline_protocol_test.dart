@@ -5,11 +5,10 @@ import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/timeline/timeline_protocol.dart';
 import 'package:devtools/src/utils.dart';
+import 'package:devtools_testing/support/test_utils.dart';
+import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-
-import 'support/test_utils.dart';
-import 'support/timeline_test_data.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();

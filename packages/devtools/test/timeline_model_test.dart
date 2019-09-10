@@ -7,11 +7,10 @@ import 'package:devtools/src/profiler/cpu_profile_model.dart';
 import 'package:devtools/src/timeline/timeline_controller.dart';
 import 'package:devtools/src/timeline/timeline_model.dart';
 import 'package:devtools/src/utils.dart';
+import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:devtools_testing/support/test_utils.dart';
+import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:test/test.dart';
-
-import 'support/cpu_profile_test_data.dart';
-import 'support/test_utils.dart';
-import 'support/timeline_test_data.dart';
 
 void main() {
   group('TimelineData', () {
