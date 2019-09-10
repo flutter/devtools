@@ -92,9 +92,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 
   static String _normalize(String s) {
-    return s
-        .replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000')
-        .replaceAll(RegExp(r'dependencies: \[.*\]'), 'dependencies: []');
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override
