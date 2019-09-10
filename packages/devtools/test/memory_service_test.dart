@@ -13,7 +13,6 @@ import 'package:devtools_testing/support/flutter_test_environment.dart';
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
-    testAppDirectory: 'fixtures/flutter_error_app',
   );
 
   await runMemoryServiceTests(env);
