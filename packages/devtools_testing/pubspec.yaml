@@ -1,5 +1,5 @@
 name: devtools_testing
-version: 1.0.0
+version: 1.0.0-dev
 environment:
   sdk: ^2.2.0
 dependencies:
