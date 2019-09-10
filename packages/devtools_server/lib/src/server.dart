@@ -214,7 +214,7 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
 
 Future<void> _handleClientsList(
     dynamic id, Map<String, dynamic> params, bool machineMode) async {
-  final connectedClients = clients.connectedClients;
+  final connectedClients = clients.allClients;
   printOutput(
     connectedClients
         .map((c) =>
@@ -277,6 +277,19 @@ Future<void> registerLaunchDevToolsService(
     final VmService service = await _connectToVmService(vmServiceUri);
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
+      // Prints a launch event to stdout so consumers of the DevTools server
+      // can see when clients are being launched/reused.
+      void emitLaunchEvent({@required bool reused, @required bool notified}) {
+        printOutput(
+          null,
+          {
+            'event': 'client.launch',
+            'params': {'reused': reused, 'notified': notified},
+          },
+          machineMode: machineMode,
+        );
+      }
+
       try {
         // First see if we have an existing DevTools client open that we can
         // reuse.
@@ -291,6 +304,7 @@ Future<void> registerLaunchDevToolsService(
               vmServiceUri,
               shouldNotify,
             )) {
+          emitLaunchEvent(reused: true, notified: shouldNotify);
           return {'result': Success().toJson()};
         }
 
@@ -329,6 +343,7 @@ Future<void> registerLaunchDevToolsService(
           await Chrome.start([uriToLaunch.toString()]);
         }
 
+        emitLaunchEvent(reused: false, notified: false);
         return {'result': Success().toJson()};
       } catch (e, s) {
         // Note: It's critical that we return responses in exactly the right format
@@ -426,5 +441,8 @@ void printOutput(
   Object json, {
   @required bool machineMode,
 }) {
-  print(machineMode ? jsonEncode(json) : message);
+  final output = machineMode ? jsonEncode(json) : message;
+  if (output != null) {
+    print(output);
+  }
 }

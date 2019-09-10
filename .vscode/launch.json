@@ -20,5 +20,11 @@
 			],
 			"preLaunchTask": "Build Release Package"
 		},
+		{
+			"name": "Current File",
+			"type": "dart",
+			"request": "launch",
+			"program": "${file}"
+		}
 	]
 }

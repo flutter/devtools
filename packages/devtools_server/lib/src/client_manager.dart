@@ -8,13 +8,13 @@ import 'package:sse/server/sse_handler.dart';
 
 class ClientManager {
   final List<DevToolsClient> _clients = [];
+  List<DevToolsClient> get allClients => _clients.toList();
+
   void acceptClient(SseConnection connection) {
     final client = DevToolsClient(connection);
     _clients.add(client);
     connection.sink.done.then((_) => _clients.remove(client));
   }
-
-  List<DevToolsClient> get connectedClients => _clients.toList();
 
   /// Finds an active DevTools instance that is not already connecting to
   /// a VM service that we can reuse (for example if a user stopped debugging
