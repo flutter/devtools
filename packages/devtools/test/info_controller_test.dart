@@ -4,89 +4,17 @@
 
 @TestOn('vm')
 
-import 'package:devtools/src/globals.dart';
-import 'package:devtools/src/info/info_controller.dart';
-import 'package:devtools/src/version.dart';
 import 'package:test/test.dart';
-import 'package:vm_service/vm_service.dart';
 
-import 'support/flutter_test_driver.dart';
-import 'support/flutter_test_environment.dart';
+import 'package:devtools_testing/info_controller_test.dart';
+import 'package:devtools_testing/support/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
+import 'package:devtools_testing/support/flutter_test_environment.dart';
 
 void main() async {
-  InfoController infoController;
-  final env = FlutterTestEnvironment(
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-  group('info controller', () {
-    test('entering', () async {
-      await env.setupEnvironment();
 
-      FlutterVersion flutterVersion;
-      List<Flag> flags;
-      infoController = InfoController(
-        onFlutterVersionChanged: (version) {
-          flutterVersion = version;
-        },
-        onFlagListChanged: (flagList) {
-          flags = flagList.flags;
-        },
-      );
-
-      expect(flags, null);
-      expect(flutterVersion, null);
-
-      await infoController.entering();
-
-      // TODO(kenzie): remove the try catch block once Flutter stable supports
-      // the flutterVersion service. Revisit this end of November 2019.
-      try {
-        final flutterVersionResponse = await serviceManager.getFlutterVersion();
-        final expectedFlutterVersion =
-            FlutterVersion.parse(flutterVersionResponse.json);
-        expect(flutterVersion, equals(expectedFlutterVersion));
-      } catch (e) {
-        expect(flutterVersion, isNull);
-        expect(
-          e.toString(),
-          equals('Exception: There are no registered methods for service'
-              ' "flutterVersion"'),
-        );
-      }
-
-      expect(flags, isNotNull);
-
-      final flagList = await env.service.getFlagList();
-      expect(flags.length, flagList.flags.length);
-      final expectedFlags = [
-        Flag.parse({
-          'name': 'causal_async_stacks',
-          'comment': 'Improved async stacks',
-          'modified': true,
-          'valueAsString': 'true'
-        }),
-        Flag.parse({
-          'name': 'async_debugger',
-          'comment': 'Debugger support async functions.',
-          'modified': false,
-          'valueAsString': 'true'
-        }),
-      ];
-      for (var i = 0; i < flags.length; i++) {
-        expect(flags[i].toString(), flagList.flags[i].toString());
-        if (expectedFlags.isNotEmpty &&
-            expectedFlags.last.toString() == flags[i].toString()) {
-          expectedFlags.removeLast();
-        }
-      }
-      expect(
-        expectedFlags.length,
-        0,
-        reason: 'Value of expectedFlags is $expectedFlags',
-      );
-
-      await env.tearDownEnvironment(force: true);
-    });
-  }, timeout: const Timeout.factor(8), tags: 'useFlutterSdk');
-  // TODO: Add a test that uses DartVM instead of Flutter
+  await runInfoControllerTests(env);
 }

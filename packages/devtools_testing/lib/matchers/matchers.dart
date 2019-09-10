@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: implementation_imports
+
 library matchers;
 
 import 'dart:io' as io;
 
 import 'package:devtools/src/inspector/diagnostics_node.dart';
 import 'package:matcher/matcher.dart';
+
+import '../support/constants.dart';
 
 RemoteDiagnosticsNode findNodeMatching(
     RemoteDiagnosticsNode node, String text) {
@@ -61,10 +65,12 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
 }
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
-  _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
+  _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory)
+      : assert(devtoolsTestingPackageRoot != null) {
+    path =
+        '$devtoolsTestingPackageRoot/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
     try {
-      _value = io.File(path).readAsStringSync();
+      _value = _normalize(io.File(path).readAsStringSync());
     } catch (e) {
       _value = 'Error reading $path: $e';
     }

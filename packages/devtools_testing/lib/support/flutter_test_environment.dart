@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: implementation_imports
+
 import 'dart:async';
 import 'dart:io';
 
@@ -9,24 +11,40 @@ import 'package:devtools/src/globals.dart';
 import 'package:devtools/src/service_manager.dart';
 import 'package:devtools/src/utils.dart';
 import 'package:devtools/src/vm_service_wrapper.dart';
+import 'package:package_resolver/package_resolver.dart';
 
+import 'constants.dart';
 import 'flutter_test_driver.dart';
 
 final flutterVersion = Platform.environment['FLUTTER_VERSION'];
 
+typedef FlutterDriverFactory = FlutterTestDriver Function(
+    Directory testAppDirectory);
+
+/// The default [FlutterDriverFactory] method. Runs a normal flutter app.
+FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
+    FlutterRunTestDriver(appDir);
+
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = '../../fixtures/flutter_app',
-  });
+    this.testAppDirectory = 'fixtures/flutter_app',
+    FlutterDriverFactory flutterDriverFactory,
+  }) : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver;
 
   FlutterRunConfiguration _runConfig;
   FlutterRunConfiguration get runConfig => _runConfig;
-  final String testAppDirectory;
   FlutterRunTestDriver _flutter;
   FlutterRunTestDriver get flutter => _flutter;
   VmServiceWrapper _service;
   VmServiceWrapper get service => _service;
+
+  /// Path relative to the `devtools_testing` package for the test fixture.
+  final String testAppDirectory;
+
+  /// A factory method which can return a [FlutterRunTestDriver] for a test
+  /// fixture directory.
+  final FlutterDriverFactory _flutterDriverFactory;
 
   // This function will be called after we have ran the Flutter app and the
   // vmService is opened.
@@ -59,6 +77,9 @@ class FlutterTestEnvironment {
     bool force = false,
     FlutterRunConfiguration config,
   }) async {
+    // Must set this up for the golden tests to work.
+    devtoolsTestingPackageRoot ??=
+        await (PackageResolver.current).packagePath('devtools_testing');
     // Setting up the environment is slow so we reuse the existing environment
     // when possible.
     if (force ||
@@ -74,7 +95,8 @@ class FlutterTestEnvironment {
 
       _needsSetup = false;
 
-      _flutter = FlutterRunTestDriver(Directory(testAppDirectory));
+      _flutter = _flutterDriverFactory(
+          Directory('$devtoolsTestingPackageRoot/$testAppDirectory'));
       await _flutter.run(runConfig: _runConfig);
 
       _service = _flutter.vmService;
