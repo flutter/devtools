@@ -1,7 +1,8 @@
 ## 0.1.8
 
 - Use `http_multi_server` for serving.
-- Make printing and stdin commands configurable.
+- Make stdin commands configurable.
+- Return the underlying server so that it can be closed.
 
 ## 0.1.7
 

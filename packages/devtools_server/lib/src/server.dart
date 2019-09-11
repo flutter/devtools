@@ -70,7 +70,6 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
 
 Future<HttpServer> serveDevTools({
   bool help = false,
-  bool enablePrinting = true,
   bool enableStdinCommands = true,
   bool machineMode = false,
   bool launchBrowser = false,
@@ -118,7 +117,11 @@ Future<HttpServer> serveDevTools({
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
 
-  if (enablePrinting) {
+  if (launchBrowser) {
+    await Chrome.start([devToolsUrl.toString()]);
+  }
+
+  if (enableStdinCommands) {
     printOutput(
       'Serving DevTools at $devToolsUrl',
       {
@@ -131,13 +134,7 @@ Future<HttpServer> serveDevTools({
       },
       machineMode: machineMode,
     );
-  }
 
-  if (launchBrowser) {
-    await Chrome.start([devToolsUrl.toString()]);
-  }
-
-  if (enableStdinCommands) {
     final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
