@@ -13,9 +13,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
-import 'package:shelf_static/shelf_static.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
+
+import 'routing.dart';
 
 const argHelp = 'help';
 const argLaunchBrowser = 'launch-browser';
@@ -52,7 +53,8 @@ final argParser = ArgParser()
     help: 'Launches DevTools in a browser immediately at start.',
   );
 
-void serveDevToolsWithArgs(List<String> arguments) async {
+void serveDevToolsWithArgs(List<String> arguments,
+    {shelf.Handler router}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -61,10 +63,12 @@ void serveDevToolsWithArgs(List<String> arguments) async {
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
   serveDevTools(
-      help: help,
-      machineMode: machineMode,
-      launchBrowser: launchBrowser,
-      port: port);
+    help: help,
+    machineMode: machineMode,
+    launchBrowser: launchBrowser,
+    port: port,
+    router: router,
+  );
 }
 
 void serveDevTools({
@@ -72,7 +76,9 @@ void serveDevTools({
   bool machineMode = false,
   bool launchBrowser = false,
   int port = 0,
+  shelf.Handler router,
 }) async {
+  router ??= await defaultRouter();
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
     print('');
@@ -82,35 +88,7 @@ void serveDevTools({
     return;
   }
 
-  final Uri resourceUri = await Isolate.resolvePackageUri(
-      Uri(scheme: 'package', path: 'devtools/devtools.dart'));
-  final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
-
-  // Default static handler for all non-package requests.
-  final String buildDir = path.join(packageDir, 'build');
-  final buildHandler = createStaticHandler(
-    buildDir,
-    defaultDocument: 'index.html',
-  );
-
-  // The packages folder is renamed in the pub package so this handler serves
-  // out of the `pack` folder.
-  final String packagesDir = path.join(packageDir, 'build', 'pack');
-  final packHandler = createStaticHandler(
-    packagesDir,
-    defaultDocument: 'index.html',
-  );
-
-  // Make a handler that delegates to the correct handler based on path.
-  final handler = (shelf.Request request) {
-    return request.url.path.startsWith('packages/')
-        // request.change here will strip the `packages` prefix from the path
-        // so it's relative to packHandler's root.
-        ? packHandler(request.change(path: 'packages'))
-        : buildHandler(request);
-  };
-
-  final server = await shelf.serve(handler, '127.0.0.1', port);
+  final server = await shelf.serve(router, '127.0.0.1', port);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
 
