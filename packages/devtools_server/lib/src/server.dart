@@ -14,9 +14,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
-import 'package:shelf_static/shelf_static.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
+
+import 'handlers.dart';
 
 const argHelp = 'help';
 const argLaunchBrowser = 'launch-browser';
@@ -53,7 +54,11 @@ final argParser = ArgParser()
     help: 'Launches DevTools in a browser immediately at start.',
   );
 
-Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
+/// Wraps [serveDevTools] `arguments` parsed, as from the command line.
+///
+/// For more information on `handler`, see [serveDevTools].
+Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
+    {shelf.Handler handler}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -62,18 +67,26 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
   return serveDevTools(
-      help: help,
-      machineMode: machineMode,
-      launchBrowser: launchBrowser,
-      port: port);
+    help: help,
+    machineMode: machineMode,
+    launchBrowser: launchBrowser,
+    port: port,
+    handler: handler,
+  );
 }
 
+/// Serves DevTools.
+///
+/// `handler` is the [shelf.Handler] that the server will use for all requests.
+/// If null, [defaultHandler] will be used.
+/// Defaults to null.
 Future<HttpServer> serveDevTools({
   bool help = false,
   bool enableStdinCommands = true,
   bool machineMode = false,
   bool launchBrowser = false,
   int port = 0,
+  shelf.Handler handler,
 }) async {
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -88,33 +101,7 @@ Future<HttpServer> serveDevTools({
         'machineMode only works with enableStdinCommands.');
   }
 
-  final Uri resourceUri = await Isolate.resolvePackageUri(
-      Uri(scheme: 'package', path: 'devtools/devtools.dart'));
-  final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
-
-  // Default static handler for all non-package requests.
-  final String buildDir = path.join(packageDir, 'build');
-  final buildHandler = createStaticHandler(
-    buildDir,
-    defaultDocument: 'index.html',
-  );
-
-  // The packages folder is renamed in the pub package so this handler serves
-  // out of the `pack` folder.
-  final String packagesDir = path.join(packageDir, 'build', 'pack');
-  final packHandler = createStaticHandler(
-    packagesDir,
-    defaultDocument: 'index.html',
-  );
-
-  // Make a handler that delegates to the correct handler based on path.
-  final handler = (shelf.Request request) {
-    return request.url.path.startsWith('packages/')
-        // request.change here will strip the `packages` prefix from the path
-        // so it's relative to packHandler's root.
-        ? packHandler(request.change(path: 'packages'))
-        : buildHandler(request);
-  };
+  handler ??= await defaultHandler();
 
   final server = await HttpMultiServer.bind('localhost', port);
   shelf.serveRequests(server, handler);
