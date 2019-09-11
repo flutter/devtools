@@ -1,3 +1,9 @@
+## 0.1.8
+
+- Use `http_multi_server` for serving.
+- Make stdin commands configurable.
+- Return the underlying server so that it can be closed.
+
 ## 0.1.7
 
 - Rev to using the latest version of `package:vm_service` (1.2.0).
