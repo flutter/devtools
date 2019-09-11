@@ -9,6 +9,7 @@ import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
+import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
@@ -52,7 +53,7 @@ final argParser = ArgParser()
     help: 'Launches DevTools in a browser immediately at start.',
   );
 
-void serveDevToolsWithArgs(List<String> arguments) async {
+Future<HttpServer> serveDevToolsWithArgs(List<String> arguments) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -60,15 +61,16 @@ void serveDevToolsWithArgs(List<String> arguments) async {
   final bool launchBrowser = args[argLaunchBrowser];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
-  serveDevTools(
+  return serveDevTools(
       help: help,
       machineMode: machineMode,
       launchBrowser: launchBrowser,
       port: port);
 }
 
-void serveDevTools({
+Future<HttpServer> serveDevTools({
   bool help = false,
+  bool enableStdinCommands = true,
   bool machineMode = false,
   bool launchBrowser = false,
   int port = 0,
@@ -79,7 +81,11 @@ void serveDevTools({
     print('usage: devtools <options>');
     print('');
     print(argParser.usage);
-    return;
+    return null;
+  }
+  if (machineMode) {
+    assert(enableStdinCommands,
+        'machineMode only works with enableStdinCommands.');
   }
 
   final Uri resourceUri = await Isolate.resolvePackageUri(
@@ -110,63 +116,68 @@ void serveDevTools({
         : buildHandler(request);
   };
 
-  final server = await shelf.serve(handler, '127.0.0.1', port);
+  final server = await HttpMultiServer.bind('localhost', port);
+  shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
-
-  printOutput(
-    'Serving DevTools at $devToolsUrl',
-    {
-      'event': 'server.started',
-      // TODO(dantup): Remove this `method` field when we're sure VS Code users
-      // are all on a newer version that uses `event`. We incorrectly used
-      // `method` for the original releases.
-      'method': 'server.started',
-      'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
-    },
-    machineMode: machineMode,
-  );
 
   if (launchBrowser) {
     await Chrome.start([devToolsUrl.toString()]);
   }
 
-  final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .where((String line) => line.startsWith('{') && line.endsWith('}'))
-      .map<Map<String, dynamic>>((String line) {
-    return json.decode(line) as Map<String, dynamic>;
-  });
+  if (enableStdinCommands) {
+    printOutput(
+      'Serving DevTools at $devToolsUrl',
+      {
+        'event': 'server.started',
+        // TODO(dantup): Remove this `method` field when we're sure VS Code users
+        // are all on a newer version that uses `event`. We incorrectly used
+        // `method` for the original releases.
+        'method': 'server.started',
+        'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
+      },
+      machineMode: machineMode,
+    );
 
-  // Example input:
-  // {
-  //   "id":0,
-  //   "method":"vm.register",
-  //   "params":{
-  //     "uri":"<vm-service-uri-here>",
-  //   }
-  // }
-  _stdinCommandStream.listen((Map<String, dynamic> json) async {
-    // ID can be String, int or null
-    final dynamic id = json['id'];
-    final Map<String, dynamic> params = json['params'];
+    final Stream<Map<String, dynamic>> _stdinCommandStream = stdin
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .where((String line) => line.startsWith('{') && line.endsWith('}'))
+        .map<Map<String, dynamic>>((String line) {
+      return json.decode(line) as Map<String, dynamic>;
+    });
 
-    switch (json['method']) {
-      case 'vm.register':
-        await _handleVmRegister(id, params, machineMode, devToolsUrl);
-        break;
-      default:
-        printOutput(
-          'Unknown method ${json['method']}',
-          {
-            'id': id,
-            'error': 'Unknown method ${json['method']}',
-          },
-          machineMode: machineMode,
-        );
-    }
-  });
+    // Example input:
+    // {
+    //   "id":0,
+    //   "method":"vm.register",
+    //   "params":{
+    //     "uri":"<vm-service-uri-here>",
+    //   }
+    // }
+    _stdinCommandStream.listen((Map<String, dynamic> json) async {
+      // ID can be String, int or null
+      final dynamic id = json['id'];
+      final Map<String, dynamic> params = json['params'];
+
+      switch (json['method']) {
+        case 'vm.register':
+          await _handleVmRegister(id, params, machineMode, devToolsUrl);
+          break;
+        default:
+          printOutput(
+            'Unknown method ${json['method']}',
+            {
+              'id': id,
+              'error': 'Unknown method ${json['method']}',
+            },
+            machineMode: machineMode,
+          );
+      }
+    });
+  }
+
+  return server;
 }
 
 Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
