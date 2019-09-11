@@ -19,6 +19,7 @@ class DevToolsServerApiClient {
     _channel.stream.listen((msg) {
       try {
         final request = jsonDecode(msg);
+        assert(request['method'] != null);
         switch (request['method']) {
           case 'connectToVm':
             connectToVm(request['params']);
@@ -38,7 +39,7 @@ class DevToolsServerApiClient {
   final SseClient _channel;
 
   int _nextRequestId = 0;
-  void _send(String method, [dynamic params]) {
+  void _send(String method, [Map<String, dynamic> params]) {
     final id = _nextRequestId++;
     final json = jsonEncode({'id': id, 'method': method, 'params': params});
     _channel.sink.add(json);
