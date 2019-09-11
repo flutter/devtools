@@ -83,6 +83,10 @@ Future<HttpServer> serveDevTools({
     print(argParser.usage);
     return null;
   }
+  if (machineMode) {
+    assert(enableStdinCommands,
+        'machineMode only works with enableStdinCommands.');
+  }
 
   final Uri resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
