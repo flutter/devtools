@@ -16,7 +16,7 @@ import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
-import 'routing.dart';
+import 'handlers.dart';
 
 const argHelp = 'help';
 const argLaunchBrowser = 'launch-browser';
@@ -53,8 +53,11 @@ final argParser = ArgParser()
     help: 'Launches DevTools in a browser immediately at start.',
   );
 
+/// Wraps [serveDevTools] `arguments` parsed, as from the command line.
+///
+/// For more information on `handler`, see [serveDevTools].
 void serveDevToolsWithArgs(List<String> arguments,
-    {shelf.Handler router}) async {
+    {shelf.Handler handler}) async {
   final args = argParser.parse(arguments);
 
   final help = args[argHelp];
@@ -67,18 +70,22 @@ void serveDevToolsWithArgs(List<String> arguments,
     machineMode: machineMode,
     launchBrowser: launchBrowser,
     port: port,
-    router: router,
+    handler: handler,
   );
 }
 
+/// Serves DevTools.
+///
+/// `handler` is the [shelf.Handler] that the server will use for all requests.
+/// If null, [defaultHandler] will be used.
+/// Defaults to null.
 void serveDevTools({
   bool help = false,
   bool machineMode = false,
   bool launchBrowser = false,
   int port = 0,
-  shelf.Handler router,
+  shelf.Handler handler,
 }) async {
-  router ??= await defaultRouter();
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
     print('');
@@ -88,7 +95,9 @@ void serveDevTools({
     return;
   }
 
-  final server = await shelf.serve(router, '127.0.0.1', port);
+  handler ??= await defaultHandler();
+
+  final server = await shelf.serve(handler, '127.0.0.1', port);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
 
