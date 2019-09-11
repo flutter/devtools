@@ -67,7 +67,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
   static const _reloadActionId = 'reload-action';
   static const _restartActionId = 'restart-action';
 
-  ServerApiClient apiClient;
+  DevToolsServerApiClient devToolsServer;
 
   void initGlobalUI() async {
     // Listen for clicks on the 'send feedback' button.
@@ -149,7 +149,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
     }
 
     try {
-      apiClient = ServerApiClient();
+      devToolsServer = DevToolsServerApiClient();
 
       // TODO(dantup): As a workaround for not being able to reconnect DevTools to
       // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
@@ -160,15 +160,15 @@ class HtmlPerfToolFramework extends HtmlFramework {
         final newParams = Map.of(uri.queryParameters)..remove('notify');
         html.window.history.pushState(
             null, null, uri.replace(queryParameters: newParams).toString());
-        apiClient.notify();
+        devToolsServer.notify();
       }
 
       serviceManager.onStateChange.listen((connected) {
         try {
           if (connected) {
-            apiClient.notifyConnected(serviceManager.service.connectedUri);
+            devToolsServer.notifyConnected(serviceManager.service.connectedUri);
           } else {
-            apiClient.notifyDisconnected();
+            devToolsServer.notifyDisconnected();
           }
         } catch (e) {
           print('Failed to notify server of connection status: $e');

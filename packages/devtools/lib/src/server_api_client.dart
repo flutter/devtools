@@ -7,8 +7,8 @@ import 'dart:html';
 
 import 'package:sse/client/sse_client.dart';
 
-class ServerApiClient {
-  ServerApiClient() : _channel = SseClient('/api/sse') {
+class DevToolsServerApiClient {
+  DevToolsServerApiClient() : _channel = SseClient('/api/sse') {
     _channel.onOpen.first.then((_) {
       // We'll want to send notifications when a user tries to reuse an existing
       // DevTools window, so pop up the notification dialog early while they're
