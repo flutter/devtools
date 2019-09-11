@@ -39,7 +39,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
   HtmlPerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
 
-    initSseConnection();
+    initDevToolsServerConnection();
     initGlobalUI();
     initTestingModel();
   }
@@ -141,7 +141,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
     screensReady.future.then(app.devToolsReady);
   }
 
-  void initSseConnection() {
+  void initDevToolsServerConnection() {
     // When running the debug DDC Build, the server won't be running so we
     // can't connect to its API (for now at least, the API is optional).
     if (isDebugBuild()) {
