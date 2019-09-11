@@ -59,7 +59,7 @@ class TimelineScreen extends Screen {
 
   CoreElement flameChartContainer;
 
-  TimelineFlameChartCanvas flameChartCanvas;
+  TimelineFlameChartCanvas frameFlameChartCanvas;
 
   EventDetails eventDetails;
 
@@ -237,7 +237,7 @@ class TimelineScreen extends Screen {
         ..clear()
         ..hidden(false);
       final TimelineFrame frame = timelineController.timelineData.selectedFrame;
-      flameChartCanvas = TimelineFlameChartCanvas(
+      frameFlameChartCanvas = TimelineFlameChartCanvas(
         data: frame,
         width: flameChartContainer.element.clientWidth.toDouble(),
         height: math.max(
@@ -250,12 +250,12 @@ class TimelineScreen extends Screen {
               TimelineFlameChartCanvas.sectionSpacing,
         ),
       );
-      flameChartCanvas.onNodeSelected.listen((node) {
+      frameFlameChartCanvas.onNodeSelected.listen((node) {
         eventDetails.titleBackgroundColor = node.backgroundColor;
         eventDetails.titleTextColor = node.textColor;
         timelineController.selectTimelineEvent(node.data);
       });
-      flameChartContainer.add(flameChartCanvas.element);
+      flameChartContainer.add(frameFlameChartCanvas.element);
 
       _configureSplitter();
     });
@@ -278,13 +278,14 @@ class TimelineScreen extends Screen {
     final observer = html.ResizeObserver((List<dynamic> entries, _) {
       // TODO(kenzie): observe resizing for recordedTimeline as well. Recorded
       // timeline will not have a selected frame.
-      if (flameChartCanvas == null ||
-          timelineController.timelineMode == TimelineMode.full) {
+      if (frameFlameChartCanvas == null ||
+          timelineController.timelineMode == TimelineMode.full ||
+          timelineController.timelineData.selectedFrame == null) {
         return;
       }
 
-      flameChartCanvas.forceRebuildForSize(
-        flameChartCanvas.widthWithInsets,
+      frameFlameChartCanvas.forceRebuildForSize(
+        frameFlameChartCanvas.widthWithInsets,
         math.max(
           // Subtract [rowHeightWithPadding] to account for the size of
           // [stackFrameDetails] section at the bottom of the chart.
@@ -403,7 +404,7 @@ class TimelineScreen extends Screen {
       ..hidden(timelineMode == TimelineMode.full)
       ..frameUIgraph.reset();
 
-    flameChartCanvas = null;
+    frameFlameChartCanvas = null;
     flameChartContainer
       ..clear()
       ..hidden(timelineMode == TimelineMode.frameBased);
@@ -470,7 +471,7 @@ class TimelineScreen extends Screen {
     timelineController.timelineData?.clear();
     flameChartContainer
         .hidden(timelineController.timelineMode == TimelineMode.frameBased);
-    flameChartCanvas = null;
+    frameFlameChartCanvas = null;
     eventDetails.reset(
         hide: timelineController.timelineMode == TimelineMode.frameBased);
 

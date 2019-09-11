@@ -54,6 +54,10 @@ class TimelineData {
     selectedEvent = null;
     cpuProfileData = null;
   }
+
+  bool hasCpuProfileData() {
+    return cpuProfileData != null && cpuProfileData.stackFrames.isNotEmpty;
+  }
 }
 
 class OfflineTimelineData extends TimelineData {

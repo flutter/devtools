@@ -16,7 +16,7 @@ import '../utils.dart';
 import 'timeline_controller.dart';
 
 class EventDetails extends CoreElement {
-  EventDetails(this.timelineController) : super('div') {
+  EventDetails(this._timelineController) : super('div') {
     flex();
     layoutVertical();
 
@@ -29,41 +29,41 @@ class EventDetails extends CoreElement {
     // TODO(jacobr): Change argument type when
     // https://github.com/dart-lang/sdk/issues/36798 is fixed.
     final observer = html.ResizeObserver((List<dynamic> entries, _) {
-      cpuProfiler.flameChart.updateForContainerResize();
+      _cpuProfiler.flameChart.updateForContainerResize();
     });
     observer.observe(element);
 
-    assert(tabNav != null);
-    assert(content != null);
+    assert(_tabNav != null);
+    assert(_content != null);
 
-    add([tabNav.element, content]);
+    add([_tabNav.element, _content]);
   }
 
-  static const defaultTitleText = '[No event selected]';
+  static const _defaultTitleText = '[No event selected]';
 
-  static const defaultTitleBackground = ThemedColor(
+  static const _defaultTitleBackground = ThemedColor(
     Color(0xFFF6F6F6),
     Color(0xFF2D2E31), // Material Dark Grey 900+2
   );
 
-  final TimelineController timelineController;
+  final TimelineController _timelineController;
 
-  CpuProfilerTabNav tabNav;
+  CpuProfilerTabNav _tabNav;
 
-  CoreElement content;
+  CoreElement _content;
 
   CoreElement _title;
 
-  _CpuProfiler cpuProfiler;
+  _CpuProfiler _cpuProfiler;
 
-  CoreElement gpuEventDetails;
+  CoreElement _gpuEventDetails;
 
-  Color titleBackgroundColor = defaultTitleBackground;
+  Color titleBackgroundColor = _defaultTitleBackground;
 
   Color titleTextColor = contrastForeground;
 
   void _initContent() {
-    _title = div(text: defaultTitleText, c: 'event-details-heading');
+    _title = div(text: _defaultTitleText, c: 'event-details-heading');
     _title.element.style
       ..color = colorToCss(titleTextColor)
       ..backgroundColor = colorToCss(titleBackgroundColor);
@@ -72,24 +72,24 @@ class EventDetails extends CoreElement {
       ..layoutVertical()
       ..flex()
       ..add([
-        cpuProfiler = _CpuProfiler(
-          timelineController,
-          () => timelineController.timelineData.cpuProfileData,
+        _cpuProfiler = _CpuProfiler(
+          _timelineController,
+          () => _timelineController.timelineData.cpuProfileData,
         )..hidden(true),
         // TODO(kenzie): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
-        gpuEventDetails = div(
+        _gpuEventDetails = div(
           text: 'CPU profiling is not available for GPU events.',
           c: 'centered-single-line-message',
         )..hidden(true),
       ]);
 
-    content = div(c: 'event-details-section section-border')
+    _content = div(c: 'event-details-section section-border')
       ..flex()
       ..add(<CoreElement>[_title, details]);
 
-    tabNav = CpuProfilerTabNav(
-      cpuProfiler,
+    _tabNav = CpuProfilerTabNav(
+      _cpuProfiler,
       CpuProfilerTabOrder(
         first: CpuProfilerViewType.flameChart,
         second: CpuProfilerViewType.callTree,
@@ -99,13 +99,15 @@ class EventDetails extends CoreElement {
   }
 
   void _initListeners() {
-    timelineController.onSelectedFrame.listen((_) => reset());
+    _timelineController.onSelectedFrame.listen((_) => reset());
 
-    timelineController.onSelectedTimelineEvent
+    _timelineController.onSelectedTimelineEvent
         .listen((_) async => await update());
 
-    timelineController.onLoadOfflineData.listen((_) async {
-      if (timelineController.timelineData.selectedEvent != null) {
+    _timelineController.onLoadOfflineData.listen((_) async {
+      // If there is no CPU profile data, there is no reason to show the event
+      // details section.
+      if (_timelineController.offlineTimelineData.hasCpuProfileData()) {
         titleTextColor = Colors.black;
         titleBackgroundColor = mainUiColor;
         await update();
@@ -114,27 +116,27 @@ class EventDetails extends CoreElement {
   }
 
   Future<void> update({bool hide = false}) async {
-    final selectedEvent = timelineController.timelineData?.selectedEvent;
+    final selectedEvent = _timelineController.timelineData?.selectedEvent;
 
     _title.text = selectedEvent != null
         ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
-        : defaultTitleText;
+        : _defaultTitleText;
     _title.element.style
       ..backgroundColor = colorToCss(titleBackgroundColor)
       ..color = colorToCss(titleTextColor);
 
     hidden(hide);
-    gpuEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
-    cpuProfiler.hidden(selectedEvent?.isGpuEvent ?? true);
+    _gpuEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
+    _cpuProfiler.hidden(selectedEvent?.isGpuEvent ?? true);
 
     if (selectedEvent != null && selectedEvent.isUiEvent) {
-      await cpuProfiler.update();
+      await _cpuProfiler.update();
     }
   }
 
   void reset({bool hide = false}) {
     titleTextColor = contrastForeground;
-    titleBackgroundColor = defaultTitleBackground;
+    titleBackgroundColor = _defaultTitleBackground;
     update(hide: hide);
   }
 }
@@ -169,7 +171,7 @@ class _CpuProfiler extends CpuProfiler {
             text:
                 'CPU profiling is not yet available for snapshots. You can only'
                 ' view '));
-      if (_timelineController.offlineTimelineData?.cpuProfileData != null) {
+      if (_timelineController.offlineTimelineData.hasCpuProfileData()) {
         offlineModeMessage
           ..add(span(text: 'the '))
           ..add(span(text: 'CPU profile', c: 'message-action')
