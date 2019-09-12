@@ -416,7 +416,8 @@ class DebuggerScreen extends Screen {
   void onContentAttached() {
     // configure the navigation / editor splitter
     split.flexSplit(
-      html.toDartHtmlElementList(_navEditorPanels.map((e) => e.element).toList()),
+      html.toDartHtmlElementList(
+          _navEditorPanels.map((e) => e.element).toList()),
       gutterSize: defaultSplitterWidth,
       sizes: [22, 78],
       minSize: [200, 600],
@@ -436,8 +437,9 @@ class DebuggerScreen extends Screen {
       'lineNumbers': true,
       'gutters': <String>['breakpoints'],
     };
-    final codeMirror =
-        CodeMirror.fromElement(html.toDartHtmlElement(_sourceArea.element), options: options);
+    final codeMirror = CodeMirror.fromElement(
+        html.toDartHtmlElement(_sourceArea.element),
+        options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
@@ -834,7 +836,8 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          html.toDartHtmlElement(span(c: 'octicon octicon-primitive-dot').element),
+          html.toDartHtmlElement(
+              span(c: 'octicon octicon-primitive-dot').element),
         );
       } else if (breakpoint.location is UnresolvedSourceLocation) {
         final UnresolvedSourceLocation loc = breakpoint.location;
@@ -852,7 +855,8 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          html.toDartHtmlElement(span(c: 'octicon octicon-primitive-dot').element),
+          html.toDartHtmlElement(
+              span(c: 'octicon octicon-primitive-dot').element),
         );
       }
     }

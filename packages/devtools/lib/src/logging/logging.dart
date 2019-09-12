@@ -109,7 +109,8 @@ class LoggingScreen extends Screen {
   @override
   void onContentAttached() {
     split.fixedSplitBidirectional(
-      html.toDartHtmlElementList([_loggingTable.element.element, logDetailsUI.element]),
+      html.toDartHtmlElementList(
+          [_loggingTable.element.element, logDetailsUI.element]),
       gutterSize: defaultSplitterWidth,
       horizontalSizes: [60, 40],
       verticalSizes: [70, 30],

@@ -321,7 +321,8 @@ class TimelineScreen extends Screen {
       // display this UI. On typical devices, the space available is very
       // limited making the UI harder to use than it would be otherwise.
       splitter = split.flexSplit(
-        html.toDartHtmlElementList([flameChartContainer.element, eventDetails.element]),
+        html.toDartHtmlElementList(
+            [flameChartContainer.element, eventDetails.element]),
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: [75, 25],
