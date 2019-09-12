@@ -164,8 +164,8 @@ class _CpuProfiler extends CpuProfiler {
   @override
   bool maybeShowMessageOnUpdate() {
     if (offlineMode &&
-        _timelineController.timelineData.selectedEvent !=
-            _timelineController.offlineTimelineData?.selectedEvent) {
+        !collectionEquals(_timelineController.timelineData.selectedEvent.json,
+            _timelineController.offlineTimelineData?.selectedEvent?.json)) {
       final offlineModeMessage = div()
         ..add(span(
             text:

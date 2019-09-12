@@ -237,7 +237,6 @@ class TimelineController {
         final eventToSelect =
             frameToSelect.findTimelineEvent(offlineTimelineData.selectedEvent);
         if (eventToSelect != null) {
-          offlineTimelineData.selectedEvent = eventToSelect;
           timelineData.selectedEvent = eventToSelect;
           timelineData.cpuProfileData = offlineTimelineData.cpuProfileData;
           // TODO(kenzie): frame flame chart should listen to this stream and
