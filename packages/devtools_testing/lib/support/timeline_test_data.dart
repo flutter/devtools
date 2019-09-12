@@ -410,6 +410,6 @@ final offlineTimelineDataJson = {
   TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
   TimelineData.selectedFrameIdKey: 'PipelineItem-1',
   TimelineData.selectedEventKey: vsyncEvent.json,
-  TimelineData.displayRefreshRateKey: 120,
+  TimelineData.displayRefreshRateKey: 120.0,
   TimelineData.devToolsScreenKey: timelineScreenId,
 };

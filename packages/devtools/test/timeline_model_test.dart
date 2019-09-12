@@ -74,7 +74,7 @@ void main() {
       expect(timelineData.traceEvents, isNotEmpty);
       expect(timelineData.frames, isNotEmpty);
       expect(timelineData.selectedFrame, isNotNull);
-      expect(timelineData.selectedFrameId, isNull);
+      expect(timelineData.selectedFrameId, 'id_0');
       expect(timelineData.selectedEvent, isNotNull);
       expect(timelineData.displayRefreshRate, isNotNull);
       expect(timelineData.cpuProfileData, isNotNull);
