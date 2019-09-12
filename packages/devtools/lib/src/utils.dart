@@ -10,6 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'ui/fake_flutter/dart_ui/dart_ui.dart';
+
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
 const String loremIpsum = '''
@@ -400,4 +402,12 @@ class TimeRange {
         return '[${_start?.inMilliseconds} ms - ${end?.inMilliseconds} ms]';
     }
   }
+
+  @override
+  bool operator ==(other) {
+    return start == other.start && end == other.end;
+  }
+
+  @override
+  int get hashCode => hashValues(start, end);
 }
