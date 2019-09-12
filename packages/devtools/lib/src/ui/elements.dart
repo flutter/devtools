@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' hide Point;
+import 'package:html_shim/html.dart' hide Point;
 
 /// Finds the first descendant element of this document with the given id.
 Element queryId(String id) => querySelector('#$id');

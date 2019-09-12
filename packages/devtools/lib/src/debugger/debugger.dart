@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'package:html_shim/html.dart' as html;
 
 import 'package:codemirror/codemirror.dart';
 import 'package:meta/meta.dart';
@@ -416,7 +416,7 @@ class DebuggerScreen extends Screen {
   void onContentAttached() {
     // configure the navigation / editor splitter
     split.flexSplit(
-      _navEditorPanels.map((e) => e.element).toList(),
+      html.toDartHtmlElementList(_navEditorPanels.map((e) => e.element).toList()),
       gutterSize: defaultSplitterWidth,
       sizes: [22, 78],
       minSize: [200, 600],
@@ -424,7 +424,7 @@ class DebuggerScreen extends Screen {
 
     // configure the editor / console splitter
     split.flexSplit(
-      [_sourceArea.element, _consoleDiv.element],
+      html.toDartHtmlElementList([_sourceArea.element, _consoleDiv.element]),
       horizontal: false,
       gutterSize: defaultSplitterWidth,
       sizes: [80, 20],
@@ -437,7 +437,7 @@ class DebuggerScreen extends Screen {
       'gutters': <String>['breakpoints'],
     };
     final codeMirror =
-        CodeMirror.fromElement(_sourceArea.element, options: options);
+        CodeMirror.fromElement(html.toDartHtmlElement(_sourceArea.element), options: options);
     codeMirror.setReadOnly(true);
     if (isDarkTheme) {
       codeMirror.setTheme('darcula');
@@ -834,7 +834,7 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          span(c: 'octicon octicon-primitive-dot').element,
+          html.toDartHtmlElement(span(c: 'octicon octicon-primitive-dot').element),
         );
       } else if (breakpoint.location is UnresolvedSourceLocation) {
         final UnresolvedSourceLocation loc = breakpoint.location;
@@ -852,7 +852,7 @@ class SourceEditor {
         codeMirror.setGutterMarker(
           line,
           'breakpoints',
-          span(c: 'octicon octicon-primitive-dot').element,
+          html.toDartHtmlElement(span(c: 'octicon octicon-primitive-dot').element),
         );
       }
     }
@@ -900,7 +900,7 @@ class SourceEditor {
 
       codeMirror.addWidget(
         Position(position.line - 1, position.column - 1),
-        _executionPointElement.element,
+        html.toDartHtmlElement(_executionPointElement.element),
       );
     }
   }

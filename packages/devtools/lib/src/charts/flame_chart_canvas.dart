@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 import 'dart:math' as math;
 
+import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../ui/colors.dart';

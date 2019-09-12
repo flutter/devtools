@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' hide Screen;
+import 'package:html_shim/html.dart' hide Screen;
 
 import 'package:meta/meta.dart';
 

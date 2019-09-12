@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:math' as math;
 
+import 'package:html_shim/html.dart' as html;
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 
@@ -321,7 +321,7 @@ class TimelineScreen extends Screen {
       // display this UI. On typical devices, the space available is very
       // limited making the UI harder to use than it would be otherwise.
       splitter = split.flexSplit(
-        [flameChartContainer.element, eventDetails.element],
+        html.toDartHtmlElementList([flameChartContainer.element, eventDetails.element]),
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: [75, 25],

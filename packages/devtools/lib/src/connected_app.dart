@@ -10,7 +10,7 @@ import 'globals.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
-const dartHtmlLibraryUri = 'dart:html';
+const dartHtmlLibraryUri = 'package:html_shim/html.dart';
 
 class ConnectedApp {
   ConnectedApp();

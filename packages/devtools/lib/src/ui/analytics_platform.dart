@@ -6,7 +6,7 @@
 library analytics_platform;
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'package:html_shim/html.dart' as html;
 
 import 'package:js/js.dart';
 

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'package:html_shim/html.dart';
 
 import '../ui/elements.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 
 class DragScroll {
   /// Whether the element was dragged on the previous click or touch.

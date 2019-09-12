@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ansi_up/ansi_up.dart';
+import 'package:html_shim/html.dart' as html;
 import 'package:split/split.dart' as split;
-
 import '../framework/framework.dart';
 import '../globals.dart';
 import '../inspector/inspector.dart';
@@ -109,7 +109,7 @@ class LoggingScreen extends Screen {
   @override
   void onContentAttached() {
     split.fixedSplitBidirectional(
-      [_loggingTable.element.element, logDetailsUI.element],
+      html.toDartHtmlElementList([_loggingTable.element.element, logDetailsUI.element]),
       gutterSize: defaultSplitterWidth,
       horizontalSizes: [60, 40],
       verticalSizes: [70, 30],

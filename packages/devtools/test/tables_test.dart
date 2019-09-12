@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('browser')
-import 'dart:html';
+import 'package:html_shim/html.dart';
 
 import 'package:devtools/src/table_data.dart';
 import 'package:devtools/src/tables.dart';
