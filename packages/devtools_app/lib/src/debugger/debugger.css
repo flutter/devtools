@@ -1,0 +1,98 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.debugger-menu {
+    width: 200px;
+}
+
+.source-head {
+    font-weight: bold;
+    color: var(--header-color);
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--table-border);
+    padding: 4px 8px;
+}
+
+.source-head-filter {
+    color: var(--header-color);
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--table-border);
+}
+
+.breakpoints {
+    width: 1em;
+}
+
+.CodeMirror-gutter-elt .octicon {
+    margin-left: 4px;
+}
+
+.CodeMirror-linebackground.executionLine {
+    background: var(--selected-line);
+}
+
+.execution-marker {
+    margin-left: -2px;
+    margin-top: -2px;
+    z-index: 10;
+}
+
+.break-on-exceptions {
+    line-height: 32px;
+}
+
+.break-on-exceptions label {
+    margin-left: 6px;
+}
+
+.debugger-items-list {
+    overflow-y: scroll;
+    cursor: pointer;
+}
+
+.debugger-items-list:focus {
+    outline: none;
+}
+
+.open-popup {
+    z-index: 1000;
+    position: absolute;
+    height: calc(100% - 70%);
+    color: var(--header-color);
+    background-color: var(--list-background);
+    list-style: none;
+    border: 1px solid var(--popup-border-color);
+    padding-left: 4px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    display: none;
+}
+
+.popup-textfield {
+    z-index: 1000;
+    position: absolute;
+    color: var(--header-color);
+    background-color: var(--list-background);
+    width: calc(100% - 105px);
+    display: none;
+}
+
+.flex-no-wrap {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+/* Octicons CSS fixes (make 16px and centered) */
+/* These icons are 8px wide and have 8px padding on the right, so offset
+ * by 4px to the left */
+ .octicon-chevron-right {
+    margin-left: 4px;
+    margin-right: -4px;
+}
+/* These icons are 10px wide and have 6px padding on the right, so offset
+ * by 3px to the left */
+ .octicon-chevron-down, .octicon-chevron-up {
+    margin-left: 3px;
+    margin-right: -3px;
+}

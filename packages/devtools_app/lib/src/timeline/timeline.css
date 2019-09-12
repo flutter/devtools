@@ -1,0 +1,171 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.timeline-frames {
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-frames .frames-container {
+    overflow-x: hidden;
+    white-space: nowrap;
+    direction: rtl;
+}
+
+.timeline-frames .divider-line {
+    height: 1px;
+    border-bottom: 1px solid;
+    left: 0;
+    right: 0;
+    position: absolute;
+    border-color: var(--light-background);
+    opacity: 0.5;
+}
+
+.timeline-frames .divider-line.subtle {
+    opacity: 0.2;
+}
+
+.timeline-frame {
+    width: 18px;
+    cursor: pointer;
+    position: relative;
+    direction: initial;
+    user-select: none;
+    margin: 0 3px;
+    z-index: 1;
+}
+
+.timeline-frame .bar {
+    width: 18px;
+}
+
+.timeline-frame .bar.bottom {
+}
+
+.timeline-frame .bar.top {
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom: 1px solid;
+    border-color: var(--light-background);
+}
+
+.timeline-frame.selected .bar {
+    border-color: var(--selected-border);
+}
+
+.timeline-flame-chart-container {
+    min-height: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-background {
+    background-color: var(--shaded-background-darker);
+    min-width: 100%;
+    position: sticky;
+    top: 0;
+}
+
+.flame-chart {
+    min-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.flame-chart-section {
+    min-width: 100%;
+    position: absolute;
+}
+
+.flame-chart-section.ui {
+    background-color: var(--shaded-background-lighter);
+}
+
+.flame-chart-item {
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 0 2px;
+    position: absolute;
+    white-space: nowrap;
+    height: 24px;
+}
+
+.flame-chart-item-label-wrapper {
+    position: sticky;
+    left: 0;
+    overflow-x: hidden;
+    display: inline-block;
+}
+
+.flame-chart-item-label {
+    display: inline-block;
+}
+
+.flame-chart-item.flame-chart-title {
+    font-weight: bold;
+    padding-left: 4px;
+    padding-right: 4px;
+    cursor: default;
+    color: white;
+}
+
+.flame-chart-section.ui .flame-chart-item.flame-chart-title {
+    color: black;
+}
+
+.flame-chart-grid {
+    left: 0;
+    top: 0;
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
+    pointer-events: none;
+}
+
+.flame-chart-grid-item {
+    top: 0;
+    min-height: 100%;
+    position: absolute;
+    pointer-events: none;
+}
+
+.flame-chart-grid-item .grid-line {
+    top: 0;
+    background-color: var(--light-background);
+    opacity: 0.5;
+    min-height: 100%;
+    width: 1px;
+    position: absolute;
+}
+
+.flame-chart-grid-item .timestamp {
+    top: 2px;
+    left: 4px;
+    text-align: end;
+    position: sticky;
+}
+
+.section-border {
+    border: 1px solid;
+    border-color: var(--light-background);
+    border-radius: 3px;
+}
+
+.event-details-section {
+    position: relative;
+}
+
+.event-details-heading {
+    padding: 3px 12px;
+    min-width: 100%;
+}
+
+.event-details {
+    position: relative;
+    /* 100% height minus the height of the event-details-heading */
+    height: calc(100% - 27px);
+}

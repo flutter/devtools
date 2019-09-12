@@ -1,0 +1,106 @@
+/* Copyright 2019 The Chromium Authors. All rights reserved. */
+/* Use of this source code is governed by a BSD-style license that can be */
+/* found in the LICENSE file. */
+
+.inspector-tree-container {
+    border: 1px solid #484848;
+}
+
+.inspector-container {
+    color: #000;
+}
+
+
+/*
+Styles for rendering html versions of the inspector tree.
+
+Should be kept consistent with the styles for the Canvas tree. Styles match names
+of DiagnosticsTreeStyle enum entries and DiagnosticLevel enum entries so these
+names intentionally violate CSS style name best practices.
+
+The main use case for adding custom styles here is for making structured error
+messages beautiful.
+*/
+
+.inspector-style-sparse {
+
+}
+
+.inspector-style-offstage {
+
+}
+
+.inspector-style-dense {
+
+}
+
+.inspector-style-transition {
+
+}
+
+.inspector-style-whitespace {
+
+}
+
+.inspector-style-error {
+    background-color: #f97c7c;
+}
+
+.inspector-style-flat {
+
+}
+
+.inspector-style-singleLine {
+
+}
+
+.inspector-style-headerLine {
+
+}
+
+.inspector-style-indentedSingleLine {
+
+}
+
+.inspector-style-shallow {
+
+}
+
+.inspector-style-truncateChildren {
+
+}
+
+/* levels */
+.inspector-level-hidden {
+
+}
+.inspector-level-fine {
+
+}
+.inspector-level-debug {
+
+}
+.inspector-level-info {
+
+}
+.inspector-level-warning {
+
+}
+.inspector-level-hint {
+    background-color: lightgoldenrodyellow;
+}
+.inspector-level-fix {
+
+}
+.inspector-level-contract {
+
+}
+.inspector-level-violation {
+
+}
+.inspector-level-error {
+
+}
+.inspector-level-off {
+
+}

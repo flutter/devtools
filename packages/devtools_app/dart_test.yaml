@@ -1,0 +1,6 @@
+define_platforms:
+  chrome-no-sandbox:
+    name: Chrome (no sandbox)
+    extends: chrome
+    settings:
+      arguments: --no-sandbox
