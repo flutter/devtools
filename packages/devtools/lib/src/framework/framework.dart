@@ -137,6 +137,7 @@ class Framework {
               'DevTools to view this file.',
               hideDelay: Toast.extendedHideDelay,
             );
+            return;
         }
       } on FormatException catch (e) {
         toast(
@@ -147,6 +148,7 @@ class Framework {
         );
         return;
       }
+      messageManager.removeAll();
     });
 
     try {
