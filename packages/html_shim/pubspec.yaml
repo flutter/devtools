@@ -1,0 +1,6 @@
+name: html_shim
+description: Shim that exposes dart:html to flutter throwing exceptions when not run in a browser.
+version: 0.0.1
+
+environment:
+  sdk: '>=2.0.0 <3.0.0'
