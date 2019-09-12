@@ -7,7 +7,7 @@
 set -x #echo on
 echo "Editing .gitignore to comment out build directory"
 
-pushd packages/devtools
+pushd packages/devtools_app
 pub get
 popd
 

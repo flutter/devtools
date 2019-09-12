@@ -16,15 +16,18 @@ git pull upstream master
 
 git checkout -b release_0_0_15
 
-cd packages/devtools
 ```
 
-## Update the release number in two files:
+## Update the release number in three files:
 - **packages/devtools/pubspec.yaml**
 
 Change ```version: 0.0.14``` to ```version: 0.0.15```
 
-- **packages/devtools/lib/devtools.dart**
+- **packages/devtools_app/pubspec.yaml**
+
+Change ```version: 0.0.14``` to ```version: 0.0.15```
+
+- **packages/devtools_app/lib/devtools.dart**
 
 Change ```const String version = '0.0.14';``` to ```const String version = '0.0.15';```
 
@@ -41,11 +44,13 @@ Add the release number and date followed by the features or changes e.g.,
 ## Push the local branch
 
 ```shell
-git add lib/devtools.dart 
+git add packages/devtools_app/lib/devtools.dart
 
-git add pubspec.yaml
+git add packages/devtools_app/pubspec.yaml
 
-git add CHANGELOG.md
+git add packages/devtools/pubspec.yaml
+
+git add pavackages/devtools/CHANGELOG.md
 
 git commit -a -m “Prepare for v0.0.15 release.”
 
@@ -83,8 +88,15 @@ git pull upstream master
 - connect to the running app from devtools, and verify that the pages
   generally work, and there are no exceptions in the chrome devtools log
 
-#### Publish the package
+#### Publish the packages
 ```shell
+cd packages/devtools_app
+
+pub publish
+
+...
+Looks great! Are you ready to upload your package (y/n)? y
+
 cd packages/devtools
 
 pub publish

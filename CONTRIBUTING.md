@@ -13,7 +13,7 @@ file.
 ## Development
 
 - `git clone https://github.com/flutter/devtools`
-- `cd devtools/packages/devtools`
+- `cd devtools/packages/devtools_app`
 - `pub get`
 
 From a separate terminal:
@@ -21,7 +21,7 @@ From a separate terminal:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
-From the packages/devtools directory:
+From the packages/devtools_app directory:
 - `pub global activate webdev` (install webdev globally)
 - `export PATH=$PATH:~/.pub-cache/bin` (make globally activated packages available from the command line)
 - `webdev serve`
@@ -79,14 +79,14 @@ Make sure your Flutter SDK matches the tip of trunk before
 running these tests.
 
 ```
-cd packages/devtools
+cd packages/devtools_app
 pub run test -j1 --tags useFlutterSdk
 ```
 
 ### Run all other tests
 
 ```
-cd packages/devtools
+cd packages/devtools_app
 pub run test --exclude-tags useFlutterSdk
 pub run build_runner test -- --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 ```
@@ -110,4 +110,4 @@ All content not authored by the Flutter team must go in the third_party
 directory. As an expedient to make the third_party code work well with our build scripts,
 code in third_party should be given a stub pubspec.yaml file so that you can
 reference the resources from the packages directory from
-`packages/devtools/web/index.html`
+`packages/devtools_app/web/index.html`

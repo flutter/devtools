@@ -7,7 +7,7 @@
 # Fast fail the script on failures.
 set -ex
 
-pushd packages/devtools
+pushd packages/devtools_app
 echo `pwd`
 
 # Add globally activated packages to the path.

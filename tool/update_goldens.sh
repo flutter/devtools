@@ -20,7 +20,7 @@ fi
 
 set -x #echo on
 which flutter
-cd packages/devtools
+cd packages/devtools_app
 
 pub run test --reporter expanded --tags useFlutterSdk
 
