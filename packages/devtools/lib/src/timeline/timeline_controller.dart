@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import '../config_specific/logger.dart';
+import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -254,6 +255,10 @@ class TimelineController {
     }
     offlineTimelineData = null;
   }
+
+  Future<double> get displayRefreshRate async =>
+      timelineData?.displayRefreshRate ??
+      await serviceManager.getDisplayRefreshRate();
 
   void logNonFatalError(String message) {
     _nonFatalErrorController.add(message);

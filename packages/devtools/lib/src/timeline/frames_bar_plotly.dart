@@ -57,7 +57,7 @@ class FramesBarPlotly {
 
   double get jankThresholdMs => 1000.0 / displayRefreshRate;
 
-  int displayRefreshRate;
+  double displayRefreshRate;
 
   final _yAxisLogScale = AxisLayout(
     title: Title(

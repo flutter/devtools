@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../config_specific/logger.dart';
 import '../framework/framework.dart';
-import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
 import '../ui/plotly.dart';
@@ -161,8 +160,7 @@ class PlotlyDivGraph extends CoreElement {
       element,
       useLogScale: false,
       showRangeSlider: false,
-      displayRefreshRate: timelineController.timelineData?.displayRefreshRate ??
-          await serviceManager.getDisplayRefreshRate(),
+      displayRefreshRate: await timelineController.displayRefreshRate,
     );
     plotlyChart.plotFPS();
 

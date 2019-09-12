@@ -18,7 +18,7 @@ import 'vm_service_wrapper.dart';
 
 // TODO(kenzie): add an offline service manager implementation.
 
-const defaultRefreshRate = 60;
+const defaultRefreshRate = 60.0;
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
@@ -234,7 +234,7 @@ class ServiceConnectionManager {
     );
   }
 
-  Future<int> getDisplayRefreshRate() async {
+  Future<double> getDisplayRefreshRate() async {
     const unknownRefreshRate = 0.0;
 
     final flutterViewListResponse = await service.callServiceExtension(
@@ -271,7 +271,7 @@ class ServiceConnectionManager {
       return defaultRefreshRate;
     }
 
-    return fps.round();
+    return fps.roundToDouble();
   }
 }
 

@@ -50,7 +50,7 @@ class TimelineData {
 
   CpuProfileData cpuProfileData;
 
-  int displayRefreshRate;
+  double displayRefreshRate;
 
   String get selectedFrameId => selectedFrame?.id;
 
@@ -86,7 +86,7 @@ class OfflineTimelineData extends TimelineData {
     TimelineFrame selectedFrame,
     String selectedFrameId,
     TimelineEvent selectedEvent,
-    int displayRefreshRate,
+    double displayRefreshRate,
     CpuProfileData cpuProfileData,
   })  : _selectedFrameId = selectedFrameId,
         super(
@@ -120,7 +120,7 @@ class OfflineTimelineData extends TimelineData {
           )
         : null;
 
-    final int displayRefreshRate = json[TimelineData.displayRefreshRateKey];
+    final double displayRefreshRate = json[TimelineData.displayRefreshRateKey];
 
     return OfflineTimelineData._(
       traceEvents: traceEvents,
