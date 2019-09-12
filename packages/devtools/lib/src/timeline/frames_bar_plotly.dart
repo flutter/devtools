@@ -15,14 +15,15 @@ class FramesBarPlotly {
     this._chart, {
     this.useLogScale = true,
     this.showRangeSlider = true,
+    this.displayRefreshRate,
   });
 
-  // Any duration of ui/gpu greater than 8 ms is a jank.
-  static const double jankthresholdMs = 1000.0 / 60.0;
-
   static const int gpuGoodTraceIndex = 0;
+
   static const int gpuSelectTraceIndex = 1;
+
   static const int uiGoodTraceIndex = 2;
+
   static const int uiSelectTraceIndex = 3;
 
   // IMPORTANT: Last trace need to update numberOfTraces constant below.
@@ -47,9 +48,16 @@ class FramesBarPlotly {
   static const int ticksInRangeSlider = 90;
 
   final String _domName;
+
   final dynamic _chart;
+
   final bool useLogScale;
+
   final bool showRangeSlider;
+
+  double get jankThresholdMs => 1000.0 / displayRefreshRate;
+
+  double displayRefreshRate;
 
   final _yAxisLogScale = AxisLayout(
     title: Title(
@@ -111,9 +119,9 @@ class FramesBarPlotly {
           xref: 'paper',
           layer: 'below',
           x0: 0,
-          y0: jankthresholdMs,
+          y0: jankThresholdMs,
           x1: 1,
-          y1: jankthresholdMs,
+          y1: jankThresholdMs,
           line: Line(
             dash: 'dot',
             color: colorToCss(highwater16msColor),
@@ -253,6 +261,10 @@ class FramesBarPlotly {
     );
   }
 
+  void relayoutFPSTimeseriesLayout() {
+    Plotly.relayout(_domName, getFPSTimeseriesLayout());
+  }
+
   // Chunky plotting of data to reduce plotly live charting lag.
   void plotFPSDataList(
     List<int> dataIndexes,
@@ -276,7 +288,7 @@ class FramesBarPlotly {
       gpuGoodX.add(dataIndexes[dataIndex]);
       gpuGoodTrace.add(gpuDuration);
 
-      if (uiDuration + gpuDuration > jankthresholdMs) {
+      if (uiDuration + gpuDuration > jankThresholdMs) {
         glowBarFrame(dataIndexes[dataIndex], uiDuration + gpuDuration);
       }
     }

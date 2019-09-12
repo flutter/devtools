@@ -158,7 +158,7 @@ class Framework {
     }
   }
 
-  void _importTimeline(Map<String, dynamic> import) {
+  Future<void> _importTimeline(Map<String, dynamic> import) async {
     final offlineData = OfflineTimelineData.parse(import);
     if (offlineData.isEmpty) {
       toast('Imported file does not contain timeline data.');
@@ -176,7 +176,7 @@ class Framework {
     }
     navigateTo(timelineScreenId);
 
-    timelineScreen.clearTimeline();
+    await timelineScreen.clearTimeline();
     timelineScreen.timelineController.loadOfflineData(offlineData);
   }
 

@@ -47,19 +47,9 @@ class FramesBarChart extends CoreElement with SetStateMixin {
 
   final TimelineController timelineController;
 
-  TimelineFrame selectedFrame;
   PlotlyDivGraph frameUIgraph;
+
   bool _createdPlot = false;
-
-  final StreamController<TimelineFrame> _selectedFrameController =
-      StreamController<TimelineFrame>.broadcast();
-
-  Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
-
-  void setSelected(TimelineFrame frame) {
-    selectedFrame = frame;
-    _selectedFrameController.add(frame);
-  }
 }
 
 class PlotlyDivGraph extends CoreElement {
@@ -164,12 +154,13 @@ class PlotlyDivGraph extends CoreElement {
     plotFXHover(frameGraph, hoverDisplay);
   }
 
-  void createPlot(dynamic element) {
+  Future<void> createPlot(dynamic element) async {
     plotlyChart = FramesBarPlotly(
       frameGraph,
       element,
       useLogScale: false,
       showRangeSlider: false,
+      displayRefreshRate: await timelineController.displayRefreshRate,
     );
     plotlyChart.plotFPS();
 

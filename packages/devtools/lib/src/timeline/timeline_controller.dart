@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import '../config_specific/logger.dart';
+import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -32,15 +33,13 @@ class TimelineController {
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
   /// new value of [timelineData.frames].
-  final StreamController<TimelineFrame> frameAddedController =
-      StreamController<TimelineFrame>.broadcast();
+  final frameAddedController = StreamController<TimelineFrame>.broadcast();
 
   /// Stream controller that notifies a frame was selected.
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
   /// new value of [timelineData.selectedFrame].
-  final StreamController<TimelineFrame> _selectedFrameController =
-      StreamController<TimelineFrame>.broadcast();
+  final _selectedFrameController = StreamController<TimelineFrame>.broadcast();
 
   /// Stream controller that notifies a timeline event was selected.
   ///
@@ -48,7 +47,7 @@ class TimelineController {
   /// new value of [timelineData.selectedEvent]. We send the
   /// [FrameFlameChartItem] so that we can persist the colors through to the
   /// event details view.
-  final StreamController<TimelineEvent> _selectedTimelineEventController =
+  final _selectedTimelineEventController =
       StreamController<TimelineEvent>.broadcast();
 
   /// Stream controller that notifies that offline data was loaded into the
@@ -56,7 +55,7 @@ class TimelineController {
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
   /// new value of [timelineData].
-  final StreamController<OfflineTimelineData> _loadOfflineDataController =
+  final _loadOfflineDataController =
       StreamController<OfflineTimelineData>.broadcast();
 
   /// Stream controller that notifies the timeline screen when a non-fatal error
@@ -83,9 +82,9 @@ class TimelineController {
 
   TimelineProtocol timelineProtocol;
 
-  CpuProfileTransformer cpuProfileTransformer = CpuProfileTransformer();
+  final _cpuProfileTransformer = CpuProfileTransformer();
 
-  CpuProfilerService cpuProfilerService = CpuProfilerService();
+  final _cpuProfilerService = CpuProfilerService();
 
   TimelineMode timelineMode = TimelineMode.frameBased;
 
@@ -146,7 +145,7 @@ class TimelineController {
   }
 
   void selectTimelineEvent(TimelineEvent event) {
-    if (timelineData.selectedEvent == event) {
+    if (event == null || timelineData.selectedEvent == event) {
       return;
     }
     timelineData.selectedEvent = event;
@@ -164,7 +163,7 @@ class TimelineController {
     assert(timelineData.selectedEvent.frameId == timelineData.selectedFrame.id);
 
     timelineData.selectedFrame.cpuProfileData ??=
-        await cpuProfilerService.getCpuProfile(
+        await _cpuProfilerService.getCpuProfile(
       startMicros:
           timelineData.selectedFrame.uiEventFlow.time.start.inMicroseconds,
       extentMicros:
@@ -175,15 +174,7 @@ class TimelineController {
       timelineData.selectedFrame.cpuProfileData,
       timelineData.selectedEvent.time,
     );
-    cpuProfileTransformer.processData(timelineData.cpuProfileData);
-  }
-
-  void restoreCpuProfileFromOfflineData() {
-    if (offlineTimelineData == null) {
-      return;
-    }
-    timelineData = offlineTimelineData.copy();
-    _loadOfflineDataController.add(offlineTimelineData);
+    _cpuProfileTransformer.processData(timelineData.cpuProfileData);
   }
 
   void recordTrace(Map<String, dynamic> trace) {
@@ -225,16 +216,49 @@ class TimelineController {
     timelineProtocol.maybeAddPendingEvents();
 
     if (timelineData.cpuProfileData != null) {
-      cpuProfileTransformer.processData(timelineData.cpuProfileData);
+      _cpuProfileTransformer.processData(timelineData.cpuProfileData);
     }
 
+    setOfflineData();
     _loadOfflineDataController.add(offlineData);
   }
 
-  void exitOfflineMode() {
-    timelineData.clear();
+  void setOfflineData() {
+    final frameToSelect = offlineTimelineData.frames.firstWhere(
+      (frame) => frame.id == offlineTimelineData.selectedFrameId,
+      orElse: () => null,
+    );
+    if (frameToSelect != null) {
+      timelineData.selectedFrame = frameToSelect;
+      // TODO(kenzie): frames bar chart should listen to this stream and
+      // programmatially select the frame from the offline snapshot.
+      _selectedFrameController.add(frameToSelect);
+
+      if (offlineTimelineData.selectedEvent != null) {
+        final eventToSelect =
+            frameToSelect.findTimelineEvent(offlineTimelineData.selectedEvent);
+        if (eventToSelect != null) {
+          timelineData.selectedEvent = eventToSelect;
+          timelineData.cpuProfileData = offlineTimelineData.cpuProfileData;
+          // TODO(kenzie): frame flame chart should listen to this stream and
+          // programmatically select the flame chart item that corresponds to
+          // the selected event from the offline snapshot.
+          _selectedTimelineEventController.add(eventToSelect);
+        }
+      }
+    }
+  }
+
+  Future<void> exitOfflineMode({bool clearTimeline = true}) async {
+    if (clearTimeline) {
+      await timelineData.clear();
+    }
     offlineTimelineData = null;
   }
+
+  Future<double> get displayRefreshRate async =>
+      timelineData?.displayRefreshRate ??
+      await serviceManager.getDisplayRefreshRate();
 
   void logNonFatalError(String message) {
     _nonFatalErrorController.add(message);

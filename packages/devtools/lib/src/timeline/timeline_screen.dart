@@ -261,9 +261,19 @@ class TimelineScreen extends Screen {
     });
 
     timelineController.onLoadOfflineData.listen((_) {
+      // Relayout the plotly graph so that the frames bar chart reflects the
+      // display refresh rate from the imported snapshot.
+      framesBarChart.frameUIgraph.plotlyChart
+        ..displayRefreshRate =
+            timelineController.offlineTimelineData.displayRefreshRate
+        ..relayoutFPSTimeseriesLayout();
       framesBarChart.hidden(false);
-      flameChartContainer..hidden(true);
-      _destroySplitter();
+      if (timelineController.offlineTimelineData.selectedFrameId == null) {
+        flameChartContainer.hidden(true);
+        _destroySplitter();
+      } else if (timelineController.offlineTimelineData.hasCpuProfileData()) {
+        splitter.setSizes([50, 50]);
+      }
     });
 
     timelineController.onNonFatalError.listen((message) {
@@ -329,31 +339,39 @@ class TimelineScreen extends Screen {
   }
 
   @override
-  void entering() {
-    _updateListeningState();
+  void entering() async {
+    await _updateListeningState();
     _updateButtonStates();
-    _profileGranularitySelector.setGranularity();
+    await _profileGranularitySelector.setGranularity();
   }
 
   @override
-  void exiting() {
-    _updateListeningState();
+  void exiting() async {
+    await _updateListeningState();
     _updateButtonStates();
   }
 
-  void _exitOfflineMode() {
+  Future<void> _exitOfflineMode() async {
     // This needs to be called first because [framework.exitOfflineMode()] will
     // remove all elements from the dom if we are not connected to an app.
     // Performing operations from [_clearTimeline()] on elements that have been
     // removed will throw exceptions, so we need to maintain this order.
-    clearTimeline();
+    await clearTimeline();
     eventDetails.reset(hide: true);
-    timelineController.exitOfflineMode();
+
+    // We already cleared the timeline data - do not repeat this action.
+    await timelineController.exitOfflineMode(clearTimeline: false);
+
     // This needs to be called before we update the button states because it
     // changes the value of [offlineMode], which the button states depend on.
     framework.exitOfflineMode();
-    // Revert to the previously selected mode on offline exit.
-    _setTimelineMode(timelineMode: timelineController.timelineMode);
+
+    // Revert to the previously selected mode on offline exit. We already
+    // cleared the timeline data - do not repeat this action.
+    await _setTimelineMode(
+      timelineMode: timelineController.timelineMode,
+      clearTimeline: false,
+    );
     _updateButtonStates();
   }
 
@@ -390,11 +408,16 @@ class TimelineScreen extends Screen {
     _updateButtonStates();
   }
 
-  void _setTimelineMode({@required TimelineMode timelineMode}) {
+  Future<void> _setTimelineMode({
+    @required TimelineMode timelineMode,
+    bool clearTimeline = true,
+  }) async {
     // TODO(kenzie): the two modes should be aware of one another and we should
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
-    timelineController.timelineData.clear();
+    if (clearTimeline) {
+      await timelineController.timelineData.clear();
+    }
 
     timelineController.timelineMode = timelineMode;
     _updateButtonStates();
@@ -467,8 +490,8 @@ class TimelineScreen extends Screen {
     );
   }
 
-  void clearTimeline() {
-    timelineController.timelineData?.clear();
+  Future<void> clearTimeline() async {
+    await timelineController.timelineData?.clear();
     flameChartContainer
         .hidden(timelineController.timelineMode == TimelineMode.frameBased);
     frameFlameChartCanvas = null;

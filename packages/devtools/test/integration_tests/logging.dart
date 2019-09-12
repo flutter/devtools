@@ -56,7 +56,7 @@ void loggingTests() {
     expect(await logs.logCount(), 0);
 
     // Switch to a different page.
-    await tools.switchPage('timeline');
+    await tools.switchPage('performance');
 
     // Cause app to log.
     await appFixture.invoke('controller.emitLog()');

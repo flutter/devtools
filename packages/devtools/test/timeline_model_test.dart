@@ -24,7 +24,9 @@ void main() {
       expect(timelineData.traceEvents, isEmpty);
       expect(timelineData.frames, isEmpty);
       expect(timelineData.selectedFrame, isNull);
+      expect(timelineData.selectedFrameId, isNull);
       expect(timelineData.selectedEvent, isNull);
+      expect(timelineData.displayRefreshRate, isNull);
       expect(timelineData.cpuProfileData, isNull);
     });
 
@@ -34,14 +36,17 @@ void main() {
           equals({
             TimelineData.traceEventsKey: [],
             TimelineData.cpuProfileKey: {},
+            TimelineData.selectedFrameIdKey: null,
             TimelineData.selectedEventKey: {},
+            TimelineData.displayRefreshRateKey: 60,
             TimelineData.devToolsScreenKey: timelineScreenId,
           }));
 
       timelineData
         ..traceEvents.add({'name': 'FakeTraceEvent'})
         ..cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson)
-        ..selectedEvent = vsyncEvent;
+        ..selectedEvent = vsyncEvent
+        ..displayRefreshRate = 60;
 
       expect(
           timelineData.json,
@@ -50,7 +55,9 @@ void main() {
               {'name': 'FakeTraceEvent'}
             ],
             TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
+            TimelineData.selectedFrameIdKey: null,
             TimelineData.selectedEventKey: vsyncEvent.json,
+            TimelineData.displayRefreshRateKey: 60,
             TimelineData.devToolsScreenKey: timelineScreenId,
           }));
     });
@@ -62,18 +69,23 @@ void main() {
         ..frames.add(frame)
         ..selectedEvent = vsyncEvent
         ..selectedFrame = frame
+        ..displayRefreshRate = 120
         ..cpuProfileData = CpuProfileData.parse(jsonDecode(jsonEncode({})));
       expect(timelineData.traceEvents, isNotEmpty);
       expect(timelineData.frames, isNotEmpty);
       expect(timelineData.selectedFrame, isNotNull);
+      expect(timelineData.selectedFrameId, 'id_0');
       expect(timelineData.selectedEvent, isNotNull);
+      expect(timelineData.displayRefreshRate, isNotNull);
       expect(timelineData.cpuProfileData, isNotNull);
 
       timelineData.clear();
       expect(timelineData.traceEvents, isEmpty);
       expect(timelineData.frames, isEmpty);
       expect(timelineData.selectedFrame, isNull);
+      expect(timelineData.selectedFrameId, isNull);
       expect(timelineData.selectedEvent, isNull);
+      expect(timelineData.displayRefreshRate, isNull);
       expect(timelineData.cpuProfileData, isNull);
     });
   });
@@ -84,7 +96,9 @@ void main() {
       expect(offlineData.traceEvents, isEmpty);
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
+      expect(offlineData.selectedFrameId, isNull);
       expect(offlineData.selectedEvent, isNull);
+      expect(offlineData.displayRefreshRate, isNull);
       expect(offlineData.cpuProfileData, isNull);
 
       offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
@@ -94,6 +108,7 @@ void main() {
       );
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
+      expect(offlineData.selectedFrameId, equals('PipelineItem-1'));
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
       expect(
         offlineData.selectedEvent.json,
@@ -105,6 +120,7 @@ void main() {
               vsyncEvent.time.duration.inMicroseconds,
         }),
       );
+      expect(offlineData.displayRefreshRate, equals(120));
       expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
     });
 
@@ -114,7 +130,9 @@ void main() {
       expect(offlineData.traceEvents, equals(copy.traceEvents));
       expect(offlineData.frames, equals(copy.frames));
       expect(offlineData.selectedFrame, equals(copy.selectedFrame));
+      expect(offlineData.selectedFrameId, equals(copy.selectedFrameId));
       expect(offlineData.selectedEvent, equals(copy.selectedEvent));
+      expect(offlineData.displayRefreshRate, equals(copy.displayRefreshRate));
       expect(offlineData.cpuProfileData, equals(copy.cpuProfileData));
       expect(identical(offlineData, copy), isFalse);
     });

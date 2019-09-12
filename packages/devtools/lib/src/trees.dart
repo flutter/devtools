@@ -115,11 +115,15 @@ class TreeNode<T extends TreeNode<T>> {
   }
 
   bool containsChildWithCondition(bool condition(T node)) {
-    final T childWithCondition = breadthFirstTraversal<T>(
+    final T childWithCondition = firstChildWithCondition(condition);
+    return childWithCondition != null;
+  }
+
+  T firstChildWithCondition(bool condition(T node)) {
+    return breadthFirstTraversal<T>(
       this,
       returnCondition: condition,
     );
-    return childWithCondition != null;
   }
 }
 

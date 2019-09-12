@@ -55,7 +55,9 @@ class TimelineService {
   }
 
   Future<void> startTimeline() async {
-    timelineController.timelineData = TimelineData();
+    timelineController.timelineData = TimelineData(
+      displayRefreshRate: await serviceManager.getDisplayRefreshRate(),
+    );
 
     await serviceManager.serviceAvailable.future;
     await allowedError(serviceManager.service

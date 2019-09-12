@@ -164,8 +164,8 @@ class _CpuProfiler extends CpuProfiler {
   @override
   bool maybeShowMessageOnUpdate() {
     if (offlineMode &&
-        _timelineController.timelineData.selectedEvent !=
-            _timelineController.offlineTimelineData?.selectedEvent) {
+        !collectionEquals(_timelineController.timelineData.selectedEvent.json,
+            _timelineController.offlineTimelineData?.selectedEvent?.json)) {
       final offlineModeMessage = div()
         ..add(span(
             text:
@@ -175,8 +175,10 @@ class _CpuProfiler extends CpuProfiler {
         offlineModeMessage
           ..add(span(text: 'the '))
           ..add(span(text: 'CPU profile', c: 'message-action')
-            ..click(
-                () => _timelineController.restoreCpuProfileFromOfflineData()))
+            ..click(() {
+              // TODO(kenzie): ensure event details title style is restored.
+              _timelineController.setOfflineData();
+            }))
           ..add(span(text: ' included in the snapshot.'));
       } else {
         offlineModeMessage.add(span(
@@ -187,7 +189,8 @@ class _CpuProfiler extends CpuProfiler {
       return true;
     }
 
-    if (_timelineController.timelineData.cpuProfileData.stackFrames.isEmpty) {
+    final cpuProfileData = _timelineController.timelineData.cpuProfileData;
+    if (cpuProfileData != null && cpuProfileData.stackFrames.isEmpty) {
       final frameOffset =
           _timelineController.timelineData.selectedFrame.time.start;
       final startTime =

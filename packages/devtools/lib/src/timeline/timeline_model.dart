@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
 
+import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
+import '../service_manager.dart';
 import '../trees.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
@@ -16,12 +18,20 @@ class TimelineData {
     this.selectedFrame,
     this.selectedEvent,
     this.cpuProfileData,
+    this.displayRefreshRate,
   })  : traceEvents = traceEvents ?? [],
         frames = frames ?? [];
 
   static const traceEventsKey = 'traceEvents';
+
   static const cpuProfileKey = 'cpuProfile';
+
+  static const selectedFrameIdKey = 'selectedFrameId';
+
   static const selectedEventKey = 'selectedEvent';
+
+  static const displayRefreshRateKey = 'displayRefreshRate';
+
   static const devToolsScreenKey = 'dartDevToolsScreen';
 
   /// List that will store trace events in the order we process them.
@@ -40,18 +50,27 @@ class TimelineData {
 
   CpuProfileData cpuProfileData;
 
+  double displayRefreshRate;
+
+  String get selectedFrameId => selectedFrame?.id;
+
   Map<String, dynamic> get json => {
         traceEventsKey: traceEvents,
         cpuProfileKey: cpuProfileData?.json ?? {},
+        selectedFrameIdKey: selectedFrame?.id,
         selectedEventKey: selectedEvent?.json ?? {},
+        displayRefreshRateKey: displayRefreshRate ?? defaultRefreshRate,
         devToolsScreenKey: timelineScreenId,
       };
 
-  void clear() {
+  Future<void> clear() async {
     traceEvents.clear();
     frames.clear();
     selectedFrame = null;
     selectedEvent = null;
+    displayRefreshRate = serviceManager?.connectedApp == null
+        ? null
+        : await serviceManager.getDisplayRefreshRate();
     cpuProfileData = null;
   }
 
@@ -65,13 +84,17 @@ class OfflineTimelineData extends TimelineData {
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
     TimelineFrame selectedFrame,
+    String selectedFrameId,
     TimelineEvent selectedEvent,
+    double displayRefreshRate,
     CpuProfileData cpuProfileData,
-  }) : super(
+  })  : _selectedFrameId = selectedFrameId,
+        super(
           traceEvents: traceEvents,
           frames: frames,
           selectedFrame: selectedFrame,
           selectedEvent: selectedEvent,
+          displayRefreshRate: displayRefreshRate,
           cpuProfileData: cpuProfileData,
         );
 
@@ -84,6 +107,8 @@ class OfflineTimelineData extends TimelineData {
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
+    final String selectedFrameId = json[TimelineData.selectedFrameIdKey];
+
     final Map<String, dynamic> selectedEventJson =
         json[TimelineData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
@@ -95,18 +120,25 @@ class OfflineTimelineData extends TimelineData {
           )
         : null;
 
+    final double displayRefreshRate = json[TimelineData.displayRefreshRateKey];
+
     return OfflineTimelineData._(
       traceEvents: traceEvents,
+      selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
+      displayRefreshRate: displayRefreshRate,
       cpuProfileData: cpuProfileData,
     );
   }
 
   bool get isEmpty => traceEvents.isEmpty;
 
+  @override
+  String get selectedFrameId => _selectedFrameId;
+  final String _selectedFrameId;
+
   /// Creates a new instance of [OfflineTimelineData] with references to the
-  /// same objects contained in this instance ([traceEvents], [frames],
-  /// [selectedFrame], [selectedEvent], [cpuProfileData]).
+  /// same objects contained in this instance.
   ///
   /// This is not a deep copy. We are not modifying the before-mentioned
   /// objects, only pointing our reference variables at different objects.
@@ -117,7 +149,9 @@ class OfflineTimelineData extends TimelineData {
       traceEvents: traceEvents,
       frames: frames,
       selectedFrame: selectedFrame,
+      selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
+      displayRefreshRate: displayRefreshRate,
       cpuProfileData: cpuProfileData,
     );
   }
@@ -158,11 +192,6 @@ class OfflineTimelineEvent extends TimelineEvent {
 /// * [gpuEventFlow] : flow of events showing the GPU work for the frame.
 class TimelineFrame {
   TimelineFrame(this.id);
-
-  // TODO(kenzie): we should query the device for targetFps at some point.
-  static const targetFps = 60.0;
-
-  static const targetMaxDuration = 1000.0 / targetFps;
 
   final String id;
 
@@ -238,6 +267,15 @@ class TimelineFrame {
     }
     eventFlows[type.index] = event;
     event?.frameId = id;
+  }
+
+  TimelineEvent findTimelineEvent(TimelineEvent event) {
+    if (event.type == TimelineEventType.ui ||
+        event.type == TimelineEventType.gpu) {
+      return eventFlows[event.type.index].firstChildWithCondition(
+          (e) => e.name == event.name && e.time == event.time);
+    }
+    return null;
   }
 
   @override
