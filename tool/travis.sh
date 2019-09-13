@@ -7,6 +7,12 @@
 # Fast fail the script on failures.
 set -ex
 
+# Some integration tests assume the devtools package is up to date and located
+# adjacent to the devtools_app package.
+pushd packages/devtools
+    pub get
+popd
+
 pushd packages/devtools_app
 echo `pwd`
 

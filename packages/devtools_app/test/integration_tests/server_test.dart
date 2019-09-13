@@ -27,7 +27,15 @@ void main() {
     if (Directory('build/pack').existsSync()) {
       Directory('build/pack').deleteSync(recursive: true);
     }
+
     Directory('build/packages').renameSync('build/pack');
+    // The devtools package build directory needs to reflect the latest
+    // devtools_app package contents.
+    if (Directory('../devtools/build').existsSync()) {
+      Directory('../devtools/build').deleteSync(recursive: true);
+    }
+
+    Directory('build').renameSync('../devtools/build');
 
     // Start the command-line server.
     server = await DevToolsServerDriver.create();
