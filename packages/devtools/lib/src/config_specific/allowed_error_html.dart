@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
+import 'package:html_shim/html.dart';
 
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics

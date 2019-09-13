@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' show Element, window, Rectangle, Event;
 import 'dart:math' as math;
+
+import 'package:html_shim/html.dart' show Element, window, Rectangle, Event;
 
 import '../framework/framework.dart';
 import '../ui/elements.dart';

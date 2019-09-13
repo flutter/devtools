@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
 import 'dart:math' as math;
 import 'dart:math';
 
+import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../ui/elements.dart';

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' hide Event;
 import 'dart:typed_data';
 
+import 'package:html_shim/html.dart' hide Event;
 import 'package:sse/client/sse_client.dart';
 import 'package:vm_service/utils.dart';
 

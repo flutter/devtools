@@ -5,6 +5,7 @@
 import 'package:ansi_up/ansi_up.dart';
 import 'package:codemirror/codemirror.dart';
 import 'package:devtools/src/ui/theme.dart';
+import 'package:html_shim/html.dart' as html;
 
 import '../ui/elements.dart';
 import '../utils.dart';
@@ -18,7 +19,8 @@ class ConsoleArea implements CoreElementView {
     _container = div()
       ..layoutVertical()
       ..flex();
-    _editor = CodeMirror.fromElement(_container.element, options: options);
+    _editor = CodeMirror.fromElement(html.toDartHtmlElement(_container.element),
+        options: options);
     _editor.setReadOnly(true);
     if (isDarkTheme) {
       _editor.setTheme('darcula');

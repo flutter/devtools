@@ -9,7 +9,7 @@
 /// canvas.
 library inspector_tree_html;
 
-import 'dart:html';
+import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
