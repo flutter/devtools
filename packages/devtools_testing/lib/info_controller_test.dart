@@ -7,9 +7,9 @@
 
 @TestOn('vm')
 
-import 'package:devtools/src/globals.dart';
-import 'package:devtools/src/info/info_controller.dart';
-import 'package:devtools/src/version.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/info/info_controller.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 

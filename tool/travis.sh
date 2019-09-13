@@ -7,7 +7,13 @@
 # Fast fail the script on failures.
 set -ex
 
+# Some integration tests assume the devtools package is up to date and located
+# adjacent to the devtools_app package.
 pushd packages/devtools
+    pub get
+popd
+
+pushd packages/devtools_app
 echo `pwd`
 
 # Add globally activated packages to the path.
@@ -124,8 +130,8 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
 
-    # Return to the devtools directory.
-    cd devtools
+    # Return to the devtools_app directory.
+    cd devtools_app
 
     # Provision our packages using Flutter's version of Dart.
     pub get

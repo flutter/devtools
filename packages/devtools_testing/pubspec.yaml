@@ -1,12 +1,12 @@
 name: devtools_testing
-version: 1.0.0-dev
+version: 2.0.0-dev
 environment:
   sdk: '>=2.3.0 <3.0.0'
 dependencies:
-  devtools: ^0.1.7
+  devtools_app: ^0.1.7
   meta: ^1.1.0
   package_resolver: ^1.0.0
   test: ^1.0.0
 dependency_overrides:
-  devtools:
-    path: ../devtools
+  devtools_app:
+    path: ../devtools_app

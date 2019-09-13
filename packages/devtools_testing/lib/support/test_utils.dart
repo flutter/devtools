@@ -6,7 +6,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
 
 TimelineEvent testTimelineEvent(Map<String, dynamic> json) =>
     TimelineEvent(testTraceEventWrapper(json));

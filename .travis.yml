@@ -52,4 +52,4 @@ cache:
   directories:
   - $HOME/.pub-cache # macOS / Linux
   - $APPDATA/Roaming/Pub/Cache # Windows
-  - packages/devtools/.dart_tool/build
+  - packages/devtools_app/.dart_tool/build

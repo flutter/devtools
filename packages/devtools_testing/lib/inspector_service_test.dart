@@ -9,9 +9,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/src/inspector/diagnostics_node.dart';
-import 'package:devtools/src/inspector/flutter_widget.dart';
-import 'package:devtools/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_testing/matchers/fake_flutter_matchers.dart';
 import 'package:devtools_testing/matchers/matchers.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'

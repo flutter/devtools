@@ -6,10 +6,12 @@
 
 set -x #echo on
 
-pushd packages/devtools
+pushd packages/devtools_app
 
 rm -rf build
 pub run build_runner build -o web:build --release
 mv ./build/packages ./build/pack
 
+# move release to the devtools package from the devtools_app package for deployment
+mv build ../devtools
 popd

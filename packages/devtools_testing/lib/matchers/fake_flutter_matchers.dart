@@ -10,7 +10,7 @@ library fake_flutter_matchers;
 
 import 'dart:math' as math;
 
-import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
