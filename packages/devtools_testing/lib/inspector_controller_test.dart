@@ -8,11 +8,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/src/inspector/flutter_widget.dart';
-import 'package:devtools/src/inspector/inspector_controller.dart';
-import 'package:devtools/src/inspector/inspector_service.dart';
-import 'package:devtools/src/inspector/inspector_tree.dart';
-import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
+import 'package:devtools_app/src/inspector/inspector_controller.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:meta/meta.dart';
 import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';

@@ -36,9 +36,11 @@ class DevToolsServerDriver {
   bool kill() => _process.kill();
 
   static Future<DevToolsServerDriver> create() async {
+    // These tests assume that the devtools package is present in a sibling
+    // directory of the devtools_app package.
     final Process process = await Process.start(
       Platform.resolvedExecutable,
-      <String>['bin/devtools.dart', '--machine', '--port', '0'],
+      <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
     );
 
     return DevToolsServerDriver._(

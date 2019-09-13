@@ -7,10 +7,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/src/globals.dart';
-import 'package:devtools/src/service_manager.dart';
-import 'package:devtools/src/utils.dart';
-import 'package:devtools/src/vm_service_wrapper.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:package_resolver/package_resolver.dart';
 
 import 'constants.dart';

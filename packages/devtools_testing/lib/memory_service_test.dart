@@ -6,8 +6,8 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 @TestOn('vm')
-import 'package:devtools/src/memory/memory_controller.dart';
-import 'package:devtools/src/memory/memory_protocol.dart';
+import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/memory/memory_protocol.dart';
 import 'package:test/test.dart';
 
 import 'package:devtools_testing/support/flutter_test_environment.dart';

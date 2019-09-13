@@ -9,12 +9,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools/src/eval_on_dart_library.dart';
-import 'package:devtools/src/globals.dart';
-import 'package:devtools/src/service_extensions.dart' as extensions;
-import 'package:devtools/src/service_manager.dart';
-import 'package:devtools/src/service_registrations.dart' as registrations;
-import 'package:devtools/src/vm_service_wrapper.dart';
+import 'package:devtools_app/src/eval_on_dart_library.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/service_registrations.dart' as registrations;
+import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 

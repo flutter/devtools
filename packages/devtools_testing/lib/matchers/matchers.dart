@@ -8,7 +8,7 @@ library matchers;
 
 import 'dart:io' as io;
 
-import 'package:devtools/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:matcher/matcher.dart';
 
 import '../support/constants.dart';

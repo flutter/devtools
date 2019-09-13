@@ -7,13 +7,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:devtools/src/inspector/inspector_service.dart';
-import 'package:devtools/src/inspector/inspector_text_styles.dart' as styles;
-import 'package:devtools/src/inspector/inspector_tree.dart';
-import 'package:devtools/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools/src/ui/flutter_html_shim.dart' as shim;
-import 'package:devtools/src/ui/icons.dart';
-import 'package:devtools/src/ui/material_icons.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/inspector/inspector_text_styles.dart' as styles;
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/ui/flutter_html_shim.dart' as shim;
+import 'package:devtools_app/src/ui/icons.dart';
+import 'package:devtools_app/src/ui/material_icons.dart';
 import 'package:meta/meta.dart';
 
 class FakePaintEntry extends PaintEntry {

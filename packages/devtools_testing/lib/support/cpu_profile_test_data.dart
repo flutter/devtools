@@ -4,8 +4,8 @@
 
 // ignore_for_file: implementation_imports
 
-import 'package:devtools/src/profiler/cpu_profile_model.dart';
-import 'package:devtools/src/utils.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/utils.dart';
 
 final Map<String, dynamic> goldenCpuProfileDataJson = {
   'type': '_CpuProfileTimeline',

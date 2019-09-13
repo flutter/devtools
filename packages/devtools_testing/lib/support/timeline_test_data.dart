@@ -4,9 +4,9 @@
 
 // ignore_for_file: implementation_imports
 
-import 'package:devtools/src/timeline/timeline_controller.dart'
+import 'package:devtools_app/src/timeline/timeline_controller.dart'
     show timelineScreenId;
-import 'package:devtools/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
 
 import 'cpu_profile_test_data.dart';
 import 'test_utils.dart';
