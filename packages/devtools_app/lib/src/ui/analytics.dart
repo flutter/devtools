@@ -7,9 +7,9 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:devtools/devtools.dart' as devtools show version;
 import 'package:js/js.dart';
 
+import '../../devtools.dart' as devtools show version;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
