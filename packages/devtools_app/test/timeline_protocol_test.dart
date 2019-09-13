@@ -1,10 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools/src/timeline/timeline_controller.dart';
-import 'package:devtools/src/timeline/timeline_model.dart';
-import 'package:devtools/src/timeline/timeline_protocol.dart';
-import 'package:devtools/src/utils.dart';
+import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
+import 'package:devtools_app/src/timeline/timeline_protocol.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/test_utils.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:mockito/mockito.dart';

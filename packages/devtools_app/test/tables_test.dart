@@ -5,8 +5,8 @@
 @TestOn('browser')
 import 'package:html_shim/html.dart';
 
-import 'package:devtools/src/table_data.dart';
-import 'package:devtools/src/tables.dart';
+import 'package:devtools_app/src/table_data.dart';
+import 'package:devtools_app/src/tables.dart';
 import 'package:test/test.dart';
 
 void main() {

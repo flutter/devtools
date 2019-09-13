@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'package:html_shim/html.dart';
 
-import 'package:devtools/src/framework/framework_core.dart';
-import 'package:devtools/src/main.dart';
-import 'package:devtools/src/ui/analytics.dart' as ga;
-import 'package:devtools/src/ui/analytics_platform.dart' as ga_platform;
+import 'package:devtools_app/src/framework/framework_core.dart';
+import 'package:devtools_app/src/main.dart';
+import 'package:devtools_app/src/ui/analytics.dart' as ga;
+import 'package:devtools_app/src/ui/analytics_platform.dart' as ga_platform;
 import 'package:platform_detect/platform_detect.dart';
 
 void main() {

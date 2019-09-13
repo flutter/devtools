@@ -7,7 +7,7 @@
 
 import 'dart:io';
 
-import 'package:devtools/devtools.dart' as devtools show version;
+import 'package:devtools_app/devtools.dart' as devtools show version;
 
 void main() {
   final File pubspecFile = File('pubspec.yaml');

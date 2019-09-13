@@ -22,8 +22,5 @@ dependencies:
 #    path: ../devtools_server
   http: ^0.12.0+1
 
-dev_dependencies:
-  devtools_app: 0.1.7
-
 executables:
   devtools:

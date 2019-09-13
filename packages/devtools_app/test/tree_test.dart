@@ -5,9 +5,9 @@
 @TestOn('browser')
 import 'package:html_shim/html.dart';
 
-import 'package:devtools/src/ui/custom.dart';
-import 'package:devtools/src/ui/elements.dart';
-import 'package:devtools/src/ui/trees.dart';
+import 'package:devtools_app/src/ui/custom.dart';
+import 'package:devtools_app/src/ui/elements.dart';
+import 'package:devtools_app/src/ui/trees.dart';
 import 'package:test/test.dart';
 
 import 'integration_tests/util.dart';
