@@ -130,8 +130,8 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
 
-    # Return to the devtools directory.
-    cd devtools
+    # Return to the devtools_app directory.
+    cd devtools_app
 
     # Provision our packages using Flutter's version of Dart.
     pub get
