@@ -5,7 +5,7 @@
 			"label": "Serve DDC",
 			"type": "shell",
 			"options": {
-				"cwd": "${workspaceFolder}/packages_app/devtools",
+				"cwd": "${workspaceFolder}/packages/devtools_app",
 			},
 			"command": "pub",
 			"args": [
