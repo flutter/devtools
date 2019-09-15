@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
+import 'package:plotly_js/plotly.dart';
+
 import '../config_specific/logger.dart';
 import '../framework/framework.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/elements.dart';
-import '../ui/plotly.dart';
 import 'frames_bar_plotly.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';

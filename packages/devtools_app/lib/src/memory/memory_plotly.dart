@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:js/js_util.dart';
+import 'package:html_shim/js_util.dart';
+import 'package:plotly_js/plotly.dart';
 
-import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
-import '../ui/plotly.dart';
 import '../ui/theme.dart';
 import 'memory_chart.dart';
 

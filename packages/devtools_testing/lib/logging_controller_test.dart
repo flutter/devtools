@@ -68,7 +68,7 @@ Future<List<LogData>> waitForNextLogData(int length) async {
 
 Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
   final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools');
+      await (PackageResolver.current).packagePath('devtools_app');
   // Required as the logging view depends on the inspector which needs a version
   // of the widget catalog.
   Catalog.setCatalog(Catalog.decode(

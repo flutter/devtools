@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:js/js_util.dart';
+// TODO(jacobr): remove all uses of JS interop from package:devtools_app
+import 'package:html_shim/js_util.dart';
+import 'package:plotly_js/plotly.dart';
 
 import '../ui/colors.dart';
 import '../ui/flutter_html_shim.dart';
-import '../ui/plotly.dart';
 import '../ui/theme.dart';
 
 class FramesBarPlotly {
