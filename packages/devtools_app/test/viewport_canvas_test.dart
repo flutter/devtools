@@ -59,23 +59,23 @@ void main() {
 
     test('render only first rect', () async {
       expect(paintsRequested.length, equals(1));
-      expect(paintsRequested.first, equals(Rect.fromLTWH(0, 0, 512, 512)));
+      expect(paintsRequested.first, equals(const Rect.fromLTWH(0, 0, 512, 512)));
     });
 
     test('visibility observer fired', () async {
       await settleUi();
       expect(paintsRequested.length, equals(1));
 
-      expect(viewportCanvas.viewport, equals(Rect.fromLTWH(0, 0, 500, 300)));
+      expect(viewportCanvas.viewport, equals(const Rect.fromLTWH(0, 0, 500, 300)));
       viewportCanvas.element.element.style..height = '1000px';
 
       await window.animationFrame;
       await window.animationFrame;
-      expect(viewportCanvas.viewport, equals(Rect.fromLTWH(0, 0, 500, 1000)));
+      expect(viewportCanvas.viewport, equals(const Rect.fromLTWH(0, 0, 500, 1000)));
 
       expect(paintsRequested.length, equals(2));
-      expect(paintsRequested[0], equals(Rect.fromLTWH(0, 0, 512, 512)));
-      expect(paintsRequested[1], equals(Rect.fromLTWH(0, 512, 512, 512)));
+      expect(paintsRequested[0], equals(const Rect.fromLTWH(0, 0, 512, 512)));
+      expect(paintsRequested[1], equals(const Rect.fromLTWH(0, 512, 512, 512)));
     });
 
     test('scroll to rect', () async {
@@ -84,7 +84,7 @@ void main() {
       expect(viewportCanvas.viewport.left, equals(0));
       expect(viewportCanvas.viewport.top, equals(0));
 
-      viewportCanvas.scrollToRect(Rect.fromLTWH(1000.0, 1500.0, 100.0, 100.0));
+      viewportCanvas.scrollToRect(const Rect.fromLTWH(1000.0, 1500.0, 100.0, 100.0));
 
       await settleUi();
 
@@ -93,7 +93,7 @@ void main() {
 
       // Scroll down slightly. The top should not move all the way to match the
       // top of the target.
-      viewportCanvas.scrollToRect(Rect.fromLTWH(1000.0, 1700.0, 100.0, 200.0));
+      viewportCanvas.scrollToRect(const Rect.fromLTWH(1000.0, 1700.0, 100.0, 200.0));
 
       await settleUi();
 
@@ -101,7 +101,7 @@ void main() {
       expect(viewportCanvas.viewport.top, equals(1600.0));
 
       // Doesn't cause a scroll
-      viewportCanvas.scrollToRect(Rect.fromLTWH(1000.0, 1600.0, 100.0, 200.0));
+      viewportCanvas.scrollToRect(const Rect.fromLTWH(1000.0, 1600.0, 100.0, 200.0));
 
       await settleUi();
 
@@ -109,7 +109,7 @@ void main() {
       expect(viewportCanvas.viewport.top, equals(1600.0));
 
       // Scroll back to top.
-      viewportCanvas.scrollToRect(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+      viewportCanvas.scrollToRect(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
 
       await settleUi();
 
@@ -149,23 +149,23 @@ void main() {
       await settleUi();
       paintsRequested.clear();
       // Nothing to actually rebuild
-      viewportCanvas.markNeedsPaint(Rect.fromLTWH(0, 0, 50, 50));
+      viewportCanvas.markNeedsPaint(const Rect.fromLTWH(0, 0, 50, 50));
       await settleUi();
       expect(paintsRequested.length, 1);
-      expect(paintsRequested.first, equals(Rect.fromLTWH(0, 0, 512, 512)));
+      expect(paintsRequested.first, equals(const Rect.fromLTWH(0, 0, 512, 512)));
       paintsRequested.clear();
       // Off the edge of the ui.
-      viewportCanvas.markNeedsPaint(Rect.fromLTWH(300000, 0, 50, 50));
+      viewportCanvas.markNeedsPaint(const Rect.fromLTWH(300000, 0, 50, 50));
       await settleUi();
       expect(paintsRequested, isEmpty);
 
       // Request triggering multiple chunks to paint
       paintsRequested.clear();
-      viewportCanvas.markNeedsPaint(Rect.fromLTWH(400, 600, 512, 40));
+      viewportCanvas.markNeedsPaint(const Rect.fromLTWH(400, 600, 512, 40));
       await settleUi();
       expect(paintsRequested.length, equals(2));
-      expect(paintsRequested[0], equals(Rect.fromLTWH(0, 512, 512, 512)));
-      expect(paintsRequested[1], equals(Rect.fromLTWH(512, 512, 512, 512)));
+      expect(paintsRequested[0], equals(const Rect.fromLTWH(0, 512, 512, 512)));
+      expect(paintsRequested[1], equals(const Rect.fromLTWH(512, 512, 512, 512)));
     });
   });
 

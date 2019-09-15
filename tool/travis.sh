@@ -61,8 +61,7 @@ pub --version
 if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
-    pub get
-    pub global activate webdev
+    flutter pub get
 
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
@@ -77,18 +76,24 @@ if [ "$BOT" = "main" ]; then
     dart tool/version_check.dart
 
     # Analyze the source.
-    pub global activate tuneup && pub global run tuneup check
+    flutter pub global activate tuneup && flutter pub global run tuneup check
 
     # Ensure we can build the app.
-    pub run build_runner build -o web:build --release
+    rm -rf build
+    flutter build macos
+    rm -rf build
+    flutter build web --no-web-initialize-platform --release
+    rm -rf build
+    # Remove this build once the regular web build step is successful.
+    flutter pub run build_runner build -o web:build --release
+    rm -rf build
 
 elif [ "$BOT" = "test_ddc" ]; then
 
     # Provision our packages.
-    pub get
-    pub global activate webdev
+    flutter pub get
 
-    pub run test -j1 --reporter expanded --exclude-tags useFlutterSdk
+    flutter pub run test -j1 --reporter expanded --exclude-tags useFlutterSdk
     pub run build_runner test -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "test_dart2js" ]; then

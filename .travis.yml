@@ -6,7 +6,10 @@ os:
 language: dart
 dart:
   - "dev/raw/latest"
-  - stable
+# Skip testing on stable until https://github.com/flutter/devtools/issues/1061
+# is fixed allowing us to use a different version of Flutter to compile and
+# test the DevTools app.
+#  - stable
 addons:
   chrome: stable
 

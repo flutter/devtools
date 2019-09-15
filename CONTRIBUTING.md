@@ -12,38 +12,32 @@ file.
 
 ## Development
 
+- Install the latest Flutter dev release.
 - `git clone https://github.com/flutter/devtools`
 - `cd devtools/packages/devtools_app`
-- `pub get`
+- `flutter pub get`
 
 From a separate terminal:
 - `cd <path/to/flutter-sdk>/examples/flutter_gallery`
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
+### Run the dart:html based version of the DevTools app
 From the packages/devtools_app directory:
-- `pub global activate webdev` (install webdev globally)
-- `export PATH=$PATH:~/.pub-cache/bin` (make globally activated packages available from the command line)
-- `webdev serve`
+- `flutter run -d chrome --no-initialize-platform --web-port=8080`
 
-Then, open a browser window to the local url specified by webdev. After the page has loaded, append
-`?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by
-the `flutter run` output.
+### Run the incomplete Flutter version of the DevTools app
+When this app is closer to being ready we will add steps to run it using Flutter Web as well.
 
-- `flutter run`
-- `open http://localhost:8080`
-
-`webdev` provides a fast development server that incrementally
-rebuilds the portion of the application that was edited each time you reload
-the page in the browser. If initial app load times become slow as this tool
-grows, we can integrate with the hot restart support in `webdev`.
+From the packages/devtools_app directory:
+- `flutter run -d macos`
 
 ### Developing with VS Code
 
 #### DevTools
 
 If you're using VS Code to work on DevTools you can run DevTools from the editor
-using the VS Code tasks without having to run `webdev serve` in a terminal window:
+using the VS Code tasks without having to run `flutter run` in a terminal window:
 
 - Open the root of the repository in VS Code
 - Press `F5`
@@ -80,15 +74,15 @@ running these tests.
 
 ```
 cd packages/devtools_app
-pub run test -j1 --tags useFlutterSdk
+flutter pub run test -j1 --tags useFlutterSdk
 ```
 
 ### Run all other tests
 
 ```
 cd packages/devtools_app
-pub run test --exclude-tags useFlutterSdk
-pub run build_runner test -- --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+flutter pub run test --exclude-tags useFlutterSdk
+flutter pub run build_runner test -- --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 ```
 
 ### Updating golden files

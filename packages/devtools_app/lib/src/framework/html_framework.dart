@@ -8,9 +8,9 @@ import 'package:html_shim/html.dart' hide Screen;
 
 import 'package:meta/meta.dart';
 
+import '../app_html_only.dart';
 import '../globals.dart';
 import '../html_message_manager.dart';
-import '../main.dart';
 import '../timeline/html_timeline_screen.dart';
 import '../timeline/timeline_controller.dart';
 import '../timeline/timeline_model.dart';

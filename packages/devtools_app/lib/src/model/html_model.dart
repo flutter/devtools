@@ -18,13 +18,13 @@ import 'package:html_shim/js_util.dart' as js_util;
 
 import 'package:vm_service/vm_service.dart';
 
+import '../app_html_only.dart';
 import '../config_specific/logger.dart';
 import '../debugger/html_debugger_screen.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../logging/html_logging_screen.dart';
 import '../logging/logging_controller.dart';
-import '../main.dart';
 
 class HtmlApp {
   HtmlApp(this.framework) {

@@ -10,7 +10,10 @@ pushd packages/devtools_app
 
 rm -rf build
 rm -rf ../devtools/build
-pub run build_runner build -o web:build --release
+# TODO(jacobr): it would be nice to use
+# flutter build web --no-web-initialize-platform --release
+# instead but that does not appear to to generate the correct output.
+flutter pub run build_runner build -o web:build --release
 mv ./build/packages ./build/pack
 
 # move release to the devtools package from the devtools_app package for deployment
