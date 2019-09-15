@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 
 import '../charts/flame_chart_canvas.dart';
 import '../ui/colors.dart';
-import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/theme.dart';
 import 'timeline_model.dart';
 

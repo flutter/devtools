@@ -5,7 +5,7 @@
 // This file is a copy of packages/flutter/lib/src/foundation/print.dart
 // with functionality that can't run without a full flutter runtime stripped
 // out.
-part of 'fake_flutter.dart';
+part of '_fake_flutter.dart';
 
 /// Signature for [debugPrint] implementations.
 typedef DebugPrintCallback = void Function(String message, {int wrapWidth});

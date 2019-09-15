@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of 'fake_flutter.dart';
+part of '_fake_flutter.dart';
 
 /// An object that maintains a list of listeners.
 ///

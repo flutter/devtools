@@ -8,7 +8,7 @@ import '../profiler/html_cpu_profile_flame_chart.dart';
 import '../profiler/html_cpu_profile_tables.dart';
 import '../profiler/html_cpu_profiler.dart';
 import '../ui/colors.dart';
-import '../ui/fake_flutter/dart_ui/dart_ui.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_elements.dart';
 import '../ui/theme.dart';
