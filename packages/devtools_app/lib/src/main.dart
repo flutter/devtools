@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:devtools_app/src/server_api_client.dart';
 import 'package:html_shim/html.dart' as html;
 
-import 'package:devtools/src/server_api_client.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
