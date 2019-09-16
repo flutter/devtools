@@ -85,6 +85,7 @@ Future<HttpServer> serveDevTools({
   bool enableStdinCommands = true,
   bool machineMode = false,
   bool launchBrowser = false,
+  String hostname = 'localhost',
   int port = 0,
   shelf.Handler handler,
 }) async {
@@ -103,7 +104,7 @@ Future<HttpServer> serveDevTools({
 
   handler ??= await defaultHandler();
 
-  final server = await HttpMultiServer.bind('localhost', port);
+  final server = await HttpMultiServer.bind(hostname, port);
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
