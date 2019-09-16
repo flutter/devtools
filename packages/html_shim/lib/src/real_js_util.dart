@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-int foo(int param) {
-  return param * param;
-}
+// This library exists purely as a workaround for bugs exporting 'dart:js_util'
+// directly from a conditional export.
+
+export 'dart:js_util';

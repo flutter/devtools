@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_html_io.dart';
+// This library exists purely as a workaround for bugs exporting 'dart:js'
+// directly from a conditional export.
 
-Element toDartHtmlElement(e) => e;
-
-List<Element> toDartHtmlElementList(List list) => List<Element>.from(list);
+export 'dart:js';

@@ -279,7 +279,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
       if (_iconsFont == null) {
         _iconsFont = FontFace(
           'Material Icons',
-          'url(packages/devtools/src/ui/MaterialIcons-Regular.woff2)',
+          'url(packages/devtools_app/src/ui/MaterialIcons-Regular.woff2)',
         );
         document.fonts.add(_iconsFont);
         _iconsFontFuture = _iconsFont.load();

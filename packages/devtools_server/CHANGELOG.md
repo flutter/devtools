@@ -1,3 +1,7 @@
+## 0.1.9
+
+- Support configurable `hostname`.
+
 ## 0.1.8
 
 - Use `http_multi_server` for serving.

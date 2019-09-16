@@ -22,7 +22,7 @@ import 'package:test/test.dart';
 
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
   final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools');
+      await (PackageResolver.current).packagePath('devtools_app');
   Catalog.setCatalog(Catalog.decode(
       await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
   InspectorService inspectorService;

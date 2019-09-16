@@ -14,6 +14,7 @@ dynamic unsupported() =>
 
 Map<String, dynamic> convertNativeToDart_Dictionary(object) {
   unsupported();
+  return null;
 }
 
 /// Converts a flat Dart map into a JavaScript object with properties.
