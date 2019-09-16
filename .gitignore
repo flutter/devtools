@@ -14,5 +14,5 @@ pubspec.lock
 .DS_Store
 
 # A generated file not intended to be checked in to version control
-fixtures/*/ios/Flutter/flutter_export_environment.sh
+flutter_export_environment.sh
 
