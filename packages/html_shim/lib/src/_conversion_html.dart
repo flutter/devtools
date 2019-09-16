@@ -6,5 +6,4 @@ import 'dart:html';
 
 Element toDartHtmlElement(e) => e;
 
-List<Element> toDartHtmlElementList(List list) =>
-    List<Element>.from(list);
+List<Element> toDartHtmlElementList(List list) => List<Element>.from(list);

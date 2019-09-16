@@ -5,7 +5,7 @@
 /// to run html manipulation code in a context where dart:html isn't
 /// available. This library is a footgun and should only be used as an
 /// incremental step in porting code from using dart:html to package:flutter.
-/// 
+///
 /// This library is unlikely to be updated to reflect changes to dart:html so
 /// do not use it if the version of dart:html from Dart 2.5 is not sufficient
 /// for your needs.
