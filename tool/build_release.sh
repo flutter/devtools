@@ -9,6 +9,7 @@ set -x #echo on
 pushd packages/devtools_app
 
 rm -rf build
+rm -rf ../devtools/build
 pub run build_runner build -o web:build --release
 mv ./build/packages ./build/pack
 
