@@ -1,3 +1,6 @@
+## 0.1.8 - 2019-09-16
+* Depend on latest `package:devtools_server`.
+
 ## 0.1.7 - 2019-09-09
 * Fix bug with profile mode detection.
 * Enable expand all / collapse to selected functionality in the inspector (will not be available until certain changes land in Flutter stable).
