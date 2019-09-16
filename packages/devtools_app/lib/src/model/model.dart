@@ -10,7 +10,11 @@ library model;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js' as js;
+
+// TODO(jacobr): remove these dependencies on html_shim.
+import 'package:html_shim/html.dart' show window;
+import 'package:html_shim/js.dart' as js;
+import 'package:html_shim/js_util.dart' as js_util;
 
 import 'package:vm_service/vm_service.dart';
 
@@ -64,8 +68,9 @@ class App {
   final PerfToolFramework framework;
 
   void _bind() {
-    final js.JsObject binding = js.JsObject.jsify(<dynamic, dynamic>{});
-    binding['send'] = (String method, int id, dynamic arg) {
+    final binding = js_util.newObject();
+    js_util.setProperty(binding, 'send',
+        js.allowInterop((String method, int id, dynamic arg) {
       try {
         final dynamic result = _dispatch(method, id, arg);
         Future<dynamic>.value(result).then((dynamic result) {
@@ -76,9 +81,9 @@ class App {
       } catch (error, stackTrace) {
         _sendReponseError(id, error, stackTrace);
       }
-    };
+    }));
 
-    js.context['devtools'] = binding;
+    js_util.setProperty(window, 'devtools', binding);
   }
 
   Future<void> devToolsReady(dynamic message) async {
