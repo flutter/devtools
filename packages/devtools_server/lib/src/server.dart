@@ -10,7 +10,6 @@ import 'dart:isolate';
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:http_multi_server/http_multi_server.dart';
-import 'package:devtools_server/src/client_manager.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
@@ -18,6 +17,7 @@ import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
+import 'client_manager.dart';
 import 'handlers.dart';
 
 const argHelp = 'help';

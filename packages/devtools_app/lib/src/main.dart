@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:devtools_app/src/server_api_client.dart';
-import 'package:html_shim/html.dart' as html;
 
+import 'package:html_shim/html.dart' as html;
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
@@ -19,6 +18,7 @@ import 'logging/html_logging_screen.dart';
 import 'memory/html_memory_screen.dart';
 import 'model/html_model.dart';
 import 'performance/html_performance_screen.dart';
+import 'server_api_client.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/html_timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
