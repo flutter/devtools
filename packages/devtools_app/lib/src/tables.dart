@@ -340,7 +340,7 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
           final rowElement = tableRow.element;
           final dataForRow = _dataForRow[rowElement];
           selectRow(rowElement, model.data.indexOf(dataForRow));
-          // TODO(kenzie): we should do less work on selection.
+          // TODO(kenz): we should do less work on selection.
           model.scheduleRebuild();
         });
       }

@@ -6,7 +6,7 @@ import 'fake_flutter/dart_ui/dart_ui.dart';
 import 'theme.dart';
 
 /// This file holds color constants that are used throughout DevTools.
-// TODO(kenzie): move colors from other pages to this file for consistency.
+// TODO(kenz): move colors from other pages to this file for consistency.
 
 /// Mark: Timeline / CPU profiler.
 ///

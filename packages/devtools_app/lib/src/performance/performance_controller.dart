@@ -29,7 +29,7 @@ class PerformanceController {
     await reset();
     _recording = true;
 
-    // TODO(kenzie): once [getVMTimelineMicros] is available, we can get the
+    // TODO(kenz): once [getVMTimelineMicros] is available, we can get the
     // current timestamp here and set [_profileStartMicros] equal to it. We will
     // use [_profileStartMicros] for [startMicros] in the [getCpuProfile]
     // request. For backwards compatibility, we will let start micros default to

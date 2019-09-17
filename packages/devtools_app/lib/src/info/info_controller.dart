@@ -11,7 +11,7 @@ import '../globals.dart';
 import '../service_registrations.dart' as registrations;
 import '../version.dart';
 
-// TODO(kenzie): we should listen for flag value updates and update the info
+// TODO(kenz): we should listen for flag value updates and update the info
 // screen with the new flag values. See
 // https://github.com/flutter/devtools/issues/988.
 

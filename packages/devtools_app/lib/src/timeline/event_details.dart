@@ -76,7 +76,7 @@ class EventDetails extends CoreElement {
           _timelineController,
           () => _timelineController.timelineData.cpuProfileData,
         )..hidden(true),
-        // TODO(kenzie): eventually we should show something in this area that
+        // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
         _gpuEventDetails = div(
           text: 'CPU profiling is not available for GPU events.',
@@ -176,7 +176,7 @@ class _CpuProfiler extends CpuProfiler {
           ..add(span(text: 'the '))
           ..add(span(text: 'CPU profile', c: 'message-action')
             ..click(() {
-              // TODO(kenzie): ensure event details title style is restored.
+              // TODO(kenz): ensure event details title style is restored.
               _timelineController.setOfflineData();
             }))
           ..add(span(text: ' included in the snapshot.'));

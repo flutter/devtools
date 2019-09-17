@@ -112,12 +112,12 @@ class TimelineController {
   }
 
   void startRecording() {
-    // TODO(kenzie): kick off timeline recording here.
+    // TODO(kenz): kick off timeline recording here.
     recording = true;
   }
 
   void stopRecording() {
-    // TODO(kenzie): kick off trace event processing here.
+    // TODO(kenz): kick off trace event processing here.
     recording = false;
   }
 
@@ -196,7 +196,7 @@ class TimelineController {
     final traceEvents =
         offlineData.traceEvents.map((trace) => TraceEvent(trace)).toList();
 
-    // TODO(kenzie): once each trace event has a ui/gpu distinction bit added to
+    // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
     // the trace, we will not need to infer thread ids. Since we control the
     // format of the input, this is okay for now.
     final uiThreadId = traceEvents.first.threadId;
@@ -230,7 +230,7 @@ class TimelineController {
     );
     if (frameToSelect != null) {
       timelineData.selectedFrame = frameToSelect;
-      // TODO(kenzie): frames bar chart should listen to this stream and
+      // TODO(kenz): frames bar chart should listen to this stream and
       // programmatially select the frame from the offline snapshot.
       _selectedFrameController.add(frameToSelect);
 
@@ -240,7 +240,7 @@ class TimelineController {
         if (eventToSelect != null) {
           timelineData.selectedEvent = eventToSelect;
           timelineData.cpuProfileData = offlineTimelineData.cpuProfileData;
-          // TODO(kenzie): frame flame chart should listen to this stream and
+          // TODO(kenz): frame flame chart should listen to this stream and
           // programmatically select the flame chart item that corresponds to
           // the selected event from the offline snapshot.
           _selectedTimelineEventController.add(eventToSelect);

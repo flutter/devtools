@@ -16,7 +16,7 @@ import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'vm_service_wrapper.dart';
 
-// TODO(kenzie): add an offline service manager implementation.
+// TODO(kenz): add an offline service manager implementation.
 
 const defaultRefreshRate = 60.0;
 
@@ -507,6 +507,7 @@ class ServiceExtensionManager {
     final Isolate isolate = await _service.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs != null) {
       for (String extension in isolate.extensionRPCs) {
+        print(extension);
         await _maybeAddServiceExtension(extension);
       }
 
