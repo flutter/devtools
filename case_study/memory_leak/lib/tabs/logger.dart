@@ -22,7 +22,7 @@ class LogEntries extends StatefulWidget {
   final Logging _logging;
 
   @override
-  createState() => LoggingState(_logging);
+  State createState() => LoggingState(_logging);
 }
 
 class LoggingState extends State<LogEntries> {

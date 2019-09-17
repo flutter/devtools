@@ -10,9 +10,7 @@ class Logging {
   static Logging _theLogging;
 
   static Logging get logging {
-    if (_theLogging == null)
-      _theLogging = Logging();
-
+    _theLogging ??= Logging();
     return _theLogging;
   }
 
