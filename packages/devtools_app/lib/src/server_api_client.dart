@@ -9,13 +9,6 @@ import 'package:sse/client/sse_client.dart';
 
 class DevToolsServerApiClient {
   DevToolsServerApiClient() : _channel = SseClient('/api/sse') {
-    _channel.onOpen.first.then((_) {
-      // We'll want to send notifications when a user tries to reuse an existing
-      // DevTools window, so pop up the notification dialog early while they're
-      // looking at the page (this won't pop up if they've already answered).
-      Notification.requestPermission();
-    });
-
     _channel.stream.listen((msg) {
       try {
         final request = jsonDecode(msg);
@@ -23,6 +16,9 @@ class DevToolsServerApiClient {
         switch (request['method']) {
           case 'connectToVm':
             connectToVm(request['params']);
+            return;
+          case 'enableNotifications':
+            Notification.requestPermission();
             return;
           case 'notify':
             notify();

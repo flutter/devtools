@@ -7,11 +7,19 @@ import 'dart:convert';
 import 'package:sse/server/sse_handler.dart';
 
 class ClientManager {
+  ClientManager(this.requestNotificationPermissions);
+
+  /// Whether to immediately request notification permissions when a client connects.
+  /// Otherwise permission will be requested only with the first notification.
+  final bool requestNotificationPermissions;
   final List<DevToolsClient> _clients = [];
   List<DevToolsClient> get allClients => _clients.toList();
 
   void acceptClient(SseConnection connection) {
     final client = DevToolsClient(connection);
+    if (requestNotificationPermissions) {
+      client.enableNotifications();
+    }
     _clients.add(client);
     connection.sink.done.then((_) => _clients.remove(client));
   }
@@ -77,6 +85,12 @@ class DevToolsClient {
   Future<void> notify() async {
     _connection.sink.add(jsonEncode({
       'method': 'notify',
+    }));
+  }
+
+  Future<void> enableNotifications() async {
+    _connection.sink.add(jsonEncode({
+      'method': 'enableNotifications',
     }));
   }
 

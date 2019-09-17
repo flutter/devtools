@@ -21,6 +21,7 @@ import 'client_manager.dart';
 import 'handlers.dart';
 
 const argHelp = 'help';
+const argEnableNotifications = 'enable-notifications';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
@@ -28,7 +29,7 @@ const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
 
-final ClientManager clients = ClientManager();
+ClientManager clients;
 
 final argParser = ArgParser()
   ..addFlag(
@@ -55,6 +56,13 @@ final argParser = ArgParser()
     negatable: false,
     abbr: 'b',
     help: 'Launches DevTools in a browser immediately at start.',
+  )
+  ..addFlag(
+    argEnableNotifications,
+    hide: true,
+    negatable: false,
+    help:
+        'Requests notification permissions immediately when a client connects back to the server.',
   );
 
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
@@ -67,12 +75,14 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final help = args[argHelp];
   final bool machineMode = args[argMachine];
   final bool launchBrowser = args[argLaunchBrowser];
+  final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
   return serveDevTools(
     help: help,
     machineMode: machineMode,
     launchBrowser: launchBrowser,
+    enableNotifications: enableNotifications,
     port: port,
     handler: handler,
   );
@@ -88,6 +98,7 @@ Future<HttpServer> serveDevTools({
   bool enableStdinCommands = true,
   bool machineMode = false,
   bool launchBrowser = false,
+  bool enableNotifications = false,
   String hostname = 'localhost',
   int port = 0,
   shelf.Handler handler,
@@ -104,6 +115,8 @@ Future<HttpServer> serveDevTools({
     assert(enableStdinCommands,
         'machineMode only works with enableStdinCommands.');
   }
+
+  clients = ClientManager(enableNotifications);
 
   handler ??= await defaultHandler(clients);
 
