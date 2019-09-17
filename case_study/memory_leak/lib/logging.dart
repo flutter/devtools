@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 
 class Logging {
   Logging() {
-    TimeModel(this).start();
+    model = TimeModel(this)..start();
   }
+
+  TimeModel model;
 
   static Logging _theLogging;
 
@@ -19,7 +21,7 @@ class Logging {
   void add(String entry) {
     final TimeStamp newTimeStamp = TimeStamp.record(DateTime.now());
 
-    _logs.add('[${newTimeStamp.time}] $entry');
+    _logs.add('[${model.log.length}] : ${newTimeStamp.time}] $entry');
   }
 
   List<String> get logs => _logs;
