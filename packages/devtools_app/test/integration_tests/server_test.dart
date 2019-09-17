@@ -121,7 +121,7 @@ void main() {
       // TODO(dantup): This requires the ability for us to shut down Chrome,
       // probably via a command to the server, which needs
       // https://github.com/dart-lang/browser_launcher/pull/12
-    }, timeout: const Timeout.factor(10), skip: false);
+    }, timeout: const Timeout.factor(10), skip: true);
 
     test('Server reuses DevTools instance if already connected to same VM',
         () async {
@@ -184,7 +184,7 @@ void main() {
     // references a version of devtools_server that has this support!
     // Usually we should only skip when not in release mode, since the API only
     // works in release mode.
-  }, skip: true && !testInReleaseMode);
+  }, skip: true /*!testInReleaseMode*/);
 }
 
 Future<Map<String, dynamic>> launchDevTools({bool reuseWindows = false}) async {
