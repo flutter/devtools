@@ -51,7 +51,7 @@ class TimelineService {
   }
 
   void _handleConnectionStop(dynamic event) {
-    // TODO(kenzie): investigate if we need to do anything here.
+    // TODO(kenz): investigate if we need to do anything here.
   }
 
   Future<void> startTimeline() async {
@@ -75,7 +75,7 @@ class TimelineService {
       return event.name == 'thread_name';
     }).toList();
 
-    // TODO(kenzie): Remove this logic once ui/gpu distinction changes are
+    // TODO(kenz): Remove this logic once ui/gpu distinction changes are
     // available in the engine.
     int uiThreadId;
     int gpuThreadId;

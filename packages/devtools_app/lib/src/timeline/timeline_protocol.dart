@@ -61,7 +61,7 @@ class TimelineProtocol {
   static const flowStartPhase = 's';
   static const flowEndPhase = 'f';
 
-  // TODO(kenzie): Remove the following members once ui/gpu distinction changes
+  // TODO(kenz): Remove the following members once ui/gpu distinction changes
   //  and frame ids are available in the engine.
   final int uiThreadId;
   final int gpuThreadId;
@@ -93,7 +93,7 @@ class TimelineProtocol {
   );
 
   void processTraceEvent(TraceEvent event, {bool immediate = false}) {
-    // TODO(kenzie): stop manually setting the type once we have that data from
+    // TODO(kenz): stop manually setting the type once we have that data from
     // the engine.
     event.type = _inferEventType(event);
 
@@ -503,12 +503,12 @@ class TimelineProtocol {
       pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
 
-      // TODO(kenzie): add cpu profile pre-fetching here when the app is idle.
+      // TODO(kenz): add cpu profile pre-fetching here when the app is idle.
     }
   }
 
   bool eventOccursWithinFrameBounds(TimelineEvent e, TimelineFrame f) {
-    // TODO(kenzie): talk to the engine team about why we need the epsilon. Why
+    // TODO(kenz): talk to the engine team about why we need the epsilon. Why
     // do event times extend slightly beyond the times we get from frame start
     // and end flow events.
 

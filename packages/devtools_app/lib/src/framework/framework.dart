@@ -38,7 +38,7 @@ class Framework {
     globalActions =
         ActionsContainer(CoreElement.from(queryId('global-actions')));
 
-    // TODO(kenzie): refactor [connectDialog] and [snapshotMessage] to be in their
+    // TODO(kenz): refactor [connectDialog] and [snapshotMessage] to be in their
     // own screen.
     connectDialog = ConnectDialog(this);
 
@@ -772,7 +772,7 @@ class SnapshotMessage {
           CoreElement('dd')
             ..add([
               p(
-                  // TODO(kenzie): support other generic chrome:trace files and
+                  // TODO(kenz): support other generic chrome:trace files and
                   // note their support here.
                   text: 'Supported file formats include any files exported from'
                       ' DevTools, such as the timeline export.',

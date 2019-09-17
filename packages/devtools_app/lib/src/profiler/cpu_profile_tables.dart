@@ -174,7 +174,7 @@ class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   String getTooltip(CpuStackFrame dataObject) => dataObject.name;
 }
 
-// TODO(kenzie): make these urls clickable once we can jump to source.
+// TODO(kenz): make these urls clickable once we can jump to source.
 class SourceColumn extends ColumnData<CpuStackFrame> {
   SourceColumn() : super('Source', alignment: ColumnAlignment.right);
 

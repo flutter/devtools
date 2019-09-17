@@ -144,7 +144,7 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.
-// TODO(kenzie): extend TreeNode class to share tree logic.
+// TODO(kenz): extend TreeNode class to share tree logic.
 abstract class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode parent,

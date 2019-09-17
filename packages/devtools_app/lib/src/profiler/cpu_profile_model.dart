@@ -268,7 +268,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
     final buf = StringBuffer();
     buf.write('$name ');
     if (totalTime != null) {
-      // TODO(kenzie): use a number of fractionDigits that better matches the
+      // TODO(kenz): use a number of fractionDigits that better matches the
       // resolution of the stack frame.
       buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
     }

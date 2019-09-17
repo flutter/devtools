@@ -332,7 +332,7 @@ class SelectableTree<T> extends CoreElement
   }
 }
 
-// TODO(kenzie): wrap this element in a larger div to increase tap target.
+// TODO(kenz): wrap this element in a larger div to increase tap target.
 class TreeToggle extends CoreElement {
   TreeToggle({bool empty = false, bool forceOpen = false})
       : super('div', classes: 'tree-toggle octicon') {

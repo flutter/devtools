@@ -194,7 +194,7 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
     createChartNodes(data.cpuProfileRoot, 0);
   }
 
-  // TODO(kenzie): base colors on categories (Widget, Render, Layer, User code,
+  // TODO(kenz): base colors on categories (Widget, Render, Layer, User code,
   // etc.)
   Color _colorForStackFrame(CpuStackFrame stackFrame) {
     final color = uiColorPalette[_colorOffset % uiColorPalette.length];

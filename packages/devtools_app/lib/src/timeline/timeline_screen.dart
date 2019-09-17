@@ -184,7 +184,7 @@ class TimelineScreen extends Screen {
         div(text: 'Show frames', c: 'checkbox-text')
       ]);
 
-    // TODO(kenzie): once [enableMultiModeTimeline] is enabled by default,
+    // TODO(kenz): once [enableMultiModeTimeline] is enabled by default,
     // adjust collapsible-xxx CSS classes to account for timeline mode checkbox.
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
@@ -286,7 +286,7 @@ class TimelineScreen extends Screen {
     // TODO(jacobr): Change argument type when
     // https://github.com/dart-lang/sdk/issues/36798 is fixed.
     final observer = html.ResizeObserver((List<dynamic> entries, _) {
-      // TODO(kenzie): observe resizing for recordedTimeline as well. Recorded
+      // TODO(kenz): observe resizing for recordedTimeline as well. Recorded
       // timeline will not have a selected frame.
       if (frameFlameChartCanvas == null ||
           timelineController.timelineMode == TimelineMode.full ||
@@ -413,7 +413,7 @@ class TimelineScreen extends Screen {
     @required TimelineMode timelineMode,
     bool clearTimeline = true,
   }) async {
-    // TODO(kenzie): the two modes should be aware of one another and we should
+    // TODO(kenz): the two modes should be aware of one another and we should
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
     if (clearTimeline) {
@@ -467,7 +467,7 @@ class TimelineScreen extends Screen {
           timelineController.timelineMode == TimelineMode.frameBased);
     _frameBasedTimelineCheckbox.disabled = timelineController.recording;
 
-    // TODO(kenzie): support loading offline data in both modes.
+    // TODO(kenz): support loading offline data in both modes.
     _frameBasedTimelineSettingContainer.hidden(offlineMode);
 
     clearButton
@@ -512,7 +512,7 @@ class TimelineScreen extends Screen {
   }
 
   void _exportTimeline() {
-    // TODO(kenzie): add analytics for this. It would be helpful to know how
+    // TODO(kenz): add analytics for this. It would be helpful to know how
     // complex the problems are that users are trying to solve.
     final String encodedTimelineData =
         jsonEncode(timelineController.timelineData.json);

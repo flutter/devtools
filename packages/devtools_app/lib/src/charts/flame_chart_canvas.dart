@@ -18,7 +18,7 @@ import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
 
-// TODO(kenzie): add tooltips to nodes on hover.
+// TODO(kenz): add tooltips to nodes on hover.
 
 // We use the same color in light and dark mode because it aligns well with both
 // color schemes.
@@ -210,7 +210,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     );
   }
 
-  // TODO(kenzie): optimize painting to canvas by grouping paints with the same
+  // TODO(kenz): optimize painting to canvas by grouping paints with the same
   // canvas settings.
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
     final int startRow = math.max(rowIndexForY(rect.top), 0);
@@ -431,7 +431,7 @@ class FlameChartNode<T> {
 
       String displayText = text;
 
-      // TODO(kenzie): further optimize text painting by setting a budget for
+      // TODO(kenz): further optimize text painting by setting a budget for
       // how much text can be measured each frame, and incrementally updating
       // the text in the UI.
       if (!_textFitsInRect(displayText, canvas)) {
@@ -458,7 +458,7 @@ class FlameChartNode<T> {
   }
 
   void updateForZoom({@required num zoom}) {
-    // TODO(kenzie): this comment may be dated now that we are drawing to
+    // TODO(kenz): this comment may be dated now that we are drawing to
     // canvas. Look into it and delete it if necessary.
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
@@ -537,7 +537,7 @@ class TimelineGrid {
         return;
       }
 
-      // TODO(kenzie): Instead of calculating timestamp based on position, track
+      // TODO(kenz): Instead of calculating timestamp based on position, track
       // timestamp var and increment it by time interval represented by each
       // grid item. See comment on https://github.com/flutter/devtools/pull/325.
       final timestamp =

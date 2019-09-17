@@ -10,7 +10,7 @@ import 'dart:math';
 /// This file does not have direct dependencies on dart:html and therefore
 /// allows for testing to be done on the VM.
 
-// TODO(kenzie): look into consolidating logic between this file and
+// TODO(kenz): look into consolidating logic between this file and
 // ui/trees.dart, which houses generic tree types vs the base classes in this
 // file.
 
