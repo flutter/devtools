@@ -351,8 +351,8 @@ class HtmlPerfToolFramework extends HtmlFramework {
   }
 }
 
-class NotFoundScreen extends HtmlScreen {
-  NotFoundScreen() : super(name: 'Not Found', id: 'notfound');
+class HtmlNotFoundScreen extends HtmlScreen {
+  HtmlNotFoundScreen() : super(name: 'Not Found', id: 'notfound');
 
   @override
   CoreElement createContent(HtmlFramework framework) {

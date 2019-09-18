@@ -318,8 +318,10 @@ class HtmlSelectableTree<T> extends CoreElement
   }
 
   @override
-  void select(TreeNode<HtmlSelectableTreeNodeItem<T>> node,
-      {bool clear = false}) {
+  void select(
+    TreeNode<HtmlSelectableTreeNodeItem<T>> node, {
+    bool clear = false,
+  }) {
     _selectedItem?.data?.element?.toggleClass('selected', false);
 
     if (clear) {

@@ -48,10 +48,12 @@ void main() {
         return;
       }
 
-      FrameworkCore.initVmService(window.location.toString(),
-          errorReporter: (String title, dynamic error) {
-        framework.showError(title, error);
-      }).then((bool connected) {
+      FrameworkCore.initVmService(
+        window.location.toString(),
+        errorReporter: (String title, dynamic error) {
+          framework.showError(title, error);
+        },
+      ).then((bool connected) {
         if (!connected) {
           framework.showConnectionDialog();
           framework.showSnapshotMessage();

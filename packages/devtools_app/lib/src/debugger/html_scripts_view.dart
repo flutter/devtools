@@ -348,9 +348,12 @@ class HtmlScriptsMatcher {
     if (_finishCallback != null) _finishCallback();
   }
 
-  void start(ScriptRef revertScriptRef, HtmlScriptsView scriptView,
-      CoreElement textfield,
-      [Function finishCallback]) {
+  void start(
+    ScriptRef revertScriptRef,
+    HtmlScriptsView scriptView,
+    CoreElement textfield, [
+    Function finishCallback,
+  ]) {
     _scriptsView = scriptView;
     _textfield = textfield;
 

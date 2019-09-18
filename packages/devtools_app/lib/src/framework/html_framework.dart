@@ -263,7 +263,7 @@ class HtmlFramework {
         ga_platform.setupAndGaScreen(id);
         load(screen);
       } else {
-        load(NotFoundScreen());
+        load(HtmlNotFoundScreen());
       }
     });
   }
@@ -351,8 +351,10 @@ class HtmlFramework {
     }
   }
 
-  void showMessage(
-      {@required HtmlMessage message, String screenId = generalId}) {
+  void showMessage({
+    @required HtmlMessage message,
+    String screenId = generalId,
+  }) {
     messageManager.addMessage(message, screenId);
   }
 
