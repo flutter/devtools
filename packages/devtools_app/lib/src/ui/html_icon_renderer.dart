@@ -10,10 +10,10 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import 'elements.dart';
-import 'environment.dart' as environment;
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
+import 'html_elements.dart';
+import 'html_environment.dart' as environment;
 import 'icons.dart';
 import 'material_icons.dart';
 import 'theme.dart';

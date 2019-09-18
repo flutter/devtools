@@ -9,8 +9,8 @@ class Logger extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Logger',
-      theme: ThemeData(
-          primaryColor: Colors.blue, accentColor: Colors.lightBlue),
+      theme:
+          ThemeData(primaryColor: Colors.blue, accentColor: Colors.lightBlue),
       home: LogEntries(_logging),
     );
   }
@@ -39,7 +39,7 @@ class LoggingState extends State<LogEntries> {
         title: const Text('Infinite List'),
         centerTitle: true,
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.list)/*, onPressed: _pushSaved*/),
+          IconButton(icon: Icon(Icons.list) /*, onPressed: _pushSaved*/),
         ],
       ),
       body: _buildSuggestions(),
@@ -51,7 +51,7 @@ class LoggingState extends State<LogEntries> {
       MaterialPageRoute(
         builder: (context) {
           final tiles = _saved.map(
-                (itemValue) {
+            (itemValue) {
               return ListTile(
                 title: Text(
                   itemValue,
@@ -60,12 +60,10 @@ class LoggingState extends State<LogEntries> {
               );
             },
           );
-          final divided = ListTile
-              .divideTiles(
+          final divided = ListTile.divideTiles(
             context: context,
             tiles: tiles,
-          )
-              .toList();
+          ).toList();
 
           return Scaffold(
             appBar: AppBar(
@@ -92,7 +90,7 @@ class LoggingState extends State<LogEntries> {
       ),
       onTap: () {
         setState(() {
-            _saved.add('LOG: $logEntry');
+          _saved.add('LOG: $logEntry');
         });
       },
     );

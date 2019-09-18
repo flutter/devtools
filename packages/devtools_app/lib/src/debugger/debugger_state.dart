@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../debugger/debugger.dart';
+import '../debugger/html_debugger_screen.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/fake_flutter/fake_flutter.dart'
     show ValueNotifier, ValueListenable;

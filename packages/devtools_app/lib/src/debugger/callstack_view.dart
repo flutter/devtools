@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
 class CallStackView implements CoreElementView {
   CallStackView() {
-    _items = SelectableList<Frame>()
+    _items = HtmlSelectableList<Frame>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -49,7 +49,7 @@ class CallStackView implements CoreElementView {
 
   static const String emptyStackMarker = 'EmptyStackMarker';
 
-  SelectableList<Frame> _items;
+  HtmlSelectableList<Frame> _items;
 
   List<Frame> get items => _items.items;
 

@@ -5,9 +5,9 @@
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
-import '../framework/framework.dart';
-import 'elements.dart';
+import '../framework/html_framework.dart';
 import 'fake_flutter/fake_flutter.dart';
+import 'html_elements.dart';
 import 'ui_utils.dart';
 
 // Generally, chunkSize should be a power of 2 for more efficient GPU handling
@@ -138,7 +138,7 @@ typedef SizeChangeCallback = void Function(Size size);
 /// This class is only compatible with browsers that support
 /// [ResizeObserver].
 /// https://caniuse.com/#feat=resizeobserver
-class ViewportCanvas extends Object with SetStateMixin {
+class ViewportCanvas extends Object with HtmlSetStateMixin {
   ViewportCanvas({
     @required CanvasPaintCallback paintCallback,
     MouseCallback onTap,

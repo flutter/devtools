@@ -8,8 +8,8 @@ import 'package:html_shim/html.dart' as html;
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger_state.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
 enum ListDirection {
   pageUp,
@@ -30,8 +30,8 @@ const int DOM_VK_DOWN = 40;
 
 typedef URIDescriber = String Function(String uri);
 
-class PopupView extends CoreElement {
-  PopupView(this._scriptsView, this._sourceArea, this._sourcePathDiv,
+class HtmlPopupView extends CoreElement {
+  HtmlPopupView(this._scriptsView, this._sourceArea, this._sourcePathDiv,
       this._popupTextfield)
       : super('div', classes: 'open-popup');
 
@@ -41,7 +41,7 @@ class PopupView extends CoreElement {
 
   CoreElement get popupTextfield => _popupTextfield;
 
-  final ScriptsView _scriptsView;
+  final HtmlScriptsView _scriptsView;
 
   String _oldSourceNameTextColor;
 
@@ -113,12 +113,12 @@ class PopupView extends CoreElement {
     _poppedUp = false;
   }
 
-  ScriptsView get scriptsView => _scriptsView;
+  HtmlScriptsView get scriptsView => _scriptsView;
 }
 
-class ScriptsView implements CoreElementView {
-  ScriptsView(URIDescriber uriDescriber) {
-    _items = SelectableList<ScriptRef>()
+class HtmlScriptsView implements CoreElementView {
+  HtmlScriptsView(URIDescriber uriDescriber) {
+    _items = HtmlSelectableList<ScriptRef>()
       ..flex()
       ..clazz('debugger-items-list');
     _items.setRenderer((ScriptRef scriptRef) {
@@ -163,11 +163,11 @@ class ScriptsView implements CoreElementView {
     });
   }
 
-  ScriptsMatcher _matcherRendering;
+  HtmlScriptsMatcher _matcherRendering;
 
-  ScriptsMatcher get matcher => _matcherRendering;
+  HtmlScriptsMatcher get matcher => _matcherRendering;
 
-  void setMatcher(ScriptsMatcher _matcher) {
+  void setMatcher(HtmlScriptsMatcher _matcher) {
     _matcherRendering = _matcher;
   }
 
@@ -237,7 +237,7 @@ class ScriptsView implements CoreElementView {
     return childToScrollTo;
   }
 
-  SelectableList<ScriptRef> _items;
+  HtmlSelectableList<ScriptRef> _items;
   ScriptRef _highlightRef;
 
   String rootLib;
@@ -318,10 +318,10 @@ class ScriptsView implements CoreElementView {
   void clearScripts() => _items.clearItems();
 }
 
-class ScriptsMatcher {
-  ScriptsMatcher(this._debuggerState);
+class HtmlScriptsMatcher {
+  HtmlScriptsMatcher(this._debuggerState);
 
-  ScriptsView _scriptsView;
+  HtmlScriptsView _scriptsView;
   CoreElement _textfield;
   final DebuggerState _debuggerState;
 
@@ -348,8 +348,8 @@ class ScriptsMatcher {
     if (_finishCallback != null) _finishCallback();
   }
 
-  void start(
-      ScriptRef revertScriptRef, ScriptsView scriptView, CoreElement textfield,
+  void start(ScriptRef revertScriptRef, HtmlScriptsView scriptView,
+      CoreElement textfield,
       [Function finishCallback]) {
     _scriptsView = scriptView;
     _textfield = textfield;

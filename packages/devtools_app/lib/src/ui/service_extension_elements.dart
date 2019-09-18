@@ -10,7 +10,7 @@ import '../service_manager.dart' show ServiceExtensionState;
 import '../service_registrations.dart';
 import '../utils.dart';
 import 'analytics.dart' as ga;
-import 'elements.dart';
+import 'html_elements.dart';
 import 'primer.dart';
 
 List<CoreElement> getServiceExtensionElements() {

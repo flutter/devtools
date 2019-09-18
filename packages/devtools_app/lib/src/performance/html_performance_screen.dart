@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
 
-import '../framework/framework.dart';
-import '../profiler/cpu_profile_flame_chart.dart';
-import '../profiler/cpu_profile_tables.dart';
-import '../profiler/cpu_profiler.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../framework/html_framework.dart';
+import '../profiler/html_cpu_profile_flame_chart.dart';
+import '../profiler/html_cpu_profile_tables.dart';
+import '../profiler/html_cpu_profiler.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
@@ -17,8 +17,8 @@ import 'performance_controller.dart';
 
 const performanceScreenId = 'performance';
 
-class PerformanceScreen extends Screen {
-  PerformanceScreen({bool enabled, String disabledTooltip})
+class HtmlPerformanceScreen extends HtmlScreen {
+  HtmlPerformanceScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Performance',
           id: 'performance',
@@ -43,12 +43,12 @@ class PerformanceScreen extends Screen {
 
   CoreElement _recordingStatusMessage;
 
-  CpuProfilerTabNav _tabNav;
+  HtmlCpuProfilerTabNav _tabNav;
 
-  _CpuProfiler _cpuProfiler;
+  _HtmlCpuProfiler _cpuProfiler;
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
 
     // Initialize screen content.
@@ -114,15 +114,15 @@ class PerformanceScreen extends Screen {
       ..flex()
       ..add([
         _recordingStatusMessage = div(c: 'recording-status-message'),
-        Spinner.centered(classes: ['recording-spinner']),
+        HtmlSpinner.centered(classes: ['recording-spinner']),
       ]);
 
-    _cpuProfiler = _CpuProfiler(
+    _cpuProfiler = _HtmlCpuProfiler(
       _performanceController,
       () => _performanceController.cpuProfileData,
     );
 
-    _tabNav = CpuProfilerTabNav(
+    _tabNav = HtmlCpuProfilerTabNav(
       _cpuProfiler,
       CpuProfilerTabOrder(
         first: CpuProfilerViewType.callTree,
@@ -173,13 +173,13 @@ class PerformanceScreen extends Screen {
   }
 }
 
-class _CpuProfiler extends CpuProfiler {
-  _CpuProfiler(
+class _HtmlCpuProfiler extends HtmlCpuProfiler {
+  _HtmlCpuProfiler(
     this._performanceController,
     CpuProfileDataProvider profileDataProvider,
   ) : super(
-          CpuFlameChart(profileDataProvider),
-          CpuCallTree(profileDataProvider),
+          HtmlCpuFlameChart(profileDataProvider),
+          HtmlCpuCallTree(profileDataProvider),
           CpuBottomUp(profileDataProvider),
           defaultView: CpuProfilerViewType.callTree,
         );

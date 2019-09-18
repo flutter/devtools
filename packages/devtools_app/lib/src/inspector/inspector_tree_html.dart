@@ -14,9 +14,9 @@ import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
-import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import 'diagnostics_node.dart';

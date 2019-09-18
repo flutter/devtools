@@ -7,18 +7,18 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
-import '../messages.dart';
-import 'elements.dart';
-import 'environment.dart' as environment;
-import 'fake_flutter/dart_ui/dart_ui.dart';
+import '../html_messages.dart';
+import 'fake_flutter/fake_flutter.dart';
+import 'html_elements.dart';
+import 'html_environment.dart' as environment;
 import 'html_icon_renderer.dart';
 import 'material_icons.dart';
 
 const int defaultSplitterWidth = 10;
 
-StatusItem createLinkStatusItem(
+HtmlStatusItem createLinkStatusItem(
   CoreElement textElement, {
   @required String href,
   @required String title,
@@ -38,10 +38,11 @@ StatusItem createLinkStatusItem(
     ..setAttribute('href', href)
     ..setAttribute('target', '_blank')
     ..element.title = title;
-  return StatusItem()..element.add(element);
+  return HtmlStatusItem()..element.add(element);
 }
 
-Future<void> maybeAddDebugMessage(Framework framework, String screenId) async {
+Future<void> maybeAddDebugMessage(
+    HtmlFramework framework, String screenId) async {
   if (!offlineMode &&
       serviceManager.connectedApp != null &&
       await serviceManager.connectedApp.isFlutterApp &&

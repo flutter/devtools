@@ -9,7 +9,7 @@ import 'package:plotly_js/plotly.dart' as plotly;
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
-import 'memory_chart.dart';
+import 'html_memory_chart.dart';
 
 class MemoryPlotly {
   MemoryPlotly(this._domName, this._memoryChart);
@@ -17,7 +17,7 @@ class MemoryPlotly {
   static const String fontFamily = 'sans-serif';
 
   final String _domName;
-  final MemoryChart _memoryChart;
+  final HtmlMemoryChart _memoryChart;
 
   // We're going to dynamically add the Event timeline chart to our memory
   // profiler chart.

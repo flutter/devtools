@@ -6,11 +6,11 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import 'framework/framework.dart';
+import 'framework/html_framework.dart';
 import 'table_data.dart';
 import 'trees.dart';
-import 'ui/custom.dart';
-import 'ui/elements.dart';
+import 'ui/html_custom.dart';
+import 'ui/html_elements.dart';
 import 'ui/primer.dart';
 
 class HtmlHoverCell<T> extends HoverCellData<T> {
@@ -19,7 +19,7 @@ class HtmlHoverCell<T> extends HoverCellData<T> {
   final CoreElement cell;
 }
 
-class HtmlTable<T> with SetStateMixin implements TableDataClient<T> {
+class HtmlTable<T> with HtmlSetStateMixin implements TableDataClient<T> {
   factory HtmlTable() => HtmlTable._(TableData<T>(), null, false);
 
   factory HtmlTable.virtual({double rowHeight = 29.0}) =>
@@ -526,14 +526,15 @@ class HtmlTreeColumnRenderer<T extends TreeNode<T>>
         ..element.style.minWidth = '${model.getNodeIndentPx(dataObject)}px');
 
     if (dataObject.isExpandable) {
-      final TreeToggle treeToggle = TreeToggle(forceOpen: dataObject.isExpanded)
-        ..onOpen.listen((isOpen) {
-          if (isOpen) {
-            model.nodeExpandedController.add(dataObject);
-          } else {
-            model.nodeCollapsedController.add(dataObject);
-          }
-        });
+      final HtmlTreeToggle treeToggle =
+          HtmlTreeToggle(forceOpen: dataObject.isExpanded)
+            ..onOpen.listen((isOpen) {
+              if (isOpen) {
+                model.nodeExpandedController.add(dataObject);
+              } else {
+                model.nodeCollapsedController.add(dataObject);
+              }
+            });
       container.add(treeToggle);
     }
 

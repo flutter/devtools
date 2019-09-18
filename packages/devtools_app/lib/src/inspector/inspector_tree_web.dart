@@ -4,7 +4,7 @@
 
 import 'package:html_shim/html.dart';
 
-import '../ui/elements.dart';
+import '../ui/html_elements.dart';
 import 'inspector_tree.dart';
 
 /// Base class for all inspector tree classes that can be used on the web.

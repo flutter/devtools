@@ -10,10 +10,10 @@ import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../ui/colors.dart';
-import '../ui/drag_scroll.dart';
-import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/html_drag_scroll.dart';
+import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import '../ui/viewport_canvas.dart';
 import '../utils.dart';
@@ -179,7 +179,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     _initAsciiMeasurements();
   }
 
-  final DragScroll _dragScroll = DragScroll();
+  final HtmlDragScroll _dragScroll = HtmlDragScroll();
 
   ViewportCanvas _viewportCanvas;
 

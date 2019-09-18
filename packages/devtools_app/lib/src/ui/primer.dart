@@ -7,7 +7,7 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import 'elements.dart';
+import 'html_elements.dart';
 import 'html_icon_renderer.dart';
 import 'icons.dart';
 

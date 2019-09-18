@@ -4,19 +4,19 @@
 import 'package:html_shim/html.dart' as html;
 
 import '../globals.dart';
-import '../profiler/cpu_profile_flame_chart.dart';
-import '../profiler/cpu_profile_tables.dart';
-import '../profiler/cpu_profiler.dart';
+import '../profiler/html_cpu_profile_flame_chart.dart';
+import '../profiler/html_cpu_profile_tables.dart';
+import '../profiler/html_cpu_profiler.dart';
 import '../ui/colors.dart';
-import '../ui/elements.dart';
 import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
 
-class EventDetails extends CoreElement {
-  EventDetails(this._timelineController) : super('div') {
+class HtmlEventDetails extends CoreElement {
+  HtmlEventDetails(this._timelineController) : super('div') {
     flex();
     layoutVertical();
 
@@ -48,7 +48,7 @@ class EventDetails extends CoreElement {
 
   final TimelineController _timelineController;
 
-  CpuProfilerTabNav _tabNav;
+  HtmlCpuProfilerTabNav _tabNav;
 
   CoreElement _content;
 
@@ -88,7 +88,7 @@ class EventDetails extends CoreElement {
       ..flex()
       ..add(<CoreElement>[_title, details]);
 
-    _tabNav = CpuProfilerTabNav(
+    _tabNav = HtmlCpuProfilerTabNav(
       _cpuProfiler,
       CpuProfilerTabOrder(
         first: CpuProfilerViewType.flameChart,
@@ -141,13 +141,13 @@ class EventDetails extends CoreElement {
   }
 }
 
-class _CpuProfiler extends CpuProfiler {
+class _CpuProfiler extends HtmlCpuProfiler {
   _CpuProfiler(
     this._timelineController,
     CpuProfileDataProvider profileDataProvider,
   ) : super(
-          CpuFlameChart(profileDataProvider),
-          CpuCallTree(profileDataProvider),
+          HtmlCpuFlameChart(profileDataProvider),
+          HtmlCpuCallTree(profileDataProvider),
           CpuBottomUp(profileDataProvider),
         );
 

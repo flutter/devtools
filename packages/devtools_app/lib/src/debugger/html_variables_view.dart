@@ -7,15 +7,15 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger_state.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
 typedef VariableDescriber = Future<String> Function(BoundVariable variable);
 
-class VariablesView implements CoreElementView {
-  VariablesView(
+class HtmlVariablesView implements CoreElementView {
+  HtmlVariablesView(
       DebuggerState debuggerState, VariableDescriber variableDescriber) {
-    _items = SelectableTree<BoundVariable>()
+    _items = HtmlSelectableTree<BoundVariable>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -77,7 +77,7 @@ class VariablesView implements CoreElementView {
     });
   }
 
-  SelectableTree<BoundVariable> _items;
+  HtmlSelectableTree<BoundVariable> _items;
 
   List<BoundVariable> get items => _items.items;
 

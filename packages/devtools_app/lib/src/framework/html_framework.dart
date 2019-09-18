@@ -9,71 +9,72 @@ import 'package:html_shim/html.dart' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../globals.dart';
+import '../html_message_manager.dart';
 import '../main.dart';
-import '../message_manager.dart';
+import '../timeline/html_timeline_screen.dart';
 import '../timeline/timeline_controller.dart';
 import '../timeline/timeline_model.dart';
-import '../timeline/timeline_screen.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'framework_core.dart';
 
-class Framework {
-  Framework() {
+class HtmlFramework {
+  HtmlFramework() {
     window.onPopState.listen(handlePopState);
 
     _initDragDrop();
 
-    globalStatus = StatusLine(CoreElement.from(queryId('global-status')));
-    pageStatus = StatusLine(CoreElement.from(queryId('page-status')));
-    auxiliaryStatus = StatusLine(CoreElement.from(queryId('auxiliary-status')))
-      ..defaultStatus = defaultAuxiliaryStatus;
+    globalStatus = HtmlStatusLine(CoreElement.from(queryId('global-status')));
+    pageStatus = HtmlStatusLine(CoreElement.from(queryId('page-status')));
+    auxiliaryStatus =
+        HtmlStatusLine(CoreElement.from(queryId('auxiliary-status')))
+          ..defaultStatus = defaultAuxiliaryStatus;
 
     globalActions =
-        ActionsContainer(CoreElement.from(queryId('global-actions')));
+        HtmlActionsContainer(CoreElement.from(queryId('global-actions')));
 
     // TODO(kenz): refactor [connectDialog] and [snapshotMessage] to be in their
     // own screen.
-    connectDialog = ConnectDialog(this);
+    connectDialog = HtmlConnectDialog(this);
 
-    snapshotMessage = SnapshotMessage(this);
+    snapshotMessage = HtmlSnapshotMessage(this);
 
-    analyticsDialog = AnalyticsOptInDialog(this);
+    analyticsDialog = HtmlAnalyticsOptInDialog(this);
   }
 
-  final List<Screen> screens = <Screen>[];
+  final List<HtmlScreen> screens = <HtmlScreen>[];
 
-  final Map<Screen, CoreElement> _screenContents = {};
+  final Map<HtmlScreen, CoreElement> _screenContents = {};
 
   final Completer<void> screensReady = Completer();
 
-  final MessageManager messageManager = MessageManager();
+  final HtmlMessageManager messageManager = HtmlMessageManager();
 
-  Screen current;
+  HtmlScreen current;
 
-  Screen _previous;
+  HtmlScreen _previous;
 
-  StatusLine globalStatus;
+  HtmlStatusLine globalStatus;
 
-  StatusLine pageStatus;
+  HtmlStatusLine pageStatus;
 
-  StatusLine auxiliaryStatus;
+  HtmlStatusLine auxiliaryStatus;
 
-  ActionsContainer globalActions;
+  HtmlActionsContainer globalActions;
 
-  ConnectDialog connectDialog;
+  HtmlConnectDialog connectDialog;
 
-  SnapshotMessage snapshotMessage;
+  HtmlSnapshotMessage snapshotMessage;
 
-  AnalyticsOptInDialog analyticsDialog;
+  HtmlAnalyticsOptInDialog analyticsDialog;
 
-  final StatusItem defaultAuxiliaryStatus = createLinkStatusItem(
+  final HtmlStatusItem defaultAuxiliaryStatus = createLinkStatusItem(
     span()..add(span(text: 'DevTools Docs', c: 'optional-700')),
     href: 'https://flutter.dev/docs/development/tools/devtools/overview',
     title: 'Documentation on using Dart DevTools',
@@ -118,7 +119,7 @@ class Framework {
             'The imported file is not a Dart DevTools file. At this time, '
             'DevTools only supports importing files that were originally '
             'exported from DevTools.',
-            hideDelay: Toast.extendedHideDelay,
+            hideDelay: HtmlToast.extendedHideDelay,
           );
           return;
         }
@@ -135,7 +136,7 @@ class Framework {
               '"$devToolsScreen", which is not supported by this version of '
               'Dart DevTools. You may need to upgrade your version of Dart '
               'DevTools to view this file.',
-              hideDelay: Toast.extendedHideDelay,
+              hideDelay: HtmlToast.extendedHideDelay,
             );
             return;
         }
@@ -144,7 +145,7 @@ class Framework {
           'JSON syntax error in imported file: "$e". Please make sure the '
           'imported file is a Dart DevTools file, and check that it has not '
           'been modified.',
-          hideDelay: Toast.extendedHideDelay,
+          hideDelay: HtmlToast.extendedHideDelay,
         );
         return;
       }
@@ -167,12 +168,12 @@ class Framework {
 
     _enterOfflineMode();
 
-    TimelineScreen timelineScreen = screens.firstWhere(
+    HtmlTimelineScreen timelineScreen = screens.firstWhere(
       (screen) => screen.id == timelineScreenId,
       orElse: () => null,
     );
     if (timelineScreen == null) {
-      addScreen(timelineScreen = TimelineScreen());
+      addScreen(timelineScreen = HtmlTimelineScreen());
     }
     navigateTo(timelineScreenId);
 
@@ -199,13 +200,13 @@ class Framework {
     }
   }
 
-  void addScreen(Screen screen) {
+  void addScreen(HtmlScreen screen) {
     screens.add(screen);
   }
 
   /// Returns false if the screen is disabled.
   bool navigateTo(String id) {
-    final Screen screen = getScreen(id);
+    final HtmlScreen screen = getScreen(id);
     assert(screen != null);
     if (screen.disabled) {
       return false;
@@ -255,7 +256,7 @@ class Framework {
         assert(id[0] == '#');
         id = id.substring(1);
       }
-      Screen screen = getScreen(id, onlyEnabled: true);
+      HtmlScreen screen = getScreen(id, onlyEnabled: true);
       screen ??= screens.firstWhere((screen) => !screen.disabled,
           orElse: () => screens.first);
       if (screen != null) {
@@ -267,9 +268,9 @@ class Framework {
     });
   }
 
-  Screen getScreen(String id, {bool onlyEnabled = false}) {
+  HtmlScreen getScreen(String id, {bool onlyEnabled = false}) {
     return screens.firstWhere(
-        (Screen screen) =>
+        (HtmlScreen screen) =>
             screen.id == id && (!onlyEnabled || !screen.disabled),
         orElse: () => null);
   }
@@ -280,7 +281,7 @@ class Framework {
 
   CoreElement get mainElement => CoreElement.from(queryId('content'));
 
-  void load(Screen screen) {
+  void load(HtmlScreen screen) {
     if (current == null) {
       mainElement.element.children.clear();
     }
@@ -324,7 +325,7 @@ class Framework {
         // though its in a div with a 'display:none' and will resize improperly.
         e.stopImmediatePropagation(); // Don't bubble up the resize event.
 
-        _screenContents.forEach((Screen theScreen, CoreElement content) {
+        _screenContents.forEach((HtmlScreen theScreen, CoreElement content) {
           if (current != theScreen) {
             theScreen.needsResizing = true;
           }
@@ -350,7 +351,8 @@ class Framework {
     }
   }
 
-  void showMessage({@required Message message, String screenId = generalId}) {
+  void showMessage(
+      {@required HtmlMessage message, String screenId = generalId}) {
     messageManager.addMessage(message, screenId);
   }
 
@@ -365,7 +367,7 @@ class Framework {
       }
     }
     messageManager.addMessage(
-      Message(MessageType.error, message: message, title: title),
+      HtmlMessage(MessageType.error, message: message, title: title),
       generalId,
     );
   }
@@ -377,16 +379,16 @@ class Framework {
   void toast(
     String message, {
     String title,
-    Duration hideDelay = Toast.defaultHideDelay,
+    Duration hideDelay = HtmlToast.defaultHideDelay,
   }) {
-    final Toast toast = Toast(title: title, message: message);
+    final HtmlToast toast = HtmlToast(title: title, message: message);
     final CoreElement toastContainer =
         CoreElement.from(queryId('toast-container'));
     toastContainer.add(toast);
     toast.show(hideDelay: hideDelay);
   }
 
-  void addGlobalAction(ActionButton action) {
+  void addGlobalAction(HtmlActionButton action) {
     globalActions.addAction(action);
   }
 
@@ -395,22 +397,22 @@ class Framework {
   }
 }
 
-class StatusLine {
-  StatusLine(this.element);
+class HtmlStatusLine {
+  HtmlStatusLine(this.element);
 
   final CoreElement element;
-  final List<StatusItem> _items = <StatusItem>[];
+  final List<HtmlStatusItem> _items = <HtmlStatusItem>[];
 
   /// Status to show if no actual status is provided..
-  final List<StatusItem> _defaultStatusItems = <StatusItem>[];
+  final List<HtmlStatusItem> _defaultStatusItems = <HtmlStatusItem>[];
 
-  void add(StatusItem item) {
+  void add(HtmlStatusItem item) {
     _items.add(item);
 
     _rebuild();
   }
 
-  set defaultStatus(StatusItem defaultStatus) {
+  set defaultStatus(HtmlStatusItem defaultStatus) {
     _defaultStatusItems.clear();
     if (defaultStatus != null) {
       _defaultStatusItems.add(defaultStatus);
@@ -420,11 +422,11 @@ class StatusLine {
 
   void _rebuild() {
     element.clear();
-    final List<StatusItem> items =
+    final List<HtmlStatusItem> items =
         _items.isEmpty ? _defaultStatusItems : _items;
 
     bool first = true;
-    for (StatusItem item in items) {
+    for (HtmlStatusItem item in items) {
       if (!first) {
         element.add(SpanElement()
           ..text = '•'
@@ -435,13 +437,13 @@ class StatusLine {
     }
   }
 
-  void remove(StatusItem item) {
+  void remove(HtmlStatusItem item) {
     _items.remove(item);
 
     _rebuild();
   }
 
-  void addAll(List<StatusItem> items) {
+  void addAll(List<HtmlStatusItem> items) {
     _items.addAll(items);
 
     _rebuild();
@@ -453,14 +455,14 @@ class StatusLine {
   }
 }
 
-class ActionsContainer {
-  ActionsContainer(this.element);
+class HtmlActionsContainer {
+  HtmlActionsContainer(this.element);
 
   final CoreElement element;
-  final List<ActionButton> _actions = [];
+  final List<HtmlActionButton> _actions = [];
 
-  void addAction(ActionButton action) {
-    for (ActionButton _action in _actions) {
+  void addAction(HtmlActionButton action) {
+    for (HtmlActionButton _action in _actions) {
       if (_action.id == action.id) {
         // This action is a duplicate. Do not add it.
         return;
@@ -478,7 +480,7 @@ class ActionsContainer {
   }
 
   void removeAction(String id) {
-    _actions.removeWhere((ActionButton button) => button.id == id);
+    _actions.removeWhere((HtmlActionButton button) => button.id == id);
   }
 
   void clearActions() {
@@ -491,8 +493,8 @@ class ActionsContainer {
 typedef ShortCut = bool Function(
     bool ctrlKey, bool shiftKey, bool altKey, String key);
 
-abstract class Screen {
-  Screen({
+abstract class HtmlScreen {
+  HtmlScreen({
     @required this.name,
     @required this.id,
     this.iconClass,
@@ -519,18 +521,18 @@ abstract class Screen {
   final bool disabled;
   final bool showTab;
 
-  StatusItem _helpStatus;
+  HtmlStatusItem _helpStatus;
 
   // Set to handle short-cut keys for a particular screen.
   ShortCut shortcutCallback;
 
   bool needsResizing = false;
 
-  Framework framework;
+  HtmlFramework framework;
 
   final Property<bool> _visible = Property<bool>(false);
 
-  final List<StatusItem> statusItems = <StatusItem>[];
+  final List<HtmlStatusItem> statusItems = <HtmlStatusItem>[];
 
   String get ref => id.isEmpty ? id : '#$id';
 
@@ -542,7 +544,7 @@ abstract class Screen {
 
   Stream<bool> get onVisibleChange => _visible.onValueChange;
 
-  CoreElement createContent(Framework framework);
+  CoreElement createContent(HtmlFramework framework);
 
   void entering() {}
 
@@ -550,11 +552,11 @@ abstract class Screen {
 
   void exiting() {}
 
-  void addStatusItem(StatusItem item) {
+  void addStatusItem(HtmlStatusItem item) {
     statusItems.add(item);
   }
 
-  void removeStatusItem(StatusItem item) {
+  void removeStatusItem(HtmlStatusItem item) {
     statusItems.remove(item);
   }
 
@@ -569,20 +571,20 @@ abstract class Screen {
   void onContentAttached() {}
 }
 
-class SetStateMixin {
+class HtmlSetStateMixin {
   void setState(Function rebuild) {
     window.requestAnimationFrame((_) => rebuild());
   }
 }
 
-class StatusItem {
-  StatusItem() : element = span();
+class HtmlStatusItem {
+  HtmlStatusItem() : element = span();
 
   final CoreElement element;
 }
 
-class Toast extends CoreElement {
-  Toast({this.title, this.message}) : super('div', classes: 'toast') {
+class HtmlToast extends CoreElement {
+  HtmlToast({this.title, this.message}) : super('div', classes: 'toast') {
     if (title != null) {
       add(label(text: title));
     }
@@ -617,8 +619,8 @@ class Toast extends CoreElement {
   String toString() => '$title $message';
 }
 
-class ConnectDialog {
-  ConnectDialog(this.framework) {
+class HtmlConnectDialog {
+  HtmlConnectDialog(this.framework) {
     parent = CoreElement.from(queryId('connect-dialog'));
     parent.layoutVertical();
 
@@ -665,7 +667,7 @@ class ConnectDialog {
     });
   }
 
-  final Framework framework;
+  final HtmlFramework framework;
 
   CoreElement parent;
   CoreElement textfield;
@@ -728,6 +730,7 @@ class ConnectDialog {
 
   Future _connect(Uri serviceUri) async {
     final bool connected = await FrameworkCore.initVmService(
+      window.location.toString(),
       explicitUri: serviceUri,
       errorReporter: (String title, dynamic error) {
         // ignore - we report this in _tryConnect
@@ -754,8 +757,8 @@ class ConnectDialog {
   }
 }
 
-class SnapshotMessage {
-  SnapshotMessage(this.framework) {
+class HtmlSnapshotMessage {
+  HtmlSnapshotMessage(this.framework) {
     parent = CoreElement.from(queryId('snapshot-message'));
     parent.layoutVertical();
 
@@ -784,7 +787,7 @@ class SnapshotMessage {
     hide();
   }
 
-  final Framework framework;
+  final HtmlFramework framework;
 
   CoreElement parent;
 
@@ -799,8 +802,8 @@ class SnapshotMessage {
   bool isVisible() => parent.display != 'none';
 }
 
-class AnalyticsOptInDialog {
-  AnalyticsOptInDialog(this.framework) {
+class HtmlAnalyticsOptInDialog {
+  HtmlAnalyticsOptInDialog(this.framework) {
     parent = CoreElement.from(queryId('ga-dialog'));
     parent.layoutVertical();
 
@@ -850,7 +853,7 @@ class AnalyticsOptInDialog {
     hide();
   }
 
-  final Framework framework;
+  final HtmlFramework framework;
 
   CoreElement parent;
   CoreElement acceptButton;

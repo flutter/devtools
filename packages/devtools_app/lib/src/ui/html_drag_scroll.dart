@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'package:html_shim/html.dart';
 
-import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
+import '../ui/html_elements.dart';
 
-class DragScroll {
+class HtmlDragScroll {
   /// Whether the element was dragged on the previous click or touch.
   bool wasDragged = false;
 

@@ -7,16 +7,15 @@ import 'package:meta/meta.dart';
 
 import '../charts/flame_chart_canvas.dart';
 import '../ui/colors.dart';
-import '../ui/elements.dart';
-import '../ui/fake_flutter/dart_ui/dart_ui.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profiler.dart';
+import 'html_cpu_profiler.dart';
 
-class CpuFlameChart extends CpuProfilerView {
-  CpuFlameChart(CpuProfileDataProvider profileDataProvider)
+class HtmlCpuFlameChart extends HtmlCpuProfilerView {
+  HtmlCpuFlameChart(CpuProfileDataProvider profileDataProvider)
       : super(CpuProfilerViewType.flameChart, profileDataProvider) {
     stackFrameDetails = div(c: 'event-details-heading stack-frame-details')
       ..element.style.backgroundColor = colorToCss(stackFrameDetailsBackground)

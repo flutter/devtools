@@ -19,15 +19,15 @@ import 'package:html_shim/js_util.dart' as js_util;
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
-import '../debugger/debugger.dart';
-import '../framework/framework.dart';
+import '../debugger/html_debugger_screen.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
-import '../logging/logging.dart';
+import '../logging/html_logging_screen.dart';
 import '../logging/logging_controller.dart';
 import '../main.dart';
 
-class App {
-  App(this.framework) {
+class HtmlApp {
+  HtmlApp(this.framework) {
     _register<void>('devToolsReady', devToolsReady);
     _register<void>('echo', echo);
     _register<void>('switchPage', switchPage);
@@ -61,11 +61,11 @@ class App {
         'debugger.getConsoleContents', debuggerGetConsoleContents);
   }
 
-  static App register(PerfToolFramework framework) {
-    return App(framework).._bind();
+  static HtmlApp register(HtmlPerfToolFramework framework) {
+    return HtmlApp(framework).._bind();
   }
 
-  final PerfToolFramework framework;
+  final HtmlPerfToolFramework framework;
 
   void _bind() {
     final binding = js_util.newObject();
@@ -95,7 +95,7 @@ class App {
   }
 
   Future<void> switchPage(dynamic pageId) async {
-    final Screen screen = framework.getScreen(pageId);
+    final HtmlScreen screen = framework.getScreen(pageId);
     if (screen == null) {
       throw 'page $pageId not found';
     }
@@ -116,27 +116,27 @@ class App {
   }
 
   Future<void> logsClearLogs([dynamic _]) async {
-    final LoggingScreen screen = framework.getScreen('logging');
+    final HtmlLoggingScreen screen = framework.getScreen('logging');
     screen.controller.loggingTableModel.setRows(<LogData>[]);
   }
 
   Future<int> logsLogCount([dynamic _]) async {
-    final LoggingScreen screen = framework.getScreen('logging');
+    final HtmlLoggingScreen screen = framework.getScreen('logging');
     return screen.controller.loggingTableModel.rowCount;
   }
 
   Future<String> debuggerGetState([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.debuggerState.isPaused.value ? 'paused' : 'running';
   }
 
   Future<String> debuggerGetConsoleContents([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.consoleArea.styledContents();
   }
 
   Future<String> debuggerGetLocation([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     final scriptAndPos = screen.sourceEditor.executionPoint;
 
     if (scriptAndPos == null) {
@@ -147,27 +147,27 @@ class App {
   }
 
   Future<void> debuggerResume([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.resume();
   }
 
   Future<void> debuggerPause([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.pause();
   }
 
   Future<void> debuggerStep([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.stepOver();
   }
 
   Future<void> debuggerClearBreakpoints([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.clearBreakpoints();
   }
 
   Future<List<String>> debuggerGetBreakpoints([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.debuggerState.breakpoints.value
         .map((breakpoint) => breakpoint.id)
         .toList();
@@ -178,14 +178,14 @@ class App {
   }
 
   Future<List<String>> debuggerGetScripts([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.scriptsView.items.map((ScriptRef script) {
       return script.uri;
     }).toList();
   }
 
   Future<List<String>> debuggerGetCallStackFrames([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.callStackView.items.map((Frame frame) {
       String name = frame.code?.name ?? '<none>';
       if (name.startsWith('[Unoptimized] ')) {
@@ -211,7 +211,7 @@ class App {
   }
 
   Future<List<String>> debuggerGetVariables([dynamic _]) async {
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     return screen.variablesView.items.map((BoundVariable variable) {
       final dynamic value = variable.value;
       String valueStr;
@@ -234,14 +234,14 @@ class App {
     final String path = params[0];
     final int line = params[1] + 1;
 
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.addBreakpointByPathFragment(path, line);
   }
 
   Future<void> debuggerSetExceptionPauseMode([dynamic params]) async {
     final String mode = params;
 
-    final DebuggerScreen screen = framework.getScreen('debugger');
+    final HtmlDebuggerScreen screen = framework.getScreen('debugger');
     await screen.debuggerState.setExceptionPauseMode(mode);
   }
 

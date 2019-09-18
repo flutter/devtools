@@ -7,14 +7,14 @@ import 'dart:async';
 import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 
 import '../config_specific/logger.dart';
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../ui/analytics.dart' as ga;
-import '../ui/elements.dart';
+import '../ui/html_elements.dart';
 import 'frames_bar_plotly.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
-class FramesBarChart extends CoreElement with SetStateMixin {
+class FramesBarChart extends CoreElement with HtmlSetStateMixin {
   FramesBarChart(this.timelineController)
       : super('div', classes: 'timeline-frames section section-border') {
     // No frame around component, so data spikes can appear to go through the

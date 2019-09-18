@@ -6,18 +6,18 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
+import '../html_tables.dart';
 import '../table_data.dart';
-import '../tables.dart';
 import '../trees.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
-import 'memory.dart';
+import 'html_memory_screen.dart';
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
-class InboundsTree extends InstanceRefsView {
-  InboundsTree(
+class HtmlInboundsTree extends HtmlInstanceRefsView {
+  HtmlInboundsTree(
     this._memoryScreen,
     InboundsTreeData inboundsTree,
     String className,
@@ -28,11 +28,11 @@ class InboundsTree extends InstanceRefsView {
     _init(className);
   }
 
-  final MemoryScreen _memoryScreen;
+  final HtmlMemoryScreen _memoryScreen;
 
   HtmlTreeTable<InboundsTreeNode> referencesTable;
 
-  Spinner spinner;
+  HtmlSpinner spinner;
 
   void _init(String className) {
     final title =
@@ -48,7 +48,7 @@ class InboundsTree extends InstanceRefsView {
           inboundNode.children.removeLast();
           // Make sure it's a known class (not abstract).
           if (!inboundNode.isEmpty) {
-            spinner = Spinner.centered();
+            spinner = HtmlSpinner.centered();
             referencesTable.element.add(spinner);
 
             if (inboundNode.instanceHashCode == null &&
@@ -295,8 +295,9 @@ class InboundsTreeNode extends TreeNode<InboundsTreeNode> {
       _name == null && fieldName == null && instanceHashCode == null;
 }
 
-abstract class InstanceRefsView extends CoreElement {
-  InstanceRefsView(this.inboundsTree) : super('div', classes: 'memory-table');
+abstract class HtmlInstanceRefsView extends CoreElement {
+  HtmlInstanceRefsView(this.inboundsTree)
+      : super('div', classes: 'memory-table');
 
   final InboundsTreeData inboundsTree;
 
@@ -313,7 +314,7 @@ abstract class InstanceRefsView extends CoreElement {
     // rebuild.
     if (!isHidden) {
       if (showLoadingSpinner) {
-        final spinner = Spinner.centered();
+        final spinner = HtmlSpinner.centered();
         add(spinner);
 
         // Awaiting this future ensures the spinner pops up in between switching

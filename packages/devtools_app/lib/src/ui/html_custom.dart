@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import '../ui/icons.dart';
-import 'elements.dart';
+import 'html_elements.dart';
 import 'html_icon_renderer.dart';
 import 'trees.dart';
 import 'trees_html.dart';
 
-class ProgressElement extends CoreElement {
-  ProgressElement() : super('div') {
+class HtmlProgressElement extends CoreElement {
+  HtmlProgressElement() : super('div') {
     clazz('progress-element');
     add(completeElement = div(c: 'complete'));
   }
@@ -42,22 +42,22 @@ class ProgressElement extends CoreElement {
   }
 }
 
-class Spinner extends CoreElement {
-  Spinner({List<String> classes = const []}) : super('div') {
+class HtmlSpinner extends CoreElement {
+  HtmlSpinner({List<String> classes = const []}) : super('div') {
     clazz('spinner');
     classes.forEach(clazz);
   }
 
-  static Spinner centered({List<String> classes = const []}) =>
-      Spinner(classes: ['centered']..addAll(classes));
+  static HtmlSpinner centered({List<String> classes = const []}) =>
+      HtmlSpinner(classes: ['centered']..addAll(classes));
 
   void remove() => element.remove();
 }
 
 typedef ListRenderer<T> = CoreElement Function(T item);
 
-class SelectableList<T> extends CoreElement {
-  SelectableList() : super('div');
+class HtmlSelectableList<T> extends CoreElement {
+  HtmlSelectableList() : super('div');
 
   List<T> items = <T>[];
   ListRenderer<T> renderer;
@@ -193,18 +193,18 @@ abstract class ChildProvider<T> {
   Future<List<T>> getChildren(T item);
 }
 
-class SelectableTreeNodeItem<T> {
-  SelectableTreeNodeItem(this.element, this.item);
+class HtmlSelectableTreeNodeItem<T> {
+  HtmlSelectableTreeNodeItem(this.element, this.item);
   final CoreElement element;
   final T item;
 }
 
-class SelectableTree<T> extends CoreElement
+class HtmlSelectableTree<T> extends CoreElement
     with
-        Tree<SelectableTreeNodeItem<T>>,
-        TreeNavigator<SelectableTreeNodeItem<T>>,
-        HtmlTreeNavigator<SelectableTreeNodeItem<T>> {
-  SelectableTree() : super('ul') {
+        Tree<HtmlSelectableTreeNodeItem<T>>,
+        TreeNavigator<HtmlSelectableTreeNodeItem<T>>,
+        HtmlTreeNavigator<HtmlSelectableTreeNodeItem<T>> {
+  HtmlSelectableTree() : super('ul') {
     // Ensure the tree can be tabbed into.
     element.tabIndex = 0;
     element.onKeyDown.listen(handleKeyPress);
@@ -212,12 +212,12 @@ class SelectableTree<T> extends CoreElement
 
   List<T> items = <T>[];
   @override
-  List<TreeNode<SelectableTreeNodeItem<T>>> treeNodes = [];
+  List<TreeNode<HtmlSelectableTreeNodeItem<T>>> treeNodes = [];
   ListRenderer<T> renderer;
   ChildProvider<T> childProvider;
-  TreeNode<SelectableTreeNodeItem<T>> _selectedItem;
+  TreeNode<HtmlSelectableTreeNodeItem<T>> _selectedItem;
   @override
-  TreeNode<SelectableTreeNodeItem<T>> get selectedItem => _selectedItem;
+  TreeNode<HtmlSelectableTreeNodeItem<T>> get selectedItem => _selectedItem;
 
   final StreamController<T> _selectionController = StreamController.broadcast();
 
@@ -246,10 +246,10 @@ class SelectableTree<T> extends CoreElement
     }
   }
 
-  TreeNode<SelectableTreeNodeItem<T>> _addItemToTree(
+  TreeNode<HtmlSelectableTreeNodeItem<T>> _addItemToTree(
       CoreElement container, T item) {
     final ListRenderer<T> renderer = this.renderer ?? _defaultRenderer;
-    final obj = TreeNode(SelectableTreeNodeItem(renderer(item), item));
+    final obj = TreeNode(HtmlSelectableTreeNodeItem(renderer(item), item));
     obj.data.element.click(() {
       select(obj, clear: obj.data.element.hasClass('selected'));
     });
@@ -258,7 +258,7 @@ class SelectableTree<T> extends CoreElement
     element.add(obj.data.element);
 
     if (childProvider.hasChildren(item)) {
-      final TreeToggle toggle = TreeToggle();
+      final HtmlTreeToggle toggle = HtmlTreeToggle();
       obj.data.element.element.children.insert(0, toggle.element);
 
       bool hasPopulated = false;
@@ -287,7 +287,7 @@ class SelectableTree<T> extends CoreElement
       });
     } else {
       obj.data.element.element.children
-          .insert(0, TreeToggle(empty: true).element);
+          .insert(0, HtmlTreeToggle(empty: true).element);
     }
 
     container.add(element);
@@ -296,12 +296,12 @@ class SelectableTree<T> extends CoreElement
   }
 
   /// Builds a tree for [results] into [container].
-  List<TreeNode<SelectableTreeNodeItem<T>>> _buildTree(
+  List<TreeNode<HtmlSelectableTreeNodeItem<T>>> _buildTree(
     List<T> results,
     CoreElement container,
-    TreeNode<SelectableTreeNodeItem<T>> parent,
+    TreeNode<HtmlSelectableTreeNodeItem<T>> parent,
   ) {
-    final List<TreeNode<SelectableTreeNodeItem<T>>> children =
+    final List<TreeNode<HtmlSelectableTreeNodeItem<T>>> children =
         results.map((result) => _addItemToTree(container, result)).toList();
 
     connectNodes(
@@ -318,7 +318,8 @@ class SelectableTree<T> extends CoreElement
   }
 
   @override
-  void select(TreeNode<SelectableTreeNodeItem<T>> node, {bool clear = false}) {
+  void select(TreeNode<HtmlSelectableTreeNodeItem<T>> node,
+      {bool clear = false}) {
     _selectedItem?.data?.element?.toggleClass('selected', false);
 
     if (clear) {
@@ -333,8 +334,8 @@ class SelectableTree<T> extends CoreElement
 }
 
 // TODO(kenz): wrap this element in a larger div to increase tap target.
-class TreeToggle extends CoreElement {
-  TreeToggle({bool empty = false, bool forceOpen = false})
+class HtmlTreeToggle extends CoreElement {
+  HtmlTreeToggle({bool empty = false, bool forceOpen = false})
       : super('div', classes: 'tree-toggle octicon') {
     if (!empty) {
       click(toggle);
@@ -368,8 +369,8 @@ CoreElement _defaultRenderer<T>(T item) {
   return li(text: item.toString(), c: 'list-item');
 }
 
-class ActionButton implements CoreElementView {
-  ActionButton(this.id, this.icon, this.tooltip) {
+class HtmlActionButton implements CoreElementView {
+  HtmlActionButton(this.id, this.icon, this.tooltip) {
     _element = div(c: 'masthead-item action-button')
       ..tooltip = tooltip
       ..add(createIconElement(icon));

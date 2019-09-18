@@ -6,15 +6,15 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/elements.dart';
+import '../ui/html_elements.dart';
 import '../version.dart';
 import 'info_controller.dart';
 
-class FlagDetailsUI extends CoreElement {
-  FlagDetailsUI(Flag flag) : super('div', classes: 'flag-details-container') {
+class HtmlFlagDetails extends CoreElement {
+  HtmlFlagDetails(Flag flag) : super('div', classes: 'flag-details-container') {
     final flagDescription = div(c: 'flag-details-descriptions-container')
       ..add(<CoreElement>[
         div(c: 'info-title', text: flag.name),
@@ -35,8 +35,8 @@ class FlagDetailsUI extends CoreElement {
   }
 }
 
-class InfoScreen extends Screen {
-  InfoScreen()
+class HtmlInfoScreen extends HtmlScreen {
+  HtmlInfoScreen()
       : super(
           name: '',
           id: 'info',
@@ -47,7 +47,7 @@ class InfoScreen extends Screen {
       onFlagListChanged: (FlagList flagList) {
         _flagList
           ..clear()
-          ..add(flagList.flags.map((flag) => FlagDetailsUI(flag)));
+          ..add(flagList.flags.map((flag) => HtmlFlagDetails(flag)));
       },
       onFlutterVersionChanged: (FlutterVersion version) {
         _updateFlutterVersionUI(version);
@@ -64,7 +64,7 @@ class InfoScreen extends Screen {
   InfoController _controller;
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     ga_platform.setupDimensions();
     this.framework = framework;
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();

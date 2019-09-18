@@ -10,21 +10,21 @@ import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 
 import '../charts/flame_chart_canvas.dart';
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../service_extensions.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
 import '../ui/vm_flag_elements.dart';
-import 'event_details.dart';
-import 'frames_bar_chart.dart';
+import 'html_event_details.dart';
+import 'html_frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_flame_chart.dart';
 import 'timeline_model.dart';
@@ -43,8 +43,8 @@ import 'timeline_protocol.dart';
 
 const enableMultiModeTimeline = false;
 
-class TimelineScreen extends Screen {
-  TimelineScreen({bool enabled, String disabledTooltip})
+class HtmlTimelineScreen extends HtmlScreen {
+  HtmlTimelineScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Timeline',
           id: timelineScreenId,
@@ -61,7 +61,7 @@ class TimelineScreen extends Screen {
 
   TimelineFlameChartCanvas frameFlameChartCanvas;
 
-  EventDetails eventDetails;
+  HtmlEventDetails eventDetails;
 
   PButton pauseButton;
 
@@ -100,7 +100,7 @@ class TimelineScreen extends Screen {
   bool splitterConfigured = false;
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
@@ -140,7 +140,7 @@ class TimelineScreen extends Screen {
       ..flex()
       ..add([
         _recordingStatusMessage = div(c: 'recording-status-message'),
-        Spinner.centered(classes: ['recording-spinner']),
+        HtmlSpinner.centered(classes: ['recording-spinner']),
       ]);
 
     exportButton = PButton.icon('Export', exportIcon)
@@ -221,7 +221,7 @@ class TimelineScreen extends Screen {
                 ..flex()
                 ..layoutVertical()
                 ..hidden(true),
-          eventDetails = EventDetails(timelineController)..hidden(true),
+          eventDetails = HtmlEventDetails(timelineController)..hidden(true),
         ]),
     ]);
 

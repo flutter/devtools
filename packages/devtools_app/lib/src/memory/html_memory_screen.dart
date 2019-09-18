@@ -10,31 +10,31 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
-import '../popup.dart';
+import '../html_popup.dart';
+import '../html_tables.dart';
 import '../table_data.dart';
-import '../tables.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/ui_utils.dart';
 import '../utils.dart';
-import 'memory_chart.dart';
+import 'html_memory_chart.dart';
+import 'html_memory_data_view.dart';
+import 'html_memory_inbounds.dart';
 import 'memory_controller.dart';
-import 'memory_data_view.dart';
 import 'memory_detail.dart';
-import 'memory_inbounds.dart';
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
 const memoryScreenId = 'memory';
 
-class MemoryScreen extends Screen with SetStateMixin {
-  MemoryScreen({bool enabled, String disabledTooltip, this.isProfileBuild})
+class HtmlMemoryScreen extends HtmlScreen with HtmlSetStateMixin {
+  HtmlMemoryScreen({bool enabled, String disabledTooltip, this.isProfileBuild})
       : super(
           name: 'Memory',
           id: memoryScreenId,
@@ -45,13 +45,13 @@ class MemoryScreen extends Screen with SetStateMixin {
     // Hookup for memory UI short-cut keys.
     shortcutCallback = memoryShortcuts;
 
-    classCountStatus = StatusItem();
+    classCountStatus = HtmlStatusItem();
     addStatusItem(classCountStatus);
 
-    objectCountStatus = StatusItem();
+    objectCountStatus = HtmlStatusItem();
     addStatusItem(objectCountStatus);
 
-    experimentStatus = StatusItem();
+    experimentStatus = HtmlStatusItem();
     addStatusItem(experimentStatus);
   }
 
@@ -60,11 +60,11 @@ class MemoryScreen extends Screen with SetStateMixin {
   CoreElement settings;
   CoreElement librariesUi;
 
-  StatusItem classCountStatus;
+  HtmlStatusItem classCountStatus;
 
-  StatusItem objectCountStatus;
+  HtmlStatusItem objectCountStatus;
 
-  StatusItem experimentStatus;
+  HtmlStatusItem experimentStatus;
 
   PButton pauseButton;
 
@@ -73,9 +73,9 @@ class MemoryScreen extends Screen with SetStateMixin {
   /// The autocomplete view manages the textfield and popup list.
   CoreElement vmSearchField;
 
-  PopupListView<String> heapPopupList;
+  HtmlPopupListView<String> heapPopupList;
 
-  PopupAutoCompleteView heapAutoCompletePopup;
+  HtmlPopupAutoCompleteView heapAutoCompletePopup;
 
   /// Hover card shows where allocation occurred and references to instance.
   final CoreElement hoverPopup = div(c: 'allocation-hover-card');
@@ -92,13 +92,13 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   ListQueue<HtmlTable<dynamic>> tableStack = ListQueue<HtmlTable<dynamic>>();
 
-  MemoryChart memoryChart;
+  HtmlMemoryChart memoryChart;
 
   CoreElement tableContainer;
 
   List<ClassHeapDetailStats> originalHeapStats;
 
-  InboundsTree _inboundTree;
+  HtmlInboundsTree _inboundTree;
 
   /// Memory navigation history. Driven from selecting items in the list of
   /// known classes, instances of a particular class and clicking on the class
@@ -124,11 +124,11 @@ class MemoryScreen extends Screen with SetStateMixin {
   /// If true, keep recording the navigation instead of resetting history.
   bool fromMemoryHover = false;
 
-  MemoryDataView memoryDataView;
+  HtmlMemoryDataView memoryDataView;
 
   MemoryTracker memoryTracker;
 
-  ProgressElement progressElement;
+  HtmlProgressElement progressElement;
 
   // TODO(terry): Remove experiment after binary snapshot is added.
   bool get isMemoryExperiment =>
@@ -159,7 +159,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
@@ -171,7 +171,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     pauseButton = PButton.icon('Pause', FlutterIcons.pause_black_2x)..small();
 
-    heapPopupList = PopupListView<String>();
+    heapPopupList = HtmlPopupListView<String>();
 
     vmSearchField = CoreElement('input', classes: 'search-text')
       ..setAttribute('type', 'text')
@@ -206,7 +206,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       ..small()
       ..click(_resetAllocatorCounts)
       ..disabled = true;
-    heapAutoCompletePopup = PopupAutoCompleteView(
+    heapAutoCompletePopup = HtmlPopupAutoCompleteView(
       heapPopupList,
       screenDiv,
       vmSearchField,
@@ -282,7 +282,7 @@ class MemoryScreen extends Screen with SetStateMixin {
                 ]),
             ]),
         ]),
-      memoryChart = MemoryChart(memoryController)..disabled = true,
+      memoryChart = HtmlMemoryChart(memoryController)..disabled = true,
       tableContainer = div(c: 'section overflow-auto')
         ..layoutHorizontal()
         ..flex(),
@@ -597,7 +597,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   Future<int> _selectInstanceInFieldHashCode(
       String fieldName, int instanceHashCode) async {
     final HtmlTable<Object> instanceTable = tableStack.elementAt(1);
-    final spinner = Spinner.centered();
+    final spinner = HtmlSpinner.centered();
     instanceTable.element.add(spinner);
 
     // There's an instances table up.
@@ -800,7 +800,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   void _pushNextTable(
     HtmlTable<dynamic> current,
     HtmlTable<dynamic> next, [
-    InboundsTree inboundTree,
+    HtmlInboundsTree inboundTree,
   ]) {
     // Remove any tables to the right of current from the DOM and the stack.
     while (tableStack.length > 1 && tableStack.last != current) {
@@ -841,7 +841,8 @@ class MemoryScreen extends Screen with SetStateMixin {
 
     resetAccumulatorsButton.disabled = true;
     tableStack.first.element.display = null;
-    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
+    final HtmlSpinner spinner =
+        tableStack.first.element.add(HtmlSpinner.centered());
 
     try {
       originalHeapStats = await memoryController.resetAllocationProfile();
@@ -904,7 +905,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     vmMemorySnapshotButton.disabled = true;
 
     tableStack.first.element.display = null;
-    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
+    final HtmlSpinner spinner =
+        tableStack.first.element.add(HtmlSpinner.centered());
 
     try {
       originalHeapStats = await memoryController.getAllocationProfile();
@@ -970,7 +972,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   }) {
     if (originalHeapStats == null) return;
 
-    final Spinner spinner = tableStack.first.element.add(Spinner.centered());
+    final HtmlSpinner spinner =
+        tableStack.first.element.add(HtmlSpinner.centered());
 
     final List<ClassHeapDetailStats> heapStats = [];
 
@@ -1071,7 +1074,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       // which would be the third child needs to be removed.
       removeInstanceTableView();
 
-      final InboundsTree inboundTree =
+      final HtmlInboundsTree inboundTree =
           row == null ? null : await displayInboundReferences(row);
       if (inboundTree != null) {
         final HtmlTreeTable<InboundsTreeNode> tree =
@@ -1083,7 +1086,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     return table;
   }
 
-  Future<InboundsTree> displayInboundReferences(
+  Future<HtmlInboundsTree> displayInboundReferences(
       ClassHeapDetailStats row) async {
     final treeData = InboundsTreeData()..data = InboundsTreeNode.root();
 
@@ -1102,7 +1105,8 @@ class MemoryScreen extends Screen with SetStateMixin {
       instanceNode.addChild(InboundsTreeNode.empty());
     }
 
-    final inboundsTreeTable = InboundsTree(this, treeData, row.classRef.name);
+    final inboundsTreeTable =
+        HtmlInboundsTree(this, treeData, row.classRef.name);
     return inboundsTreeTable..update();
   }
 
@@ -1459,7 +1463,7 @@ class MemoryScreen extends Screen with SetStateMixin {
       return null;
     };
 
-    memoryDataView = MemoryDataView(memoryController, describer);
+    memoryDataView = HtmlMemoryDataView(memoryController, describer);
 
     return div(
         c: 'table-border table-virtual memory-table margin-left debugger-menu')

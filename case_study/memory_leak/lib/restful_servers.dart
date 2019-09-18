@@ -182,6 +182,6 @@ class OpenWeatherMapAPI extends RestfulAPI {
   @override
   String display(dynamic data, int index) =>
       '${OpenWeatherMapAPI.cityName(data, index)} '
-          '${OpenWeatherMapAPI.temperature(data, index)} '
-          '${OpenWeatherMapAPI.weather(data, index)}';
+      '${OpenWeatherMapAPI.temperature(data, index)} '
+      '${OpenWeatherMapAPI.weather(data, index)}';
 }

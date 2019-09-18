@@ -7,11 +7,11 @@ import 'package:html_shim/html.dart' as html;
 
 import 'package:vm_service/vm_service.dart';
 
-import '../debugger/debugger.dart';
 import '../debugger/debugger_state.dart';
+import '../debugger/html_debugger_screen.dart';
 import '../ui/analytics.dart' as ga;
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
 typedef URIDescriber = String Function(String uri);
 
@@ -51,7 +51,7 @@ int _breakpointComparator(Breakpoint a, Breakpoint b) {
 class BreakpointsView implements CoreElementView {
   BreakpointsView(this._breakpointsCountDiv, DebuggerState debuggerState,
       URIDescriber uriDescriber) {
-    _items = SelectableList<Breakpoint>()
+    _items = HtmlSelectableList<Breakpoint>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list');
@@ -85,7 +85,7 @@ class BreakpointsView implements CoreElementView {
 
   final CoreElement _breakpointsCountDiv;
 
-  SelectableList<Breakpoint> _items;
+  HtmlSelectableList<Breakpoint> _items;
 
   Stream<Breakpoint> get onDoubleClick => _items.onDoubleClick;
 

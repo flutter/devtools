@@ -5,8 +5,8 @@
 @TestOn('browser')
 import 'package:html_shim/html.dart';
 
-import 'package:devtools_app/src/ui/custom.dart';
-import 'package:devtools_app/src/ui/elements.dart';
+import 'package:devtools_app/src/ui/html_custom.dart';
+import 'package:devtools_app/src/ui/html_elements.dart';
 import 'package:devtools_app/src/ui/trees.dart';
 import 'package:test/test.dart';
 
@@ -369,7 +369,7 @@ void main() {
   });
 }
 
-class TestStringTreeView extends SelectableTree<String> {
+class TestStringTreeView extends HtmlSelectableTree<String> {
   TestStringTreeView() {
     setChildProvider(StringChildProvider());
     setItems(['Item 1', 'Item 2', 'Item 3']);
@@ -382,7 +382,7 @@ class TestStringTreeView extends SelectableTree<String> {
     final StringBuffer output = StringBuffer();
 
     void addLevel(
-        int indent, List<TreeNode<SelectableTreeNodeItem<String>>> nodes) {
+        int indent, List<TreeNode<HtmlSelectableTreeNodeItem<String>>> nodes) {
       for (var node in nodes) {
         output.writeln(
             '${' ' * indent * 2}- ${node.data.item} ${node == selectedItem ? '***' : ''}'
