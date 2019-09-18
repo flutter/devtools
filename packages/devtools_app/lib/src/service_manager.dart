@@ -507,7 +507,6 @@ class ServiceExtensionManager {
     final Isolate isolate = await _service.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs != null) {
       for (String extension in isolate.extensionRPCs) {
-        print(extension);
         await _maybeAddServiceExtension(extension);
       }
 
