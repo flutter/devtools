@@ -67,9 +67,9 @@ if [ "$BOT" = "main" ]; then
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
 
-    if [[ $(dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/) ]]; then
-        echo "Failed dartfmt check: run dartfmt -w bin/ lib/ test/ web/"
-        dartfmt -n --set-exit-if-changed bin/ lib/ test/ web/
+    if [[ $(dartfmt -n --set-exit-if-changed lib/ test/ web/) ]]; then
+        echo "Failed dartfmt check: run dartfmt -w lib/ test/ web/"
+        dartfmt -n --set-exit-if-changed lib/ test/ web/
         exit 1
     fi
 
