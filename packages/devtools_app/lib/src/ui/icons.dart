@@ -19,14 +19,14 @@ import 'fake_flutter/fake_flutter.dart';
 import 'material_icons.dart';
 import 'theme.dart';
 
-abstract class Icon {
-  const Icon();
+abstract class DevToolsIcon {
+  const DevToolsIcon();
 
   int get iconWidth => 18;
   int get iconHeight => 18;
 }
 
-class UrlIcon extends Icon {
+class UrlIcon extends DevToolsIcon {
   const UrlIcon(this.src, {this.invertDark = false});
 
   final String src;
@@ -38,109 +38,124 @@ class UrlIcon extends Icon {
 class FlutterIcons {
   FlutterIcons._();
 
-  static const Icon flutter13 = UrlIcon('/icons/flutter_13.png');
-  static const Icon flutter13_2x = UrlIcon('/icons/flutter_13@2x.png');
-  static const Icon flutter64 = UrlIcon('/icons/flutter_64.png');
-  static const Icon flutter64_2x = UrlIcon('/icons/flutter_64@2x.png');
-  static const Icon flutter = UrlIcon('/icons/flutter.png');
-  static const Icon flutter2x = UrlIcon('/icons/flutter@2x.png');
-  static const Icon flutterInspect = UrlIcon('/icons/flutter_inspect.png');
-  static const Icon flutterTest = UrlIcon('/icons/flutter_test.png');
-  static const Icon flutterBadge = UrlIcon('/icons/flutter_badge.png');
+  static const DevToolsIcon flutter13 = UrlIcon('/icons/flutter_13.png');
+  static const DevToolsIcon flutter13_2x = UrlIcon('/icons/flutter_13@2x.png');
+  static const DevToolsIcon flutter64 = UrlIcon('/icons/flutter_64.png');
+  static const DevToolsIcon flutter64_2x = UrlIcon('/icons/flutter_64@2x.png');
+  static const DevToolsIcon flutter = UrlIcon('/icons/flutter.png');
+  static const DevToolsIcon flutter2x = UrlIcon('/icons/flutter@2x.png');
+  static const DevToolsIcon flutterInspect =
+      UrlIcon('/icons/flutter_inspect.png');
+  static const DevToolsIcon flutterTest = UrlIcon('/icons/flutter_test.png');
+  static const DevToolsIcon flutterBadge = UrlIcon('/icons/flutter_badge.png');
 
-  static const Icon phone = UrlIcon('/icons/phone.png');
-  static const Icon feedback = UrlIcon('/icons/feedback.png');
+  static const DevToolsIcon phone = UrlIcon('/icons/phone.png');
+  static const DevToolsIcon feedback = UrlIcon('/icons/feedback.png');
 
-  static const Icon openObservatory = UrlIcon('/icons/observatory.png');
-  static const Icon openObservatoryGroup =
+  static const DevToolsIcon openObservatory = UrlIcon('/icons/observatory.png');
+  static const DevToolsIcon openObservatoryGroup =
       UrlIcon('/icons/observatory_overflow.png');
 
-  static const Icon openTimeline = UrlIcon('/icons/timeline.png');
+  static const DevToolsIcon openTimeline = UrlIcon('/icons/timeline.png');
 
-  static const Icon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
-  static const Icon hotReload = UrlIcon('/icons/hot-reload.png');
-  static const Icon hotReloadWhite = UrlIcon('icons/hot-reload-white.png');
-  static const Icon hotRestart = UrlIcon('/icons/hot-restart.png');
-  static const Icon hotRestartWhite = UrlIcon('icons/hot-restart-white.png');
+  static const DevToolsIcon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
+  static const DevToolsIcon hotReload = UrlIcon('/icons/hot-reload.png');
+  static const DevToolsIcon hotReloadWhite =
+      UrlIcon('icons/hot-reload-white.png');
+  static const DevToolsIcon hotRestart = UrlIcon('/icons/hot-restart.png');
+  static const DevToolsIcon hotRestartWhite =
+      UrlIcon('icons/hot-restart-white.png');
 
-  static const Icon iconRun = UrlIcon('/icons/refinal Icon_run.png');
-  static const Icon iconDebug = UrlIcon('/icons/refinal Icon_debug.png');
+  static const DevToolsIcon iconRun = UrlIcon('/icons/refinal Icon_run.png');
+  static const DevToolsIcon iconDebug =
+      UrlIcon('/icons/refinal Icon_debug.png');
 
-  static const Icon bazelRun = UrlIcon('/icons/bazel_run.png');
+  static const DevToolsIcon bazelRun = UrlIcon('/icons/bazel_run.png');
 
-  static const Icon customClass = UrlIcon('/icons/custom/class.png');
-  static const Icon customClassAbstract =
+  static const DevToolsIcon customClass = UrlIcon('/icons/custom/class.png');
+  static const DevToolsIcon customClassAbstract =
       UrlIcon('/icons/custom/class_abstract.png');
-  static const Icon customFields = UrlIcon('/icons/custom/fields.png');
-  static const Icon customInterface = UrlIcon('/icons/custom/interface.png');
-  static const Icon customMethod = UrlIcon('/icons/custom/method.png');
-  static const Icon customMethodAbstract =
+  static const DevToolsIcon customFields = UrlIcon('/icons/custom/fields.png');
+  static const DevToolsIcon customInterface =
+      UrlIcon('/icons/custom/interface.png');
+  static const DevToolsIcon customMethod = UrlIcon('/icons/custom/method.png');
+  static const DevToolsIcon customMethodAbstract =
       UrlIcon('/icons/custom/method_abstract.png');
-  static const Icon customProperty = UrlIcon('/icons/custom/property.png');
-  static const Icon customInfo = UrlIcon('/icons/custom/info.png');
+  static const DevToolsIcon customProperty =
+      UrlIcon('/icons/custom/property.png');
+  static const DevToolsIcon customInfo = UrlIcon('/icons/custom/info.png');
 
-  static const Icon androidStudioNewProject =
+  static const DevToolsIcon androidStudioNewProject =
       UrlIcon('/icons/template_new_project.png');
-  static const Icon androidStudioNewPackage =
+  static const DevToolsIcon androidStudioNewPackage =
       UrlIcon('/icons/template_new_package.png');
-  static const Icon androidStudioNewPlugin =
+  static const DevToolsIcon androidStudioNewPlugin =
       UrlIcon('/icons/template_new_plugin.png');
-  static const Icon androidStudioNewModule =
+  static const DevToolsIcon androidStudioNewModule =
       UrlIcon('/icons/template_new_module.png');
 
-  static const Icon attachDebugger = UrlIcon('/icons/attachDebugger.png');
+  static const DevToolsIcon attachDebugger =
+      UrlIcon('/icons/attachDebugger.png');
 
   // Flutter Inspector Widget Icons.
-  static const Icon accessibility =
+  static const DevToolsIcon accessibility =
       UrlIcon('/icons/inspector/balloonInformation.png');
-  static const Icon animation = UrlIcon('/icons/inspector/resume.png');
-  static const Icon assets = UrlIcon('/icons/inspector/any_type.png');
-  static const Icon asyncUrlIcon = UrlIcon('/icons/inspector/threads.png');
-  static const Icon diagram = UrlIcon('/icons/inspector/diagram.png');
-  static const Icon input = UrlIcon('/icons/inspector/renderer.png');
-  static const Icon painting = UrlIcon('/icons/inspector/colors.png');
-  static const Icon scrollbar = UrlIcon('/icons/inspector/scrollbar.png');
-  static const Icon stack = UrlIcon('/icons/inspector/value.png');
-  static const Icon styling = UrlIcon('/icons/inspector/atrule.png');
-  static const Icon text = UrlIcon('/icons/inspector/textArea.png');
+  static const DevToolsIcon animation = UrlIcon('/icons/inspector/resume.png');
+  static const DevToolsIcon assets = UrlIcon('/icons/inspector/any_type.png');
+  static const DevToolsIcon asyncUrlIcon =
+      UrlIcon('/icons/inspector/threads.png');
+  static const DevToolsIcon diagram = UrlIcon('/icons/inspector/diagram.png');
+  static const DevToolsIcon input = UrlIcon('/icons/inspector/renderer.png');
+  static const DevToolsIcon painting = UrlIcon('/icons/inspector/colors.png');
+  static const DevToolsIcon scrollbar =
+      UrlIcon('/icons/inspector/scrollbar.png');
+  static const DevToolsIcon stack = UrlIcon('/icons/inspector/value.png');
+  static const DevToolsIcon styling = UrlIcon('/icons/inspector/atrule.png');
+  static const DevToolsIcon text = UrlIcon('/icons/inspector/textArea.png');
 
-  static const Icon expandProperty =
+  static const DevToolsIcon expandProperty =
       UrlIcon('/icons/inspector/expand_property.png');
-  static const Icon collapseProperty =
+  static const DevToolsIcon collapseProperty =
       UrlIcon('/icons/inspector/collapse_property.png');
 
   // Flutter Outline Widget Icons.
-  static const Icon column = UrlIcon('/icons/preview/column.png');
-  static const Icon padding = UrlIcon('/icons/preview/padding.png');
-  static const Icon removeWidget = UrlIcon('/icons/preview/remove_widget.png');
-  static const Icon row = UrlIcon('/icons/preview/row.png');
-  static const Icon center = UrlIcon('/icons/preview/center.png');
-  static const Icon container = UrlIcon('/icons/preview/container.png');
-  static const Icon up = UrlIcon('/icons/preview/up.png');
-  static const Icon down = UrlIcon('/icons/preview/down.png');
-  static const Icon extractMethod =
+  static const DevToolsIcon column = UrlIcon('/icons/preview/column.png');
+  static const DevToolsIcon padding = UrlIcon('/icons/preview/padding.png');
+  static const DevToolsIcon removeWidget =
+      UrlIcon('/icons/preview/remove_widget.png');
+  static const DevToolsIcon row = UrlIcon('/icons/preview/row.png');
+  static const DevToolsIcon center = UrlIcon('/icons/preview/center.png');
+  static const DevToolsIcon container = UrlIcon('/icons/preview/container.png');
+  static const DevToolsIcon up = UrlIcon('/icons/preview/up.png');
+  static const DevToolsIcon down = UrlIcon('/icons/preview/down.png');
+  static const DevToolsIcon extractMethod =
       UrlIcon('/icons/preview/extract_method.png');
 
-  static const Icon greyProgr = UrlIcon('/icons/perf/GreyProgr.png');
-  static const Icon greyProgress = UrlIcon('/icons/perf/grey_progress.gif');
-  static const Icon redProgress = UrlIcon('/icons/perf/red_progress.gif');
-  static const Icon yellowProgress = UrlIcon('/icons/perf/yellow_progress.gif');
+  static const DevToolsIcon greyProgr = UrlIcon('/icons/perf/GreyProgr.png');
+  static const DevToolsIcon greyProgress =
+      UrlIcon('/icons/perf/grey_progress.gif');
+  static const DevToolsIcon redProgress =
+      UrlIcon('/icons/perf/red_progress.gif');
+  static const DevToolsIcon yellowProgress =
+      UrlIcon('/icons/perf/yellow_progress.gif');
 
-  static const Icon redError = UrlIcon('/icons/perf/RedExcl.png');
+  static const DevToolsIcon redError = UrlIcon('/icons/perf/RedExcl.png');
 
   // Icons matching IntelliJ core icons.
-  static const Icon locate = UrlIcon('/icons/general/locate.png');
-  static const Icon forceRefresh = UrlIcon('/icons/actions/forceRefresh.svg');
+  static const DevToolsIcon locate = UrlIcon('/icons/general/locate.png');
+  static const DevToolsIcon forceRefresh =
+      UrlIcon('/icons/actions/forceRefresh.svg');
   // TODO(dantup): Make a ThemedIcon class to handle this.
-  static Icon get refresh => isDarkTheme
+  static DevToolsIcon get refresh => isDarkTheme
       ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
       : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
-  static const Icon performanceOverlay =
+  static const DevToolsIcon performanceOverlay =
       UrlIcon('/icons/general/performance_overlay.svg');
-  static const Icon debugPaint = UrlIcon('/icons/debug_paint.png');
-  static const Icon repaintRainbow = UrlIcon('/icons/repaint_rainbow.png');
-  static const Icon debugBanner = UrlIcon('/icons/debug_banner.png');
-  static const Icon history = UrlIcon('/icons/history.svg');
+  static const DevToolsIcon debugPaint = UrlIcon('/icons/debug_paint.png');
+  static const DevToolsIcon repaintRainbow =
+      UrlIcon('/icons/repaint_rainbow.png');
+  static const DevToolsIcon debugBanner = UrlIcon('/icons/debug_banner.png');
+  static const DevToolsIcon history = UrlIcon('/icons/history.svg');
 
   static const UrlIcon pause_black_2x =
       UrlIcon('/icons/general/pause_black@2x.png', invertDark: true);
@@ -180,7 +195,7 @@ class FlutterIcons {
       UrlIcon('/icons/memory/ic_delete_outline_black.png', invertDark: true);
 }
 
-class CustomIcon extends Icon {
+class CustomIcon extends DevToolsIcon {
   const CustomIcon(
       {@required this.kind, @required this.text, this.isAbstract = false});
 
@@ -188,7 +203,7 @@ class CustomIcon extends Icon {
   final String text;
   final bool isAbstract;
 
-  Icon get baseIcon => isAbstract ? kind.abstractIcon : kind.icon;
+  DevToolsIcon get baseIcon => isAbstract ? kind.abstractIcon : kind.icon;
 
   @override
   int get iconWidth => baseIcon.iconWidth;
@@ -199,7 +214,7 @@ class CustomIcon extends Icon {
 class CustomIconMaker {
   final Map<String, CustomIcon> iconCache = {};
 
-  Icon getCustomIcon(String fromText,
+  DevToolsIcon getCustomIcon(String fromText,
       {IconKind kind, bool isAbstract = false}) {
     kind ??= IconKind.classIcon;
     if (fromText?.isEmpty != false) {
@@ -214,7 +229,7 @@ class CustomIconMaker {
     });
   }
 
-  Icon fromWidgetName(String name) {
+  DevToolsIcon fromWidgetName(String name) {
     if (name == null) {
       return null;
     }
@@ -232,7 +247,7 @@ class CustomIconMaker {
         kind: isPrivate ? IconKind.method : IconKind.classIcon);
   }
 
-  Icon fromInfo(String name) {
+  DevToolsIcon fromInfo(String name) {
     if (name == null) {
       return null;
     }
@@ -252,7 +267,7 @@ class CustomIconMaker {
 }
 
 class IconKind {
-  const IconKind(this.name, this.icon, [Icon abstractIcon])
+  const IconKind(this.name, this.icon, [DevToolsIcon abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
   static const IconKind classIcon = IconKind(
@@ -267,20 +282,20 @@ class IconKind {
   static const IconKind info = IconKind('info', FlutterIcons.customInfo);
 
   final String name;
-  final Icon icon;
-  final Icon abstractIcon;
+  final DevToolsIcon icon;
+  final DevToolsIcon abstractIcon;
 }
 
-class ColorIcon extends Icon {
+class ColorIcon extends DevToolsIcon {
   const ColorIcon(this.color);
 
   final Color color;
 }
 
 class ColorIconMaker {
-  final Map<Color, Icon> iconCache = {};
+  final Map<Color, DevToolsIcon> iconCache = {};
 
-  Icon getCustomIcon(Color color) {
+  DevToolsIcon getCustomIcon(Color color) {
     return iconCache.putIfAbsent(color, () => ColorIcon(color));
   }
 }

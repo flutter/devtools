@@ -376,7 +376,7 @@ class ActionButton implements CoreElementView {
   }
 
   final String id;
-  final Icon icon;
+  final DevToolsIcon icon;
   final String tooltip;
 
   CoreElement _element;

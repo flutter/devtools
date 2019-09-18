@@ -4,7 +4,8 @@
 
 // TODO(jacobr): remove all uses of JS interop from package:devtools_app
 import 'package:html_shim/js_util.dart';
-import 'package:plotly_js/plotly.dart';
+import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
+import 'package:plotly_js/plotly.dart' as plotly;
 
 import '../ui/colors.dart';
 import '../ui/flutter_html_shim.dart';
@@ -61,7 +62,7 @@ class FramesBarPlotly {
   double displayRefreshRate;
 
   final _yAxisLogScale = AxisLayout(
-    title: Title(
+    title: plotly.Title(
       text: 'Milliseconds',
     ),
     tickformat: '.0f',
@@ -86,7 +87,7 @@ class FramesBarPlotly {
   );
 
   final _yAxisLinearScale = AxisLayout(
-    title: Title(
+    title: plotly.Title(
       text: 'Milliseconds',
     ),
     titlefont: Font(color: colorToCss(defaultForeground)),
@@ -100,7 +101,7 @@ class FramesBarPlotly {
       paper_bgcolor: colorToCss(chartBackground),
       legend: Legend(font: Font(color: colorToCss(defaultForeground))),
       xaxis: AxisLayout(
-        rangeslider: showRangeSlider ? RangeSlider() : null,
+        rangeslider: showRangeSlider ? plotly.RangeSlider() : null,
         // Hide ticks by using font color of bgColor.
         tickfont: Font(
           color: colorToCss(chartBackground),
@@ -331,7 +332,7 @@ class FramesBarPlotly {
           rangemode: 'nonnegative',
           range: [dataIndex - ticksInRangeSlider, dataIndex],
           rangeslider: showRangeSlider
-              ? RangeSlider(rangemode: 'nonnegative', autorange: true)
+              ? plotly.RangeSlider(rangemode: 'nonnegative', autorange: true)
               : null,
         ),
       ),

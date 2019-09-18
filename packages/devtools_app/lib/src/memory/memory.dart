@@ -90,7 +90,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   PButton gcNowButton;
 
-  ListQueue<Table<dynamic>> tableStack = ListQueue<Table<dynamic>>();
+  ListQueue<HtmlTable<dynamic>> tableStack = ListQueue<HtmlTable<dynamic>>();
 
   MemoryChart memoryChart;
 
@@ -596,7 +596,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   Future<int> _selectInstanceInFieldHashCode(
       String fieldName, int instanceHashCode) async {
-    final Table<Object> instanceTable = tableStack.elementAt(1);
+    final HtmlTable<Object> instanceTable = tableStack.elementAt(1);
     final spinner = Spinner.centered();
     instanceTable.element.add(spinner);
 
@@ -673,7 +673,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     removeInstanceTableView();
 
     // There's an instances table up.
-    final Table<Object> instanceTable = tableStack.last;
+    final HtmlTable<Object> instanceTable = tableStack.last;
     final List<InboundsTreeNode> nodes = instanceTable.model.data;
 
     final foundNode = nodes.firstWhere(
@@ -690,7 +690,7 @@ class MemoryScreen extends Screen with SetStateMixin {
 
   Future<void> _selectInstanceByHashCode(int instanceHashCode) async {
     // There's an instances table up.
-    final Table<Object> instanceTable = tableStack.last;
+    final HtmlTable<Object> instanceTable = tableStack.last;
     final List<InstanceSummary> instances = instanceTable.model.data;
     int row = 0;
     for (InstanceSummary instance in instances) {
@@ -798,8 +798,8 @@ class MemoryScreen extends Screen with SetStateMixin {
   }
 
   void _pushNextTable(
-    Table<dynamic> current,
-    Table<dynamic> next, [
+    HtmlTable<dynamic> current,
+    HtmlTable<dynamic> next, [
     InboundsTree inboundTree,
   ]) {
     // Remove any tables to the right of current from the DOM and the stack.
@@ -1052,8 +1052,8 @@ class MemoryScreen extends Screen with SetStateMixin {
     }
   }
 
-  Table<ClassHeapDetailStats> _createHeapStatsTableView() {
-    final table = Table<ClassHeapDetailStats>.virtual()
+  HtmlTable<ClassHeapDetailStats> _createHeapStatsTableView() {
+    final table = HtmlTable<ClassHeapDetailStats>.virtual()
       ..element.display = 'none'
       ..element.clazz('memory-table');
 
@@ -1074,7 +1074,8 @@ class MemoryScreen extends Screen with SetStateMixin {
       final InboundsTree inboundTree =
           row == null ? null : await displayInboundReferences(row);
       if (inboundTree != null) {
-        final TreeTable<InboundsTreeNode> tree = inboundTree.referencesTable;
+        final HtmlTreeTable<InboundsTreeNode> tree =
+            inboundTree.referencesTable;
         _pushNextTable(table, tree, inboundTree);
       }
     });
@@ -1244,7 +1245,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   CoreElement _tdCellHover;
 
   /// InstanceSummary of the visible hover card.
-  HoverCell<InstanceSummary> _currentHoverSummary;
+  HtmlHoverCell<InstanceSummary> _currentHoverSummary;
 
   /// This is the listener for the hover card (hoverPopup's) onMouseOver, it's
   /// designed to keep the hover state (background-color for the TD same as the
@@ -1279,7 +1280,7 @@ class MemoryScreen extends Screen with SetStateMixin {
     hoverPopup.display = 'none';
   }
 
-  void _closeHover(HoverCell<InstanceSummary> newCurrent) {
+  void _closeHover(HtmlHoverCell<InstanceSummary> newCurrent) {
     // We're really leaving hover so close it.
     hoverPopup.clear(); // Remove all children.
     hoverPopup.display = 'none';
@@ -1303,7 +1304,7 @@ class MemoryScreen extends Screen with SetStateMixin {
   static const String dataRef = 'data-ref';
 
   void hoverInstanceAllocations(HoverCellData<InstanceSummary> data) async {
-    final HoverCell<InstanceSummary> hover = data;
+    final HtmlHoverCell<InstanceSummary> hover = data;
     if (hover.cell == null) {
       // Hover out of the cell.
       _maybeCloseHover();

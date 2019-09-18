@@ -30,7 +30,7 @@ class InboundsTree extends InstanceRefsView {
 
   final MemoryScreen _memoryScreen;
 
-  TreeTable<InboundsTreeNode> referencesTable;
+  HtmlTreeTable<InboundsTreeNode> referencesTable;
 
   Spinner spinner;
 
@@ -149,7 +149,7 @@ class InboundsTree extends InstanceRefsView {
       ..onNodeCollapsed.listen(
           (inboundNode) => referencesTable.model.collapseNode(inboundNode));
 
-    referencesTable = TreeTable<InboundsTreeNode>.virtual()
+    referencesTable = HtmlTreeTable<InboundsTreeNode>.virtual()
       ..element.clazz('memory-table');
 
     referencesTable.model

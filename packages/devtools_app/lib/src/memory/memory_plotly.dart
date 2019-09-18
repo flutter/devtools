@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:html_shim/js_util.dart';
-import 'package:plotly_js/plotly.dart';
+import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
+import 'package:plotly_js/plotly.dart' as plotly;
 
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -40,8 +41,8 @@ class MemoryPlotly {
       gridwidth: 1,
       range: startTime == -1 ? [] : [startTime, endTime],
       rangeslider: startTime == -1
-          ? RangeSlider()
-          : RangeSlider(
+          ? plotly.RangeSlider()
+          : plotly.RangeSlider(
               autorange: true,
             ),
     );
@@ -107,7 +108,7 @@ class MemoryPlotly {
           showticklabels: false,
           range: [.50, 1.50],
           type: 'linear',
-          title: Title(
+          title: plotly.Title(
             text: 'Events',
             font: Font(
               family: fontFamily,

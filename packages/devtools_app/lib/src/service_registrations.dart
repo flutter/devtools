@@ -13,7 +13,7 @@ class RegisteredServiceDescription {
 
   final String service;
   final String title;
-  final Icon icon;
+  final DevToolsIcon icon;
 }
 
 /// Hot reload service registered by Flutter Tools.

@@ -38,7 +38,7 @@ class LoggingScreen extends Screen {
     );
   }
 
-  Table<LogData> _loggingTable;
+  HtmlTable<LogData> _loggingTable;
 
   LoggingController controller;
   LogDetailsUI logDetailsUI;
@@ -123,8 +123,8 @@ class LoggingScreen extends Screen {
     controller.entering();
   }
 
-  Table<LogData> _createTableView() {
-    final table = Table<LogData>.virtual();
+  HtmlTable<LogData> _createTableView() {
+    final table = HtmlTable<LogData>.virtual();
     table.model
       ..addColumn(LogWhenColumn())
       ..addColumn(LogKindColumn())

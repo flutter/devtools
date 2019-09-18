@@ -13,19 +13,19 @@ import 'ui/custom.dart';
 import 'ui/elements.dart';
 import 'ui/primer.dart';
 
-class HoverCell<T> extends HoverCellData<T> {
-  HoverCell(this.cell, T data) : super(data);
+class HtmlHoverCell<T> extends HoverCellData<T> {
+  HtmlHoverCell(this.cell, T data) : super(data);
 
   final CoreElement cell;
 }
 
-class Table<T> with SetStateMixin implements TableDataClient<T> {
-  factory Table() => Table._(TableData<T>(), null, false);
+class HtmlTable<T> with SetStateMixin implements TableDataClient<T> {
+  factory HtmlTable() => HtmlTable._(TableData<T>(), null, false);
 
-  factory Table.virtual({double rowHeight = 29.0}) =>
-      Table._(TableData<T>(), rowHeight, true);
+  factory HtmlTable.virtual({double rowHeight = 29.0}) =>
+      HtmlTable._(TableData<T>(), rowHeight, true);
 
-  Table._(
+  HtmlTable._(
     this.model,
     this.rowHeight,
     this.isVirtual, {
@@ -133,8 +133,8 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   final Map<Element, T> _dataForRow = <Element, T>{};
   final Map<int, CoreElement> _rowForIndex = <int, CoreElement>{};
 
-  ColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
-    return ColumnRenderer(columnModel);
+  HtmlColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
+    return HtmlColumnRenderer(columnModel);
   }
 
   @override
@@ -418,7 +418,7 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   }
 
   void _selectCoreElement(CoreElement coreElement, T object, int index) {
-    model.selectElementController.add(HoverCell<T>(coreElement, object));
+    model.selectElementController.add(HtmlHoverCell<T>(coreElement, object));
   }
 
   /// Selects by index. Note: This is index of the row as it's rendered
@@ -478,8 +478,8 @@ class Table<T> with SetStateMixin implements TableDataClient<T> {
   void clearSelection() => _select(null, null, null);
 }
 
-class ColumnRenderer<T> {
-  ColumnRenderer(this.model);
+class HtmlColumnRenderer<T> {
+  HtmlColumnRenderer(this.model);
 
   final ColumnData<T> model;
 
@@ -509,8 +509,9 @@ class ColumnRenderer<T> {
   }
 }
 
-class TreeColumnRenderer<T extends TreeNode<T>> extends ColumnRenderer<T> {
-  TreeColumnRenderer(TreeColumnData<T> model) : super(model);
+class HtmlTreeColumnRenderer<T extends TreeNode<T>>
+    extends HtmlColumnRenderer<T> {
+  HtmlTreeColumnRenderer(TreeColumnData<T> model) : super(model);
 
   @override
   TreeColumnData<T> get model => super.model;
@@ -545,23 +546,23 @@ class TreeColumnRenderer<T extends TreeNode<T>> extends ColumnRenderer<T> {
   }
 }
 
-class TreeTable<T extends TreeNode<T>> extends Table<T> {
-  factory TreeTable() => TreeTable._(TreeTableData<T>(), null, false);
+class HtmlTreeTable<T extends TreeNode<T>> extends HtmlTable<T> {
+  factory HtmlTreeTable() => HtmlTreeTable._(TreeTableData<T>(), null, false);
 
-  factory TreeTable.virtual({double rowHeight = 29.0}) =>
-      TreeTable._(TreeTableData<T>(), rowHeight, true);
+  factory HtmlTreeTable.virtual({double rowHeight = 29.0}) =>
+      HtmlTreeTable._(TreeTableData<T>(), rowHeight, true);
 
-  TreeTable._(TreeTableData<T> model, double rowHeight, bool isVirtual)
+  HtmlTreeTable._(TreeTableData<T> model, double rowHeight, bool isVirtual)
       : super._(model, rowHeight, isVirtual, overflowAuto: true);
 
   @override
   TreeTableData<T> get model => super.model;
 
   @override
-  ColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
+  HtmlColumnRenderer<T> getColumnRenderer(ColumnData<T> columnModel) {
     return columnModel is TreeColumnData<T>
-        ? TreeColumnRenderer(columnModel)
-        : ColumnRenderer(columnModel);
+        ? HtmlTreeColumnRenderer(columnModel)
+        : HtmlColumnRenderer(columnModel);
   }
 }
 
@@ -578,7 +579,7 @@ class TreeTableToolbar<T extends TreeNode<T>> extends CoreElement {
       ]));
   }
 
-  TreeTable<T> treeTable;
+  HtmlTreeTable<T> treeTable;
 
   void _expandAll() {
     treeTable.model.expandAll();

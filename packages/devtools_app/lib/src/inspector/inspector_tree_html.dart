@@ -37,7 +37,7 @@ class IconPaintEntry extends HtmlPaintEntry {
   });
 
   @override
-  Icon get icon => iconRenderer.icon;
+  DevToolsIcon get icon => iconRenderer.icon;
 
   final HtmlIconRenderer iconRenderer;
 
@@ -66,7 +66,7 @@ class HtmlTextPaintEntry extends HtmlPaintEntry {
   final String font;
 
   @override
-  Icon get icon => null;
+  DevToolsIcon get icon => null;
 
   @override
   void paint(Element parent) {
@@ -119,7 +119,7 @@ class InspectorTreeNodeRenderHtmlBuilder
   }
 
   @override
-  void addIcon(Icon icon) {
+  void addIcon(DevToolsIcon icon) {
     _entries.add(IconPaintEntry(iconRenderer: getIconRenderer(icon)));
   }
 
@@ -216,7 +216,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
     return row;
   }
 
-  Icon _resolveIcon(InspectorTreeRow row, Element e) {
+  DevToolsIcon _resolveIcon(InspectorTreeRow row, Element e) {
     final InspectorTreeNodeHtmlRender render = row?.node?.renderObject;
     if (render == null) {
       return null;
@@ -275,7 +275,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
     if (row == null) {
       return;
     }
-    final Icon icon = _resolveIcon(row, mouseEvent.target);
+    final DevToolsIcon icon = _resolveIcon(row, mouseEvent.target);
     if (row != null) {
       onTapIcon(row, icon);
     }

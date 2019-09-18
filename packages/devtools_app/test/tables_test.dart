@@ -14,9 +14,9 @@ void main() {
       List<TestData>.generate(1000, (int i) => TestData('Test Data $i'));
 
   group('static tables', () {
-    Table<TestData> table;
+    HtmlTable<TestData> table;
     setUp(() async {
-      table = Table<TestData>();
+      table = HtmlTable<TestData>();
       // About 10 rows of data visible.
       table.element.element.style
         ..height = '300px'
@@ -39,9 +39,9 @@ void main() {
   });
 
   group('virtual tables', () {
-    Table<TestData> table;
+    HtmlTable<TestData> table;
     setUp(() async {
-      table = Table<TestData>.virtual();
+      table = HtmlTable<TestData>.virtual();
       // About 10 rows of data visible.
       table.element.element.style
         ..height = '300px'
@@ -130,7 +130,7 @@ void main() {
   });
 }
 
-int getApproximatelyFirstRenderedDataIndex(Table<TestData> table) {
+int getApproximatelyFirstRenderedDataIndex(HtmlTable<TestData> table) {
   // It's possible we have a spacer row and a dummy row to force the alternating
   // colour to line up, so look at the third row (index: 2) to ensure it's
   // approximately what we'd expect.

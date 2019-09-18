@@ -258,8 +258,7 @@ class JsArray<E> extends JsObject with ListMixin<E> {
    * Creates a new JavaScript array and initializes it to the contents of
    * [other].
    */
-  JsArray.from(Iterable<E> other)
-      : super._fromJs(unsupported());
+  JsArray.from(Iterable<E> other) : super._fromJs(unsupported());
 
   JsArray._fromJs(jsObject) : super._fromJs(jsObject);
 

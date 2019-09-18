@@ -20,7 +20,7 @@ class CpuCallTree extends CpuProfilerView {
     _init();
   }
 
-  TreeTable<CpuStackFrame> callTreeTable;
+  HtmlTreeTable<CpuStackFrame> callTreeTable;
 
   void _init() {
     final methodNameColumn = MethodNameColumn()
@@ -29,7 +29,7 @@ class CpuCallTree extends CpuProfilerView {
       ..onNodeCollapsed
           .listen((stackFrame) => callTreeTable.model.collapseNode(stackFrame));
 
-    callTreeTable = TreeTable<CpuStackFrame>.virtual();
+    callTreeTable = HtmlTreeTable<CpuStackFrame>.virtual();
     callTreeTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(SelfTimeColumn())
@@ -66,7 +66,7 @@ class CpuBottomUp extends CpuProfilerView {
     _init();
   }
 
-  TreeTable<CpuStackFrame> bottomUpTable;
+  HtmlTreeTable<CpuStackFrame> bottomUpTable;
 
   void _init() {
     final methodNameColumn = MethodNameColumn()
@@ -76,7 +76,7 @@ class CpuBottomUp extends CpuProfilerView {
           .listen((stackFrame) => bottomUpTable.model.collapseNode(stackFrame));
     final selfTimeColumn = SelfTimeColumn();
 
-    bottomUpTable = TreeTable<CpuStackFrame>.virtual();
+    bottomUpTable = HtmlTreeTable<CpuStackFrame>.virtual();
     bottomUpTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(selfTimeColumn)

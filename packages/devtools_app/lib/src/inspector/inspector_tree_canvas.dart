@@ -41,7 +41,7 @@ class IconPaintEntry extends CanvasPaintEntry {
   }) : super(x);
 
   @override
-  Icon get icon => iconRenderer.icon;
+  DevToolsIcon get icon => iconRenderer.icon;
 
   final HtmlIconRenderer iconRenderer;
 
@@ -89,7 +89,7 @@ class TextPaintEntry extends CanvasPaintEntry {
   final String font;
 
   @override
-  Icon get icon => null;
+  DevToolsIcon get icon => null;
 
   @override
   void paint(CanvasRenderingContext2D canvas) {
@@ -142,7 +142,7 @@ class InspectorTreeNodeRenderCanvasBuilder
   }
 
   @override
-  void addIcon(Icon icon) {
+  void addIcon(DevToolsIcon icon) {
     final double width = icon.iconWidth + iconPadding;
     _entries.add(IconPaintEntry(x: x, iconRenderer: getIconRenderer(icon)));
     x += width;
