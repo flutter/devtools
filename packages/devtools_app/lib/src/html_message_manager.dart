@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'ui/elements.dart';
+import 'ui/html_elements.dart';
 import 'ui/primer.dart';
 
 /// Used as a screen id for messages that do not pertain to a specific screen.
 const generalId = 'general';
 
-class MessageManager {
-  MessageManager();
+class HtmlMessageManager {
+  HtmlMessageManager();
 
   final _container = CoreElement.from(queryId('messages-container'));
 
@@ -18,7 +18,7 @@ class MessageManager {
   ///
   /// Messages that do not pertain to a specific screen will be stored under the
   /// key [_generalId].
-  final Map<String, Set<Message>> _messages = {};
+  final Map<String, Set<HtmlMessage>> _messages = {};
 
   final List<String> _dismissedMessageIds = [];
 
@@ -26,7 +26,7 @@ class MessageManager {
     _messages[screenId]?.forEach(_showMessage);
   }
 
-  void _showMessage(Message message) {
+  void _showMessage(HtmlMessage message) {
     if (_dismissedMessageIds.contains(message.id)) return;
     _container.add(message.flash);
   }
@@ -38,7 +38,7 @@ class MessageManager {
         ?.removeWhere((m) => m.messageType == MessageType.error);
   }
 
-  void addMessage(Message message, String screenId) {
+  void addMessage(HtmlMessage message, String screenId) {
     message.onDismiss.listen((_message) {
       if (_message.id != null) {
         _dismissedMessageIds.add(_message.id);
@@ -52,8 +52,8 @@ class MessageManager {
   }
 }
 
-class Message {
-  Message(
+class HtmlMessage {
+  HtmlMessage(
     this.messageType, {
     this.id,
     this.message,
@@ -75,10 +75,10 @@ class Message {
 
   final PFlash flash = PFlash();
 
-  final StreamController<Message> _dismissController =
-      StreamController<Message>.broadcast();
+  final StreamController<HtmlMessage> _dismissController =
+      StreamController<HtmlMessage>.broadcast();
 
-  Stream<Message> get onDismiss => _dismissController.stream;
+  Stream<HtmlMessage> get onDismiss => _dismissController.stream;
 
   void _buildFlash() {
     if (messageType == MessageType.warning) {

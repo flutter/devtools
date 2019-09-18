@@ -7,11 +7,11 @@ import 'dart:math' as math;
 
 import 'package:html_shim/html.dart' show Element, window, Rectangle, Event;
 
-import '../framework/framework.dart';
-import '../ui/elements.dart';
+import '../framework/html_framework.dart';
+import '../ui/html_elements.dart';
 
-abstract class LineChart<T> {
-  LineChart(this.parent, {String classes}) {
+abstract class HtmlLineChart<T> {
+  HtmlLineChart(this.parent, {String classes}) {
     parent.element.style.position = 'relative';
 
     _windowResizeSubscription =
@@ -39,7 +39,7 @@ abstract class LineChart<T> {
   CoreElement chartElement;
   math.Point<int> dim;
 
-  final SetStateMixin _state = SetStateMixin();
+  final HtmlSetStateMixin _state = HtmlSetStateMixin();
   T data;
 
   void _updateSize() {

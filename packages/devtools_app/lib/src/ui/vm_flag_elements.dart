@@ -4,9 +4,9 @@
 import 'dart:async';
 
 import '../config_specific/allowed_error.dart';
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
-import '../messages.dart';
+import '../html_messages.dart';
 import 'primer.dart';
 
 // TODO(kenz): handle the multi-client case for this selector.
@@ -38,7 +38,7 @@ class ProfileGranularitySelector {
 
   static const mediumGranularityIndex = 1;
 
-  final Framework framework;
+  final HtmlFramework framework;
 
   PSelect selector;
 

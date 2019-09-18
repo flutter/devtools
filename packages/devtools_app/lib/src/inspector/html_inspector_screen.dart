@@ -11,14 +11,14 @@ import 'package:html_shim/html.dart' as html;
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../framework/framework.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
-import '../messages.dart';
+import '../html_messages.dart';
 import '../service_extensions.dart' as extensions;
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
@@ -38,8 +38,8 @@ bool _useHtmlInspectorTreeRenderer = false;
 
 // TODO(jacobr): add UI to view and configure the pub root directory.
 
-class InspectorScreen extends Screen {
-  InspectorScreen({bool enabled, String disabledTooltip})
+class HtmlInspectorScreen extends HtmlScreen {
+  HtmlInspectorScreen({bool enabled, String disabledTooltip})
       : super(
           name: 'Flutter Inspector',
           id: inspectorScreenId,
@@ -50,13 +50,13 @@ class InspectorScreen extends Screen {
 
   PButton refreshTreeButton;
 
-  SetStateMixin inspectorStateMixin = SetStateMixin();
+  HtmlSetStateMixin inspectorStateMixin = HtmlSetStateMixin();
 
   InspectorService inspectorService;
 
   InspectorController inspectorController;
 
-  ProgressElement progressElement;
+  HtmlProgressElement progressElement;
 
   CoreElement inspectorContainer;
 
@@ -67,7 +67,7 @@ class InspectorScreen extends Screen {
   bool displayedWidgetTrackingNotice = false;
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar inspector-page')
@@ -87,7 +87,7 @@ class InspectorScreen extends Screen {
                   ..disabled = true
                   ..click(_refreshInspector),
           ]),
-        progressElement = ProgressElement()
+        progressElement = HtmlProgressElement()
           ..clazz('margin-left')
           ..display = 'none',
         div()..flex(),
@@ -129,7 +129,7 @@ class InspectorScreen extends Screen {
   void _handleConnectionStart(VmService service) async {
     refreshTreeButton.disabled = false;
 
-    final Spinner spinner = Spinner.centered();
+    final HtmlSpinner spinner = HtmlSpinner.centered();
     inspectorContainer.add(spinner);
 
     try {

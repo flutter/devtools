@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'package:html_shim/html.dart' as html;
 
-import 'ui/custom.dart';
-import 'ui/elements.dart';
+import 'ui/html_custom.dart';
+import 'ui/html_elements.dart';
 
 /// Overview
 /// --------
@@ -123,9 +123,9 @@ const int DOM_VK_DOWN = 40;
 typedef FinishFunction = void Function([bool cancel]);
 
 // This is the class that has the entire list to display for auto-complete.
-class PopupListView<T> implements CoreElementView {
-  PopupListView() {
-    items = SelectableList<T>()
+class HtmlPopupListView<T> implements CoreElementView {
+  HtmlPopupListView() {
+    items = HtmlSelectableList<T>()
       ..flex()
       ..clazz('popup-items-list');
     items.setRenderer((T item) {
@@ -170,9 +170,9 @@ class PopupListView<T> implements CoreElementView {
     });
   }
 
-  PopupAutoCompleteView _popupAutoCompleteView;
+  HtmlPopupAutoCompleteView _popupAutoCompleteView;
 
-  set setPopupAutoCompleteView(PopupAutoCompleteView pacView) {
+  set setPopupAutoCompleteView(HtmlPopupAutoCompleteView pacView) {
     _popupAutoCompleteView = pacView;
   }
 
@@ -242,7 +242,7 @@ class PopupListView<T> implements CoreElementView {
     return childToScrollTo;
   }
 
-  SelectableList<T> items;
+  HtmlSelectableList<T> items;
   T highlightedItem;
 
   List<T> get itemsAsList => items.items;
@@ -282,8 +282,8 @@ class PopupListView<T> implements CoreElementView {
 
 // View manages Input element (popupTextField) / popup list displayed _listView.
 // show() displays popup list directly below the Input element (popupTextfield).
-class PopupAutoCompleteView extends CoreElement {
-  PopupAutoCompleteView(
+class HtmlPopupAutoCompleteView extends CoreElement {
+  HtmlPopupAutoCompleteView(
     this._listView,
     this._containerElement,
     this._popupTextfield,
@@ -294,7 +294,7 @@ class PopupAutoCompleteView extends CoreElement {
 
   // Mimic used when the textField should mimic another field's background-color
   // and color.
-  PopupAutoCompleteView.mimic(
+  HtmlPopupAutoCompleteView.mimic(
     this._listView,
     this._containerElement,
     this._popupTextfield,
@@ -317,7 +317,7 @@ class PopupAutoCompleteView extends CoreElement {
     _popupTextfield
       ..focus(() {
         // Activate popup auto-complete.
-        _matcher ??= AutoCompleteMatcher();
+        _matcher ??= HtmlAutoCompleteMatcher();
         if (!matcher.active) {
           matcher.start('', _listView, _popupTextfield, _completeAction);
         }
@@ -352,7 +352,7 @@ class PopupAutoCompleteView extends CoreElement {
 
   // View of all items to display during auto-complete, this list will be pruned
   // during auto-complete matching.
-  final PopupListView _listView;
+  final HtmlPopupListView _listView;
 
   // Container to display input element that accepts keyboard input during auto-
   // complete and the _listView (popup) is displayed in this container too.
@@ -368,8 +368,8 @@ class PopupAutoCompleteView extends CoreElement {
   final CoreElement _popupTextfield;
 
   // This is where all the incremental filter is done.
-  AutoCompleteMatcher get matcher => _matcher;
-  AutoCompleteMatcher _matcher;
+  HtmlAutoCompleteMatcher get matcher => _matcher;
+  HtmlAutoCompleteMatcher _matcher;
 
   // Callback to user code to process an item selected (click or ENTER to
   // process the selected item).
@@ -434,16 +434,16 @@ class PopupAutoCompleteView extends CoreElement {
     _poppedUp = false;
   }
 
-  PopupListView get listView => _listView;
+  HtmlPopupListView get listView => _listView;
 }
 
 /// This class handles all the incremental matching as keys are types as well as
 /// navigation through the popup list e.g., pageUp, arrow up/down, etc.
-class AutoCompleteMatcher<T> {
-  AutoCompleteMatcher();
+class HtmlAutoCompleteMatcher<T> {
+  HtmlAutoCompleteMatcher();
 
-  PopupListView get listView => _listView;
-  PopupListView _listView;
+  HtmlPopupListView get listView => _listView;
+  HtmlPopupListView _listView;
 
   CoreElement get textField => _textField;
   CoreElement _textField; // Input element for keyboard input.
@@ -472,7 +472,7 @@ class AutoCompleteMatcher<T> {
     if (_finishCallback != null) _finishCallback(cancel);
   }
 
-  void start(T revert, PopupListView<T> listView, CoreElement textfield,
+  void start(T revert, HtmlPopupListView<T> listView, CoreElement textfield,
       [FinishFunction finishCallback]) {
     _listView = listView;
     _textField = textfield;

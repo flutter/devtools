@@ -1,18 +1,18 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import '../html_tables.dart';
 import '../table_data.dart';
-import '../tables.dart';
 import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_transformer.dart';
-import 'cpu_profiler.dart';
+import 'html_cpu_profiler.dart';
 
 const _timeColumnWidthPx = 145;
 
-class CpuCallTree extends CpuProfilerView {
-  CpuCallTree(CpuProfileDataProvider profileDataProvider)
+class HtmlCpuCallTree extends HtmlCpuProfilerView {
+  HtmlCpuCallTree(CpuProfileDataProvider profileDataProvider)
       : super(CpuProfilerViewType.callTree, profileDataProvider) {
     flex();
     layoutVertical();
@@ -20,7 +20,7 @@ class CpuCallTree extends CpuProfilerView {
     _init();
   }
 
-  TreeTable<CpuStackFrame> callTreeTable;
+  HtmlTreeTable<CpuStackFrame> callTreeTable;
 
   void _init() {
     final methodNameColumn = MethodNameColumn()
@@ -29,7 +29,7 @@ class CpuCallTree extends CpuProfilerView {
       ..onNodeCollapsed
           .listen((stackFrame) => callTreeTable.model.collapseNode(stackFrame));
 
-    callTreeTable = TreeTable<CpuStackFrame>.virtual();
+    callTreeTable = HtmlTreeTable<CpuStackFrame>.virtual();
     callTreeTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(SelfTimeColumn())
@@ -58,7 +58,7 @@ class CpuCallTree extends CpuProfilerView {
   void reset() => callTreeTable.model.setRows(<CpuStackFrame>[]);
 }
 
-class CpuBottomUp extends CpuProfilerView {
+class CpuBottomUp extends HtmlCpuProfilerView {
   CpuBottomUp(CpuProfileDataProvider profileDataProvider)
       : super(CpuProfilerViewType.bottomUp, profileDataProvider) {
     flex();
@@ -66,7 +66,7 @@ class CpuBottomUp extends CpuProfilerView {
     _init();
   }
 
-  TreeTable<CpuStackFrame> bottomUpTable;
+  HtmlTreeTable<CpuStackFrame> bottomUpTable;
 
   void _init() {
     final methodNameColumn = MethodNameColumn()
@@ -76,7 +76,7 @@ class CpuBottomUp extends CpuProfilerView {
           .listen((stackFrame) => bottomUpTable.model.collapseNode(stackFrame));
     final selfTimeColumn = SelfTimeColumn();
 
-    bottomUpTable = TreeTable<CpuStackFrame>.virtual();
+    bottomUpTable = HtmlTreeTable<CpuStackFrame>.virtual();
     bottomUpTable.model
       ..addColumn(TotalTimeColumn())
       ..addColumn(selfTimeColumn)

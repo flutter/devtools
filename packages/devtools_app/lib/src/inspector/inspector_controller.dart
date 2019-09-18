@@ -206,7 +206,7 @@ class InspectorController implements InspectorServiceClient {
     return highlightShowNode(valueToInspectorTreeNode[ref], null);
   }
 
-  bool highlightShowNode(InspectorTreeNode node, Icon icon) {
+  bool highlightShowNode(InspectorTreeNode node, DevToolsIcon icon) {
     if (node == null && parent != null) {
       // If nothing is highlighted, highlight the node selected in the parent
       // tree so user has context of where the node selected in the parent is

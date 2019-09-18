@@ -52,7 +52,7 @@ class Category {
   ];
 
   final String label;
-  final Icon icon;
+  final DevToolsIcon icon;
 
   static Map<String, Category> _categories;
 
@@ -71,16 +71,16 @@ class FlutterWidget {
   FlutterWidget(this.json) : icon = initIcon(json);
 
   final Map<String, Object> json;
-  final Icon icon;
+  final DevToolsIcon icon;
 
-  static Icon initIcon(Map<String, Object> json) {
+  static DevToolsIcon initIcon(Map<String, Object> json) {
     final List<Object> categories = json['categories'];
     if (categories != null) {
       // TODO(pq): consider priority over first match.
       for (String label in categories) {
         final Category category = Category.forLabel(label);
         if (category != null) {
-          final Icon icon = category.icon;
+          final DevToolsIcon icon = category.icon;
           if (icon != null) return icon;
         }
       }

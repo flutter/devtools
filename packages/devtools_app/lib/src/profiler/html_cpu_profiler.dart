@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
 
-import '../tables.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../html_tables.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 import '../ui/primer.dart';
-import 'cpu_profile_flame_chart.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profile_tables.dart';
+import 'html_cpu_profile_flame_chart.dart';
+import 'html_cpu_profile_tables.dart';
 
-abstract class CpuProfiler extends CoreElement {
-  CpuProfiler(
+abstract class HtmlCpuProfiler extends CoreElement {
+  HtmlCpuProfiler(
     this.flameChart,
     this.callTree,
     this.bottomUp, {
@@ -28,21 +28,22 @@ abstract class CpuProfiler extends CoreElement {
     ]);
 
     // Hide views that are not the default view.
-    for (CpuProfilerView v in views.where((view) => view.type != defaultView)) {
+    for (HtmlCpuProfilerView v
+        in views.where((view) => view.type != defaultView)) {
       v.hide();
     }
     _selectedViewType = defaultView;
   }
 
-  CpuFlameChart flameChart;
+  HtmlCpuFlameChart flameChart;
 
   CpuBottomUp bottomUp;
 
-  CpuCallTree callTree;
+  HtmlCpuCallTree callTree;
 
   CpuProfilerViewType defaultView;
 
-  List<CpuProfilerView> views;
+  List<HtmlCpuProfilerView> views;
 
   CpuProfilerViewType _selectedViewType;
 
@@ -54,8 +55,8 @@ abstract class CpuProfiler extends CoreElement {
     // If we are showing a message, we do not want to show any other views.
     if (showingMessage) return;
 
-    CpuProfilerView viewToShow;
-    for (CpuProfilerView view in views) {
+    HtmlCpuProfilerView viewToShow;
+    for (HtmlCpuProfilerView view in views) {
       if (view.type == showType) {
         viewToShow = view;
       } else {
@@ -68,7 +69,7 @@ abstract class CpuProfiler extends CoreElement {
   }
 
   void hideAll() {
-    for (CpuProfilerView view in views) {
+    for (HtmlCpuProfilerView view in views) {
       view.hide();
     }
   }
@@ -76,7 +77,7 @@ abstract class CpuProfiler extends CoreElement {
   Future<void> update() async {
     reset();
 
-    final Spinner spinner = Spinner.centered();
+    final HtmlSpinner spinner = HtmlSpinner.centered();
     try {
       add(spinner);
 
@@ -85,7 +86,7 @@ abstract class CpuProfiler extends CoreElement {
       final showingMessage = maybeShowMessageOnUpdate();
       if (showingMessage) return;
 
-      for (CpuProfilerView view in views) {
+      for (HtmlCpuProfilerView view in views) {
         view.update();
       }
 
@@ -99,7 +100,7 @@ abstract class CpuProfiler extends CoreElement {
   }
 
   void reset() {
-    for (CpuProfilerView view in views) {
+    for (HtmlCpuProfilerView view in views) {
       view.reset();
     }
     _removeMessage();
@@ -126,8 +127,8 @@ abstract class CpuProfiler extends CoreElement {
 
 typedef CpuProfileDataProvider = CpuProfileData Function();
 
-abstract class CpuProfilerView extends CoreElement {
-  CpuProfilerView(this.type, this.profileDataProvider)
+abstract class HtmlCpuProfilerView extends CoreElement {
+  HtmlCpuProfilerView(this.type, this.profileDataProvider)
       : super('div', classes: 'fill-section');
 
   final CpuProfilerViewType type;
@@ -147,7 +148,7 @@ abstract class CpuProfilerView extends CoreElement {
     // rebuild.
     if (!isHidden) {
       if (showLoadingSpinner) {
-        final Spinner spinner = Spinner.centered();
+        final HtmlSpinner spinner = HtmlSpinner.centered();
         add(spinner);
 
         // Awaiting this future ensures the spinner pops up in between switching
@@ -182,12 +183,12 @@ enum CpuProfilerViewType {
   callTree,
 }
 
-class CpuProfilerTabNav {
-  CpuProfilerTabNav(this.cpuProfiler, this.tabOrder) {
+class HtmlCpuProfilerTabNav {
+  HtmlCpuProfilerTabNav(this.cpuProfiler, this.tabOrder) {
     _init();
   }
 
-  final CpuProfiler cpuProfiler;
+  final HtmlCpuProfiler cpuProfiler;
 
   final CpuProfilerTabOrder tabOrder;
 

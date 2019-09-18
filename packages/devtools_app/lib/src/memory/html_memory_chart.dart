@@ -4,14 +4,14 @@
 
 import 'package:html_shim/html.dart';
 
-import '../timeline/frames_bar_chart.dart';
-import '../ui/elements.dart';
+import '../timeline/html_frames_bar_chart.dart';
+import '../ui/html_elements.dart';
 import 'memory_controller.dart';
 import 'memory_plotly.dart';
 import 'memory_protocol.dart';
 
-class MemoryChart extends CoreElement {
-  MemoryChart(this._memoryController)
+class HtmlMemoryChart extends CoreElement {
+  HtmlMemoryChart(this._memoryController)
       : super('div', classes: 'section section-border') {
     layoutVertical();
 

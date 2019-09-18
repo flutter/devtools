@@ -8,7 +8,6 @@ import '../logging.dart';
 import '../restful_servers.dart';
 import 'settings.dart';
 
-
 /// Create a stateful widget
 class MyGetHttpData extends StatefulWidget {
   @override

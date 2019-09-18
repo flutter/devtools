@@ -15,13 +15,13 @@ import '../debugger/breakpoints_view.dart';
 import '../debugger/callstack_view.dart';
 import '../debugger/console_area.dart';
 import '../debugger/debugger_state.dart';
-import '../debugger/scripts_view.dart';
-import '../debugger/variables_view.dart';
-import '../framework/framework.dart';
+import '../debugger/html_scripts_view.dart';
+import '../debugger/html_variables_view.dart';
+import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/analytics_platform.dart' as ga_platform;
-import '../ui/elements.dart';
+import '../ui/html_elements.dart';
 import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/theme.dart';
@@ -38,8 +38,8 @@ import '../ui/ui_utils.dart';
 
 // TODO(devoncarew): handle displaying large lists, maps, in the variables view
 
-class DebuggerScreen extends Screen {
-  DebuggerScreen({
+class HtmlDebuggerScreen extends HtmlScreen {
+  HtmlDebuggerScreen({
     bool enabled,
     String disabledTooltip,
   })  : debuggerState = DebuggerState(),
@@ -51,7 +51,7 @@ class DebuggerScreen extends Screen {
           disabledTooltip: disabledTooltip,
         ) {
     shortcutCallback = debuggerShortcuts;
-    deviceStatus = StatusItem();
+    deviceStatus = HtmlStatusItem();
     addStatusItem(deviceStatus);
   }
 
@@ -59,7 +59,7 @@ class DebuggerScreen extends Screen {
 
   bool _initialized = false;
 
-  StatusItem deviceStatus;
+  HtmlStatusItem deviceStatus;
 
   CoreElement _breakpointsCountDiv;
 
@@ -67,23 +67,23 @@ class DebuggerScreen extends Screen {
 
   CoreElement _popupTextfield;
 
-  PopupView _popupView;
+  HtmlPopupView _popupView;
 
   SourceEditor sourceEditor;
 
   CallStackView callStackView;
 
-  VariablesView variablesView;
+  HtmlVariablesView variablesView;
 
   BreakpointsView breakpointsView;
 
-  ScriptsView scriptsView;
+  HtmlScriptsView scriptsView;
 
-  ScriptsView popupScriptsView;
+  HtmlScriptsView popupScriptsView;
 
   ConsoleArea consoleArea;
 
-  ScriptsMatcher _matcher;
+  HtmlScriptsMatcher _matcher;
 
   List<CoreElement> _navEditorPanels;
 
@@ -133,7 +133,7 @@ class DebuggerScreen extends Screen {
   }
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
@@ -201,7 +201,7 @@ class DebuggerScreen extends Screen {
           ..setAttribute('placeholder', 'search')
           ..id = 'popup_script_name'
           ..focus(() {
-            _matcher ??= ScriptsMatcher(debuggerState);
+            _matcher ??= HtmlScriptsMatcher(debuggerState);
             popupScriptsView.setMatcher(_matcher);
           })
           ..blur(() {
@@ -281,7 +281,7 @@ class DebuggerScreen extends Screen {
 
     screenDiv.add([
       _popupTextfield,
-      _popupView = PopupView(
+      _popupView = HtmlPopupView(
         popupScriptsView,
         _sourceArea,
         _sourcePathDiv,
@@ -478,7 +478,7 @@ class DebuggerScreen extends Screen {
     serviceManager.onConnectionClosed.listen(_handleConnectionStop);
   }
 
-  void _hookupListeners(ScriptsView scriptsView) {
+  void _hookupListeners(HtmlScriptsView scriptsView) {
     scriptsView.onSelectionChanged.listen((ScriptRef scriptRef) async {
       if (scriptsView.itemsHadClicked && _matcher != null && _matcher.active) {
         // User clicked while matcher was active then reset the matcher.
@@ -550,7 +550,7 @@ class DebuggerScreen extends Screen {
         }
       }
     };
-    variablesView = VariablesView(debuggerState, describer);
+    variablesView = HtmlVariablesView(debuggerState, describer);
 
     _breakpointsCountDiv = span(text: '0', c: 'counter');
     breakpointsView = BreakpointsView(
@@ -579,10 +579,10 @@ class DebuggerScreen extends Screen {
     final CoreElement scriptCountDiv = span(text: '-', c: 'counter')
       ..element.style.marginTop = '4px';
 
-    scriptsView = ScriptsView(debuggerState.getShortScriptName);
+    scriptsView = HtmlScriptsView(debuggerState.getShortScriptName);
     _hookupListeners(scriptsView);
 
-    popupScriptsView = ScriptsView(debuggerState.getShortScriptName);
+    popupScriptsView = HtmlScriptsView(debuggerState.getShortScriptName);
     _hookupListeners(popupScriptsView);
 
     scriptsView.onScriptsChanged.listen((_) {
@@ -604,11 +604,11 @@ class DebuggerScreen extends Screen {
         ..add([
           textfield
             ..click(() {
-              _matcher ??= ScriptsMatcher(debuggerState);
+              _matcher ??= HtmlScriptsMatcher(debuggerState);
               scriptsView.setMatcher(_matcher);
             })
             ..focus(() {
-              _matcher ??= ScriptsMatcher(debuggerState);
+              _matcher ??= HtmlScriptsMatcher(debuggerState);
               scriptsView.setMatcher(_matcher);
             })
             ..onKeyUp.listen((html.KeyboardEvent e) {
@@ -707,7 +707,7 @@ class DebuggerScreen extends Screen {
 
   /// Populate the ScriptsViews - the library UI list and the file open pop-up.
   void _populateFromIsolate(
-      Isolate isolate, List<ScriptsView> scriptsViewers) async {
+      Isolate isolate, List<HtmlScriptsView> scriptsViewers) async {
     debuggerState.setRootLib(isolate.rootLib);
     debuggerState.updateFrom(isolate);
 
@@ -723,7 +723,7 @@ class DebuggerScreen extends Screen {
 
       debuggerState.scripts = scripts;
 
-      for (ScriptsView scriptsViewer in scriptsViewers) {
+      for (HtmlScriptsView scriptsViewer in scriptsViewers) {
         scriptsViewer.showScripts(
           scripts,
           debuggerState.rootLib.uri,

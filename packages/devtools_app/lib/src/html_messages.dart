@@ -1,10 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'message_manager.dart';
-import 'ui/elements.dart';
+import 'html_message_manager.dart';
+import 'ui/html_elements.dart';
 
-final trackWidgetCreationWarning = Message(
+final trackWidgetCreationWarning = HtmlMessage(
   MessageType.warning,
   id: 'trackWidgetCreationWarningId',
   children: <CoreElement>[
@@ -29,7 +29,7 @@ IntelliJ).'''),
 const _trackWidgetCreationDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/inspector#track-widget-creation';
 
-final debugWarning = Message(
+final debugWarning = HtmlMessage(
   MessageType.warning,
   id: 'debugWarningId',
   children: <CoreElement>[
@@ -51,7 +51,7 @@ final debugWarning = Message(
 const String _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
 
-final profileGranularityWarning = Message(
+final profileGranularityWarning = HtmlMessage(
   MessageType.warning,
   id: 'highSamplingRateWarning',
   children: [

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' hide Screen;
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger.dart';
@@ -17,11 +16,11 @@ import '../vm_service_wrapper.dart';
 typedef ErrorReporter = void Function(String title, dynamic error);
 
 class FrameworkCore {
-  static void init() {
+  static void init(String url) {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
 
-    final uri = Uri.parse(window.location.toString());
+    final uri = Uri.parse(url);
     theme.initializeTheme(uri.queryParameters['theme']);
 
     _setGlobals();
@@ -33,11 +32,12 @@ class FrameworkCore {
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
-  static Future<bool> initVmService({
+  static Future<bool> initVmService(
+    String url, {
     Uri explicitUri,
     ErrorReporter errorReporter,
   }) async {
-    final Uri uri = explicitUri ?? _getUriFromQuerystring();
+    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
 
     if (uri != null) {
       final finishedCompleter = Completer<void>();
@@ -64,12 +64,12 @@ class FrameworkCore {
 
   /// Gets a VM Service URI from the querystring (in preference from the 'uri'
   /// value, but otherwise from 'port').
-  static Uri _getUriFromQuerystring() {
-    if (window.location.search.isEmpty) {
+  static Uri _getUriFromQuerystring(String location) {
+    if (location == null) {
       return null;
     }
 
-    final queryParams = Uri.parse(window.location.toString()).queryParameters;
+    final queryParams = Uri.parse(location).queryParameters;
 
     // First try to use uri.
     if (queryParams['uri'] != null) {

@@ -13,7 +13,7 @@ import 'ui/icons.dart';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    Icon icon,
+    DevToolsIcon icon,
     @required String extension,
     @required String description,
     @required T enabledValue,
@@ -62,7 +62,7 @@ class ServiceExtensionDescription<T> {
 
   final String description;
 
-  final Icon icon;
+  final DevToolsIcon icon;
 
   final List<T> values;
 

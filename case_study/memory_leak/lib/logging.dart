@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:intl/intl.dart';
 
-
 class Logging {
   Logging() {
     model = TimeModel(this)..start();

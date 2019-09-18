@@ -8,14 +8,15 @@ import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
 import '../memory/memory_controller.dart';
-import '../ui/custom.dart';
-import '../ui/elements.dart';
+import '../ui/html_custom.dart';
+import '../ui/html_elements.dart';
 
 typedef MemoryDescriber = Future<String> Function(BoundField variable);
 
-class MemoryDataView implements CoreElementView {
-  MemoryDataView(this._memoryController, MemoryDescriber variableDescriber) {
-    _items = SelectableTree<BoundField>()
+class HtmlMemoryDataView implements CoreElementView {
+  HtmlMemoryDataView(
+      this._memoryController, MemoryDescriber variableDescriber) {
+    _items = HtmlSelectableTree<BoundField>()
       ..flex()
       ..clazz('menu-item-bottom-border')
       ..clazz('debugger-items-list')
@@ -87,7 +88,7 @@ class MemoryDataView implements CoreElementView {
   }
 
   final MemoryController _memoryController;
-  SelectableTree<BoundField> _items;
+  HtmlSelectableTree<BoundField> _items;
 
   List<BoundField> get items => _items.items;
 

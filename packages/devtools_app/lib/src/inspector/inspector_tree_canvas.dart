@@ -8,9 +8,9 @@ import 'dart:math';
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
-import '../ui/elements.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
+import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import '../ui/viewport_canvas.dart';
@@ -41,7 +41,7 @@ class IconPaintEntry extends CanvasPaintEntry {
   }) : super(x);
 
   @override
-  Icon get icon => iconRenderer.icon;
+  DevToolsIcon get icon => iconRenderer.icon;
 
   final HtmlIconRenderer iconRenderer;
 
@@ -89,7 +89,7 @@ class TextPaintEntry extends CanvasPaintEntry {
   final String font;
 
   @override
-  Icon get icon => null;
+  DevToolsIcon get icon => null;
 
   @override
   void paint(CanvasRenderingContext2D canvas) {
@@ -142,7 +142,7 @@ class InspectorTreeNodeRenderCanvasBuilder
   }
 
   @override
-  void addIcon(Icon icon) {
+  void addIcon(DevToolsIcon icon) {
     final double width = icon.iconWidth + iconPadding;
     _entries.add(IconPaintEntry(x: x, iconRenderer: getIconRenderer(icon)));
     x += width;

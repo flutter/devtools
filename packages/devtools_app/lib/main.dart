@@ -16,10 +16,10 @@ void main() {
   runZoned(
     () {
       // Initialize the core framework.
-      FrameworkCore.init();
+      FrameworkCore.init(window.location.toString());
 
       // Load the web app framework.
-      final PerfToolFramework framework = PerfToolFramework();
+      final HtmlPerfToolFramework framework = HtmlPerfToolFramework();
 
       // Show the opt-in dialog for collection analytics?
       try {
@@ -48,9 +48,12 @@ void main() {
         return;
       }
 
-      FrameworkCore.initVmService(errorReporter: (String title, dynamic error) {
-        framework.showError(title, error);
-      }).then((bool connected) {
+      FrameworkCore.initVmService(
+        window.location.toString(),
+        errorReporter: (String title, dynamic error) {
+          framework.showError(title, error);
+        },
+      ).then((bool connected) {
         if (!connected) {
           framework.showConnectionDialog();
           framework.showSnapshotMessage();

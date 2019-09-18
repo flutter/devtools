@@ -43,7 +43,7 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 typedef TreeHoverEventCallback = void Function(
   InspectorTreeNode node,
-  Icon icon,
+  DevToolsIcon icon,
 );
 
 const Color selectedRowBackgroundColor = ThemedColor(
@@ -69,19 +69,19 @@ const double columnWidth = 16.0;
 const double verticalPadding = 10.0;
 const double rowHeight = 24.0;
 const Color arrowColor = Colors.grey;
-final Icon defaultIcon = _customIconMaker.fromInfo('Default');
+final DevToolsIcon defaultIcon = _customIconMaker.fromInfo('Default');
 
 // TODO(jacobr): these arrows are a bit ugly.
 // We should create pngs instead of trying to stretch the material icons into
 // being good expand collapse arrows.
-final Icon collapseArrow = MaterialIcon(
+final DevToolsIcon collapseArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
   iconWidth: (columnWidth - iconPadding).toInt(),
 );
 
-final Icon expandArrow = MaterialIcon(
+final DevToolsIcon expandArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
@@ -92,7 +92,7 @@ final Icon expandArrow = MaterialIcon(
 abstract class PaintEntry {
   PaintEntry();
 
-  Icon get icon;
+  DevToolsIcon get icon;
 
   void attach(InspectorTree owner) {}
 }
@@ -104,7 +104,7 @@ abstract class InspectorTreeNodeRenderBuilder<
     @required this.treeStyle,
   });
   void appendText(String text, TextStyle textStyle);
-  void addIcon(Icon icon);
+  void addIcon(DevToolsIcon icon);
 
   final DiagnosticLevel level;
   final DiagnosticsTreeStyle treeStyle;
@@ -244,7 +244,7 @@ abstract class InspectorTreeNode {
               final int codePoint =
                   JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
-                final Icon icon =
+                final DevToolsIcon icon =
                     FlutterMaterialIcons.getIconForCodePoint(codePoint);
                 if (icon != null) {
                   builder.addIcon(icon);
@@ -819,7 +819,7 @@ abstract class InspectorTree {
     onTapIcon(row, row.node.renderObject?.hitTest(offset)?.icon);
   }
 
-  void onTapIcon(InspectorTreeRow row, Icon icon) {
+  void onTapIcon(InspectorTreeRow row, DevToolsIcon icon) {
     if (icon == expandArrow) {
       setState(() {
         row.node.isExpanded = true;

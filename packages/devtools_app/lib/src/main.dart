@@ -9,21 +9,21 @@ import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
 import 'core/message_bus.dart';
-import 'debugger/debugger.dart';
-import 'framework/framework.dart';
+import 'debugger/html_debugger_screen.dart';
+import 'framework/html_framework.dart';
 import 'globals.dart';
-import 'info/info_screen.dart';
-import 'inspector/inspector.dart';
-import 'logging/logging.dart';
-import 'memory/memory.dart';
-import 'model/model.dart';
-import 'performance/performance_screen.dart';
+import 'info/html_info_screen.dart';
+import 'inspector/html_inspector_screen.dart';
+import 'logging/html_logging_screen.dart';
+import 'memory/html_memory_screen.dart';
+import 'model/html_model.dart';
+import 'performance/html_performance_screen.dart';
 import 'service_registrations.dart' as registrations;
-import 'timeline/timeline_screen.dart';
+import 'timeline/html_timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
-import 'ui/custom.dart';
-import 'ui/elements.dart';
+import 'ui/html_custom.dart';
+import 'ui/html_elements.dart';
 import 'ui/icons.dart';
 import 'ui/primer.dart';
 import 'ui/ui_utils.dart';
@@ -34,8 +34,8 @@ import 'utils.dart';
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
-class PerfToolFramework extends Framework {
-  PerfToolFramework() {
+class HtmlPerfToolFramework extends HtmlFramework {
+  HtmlPerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
 
     initGlobalUI();
@@ -56,11 +56,11 @@ class PerfToolFramework extends Framework {
     log(message, LogLevel.error);
   }
 
-  StatusItem isolateSelectStatus;
+  HtmlStatusItem isolateSelectStatus;
   PSelect isolateSelect;
 
-  StatusItem connectionStatus;
-  Status reloadStatus;
+  HtmlStatusItem connectionStatus;
+  HtmlStatus reloadStatus;
 
   static const _reloadActionId = 'reload-action';
   static const _restartActionId = 'restart-action';
@@ -82,7 +82,7 @@ class PerfToolFramework extends Framework {
     final mainNav = CoreElement.from(queryId('main-nav'))..clear();
     final iconNav = CoreElement.from(queryId('icon-nav'))..clear();
 
-    for (Screen screen in screens) {
+    for (HtmlScreen screen in screens) {
       final link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
@@ -107,7 +107,7 @@ class PerfToolFramework extends Framework {
       (screen.showTab ? mainNav : iconNav).add(link);
     }
 
-    isolateSelectStatus = StatusItem();
+    isolateSelectStatus = HtmlStatusItem();
     globalStatus.add(isolateSelectStatus);
     isolateSelect = PSelect()
       ..small()
@@ -133,7 +133,7 @@ class PerfToolFramework extends Framework {
   }
 
   void initTestingModel() {
-    final app = App.register(this);
+    final app = HtmlApp.register(this);
     screensReady.future.then(app.devToolsReady);
   }
 
@@ -180,33 +180,33 @@ class PerfToolFramework extends Framework {
     // possible GA collection.
     ga_platform.setupDimensions();
 
-    addScreen(InspectorScreen(
+    addScreen(HtmlInspectorScreen(
       enabled: isFlutterApp && !isFlutterVmProfileBuild,
       disabledTooltip: isFlutterVmProfileBuild
           ? runningProfileBuildMsg
           : notRunningFlutterMsg,
     ));
-    addScreen(TimelineScreen(
+    addScreen(HtmlTimelineScreen(
       enabled: isFlutterApp && !isFlutterWebApp,
       disabledTooltip:
           isFlutterWebApp ? notFlutterWebMsg : notRunningFlutterMsg,
     ));
-    addScreen(MemoryScreen(
+    addScreen(HtmlMemoryScreen(
       enabled: isFlutterVmApp || isDartCliApp,
       disabledTooltip: isFlutterWebApp ? notFlutterWebMsg : notDartWebMsg,
       isProfileBuild: isFlutterVmProfileBuild,
     ));
-    addScreen(PerformanceScreen(
+    addScreen(HtmlPerformanceScreen(
       enabled: isFlutterVmApp || isDartCliApp,
       disabledTooltip: isFlutterWebApp ? notFlutterWebMsg : notDartWebMsg,
     ));
-    addScreen(DebuggerScreen(
+    addScreen(HtmlDebuggerScreen(
         enabled: !isFlutterVmProfileBuild && !isTabDisabledByQuery('debugger'),
         disabledTooltip: isFlutterVmProfileBuild
             ? runningProfileBuildMsg
             : duplicateDebuggerFunctionalityMsg));
-    addScreen(LoggingScreen());
-    addScreen(InfoScreen());
+    addScreen(HtmlLoggingScreen());
+    addScreen(HtmlInfoScreen());
   }
 
   IsolateRef get currentIsolate =>
@@ -259,7 +259,7 @@ class PerfToolFramework extends Framework {
     // them in the UI. That will mean that our UI will update appropriately
     // even when other clients (the CLI, and IDE) initiate the hot reload.
 
-    final ActionButton reloadAction = ActionButton(
+    final HtmlActionButton reloadAction = HtmlActionButton(
       _reloadActionId,
       FlutterIcons.hotReloadWhite,
       'Hot Reload',
@@ -268,7 +268,7 @@ class PerfToolFramework extends Framework {
       // Hide any previous status related to / restart.
       reloadStatus?.dispose();
 
-      final Status status = Status(auxiliaryStatus, 'reloading...');
+      final HtmlStatus status = HtmlStatus(auxiliaryStatus, 'reloading...');
       reloadStatus = status;
 
       final Stopwatch timer = Stopwatch()..start();
@@ -298,7 +298,7 @@ class PerfToolFramework extends Framework {
   }
 
   void _buildRestartButton() async {
-    final ActionButton restartAction = ActionButton(
+    final HtmlActionButton restartAction = HtmlActionButton(
       _restartActionId,
       FlutterIcons.hotRestartWhite,
       'Hot Restart',
@@ -307,7 +307,7 @@ class PerfToolFramework extends Framework {
       // Hide any previous status related to reload / restart.
       reloadStatus?.dispose();
 
-      final Status status = Status(auxiliaryStatus, 'restarting...');
+      final HtmlStatus status = HtmlStatus(auxiliaryStatus, 'restarting...');
       reloadStatus = status;
 
       final Stopwatch timer = Stopwatch()..start();
@@ -343,7 +343,7 @@ class PerfToolFramework extends Framework {
       }
     } else {
       if (connectionStatus == null) {
-        connectionStatus = StatusItem();
+        connectionStatus = HtmlStatusItem();
         auxiliaryStatus.add(connectionStatus);
       }
       connectionStatus.element.text = 'no device connected';
@@ -351,25 +351,25 @@ class PerfToolFramework extends Framework {
   }
 }
 
-class NotFoundScreen extends Screen {
-  NotFoundScreen() : super(name: 'Not Found', id: 'notfound');
+class HtmlNotFoundScreen extends HtmlScreen {
+  HtmlNotFoundScreen() : super(name: 'Not Found', id: 'notfound');
 
   @override
-  CoreElement createContent(Framework framework) {
+  CoreElement createContent(HtmlFramework framework) {
     return p(text: 'Page not found: ${html.window.location.pathname}');
   }
 }
 
-class Status {
-  Status(this.statusLine, String initialMessage) {
-    item = StatusItem();
+class HtmlStatus {
+  HtmlStatus(this.statusLine, String initialMessage) {
+    item = HtmlStatusItem();
     item.element.text = initialMessage;
 
     statusLine.add(item);
   }
 
-  final StatusLine statusLine;
-  StatusItem item;
+  final HtmlStatusLine statusLine;
+  HtmlStatusItem item;
 
   void setText(String newText) {
     item.element.text = newText;

@@ -7,7 +7,7 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import 'elements.dart';
+import 'html_elements.dart';
 import 'html_icon_renderer.dart';
 import 'icons.dart';
 
@@ -75,7 +75,8 @@ class PButton extends CoreElement {
     small();
   }
 
-  PButton.icon(String text, Icon icon, {String title, List<String> classes})
+  PButton.icon(String text, DevToolsIcon icon,
+      {String title, List<String> classes})
       : super('button', classes: 'btn optional-text') {
     setAttribute('type', 'button');
     setAttribute('title', title ?? text);
@@ -91,7 +92,7 @@ class PButton extends CoreElement {
     }
   }
 
-  Icon _icon;
+  DevToolsIcon _icon;
 
   void changeIcon(String url) {
     if (_icon != null) {

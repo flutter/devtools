@@ -21,7 +21,7 @@ class FakePaintEntry extends PaintEntry {
   FakePaintEntry({this.icon, this.text, this.textStyle, @required this.x});
 
   @override
-  final Icon icon;
+  final DevToolsIcon icon;
   final String text;
   final TextStyle textStyle;
   final double x;
@@ -65,7 +65,7 @@ class FakeInspectorTreeNodeRenderBuilder
   double x = 0;
 
   @override
-  void addIcon(Icon icon) {
+  void addIcon(DevToolsIcon icon) {
     x += 20;
     entries.add(FakePaintEntry(icon: icon, x: x));
   }
@@ -204,7 +204,7 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
       for (FakePaintEntry entry in entries) {
         if (entry.icon != null) {
           // Visualize icons
-          final Icon icon = entry.icon;
+          final DevToolsIcon icon = entry.icon;
           if (icon == collapseArrow) {
             sb.write('▼');
           } else if (icon == expandArrow) {

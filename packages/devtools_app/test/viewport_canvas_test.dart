@@ -5,7 +5,7 @@
 @TestOn('browser')
 import 'package:html_shim/html.dart';
 
-import 'package:devtools_app/src/ui/environment.dart' as environment;
+import 'package:devtools_app/src/ui/html_environment.dart' as environment;
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/ui/viewport_canvas.dart';
 import 'package:test/test.dart';

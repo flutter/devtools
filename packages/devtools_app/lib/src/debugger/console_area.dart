@@ -6,7 +6,7 @@ import 'package:ansi_up/ansi_up.dart';
 import 'package:codemirror/codemirror.dart';
 import 'package:html_shim/html.dart' as html;
 
-import '../ui/elements.dart';
+import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 

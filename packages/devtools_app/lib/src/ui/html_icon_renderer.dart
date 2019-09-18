@@ -10,10 +10,10 @@ import 'package:html_shim/html.dart';
 
 import 'package:meta/meta.dart';
 
-import 'elements.dart';
-import 'environment.dart' as environment;
 import 'fake_flutter/fake_flutter.dart';
 import 'flutter_html_shim.dart';
+import 'html_elements.dart';
+import 'html_environment.dart' as environment;
 import 'icons.dart';
 import 'material_icons.dart';
 import 'theme.dart';
@@ -23,7 +23,7 @@ final Expando<HtmlIconRenderer> rendererExpando = Expando('IconRenderer');
 
 typedef DrawIconImageCallback = void Function(CanvasRenderingContext2D element);
 
-abstract class HtmlIconRenderer<T extends Icon> {
+abstract class HtmlIconRenderer<T extends DevToolsIcon> {
   HtmlIconRenderer(this.icon);
 
   CanvasImageSource get image;
@@ -324,11 +324,11 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
   }
 }
 
-CoreElement createIconElement(Icon icon) {
+CoreElement createIconElement(DevToolsIcon icon) {
   return getIconRenderer(icon).createCoreElement();
 }
 
-HtmlIconRenderer getIconRenderer(Icon icon) {
+HtmlIconRenderer getIconRenderer(DevToolsIcon icon) {
   HtmlIconRenderer renderer = rendererExpando[icon];
   if (renderer != null) {
     return renderer;
