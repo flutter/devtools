@@ -1,9 +1,14 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../common.dart';
 import '../logging.dart';
 import '../restful_servers.dart';
 import 'settings.dart';
@@ -17,9 +22,7 @@ class MyGetHttpData extends StatefulWidget {
 // Create the state for our stateful widget
 class MyGetHttpDataState extends State<MyGetHttpData> {
   MyGetHttpDataState() {
-    api = computeUri();
-    currentRestfulAPI?.next = api;
-    currentRestfulAPI = api;
+    api = currentRestfulAPI = computeUri();
   }
 
   final Logging logs = Logging.logging;
@@ -29,24 +32,19 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
 
   RestfulAPI computeUri() {
     switch (restfulApi) {
-      case 'Weather':
+      case '${OpenWeatherMapAPI.friendlyName}':
         return OpenWeatherMapAPI();
-      case 'NYC Bike Sharing':
+      case '${CitiBikesNYC.friendlyName}':
         return CitiBikesNYC();
-      case 'StarWars Films':
-        return StarWars(0);
-      case 'StarWars People':
-        return StarWars(1);
-      case 'StarWars Planets':
-        return StarWars(2);
-      case 'StarWars Species':
-        return StarWars(3);
-      case 'StarWars Starships':
-        return StarWars(4);
-      case 'StarWars Vehicles':
-        return StarWars(5);
+      case '${StarWars.starWarsFilms}':
+      case '${StarWars.starWarsPeople}':
+      case '${StarWars.starWarsPlanets}':
+      case '${StarWars.starWarsSpecies}':
+      case '${StarWars.starWarsStarships}':
+      case '${StarWars.starWarsVehicles}':
+        return StarWars(restfulApi);
       default:
-        return StarWars();
+        return StarWars('${StarWars.starWarsPeople}');
     }
   }
 
@@ -81,7 +79,29 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Retrieve JSON Data via HTTP GET'),
+        // Title
+        title: const Text(appName),
+        actions: const <Widget>[],
+        // Set the background color of the App Bar
+        backgroundColor: Colors.blue,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48.0),
+          child: Theme(
+            data: Theme.of(context).copyWith(accentColor: Colors.white),
+            child: Container(
+              child: Text(
+                currentRestfulAPI.activeFriendlyName,
+                style: TextStyle(
+                  inherit: true,
+                  fontSize: 24.0,
+                  color: Colors.lightBlueAccent,
+                ),
+              ),
+              height: 48.0,
+              alignment: Alignment.center,
+            ),
+          ),
+        ),
       ),
       // Create a Listview and load the data when available
       body: ListView.builder(

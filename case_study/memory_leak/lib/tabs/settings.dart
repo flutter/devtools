@@ -1,7 +1,12 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 import '../logging.dart';
 import '../restful_servers.dart';
+import 'http_data.dart';
 
 class Settings extends StatefulWidget {
   Settings() : restfulRoot = currentRestfulAPI;
@@ -22,20 +27,20 @@ class Settings extends StatefulWidget {
 }
 
 /// Which Restful Server is selected.
-String restfulApi = 'StarWars People';
+String restfulApi = StarWars.starWarsPeople;
 
 RestfulAPI currentRestfulAPI;
 
 class SettingsState extends State<Settings> {
-  Map<String, bool> values = {
-    'NYC Bike Sharing': false,
-    'StarWars Films': false,
-    'StarWars People': false,
-    'StarWars Planets': false,
-    'StarWars Species': false,
-    'StarWars Starships': false,
-    'StarWars Vehicles': false,
-    'Weather': false,
+  Map<String, IconData> values = {
+    '${CitiBikesNYC.friendlyName}': Icons.directions_bike,
+    '${StarWars.starWarsFilms}': Icons.videocam,
+    '${StarWars.starWarsPeople}': Icons.people_outline,
+    '${StarWars.starWarsPlanets}': Icons.bubble_chart,
+    '${StarWars.starWarsSpecies}': Icons.android,
+    '${StarWars.starWarsStarships}': Icons.tram,
+    '${StarWars.starWarsVehicles}': Icons.time_to_leave,
+    '${OpenWeatherMapAPI.friendlyName}': Icons.cloud,
   };
 
   final Logging logs = Logging.logging;
@@ -43,18 +48,21 @@ class SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Restful Servers')),
+      //appBar: AppBar(title: const Text('Restful Servers')),
       body: ListView(
         children: values.keys.map((String key) {
-          return RadioListTile<String>(
+          return ListTile(
+            leading: Icon(values[key]), // starships
             title: Text(key),
-            value: key,
-            groupValue: restfulApi,
-            onChanged: (String value) {
+            trailing: Icon(Icons.arrow_right),
+            onTap: () {
+              logs.add('$key Selected');
               setState(() {
-                restfulApi = value;
-                logs.add('Settings is now $restfulApi');
+                restfulApi = key;
               });
+              // Display the data received.
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MyGetHttpData()));
             },
           );
         }).toList(),
