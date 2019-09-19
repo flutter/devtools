@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 
 import 'about.dart';
 import 'common.dart';
+import 'logging.dart';
 import 'tabs/logger.dart';
 import 'tabs/settings.dart';
 
 void main() {
+  Logging.logging.add('Starting...');
+
   runApp(MaterialApp(
       // Title
       title: appName,

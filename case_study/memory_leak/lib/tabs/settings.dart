@@ -9,9 +9,7 @@ import '../restful_servers.dart';
 import 'http_data.dart';
 
 class Settings extends StatefulWidget {
-  Settings() : restfulRoot = currentRestfulAPI {
-    logs.add('Starting...');
-  }
+  Settings() : restfulRoot = currentRestfulAPI;
 
   final Logging logs = Logging.logging;
 
