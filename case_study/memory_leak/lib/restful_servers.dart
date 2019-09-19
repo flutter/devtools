@@ -1,15 +1,16 @@
-/// All Restful Servers are defined here.
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-import 'tabs/settings.dart';
+/// All Restful Servers are defined here.
 
 /// All servers with RestfulAPI implement this base.
 abstract class RestfulAPI {
-  RestfulAPI(this.previous);
-
-  RestfulAPI previous;
-  RestfulAPI next;
+  RestfulAPI();
 
   String uri();
+
+  String get activeFriendlyName;
 
   dynamic findData(dynamic data);
 
@@ -18,39 +19,34 @@ abstract class RestfulAPI {
 
 /// StarWars information server.
 class StarWars extends RestfulAPI {
-  StarWars([int index = 1]) : super(currentRestfulAPI) {
-    switch (index) {
-      case 0:
-        _defaultUri = StarWars.filmsUri;
-        break;
-      case 1:
-        _defaultUri = StarWars.peopleUri;
-        break;
-      case 2:
-        _defaultUri = StarWars.planetsUri;
-        break;
-      case 3:
-        _defaultUri = StarWars.speciesUri;
-        break;
-      case 4:
-        _defaultUri = StarWars.starshipsUri;
-        break;
-      case 5:
-        _defaultUri = StarWars.vehiclesUri;
-        break;
-      default:
-        _defaultUri = StarWars.peopleUri;
-    }
+  StarWars([String name = starWarsPeople]) {
+    _defaultUri = _friendlyNames[name];
+    _activefriendlyName = name;
   }
 
-  static const peopleUri = 'https://swapi.co/api/people';
-  static const vehiclesUri = 'https://swapi.co/api/vehicles';
-  static const starshipsUri = 'https://swapi.co/api/starships';
-  static const planetsUri = 'https://swapi.co/api/planets';
-  static const filmsUri = 'https://swapi.co/api/films';
-  static const speciesUri = 'https://swapi.co/api/species';
+  static const String starWarsFilms = 'StarWars Films';
+  static const String starWarsPeople = 'StarWars People';
+  static const String starWarsPlanets = 'StarWars Planets';
+  static const String starWarsSpecies = 'StarWars Species';
+  static const String starWarsStarships = 'StarWars Starships';
+  static const String starWarsVehicles = 'StarWars Vehicles';
 
+  static const Map<String, String> _friendlyNames = {
+    '$starWarsFilms': 'https://swapi.co/api/films',
+    '$starWarsPeople': 'https://swapi.co/api/people',
+    '$starWarsPlanets': 'https://swapi.co/api/planets',
+    '$starWarsSpecies': 'https://swapi.co/api/species',
+    '$starWarsStarships': 'https://swapi.co/api/starships',
+    '$starWarsVehicles': 'https://swapi.co/api/vehicles',
+  };
+
+  String _activefriendlyName;
   String _defaultUri;
+
+  static List<String> get friendlyNames => _friendlyNames.keys.toList();
+
+  @override
+  String get activeFriendlyName => _activefriendlyName;
 
   @override
   String uri() => _defaultUri;
@@ -60,7 +56,9 @@ class StarWars extends RestfulAPI {
 
   @override
   String display(dynamic data, int index) {
-    final isFilm = _defaultUri == StarWars.filmsUri;
+    // data from film Restful URI has slightly different format
+    // title instead of name.
+    final isFilm = _defaultUri == _friendlyNames[starWarsFilms];
     return data == null ? '' : data[index][isFilm ? 'title' : 'name'];
   }
 }
@@ -68,13 +66,16 @@ class StarWars extends RestfulAPI {
 /// CitiBike NYCA single public API that shows location, status and current
 /// availability for all stations in the New York City bike sharing imitative.
 class CitiBikesNYC extends RestfulAPI {
-  CitiBikesNYC() : super(currentRestfulAPI);
-
   static const citiBikesUri =
       'https://feeds.citibikenyc.com/stations/stations.json';
 
+  static const String friendlyName = 'NYC Bike Sharing';
+
   @override
   String uri() => citiBikesUri;
+
+  @override
+  String get activeFriendlyName => friendlyName;
 
   @override
   dynamic findData(dynamic data) => data['stationBeanList'];
@@ -106,7 +107,7 @@ class CityInformation {
 ///   Subscribe for free OpenWeatherMap then create an appid using:
 ///       https://home.openweathermap.org/api_keys
 class OpenWeatherMapAPI extends RestfulAPI {
-  OpenWeatherMapAPI() : super(currentRestfulAPI);
+  static const String friendlyName = 'Weather';
 
   static const _baseUrl = 'http://api.openweathermap.org/data/2.5/group?id=';
   static const _unitsOption = '&units=imperial';
@@ -167,6 +168,9 @@ class OpenWeatherMapAPI extends RestfulAPI {
 
   @override
   String uri() => uri20Cities;
+
+  @override
+  String get activeFriendlyName => friendlyName;
 
   @override
   dynamic findData(dynamic data) => data['list']; // weather group

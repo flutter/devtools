@@ -1,46 +1,32 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
+import '../common.dart';
 import '../logging.dart';
 
-class Logger extends StatelessWidget {
+//  class Logger extends StatelessWidget {
+class Logger extends StatefulWidget {
   final Logging _logging = Logging.logging;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Logger',
-      theme:
-          ThemeData(primaryColor: Colors.blue, accentColor: Colors.lightBlue),
-      home: LogEntries(_logging),
-    );
-  }
+  LoggerState createState() => LoggerState(_logging);
 }
 
-class LogEntries extends StatefulWidget {
-  const LogEntries(this._logging);
-
-  final Logging _logging;
-
-  @override
-  State createState() => LoggingState(_logging);
-}
-
-class LoggingState extends State<LogEntries> {
-  LoggingState(this._logging);
+class LoggerState extends State<Logger> {
+  LoggerState(this._logging);
 
   Logging _logging;
-  final _saved = List<String>();
+  final List<String> _saved = [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Infinite List'),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.list) /*, onPressed: _pushSaved*/),
-        ],
+        title: const Text(appName),
       ),
       body: _buildSuggestions(),
     );

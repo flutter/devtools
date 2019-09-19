@@ -1,13 +1,18 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
-import 'tabs/http_data.dart';
+import 'about.dart';
+import 'common.dart';
 import 'tabs/logger.dart';
 import 'tabs/settings.dart';
 
 void main() {
   runApp(MaterialApp(
       // Title
-      title: 'Memory Leak',
+      title: appName,
       // Home
       home: MyHome()));
 }
@@ -29,7 +34,7 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
     super.initState();
 
     // Initialize the Tab Controller
-    controller = TabController(length: 3, vsync: this);
+    controller = TabController(length: 1, vsync: this);
   }
 
   @override
@@ -39,34 +44,6 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  TabBar getTabBar() {
-    return TabBar(
-      tabs: <Tab>[
-        Tab(
-          // set icon to the tab
-          icon: Icon(Icons.wifi),
-        ),
-        Tab(
-          icon: Icon(Icons.build),
-        ),
-        Tab(
-          icon: Icon(Icons.bug_report),
-        ),
-      ],
-      // setup the controller
-      controller: controller,
-    );
-  }
-
-  TabBarView getTabBarView(var tabs) {
-    return TabBarView(
-      // Add tabs as widgets
-      children: tabs,
-      // Set the controller
-      controller: controller,
-    );
-  }
-
   /// Setup the tabs.
   @override
   Widget build(BuildContext context) {
@@ -74,13 +51,43 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
     return Scaffold(
         // Appbar
         appBar: AppBar(
-            // Title
-            title: const Text('Memory Leak'),
-            // Set the background color of the App Bar
-            backgroundColor: Colors.blue,
-            // Set the bottom property of the Appbar to include a Tab Bar
-            bottom: getTabBar()),
-        // Set the TabBar view as the body of the Scaffold
-        body: getTabBarView(<Widget>[MyGetHttpData(), settings, Logger()]));
+          // Title
+          title: const Text(appName),
+          actions: <Widget>[
+            PopupMenuButton<String>(
+              onSelected: showMenuSelection,
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                const PopupMenuItem<String>(
+                  value: logMenu,
+                  child: Text(logMenu),
+                ),
+                const PopupMenuItem<String>(
+                  value: aboutMenu,
+                  child: Text(aboutMenu),
+                ),
+              ],
+            ),
+          ],
+
+          // Set the background color of the App Bar
+          backgroundColor: Colors.blue,
+          // Set the bottom property of the Appbar to include a Tab Bar
+        ),
+        body: settings);
+  }
+
+  void showMenuSelection(String value) {
+    switch (value) {
+      case logMenu:
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Logger()));
+        break;
+      case aboutMenu:
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => About()));
+        break;
+      default:
+        print('ERROR: Unhandled Menu.');
+    }
   }
 }
