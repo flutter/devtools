@@ -5,5 +5,6 @@
 import 'package:devtools_server/devtools_server.dart';
 
 void main(List<String> arguments) async {
+  // ignore: unawaited_futures
   serveDevToolsWithArgs(arguments);
 }
