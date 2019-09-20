@@ -142,30 +142,27 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
 elif [ "$BOT" = "packages" ]; then
 
+    popd
+
     pub global activate tuneup
 
-    # Analyze packages/devtools_server.
-    popd
-    pushd packages/devtools_server
-    echo `pwd`
+    # Analyze packages/
+    (cd packages/devtools_app; pub get)
+    (cd packages/devtools_server; pub get)
+    (cd packages/devtools_testing; pub get)
+    (cd packages/html_shim; pub get)
+    (cd packages; pub global run tuneup check)
 
-    pub get
-    pub global run tuneup check
+    # Analyze third_party/
+    (cd third_party/packages/ansi_up; pub get)
+    (cd third_party/packages/plotly_js; pub get)
+    (cd third_party/packages/split; pub get)
+    (cd third_party/packages; pub global run tuneup check)
 
-    # Analyze third_party/packages/split.
-    popd
-    pushd third_party/packages/split
-    echo `pwd`
+    # Analyze Dart code in tool/
+    (cd tool; pub global run tuneup check)
 
-    pub get
-    pub global run tuneup check
-
-    # Analyze Dart code in tool.
-    popd
-    pushd tool
-    echo `pwd`
-
-    pub global run tuneup check
+    pushd packages/devtools_app
 
 else
 

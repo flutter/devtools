@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_classes_with_only_static_members
+// ignore_for_file: camel_case_types
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: prefer_const_declarations
+
 /// ansi_up is an library that parses text containing ANSI color escape
 /// codes.
 @JS()
