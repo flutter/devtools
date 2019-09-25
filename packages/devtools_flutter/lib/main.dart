@@ -4,13 +4,16 @@
 
 import 'package:flutter/material.dart';
 
+import 'src/config.dart';
+
 void main() {
+  final config = Config();
   runApp(
     MaterialApp(
       theme: ThemeData.light().copyWith(
-        colorScheme: ColorScheme.fromSwatch(),
+        colorScheme: const ColorScheme.dark(),
       ),
-      home: LandingPage(),
+      routes: config.routes,
     ),
   );
 }
@@ -22,8 +25,10 @@ class LandingPage extends StatelessWidget {
       body: Center(
         child: Text(
           'Hello World!',
-          style:
-              TextStyle(fontSize: 36.0, color: Theme.of(context).accentColor),
+          style: TextStyle(
+            fontSize: 36.0,
+            color: Theme.of(context).accentColor,
+          ),
         ),
       ),
     );
