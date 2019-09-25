@@ -157,6 +157,8 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  // Let the server know that we're logging a screen view event,
+  // then let GA know about the event.
   HttpRequest.request(
     '/api/logScreenView',
     method: 'POST',
