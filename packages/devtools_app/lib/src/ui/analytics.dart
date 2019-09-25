@@ -7,6 +7,9 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
+
+import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
@@ -154,6 +157,11 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  HttpRequest.request(
+    '/api/logScreenView',
+    method: 'POST',
+    sendData: jsonEncode({'screen': screenName}),
+  );
   GTag.event(
     screenName,
     GtagEventDevTools(
