@@ -1088,6 +1088,10 @@ html [full] {
     margin-top: 1em;
 }
 
+.toast-title {
+    white-space: pre;
+}
+
 .action-button {
     border-radius: 50%;
     height: 28px;
