@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:path/path.dart' as path;
@@ -53,6 +52,7 @@ Future<shelf.Handler> defaultHandler() async {
 ///
 /// This defines endpoints that serve all requests that come in over api/.
 class Api {
+  /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
     return request.url.path.startsWith('api/');
   }
