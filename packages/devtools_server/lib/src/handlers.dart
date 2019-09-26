@@ -66,7 +66,7 @@ class Api {
       case 'api/logPageView':
         return api.logPageView(request);
       default:
-        return api.notImplemented;
+        return api.notImplemented(request);
     }
   }
 
@@ -74,12 +74,12 @@ class Api {
   ///
   /// In the open-source version of DevTools, Google Analytics handles this
   /// without any need to involve the server.
-  FutureOr<shelf.Response> logPageView(shelf.Request request) async {
-    return notImplemented;
-  }
+  FutureOr<shelf.Response> logPageView(shelf.Request request) =>
+      notImplemented(request);
 
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
-  shelf.Response get notImplemented => shelf.Response.notFound(
-      'This API is not implemented in this version of the DevTools server.');
+  shelf.Response notImplemented(shelf.Request request) => shelf.Response.notFound(
+      '${request.url.path} is not implemented in this version of the DevTools '
+      'server.');
 }
