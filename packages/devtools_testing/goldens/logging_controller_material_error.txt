@@ -13,6 +13,7 @@ The ancestors of this widget were:
   Builder
   RepaintBoundary-[GlobalKey#<NUMBER>]
   IgnorePointer(ignoring: false)
+  AnimatedBuilder(animation: ValueNotifier<bool>#<NUMBER>(false))
   FadeTransition(opacity: AnimationController#<NUMBER>(⏭ <NUMBER>; paused; for MaterialPageRoute<dynamic>(/))➩ProxyAnimation➩CurveTween(curve: Cubic(<NUMBER>, <NUMBER>, <NUMBER>, <NUMBER>))➩<NUMBER>)
   FractionalTranslation
   SlideTransition(animation: AnimationController#<NUMBER>(⏭ <NUMBER>; paused; for MaterialPageRoute<dynamic>(/))➩ProxyAnimation➩CurveTween(curve: Cubic(<NUMBER>, <NUMBER>, <NUMBER>, <NUMBER>))➩Tween<Offset>(Offset(<NUMBER>, <NUMBER>) → Offset(<NUMBER>, <NUMBER>))➩Offset(<NUMBER>, <NUMBER>))
@@ -64,6 +65,7 @@ The ancestors of this widget were:
   Builder
   RepaintBoundary-[GlobalKey#<NUMBER>]
   IgnorePointer(ignoring: false)
+  AnimatedBuilder(animation: ValueNotifier<bool>#<NUMBER>(false))
   FadeTransition(opacity: kAlwaysCompleteAnimation➩ProxyAnimation➩CurveTween(curve: Cubic(<NUMBER>, <NUMBER>, <NUMBER>, <NUMBER>))➩<NUMBER>)
   FractionalTranslation
   SlideTransition(animation: kAlwaysCompleteAnimation➩ProxyAnimation➩CurveTween(curve: Cubic(<NUMBER>, <NUMBER>, <NUMBER>, <NUMBER>))➩Tween<Offset>(Offset(<NUMBER>, <NUMBER>) → Offset(<NUMBER>, <NUMBER>))➩Offset(<NUMBER>, <NUMBER>))
