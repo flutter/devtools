@@ -7,7 +7,7 @@ Text
  │ overflow: null
  │ textScaleFactor: null
  │ maxLines: null
- │ dependencies: [DefaultTextStyle, MediaQuery]
+ │ dependencies: [MediaQuery, DefaultTextStyle]
  │
  └─RichText
      softWrap: wrapping at box width
