@@ -14,9 +14,10 @@ import 'ui/analytics_platform.dart' as ga_platform;
 import '_app_flutter.dart' as flutter_app;
 
 void main() {
-  if (document.body.hasAttribute('fullbleed')) {
-    // Hack to detect we are running on the real Flutter web platform.
-    print("Running the real Flutter app. Warning: the Flutter version is incomplete");
+  if (document.body.querySelector('flt-glass-pane') != null) {
+    //   // Hack to detect we are running on the real Flutter web platform.
+    print(
+        "Running the real Flutter app. Warning: the Flutter version is incomplete");
     flutter_app.main();
     return;
   }
@@ -56,7 +57,8 @@ void main() {
         return;
       }
 
-      FrameworkCore.initVmService(window.location.toString(), errorReporter: (String title, dynamic error) {
+      FrameworkCore.initVmService(window.location.toString(),
+          errorReporter: (String title, dynamic error) {
         framework.showError(title, error);
       }).then((bool connected) {
         if (!connected) {
