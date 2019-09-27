@@ -37,8 +37,8 @@ Future<shelf.Handler> defaultHandler() async {
   // Make a handler that delegates based on path.
   return (shelf.Request request) {
     // The API handler takes all calls to api/.
-    if (Api.canHandle(request)) {
-      return Api.handle(request);
+    if (ServerApi.canHandle(request)) {
+      return ServerApi.handle(request);
     }
     return request.url.path.startsWith('packages/')
         // request.change here will strip the `packages` prefix from the path
@@ -51,7 +51,7 @@ Future<shelf.Handler> defaultHandler() async {
 /// The DevTools server API.
 ///
 /// This defines endpoints that serve all requests that come in over api/.
-class Api {
+class ServerApi {
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
     return request.url.path.startsWith('api/');
@@ -59,12 +59,12 @@ class Api {
 
   /// Handles all requests.
   ///
-  /// To override an API call, pass in a subclass of [Api].
-  static FutureOr<shelf.Response> handle(shelf.Request request, [Api api]) {
-    api ??= Api();
+  /// To override an API call, pass in a subclass of [ServerApi].
+  static FutureOr<shelf.Response> handle(shelf.Request request, [ServerApi api]) {
+    api ??= ServerApi();
     switch (request.url.path) {
-      case 'api/logPageView':
-        return api.logPageView(request);
+      case 'api/logScreenView':
+        return api.logScreenView(request);
       default:
         return api.notImplemented(request);
     }
@@ -74,7 +74,7 @@ class Api {
   ///
   /// In the open-source version of DevTools, Google Analytics handles this
   /// without any need to involve the server.
-  FutureOr<shelf.Response> logPageView(shelf.Request request) =>
+  FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
       notImplemented(request);
 
   /// A [shelf.Response] for API calls that have not been implemented in this
