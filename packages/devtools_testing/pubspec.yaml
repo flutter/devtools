@@ -9,6 +9,8 @@ dependencies:
   test: ^1.0.0
   flutter:
     sdk: flutter
+  flutter_test:
+    sdk: flutter
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
