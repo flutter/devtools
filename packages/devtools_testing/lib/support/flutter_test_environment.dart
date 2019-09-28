@@ -78,8 +78,8 @@ class FlutterTestEnvironment {
     FlutterRunConfiguration config,
   }) async {
     // Must set this up for the golden tests to work.
-    devtoolsTestingPackageRoot ??=
-        await (PackageResolver.current).packagePath('devtools_testing');
+    devtoolsTestingPackageRoot ??= '../devtools_testing';
+    // await (PackageResolver.current).packagePath('devtools_testing');
     // Setting up the environment is slow so we reuse the existing environment
     // when possible.
     if (force ||

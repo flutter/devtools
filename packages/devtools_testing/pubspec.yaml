@@ -7,6 +7,8 @@ dependencies:
   meta: ^1.1.0
   package_resolver: ^1.0.0
   test: ^1.0.0
+  flutter:
+    sdk: flutter
 dependency_overrides:
   devtools_app:
     path: ../devtools_app

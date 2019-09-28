@@ -14,7 +14,7 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:package_resolver/package_resolver.dart';
+// import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
@@ -23,8 +23,9 @@ import 'support/fake_inspector_tree.dart';
 import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
-  final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools_app');
+  const devtoolsPackageRoot = '.';
+  print('package root: $devtoolsPackageRoot');
+  // await (PackageResolver.current).packagePath('devtools_app');
   Catalog.setCatalog(Catalog.decode(
       await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
   InspectorService inspectorService;
@@ -36,6 +37,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     await ensureInspectorServiceDependencies();
   };
 
+  print('afterNewSetp defined');
   env.afterEverySetup = () async {
     inspectorService = await InspectorService.create(env.service);
     if (env.reuseTestEnvironment) {
@@ -50,7 +52,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     }
 
     await inspectorService.inferPubRootDirectoryIfNeeded();
-
+    print('inferring pub root directory');
     inspectorController = InspectorController(
       inspectorTreeFactory: ({
         summaryTree,

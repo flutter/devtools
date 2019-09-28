@@ -283,6 +283,7 @@ class WebdevFixture {
     bool verbose = false,
   }) async {
     final List<String> cliArgs = [
+      'run',
       '-d',
       'web',
       '--no-web-initialize-platform',
@@ -307,7 +308,7 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('flutter • ${line.trim()}');
+        print('flutter ������ ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
@@ -328,7 +329,14 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = ['build'];
+    final List<String> cliArgs = [
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '-o',
+      'web:build',
+    ];
     cliArgs.add(release ? '--release' : '--no-release');
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
@@ -376,8 +384,8 @@ class WebdevFixture {
   }
 
   static Future<Process> _runFlutter(
-    List<String> buildArgs, {
-    bool verbose = false,
+    List<String> cliArgs, {
+    bool verbose = true,
   }) async {
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
@@ -390,7 +398,6 @@ class WebdevFixture {
 
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
-    final List<String> cliArgs = ['run', ...buildArgs];
     if (verbose) {
       print('Running "$executable" with args: ${cliArgs.join(' ')}');
     }

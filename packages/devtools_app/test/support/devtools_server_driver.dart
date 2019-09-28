@@ -38,8 +38,9 @@ class DevToolsServerDriver {
   static Future<DevToolsServerDriver> create() async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
+    print('dart ../devtools/bin/devtools.dart --machine --port 0');
     final Process process = await Process.start(
-      Platform.resolvedExecutable,
+      'dart',
       <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
     );
 
