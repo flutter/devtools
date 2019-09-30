@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:devtools_app/services.dart' as service;
+
 import 'screen.dart';
 
+/// Handles connections to the VM Service.
 class ConnectScreen extends StatefulWidget {
   @override
   State<ConnectScreen> createState() => _ConnectScreenState();
@@ -29,7 +32,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Connect', style: textTheme.headline, key: const Key('Connect Title')),
+          Text('Connect',
+              style: textTheme.headline, key: const Key('Connect Title')),
           const Divider(),
           const Padding(padding: EdgeInsets.only(top: 10.0)),
           Text('Connect to a running app', style: textTheme.body2),
@@ -69,11 +73,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
         ),
         RaisedButton(
           child: const Text('Connect'),
-          onPressed: connect,
+          onPressed: _tryConnect,
         ),
       ],
     );
   }
 
-  void connect() {}
+  void _tryConnect() {
+    service.FrameworkCore.initVmService(
+      '',
+      explicitUri: Uri.parse(controller.text),
+    ).then((ready) {
+      print('Ready? $ready');
+    });
+  }
 }
