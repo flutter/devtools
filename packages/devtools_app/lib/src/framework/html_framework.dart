@@ -74,6 +74,8 @@ class HtmlFramework {
 
   HtmlAnalyticsOptInDialog analyticsDialog;
 
+  HtmlSurveyToast devToolsSurvey;
+
   final HtmlStatusItem defaultAuxiliaryStatus = createLinkStatusItem(
     span()..add(span(text: 'DevTools Docs', c: 'optional-700')),
     href: 'https://flutter.dev/docs/development/tools/devtools/overview',
@@ -119,7 +121,7 @@ class HtmlFramework {
             'The imported file is not a Dart DevTools file. At this time, '
             'DevTools only supports importing files that were originally '
             'exported from DevTools.',
-            hideDelay: HtmlToast.extendedHideDelay,
+            hideDelay: HtmlToastAnimator.extendedHideDelay,
           );
           return;
         }
@@ -136,7 +138,7 @@ class HtmlFramework {
               '"$devToolsScreen", which is not supported by this version of '
               'Dart DevTools. You may need to upgrade your version of Dart '
               'DevTools to view this file.',
-              hideDelay: HtmlToast.extendedHideDelay,
+              hideDelay: HtmlToastAnimator.extendedHideDelay,
             );
             return;
         }
@@ -145,7 +147,7 @@ class HtmlFramework {
           'JSON syntax error in imported file: "$e". Please make sure the '
           'imported file is a Dart DevTools file, and check that it has not '
           'been modified.',
-          hideDelay: HtmlToast.extendedHideDelay,
+          hideDelay: HtmlToastAnimator.extendedHideDelay,
         );
         return;
       }
@@ -340,6 +342,22 @@ class HtmlFramework {
     auxiliaryStatus.defaultStatus = screen._helpStatus;
 
     updatePage();
+    _updateSurveyUrlForCurrentScreen();
+  }
+
+  void _updateSurveyUrlForCurrentScreen() {
+    if (devToolsSurvey == null) return;
+    assert(current != null);
+
+    final oldUri = Uri.parse(devToolsSurvey.url);
+    final newUri = Uri(
+      scheme: oldUri.scheme,
+      host: oldUri.host,
+      path: oldUri.path,
+      queryParameters: Map.from(oldUri.queryParameters)
+        ..['From'] = current?.id ?? '',
+    );
+    devToolsSurvey.url = newUri.toString();
   }
 
   void updatePage() {
@@ -378,10 +396,18 @@ class HtmlFramework {
     messageManager.removeAll();
   }
 
+  void surveyToast(String url) {
+    devToolsSurvey = HtmlSurveyToast(url);
+    final CoreElement toastContainer =
+        CoreElement.from(queryId('toast-container'));
+    toastContainer.add(devToolsSurvey);
+    devToolsSurvey.show();
+  }
+
   void toast(
     String message, {
     String title,
-    Duration hideDelay = HtmlToast.defaultHideDelay,
+    Duration hideDelay = HtmlToastAnimator.defaultHideDelay,
   }) {
     final HtmlToast toast = HtmlToast(title: title, message: message);
     final CoreElement toastContainer =
@@ -586,39 +612,105 @@ class HtmlStatusItem {
 }
 
 class HtmlToast extends CoreElement {
-  HtmlToast({this.title, this.message}) : super('div', classes: 'toast') {
+  HtmlToast({this.title, @required this.message})
+      : super('div', classes: 'toast') {
     if (title != null) {
       add(label(text: title));
     }
     add(div(text: message));
-  }
 
-  static const Duration animationDelay = Duration(milliseconds: 500);
-  static const Duration defaultHideDelay = Duration(seconds: 4);
-  static const Duration extendedHideDelay = Duration(seconds: 10);
+    toastAnimator = HtmlToastAnimator(this);
+  }
 
   final String title;
-  @required
+
   final String message;
 
-  void show({Duration hideDelay = defaultHideDelay}) async {
-    await window.animationFrame;
+  HtmlToastAnimator toastAnimator;
 
-    element.style.left = '0px';
-
-    Timer(animationDelay, () {
-      Timer(hideDelay, _hide);
-    });
-  }
-
-  void _hide() {
-    element.style.left = '400px';
-
-    Timer(animationDelay, dispose);
+  void show({Duration hideDelay = HtmlToastAnimator.defaultHideDelay}) async {
+    toastAnimator.show(hideDelay: hideDelay);
   }
 
   @override
   String toString() => '$title $message';
+}
+
+class HtmlSurveyToast extends CoreElement {
+  HtmlSurveyToast(this._url) : super('div', classes: 'toast') {
+    toastAnimator = HtmlToastAnimator(this);
+
+    layoutVertical();
+    add([
+      div()
+        ..layoutHorizontal()
+        ..add([
+          label(text: 'Help improve DevTools! ', c: 'toast-title'),
+          surveyLink =
+              a(text: 'Take our Q3 survey', href: _url, target: '_blank')
+                ..click(() {
+                  toastAnimator.hide();
+                }),
+          label(text: '.'),
+          div()..flex(),
+          span(c: 'octicon octicon-x flash-close js-flash-close')
+            ..click(() {
+              toastAnimator.hide();
+            }),
+        ]),
+      div(
+          text:
+              'By clicking on this link, you agree to share feature usage along'
+              ' with the survey responses.'),
+    ]);
+  }
+
+  String get url => _url;
+  String _url;
+  set url(String url) {
+    _url = url;
+    surveyLink.setAttribute('href', url);
+  }
+
+  CoreElement surveyLink;
+
+  HtmlToastAnimator toastAnimator;
+
+  void show() async {
+    toastAnimator.show(hideDelay: HtmlToastAnimator.infiniteHideDelay);
+  }
+}
+
+class HtmlToastAnimator {
+  HtmlToastAnimator(this.element);
+
+  static const Duration _animationDelay = Duration(milliseconds: 500);
+
+  static const Duration defaultHideDelay = Duration(seconds: 4);
+
+  static const Duration extendedHideDelay = Duration(seconds: 10);
+
+  static const Duration infiniteHideDelay = null;
+
+  final CoreElement element;
+
+  void show({Duration hideDelay = defaultHideDelay}) async {
+    await window.animationFrame;
+
+    element.element.style.left = '0px';
+
+    // Skip creating the timer if the selected delay is [infiniteHideDelay].
+    if (hideDelay == infiniteHideDelay) return;
+
+    Timer(_animationDelay, () {
+      Timer(hideDelay, hide);
+    });
+  }
+
+  void hide() {
+    element.element.style.left = '400px';
+    Timer(_animationDelay, element.dispose);
+  }
 }
 
 class HtmlConnectDialog {
