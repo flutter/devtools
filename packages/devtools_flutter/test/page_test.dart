@@ -20,10 +20,7 @@ void main() {
         (WidgetTester tester) async {
       await setWindowSize(const Size(800.0, 1200.0));
 
-      await tester.pumpWidget(wrap(
-        const Page(child: content)
-      ));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(wrap(const Page(child: content)));
       expect(find.byKey(contentKey), findsOneWidget);
       expect(find.byKey(Page.narrowWidth), findsOneWidget);
       expect(find.byKey(Page.fullWidth), findsNothing);
@@ -31,12 +28,9 @@ void main() {
 
     testWidgets('displays in full-width mode without error',
         (WidgetTester tester) async {
-      await setWindowSize(const Size(900.0, 1200.0));
+      await setWindowSize(const Size(1203.0, 1200.0));
 
-      await tester.pumpWidget(wrap(
-        const Page(child: content)
-      ));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(wrap(const Page(child: content)));
       expect(find.byKey(contentKey), findsOneWidget);
       expect(find.byKey(Page.fullWidth), findsOneWidget);
       expect(find.byKey(Page.narrowWidth), findsNothing);
