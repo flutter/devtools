@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'page.dart';
+import 'screen.dart';
 
-class ConnectPage extends StatefulWidget {
+class ConnectScreen extends StatefulWidget {
   @override
-  State<ConnectPage> createState() => _ConnectPageState();
+  State<ConnectScreen> createState() => _ConnectScreenState();
 }
 
-class _ConnectPageState extends State<ConnectPage> {
+class _ConnectScreenState extends State<ConnectScreen> {
   TextEditingController controller;
 
   @override
@@ -25,7 +25,7 @@ class _ConnectPageState extends State<ConnectPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Page(
+    return Screen(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

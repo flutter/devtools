@@ -5,7 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:devtools_flutter/src/page.dart';
+import 'package:devtools_flutter/src/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,20 +20,20 @@ void main() {
         (WidgetTester tester) async {
       await setWindowSize(const Size(800.0, 1200.0));
 
-      await tester.pumpWidget(wrap(const Page(child: content)));
+      await tester.pumpWidget(wrap(const Screen(child: content)));
       expect(find.byKey(contentKey), findsOneWidget);
-      expect(find.byKey(Page.narrowWidth), findsOneWidget);
-      expect(find.byKey(Page.fullWidth), findsNothing);
+      expect(find.byKey(Screen.narrowWidth), findsOneWidget);
+      expect(find.byKey(Screen.fullWidth), findsNothing);
     });
 
     testWidgets('displays in full-width mode without error',
         (WidgetTester tester) async {
       await setWindowSize(const Size(1203.0, 1200.0));
 
-      await tester.pumpWidget(wrap(const Page(child: content)));
+      await tester.pumpWidget(wrap(const Screen(child: content)));
       expect(find.byKey(contentKey), findsOneWidget);
-      expect(find.byKey(Page.fullWidth), findsOneWidget);
-      expect(find.byKey(Page.narrowWidth), findsNothing);
+      expect(find.byKey(Screen.fullWidth), findsOneWidget);
+      expect(find.byKey(Screen.narrowWidth), findsNothing);
     });
   });
 }

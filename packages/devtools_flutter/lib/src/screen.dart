@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'connect_page.dart';
 
 /// A page in the DevTools App, including the scaffolding and navigation tabs
 /// for navigating the app.
@@ -19,23 +18,23 @@ import 'connect_page.dart';
 /// ```
 ///
 /// For a sample implementation, see [ConnectPage].
-class Page extends StatefulWidget {
+class Screen extends StatefulWidget {
   static const Key narrowWidth = Key('Narrow Page');
   static const Key fullWidth = Key('Full-width Page');
 
   /// The width where we need to treat the page as narrow-width.
   static const double narrowPageWidth = 800.0;
-  const Page({Key key, @required this.child})
+  const Screen({Key key, @required this.child})
       : assert(child != null),
         super(key: key);
 
   final Widget child;
 
   @override
-  State<StatefulWidget> createState() => PageState();
+  State<StatefulWidget> createState() => ScreenState();
 }
 
-class PageState extends State<Page> with TickerProviderStateMixin {
+class ScreenState extends State<Screen> with TickerProviderStateMixin {
   TabController controller;
 
   @override
@@ -93,15 +92,15 @@ class PageState extends State<Page> with TickerProviderStateMixin {
         ),
       ],
     );
-    if (MediaQuery.of(context).size.width <= Page.narrowPageWidth) {
+    if (MediaQuery.of(context).size.width <= Screen.narrowPageWidth) {
       return AppBar(
-        key: Page.narrowWidth,
+        key: Screen.narrowWidth,
         title: const Text('Dart DevTools'),
         bottom: tabs,
       );
     }
     return AppBar(
-      key: Page.fullWidth,
+      key: Screen.fullWidth,
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
