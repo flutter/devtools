@@ -18,7 +18,7 @@ class Logger extends StatefulWidget {
 class LoggerState extends State<Logger> {
   LoggerState(this._logging);
 
-  Logging _logging;
+  final Logging _logging;
   final List<String> _saved = [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
@@ -32,6 +32,7 @@ class LoggerState extends State<Logger> {
     );
   }
 
+  // ignore: unused_element
   void _pushSaved() {
     Navigator.of(context).push(
       MaterialPageRoute(

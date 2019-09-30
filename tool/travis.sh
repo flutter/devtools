@@ -153,6 +153,11 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages/html_shim; pub get)
     (cd packages; pub global run tuneup check)
 
+    # Analyze case_study/
+    (cd case_study/memory_leak; flutter pub get)
+    (cd case_study/platform_channel; flutter pub get)
+    (cd case_study; pub global run tuneup check)
+
     # Analyze third_party/
     (cd third_party/packages/ansi_up; pub get)
     (cd third_party/packages/plotly_js; pub get)
