@@ -58,7 +58,8 @@ void main() {
         framework.surveyToast(await _generateSurveyUrl());
       }
 
-      await FrameworkCore.initVmService(
+      // ignore: unawaited_futures
+      FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
           framework.showError(title, error);
