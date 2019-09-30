@@ -10,9 +10,7 @@ void main() {
   final config = Config();
   runApp(
     MaterialApp(
-      theme: ThemeData.light().copyWith(
-        colorScheme: const ColorScheme.dark(),
-      ),
+      theme: ThemeData.light(),
       routes: config.routes,
     ),
   );

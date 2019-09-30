@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Page extends StatelessWidget {
-  const Page({Key key, @required this.child})
+class Screen extends StatelessWidget {
+  const Screen({Key key, @required this.child})
       : assert(child != null),
         super(key: key);
 
