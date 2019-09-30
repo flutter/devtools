@@ -60,11 +60,16 @@ class ServerApi {
   /// Handles all requests.
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
-  static FutureOr<shelf.Response> handle(shelf.Request request, [ServerApi api]) {
+  static FutureOr<shelf.Response> handle(
+    shelf.Request request, [
+    ServerApi api,
+  ]) {
     api ??= ServerApi();
     switch (request.url.path) {
       case 'api/logScreenView':
         return api.logScreenView(request);
+      case 'api/getUserLdap':
+        return api.getUserLdap(request);
       default:
         return api.notImplemented(request);
     }
@@ -77,9 +82,19 @@ class ServerApi {
   FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
       notImplemented(request);
 
+  /// Gets a user's LDAP for use in analytics and for distinguishing internal
+  /// users from external users.
+  ///
+  /// This endpoint is not supported externally and will only be implemented for
+  /// the version of DevTools used inside Google.
+  FutureOr<shelf.Response> getUserLdap(shelf.Request request) =>
+      notImplemented(request);
+
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
-  shelf.Response notImplemented(shelf.Request request) => shelf.Response.notFound(
-      '${request.url.path} is not implemented in this version of the DevTools '
-      'server.');
+  ///
+  /// This is a no-op 204 No Content response because returning 404 Not Found
+  /// creates unnecessary noise in the console.
+  FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
+      shelf.Response(204);
 }
