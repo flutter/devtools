@@ -85,8 +85,8 @@ class ServerApi {
   /// Gets a user's LDAP for use in analytics and for distinguishing internal
   /// users from external users.
   ///
-  /// This endpoint is not supported externally and will only return a valid
-  /// response if the user is from google3.
+  /// This endpoint is not supported externally and will only be implemented for
+  /// the version of DevTools used inside Google.
   FutureOr<shelf.Response> getUserLdap(shelf.Request request) =>
       notImplemented(request);
 
