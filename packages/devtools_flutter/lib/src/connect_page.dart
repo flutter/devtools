@@ -29,7 +29,7 @@ class _ConnectPageState extends State<ConnectPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Connect', style: textTheme.headline),
+          Text('Connect', style: textTheme.headline, key: const Key('Connect Title')),
           const Divider(),
           const Padding(padding: EdgeInsets.only(top: 10.0)),
           Text('Connect to a running app', style: textTheme.body2),
