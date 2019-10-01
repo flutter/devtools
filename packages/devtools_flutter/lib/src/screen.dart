@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 
-/// A page in the DevTools App, including the scaffolding and navigation tabs
+/// A screen in the DevTools App, including the scaffolding and navigation tabs
 /// for navigating the app.
 ///
 /// This widget is used by encapsulation instead of inheritance, so to add a
-/// FooPage to the app, you'll create a FooPage widget like so:
+/// FooScreen to the app, you'll create a FooScreen widget like so:
 ///
 /// ```dart
-/// class FooPage extends StatelessWidget {
+/// class FooScreen extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Page(
-///       child: /* Build out the page content */,
+///     return Screen(
+///       child: /* Build out the screen content */,
 ///     )
 ///   }
 /// }
 /// ```
 ///
-/// For a sample implementation, see [ConnectPage].
+/// For a sample implementation, see [ConnectScreen].
 class Screen extends StatefulWidget {
-  static const Key narrowWidth = Key('Narrow Page');
-  static const Key fullWidth = Key('Full-width Page');
+  static const Key narrowWidth = Key('Narrow Screen');
+  static const Key fullWidth = Key('Full-width Screen');
 
-  /// The width where we need to treat the page as narrow-width.
-  static const double narrowPageWidth = 800.0;
+  /// The width where we need to treat the screen as narrow-width.
+  static const double narrowScreenWidth = 800.0;
   const Screen({Key key, @required this.child})
       : assert(child != null),
         super(key: key);
@@ -92,7 +92,7 @@ class ScreenState extends State<Screen> with TickerProviderStateMixin {
         ),
       ],
     );
-    if (MediaQuery.of(context).size.width <= Screen.narrowPageWidth) {
+    if (MediaQuery.of(context).size.width <= Screen.narrowScreenWidth) {
       return AppBar(
         key: Screen.narrowWidth,
         title: const Text('Dart DevTools'),
