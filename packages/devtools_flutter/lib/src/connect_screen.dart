@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screen.dart';
 
+/// The screen in the app responsible for connecting.
 class ConnectScreen extends StatefulWidget {
   @override
   State<ConnectScreen> createState() => _ConnectScreenState();
@@ -29,15 +30,24 @@ class _ConnectScreenState extends State<ConnectScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Connect', style: textTheme.headline, key: const Key('Connect Title')),
+          Text(
+            'Connect',
+            style: textTheme.headline,
+            key: const Key('Connect Title'),
+          ),
           const _SpacedDivider(),
-          Text('Connect to a running app', style: textTheme.body2),
-          Text('Enter a URL to a running Dart or Flutter application',
-              style: textTheme.caption),
+          Text(
+            'Connect to a running app',
+            style: textTheme.body2,
+          ),
+          Text(
+            'Enter a URL to a running Dart or Flutter application',
+            style: textTheme.caption,
+          ),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildTextInput(),
           const _SpacedDivider(),
-          const Text('Additional features'),
+          // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
         ],
       ),
     );
@@ -82,6 +92,7 @@ class _SpacedDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(padding: EdgeInsets.only(bottom: 10.0), child: Divider());
+    return const Padding(
+        padding: EdgeInsets.only(bottom: 10.0), child: Divider());
   }
 }
