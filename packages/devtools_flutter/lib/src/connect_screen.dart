@@ -33,7 +33,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
           const Divider(),
           const Padding(padding: EdgeInsets.only(top: 10.0)),
           Text('Connect to a running app', style: textTheme.body2),
-          Text('Enter a port or URL to a running Dart or Flutter application',
+          Text('Enter a URL to a running Dart or Flutter application',
               style: textTheme.caption),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildTextInput(),
@@ -58,7 +58,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
-              hintText: 'Port or URL',
+              hintText: 'URL',
             ),
             maxLines: 1,
             controller: controller,
