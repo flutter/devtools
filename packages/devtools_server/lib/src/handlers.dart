@@ -68,8 +68,8 @@ class ServerApi {
     switch (request.url.path) {
       case 'api/logScreenView':
         return api.logScreenView(request);
-      case 'api/getUserLdap':
-        return api.getUserLdap(request);
+      case 'api/getUserId':
+        return api.getUserId(request);
       default:
         return api.notImplemented(request);
     }
@@ -82,12 +82,12 @@ class ServerApi {
   FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
       notImplemented(request);
 
-  /// Gets a user's LDAP for use in analytics and for distinguishing internal
+  /// Gets a user's id for use in analytics and for distinguishing internal
   /// users from external users.
   ///
   /// This endpoint is not supported externally and will only be implemented for
   /// the version of DevTools used inside Google.
-  FutureOr<shelf.Response> getUserLdap(shelf.Request request) =>
+  FutureOr<shelf.Response> getUserId(shelf.Request request) =>
       notImplemented(request);
 
   /// A [shelf.Response] for API calls that have not been implemented in this

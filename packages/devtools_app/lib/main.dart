@@ -99,8 +99,8 @@ Future<String> _generateSurveyUrl() async {
 
   final fromValue = uri.fragment ?? '';
 
-  final ldapResponse = await HttpRequest.request('/api/getUserLdap');
-  final internalValue = (ldapResponse.status == 200).toString();
+  final userIdResponse = await HttpRequest.request('/api/getUserId');
+  final internalValue = (userIdResponse.status == 200).toString();
 
   final surveyUri = Uri(
     scheme: 'https',
