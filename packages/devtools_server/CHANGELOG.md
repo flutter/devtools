@@ -1,6 +1,6 @@
 ## 0.1.10
 - Add API for handling http requests.
-- Add API endpoints for `logScreenView` and `getUserId`.
+- Add API endpoint for `logScreenView`.
 
 ## 0.1.9
 
