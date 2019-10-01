@@ -16,9 +16,17 @@
 			"program": "bin/devtools.dart",
 			"cwd": "packages/devtools",
 			"args": [
-				"--launch-browser"
+				"--launch-browser",
+				"--machine",
+				"--enable-notifications"
 			],
 			"preLaunchTask": "Build Release Package"
 		},
+		{
+			"name": "Current File",
+			"type": "dart",
+			"request": "launch",
+			"program": "${file}"
+		}
 	]
 }

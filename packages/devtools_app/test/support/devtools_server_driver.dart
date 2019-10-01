@@ -12,7 +12,7 @@ class DevToolsServerDriver {
   DevToolsServerDriver._(
       this._process, this._stdin, Stream<String> _stdout, this.stderr)
       : output = _stdout.map((line) {
-          _trace(line);
+          _trace('<== $line');
           return line;
         }).map((line) => jsonDecode(line) as Map<String, dynamic>);
 

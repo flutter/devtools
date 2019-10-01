@@ -411,3 +411,12 @@ class TimeRange {
   @override
   int get hashCode => hashValues(start, end);
 }
+
+bool isDebugBuild() {
+  bool debugBuild = false;
+  assert((() {
+    debugBuild = true;
+    return true;
+  })());
+  return debugBuild;
+}
