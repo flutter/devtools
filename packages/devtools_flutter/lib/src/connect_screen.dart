@@ -30,15 +30,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Connect', style: textTheme.headline, key: const Key('Connect Title')),
-          const Divider(),
-          const Padding(padding: EdgeInsets.only(top: 10.0)),
+          const _SpacedDivider(),
           Text('Connect to a running app', style: textTheme.body2),
           Text('Enter a URL to a running Dart or Flutter application',
               style: textTheme.caption),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildTextInput(),
-          const Divider(),
-          const Padding(padding: EdgeInsets.only(top: 10.0)),
+          const _SpacedDivider(),
           const Text('Additional features'),
         ],
       ),
@@ -76,4 +74,14 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   void connect() {}
+}
+
+// A divider that adds spacing underneath for forms.
+class _SpacedDivider extends StatelessWidget {
+  const _SpacedDivider({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(padding: EdgeInsets.only(bottom: 10.0), child: Divider());
+  }
 }
