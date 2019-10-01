@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Wraps [widget] with the build context it needs to load in a test.
-Widget wrap(Widget widget, {Size windowSize}) => MaterialApp(home: widget);
+Widget wrap(Widget widget) => MaterialApp(home: widget);
 
 /// Sets the size of the app window under test to [windowSize].
 ///
