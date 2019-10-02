@@ -103,7 +103,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # Get Flutter.
-    ./get_flutter.sh
+    ./tool/get_flutter.sh
 
     flutter doctor
 
@@ -140,7 +140,7 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages; pub global run tuneup check)
 
     # Get Flutter.
-    ./get_flutter.sh
+    ./tool/get_flutter.sh
 
     # Analyze case_study/
     (cd case_study/memory_leak; flutter pub get)
