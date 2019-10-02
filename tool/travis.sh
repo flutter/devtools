@@ -13,8 +13,10 @@ pushd packages/devtools
     pub get
 popd
 
-pushd packages/devtools_app
-echo `pwd`
+# Get Flutter.
+if [[ $TRAVIS_OS_NAME != "windows" ]]; then
+    ./tool/get_flutter.sh
+fi
 
 # Add globally activated packages to the path.
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
@@ -22,6 +24,9 @@ if [[ $TRAVIS_OS_NAME == "windows" ]]; then
 else
     export PATH=$PATH:~/.pub-cache/bin
 fi
+
+pushd packages/devtools_app
+echo `pwd`
 
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -102,9 +107,6 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
-    # Get Flutter.
-    ./tool/get_flutter.sh
-
     flutter doctor
 
     # Put the Flutter version into a variable.
@@ -138,9 +140,6 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages/devtools_testing; pub get)
     (cd packages/html_shim; pub get)
     (cd packages; pub global run tuneup check)
-
-    # Get Flutter.
-    ./tool/get_flutter.sh
 
     # Analyze case_study/
     (cd case_study/memory_leak; flutter pub get)
