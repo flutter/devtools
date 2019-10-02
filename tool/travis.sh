@@ -103,19 +103,8 @@ elif [ "$BOT" = "test_dart2js" ]; then
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # Get Flutter.
-    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
-        echo "Cloning stable Flutter branch"
-        git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+    ./get_flutter.sh
 
-        # Set the suffix so we use stable goldens.
-        export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
-    else
-        echo "Cloning master Flutter branch"
-        git clone https://github.com/flutter/flutter.git ../flutter
-    fi
-    cd ..
-    export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
-    flutter config --no-analytics
     flutter doctor
 
     # Put the Flutter version into a variable.
@@ -129,9 +118,6 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
 
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
-
-    # Return to the devtools_app directory.
-    cd devtools_app
 
     # Provision our packages using Flutter's version of Dart.
     pub get
@@ -152,6 +138,9 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages/devtools_testing; pub get)
     (cd packages/html_shim; pub get)
     (cd packages; pub global run tuneup check)
+
+    # Get Flutter.
+    ./get_flutter.sh
 
     # Analyze case_study/
     (cd case_study/memory_leak; flutter pub get)
