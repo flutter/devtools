@@ -1,7 +1,6 @@
 ## 0.1.8 - 2019-10-01
 * Query a flutter isolate for the target frame rate (e.g. 60FPS vs 120FPS). Respect this value in the Timeline.
 * Polish import / export flow for Timeline.
-* Add case study applications for memory leaks and platform channel activity.
 * Depend on latest `package:devtools_server`.
 
 ## 0.1.7 - 2019-09-09
