@@ -180,11 +180,8 @@ void main() {
       expect(serverResponse['clients'][0]['vmServiceUri'],
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
-    // TODO(dantup): This test will fail until the devtools pubspec.yaml
-    // references a version of devtools_server that has this support!
-    // Usually we should only skip when not in release mode, since the API only
-    // works in release mode.
-  }, skip: true /*!testInReleaseMode*/);
+    // The API only works in release mode, so skip if not running release tests.
+  }, !testInReleaseMode);
 }
 
 Future<Map<String, dynamic>> launchDevTools({bool reuseWindows = false}) async {
