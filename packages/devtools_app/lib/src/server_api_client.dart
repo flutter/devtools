@@ -33,6 +33,7 @@ class DevToolsServerApiClient {
   }
 
   final SseClient _channel;
+  Notification _lastNotification;
 
   int _nextRequestId = 0;
   void _send(String method, [Map<String, dynamic> params]) {
@@ -78,7 +79,18 @@ class DevToolsServerApiClient {
       return;
     }
 
-    Notification('Dart DevTools',
+    // Dismiss any earlier notifications first so they don't build up
+    // in the notifications list if the user presses the button multiple times.
+    dismissNotifications();
+
+    _lastNotification = Notification('Dart DevTools',
         body: 'DevTools is available in this existing browser window');
+  }
+
+  void dismissNotifications() {
+    if (_lastNotification != null) {
+      print('Closing notification!');
+    }
+    _lastNotification?.close();
   }
 }

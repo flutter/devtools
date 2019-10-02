@@ -150,6 +150,9 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
     try {
       devToolsServer = DevToolsServerApiClient();
+      // If we showed a notification for DevTools and the user manually clicked
+      // into the window instead, we should hide the notification automatically.
+      html.window.onFocus.listen((_) => devToolsServer.dismissNotifications());
 
       // TODO(dantup): As a workaround for not being able to reconnect DevTools to
       // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
