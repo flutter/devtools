@@ -35,15 +35,22 @@ class DevToolsServerDriver {
 
   bool kill() => _process.kill();
 
-  static Future<DevToolsServerDriver> create() async {
+  static Future<DevToolsServerDriver> create({
+    int port = 0,
+    int tryPorts,
+  }) async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
     final args = [
       '../devtools/bin/devtools.dart',
       '--machine',
       '--port',
-      '0',
+      '$port',
     ];
+
+    if (tryPorts != null) {
+      args.addAll(['--try-ports', '$tryPorts']);
+    }
 
     // TODO: This needs enabling once the server version that supports headless
     // has been published.

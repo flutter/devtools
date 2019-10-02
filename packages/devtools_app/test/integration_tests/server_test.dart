@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
+import 'util.dart';
 
 CliAppFixture appFixture;
 DevToolsServerDriver server;
@@ -76,6 +77,31 @@ void main() {
     // Expect the VM service to see the launchDevTools service registered.
     expect(registeredServices, contains('launchDevTools'));
   }, timeout: const Timeout.factor(10));
+
+  test('can bind to next available port', () async {
+    final server1 = await DevToolsServerDriver.create(port: 8855);
+    try {
+      // Give first server chance to grab the port before we start the second.
+      await shortDelay();
+      final server2 =
+          await DevToolsServerDriver.create(port: 8855, tryPorts: 2);
+      try {
+        final event1 = await server1.output
+            .firstWhere((map) => map['event'] == 'server.started');
+        final event2 = await server2.output
+            .firstWhere((map) => map['event'] == 'server.started');
+
+        expect(event1['params']['port'], equals(8855));
+        expect(event2['params']['port'], equals(8856));
+      } finally {
+        server2.kill();
+      }
+    } finally {
+      server1.kill();
+    }
+    // TODO(dantup): This test will fail until the devtools pubspec.yaml
+    // references a version of devtools_server that has this support!
+  }, skip: true, timeout: const Timeout.factor(10));
 
   group('Server API', () {
     test(
