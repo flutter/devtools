@@ -6,7 +6,7 @@
 
 ## 0.1.7 - 2019-09-09
 * Fix bug with profile mode detection.
-* Enable expand all / collapse functionality in the inspector details tree (available in Flutter 1.10.0 and later).
+* Enable expand all / collapse to selected functionality in the inspector (will not be available until certain changes land in Flutter stable).
 * Fix analytics bug for apps running in profile mode.
 * Fix bug in memory experiment handling.
 * Hide Dart VM flags when the connected app is not running on the Dart VM (web apps).
