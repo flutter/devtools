@@ -235,7 +235,7 @@ Future<Map<String, dynamic>> _waitForClients(
               clients
                   .any((c) => c['hasConnection'] == requiredConnectionState));
     },
-    timeout: const Duration(seconds: 10),
+    timeout: const Duration(seconds: 30),
     timeoutMessage: 'Server did not return any known clients',
     delay: const Duration(seconds: 1),
   );
