@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:html_shim/html.dart' show document;
 
-void main() => runApp(MyApp());
+void main() {
+  // Clear out the unneeded HTML from index.html.
+  document.body.querySelector('#pure-dart').innerHtml = '';
+
+  // Now run the app.
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
