@@ -64,12 +64,14 @@ if [ "$BOT" = "main" ]; then
     pub get
     pub global activate webdev
 
+    echo "Analyzing package:devtools_app"
+
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
 
-    if [[ $(dartfmt -n --set-exit-if-changed lib/ test/ web/) ]]; then
-        echo "Failed dartfmt check: run dartfmt -w lib/ test/ web/"
-        dartfmt -n --set-exit-if-changed lib/ test/ web/
+    if [[ $(dartfmt -n --set-exit-if-changed lib/ test/) ]]; then
+        echo "Failed dartfmt check: run dartfmt -w lib/ test/"
+        dartfmt -n --set-exit-if-changed lib/ test/
         exit 1
     fi
 
@@ -79,8 +81,24 @@ if [ "$BOT" = "main" ]; then
     # Analyze the source.
     pub global activate tuneup && pub global run tuneup check
 
-    # Ensure we can build the app.
+    # Analyze, then ensure we can build the web source.
+    pushd ../devtools_web
+
+    echo "Analyzing package:devtools_web"
+
+    echo "Checking dartfmt..."
+
+    if [[ $(dartfmt -n --set-exit-if-changed web/) ]]; then
+        echo "Failed dartfmt check: run dartfmt -w web/"
+        dartfmt -n --set-exit-if-changed web/
+        exit 1
+    fi
+
+    pub global run tuneup check
+
     pub run build_runner build -o web:build --release
+
+    popd
 
 elif [ "$BOT" = "test_ddc" ]; then
 
@@ -150,6 +168,7 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages/devtools_app; pub get)
     (cd packages/devtools_server; pub get)
     (cd packages/devtools_testing; pub get)
+    (cd packages/devtools_web; pub get)
     (cd packages/html_shim; pub get)
     (cd packages; pub global run tuneup check)
 
