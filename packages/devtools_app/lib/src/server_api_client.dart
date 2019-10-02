@@ -7,8 +7,10 @@ import 'dart:html';
 
 import 'package:sse/client/sse_client.dart';
 
+import 'main.dart';
+
 class DevToolsServerApiClient {
-  DevToolsServerApiClient() : _channel = SseClient('/api/sse') {
+  DevToolsServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
     _channel.stream.listen((msg) {
       try {
         final request = jsonDecode(msg);
@@ -16,6 +18,9 @@ class DevToolsServerApiClient {
         switch (request['method']) {
           case 'connectToVm':
             connectToVm(request['params']);
+            return;
+          case 'showPage':
+            showPage(request['params']);
             return;
           case 'enableNotifications':
             Notification.requestPermission();
@@ -32,6 +37,7 @@ class DevToolsServerApiClient {
     });
   }
 
+  final HtmlPerfToolFramework _framework;
   final SseClient _channel;
   Notification _lastNotification;
 
@@ -50,7 +56,7 @@ class DevToolsServerApiClient {
     _send('disconnected');
   }
 
-  void connectToVm(dynamic requestParams) {
+  void connectToVm(Map<String, dynamic> requestParams) {
     // Reload the page with the new VM service URI in the querystring.
     // TODO(dantup): Remove this code and replace with code that just reconnects
     // (and optionall notifies based on requestParams['notify']) when it's
@@ -71,6 +77,14 @@ class DevToolsServerApiClient {
     }
     window.location
         .replace(uri.replace(queryParameters: newUriParams).toString());
+  }
+
+  void showPage(Map<String, dynamic> requestParams) {
+    final String pageId = requestParams['page'];
+    final screen = _framework.getScreen(pageId);
+    if (screen != null) {
+      _framework.load(screen);
+    }
   }
 
   Future<void> notify() async {

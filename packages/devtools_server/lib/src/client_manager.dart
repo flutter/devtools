@@ -94,6 +94,13 @@ class DevToolsClient {
     }));
   }
 
+  Future<void> showPage(String pageId) async {
+    _connection.sink.add(jsonEncode({
+      'method': 'showPage',
+      'params': {'page': pageId}
+    }));
+  }
+
   final SseConnection _connection;
   Uri _vmServiceUri;
   Uri get vmServiceUri => _vmServiceUri;
