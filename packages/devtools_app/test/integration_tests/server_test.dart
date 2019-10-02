@@ -181,7 +181,7 @@ void main() {
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
     // The API only works in release mode, so skip if not running release tests.
-  }, !testInReleaseMode);
+  }, skip: !testInReleaseMode);
 }
 
 Future<Map<String, dynamic>> launchDevTools({bool reuseWindows = false}) async {
