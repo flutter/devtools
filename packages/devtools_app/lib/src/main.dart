@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' as html;
 
+import 'package:html_shim/html.dart' as html;
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger.dart';
@@ -18,6 +18,7 @@ import 'logging/html_logging_screen.dart';
 import 'memory/html_memory_screen.dart';
 import 'model/html_model.dart';
 import 'performance/html_performance_screen.dart';
+import 'server_api_client.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/html_timeline_screen.dart';
 import 'ui/analytics.dart' as ga;
@@ -38,6 +39,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
   HtmlPerfToolFramework() {
     html.window.onError.listen(_gAReportExceptions);
 
+    initDevToolsServerConnection();
     initGlobalUI();
     initTestingModel();
   }
@@ -64,6 +66,8 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
   static const _reloadActionId = 'reload-action';
   static const _restartActionId = 'restart-action';
+
+  DevToolsServerApiClient devToolsServer;
 
   void initGlobalUI() async {
     // Listen for clicks on the 'send feedback' button.
@@ -135,6 +139,44 @@ class HtmlPerfToolFramework extends HtmlFramework {
   void initTestingModel() {
     final app = HtmlApp.register(this);
     screensReady.future.then(app.devToolsReady);
+  }
+
+  void initDevToolsServerConnection() {
+    // When running the debug DDC Build, the server won't be running so we
+    // can't connect to its API (for now at least, the API is optional).
+    if (isDebugBuild()) {
+      return;
+    }
+
+    try {
+      devToolsServer = DevToolsServerApiClient();
+
+      // TODO(dantup): As a workaround for not being able to reconnect DevTools to
+      // a new VM yet (https://github.com/flutter/devtools/issues/989) we reload
+      // the page and pass a querystring variable to know that we need to notify
+      // the user.
+      final uri = Uri.parse(html.window.location.href);
+      if (uri.queryParameters.containsKey('notify')) {
+        final newParams = Map.of(uri.queryParameters)..remove('notify');
+        html.window.history.pushState(
+            null, null, uri.replace(queryParameters: newParams).toString());
+        devToolsServer.notify();
+      }
+
+      serviceManager.onStateChange.listen((connected) {
+        try {
+          if (connected) {
+            devToolsServer.notifyConnected(serviceManager.service.connectedUri);
+          } else {
+            devToolsServer.notifyDisconnected();
+          }
+        } catch (e) {
+          print('Failed to notify server of connection status: $e');
+        }
+      });
+    } catch (e) {
+      print('Failed to connect to SSE API: $e');
+    }
   }
 
   void disableAppWithError(String title, [dynamic error]) {
