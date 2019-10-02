@@ -1,0 +1,18 @@
+name: devtools_web
+description: A wrapper for the Dart HTML version of DevTools.
+
+# Note: when updating this version, please update the corresponding entry in
+# ../devtools_app/pubspec.yaml to the same version.
+version: 0.1.8-dev.2
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  devtools_app:
+    path: ../devtools_app
+
+# pubspec.yaml
+dev_dependencies:
+  build_runner: ">=1.6.2 <2.0.0"
+  build_web_compilers: ">=1.2.0 <3.0.0"
