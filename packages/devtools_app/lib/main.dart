@@ -14,7 +14,7 @@ import 'package:platform_detect/platform_detect.dart';
 void main() {
   // Run in a zone in order to catch all Dart exceptions.
   runZoned(
-    () async {
+    () {
       // Initialize the core framework.
       FrameworkCore.init(window.location.toString());
 
@@ -55,10 +55,9 @@ void main() {
       // required for a) and b) needs to be added to devtools_server.
       // ignore: dead_code
       if (false) {
-        framework.surveyToast(await _generateSurveyUrl());
+        framework.surveyToast(_generateSurveyUrl());
       }
 
-      // ignore: unawaited_futures
       FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
@@ -83,7 +82,7 @@ void main() {
   );
 }
 
-Future<String> _generateSurveyUrl() async {
+String _generateSurveyUrl() {
   const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
@@ -99,8 +98,8 @@ Future<String> _generateSurveyUrl() async {
 
   final fromValue = uri.fragment ?? '';
 
-  final userIdResponse = await HttpRequest.request('/api/getUserId');
-  final internalValue = (userIdResponse.status == 200).toString();
+  // TODO(djshuckerow): override this value for internal users.
+  const internalValue = false;
 
   final surveyUri = Uri(
     scheme: 'https',
