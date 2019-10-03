@@ -289,10 +289,10 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="HyV-fh-RgO">
                         <items>
-                            <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
+                            <menuItem title="Enter Full DevToolsScaffold" keyEquivalent="f" id="4J7-dP-txa">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
-                                    <action selector="toggleFullScreen:" target="-1" id="dU3-MA-1Rq"/>
+                                    <action selector="toggleFullDevToolsScaffold:" target="-1" id="dU3-MA-1Rq"/>
                                 </connections>
                             </menuItem>
                         </items>

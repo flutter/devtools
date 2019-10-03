@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import 'src/config.dart';
+import 'src/scaffold.dart';
 
 void main() {
   // When running in a desktop embedder, Flutter throws an error because the
@@ -15,7 +16,10 @@ void main() {
   runApp(
     MaterialApp(
       theme: ThemeData.light(),
-      routes: config.routes,
+      home: DevToolsScaffold(
+        allScreens: config.allScreens,
+        screensWithTabs: config.screensWithTabs,
+      ),
     ),
   );
 }

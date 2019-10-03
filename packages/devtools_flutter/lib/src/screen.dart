@@ -4,119 +4,61 @@
 
 import 'package:flutter/material.dart';
 
-/// A screen in the DevTools App, including the scaffolding and navigation tabs
-/// for navigating the app.
-///
-/// This widget is used by encapsulation instead of inheritance, so to add a
-/// FooScreen to the app, you'll create a FooScreen widget like so:
-///
-/// ```dart
-/// class FooScreen extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return Screen(
-///       child: /* Build out the screen content */,
-///     )
-///   }
-/// }
-/// ```
-///
-/// For a sample implementation, see [ConnectScreen].
-class Screen extends StatefulWidget {
-  const Screen({Key key, @required this.child})
-      : assert(child != null),
-        super(key: key);
+/// Defines pages shown in the tabbar of the app.
+@immutable
+abstract class Screen {
+  const Screen(this.name, this.route);
 
-  static const Key narrowWidth = Key('Narrow Screen');
-  static const Key fullWidth = Key('Full-width Screen');
+  /// The human-readable name to show for the app.
+  final String name;
 
-  /// The width where we need to treat the screen as narrow-width.
-  static const double narrowScreenWidth = 800.0;
+  /// The route to show in the browser window.
+  final String route;
 
-  final Widget child;
+  /// Builds the tab to show for this widget in the app's main navbar.
+  ///
+  /// This will only be used if this [Screen] is in the app's
+  /// [Config.screensWithTabs].
+  Widget buildTab(BuildContext context);
 
-  @override
-  State<StatefulWidget> createState() => ScreenState();
+  /// Builds the displayed body for this tab.
+  Widget build(BuildContext context);
 }
 
-class ScreenState extends State<Screen> with TickerProviderStateMixin {
-  TabController controller;
+/// A placeholder screen that hasn't been implemented.
+class EmptyScreen extends Screen {
+  const EmptyScreen(String name, String route, this.icon) : super(name, route);
 
-  @override
-  void initState() {
-    super.initState();
-    controller = TabController(length: 5, vsync: this);
-  }
+  static const EmptyScreen inspector =
+      EmptyScreen('Flutter Inspector', 'inspector', Icons.map);
+  static const EmptyScreen timeline =
+      EmptyScreen('Timeline', 'timeline', Icons.timeline);
+  static const EmptyScreen performance =
+      EmptyScreen('Performance', 'performance', Icons.computer);
+  static const EmptyScreen memory =
+      EmptyScreen('Memory', 'memory', Icons.memory);
+  static const EmptyScreen logging =
+      EmptyScreen('Logging', 'Logging', Icons.directions_run);
 
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  /// The icon to show for this screen in a tab.
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(),
-      body: Align(
-        alignment: Alignment.topLeft,
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: widget.child,
-        ),
+    return Center(
+      child: Text(
+        'Hello $name',
+        style: Theme.of(context).accentTextTheme.headline,
       ),
     );
   }
 
-  /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
-  /// depending on the screen width.
-  Widget buildAppBar() {
-    final tabs = TabBar(
-      controller: controller,
-      isScrollable: true,
-      tabs: <Widget>[
-        Tab(
-          text: 'Flutter Inspector',
-          icon: Icon(Icons.map),
-        ),
-        Tab(
-          text: 'Timeline',
-          icon: Icon(Icons.timeline),
-        ),
-        Tab(
-          text: 'Performance',
-          icon: Icon(Icons.computer),
-        ),
-        Tab(
-          text: 'Memory',
-          icon: Icon(Icons.memory),
-        ),
-        Tab(
-          text: 'Logging',
-          icon: Icon(Icons.directions_run),
-        ),
-      ],
-    );
-    if (MediaQuery.of(context).size.width <= Screen.narrowScreenWidth) {
-      return AppBar(
-        key: Screen.narrowWidth,
-        title: const Text('Dart DevTools'),
-        bottom: tabs,
-      );
-    }
-    return AppBar(
-      key: Screen.fullWidth,
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('Dart DevTools'),
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 32.0, right: 32.0),
-            child: tabs,
-          ),
-        ],
-      ),
+  @override
+  Widget buildTab(BuildContext context) {
+    // TODO: implement buildTab
+    return Tab(
+      text: name,
+      icon: Icon(icon),
     );
   }
 }
