@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'chrome.dart';
+
 const verbose = true;
 
 class DevToolsServerDriver {
@@ -38,10 +40,18 @@ class DevToolsServerDriver {
   static Future<DevToolsServerDriver> create() async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
-    final Process process = await Process.start(
-      Platform.resolvedExecutable,
-      <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
-    );
+    final args = <String>[
+      '../devtools/bin/devtools.dart',
+      '--machine',
+      '--port',
+      '0'
+    ];
+
+    if (useChromeHeadless && headlessModeIsSupported) {
+      args.add('--headless');
+    }
+    final Process process =
+        await Process.start(Platform.resolvedExecutable, args);
 
     return DevToolsServerDriver._(
         process,
