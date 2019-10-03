@@ -63,20 +63,22 @@ else
     git clone https://github.com/flutter/flutter.git ./flutter
 fi
 export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+flutter config --no-analytics
+flutter doctor
 
 pushd packages/devtools_app
 echo `pwd`
 
-# Print out the versions and ensure we can call Dart, Pub, and Flutter.
+# Print out the versions and ensure we can call Dart, Pub,.
 dart --version
-pub --version
+flutter pub --version
 flutter --version
 
 if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
-    pub get
-    pub global activate webdev
+    flutter pub get
+    flutter pub global activate webdev
 
     # Verify that dartfmt has been run.
     echo "Checking dartfmt..."
@@ -91,33 +93,30 @@ if [ "$BOT" = "main" ]; then
     dart tool/version_check.dart
 
     # Analyze the source.
-    pub global activate tuneup && pub global run tuneup check
+    flutter pub global activate tuneup && flutter pub global run tuneup check
 
     # Ensure we can build the app.
-    pub run build_runner build -o web:build --release
+    flutter pub run build_runner build -o web:build --release
 
 elif [ "$BOT" = "test_ddc" ]; then
 
     # Provision our packages.
-    pub get
-    pub global activate webdev
+    flutter pub get
+    flutter pub global activate webdev
 
-    pub run test -j1 --reporter expanded --exclude-tags useFlutterSdk
-    pub run build_runner test -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    flutter pub run test -j1 --reporter expanded --exclude-tags useFlutterSdk
+    flutter pub run build_runner test -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
     # Provision our packages.
-    pub get
-    pub global activate webdev
+    flutter pub get
+    flutter pub global activate webdev
 
-    WEBDEV_RELEASE=true pub run --enable-asserts test -j1 --reporter expanded --exclude-tags useFlutterSdk
-    pub run build_runner test -r -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    WEBDEV_RELEASE=true flutter pub run --enable-asserts test -j1 --reporter expanded --exclude-tags useFlutterSdk
+    flutter pub run build_runner test -r -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
-    cd ..
-    flutter config --no-analytics
-    flutter doctor
 
     # Put the Flutter version into a variable.
     # First awk extracts "Flutter x.y.z-pre.a":
@@ -131,15 +130,12 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
     echo "which dart: " `which dart`
 
-    # Return to the devtools_app directory.
-    cd devtools_app
-
     # Provision our packages using Flutter's version of Dart.
-    pub get
-    pub global activate webdev
+    flutter pub get
+    flutter pub global activate webdev
 
     # Run tests that require the Flutter SDK.
-    pub run test -j1 --reporter expanded --tags useFlutterSdk
+    flutter pub run test -j1 --reporter expanded --tags useFlutterSdk
 
 elif [ "$BOT" = "packages" ]; then
 
@@ -148,22 +144,22 @@ elif [ "$BOT" = "packages" ]; then
     flutter pub global activate tuneup
 
     # Analyze packages/
-    (cd packages/devtools_app; pub get)
-    (cd packages/devtools_server; pub get)
+    (cd packages/devtools_app; flutter pub get)
+    (cd packages/devtools_server; flutter pub get)
     (cd packages/devtools_flutter; flutter pub get)
-    (cd packages/devtools_testing; pub get)
-    (cd packages/html_shim; pub get)
+    (cd packages/devtools_testing; flutter pub get)
+    (cd packages/html_shim; flutter pub get)
     # TODO(djshuckerow): Re-enable this check as part of using Flutter to run.
     (cd packages; flutter pub global run tuneup check)
 
     # Analyze third_party/
-    (cd third_party/packages/ansi_up; pub get)
-    (cd third_party/packages/plotly_js; pub get)
-    (cd third_party/packages/split; pub get)
-    (cd third_party/packages; pub global run tuneup check)
+    (cd third_party/packages/ansi_up; flutter pub get)
+    (cd third_party/packages/plotly_js; flutter pub get)
+    (cd third_party/packages/split; flutter pub get)
+    (cd third_party/packages; flutter pub global run tuneup check)
 
     # Analyze Dart code in tool/
-    (cd tool; pub global run tuneup check)
+    (cd tool; flutter pub global run tuneup check)
 
     pushd packages/devtools_app
 
