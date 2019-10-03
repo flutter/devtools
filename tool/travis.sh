@@ -54,6 +54,19 @@ function flutter {
     fi
 }
 
+# Get Flutter.
+if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+    echo "Cloning stable Flutter branch"
+    git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+
+    # Set the suffix so we use stable goldens.
+    export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
+else
+    echo "Cloning master Flutter branch"
+    git clone https://github.com/flutter/flutter.git ../flutter
+fi
+export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+
 # Print out the versions and ensure we can call both Dart and Pub.
 dart --version
 pub --version
@@ -101,20 +114,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
     pub run build_runner test -r -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
-
-    # Get Flutter.
-    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
-        echo "Cloning stable Flutter branch"
-        git clone https://github.com/flutter/flutter.git --branch stable ../flutter
-
-        # Set the suffix so we use stable goldens.
-        export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
-    else
-        echo "Cloning master Flutter branch"
-        git clone https://github.com/flutter/flutter.git ../flutter
-    fi
     cd ..
-    export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
     flutter config --no-analytics
     flutter doctor
 
@@ -145,13 +145,16 @@ elif [ "$BOT" = "packages" ]; then
     popd
 
     pub global activate tuneup
+    flutter pub global activate tuneup
 
     # Analyze packages/
     (cd packages/devtools_app; pub get)
     (cd packages/devtools_server; pub get)
+    (cd packages/devtools_flutter; flutter pub get)
     (cd packages/devtools_testing; pub get)
     (cd packages/html_shim; pub get)
-    (cd packages; pub global run tuneup check)
+    # TODO(djshuckerow): Re-enable this check as part of using Flutter to run.
+    (cd packages; flutter pub global run tuneup check)
 
     # Analyze third_party/
     (cd third_party/packages/ansi_up; pub get)

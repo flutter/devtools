@@ -23,14 +23,15 @@ import 'package:flutter/material.dart';
 ///
 /// For a sample implementation, see [ConnectScreen].
 class Screen extends StatefulWidget {
+  const Screen({Key key, @required this.child})
+      : assert(child != null),
+        super(key: key);
+
   static const Key narrowWidth = Key('Narrow Screen');
   static const Key fullWidth = Key('Full-width Screen');
 
   /// The width where we need to treat the screen as narrow-width.
   static const double narrowScreenWidth = 800.0;
-  const Screen({Key key, @required this.child})
-      : assert(child != null),
-        super(key: key);
 
   final Widget child;
 
