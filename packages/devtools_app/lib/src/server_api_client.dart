@@ -88,9 +88,6 @@ class DevToolsServerApiClient {
   }
 
   void dismissNotifications() {
-    if (_lastNotification != null) {
-      print('Closing notification!');
-    }
     _lastNotification?.close();
   }
 }
