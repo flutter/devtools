@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'ui/fake_flutter/fake_flutter.dart';
+import 'utils.dart';
 
 class FlutterVersion {
   FlutterVersion._({
@@ -15,7 +16,20 @@ class FlutterVersion {
     @required this.frameworkCommitDate,
     @required this.engineRevision,
     @required this.dartSdkVersion,
-  });
+  }) {
+    // Flutter versions can come in as '1.10.7-pre.42', so we strip out any
+    // characters that are not digits. We do not currently have a need to know
+    // more version parts than major, minor, and patch. If this changes, we can
+    // add support for the extra values.
+    final _versionParts = version.split('.').map((part) => String.fromCharCodes(
+        part.codeUnits.where((cu) => isDigit(cu)).toList())).toList();
+    versionMajor =
+        _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
+    versionMinor =
+        _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
+    versionPatch =
+        _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
+  }
 
   factory FlutterVersion.parse(Map<String, dynamic> json) {
     return FlutterVersion._(
@@ -42,6 +56,12 @@ class FlutterVersion {
   final String engineRevision;
 
   final String dartSdkVersion;
+
+  int versionMajor;
+
+  int versionMinor;
+
+  int versionPatch;
 
   String get flutterVersionSummary => [
         if (version != 'unknown') version,

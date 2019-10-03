@@ -152,6 +152,9 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
+/// Whether a given code unit is a digit (0-9).
+bool isDigit(int codeUnit) => codeUnit >= 48 && codeUnit <= 57;
+
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -419,4 +422,23 @@ bool isDebugBuild() {
     return true;
   })());
   return debugBuild;
+}
+
+int semVerCompare({
+  int major = 0,
+  int minor = 0,
+  int patch = 0,
+  int otherMajor = 0,
+  int otherMinor = 0,
+  int otherPatch = 0,
+}) {
+  if (major == otherMajor && minor == otherMinor && patch == otherPatch) {
+    return 0;
+  }
+  if (major > otherMajor ||
+      (major == otherMajor && minor > otherMinor) ||
+      (major == otherMajor && minor == otherMinor && patch > otherPatch)) {
+    return 1;
+  }
+  return -1;
 }

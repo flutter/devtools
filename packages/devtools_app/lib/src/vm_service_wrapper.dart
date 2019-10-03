@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'profiler/cpu_profile_model.dart';
+import 'utils.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -628,8 +629,12 @@ class VmServiceWrapper implements VmService {
     @required int minor,
   }) {
     assert(_protocolVersion != null);
-    return _protocolVersion.major < major ||
-        (_protocolVersion.major == major && _protocolVersion.minor < minor);
+    return semVerCompare(
+      major: _protocolVersion.major,
+      minor: _protocolVersion.minor,
+      otherMajor: major,
+      otherMinor: minor,
+    ) == -1;
   }
 
   /// Gets the name of the service stream for the connected VM service. Pre-v3.22

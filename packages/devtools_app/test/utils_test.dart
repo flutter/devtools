@@ -233,6 +233,13 @@ void main() {
       expect(isLetter('z'.codeUnitAt(0)), isTrue);
     });
 
+    test('isDigit', () {
+      expect(isDigit('0'.codeUnitAt(0)), isTrue);
+      expect(isDigit('9'.codeUnitAt(0)), isTrue);
+      expect(isDigit('a'.codeUnitAt(0)), isFalse);
+      expect(isDigit('@'.codeUnitAt(0)), isFalse);
+    });
+
     test('getSimpleStackFrameName', () {
       String name =
           '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
@@ -270,6 +277,65 @@ void main() {
       // No leading class names.
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
+    });
+
+    test('semVerCompare', () {
+      expect(semVerCompare(), equals(0));
+      expect(
+        semVerCompare(
+          major: 1,
+          minor: 1,
+          patch: 1,
+          otherMajor: 1,
+          otherMinor: 1,
+          otherPatch: 1,
+        ),
+        equals(0),
+      );
+      expect(
+        semVerCompare(
+          major: 1,
+          minor: 1,
+          patch: 2,
+          otherMajor: 1,
+          otherMinor: 1,
+          otherPatch: 1,
+        ),
+        equals(1),
+      );
+      expect(
+        semVerCompare(
+          major: 1,
+          minor: 2,
+          patch: 1,
+          otherMajor: 1,
+          otherMinor: 1,
+          otherPatch: 1,
+        ),
+        equals(1),
+      );
+      expect(
+        semVerCompare(
+          major: 2,
+          minor: 1,
+          patch: 1,
+          otherMajor: 1,
+          otherMinor: 1,
+          otherPatch: 1,
+        ),
+        equals(1),
+      );
+      expect(
+        semVerCompare(
+          major: 2,
+          minor: 1,
+          patch: 1,
+          otherMajor: 2,
+          otherMinor: 2,
+          otherPatch: 1,
+        ),
+        equals(-1),
+      );
     });
   });
 }
