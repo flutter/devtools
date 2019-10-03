@@ -10,6 +10,7 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
+import 'package:usage/usage_io.dart';
 
 import 'client_manager.dart';
 
@@ -83,10 +84,25 @@ class ServerApi {
     switch (request.url.path) {
       case 'api/logScreenView':
         return api.logScreenView(request);
+      case 'api/getUserId':
+        return api.getUserId(request);
+      case 'analytics/getFirstRun':
+        print('>>>>> analytics/getFirstRun');
+        return api.getFirstRun(request);
+      case 'analytics/getFirstRun':
+        return api.getEnabled(request);
+      case 'analytics/setEnbled':
+        print('>>>>> analytics/setEnbled');
+        return api.setEnabled(request);
+      case 'analytics/getClientId':
+        print('>>>>> analytics/getClientId');
+        return api.getClientId(request);
       default:
         return api.notImplemented(request);
     }
   }
+
+  final Usage _usage = Usage();
 
   /// Logs a page view in the DevTools server.
   ///
@@ -95,6 +111,32 @@ class ServerApi {
   FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
       notImplemented(request);
 
+  /// Gets a user's id for use in analytics and for distinguishing internal
+  /// users from external users.
+  ///
+  /// This endpoint is not supported externally and will only be implemented for
+  /// the version of DevTools used inside Google.
+  FutureOr<shelf.Response> getUserId(shelf.Request request) =>
+      notImplemented(request);
+
+  /// Has Analytics dialog appeared yet - Flutter tool every used?
+  FutureOr<shelf.Response> getFirstRun(shelf.Request request) =>
+      shelf.Response.ok('${_usage.isFirstRun}');
+
+  /// Has Analytics dialog appeared yet - Flutter tool every used?
+  FutureOr<shelf.Response> getEnabled(shelf.Request request) =>
+      shelf.Response.ok('${_usage.enabled}');
+
+  /// Has Analytics dialog appeared yet - Flutter tool every used?
+  FutureOr<shelf.Response> setEnabled(shelf.Request request) {
+    _usage.enabled = true;
+    shelf.Response.ok('Done');
+  }
+
+  /// Has Analytics dialog appeared yet - Flutter tool every used?
+  FutureOr<shelf.Response> getClientId(shelf.Request request) =>
+      shelf.Response.ok('${_usage.clientId}');
+
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
   ///
@@ -102,4 +144,31 @@ class ServerApi {
   /// creates unnecessary noise in the console.
   FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
       shelf.Response(204);
+}
+
+class Usage {
+  Analytics _analytics;
+
+  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
+  /// used for testing.
+  Usage(
+      {String settingsName = 'flutter',
+      String versionOverride,
+      String configDirOverride}) {
+    // final FlutterVersion flutterVersion = FlutterVersion.instance;
+    // final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
+    // TODO(terry): UA, first parameter, is '' could be DevTools UA
+    // TODO(terry): version, second parameter, is '' could be real Flutter version #.
+    // TODO(terry): documentDirectory, third parameter, is null could be :
+    //    documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null
+    _analytics = AnalyticsIO('', settingsName, '', documentDirectory: null);
+  }
+
+  bool get isFirstRun => _analytics.firstRun;
+
+  bool get enabled => _analytics.enabled;
+
+  set enabled(bool value) => _analytics.enabled = value;
+
+  String get clientId => _analytics.clientId;
 }
