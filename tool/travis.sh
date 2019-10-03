@@ -145,7 +145,6 @@ elif [ "$BOT" = "packages" ]; then
 
     popd
 
-    pub global activate tuneup
     flutter pub global activate tuneup
 
     # Analyze packages/
