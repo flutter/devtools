@@ -76,6 +76,9 @@ class HtmlFramework {
 
   HtmlSurveyToast devToolsSurvey;
 
+  Stream<String> get onPageChange => _pageChangeController.stream;
+  final _pageChangeController = StreamController<String>.broadcast();
+
   final HtmlStatusItem defaultAuxiliaryStatus = createLinkStatusItem(
     span()..add(span(text: 'DevTools Docs', c: 'optional-700')),
     href: 'https://flutter.dev/docs/development/tools/devtools/overview',
@@ -367,6 +370,7 @@ class HtmlFramework {
       final bool isCurrent = current.ref == element.attributes['href'];
       e.toggleClass('active', isCurrent);
     }
+    _pageChangeController.add(current.id);
   }
 
   void showMessage({

@@ -98,8 +98,8 @@ String _generateSurveyUrl() {
 
   final fromValue = uri.fragment ?? '';
 
-  // TODO(kenz): get actual value of whether user is internal or external.
-  const internalValue = 'false';
+  // TODO(djshuckerow): override this value for internal users.
+  const internalValue = false;
 
   final surveyUri = Uri(
     scheme: 'https',

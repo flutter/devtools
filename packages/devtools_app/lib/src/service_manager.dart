@@ -69,8 +69,8 @@ class ServiceConnectionManager {
 
   bool get hasConnection => service != null;
 
-  Stream<void> get onStateChange => _stateController.stream;
-  final _stateController = StreamController<void>.broadcast();
+  Stream<bool> get onStateChange => _stateController.stream;
+  final _stateController = StreamController<bool>.broadcast();
 
   Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
@@ -155,7 +155,7 @@ class ServiceConnectionManager {
     _isolateManager._service = service;
     _serviceExtensionManager._service = service;
 
-    _stateController.add(null);
+    _stateController.add(true);
     _connectionAvailableController.add(service);
 
     await _isolateManager._initIsolates(vm.isolates);
@@ -207,7 +207,7 @@ class ServiceConnectionManager {
     sdkVersion = null;
     connectedApp = null;
 
-    _stateController.add(null);
+    _stateController.add(false);
     _connectionClosedController.add(null);
   }
 

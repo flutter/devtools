@@ -14,6 +14,7 @@ dependencies:
   browser_launcher: ^0.1.3
   meta: ^1.1.0
   path: ^1.6.0
+  sse: ^2.0.0
   shelf: ^0.7.4
   shelf_static: ^0.2.8
   http_multi_server: ^2.1.0
