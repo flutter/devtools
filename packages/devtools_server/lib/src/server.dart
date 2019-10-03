@@ -254,7 +254,7 @@ Future<void> _handleClientsList(
   printOutput(
     connectedClients
         .map((c) =>
-            '${c.hasConnection.toString().padRight(5, ' ')} ${c.vmServiceUri.toString()}')
+            '${c.hasConnection.toString().padRight(5, ' ')} ${c.currentPage?.padRight(12, ' ')} ${c.vmServiceUri.toString()}')
         .join('\n'),
     {
       'id': id,
@@ -262,6 +262,7 @@ Future<void> _handleClientsList(
         'clients': connectedClients
             .map((c) => {
                   'hasConnection': c.hasConnection,
+                  'currentPage': c.currentPage,
                   'vmServiceUri': c.vmServiceUri?.toString(),
                 })
             .toList()
@@ -272,12 +273,16 @@ Future<void> _handleClientsList(
 }
 
 Future<bool> _tryReuseExistingDevToolsInstance(
-    Uri vmServiceUri, bool notifyUser) async {
+  Uri vmServiceUri,
+  String page,
+  bool notifyUser,
+) async {
   // First try to find a client that's already connected to this VM service,
   // and just send the user a notification for that one.
   final existingClient = clients.findExistingConnectedClient(vmServiceUri);
   if (existingClient != null) {
     try {
+      await existingClient.showPage(page);
       if (notifyUser) {
         await existingClient.notify();
       }
@@ -336,9 +341,11 @@ Future<void> registerLaunchDevToolsService(
         final shouldNotify = params != null &&
             params.containsKey('notify') &&
             params['notify'] == true;
+        final page = params != null ? params['page'] : null;
         if (canReuse &&
             await _tryReuseExistingDevToolsInstance(
               vmServiceUri,
+              page,
               shouldNotify,
             )) {
           emitLaunchEvent(reused: true, notified: shouldNotify);
@@ -365,6 +372,7 @@ Future<void> registerLaunchDevToolsService(
           // to the containers loopback IP).
           path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
           queryParameters: uriParams,
+          fragment: page,
         );
 
         // TODO(dantup): When ChromeOS has support for tunneling all ports we
