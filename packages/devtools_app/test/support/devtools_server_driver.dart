@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'chrome.dart';
-
 const verbose = true;
 
 class DevToolsServerDriver {
