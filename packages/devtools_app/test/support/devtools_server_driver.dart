@@ -38,11 +38,11 @@ class DevToolsServerDriver {
   static Future<DevToolsServerDriver> create() async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
-    final args = <String>[
+    final args = [
       '../devtools/bin/devtools.dart',
       '--machine',
       '--port',
-      '0'
+      '0',
     ];
 
     // TODO: This needs enabling once the server version that supports headless
