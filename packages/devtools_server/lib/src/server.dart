@@ -231,7 +231,7 @@ Future<void> _handleClientsList(
   printOutput(
     connectedClients
         .map((c) =>
-            '${c.hasConnection.toString().padRight(5, ' ')} ${c.vmServiceUri.toString()}')
+            '${c.hasConnection.toString().padRight(5, ' ')} ${c.currentPage?.padRight(12, ' ')} ${c.vmServiceUri.toString()}')
         .join('\n'),
     {
       'id': id,
@@ -239,6 +239,7 @@ Future<void> _handleClientsList(
         'clients': connectedClients
             .map((c) => {
                   'hasConnection': c.hasConnection,
+                  'currentPage': c.currentPage,
                   'vmServiceUri': c.vmServiceUri?.toString(),
                 })
             .toList()

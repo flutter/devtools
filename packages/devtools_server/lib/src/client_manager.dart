@@ -60,6 +60,9 @@ class DevToolsClient {
           case 'connected':
             _vmServiceUri = Uri.parse(request['params']['uri']);
             return;
+          case 'currentPage':
+            _currentPage = request['params']['id'];
+            return;
           case 'disconnected':
             _vmServiceUri = null;
             return;
@@ -105,4 +108,6 @@ class DevToolsClient {
   Uri _vmServiceUri;
   Uri get vmServiceUri => _vmServiceUri;
   bool get hasConnection => _vmServiceUri != null;
+  String _currentPage;
+  String get currentPage => _currentPage;
 }

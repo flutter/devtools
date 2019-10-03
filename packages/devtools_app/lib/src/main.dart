@@ -166,6 +166,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
         devToolsServer.notify();
       }
 
+      onPageChange.listen(devToolsServer.notifyCurrentPage);
       serviceManager.onStateChange.listen((connected) {
         try {
           if (connected) {

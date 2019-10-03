@@ -56,6 +56,10 @@ class DevToolsServerApiClient {
     _send('disconnected');
   }
 
+  void notifyCurrentPage(String pageId) {
+    _send('currentPage', {'id': pageId});
+  }
+
   void connectToVm(Map<String, dynamic> requestParams) {
     // Reload the page with the new VM service URI in the querystring.
     // TODO(dantup): Remove this code and replace with code that just reconnects
