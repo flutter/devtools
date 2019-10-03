@@ -9,6 +9,7 @@ library gtags;
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/version.dart';
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 
@@ -323,10 +324,10 @@ Future<void> computeUserApplicationCustomGTagData() async {
   final isAnyFlutterApp = await serviceManager.connectedApp.isAnyFlutterApp;
 
   if (isFlutter) {
-    userPlatformType = (await serviceManager.service
-            .isProtocolVersionLessThan(major: 3, minor: 24))
-        ? 'unknown'
-        : serviceManager.vm.operatingSystem;
+    userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
+            supportedVersion: SemanticVersion(major: 3, minor: 24)))
+        ? serviceManager.vm.operatingSystem
+        : 'unknown';
   }
 
   if (isAnyFlutterApp) {

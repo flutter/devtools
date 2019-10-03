@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app/src/version.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -171,14 +172,15 @@ class HeapSample {
 class ClassHeapDetailStats {
   ClassHeapDetailStats(this.json) {
     classRef = ClassRef.parse(json['class']);
-    if (serviceManager.service.protocolVersionLessThan(major: 3, minor: 18)) {
-      _update(json['new']);
-      _update(json['old']);
-    } else {
+    if (serviceManager.service.protocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 18))) {
       instancesCurrent = json['instancesCurrent'];
       instancesAccumulated = json['instancesAccumulated'];
       bytesCurrent = json['bytesCurrent'];
       bytesAccumulated = json['bytesAccumulated'];
+    } else {
+      _update(json['new']);
+      _update(json['old']);
     }
   }
 
