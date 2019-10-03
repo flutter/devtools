@@ -21,8 +21,11 @@ class FlutterVersion {
     // characters that are not digits. We do not currently have a need to know
     // more version parts than major, minor, and patch. If this changes, we can
     // add support for the extra values.
-    final _versionParts = version.split('.').map((part) => String.fromCharCodes(
-        part.codeUnits.where((cu) => isDigit(cu)).toList())).toList();
+    final _versionParts = version
+        .split('.')
+        .map((part) => String.fromCharCodes(
+            part.codeUnits.where((cu) => isDigit(cu)).toList()))
+        .toList();
     versionMajor =
         _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
     versionMinor =

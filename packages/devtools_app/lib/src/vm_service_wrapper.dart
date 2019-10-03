@@ -630,11 +630,12 @@ class VmServiceWrapper implements VmService {
   }) {
     assert(_protocolVersion != null);
     return semVerCompare(
-      major: _protocolVersion.major,
-      minor: _protocolVersion.minor,
-      otherMajor: major,
-      otherMinor: minor,
-    ) == -1;
+          major: _protocolVersion.major,
+          minor: _protocolVersion.minor,
+          otherMajor: major,
+          otherMinor: minor,
+        ) ==
+        -1;
   }
 
   /// Gets the name of the service stream for the connected VM service. Pre-v3.22
