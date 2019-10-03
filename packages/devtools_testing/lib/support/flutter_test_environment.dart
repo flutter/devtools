@@ -11,8 +11,8 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
-import 'package:package_resolver/package_resolver.dart';
 
+import '../support/file_utils.dart';
 import 'constants.dart';
 import 'flutter_test_driver.dart';
 
@@ -78,8 +78,8 @@ class FlutterTestEnvironment {
     FlutterRunConfiguration config,
   }) async {
     // Must set this up for the golden tests to work.
-    devtoolsTestingPackageRoot ??=
-        await (PackageResolver.current).packagePath('devtools_testing');
+    devtoolsTestingPackageRoot ??= await resolvePackagePath('devtools_testing');
+
     // Setting up the environment is slow so we reuse the existing environment
     // when possible.
     if (force ||

@@ -9,6 +9,7 @@ library matchers;
 import 'dart:io' as io;
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/matcher.dart';
 
 import '../support/constants.dart';
@@ -84,12 +85,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   static const String _goldensSuffix =
       String.fromEnvironment('GOLDENS_SUFFIX', defaultValue: '');
 
-  static bool get updateGoldens {
-    _updateGoldens ??=
-        const String.fromEnvironment('UPDATE_GOLDENS', defaultValue: 'false') ==
-            'true';
-    return _updateGoldens;
-  }
+  static bool get updateGoldens => autoUpdateGoldenFiles;
 
   static String _normalize(String s) {
     return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
