@@ -20,9 +20,7 @@ void main() {
 
       webdevFixture =
           await WebdevFixture.serve(release: testInReleaseMode, verbose: true);
-      print('Fixture: ${webdevFixture.process}, ${webdevFixture.url}');
       browserManager = await BrowserManager.create();
-      print('Browser manager: ${browserManager.chromeProcess}');
     });
 
     tearDownAll(() async {
