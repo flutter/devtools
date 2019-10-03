@@ -47,9 +47,11 @@ class DevToolsServerDriver {
       '0'
     ];
 
-    if (useChromeHeadless && headlessModeIsSupported) {
-      args.add('--headless');
-    }
+    // TODO: This needs enabling once the server version that supports headless
+    // has been published.
+    // if (useChromeHeadless && headlessModeIsSupported) {
+    //   args.add('--headless');
+    // }
     final Process process =
         await Process.start(Platform.resolvedExecutable, args);
 
