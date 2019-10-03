@@ -7,14 +7,11 @@
 # Fast fail the script on failures.
 set -ex
 
-# In GitBash on Windows, we have to call pub.bat so we alias `pub` in this script to call the
-# correct one based on the OS.
+# In GitBash on Windows, we have to call dartfmt.bat and flutter.bat so we alias
+# them in this script to call the correct one based on the OS.
 function pub {
-	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-        command pub.bat "$@"
-    else
-        command pub "$@"
-    fi
+    echo "Use `flutter pub` instead of `pub`."
+	exit 1
 }
 function dartfmt {
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
