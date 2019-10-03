@@ -17,10 +17,11 @@ Future<String> resolvePackagePath(String package) async {
   } on UnsupportedError catch (e) {
     // PackageResolver makes calls to Isolate, which isn't accessible from a
     // flutter test run. Flutter test runs in the test directory of the app,
-    // so we use the parent directory.
-    path = '${io.Directory.current.path}/../../$package';
+    // so the packages directory is the current directory's grandparent.
+    final grandparentPath = io.Directory.current.parent.parent.path;
+    path = '$grandparentPath/$package';
     if (!io.Directory(path).existsSync()) {
-      fail('Unable to locate package:$package');
+      fail('Unable to locate package:$package at $path');
     }
   }
   return path;

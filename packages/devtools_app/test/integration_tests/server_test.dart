@@ -96,6 +96,42 @@ void main() {
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
 
+    test('can launch on a specific page', () async {
+      // Register the VM.
+      await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+      // Send a request to launch at a certain page.
+      await launchDevTools(page: 'memory');
+
+      final serverResponse = await _waitForClients(requiredPage: 'memory');
+      expect(serverResponse, isNotNull);
+      expect(serverResponse['clients'], hasLength(1));
+      expect(serverResponse['clients'][0]['hasConnection'], isTrue);
+      expect(serverResponse['clients'][0]['vmServiceUri'],
+          equals(appFixture.serviceUri.toString()));
+      expect(serverResponse['clients'][0]['currentPage'], equals('memory'));
+    }, timeout: const Timeout.factor(10));
+
+    test('can switch page', () async {
+      await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
+
+      // Launch on the memory page and wait for the connection.
+      await launchDevTools(page: 'memory');
+      await _waitForClients(requiredPage: 'memory');
+
+      // Re-launch, allowing reuse and with a different page.
+      await launchDevTools(reuseWindows: true, page: 'performance');
+
+      final serverResponse = await _waitForClients(requiredPage: 'performance');
+      expect(serverResponse, isNotNull);
+      expect(serverResponse['clients'], hasLength(1));
+      expect(serverResponse['clients'][0]['hasConnection'], isTrue);
+      expect(serverResponse['clients'][0]['vmServiceUri'],
+          equals(appFixture.serviceUri.toString()));
+      expect(
+          serverResponse['clients'][0]['currentPage'], equals('performance'));
+    }, timeout: const Timeout.factor(10));
+
     test('DevTools reports disconnects from a VM', () async {
       // Register the VM.
       await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
@@ -187,11 +223,14 @@ void main() {
   }, skip: true /*!testInReleaseMode*/);
 }
 
-Future<Map<String, dynamic>> launchDevTools({bool reuseWindows = false}) async {
+Future<Map<String, dynamic>> launchDevTools({
+  String page,
+  bool reuseWindows = false,
+}) async {
   final launchEvent = events.where((e) => e['event'] == 'client.launch').first;
   await appFixture.serviceConnection.callMethod(
     registeredServices['launchDevTools'],
-    args: reuseWindows ? {'reuseWindows': true} : null,
+    args: reuseWindows ? {'reuseWindows': true, 'page': page} : null,
   );
   final response = await launchEvent;
   return response['params'];
@@ -225,8 +264,10 @@ Future<Map<String, dynamic>> _send(String method,
 // It may take time for the servers client list to be updated as the web app
 // connects, so this helper just polls waiting for the expected state and
 // then returns the client list.
-Future<Map<String, dynamic>> _waitForClients(
-    {bool requiredConnectionState}) async {
+Future<Map<String, dynamic>> _waitForClients({
+  bool requiredConnectionState,
+  String requiredPage,
+}) async {
   Map<String, dynamic> serverResponse;
   await waitFor(
     () async {
@@ -234,6 +275,8 @@ Future<Map<String, dynamic>> _waitForClients(
       final clients = serverResponse['clients'];
       return clients is List &&
           clients.isNotEmpty &&
+          (requiredPage == null ||
+              clients.any((c) => c['currentPage'] == requiredPage)) &&
           (requiredConnectionState == null ||
               clients
                   .any((c) => c['hasConnection'] == requiredConnectionState));
