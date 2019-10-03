@@ -37,9 +37,6 @@ pushd packages/devtools
     pub get
 popd
 
-pushd packages/devtools_app
-echo `pwd`
-
 # Add globally activated packages to the path.
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     export PATH=$PATH:$APPDATA/Roaming/Pub/Cache/bin
@@ -57,15 +54,18 @@ fi
 # Get Flutter.
 if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     echo "Cloning stable Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch stable ../flutter
+    git clone https://github.com/flutter/flutter.git --branch stable ./flutter
 
     # Set the suffix so we use stable goldens.
     export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
 else
     echo "Cloning master Flutter branch"
-    git clone https://github.com/flutter/flutter.git ../flutter
+    git clone https://github.com/flutter/flutter.git ./flutter
 fi
 export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+
+pushd packages/devtools_app
+echo `pwd`
 
 # Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
