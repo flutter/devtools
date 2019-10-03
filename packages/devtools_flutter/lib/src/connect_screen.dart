@@ -8,7 +8,7 @@ import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
 class ConnectScreen extends Screen {
-  const ConnectScreen() : super('Connect', 'connect');
+  const ConnectScreen() : super('Connect');
 
   @override
   Widget build(BuildContext context) => ConnectScreenBody();
@@ -98,7 +98,9 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     );
   }
 
-  void connect() {}
+  void connect() {
+    Navigator.pushNamed(context, '/connected');
+  }
 }
 
 // A divider that adds spacing underneath for forms.

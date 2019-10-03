@@ -7,13 +7,10 @@ import 'package:flutter/material.dart';
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
-  const Screen(this.name, this.route);
+  const Screen(this.name);
 
   /// The human-readable name to show for the app.
   final String name;
-
-  /// The route to show in the browser window.
-  final String route;
 
   /// Builds the tab to show for this widget in the app's main navbar.
   ///
@@ -27,28 +24,28 @@ abstract class Screen {
 
 /// A placeholder screen that hasn't been implemented.
 class EmptyScreen extends Screen {
-  const EmptyScreen(String name, String route, this.icon) : super(name, route);
+  const EmptyScreen(String name, this.icon) : super(name);
 
   static const EmptyScreen inspector =
-      EmptyScreen('Flutter Inspector', 'inspector', Icons.map);
-  static const EmptyScreen timeline =
-      EmptyScreen('Timeline', 'timeline', Icons.timeline);
+      EmptyScreen('Flutter Inspector', Icons.map);
+  static const EmptyScreen timeline = EmptyScreen('Timeline', Icons.timeline);
   static const EmptyScreen performance =
-      EmptyScreen('Performance', 'performance', Icons.computer);
-  static const EmptyScreen memory =
-      EmptyScreen('Memory', 'memory', Icons.memory);
+      EmptyScreen('Performance', Icons.computer);
+  static const EmptyScreen memory = EmptyScreen('Memory', Icons.memory);
   static const EmptyScreen logging =
-      EmptyScreen('Logging', 'Logging', Icons.directions_run);
+      EmptyScreen('Logging', Icons.directions_run);
 
   /// The icon to show for this screen in a tab.
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.headline.copyWith(color: theme.accentColor);
     return Center(
       child: Text(
-        'Hello $name',
-        style: Theme.of(context).accentTextTheme.headline,
+        '$name Page',
+        style: style,
       ),
     );
   }
