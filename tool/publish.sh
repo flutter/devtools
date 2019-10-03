@@ -14,6 +14,7 @@ popd
 tool/build_release.sh
 
 pushd packages/devtools
+pub get
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
 popd
 
