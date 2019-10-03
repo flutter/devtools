@@ -284,13 +284,7 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = [
-      'run',
-      '-d',
-      'web',
-      '--no-web-initialize-platform',
-      '--verbose'
-    ];
+    final List<String> cliArgs = ['pub', 'run', 'build_runner', 'serve', 'web'];
     if (release) {
       cliArgs.add('--release');
     }
@@ -310,11 +304,11 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('flutter run • ${line.trim()}');
+        print('pub run build_runner serve • ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
-      if (line.contains('lib/main.dart is being served at')) {
+      if (line.contains('Serving `web` on')) {
         final String url = line.substring(line.indexOf('http://'));
         hasUrl.complete(url);
       }
@@ -358,7 +352,7 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('pub run build_runner • ${line.trim()}');
+        print('pub run build_runner build • ${line.trim()}');
       }
 
       if (line.contains('[INFO] Succeeded')) {
