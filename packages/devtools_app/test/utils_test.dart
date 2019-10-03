@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -279,62 +280,41 @@ void main() {
       expect(getSimpleStackFrameName(name), equals(name));
     });
 
-    test('semVerCompare', () {
-      expect(semVerCompare(), equals(0));
+    test('isVersionSupported', () {
       expect(
-        semVerCompare(
-          major: 1,
-          minor: 1,
-          patch: 1,
-          otherMajor: 1,
-          otherMinor: 1,
-          otherPatch: 1,
+        isVersionSupported(
+          SemanticVersion(),
+          supportedVersion: SemanticVersion(),
         ),
-        equals(0),
+        isTrue,
       );
       expect(
-        semVerCompare(
-          major: 1,
-          minor: 1,
-          patch: 2,
-          otherMajor: 1,
-          otherMinor: 1,
-          otherPatch: 1,
+        isVersionSupported(
+          SemanticVersion(major: 1, minor: 1, patch: 2),
+          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
         ),
-        equals(1),
+        isTrue,
       );
       expect(
-        semVerCompare(
-          major: 1,
-          minor: 2,
-          patch: 1,
-          otherMajor: 1,
-          otherMinor: 1,
-          otherPatch: 1,
+        isVersionSupported(
+          SemanticVersion(major: 1, minor: 2, patch: 1),
+          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
         ),
-        equals(1),
+        isTrue,
       );
       expect(
-        semVerCompare(
-          major: 2,
-          minor: 1,
-          patch: 1,
-          otherMajor: 1,
-          otherMinor: 1,
-          otherPatch: 1,
+        isVersionSupported(
+          SemanticVersion(major: 2, minor: 1, patch: 1),
+          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
         ),
-        equals(1),
+        isTrue,
       );
       expect(
-        semVerCompare(
-          major: 2,
-          minor: 1,
-          patch: 1,
-          otherMajor: 2,
-          otherMinor: 2,
-          otherPatch: 1,
+        isVersionSupported(
+          SemanticVersion(major: 2, minor: 1, patch: 1),
+          supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
         ),
-        equals(-1),
+        isFalse,
       );
     });
   });

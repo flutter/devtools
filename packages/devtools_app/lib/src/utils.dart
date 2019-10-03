@@ -8,9 +8,11 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'ui/fake_flutter/dart_ui/dart_ui.dart';
+import 'version.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
@@ -424,21 +426,9 @@ bool isDebugBuild() {
   return debugBuild;
 }
 
-int semVerCompare({
-  int major = 0,
-  int minor = 0,
-  int patch = 0,
-  int otherMajor = 0,
-  int otherMinor = 0,
-  int otherPatch = 0,
+bool isVersionSupported(
+  SemanticVersion version, {
+  @required SemanticVersion supportedVersion,
 }) {
-  if (major == otherMajor && minor == otherMinor && patch == otherPatch) {
-    return 0;
-  }
-  if (major > otherMajor ||
-      (major == otherMajor && minor > otherMinor) ||
-      (major == otherMajor && minor == otherMinor && patch > otherPatch)) {
-    return 1;
-  }
-  return -1;
+  return version.compareTo(supportedVersion) >= 0;
 }

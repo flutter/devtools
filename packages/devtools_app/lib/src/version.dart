@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'ui/fake_flutter/fake_flutter.dart';
 import 'utils.dart';
 
-class FlutterVersion {
+class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
     @required this.version,
     @required this.channel,
@@ -26,12 +26,10 @@ class FlutterVersion {
         .map((part) => String.fromCharCodes(
             part.codeUnits.where((cu) => isDigit(cu)).toList()))
         .toList();
-    versionMajor =
+    major =
         _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
-    versionMinor =
-        _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
-    versionPatch =
-        _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
+    minor = _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
+    patch = _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
   }
 
   factory FlutterVersion.parse(Map<String, dynamic> json) {
@@ -59,12 +57,6 @@ class FlutterVersion {
   final String engineRevision;
 
   final String dartSdkVersion;
-
-  int versionMajor;
-
-  int versionMinor;
-
-  int versionPatch;
 
   String get flutterVersionSummary => [
         if (version != 'unknown') version,
@@ -98,4 +90,27 @@ class FlutterVersion {
         engineRevision,
         dartSdkVersion,
       );
+}
+
+class SemanticVersion implements Comparable {
+  SemanticVersion({this.major = 0, this.minor = 0, this.patch = 0});
+
+  int major;
+
+  int minor;
+
+  int patch;
+
+  @override
+  int compareTo(other) {
+    if (major == other.major && minor == other.minor && patch == other.patch) {
+      return 0;
+    }
+    if (major > other.major ||
+        (major == other.major && minor > other.minor) ||
+        (major == other.major && minor == other.minor && patch > other.patch)) {
+      return 1;
+    }
+    return -1;
+  }
 }
