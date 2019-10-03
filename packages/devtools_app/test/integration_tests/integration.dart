@@ -284,12 +284,18 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = ['serve', 'web'];
+    final List<String> cliArgs = [
+      'run',
+      '-d',
+      'web',
+      '--no-web-initialize-platform',
+      '--verbose'
+    ];
     if (release) {
       cliArgs.add('--release');
     }
 
-    final process = await _runWebdev(cliArgs);
+    final process = await _runFlutter(cliArgs);
 
     final Completer<String> hasUrl = Completer<String>();
 
@@ -304,11 +310,11 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('webdev • ${line.trim()}');
+        print('flutter run • ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
-      if (line.contains('Serving `web`')) {
+      if (line.contains('lib/main.dart is being served at')) {
         final String url = line.substring(line.indexOf('http://'));
         hasUrl.complete(url);
       }
@@ -325,10 +331,19 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = ['build'];
-    cliArgs.add(release ? '--release' : '--no-release');
+    final List<String> cliArgs = [
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '-o',
+      'web:build',
+      release ? '--release' : '--no-release'
+    ];
 
-    final process = await _runWebdev(cliArgs, verbose: verbose);
+    final clean = await _runFlutter(['clean']);
+    await clean.exitCode;
+    final process = await _runFlutter(cliArgs, verbose: verbose);
 
     final Completer<void> buildFinished = Completer<void>();
 
@@ -343,7 +358,7 @@ class WebdevFixture {
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('webdev • ${line.trim()}');
+        print('pub run build_runner • ${line.trim()}');
       }
 
       if (line.contains('[INFO] Succeeded')) {
@@ -372,7 +387,7 @@ class WebdevFixture {
     }
   }
 
-  static Future<Process> _runWebdev(
+  static Future<Process> _runFlutter(
     List<String> buildArgs, {
     bool verbose = false,
   }) async {
@@ -388,24 +403,15 @@ class WebdevFixture {
     // Run the snapshot directly instead of going via pub.bat so that on Windows
     // when we send kill() it gets passed to Dart and doesn't sometimes terminate
     // the shell and leave the Dart process behind.
-    final executable = Platform.executable;
-    final pubSnapshotPath = path.join(
-      File(executable).parent.path,
-      'snapshots',
-      'pub.dart.snapshot',
-    );
-
-    final List<String> cliArgs = [pubSnapshotPath, 'global', 'run', 'webdev']
-        .followedBy(buildArgs)
-        .toList();
+    final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
     if (verbose) {
-      print('Running "$executable" with args: ${cliArgs.join(' ')}');
+      print('Running "$executable" with args: ${buildArgs.join(' ')}');
     }
 
     return Process.start(
       executable,
-      cliArgs,
+      buildArgs,
       environment: environment,
     );
   }

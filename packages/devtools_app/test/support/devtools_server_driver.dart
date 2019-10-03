@@ -39,7 +39,7 @@ class DevToolsServerDriver {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
     final Process process = await Process.start(
-      Platform.resolvedExecutable,
+      Platform.isWindows ? 'dart.bat' : 'dart',
       <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
     );
 

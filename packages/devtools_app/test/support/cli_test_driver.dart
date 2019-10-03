@@ -76,7 +76,7 @@ class CliAppFixture extends AppFixture {
 
   static Future<CliAppFixture> create(String appScriptPath) async {
     final Process process = await Process.start(
-      Platform.resolvedExecutable,
+      Platform.isWindows ? 'dart.bat' : 'dart',
       <String>['--observe=0', '--pause-isolates-on-start', appScriptPath],
     );
 

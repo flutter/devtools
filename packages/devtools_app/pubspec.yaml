@@ -65,6 +65,8 @@ dev_dependencies:
     path: ../devtools
   devtools_testing:
     path: ../devtools_testing
+  flutter_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

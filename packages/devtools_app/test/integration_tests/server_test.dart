@@ -26,13 +26,13 @@ void main() {
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
   setUp(() async {
+    // Clear the existing build directory.
+    if (Directory('build').existsSync()) {
+      Directory('build').deleteSync(recursive: true);
+    }
+
     // Build the app, as the server can't start without the build output.
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
-
-    // The packages folder needs to be renamed to `pack` for the server to work.
-    if (Directory('build/pack').existsSync()) {
-      Directory('build/pack').deleteSync(recursive: true);
-    }
 
     Directory('build/packages').renameSync('build/pack');
     // The devtools package build directory needs to reflect the latest

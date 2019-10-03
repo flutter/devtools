@@ -78,7 +78,9 @@
 
     <script type="text/javascript" src="packages/split/split.min.js"></script>
 
-    <script defer src="main.dart.js"></script>
+    <!-- Load the main.dart for regular DevTools. Eventually we'll change this
+      to load main.dart.js, which is produced as output by flutter build. -->
+    <script defer src="html_main.dart.js"></script>
 </head>
 
 <body fullbleed layout vertical>
