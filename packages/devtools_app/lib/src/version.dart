@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import 'ui/fake_flutter/fake_flutter.dart';
-import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
@@ -23,8 +22,7 @@ class FlutterVersion extends SemanticVersion {
     // add support for the extra values.
     final _versionParts = version
         .split('.')
-        .map((part) => String.fromCharCodes(
-            part.codeUnits.where((cu) => isDigit(cu)).toList()))
+        .map((part) => RegExp(r'\d+').stringMatch(part) ?? '0')
         .toList();
     major =
         _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
@@ -100,6 +98,9 @@ class SemanticVersion implements Comparable {
   int minor;
 
   int patch;
+
+  bool isSupported({@required SemanticVersion supportedVersion}) =>
+      compareTo(supportedVersion) >= 0;
 
   @override
   int compareTo(other) {

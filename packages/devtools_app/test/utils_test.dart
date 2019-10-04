@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_app/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -234,13 +233,6 @@ void main() {
       expect(isLetter('z'.codeUnitAt(0)), isTrue);
     });
 
-    test('isDigit', () {
-      expect(isDigit('0'.codeUnitAt(0)), isTrue);
-      expect(isDigit('9'.codeUnitAt(0)), isTrue);
-      expect(isDigit('a'.codeUnitAt(0)), isFalse);
-      expect(isDigit('@'.codeUnitAt(0)), isFalse);
-    });
-
     test('getSimpleStackFrameName', () {
       String name =
           '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
@@ -278,44 +270,6 @@ void main() {
       // No leading class names.
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
-    });
-
-    test('isVersionSupported', () {
-      expect(
-        isVersionSupported(
-          SemanticVersion(),
-          supportedVersion: SemanticVersion(),
-        ),
-        isTrue,
-      );
-      expect(
-        isVersionSupported(
-          SemanticVersion(major: 1, minor: 1, patch: 2),
-          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
-        ),
-        isTrue,
-      );
-      expect(
-        isVersionSupported(
-          SemanticVersion(major: 1, minor: 2, patch: 1),
-          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
-        ),
-        isTrue,
-      );
-      expect(
-        isVersionSupported(
-          SemanticVersion(major: 2, minor: 1, patch: 1),
-          supportedVersion: SemanticVersion(major: 1, minor: 1, patch: 1),
-        ),
-        isTrue,
-      );
-      expect(
-        isVersionSupported(
-          SemanticVersion(major: 2, minor: 1, patch: 1),
-          supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
-        ),
-        isFalse,
-      );
     });
   });
 }

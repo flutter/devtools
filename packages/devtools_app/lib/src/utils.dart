@@ -8,11 +8,9 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'ui/fake_flutter/dart_ui/dart_ui.dart';
-import 'version.dart';
 
 bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
 
@@ -153,9 +151,6 @@ String longestFittingSubstring(
 /// Whether a given code unit is a letter (A-Z or a-z).
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
-
-/// Whether a given code unit is a digit (0-9).
-bool isDigit(int codeUnit) => codeUnit >= 48 && codeUnit <= 57;
 
 /// Returns a simplified version of a StackFrame name.
 ///
@@ -424,11 +419,4 @@ bool isDebugBuild() {
     return true;
   })());
   return debugBuild;
-}
-
-bool isVersionSupported(
-  SemanticVersion version, {
-  @required SemanticVersion supportedVersion,
-}) {
-  return version.compareTo(supportedVersion) >= 0;
 }

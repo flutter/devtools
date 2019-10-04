@@ -789,10 +789,9 @@ class InspectorController implements InspectorServiceClient {
           // Configurable subtree depth is available in versions of Flutter
           // greater than or equal to 1.9.7, but the flutterVersion service is
           // not available until 1.10.1, so we will check for 1.10.1 here.
-          if (isVersionSupported(
-            flutterVersion,
-            supportedVersion: SemanticVersion(major: 1, minor: 10, patch: 1),
-          )) {
+          if (flutterVersion.isSupported(
+              supportedVersion:
+                  SemanticVersion(major: 1, minor: 10, patch: 1))) {
             onExpandCollapseSupported();
           }
         }
