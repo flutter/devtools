@@ -32,8 +32,10 @@ class TimelineService {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    allowedError(serviceManager.service
-        .setFlag('profile_period', '$defaultSamplePeriod'));
+    allowedError(
+      serviceManager.service.setFlag('profile_period', '$defaultSamplePeriod'),
+      logError: false,
+    );
     serviceManager.service.onEvent('Timeline').listen((Event event) {
       final List<dynamic> list = event.json['timelineEvents'];
       final List<Map<String, dynamic>> events =

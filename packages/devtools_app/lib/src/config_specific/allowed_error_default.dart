@@ -7,11 +7,13 @@ import 'logger.dart';
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics
 /// (i.e., they're not DevTools crashes).
-Future<T> allowedError<T>(Future<T> future) {
+Future<T> allowedError<T>(Future<T> future, {bool logError = true}) {
   return future.catchError((Object error) {
-    final errorLines = error.toString().split('\n');
-    log('[${error.runtimeType}] ${errorLines.first}', LogLevel.error);
-    log(errorLines.skip(1).join('\n'), LogLevel.error);
-    log('');
+    if (logError) {
+      final errorLines = error.toString().split('\n');
+      log('[${error.runtimeType}] ${errorLines.first}', LogLevel.error);
+      log(errorLines.skip(1).join('\n'), LogLevel.error);
+      log('');
+    }
   });
 }
