@@ -1,3 +1,7 @@
+## 0.1.10
+- Add API for handling http requests.
+- Add API endpoint for `logScreenView`.
+
 ## 0.1.9
 
 - Support configurable `hostname`.

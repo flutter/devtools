@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart';
 
-import 'package:devtools_app/src/framework/framework_core.dart';
-import 'package:devtools_app/src/main.dart';
-import 'package:devtools_app/src/ui/analytics.dart' as ga;
-import 'package:devtools_app/src/ui/analytics_platform.dart' as ga_platform;
+import 'package:html_shim/html.dart';
 import 'package:platform_detect/platform_detect.dart';
+
+import 'src/framework/framework_core.dart';
+import 'src/main.dart';
+import 'src/ui/analytics.dart' as ga;
+import 'src/ui/analytics_platform.dart' as ga_platform;
 
 void main() {
   // Run in a zone in order to catch all Dart exceptions.
@@ -48,6 +49,16 @@ void main() {
         return;
       }
 
+      // Show the Q3 DevTools survey.
+      // TODO(kenz): do not show this survey again if a) an action has been
+      // taken (survey link clicked or toast dismissed), b) we have shown it
+      // 5 times without action, or c) the date is after ~ Oct 30th 2019. Data
+      // required for a) and b) needs to be added to devtools_server.
+      // ignore: dead_code
+      if (false) {
+        framework.surveyToast(_generateSurveyUrl());
+      }
+
       FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
@@ -70,6 +81,39 @@ void main() {
       handleUncaughtError: _handleUncaughtError,
     ),
   );
+}
+
+String _generateSurveyUrl() {
+  const clientIdKey = 'ClientId';
+  const ideKey = 'IDE';
+  const fromKey = 'From';
+  const internalKey = 'Internal';
+
+  final uri = Uri.parse(window.location.toString());
+
+  // TODO(kenz): get client id once functionality is available.
+  const clientId = '';
+
+  String ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? '';
+  ideValue = ideValue == '' ? 'CLI' : ideValue;
+
+  final fromValue = uri.fragment ?? '';
+
+  // TODO(djshuckerow): override this value for internal users.
+  const internalValue = false;
+
+  final surveyUri = Uri(
+    scheme: 'https',
+    host: 'google.qualtrics.com',
+    path: 'jfe/form/SV_dcfOyXRTiB1qowl',
+    queryParameters: {
+      clientIdKey: clientId,
+      ideKey: ideValue,
+      fromKey: fromValue,
+      internalKey: internalValue,
+    },
+  );
+  return surveyUri.toString();
 }
 
 void _handleUncaughtError(

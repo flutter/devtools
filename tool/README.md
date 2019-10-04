@@ -2,7 +2,10 @@
 
 **Note:** If you need to publish a new version of devtools_server, you will need
 to do that prior to performing these steps, and update the devtools pubspec.yaml
-to reference the new version of devtools_server.
+to reference the new published version of devtools_server. To publish devtools_server, run
+`pub publish` from `packages/devtools_server`. Be sure to test the server locally
+before publishing. For instructions on how to do that, see
+[CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#devtools-server).
 
 Create a branch for your release. Below we're creating release 0.0.15, with all the PRs.
 
