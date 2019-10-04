@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 /// Wraps [widget] with the build context it needs to load in a test.
 Widget wrap(Widget widget) => MaterialApp(home: widget);
 
+Widget wrapWithMaterial(Widget widget) => wrap(Material(child: widget));
+
 /// Sets the size of the app window under test to [windowSize].
 ///
 /// This will be reset on each test invocation, so it doesn't need to be reset
