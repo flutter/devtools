@@ -10,8 +10,11 @@ set -ex
 # In GitBash on Windows, we have to call dartfmt.bat and flutter.bat so we alias
 # them in this script to call the correct one based on the OS.
 function pub {
-    echo "Use `flutter pub` instead of `pub`."
-	exit 1
+	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+        command pub.bat "$@"
+    else
+        command pub "$@"
+    fi
 }
 function dartfmt {
 	if [[ $TRAVIS_OS_NAME == "windows" ]]; then
@@ -33,6 +36,13 @@ function flutter {
 pushd packages/devtools
     pub get
 popd
+
+# The tests now all run and build with the flutter tool, so we don't want to use
+# raw pub any more.
+function pub {
+    echo "Use 'flutter pub' instead of raw 'pub'"
+    exit 1
+}
 
 # Add globally activated packages to the path.
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
