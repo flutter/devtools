@@ -83,8 +83,10 @@ class ServerApi {
     api ??= ServerApi();
     switch (request.url.path) {
       case 'api/logScreenView':
+        print('>>>>> api/logScreenView');
         return api.logScreenView(request);
       case 'api/getUserId':
+        print('>>>>> api/getUserId');
         return api.getUserId(request);
       case 'analytics/getFirstRun':
         print('>>>>> analytics/getFirstRun');
