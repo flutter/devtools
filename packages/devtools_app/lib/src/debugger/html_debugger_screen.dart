@@ -574,7 +574,7 @@ class HtmlDebuggerScreen extends HtmlScreen {
         CoreElement('input', classes: 'form-control input-sm margin-left')
           ..setAttribute('type', 'text')
           ..setAttribute('placeholder', 'search')
-          ..element.style.width = 'calc(100% - 105px)'
+          ..element.style.width = 'calc(100% - 110px)'
           ..id = 'script_name';
     final CoreElement scriptCountDiv = span(text: '-', c: 'counter')
       ..element.style.marginTop = '4px';
