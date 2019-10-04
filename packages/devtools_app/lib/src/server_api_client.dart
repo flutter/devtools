@@ -7,8 +7,10 @@ import 'dart:html';
 
 import 'package:sse/client/sse_client.dart';
 
+import 'main.dart';
+
 class DevToolsServerApiClient {
-  DevToolsServerApiClient() : _channel = SseClient('/api/sse') {
+  DevToolsServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
     _channel.stream.listen((msg) {
       try {
         final request = jsonDecode(msg);
@@ -16,6 +18,9 @@ class DevToolsServerApiClient {
         switch (request['method']) {
           case 'connectToVm':
             connectToVm(request['params']);
+            return;
+          case 'showPage':
+            showPage(request['params']);
             return;
           case 'enableNotifications':
             Notification.requestPermission();
@@ -32,7 +37,9 @@ class DevToolsServerApiClient {
     });
   }
 
+  final HtmlPerfToolFramework _framework;
   final SseClient _channel;
+  Notification _lastNotification;
 
   int _nextRequestId = 0;
   void _send(String method, [Map<String, dynamic> params]) {
@@ -49,7 +56,11 @@ class DevToolsServerApiClient {
     _send('disconnected');
   }
 
-  void connectToVm(dynamic requestParams) {
+  void notifyCurrentPage(String pageId) {
+    _send('currentPage', {'id': pageId});
+  }
+
+  void connectToVm(Map<String, dynamic> requestParams) {
     // Reload the page with the new VM service URI in the querystring.
     // TODO(dantup): Remove this code and replace with code that just reconnects
     // (and optionall notifies based on requestParams['notify']) when it's
@@ -72,13 +83,29 @@ class DevToolsServerApiClient {
         .replace(uri.replace(queryParameters: newUriParams).toString());
   }
 
+  void showPage(Map<String, dynamic> requestParams) {
+    final String pageId = requestParams['page'];
+    final screen = _framework.getScreen(pageId);
+    if (screen != null) {
+      _framework.load(screen);
+    }
+  }
+
   Future<void> notify() async {
     final permission = await Notification.requestPermission();
     if (permission != 'granted') {
       return;
     }
 
-    Notification('Dart DevTools',
+    // Dismiss any earlier notifications first so they don't build up
+    // in the notifications list if the user presses the button multiple times.
+    dismissNotifications();
+
+    _lastNotification = Notification('Dart DevTools',
         body: 'DevTools is available in this existing browser window');
+  }
+
+  void dismissNotifications() {
+    _lastNotification?.close();
   }
 }

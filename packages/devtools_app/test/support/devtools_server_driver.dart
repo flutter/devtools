@@ -38,10 +38,20 @@ class DevToolsServerDriver {
   static Future<DevToolsServerDriver> create() async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
-    final Process process = await Process.start(
-      Platform.resolvedExecutable,
-      <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
-    );
+    final args = [
+      '../devtools/bin/devtools.dart',
+      '--machine',
+      '--port',
+      '0',
+    ];
+
+    // TODO: This needs enabling once the server version that supports headless
+    // has been published.
+    // if (useChromeHeadless && headlessModeIsSupported) {
+    //   args.add('--headless');
+    // }
+    final Process process =
+        await Process.start(Platform.resolvedExecutable, args);
 
     return DevToolsServerDriver._(
         process,

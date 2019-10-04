@@ -5,12 +5,13 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:devtools_server/src/client_manager.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
+
+import 'client_manager.dart';
 
 /// Default [shelf.Handler] for serving DevTools files.
 ///

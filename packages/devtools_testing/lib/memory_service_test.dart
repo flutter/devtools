@@ -10,7 +10,7 @@ import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_protocol.dart';
 import 'package:test/test.dart';
 
-import 'package:devtools_testing/support/flutter_test_environment.dart';
+import 'support/flutter_test_environment.dart';
 
 MemoryController memoryController;
 

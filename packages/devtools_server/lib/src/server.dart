@@ -25,6 +25,7 @@ const argEnableNotifications = 'enable-notifications';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
+const argHeadlessMode = 'headless';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
@@ -63,6 +64,13 @@ final argParser = ArgParser()
     negatable: false,
     help:
         'Requests notification permissions immediately when a client connects back to the server.',
+  )
+  ..addFlag(
+    argHeadlessMode,
+    hide: true,
+    negatable: false,
+    help:
+        'Causes the server to spawn Chrome in headless mode for use in automated testing.',
   );
 
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
@@ -77,6 +85,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool launchBrowser = args[argLaunchBrowser];
   final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
+  final bool headlessMode = args[argHeadlessMode];
 
   return serveDevTools(
     help: help,
@@ -84,6 +93,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     launchBrowser: launchBrowser,
     enableNotifications: enableNotifications,
     port: port,
+    headlessMode: headlessMode,
     handler: handler,
   );
 }
@@ -99,6 +109,7 @@ Future<HttpServer> serveDevTools({
   bool machineMode = false,
   bool launchBrowser = false,
   bool enableNotifications = false,
+  bool headlessMode = false,
   String hostname = 'localhost',
   int port = 0,
   shelf.Handler handler,
@@ -166,7 +177,13 @@ Future<HttpServer> serveDevTools({
 
       switch (json['method']) {
         case 'vm.register':
-          await _handleVmRegister(id, params, machineMode, devToolsUrl);
+          await _handleVmRegister(
+            id,
+            params,
+            machineMode,
+            headlessMode,
+            devToolsUrl,
+          );
           break;
         case 'client.list':
           await _handleClientsList(id, params, machineMode);
@@ -187,8 +204,13 @@ Future<HttpServer> serveDevTools({
   return server;
 }
 
-Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
-    bool machineMode, String devToolsUrl) async {
+Future<void> _handleVmRegister(
+  dynamic id,
+  Map<String, dynamic> params,
+  bool machineMode,
+  bool headlessMode,
+  String devToolsUrl,
+) async {
   if (!params.containsKey('uri')) {
     printOutput(
       'Invalid input: $params does not contain the key \'uri\'',
@@ -212,7 +234,8 @@ Future<void> _handleVmRegister(dynamic id, Map<String, dynamic> params,
           uri.isScheme('wss') ||
           uri.isScheme('http') ||
           uri.isScheme('https'))) {
-    await registerLaunchDevToolsService(uri, id, devToolsUrl, machineMode);
+    await registerLaunchDevToolsService(
+        uri, id, devToolsUrl, machineMode, headlessMode);
   } else {
     printOutput(
       'Uri must be absolute with a http, https, ws or wss scheme',
@@ -231,7 +254,7 @@ Future<void> _handleClientsList(
   printOutput(
     connectedClients
         .map((c) =>
-            '${c.hasConnection.toString().padRight(5, ' ')} ${c.vmServiceUri.toString()}')
+            '${c.hasConnection.toString().padRight(5, ' ')} ${c.currentPage?.padRight(12, ' ')} ${c.vmServiceUri.toString()}')
         .join('\n'),
     {
       'id': id,
@@ -239,6 +262,7 @@ Future<void> _handleClientsList(
         'clients': connectedClients
             .map((c) => {
                   'hasConnection': c.hasConnection,
+                  'currentPage': c.currentPage,
                   'vmServiceUri': c.vmServiceUri?.toString(),
                 })
             .toList()
@@ -249,12 +273,16 @@ Future<void> _handleClientsList(
 }
 
 Future<bool> _tryReuseExistingDevToolsInstance(
-    Uri vmServiceUri, bool notifyUser) async {
+  Uri vmServiceUri,
+  String page,
+  bool notifyUser,
+) async {
   // First try to find a client that's already connected to this VM service,
   // and just send the user a notification for that one.
   final existingClient = clients.findExistingConnectedClient(vmServiceUri);
   if (existingClient != null) {
     try {
+      await existingClient.showPage(page);
       if (notifyUser) {
         await existingClient.notify();
       }
@@ -283,6 +311,7 @@ Future<void> registerLaunchDevToolsService(
   dynamic id,
   String devToolsUrl,
   bool machineMode,
+  bool headlessMode,
 ) async {
   try {
     // Connect to the vm service and register a method to launch DevTools in
@@ -312,9 +341,11 @@ Future<void> registerLaunchDevToolsService(
         final shouldNotify = params != null &&
             params.containsKey('notify') &&
             params['notify'] == true;
+        final page = params != null ? params['page'] : null;
         if (canReuse &&
             await _tryReuseExistingDevToolsInstance(
               vmServiceUri,
+              page,
               shouldNotify,
             )) {
           emitLaunchEvent(reused: true, notified: shouldNotify);
@@ -341,6 +372,7 @@ Future<void> registerLaunchDevToolsService(
           // to the containers loopback IP).
           path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
           queryParameters: uriParams,
+          fragment: page,
         );
 
         // TODO(dantup): When ChromeOS has support for tunneling all ports we
@@ -353,7 +385,17 @@ Future<void> registerLaunchDevToolsService(
         if (useNativeBrowser) {
           await Process.start('x-www-browser', [uriToLaunch.toString()]);
         } else {
-          await Chrome.start([uriToLaunch.toString()]);
+          final args = headlessMode
+              ? [
+                  '--headless',
+                  // When running headless, Chrome will quit immediately after loading
+                  // the page unless we have the debug port open.
+                  '--remote-debugging-port=9223',
+                  '--disable-gpu',
+                  '--no-sandbox',
+                ]
+              : null;
+          await Chrome.start([uriToLaunch.toString()], args: args);
         }
 
         emitLaunchEvent(reused: false, notified: false);
