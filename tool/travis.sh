@@ -117,7 +117,7 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub global activate webdev
 
     flutter test -j1
-    flutter test -- -j1 --platform chrome
+    flutter test -j1 --platform chrome
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
@@ -126,7 +126,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub global activate webdev
 
     WEBDEV_RELEASE=true flutter test -j1
-    flutter test -j1--platform chrome
+    flutter test -j1 --platform chrome
     echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
@@ -136,7 +136,7 @@ elif [ "$BOT" = "flutter_sdk_tests" ]; then
     flutter pub global activate webdev
 
     # Run tests that require the Flutter SDK.
-    flutter pub run test -j1 --reporter expanded --tags useFlutterSdk
+    flutter test -j1
 
 elif [ "$BOT" = "packages" ]; then
 
