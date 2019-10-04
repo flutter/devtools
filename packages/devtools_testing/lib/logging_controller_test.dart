@@ -23,6 +23,10 @@ import 'package:devtools_testing/support/file_utils.dart';
 import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:test/test.dart';
 
+import 'matchers/matchers.dart';
+import 'support/fake_inspector_tree.dart';
+import 'support/flutter_test_environment.dart';
+
 /// If this test starts timing out it probably means the number of log messages
 /// received has changed. Enable this flag to see what log messages are being
 /// sent to debug the issue.

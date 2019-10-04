@@ -19,6 +19,11 @@ import 'package:devtools_testing/support/flutter_test_driver.dart'
 import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:test/test.dart';
 
+import 'matchers/fake_flutter_matchers.dart';
+import 'matchers/matchers.dart';
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
+
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
   Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
