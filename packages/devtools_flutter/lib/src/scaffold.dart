@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 
 import 'config.dart';
 import 'screen.dart';
@@ -77,24 +76,29 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(),
-      body: Align(
-        alignment: Alignment.topLeft,
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: TabBarView(
-            controller: _controller,
-            children: [for (var screen in widget.tabs) screen.build(context)],
+    // Build the screens for each tab and wrap them in the appropriate styling.
+    final tabBodies = [
+      for (var screen in widget.tabs)
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: screen.build(context),
           ),
         ),
+    ];
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: TabBarView(
+        controller: _controller,
+        children: tabBodies,
       ),
     );
   }
 
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
-  Widget buildAppBar() {
+  Widget _buildAppBar() {
     const title = Text('Dart DevTools');
     Widget tabs;
     if (widget.tabs.length > 1) {
@@ -110,7 +114,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tag: _titleTag,
         child: AppBar(
           key: DevToolsScaffold.narrowWidthKey,
-          automaticallyImplyLeading: false,
+          // automaticallyImplyLeading: false,
           title: title,
           bottom: tabs,
         ),
@@ -143,7 +147,10 @@ class _PreferredSizeHero extends StatelessWidget
     implements PreferredSizeWidget {
   const _PreferredSizeHero({@required this.tag, @required this.child});
 
+  /// The tag to pass to [Hero.tag] when building the [Hero] widget.
   final Object tag;
+
+  /// The [PreferredSizeWidget] to delegate to for the [preferredSize].
   final PreferredSizeWidget child;
 
   @override
