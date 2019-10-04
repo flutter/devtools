@@ -18,7 +18,7 @@ class Logger extends StatefulWidget {
 class LoggerState extends State<Logger> {
   LoggerState(this._logging);
 
-  Logging _logging;
+  final Logging _logging;
   final List<String> _saved = [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
@@ -32,6 +32,7 @@ class LoggerState extends State<Logger> {
     );
   }
 
+  // ignore: unused_element
   void _pushSaved() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -100,14 +101,16 @@ class LoggerState extends State<Logger> {
           // This calculates the actual number of word pairings in the ListView,
           // minus the divider widgets.
           final index = i ~/ 2;
-          if (index < _logging.logs.length)
+          if (index < _logging.logs.length) {
             return _buildRow(_logging.logs[index]);
-/*
-          // Emits Idle... lots of them every 100ms.
-          // TOOD(terry): UI needs to appear sluggish clue to look for leaks, etc.
-          else
-            return _buildRow('Idle...');
-*/
+          } else {
+            return null;
+          }
+
+//          // Emits Idle... lots of them every 100ms.
+//          // TOOD(terry): UI needs to appear sluggish clue to look for leaks, etc.
+//          else
+//            return _buildRow('Idle...');
         });
   }
 }

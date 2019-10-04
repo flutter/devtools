@@ -160,10 +160,10 @@ elif [ "$BOT" = "packages" ]; then
     (cd third_party/packages/ansi_up; pub get)
     (cd third_party/packages/plotly_js; pub get)
     (cd third_party/packages/split; pub get)
-    (cd third_party/packages; pub global run tuneup check)
+    (cd third_party/packages; flutter pub global run tuneup check)
 
     # Analyze Dart code in tool/
-    (cd tool; pub global run tuneup check)
+    (cd tool; flutter pub global run tuneup check)
 
     pushd packages/devtools_app
 

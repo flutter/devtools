@@ -54,13 +54,13 @@ class TimeStamp {
 class TimeModel {
   TimeModel(this._logging);
 
-  Logging _logging;
+  final Logging _logging;
 
   List<TimeStamp> log = <TimeStamp>[];
 
-  String _time = '';
-  String _date = '';
-  String _meridiem = '';
+  final String _time = '';
+  final String _date = '';
+  final String _meridiem = '';
   Timer _clockUpdateTimer;
   DateTime now = DateTime.now();
 

@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'profiler/cpu_profile_model.dart';
-import 'utils.dart';
 import 'version.dart';
 
 class VmServiceWrapper implements VmService {
@@ -639,13 +638,10 @@ class VmServiceWrapper implements VmService {
   }
 
   bool protocolVersionSupported({@required SemanticVersion supportedVersion}) {
-    return isVersionSupported(
-      SemanticVersion(
-        major: _protocolVersion.major,
-        minor: _protocolVersion.minor,
-      ),
-      supportedVersion: supportedVersion,
-    );
+    return SemanticVersion(
+      major: _protocolVersion.major,
+      minor: _protocolVersion.minor,
+    ).isSupported(supportedVersion: supportedVersion);
   }
 
   /// Gets the name of the service stream for the connected VM service. Pre-v3.22

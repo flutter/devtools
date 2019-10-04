@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools_app/src/version.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../version.dart';
 import '../vm_service_wrapper.dart';
 import 'heap_space.dart';
 

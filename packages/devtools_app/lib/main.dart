@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart';
 
-import 'package:devtools_app/src/framework/framework_core.dart';
-import 'package:devtools_app/src/main.dart';
-import 'package:devtools_app/src/ui/analytics.dart' as ga;
-import 'package:devtools_app/src/ui/analytics_platform.dart' as ga_platform;
+import 'package:html_shim/html.dart';
 import 'package:platform_detect/platform_detect.dart';
+
+import 'src/framework/framework_core.dart';
+import 'src/main.dart';
+import 'src/ui/analytics.dart' as ga;
+import 'src/ui/analytics_platform.dart' as ga_platform;
 
 void main() {
   // Run in a zone in order to catch all Dart exceptions.

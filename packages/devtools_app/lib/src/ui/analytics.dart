@@ -9,7 +9,6 @@ library gtags;
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/version.dart';
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 
@@ -17,6 +16,7 @@ import '../../devtools.dart' as devtools show version;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
+import '../version.dart';
 
 export '../ui/analytics_constants.dart';
 
