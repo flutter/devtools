@@ -361,7 +361,7 @@ class WebdevFixture {
       }
     });
 
-    await buildFinished.future.catchError(() {
+    await buildFinished.future.catchError((_) {
       fail('Build failed');
     });
 
