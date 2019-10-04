@@ -34,15 +34,11 @@ function flutter {
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
 pushd packages/devtools
+    # We want to make sure that devtools is retrievable with regular pub.
+    # However, the tests now all run and build with the flutter tool, so we
+    # should use 'flutter pub' instead of 'pub' for everything else.
     pub get
 popd
-
-# The tests now all run and build with the flutter tool, so we don't want to use
-# raw pub any more.
-function pub {
-    echo "Use 'flutter pub' instead of raw 'pub'"
-    exit 1
-}
 
 # Add globally activated packages to the path.
 if [[ $TRAVIS_OS_NAME == "windows" ]]; then
