@@ -12,13 +12,13 @@ import 'dart:io';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_testing/matchers/fake_flutter_matchers.dart';
-import 'package:devtools_testing/matchers/matchers.dart';
-import 'package:devtools_testing/support/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
+
+import 'matchers/fake_flutter_matchers.dart';
+import 'matchers/matchers.dart';
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
   final devtoolsPackageRoot =
