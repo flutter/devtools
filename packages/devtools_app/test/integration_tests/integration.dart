@@ -362,7 +362,10 @@ class WebdevFixture {
       }
     });
 
-    await buildFinished.future;
+    await buildFinished.future.catchError(() {
+      fail('Build failed');
+    });
+    ;
 
     await process.exitCode;
   }

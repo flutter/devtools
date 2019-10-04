@@ -57,6 +57,7 @@ class AppFixture {
 
   Future<void> teardown() async {
     serviceConnection.dispose();
+    print('killing ${process.pid} $process');
     process.kill();
   }
 }

@@ -68,14 +68,23 @@ fi
 export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
 flutter config --no-analytics
 flutter doctor
+# We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
+echo "which dart: " `which dart`
 
 pushd packages/devtools_app
 echo `pwd`
 
-# Print out the versions and ensure we can call Dart, Pub,.
+# Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
 flutter pub --version
-flutter --version
+# Put the Flutter version into a variable.
+# First awk extracts "Flutter x.y.z-pre.a":
+#   -F '•'         uses the bullet as field separator
+#   NR==1          says only take the first record (line)
+#   { print $1}    prints just the first field
+# Second awk splits on space (default) and takes the second field (the version)
+export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
+echo "Flutter version is '$FLUTTER_VERSION'"
 
 if [ "$BOT" = "main" ]; then
 
@@ -107,8 +116,8 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    flutter pub run test -j1 --reporter expanded --exclude-tags useFlutterSdk
-    flutter pub run build_runner test -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    flutter test -j1
+    flutter test -- -j1 --platform chrome
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
@@ -116,22 +125,11 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    WEBDEV_RELEASE=true flutter pub run --enable-asserts test -j1 --reporter expanded --exclude-tags useFlutterSdk
-    flutter pub run build_runner test -r -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+    WEBDEV_RELEASE=true flutter test -j1
+    flutter test -j1--platform chrome
+    echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
-
-    # Put the Flutter version into a variable.
-    # First awk extracts "Flutter x.y.z-pre.a":
-    #   -F '•'         uses the bullet as field separator
-    #   NR==1          says only take the first record (line)
-    #   { print $1}    prints just the first field
-    # Second awk splits on space (default) and takes the second field (the version)
-    export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
-    echo "Flutter version is '$FLUTTER_VERSION'"
-
-    # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
-    echo "which dart: " `which dart`
 
     # Provision our packages using Flutter's version of Dart.
     flutter pub get

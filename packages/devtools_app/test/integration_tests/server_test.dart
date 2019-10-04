@@ -34,6 +34,9 @@ void main() {
     // Build the app, as the server can't start without the build output.
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
 
+    if (!Directory('build/packages').existsSync()) {
+      fail('Build failed');
+    }
     Directory('build/packages').renameSync('build/pack');
     // The devtools package build directory needs to reflect the latest
     // devtools_app package contents.
