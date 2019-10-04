@@ -615,6 +615,7 @@ class VmServiceWrapper implements VmService {
     activeFutures.clear();
   }
 
+  // TODO(kenz): use [isVersionSupported] from utils.dart.
   Future<bool> isProtocolVersionLessThan({
     @required int major,
     @required int minor,
