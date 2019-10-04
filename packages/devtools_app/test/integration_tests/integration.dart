@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
@@ -365,7 +364,6 @@ class WebdevFixture {
     await buildFinished.future.catchError(() {
       fail('Build failed');
     });
-    ;
 
     await process.exitCode;
   }
