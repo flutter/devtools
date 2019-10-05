@@ -82,6 +82,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _controller = TabController(length: widget.tabs.length, vsync: this);
   }
 
+  // Pushes tab changes into the navigation history.
+  //
+  // Note that this currently works very well, but it doesn't
+  // integrate with the browser's history yet.
+  void _pushScreenToLocalPageRoute(int newIndex) {
+    final previousTabIndex = _controller.previousIndex;
+    if (newIndex != previousTabIndex) {
+      ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
+        onRemove: () {
+          if (widget.tabs.length >= previousTabIndex) {
+            _controller.animateTo(previousTabIndex);
+          }
+        },
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
@@ -113,6 +130,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       tabs = TabBar(
         controller: _controller,
         isScrollable: true,
+        onTap: _pushScreenToLocalPageRoute,
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
     }
