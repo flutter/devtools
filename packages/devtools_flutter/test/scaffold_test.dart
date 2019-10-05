@@ -91,7 +91,7 @@ class _TestScreen extends Screen {
     return Tab(
       key: tabKey,
       text: name,
-      icon: Icon(Icons.computer),
+      icon: const Icon(Icons.computer),
     );
   }
 }

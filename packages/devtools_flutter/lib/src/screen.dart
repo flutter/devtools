@@ -56,7 +56,6 @@ class EmptyScreen extends Screen {
 
   @override
   Widget buildTab(BuildContext context) {
-    // TODO: implement buildTab
     return Tab(
       text: name,
       icon: Icon(icon),
