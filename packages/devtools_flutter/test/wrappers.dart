@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Wraps [widget] with the build context it needs to load in a test.
 ///
-/// This includes a [MaterialApp] to provide context like [Theme.of],
-/// as well as a [Material] to allow elements like [TextField] that require
-/// a [Material] parent to draw ink effects.
+/// This includes a [MaterialApp] to provide context like [Theme.of].
+/// It also provides a [Material] to support elements like [TextField] that
+/// draw ink effects.
 Widget wrap(Widget widget) => MaterialApp(home: Material(child: widget));
 
 /// Sets the size of the app window under test to [windowSize].

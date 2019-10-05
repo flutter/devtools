@@ -16,7 +16,7 @@ void main() {
   final config = Config();
   runApp(
     MaterialApp(
-      theme: ThemeData.light().copyWith(),
+      theme: ThemeData.light(),
       routes: config.routes,
     ),
   );

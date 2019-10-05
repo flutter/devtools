@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 import 'config.dart';
 import 'screen.dart';
 
-/// Scaffolding for a screen and navigation in the DevTools App
+/// Scaffolding for a screen and navigation in the DevTools App.
 ///
 /// This widget will host Screen widgets.
 ///
-/// [Config] defines what screens to show in the app.
-/// For a sample implementation, see [ConnectDevToolsScaffold].
+/// [Config] defines the collections of [Screen]s to show in a scaffold
+/// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
@@ -21,16 +21,16 @@ class DevToolsScaffold extends StatefulWidget {
   })  : assert(tabs != null),
         super(key: key);
 
-  /// A [Key] that indicates the page is showing in narrow-width mode.
+  /// A [Key] that indicates the scaffold is showing in narrow-width mode.
   static const Key narrowWidthKey = Key('Narrow Scaffold');
 
-  /// A [Key] that indicates the page is showing in full-width mode.
+  /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
-  /// The width at or below which we treat the screen as narrow-width.
+  /// The width at or below which we treat the scaffold as narrow-width.
   static const double narrowWidthThreshold = 800.0;
 
-  /// All of the screens that it's possible to navigate to from this Scaffold.
+  /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
 
   @override
@@ -39,8 +39,14 @@ class DevToolsScaffold extends StatefulWidget {
 
 class DevToolsScaffoldState extends State<DevToolsScaffold>
     with TickerProviderStateMixin {
-  /// A tag used for [Hero] widgets to keep the app title in the same place across page transitions.
-  static const String _titleTag = 'App Title';
+  /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
+  /// across route transitions.
+  static const String _appBarTag = 'DevTools AppBar';
+
+  /// The controller for animating between tabs.
+  ///
+  /// This will be passed to both the [TabBar] and the [TabBarView] widgets
+  /// to coordinate their animation when the tab selection changes.
   TabController _controller;
 
   @override
@@ -54,10 +60,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.didUpdateWidget(oldWidget);
     if (widget.tabs.length != oldWidget.tabs.length) {
       var newIndex = 0;
+      // Stay on the current tab if possible when the collection of tabs changes.
       if (_controller != null &&
           widget.tabs.contains(oldWidget.tabs[_controller.index])) {
         newIndex = widget.tabs.indexOf(oldWidget.tabs[_controller.index]);
       }
+      // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
       _controller.index = newIndex;
     }
@@ -111,7 +119,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     if (MediaQuery.of(context).size.width <=
         DevToolsScaffold.narrowWidthThreshold) {
       return _PreferredSizeHero(
-        tag: _titleTag,
+        tag: _appBarTag,
         child: AppBar(
           key: DevToolsScaffold.narrowWidthKey,
           // Turn off the appbar's back button on the web.
@@ -121,8 +129,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
       );
     }
+    // Place the AppBar inside of a Hero widget to keep it the same
+    // across route transitions.
     return _PreferredSizeHero(
-      tag: _titleTag,
+      tag: _appBarTag,
       child: AppBar(
         key: DevToolsScaffold.fullWidthKey,
         // Turn off the appbar's back button on the web.
@@ -137,7 +147,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 padding:
                     const EdgeInsets.only(top: 4.0, left: 32.0, right: 32.0),
                 child: tabs,
-              )
+              ),
           ],
         ),
       ),
@@ -145,6 +155,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 }
 
+/// Wrapper that places a [PreferredSizeWidget] in a [Hero] such that
+/// it can still be passed to fields like [Scaffold.appBar], which
+/// requires a [PreferredSizeWidget].
 class _PreferredSizeHero extends StatelessWidget
     implements PreferredSizeWidget {
   const _PreferredSizeHero({@required this.tag, @required this.child});
