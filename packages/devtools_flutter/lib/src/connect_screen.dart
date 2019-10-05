@@ -99,6 +99,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   void connect() {
+    // TODO(https://github.com/flutter/devtools/issues/1112): Connect to a VM.
     Navigator.pushNamed(context, '/connected');
   }
 }

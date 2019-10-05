@@ -12,7 +12,7 @@ void main() {
   testWidgets('Connect screen displays without error',
       (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(wrapWithMaterial(ConnectScreenBody()));
+    await tester.pumpWidget(wrap(ConnectScreenBody()));
     expect(find.byKey(const Key('Connect Title')), findsOneWidget);
   });
 }
