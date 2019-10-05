@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'scaffold.dart';
 
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
   const Screen(this.name);
 
-  /// The human-readable name to show for the app.
+  /// The human-readable name to show for the screen.
   final String name;
 
-  /// Builds the tab to show for this widget in the app's main navbar.
+  /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main navbar.
   ///
-  /// This will only be used if this [Screen] is in the app's
-  /// [Config.screensWithTabs].
+  /// This will not be used if the [Screen] is the only one shown in the scaffold.
   Widget buildTab(BuildContext context);
 
-  /// Builds the displayed body for this tab.
+  /// Builds the body to display for this tab.
   Widget build(BuildContext context);
 }
 
@@ -28,10 +28,14 @@ class EmptyScreen extends Screen {
 
   static const EmptyScreen inspector =
       EmptyScreen('Flutter Inspector', Icons.map);
+
   static const EmptyScreen timeline = EmptyScreen('Timeline', Icons.timeline);
+
   static const EmptyScreen performance =
       EmptyScreen('Performance', Icons.computer);
+
   static const EmptyScreen memory = EmptyScreen('Memory', Icons.memory);
+
   static const EmptyScreen logging =
       EmptyScreen('Logging', Icons.directions_run);
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'config.dart';
@@ -45,7 +46,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void initState() {
     super.initState();
-    _setupController();
+    _setupTabController();
   }
 
   @override
@@ -57,7 +58,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           widget.tabs.contains(oldWidget.tabs[_controller.index])) {
         newIndex = widget.tabs.indexOf(oldWidget.tabs[_controller.index]);
       }
-      _setupController();
+      _setupTabController();
       _controller.index = newIndex;
     }
   }
@@ -68,8 +69,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.dispose();
   }
 
-  // Sets up the tab controllers.
-  void _setupController() {
+  void _setupTabController() {
     _controller?.dispose();
     _controller = TabController(length: widget.tabs.length, vsync: this);
   }
@@ -114,7 +114,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tag: _titleTag,
         child: AppBar(
           key: DevToolsScaffold.narrowWidthKey,
-          // automaticallyImplyLeading: false,
+          // Turn off the appbar's back button on the web.
+          automaticallyImplyLeading: !kIsWeb,
           title: title,
           bottom: tabs,
         ),
@@ -124,7 +125,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       tag: _titleTag,
       child: AppBar(
         key: DevToolsScaffold.fullWidthKey,
-        automaticallyImplyLeading: false,
+        // Turn off the appbar's back button on the web.
+        automaticallyImplyLeading: !kIsWeb,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
