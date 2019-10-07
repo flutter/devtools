@@ -5,7 +5,7 @@ os:
 
 language: dart
 dart:
-  - "dev/release/2.6.0-dev.0.0"
+  - "dev/raw/latest"
   - stable
 addons:
   chrome: stable
