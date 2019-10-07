@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/services.dart' as service;
 import 'package:flutter/material.dart';
 
 import 'connect_screen.dart';
@@ -12,26 +13,62 @@ import 'screen.dart';
 @immutable
 class Config {
   /// The routes that the app exposes.
-  Map<String, WidgetBuilder> get routes {
-    final routeToBuilder = <String, WidgetBuilder>{};
-    for (var key in _routeToTabs.keys) {
-      routeToBuilder[key] =
-          (BuildContext context) => DevToolsScaffold(tabs: _routeToTabs[key]);
-    }
-    return routeToBuilder;
-  }
+  Map<String, WidgetBuilder> get routes => {
+        '/': (_) => Prerequisite(
+              condition: () => service.serviceManager.hasConnection,
+              route: '/connect',
+              builder: (_) => const DevToolsScaffold(tabs: [
+                EmptyScreen.inspector,
+                EmptyScreen.timeline,
+                EmptyScreen.performance,
+                EmptyScreen.memory,
+                EmptyScreen.logging,
+              ]),
+            ),
+        '/connect': (_) => const DevToolsScaffold(tabs: [ConnectScreen()]),
+      };
 
   // The mapping from routes to the collection of screens to show in the app.
   //
   // The /connect route will be a dependency for all the other routes.
-  final Map<String, List<Screen>> _routeToTabs = const {
-    '/': [ConnectScreen()],
-    '/connected': [
-      EmptyScreen.inspector,
-      EmptyScreen.timeline,
-      EmptyScreen.performance,
-      EmptyScreen.memory,
-      EmptyScreen.logging,
-    ],
-  };
+  final Map<String, List<Screen>> _routeToTabs = const {};
+}
+
+/// Widget that enforces a prerequisite before building its children.
+///
+/// The widget will pusth [route] if [condition] is false.
+/// Otherwise, the widget will build [builder].
+class Prerequisite extends StatefulWidget {
+  const Prerequisite(
+      {Key key,
+      @required this.condition,
+      @required this.route,
+      @required this.builder})
+      : assert(condition != null),
+        assert(route != null),
+        assert(builder != null),
+        super(key: key);
+
+  /// The
+  final bool Function() condition;
+  final String route;
+  final WidgetBuilder builder;
+
+  @override
+  _PrerequisiteState createState() => _PrerequisiteState();
+}
+
+class _PrerequisiteState extends State<Prerequisite> {
+  @override
+  Widget build(BuildContext context) {
+    if (ModalRoute.of(context).isCurrent && !widget.condition()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushNamed(widget.route).then((_) {
+          setState(() {});
+        });
+      });
+      return const SizedBox();
+    }
+    return widget.builder(context);
+  }
 }

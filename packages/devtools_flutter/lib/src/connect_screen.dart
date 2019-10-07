@@ -3,10 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:devtools_app/services.dart' as service;
 
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
+///
+/// We need to use this screen to get a guarantee that the app has a
+/// Dart VM available.
 class ConnectScreen extends Screen {
   const ConnectScreen() : super('Connect');
 
@@ -98,18 +102,23 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     );
   }
 
-  void _tryConnect() {
-    service.FrameworkCore.initVmService(
-      '',
-      explicitUri: Uri.parse(controller.text),
-    ).then((ready) {
-      print('Ready? $ready');
-    });
-  }
-
-  void connect() {
-    // TODO(https://github.com/flutter/devtools/issues/1112): Connect to a VM.
-    Navigator.pushNamed(context, '/connected');
+  Future<void> connect() async {
+    final connected = await service.FrameworkCore.initVmService(
+          '',
+          explicitUri: Uri.parse(controller.text),
+        ).catchError((_) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Unable to connect to Dart VM at "${controller.text}". Please specify a running Dart VM URL.'),
+            ),
+          );
+        }) ??
+        false;
+    print('Connection status: $connected');
+    if (connected) {
+      return Navigator.pop(context);
+    }
   }
 }
 

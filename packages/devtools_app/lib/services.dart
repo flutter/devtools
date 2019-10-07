@@ -3,4 +3,5 @@
 // found in the LICENSE file.
 
 export 'src/framework/framework_core.dart';
+export 'src/globals.dart';
 export 'src/service_manager.dart';
