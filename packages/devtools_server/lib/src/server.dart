@@ -26,6 +26,7 @@ const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
 const argHeadlessMode = 'headless';
+const argTryPorts = 'try-ports';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
@@ -45,6 +46,12 @@ final argParser = ArgParser()
     abbr: 'p',
     help: 'Port to serve DevTools on. '
         'Pass 0 to automatically assign an available port.',
+  )
+  ..addOption(
+    argTryPorts,
+    defaultsTo: '1',
+    help:
+        'The number of ascending ports to try binding to before failing with an error. ',
   )
   ..addFlag(
     argMachine,
@@ -86,6 +93,8 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool enableNotifications = args[argEnableNotifications];
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
   final bool headlessMode = args[argHeadlessMode];
+  final numPortsToTry =
+      args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
 
   return serveDevTools(
     help: help,
@@ -94,6 +103,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     enableNotifications: enableNotifications,
     port: port,
     headlessMode: headlessMode,
+    numPortsToTry: numPortsToTry,
     handler: handler,
   );
 }
@@ -112,6 +122,7 @@ Future<HttpServer> serveDevTools({
   bool headlessMode = false,
   String hostname = 'localhost',
   int port = 0,
+  int numPortsToTry = 1,
   shelf.Handler handler,
 }) async {
   if (help) {
@@ -131,7 +142,23 @@ Future<HttpServer> serveDevTools({
 
   handler ??= await defaultHandler(clients);
 
-  final server = await HttpMultiServer.bind(hostname, port);
+  HttpMultiServer server;
+  SocketException ex;
+  while (server == null && numPortsToTry > 0) {
+    try {
+      server = await HttpMultiServer.bind(hostname, port);
+    } on SocketException catch (e) {
+      ex = e;
+      numPortsToTry--;
+      port++;
+    }
+  }
+
+  // Re-throw the last exception if we failed to bind.
+  if (server == null && ex != null) {
+    throw ex;
+  }
+
   shelf.serveRequests(server, handler);
 
   final devToolsUrl = 'http://${server.address.host}:${server.port}';
