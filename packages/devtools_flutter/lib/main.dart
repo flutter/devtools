@@ -10,7 +10,9 @@ import 'src/config.dart';
 void main() {
   // When running in a desktop embedder, Flutter throws an error because the
   // platform is not officially supported. This is not needed for web.
-  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  if (!kIsWeb) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
   final config = Config();
   runApp(
     MaterialApp(

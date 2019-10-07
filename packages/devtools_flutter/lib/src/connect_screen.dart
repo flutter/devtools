@@ -6,13 +6,26 @@ import 'package:flutter/material.dart';
 
 import 'screen.dart';
 
-/// The screen in the app responsible for connecting.
-class ConnectScreen extends StatefulWidget {
+/// The screen in the app responsible for connecting to the Dart VM.
+class ConnectScreen extends Screen {
+  const ConnectScreen() : super('Connect');
+
   @override
-  State<ConnectScreen> createState() => _ConnectScreenState();
+  Widget build(BuildContext context) => ConnectScreenBody();
+
+  @override
+  Widget buildTab(BuildContext context) {
+    // ConnectScreen doesn't have a tab.
+    return null;
+  }
 }
 
-class _ConnectScreenState extends State<ConnectScreen> {
+class ConnectScreenBody extends StatefulWidget {
+  @override
+  State<ConnectScreenBody> createState() => _ConnectScreenBodyState();
+}
+
+class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   TextEditingController controller;
 
   @override
@@ -30,30 +43,28 @@ class _ConnectScreenState extends State<ConnectScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Screen(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Connect',
-            style: textTheme.headline,
-            key: const Key('Connect Title'),
-          ),
-          const _SpacedDivider(),
-          Text(
-            'Connect to a running app',
-            style: textTheme.body2,
-          ),
-          Text(
-            'Enter a URL to a running Dart or Flutter application',
-            style: textTheme.caption,
-          ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          _buildTextInput(),
-          const _SpacedDivider(),
-          // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Connect',
+          style: textTheme.headline,
+          key: const Key('Connect Title'),
+        ),
+        const _SpacedDivider(),
+        Text(
+          'Connect to a running app',
+          style: textTheme.body2,
+        ),
+        Text(
+          'Enter a URL to a running Dart or Flutter application',
+          style: textTheme.caption,
+        ),
+        const Padding(padding: EdgeInsets.only(top: 20.0)),
+        _buildTextInput(),
+        const _SpacedDivider(),
+        // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+      ],
     );
   }
 
@@ -87,7 +98,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
     );
   }
 
-  void connect() {}
+  void connect() {
+    // TODO(https://github.com/flutter/devtools/issues/1112): Connect to a VM.
+    Navigator.pushNamed(context, '/connected');
+  }
 }
 
 // A divider that adds spacing underneath for forms.
