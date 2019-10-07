@@ -421,7 +421,7 @@ Future<void> registerLaunchDevToolsService(
                   '--disable-gpu',
                   '--no-sandbox',
                 ]
-              : null;
+              : <String>[];
           await Chrome.start([uriToLaunch.toString()], args: args);
         }
 
