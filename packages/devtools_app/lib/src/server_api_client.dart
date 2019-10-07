@@ -5,13 +5,12 @@
 import 'dart:convert';
 import 'dart:html';
 
-import 'package:sse/client/sse_client.dart';
-
+import 'core/sse/sse_shim.dart';
 import 'main.dart';
 
 class DevToolsServerApiClient {
   DevToolsServerApiClient(this._framework) : _channel = SseClient('/api/sse') {
-    _channel.stream.listen((msg) {
+    _channel.stream?.listen((msg) {
       try {
         final request = jsonDecode(msg);
         assert(request['method'] != null);
@@ -45,7 +44,7 @@ class DevToolsServerApiClient {
   void _send(String method, [Map<String, dynamic> params]) {
     final id = _nextRequestId++;
     final json = jsonEncode({'id': id, 'method': method, 'params': params});
-    _channel.sink.add(json);
+    _channel.sink?.add(json);
   }
 
   void notifyConnected(Uri vmServiceUri) {
