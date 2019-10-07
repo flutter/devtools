@@ -104,17 +104,14 @@ class VmServiceWrapper implements VmService {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
       return _trackFuture(
-          'clearCpuSamples',
-          _vmService.clearCpuSamples(
-            isolateId,
-          ));
+        'clearCpuSamples',
+        _vmService.clearCpuSamples(isolateId),
+      );
     } else {
       final response = await _trackFuture(
-          'clearCpuSamples',
-          callMethod(
-            '_clearCpuProfile',
-            isolateId: isolateId,
-          ));
+        'clearCpuSamples',
+        callMethod('_clearCpuProfile', isolateId: isolateId),
+      );
       return response as Success;
     }
   }
