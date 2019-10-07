@@ -1,9 +1,17 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Wraps [widget] with the build context it needs to load in a test.
-Widget wrap(Widget widget, {Size windowSize}) => MaterialApp(home: widget);
+///
+/// This includes a [MaterialApp] to provide context like [Theme.of].
+/// It also provides a [Material] to support elements like [TextField] that
+/// draw ink effects.
+Widget wrap(Widget widget) => MaterialApp(home: Material(child: widget));
 
 /// Sets the size of the app window under test to [windowSize].
 ///

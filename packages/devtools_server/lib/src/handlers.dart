@@ -9,12 +9,15 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:sse/server/sse_handler.dart';
+
+import 'client_manager.dart';
 
 /// Default [shelf.Handler] for serving DevTools files.
 ///
 /// This serves files out from the build results of running a pub build of the
 /// DevTools project.
-Future<shelf.Handler> defaultHandler() async {
+Future<shelf.Handler> defaultHandler(ClientManager clients) async {
   final resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
   final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
@@ -34,18 +37,30 @@ Future<shelf.Handler> defaultHandler() async {
     defaultDocument: 'index.html',
   );
 
+  final sseHandler = SseHandler(Uri.parse('/api/sse'))
+    ..connections.rest.listen(clients.acceptClient);
+
   // Make a handler that delegates based on path.
-  return (shelf.Request request) {
-    // The API handler takes all calls to api/.
+  final handler = (shelf.Request request) {
+    if (request.url.path.startsWith('packages/')) {
+      // request.change here will strip the `packages` prefix from the path
+      // so it's relative to packHandler's root.
+      return packHandler(request.change(path: 'packages'));
+    }
+
+    if (request.url.path.startsWith('api/sse')) {
+      return sseHandler.handler(request);
+    }
+
+    // The API handler takes all other calls to api/.
     if (ServerApi.canHandle(request)) {
       return ServerApi.handle(request);
     }
-    return request.url.path.startsWith('packages/')
-        // request.change here will strip the `packages` prefix from the path
-        // so it's relative to packHandler's root.
-        ? packHandler(request.change(path: 'packages'))
-        : buildHandler(request);
+
+    return buildHandler(request);
   };
+
+  return handler;
 }
 
 /// The DevTools server API.
@@ -60,7 +75,10 @@ class ServerApi {
   /// Handles all requests.
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
-  static FutureOr<shelf.Response> handle(shelf.Request request, [ServerApi api]) {
+  static FutureOr<shelf.Response> handle(
+    shelf.Request request, [
+    ServerApi api,
+  ]) {
     api ??= ServerApi();
     switch (request.url.path) {
       case 'api/logScreenView':
@@ -79,7 +97,9 @@ class ServerApi {
 
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
-  shelf.Response notImplemented(shelf.Request request) => shelf.Response.notFound(
-      '${request.url.path} is not implemented in this version of the DevTools '
-      'server.');
+  ///
+  /// This is a no-op 204 No Content response because returning 404 Not Found
+  /// creates unnecessary noise in the console.
+  FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
+      shelf.Response(204);
 }

@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'ui/fake_flutter/fake_flutter.dart';
 
-class FlutterVersion {
+class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
     @required this.version,
     @required this.channel,
@@ -15,7 +15,20 @@ class FlutterVersion {
     @required this.frameworkCommitDate,
     @required this.engineRevision,
     @required this.dartSdkVersion,
-  });
+  }) {
+    // Flutter versions can come in as '1.10.7-pre.42', so we strip out any
+    // characters that are not digits. We do not currently have a need to know
+    // more version parts than major, minor, and patch. If this changes, we can
+    // add support for the extra values.
+    final _versionParts = version
+        .split('.')
+        .map((part) => RegExp(r'\d+').stringMatch(part) ?? '0')
+        .toList();
+    major =
+        _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
+    minor = _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
+    patch = _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
+  }
 
   factory FlutterVersion.parse(Map<String, dynamic> json) {
     return FlutterVersion._(
@@ -75,4 +88,30 @@ class FlutterVersion {
         engineRevision,
         dartSdkVersion,
       );
+}
+
+class SemanticVersion implements Comparable {
+  SemanticVersion({this.major = 0, this.minor = 0, this.patch = 0});
+
+  int major;
+
+  int minor;
+
+  int patch;
+
+  bool isSupported({@required SemanticVersion supportedVersion}) =>
+      compareTo(supportedVersion) >= 0;
+
+  @override
+  int compareTo(other) {
+    if (major == other.major && minor == other.minor && patch == other.patch) {
+      return 0;
+    }
+    if (major > other.major ||
+        (major == other.major && minor > other.minor) ||
+        (major == other.major && minor == other.minor && patch > other.patch)) {
+      return 1;
+    }
+    return -1;
+  }
 }

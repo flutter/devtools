@@ -6,14 +6,13 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 @TestOn('vm')
-
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/info/info_controller.dart';
 import 'package:devtools_app/src/version.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'package:devtools_testing/support/flutter_test_environment.dart';
+import 'support/flutter_test_environment.dart';
 
 Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
   InfoController infoController;

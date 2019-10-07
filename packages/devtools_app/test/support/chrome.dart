@@ -15,7 +15,9 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 
 // Change this if you want to be able to see Chrome opening while tests run
 // to aid debugging.
-const _useChromeHeadless = true;
+const useChromeHeadless = true;
+
+final headlessModeIsSupported = !Platform.isWindows;
 
 class Chrome {
   factory Chrome.from(String executable) {
@@ -80,7 +82,7 @@ class Chrome {
     ];
     // TODO(dantup): Chrome headless currently hangs on Windows (both Travis and
     // locally), so use non-headless there until we have a fix.
-    if (_useChromeHeadless && !Platform.isWindows) {
+    if (useChromeHeadless && headlessModeIsSupported) {
       args.addAll(<String>[
         '--headless',
         '--disable-gpu',

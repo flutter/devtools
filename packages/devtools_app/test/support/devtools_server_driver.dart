@@ -12,7 +12,7 @@ class DevToolsServerDriver {
   DevToolsServerDriver._(
       this._process, this._stdin, Stream<String> _stdout, this.stderr)
       : output = _stdout.map((line) {
-          _trace(line);
+          _trace('<== $line');
           return line;
         }).map((line) => jsonDecode(line) as Map<String, dynamic>);
 
@@ -35,13 +35,30 @@ class DevToolsServerDriver {
 
   bool kill() => _process.kill();
 
-  static Future<DevToolsServerDriver> create() async {
+  static Future<DevToolsServerDriver> create({
+    int port = 0,
+    int tryPorts,
+  }) async {
     // These tests assume that the devtools package is present in a sibling
     // directory of the devtools_app package.
-    final Process process = await Process.start(
-      Platform.resolvedExecutable,
-      <String>['../devtools/bin/devtools.dart', '--machine', '--port', '0'],
-    );
+    final args = [
+      '../devtools/bin/devtools.dart',
+      '--machine',
+      '--port',
+      '$port',
+    ];
+
+    if (tryPorts != null) {
+      args.addAll(['--try-ports', '$tryPorts']);
+    }
+
+    // TODO: This needs enabling once the server version that supports headless
+    // has been published.
+    // if (useChromeHeadless && headlessModeIsSupported) {
+    //   args.add('--headless');
+    // }
+    final Process process =
+        await Process.start(Platform.resolvedExecutable, args);
 
     return DevToolsServerDriver._(
         process,

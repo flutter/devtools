@@ -7,29 +7,6 @@
 # Fast fail the script on failures.
 set -ex
 
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    pub get
-popd
-
-pushd packages/devtools_app
-echo `pwd`
-
-# Add globally activated packages to the path.
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    export PATH=$PATH:$APPDATA/Roaming/Pub/Cache/bin
-else
-    export PATH=$PATH:~/.pub-cache/bin
-fi
-
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    echo Installing Google Chrome Stable...
-    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
-    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
-    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
-fi
-
 # In GitBash on Windows, we have to call pub.bat so we alias `pub` in this script to call the
 # correct one based on the OS.
 function pub {
@@ -54,9 +31,46 @@ function flutter {
     fi
 }
 
-# Print out the versions and ensure we can call both Dart and Pub.
+# Some integration tests assume the devtools package is up to date and located
+# adjacent to the devtools_app package.
+pushd packages/devtools
+    pub get
+popd
+
+# Add globally activated packages to the path.
+if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    export PATH=$PATH:$APPDATA/Roaming/Pub/Cache/bin
+else
+    export PATH=$PATH:~/.pub-cache/bin
+fi
+
+if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    echo Installing Google Chrome Stable...
+    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
+    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
+    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
+fi
+
+# Get Flutter.
+if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
+    echo "Cloning stable Flutter branch"
+    git clone https://github.com/flutter/flutter.git --branch stable ./flutter
+
+    # Set the suffix so we use stable goldens.
+    export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
+else
+    echo "Cloning master Flutter branch"
+    git clone https://github.com/flutter/flutter.git ./flutter
+fi
+export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+
+pushd packages/devtools_app
+echo `pwd`
+
+# Print out the versions and ensure we can call Dart, Pub, and Flutter.
 dart --version
 pub --version
+flutter --version
 
 if [ "$BOT" = "main" ]; then
 
@@ -101,20 +115,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
     pub run build_runner test -r -- -j1 --reporter expanded --exclude-tags useFlutterSdk --platform chrome-no-sandbox
 
 elif [ "$BOT" = "flutter_sdk_tests" ]; then
-
-    # Get Flutter.
-    if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
-        echo "Cloning stable Flutter branch"
-        git clone https://github.com/flutter/flutter.git --branch stable ../flutter
-
-        # Set the suffix so we use stable goldens.
-        export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
-    else
-        echo "Cloning master Flutter branch"
-        git clone https://github.com/flutter/flutter.git ../flutter
-    fi
     cd ..
-    export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
     flutter config --no-analytics
     flutter doctor
 
@@ -144,23 +145,25 @@ elif [ "$BOT" = "packages" ]; then
 
     popd
 
-    pub global activate tuneup
+    flutter pub global activate tuneup
 
     # Analyze packages/
     (cd packages/devtools_app; pub get)
     (cd packages/devtools_server; pub get)
+    (cd packages/devtools_flutter; flutter pub get)
     (cd packages/devtools_testing; pub get)
     (cd packages/html_shim; pub get)
-    (cd packages; pub global run tuneup check)
+    # TODO(djshuckerow): Re-enable this check as part of using Flutter to run.
+    (cd packages; flutter pub global run tuneup check)
 
     # Analyze third_party/
     (cd third_party/packages/ansi_up; pub get)
     (cd third_party/packages/plotly_js; pub get)
     (cd third_party/packages/split; pub get)
-    (cd third_party/packages; pub global run tuneup check)
+    (cd third_party/packages; flutter pub global run tuneup check)
 
     # Analyze Dart code in tool/
-    (cd tool; pub global run tuneup check)
+    (cd tool; flutter pub global run tuneup check)
 
     pushd packages/devtools_app
 

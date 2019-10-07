@@ -25,6 +25,7 @@ Future<void> waitFor(
   Future<bool> condition(), {
   Duration timeout = const Duration(seconds: 4),
   String timeoutMessage = 'condition not satisfied',
+  Duration delay = const Duration(milliseconds: 100),
 }) async {
   final DateTime end = DateTime.now().add(timeout);
 
@@ -33,7 +34,7 @@ Future<void> waitFor(
       return;
     }
 
-    await shortDelay();
+    await Future.delayed(delay);
   }
 
   throw timeoutMessage;

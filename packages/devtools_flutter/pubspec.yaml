@@ -1,11 +1,6 @@
 name: devtools_flutter
 description: UI package for web-based performance tooling for Dart and Flutter written in Flutter.
 
-# Note: when updating this version, please update the corresponding entry in
-# lib/devtools.dart and ../devtools/pubspec.yaml as well to the same version.
-# When publishing new versions of this package be sure to publish a new version
-# of package:devtools as well. package:devtools contains a compiled snapshot of
-# this package.
 version: 0.0.1
 
 author: Dart Team <misc@dartlang.org>
@@ -19,8 +14,6 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  devtools_app:
-    path: ../devtools_app
 
 flutter:
   uses-material-design: true
