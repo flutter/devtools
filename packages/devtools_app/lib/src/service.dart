@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:html_shim/html.dart' hide Event;
-import 'package:sse/client/sse_client.dart';
 import 'package:vm_service/utils.dart';
 
+import 'core/sse/sse_shim.dart';
 import 'vm_service_wrapper.dart';
 
 void _connectWithSse(
@@ -20,15 +20,15 @@ void _connectWithSse(
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
   final client = SseClient('$uri');
-  final Stream<String> stream = client.stream.asBroadcastStream();
-  client.onOpen.listen((_) {
+  final Stream<String> stream = client.stream?.asBroadcastStream();
+  client.onOpen?.listen((_) {
     final service = VmServiceWrapper.fromNewVmService(
       stream,
       client.sink.add,
       uri,
     );
 
-    client.sink.done.whenComplete(() {
+    client.sink?.done?.whenComplete(() {
       finishedCompleter.complete();
       service.dispose();
     });
@@ -36,7 +36,7 @@ void _connectWithSse(
     connectedCompleter.complete(service);
   });
 
-  stream.drain().catchError((error) {
+  stream?.drain()?.catchError((error) {
     if (!connectedCompleter.isCompleted) {
       connectedCompleter.completeError(error);
     }
