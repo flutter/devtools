@@ -14,7 +14,7 @@ Future<String> resolvePackagePath(String package) async {
   String path;
   try {
     path = await (PackageResolver.current).packagePath(package);
-  } on UnsupportedError catch (e) {
+  } on UnsupportedError catch (_) {
     // PackageResolver makes calls to Isolate, which isn't accessible from a
     // flutter test run. Flutter test runs in the test directory of the app,
     // so the packages directory is the current directory's grandparent.
