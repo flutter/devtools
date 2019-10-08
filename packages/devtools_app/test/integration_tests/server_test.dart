@@ -35,6 +35,8 @@ void main() {
     // Build the app, as the server can't start without the build output.
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
 
+    print(Directory('build').listSync(recursive: true).join('\n'));
+
     if (!Directory('build/packages').existsSync()) {
       fail('Build failed');
     }
