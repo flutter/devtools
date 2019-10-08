@@ -400,9 +400,10 @@ class WebdevFixture {
     // the shell and leave the Dart process behind.
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
-    if (verbose) {
-      print('Running "$executable" with args: ${buildArgs.join(' ')}');
-    }
+    // if (verbose) {
+    print(
+        'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}');
+    // }
     return Process.start(
       executable,
       buildArgs,
