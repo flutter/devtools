@@ -18,9 +18,8 @@ Future<String> resolvePackagePath(String package) async {
     // PackageResolver makes calls to Isolate, which isn't accessible from a
     // flutter test run. Flutter test runs in the test directory of the app,
     // so the packages directory is the current directory's grandparent.
+    // TODO(https://github.com/flutter/flutter/issues/20907): Remove the workaround here.
     String packagesPath;
-    // TODO(https://github.com/flutter/flutter/issues/41932): When running an
-    // individual test, the test command uses the app root directory instead of test.
     if (io.Directory.current.path.endsWith('test')) {
       packagesPath = io.Directory.current.parent.parent.path;
     } else {
@@ -33,4 +32,12 @@ Future<String> resolvePackagePath(String package) async {
     }
   }
   return path;
+}
+
+/// Work-around for flutter test using different directories based on how it's run.
+// TODO(https://github.com/flutter/flutter/issues/20907): Remove this.
+void compensateForFlutterTestDirectoryBug() {
+  if (io.Directory.current.path.endsWith('test')) {
+    io.Directory.current = io.Directory.current.parent;
+  }
 }

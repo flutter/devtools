@@ -5,6 +5,7 @@
 @TestOn('vm')
 import 'dart:io';
 
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:test/test.dart';
 
 import 'app.dart';
@@ -15,6 +16,7 @@ import 'logging.dart';
 void main() {
   group('integration', () {
     setUpAll(() async {
+      compensateForFlutterTestDirectoryBug();
       final bool testInReleaseMode =
           Platform.environment['WEBDEV_RELEASE'] == 'true';
 

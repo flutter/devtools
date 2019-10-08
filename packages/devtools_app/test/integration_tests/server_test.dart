@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -27,6 +28,7 @@ void main() {
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
   setUp(() async {
+    compensateForFlutterTestDirectoryBug();
     // Build the app, as the server can't start without the build output.
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
 
