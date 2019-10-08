@@ -121,7 +121,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     print('Connection status: $connected');
     if (connected) {
       final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
-      return Navigator.pushReplacementNamed(context, '/?$uriQuery');
+      return Navigator.popAndPushNamed(context, '/?$uriQuery');
     }
   }
 }
