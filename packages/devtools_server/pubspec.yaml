@@ -18,4 +18,4 @@ dependencies:
   shelf: ^0.7.4
   shelf_static: ^0.2.8
   http_multi_server: ^2.1.0
-  vm_service: ^1.2.0
+  vm_service: '>=1.0.0 <3.0.0'

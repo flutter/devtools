@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:platform_channel/channel_demo.dart';
+
+import 'channel_demo.dart';
 
 void main() => runApp(MyApp());
 
