@@ -12,6 +12,31 @@ import 'screen.dart';
 /// Top-level configuration for the app.
 @immutable
 class Config {
+  Route generateRoute(RouteSettings settings) {
+    final uri = Uri.parse(settings.name);
+    final queryParams = uri.queryParameters;
+    final path = uri.path;
+    print('path: $path, params: $queryParams');
+    MaterialPageRoute buildRoute(Widget widget) {
+      return MaterialPageRoute(settings: settings, builder: (_) => widget);
+    }
+
+    if (routes.containsKey(path)) {
+      return MaterialPageRoute(settings: settings, builder: routes[path]);
+    }
+    // Return a page not found.
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (_) {
+        return DevToolsScaffold.withChild(
+          child: const Center(
+            child: Text('Sorry, this page was not found'),
+          ),
+        );
+      },
+    );
+  }
+
   /// The routes that the app exposes.
   Map<String, WidgetBuilder> get routes => {
         '/': (_) => Prerequisite(

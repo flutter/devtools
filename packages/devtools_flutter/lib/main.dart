@@ -19,7 +19,7 @@ void main() {
   runApp(
     MaterialApp(
       theme: ThemeData.light(),
-      routes: config.routes,
+      onGenerateRoute: config.generateRoute,
     ),
   );
 }

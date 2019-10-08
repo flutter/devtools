@@ -79,6 +79,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         SizedBox(
           width: 240.0,
           child: TextField(
+            onSubmitted: connect,
             decoration: const InputDecoration(
               isDense: true,
               border: OutlineInputBorder(),
@@ -102,7 +103,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     );
   }
 
-  Future<void> connect() async {
+  Future<void> connect([_]) async {
     final connected = await service.FrameworkCore.initVmService(
           '',
           explicitUri: Uri.parse(controller.text),
@@ -110,14 +111,17 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           Scaffold.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Unable to connect to Dart VM at "${controller.text}". Please specify a running Dart VM URL.'),
+                'Unable to connect to Dart VM at "${controller.text}". '
+                'Please specify a running Dart VM URL.',
+              ),
             ),
           );
         }) ??
         false;
     print('Connection status: $connected');
     if (connected) {
-      return Navigator.pop(context);
+      final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
+      return Navigator.pushReplacementNamed(context, '/?$uriQuery');
     }
   }
 }
