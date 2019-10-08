@@ -17,14 +17,11 @@ import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/table_data.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools_testing/matchers/matchers.dart';
-import 'package:devtools_testing/support/fake_inspector_tree.dart';
-import 'package:devtools_testing/support/file_utils.dart';
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:test/test.dart';
 
 import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
+import 'support/file_utils.dart';
 import 'support/flutter_test_environment.dart';
 
 /// If this test starts timing out it probably means the number of log messages

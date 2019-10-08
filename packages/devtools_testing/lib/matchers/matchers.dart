@@ -81,7 +81,6 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   static final Object _mismatchedValueKey = Object();
 
-  static bool _updateGoldens;
   static const String _goldensSuffix =
       String.fromEnvironment('GOLDENS_SUFFIX', defaultValue: '');
 
