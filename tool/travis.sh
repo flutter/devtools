@@ -116,8 +116,8 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    flutter test -j1
-    flutter test -j1 --platform chrome
+    flutter test --verbose -j1
+    flutter test --verbose -j1 --platform chrome
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
@@ -125,18 +125,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    WEBDEV_RELEASE=true flutter test -j1
-    flutter test -j1 --platform chrome
+    WEBDEV_RELEASE=true flutter test --verbose -j1
+    flutter test --verbose -j1 --platform chrome
     echo $WEBDEV_RELEASE
-
-elif [ "$BOT" = "flutter_sdk_tests" ]; then
-
-    # Provision our packages using Flutter's version of Dart.
-    flutter pub get
-    flutter pub global activate webdev
-
-    # Run tests that require the Flutter SDK.
-    flutter test -j1
 
 elif [ "$BOT" = "packages" ]; then
 
@@ -150,7 +141,6 @@ elif [ "$BOT" = "packages" ]; then
     (cd packages/devtools_flutter; flutter pub get)
     (cd packages/devtools_testing; flutter pub get)
     (cd packages/html_shim; flutter pub get)
-    # TODO(djshuckerow): Re-enable this check as part of using Flutter to run.
     (cd packages; flutter pub global run tuneup check)
 
     # Analyze third_party/
