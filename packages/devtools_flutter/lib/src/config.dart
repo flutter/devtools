@@ -17,9 +17,6 @@ class Config {
     final queryParams = uri.queryParameters;
     final path = uri.path;
     print('path: $path, params: $queryParams');
-    MaterialPageRoute buildRoute(Widget widget) {
-      return MaterialPageRoute(settings: settings, builder: (_) => widget);
-    }
 
     if (routes.containsKey(path)) {
       return MaterialPageRoute(settings: settings, builder: routes[path]);
@@ -52,11 +49,6 @@ class Config {
             ),
         '/connect': (_) => const DevToolsScaffold(tabs: [ConnectScreen()]),
       };
-
-  // The mapping from routes to the collection of screens to show in the app.
-  //
-  // The /connect route will be a dependency for all the other routes.
-  final Map<String, List<Screen>> _routeToTabs = const {};
 }
 
 /// Widget that enforces a prerequisite before building its children.
