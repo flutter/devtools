@@ -408,10 +408,7 @@ class WebdevFixture {
       executable,
       buildArgs,
       environment: environment,
-      // TODO(https://github.com/flutter/flutter/issues/41932): Remove the ternary when we can guarantee this is always run from the root directory.
-      workingDirectory: Directory.current.path.endsWith('test')
-          ? Directory.current.parent.path
-          : Directory.current.path,
+      workingDirectory: Directory.current.path,
     );
   }
 
