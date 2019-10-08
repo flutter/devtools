@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/services.dart' as service;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -14,12 +13,7 @@ void main() {
   if (!kIsWeb) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-  final config = Config();
-  service.FrameworkCore.init('');
   runApp(
-    MaterialApp(
-      theme: ThemeData.light(),
-      onGenerateRoute: config.generateRoute,
-    ),
+    DevToolsApp(),
   );
 }

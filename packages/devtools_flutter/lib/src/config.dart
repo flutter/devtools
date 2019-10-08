@@ -11,7 +11,19 @@ import 'screen.dart';
 
 /// Top-level configuration for the app.
 @immutable
-class Config {
+class DevToolsApp extends StatefulWidget {
+  @override
+  State<DevToolsApp> createState() => DevToolsAppState();
+}
+
+class DevToolsAppState extends State<DevToolsApp> {
+  @override
+  void initState() {
+    super.initState();
+    service.FrameworkCore.init(WidgetsBinding.instance.window.defaultRouteName);
+  }
+
+  /// Generates routes, separating the path from URL query parameters.
   Route generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
     final queryParams = uri.queryParameters;
@@ -35,52 +47,59 @@ class Config {
   }
 
   /// The routes that the app exposes.
-  Map<String, WidgetBuilder> get routes => {
-        '/': (_) => Prerequisite(
-              condition: () => service.serviceManager.hasConnection,
-              route: '/connect',
-              builder: (_) => const DevToolsScaffold(tabs: [
-                EmptyScreen.inspector,
-                EmptyScreen.timeline,
-                EmptyScreen.performance,
-                EmptyScreen.memory,
-                EmptyScreen.logging,
-              ]),
-            ),
-        '/connect': (_) => const DevToolsScaffold(tabs: [ConnectScreen()]),
-      };
+  final Map<String, WidgetBuilder> routes = {
+    '/': (_) => Initializer(
+          builder: (_) => const DevToolsScaffold(
+            tabs: [
+              EmptyScreen.inspector,
+              EmptyScreen.timeline,
+              EmptyScreen.performance,
+              EmptyScreen.memory,
+              EmptyScreen.logging,
+            ],
+          ),
+        ),
+    '/connect': (_) => DevToolsScaffold.withChild(child: ConnectScreenBody()),
+  };
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.light(),
+      onGenerateRoute: generateRoute,
+    );
+  }
 }
 
-/// Widget that enforces a prerequisite before building its children.
+/// Widget that requires business logic to be loaded before building its
+/// [builder].
 ///
-/// The widget will pusth [route] if [condition] is false.
-/// Otherwise, the widget will build [builder].
-class Prerequisite extends StatefulWidget {
-  const Prerequisite(
-      {Key key,
-      @required this.condition,
-      @required this.route,
-      @required this.builder})
-      : assert(condition != null),
-        assert(route != null),
-        assert(builder != null),
+/// See [_InitializerState._loaded] for the logic that determines whether the
+/// business logic is loaded.
+class Initializer extends StatefulWidget {
+  const Initializer({Key key, @required this.builder})
+      : assert(builder != null),
         super(key: key);
 
-  /// The
-  final bool Function() condition;
-  final String route;
+  /// The builder for the widget's children.
+  ///
+  /// Will only be built if [_InitializerState._loaded] is true.
   final WidgetBuilder builder;
 
   @override
-  _PrerequisiteState createState() => _PrerequisiteState();
+  _InitializerState createState() => _InitializerState();
 }
 
-class _PrerequisiteState extends State<Prerequisite> {
+class _InitializerState extends State<Initializer> {
+  /// Determines if the VM [serviceManager] is ready for use.
+  ///
+  /// The only page that doesn't need this is '/connect'.
+  bool get _loaded => service.serviceManager.hasConnection;
+
   @override
   Widget build(BuildContext context) {
-    if (ModalRoute.of(context).isCurrent && !widget.condition()) {
+    if (ModalRoute.of(context).isCurrent && !_loaded) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushNamed(widget.route).then((_) {
+        Navigator.of(context).pushNamed('/connect').then((_) {
           setState(() {});
         });
       });

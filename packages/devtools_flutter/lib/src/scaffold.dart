@@ -12,7 +12,7 @@ import 'screen.dart';
 ///
 /// This widget will host Screen widgets.
 ///
-/// [Config] defines the collections of [Screen]s to show in a scaffold
+/// [DevToolsApp] defines the collections of [Screen]s to show in a scaffold
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
