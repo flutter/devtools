@@ -26,7 +26,10 @@ void main() {
 
     testWidgets('navigates to the connection page when uninitialized',
         (WidgetTester tester) async {
-      setGlobal(ServiceConnectionManager, FakeServiceManager(false));
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(hasConnection: false),
+      );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsOneWidget);
@@ -35,7 +38,10 @@ void main() {
 
     testWidgets('builds contents when initialized',
         (WidgetTester tester) async {
-      setGlobal(ServiceConnectionManager, FakeServiceManager(true));
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(hasConnection: true),
+      );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsNothing);
@@ -45,7 +51,7 @@ void main() {
 }
 
 class FakeServiceManager extends ServiceConnectionManager {
-  FakeServiceManager(this.hasConnection) : super();
+  FakeServiceManager({@required this.hasConnection}) : super();
 
   @override
   final bool hasConnection;
