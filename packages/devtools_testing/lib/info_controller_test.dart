@@ -85,6 +85,6 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment(force: true);
     });
-  }, timeout: const Timeout.factor(8), tags: 'useFlutterSdk');
+  }, timeout: const Timeout.factor(8));
   // TODO: Add a test that uses DartVM instead of Flutter
 }

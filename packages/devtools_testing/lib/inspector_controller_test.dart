@@ -516,7 +516,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 */
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 }
 
 void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {

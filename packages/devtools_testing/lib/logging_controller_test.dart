@@ -281,7 +281,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 }
 
 /// Normalize text in error messages that is likely unstable.

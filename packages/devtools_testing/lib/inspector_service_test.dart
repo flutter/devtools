@@ -257,7 +257,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
 
       // TODO(jacobr): add tests verifying that we can stop the running device
       // without the InspectorService spewing a bunch of errors.
-    }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+    }, timeout: const Timeout.factor(8));
   } catch (e, s) {
     print(s);
   }
