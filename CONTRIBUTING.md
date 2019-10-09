@@ -84,6 +84,13 @@ The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your
 not include the directory `devtools_app/test/integration_tests`, then you do not need to include
 this flag.
 
+Some tests are intended to run on chrome instead of in the regular Dart VM.  To run these tests,
+pass the flag `--platform=chrome` to `flutter test`:
+
+```
+flutter test -j1 --platform=chrome
+```
+
 ### Updating golden files
 
 Some of the golden file tests will fail if Flutter changes the implementation or diagnostic
@@ -96,6 +103,15 @@ file output still looks reasonable and execute the following command to update t
 
 This will update the master or stable goldens depending on whether you're on the stable
 Flutter branch.
+
+To update goldens for both channels do:
+
+```
+flutter channel master
+./tool/update_goldens.sh
+flutter channel stable
+./tool/update_goldens.sh
+```
 
 ## third_party dependencies
 

@@ -121,8 +121,8 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    flutter test --verbose -j1
-    flutter test --verbose -j1 --platform chrome
+    flutter test -j1
+    flutter test -j1 --platform chrome
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
@@ -130,8 +130,8 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
     flutter pub global activate webdev
 
-    WEBDEV_RELEASE=true flutter test --verbose -j1
-    flutter test --verbose -j1 --platform chrome
+    WEBDEV_RELEASE=true flutter test -j1
+    flutter test -j1 --platform chrome
     echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "packages" ]; then
