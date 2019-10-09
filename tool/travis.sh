@@ -117,22 +117,40 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "test_ddc" ]; then
 
-    # Provision our packages.
     flutter pub get
-    flutter pub global activate webdev
 
-    flutter test -j1
-    flutter test -j1 --platform chrome
+    # Run every test except for integration_tests.
+    # The flutter tool doesn't support excluding a specific set of targets,
+    # so we explicitly provide them.
+    flutter test test/*.dart test/{core,fixtures,support,ui}/
+    flutter test --platform chrome test/*.dart test/{core,fixtures,support,ui}/
 
 elif [ "$BOT" = "test_dart2js" ]; then
+    flutter pub get
+
+    # Run every test except for integration_tests.
+    # The flutter tool doesn't support excluding a specific set of targets,
+    # so we explicitly provide them.
+    WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,support,ui}/
+    flutter test --platform chrome test/*.dart test/{core,fixtures,support,ui}/
+    echo $WEBDEV_RELEASE
+
+elif [ "$BOT" = "integration_ddc" ]; then
 
     # Provision our packages.
     flutter pub get
     flutter pub global activate webdev
 
-    WEBDEV_RELEASE=true flutter test -j1
-    flutter test -j1 --platform chrome
-    echo $WEBDEV_RELEASE
+    # We need to run integration tests with -j1 to run with no concurrency.
+    flutter test -j1 test/integration_tests/
+
+elif [ "$BOT" = "integration_dart2js" ]; then
+
+    flutter pub get
+    flutter pub global activate webdev
+
+    # We need to run integration tests with -j1 to run with no concurrency.
+    WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 

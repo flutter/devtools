@@ -40,6 +40,8 @@ env:
   - BOT=main
   - BOT=test_ddc
   - BOT=test_dart2js
+  - BOT=integration_ddc
+  - BOT=integration_dart2js
 
 script: ./tool/travis.sh
 
