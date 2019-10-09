@@ -12,9 +12,8 @@
                     └─▼[C]CustomMultiChildLayout
                       ├───▼[L]LayoutId-[<_ScaffoldSlot.body>]
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
-                      │     └─▼[B]_BodyBuilder
-                      │         ▼[C]<bold>Center</bold>
-                      │         └─▶[/icons/inspector/textArea.png]<bold>Text</bold>
+                      │     └─▼[C]<bold>Center</bold>
+                      │       └─▶[/icons/inspector/textArea.png]<bold>Text</bold>
                       ├───▼[L]LayoutId-[<_ScaffoldSlot.appBar>]
                       │   └─▼[/icons/inspector/atrule.png]MediaQuery
                       │     └─▼[C]ConstrainedBox
