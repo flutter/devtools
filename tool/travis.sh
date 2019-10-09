@@ -35,9 +35,11 @@ function flutter {
 # adjacent to the devtools_app package.
 pushd packages/devtools
     # We want to make sure that devtools is retrievable with regular pub.
-    # However, the tests now all run and build with the flutter tool, so we
-    # should use 'flutter pub' instead of 'pub' for everything else.
     pub get
+    # Only package:devtools and package:devtools_server should be built with
+    # the pub tool. All other devtools packages and their tests now run on
+    # the flutter tool, so all other invocations of pub in this script should
+    # call 'flutter pub' instead of just 'pub'.
 popd
 
 # Add globally activated packages to the path.

@@ -22,7 +22,7 @@ set -x #echo on
 which flutter
 cd packages/devtools_app
 
-pub run test --reporter expanded --tags useFlutterSdk
+flutter test -j1 --update-goldens
 
 set +x
 echo "Done updating goldens."
