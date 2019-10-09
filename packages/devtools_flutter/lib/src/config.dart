@@ -73,8 +73,12 @@ class DevToolsAppState extends State<DevToolsApp> {
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
 ///
-/// See [_InitializerState._loaded] for the logic that determines whether the
+/// See [_InitializerState.build] for the logic that determines whether the
 /// business logic is loaded.
+///
+/// Use this widget to wrap pages that require [service.serviceManager] to be
+/// connected. As we require additional services to be available, add them
+/// here.
 class Initializer extends StatefulWidget {
   const Initializer({Key key, @required this.builder})
       : assert(builder != null),
@@ -90,21 +94,24 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer> {
-  /// Determines if the VM [serviceManager] is ready for use.
-  ///
-  /// The only page that doesn't need this is '/connect'.
-  bool get _loaded => service.serviceManager.hasConnection;
-
   @override
   Widget build(BuildContext context) {
-    if (ModalRoute.of(context).isCurrent && !_loaded) {
+    final loaded = service.serviceManager.hasConnection;
+
+    // If the loading is not completed, navigate to the connection page to
+    // connect to a VM service.
+    if (!loaded && ModalRoute.of(context).isCurrent) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushNamed('/connect').then((_) {
+          // Generally, empty setState calls in Flutter should be avoided.
+          // However, serviceManager is an implicit part of the state
+          // of Initializer. This setState call is alerting the widget of a change
+          // in the serviceManager's state.
           setState(() {});
         });
       });
-      return const SizedBox();
     }
-    return widget.builder(context);
+
+    return loaded ? widget.builder(context) : const SizedBox();
   }
 }
