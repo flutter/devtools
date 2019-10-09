@@ -244,7 +244,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(4));
+  }, timeout: const Timeout.factor(4));
 }
 
 Future<void> runServiceManagerTestsWithDriverFactory(
@@ -398,7 +398,7 @@ Future<void> runServiceManagerTestsWithDriverFactory(
         numericExtensionDescription.enabledValue,
       );
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 }
 
 Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,

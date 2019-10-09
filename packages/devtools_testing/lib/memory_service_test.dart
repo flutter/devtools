@@ -146,5 +146,5 @@ Future<void> runMemoryServiceTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk');
+  });
 }

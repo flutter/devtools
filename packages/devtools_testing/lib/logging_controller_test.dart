@@ -7,7 +7,6 @@
 
 @TestOn('vm')
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -18,11 +17,11 @@ import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/table_data.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
 import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
+import 'support/file_utils.dart';
 import 'support/flutter_test_environment.dart';
 
 /// If this test starts timing out it probably means the number of log messages
@@ -68,12 +67,9 @@ Future<List<LogData>> waitForNextLogData(int length) async {
 }
 
 Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
-  final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools_app');
   // Required as the logging view depends on the inspector which needs a version
   // of the widget catalog.
-  Catalog.setCatalog(Catalog.decode(
-      await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
+  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
 
   final detailsValuesSet = <LogData>[];
   LoggingController loggingController;
@@ -285,7 +281,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 }
 
 /// Normalize text in error messages that is likely unstable.

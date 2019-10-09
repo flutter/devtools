@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -27,12 +28,17 @@ void main() {
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
   setUp(() async {
+    compensateForFlutterTestDirectoryBug();
+
+    // Clear the existing build directory.
+    if (Directory('build').existsSync()) {
+      Directory('build').deleteSync(recursive: true);
+    }
     // Build the app, as the server can't start without the build output.
     await WebdevFixture.build(release: testInReleaseMode, verbose: true);
 
-    // The packages folder needs to be renamed to `pack` for the server to work.
-    if (Directory('build/pack').existsSync()) {
-      Directory('build/pack').deleteSync(recursive: true);
+    if (!Directory('build/packages').existsSync()) {
+      fail('Build failed');
     }
 
     Directory('build/packages').renameSync('build/pack');
