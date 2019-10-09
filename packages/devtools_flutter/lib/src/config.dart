@@ -154,6 +154,6 @@ class _InitializerState extends State<Initializer> {
     // TODO(https://github.com/flutter/devtools/issues/1150): we can add a
     // loading animation here in cases where this route will remain visible
     // and we await an attempt to connect.
-    return _loaded() ? widget.builder(context) : const SizedBox();
+    return _loaded ? widget.builder(context) : const SizedBox();
   }
 }
