@@ -30,22 +30,23 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   /// Generates routes, separating the path from URL query parameters.
-  Route generateRoute(RouteSettings settings) {
+  Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
-    final queryParams = uri.queryParameters;
     final path = uri.path;
-    print('path: $path, params: $queryParams');
 
-    if (routes.containsKey(path)) {
-      return MaterialPageRoute(settings: settings, builder: routes[path]);
+    if (_routes.containsKey(path)) {
+      return MaterialPageRoute(settings: settings, builder: _routes[path]);
     }
     // Return a page not found.
     return MaterialPageRoute(
       settings: settings,
-      builder: (_) {
+      builder: (BuildContext context) {
         return DevToolsScaffold.withChild(
-          child: const Center(
-            child: Text('Sorry, this page was not found'),
+          child: Center(
+            child: Text(
+              'Sorry, $uri was not found.',
+              style: Theme.of(context).textTheme.display1,
+            ),
           ),
         );
       },
@@ -53,7 +54,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   /// The routes that the app exposes.
-  final Map<String, WidgetBuilder> routes = {
+  final Map<String, WidgetBuilder> _routes = {
     '/': (_) => Initializer(
           builder: (_) => const DevToolsScaffold(
             tabs: [
@@ -71,7 +72,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
-      onGenerateRoute: generateRoute,
+      onGenerateRoute: _generateRoute,
     );
   }
 }

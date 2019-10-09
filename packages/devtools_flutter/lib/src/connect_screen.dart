@@ -79,7 +79,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         SizedBox(
           width: 240.0,
           child: TextField(
-            onSubmitted: connect,
+            onSubmitted: _connect,
             decoration: const InputDecoration(
               isDense: true,
               border: OutlineInputBorder(),
@@ -97,13 +97,13 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         ),
         RaisedButton(
           child: const Text('Connect'),
-          onPressed: connect,
+          onPressed: _connect,
         ),
       ],
     );
   }
 
-  Future<void> connect([_]) async {
+  Future<void> _connect([_]) async {
     var connected = false;
     try {
       connected = await service.FrameworkCore.initVmService(
