@@ -7,14 +7,15 @@
 -->
 
 <html>
+
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script>
-      const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+        const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
 
-      function getDevToolsPropertyID() {
-        return GA_DEVTOOLS_PROPERTY;
-      }
+        function getDevToolsPropertyID() {
+            return GA_DEVTOOLS_PROPERTY;
+        }
     </script>
     <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>
@@ -40,17 +41,17 @@
 
     <script type="text/javascript">
         function supportsES6Classes() {
-          "use strict";
-          try { eval("class Foo {}"); }
-          catch (e) { return false; }
-          return true;
+            "use strict";
+            try { eval("class Foo {}"); }
+            catch (e) { return false; }
+            return true;
         }
 
         if (!supportsES6Classes()) {
-          window.location.href = '/unsupported-browser.html';
+            window.location.href = '/unsupported-browser.html';
         }
 
-        (function() {
+        (function () {
             var params = new URLSearchParams(window.location.search);
             if (params.get('theme') == 'dark') {
                 document.write(
@@ -84,63 +85,95 @@
 </head>
 
 <body fullbleed layout vertical>
-<div id="pure-dart">
-<header flex wrap none class="masthead" id="header" layout horizontal>
-    <a class="masthead-logo" id="title"><span class="optional-550">Dart DevTools</span></a>
+    <div id="legacy-dart">
+        <header flex wrap none class="masthead" id="header" layout horizontal>
+            <a class="masthead-logo" id="title">
+                <span class="optional-550">Dart DevTools</span>
+            </a>
 
-    <div flex horiz-padding></div>
+            <div flex horiz-padding></div>
 
-    <nav class="masthead-nav" id="main-nav">
-        <!-- add the known pages -->
-        <a disabled><span class="octicon octicon-device-mobile"></span><span> <span class="optional-1060">Flutter Inspector</span></span></a>
-        <a disabled><span class="octicon octicon-pulse"></span><span> <span class="optional-1060">Timeline</span></span></a>
-        <a disabled><span class="octicon octicon-dashboard"></span><span> <span class="optional-1060">Performance</span></span></a>
-        <a disabled><span class="octicon octicon-package"></span><span> <span class="optional-1060">Memory</span></span></a>
-        <a disabled><span class="octicon octicon-bug"></span><span> <span class="optional-1060">Debugger</span></span></a>
-        <a disabled><span class="octicon octicon-clippy"></span><span> <span class="optional-1060">Logging</span></span></a>
-    </nav>
+            <nav class="masthead-nav" id="main-nav">
+                <!-- add the known pages -->
+                <a disabled>
+                    <span class="octicon octicon-device-mobile"></span>
+                    <span>
+                        <span class="optional-1060">Flutter Inspector</span>
+                    </span>
+                </a>
+                <a disabled>
+                    <span class="octicon octicon-pulse"></span>
+                    <span>
+                        <span class="optional-1060">Timeline</span>
+                    </span>
+                </a>
+                <a disabled>
+                    <span class="octicon octicon-dashboard"></span>
+                    <span>
+                        <span class="optional-1060">Performance</span>
+                    </span>
+                </a>
+                <a disabled>
+                    <span class="octicon octicon-package"></span>
+                    <span>
+                        <span class="optional-1060">Memory</span>
+                    </span>
+                </a>
+                <a disabled>
+                    <span class="octicon octicon-bug"></span>
+                    <span>
+                        <span class="optional-1060">Debugger</span>
+                    </span>
+                </a>
+                <a disabled>
+                    <span class="octicon octicon-clippy"></span>
+                    <span>
+                        <span class="optional-1060">Logging</span>
+                    </span>
+                </a>
+            </nav>
 
-    <div id="global-actions" class="masthead-nav"></div>
+            <div id="global-actions" class="masthead-nav"></div>
 
-    <div class="masthead-nav">
-        <span horiz-padding class="masthead-item">•</span>
-        <div class="masthead-item action-button active" id="icon-nav">
-            <span class="octicon octicon-info"></span>
+            <div class="masthead-nav">
+                <span horiz-padding class="masthead-item">•</span>
+                <div class="masthead-item action-button active" id="icon-nav">
+                    <span class="octicon octicon-info"></span>
+                </div>
+                <div class="masthead-item action-button active" id="send-feedback-button" title="Send Feedback">
+                    <span class="octicon octicon-comment"></span>
+                </div>
+            </div>
+        </header>
+
+        <div id="messages-container" class="container"></div>
+
+        <form id="ga-dialog" class="container"></form>
+        <form id="connect-dialog" class="container"></form>
+        <form id="snapshot-message" class="container"></form>
+
+        <div id="content" class="container" flex layout vertical style="overflow: auto;">
+            <div class="blankslate">
+                <p>Loading...</p>
+            </div>
         </div>
-        <div class="masthead-item action-button active" id="send-feedback-button"
-            title="Send Feedback">
-            <span class="octicon octicon-comment"></span>
+
+        <footer flex layout horizontal none class="footer align-items-center">
+            <div class="footer-status" id="global-status" flex>
+                <select class="form-select select-sm" disabled></select>
+            </div>
+
+            <div class="footer-status text-center" id="page-status" flex horiz-padding>
+            </div>
+
+            <div class="footer-status text-right" id="auxiliary-status" flex>
+                &nbsp;
+            </div>
+        </footer>
+
+        <div id="toast-container">
         </div>
     </div>
-</header>
-
-<div id="messages-container" class="container"></div>
-
-<form id="ga-dialog" class="container"></form>
-<form id="connect-dialog" class="container"></form>
-<form id="snapshot-message" class="container"></form>
-
-<div id="content" class="container" flex layout vertical style="overflow: auto;">
-    <div class="blankslate">
-        <p>Loading...</p>
-    </div>
-</div>
-
-<footer flex layout horizontal none class="footer align-items-center">
-    <div class="footer-status" id="global-status" flex>
-        <select class="form-select select-sm" disabled></select>
-    </div>
-
-    <div class="footer-status text-center" id="page-status" flex horiz-padding>
-    </div>
-
-    <div class="footer-status text-right" id="auxiliary-status" flex>
-        &nbsp;
-    </div>
-</footer>
-
-  <div id="toast-container">
-  </div>
-  </div>
 </body>
+
 </html>

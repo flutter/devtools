@@ -3,7 +3,7 @@ import 'package:html_shim/html.dart' show document;
 
 void main() {
   // Clear out the unneeded HTML from index.html.
-  document.body.querySelector('#pure-dart').innerHtml = '';
+  document.body.querySelector('#legacy-dart').innerHtml = '';
 
   // Now run the app.
   runApp(MyApp());

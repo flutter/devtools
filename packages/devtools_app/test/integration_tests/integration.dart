@@ -395,10 +395,10 @@ class WebdevFixture {
       environment['DART_VM_OPTIONS'] = '';
     }
 
-    // TODO(djshuckerow): The pub-based version of this code would run a pub
-    // snapshot instead of starting pub directly to prevent Windows-based test
-    // runs getting killed but leaving the pub process behind. Something similar
-    // might be needed here.
+    // TODO(https://github.com/flutter/devtools/issues/1145): The pub-based
+    // version of this code would run a pub snapshot instead of starting pub
+    // directly to prevent Windows-based test runs getting killed but leaving
+    // the pub process behind. Something similar might be needed here.
     // See here for more information:
     // https://github.com/flutter/flutter/wiki/The-flutter-tool#debugging-the-flutter-command-line-tool
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
