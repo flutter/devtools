@@ -10,7 +10,7 @@ You can do this online, and it only takes a minute. If you've never submitted co
 you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
 file.
 
-## Development
+## Development (Pure web)
 
 - `git clone https://github.com/flutter/devtools`
 - `cd devtools/packages/devtools_app`
@@ -22,21 +22,13 @@ From a separate terminal:
 - `flutter run`
 
 From the packages/devtools_app directory:
-- `pub global activate webdev` (install webdev globally)
-- `export PATH=$PATH:~/.pub-cache/bin` (make globally activated packages available from the command line)
-- `webdev serve`
+- `alias build_runner="flutter pub run build_runner"`
+- `build_runner serve web`
 
-Then, open a browser window to the local url specified by webdev. After the page has loaded, append
-`?port=xxx` to the url, where xxx is the port number of the service protocol port, as specified by
-the `flutter run` output.
+Then, open a browser window to the local url specified by webdev. After the page has loaded, 
+copy and paste the url for the debug service into the DevTools app:
 
-- `flutter run`
-- `open http://localhost:8080`
-
-`webdev` provides a fast development server that incrementally
-rebuilds the portion of the application that was edited each time you reload
-the page in the browser. If initial app load times become slow as this tool
-grows, we can integrate with the hot restart support in `webdev`.
+- `Debug service listening on http://localhost:8080/asdfjASD5YJK=`
 
 ### Developing with VS Code
 
@@ -78,22 +70,25 @@ critical that the devtools_server is released first and the version numbers in
 
 ## Testing
 
-### Running tests that depend on the Flutter SDK
+### Running tests
 
 Make sure your Flutter SDK matches the tip of trunk before
 running these tests.
 
 ```
 cd packages/devtools_app
-pub run test -j1 --tags useFlutterSdk
+flutter test -j1
 ```
 
-### Run all other tests
+The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
+not include the directory `devtools_app/test/integration_tests`, then you do not need to include
+this flag.
+
+Some tests are intended to run on chrome instead of in the regular Dart VM.  To run these tests,
+pass the flag `--platform=chrome` to `flutter test`:
 
 ```
-cd packages/devtools_app
-pub run test --exclude-tags useFlutterSdk
-pub run build_runner test -- --exclude-tags useFlutterSdk --platform chrome-no-sandbox
+flutter test -j1 --platform=chrome
 ```
 
 ### Updating golden files
@@ -108,6 +103,15 @@ file output still looks reasonable and execute the following command to update t
 
 This will update the master or stable goldens depending on whether you're on the stable
 Flutter branch.
+
+To update goldens for both channels do:
+
+```
+flutter channel master
+./tool/update_goldens.sh
+flutter channel stable
+./tool/update_goldens.sh
+```
 
 ## third_party dependencies
 

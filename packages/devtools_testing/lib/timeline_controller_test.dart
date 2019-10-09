@@ -115,7 +115,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment();
     });
-  }, tags: 'useFlutterSdk');
+  });
 }
 
 bool isTimelineDataEqual(TimelineData a, TimelineData b) {

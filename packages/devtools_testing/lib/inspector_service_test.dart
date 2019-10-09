@@ -7,24 +7,20 @@
 
 @TestOn('vm')
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
+import 'support/file_utils.dart';
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
 import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
-  final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools_app');
-  Catalog.setCatalog(Catalog.decode(
-      await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
+  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
 
   env.afterNewSetup = () async {
@@ -261,7 +257,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
 
       // TODO(jacobr): add tests verifying that we can stop the running device
       // without the InspectorService spewing a bunch of errors.
-    }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+    }, timeout: const Timeout.factor(8));
   } catch (e, s) {
     print(s);
   }

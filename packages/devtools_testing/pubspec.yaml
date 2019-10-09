@@ -10,3 +10,7 @@ dependencies:
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+

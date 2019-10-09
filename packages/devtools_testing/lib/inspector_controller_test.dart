@@ -6,7 +6,6 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
@@ -14,19 +13,16 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:package_resolver/package_resolver.dart';
 import 'package:test/test.dart';
 
 import 'matchers/fake_flutter_matchers.dart';
 import 'matchers/matchers.dart';
 import 'support/fake_inspector_tree.dart';
+import 'support/file_utils.dart';
 import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
-  final devtoolsPackageRoot =
-      await (PackageResolver.current).packagePath('devtools_app');
-  Catalog.setCatalog(Catalog.decode(
-      await File('$devtoolsPackageRoot/web/widgets.json').readAsString()));
+  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   InspectorService inspectorService;
   InspectorController inspectorController;
   FakeInspectorTree tree;
@@ -520,7 +516,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 */
-  }, tags: 'useFlutterSdk', timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 }
 
 void simulateRowClick(FakeInspectorTree tree, {@required int rowIndex}) {
