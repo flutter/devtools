@@ -110,7 +110,11 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         '',
         explicitUri: Uri.parse(controller.text),
       );
-    } catch (_) {
+    } catch (_) {}
+    if (connected) {
+      final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
+      return Navigator.popAndPushNamed(context, '/?$uriQuery');
+    } else {
       Scaffold.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -119,10 +123,6 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           ),
         ),
       );
-    }
-    if (connected) {
-      final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
-      return Navigator.popAndPushNamed(context, '/?$uriQuery');
     }
   }
 }
