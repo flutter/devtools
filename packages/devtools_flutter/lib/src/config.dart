@@ -119,6 +119,11 @@ class _InitializerState extends State<Initializer> {
       });
     }
 
+    // SizedBox with no parameters is a generic no-op widget in Flutter.
+    // Its use here means to display nothing.
+    // TODO(https://github.com/flutter/devtools/issues/1150): we can add a
+    // loading animation here in cases where this route will remain visible
+    // and we await an attempt to connect.
     return loaded ? widget.builder(context) : const SizedBox();
   }
 }
