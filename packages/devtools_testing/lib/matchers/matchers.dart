@@ -81,8 +81,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   static final Object _mismatchedValueKey = Object();
 
-  static const String _goldensSuffix =
-      String.fromEnvironment('GOLDENS_SUFFIX', defaultValue: '');
+  static final String _goldensSuffix =
+      io.Platform.environment['DEVTOOLS_GOLDENS_SUFFIX'] ?? '';
 
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
