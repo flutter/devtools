@@ -109,7 +109,7 @@ class _InitializerState extends State<Initializer> {
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
-  bool _checkLoaded() => service.serviceManager?.hasConnection;
+  bool _checkLoaded() => service.serviceManager.hasConnection;
 
   @override
   void initState() {
