@@ -7,8 +7,9 @@
 			"options": {
 				"cwd": "${workspaceFolder}/packages/devtools_app",
 			},
-			"command": "pub",
+			"command": "flutter",
 			"args": [
+				"pub",
 				"run",
 				"build_runner",
 				"serve",
