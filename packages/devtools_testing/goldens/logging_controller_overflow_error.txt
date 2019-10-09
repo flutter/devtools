@@ -34,11 +34,10 @@ This is considered an error condition because it indicates that there is content
     │   parentData: <none> (can use size)
     │   constraints: BoxConstraints(<NUMBER><=w<=<NUMBER>, <NUMBER><=h<=Infinity)
     │   size: Size(<NUMBER>, <NUMBER>)
-    └─▼RenderConstrainedBox#<NUMBER> relayoutBoundary=up<NUMBER>
+    └─▼RenderSemanticsAnnotations#<NUMBER> relayoutBoundary=up<NUMBER>
       │   needs compositing
       │   parentData: offset=Offset(<NUMBER>, <NUMBER>) (can use size)
       │   constraints: BoxConstraints(<NUMBER><=w<=<NUMBER>, <NUMBER><=h<=Infinity)
       │   size: Size(<NUMBER>, <NUMBER>)
-      │   additionalConstraints: BoxConstraints(<NUMBER><=w<=Infinity, <NUMBER><=h<=Infinity)
-      └─▶RenderPhysicalShape#<NUMBER> relayoutBoundary=up<NUMBER>
+      └─▶RenderConstrainedBox#<NUMBER> relayoutBoundary=up<NUMBER>
 ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
