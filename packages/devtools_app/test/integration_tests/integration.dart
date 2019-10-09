@@ -307,7 +307,7 @@ class WebdevFixture {
       }
 
       // Serving `web` on http://localhost:8080
-      if (line.contains('Serving `web` on')) {
+      if (line.contains('Serving `web`')) {
         final String url = line.substring(line.indexOf('http://'));
         hasUrl.complete(url);
       }
@@ -395,15 +395,16 @@ class WebdevFixture {
       environment['DART_VM_OPTIONS'] = '';
     }
 
-    // Run the snapshot directly instead of going via pub.bat so that on Windows
-    // when we send kill() it gets passed to Dart and doesn't sometimes terminate
-    // the shell and leave the Dart process behind.
+    // TODO(djshuckerow): The pub-based version of this code would run a pub
+    // snapshot instead of starting pub directly to prevent Windows-based test
+    // runs getting killed but leaving the pub process behind. Something similar
+    // might be needed here.
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
-    // if (verbose) {
-    print(
-        'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}');
-    // }
+    if (verbose) {
+      print(
+          'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}');
+    }
     return Process.start(
       executable,
       buildArgs,
