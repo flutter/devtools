@@ -104,21 +104,22 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> connect([_]) async {
-    final connected = await service.FrameworkCore.initVmService(
-          '',
-          explicitUri: Uri.parse(controller.text),
-        ).catchError((_) {
-          Scaffold.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Unable to connect to Dart VM at "${controller.text}". '
-                'Please specify a running Dart VM URL.',
-              ),
-            ),
-          );
-        }) ??
-        false;
-    print('Connection status: $connected');
+    var connected = false;
+    try {
+      connected = await service.FrameworkCore.initVmService(
+        '',
+        explicitUri: Uri.parse(controller.text),
+      );
+    } catch (_) {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Unable to connect to Dart VM at "${controller.text}". '
+            'Please specify a running Dart VM URL.',
+          ),
+        ),
+      );
+    }
     if (connected) {
       final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
       return Navigator.popAndPushNamed(context, '/?$uriQuery');

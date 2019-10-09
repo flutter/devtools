@@ -16,8 +16,7 @@ class DevToolsApp extends StatefulWidget {
   State<DevToolsApp> createState() => DevToolsAppState();
 }
 
-/// The DevTools app's state, which initializes the [FrameworkCore] and the
-/// app's navigation.
+/// Initializer for the [FrameworkCore] and the app's navigation.
 ///
 /// This manages the route generation, and marshalls URL query parameters into
 /// flutter route parameters.
