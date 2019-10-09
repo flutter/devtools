@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/services.dart' as service;
 import 'package:flutter/material.dart';
 
@@ -101,29 +103,57 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer> {
-  @override
-  Widget build(BuildContext context) {
-    final loaded = service.serviceManager.hasConnection;
+  final List<StreamSubscription> _subscriptions = [];
 
-    // If the loading is not completed, navigate to the connection page to
-    // connect to a VM service.
-    if (!loaded && ModalRoute.of(context).isCurrent) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushNamed('/connect').then((_) {
-          // Generally, empty setState calls in Flutter should be avoided.
-          // However, serviceManager is an implicit part of the state
-          // of Initializer. This setState call is alerting the widget of a change
-          // in the serviceManager's state.
-          setState(() {});
+  /// Checks if the [service.serviceManager] is connected.
+  ///
+  /// This is a method and not a getter to communicate that its value may
+  /// change between successive calls.
+  bool _loaded = service.serviceManager.hasConnection;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToServiceManager();
+  }
+
+  @override
+  void dispose() {
+    for (var s in _subscriptions) {
+      s.cancel();
+    }
+    super.dispose();
+  }
+
+  /// Listens to the [service.serviceManager] and rebuilds the page when the
+  /// connection status changes.
+  void _connectToServiceManager() {
+    _subscriptions.add(
+      service.serviceManager.onStateChange.listen((connected) {
+        setState(() {
+          _loaded = connected;
         });
+      }),
+    );
+    // TODO(https://github.com/flutter/devtools/issues/1150): Check the route
+    // parameters for a VM Service URL and attempt to connect to it without
+    // going to the /connect page.
+    if (!_loaded && ModalRoute.of(context).isCurrent) {
+      // If this route is on top and the app is not loaded, then we navigate to
+      // the /connect page to get a VM Service connection for serviceManager.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushNamed('/connect');
       });
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     // SizedBox with no parameters is a generic no-op widget in Flutter.
     // Its use here means to display nothing.
     // TODO(https://github.com/flutter/devtools/issues/1150): we can add a
     // loading animation here in cases where this route will remain visible
     // and we await an attempt to connect.
-    return loaded ? widget.builder(context) : const SizedBox();
+    return _loaded() ? widget.builder(context) : const SizedBox();
   }
 }
