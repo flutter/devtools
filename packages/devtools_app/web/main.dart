@@ -1,4 +1,4 @@
-import 'package:devtools_app/legacy_main.dart' as devtools;
+import 'package:devtools_app/html_main.dart' as devtools;
 
 /// Launches the pure-html DevTools web app.
 ///
