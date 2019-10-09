@@ -16,10 +16,13 @@ class DevToolsApp extends StatefulWidget {
   State<DevToolsApp> createState() => DevToolsAppState();
 }
 
-/// The DevTools app's state.
+/// The DevTools app's state, which initializes the [FrameworkCore] and the
+/// app's navigation.
 ///
-/// This manages the route generation, and marshalls URL query parameters into flutter route parameters.
-// TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that navigate the full app.
+/// This manages the route generation, and marshalls URL query parameters into
+/// flutter route parameters.
+// TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
+// navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
