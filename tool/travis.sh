@@ -62,10 +62,13 @@ if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     git clone https://github.com/flutter/flutter.git --branch stable ./flutter
 
     # Set the suffix so we use stable goldens.
-    export DART_VM_OPTIONS="-DGOLDENS_SUFFIX=_stable"
+    export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
     echo "Cloning master Flutter branch"
     git clone https://github.com/flutter/flutter.git ./flutter
+
+    # Set the suffix so we use the master goldens
+    export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
 export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
 flutter config --no-analytics

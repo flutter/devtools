@@ -6,12 +6,12 @@
 
 echo "Checking flutter version..."
 if flutter --version | tee /dev/tty | grep -q 'channel stable'; then
-  export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true -DGOLDENS_SUFFIX=_stable"
+  export DEVTOOLS_GOLDENS_SUFFIX="_stable"
   echo ""
   echo "Updating STABLE goldens because you are on the Stable flutter channel"
   echo ""
 else
-  export DART_VM_OPTIONS="-DUPDATE_GOLDENS=true"
+  export DEVTOOLS_GOLDENS_SUFFIX=""
   echo ""
   echo "Updating MASTER goldens"
   echo ""
