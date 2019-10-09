@@ -24,11 +24,21 @@ matrix:
     # rolls to the Flutter stable channel.
     - os: windows
       dart:  stable
-      env: BOT=flutter_sdk_tests
+      env: 
+        - BOT=flutter_sdk_tests
+        - BOT=test_ddc
+        - BOT=test_dart2js
+        - BOT=integration_ddc
+        - BOT=integration_dart2js
     # TODO(dantup): Skip Flutter builds until we understand/fix Flutter crashing
     # with "failed to delete build/assets: file is locked by another process".
     - os: windows
-      env: BOT=flutter_sdk_tests
+      env: 
+        - BOT=flutter_sdk_tests
+        - BOT=test_ddc
+        - BOT=test_dart2js
+        - BOT=integration_ddc
+        - BOT=integration_dart2js
   include:
     - dart: "dev/raw/latest"
       env: BOT=packages
