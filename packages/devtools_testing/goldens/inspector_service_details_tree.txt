@@ -12,20 +12,20 @@ MaterialApp
        │ actions: {[<DoNothingAction>]: Closure: () => DoNothingAction}
        │
        └─DefaultFocusTraversal
-         └─MediaQuery
-           │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
-           │   3.0, textScaleFactor: 1.0, platformBrightness:
-           │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
-           │   EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth:
-           │   1.7976931348623157e+308, alwaysUse24HourFormat: false,
-           │   accessibleNavigation: false, highContrast:
-           │   false,disableAnimations: false, invertColors: false, boldText:
-           │   false)
+         └─_MediaQueryFromWindow
+           │ state: _MediaQueryFromWindowsState#00000
            │
-           └─Localizations
-             │ locale: en_US
-             │ delegates: DefaultMaterialLocalizations.delegate(en_US),
-             │   DefaultCupertinoLocalizations.delegate(en_US),
-             │   DefaultWidgetsLocalizations.delegate(en_US)
-             │ state: _LocalizationsState#00000
+           └─MediaQuery
+             │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
+             │   3.0, textScaleFactor: 1.0, platformBrightness:
+             │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
+             │   EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth:
+             │   1.7976931348623157e+308, alwaysUse24HourFormat: false,
+             │   accessibleNavigation: false, highContrast:
+             │   false,disableAnimations: false, invertColors: false, boldText:
+             │   false)
+             │
+             └─Localizations
+               │ locale: en_US
+               │ delegates: DefaultMaterialLocalizations.delegate(en_US),
 ...

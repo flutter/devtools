@@ -56,6 +56,7 @@ The ancestors of this widget were:
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, textDirection: ltr, hintOverrides: null)
   Localizations(locale: en_US, delegates: [DefaultMaterialLocalizations.delegate(en_US), DefaultCupertinoLocalizations.delegate(en_US), DefaultWidgetsLocalizations.delegate(en_US)])
   MediaQuery(MediaQueryData(size: Size(<NUMBER>, <NUMBER>), devicePixelRatio: <NUMBER>, textScaleFactor: <NUMBER>, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: <NUMBER>e+<NUMBER>, alwaysUse<NUMBER>HourFormat: false, accessibleNavigation: false, highContrast: false,disableAnimations: false, invertColors: false, boldText: false))
+  _MediaQueryFromWindow
   DefaultFocusTraversal
   Actions(dispatcher: null, actions: {[<DoNothingAction>]: Closure: () => DoNothingAction})
   WidgetsApp-[GlobalObjectKey _MaterialAppState#<NUMBER>]
@@ -109,6 +110,7 @@ The ancestors of this widget were:
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, textDirection: ltr, hintOverrides: null)
   Localizations(locale: en_US, delegates: [DefaultMaterialLocalizations.delegate(en_US), DefaultCupertinoLocalizations.delegate(en_US), DefaultWidgetsLocalizations.delegate(en_US)])
   MediaQuery(MediaQueryData(size: Size(<NUMBER>, <NUMBER>), devicePixelRatio: <NUMBER>, textScaleFactor: <NUMBER>, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: <NUMBER>e+<NUMBER>, alwaysUse<NUMBER>HourFormat: false, accessibleNavigation: false, highContrast: false,disableAnimations: false, invertColors: false, boldText: false))
+  _MediaQueryFromWindow
   DefaultFocusTraversal
   Actions(dispatcher: null, actions: {[<DoNothingAction>]: Closure: () => DoNothingAction})
   WidgetsApp-[GlobalObjectKey _MaterialAppState#<NUMBER>]
