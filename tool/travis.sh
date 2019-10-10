@@ -123,7 +123,7 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    flutter test --platform chrome test/*.dart test/{core,fixtures,support,ui}/
 
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
@@ -132,7 +132,8 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    # Run the browser-specific tests:
+    flutter test --platform chrome test/{viewport_canvas_test.dart, tree_test.dart, tables_test.dart}
     echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "integration_ddc" ]; then
