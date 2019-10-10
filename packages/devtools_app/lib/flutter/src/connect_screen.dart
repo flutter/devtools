@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:devtools_app/services.dart' as service;
 
+import '../../services.dart' as service;
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.

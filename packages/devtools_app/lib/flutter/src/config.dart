@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/services.dart' as service;
 import 'package:flutter/material.dart';
 
+import '../../services.dart' as service;
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
