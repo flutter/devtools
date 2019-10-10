@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../services.dart' as service;
+import '../../src/framework/framework_core.dart';
+import '../../src/globals.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -28,7 +29,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
-    service.FrameworkCore.init(WidgetsBinding.instance.window.defaultRouteName);
+    FrameworkCore.init(WidgetsBinding.instance.window.defaultRouteName);
   }
 
   /// Generates routes, separating the path from URL query parameters.
@@ -109,13 +110,13 @@ class _InitializerState extends State<Initializer> {
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
-  bool _checkLoaded() => service.serviceManager.hasConnection;
+  bool _checkLoaded() => serviceManager.hasConnection;
 
   @override
   void initState() {
     super.initState();
     _subscriptions.add(
-      service.serviceManager.onStateChange.listen((_) {
+      serviceManager.onStateChange.listen((_) {
         // Generally, empty setState calls in Flutter should be avoided.
         // However, serviceManager is an implicit part of this state.
         // This setState call is alerting a change in the serviceManager's

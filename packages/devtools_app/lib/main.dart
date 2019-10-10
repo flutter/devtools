@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html_shim/html.dart' show document;
 
-import 'flutter/src/config.dart';
+import 'src/flutter/app.dart';
 
 void main() {
   if (kIsWeb) {

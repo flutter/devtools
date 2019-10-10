@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../services.dart' as service;
+import '../../src/framework/framework_core.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -106,7 +106,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   Future<void> _connect([_]) async {
     var connected = false;
     try {
-      connected = await service.FrameworkCore.initVmService(
+      connected = await FrameworkCore.initVmService(
         '',
         explicitUri: Uri.parse(controller.text),
       );
