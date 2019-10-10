@@ -57,8 +57,7 @@ class DevToolsServerDriver {
     // if (useChromeHeadless && headlessModeIsSupported) {
     //   args.add('--headless');
     // }
-    final Process process =
-        await Process.start(Platform.resolvedExecutable, args);
+    final Process process = await Process.start('dart', args);
 
     return DevToolsServerDriver._(
         process,
