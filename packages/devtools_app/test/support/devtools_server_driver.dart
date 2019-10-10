@@ -58,7 +58,7 @@ class DevToolsServerDriver {
     //   args.add('--headless');
     // }
     final Process process =
-        await Process.start(Platform.isWindows ? 'dart.bat' : 'dart', args);
+        await Process.start(Platform.resolvedExecutable, args);
 
     return DevToolsServerDriver._(
         process,
