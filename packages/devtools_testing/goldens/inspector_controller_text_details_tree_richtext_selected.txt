@@ -7,7 +7,7 @@
 │ overflow: null [D]
 │ textScaleFactor: null [D]
 │ maxLines: null [D]
-│ dependencies: [MediaQuery, DefaultTextStyle]
+│ dependencies: [DefaultTextStyle, MediaQuery]
 └─▼[/icons/inspector/textArea.png]RichText <-- selected
     softWrap: wrapping at box width
     maxLines: unlimited
