@@ -354,10 +354,12 @@ class WebdevFixture {
         print('pub run build_runner build • ${line.trim()}');
       }
 
-      if (line.contains('[INFO] Succeeded')) {
-        buildFinished.complete();
-      } else if (line.contains('[SEVERE]')) {
-        buildFinished.completeError(line);
+      if (!buildFinished.isCompleted) {
+        if (line.contains('[INFO] Succeeded')) {
+          buildFinished.complete();
+        } else if (line.contains('[SEVERE]')) {
+          buildFinished.completeError(line);
+        }
       }
     });
 
