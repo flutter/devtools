@@ -5,10 +5,10 @@
 # found in the LICENSE file.
 
 echo "Checking flutter version..."
-if flutter --version | tee /dev/tty | grep -q 'channel stable'; then
+if flutter --version | tee /dev/tty | grep -q 'channel beta'; then
   export DEVTOOLS_GOLDENS_SUFFIX="_stable"
   echo ""
-  echo "Updating STABLE goldens because you are on the Stable flutter channel"
+  echo "Updating STABLE goldens because you are on the Beta flutter channel"
   echo ""
 else
   export DEVTOOLS_GOLDENS_SUFFIX=""
