@@ -161,7 +161,6 @@ elif [ "$BOT" = "packages" ]; then
     # Analyze packages/
     (cd packages/devtools_app; flutter pub get)
     (cd packages/devtools_server; flutter pub get)
-    (cd packages/devtools_flutter; flutter pub get)
     (cd packages/devtools_testing; flutter pub get)
     (cd packages/html_shim; flutter pub get)
     (cd packages; flutter pub global run tuneup check)
