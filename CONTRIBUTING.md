@@ -21,9 +21,9 @@ From a separate terminal:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 
-### Pure-Dart Web App
+### `dart:html` Web App
 
-To run the pure-Dart build of DevTools currently shipping in production, follow these steps.
+To run the `dart:html` build of DevTools currently shipping in production, follow these steps.
 
 From the packages/devtools_app directory:
 - `alias build_runner="flutter pub run build_runner"`
@@ -73,7 +73,7 @@ directory named 'flutter'.
 For example, `lib/src/flutter`, `lib/src/inspector/flutter`, or `test/flutter` are all acceptable
 locations to put new Flutter code.
 
-When we are ready to turn down the pure-Dart web version of the app, we can delete all code that
+When we are ready to turn down the `dart:html` web version of the app, we will delete all code that
 isn't inside of or imported by the flutter code.
 
 ## Developing with VS Code
