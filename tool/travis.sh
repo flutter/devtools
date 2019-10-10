@@ -59,7 +59,7 @@ fi
 # Get Flutter.
 if [ "$TRAVIS_DART_VERSION" = "stable" ]; then
     echo "Cloning stable Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch stable ./flutter
+    git clone https://github.com/flutter/flutter.git --branch beta ./flutter
 
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
