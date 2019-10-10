@@ -13,7 +13,6 @@ import 'package:vm_service/vm_service.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
 import 'integration.dart';
-import 'util.dart';
 
 CliAppFixture appFixture;
 DevToolsServerDriver server;
@@ -55,7 +54,7 @@ void main() {
 
     // Fail tests on any stderr.
     server.stderr.listen((text) => throw 'STDERR: $text');
-    server.output.listen((map) {
+    server.stdout.listen((map) {
       if (map.containsKey('id')) {
         if (map.containsKey('result')) {
           completers[map['id']].complete(map['result']);
@@ -87,17 +86,20 @@ void main() {
   test('can bind to next available port', () async {
     final server1 = await DevToolsServerDriver.create(port: 8855);
     try {
-      // Give first server chance to grab the port before we start the second.
-      await shortDelay();
+      // Wait for the first server to start up and ensure it got the
+      // expected port.
+      final event1 = await server1.stdout
+          .firstWhere((map) => map['event'] == 'server.started');
+      expect(event1['params']['port'], equals(8855));
+
+      // Now spawn another requesting the same port and ensure it got the next
+      // port number.
       final server2 =
           await DevToolsServerDriver.create(port: 8855, tryPorts: 2);
       try {
-        final event1 = await server1.output
-            .firstWhere((map) => map['event'] == 'server.started');
-        final event2 = await server2.output
+        final event2 = await server2.stdout
             .firstWhere((map) => map['event'] == 'server.started');
 
-        expect(event1['params']['port'], equals(8855));
         expect(event2['params']['port'], equals(8856));
       } finally {
         server2.kill();
@@ -105,9 +107,7 @@ void main() {
     } finally {
       server1.kill();
     }
-    // TODO(dantup): This test will fail until the devtools pubspec.yaml
-    // references a version of devtools_server that has this support!
-  }, skip: true, timeout: const Timeout.factor(10));
+  }, skip: !serverSupportsTryPort, timeout: const Timeout.factor(10));
 
   group('Server API', () {
     test(
@@ -248,11 +248,8 @@ void main() {
       expect(serverResponse['clients'][0]['vmServiceUri'],
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
-    // TODO(dantup): This test will fail until the devtools pubspec.yaml
-    // references a version of devtools_server that has this support!
-    // Usually we should only skip when not in release mode, since the API only
-    // works in release mode.
-  }, skip: true /*!testInReleaseMode*/);
+    // The API only works in release mode.
+  }, skip: !testInReleaseMode || !serverSupportsHeadless);
 }
 
 Future<Map<String, dynamic>> launchDevTools({
