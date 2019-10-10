@@ -13,11 +13,7 @@ void main() {
   if (!kIsWeb) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-  final config = Config();
   runApp(
-    MaterialApp(
-      theme: ThemeData.light(),
-      routes: config.routes,
-    ),
+    DevToolsApp(),
   );
 }
