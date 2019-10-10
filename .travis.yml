@@ -17,8 +17,7 @@ matrix:
     # - Builds are always done by us on latest SDKs so we don't need to ensure
     #     we can build on an older SDK.
     - dart: stable
-      env:
-        - BOT=main
+      env: BOT=main
 
     # TODO(https://github.com/flutter/devtools/issues/1161): Skip test bots for dart
     # stable on Linux. They are failing with incompatible kernel versions right now.
