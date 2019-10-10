@@ -283,7 +283,14 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = ['pub', 'run', 'build_runner', 'serve', 'web'];
+    final List<String> cliArgs = [
+      'pub',
+      'run',
+      'build_runner',
+      'serve',
+      'web',
+      '--delete-conflicting-outputs'
+    ];
     if (release) {
       cliArgs.add('--release');
     }
@@ -331,6 +338,7 @@ class WebdevFixture {
       'build',
       '-o',
       'web:build',
+      '--delete-conflicting-outputs',
       release ? '--release' : '--no-release'
     ];
 
