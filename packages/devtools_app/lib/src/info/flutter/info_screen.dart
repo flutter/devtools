@@ -24,6 +24,14 @@ class InfoScreen extends Screen {
       text: 'Info',
     );
   }
+
+  /// The key to identify the flag list view
+  @visibleForTesting
+  static const Key flagListKey = Key('Info Screen Flag List');
+
+  /// The key to identify the flutter version view.
+  @visibleForTesting
+  static const Key flutterVersionKey = Key('Info Screen Flutter Version');
 }
 
 class InfoScreenBody extends StatefulWidget {
@@ -88,6 +96,7 @@ class _VersionInformation extends StatelessWidget {
       '<bold>Engine: </bold>${flutterVersion.engineVersionSummary}\n'
       '<bold>Dart SDK: </bold>${flutterVersion.dartSdkVersion}\n'
       '<bold>DevTools: </bold>${devtools.version}\n',
+      key: InfoScreen.flutterVersionKey,
     );
   }
 }
@@ -100,6 +109,7 @@ class _FlagList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      key: InfoScreen.flagListKey,
       itemCount: flagList?.flags?.length ?? 0,
       itemBuilder: (context, index) {
         final flag = flagList.flags[index];

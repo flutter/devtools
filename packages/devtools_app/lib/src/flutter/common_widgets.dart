@@ -26,7 +26,11 @@ class PaddedDivider extends StatelessWidget {
 
 /// A [TaggedText] with builtin DevTools-specific text styling.
 class DevToolsTaggedText extends StatelessWidget {
-  const DevToolsTaggedText(this.content, {this.textAlign = TextAlign.start});
+  const DevToolsTaggedText(
+    this.content, {
+    this.textAlign = TextAlign.start,
+    Key key,
+  }) : super(key: key);
 
   /// The XML-markupd string to show.
   final String content;
