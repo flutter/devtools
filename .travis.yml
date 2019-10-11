@@ -23,9 +23,10 @@ matrix:
     # stable on Linux. They are failing with incompatible kernel versions right now.
     - os: linux
       dart: stable
-      env:
-        - BOT=test_ddc
-        - BOT=test_dart2js
+      env: BOT=test_ddc
+    - os: linux
+      dart: stable
+      env: BOT=test_dart2js
 
     # TODO(dantup): Temporarily skip stable Flutter builds on Windows because the
     # Dart SDK download can take too long due to Invoke-WebRequest performance.
