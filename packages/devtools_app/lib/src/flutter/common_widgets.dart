@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_widgets/flutter_widgets.dart';
 
 /// Convenience [Divider] with [Padding] to fit in better with forms.
 class PaddedDivider extends StatelessWidget {
@@ -19,6 +20,53 @@ class PaddedDivider extends StatelessWidget {
     return Padding(
       padding: padding,
       child: const Divider(thickness: 1.0),
+    );
+  }
+}
+
+/// A [TaggedText] with builtin DevTools-specific text styling.
+class DevToolsTaggedText extends StatelessWidget {
+  const DevToolsTaggedText(this.content, {this.textAlign = TextAlign.start});
+
+  /// The XML-markupd string to show.
+  final String content;
+
+  /// See [TaggedText.textAlign].
+  final TextAlign textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final defaultTextStyle = DefaultTextStyle.of(context).style;
+    final _tagToTextSpanBuilder = {
+      'bold': (text) => TextSpan(
+            text: text,
+            style: defaultTextStyle.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+      'primary-color': (text) => TextSpan(
+            text: text,
+            style: defaultTextStyle.copyWith(
+              color: theme.primaryColor,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+      'primary-color-light': (text) => TextSpan(
+            text: text,
+            style: defaultTextStyle.copyWith(
+              color: theme.primaryColorLight,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
+    };
+    return TaggedText(
+      content: content,
+      tagToTextSpanBuilder: _tagToTextSpanBuilder,
+      overflow: TextOverflow.visible,
+      maxLines: null,
+      textAlign: textAlign,
+      style: defaultTextStyle,
     );
   }
 }

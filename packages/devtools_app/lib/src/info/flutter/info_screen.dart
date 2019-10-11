@@ -32,16 +32,13 @@ class InfoScreenBody extends StatefulWidget {
 }
 
 class _InfoScreenBodyState extends State<InfoScreenBody> {
-  InfoController _infoController;
   FlutterVersion _flutterVersion;
   FlagList _flagList;
 
   @override
   void initState() {
     super.initState();
-    _flutterVersion = null;
-    _flagList = null;
-    _infoController = InfoController(
+    InfoController(
       onFlagListChanged: (flagList) => setState(() {
         _flagList = flagList;
       }),
@@ -49,11 +46,6 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
         _flutterVersion = flutterVersion;
       }),
     )..entering();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -67,46 +59,51 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           style: textTheme.headline,
         ),
         const PaddedDivider(),
-        _buildVersionInformation(context),
+        if (_flutterVersion != null) _VersionInformation(_flutterVersion),
         const Padding(padding: EdgeInsets.only(top: 16.0)),
         Text(
           'Dart VM Flag List',
           style: textTheme.headline,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
-        Expanded(
-          child: _buildFlagList(context),
-        )
+        if (_flagList != null)
+          Expanded(
+            child: _FlagList(_flagList),
+          ),
       ],
     );
   }
+}
 
-  Widget _buildVersionInformation(BuildContext context) {
-    final span = TextSpanUtil(context);
-    return span.richText(children: [
-      span.bold('Flutter: '),
-      span.normal(_flutterVersion?.flutterVersionSummary ?? ''),
-      span.newline,
-      span.bold('Framework: '),
-      span.normal(_flutterVersion?.frameworkVersionSummary),
-      span.newline,
-      span.bold('Engine: '),
-      span.normal(_flutterVersion?.engineVersionSummary),
-      span.newline,
-      span.bold('Dart SDK: '),
-      span.normal(_flutterVersion?.dartSdkVersion),
-      span.newline,
-      span.bold('DevTools: '),
-      span.normal(devtools.version),
-    ]);
+class _VersionInformation extends StatelessWidget {
+  const _VersionInformation(this.flutterVersion);
+
+  final FlutterVersion flutterVersion;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTaggedText(
+      '<bold>Flutter: </bold>${flutterVersion.flutterVersionSummary}\n'
+      '<bold>Framework: </bold>${flutterVersion.frameworkVersionSummary}\n'
+      '<bold>Engine: </bold>${flutterVersion.engineVersionSummary}\n'
+      '<bold>Dart SDK: </bold>${flutterVersion.dartSdkVersion}\n'
+      '<bold>DevTools: </bold>${devtools.version}\n',
+    );
   }
+}
 
-  Widget _buildFlagList(BuildContext context) {
-    final span = TextSpanUtil(context);
+class _FlagList extends StatelessWidget {
+  const _FlagList(this.flagList);
+
+  final FlagList flagList;
+
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: _flagList?.flags?.length ?? 0,
+      itemCount: flagList?.flags?.length ?? 0,
       itemBuilder: (context, index) {
-        final flag = _flagList.flags[index];
+        final flag = flagList.flags[index];
+        final wasModified = flag.modified ? 'modified' : 'default';
         return Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
@@ -114,57 +111,23 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Expanded(
-                child: span.richText(children: [
-                  span.bold(flag.name),
-                  span.newline,
-                  span.normal(flag.comment),
-                ]),
+                child: DevToolsTaggedText(
+                  '<bold>${flag.name}</bold>\n'
+                  '${flag.comment}',
+                ),
               ),
               Container(
                 constraints: const BoxConstraints(minWidth: 100.0),
-                child: span.richText(textAlign: TextAlign.end, children: [
-                  span.normal(flag.valueAsString,
-                      color: span.theme.primaryColor),
-                  span.newline,
-                  span.light(flag.modified ? 'modified' : 'default',
-                      color: span.theme.primaryColorLight),
-                ]),
+                child: DevToolsTaggedText(
+                  '<primary-color>${flag.valueAsString}</primary-color>\n'
+                  '<primary-color-light>$wasModified</primary-color-light>',
+                  textAlign: TextAlign.end,
+                ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-/// A utility for creating styled [TextSpan]s in a [RichText] widget.
-class TextSpanUtil {
-  TextSpanUtil(BuildContext context) : theme = Theme.of(context);
-  final ThemeData theme;
-
-  TextSpan _span(String text, FontWeight weight, Color color) => TextSpan(
-      text: text,
-      style: theme.textTheme.body1.copyWith(fontWeight: weight, color: color));
-  TextSpan bold(String text, {Color color}) =>
-      _span(text, FontWeight.w600, color ?? theme.textTheme.body1.color);
-  TextSpan normal(String text, {Color color}) =>
-      _span(text, FontWeight.normal, color ?? theme.textTheme.body1.color);
-  TextSpan light(String text, {Color color}) =>
-      _span(text, FontWeight.w300, color ?? theme.textTheme.body1.color);
-  TextSpan get newline =>
-      _span('\n', FontWeight.normal, theme.colorScheme.onBackground);
-
-  RichText richText(
-      {TextAlign textAlign = TextAlign.start,
-      TextOverflow textOverflow = TextOverflow.visible,
-      @required List<TextSpan> children}) {
-    assert(children != null);
-    return RichText(
-      softWrap: true,
-      overflow: textOverflow,
-      text: TextSpan(text: '', children: children),
-      textAlign: textAlign,
     );
   }
 }
