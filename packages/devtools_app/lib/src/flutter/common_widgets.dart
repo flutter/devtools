@@ -68,7 +68,6 @@ class DevToolsTaggedText extends StatelessWidget {
       content: content,
       tagToTextSpanBuilder: _tagToTextSpanBuilder,
       overflow: TextOverflow.visible,
-      maxLines: null,
       textAlign: textAlign,
       style: defaultTextStyle,
     );
