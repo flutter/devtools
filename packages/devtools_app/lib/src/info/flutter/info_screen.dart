@@ -66,13 +66,14 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           'Version Information',
           style: textTheme.headline,
         ),
-        const SpacedDivider(),
+        const PaddedDivider(),
         _buildVersionInformation(context),
+        const Padding(padding: EdgeInsets.only(top: 16.0)),
         Text(
           'Dart VM Flag List',
           style: textTheme.headline,
         ),
-        const SpacedDivider(),
+        const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
         Expanded(
           child: _buildFlagList(context),
         )
@@ -109,6 +110,7 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
         return Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Expanded(

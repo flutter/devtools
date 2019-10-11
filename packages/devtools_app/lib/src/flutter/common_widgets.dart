@@ -4,15 +4,21 @@
 
 import 'package:flutter/material.dart';
 
-// A divider that adds spacing underneath for forms.
-class SpacedDivider extends StatelessWidget {
-  const SpacedDivider({Key key}) : super(key: key);
+/// Convenience [Divider] with [Padding] to fit in better with forms.
+class PaddedDivider extends StatelessWidget {
+  const PaddedDivider({
+    Key key,
+    this.padding = const EdgeInsets.only(bottom: 10.0),
+  }) : super(key: key);
+
+  /// The padding to place around the divider.
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 10.0),
-      child: Divider(thickness: 1.0),
+    return Padding(
+      padding: padding,
+      child: const Divider(thickness: 1.0),
     );
   }
 }
