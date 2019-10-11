@@ -90,6 +90,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
 
+  // Describing whether the Node is an ErrorWidget
+  bool get isError => json['error'] == true;
+
+  // TODO(albertusangga): Comment
+  int get distanceFromError  => json['distanceFromError'];
+
   Future<Map<String, InstanceRef>> _valueProperties;
 
   final bool isProperty;

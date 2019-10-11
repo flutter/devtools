@@ -204,6 +204,13 @@ abstract class InspectorTreeNode {
     }
     final String name = diagnostic.name;
     TextStyle textStyle = textStyleForLevel(diagnostic.level);
+    if (diagnostic.isError) {
+      if (diagnostic.distanceFromError <= 0) {
+        textStyle = TextStyle(color: Colors.red, fontWeight: FontWeight.bold);
+      } else {
+        textStyle = TextStyle(color: Colors.orange);
+      }
+    }
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
