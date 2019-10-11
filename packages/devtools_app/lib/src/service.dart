@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
-import 'package:html_shim/html.dart' hide Event;
 import 'package:vm_service/utils.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'core/sse/sse_shim.dart';
 import 'vm_service_wrapper.dart';
@@ -51,43 +50,27 @@ void _connectWithWebSocket(
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
-  final ws = WebSocket(uri.toString());
+  final ws = WebSocketChannel.connect(uri);
+  final service = VmServiceWrapper.fromNewVmService(
+    ws.stream,
+    (String message) {
+      ws.sink.add(message);
+    },
+    uri,
+  );
 
-  ws.onOpen.listen((_) {
-    final Stream<dynamic> inStream =
-        convertBroadcastToSingleSubscriber(ws.onMessage)
-            .asyncMap<dynamic>((MessageEvent e) {
-      if (e.data is String) {
-        return e.data;
-      } else {
-        final fileReader = FileReader();
-        fileReader.readAsArrayBuffer(e.data);
-        return fileReader.onLoadEnd.first.then<ByteData>((ProgressEvent _) {
-          final Uint8List list = fileReader.result;
-          return ByteData.view(list.buffer);
-        });
-      }
-    });
-
-    final service = VmServiceWrapper.fromNewVmService(
-      inStream,
-      ws.send,
-      uri,
-    );
-
-    ws.onClose.listen((_) {
-      finishedCompleter.complete();
-      service.dispose();
-    });
-
-    connectedCompleter.complete(service);
-  });
-
-  ws.onError.listen((dynamic e) {
+  ws.sink.done.then((_) {
+    finishedCompleter.complete();
+    service.dispose();
+  }, onError: (e) {
+    // TODO(jacobr): this may be obsolete code. This case is only useful if the
+    // sink throws an error immediately as otherwise the connectedCompleter will
+    // have already completed before we get here.
     if (!connectedCompleter.isCompleted) {
       connectedCompleter.completeError(e);
     }
   });
+  connectedCompleter.complete(service);
 }
 
 Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
