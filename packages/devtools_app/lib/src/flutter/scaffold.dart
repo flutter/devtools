@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'config.dart';
+import 'app.dart';
 import 'screen.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
