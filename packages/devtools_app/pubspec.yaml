@@ -54,6 +54,8 @@ dependencies:
     ^0.0.2
 #    path: ../../third_party/packages/plotly_js
   sse: ^2.0.0
+  web_socket_channel:
+    ^1.1.0
   flutter:
     sdk: flutter
 
