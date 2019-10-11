@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:devtools_app/services.dart';
 
-import 'package:devtools_flutter/src/config.dart';
+import 'package:devtools_app/src/flutter/app.dart';
 
 void main() {
   group('Initializer', () {
