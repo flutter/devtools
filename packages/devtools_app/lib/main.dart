@@ -11,7 +11,9 @@ import 'src/flutter/app.dart';
 void main() {
   if (kIsWeb) {
     // Clear out the unneeded HTML from index.html.
-    document.body.innerHtml = '';
+    for (var element in document.body.querySelectorAll('.legacy-dart')) {
+      element.remove();
+    }
   } else {
     // When running in a desktop embedder, Flutter throws an error because the
     // platform is not officially supported. This is not needed for web.
