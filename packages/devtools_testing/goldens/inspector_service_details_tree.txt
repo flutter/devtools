@@ -7,25 +7,25 @@ MaterialApp
    └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
      │ state: _WidgetsAppState#00000
      │
-     └─Actions
-       │ dispatcher: null
-       │ actions: {[<DoNothingAction>]: Closure: () => DoNothingAction}
-       │
-       └─DefaultFocusTraversal
-         └─MediaQuery
-           │ data: MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio:
-           │   3.0, textScaleFactor: 1.0, platformBrightness:
-           │   Brightness.light, padding: EdgeInsets.zero, viewPadding:
-           │   EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth:
-           │   1.7976931348623157e+308, alwaysUse24HourFormat: false,
-           │   accessibleNavigation: false, highContrast:
-           │   false,disableAnimations: false, invertColors: false, boldText:
-           │   false)
-           │
-           └─Localizations
-             │ locale: en_US
-             │ delegates: DefaultMaterialLocalizations.delegate(en_US),
-             │   DefaultCupertinoLocalizations.delegate(en_US),
-             │   DefaultWidgetsLocalizations.delegate(en_US)
-             │ state: _LocalizationsState#00000
+     └─Shortcuts
+       │ manager: null
+       │ shortcuts: {LogicalKeySet#00000(keys:
+       │   {LogicalKeyboardKey#00000(keyId: "0x10007002b", keyLabel: null,
+       │   debugName: "Tab")}): Intent#00000(key: [<NextFocusAction>]),
+       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
+       │   "0x201000700e1", keyLabel: null, debugName: "Shift"),
+       │   LogicalKeyboardKey#00000(keyId: "0x10007002b", keyLabel: null,
+       │   debugName: "Tab")}): Intent#00000(key:
+       │   [<PreviousFocusAction>]), LogicalKeySet#00000(keys:
+       │   {LogicalKeyboardKey#00000(keyId: "0x100070050", keyLabel: null,
+       │   debugName: "Arrow Left")}): DirectionalFocusIntent#00000(key:
+       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
+       │   {LogicalKeyboardKey#00000(keyId: "0x10007004f", keyLabel: null,
+       │   debugName: "Arrow Right")}): DirectionalFocusIntent#00000(key:
+       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
+       │   {LogicalKeyboardKey#00000(keyId: "0x100070051", keyLabel: null,
+       │   debugName: "Arrow Down")}): DirectionalFocusIntent#00000(key:
+       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
+       │   {LogicalKeyboardKey#00000(keyId: "0x100070052", keyLabel: null,
+       │   debugName: "Arrow Up")}): DirectionalFocusIntent#00000(key:
 ...

@@ -12,7 +12,7 @@ import 'screen.dart';
 ///
 /// This widget will host Screen widgets.
 ///
-/// [Config] defines the collections of [Screen]s to show in a scaffold
+/// [DevToolsApp] defines the collections of [Screen]s to show in a scaffold
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
@@ -20,6 +20,9 @@ class DevToolsScaffold extends StatefulWidget {
     @required this.tabs,
   })  : assert(tabs != null),
         super(key: key);
+
+  DevToolsScaffold.withChild({Key key, Widget child})
+      : this(key: key, tabs: [_SimpleScreen(child)]);
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
   static const Key narrowWidthKey = Key('Narrow Scaffold');
@@ -193,4 +196,20 @@ class _PreferredSizeHero extends StatelessWidget
 
   @override
   Size get preferredSize => child.preferredSize;
+}
+
+class _SimpleScreen extends Screen {
+  const _SimpleScreen(this.child) : super('');
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  Widget buildTab(BuildContext context) {
+    return null;
+  }
 }

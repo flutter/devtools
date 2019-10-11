@@ -18,17 +18,37 @@ matrix:
     #     we can build on an older SDK.
     - dart: stable
       env: BOT=main
+
+    # TODO(https://github.com/flutter/devtools/issues/1161): Skip test bots for dart
+    # stable on Linux. They are failing with incompatible kernel versions right now.
+    - os: linux
+      dart: stable
+      env: BOT=test_ddc
+    - os: linux
+      dart: stable
+      env: BOT=test_dart2js
+
     # TODO(dantup): Temporarily skip stable Flutter builds on Windows because the
     # Dart SDK download can take too long due to Invoke-WebRequest performance.
     # This block can be removed when https://github.com/flutter/flutter/pull/37792
     # rolls to the Flutter stable channel.
     - os: windows
       dart:  stable
-      env: BOT=flutter_sdk_tests
+      env: 
+        - BOT=flutter_sdk_tests
+        - BOT=test_ddc
+        - BOT=test_dart2js
+        - BOT=integration_ddc
+        - BOT=integration_dart2js
     # TODO(dantup): Skip Flutter builds until we understand/fix Flutter crashing
     # with "failed to delete build/assets: file is locked by another process".
     - os: windows
-      env: BOT=flutter_sdk_tests
+      env: 
+        - BOT=flutter_sdk_tests
+        - BOT=test_ddc
+        - BOT=test_dart2js
+        - BOT=integration_ddc
+        - BOT=integration_dart2js
   include:
     - dart: "dev/raw/latest"
       env: BOT=packages
@@ -40,6 +60,8 @@ env:
   - BOT=main
   - BOT=test_ddc
   - BOT=test_dart2js
+  - BOT=integration_ddc
+  - BOT=integration_dart2js
 
 script: ./tool/travis.sh
 
