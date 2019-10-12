@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/connected_app.dart';
-import 'package:devtools_app/src/flutter/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/info/flutter/info_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
