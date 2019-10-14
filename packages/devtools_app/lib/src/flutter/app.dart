@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
 import '../info/flutter/info_screen.dart';
+import '../inspector/flutter/inspector_screen.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -60,14 +61,15 @@ class DevToolsAppState extends State<DevToolsApp> {
   /// The routes that the app exposes.
   final Map<String, WidgetBuilder> _routes = {
     '/': (_) => Initializer(
-          builder: (_) => const DevToolsScaffold(
+          builder: (_) => DevToolsScaffold(
             tabs: [
-              EmptyScreen.inspector,
+              const InspectorScreen(),
               EmptyScreen.timeline,
               EmptyScreen.performance,
               EmptyScreen.memory,
+              EmptyScreen.debugger,
               EmptyScreen.logging,
-              InfoScreen(),
+              const InfoScreen(),
             ],
           ),
         ),

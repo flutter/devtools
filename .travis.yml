@@ -6,7 +6,9 @@ os:
 language: dart
 dart:
   - "dev/raw/latest"
-  - stable
+# Exclude stable for now as we depend on Flutter features not availabe on
+# stable.
+#  - stable
 addons:
   chrome: stable
 

@@ -55,8 +55,8 @@ abstract class HtmlIconRenderer<T extends DevToolsIcon> {
 
   final T icon;
 
-  int get iconWidth => icon.iconWidth;
-  int get iconHeight => icon.iconHeight;
+  double get iconWidth => icon.iconWidth;
+  double get iconHeight => icon.iconHeight;
 }
 
 class _UrlIconRenderer extends HtmlIconRenderer<UrlIcon> {
@@ -128,7 +128,7 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
 
   @override
   CanvasElement createCanvasSource() {
-    final canvas = createHighDpiCanvas(iconWidth, iconHeight);
+    final canvas = createHighDpiCanvas(iconWidth.toInt(), iconHeight.toInt());
     final context = canvas.context2D;
     context.clearRect(0, 0, iconWidth, iconHeight);
 
@@ -172,10 +172,10 @@ class _ColorIconRenderer extends HtmlIconRenderer<ColorIcon> {
   }
 
   @override
-  int get iconWidth => 18;
+  double get iconWidth => 18;
 
   @override
-  int get iconHeight => 18;
+  double get iconHeight => 18;
 }
 
 class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
@@ -222,7 +222,7 @@ class _CustomIconRenderer extends HtmlIconRenderer<CustomIcon> {
   }
 
   CanvasElement _createCanvas() {
-    return createHighDpiCanvas(iconWidth, iconHeight);
+    return createHighDpiCanvas(iconWidth.toInt(), iconHeight.toInt());
   }
 
   CanvasElement _buildImage(CanvasImageSource source) {
@@ -298,7 +298,7 @@ class _MaterialIconRenderer extends HtmlIconRenderer<MaterialIcon> {
 
   @override
   CanvasImageSource createCanvasSource() {
-    final canvas = createHighDpiCanvas(iconWidth, iconHeight);
+    final canvas = createHighDpiCanvas(iconWidth.toInt(), iconHeight.toInt());
     final context2D = canvas.context2D
       ..translate(iconWidth / 2, iconHeight / 2);
     if (icon.angle != 0) {
