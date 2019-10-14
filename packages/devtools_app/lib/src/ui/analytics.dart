@@ -7,12 +7,12 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:convert';
-
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
+import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -53,7 +53,11 @@ const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 @JS('gtagsEnabled')
 external bool isGtagsEnabled();
 
-@JS('_initializeGA')
+/// Reset the .devtools file.
+@JS('gtagsReset')
+external bool isGtagsReset();
+
+@JS('initializeGA')
 external void initializeGA();
 
 @JS()
@@ -154,17 +158,181 @@ class GtagExceptionDevTools extends GtagException {
   external String get ide_launched;
 }
 
+/// Request Flutter tool stored value enabled (GA enabled) stored in ~\.flutter.
+/// Return bool or null, null implies Flutter Tool has never been run.
+Future<bool> get isFlutterGAEnabled async {
+  bool enabled = false;
+
+  var resp =
+      await HttpRequest.request('/api/getFlutterGAEnabled', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    // Return value 'null' implies Flutter tool has never been run return null.
+    if (resp.responseText == 'null') return null;
+
+    enabled = resp.responseText == 'true';
+  } else {
+    log('HttpRequest api/getFlutterGAEnabled failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return enabled;
+}
+
+/// Request Flutter tool stored clientID (GA enabled) stored in ~\.flutter.
+/// Return clientId as a String or null, null implies Flutter Tool has never
+/// been run.
+Future<String> flutterGAClientID() async {
+  String clientId = '';
+
+  var resp =
+      await HttpRequest.request('/api/getFlutterGAClientId', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    // Return value 'null' implies Flutter tool has never been run return null.
+    if (resp.responseText == 'null') return null;
+
+    clientId = resp.responseText;
+  } else {
+    log('HttpRequest api/getFlutterGAClientId failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return clientId;
+}
+
+/// Request all .devtools properties resets to their default values.
+void resetDevTools() async {
+  final resp = await HttpRequest.request('api/resetDevTools', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    assert(resp.responseText == 'true');
+  } else {
+    log(
+      'HttpRequest api/resetDevTools failed status = ${resp.status}',
+      LogLevel.error,
+    );
+  }
+}
+
+/// Request DevTools stored value firstRun (GA dialog) stored in ~\.devtools.
+Future<bool> get isFirstRun async {
+  bool firstRun = false;
+
+  var resp =
+      await HttpRequest.request('api/getDevToolsFirstRun', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    firstRun = resp.responseText == 'true';
+  } else {
+    log('HttpRequest api/getDevToolsFirstRun failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return firstRun;
+}
+
+bool _gaEnabled;
+
+bool gaEnabled() => _gaEnabled;
+
+/// Request DevTools stored value enabled (GA enabled) stored in ~\.devtools.
+Future<bool> get isEnabled async {
+  if (_gaEnabled != null) return _gaEnabled;
+
+  bool enabled = false;
+
+  var resp =
+      await HttpRequest.request('/api/getDevToolsEnabled', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    enabled = resp.responseText == 'true';
+  } else {
+    log('HttpRequest api/getDevToolsEnabled failed status = ${resp.status}',
+        LogLevel.error);
+  }
+
+  _gaEnabled = enabled;
+
+  return enabled;
+}
+
+/// Set DevTools enabled (GA enabled) stored in ~/.devtools.
+void setEnabled([bool value = true]) async {
+  var resp = await HttpRequest.request(
+    '/api/setDevToolsEnabled?enabled=${value}',
+    method: 'POST',
+  );
+  if (resp.status == HttpStatus.ok) {
+    assert(resp.responseText == '$value');
+    _gaEnabled = value;
+  } else {
+    log(
+      'HttpRequest api/setDevToolsEnabled failed status = ${resp.status}, '
+      'responseText = ${resp.responseText}',
+      LogLevel.error,
+    );
+  }
+}
+
+/// Request DevTools surveyActionTaken property stored in ~\.devtools.
+Future<bool> get isSurveyActionTaken async {
+  bool surveyActionTaken = false;
+
+  var resp =
+      await HttpRequest.request('/api/getSurveyActionTaken', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    surveyActionTaken = resp.responseText == 'true';
+  } else {
+    log('HttpRequest api/getSurveyActionTaken failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return surveyActionTaken;
+}
+
+/// Set DevTools surveyActionTaken property stored in ~\.devtools.
+void setSurveyActionTaken([bool value = true]) async {
+  var resp = await HttpRequest.request(
+    '/api/setSurveyActionTaken?surveyActionTaken=${value}',
+    method: 'POST',
+  );
+  if (resp.status == HttpStatus.ok) {
+    assert(resp.responseText == '$value');
+  } else {
+    log(
+      'HttpRequest api/setSurveyActionTaken failed status = ${resp.status}, '
+      'responseText = ${resp.responseText}',
+      LogLevel.error,
+    );
+  }
+}
+
+/// Request DevTools surveyShownCount property stored in ~\.devtools.
+Future<int> get surveyShownCount async {
+  int surveyShownCount;
+
+  var resp =
+      await HttpRequest.request('/api/getSurveyShownCount', method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    surveyShownCount = int.parse(resp.responseText);
+  } else {
+    log('HttpRequest api/getSurveyShownCount failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return surveyShownCount;
+}
+
+/// Increment DevTools surveyShownCount property stored in ~\.devtools.
+Future<int> get incrementSurveyShownCount async {
+  int surveyShownCount;
+
+  var resp = await HttpRequest.request('/api/incrementSurveyShownCount',
+      method: 'POST');
+  if (resp.status == HttpStatus.ok) {
+    surveyShownCount = int.parse(resp.responseText);
+  } else {
+    log('HttpRequest api/getSurveyShownCount failed status = ${resp.status}',
+        LogLevel.error);
+  }
+  return surveyShownCount;
+}
+
 void screen(
   String screenName, [
   int value = 0,
 ]) {
-  // Let the server know that we're logging a screen view event,
-  // then let GA know about the event.
-  HttpRequest.request(
-    '/api/logScreenView',
-    method: 'POST',
-    sendData: jsonEncode({'screen': screenName}),
-  );
   GTag.event(
     screenName,
     GtagEventDevTools(
@@ -341,4 +509,8 @@ Future<void> computeUserApplicationCustomGTagData() async {
   userBuildType = isProfile ? buildTypeProfile : buildTypeDebug;
 
   _analyticsComputed = true;
+}
+
+void exposeGaDevToolsEnabledToJs() {
+  setProperty(window, 'gaDevToolsEnabled', allowInterop(gaEnabled));
 }

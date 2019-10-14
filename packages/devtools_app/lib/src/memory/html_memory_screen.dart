@@ -160,7 +160,6 @@ class HtmlMemoryScreen extends HtmlScreen with HtmlSetStateMixin {
 
   @override
   CoreElement createContent(HtmlFramework framework) {
-    print(">>>> html_memory_screen ENTERING createContent");
     ga_platform.setupDimensions();
 
     final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();

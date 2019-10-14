@@ -28,22 +28,8 @@ function gtagsEnabled() {
   return _gtagsEnabled
 }
 
-if (_gtagsReset) {
-  localStorage.removeItem(GA_DEVTOOLS_PROPERTY);
-}
-
-// Values in local storage:
-const _GA_COLLECT = 'collect';
-function gaStorageCollect() {
-  return _GA_COLLECT;
-}
-const _GA_DONT_COLLECT = 'do-not-collect';
-function gaStorageDontCollect() {
-  return _GA_DONT_COLLECT;
-}
-
-function gaCollectionAllowed() {
-  return localStorage.getItem(GA_DEVTOOLS_PROPERTY) == _GA_COLLECT;
+function gtagsReset() {
+  return _gtagsReset;
 }
 
 let _initializedGA = false;
@@ -52,8 +38,8 @@ function isGaInitialized() {
 }
 
 // InitializeGA with our dimensions. Both the name and order (dimension #) should match the those in gtags.dart
-function _initializeGA() {
-  if (gtagsEnabled() && gaCollectionAllowed() && !_initializedGA) {
+function initializeGA() {
+  if (gtagsEnabled() && window.gaDevToolsEnabled() && !_initializedGA) {
     gtag('js', new Date());
     gtag('config', GA_DEVTOOLS_PROPERTY, {
            'custom_map': {
@@ -76,15 +62,15 @@ function _initializeGA() {
   }
 }
 
-_initializeGA();
-
-if (gtagsEnabled()) {
-// Record when DevTools browser tab is selected (visible), not selected (hidden) or browser minimized.
-    document.addEventListener("visibilitychange", function (e) {
-        if (gaCollectionAllowed()) {
-            gtag('event', document.visibilityState, {
-                event_category: 'application',
-            });
-        }
+function hookupListenerForGA() {
+  if (gtagsEnabled()) {
+    // Record when DevTools browser tab is selected (visible), not selected (hidden) or browser minimized.
+    document.addEventListener('visibilitychange', function (e) {
+      if (window.gaDevToolsEnabled()) {
+        gtag('event', document.visibilityState, {
+          event_category: 'application',
+        });
+      }
     });
+  }
 }

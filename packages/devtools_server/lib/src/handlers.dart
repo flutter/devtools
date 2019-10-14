@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:path/path.dart' as path;
@@ -21,6 +23,7 @@ import 'client_manager.dart';
 Future<shelf.Handler> defaultHandler(ClientManager clients) async {
   final resourceUri = await Isolate.resolvePackageUri(
       Uri(scheme: 'package', path: 'devtools/devtools.dart'));
+
   final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
 
   // Default static handler for all non-package requests.
@@ -83,28 +86,73 @@ class ServerApi {
     api ??= ServerApi();
     switch (request.url.path) {
       case 'api/logScreenView':
-        print('>>>>> api/logScreenView');
         return api.logScreenView(request);
-      case 'api/getUserId':
-        print('>>>>> api/getUserId');
-        return api.getUserId(request);
-      case 'analytics/getFirstRun':
-        print('>>>>> analytics/getFirstRun');
-        return api.getFirstRun(request);
-      case 'analytics/getFirstRun':
-        return api.getEnabled(request);
-      case 'analytics/setEnbled':
-        print('>>>>> analytics/setEnbled');
-        return api.setEnabled(request);
-      case 'analytics/getClientId':
-        print('>>>>> analytics/getClientId');
-        return api.getClientId(request);
+
+      // ----- Flutter Tool GA store. -----
+      case 'api/getFlutterGAEnabled':
+        // Is Analytics collection enabled?
+        return api.getCompleted(
+          request,
+          '${Usage.doesStoreExits ? _usage.enabled : 'null'}',
+        );
+      case 'api/getFlutterGAClientId':
+        // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
+        // true.
+        return (Usage.doesStoreExits)
+            ? api.getCompleted(
+                request, _usage.enabled ? _usage.clientId : 'null')
+            : api.getCompleted(request, 'null');
+
+      // ----- DevTools GA store. -----
+      case 'api/resetDevTools':
+        _devToolsUsage.reset();
+        return api.getCompleted(request, 'true');
+      case 'api/getDevToolsFirstRun':
+        // Has DevTools been run first time? To bring up welcome screen.
+        return api.getCompleted(request, '${_devToolsUsage.isFirstRun}');
+      case 'api/getDevToolsEnabled':
+        // Is DevTools Analytics collection enabled?
+        return api.getCompleted(request, '${_devToolsUsage.enabled}');
+      case 'api/setDevToolsEnabled':
+        // Enable or disable DevTools analytics collection.
+        final queryParams = request.requestedUri.queryParameters;
+        _devToolsUsage.enabled = queryParams.containsKey('enabled')
+            ? queryParams['enabled'] == 'true'
+            : false;
+        return api.setCompleted(request, '${_devToolsUsage.enabled}');
+
+      // ----- DevTools survey store. -----
+      case 'api/getSurveyActionTaken':
+        // SurveyActionTaken has the survey be taken?
+        return api.getCompleted(request, '${_devToolsUsage.surveyActionTaken}');
+      case 'api/setSurveyActionTaken':
+        // Set the SurveyActionTaken.
+        // Enable or disable analytics collection.
+        final queryParams = request.requestedUri.queryParameters;
+        _devToolsUsage.surveyActionTaken =
+            queryParams.containsKey('surveyActionTaken')
+                ? queryParams['surveyActionTaken'] == 'true'
+                : false;
+        return api.setCompleted(request, '${_devToolsUsage.surveyActionTaken}');
+      case 'api/getSurveyShownCount':
+        // SurveyShownCount how many times have we asked to take survey.
+        return api.getCompleted(request, '${_devToolsUsage.surveyShownCount}');
+      case 'api/incrementSurveyShownCount':
+        // Increment the SurveyShownCount, we've asked about the survey.
+        _devToolsUsage.incrementSurveyShownCount();
+        return api.getCompleted(request, '${_devToolsUsage.surveyShownCount}');
       default:
         return api.notImplemented(request);
     }
   }
 
-  final Usage _usage = Usage();
+  // Accessing Flutter usage file e.g., ~/.flutter.
+  // NOTE: Only access the file if it exists otherwise Flutter Tool hasn't yet
+  //       been run.
+  static final Usage _usage = Usage.doesStoreExits ? Usage() : null;
+
+  // Accessing DevTools usage file e.g., ~/.devtools
+  static final DevToolsUsage _devToolsUsage = DevToolsUsage();
 
   /// Logs a page view in the DevTools server.
   ///
@@ -113,31 +161,13 @@ class ServerApi {
   FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
       notImplemented(request);
 
-  /// Gets a user's id for use in analytics and for distinguishing internal
-  /// users from external users.
-  ///
-  /// This endpoint is not supported externally and will only be implemented for
-  /// the version of DevTools used inside Google.
-  FutureOr<shelf.Response> getUserId(shelf.Request request) =>
-      notImplemented(request);
+  /// Return the value of the property.
+  FutureOr<shelf.Response> getCompleted(shelf.Request request, String value) =>
+      shelf.Response.ok('$value');
 
-  /// Has Analytics dialog appeared yet - Flutter tool every used?
-  FutureOr<shelf.Response> getFirstRun(shelf.Request request) =>
-      shelf.Response.ok('${_usage.isFirstRun}');
-
-  /// Has Analytics dialog appeared yet - Flutter tool every used?
-  FutureOr<shelf.Response> getEnabled(shelf.Request request) =>
-      shelf.Response.ok('${_usage.enabled}');
-
-  /// Has Analytics dialog appeared yet - Flutter tool every used?
-  FutureOr<shelf.Response> setEnabled(shelf.Request request) {
-    _usage.enabled = true;
-    shelf.Response.ok('Done');
-  }
-
-  /// Has Analytics dialog appeared yet - Flutter tool every used?
-  FutureOr<shelf.Response> getClientId(shelf.Request request) =>
-      shelf.Response.ok('${_usage.clientId}');
+  /// Return the value of the property after the property value has been set.
+  FutureOr<shelf.Response> setCompleted(shelf.Request request, String value) =>
+      shelf.Response.ok('$value');
 
   /// A [shelf.Response] for API calls that have not been implemented in this
   /// server.
@@ -148,6 +178,7 @@ class ServerApi {
       shelf.Response(204);
 }
 
+// Access the ~/.flutter file.
 class Usage {
   Analytics _analytics;
 
@@ -166,6 +197,12 @@ class Usage {
     _analytics = AnalyticsIO('', settingsName, '', documentDirectory: null);
   }
 
+  /// Does the .flutter store exist?
+  static bool get doesStoreExits {
+    final flutterStore = File('${DevToolsUsage.userHomeDir()}/.flutter');
+    return flutterStore.existsSync();
+  }
+
   bool get isFirstRun => _analytics.firstRun;
 
   bool get enabled => _analytics.enabled;
@@ -173,4 +210,149 @@ class Usage {
   set enabled(bool value) => _analytics.enabled = value;
 
   String get clientId => _analytics.clientId;
+}
+
+// Access the DevTools on disk store (~/.devtools).
+class DevToolsUsage {
+  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
+  /// used for testing.
+  DevToolsUsage(
+      {String settingsName = 'devtools',
+      String versionOverride,
+      String configDirOverride}) {
+    // final FlutterVersion flutterVersion = FlutterVersion.instance;
+    // final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
+    // TODO(terry): UA, first parameter, is '' could be DevTools UA
+    // TODO(terry): version, second parameter, is '' could be real Flutter version #.
+    // TODO(terry): documentDirectory, third parameter, is null could be :
+    //    documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null
+
+    properties =
+        IOPersistentProperties(settingsName, documentDirPath: userHomeDir());
+  }
+
+  static String userHomeDir() {
+    final String envKey =
+        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+    final String value = Platform.environment[envKey];
+    return value == null ? '.' : value;
+  }
+
+  IOPersistentProperties properties;
+
+  void reset() {
+    properties.remove('firstRun');
+    properties['enabled'] = false;
+    properties['surveyShownCount'] = 0;
+    properties['surveyActionTaken'] = false;
+  }
+
+  bool get isFirstRun {
+    properties['firstRun'] = properties['firstRun'] == null;
+    return properties['firstRun'];
+  }
+
+  bool get enabled {
+    if (properties['enabled'] == null) {
+      properties['enabled'] = false;
+    }
+
+    return properties['enabled'];
+  }
+
+  set enabled(bool value) {
+    properties['enabled'] = value;
+    return properties['enabled'];
+  }
+
+  int get surveyShownCount {
+    if (properties['surveyShownCount'] == null) {
+      properties['surveyShownCount'] = 0;
+    }
+
+    return properties['surveyShownCount'];
+  }
+
+  void incrementSurveyShownCount() {
+    surveyShownCount; // Insure surveyShownCount has been initialized.
+    properties['surveyShownCount'] += 1;
+  }
+
+  bool get surveyActionTaken => properties['surveyActionTaken'] == true;
+
+  set surveyActionTaken(bool value) {
+    properties['surveyActionTaken'] = value;
+  }
+}
+
+abstract class PersistentProperties {
+  PersistentProperties(this.name);
+
+  final String name;
+
+  dynamic operator [](String key);
+  void operator []=(String key, dynamic value);
+
+  /// Re-read settings from the backing store. This may be a no-op on some
+  /// platforms.
+  void syncSettings();
+}
+
+const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
+
+class IOPersistentProperties extends PersistentProperties {
+  IOPersistentProperties(String name, {String documentDirPath}) : super(name) {
+    String fileName = '.${name.replaceAll(' ', '_')}';
+    documentDirPath ??= DevToolsUsage.userHomeDir();
+    _file = File(path.join(documentDirPath, fileName));
+    if (!_file.existsSync()) {
+      _file.createSync();
+    }
+    syncSettings();
+  }
+
+  IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
+    _file = file;
+    if (!_file.existsSync()) {
+      _file.createSync();
+    }
+    syncSettings();
+  }
+
+  File _file;
+  Map _map;
+
+  @override
+  dynamic operator [](String key) => _map[key];
+
+  @override
+  void operator []=(String key, dynamic value) {
+    if (value == null && !_map.containsKey(key)) return;
+    if (_map[key] == value) return;
+
+    if (value == null) {
+      _map.remove(key);
+    } else {
+      _map[key] = value;
+    }
+
+    try {
+      _file.writeAsStringSync(_jsonEncoder.convert(_map) + '\n');
+    } catch (_) {}
+  }
+
+  @override
+  void syncSettings() {
+    try {
+      String contents = _file.readAsStringSync();
+      if (contents.isEmpty) contents = '{}';
+      _map = jsonDecode(contents);
+    } catch (_) {
+      _map = {};
+    }
+  }
+
+  remove(String propertyName) {
+    _map.remove(propertyName);
+  }
 }

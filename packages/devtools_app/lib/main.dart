@@ -8,7 +8,6 @@ import 'package:html_shim/html.dart' show document;
 
 import 'src/flutter/app.dart';
 
-
 void main() {
   if (kIsWeb) {
     // Clear out the unneeded HTML from index.html.
