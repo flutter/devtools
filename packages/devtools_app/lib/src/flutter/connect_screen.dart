@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../src/framework/framework_core.dart';
 import 'common_widgets.dart';
@@ -67,6 +69,21 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         ),
         const Padding(padding: EdgeInsets.only(top: 20.0)),
         _buildTextInput(),
+        // Workaround the lack of copy/paste in macOS shell text input
+        // https://github.com/flutter/flutter/issues/30709
+        // by providing a manual paste button.
+        if (!kIsWeb)
+          RaisedButton(
+            child: const Text(
+              'Paste from clipboard (Flutter Desktop paste support workaround)',
+            ),
+            onPressed: () async {
+              final data = await Clipboard.getData('text/plain');
+              if (data?.text?.isNotEmpty == true) {
+                controller.text = data?.text;
+              }
+            },
+          ),
         const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
         // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
       ],
@@ -105,25 +122,20 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect([_]) async {
-    var connected = false;
-    try {
-      connected = await FrameworkCore.initVmService(
-        '',
-        explicitUri: Uri.parse(controller.text),
-      );
-    } catch (_) {}
+    final uri = Uri.parse(controller.text);
+    final bool connected = await FrameworkCore.initVmService(
+      '',
+      explicitUri: uri,
+      errorReporter: (title, error) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(title)),
+        );
+      },
+    );
+
     if (connected) {
       final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
       return Navigator.popAndPushNamed(context, '/?$uriQuery');
-    } else {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Unable to connect to Dart VM at "${controller.text}". '
-            'Please specify a running Dart VM URL.',
-          ),
-        ),
-      );
     }
   }
 }

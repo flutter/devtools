@@ -13,6 +13,10 @@ homepage: https://github.com/flutter/devtools
 
 environment:
   sdk: '>=2.3.0 <3.0.0'
+  # The flutter desktop support interacts with build scripts on the Flutter
+  # side that are not yet stable, so it requires a very recent version of
+  # Flutter. This version will increase regularly as the build scripts change.
+  # flutter: '>=1.9.8-pre.31'
 
 dependencies:
   ansicolor: ^1.0.2
@@ -50,6 +54,8 @@ dependencies:
     ^0.0.2
 #    path: ../../third_party/packages/plotly_js
   sse: ^2.0.0
+  web_socket_channel:
+    ^1.1.0
   flutter:
     sdk: flutter
   flutter_widgets: ^0.1.6

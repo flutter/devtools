@@ -98,4 +98,12 @@ class ThemedColor implements Color {
 
   @override
   Color withRed(int r) => _current.withRed(r);
+
+  // TODO(jacobr): remove these methods when they are removed from flutter_web.
+  // @override only on Flutter Web
+  String toCssString() => (_current as dynamic).toCssString();
+
+  // TODO(jacobr): remove these methods when they are removed from flutter_web.
+  // @override only on Flutter Web
+  String toCssStringRgbOnly() => (_current as dynamic).toCssStringRgbOnly();
 }

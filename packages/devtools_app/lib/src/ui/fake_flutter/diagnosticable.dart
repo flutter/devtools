@@ -4,7 +4,7 @@
 
 // This is a direct copy of
 // /packages/flutter/lib/src/foundation/diagnostics.dart
-part of 'fake_flutter.dart';
+part of '_fake_flutter.dart';
 
 // Examples can assume:
 // int rows, columns;

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger.dart';
 import '../core/message_bus.dart';
@@ -35,7 +37,7 @@ class FrameworkCore {
   static Future<bool> initVmService(
     String url, {
     Uri explicitUri,
-    ErrorReporter errorReporter,
+    @required ErrorReporter errorReporter,
   }) async {
     final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
 
@@ -54,7 +56,7 @@ class FrameworkCore {
           return false;
         }
       } catch (e) {
-        errorReporter('Unable to connect to VM service at $uri', e);
+        errorReporter('Unable to connect to VM service at "$uri"', e);
         return false;
       }
     } else {
