@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-/// Convenience [Divider] with [Padding] to fit in better with forms.
+/// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
     Key key,
@@ -25,14 +25,54 @@ class PaddedDivider extends StatelessWidget {
 }
 
 /// A [TaggedText] with builtin DevTools-specific text styling.
-class DevToolsTaggedText extends StatelessWidget {
-  const DevToolsTaggedText(
+///
+/// This widget is a wrapper around Flutter's [RichText]. It's an alternative
+/// to that for richly-formatted text. The performance is roughly the same,
+/// and it will throw assertion errors in any cases where the text isn't
+/// parsed properly.
+///
+/// The xml styling is much easier to read than creating multiple [TextSpan]s
+/// in a [RichText].  For example, the following are equivalent text
+/// presentations:
+///
+/// ```dart
+/// var taggedText = DefaultTaggedText(
+///   '<bold>bold text</bold>\n'
+///   'normal text',
+/// );
+///
+/// var richText = RichText(
+///   style
+///   text: TextSpan(
+///     text: '',
+///     style: DefaultTextStyle.of(context)
+///     children: [
+///       TextSpan(
+///         text: 'bold text',
+///         style: DefaultTextStyle.of(context).copyWith(fontWeight: FontWeight.w600),
+///       ),
+///       TextSpan(
+///         text: '\nnormal text',
+///       )
+///     ],
+///   ),
+/// );
+/// ```
+///
+/// The [TaggedText] abstraction separates the styling from the content
+/// of the rich strings we show in the UI.
+///
+/// The [TaggedText] also has the benefit of being localizable by a
+/// human translator. The content is passed in to Flutter as a single
+/// string, and the xml markup is understood by many translators.
+class DefaultTaggedText extends StatelessWidget {
+  const DefaultTaggedText(
     this.content, {
     this.textAlign = TextAlign.start,
     Key key,
   }) : super(key: key);
 
-  /// The XML-markupd string to show.
+  /// The XML-markup string to show.
   final String content;
 
   /// See [TaggedText.textAlign].

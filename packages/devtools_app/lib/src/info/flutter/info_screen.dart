@@ -41,6 +41,7 @@ class InfoScreenBody extends StatefulWidget {
 
 class _InfoScreenBodyState extends State<InfoScreenBody> {
   FlutterVersion _flutterVersion;
+
   FlagList _flagList;
 
   @override
@@ -90,7 +91,7 @@ class _VersionInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsTaggedText(
+    return DefaultTaggedText(
       '<bold>Flutter: </bold>${flutterVersion.flutterVersionSummary}\n'
       '<bold>Framework: </bold>${flutterVersion.frameworkVersionSummary}\n'
       '<bold>Engine: </bold>${flutterVersion.engineVersionSummary}\n'
@@ -113,7 +114,7 @@ class _FlagList extends StatelessWidget {
       itemCount: flagList?.flags?.length ?? 0,
       itemBuilder: (context, index) {
         final flag = flagList.flags[index];
-        final wasModified = flag.modified ? 'modified' : 'default';
+        final modifiedStatusText = flag.modified ? 'modified' : 'default';
         return Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
@@ -121,16 +122,16 @@ class _FlagList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Expanded(
-                child: DevToolsTaggedText(
+                child: DefaultTaggedText(
                   '<bold>${flag.name}</bold>\n'
                   '${flag.comment}',
                 ),
               ),
               Container(
                 constraints: const BoxConstraints(minWidth: 100.0),
-                child: DevToolsTaggedText(
+                child: DefaultTaggedText(
                   '<primary-color>${flag.valueAsString}</primary-color>\n'
-                  '<primary-color-light>$wasModified</primary-color-light>',
+                  '<primary-color-light>$modifiedStatusText</primary-color-light>',
                   textAlign: TextAlign.end,
                 ),
               ),
