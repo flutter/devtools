@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
+import '../info/flutter/info_screen.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -66,6 +67,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.performance,
               EmptyScreen.memory,
               EmptyScreen.logging,
+              InfoScreen(),
             ],
           ),
         ),

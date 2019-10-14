@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../src/framework/framework_core.dart';
+import 'common_widgets.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -57,7 +58,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           style: textTheme.headline,
           key: const Key('Connect Title'),
         ),
-        const _SpacedDivider(),
+        const PaddedDivider(),
         Text(
           'Connect to a running app',
           style: textTheme.body2,
@@ -83,7 +84,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
               }
             },
           ),
-        const _SpacedDivider(),
+        const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
         // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
       ],
     );
@@ -136,16 +137,5 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
       return Navigator.popAndPushNamed(context, '/?$uriQuery');
     }
-  }
-}
-
-// A divider that adds spacing underneath for forms.
-class _SpacedDivider extends StatelessWidget {
-  const _SpacedDivider({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-        padding: EdgeInsets.only(bottom: 10.0), child: Divider());
   }
 }
