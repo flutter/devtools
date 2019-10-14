@@ -10,24 +10,40 @@ import 'package:platform_detect/platform_detect.dart';
 import 'src/framework/framework_core.dart';
 import 'src/main.dart';
 import 'src/ui/analytics.dart' as ga;
-import 'src/ui/analytics_platform.dart' as ga_platform;
+import 'src/ui/analytics_platform.dart' as platform;
+import 'package:pedantic/pedantic.dart';
 
 void main() {
   // Run in a zone in order to catch all Dart exceptions.
   runZoned(
-    () {
+    () async {
       // Initialize the core framework.
       FrameworkCore.init(window.location.toString());
+
+      // Hookup for possbile analytic collection.
+      ga.exposeGaDevToolsEnabledToJs();
+
+      if (ga.isGtagsReset()) {
+        ga.resetDevTools();
+      }
 
       // Load the web app framework.
       final HtmlPerfToolFramework framework = HtmlPerfToolFramework();
 
+      // TODO(terry): Eventually remove thebelow line localStorage clear().
+      /// Nothing is now stored in Chrome's local store - remove old stuff.
+      window.localStorage.clear();
+
       // Show the opt-in dialog for collection analytics?
       try {
-        if (ga.isGtagsEnabled() &
-            (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
-                window.localStorage[ga_platform.devToolsProperty()].isEmpty)) {
-          framework.showAnalyticsDialog();
+        if (ga.isGtagsEnabled()) {
+          if (await ga.isFirstRun) {
+            framework.showAnalyticsDialog();
+          } else if (await ga.isEnabled) {
+            // Analytic collection is enabled - setup for analytics.
+            platform.initializeGA();
+            platform.jsHookupListenerForGA();
+          }
         }
       } catch (e) {
         // If there are errors setting up analytics, write them to the console
@@ -59,7 +75,7 @@ void main() {
         framework.surveyToast(_generateSurveyUrl());
       }
 
-      FrameworkCore.initVmService(
+      unawaited(FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
           framework.showError(title, error);
@@ -73,7 +89,7 @@ void main() {
           // application from the command line and connect to it with DevTools.
           framework.mainElement.clear();
         }
-      });
+      }));
 
       framework.loadScreenFromLocation();
     },
