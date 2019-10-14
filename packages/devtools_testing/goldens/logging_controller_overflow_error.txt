@@ -2,7 +2,7 @@ Exception caught by rendering library
 The following assertion was thrown during layout:
 A RenderFlex overflowed by <NUMBER> pixels on the bottom.
 
-▼User-created ancestor of the error-causing widget was: 
+▼The relevant error-causing widget was: 
 <STACK_TRACE_LINE>
 
 The overflowing RenderFlex has an orientation of Axis.vertical.
