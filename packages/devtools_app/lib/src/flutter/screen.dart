@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+
 import 'scaffold.dart';
 
 /// Defines pages shown in the tabbar of the app.
@@ -26,18 +28,30 @@ abstract class Screen {
 class EmptyScreen extends Screen {
   const EmptyScreen(String name, this.icon) : super(name);
 
-  static const EmptyScreen inspector =
-      EmptyScreen('Flutter Inspector', Icons.map);
+  static final EmptyScreen debugger = EmptyScreen(
+    'Debugger',
+    Octicons.getIconData('bug'),
+  );
 
-  static const EmptyScreen timeline = EmptyScreen('Timeline', Icons.timeline);
+  static final EmptyScreen timeline = EmptyScreen(
+    'Timeline',
+    Octicons.getIconData('pulse'),
+  );
 
-  static const EmptyScreen performance =
-      EmptyScreen('Performance', Icons.computer);
+  static final EmptyScreen performance = EmptyScreen(
+    'Performance',
+    Octicons.getIconData('dashboard'),
+  );
 
-  static const EmptyScreen memory = EmptyScreen('Memory', Icons.memory);
+  static final EmptyScreen memory = EmptyScreen(
+    'Memory',
+    Octicons.getIconData('package'),
+  );
 
-  static const EmptyScreen logging =
-      EmptyScreen('Logging', Icons.directions_run);
+  static final EmptyScreen logging = EmptyScreen(
+    'Logging',
+    Octicons.getIconData('clippy'),
+  );
 
   /// The icon to show for this screen in a tab.
   final IconData icon;
