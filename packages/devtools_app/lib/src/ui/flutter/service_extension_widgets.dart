@@ -40,17 +40,12 @@ class ExtensionState {
   final ToggleableServiceExtensionDescription description;
   bool isSelected = false;
   bool isAvailable = false;
-  StreamSubscription subscription;
-
-  void dispose() {
-    subscription?.cancel();
-    subscription = null;
-  }
 }
 
 class _ServiceExtensionButtonGroupState
     extends State<ServiceExtensionButtonGroup> {
   List<ExtensionState> _extensionStates;
+  final List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
@@ -66,34 +61,33 @@ class _ServiceExtensionButtonGroupState
       // VMServiceManager.
       final extensionName = extension.description.extension;
       // Update the button state to match the latest state on the VM.
-      serviceManager.serviceExtensionManager
+      _subscriptions.add(serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName, (state) {
         setState(() {
           extension.isSelected =
               state.value == extension.description.enabledValue;
         });
-      });
+      }));
       // Track whether the extension is actually exposed by the VM.
-      extension.isAvailable = serviceManager.serviceExtensionManager
-          .isServiceExtensionAvailable(extensionName);
-      extension.subscription =
-          serviceManager.serviceExtensionManager.hasServiceExtension(
+      _subscriptions
+          .add(serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName,
         (available) {
           setState(() {
             extension.isAvailable = available;
           });
         },
-      );
+      ));
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    for (var config in _extensionStates) {
-      config.dispose();
+    for (var subscription in _subscriptions) {
+      subscription.cancel();
     }
+    _subscriptions.clear();
   }
 
   @override
@@ -121,14 +115,16 @@ class _ServiceExtensionButtonGroupState
   Widget _buildExtension(ExtensionState extensionState, bool showLabels) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(children: [
-        getIconWidget(extensionState.description.icon),
-        if (showLabels)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(extensionState.description.description),
-          )
-      ]),
+      child: Row(
+        children: [
+          getIconWidget(extensionState.description.icon),
+          if (showLabels)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(extensionState.description.description),
+            )
+        ],
+      ),
     );
   }
 

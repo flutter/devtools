@@ -53,27 +53,42 @@ class _ColorIconPainter extends CustomPainter {
     );
     canvas
       ..drawRect(
-        Rect.fromLTRB(iconMargin, iconMargin, size.width - iconMargin,
-            size.height - iconMargin),
+        Rect.fromLTRB(
+          iconMargin,
+          iconMargin,
+          size.width - iconMargin,
+          size.height - iconMargin,
+        ),
         Paint()..color = defaultBackground,
       )
       ..drawRect(
-          Rect.fromLTRB(
-              iconMargin, iconMargin, size.width * 0.5, size.height * 0.5),
-          greyPaint)
+        Rect.fromLTRB(
+          iconMargin,
+          iconMargin,
+          size.width * 0.5,
+          size.height * 0.5,
+        ),
+        greyPaint,
+      )
       ..drawRect(
-          Rect.fromLTRB(size.width * 0.5, size.height * 0.5,
-              size.width - iconMargin, size.height - iconMargin),
-          greyPaint)
+        Rect.fromLTRB(
+          size.width * 0.5,
+          size.height * 0.5,
+          size.width - iconMargin,
+          size.height - iconMargin,
+        ),
+        greyPaint,
+      )
       ..drawRect(
         iconRect,
         Paint()..color = color,
       )
       ..drawRect(
-          iconRect,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = defaultForeground);
+        iconRect,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..color = defaultForeground,
+      );
   }
 
   @override

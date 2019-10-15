@@ -35,28 +35,24 @@ class FakeServiceExtensionManager extends Fake
     implements ServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
-  final Map<String, StreamController<bool>> _serviceExtensionController =
-      <String, StreamController<bool>>{};
+  final Map<String, StreamController<bool>> _serviceExtensionController = {};
   final Map<String, StreamController<ServiceExtensionState>>
-      _serviceExtensionStateController =
-      <String, StreamController<ServiceExtensionState>>{};
+      _serviceExtensionStateController = {};
 
   /// All available service extensions.
   // ignore: prefer_collection_literals
   final Set<String> _serviceExtensions = Set<String>();
 
   /// All service extensions that are currently enabled.
-  final Map<String, ServiceExtensionState> _enabledServiceExtensions =
-      <String, ServiceExtensionState>{};
+  final Map<String, ServiceExtensionState> _enabledServiceExtensions = {};
 
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
-  // ignore: prefer_collection_literals
-  final Set<String> _pendingServiceExtensions = Set<String>();
+  final Set<String> _pendingServiceExtensions = {};
 
   @override
-  var extensionStatesUpdated = Completer<void>();
+  Completer<void> extensionStatesUpdated = Completer();
 
   /// Hook to simulate receiving the first frame event.
   ///
@@ -131,8 +127,7 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Future<void> _addServiceExtension(String name) async {
-    final StreamController<bool> streamController =
-        _getServiceExtensionController(name);
+    final streamController = _getServiceExtensionController(name);
 
     _serviceExtensions.add(name);
     streamController.add(true);
