@@ -187,13 +187,17 @@ class CollapsingTableState<T extends CollapsingData>
       Widget sortIndicator = const SizedBox();
       if (i == sortColumn) {
         sortIndicator = sortDescending
-            ? Icon(Icons.arrow_drop_up)
-            : Icon(Icons.arrow_drop_down);
+            ? Icon(Icons.arrow_drop_down)
+            : Icon(Icons.arrow_drop_up);
       }
-      headerColumns.add(InkWell(
-        onTap: () => _updateSorting(i),
-        child: column.buildHeader(context, sortIndicator),
-      ));
+      headerColumns.add(
+        Expanded(
+          child: InkWell(
+            onTap: () => _updateSorting(i),
+            child: column.buildHeader(context, sortIndicator),
+          ),
+        ),
+      );
     }
     final header = Material(
       child: Row(
@@ -204,6 +208,8 @@ class CollapsingTableState<T extends CollapsingData>
       header,
       ListView.builder(
         itemBuilder: (context, index) => _buildRow(context, widget.data[index]),
+        itemCount: widget.data.length,
+        shrinkWrap: true,
       ),
     ]);
   }
@@ -235,26 +241,55 @@ class CollapsingListItem extends StatefulWidget {
 class CollapsingListItemState extends State<CollapsingListItem>
     with TickerProviderStateMixin {
   bool collapsed = true;
+  AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    controller.dispose();
+  }
 
   void toggle() {
     setState(() {
       collapsed = !collapsed;
+      if (!collapsed) {
+        controller.forward();
+      } else {
+        controller.reverse();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOutCubic,
-      child: Column(children: [
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
         InkWell(
           child: widget.content,
           onTap: toggle,
         ),
-        if (!collapsed) ...widget.children,
-      ]),
+        SizeTransition(
+          sizeFactor: CurvedAnimation(
+            parent: controller,
+            curve: Curves.easeInOutCubic,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: widget.children,
+          ),
+        ),
+      ],
     );
   }
 }
