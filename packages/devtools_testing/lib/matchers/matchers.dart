@@ -87,9 +87,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
   static String _normalize(String s) {
-    return s
-        .replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000')
-        .replaceAll('\r\n', '\n');
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override
