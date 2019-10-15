@@ -137,7 +137,7 @@ class CollapsingTableColumn<T extends CollapsingData> {
       @required this.comparator});
 
   final Widget Function(BuildContext context, Widget sortIndicator) buildHeader;
-  final Widget Function(BuildContext context, T data) build;
+  final Widget Function(BuildContext context, T data, bool isExpanded) build;
   final int Function(T data1, T data2) comparator;
 }
 
@@ -207,39 +207,28 @@ class CollapsingTableState<T extends CollapsingData>
     return Column(children: [
       header,
       ListView.builder(
-        itemBuilder: (context, index) => _buildRow(context, widget.data[index]),
+        itemBuilder: (context, index) =>
+            CollapsingListItem<T>(widget.data[index], widget.columns),
         itemCount: widget.data.length,
         shrinkWrap: true,
       ),
     ]);
   }
-
-  Widget _buildRow(BuildContext context, T item) {
-    return CollapsingListItem(
-      content: Material(
-        key: ValueKey(item),
-        child: Row(children: [
-          for (var column in widget.columns) column.build(context, item)
-        ]),
-      ),
-      children: [for (var child in item.children) _buildRow(context, child)],
-    );
-  }
 }
 
-class CollapsingListItem extends StatefulWidget {
-  const CollapsingListItem(
-      {Key key, @required this.content, this.children = const []})
+class CollapsingListItem<T extends CollapsingData> extends StatefulWidget {
+  const CollapsingListItem(this.item, this.columns, {Key key})
       : super(key: key);
 
-  final Widget content;
-  final List<Widget> children;
+  final List<CollapsingTableColumn<T>> columns;
+  final T item;
+
   @override
-  CollapsingListItemState createState() => CollapsingListItemState();
+  CollapsingListItemState createState() => CollapsingListItemState<T>();
 }
 
-class CollapsingListItemState extends State<CollapsingListItem>
-    with TickerProviderStateMixin {
+class CollapsingListItemState<T extends CollapsingData>
+    extends State<CollapsingListItem<T>> with TickerProviderStateMixin {
   bool collapsed = true;
   AnimationController controller;
 
@@ -254,7 +243,6 @@ class CollapsingListItemState extends State<CollapsingListItem>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     controller.dispose();
   }
@@ -272,12 +260,25 @@ class CollapsingListItemState extends State<CollapsingListItem>
 
   @override
   Widget build(BuildContext context) {
+    final content = Row(
+      key: ValueKey(widget.item),
+      children: [
+        for (var column in widget.columns)
+          column.build(context, widget.item, !collapsed)
+      ],
+    );
+    final children = [
+      for (var child in widget.item.children)
+        CollapsingListItem<T>(child, widget.columns)
+    ];
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          child: widget.content,
-          onTap: toggle,
+        Material(
+          child: InkWell(
+            child: content,
+            onTap: toggle,
+          ),
         ),
         SizeTransition(
           sizeFactor: CurvedAnimation(
@@ -286,7 +287,7 @@ class CollapsingListItemState extends State<CollapsingListItem>
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: widget.children,
+            children: children,
           ),
         ),
       ],

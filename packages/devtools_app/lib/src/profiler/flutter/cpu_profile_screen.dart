@@ -47,16 +47,20 @@ class PerformanceBodyState extends State<PerformanceBody> {
   ];
 
   List<CollapsingTableColumn<CpuData>> columns = [
-    CollapsingTableColumn(
+    CollapsingTableColumn<CpuData>(
       buildHeader: (context, sortIndicator) => Container(
         constraints: const BoxConstraints.tightFor(height: 32.0),
         child: Row(children: [const Text('Name'), sortIndicator]),
       ),
-      build: (context, item) => Expanded(
+      build: (context, item, isExpanded) => Expanded(
         child: Container(
           constraints: const BoxConstraints.tightFor(height: 32.0),
           child: Row(children: [
             SizedBox(width: item.depth * 32.0),
+            if (item.children?.isNotEmpty)
+              isExpanded
+                  ? const Icon(Icons.arrow_drop_down)
+                  : const Icon(Icons.arrow_right),
             Text(item.name),
           ]),
         ),
