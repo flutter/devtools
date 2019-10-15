@@ -12,6 +12,13 @@ import '../../service_registrations.dart';
 import '../../utils.dart';
 import 'flutter_icon_renderer.dart';
 
+/// Group of buttons where each button toggles the state of a VMService
+/// extension.
+///
+/// Use this class any time you need to write UI code that exposes button(s) to
+/// control VMServiceExtension. This class handles error handling and lifecycle
+/// states for keeping state on the client and device consistent so you don't
+/// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
     this.minIncludeLabelWidth,
@@ -48,10 +55,17 @@ class _ServiceExtensionButtonGroupState
   @override
   void initState() {
     super.initState();
+    // To use ToggleButtons we have to track states for all buttons in the
+    // group here rather than tracking state with the individual button widgets
+    // which would be more natural.
+
     _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
 
     for (var extension in _extensionStates) {
+      // Listen for changes to the state of each service extension using the
+      // VMServiceManager.
       final extensionName = extension.description.extension;
+      // Update the button state to match the latest state on the VM.
       serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName, (state) {
         setState(() {
@@ -59,6 +73,7 @@ class _ServiceExtensionButtonGroupState
               state.value == extension.description.enabledValue;
         });
       });
+      // Track whether the extension is actually exposed by the VM.
       extension.isAvailable = serviceManager.serviceExtensionManager
           .isServiceExtensionAvailable(extensionName);
       extension.subscription =
@@ -83,10 +98,8 @@ class _ServiceExtensionButtonGroupState
 
   @override
   Widget build(BuildContext context) {
-    // TODO(jacobr): respect the minSize animating to hidden when the minSize
-    // for the window is not met.
     // TODO(jacobr): respect _available better by displaying whether individual
-    // widgets are available.
+    // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
     // TODO(jacobr): animate showing and hiding the labels.
     final showLabels = widget.minIncludeLabelWidth == null ||
@@ -157,9 +170,10 @@ List<Widget> getServiceExtensionWidgets() {
       minIncludeLabelWidth: 1400,
       extensions: [repaintRainbow, debugAllowBanner],
     ),
-    // XXX TODO(jacobr): implement.
+    // TODO(jacobr): implement TogglePlatformSelector.
     //  TogglePlatformSelector().selector
   ];
+}
 }
 
 // TODO(jacobr): use this button to support hot reload.
