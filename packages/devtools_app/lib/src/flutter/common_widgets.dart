@@ -115,6 +115,8 @@ class DefaultTaggedText extends StatelessWidget {
 }
 
 abstract class CollapsingData {
+  const CollapsingData();
+
   List<CollapsingData> get children;
 
   /// The depth of this data in the nested hierarchy.
@@ -129,7 +131,10 @@ abstract class CollapsingData {
 }
 
 class CollapsingTableColumn<T extends CollapsingData> {
-  const CollapsingTableColumn(this.buildHeader, this.build, this.comparator);
+  const CollapsingTableColumn(
+      {@required this.buildHeader,
+      @required this.build,
+      @required this.comparator});
 
   final Widget Function(BuildContext context, Widget sortIndicator) buildHeader;
   final Widget Function(BuildContext context, T data) build;

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
 import '../info/flutter/info_screen.dart';
+import '../profiler/flutter/cpu_profile_screen.dart';
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -64,7 +65,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             tabs: [
               EmptyScreen.inspector,
               EmptyScreen.timeline,
-              EmptyScreen.performance,
+              PerformanceScreen(),
               EmptyScreen.memory,
               EmptyScreen.logging,
               InfoScreen(),
