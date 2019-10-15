@@ -8,14 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../globals.dart';
 import '../../service_extensions.dart';
-/* Dead imports to uncomment when the rest of the file is ported.
-import '../../service_manager.dart' show ServiceExtensionState;
-import '../../service_registrations.dart';
-import '../../utils.dart';
-*/
-
-// TODO(jacobr): add support for analytics.
-//import '../analytics.dart' as ga;
 import '../../service_registrations.dart';
 import '../../utils.dart';
 import 'flutter_icon_renderer.dart';
@@ -56,9 +48,8 @@ class _ServiceExtensionButtonGroupState
   @override
   void initState() {
     super.initState();
-    _extensionStates = widget.extensions
-        .map((extension) => ExtensionState(extension))
-        .toList();
+    _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
+
     for (var extension in _extensionStates) {
       final extensionName = extension.description.extension;
       serviceManager.serviceExtensionManager
@@ -70,7 +61,6 @@ class _ServiceExtensionButtonGroupState
       });
       extension.isAvailable = serviceManager.serviceExtensionManager
           .isServiceExtensionAvailable(extensionName);
-
       extension.subscription =
           serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName,
@@ -107,46 +97,49 @@ class _ServiceExtensionButtonGroupState
         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
         children: <Widget>[
           for (var extensionState in _extensionStates)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(children: [
-                getIconWidget(extensionState.description.icon),
-                if (showLabels)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(extensionState.description.description),
-                  )
-              ]),
-            )
+            _buildExtension(extensionState, showLabels)
         ],
         isSelected: [for (var e in _extensionStates) e.isSelected],
-        onPressed: available
-            ? (index) {
-                final extensionState = _extensionStates[index];
-                if (extensionState.isAvailable) {
-                  setState(() {
-                    final wasSelected = extensionState.isSelected;
-                    // TODO(jacobr): support analytics.
-                    // ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
-
-                    serviceManager.serviceExtensionManager
-                        .setServiceExtensionState(
-                      extensionState.description.extension,
-                      !wasSelected,
-                      wasSelected
-                          ? extensionState.description.disabledValue
-                          : extensionState.description.enabledValue,
-                    );
-                  });
-                } else {
-                  // TODO(jacobr): display a toast warning that the extension is
-                  // not available. That could happen as entire groups have to
-                  // be enabled or disabled at a time.
-                }
-              }
-            : null,
+        onPressed: available ? _onPressed : null,
       ),
     );
+  }
+
+  Widget _buildExtension(ExtensionState extensionState, bool showLabels) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(children: [
+        getIconWidget(extensionState.description.icon),
+        if (showLabels)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(extensionState.description.description),
+          )
+      ]),
+    );
+  }
+
+  void _onPressed(int index) {
+    final extensionState = _extensionStates[index];
+    if (extensionState.isAvailable) {
+      setState(() {
+        final wasSelected = extensionState.isSelected;
+        // TODO(jacobr): support analytics.
+        // ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
+
+        serviceManager.serviceExtensionManager.setServiceExtensionState(
+          extensionState.description.extension,
+          !wasSelected,
+          wasSelected
+              ? extensionState.description.disabledValue
+              : extensionState.description.enabledValue,
+        );
+      });
+    } else {
+      // TODO(jacobr): display a toast warning that the extension is
+      // not available. That could happen as entire groups have to
+      // be enabled or disabled at a time.
+    }
   }
 }
 
@@ -196,6 +189,7 @@ class _RegisteredServiceExtensionButtonState
 
   bool _disabled = false;
   bool _hidden = true;
+
   @override
   void initState() {
     super.initState();

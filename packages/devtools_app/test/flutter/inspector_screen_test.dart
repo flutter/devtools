@@ -58,18 +58,22 @@ void main() {
     });
 
     testWidgets('builds with no data', (WidgetTester tester) async {
+      // Make sure the window is wide enough to display description text.
+      await setWindowSize(const Size(1920.0, 1200.0));
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleSelectWidgetMode.description),
           findsOneWidget);
-      // expect(find.ancestor(of: toggleSelect, , matching: find.byElementType(type)), findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
-
-      // TODO(jacobr): verify that the service extensions are disabled.
+      // Make sure there is not an overflow if the window is shrunk.
+      await setWindowSize(const Size(600.0, 1200.0));
+      // Verify that description text is no-longer shown.
+      expect(find.text(extensions.debugPaint.description), findsOneWidget);
     });
 
     testWidgets('Test toggling service extension buttons',
         (WidgetTester tester) async {
+      await setWindowSize(const Size(1920.0, 1200.0));
       mockExtensions();
       expect(
           fakeExtensionManager
@@ -84,7 +88,6 @@ void main() {
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleSelectWidgetMode.description),
           findsOneWidget);
-      // expect(find.ancestor(of: toggleSelect, , matching: find.byElementType(type)), findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       await tester.pumpAndSettle();
 
@@ -120,6 +123,7 @@ void main() {
 
     testWidgets('Test toggling service extension buttons',
         (WidgetTester tester) async {
+      await setWindowSize(const Size(1920.0, 1200.0));
       mockNoExtensionsAvailable();
       expect(
           fakeExtensionManager
@@ -134,7 +138,6 @@ void main() {
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleSelectWidgetMode.description),
           findsOneWidget);
-      // expect(find.ancestor(of: toggleSelect, , matching: find.byElementType(type)), findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       await tester.pumpAndSettle();
 
