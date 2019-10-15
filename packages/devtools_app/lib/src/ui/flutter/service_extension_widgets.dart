@@ -174,7 +174,6 @@ List<Widget> getServiceExtensionWidgets() {
     //  TogglePlatformSelector().selector
   ];
 }
-}
 
 // TODO(jacobr): use this button to support hot reload.
 // It appears the matching class in service_extension_elements is not being
