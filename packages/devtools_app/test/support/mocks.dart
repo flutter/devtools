@@ -31,6 +31,8 @@ class MockConnectedApp extends Mock implements ConnectedApp {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
+// TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more
+// code from ServiceExtensionManager instead of reimplementing it.
 class FakeServiceExtensionManager extends Fake
     implements ServiceExtensionManager {
   bool _firstFrameEventReceived = false;
