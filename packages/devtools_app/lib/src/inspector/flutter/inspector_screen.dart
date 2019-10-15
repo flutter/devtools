@@ -40,19 +40,26 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody> {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ServiceExtensionButtonGroup(
-          extensions: [extensions.toggleSelectWidgetMode],
-        ),
-        // TODO(jacobr): add the refresh tree button here.
-        /*
+        Row(
+          children: <Widget>[
+            ServiceExtensionButtonGroup(
+              extensions: [extensions.toggleSelectWidgetMode],
+            ),
+          ],
+          // TODO(jacobr): add the refresh tree button here.
+          /*
           RaisedButton(
               child: IconAndText('Refresh Tree', FlutterIcons.refresh)
             onClick: _refreshInspector
           ),
 
            */
-        ...getServiceExtensionWidgets()
+        ),
+        Row(
+          children: getServiceExtensionWidgets(),
+        )
       ],
     );
   }

@@ -76,13 +76,15 @@ void main() {
       await setWindowSize(const Size(1920.0, 1200.0));
       mockExtensions();
       expect(
-          fakeExtensionManager
-              .extensionValueOnDevice[extensions.debugPaint.extension],
-          isFalse);
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
@@ -92,47 +94,55 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
       await tester
           .tap(find.text(extensions.toggleSelectWidgetMode.description));
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
-          isFalse);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isFalse,
+      );
       // Verify the the other service extension's state hasn't changed.
       expect(
-          fakeExtensionManager
-              .extensionValueOnDevice[extensions.debugPaint.extension],
-          isFalse);
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
 
       await tester
           .tap(find.text(extensions.toggleSelectWidgetMode.description));
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
 
       await tester.tap(find.text(extensions.debugPaint.description));
       expect(
-          fakeExtensionManager
-              .extensionValueOnDevice[extensions.debugPaint.extension],
-          isTrue);
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isTrue,
+      );
     });
 
-    testWidgets('Test toggling service extension buttons',
+    testWidgets(
+        'Test toggling service extension buttons with no extensions available',
         (WidgetTester tester) async {
       await setWindowSize(const Size(1920.0, 1200.0));
       mockNoExtensionsAvailable();
       expect(
-          fakeExtensionManager
-              .extensionValueOnDevice[extensions.debugPaint.extension],
-          isFalse);
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
