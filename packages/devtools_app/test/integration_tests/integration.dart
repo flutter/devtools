@@ -300,7 +300,7 @@ class WebdevFixture {
     final Completer<String> hasUrl = Completer<String>();
 
     _toLines(process.stderr).listen((String line) {
-      if (verbose) {
+      if (verbose || hasUrl.isCompleted) {
         print('pub run build_runner serve • ${process.pid}'
             ' • STDERR • ${line.trim()}');
       }
