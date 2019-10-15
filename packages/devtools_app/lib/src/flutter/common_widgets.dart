@@ -113,3 +113,143 @@ class DefaultTaggedText extends StatelessWidget {
     );
   }
 }
+
+abstract class CollapsingData {
+  List<CollapsingData> get children;
+
+  /// The depth of this data in the nested hierarchy.
+  int get depth;
+
+  void sort(int Function(CollapsingData d1, CollapsingData d2) comparator) {
+    children.sort(comparator);
+    for (var c in children) {
+      c.sort(comparator);
+    }
+  }
+}
+
+class CollapsingTableColumn<T extends CollapsingData> {
+  const CollapsingTableColumn(this.buildHeader, this.build, this.comparator);
+
+  final Widget Function(BuildContext context, Widget sortIndicator) buildHeader;
+  final Widget Function(BuildContext context, T data) build;
+  final int Function(T data1, T data2) comparator;
+}
+
+class CollapsingTable<T extends CollapsingData> extends StatefulWidget {
+  const CollapsingTable({Key key, this.columns, this.data}) : super(key: key);
+
+  final List<CollapsingTableColumn<T>> columns;
+  final List<T> data;
+
+  @override
+  CollapsingTableState<T> createState() => CollapsingTableState<T>();
+}
+
+class CollapsingTableState<T extends CollapsingData>
+    extends State<CollapsingTable<T>> {
+  bool sortDescending = true;
+  int sortColumn = 0;
+
+  void _updateSorting(int column) {
+    setState(() {
+      if (column != sortColumn) {
+        sortDescending = true;
+        sortColumn = column;
+      } else {
+        sortDescending = !sortDescending;
+      }
+    });
+    sort();
+  }
+
+  void sort() {
+    setState(() {
+      for (T element in widget.data) {
+        final comparator = widget.columns[sortColumn].comparator;
+        element.sort(
+          sortDescending ? comparator : (d1, d2) => comparator(d2, d1),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final headerColumns = <Widget>[];
+    for (var i = 0; i < widget.columns.length; i++) {
+      final column = widget.columns[i];
+      Widget sortIndicator = const SizedBox();
+      if (i == sortColumn) {
+        sortIndicator = sortDescending
+            ? Icon(Icons.arrow_drop_up)
+            : Icon(Icons.arrow_drop_down);
+      }
+      headerColumns.add(InkWell(
+        onTap: () => _updateSorting(i),
+        child: column.buildHeader(context, sortIndicator),
+      ));
+    }
+    final header = Material(
+      child: Row(
+        children: headerColumns,
+      ),
+    );
+    return Column(children: [
+      header,
+      ListView.builder(
+        itemBuilder: (context, index) => _buildRow(context, widget.data[index]),
+      ),
+    ]);
+  }
+
+  Widget _buildRow(BuildContext context, T item) {
+    return CollapsingListItem(
+      content: Material(
+        key: ValueKey(item),
+        child: Row(children: [
+          for (var column in widget.columns) column.build(context, item)
+        ]),
+      ),
+      children: [for (var child in item.children) _buildRow(context, child)],
+    );
+  }
+}
+
+class CollapsingListItem extends StatefulWidget {
+  const CollapsingListItem(
+      {Key key, @required this.content, this.children = const []})
+      : super(key: key);
+
+  final Widget content;
+  final List<Widget> children;
+  @override
+  CollapsingListItemState createState() => CollapsingListItemState();
+}
+
+class CollapsingListItemState extends State<CollapsingListItem>
+    with TickerProviderStateMixin {
+  bool collapsed = true;
+
+  void toggle() {
+    setState(() {
+      collapsed = !collapsed;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOutCubic,
+      child: Column(children: [
+        InkWell(
+          child: widget.content,
+          onTap: toggle,
+        ),
+        if (!collapsed) ...widget.children,
+      ]),
+    );
+  }
+}
