@@ -25,12 +25,12 @@ external void jsHookupListenerForGA();
 
 Future<bool> get isAnalyticsAllowed async => await ga.isEnabled;
 
-void setAllowAnalytics() async {
-  await ga.setEnabled(true);
+void setAllowAnalytics() {
+  ga.setEnabled(true);
 }
 
-void setDontAllowAnalytics() async {
-  await ga.setEnabled(false);
+void setDontAllowAnalytics() {
+  ga.setEnabled(false);
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and

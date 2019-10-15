@@ -7,12 +7,15 @@ library gtags;
 
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
+
 import 'package:html_shim/html.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/logger.dart';
+import '../devtools_api.dart' as server;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';
 import '../ui/gtags.dart';
@@ -53,7 +56,7 @@ const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 @JS('gtagsEnabled')
 external bool isGtagsEnabled();
 
-/// Reset the .devtools file.
+/// Is the query parameter &gtags= set to reset?
 @JS('gtagsReset')
 external bool isGtagsReset();
 
@@ -158,90 +161,110 @@ class GtagExceptionDevTools extends GtagException {
   external String get ide_launched;
 }
 
-/// Request Flutter tool stored value enabled (GA enabled) stored in ~\.flutter.
+void _logWarning(HttpRequest response, String apiType, [String respText]) {
+  log(
+    'HttpRequest $apiType failed status = ${response.status}'
+    '${respText ??= ', responseText = $respText}'}',
+    LogLevel.warning,
+  );
+}
+
+// TODO(terry): Move to an API scheme similar to the VM service extension where
+// '/api/devToolsEnabled' returns the value (identical VM service) and
+// '/api/devToolsEnabled?value=true' sets the value.
+
+/// Request Flutter tool stored property value enabled (GA enabled) stored in
+/// the file '~\.flutter'.
+///
 /// Return bool or null, null implies Flutter Tool has never been run.
 Future<bool> get isFlutterGAEnabled async {
   bool enabled = false;
 
-  var resp =
-      await HttpRequest.request('/api/getFlutterGAEnabled', method: 'POST');
+  final resp = await HttpRequest.request(
+    server.apiGetFlutterGAEnabled,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    // Return value 'null' implies Flutter tool has never been run return null.
-    if (resp.responseText == 'null') return null;
-
-    enabled = resp.responseText == 'true';
+    // A return value of 'null' implies Flutter tool has never been run.
+    enabled = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getFlutterGAEnabled failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetFlutterGAEnabled);
   }
+
   return enabled;
 }
 
-/// Request Flutter tool stored clientID (GA enabled) stored in ~\.flutter.
-/// Return clientId as a String or null, null implies Flutter Tool has never
-/// been run.
+/// Request Flutter tool stored property value clientID (GA enabled) stored in
+/// the file '~\.flutter'.
+///
+/// Return as a String or null, null implies Flutter Tool has never been run.
 Future<String> flutterGAClientID() async {
-  String clientId = '';
+  String clientId;
 
-  var resp =
-      await HttpRequest.request('/api/getFlutterGAClientId', method: 'POST');
+  final resp = await HttpRequest.request(
+    server.apiGetFlutterGAClientId,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
     // Return value 'null' implies Flutter tool has never been run return null.
-    if (resp.responseText == 'null') return null;
-
-    clientId = resp.responseText;
+    clientId = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getFlutterGAClientId failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetFlutterGAClientId);
   }
   return clientId;
 }
 
-/// Request all .devtools properties resets to their default values.
-void resetDevTools() async {
-  final resp = await HttpRequest.request('api/resetDevTools', method: 'POST');
+/// Requests all .devtools properties to be reset to their default values in the
+/// file '~/.devtools'.
+void resetDevToolsFile() async {
+  final resp = await HttpRequest.request(
+    server.apiResetDevTools,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    assert(resp.responseText == 'true');
+    assert(json.decode(resp.responseText));
   } else {
-    log(
-      'HttpRequest api/resetDevTools failed status = ${resp.status}',
-      LogLevel.error,
-    );
+    _logWarning(resp, server.apiResetDevTools);
   }
 }
 
-/// Request DevTools stored value firstRun (GA dialog) stored in ~\.devtools.
+/// Request DevTools property value 'firstRun' (GA dialog) stored in the file
+/// '~\.devtools'.
 Future<bool> get isFirstRun async {
   bool firstRun = false;
 
-  var resp =
-      await HttpRequest.request('api/getDevToolsFirstRun', method: 'POST');
+  final resp = await HttpRequest.request(
+    server.apiGetDevToolsFirstRun,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    firstRun = resp.responseText == 'true';
+    firstRun = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getDevToolsFirstRun failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetDevToolsFirstRun);
   }
   return firstRun;
 }
 
 bool _gaEnabled;
 
+// Exposed function to JS via allowInterop.
 bool gaEnabled() => _gaEnabled;
 
-/// Request DevTools stored value enabled (GA enabled) stored in ~\.devtools.
+/// Request DevTools property value 'enabled' (GA enabled) stored in the file
+/// '~\.devtools'.
 Future<bool> get isEnabled async {
   if (_gaEnabled != null) return _gaEnabled;
 
   bool enabled = false;
 
-  var resp =
-      await HttpRequest.request('/api/getDevToolsEnabled', method: 'POST');
+  final resp = await HttpRequest.request(
+    server.apiGetDevToolsEnabled,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    enabled = resp.responseText == 'true';
+    enabled = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getDevToolsEnabled failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetDevToolsEnabled);
   }
 
   _gaEnabled = enabled;
@@ -249,82 +272,87 @@ Future<bool> get isEnabled async {
   return enabled;
 }
 
-/// Set DevTools enabled (GA enabled) stored in ~/.devtools.
+/// Set the DevTools property 'enabled' (GA enabled) stored in the file
+/// '~/.devtools'.
 void setEnabled([bool value = true]) async {
-  var resp = await HttpRequest.request(
-    '/api/setDevToolsEnabled?enabled=${value}',
+  final resp = await HttpRequest.request(
+    '${server.apiSetDevToolsEnabled}'
+    '?${server.devToolsEnabledPropertyName}=$value',
     method: 'POST',
   );
   if (resp.status == HttpStatus.ok) {
-    assert(resp.responseText == '$value');
+    assert(json.decode(resp.responseText) == value);
     _gaEnabled = value;
   } else {
-    log(
-      'HttpRequest api/setDevToolsEnabled failed status = ${resp.status}, '
-      'responseText = ${resp.responseText}',
-      LogLevel.error,
-    );
+    _logWarning(resp, server.apiSetDevToolsEnabled, resp.responseText);
   }
 }
 
-/// Request DevTools surveyActionTaken property stored in ~\.devtools.
+/// Request DevTools property value 'surveyActionTaken' stored in the file
+/// '~\.devtools'.
 Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
-  var resp =
-      await HttpRequest.request('/api/getSurveyActionTaken', method: 'POST');
+  final resp = await HttpRequest.request(
+    '${server.apiGetSurveyActionTaken}',
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    surveyActionTaken = resp.responseText == 'true';
+    surveyActionTaken = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getSurveyActionTaken failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetSurveyActionTaken);
   }
   return surveyActionTaken;
 }
 
-/// Set DevTools surveyActionTaken property stored in ~\.devtools.
+/// Set DevTools property value 'surveyActionTaken' stored in the file
+/// '~\.devtools'.
 void setSurveyActionTaken([bool value = true]) async {
-  var resp = await HttpRequest.request(
-    '/api/setSurveyActionTaken?surveyActionTaken=${value}',
+  final resp = await HttpRequest.request(
+    // Format of request is e.g., api/setDevToolsEnabled?surveyActionTaken=true
+    '${server.apiSetSurveyActionTaken}'
+    '?${server.surveyActionTakenPropertyName}=$value',
     method: 'POST',
   );
   if (resp.status == HttpStatus.ok) {
-    assert(resp.responseText == '$value');
+    assert(json.decode(resp.responseText) == value);
   } else {
-    log(
-      'HttpRequest api/setSurveyActionTaken failed status = ${resp.status}, '
-      'responseText = ${resp.responseText}',
-      LogLevel.error,
-    );
+    _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
   }
 }
 
-/// Request DevTools surveyShownCount property stored in ~\.devtools.
+/// Request DevTools property value 'surveyShownCount' stored in the file
+/// '~\.devtools'.
 Future<int> get surveyShownCount async {
   int surveyShownCount;
 
-  var resp =
-      await HttpRequest.request('/api/getSurveyShownCount', method: 'POST');
+  final resp = await HttpRequest.request(
+    '${server.apiGetSurveyShownCount}',
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    surveyShownCount = int.parse(resp.responseText);
+    surveyShownCount = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getSurveyShownCount failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiGetSurveyShownCount);
   }
   return surveyShownCount;
 }
 
-/// Increment DevTools surveyShownCount property stored in ~\.devtools.
+/// Increment DevTools property value 'surveyShownCount' stored in the file
+/// '~\.devtools'.
 Future<int> get incrementSurveyShownCount async {
-  int surveyShownCount;
+  // Any failure will still return 1.
+  int surveyShownCount = 1;
 
-  var resp = await HttpRequest.request('/api/incrementSurveyShownCount',
-      method: 'POST');
+  final resp = await HttpRequest.request(
+    server.apiIncrementSurveyShownCount,
+    method: 'POST',
+  );
   if (resp.status == HttpStatus.ok) {
-    surveyShownCount = int.parse(resp.responseText);
+    surveyShownCount = json.decode(resp.responseText);
   } else {
-    log('HttpRequest api/getSurveyShownCount failed status = ${resp.status}',
-        LogLevel.error);
+    _logWarning(resp, server.apiIncrementSurveyShownCount);
+
   }
   return surveyShownCount;
 }

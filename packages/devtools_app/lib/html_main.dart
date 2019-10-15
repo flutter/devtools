@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:html_shim/html.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:platform_detect/platform_detect.dart';
 
 import 'src/framework/framework_core.dart';
 import 'src/main.dart';
 import 'src/ui/analytics.dart' as ga;
 import 'src/ui/analytics_platform.dart' as platform;
-import 'package:pedantic/pedantic.dart';
 
 void main() {
   // Run in a zone in order to catch all Dart exceptions.
@@ -24,13 +24,13 @@ void main() {
       ga.exposeGaDevToolsEnabledToJs();
 
       if (ga.isGtagsReset()) {
-        ga.resetDevTools();
+        ga.resetDevToolsFile();
       }
 
       // Load the web app framework.
       final HtmlPerfToolFramework framework = HtmlPerfToolFramework();
 
-      // TODO(terry): Eventually remove thebelow line localStorage clear().
+      // TODO(terry): Eventually remove the below line localStorage clear().
       /// Nothing is now stored in Chrome's local store - remove old stuff.
       window.localStorage.clear();
 

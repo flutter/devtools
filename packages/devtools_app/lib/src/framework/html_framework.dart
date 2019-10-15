@@ -937,8 +937,8 @@ class HtmlAnalyticsOptInDialog {
         ]),
     ]);
 
-    acceptButton.click(() async {
-      await ga_platform.setAllowAnalytics();
+    acceptButton.click(() {
+      ga_platform.setAllowAnalytics();
 
       // Analytic collection is enabled - setup for analytics.
       ga_platform.initializeGA();
@@ -947,8 +947,8 @@ class HtmlAnalyticsOptInDialog {
       hide();
     });
 
-    dontAcceptButton.click(() async {
-      await ga_platform.setDontAllowAnalytics();
+    dontAcceptButton.click(() {
+      ga_platform.setDontAllowAnalytics();
       hide();
     });
 
