@@ -171,6 +171,12 @@ List<Widget> getServiceExtensionWidgets() {
   ];
 }
 
+/// Class to use for a button that when clicked invokes a VM Service such as
+/// hot reload or hot restart.
+///
+/// Callbacks on when the action is performed or an error occurs are provided
+/// to wire up cases such as hot reload where users need to be notified when
+/// the action completes.
 // TODO(jacobr): use this button to support hot reload.
 // It appears the matching class in service_extension_elements is not being
 // used but that is likely accidental.
@@ -236,7 +242,7 @@ class _RegisteredServiceExtensionButtonState
 
   @override
   Widget build(BuildContext context) {
-    if (_hidden) return Container();
+    if (_hidden) return const SizedBox();
 
     return FlatButton(
       onPressed: _disabled ? null : _click,
