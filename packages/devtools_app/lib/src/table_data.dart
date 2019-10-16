@@ -375,7 +375,8 @@ abstract class ColumnData<T> {
     this.usesHtml = false,
     this.hover = false,
     this.cssClass,
-  }) : percentWidth = defaultWideColumnPercentWidth;
+  })  : percentWidth = defaultWideColumnPercentWidth,
+        fixedWidthPx = null;
 
   static const defaultWideColumnPercentWidth = 100;
 
@@ -388,7 +389,7 @@ abstract class ColumnData<T> {
   ///
   /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
   /// will be used.
-  int fixedWidthPx;
+  final int fixedWidthPx;
 
   /// Width of the column expressed as a percent value between 0 and 100.
   ///

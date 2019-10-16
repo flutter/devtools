@@ -88,7 +88,6 @@ class CpuTable extends StatelessWidget {
         TotalTimeColumn(),
         SelfTimeColumn(),
         MethodNameColumn(),
-        SourceColumn(),
       ],
       id: (frame) => frame.id,
     );
@@ -115,28 +114,22 @@ class TableState<T extends TreeNode<T>> extends State<Table<T>> {
   Widget build(BuildContext context) {
     // This doesn't seem to make sense.  Why are we building a list with one item?
     // Switch to a custom listview builder, possibly.
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints viewportConstraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: viewportConstraints.maxWidth,
-              minWidth: viewportConstraints.constrainWidth(),
-            ),
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return TreeNodeWidget<T>(
-                  node: widget.data,
-                  columns: widget.columns,
-                  id: widget.id,
-                );
-              },
-              itemCount: 1,
-            ),
+    return GridView.count(
+      crossAxisCount: 1,
+      shrinkWrap: true,
+      children: [
+        Container(
+          constraints: const BoxConstraints(
+            maxWidth: 1000.0,
+            maxHeight: 0.0,
           ),
-        );
-      },
+          child: TreeNodeWidget<T>(
+            node: widget.data,
+            columns: widget.columns,
+            id: widget.id,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -161,8 +154,12 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
   @override
   Widget build(BuildContext context) {
     if (!widget.node.isExpandable) {
-      return ListTile(title: _buildContent());
+      return ListTile(
+        key: PageStorageKey(widget.id(widget.node)),
+        title: _buildContent(),
+      );
     }
+
     return ExpansionTile(
       key: PageStorageKey(widget.id(widget.node)),
       title: _buildContent(),
@@ -194,6 +191,7 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
       final text = Text(
         column.getDisplayValue(widget.node),
       );
+      return text;
       Widget content = text;
       if (column.fixedWidthPx != null) {
         content = SizedBox(
@@ -202,11 +200,7 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
         );
       } else {
         // } else if (column.percentWidth != null) {
-        content = FractionallySizedBox(
-          widthFactor:
-              column.percentWidth != null ? column.percentWidth / 100.0 : 1.0,
-          child: text,
-        );
+        content = text;
       }
       content = Padding(
         padding: EdgeInsets.only(
@@ -214,18 +208,21 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
         ),
         child: content,
       );
-      if (column.fixedWidthPx == null && column.percentWidth == null) {
-        return Expanded(child: content);
-      } else {
-        return content;
-      }
+      // if (column.fixedWidthPx == null) {
+      //   return Expanded(child: content);
+      // } else {
+      return content;
+      // }
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        for (var column in widget.columns) present(column),
-      ],
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 64.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var column in widget.columns) present(column),
+        ],
+      ),
     );
   }
 }
