@@ -10,7 +10,7 @@ pushd packages/devtools_app
 
 rm -rf build
 rm -rf ../devtools/build
-pub run build_runner build -o web:build --release
+flutter pub run build_runner build -o web:build --release
 mv ./build/packages ./build/pack
 
 # move release to the devtools package from the devtools_app package for deployment
