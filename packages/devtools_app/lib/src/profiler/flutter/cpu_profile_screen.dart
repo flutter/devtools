@@ -107,15 +107,7 @@ class DtTable<T extends TreeNode<T>> extends StatefulWidget {
 
   @override
   DtTableState<T> createState() => DtTableState<T>();
-
-  static Widget wrapWithColumnWidth<T extends TreeNode<T>>(
-      ColumnData<T> columnData, TreeNode<T> treeNode, Widget content) {}
 }
-
-typedef TableRowBuilder = Widget Function(
-  BuildContext context,
-  List<Widget> row,
-);
 
 class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>> {
   @override
