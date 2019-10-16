@@ -111,6 +111,13 @@ class DtTable<T extends TreeNode<T>> extends StatefulWidget {
 
 class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    widget.data.expandCascading();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final columnWidths = [
       for (var column in widget.columns)
