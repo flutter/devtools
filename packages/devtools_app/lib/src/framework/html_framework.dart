@@ -939,8 +939,12 @@ class HtmlAnalyticsOptInDialog {
 
     acceptButton.click(() {
       ga_platform.setAllowAnalytics();
+
+      // Analytic collection is enabled - setup for analytics.
+      ga_platform.initializeGA();
+      ga_platform.jsHookupListenerForGA();
+
       hide();
-      ga.initializeGA();
     });
 
     dontAcceptButton.click(() {
