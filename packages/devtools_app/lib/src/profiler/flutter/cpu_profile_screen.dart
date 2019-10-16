@@ -107,64 +107,32 @@ class DtTable<T extends TreeNode<T>> extends StatefulWidget {
 
   @override
   DtTableState<T> createState() => DtTableState<T>();
+
+  static Widget wrapWithColumnWidth<T extends TreeNode<T>>(
+      ColumnData<T> columnData, TreeNode<T> treeNode, Widget content) {}
 }
+
+typedef TableRowBuilder = Widget Function(
+  BuildContext context,
+  List<Widget> row,
+);
 
 class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     widget.data.expandCascading();
   }
 
   @override
   Widget build(BuildContext context) {
-    final columnWidths = [
-      for (var column in widget.columns)
-        column.fixedWidthPx != null
-            ? FixedColumnWidth(column.fixedWidthPx.toDouble())
-            : MaxColumnWidth(
-                FractionColumnWidth((column.percentWidth ?? 100) / 100.0),
-                const FlexColumnWidth(),
-              )
-    ];
-    final header = [for (var column in widget.columns) Text(column.title)];
-    return Table(
-        // I heard you liked Lisp so I put some list comprehensions in your list comprehensions.
-        columnWidths: Map.fromEntries(
-          [
-            for (var i = 0; i < columnWidths.length; i++)
-              MapEntry<int, TableColumnWidth>(i, columnWidths[i])
-          ],
-        ),
-        children: [
-          TableRow(children: header),
-          ...tableRowsFor(widget.data),
-        ]);
-  }
-
-  List<TableRow> tableRowsFor(TreeNode<T> root) {
-    final row = [for (var column in widget.columns) _present(column, root)];
-    return [
-      TableRow(children: row),
-      if (root.isExpanded) ...[
-        for (var child in root.children) ...tableRowsFor(child)
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        TreeNodeWidget(columns: widget.columns, node: null, id: (_) => null),
+        TreeNodeWidget(
+            columns: widget.columns, node: widget.data, id: widget.id)
       ],
-    ];
-  }
-
-  Widget _present(ColumnData<T> column, TreeNode<T> node) {
-    Widget text = Text(
-      column.getDisplayValue(node),
-    );
-    if (column.runtimeType == TreeColumnData) {
-      text = InkWell(child: text);
-    }
-    return Padding(
-      padding: EdgeInsets.only(
-        left: column.getNodeIndentPx(node) * 1.0,
-      ),
-      child: text,
     );
   }
 }
@@ -188,26 +156,26 @@ class TreeNodeWidget<T extends TreeNode<T>> extends StatefulWidget {
 class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
   @override
   Widget build(BuildContext context) {
-    if (!widget.node.isExpandable) {
-      return ListTile(
+    final title = tableRowFor(context);
+    if (widget.node?.isExpandable ?? false) {
+      return ExpansionTile(
         key: PageStorageKey(widget.id(widget.node)),
-        title: _buildContent(),
+        title: title,
+        initiallyExpanded: widget.node.isExpanded,
+        onExpansionChanged: _setExpanded,
+        children: <Widget>[
+          for (var childFrame in widget.node.children)
+            TreeNodeWidget<T>(
+              node: childFrame,
+              columns: widget.columns,
+              id: widget.id,
+            ),
+        ],
       );
     }
-
-    return ExpansionTile(
+    return ListTile(
       key: PageStorageKey(widget.id(widget.node)),
-      title: _buildContent(),
-      initiallyExpanded: widget.node.isExpanded,
-      onExpansionChanged: _setExpanded,
-      children: <Widget>[
-        for (var childFrame in widget.node.children)
-          TreeNodeWidget<T>(
-            node: childFrame,
-            columns: widget.columns,
-            id: widget.id,
-          ),
-      ],
+      title: title,
     );
   }
 
@@ -221,13 +189,37 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
     });
   }
 
-  Widget _buildContent() {
+  Widget tableRowFor(BuildContext context) {
+    Widget columnFor(ColumnData<T> column) {
+      Widget content;
+      if (widget.node == null) {
+        content = Text(column.title);
+      } else {
+        content = Padding(
+          padding: EdgeInsets.only(
+            left: column.getNodeIndentPx(widget.node).toDouble(),
+          ),
+          child: Text(
+            column.getDisplayValue(widget.node),
+          ),
+        );
+      }
+
+      if (column.fixedWidthPx != null) {
+        content = SizedBox(
+          width: column.fixedWidthPx.toDouble(),
+          child: content,
+        );
+      }
+      return content;
+    }
+
     return Container(
-      constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 64.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // for (var column in widget.columns) _present(column),
+          for (var i = 0; i < widget.columns.length; i++)
+            columnFor(widget.columns[i]),
         ],
       ),
     );
