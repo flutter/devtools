@@ -1,3 +1,6 @@
+## 0.1.9-dev.2 - 2019-10-15
+* Update to use latest devtools_server 0.1.12.
+
 ## 0.1.9-dev - 2019-10-15
 * Remove usage of browser LocalStorage, previously used to store the user's answer to collect or not collect Analytics.
 * Analytic's properties (firstRun, enabled) are now stored in local file ~/.devtools controlled by the devtools_server.
