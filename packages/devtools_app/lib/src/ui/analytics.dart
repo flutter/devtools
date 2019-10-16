@@ -307,9 +307,12 @@ Future<bool> get isSurveyActionTaken async {
 
 /// Set DevTools property value 'surveyActionTaken' stored in the file
 /// '~\.devtools'.
+// TODO(terry): remove the query param logic for this request.
+// setSurveyActionTaken should only be called with the value of true, so
+// we can remove the extra complexity.
 void setSurveyActionTaken([bool value = true]) async {
   final resp = await HttpRequest.request(
-    // Format of request is e.g., api/setDevToolsEnabled?surveyActionTaken=true
+    // Format of request is e.g. api/setSurveyActionTaken?surveyActionTaken=true
     '${server.apiSetSurveyActionTaken}'
     '?${server.surveyActionTakenPropertyName}=$value',
     method: 'POST',
