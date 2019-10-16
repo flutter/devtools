@@ -31,6 +31,14 @@ function flutter {
     fi
 }
 
+if [ -z "$USE_LOCAL_DEPENDENCIES" ]; then
+    echo "Using dependencies from Pub"
+else
+    echo "Updating pubspecs to use local dependencies"
+    perl -pi -e 's/#OVERRIDE_FOR_TESTS//' packages/devtools/pubspec.yaml
+    perl -pi -e 's/#OVERRIDE_FOR_TESTS//' packages/devtools_app/pubspec.yaml
+fi
+
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
 pushd packages/devtools

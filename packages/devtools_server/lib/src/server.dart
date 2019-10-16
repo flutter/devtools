@@ -142,7 +142,7 @@ Future<HttpServer> serveDevTools({
 
   handler ??= await defaultHandler(clients);
 
-  HttpMultiServer server;
+  HttpServer server;
   SocketException ex;
   while (server == null && numPortsToTry > 0) {
     try {

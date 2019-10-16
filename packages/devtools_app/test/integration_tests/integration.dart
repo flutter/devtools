@@ -300,23 +300,32 @@ class WebdevFixture {
     final Completer<String> hasUrl = Completer<String>();
 
     _toLines(process.stderr).listen((String line) {
+      if (verbose || hasUrl.isCompleted) {
+        print('pub run build_runner serve • ${process.pid}'
+            ' • STDERR • ${line.trim()}');
+      }
+
       final err = 'error starting webdev: $line';
       if (!hasUrl.isCompleted) {
         hasUrl.completeError(err);
       } else {
-        print(err);
+        print('Ignoring stderr output because already completed');
       }
     });
 
     _toLines(process.stdout).listen((String line) {
       if (verbose) {
-        print('pub run build_runner serve • ${line.trim()}');
+        print('pub run build_runner serve • ${process.pid} • ${line.trim()}');
       }
 
       // Serving `web` on http://localhost:8080
       if (line.contains('Serving `web`')) {
-        final String url = line.substring(line.indexOf('http://'));
-        hasUrl.complete(url);
+        if (!hasUrl.isCompleted) {
+          final String url = line.substring(line.indexOf('http://'));
+          hasUrl.complete(url);
+        } else {
+          print('Ignoring "Serving..." notification because already completed');
+        }
       }
     });
 

@@ -19,8 +19,14 @@ environment:
 
 dependencies:
   devtools_server: 0.1.10
-#    path: ../devtools_server
   http: ^0.12.0+1
+
+dependency_overrides:
+# The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
+# tests can run using the in-repo version of these dependencies instead of
+# only the live Pub version.
+#OVERRIDE_FOR_TESTS   devtools_server:
+#OVERRIDE_FOR_TESTS     path: ../devtools_server
 
 executables:
   devtools:
