@@ -395,6 +395,11 @@ abstract class ColumnData<T> {
   /// TODO(jacobr): make this a double.
   int percentWidth;
 
+  /// How much to indent the data object by.
+  ///
+  /// This should only be non-zero for [TreeColumnData].
+  int getNodeIndentPx(T dataObject) => 0;
+
   final ColumnAlignment alignment;
 
   final bool usesHtml;
@@ -459,6 +464,7 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
 
   Stream<T> get onNodeCollapsed => nodeCollapsedController.stream;
 
+  @override
   int getNodeIndentPx(T dataObject) {
     int indentWidth = dataObject.level * treeToggleWidth;
     if (!dataObject.isExpandable) {
