@@ -39,7 +39,7 @@ class MaterialIcon extends DevToolsIcon {
   final int fontSize;
   final double angle;
   @override
-  final int iconWidth;
+  final double iconWidth;
 }
 
 class FlutterMaterialIcons {

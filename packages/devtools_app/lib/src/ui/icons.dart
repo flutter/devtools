@@ -22,8 +22,8 @@ import 'theme.dart';
 abstract class DevToolsIcon {
   const DevToolsIcon();
 
-  int get iconWidth => 18;
-  int get iconHeight => 18;
+  double get iconWidth => 18;
+  double get iconHeight => 18;
 }
 
 class UrlIcon extends DevToolsIcon {
@@ -144,18 +144,18 @@ class FlutterIcons {
   // Icons matching IntelliJ core icons.
   static const DevToolsIcon locate = UrlIcon('/icons/general/locate.png');
   static const DevToolsIcon forceRefresh =
-      UrlIcon('/icons/actions/forceRefresh.svg');
+      UrlIcon('/icons/actions/forceRefresh.png');
   // TODO(dantup): Make a ThemedIcon class to handle this.
   static DevToolsIcon get refresh => isDarkTheme
       ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
       : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
   static const DevToolsIcon performanceOverlay =
-      UrlIcon('/icons/general/performance_overlay.svg');
+      UrlIcon('/icons/general/performance_overlay.png');
   static const DevToolsIcon debugPaint = UrlIcon('/icons/debug_paint.png');
   static const DevToolsIcon repaintRainbow =
       UrlIcon('/icons/repaint_rainbow.png');
   static const DevToolsIcon debugBanner = UrlIcon('/icons/debug_banner.png');
-  static const DevToolsIcon history = UrlIcon('/icons/history.svg');
+  static const DevToolsIcon history = UrlIcon('/icons/history.png');
 
   static const UrlIcon pause_black_2x =
       UrlIcon('/icons/general/pause_black@2x.png', invertDark: true);
@@ -206,9 +206,9 @@ class CustomIcon extends DevToolsIcon {
   DevToolsIcon get baseIcon => isAbstract ? kind.abstractIcon : kind.icon;
 
   @override
-  int get iconWidth => baseIcon.iconWidth;
+  double get iconWidth => baseIcon.iconWidth;
   @override
-  int get iconHeight => baseIcon.iconHeight;
+  double get iconHeight => baseIcon.iconHeight;
 }
 
 class CustomIconMaker {

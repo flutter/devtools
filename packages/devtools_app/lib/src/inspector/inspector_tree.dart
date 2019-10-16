@@ -74,19 +74,19 @@ final DevToolsIcon defaultIcon = _customIconMaker.fromInfo('Default');
 // TODO(jacobr): these arrows are a bit ugly.
 // We should create pngs instead of trying to stretch the material icons into
 // being good expand collapse arrows.
-final DevToolsIcon collapseArrow = MaterialIcon(
+const DevToolsIcon collapseArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
-  iconWidth: (columnWidth - iconPadding).toInt(),
+  iconWidth: columnWidth - iconPadding,
 );
 
-final DevToolsIcon expandArrow = MaterialIcon(
+const DevToolsIcon expandArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
   angle: -math.pi / 2, // -90 degrees
-  iconWidth: (columnWidth - iconPadding).toInt(),
+  iconWidth: columnWidth - iconPadding,
 );
 
 abstract class PaintEntry {
