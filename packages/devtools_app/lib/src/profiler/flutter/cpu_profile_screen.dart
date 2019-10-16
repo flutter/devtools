@@ -82,7 +82,7 @@ class CpuTable extends StatelessWidget {
   final CpuProfileData data;
   @override
   Widget build(BuildContext context) {
-    return Table<CpuStackFrame>(
+    return DtTable<CpuStackFrame>(
       data: data.cpuProfileRoot,
       columns: [
         TotalTimeColumn(),
@@ -94,8 +94,8 @@ class CpuTable extends StatelessWidget {
   }
 }
 
-class Table<T extends TreeNode<T>> extends StatefulWidget {
-  const Table({
+class DtTable<T extends TreeNode<T>> extends StatefulWidget {
+  const DtTable({
     Key key,
     @required this.columns,
     @required this.data,
@@ -106,30 +106,58 @@ class Table<T extends TreeNode<T>> extends StatefulWidget {
   final String Function(T data) id;
 
   @override
-  TableState<T> createState() => TableState<T>();
+  DtTableState<T> createState() => DtTableState<T>();
 }
 
-class TableState<T extends TreeNode<T>> extends State<Table<T>> {
+class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>> {
   @override
   Widget build(BuildContext context) {
-    // This doesn't seem to make sense.  Why are we building a list with one item?
-    // Switch to a custom listview builder, possibly.
-    return GridView.count(
-      crossAxisCount: 1,
-      shrinkWrap: true,
-      children: [
-        Container(
-          constraints: const BoxConstraints(
-            maxWidth: 1000.0,
-            maxHeight: 0.0,
-          ),
-          child: TreeNodeWidget<T>(
-            node: widget.data,
-            columns: widget.columns,
-            id: widget.id,
-          ),
+    final columnWidths = [
+      for (var column in widget.columns)
+        column.fixedWidthPx != null
+            ? FixedColumnWidth(column.fixedWidthPx.toDouble())
+            : MaxColumnWidth(
+                FractionColumnWidth((column.percentWidth ?? 100) / 100.0),
+                const FlexColumnWidth(),
+              )
+    ];
+    final header = [for (var column in widget.columns) Text(column.title)];
+    return Table(
+        // I heard you liked Lisp so I put some list comprehensions in your list comprehensions.
+        columnWidths: Map.fromEntries(
+          [
+            for (var i = 0; i < columnWidths.length; i++)
+              MapEntry<int, TableColumnWidth>(i, columnWidths[i])
+          ],
         ),
+        children: [
+          TableRow(children: header),
+          ...tableRowsFor(widget.data),
+        ]);
+  }
+
+  List<TableRow> tableRowsFor(TreeNode<T> root) {
+    final row = [for (var column in widget.columns) _present(column, root)];
+    return [
+      TableRow(children: row),
+      if (root.isExpanded) ...[
+        for (var child in root.children) ...tableRowsFor(child)
       ],
+    ];
+  }
+
+  Widget _present(ColumnData<T> column, TreeNode<T> node) {
+    Widget text = Text(
+      column.getDisplayValue(node),
+    );
+    if (column.runtimeType == TreeColumnData) {
+      text = InkWell(child: text);
+    }
+    return Padding(
+      padding: EdgeInsets.only(
+        left: column.getNodeIndentPx(node) * 1.0,
+      ),
+      child: text,
     );
   }
 }
@@ -187,40 +215,12 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
   }
 
   Widget _buildContent() {
-    Widget present(ColumnData<T> column) {
-      final text = Text(
-        column.getDisplayValue(widget.node),
-      );
-      return text;
-      Widget content = text;
-      if (column.fixedWidthPx != null) {
-        content = SizedBox(
-          width: column.fixedWidthPx.toDouble(),
-          child: text,
-        );
-      } else {
-        // } else if (column.percentWidth != null) {
-        content = text;
-      }
-      content = Padding(
-        padding: EdgeInsets.only(
-          left: column.getNodeIndentPx(widget.node) * 1.0,
-        ),
-        child: content,
-      );
-      // if (column.fixedWidthPx == null) {
-      //   return Expanded(child: content);
-      // } else {
-      return content;
-      // }
-    }
-
     return Container(
       constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 64.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (var column in widget.columns) present(column),
+          // for (var column in widget.columns) _present(column),
         ],
       ),
     );
