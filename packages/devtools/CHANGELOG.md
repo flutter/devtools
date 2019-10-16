@@ -1,7 +1,7 @@
-## 0.1.9-dev.2 - 2019-10-15
+## 0.1.9 - 2019-10-17
+* Launched the Q3 DevTools Survey.
+* Bug fixes related to layouts and logging.
 * Update to use latest devtools_server 0.1.12.
-
-## 0.1.9-dev - 2019-10-15
 * Remove usage of browser LocalStorage, previously used to store the user's answer to collect or not collect Analytics.
 * Analytic's properties (firstRun, enabled) are now stored in local file ~/.devtools controlled by the devtools_server.
 * Now devtools_app will request and set property values, in ~/.devtools, via HTTP requests to the devtools_server.
