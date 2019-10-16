@@ -352,7 +352,6 @@ Future<int> get incrementSurveyShownCount async {
     surveyShownCount = json.decode(resp.responseText);
   } else {
     _logWarning(resp, server.apiIncrementSurveyShownCount);
-
   }
   return surveyShownCount;
 }
