@@ -5,7 +5,7 @@
 * Remove usage of browser LocalStorage, previously used to store the user's answer to collect or not collect Analytics.
 * Analytic's properties (firstRun, enabled) are now stored in local file ~/.devtools controlled by the devtools_server.
 * Now devtools_app will request and set property values, in ~/.devtools, via HTTP requests to the devtools_server.
-* Store survey properties on whether the user has answered or dismissed a survery in the ~/.devtools file too.
+* Store survey properties on whether the user has answered or dismissed a survey in the ~/.devtools file too.
 
 ## 0.1.8 - 2019-10-01
 * Query a flutter isolate for the target frame rate (e.g. 60FPS vs 120FPS). Respect this value in the Timeline.
