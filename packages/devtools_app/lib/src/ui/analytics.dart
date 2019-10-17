@@ -310,15 +310,15 @@ Future<bool> get isSurveyActionTaken async {
 // TODO(terry): remove the query param logic for this request.
 // setSurveyActionTaken should only be called with the value of true, so
 // we can remove the extra complexity.
-void setSurveyActionTaken([bool value = true]) async {
+void setSurveyActionTaken() async {
   final resp = await HttpRequest.request(
     // Format of request is e.g. api/setSurveyActionTaken?surveyActionTaken=true
     '${server.apiSetSurveyActionTaken}'
-    '?${server.surveyActionTakenPropertyName}=$value',
+    '?${server.surveyActionTakenPropertyName}=true',
     method: 'POST',
   );
   if (resp.status == HttpStatus.ok) {
-    assert(json.decode(resp.responseText) == value);
+    assert(json.decode(resp.responseText) == true);
   } else {
     _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
   }
