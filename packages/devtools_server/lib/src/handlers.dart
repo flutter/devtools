@@ -133,6 +133,9 @@ class ServerApi {
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
         return api.getCompleted(
             request, json.encode(_devToolsUsage.surveyActionTaken));
+      // TODO(terry): remove the query param logic for this request.
+      // setSurveyActionTaken should only be called with the value of true, so
+      // we can remove the extra complexity.
       case apiSetSurveyActionTaken:
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
