@@ -166,6 +166,21 @@ class GtagExceptionDevTools extends GtagException {
 // mode, debug mode will be set to false.
 bool get isDevToolsServerAvailable => !isDebugBuild();
 
+/// Helper to catch any server request which could fail we don't want to fail
+/// because Analytics had a problem.
+Future<HttpRequest> _request(String url) async {
+  HttpRequest response;
+
+  try {
+    response = await HttpRequest.request(
+      server.apiGetFlutterGAEnabled,
+      method: 'POST',
+    );
+  } catch (_) {}
+
+  return response;
+}
+
 void _logWarning(HttpRequest response, String apiType, [String respText]) {
   log(
     'HttpRequest $apiType failed status = ${response.status}'
@@ -186,10 +201,7 @@ Future<bool> get isFlutterGAEnabled async {
   bool enabled = false;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiGetFlutterGAEnabled,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetFlutterGAEnabled);
     if (resp.status == HttpStatus.ok) {
       // A return value of 'null' implies Flutter tool has never been run.
       enabled = json.decode(resp.responseText);
@@ -209,10 +221,7 @@ Future<String> flutterGAClientID() async {
   String clientId = '';
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiGetFlutterGAClientId,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetFlutterGAClientId);
     if (resp.status == HttpStatus.ok) {
       // Return value 'null' implies Flutter tool has never been run return null.
       clientId = json.decode(resp.responseText);
@@ -228,10 +237,7 @@ Future<String> flutterGAClientID() async {
 /// file '~/.devtools'.
 void resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiResetDevTools,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiResetDevTools);
     if (resp.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText));
     } else {
@@ -246,10 +252,7 @@ Future<bool> get isFirstRun async {
   bool firstRun = false;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiGetDevToolsFirstRun,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetDevToolsFirstRun);
     if (resp.status == HttpStatus.ok) {
       firstRun = json.decode(resp.responseText);
     } else {
@@ -273,10 +276,7 @@ Future<bool> get isEnabled async {
   bool enabled = false;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiGetDevToolsEnabled,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetDevToolsEnabled);
     if (resp.status == HttpStatus.ok) {
       enabled = json.decode(resp.responseText);
     } else {
@@ -292,10 +292,9 @@ Future<bool> get isEnabled async {
 /// '~/.devtools'.
 void setEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
+    final resp = await _request(
       '${server.apiSetDevToolsEnabled}'
       '?${server.devToolsEnabledPropertyName}=$value',
-      method: 'POST',
     );
     if (resp.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText) == value);
@@ -312,10 +311,7 @@ Future<bool> get isSurveyActionTaken async {
   bool surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      '${server.apiGetSurveyActionTaken}',
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetSurveyActionTaken);
     if (resp.status == HttpStatus.ok) {
       surveyActionTaken = json.decode(resp.responseText);
     } else {
@@ -333,11 +329,9 @@ Future<bool> get isSurveyActionTaken async {
 // we can remove the extra complexity.
 void setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      // Format of request is e.g., api/setDevToolsEnabled?surveyActionTaken=true
+    final resp = await _request(
       '${server.apiSetSurveyActionTaken}'
       '?${server.surveyActionTakenPropertyName}=true',
-      method: 'POST',
     );
     if (resp.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText) == true);
@@ -353,10 +347,7 @@ Future<int> get surveyShownCount async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      '${server.apiGetSurveyShownCount}',
-      method: 'POST',
-    );
+    final resp = await _request(server.apiGetSurveyShownCount);
     if (resp.status == HttpStatus.ok) {
       surveyShownCount = json.decode(resp.responseText);
     } else {
@@ -374,10 +365,7 @@ Future<int> get incrementSurveyShownCount async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
-    final resp = await HttpRequest.request(
-      server.apiIncrementSurveyShownCount,
-      method: 'POST',
-    );
+    final resp = await _request(server.apiIncrementSurveyShownCount);
     if (resp.status == HttpStatus.ok) {
       surveyShownCount = json.decode(resp.responseText);
     } else {
