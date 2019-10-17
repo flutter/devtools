@@ -172,10 +172,7 @@ Future<HttpRequest> _request(String url) async {
   HttpRequest response;
 
   try {
-    response = await HttpRequest.request(
-      server.apiGetFlutterGAEnabled,
-      method: 'POST',
-    );
+    response = await HttpRequest.request(url, method: 'POST');
   } catch (_) {}
 
   return response;
