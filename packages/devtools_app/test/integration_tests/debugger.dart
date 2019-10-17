@@ -34,13 +34,6 @@ void debuggingTests() {
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
 
-    // TODO(dantup): This check can be removed on the next stable Dart release
-    // since we'll only be running the tests where getScripts is supported.
-    if (!(await debuggingManager.supportsScripts())) {
-      print('=== VM does not support getScripts, skipping test ===');
-      return;
-    }
-
     // Allow some time for the scripts view to be populated, as it requires
     // some isolate events to fire that we have not already waited for.
     await waitFor(
@@ -72,14 +65,6 @@ void debuggingTests() {
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, isEmpty);
-
-    // TODO(dantup): This check can be removed on the next stable Dart release
-    // since we'll only be running the tests where getScripts is supported.
-    if (!(await debuggingManager.supportsScripts())) {
-      print(
-          '=== VM does not support getScripts, required by addBreakpoint, skipping test ===');
-      return;
-    }
 
     await delay();
 
@@ -148,14 +133,6 @@ void debuggingTests() {
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, isEmpty);
-
-    // TODO(dantup): This check can be removed on the next stable Dart release
-    // since we'll only be running the tests where getScripts is supported.
-    if (!(await debuggingManager.supportsScripts())) {
-      print(
-          '=== VM does not support getScripts, required by addBreakpoint, skipping test ===');
-      return;
-    }
 
     await delay();
 

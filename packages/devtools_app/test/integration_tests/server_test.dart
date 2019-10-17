@@ -107,7 +107,7 @@ void main() {
     } finally {
       server1.kill();
     }
-  }, skip: !serverSupportsTryPort, timeout: const Timeout.factor(10));
+  }, timeout: const Timeout.factor(10));
 
   group('Server API', () {
     test(
@@ -249,7 +249,7 @@ void main() {
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
     // The API only works in release mode.
-  }, skip: !testInReleaseMode || !serverSupportsHeadless);
+  }, skip: !testInReleaseMode);
 }
 
 Future<Map<String, dynamic>> launchDevTools({
