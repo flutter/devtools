@@ -168,6 +168,8 @@ bool get isDevToolsServerAvailable => !isDebugBuild();
 
 /// Helper to catch any server request which could fail we don't want to fail
 /// because Analytics had a problem.
+///
+/// Returns HttpRequest or null (if server failure).
 Future<HttpRequest> _request(String url) async {
   HttpRequest response;
 
@@ -180,7 +182,7 @@ Future<HttpRequest> _request(String url) async {
 
 void _logWarning(HttpRequest response, String apiType, [String respText]) {
   log(
-    'HttpRequest $apiType failed status = ${response.status}'
+    'HttpRequest $apiType failed status = ${response?.status}'
     '${respText != null ? ', responseText = $respText' : ''}',
     LogLevel.warning,
   );
@@ -199,7 +201,7 @@ Future<bool> get isFlutterGAEnabled async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetFlutterGAEnabled);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       // A return value of 'null' implies Flutter tool has never been run.
       enabled = json.decode(resp.responseText);
     } else {
@@ -219,7 +221,7 @@ Future<String> flutterGAClientID() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetFlutterGAClientId);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       // Return value 'null' implies Flutter tool has never been run return null.
       clientId = json.decode(resp.responseText);
     } else {
@@ -235,7 +237,7 @@ Future<String> flutterGAClientID() async {
 void resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiResetDevTools);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText));
     } else {
       _logWarning(resp, server.apiResetDevTools);
@@ -250,7 +252,7 @@ Future<bool> get isFirstRun async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetDevToolsFirstRun);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       firstRun = json.decode(resp.responseText);
     } else {
       _logWarning(resp, server.apiGetDevToolsFirstRun);
@@ -274,7 +276,7 @@ Future<bool> get isEnabled async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetDevToolsEnabled);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       enabled = json.decode(resp.responseText);
     } else {
       _logWarning(resp, server.apiGetDevToolsEnabled);
@@ -293,7 +295,7 @@ void setEnabled([bool value = true]) async {
       '${server.apiSetDevToolsEnabled}'
       '?${server.devToolsEnabledPropertyName}=$value',
     );
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText) == value);
       _gaEnabled = value;
     } else {
@@ -309,7 +311,7 @@ Future<bool> get isSurveyActionTaken async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetSurveyActionTaken);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       surveyActionTaken = json.decode(resp.responseText);
     } else {
       _logWarning(resp, server.apiGetSurveyActionTaken);
@@ -330,7 +332,7 @@ void setSurveyActionTaken() async {
       '${server.apiSetSurveyActionTaken}'
       '?${server.surveyActionTakenPropertyName}=true',
     );
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       assert(json.decode(resp.responseText) == true);
     } else {
       _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
@@ -345,7 +347,7 @@ Future<int> get surveyShownCount async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetSurveyShownCount);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       surveyShownCount = json.decode(resp.responseText);
     } else {
       _logWarning(resp, server.apiGetSurveyShownCount);
@@ -363,7 +365,7 @@ Future<int> get incrementSurveyShownCount async {
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiIncrementSurveyShownCount);
-    if (resp.status == HttpStatus.ok) {
+    if (resp?.status == HttpStatus.ok) {
       surveyShownCount = json.decode(resp.responseText);
     } else {
       _logWarning(resp, server.apiIncrementSurveyShownCount);
