@@ -360,7 +360,7 @@ Future<int> get surveyShownCount async {
 /// Increment DevTools property value 'surveyShownCount' stored in the file
 /// '~\.devtools'.
 Future<int> get incrementSurveyShownCount async {
-  // Any failure will still return 1.
+  // Any failure will still return 0.
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
