@@ -87,7 +87,7 @@ class CpuTable extends StatelessWidget {
       data: data.cpuProfileRoot,
       columns: columns,
       treeColumn: columns[2],
-      id: (frame) => frame.id,
+      keyFactory: (frame) => frame.id,
     );
   }
 }
