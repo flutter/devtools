@@ -294,7 +294,7 @@ void setEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await HttpRequest.request(
       '${server.apiSetDevToolsEnabled}'
-          '?${server.devToolsEnabledPropertyName}=$value',
+      '?${server.devToolsEnabledPropertyName}=$value',
       method: 'POST',
     );
     if (resp.status == HttpStatus.ok) {
@@ -333,7 +333,7 @@ void setSurveyActionTaken() async {
     final resp = await HttpRequest.request(
       // Format of request is e.g., api/setDevToolsEnabled?surveyActionTaken=true
       '${server.apiSetSurveyActionTaken}'
-          '?${server.surveyActionTakenPropertyName}=true',
+      '?${server.surveyActionTakenPropertyName}=true',
       method: 'POST',
     );
     if (resp.status == HttpStatus.ok) {
