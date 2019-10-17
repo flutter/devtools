@@ -166,28 +166,22 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     final streamIds = [
-      EventStreams.kStdout,
-      EventStreams.kStderr,
-      EventStreams.kVM,
-      EventStreams.kIsolate,
       EventStreams.kDebug,
-      EventStreams.kGC,
-      EventStreams.kTimeline,
       EventStreams.kExtension,
-      serviceStreamName
+      EventStreams.kGC,
+      EventStreams.kIsolate,
+      EventStreams.kLogging,
+      EventStreams.kStderr,
+      EventStreams.kStdout,
+      EventStreams.kTimeline,
+      EventStreams.kVM,
+      serviceStreamName,
     ];
-
-    // The following streams are not yet supported by Flutter Web / Dart web
-    // apps.
-    if (!await connectedApp.isDartWebApp) {
-      streamIds.addAll(['_Logging', EventStreams.kLogging]);
-    }
 
     await Future.wait(streamIds.map((String id) async {
       try {
         await service.streamListen(id);
       } catch (e) {
-        // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
           // have the private names, and older ones don't have the public ones).
