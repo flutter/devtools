@@ -65,14 +65,19 @@ void main() {
         return;
       }
 
-      // Show the Q3 DevTools survey.
-      // TODO(kenz): do not show this survey again if a) an action has been
-      // taken (survey link clicked or toast dismissed), b) we have shown it
-      // 5 times without action, or c) the date is after ~ Oct 30th 2019. Data
-      // required for a) and b) needs to be added to devtools_server.
-      // ignore: dead_code
-      if (false) {
-        framework.surveyToast(_generateSurveyUrl());
+      // Show the Q3 DevTools survey. Stop showing the survey after
+      // November 14, 2019 (4 weeks after the survey start date
+      // October 17, 2019).
+      final surveyThresholdDate = DateTime(2019, 11, 14);
+      if (DateTime.now().isBefore(surveyThresholdDate)) {
+        // Do not show the survey if the user has either taken or dismissed it.
+        if (!await ga.isSurveyActionTaken) {
+          // Stop showing the survey toast after 5 times without action.
+          if (await ga.surveyShownCount < 5) {
+            framework.surveyToast(await _generateSurveyUrl());
+            await ga.incrementSurveyShownCount;
+          }
+        }
       }
 
       unawaited(FrameworkCore.initVmService(
@@ -99,24 +104,19 @@ void main() {
   );
 }
 
-String _generateSurveyUrl() {
+Future<String> _generateSurveyUrl() async {
   const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
   const internalKey = 'Internal';
 
   final uri = Uri.parse(window.location.toString());
-
-  // TODO(kenz): get client id once functionality is available.
-  const clientId = '';
-
-  String ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? '';
-  ideValue = ideValue == '' ? 'CLI' : ideValue;
-
+  final ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? 'CLI';
   final fromValue = uri.fragment ?? '';
+  final clientId = await ga.flutterGAClientID();
 
   // TODO(djshuckerow): override this value for internal users.
-  const internalValue = false;
+  const internalValue = 'false';
 
   final surveyUri = Uri(
     scheme: 'https',

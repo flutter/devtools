@@ -652,15 +652,11 @@ class HtmlSurveyToast extends CoreElement {
           label(text: 'Help improve DevTools! ', c: 'toast-title'),
           surveyLink =
               a(text: 'Take our Q3 survey', href: _url, target: '_blank')
-                ..click(() {
-                  toastAnimator.hide();
-                }),
+                ..click(_hideAndSetActionTaken),
           label(text: '.'),
           div()..flex(),
           span(c: 'octicon octicon-x flash-close js-flash-close')
-            ..click(() {
-              toastAnimator.hide();
-            }),
+            ..click(_hideAndSetActionTaken),
         ]),
       div(
           text:
@@ -682,6 +678,11 @@ class HtmlSurveyToast extends CoreElement {
 
   void show() async {
     toastAnimator.show(hideDelay: HtmlToastAnimator.infiniteHideDelay);
+  }
+
+  void _hideAndSetActionTaken() {
+    toastAnimator.hide();
+    ga.setSurveyActionTaken();
   }
 }
 

@@ -164,7 +164,7 @@ class GtagExceptionDevTools extends GtagException {
 void _logWarning(HttpRequest response, String apiType, [String respText]) {
   log(
     'HttpRequest $apiType failed status = ${response.status}'
-    '${respText ??= ', responseText = $respText}'}',
+    '${respText != null ? ', responseText = $respText' : ''}',
     LogLevel.warning,
   );
 }
@@ -307,15 +307,18 @@ Future<bool> get isSurveyActionTaken async {
 
 /// Set DevTools property value 'surveyActionTaken' stored in the file
 /// '~\.devtools'.
-void setSurveyActionTaken([bool value = true]) async {
+// TODO(terry): remove the query param logic for this request.
+// setSurveyActionTaken should only be called with the value of true, so
+// we can remove the extra complexity.
+void setSurveyActionTaken() async {
   final resp = await HttpRequest.request(
-    // Format of request is e.g., api/setDevToolsEnabled?surveyActionTaken=true
+    // Format of request is e.g. api/setSurveyActionTaken?surveyActionTaken=true
     '${server.apiSetSurveyActionTaken}'
-    '?${server.surveyActionTakenPropertyName}=$value',
+    '?${server.surveyActionTakenPropertyName}=true',
     method: 'POST',
   );
   if (resp.status == HttpStatus.ok) {
-    assert(json.decode(resp.responseText) == value);
+    assert(json.decode(resp.responseText) == true);
   } else {
     _logWarning(resp, server.apiSetSurveyActionTaken, resp.responseText);
   }
