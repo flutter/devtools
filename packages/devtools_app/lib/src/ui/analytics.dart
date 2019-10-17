@@ -164,7 +164,7 @@ class GtagExceptionDevTools extends GtagException {
 void _logWarning(HttpRequest response, String apiType, [String respText]) {
   log(
     'HttpRequest $apiType failed status = ${response.status}'
-    '${respText ??= ', responseText = $respText}'}',
+    '${respText != null ? ', responseText = $respText' : ''}',
     LogLevel.warning,
   );
 }
