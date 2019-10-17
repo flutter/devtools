@@ -3,19 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
-import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:flutter/material.dart';
 
-import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
+import '../../performance/performance_controller.dart';
 import '../../table_data.dart';
 import '../../trees.dart';
-import '../../url_utils.dart';
-import '../../utils.dart';
 import '../cpu_profile_columns.dart';
 import '../cpu_profile_model.dart';
-import '../cpu_profile_service.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen() : super('Performance');
@@ -109,22 +106,125 @@ class DtTable<T extends TreeNode<T>> extends StatefulWidget {
   DtTableState<T> createState() => DtTableState<T>();
 }
 
-class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>> {
+class DtTableState<T extends TreeNode<T>> extends State<DtTable<T>>
+    with TickerProviderStateMixin {
+  List<T> flattenedList = [];
+  List<double> columnWidths = [];
+  double get tableWidth => columnWidths.reduce((x, y) => x + y);
+
+  AnimationController resizeAnimation;
+  Tween<double> widthTween;
+
+  static const defaultColumnWidth = 500.0;
+
   @override
   void initState() {
     super.initState();
     widget.data.expandCascading();
+    flattenedList = _flattenExpandedTree();
+    columnWidths = _computeTableWidth();
+    widthTween = Tween<double>(begin: tableWidth, end: tableWidth);
+    resizeAnimation = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    resizeAnimation.dispose();
+    super.dispose();
+  }
+
+  List<T> _flattenExpandedTree({T node, bool Function(T node) filter}) {
+    node ??= widget.data;
+    filter ??= (_) => true;
+    List<T> flattenedChildren = [];
+    if (filter(node)) {
+      flattenedChildren = [
+        for (var child in node.children)
+          ..._flattenExpandedTree(
+            node: child,
+            filter: filter,
+          ),
+      ];
+    }
+    return [node, ...flattenedChildren];
+  }
+
+  List<double> _computeTableWidth() {
+    // Size the table to only fit the items that are visible.
+    final flattenedList = _flattenExpandedTree(filter: (n) => n.isExpanded);
+    final root = flattenedList[0];
+    TreeNode deepest = root;
+    for (var node in flattenedList) {
+      if (node.level > deepest.level) {
+        deepest = node;
+      }
+    }
+    final widths = <double>[];
+    for (ColumnData<T> column in widget.columns) {
+      double width = column.getNodeIndentPx(deepest).toDouble();
+      if (column.fixedWidthPx != null) {
+        width += column.fixedWidthPx;
+      } else {
+        // TODO(djshuckerow): measure the text of the longest content to get an idea for how wide this column should be.
+        width += defaultColumnWidth;
+      }
+      widths.add(width);
+    }
+    return widths;
+  }
+
+  void _refreshTree() {
+    setState(() {
+      flattenedList = _flattenExpandedTree();
+      columnWidths = _computeTableWidth();
+      widthTween = Tween<double>(
+        begin: widthTween.evaluate(resizeAnimation),
+        end: tableWidth,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      children: <Widget>[
-        TreeNodeWidget(columns: widget.columns, node: null, id: (_) => null),
-        TreeNodeWidget(
-            columns: widget.columns, node: widget.data, id: widget.id)
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: AnimatedBuilder(
+        animation: resizeAnimation,
+        builder: (context, child) {
+          return SizedBox(
+              width: widthTween.evaluate(
+                CurvedAnimation(
+                    parent: resizeAnimation, curve: Curves.easeInOutCubic),
+              ),
+              child: child);
+        },
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          TreeNodeWidget(
+            columns: widget.columns,
+            columnWidths: columnWidths,
+            node: null,
+            id: (_) => null,
+            onListUpdated: _refreshTree,
+          ),
+          Expanded(
+            child: ListView.custom(
+              childrenDelegate: SliverChildListDelegate([
+                for (var node in flattenedList)
+                  TreeNodeWidget(
+                    columns: widget.columns,
+                    columnWidths: columnWidths,
+                    node: node,
+                    id: widget.id,
+                    onListUpdated: _refreshTree,
+                  ),
+              ]),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }
@@ -134,41 +234,44 @@ class TreeNodeWidget<T extends TreeNode<T>> extends StatefulWidget {
     Key key,
     @required this.node,
     @required this.columns,
+    @required this.columnWidths,
     @required this.id,
+    @required this.onListUpdated,
   }) : super(key: key);
 
   final T node;
   final List<ColumnData<T>> columns;
   final String Function(T frame) id;
+  final VoidCallback onListUpdated;
+  final List<double> columnWidths;
 
   @override
   _TreeNodeState createState() => _TreeNodeState<T>();
 }
 
-class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
+class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>>
+    with TickerProviderStateMixin {
+  AnimationController showController;
+  bool show;
+
   @override
-  Widget build(BuildContext context) {
-    final title = tableRowFor(context);
-    if (widget.node?.isExpandable ?? false) {
-      return ExpansionTile(
-        key: PageStorageKey(widget.id(widget.node)),
-        title: title,
-        initiallyExpanded: widget.node.isExpanded,
-        onExpansionChanged: _setExpanded,
-        children: <Widget>[
-          for (var childFrame in widget.node.children)
-            TreeNodeWidget<T>(
-              node: childFrame,
-              columns: widget.columns,
-              id: widget.id,
-            ),
-        ],
-      );
+  void initState() {
+    show = widget.node?.shouldShow() ?? true;
+    showController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
+    if (show) {
+      showController.forward();
     }
-    return ListTile(
-      key: PageStorageKey(widget.id(widget.node)),
-      title: title,
-    );
+  }
+
+  @override
+  void dispose() {
+    showController.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpanded() {
+    _setExpanded(!widget.node.isExpanded);
   }
 
   void _setExpanded(bool isExpanded) {
@@ -178,42 +281,90 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<TreeNodeWidget<T>> {
       } else {
         widget.node.collapse();
       }
+      widget.onListUpdated();
     });
   }
 
+  void didUpdateWidget(Widget oldWidget) {
+    show = widget.node?.shouldShow() ?? true;
+    if (show) {
+      showController.forward();
+    } else {
+      showController.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = tableRowFor(context);
+    return AnimatedBuilder(
+      animation: showController,
+      builder: (context, child) {
+        return SizedBox(
+          height: 42.0 *
+              CurvedAnimation(
+                curve: Curves.easeInOutCubic,
+                parent: showController,
+              ).value,
+          child: Material(child: child),
+        );
+      },
+      key: PageStorageKey(widget.id(widget.node)),
+      child: InkWell(
+        onTap: _toggleExpanded,
+        child: title,
+      ),
+    );
+  }
+
   Widget tableRowFor(BuildContext context) {
-    Widget columnFor(ColumnData<T> column) {
+    Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       if (widget.node == null) {
-        content = Text(column.title);
+        content = Text(
+          column.title,
+          overflow: TextOverflow.ellipsis,
+        );
       } else {
+        content = Text(
+          column.getDisplayValue(widget.node),
+          overflow: TextOverflow.ellipsis,
+        );
+        final padding = column.getNodeIndentPx(widget.node).toDouble();
+        if (padding != 0.0) {
+          content = Row(children: [
+            RotationTransition(
+              turns:
+                  Tween<double>(begin: 0.0, end: 0.5).animate(showController),
+              child: Icon(Icons.arrow_drop_down),
+            ),
+            content
+          ]);
+        }
         content = Padding(
           padding: EdgeInsets.only(
-            left: column.getNodeIndentPx(widget.node).toDouble(),
+            left: padding,
           ),
-          child: Text(
-            column.getDisplayValue(widget.node),
-          ),
-        );
-      }
-
-      if (column.fixedWidthPx != null) {
-        content = SizedBox(
-          width: column.fixedWidthPx.toDouble(),
           child: content,
         );
       }
+
+      content = SizedBox(
+        width: columnWidth,
+        child: content,
+      );
       return content;
     }
 
-    return Container(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < widget.columns.length; i++)
-            columnFor(widget.columns[i]),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < widget.columns.length; i++)
+          columnFor(
+            widget.columns[i],
+            widget.columnWidths[i],
+          ),
+      ],
     );
   }
 }

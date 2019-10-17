@@ -90,6 +90,10 @@ class TreeNode<T extends TreeNode<T>> {
     _isExpanded = true;
   }
 
+  bool shouldShow() {
+    return parent == null || (parent.isExpanded && parent.shouldShow());
+  }
+
   void collapse() {
     _isExpanded = false;
   }
