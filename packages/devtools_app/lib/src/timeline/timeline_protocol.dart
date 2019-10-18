@@ -577,7 +577,7 @@ class TimelineProtocol {
   }
 
   bool _shouldProcessTraceEvent(TraceEvent event) {
-    final Set<String> phaseWhitelist = {
+    final phaseWhitelist = {
       flowStartPhase,
       flowEndPhase,
       durationBeginPhase,
