@@ -22,7 +22,8 @@ BrowserManager browserManager;
 
 Future<void> waitFor(
   Future<bool> condition(), {
-  Duration timeout = const Duration(seconds: 4),
+    // TODO(kenz): shorten this as long as it doesn't cause flakes.
+  Duration timeout = const Duration(seconds: 10),
   String timeoutMessage = 'condition not satisfied',
   Duration delay = const Duration(milliseconds: 100),
 }) async {
