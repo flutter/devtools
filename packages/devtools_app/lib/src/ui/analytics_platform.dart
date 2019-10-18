@@ -74,7 +74,7 @@ void computeDevToolsQueryParams() {
 
 void computeFlutterClientId() async {
   final flutterClientId = await ga.flutterGAClientID();
-  ga.flutterClientId =  flutterClientId;
+  ga.flutterClientId = flutterClientId;
 }
 
 bool _computing = false;
