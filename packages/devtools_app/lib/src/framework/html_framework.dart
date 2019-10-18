@@ -403,7 +403,8 @@ class HtmlFramework {
   void surveyToast(String url) {
     devToolsSurvey = HtmlSurveyToast(url);
     final CoreElement toastContainer =
-        CoreElement.from(queryId('toast-container'));
+        CoreElement.from(queryId('toast-container'))
+          ..clazz('survey-toast-container');
     toastContainer.add(devToolsSurvey);
     devToolsSurvey.show();
   }
