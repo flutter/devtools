@@ -37,9 +37,11 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('empty')), findsOneWidget);
     });
 
     testWidgets('displays with tree column first', (WidgetTester tester) async {
+      await setWindowSize(const Size(800.0, 1200.0));
       final table = TreeTable<TestData>(
         columns: [
           treeColumn,
@@ -51,6 +53,16 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Foo')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Bar')), findsOneWidget);
+      // Note that two keys with the same name are allowed but not necessarily a
+      // good idea. We should be using unique identifiers for keys.
+      expect(find.byKey(const PageStorageKey('Baz')), findsNWidgets(2));
+      expect(find.byKey(const PageStorageKey('Qux')), findsNWidgets(2));
+      expect(find.byKey(const PageStorageKey('Snap')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Crackle')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Pop')), findsOneWidget);
+      await resetWindowSize();
     });
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
