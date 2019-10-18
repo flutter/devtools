@@ -143,6 +143,7 @@ void main() {
         TreeTable<TestData>(
           columns: [treeColumn],
           data: tree,
+          treeColumn: null,
           keyFactory: (data) => data.name,
         );
       }, throwsAssertionError);
