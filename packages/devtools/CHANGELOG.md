@@ -1,3 +1,6 @@
+## 0.1.10 - 2019-10-18
+* Change wording of DevTools survey prompt.
+
 ## 0.1.9 - 2019-10-17
 * Launched the Q3 DevTools Survey.
 * Bug fixes related to layouts and logging.
