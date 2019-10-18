@@ -110,36 +110,38 @@ class _FlagList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      key: InfoScreen.flagListKey,
-      itemCount: flagList?.flags?.length ?? 0,
-      itemBuilder: (context, index) {
-        final flag = flagList.flags[index];
-        final modifiedStatusText = flag.modified ? 'modified' : 'default';
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: DefaultTaggedText(
-                  '<bold>${flag.name}</bold>\n'
-                  '${flag.comment}',
+    return Scrollbar(
+      child: ListView.builder(
+        key: InfoScreen.flagListKey,
+        itemCount: flagList?.flags?.length ?? 0,
+        itemBuilder: (context, index) {
+          final flag = flagList.flags[index];
+          final modifiedStatusText = flag.modified ? 'modified' : 'default';
+          return Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: DefaultTaggedText(
+                    '<bold>${flag.name}</bold>\n'
+                    '${flag.comment}',
+                  ),
                 ),
-              ),
-              Container(
-                constraints: const BoxConstraints(minWidth: 100.0),
-                child: DefaultTaggedText(
-                  '<primary-color>${flag.valueAsString}</primary-color>\n'
-                  '<primary-color-light>$modifiedStatusText</primary-color-light>',
-                  textAlign: TextAlign.end,
+                Container(
+                  constraints: const BoxConstraints(minWidth: 100.0),
+                  child: DefaultTaggedText(
+                    '<primary-color>${flag.valueAsString}</primary-color>\n'
+                    '<primary-color-light>$modifiedStatusText</primary-color-light>',
+                    textAlign: TextAlign.end,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
