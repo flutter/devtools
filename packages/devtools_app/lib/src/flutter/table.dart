@@ -18,13 +18,17 @@ import '../trees.dart';
 /// deepest row in [data] that is currently visible with the prescribed
 /// width of each row in the table.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeTable({
+  TreeTable({
     Key key,
     @required this.columns,
-    this.treeColumn,
+    @required this.treeColumn,
     @required this.data,
     @required this.keyFactory,
-  }) : super(key: key);
+  })  : assert(columns.contains(treeColumn)),
+        assert(columns != null),
+        assert(keyFactory != null),
+        assert(data != null),
+        super(key: key);
 
   /// The columns to show in this table.
   final List<ColumnData<T>> columns;
@@ -52,13 +56,10 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   /// The width of each column in this table, including the
   /// appropriate indentation for nested rows.
   ///
-  /// This is computed in [_computeTableWidth].
+  /// This is computed in [_computeColumnWidths].
   List<double> columnWidths = [];
-  double get tableWidth => columnWidths.reduce((x, y) => x + y);
-
-  AnimationController _resizeController;
-  Animation<double> _resizeAnimation;
-  Tween<double> _widthTween;
+  double get tableWidth =>
+      columnWidths.isEmpty ? 0.0 : columnWidths.reduce((x, y) => x + y);
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -69,57 +70,47 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void initState() {
     super.initState();
-    widget.data.expandCascading();
-    _flattenedList = _flattenExpandedTree();
-    columnWidths = _computeTableWidth();
-    _widthTween = Tween<double>(begin: tableWidth, end: tableWidth);
-    _resizeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _resizeAnimation = CurvedAnimation(
-      parent: _resizeController,
-      curve: Curves.easeInOutCubic,
-    );
+    widget.data?.expandCascading();
+    _flattenedList = [];
+    _flattenExpandedTree(stack: _flattenedList);
+    columnWidths = _computeColumnWidths();
   }
 
   @override
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _flattenedList = _flattenExpandedTree();
+    _flattenedList = [];
+    _flattenExpandedTree(stack: _flattenedList);
     refreshTree();
   }
 
-  @override
-  void dispose() {
-    _resizeController.dispose();
-    super.dispose();
-  }
-
-  List<T> _flattenExpandedTree({T node, bool Function(T node) filter}) {
+  void _flattenExpandedTree(
+      {T node, bool Function(T node) filter, @required List<T> stack}) {
     node ??= widget.data;
     filter ??= (_) => true;
-    List<T> flattenedChildren = [];
-    if (filter(node)) {
-      flattenedChildren = [
-        for (var child in node.children)
-          ..._flattenExpandedTree(
-            node: child,
-            filter: filter,
-          ),
-      ];
+    if (node == null) {
+      return;
     }
-    return [node, ...flattenedChildren];
+    stack.add(node);
+    if (filter(node)) {
+      for (var child in node.children) {
+        _flattenExpandedTree(
+          node: child,
+          filter: filter,
+          stack: stack,
+        );
+      }
+    }
+    return;
   }
 
   // Determines the width of all columns, including the columns that
   // use indentation to show the nesting of the table.
-  List<double> _computeTableWidth() {
+  List<double> _computeColumnWidths() {
     // Size the table to only fit the items that are visible.
-    final flattenedList = _flattenExpandedTree(filter: (n) => n.isExpanded);
-    final root = flattenedList[0];
+    final root = widget.data;
     TreeNode deepest = root;
-    for (var node in flattenedList) {
+    for (var node in _flattenedList) {
       if (node.level > deepest.level) {
         deepest = node;
       }
@@ -150,11 +141,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   /// to expand or collapse.
   void refreshTree() {
     setState(() {
-      columnWidths = _computeTableWidth();
-      _widthTween = Tween<double>(
-        begin: _widthTween.evaluate(_resizeController),
-        end: tableWidth,
-      );
+      columnWidths = _computeColumnWidths();
     });
   }
 
@@ -162,31 +149,29 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: AnimatedBuilder(
-        animation: _resizeController,
-        builder: (context, child) {
-          return SizedBox(
-            width: max(
-              MediaQuery.of(context).size.width,
-              _widthTween.evaluate(_resizeAnimation),
-            ),
-            child: child,
-          );
-        },
+      child: SizedBox(
+        width: max(
+          MediaQuery.of(context).size.width,
+          tableWidth,
+        ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _TreeNodeWidget(
-            node: null,
+          _TreeNodeWidget.tableHeading(
+            key: const Key('Table header'),
             tableState: this,
           ),
           Expanded(
             child: ListView.custom(
-              childrenDelegate: SliverChildListDelegate([
-                for (var node in _flattenedList)
-                  _TreeNodeWidget(
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final node = _flattenedList[index];
+                  return _TreeNodeWidget(
+                    key: PageStorageKey(widget.keyFactory(node)),
                     tableState: this,
                     node: node,
-                  ),
-              ]),
+                  );
+                },
+                childCount: _flattenedList.length,
+              ),
             ),
           ),
         ]),
@@ -195,12 +180,22 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 }
 
+/// Presents a [TreeNode].
+///
+/// When the given [node] is null, this widget will instead present
+/// column headings.
 class _TreeNodeWidget<T extends TreeNode<T>> extends StatefulWidget {
   const _TreeNodeWidget({
     Key key,
     @required this.node,
     @required this.tableState,
   }) : super(key: key);
+
+  /// Constructs a [_TreeNodeWidget] that presents the column headings instead
+  /// of a single [TreeNode].
+  const _TreeNodeWidget.tableHeading({Key key, @required this.tableState})
+      : node = null,
+        super(key: key);
 
   final _TreeTableState<T> tableState;
   final T node;
@@ -229,8 +224,6 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
   // Convenience accessors for relevant fields from [TreeTable].
   TreeColumnData<T> get treeColumn => widget.tableState.widget.treeColumn;
   List<ColumnData<T>> get columns => widget.tableState.widget.columns;
-  String id(T data) =>
-      data == null ? null : widget.tableState.widget.keyFactory(data);
   void onListUpdated() => widget.tableState.refreshTree();
   List<double> get columnWidths => widget.tableState.columnWidths;
 
@@ -249,15 +242,15 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
       curve: Curves.easeInOutCubic,
       parent: showController,
     );
-    expandAnimation = Tween<double>(begin: 0.0, end: 0.5).animate(
+    expandAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
       CurvedAnimation(curve: Curves.easeInOutCubic, parent: expandController),
     );
     show = widget.node?.shouldShow() ?? true;
     if (show) {
-      showController.forward();
+      showController.value = 1.0;
     }
     if (widget.node?.isExpanded ?? false) {
-      expandController.forward();
+      expandController.value = 1.0;
     }
   }
 
@@ -312,7 +305,6 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
           child: Material(child: child),
         );
       },
-      key: PageStorageKey(id(widget.node)),
       child: InkWell(
         onTap: _toggleExpanded,
         child: title,
@@ -341,13 +333,15 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RotationTransition(
-                turns: expandAnimation,
-                child: Icon(
-                  Icons.expand_more,
-                  size: 16.0,
-                ),
-              ),
+              widget.node.isExpandable
+                  ? RotationTransition(
+                      turns: expandAnimation,
+                      child: Icon(
+                        Icons.expand_more,
+                        size: 16.0,
+                      ),
+                    )
+                  : const SizedBox(width: 16.0, height: 16.0),
               Expanded(child: content),
             ],
           );

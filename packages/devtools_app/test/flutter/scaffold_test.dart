@@ -23,6 +23,7 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
+      await resetWindowSize();
     });
 
     testWidgets('displays in full-width mode without error',
@@ -37,6 +38,7 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
+      await resetWindowSize();
     });
 
     testWidgets('displays no tabs when only one is given',

@@ -15,12 +15,16 @@ Widget wrap(Widget widget) => MaterialApp(home: Material(child: widget));
 
 /// Sets the size of the app window under test to [windowSize].
 ///
-/// This will be reset on each test invocation, so it doesn't need to be reset
-/// in [tearDown] calls.
+/// This must be reset on after each test invocation that calls
+/// by using [resetWindowSize].
 Future<void> setWindowSize(Size windowSize) async {
   final TestWidgetsFlutterBinding binding =
       TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
   binding.window.physicalSizeTestValue = windowSize;
   binding.window.devicePixelRatioTestValue = 1.0;
+}
+
+Future<void> resetWindowSize() async {
+  await setWindowSize(const Size(800.0, 1200.0));
 }

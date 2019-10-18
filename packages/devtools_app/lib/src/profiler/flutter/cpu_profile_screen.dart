@@ -78,6 +78,7 @@ class CpuTable extends StatelessWidget {
     TotalTimeColumn(),
     SelfTimeColumn(),
     MethodNameColumn(),
+    SourceColumn(),
   ]);
 
   final CpuProfileData data;
