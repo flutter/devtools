@@ -10,6 +10,7 @@ import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
+import '../performance/flutter/performance_screen.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'scaffold.dart';
@@ -65,7 +66,7 @@ class DevToolsAppState extends State<DevToolsApp> {
             tabs: [
               const InspectorScreen(),
               EmptyScreen.timeline,
-              EmptyScreen.performance,
+              const PerformanceScreen(),
               EmptyScreen.memory,
               EmptyScreen.debugger,
               EmptyScreen.logging,

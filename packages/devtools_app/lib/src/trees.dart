@@ -90,6 +90,13 @@ class TreeNode<T extends TreeNode<T>> {
     _isExpanded = true;
   }
 
+  /// Whether this node should be shown in the tree.
+  ///
+  /// When using this, consider caching the value. It is O([level]) to compute.
+  bool shouldShow() {
+    return parent == null || (parent.isExpanded && parent.shouldShow());
+  }
+
   void collapse() {
     _isExpanded = false;
   }

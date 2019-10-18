@@ -375,7 +375,8 @@ abstract class ColumnData<T> {
     this.usesHtml = false,
     this.hover = false,
     this.cssClass,
-  }) : percentWidth = defaultWideColumnPercentWidth;
+  })  : percentWidth = defaultWideColumnPercentWidth,
+        fixedWidthPx = null;
 
   static const defaultWideColumnPercentWidth = 100;
 
@@ -388,12 +389,17 @@ abstract class ColumnData<T> {
   ///
   /// If both [fixedWidthPx] and [percentWidth] are specified, [fixedWidthPx]
   /// will be used.
-  int fixedWidthPx;
+  final double fixedWidthPx;
 
   /// Width of the column expressed as a percent value between 0 and 100.
   ///
   /// TODO(jacobr): make this a double.
   int percentWidth;
+
+  /// How much to indent the data object by.
+  ///
+  /// This should only be non-zero for [TreeColumnData].
+  double getNodeIndentPx(T dataObject) => 0.0;
 
   final ColumnAlignment alignment;
 
@@ -441,13 +447,9 @@ abstract class ColumnData<T> {
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(
-    String title, {
-    int fixedWidthPx,
-    int percentWidth,
-  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
+  TreeColumnData(String title) : super(title);
 
-  static const treeToggleWidth = 14;
+  static const treeToggleWidth = 14.0;
 
   final StreamController<T> nodeExpandedController =
       StreamController<T>.broadcast();
@@ -459,8 +461,9 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
 
   Stream<T> get onNodeCollapsed => nodeCollapsedController.stream;
 
-  int getNodeIndentPx(T dataObject) {
-    int indentWidth = dataObject.level * treeToggleWidth;
+  @override
+  double getNodeIndentPx(T dataObject) {
+    double indentWidth = dataObject.level * treeToggleWidth;
     if (!dataObject.isExpandable) {
       // If the object is not expandable, we need to increase the width of our
       // spacer to account for the missing tree toggle.
