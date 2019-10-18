@@ -651,7 +651,7 @@ class HtmlSurveyToast extends CoreElement {
         ..add([
           label(text: 'Help improve DevTools! ', c: 'toast-title'),
           surveyLink =
-              a(text: 'Take our Q3 survey', href: _url, target: '_blank')
+              a(text: 'Take our quarterly survey', href: _url, target: '_blank')
                 ..click(_hideAndSetActionTaken),
           label(text: '.'),
           div()..flex(),
