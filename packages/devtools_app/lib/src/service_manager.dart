@@ -229,6 +229,10 @@ class ServiceConnectionManager {
   }
 
   Future<double> getDisplayRefreshRate() async {
+    if (connectedApp == null || !await connectedApp.isAnyFlutterApp) {
+      return null;
+    }
+
     const unknownRefreshRate = 0.0;
 
     final flutterViewListResponse = await service.callServiceExtension(

@@ -391,6 +391,11 @@ class TimeRange {
 
   Duration get duration => end - start;
 
+  bool overlaps(TimeRange t) {
+    return (t.start >= start && t.start <= end) ||
+        (t.end >= start && t.end <= end);
+  }
+
   @override
   String toString({TimeUnit unit}) {
     unit ??= TimeUnit.microseconds;

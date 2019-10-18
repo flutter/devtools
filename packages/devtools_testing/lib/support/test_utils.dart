@@ -8,8 +8,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 
-TimelineEvent testTimelineEvent(Map<String, dynamic> json) =>
-    TimelineEvent(testTraceEventWrapper(json));
+SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
+    SyncTimelineEvent(eventWrapper);
 
 TraceEvent testTraceEvent(Map<String, dynamic> json) =>
     TraceEvent(jsonDecode(jsonEncode(json)));

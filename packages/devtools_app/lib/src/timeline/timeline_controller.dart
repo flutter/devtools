@@ -18,8 +18,8 @@ const String timelineScreenId = 'timeline';
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// protocols [TimelineProtocol] and [CpuProfileTransformer], and it communicates
-/// with [TimelineService].
+/// [TimelineProcessor] and [CpuProfileTransformer], and it communicates with
+/// [TimelineService].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
@@ -27,19 +27,8 @@ const String timelineScreenId = 'timeline';
 class TimelineController {
   TimelineController() {
     timelineService = TimelineService(this);
+    fullTimeline = FullTimeline(this);
   }
-
-  /// Stream controller that notifies a frame was added to the timeline.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [timelineData.frames].
-  final frameAddedController = StreamController<TimelineFrame>.broadcast();
-
-  /// Stream controller that notifies a frame was selected.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [timelineData.selectedFrame].
-  final _selectedFrameController = StreamController<TimelineFrame>.broadcast();
 
   /// Stream controller that notifies a timeline event was selected.
   ///
@@ -62,10 +51,6 @@ class TimelineController {
   /// should be logged for the timeline.
   final _nonFatalErrorController = StreamController<String>.broadcast();
 
-  Stream<TimelineFrame> get onFrameAdded => frameAddedController.stream;
-
-  Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
-
   Stream<TimelineEvent> get onSelectedTimelineEvent =>
       _selectedTimelineEventController.stream;
 
@@ -74,13 +59,13 @@ class TimelineController {
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
 
-  TimelineData timelineData;
+  final frameBasedTimeline = FrameBasedTimeline();
+
+  FullTimeline fullTimeline;
 
   OfflineTimelineData offlineTimelineData;
 
   TimelineService timelineService;
-
-  TimelineProtocol timelineProtocol;
 
   final _cpuProfileTransformer = CpuProfileTransformer();
 
@@ -88,14 +73,190 @@ class TimelineController {
 
   TimelineMode timelineMode = TimelineMode.frameBased;
 
+  /// Trace events we received while listening to the Timeline event stream.
+  ///
+  /// This does not include events that we receive while paused (if
+  /// [timelineMode] == [TimelineMode.frameBased]) or stopped (if
+  /// [timelineMode] == [TimelineMode.full]).
+  ///
+  /// These events will be used to switch timeline modes (frameBased vs full).
+  /// The selected mode will process these events using the respective processor
+  /// ([frameBasedTimeline.processor] or
+  /// [fullTimeline.processor]).
+  List<TraceEventWrapper> allTraceEvents = [];
+
+  bool get hasStarted =>
+      frameBasedTimeline.hasStarted && fullTimeline.hasStarted;
+
+  TimelineData get timelineData => timelineMode == TimelineMode.frameBased
+      ? frameBasedTimeline.data
+      : fullTimeline.data;
+
+  CpuProfileData get cpuProfileData =>
+      timelineMode == TimelineMode.frameBased || offlineMode
+          ? frameBasedTimeline.data?.cpuProfileData
+          : fullTimeline.data?.cpuProfileData;
+
+  void selectTimelineEvent(TimelineEvent event) {
+    if (event == null) return;
+    if (timelineMode == TimelineMode.frameBased) {
+      if (frameBasedTimeline.data.selectedEvent == event) return;
+      frameBasedTimeline.data.selectedEvent = event;
+    } else {
+      if (fullTimeline.data.selectedEvent == event) return;
+      fullTimeline.data.selectedEvent = event;
+    }
+    _selectedTimelineEventController.add(event);
+  }
+
+  Future<void> getCpuProfileForSelectedEvent() async {
+    final selectedEvent = timelineData.selectedEvent;
+    if (!selectedEvent.isUiEvent) return;
+
+    final cpuProfileData = await _cpuProfilerService.getCpuProfile(
+      startMicros: selectedEvent.time.start.inMicroseconds,
+      extentMicros: selectedEvent.time.duration.inMicroseconds,
+    );
+
+    if (timelineMode == TimelineMode.frameBased) {
+      frameBasedTimeline.data.cpuProfileData = cpuProfileData;
+    } else {
+      fullTimeline.data.cpuProfileData = cpuProfileData;
+    }
+    _cpuProfileTransformer.processData(cpuProfileData);
+  }
+
+  void loadOfflineData(OfflineTimelineData offlineData) {
+    // TODO(kenz): loading offline data should respect user's current timeline
+    // mode (frameBased vs full). It should also support toggling modes.
+    frameBasedTimeline.data = offlineData.copy();
+    offlineTimelineData = offlineData.copy();
+
+    final traceEvents =
+        offlineData.traceEvents.map((trace) => TraceEvent(trace)).toList();
+
+    // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
+    // the trace, we will not need to infer thread ids. Since we control the
+    // format of the input, this is okay for now.
+    final uiThreadId = traceEvents.first.threadId;
+    final gpuThreadId = traceEvents.last.threadId;
+
+    frameBasedTimeline.processor = FrameBasedTimelineProcessor(
+      timelineController: this,
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+    );
+
+    for (TraceEvent event in traceEvents) {
+      frameBasedTimeline.processor.processTraceEvent(
+        TraceEventWrapper(event, DateTime.now().millisecondsSinceEpoch),
+        immediate: true,
+      );
+    }
+    // Make a final call to [maybeAddPendingEvents] so that we complete the
+    // processing for every frame in the snapshot.
+    frameBasedTimeline.processor.maybeAddPendingEvents();
+
+    if (frameBasedTimeline.data.cpuProfileData != null) {
+      _cpuProfileTransformer
+          .processData(frameBasedTimeline.data.cpuProfileData);
+    }
+
+    setOfflineData();
+    _loadOfflineDataController.add(offlineData);
+  }
+
+  void setOfflineData() {
+    final frameToSelect = offlineTimelineData.frames.firstWhere(
+      (frame) => frame.id == offlineTimelineData.selectedFrameId,
+      orElse: () => null,
+    );
+    if (frameToSelect != null) {
+      frameBasedTimeline.data.selectedFrame = frameToSelect;
+      // TODO(kenz): frames bar chart should listen to this stream and
+      // programmatially select the frame from the offline snapshot.
+      frameBasedTimeline._selectedFrameController.add(frameToSelect);
+
+      if (offlineTimelineData.selectedEvent != null) {
+        final eventToSelect =
+            frameToSelect.findTimelineEvent(offlineTimelineData.selectedEvent);
+        if (eventToSelect != null) {
+          frameBasedTimeline.data.selectedEvent = eventToSelect;
+          frameBasedTimeline.data.cpuProfileData =
+              offlineTimelineData.cpuProfileData;
+          // TODO(kenz): frame flame chart should listen to this stream and
+          // programmatically select the flame chart item that corresponds to
+          // the selected event from the offline snapshot.
+          _selectedTimelineEventController.add(eventToSelect);
+        }
+      }
+    }
+  }
+
+  void exitOfflineMode({bool clearTimeline = true}) {
+    if (clearTimeline) {
+      frameBasedTimeline.data.clear();
+    }
+    offlineTimelineData = null;
+  }
+
+  Future<void> clearData() async {
+    if (serviceManager.hasConnection) {
+      await serviceManager.service.clearVMTimeline();
+    }
+    frameBasedTimeline.clear();
+    fullTimeline.clear();
+    allTraceEvents.clear();
+  }
+
+  void recordTrace(Map<String, dynamic> trace) {
+    final traceEvents = timelineMode == TimelineMode.frameBased
+        ? frameBasedTimeline.data.traceEvents
+        : fullTimeline.data.traceEvents;
+    traceEvents.add(trace);
+  }
+
+  void recordTraceForTimelineEvent(TimelineEvent event) {
+    recordTrace(event.beginTraceEventJson);
+    event.children.forEach(recordTraceForTimelineEvent);
+    if (event.endTraceEventJson != null) {
+      recordTrace(event.endTraceEventJson);
+    }
+  }
+
+  void logNonFatalError(String message) {
+    _nonFatalErrorController.add(message);
+  }
+}
+
+class FrameBasedTimeline {
+  /// Stream controller that notifies a frame was added to the timeline.
+  ///
+  /// Subscribers to this stream will be responsible for updating the UI for the
+  /// new value of [frameBasedTimelineData.frames].
+  final _frameAddedController = StreamController<TimelineFrame>.broadcast();
+
+  /// Stream controller that notifies a frame was selected.
+  ///
+  /// Subscribers to this stream will be responsible for updating the UI for the
+  /// new value of [frameBasedTimelineData.selectedFrame].
+  final _selectedFrameController = StreamController<TimelineFrame>.broadcast();
+
+  Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
+
+  Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
+
+  Future<double> get displayRefreshRate async =>
+      data?.displayRefreshRate ?? await serviceManager.getDisplayRefreshRate();
+
+  FrameBasedTimelineData data;
+
+  FrameBasedTimelineProcessor processor;
+
+  bool get hasStarted => data != null;
+
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
-
-  /// Whether the timeline is being recorded, which will only occur when the
-  /// timeline is not in display-by-frame mode.
-  bool recording = false;
-
-  bool get hasStarted => timelineData != null;
 
   bool get paused => _paused;
 
@@ -111,23 +272,13 @@ class TimelineController {
     _paused = false;
   }
 
-  void startRecording() {
-    // TODO(kenz): kick off timeline recording here.
-    recording = true;
-  }
-
-  void stopRecording() {
-    // TODO(kenz): kick off trace event processing here.
-    recording = false;
-  }
-
   void selectFrame(TimelineFrame frame) {
-    if (frame == null || timelineData.selectedFrame == frame || !hasStarted) {
+    if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
-    timelineData.selectedFrame = frame;
-    timelineData.selectedEvent = null;
-    timelineData.cpuProfileData = null;
+    data.selectedFrame = frame;
+    data.selectedEvent = null;
+    data.cpuProfileData = null;
     _selectedFrameController.add(frame);
 
     if (debugTimeline && frame != null) {
@@ -144,124 +295,58 @@ class TimelineController {
     }
   }
 
-  void selectTimelineEvent(TimelineEvent event) {
-    if (event == null || timelineData.selectedEvent == event) {
+  void addFrame(TimelineFrame frame) {
+    data.frames.add(frame);
+    _frameAddedController.add(frame);
+  }
+
+  void clear() {
+    data.clear();
+  }
+}
+
+class FullTimeline {
+  FullTimeline(this._timelineController);
+
+  final TimelineController _timelineController;
+
+  final _timelineProcessedController = StreamController<bool>.broadcast();
+
+  Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
+
+  FullTimelineData data;
+
+  FullTimelineProcessor processor;
+
+  bool get hasStarted => data != null;
+
+  /// Whether the timeline is being recorded.
+  bool recording = false;
+
+  void startRecording() async {
+    recording = true;
+  }
+
+  void stopRecording() {
+    recording = false;
+
+    if (_timelineController.allTraceEvents.isEmpty) {
+      // TODO(kenz): show a no events recorded error message.
       return;
     }
-    timelineData.selectedEvent = event;
-    _selectedTimelineEventController.add(event);
+
+    processor.processTimeline(_timelineController.allTraceEvents);
+    _timelineController.fullTimeline.data.initializeEventBuckets();
+    _timelineProcessedController.add(true);
   }
 
-  void addFrame(TimelineFrame frame) {
-    timelineData.frames.add(frame);
-    frameAddedController.add(frame);
+  void addTimelineEvent(TimelineEvent event) {
+    data.timelineEvents.add(event);
   }
 
-  Future<void> getCpuProfileForSelectedEvent() async {
-    if (!timelineData.selectedEvent.isUiEvent) return;
-
-    assert(timelineData.selectedEvent.frameId == timelineData.selectedFrame.id);
-
-    timelineData.selectedFrame.cpuProfileData ??=
-        await _cpuProfilerService.getCpuProfile(
-      startMicros:
-          timelineData.selectedFrame.uiEventFlow.time.start.inMicroseconds,
-      extentMicros:
-          timelineData.selectedFrame.uiEventFlow.time.duration.inMicroseconds,
-    );
-
-    timelineData.cpuProfileData = CpuProfileData.subProfile(
-      timelineData.selectedFrame.cpuProfileData,
-      timelineData.selectedEvent.time,
-    );
-    _cpuProfileTransformer.processData(timelineData.cpuProfileData);
-  }
-
-  void recordTrace(Map<String, dynamic> trace) {
-    timelineData.traceEvents.add(trace);
-  }
-
-  void recordTraceForTimelineEvent(TimelineEvent event) {
-    recordTrace(event.beginTraceEventJson);
-    event.children.forEach(recordTraceForTimelineEvent);
-    if (event.endTraceEventJson != null) {
-      recordTrace(event.endTraceEventJson);
-    }
-  }
-
-  void loadOfflineData(OfflineTimelineData offlineData) {
-    timelineData = offlineData.copy();
-    offlineTimelineData = offlineData.copy();
-
-    final traceEvents =
-        offlineData.traceEvents.map((trace) => TraceEvent(trace)).toList();
-
-    // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
-    // the trace, we will not need to infer thread ids. Since we control the
-    // format of the input, this is okay for now.
-    final uiThreadId = traceEvents.first.threadId;
-    final gpuThreadId = traceEvents.last.threadId;
-
-    timelineProtocol = TimelineProtocol(
-      timelineController: this,
-      uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
-    );
-
-    for (TraceEvent event in traceEvents) {
-      timelineProtocol.processTraceEvent(event, immediate: true);
-    }
-    // Make a final call to [maybeAddPendingEvents] so that we complete the
-    // processing for every frame in the snapshot.
-    timelineProtocol.maybeAddPendingEvents();
-
-    if (timelineData.cpuProfileData != null) {
-      _cpuProfileTransformer.processData(timelineData.cpuProfileData);
-    }
-
-    setOfflineData();
-    _loadOfflineDataController.add(offlineData);
-  }
-
-  void setOfflineData() {
-    final frameToSelect = offlineTimelineData.frames.firstWhere(
-      (frame) => frame.id == offlineTimelineData.selectedFrameId,
-      orElse: () => null,
-    );
-    if (frameToSelect != null) {
-      timelineData.selectedFrame = frameToSelect;
-      // TODO(kenz): frames bar chart should listen to this stream and
-      // programmatially select the frame from the offline snapshot.
-      _selectedFrameController.add(frameToSelect);
-
-      if (offlineTimelineData.selectedEvent != null) {
-        final eventToSelect =
-            frameToSelect.findTimelineEvent(offlineTimelineData.selectedEvent);
-        if (eventToSelect != null) {
-          timelineData.selectedEvent = eventToSelect;
-          timelineData.cpuProfileData = offlineTimelineData.cpuProfileData;
-          // TODO(kenz): frame flame chart should listen to this stream and
-          // programmatically select the flame chart item that corresponds to
-          // the selected event from the offline snapshot.
-          _selectedTimelineEventController.add(eventToSelect);
-        }
-      }
-    }
-  }
-
-  Future<void> exitOfflineMode({bool clearTimeline = true}) async {
-    if (clearTimeline) {
-      await timelineData.clear();
-    }
-    offlineTimelineData = null;
-  }
-
-  Future<double> get displayRefreshRate async =>
-      timelineData?.displayRefreshRate ??
-      await serviceManager.getDisplayRefreshRate();
-
-  void logNonFatalError(String message) {
-    _nonFatalErrorController.add(message);
+  void clear() {
+    data.clear();
+    processor.reset();
   }
 }
 
