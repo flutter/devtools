@@ -447,11 +447,7 @@ abstract class ColumnData<T> {
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(
-    String title, {
-    double fixedWidthPx,
-    int percentWidth,
-  }) : super(title, fixedWidthPx: fixedWidthPx, percentWidth: percentWidth);
+  TreeColumnData(String title) : super(title);
 
   static const treeToggleWidth = 14.0;
 

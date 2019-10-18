@@ -48,6 +48,36 @@ void main() {
       });
     });
 
+    test('shouldShow determines if each node is visible', () {
+      final childTreeNodes = [
+        treeNode1,
+        treeNode2,
+        treeNode3,
+        treeNode4,
+        treeNode5
+      ];
+      void expectChildTreeNodesShouldShow(List<bool> expected) {
+        expect(childTreeNodes.length, expected.length,
+            reason: 'expected list of bool must have '
+                '${childTreeNodes.length} elements');
+        for (var i = 0; i < childTreeNodes.length; i++) {
+          expect(childTreeNodes[i].shouldShow(), expected[i],
+              reason: 'treeNode${i + 1}.shouldShow() did not match '
+                  'the expected value.');
+        }
+      }
+
+      expect(treeNode0.shouldShow(), true);
+      expectChildTreeNodesShouldShow([false, false, false, false, false]);
+      treeNode0.expandCascading();
+      treeNode4.collapse();
+      expectChildTreeNodesShouldShow([true, true, true, true, false]);
+      treeNode4.expand();
+      treeNode2.collapse();
+      expectChildTreeNodesShouldShow([true, true, false, false, false]);
+      testTreeNode.collapseCascading();
+    });
+
     test('addChild', () {
       final parent = TestTreeNode();
       final child = TestTreeNode();

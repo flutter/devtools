@@ -24,8 +24,9 @@ void main() {
               TestData('Pop', 5),
             ]),
           TestData('Baz', 6),
-          TestData('Qux', 6),
+          TestData('Qux', 7),
         ]);
+      tree.expandCascading();
     });
 
     testWidgets('displays with simple content', (WidgetTester tester) async {
@@ -87,7 +88,8 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
-    testWidgets('properly collapses the tree', (WidgetTester tester) async {
+    testWidgets('properly collapses and expands the tree',
+        (WidgetTester tester) async {
       final table = TreeTable<TestData>(
         columns: [
           _NumberColumn(),
@@ -101,8 +103,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(tree.isExpanded, true);
       await tester.tap(find.byKey(const PageStorageKey('Foo')));
-      expect(tree.isExpanded, false);
       await tester.pumpAndSettle();
+      expect(tree.isExpanded, false);
+      await tester.tap(find.byKey(const PageStorageKey('Foo')));
+      await tester.pumpAndSettle();
+      expect(tree.isExpanded, true);
+      await tester.tap(find.byKey(const PageStorageKey('Bar')));
+      await tester.pumpAndSettle();
+      expect(tree.children[0].isExpanded, false);
     });
 
     test('fails with no data', () {

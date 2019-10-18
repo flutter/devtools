@@ -48,11 +48,15 @@ class PerformanceBodyState extends State<PerformanceBody> {
       _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
       setState(() {
         // Note: it's not really clear what the source of truth for data is.
-        // We're copying a value out of the controller and storing it in this state.
-        // There's no real reason to not just use it directly from the controller.
-        // We also want a way of making sure that the controller doesn't change this value
-        // without an update to this State instance.
+        // We're copying a value out of the controller and storing it in
+        // this state. There's no real reason to not just use it directly
+        // from the controller. We also want a way of making sure that
+        // the controller doesn't change this value without an update to this
+        // State instance.
         data = _controller.cpuProfileData;
+        // TODO(djshuckerow): remove when this screen includes buttons to
+        // expand/collapse all by default.
+        data.cpuProfileRoot.expandCascading();
       });
     });
   }
