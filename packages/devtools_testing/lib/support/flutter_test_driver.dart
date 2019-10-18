@@ -269,9 +269,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'run',
       '--machine',
     ];
-    if (runConfig.trackWidgetCreation) {
-      args.add('--track-widget-creation');
-    }
+    args.add(runConfig.trackWidgetCreation
+        ? '--track-widget-creation'
+        : '--no-track-widget-creation');
     args.addAll(['-d', 'flutter-tester']);
     await setupProcess(
       args,
