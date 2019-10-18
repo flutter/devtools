@@ -72,6 +72,11 @@ void computeDevToolsQueryParams() {
   }
 }
 
+void computeFlutterClientId() async {
+  final flutterClientId = await ga.flutterGAClientID();
+  ga.flutterClientId = flutterClientId;
+}
+
 bool _computing = false;
 
 int _stillWaiting = 0;
@@ -113,6 +118,7 @@ void setupDimensions() async {
     await ga.computeUserApplicationCustomGTagData();
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
+    computeFlutterClientId();
     ga.dimensionsComputed();
   }
 }

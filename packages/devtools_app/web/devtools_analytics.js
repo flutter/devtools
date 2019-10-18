@@ -51,6 +51,7 @@ function initializeGA() {
              dimension5: 'devtools_chrome',
              dimension6: 'devtools_version',
              dimension7: 'ide_launched',
+             dimension8: 'flutter_client_id',
 
              // Custom metrics:
              metric1: 'gpu_duration',

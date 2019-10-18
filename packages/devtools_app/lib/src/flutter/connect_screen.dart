@@ -102,6 +102,8 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
               isDense: true,
               border: OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
+                // TODO(jacobr): we need to use themed colors everywhere instead
+                // of hard coding material colors.
                 borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
               hintText: 'URL',

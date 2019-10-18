@@ -424,8 +424,7 @@ class ServiceExtensionManager {
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
-  // ignore: prefer_collection_literals
-  final Set<String> _pendingServiceExtensions = {};
+  final _pendingServiceExtensions = <String>{};
 
   var extensionStatesUpdated = Completer<void>();
 

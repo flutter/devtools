@@ -25,9 +25,7 @@ void main() {
   group('virtual canvas logic', () {
     ViewportCanvas viewportCanvas;
     final paintsRequested = <Rect>[];
-    // TODO(devoncarew): Remove this suppression once after a few Dart releases.
-    // ignore: prefer_collection_literals
-    final canvasesPainted = Set<CanvasRenderingContext2D>();
+    final canvasesPainted = <CanvasRenderingContext2D>{};
     void loggingPaintCallback(CanvasRenderingContext2D context, Rect rect) {
       paintsRequested.add(rect);
       canvasesPainted.add(context);

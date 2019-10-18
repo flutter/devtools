@@ -11,6 +11,7 @@ import '../../src/globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
+import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -32,7 +33,6 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
-    FrameworkCore.init(WidgetsBinding.instance.window.defaultRouteName);
   }
 
   /// Generates routes, separating the path from URL query parameters.
@@ -76,10 +76,17 @@ class DevToolsAppState extends State<DevToolsApp> {
         ),
     '/connect': (_) => DevToolsScaffold.withChild(child: ConnectScreenBody()),
   };
+
   @override
   Widget build(BuildContext context) {
+    final theme =
+        devtools_theme.isDarkTheme ? ThemeData.dark() : ThemeData.light();
+    // TODO(jacobr): determine whether to update the theme to match the
+    // devtools_theme or update devtools_theme to match the flutter theme.
+    // For example, to match the devtools_theme we would wrtie:
+    // theme.copyWith(backgroundColor: devtools_theme.defaultBackground);
     return MaterialApp(
-      theme: ThemeData.light(),
+      theme: theme,
       onGenerateRoute: _generateRoute,
     );
   }
