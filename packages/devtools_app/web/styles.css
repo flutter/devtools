@@ -1036,6 +1036,10 @@ but a more subtle solution would be better. */
     z-index: 10;
 }
 
+.survey-toast-container {
+    width: 375px !important;
+}
+
 @font-face {
     font-family: 'Material Icons';
     font-style: normal;
