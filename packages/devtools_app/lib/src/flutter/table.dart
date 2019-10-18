@@ -61,7 +61,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   /// The width of all columns in the table.
   double get tableWidth {
-    double sum = 0.0;
+    double sum = 2 * rowHorizontalPadding;
     for (var width in columnWidths) {
       sum += width;
     }
@@ -77,20 +77,26 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   /// a height of 0 and a height of [defaultRowHeight].
   static const defaultRowHeight = 42.0;
 
+  /// How much padding to place around the beginning
+  /// and end of each row in the table.
+  static const rowHorizontalPadding = 16.0;
+
   @override
   void initState() {
     super.initState();
-    _flattenedList = [];
-    _computeFlatListFromTree(flatList: _flattenedList);
-    columnWidths = _computeColumnWidths();
+    _refreshTree();
   }
 
   @override
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _flattenedList = [];
-    _computeFlatListFromTree(flatList: _flattenedList);
-    refreshTree();
+    // TODO(djshuckerow): Be selective about running this only
+    // when the members of the oldWidget have changed.
+    // We need to be careful that we don't ignore a change to the tree
+    // when the tree has had a child added to it but not been replaced.
+    // The TableData class may provide some utilities for managing computations
+    // necessary when the table is rebuilt.
+    _refreshTree();
   }
 
   void _computeFlatListFromTree(
@@ -147,48 +153,69 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     return widths;
   }
 
-  /// Resizes the table when the tree structure has been updated.
+  /// Recomputes the flattened list of the tree and the widths of the columns.
   ///
-  /// [TreeNodeWidgets] call this method when they have told a [TreeNode]
-  /// to expand or collapse.
-  void refreshTree() {
+  /// This computation traverses every row to show in the table, which can become
+  /// expensive for large tables.
+  void _refreshTree() {
     setState(() {
+      _flattenedList = [];
+      _computeFlatListFromTree(flatList: _flattenedList);
       columnWidths = _computeColumnWidths();
     });
   }
 
+  /// Rebuilds the table whenever the tree structure has been updated
+  ///
+  /// [TreeNodeWidgets] call this method when they have told a [TreeNode]
+  /// to expand or collapse.
+  ///
+  /// Note that setState is being called in response to a change in
+  /// [widget.node] or its children, and it does not reflect a change in
+  /// an instance variable.
+  void onNodeExpansionChanged() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: max(
-          MediaQuery.of(context).size.width,
-          tableWidth,
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _TreeNodeWidget.tableHeader(
-            key: const Key('Table header'),
-            tableState: this,
-          ),
-          Expanded(
-            child: ListView.custom(
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final node = _flattenedList[index];
-                  return _TreeNodeWidget(
-                    key: PageStorageKey(widget.keyFactory(node)),
-                    tableState: this,
-                    node: node,
-                  );
-                },
-                childCount: _flattenedList.length,
-              ),
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scrollbar(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: max(
+              constraints.widthConstraints().maxWidth,
+              tableWidth,
             ),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _TreeNodeWidget.tableHeader(
+                key: const Key('Table header'),
+                tableState: this,
+              ),
+              Expanded(
+                child: Scrollbar(
+                  child: ListView.custom(
+                    childrenDelegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final node = _flattenedList[index];
+                        return _TreeNodeWidget(
+                          key: PageStorageKey(widget.keyFactory(node)),
+                          tableState: this,
+                          node: node,
+                        );
+                      },
+                      childCount: _flattenedList.length,
+                    ),
+                  ),
+                ),
+              ),
+            ]),
           ),
-        ]),
-      ),
-    );
+        ),
+      );
+    });
   }
 }
 
@@ -240,7 +267,7 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
   // Convenience accessors for relevant fields from [TreeTable].
   TreeColumnData<T> get treeColumn => widget.tableState.widget.treeColumn;
   List<ColumnData<T>> get columns => widget.tableState.widget.columns;
-  void onListUpdated() => widget.tableState.refreshTree();
+  void onListUpdated() => widget.tableState.onNodeExpansionChanged();
   List<double> get columnWidths => widget.tableState.columnWidths;
 
   @override
@@ -393,15 +420,20 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
       return content;
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < columns.length; i++)
-          columnFor(
-            columns[i],
-            columnWidths[i],
-          ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _TreeTableState.rowHorizontalPadding,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < columns.length; i++)
+            columnFor(
+              columns[i],
+              columnWidths[i],
+            ),
+        ],
+      ),
     );
   }
 }
