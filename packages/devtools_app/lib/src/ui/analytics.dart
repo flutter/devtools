@@ -231,8 +231,8 @@ Future<String> flutterGAClientID() async {
   String clientId = '';
 
   if (isDevToolsServerAvailable) {
-    // Test if Flutter is enabled (or if Flutter Tool ever run if not enabled is
-    // false, we don't want to be the first to create a ~/.flutter file.
+    // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
+    // is false, we don't want to be the first to create a ~/.flutter file.
     if (await isFlutterGAEnabled) {
       final resp = await _request(server.apiGetFlutterGAClientId);
       if (resp?.status == HttpStatus.ok) {
