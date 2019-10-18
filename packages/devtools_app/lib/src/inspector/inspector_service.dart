@@ -44,8 +44,7 @@ class InspectorService {
     this.vmService,
     this.inspectorLibrary,
     this.supportedServiceMethods,
-    // ignore: prefer_collection_literals
-  ) : clients = Set() {
+  ) : clients = {} {
     vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
     vmService.onDebugEvent.listen(onDebugVmServiceReceived);
   }

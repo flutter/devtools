@@ -46,8 +46,7 @@ class HtmlMessageManager {
       _messages[screenId]?.remove(_message);
     });
 
-    // ignore: prefer_collection_literals
-    _messages.putIfAbsent(screenId, () => Set()).add(message);
+    _messages.putIfAbsent(screenId, () => {message});
     _showMessage(message);
   }
 }

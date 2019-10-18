@@ -42,8 +42,7 @@ class FakeServiceExtensionManager extends Fake
       _serviceExtensionStateController = {};
 
   /// All available service extensions.
-  // ignore: prefer_collection_literals
-  final Set<String> _serviceExtensions = Set<String>();
+  final _serviceExtensions = <String>{};
 
   /// All service extensions that are currently enabled.
   final Map<String, ServiceExtensionState> _enabledServiceExtensions = {};

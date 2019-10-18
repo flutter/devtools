@@ -577,14 +577,13 @@ class TimelineProtocol {
   }
 
   bool _shouldProcessTraceEvent(TraceEvent event) {
-    // ignore: prefer_collection_literals
-    final Set<String> phaseWhitelist = Set.of([
+    final Set<String> phaseWhitelist = {
       flowStartPhase,
       flowEndPhase,
       durationBeginPhase,
       durationEndPhase,
       durationCompletePhase,
-    ]);
+    };
     return phaseWhitelist.contains(event.phase) &&
         // Do not process Garbage Collection events.
         event.category != 'GC' &&
