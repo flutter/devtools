@@ -180,35 +180,39 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: max(
-            constraints.widthConstraints().maxWidth,
-            tableWidth,
-          ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _TreeNodeWidget.tableHeader(
-              key: const Key('Table header'),
-              tableState: this,
+      return Scrollbar(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: max(
+              constraints.widthConstraints().maxWidth,
+              tableWidth,
             ),
-            Expanded(
-              child: ListView.custom(
-                childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final node = _flattenedList[index];
-                    return _TreeNodeWidget(
-                      key: PageStorageKey(widget.keyFactory(node)),
-                      tableState: this,
-                      node: node,
-                    );
-                  },
-                  childCount: _flattenedList.length,
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _TreeNodeWidget.tableHeader(
+                key: const Key('Table header'),
+                tableState: this,
+              ),
+              Expanded(
+                child: Scrollbar(
+                  child: ListView.custom(
+                    childrenDelegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final node = _flattenedList[index];
+                        return _TreeNodeWidget(
+                          key: PageStorageKey(widget.keyFactory(node)),
+                          tableState: this,
+                          node: node,
+                        );
+                      },
+                      childCount: _flattenedList.length,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       );
     });
