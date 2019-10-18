@@ -236,8 +236,13 @@ Future<String> flutterGAClientID() async {
     if (await isFlutterGAEnabled) {
       final resp = await _request(server.apiGetFlutterGAClientId);
       if (resp?.status == HttpStatus.ok) {
-        // Return value 'null' implies Flutter tool has never been run return null.
         clientId = json.decode(resp.responseText);
+        if (clientId == null) {
+          // Return value of 'null' (Flutter tool never ran). Server request
+          // apiGetFlutterGAClientId should not happen because the
+          // isFlutterGAEnabled test should have been false.
+          log('${server.apiGetFlutterGAClientId} is null', LogLevel.warning);
+        }
       } else {
         _logWarning(resp, server.apiGetFlutterGAClientId);
       }
