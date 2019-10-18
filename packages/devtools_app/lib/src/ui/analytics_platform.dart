@@ -17,21 +17,20 @@ import '../ui/analytics.dart' as ga;
 @JS('getDevToolsPropertyID')
 external String devToolsProperty();
 
-@JS('gaStorageCollect')
-external String storageCollectValue();
+@JS('initializeGA')
+external void initializeGA();
 
-@JS('gaStorageDontCollect')
-external String storageDontCollectValue();
+@JS('hookupListenerForGA')
+external void jsHookupListenerForGA();
 
-bool isAnalyticsAllowed() =>
-    html.window.localStorage[devToolsProperty()] == storageCollectValue();
+Future<bool> get isAnalyticsAllowed async => await ga.isEnabled;
 
 void setAllowAnalytics() {
-  html.window.localStorage[devToolsProperty()] = storageCollectValue();
+  ga.setEnabled(true);
 }
 
 void setDontAllowAnalytics() {
-  html.window.localStorage[devToolsProperty()] = storageDontCollectValue();
+  ga.setEnabled(false);
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and

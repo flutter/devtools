@@ -5,29 +5,45 @@
 import 'dart:async';
 
 import 'package:html_shim/html.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:platform_detect/platform_detect.dart';
 
 import 'src/framework/framework_core.dart';
 import 'src/main.dart';
 import 'src/ui/analytics.dart' as ga;
-import 'src/ui/analytics_platform.dart' as ga_platform;
+import 'src/ui/analytics_platform.dart' as platform;
 
 void main() {
   // Run in a zone in order to catch all Dart exceptions.
   runZoned(
-    () {
+    () async {
       // Initialize the core framework.
       FrameworkCore.init(window.location.toString());
+
+      // Hookup for possbile analytic collection.
+      ga.exposeGaDevToolsEnabledToJs();
+
+      if (ga.isGtagsReset()) {
+        ga.resetDevToolsFile();
+      }
 
       // Load the web app framework.
       final HtmlPerfToolFramework framework = HtmlPerfToolFramework();
 
+      // TODO(terry): Eventually remove the below line localStorage clear().
+      /// Nothing is now stored in Chrome's local store - remove old stuff.
+      window.localStorage.clear();
+
       // Show the opt-in dialog for collection analytics?
       try {
-        if (ga.isGtagsEnabled() &
-            (!window.localStorage.containsKey(ga_platform.devToolsProperty()) ||
-                window.localStorage[ga_platform.devToolsProperty()].isEmpty)) {
-          framework.showAnalyticsDialog();
+        if (ga.isGtagsEnabled()) {
+          if (await ga.isFirstRun) {
+            framework.showAnalyticsDialog();
+          } else if (await ga.isEnabled) {
+            // Analytic collection is enabled - setup for analytics.
+            platform.initializeGA();
+            platform.jsHookupListenerForGA();
+          }
         }
       } catch (e) {
         // If there are errors setting up analytics, write them to the console
@@ -49,17 +65,22 @@ void main() {
         return;
       }
 
-      // Show the Q3 DevTools survey.
-      // TODO(kenz): do not show this survey again if a) an action has been
-      // taken (survey link clicked or toast dismissed), b) we have shown it
-      // 5 times without action, or c) the date is after ~ Oct 30th 2019. Data
-      // required for a) and b) needs to be added to devtools_server.
-      // ignore: dead_code
-      if (false) {
-        framework.surveyToast(_generateSurveyUrl());
+      // Show the Q3 DevTools survey. Stop showing the survey after
+      // November 14, 2019 (4 weeks after the survey start date
+      // October 17, 2019).
+      final surveyThresholdDate = DateTime(2019, 11, 14);
+      if (DateTime.now().isBefore(surveyThresholdDate)) {
+        // Do not show the survey if the user has either taken or dismissed it.
+        if (!await ga.isSurveyActionTaken) {
+          // Stop showing the survey toast after 5 times without action.
+          if (await ga.surveyShownCount < 5) {
+            framework.surveyToast(await _generateSurveyUrl());
+            await ga.incrementSurveyShownCount;
+          }
+        }
       }
 
-      FrameworkCore.initVmService(
+      unawaited(FrameworkCore.initVmService(
         window.location.toString(),
         errorReporter: (String title, dynamic error) {
           framework.showError(title, error);
@@ -73,7 +94,7 @@ void main() {
           // application from the command line and connect to it with DevTools.
           framework.mainElement.clear();
         }
-      });
+      }));
 
       framework.loadScreenFromLocation();
     },
@@ -83,24 +104,19 @@ void main() {
   );
 }
 
-String _generateSurveyUrl() {
+Future<String> _generateSurveyUrl() async {
   const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
   const internalKey = 'Internal';
 
   final uri = Uri.parse(window.location.toString());
-
-  // TODO(kenz): get client id once functionality is available.
-  const clientId = '';
-
-  String ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? '';
-  ideValue = ideValue == '' ? 'CLI' : ideValue;
-
+  final ideValue = uri.queryParameters[ga.ideLaunchedQuery] ?? 'CLI';
   final fromValue = uri.fragment ?? '';
+  final clientId = await ga.flutterGAClientID();
 
   // TODO(djshuckerow): override this value for internal users.
-  const internalValue = false;
+  const internalValue = 'false';
 
   final surveyUri = Uri(
     scheme: 'https',

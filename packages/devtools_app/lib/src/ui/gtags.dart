@@ -9,14 +9,13 @@ library gtags;
 
 import 'package:js/js.dart';
 
+import 'analytics.dart' as ga;
+
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".
 
 @JS('gtag')
 external void _gTagCommandName(String command, String name, [dynamic params]);
-
-@JS('gaCollectionAllowed')
-external bool _gaCollectionAllowed();
 
 /// Google Analytics ready to collect.
 @JS('isGaInitialized')
@@ -27,12 +26,12 @@ class GTag {
   static const String _exception = 'exception';
 
   /// Collect the analytic's event and its parameters.
-  static void event(String eventName, GtagEvent gaEvent) {
-    if (_gaCollectionAllowed()) _gTagCommandName(_event, eventName, gaEvent);
+  static void event(String eventName, GtagEvent gaEvent) async {
+    if (await ga.isEnabled) _gTagCommandName(_event, eventName, gaEvent);
   }
 
-  static void exception(GtagException gaException) {
-    if (_gaCollectionAllowed()) {
+  static void exception(GtagException gaException) async {
+    if (await ga.isEnabled) {
       _gTagCommandName(_event, _exception, gaException);
     }
   }

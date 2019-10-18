@@ -166,28 +166,22 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     final streamIds = [
-      EventStreams.kStdout,
-      EventStreams.kStderr,
-      EventStreams.kVM,
-      EventStreams.kIsolate,
       EventStreams.kDebug,
-      EventStreams.kGC,
-      EventStreams.kTimeline,
       EventStreams.kExtension,
-      serviceStreamName
+      EventStreams.kGC,
+      EventStreams.kIsolate,
+      EventStreams.kLogging,
+      EventStreams.kStderr,
+      EventStreams.kStdout,
+      EventStreams.kTimeline,
+      EventStreams.kVM,
+      serviceStreamName,
     ];
-
-    // The following streams are not yet supported by Flutter Web / Dart web
-    // apps.
-    if (!await connectedApp.isDartWebApp) {
-      streamIds.addAll(['_Logging', EventStreams.kLogging]);
-    }
 
     await Future.wait(streamIds.map((String id) async {
       try {
         await service.streamListen(id);
       } catch (e) {
-        // TODO(devoncarew): Remove this check on or after approx. Oct 1 2019.
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
           // have the private names, and older ones don't have the public ones).
@@ -417,25 +411,21 @@ class ServiceExtensionManager {
 
   bool _firstFrameEventReceived = false;
 
-  final Map<String, StreamController<bool>> _serviceExtensionController =
-      <String, StreamController<bool>>{};
+  final Map<String, StreamController<bool>> _serviceExtensionController = {};
   final Map<String, StreamController<ServiceExtensionState>>
-      _serviceExtensionStateController =
-      <String, StreamController<ServiceExtensionState>>{};
+      _serviceExtensionStateController = {};
 
   /// All available service extensions.
-  // ignore: prefer_collection_literals
-  final Set<String> _serviceExtensions = Set<String>();
+  final Set<String> _serviceExtensions = {};
 
   /// All service extensions that are currently enabled.
-  final Map<String, ServiceExtensionState> _enabledServiceExtensions =
-      <String, ServiceExtensionState>{};
+  final Map<String, ServiceExtensionState> _enabledServiceExtensions = {};
 
   /// Temporarily stores service extensions that we need to add. We should not
   /// add extensions until the first frame event has been received
   /// [_firstFrameEventReceived].
   // ignore: prefer_collection_literals
-  final Set<String> _pendingServiceExtensions = Set<String>();
+  final Set<String> _pendingServiceExtensions = {};
 
   var extensionStatesUpdated = Completer<void>();
 
@@ -557,8 +547,7 @@ class ServiceExtensionManager {
   }
 
   Future<void> _addServiceExtension(String name) async {
-    final StreamController<bool> streamController =
-        _getServiceExtensionController(name);
+    final streamController = _getServiceExtensionController(name);
 
     _serviceExtensions.add(name);
     streamController.add(true);

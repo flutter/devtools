@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools.dart' as devtools;
@@ -20,7 +21,7 @@ class InfoScreen extends Screen {
   @override
   Widget buildTab(BuildContext context) {
     return Tab(
-      icon: Icon(Icons.info),
+      icon: Icon(Octicons.getIconData('info')),
       text: 'Info',
     );
   }

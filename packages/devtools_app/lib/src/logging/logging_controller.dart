@@ -161,6 +161,7 @@ class LoggingController {
 
   TableData<LogData> get loggingTableModel => _loggingTableModel;
   TableData<LogData> _loggingTableModel;
+
   set loggingTableModel(TableData<LogData> model) {
     _loggingTableModel = model;
     _listen(_loggingTableModel.onSelect, (LogData selection) {
@@ -237,8 +238,6 @@ class LoggingController {
     _listen(service.onGCEvent, _handleGCEvent);
 
     // Log `dart:developer` `log` events.
-    // TODO(devoncarew): Remove `_Logging` support on or after approx. Oct 1 2019.
-    _listen(service.onEvent('_Logging'), _handleDeveloperLogEvent);
     _listen(service.onLoggingEvent, _handleDeveloperLogEvent);
 
     // Log Flutter extension events.

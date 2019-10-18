@@ -22,7 +22,7 @@ The ancestors of this widget were:
   RepaintBoundary
   _FocusMarker
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, hintOverrides: null)
-  FocusScope(node: FocusScopeNode#<NUMBER>)
+  FocusScope(node: FocusScopeNode#<NUMBER>(_ModalScopeState<dynamic> Focus Scope))
   PageStorage
   Offstage(offstage: false)
   _ModalScopeStatus(active)
@@ -33,7 +33,7 @@ The ancestors of this widget were:
   Overlay-[LabeledGlobalKey<OverlayState>#<NUMBER>]
   _FocusMarker
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, hintOverrides: null)
-  FocusScope(AUTOFOCUS, node: FocusScopeNode#<NUMBER>)
+  FocusScope(AUTOFOCUS, node: FocusScopeNode#<NUMBER>(Navigator Scope))
   AbsorbPointer(absorbing: false)
   _PointerListener(listeners: [down, up, cancel], behavior: deferToChild)
   Listener
@@ -81,7 +81,7 @@ The ancestors of this widget were:
   RepaintBoundary
   _FocusMarker
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, hintOverrides: null)
-  FocusScope(node: FocusScopeNode#<NUMBER>)
+  FocusScope(node: FocusScopeNode#<NUMBER>(_ModalScopeState<dynamic> Focus Scope))
   PageStorage
   Offstage(offstage: true)
   _ModalScopeStatus(active, can pop)
@@ -92,7 +92,7 @@ The ancestors of this widget were:
   Overlay-[LabeledGlobalKey<OverlayState>#<NUMBER>]
   _FocusMarker
   Semantics(container: false, properties: SemanticsProperties, label: null, value: null, hint: null, hintOverrides: null)
-  FocusScope(AUTOFOCUS, node: FocusScopeNode#<NUMBER>)
+  FocusScope(AUTOFOCUS, node: FocusScopeNode#<NUMBER>(Navigator Scope))
   AbsorbPointer(absorbing: false)
   _PointerListener(listeners: [down, up, cancel], behavior: deferToChild)
   Listener

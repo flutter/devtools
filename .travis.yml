@@ -6,7 +6,9 @@ os:
 language: dart
 dart:
   - "dev/raw/latest"
-  - stable
+# Exclude stable for now as we depend on Flutter features not availabe on
+# stable.
+#  - stable
 addons:
   chrome: stable
 
@@ -34,7 +36,7 @@ matrix:
     # rolls to the Flutter stable channel.
     - os: windows
       dart:  stable
-      env: 
+      env:
         - BOT=flutter_sdk_tests
         - BOT=test_ddc
         - BOT=test_dart2js
@@ -43,7 +45,7 @@ matrix:
     # TODO(dantup): Skip Flutter builds until we understand/fix Flutter crashing
     # with "failed to delete build/assets: file is locked by another process".
     - os: windows
-      env: 
+      env:
         - BOT=flutter_sdk_tests
         - BOT=test_ddc
         - BOT=test_dart2js
@@ -62,12 +64,16 @@ env:
   - BOT=test_dart2js
   - BOT=integration_ddc
   - BOT=integration_dart2js
+  - BOT=integration_dart2js USE_LOCAL_DEPENDENCIES=true
 
 script: ./tool/travis.sh
 
-# Only building master means that we don't run two builds for each pull request.
-branches:
-  only: [master]
+# Specifying master here means that we don't run two builds for each pull request
+# made from within the DevTools repo, however it complicates running builds on
+# forks without opening PRs.
+# See https://github.com/flutter/devtools/pull/398
+# branches:
+#   only: [master]
 
 cache:
   directories:

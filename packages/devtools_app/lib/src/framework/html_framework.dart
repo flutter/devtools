@@ -651,16 +651,12 @@ class HtmlSurveyToast extends CoreElement {
         ..add([
           label(text: 'Help improve DevTools! ', c: 'toast-title'),
           surveyLink =
-              a(text: 'Take our Q3 survey', href: _url, target: '_blank')
-                ..click(() {
-                  toastAnimator.hide();
-                }),
+              a(text: 'Take our quarterly survey', href: _url, target: '_blank')
+                ..click(_hideAndSetActionTaken),
           label(text: '.'),
           div()..flex(),
           span(c: 'octicon octicon-x flash-close js-flash-close')
-            ..click(() {
-              toastAnimator.hide();
-            }),
+            ..click(_hideAndSetActionTaken),
         ]),
       div(
           text:
@@ -682,6 +678,11 @@ class HtmlSurveyToast extends CoreElement {
 
   void show() async {
     toastAnimator.show(hideDelay: HtmlToastAnimator.infiniteHideDelay);
+  }
+
+  void _hideAndSetActionTaken() {
+    toastAnimator.hide();
+    ga.setSurveyActionTaken();
   }
 }
 
@@ -939,8 +940,12 @@ class HtmlAnalyticsOptInDialog {
 
     acceptButton.click(() {
       ga_platform.setAllowAnalytics();
+
+      // Analytic collection is enabled - setup for analytics.
+      ga_platform.initializeGA();
+      ga_platform.jsHookupListenerForGA();
+
       hide();
-      ga.initializeGA();
     });
 
     dontAcceptButton.click(() {

@@ -1,3 +1,11 @@
+## 0.1.12
+- Change from HttpMultiServer to HttpServer. 
+
+## 0.1.11
+- Add APIs to persist enabling/disabling properties for GA and Surveys to a local file `~/.devtools`.
+- Created shared devtools_api.dart list of APIs known between server and devtools_app.
+- Removed sample API endpoint for `logScreenView`.
+
 ## 0.1.10
 - Add API for handling http requests.
 - Add API endpoint for `logScreenView`.

@@ -6,18 +6,30 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'chrome.dart';
+
 const verbose = true;
 
+// TODO(dantup): Remove these when the live Pub version supports headless mode.
+final bool serverSupportsHeadless =
+    Platform.environment['USE_LOCAL_DEPENDENCIES'] == 'true';
+final bool serverSupportsTryPort =
+    Platform.environment['USE_LOCAL_DEPENDENCIES'] == 'true';
+
 class DevToolsServerDriver {
-  DevToolsServerDriver._(
-      this._process, this._stdin, Stream<String> _stdout, this.stderr)
-      : output = _stdout.map((line) {
+  DevToolsServerDriver._(this._process, this._stdin, Stream<String> _stdout,
+      Stream<String> _stderr)
+      : stdout = _stdout.map((line) {
           _trace('<== $line');
           return line;
-        }).map((line) => jsonDecode(line) as Map<String, dynamic>);
+        }).map((line) => jsonDecode(line) as Map<String, dynamic>),
+        stderr = _stderr.map((line) {
+          _trace('<== STDERR $line');
+          return line;
+        });
 
   final Process _process;
-  final Stream<Map<String, dynamic>> output;
+  final Stream<Map<String, dynamic>> stdout;
   final Stream<String> stderr;
   final StringSink _stdin;
 
@@ -52,11 +64,11 @@ class DevToolsServerDriver {
       args.addAll(['--try-ports', '$tryPorts']);
     }
 
-    // TODO: This needs enabling once the server version that supports headless
-    // has been published.
-    // if (useChromeHeadless && headlessModeIsSupported) {
-    //   args.add('--headless');
-    // }
+    if (useChromeHeadless &&
+        headlessModeIsSupported &&
+        serverSupportsHeadless) {
+      args.add('--headless');
+    }
     final Process process = await Process.start('dart', args);
 
     return DevToolsServerDriver._(
