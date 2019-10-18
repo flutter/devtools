@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/table.dart';
 import '../../performance/performance_controller.dart';
+import '../../profiler/cpu_profile_columns.dart';
+import '../../profiler/cpu_profile_model.dart';
 import '../../table_data.dart';
-import '../cpu_profile_columns.dart';
-import '../cpu_profile_model.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen() : super('Performance');
@@ -37,11 +37,12 @@ class PerformanceBody extends StatefulWidget {
 
 class PerformanceBodyState extends State<PerformanceBody> {
   final PerformanceController _controller = PerformanceController();
-  CpuProfileData data;
+  CpuProfileData _data;
 
   @override
   void initState() {
     super.initState();
+    // TODO(djshuckerow): add in buttons to control the CPU recording.
     _controller.startRecording();
     Future.delayed(const Duration(seconds: 1)).then((_) async {
       await _controller.stopRecording();
@@ -53,37 +54,45 @@ class PerformanceBodyState extends State<PerformanceBody> {
         // from the controller. We also want a way of making sure that
         // the controller doesn't change this value without an update to this
         // State instance.
-        data = _controller.cpuProfileData;
+        _data = _controller.cpuProfileData;
         // TODO(djshuckerow): remove when this screen includes buttons to
         // expand/collapse all by default.
-        data.cpuProfileRoot.expandCascading();
+        _data.cpuProfileRoot.expandCascading();
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return data == null
+    return _data == null
         ? const Center(child: CircularProgressIndicator())
-        : CpuTable(data: data);
+        : CpuCallTreeTable(data: _data);
   }
 
   void handleProfile(CpuProfileData value) {
     setState(() {
-      data = value;
+      _data = value;
     });
   }
 }
 
-class CpuTable extends StatelessWidget {
-  CpuTable({Key key, this.data}) : super(key: key);
+/// A table of the CPU's call tree.
+class CpuCallTreeTable extends StatelessWidget {
+  factory CpuCallTreeTable({Key key, CpuProfileData data}) {
+    final treeColumn = MethodNameColumn();
+    final columns = List.unmodifiable([
+      TotalTimeColumn(),
+      SelfTimeColumn(),
+      treeColumn,
+      SourceColumn(),
+    ]);
+    return CpuCallTreeTable._(key, data, treeColumn, columns);
+  }
+  const CpuCallTreeTable._(Key key, this.data, this.treeColumn, this.columns)
+      : super(key: key);
 
-  final List<ColumnData<CpuStackFrame>> columns = List.unmodifiable([
-    TotalTimeColumn(),
-    SelfTimeColumn(),
-    MethodNameColumn(),
-    SourceColumn(),
-  ]);
+  final TreeColumnData<CpuStackFrame> treeColumn;
+  final List<ColumnData<CpuStackFrame>> columns;
 
   final CpuProfileData data;
   @override
@@ -91,7 +100,7 @@ class CpuTable extends StatelessWidget {
     return TreeTable<CpuStackFrame>(
       data: data.cpuProfileRoot,
       columns: columns,
-      treeColumn: columns[2],
+      treeColumn: treeColumn,
       keyFactory: (frame) => frame.id,
     );
   }

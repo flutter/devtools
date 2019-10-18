@@ -116,9 +116,12 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   /// Determines the width of all columns, including the columns that
   /// use indentation to show the nesting of the table.
   List<double> _computeColumnWidths() {
-    // Size the table to only fit the items that are visible.
     final root = widget.data;
     TreeNode deepest = root;
+    // This will use the width of all rows in the table, even the rows
+    // that are hidden by nesting.
+    // We may want to change this to using a flattened list of only
+    // the list items that should show right now.
     for (var node in _flattenedList) {
       if (node.level > deepest.level) {
         deepest = node;
@@ -255,6 +258,8 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
       curve: Curves.easeInOutCubic,
       parent: showController,
     );
+    // An animation that rotates the expand arrow
+    // from pointing right (0.75 full turns) to pointing down (1.0 full turns).
     expandAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
       CurvedAnimation(curve: Curves.easeInOutCubic, parent: expandController),
     );
