@@ -80,7 +80,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
 class CpuCallTreeTable extends StatelessWidget {
   factory CpuCallTreeTable({Key key, CpuProfileData data}) {
     final treeColumn = MethodNameColumn();
-    final columns = List.unmodifiable([
+    final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
       TotalTimeColumn(),
       SelfTimeColumn(),
       treeColumn,
