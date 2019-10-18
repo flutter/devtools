@@ -82,6 +82,7 @@ class GtagEventDevTools extends GtagEvent {
     String devtools_chrome, // dimension5 Chrome version #
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
+    String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
 
     int gpu_duration,
     int ui_duration,
@@ -120,6 +121,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String get ide_launched;
 
+  external String get flutter_client_id;
+
   // Custom metrics:
   external int get gpu_duration;
 
@@ -139,6 +142,7 @@ class GtagExceptionDevTools extends GtagException {
     String devtools_chrome, // dimension5 Chrome version #
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 IDE launched DevTools
+    String flutter_client_id, // dimension8 Flutter tool clientId
   });
 
   @override
@@ -160,6 +164,8 @@ class GtagExceptionDevTools extends GtagException {
   external String get devtools_version;
 
   external String get ide_launched;
+
+  external String get flutter_client_id;
 }
 
 // Code to check if DevTools server is available, will only be true in release
@@ -195,15 +201,19 @@ void _logWarning(HttpRequest response, String apiType, [String respText]) {
 /// Request Flutter tool stored property value enabled (GA enabled) stored in
 /// the file '~\.flutter'.
 ///
-/// Return bool or null, null implies Flutter Tool has never been run.
+/// Return bool.
+/// Return value of false implies either GA is disabled or the Flutter Tool has
+/// never been run (null returned from the server).
 Future<bool> get isFlutterGAEnabled async {
   bool enabled = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(server.apiGetFlutterGAEnabled);
     if (resp?.status == HttpStatus.ok) {
-      // A return value of 'null' implies Flutter tool has never been run.
-      enabled = json.decode(resp.responseText);
+      // A return value of 'null' implies Flutter tool has never been run so
+      // return false for Flutter GA enabled.
+      final responseValue = json.decode(resp.responseText);
+      enabled = responseValue == null ? false : responseValue;
     } else {
       _logWarning(resp, server.apiGetFlutterGAEnabled);
     }
@@ -215,17 +225,27 @@ Future<bool> get isFlutterGAEnabled async {
 /// Request Flutter tool stored property value clientID (GA enabled) stored in
 /// the file '~\.flutter'.
 ///
-/// Return as a String or null, null implies Flutter Tool has never been run.
+/// Return as a String, empty string implies Flutter Tool has never been run.
 Future<String> flutterGAClientID() async {
+  // Default empty string, Flutter tool never run.
   String clientId = '';
 
   if (isDevToolsServerAvailable) {
-    final resp = await _request(server.apiGetFlutterGAClientId);
-    if (resp?.status == HttpStatus.ok) {
-      // Return value 'null' implies Flutter tool has never been run return null.
-      clientId = json.decode(resp.responseText);
-    } else {
-      _logWarning(resp, server.apiGetFlutterGAClientId);
+    // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
+    // is false, we don't want to be the first to create a ~/.flutter file.
+    if (await isFlutterGAEnabled) {
+      final resp = await _request(server.apiGetFlutterGAClientId);
+      if (resp?.status == HttpStatus.ok) {
+        clientId = json.decode(resp.responseText);
+        if (clientId == null) {
+          // Requested value of 'null' (Flutter tool never ran). Server request
+          // apiGetFlutterGAClientId should not happen because the
+          // isFlutterGAEnabled test should have been false.
+          log('${server.apiGetFlutterGAClientId} is null', LogLevel.warning);
+        }
+      } else {
+        _logWarning(resp, server.apiGetFlutterGAClientId);
+      }
     }
   }
 
@@ -390,6 +410,7 @@ void screen(
       devtools_chrome: devtoolsChrome,
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
     ),
   );
 }
@@ -412,6 +433,7 @@ void select(
       devtools_chrome: devtoolsChrome,
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
     ),
   );
 }
@@ -437,6 +459,7 @@ void selectFrame(
       devtools_chrome: devtoolsChrome,
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
     ),
   );
 }
@@ -462,6 +485,7 @@ void error(
       devtools_chrome: devtoolsChrome,
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
     ),
   );
 }
@@ -482,6 +506,8 @@ String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
 const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
+
+String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
 
@@ -517,6 +543,12 @@ String get ideLaunched => _ideLaunched;
 
 set ideLaunched(String __ideLaunched) {
   _ideLaunched = __ideLaunched;
+}
+
+String get flutterClientId => _flutterClientId;
+
+set flutterClientId(String __flutterClientId) {
+  _flutterClientId = __flutterClientId;
 }
 
 bool _analyticsComputed = false;
