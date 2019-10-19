@@ -496,3 +496,20 @@ const String bottomUpGolden = '''
         A - children: 0 - excl: 3 - incl: 3
 
 ''';
+
+final CpuProfileMetaData zeroProfileMetaData = CpuProfileMetaData(
+  sampleCount: 0,
+  samplePeriod: 50,
+  stackDepth: 128,
+  time: TimeRange()
+    ..start = const Duration(microseconds: 0)
+    ..end = const Duration(microseconds: 100),
+);
+
+final CpuStackFrame zeroStackFrame = CpuStackFrame(
+  id: 'id_0',
+  name: 'A',
+  category: 'Dart',
+  url: '',
+  profileMetaData: zeroProfileMetaData,
+)..exclusiveSampleCount = 0;
