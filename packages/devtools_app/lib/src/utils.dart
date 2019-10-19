@@ -429,7 +429,7 @@ bool isDebugBuild() {
 /// NaN, null, or infinite.
 ///
 /// [ifNotFinite] defaults to 0.0.
-double safeDivide(num numerator, num denominator, [double ifNotFinite = 0.0]) {
+double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
   if (numerator != null && denominator != null) {
     final quotient = numerator / denominator;
     if (quotient.isFinite) {
