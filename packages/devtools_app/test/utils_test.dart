@@ -271,6 +271,34 @@ void main() {
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
     });
+
+    group('safeDivide', () {
+      test('divides a finite result correctly', () {
+        expect(safeDivide(2.0, 1.0), 2.0);
+        expect(safeDivide(2, -4), -0.5);
+      });
+
+      test('produces the safe value on nan division', () {
+        expect(safeDivide(double.nan, 1.0), 0.0);
+        expect(safeDivide(double.nan, 1.0, 50.0), 50.0);
+        expect(safeDivide(0.0, double.nan, -5.0), -5.0);
+      });
+
+      test('produces the safe value on infinite division', () {
+        expect(safeDivide(double.infinity, 1.0), 0.0);
+        expect(safeDivide(double.nan, double.negativeInfinity, 50.0), 50.0);
+      });
+
+      test('produces the safe value on null division', () {
+        expect(safeDivide(null, 1.0), 0.0);
+        expect(safeDivide(1.0, null, 50.0), 50.0);
+      });
+
+      test('produces the safe value on division by zero', () {
+        expect(safeDivide(1.0, 0.0), 0.0);
+        expect(safeDivide(-50.0, 0.0, 10.0), 10.0);
+      });
+    });
   });
 }
 

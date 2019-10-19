@@ -149,6 +149,13 @@ void main() {
       expect(copyFromMidTree.parent, isNull);
       expect(copyFromMidTree.level, equals(0));
     });
+
+    test('handles zero values', () {
+      expect(zeroStackFrame.totalTime, const Duration(milliseconds: 0));
+      expect(zeroStackFrame.totalTimeRatio, 0.0);
+      expect(zeroStackFrame.selfTime, const Duration(milliseconds: 0));
+      expect(zeroStackFrame.selfTimeRatio, 0.0);
+    });
   });
 
   test('matches', () {

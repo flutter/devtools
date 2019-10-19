@@ -179,8 +179,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
   int _inclusiveSampleCount;
   set inclusiveSampleCount(int count) => _inclusiveSampleCount = count;
 
-  double get totalTimeRatio =>
-      _totalTimeRatio ??= inclusiveSampleCount / profileMetaData.sampleCount;
+  double get totalTimeRatio => _totalTimeRatio ??=
+      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
 
   double _totalTimeRatio;
 
@@ -191,8 +191,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
 
   Duration _totalTime;
 
-  double get selfTimeRatio =>
-      _selfTimeRatio ??= exclusiveSampleCount / profileMetaData.sampleCount;
+  double get selfTimeRatio => _selfTimeRatio ??=
+      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
 
   double _selfTimeRatio;
 

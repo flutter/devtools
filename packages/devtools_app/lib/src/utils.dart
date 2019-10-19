@@ -420,3 +420,21 @@ bool isDebugBuild() {
   })());
   return debugBuild;
 }
+
+/// Divides [numerator] by [denominator], not returning infinite, NaN, or null
+/// quotients.
+///
+/// Returns [ifNotFinite] as a return value when the result of dividing
+/// [numerator] by [denominator] would be a non-finite value: either
+/// NaN, null, or infinite.
+///
+/// [ifNotFinite] defaults to 0.0.
+double safeDivide(num numerator, num denominator, [double ifNotFinite = 0.0]) {
+  if (numerator != null && denominator != null) {
+    final quotient = numerator / denominator;
+    if (quotient.isFinite) {
+      return quotient;
+    }
+  }
+  return ifNotFinite;
+}
