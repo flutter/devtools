@@ -7,10 +7,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_text_styles.dart'
     as styles;
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_legacy.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/ui/flutter_html_shim.dart' as shim;
 import 'package:devtools_app/src/ui/icons.dart';
@@ -39,7 +39,7 @@ class FakePaintEntry extends PaintEntry {
 }
 
 class FakeInspectorTreeNodeRender
-    extends InspectorTreeNodeRender<FakePaintEntry> {
+    extends InspectorTreeNodeRendererLegacy<FakePaintEntry> {
   FakeInspectorTreeNodeRender(List<FakePaintEntry> entries, Size size)
       : super(entries, size);
 
@@ -83,7 +83,7 @@ class FakeInspectorTreeNodeRenderBuilder
   }
 }
 
-class FakeInspectorTreeNode extends InspectorTreeNode {
+class FakeInspectorTreeNode extends InspectorTreeNodeLegacy {
   @override
   InspectorTreeNodeRenderBuilder createRenderBuilder() {
     return FakeInspectorTreeNodeRenderBuilder();
@@ -92,22 +92,9 @@ class FakeInspectorTreeNode extends InspectorTreeNode {
 
 const double fakeRowWidth = 200.0;
 
-class FakeInspectorTree extends InspectorTreeFixedRowHeight {
-  FakeInspectorTree({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  }) : super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
+class FakeInspectorTree extends InspectorTreeControllerLegacy
+    with InspectorTreeFixedRowHeightController {
+  FakeInspectorTree();
 
   final List<Rect> scrollToRequests = [];
 
@@ -141,16 +128,17 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
   }
 
   @override
-  void setState(VoidCallback modifyState) {
+  void setState(VoidCallback fn) {
     // Execute async calls synchronously for faster test execution.
-    modifyState();
+    fn();
 
     setStateCalled?.complete(null);
     setStateCalled = null;
 
     for (int i = 0; i < numRows; i++) {
       final row = getCachedRow(i);
-      row?.node?.renderObject?.attach(
+      final FakeInspectorTreeNode node = row?.node;
+      (node?.renderObject as FakeInspectorTreeNodeRender)?.attach(
         this,
         Offset(row.depth * columnWidth, i * rowHeight),
       );
@@ -195,7 +183,8 @@ class FakeInspectorTree extends InspectorTreeFixedRowHeight {
           sb.write('  ' * delta);
         }
       }
-      final renderObject = row.node.renderObject;
+      final FakeInspectorTreeNode node = row?.node;
+      final renderObject = node.renderObject;
       if (renderObject == null) {
         sb.write('<empty>\n');
         continue;
