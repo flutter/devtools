@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/screen.dart';
 import '../../flutter/table.dart';
@@ -23,7 +24,7 @@ class PerformanceScreen extends Screen {
   Widget buildTab(BuildContext context) {
     return Tab(
       text: name,
-      icon: Icon(Icons.computer),
+      icon: Icon(Octicons.getIconData('dashboard')),
     );
   }
 }
@@ -44,7 +45,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
     super.initState();
     // TODO(djshuckerow): add in buttons to control the CPU recording.
     _controller.startRecording();
-    Future.delayed(const Duration(seconds: 1)).then((_) async {
+    Future.delayed(const Duration(seconds: 15)).then((_) async {
       await _controller.stopRecording();
       _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
       setState(() {
