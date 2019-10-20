@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_legacy.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
@@ -48,23 +48,8 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     await inspectorService.inferPubRootDirectoryIfNeeded();
 
     inspectorController = InspectorController(
-      inspectorTreeFactory: ({
-        summaryTree,
-        treeType,
-        onNodeAdded,
-        onSelectionChange,
-        onExpand,
-        onHover,
-      }) {
-        return FakeInspectorTree(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
-      },
+      inspectorTree: FakeInspectorTree(),
+      detailsTree: FakeInspectorTree(),
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
     );
@@ -168,8 +153,9 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       const int rowIndex = 2;
       final double y = detailsTree.getRowY(rowIndex);
       final textAlignRow = detailsTree.getRow(Offset(0, y));
-      final FakePaintEntry lastIconEntry = textAlignRow
-          .node.renderObject.entries
+      final FakeInspectorTreeNode node = textAlignRow.node;
+      final FakePaintEntry lastIconEntry =
+          node.renderObject.entries
           .firstWhere((entry) => entry.icon == defaultIcon, orElse: () => null);
       // If the entry doesn't have the defaultIcon then the tree has changed
       // and the rest of this test case won't make sense.

@@ -109,20 +109,21 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       );
       loggingController.detailsController = LoggingDetailsController(
         onShowInspector: () {},
-        onShowDetails: ({String text, InspectorTree tree}) {
+        onShowDetails: ({String text, InspectorTreeController tree}) {
           currentDetailsTree = tree;
           currentDetailsText = text;
           detailsSelectionController.add(null);
         },
         createLoggingTree: ({VoidCallback onSelectionChange}) {
-          return FakeInspectorTree(
-            summaryTree: false,
-            treeType: FlutterTreeType.widget,
-            onNodeAdded: (_, __) {},
-            onSelectionChange: onSelectionChange,
-            onExpand: (_) {},
-            onHover: (_, __) {},
-          );
+          return FakeInspectorTree()
+            ..config = InspectorTreeConfig(
+              summaryTree: false,
+              treeType: FlutterTreeType.widget,
+              onNodeAdded: (_, __) {},
+              onSelectionChange: onSelectionChange,
+              onExpand: (_) {},
+              onHover: (_, __) {},
+            );
         },
       );
     }
