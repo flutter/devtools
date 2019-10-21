@@ -26,9 +26,7 @@ void main() {
   final bool testInReleaseMode =
       Platform.environment['WEBDEV_RELEASE'] == 'true';
 
-  setUp(() async {
-    compensateForFlutterTestDirectoryBug();
-
+  setUpAll(() async {
     // Clear the existing build directory.
     if (Directory('build').existsSync()) {
       Directory('build').deleteSync(recursive: true);
@@ -48,6 +46,10 @@ void main() {
     }
 
     Directory('build').renameSync('../devtools/build');
+  });
+
+  setUp(() async {
+    compensateForFlutterTestDirectoryBug();
 
     // Start the command-line server.
     server = await DevToolsServerDriver.create();
