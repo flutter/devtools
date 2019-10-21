@@ -46,7 +46,7 @@ class HtmlMessageManager {
       _messages[screenId]?.remove(_message);
     });
 
-    _messages.putIfAbsent(screenId, () => {message});
+    _messages.putIfAbsent(screenId, () => {}).add(message);
     _showMessage(message);
   }
 }
