@@ -10,12 +10,6 @@ import 'chrome.dart';
 
 const verbose = true;
 
-// TODO(dantup): Remove these when the live Pub version supports headless mode.
-final bool serverSupportsHeadless =
-    Platform.environment['USE_LOCAL_DEPENDENCIES'] == 'true';
-final bool serverSupportsTryPort =
-    Platform.environment['USE_LOCAL_DEPENDENCIES'] == 'true';
-
 class DevToolsServerDriver {
   DevToolsServerDriver._(this._process, this._stdin, Stream<String> _stdout,
       Stream<String> _stderr)
@@ -64,9 +58,7 @@ class DevToolsServerDriver {
       args.addAll(['--try-ports', '$tryPorts']);
     }
 
-    if (useChromeHeadless &&
-        headlessModeIsSupported &&
-        serverSupportsHeadless) {
+    if (useChromeHeadless && headlessModeIsSupported) {
       args.add('--headless');
     }
     final Process process = await Process.start('dart', args);

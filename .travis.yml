@@ -30,18 +30,6 @@ matrix:
       dart: stable
       env: BOT=test_dart2js
 
-    # TODO(dantup): Temporarily skip stable Flutter builds on Windows because the
-    # Dart SDK download can take too long due to Invoke-WebRequest performance.
-    # This block can be removed when https://github.com/flutter/flutter/pull/37792
-    # rolls to the Flutter stable channel.
-    - os: windows
-      dart:  stable
-      env:
-        - BOT=flutter_sdk_tests
-        - BOT=test_ddc
-        - BOT=test_dart2js
-        - BOT=integration_ddc
-        - BOT=integration_dart2js
     # TODO(dantup): Skip Flutter builds until we understand/fix Flutter crashing
     # with "failed to delete build/assets: file is locked by another process".
     - os: windows
@@ -54,7 +42,7 @@ matrix:
   include:
     - dart: "dev/raw/latest"
       env: BOT=packages
-  # Skip windows bots until we find a way to make the windows tests less flaky.
+  # Allow windows bots to fail until we can make the windows tests less flaky.
   # https://github.com/flutter/devtools/issues/963
   allow_failures:
     - os: windows

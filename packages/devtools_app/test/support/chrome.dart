@@ -17,6 +17,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 // to aid debugging.
 const useChromeHeadless = true;
 
+// Chrome headless currently hangs on Windows (both Travis and locally),
+// so we won't use it there.
 final headlessModeIsSupported = !Platform.isWindows;
 
 class Chrome {
@@ -80,8 +82,6 @@ class Chrome {
       '--user-data-dir=${getCreateChromeDataDir()}',
       '--remote-debugging-port=$debugPort'
     ];
-    // TODO(dantup): Chrome headless currently hangs on Windows (both Travis and
-    // locally), so use non-headless there until we have a fix.
     if (useChromeHeadless && headlessModeIsSupported) {
       args.addAll(<String>[
         '--headless',
