@@ -592,67 +592,74 @@ class Size extends OffsetBase {
 /// ```dart
 /// Rect myRect = const Offset(1.0, 2.0) & const Size(3.0, 4.0);
 /// ```
+/// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
+/// are relative to a given origin.
+///
+/// A Rect can be created with one its constructors or from an [Offset] and a
+/// [Size] using the `&` operator:
+///
+/// ```dart
+/// Rect myRect = const Offset(1.0, 2.0) & const Size(3.0, 4.0);
+/// ```
 class Rect {
-  Rect._();
-
   /// Construct a rectangle from its left, top, right, and bottom edges.
   @pragma('vm:entry-point')
-  Rect.fromLTRB(double left, double top, double right, double bottom) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = right
-      ..[3] = bottom;
-  }
+  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom)
+      : assert(left != null),
+        assert(top != null),
+        assert(right != null),
+        assert(bottom != null);
 
   /// Construct a rectangle from its left and top edges, its width, and its
   /// height.
   ///
   /// To construct a [Rect] from an [Offset] and a [Size], you can use the
   /// rectangle constructor operator `&`. See [Offset.&].
-  Rect.fromLTWH(double left, double top, double width, double height) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = left + width
-      ..[3] = top + height;
-  }
+  const Rect.fromLTWH(double left, double top, double width, double height)
+      : this.fromLTRB(left, top, left + width, top + height);
 
   /// Construct a rectangle that bounds the given circle.
   ///
   /// The `center` argument is assumed to be an offset from the origin.
-  Rect.fromCircle({Offset center, double radius}) {
-    _value
-      ..[0] = center.dx - radius
-      ..[1] = center.dy - radius
-      ..[2] = center.dx + radius
-      ..[3] = center.dy + radius;
-  }
+  Rect.fromCircle({Offset center, double radius})
+      : this.fromCenter(
+          center: center,
+          width: radius * 2,
+          height: radius * 2,
+        );
+
+  /// Constructs a rectangle from its center point, width, and height.
+  ///
+  /// The `center` argument is assumed to be an offset from the origin.
+  Rect.fromCenter({Offset center, double width, double height})
+      : this.fromLTRB(
+          center.dx - width / 2,
+          center.dy - height / 2,
+          center.dx + width / 2,
+          center.dy + height / 2,
+        );
 
   /// Construct the smallest rectangle that encloses the given offsets, treating
   /// them as vectors from the origin.
-  Rect.fromPoints(Offset a, Offset b) {
-    _value
-      ..[0] = math.min(a.dx, b.dx)
-      ..[1] = math.min(a.dy, b.dy)
-      ..[2] = math.max(a.dx, b.dx)
-      ..[3] = math.max(a.dy, b.dy);
-  }
-
-  static const int _kDataSize = 4;
-  final Float32List _value = Float32List(_kDataSize);
+  Rect.fromPoints(Offset a, Offset b)
+      : this.fromLTRB(
+          math.min(a.dx, b.dx),
+          math.min(a.dy, b.dy),
+          math.max(a.dx, b.dx),
+          math.max(a.dy, b.dy),
+        );
 
   /// The offset of the left edge of this rectangle from the x axis.
-  double get left => _value[0];
+  final double left;
 
   /// The offset of the top edge of this rectangle from the y axis.
-  double get top => _value[1];
+  final double top;
 
   /// The offset of the right edge of this rectangle from the x axis.
-  double get right => _value[2];
+  final double right;
 
   /// The offset of the bottom edge of this rectangle from the y axis.
-  double get bottom => _value[3];
+  final double bottom;
 
   /// The distance between the left and right edges of this rectangle.
   double get width => right - left;
@@ -664,17 +671,19 @@ class Rect {
   /// this rectangle.
   Size get size => Size(width, height);
 
-  /// A rectangle with left, top, right, and bottom edges all at zero.
-  static final Rect zero = Rect._();
+  /// Whether any of the dimensions are `NaN`.
+  bool get hasNaN => left.isNaN || top.isNaN || right.isNaN || bottom.isNaN;
 
-  static const double _giantScalar =
-      1.0E+9; // matches kGiantRect from default_layer_builder.cc
+  /// A rectangle with left, top, right, and bottom edges all at zero.
+  static const Rect zero = Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+
+  static const double _giantScalar = 1.0E+9; // matches kGiantRect from layer.h
 
   /// A rectangle that covers the entire coordinate space.
   ///
   /// This covers the space from -1e9,-1e9 to 1e9,1e9.
   /// This is the space over which graphics operations are valid.
-  static final Rect largest =
+  static const Rect largest =
       Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
 
   /// Whether any of the coordinates of this rectangle are equal to positive infinity.
@@ -834,9 +843,8 @@ class Rect {
   static Rect lerp(Rect a, Rect b, double t) {
     assert(t != null);
     if (a == null && b == null) return null;
-    if (a == null) {
+    if (a == null)
       return Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
-    }
     if (b == null) {
       final double k = 1.0 - t;
       return Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
@@ -854,14 +862,14 @@ class Rect {
     if (identical(this, other)) return true;
     if (runtimeType != other.runtimeType) return false;
     final Rect typedOther = other;
-    for (int i = 0; i < _kDataSize; i += 1) {
-      if (_value[i] != typedOther._value[i]) return false;
-    }
-    return true;
+    return left == typedOther.left &&
+        top == typedOther.top &&
+        right == typedOther.right &&
+        bottom == typedOther.bottom;
   }
 
   @override
-  int get hashCode => hashList(_value);
+  int get hashCode => hashValues(left, top, right, bottom);
 
   @override
   String toString() =>
