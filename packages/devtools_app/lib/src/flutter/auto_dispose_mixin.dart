@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 /// Provides functionality to automatically unsubscribe from streams on dispose.
 ///
-/// Use this class to ensure you don't leak stream subscriptions
+/// Use this class to ensure you don't leak stream subscriptions.
 mixin AutoDisposeMixin<T extends StatefulWidget> on State<T> {
   final List<StreamSubscription> _subscriptions = [];
 
