@@ -313,7 +313,9 @@ Future<Map<String, dynamic>> _waitForClients({
                   .any((c) => c['hasConnection'] == requiredConnectionState));
     },
     timeout: const Duration(seconds: 10),
-    timeoutMessage: 'Server did not return any known clients',
+    timeoutMessage: 'Server did not return any known clients'
+        '${requiredConnectionState != null ? (requiredConnectionState ? ' that are connected' : ' that are not connected') : ''}'
+        '${requiredPage != null ? ' that are on page $requiredPage' : ''}',
     delay: const Duration(seconds: 1),
   );
   return serverResponse;
