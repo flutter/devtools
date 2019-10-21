@@ -15,13 +15,16 @@ import 'package:flutter/material.dart';
 ///   on expand and collapse of tree nodes.
 mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     on TickerProviderStateMixin<T> {
-  // Animation controllers for bringing each node into the list,
-  // animating the size from 0 to the appropriate height.
+  /// Animation controller for bringing each node into the list,
+  /// animating the size from 0 to the appropriate height.
   AnimationController showController;
   Animation<double> showAnimation;
 
-  // Animation controllers for animating the expand/collapse icon.
+  /// Animation controller for animating the expand/collapse icon.
   AnimationController expandController;
+
+  /// An animation that rotates the expand arrow
+  /// from pointing right (0.75 full turns) to pointing down (1.0 full turns).
   Animation<double> expandAnimation;
 
   /// Whether or not this widget is currently shown.
@@ -55,8 +58,6 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
       curve: Curves.easeInOutCubic,
       parent: showController,
     );
-    // An animation that rotates the expand arrow
-    // from pointing right (0.75 full turns) to pointing down (1.0 full turns).
     expandAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
       CurvedAnimation(curve: Curves.easeInOutCubic, parent: expandController),
     );
