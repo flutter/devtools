@@ -103,11 +103,11 @@ class _ServiceExtensionButtonGroupState
     );
   }
 
-  Widget _buildExtension(ExtensionState extensionState, bool showLabels) {
+  Widget _buildExtension(ExtensionState extensionState, bool showText) {
     return Label(
       extensionState.description.icon,
       extensionState.description.description,
-      showText: showLabels,
+      showText: showText,
     );
   }
 
