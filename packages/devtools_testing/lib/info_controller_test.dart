@@ -56,7 +56,9 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
 
       final flagList = await env.service.getFlagList();
       expect(flags.length, flagList.flags.length);
-      final expectedFlags = [
+      final expectedFlags = <String>{};
+
+      for (var flag in [
         Flag.parse({
           'name': 'causal_async_stacks',
           'comment': 'Improved async stacks',
@@ -69,13 +71,13 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
           'modified': false,
           'valueAsString': 'true'
         }),
-      ];
+      ]) {
+        expectedFlags.add(flag.toString());
+      }
+
       for (var i = 0; i < flags.length; i++) {
         expect(flags[i].toString(), flagList.flags[i].toString());
-        if (expectedFlags.isNotEmpty &&
-            expectedFlags.last.toString() == flags[i].toString()) {
-          expectedFlags.removeLast();
-        }
+        expectedFlags.remove(flags[i].toString());
       }
       expect(
         expectedFlags.length,
