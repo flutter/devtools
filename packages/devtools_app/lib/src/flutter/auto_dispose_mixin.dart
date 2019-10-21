@@ -19,10 +19,10 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
-    super.dispose();
     for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();
+    super.dispose();
   }
 }
