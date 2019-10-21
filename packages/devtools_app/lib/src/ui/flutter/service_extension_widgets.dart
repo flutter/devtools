@@ -209,6 +209,9 @@ class _RegisteredServiceExtensionButtonState
   }
 
   void _click() async {
+    if (_disabled) {
+      return;
+    }
     try {
       setState(() {
         _disabled = true;
@@ -227,16 +230,50 @@ class _RegisteredServiceExtensionButtonState
   Widget build(BuildContext context) {
     if (_hidden) return const SizedBox();
 
-    return FlatButton(
-      onPressed: _disabled ? null : _click,
-      child: Row(children: [
-        getIconWidget(widget.serviceDescription.icon),
-        if (widget.showTitle)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(widget.serviceDescription.title),
-          ),
-      ]),
+    return InkWell(
+      onTap: _click,
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        alignment: Alignment.center,
+        child: Row(children: [
+          getIconWidget(widget.serviceDescription.icon),
+          if (widget.showTitle)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(widget.serviceDescription.title),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
+class HotReloadButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return RegisteredServiceExtensionButton(
+      hotReload,
+      () => serviceManager.performHotReload(),
+      (arg) {
+        return Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to hot reload the app: $arg.')),
+        );
+      },
+    );
+  }
+}
+
+class HotRestartButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return RegisteredServiceExtensionButton(
+      hotRestart,
+      () => serviceManager.performHotRestart(),
+      (arg) {
+        return Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to hot restart the app: $arg.')),
+        );
+      },
     );
   }
 }

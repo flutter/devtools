@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
@@ -41,7 +42,13 @@ class DevToolsAppState extends State<DevToolsApp> {
     final path = uri.path;
 
     if (_routes.containsKey(path)) {
-      return MaterialPageRoute(settings: settings, builder: _routes[path]);
+      var builder = _routes[path];
+      assert(() {
+        builder =
+            (context) => _AlternateCheckedModeBanner(builder: _routes[path]);
+        return true;
+      }());
+      return MaterialPageRoute(settings: settings, builder: builder);
     }
     // Return a page not found.
     return MaterialPageRoute(
@@ -72,6 +79,10 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.logging,
               const InfoScreen(),
             ],
+            actions: [
+              HotReloadButton(),
+              HotRestartButton(),
+            ],
           ),
         ),
     '/connect': (_) => DevToolsScaffold.withChild(child: ConnectScreenBody()),
@@ -86,6 +97,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     // For example, to match the devtools_theme we would wrtie:
     // theme.copyWith(backgroundColor: devtools_theme.defaultBackground);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: theme,
       onGenerateRoute: _generateRoute,
     );
@@ -172,5 +184,27 @@ class _InitializerState extends State<Initializer> {
     // loading animation here in cases where this route will remain visible
     // and we await an attempt to connect.
     return _checkLoaded() ? widget.builder(context) : const SizedBox();
+  }
+}
+
+/// Displays the checked mode banner in the bottom end corner instead of the
+/// top end corner.
+///
+/// This avoids issues with widgets in the appbar being hidden by the banner
+/// in a web or desktop app.
+class _AlternateCheckedModeBanner extends StatelessWidget {
+  const _AlternateCheckedModeBanner({Key key, this.builder}) : super(key: key);
+  final WidgetBuilder builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Banner(
+      message: 'DEBUG',
+      textDirection: TextDirection.ltr,
+      location: BannerLocation.bottomEnd,
+      child: Builder(
+        builder: builder,
+      ),
+    );
   }
 }
