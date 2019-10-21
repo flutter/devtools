@@ -253,8 +253,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
         );
 
         expect(await inspectorService.isWidgetCreationTracked(), isFalse);
-      }, skip: true); // TODO(jacobr): re-enable once
-      // https://github.com/flutter/flutter/issues/43014 is fixed.
+      });
 
       // TODO(jacobr): add tests verifying that we can stop the running device
       // without the InspectorService spewing a bunch of errors.
