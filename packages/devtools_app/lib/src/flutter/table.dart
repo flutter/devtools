@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
+import 'collapsible_mixin.dart';
 
 /// A table that shows [TreeNode]s.
 ///
@@ -188,30 +189,32 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
               constraints.widthConstraints().maxWidth,
               tableWidth,
             ),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _TreeNodeWidget.tableHeader(
-                key: const Key('Table header'),
-                tableState: this,
-              ),
-              Expanded(
-                child: Scrollbar(
-                  child: ListView.custom(
-                    childrenDelegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final node = _flattenedList[index];
-                        return _TreeNodeWidget(
-                          key: PageStorageKey(widget.keyFactory(node)),
-                          tableState: this,
-                          node: node,
-                        );
-                      },
-                      childCount: _flattenedList.length,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TreeNodeWidget.tableHeader(
+                  key: const Key('Table header'),
+                  tableState: this,
+                ),
+                Expanded(
+                  child: Scrollbar(
+                    child: ListView.custom(
+                      childrenDelegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final node = _flattenedList[index];
+                          return _TreeNodeWidget(
+                            key: PageStorageKey(widget.keyFactory(node)),
+                            tableState: this,
+                            node: node,
+                          );
+                        },
+                        childCount: _flattenedList.length,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ),
         ),
       );
@@ -248,95 +251,18 @@ class _TreeNodeWidget<T extends TreeNode<T>> extends StatefulWidget {
 }
 
 class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
-    with TickerProviderStateMixin {
-  // Animation controllers for bringing each node into the list,
-  // animating the size from 0 to the appropriate height.
-  AnimationController showController;
-  Animation<double> showAnimation;
-
-  // Animation controllers for animating the expand/collapse icon.
-  AnimationController expandController;
-  Animation<double> expandAnimation;
-
-  /// Whether or not this widget has been hidden.
-  ///
-  /// This is cached based on [TreeNode.shouldShow], which is
-  /// O([TreeNode.level]) to compute.
-  bool show;
-
+    with TickerProviderStateMixin, CollapsibleAnimationMixin {
   // Convenience accessors for relevant fields from [TreeTable].
   TreeColumnData<T> get treeColumn => widget.tableState.widget.treeColumn;
+
   List<ColumnData<T>> get columns => widget.tableState.widget.columns;
+
   void onListUpdated() => widget.tableState.onNodeExpansionChanged();
+
   List<double> get columnWidths => widget.tableState.columnWidths;
 
-  @override
-  void initState() {
-    super.initState();
-    showController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    expandController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    showAnimation = CurvedAnimation(
-      curve: Curves.easeInOutCubic,
-      parent: showController,
-    );
-    // An animation that rotates the expand arrow
-    // from pointing right (0.75 full turns) to pointing down (1.0 full turns).
-    expandAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
-      CurvedAnimation(curve: Curves.easeInOutCubic, parent: expandController),
-    );
-    show = widget.node?.shouldShow() ?? true;
-    if (show) {
-      showController.value = 1.0;
-    }
-    if (widget.node?.isExpanded ?? false) {
-      expandController.value = 1.0;
-    }
-  }
-
-  @override
-  void dispose() {
-    showController.dispose();
-    expandController.dispose();
-    super.dispose();
-  }
-
   void _toggleExpanded() {
-    _setExpanded(!widget.node.isExpanded);
-  }
-
-  void _setExpanded(bool isExpanded) {
-    setState(() {
-      if (isExpanded) {
-        widget.node.expand();
-        expandController.forward();
-      } else {
-        widget.node.collapse();
-        expandController.reverse();
-      }
-      onListUpdated();
-    });
-  }
-
-  @override
-  void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    show = widget.node?.shouldShow() ?? true;
-    if (show) {
-      showController.forward();
-    } else {
-      showController.reverse();
-    }
-    if (widget.node?.isExpanded ?? false) {
-      expandController.forward();
-    } else {
-      expandController.reverse();
-    }
+    setExpanded(!widget.node.isExpanded);
   }
 
   @override
@@ -436,4 +362,22 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
       ),
     );
   }
+
+  @override
+  bool get isExpanded => widget.node?.isExpanded ?? false;
+
+  @override
+  void onExpandChanged(bool isExpanded) {
+    setState(() {
+      if (isExpanded) {
+        widget.node.expand();
+      } else {
+        widget.node.collapse();
+      }
+      onListUpdated();
+    });
+  }
+
+  @override
+  bool shouldShow() => widget.node?.shouldShow() ?? true;
 }
