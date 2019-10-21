@@ -29,13 +29,13 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
   /// This is the cached value of shouldShow.
   bool _show;
 
-  /// Callback triggered when whether the collapsible is expanded changes.
-  void onExpandChanged(bool expanded);
-
   /// Visibility state of the collapsible.
   ///
   /// Implementations can be somewhat slow as the value is cached.
   bool shouldShow();
+
+  /// Callback triggered when whether the collapsible is expanded changes.
+  void onExpandChanged(bool expanded);
 
   /// Whether the collapsible is currently expanded.
   bool get isExpanded;
@@ -60,11 +60,11 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     expandAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
       CurvedAnimation(curve: Curves.easeInOutCubic, parent: expandController),
     );
-    _show = shouldShow() ?? true;
+    _show = shouldShow();
     if (_show) {
       showController.value = 1.0;
     }
-    if (isExpanded ?? false) {
+    if (isExpanded) {
       expandController.value = 1.0;
     }
   }
@@ -76,14 +76,14 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     super.dispose();
   }
 
-  void setExpanded(bool isExpanded) {
+  void setExpanded(bool expanded) {
     setState(() {
-      if (isExpanded) {
+      if (expanded) {
         expandController.forward();
       } else {
         expandController.reverse();
       }
-      onExpandChanged(isExpanded);
+      onExpandChanged(expanded);
     });
   }
 
