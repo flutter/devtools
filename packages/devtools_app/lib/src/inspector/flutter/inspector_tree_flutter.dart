@@ -10,6 +10,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
+import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
 
@@ -98,7 +99,9 @@ class InspectorTreeControllerFlutter extends Object
   }
 
   @override
-  InspectorTreeNode createNode() => InspectorTreeNode();
+  InspectorTreeNode createNode() {
+    return InspectorTreeNode(isSummaryTreeNode: config.summaryTree);
+  }
 
   @override
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -146,6 +149,16 @@ class InspectorTreeControllerFlutter extends Object
       _maxIndent = maxIndent;
     }
     return _maxIndent;
+  }
+
+  bool _showConstraints = false;
+
+  bool get showConstraints => _showConstraints;
+
+  void toggleShowConstraints() {
+    setState(() {
+      _showConstraints = !_showConstraints;
+    });
   }
 }
 
@@ -463,6 +476,54 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
+    final List<Widget> children = [
+      node.showExpandCollapse
+        ? InkWell(
+        onTap: onToggle,
+        child: RotationTransition(
+          turns: expandAnimation,
+          child: Icon(
+            Icons.expand_more,
+            size: 16.0,
+          ),
+        ))
+        : const SizedBox(width: 16.0, height: 16.0),
+      SizedOverflowBox(
+        size: Size(controller.rowWidth, rowHeight),
+        alignment: Alignment.centerLeft,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+          ),
+          child: InkWell(
+            onTap: () {
+              controller.onSelectRow(row);
+            },
+            child: Container(
+              height: rowHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: DiagnosticsNodeDescription(node.diagnostic)),
+          ),
+        ),
+      ),
+    ];
+
+    if (node.diagnostic?.isFlex == true)
+      children.add(
+        Container(
+          margin: const EdgeInsets.only(left: 4.0),
+          child: InkWell(
+            child: Icon(Icons.info, size: 16.0),
+            onTap: () {
+              showDialog(
+                context: context, child: StoryOfYourFlexWidget(node));
+            },
+          ),
+        ),
+      );
+    if (controller.showConstraints)
+      children.add(ConstraintsDescriptor(node.diagnostic));
+
     return CustomPaint(
       painter: _RowPainter(row, controller),
       size: Size(currentX, rowHeight),
@@ -472,39 +533,62 @@ class InspectorRowContent extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             textBaseline: TextBaseline.alphabetic,
-            children: [
-              node.showExpandCollapse
-                  ? InkWell(
-                      onTap: onToggle,
-                      child: RotationTransition(
-                        turns: expandAnimation,
-                        child: Icon(
-                          Icons.expand_more,
-                          size: 16.0,
-                        ),
-                      ))
-                  : const SizedBox(width: 16.0, height: 16.0),
-              SizedOverflowBox(
-                size: Size(controller.rowWidth, rowHeight),
-                alignment: Alignment.centerLeft,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      controller.onSelectRow(row);
-                    },
-                    child: Container(
-                        height: rowHeight,
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DiagnosticsNodeDescription(node.diagnostic)),
-                  ),
-                ),
-              ),
-            ],
+            children: children,
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+class ConstraintsDescriptor extends StatelessWidget {
+  const ConstraintsDescriptor(this.diagnostics, {Key key})
+    : super(key: key);
+
+  final RemoteDiagnosticsNode diagnostics;
+
+  @override
+  Widget build(BuildContext context) {
+    if (diagnostics.constraints == null) {
+      return const SizedBox();
+    }
+    TextStyle textStyle = inspector_text_styles.unimportant.merge(const TextStyle(
+      fontStyle: FontStyle.italic,
+    ));
+    if (diagnostics.shouldHighlightConstraints) {
+      textStyle = textStyle.merge(const TextStyle(
+        color: Colors.red
+      ))                 ;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Text(
+        '// constraints: ${diagnostics.constraints}',
+        style: textStyle,
+      ),
+    );
+  }
+}
+
+
+class StoryOfYourFlexWidget extends StatelessWidget {
+  const StoryOfYourFlexWidget(InspectorTreeNode node, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Column(
+        children: const [
+          Text('Story of Flex Layout page'),
+          Expanded(
+            child: Center(
+              child: Text('TODO'),
+            ),
+          ),
+        ],
       ),
     );
   }

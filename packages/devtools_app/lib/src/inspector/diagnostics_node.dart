@@ -94,6 +94,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   final bool isProperty;
 
+  // TODO(albertusangga) :
+  bool get isFlex => getBooleanMember('isFlex', false);
+
+  String get constraints => getStringMember('constraints');
+  bool get shouldHighlightConstraints =>
+    getBooleanMember('shouldHighlightConstraints', false);
+
   @override
   bool operator ==(dynamic other) {
     if (other is! RemoteDiagnosticsNode) return false;
