@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// This includes a [MaterialApp] to provide context like [Theme.of].
 /// It also provides a [Material] to support elements like [TextField] that
 /// draw ink effects.
-Widget wrap(Widget widget) => MaterialApp(home: Material(child: widget));
+Widget wrap(Widget widget) {
+  return MaterialApp(
+    theme: buildDevToolsTheme(),
+    home: Material(child: widget),
+  );
+}
 
 /// Sets the size of the app window under test to [windowSize].
 ///
