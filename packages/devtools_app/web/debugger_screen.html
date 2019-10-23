@@ -1,4 +1,102 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<!-- DO NOT SUBMIT: Fix Page Title. Missing tags? http://go/optional-html -->
-<title>Page Title</title>
+
+<!--
+  Copyright 2018 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<html>
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script>
+        const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+
+        function getDevToolsPropertyID() {
+            return GA_DEVTOOLS_PROPERTY;
+        }
+    </script>
+    <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>
+    <script type="text/javascript" src="devtools_analytics.js"></script>
+    <!-- End of DevTools Google Analytics -->
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dart DevTools</title>
+    <link href="favicon.png" rel="icon" sizes="64x64">
+
+    <link href="packages/octicons_css/octicons_4.4.0.css" rel="stylesheet">
+    <link href="packages/polymer_css/flex.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/debugger/debugger.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/inspector/inspector.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/logging/logging.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/performance/performance.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/profiler/profiler.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/info/info.css" rel="stylesheet">
+    <link href="packages/devtools_app/src/timeline/timeline.css" rel="stylesheet">
+
+    <script type="text/javascript">
+        function supportsES6Classes() {
+            "use strict";
+            try { eval("class Foo {}"); }
+            catch (e) { return false; }
+            return true;
+        }
+
+        if (!supportsES6Classes()) {
+            window.location.href = '/unsupported-browser.html';
+        }
+
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('theme') == 'dark') {
+                document.write(
+                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0_dark.css">' +
+                    '<link rel="stylesheet" href="styles.css">' +
+                    '<link rel="stylesheet" href="styles_dark.css">'
+                );
+            } else {
+                document.write(
+                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">' +
+                    '<link rel="stylesheet" href="styles.css">' +
+                    '<link rel="stylesheet" href="styles_light.css">'
+                )
+            }
+        })();
+    </script>
+
+    <script src="packages/ansi_up/ansi_up.js"></script>
+
+    <link href="packages/codemirror/codemirror.css" rel="stylesheet">
+    <script src="packages/codemirror/codemirror.js"></script>
+
+    <script src="packages/devtools_app/src/ui/plotly.js"></script>
+    <script type="text/javascript" src="packages/plotly_js/plotly.min.js"></script>
+
+    <script type="text/javascript" src="packages/split/split.min.js"></script>
+
+</head>
+
+<body fullbleed layout vertical>
+
+    <div id="messages-container" class="container legacy-dart"></div>
+
+    <form id="ga-dialog" class="container legacy-dart"></form>
+    <form id="connect-dialog" class="container legacy-dart"></form>
+    <form id="snapshot-message" class="container legacy-dart"></form>
+
+    <div id="content" class="container legacy-dart" flex layout vertical style="overflow: auto;">
+        <div class="blankslate">
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <div id="toast-container" class="legacy-dart">
+    </div>
+</body>
+
+</html>
