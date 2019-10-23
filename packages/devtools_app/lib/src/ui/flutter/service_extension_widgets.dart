@@ -23,11 +23,11 @@ import 'label.dart';
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
-    this.minIncludeLabelWidth,
+    this.minIncludeTextWidth,
     @required this.extensions,
   });
 
-  final double minIncludeLabelWidth;
+  final double minIncludeTextWidth;
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
@@ -86,16 +86,13 @@ class _ServiceExtensionButtonGroupState
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
-    // TODO(jacobr): animate showing and hiding the labels.
-    final showLabels = widget.minIncludeLabelWidth == null ||
-        MediaQuery.of(context).size.width >= widget.minIncludeLabelWidth;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ToggleButtons(
         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
         children: <Widget>[
           for (var extensionState in _extensionStates)
-            _buildExtension(extensionState, showLabels)
+            _buildExtension(extensionState)
         ],
         isSelected: [for (var e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
@@ -103,11 +100,14 @@ class _ServiceExtensionButtonGroupState
     );
   }
 
-  Widget _buildExtension(ExtensionState extensionState, bool showText) {
-    return Label(
-      extensionState.description.icon,
-      extensionState.description.description,
-      showText: showText,
+  Widget _buildExtension(ExtensionState extensionState) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Label(
+        extensionState.description.icon,
+        extensionState.description.description,
+        minIncludeTextWidth: widget.minIncludeTextWidth,
+      ),
     );
   }
 
@@ -138,15 +138,15 @@ class _ServiceExtensionButtonGroupState
 List<Widget> getServiceExtensionWidgets() {
   return [
     ServiceExtensionButtonGroup(
-      minIncludeLabelWidth: 1200,
+      minIncludeTextWidth: 1200,
       extensions: [performanceOverlay, slowAnimations],
     ),
     ServiceExtensionButtonGroup(
-      minIncludeLabelWidth: 1200,
+      minIncludeTextWidth: 1200,
       extensions: [debugPaint, debugPaintBaselines],
     ),
     ServiceExtensionButtonGroup(
-      minIncludeLabelWidth: 1400,
+      minIncludeTextWidth: 1400,
       extensions: [repaintRainbow, debugAllowBanner],
     ),
     // TODO(jacobr): implement TogglePlatformSelector.

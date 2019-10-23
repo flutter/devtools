@@ -386,6 +386,7 @@ class InspectorTreeConfig {
     @required this.summaryTree,
     @required this.treeType,
     @required this.onNodeAdded,
+    this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
     this.onHover,
@@ -395,6 +396,7 @@ class InspectorTreeConfig {
   final FlutterTreeType treeType;
   final NodeAddedCallback onNodeAdded;
   final VoidCallback onSelectionChange;
+  final void Function(bool added) onClientActiveChange;
   final TreeEventCallback onExpand;
   final TreeHoverEventCallback onHover;
 }
