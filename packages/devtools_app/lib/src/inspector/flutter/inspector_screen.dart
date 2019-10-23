@@ -73,6 +73,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void dispose() {
     inspectorService?.dispose();
+    inspectorController?.dispose();
     super.dispose();
   }
 
@@ -205,6 +206,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     }
 
     setState(() {
+      inspectorController?.dispose();
       summaryTreeController = InspectorTreeControllerFlutter();
       detailsTreeController = InspectorTreeControllerFlutter();
       inspectorController = InspectorController(
@@ -214,12 +216,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         treeType: FlutterTreeType.widget,
         onExpandCollapseSupported: _onExpandCollapseSupported,
       );
-
-      // TODO(jacobr): update visibility based on whether the screen is visible.
-      // That will reduce memory usage on the device running a Flutter
-      // application when the inspector panel is not visible.
-      inspectorController.setVisibleToUser(true);
-      inspectorController.setActivate(true);
 
       // TODO(jacobr): move this notice display to once a day.
       if (!displayedWidgetTrackingNotice) {

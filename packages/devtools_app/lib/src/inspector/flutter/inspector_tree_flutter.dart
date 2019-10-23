@@ -10,71 +10,8 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
+import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
-
-typedef CanvasPaintCallback = void Function(
-  Canvas canvas,
-  int index,
-  Size size,
-);
-
-final _defaultPaint = Paint()
-  ..color = defaultTreeLineColor
-  ..strokeWidth = chartLineStrokeWidth;
-
-class _RowPainter extends CustomPainter {
-  _RowPainter(this.row, this._controller);
-
-  final InspectorTreeController _controller;
-  final InspectorTreeRow row;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double currentX = 0;
-
-    if (row == null) {
-      return;
-    }
-    final InspectorTreeNode node = row.node;
-    final bool showExpandCollapse = node.showExpandCollapse;
-    for (int tick in row.ticks) {
-      currentX = _controller.getDepthIndent(tick) - columnWidth * 0.5;
-      canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, rowHeight),
-        _defaultPaint,
-      );
-    }
-    if (row.lineToParent) {
-      final paint = _defaultPaint;
-      currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
-      final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
-      canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, rowHeight * 0.5),
-        paint,
-      );
-      canvas.drawLine(
-        Offset(currentX, rowHeight * 0.5),
-        Offset(currentX + width, rowHeight * 0.5),
-        paint,
-      );
-    }
-
-    // Render the main row content.
-
-    currentX = _controller.getDepthIndent(row.depth) - columnWidth;
-    if (!row.node.showExpandCollapse) {
-      currentX += columnWidth;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    // TODO(jacobr): check whether the row has different ticks.
-    return false;
-  }
-}
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -93,80 +30,6 @@ class _InspectorTreeRowWidget extends StatefulWidget {
 
   @override
   _InspectorTreeRowState createState() => _InspectorTreeRowState();
-}
-
-///
-class InspectorRowContent extends StatelessWidget {
-  const InspectorRowContent({
-    @required this.row,
-    @required this.controller,
-    @required this.onToggle,
-    @required this.expandAnimation,
-  });
-
-  final InspectorTreeRow row;
-  final InspectorTreeControllerFlutter controller;
-  final VoidCallback onToggle;
-  final Animation<double> expandAnimation;
-
-  @override
-  Widget build(BuildContext context) {
-    final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
-
-    if (row == null) {
-      return const SizedBox();
-    }
-    Color backgroundColor;
-    if (row.isSelected || row.node == controller.hover) {
-      backgroundColor =
-          row.isSelected ? selectedRowBackgroundColor : hoverColor;
-    }
-
-    final node = row.node;
-    return CustomPaint(
-      painter: _RowPainter(row, controller),
-      size: Size(currentX, rowHeight),
-      child: Padding(
-        padding: EdgeInsets.only(left: currentX),
-        child: ClipRect(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              node.showExpandCollapse
-                  ? InkWell(
-                      onTap: onToggle,
-                      child: RotationTransition(
-                        turns: expandAnimation,
-                        child: Icon(
-                          Icons.expand_more,
-                          size: 16.0,
-                        ),
-                      ))
-                  : const SizedBox(width: 16.0, height: 16.0),
-              SizedOverflowBox(
-                size: Size(controller.rowWidth, rowHeight),
-                alignment: Alignment.centerLeft,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      controller.onSelectRow(row);
-                    },
-                    child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DiagnosticsNodeDescription(node.diagnostic)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
@@ -221,7 +84,18 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 class InspectorTreeControllerFlutter extends Object
     with InspectorTreeController, InspectorTreeFixedRowHeightController {
   /// Client the controller notifies to trigger changes to the UI.
-  InspectorControllerClient client;
+  InspectorControllerClient get client => _client;
+  InspectorControllerClient _client;
+  set client(InspectorControllerClient value) {
+    if (_client == value) return;
+    // Do not set a new client if there is still an old client.
+    assert(value == null || _client == null);
+    _client = value;
+
+    if (config.onClientActiveChange != null) {
+      config.onClientActiveChange(value != null);
+    }
+  }
 
   @override
   InspectorTreeNode createNode() => InspectorTreeNode();
@@ -306,9 +180,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    if (controller != null && controller.client == this) {
-      controller.client = null;
-    }
+    controller?.client = null;
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
   }
@@ -489,4 +361,145 @@ class InspectorTree extends StatefulWidget {
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
+}
+
+final _defaultPaint = Paint()
+  ..color = defaultTreeLineColor
+  ..strokeWidth = chartLineStrokeWidth;
+
+class _RowPainter extends CustomPainter {
+  _RowPainter(this.row, this._controller);
+
+  final InspectorTreeController _controller;
+  final InspectorTreeRow row;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double currentX = 0;
+
+    if (row == null) {
+      return;
+    }
+    final InspectorTreeNode node = row.node;
+    final bool showExpandCollapse = node.showExpandCollapse;
+    for (int tick in row.ticks) {
+      currentX = _controller.getDepthIndent(tick) - columnWidth * 0.5;
+      canvas.drawLine(
+        Offset(currentX, 0.0),
+        Offset(currentX, rowHeight),
+        _defaultPaint,
+      );
+    }
+    if (row.lineToParent) {
+      final paint = _defaultPaint;
+      currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
+      final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
+      canvas.drawLine(
+        Offset(currentX, 0.0),
+        Offset(currentX, rowHeight * 0.5),
+        paint,
+      );
+      canvas.drawLine(
+        Offset(currentX, rowHeight * 0.5),
+        Offset(currentX + width, rowHeight * 0.5),
+        paint,
+      );
+    }
+
+    // Render the main row content.
+
+    currentX = _controller.getDepthIndent(row.depth) - columnWidth;
+    if (!row.node.showExpandCollapse) {
+      currentX += columnWidth;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    // TODO(jacobr): check whether the row has different ticks.
+    return false;
+  }
+}
+
+/// Widget defining the contents of a single row in the InspectorTree.
+///
+/// This class defines the scaffolding around the rendering of the actual
+/// content of a [RemoteDiagnosticsNode] provided by
+/// [DiagnosticsNodeDescription] to provide a tree implementation with lines
+/// drawn between parent and child nodes when nodes have multiple children.
+///
+/// Changes to how the actual content of the node within the row should
+/// be implemented by changing [DiagnosticsNodeDescription] instead.
+class InspectorRowContent extends StatelessWidget {
+  const InspectorRowContent({
+    @required this.row,
+    @required this.controller,
+    @required this.onToggle,
+    @required this.expandAnimation,
+  });
+
+  final InspectorTreeRow row;
+  final InspectorTreeControllerFlutter controller;
+  final VoidCallback onToggle;
+  final Animation<double> expandAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
+
+    if (row == null) {
+      return const SizedBox();
+    }
+    Color backgroundColor;
+    if (row.isSelected || row.node == controller.hover) {
+      backgroundColor =
+          row.isSelected ? selectedRowBackgroundColor : hoverColor;
+    }
+
+    final node = row.node;
+    return CustomPaint(
+      painter: _RowPainter(row, controller),
+      size: Size(currentX, rowHeight),
+      child: Padding(
+        padding: EdgeInsets.only(left: currentX),
+        child: ClipRect(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              node.showExpandCollapse
+                  ? InkWell(
+                      onTap: onToggle,
+                      child: RotationTransition(
+                        turns: expandAnimation,
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 16.0,
+                        ),
+                      ))
+                  : const SizedBox(width: 16.0, height: 16.0),
+              SizedOverflowBox(
+                size: Size(controller.rowWidth, rowHeight),
+                alignment: Alignment.centerLeft,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      controller.onSelectRow(row);
+                    },
+                    child: Container(
+                        height: rowHeight,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DiagnosticsNodeDescription(node.diagnostic)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

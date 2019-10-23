@@ -173,6 +173,7 @@ void main() {
 
     // TODO(jacobr): add screenshot tests that connect to a test application
     // in the same way the inspector_controller test does today and take golden
-    // images.
+    // images. Alternately: support an offline inspector mode and add tests of
+    // that mode which would enable faster tests that run as unittests.
   });
 }

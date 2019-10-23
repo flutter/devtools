@@ -15,6 +15,7 @@ mixin BlockingActionMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Typically users should disable buttons and or other UI that should not
   /// be interactive while the action is in progress.
+  @protected
   bool get actionInProgress => _actionInProgress;
   bool _actionInProgress = false;
 

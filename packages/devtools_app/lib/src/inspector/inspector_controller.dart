@@ -73,6 +73,7 @@ class InspectorController implements InspectorServiceClient {
       onHover: highlightShowNode,
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
+      onClientActiveChange: _onClientChange,
     );
     if (isSummaryTree) {
       details = InspectorController(
@@ -94,6 +95,19 @@ class InspectorController implements InspectorServiceClient {
 
     _checkForExpandCollapseSupport();
   }
+
+  void _onClientChange(bool added) {
+    _clientCount += added ? 1 : -1;
+    assert(_clientCount >= 0);
+    if (_clientCount == 1) {
+      setVisibleToUser(true);
+      setActivate(true);
+    } else if (_clientCount == 0) {
+      setVisibleToUser(false);
+    }
+  }
+
+  int _clientCount = 0;
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
   /// physical device with too many requests to recompute properties and trees.
