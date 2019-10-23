@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
@@ -12,6 +11,7 @@ import '../../src/globals.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
+import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'scaffold.dart';

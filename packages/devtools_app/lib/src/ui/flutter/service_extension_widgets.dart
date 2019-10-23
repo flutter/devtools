@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
