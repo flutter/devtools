@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -17,10 +18,9 @@ class DebuggerScreen extends Screen {
 
   @override
   Widget buildTab(BuildContext context) {
-    // TODO: implement buildTab
     return Tab(
       text: 'Debugger',
-      icon: Octicons.getIconData('bug'),
+      icon: Icon(Octicons.getIconData('bug')),
     );
   }
 }
@@ -28,7 +28,8 @@ class DebuggerScreen extends Screen {
 class DebuggerScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return null;
+    return HtmlElementView(
+      viewType: 'DebuggerFlutterPlugin',
+    );
   }
 }

@@ -15,4 +15,5 @@ pubspec.lock
 
 # A generated file not intended to be checked in to version control
 flutter_export_environment.sh
-
+generated_plugin_registrant.dart
+.flutter-plugins

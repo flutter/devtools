@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
+import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
@@ -69,7 +70,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.timeline,
               const PerformanceScreen(),
               EmptyScreen.memory,
-              if (kIsWeb) EmptyScreen.debugger,
+              if (kIsWeb) const DebuggerScreen(),
               EmptyScreen.logging,
               const InfoScreen(),
             ],

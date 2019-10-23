@@ -58,6 +58,8 @@ dependencies:
     ^1.1.0
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
   flutter_widgets: ^0.1.6
 
 dependency_overrides:
@@ -109,3 +111,8 @@ flutter:
           weight: 700
         - asset: fonts/Roboto/Roboto-Black.ttf
           weight: 900
+  plugin:
+    platforms:
+      web:
+        pluginClass: DebuggerHtmlPlugin
+        fileName: debugger_html_plugin.dart
