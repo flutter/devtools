@@ -155,6 +155,15 @@ abstract class InspectorControllerClient {
   void scrollToRect(Rect rect);
 }
 
+class InspectorTree extends StatefulWidget {
+  const InspectorTree({Key key, this.controller}) : super(key: key);
+
+  final InspectorTreeControllerFlutter controller;
+
+  @override
+  State<InspectorTree> createState() => _InspectorTreeState();
+}
+
 class _InspectorTreeState extends State<InspectorTree>
     implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);
@@ -315,7 +324,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void onChanged() {
-    setState(() => {});
+    setState(() {});
   }
 
   @override
@@ -354,19 +363,19 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 }
 
-class InspectorTree extends StatefulWidget {
-  const InspectorTree({Key key, this.controller}) : super(key: key);
-
-  final InspectorTreeControllerFlutter controller;
-
-  @override
-  State<InspectorTree> createState() => _InspectorTreeState();
-}
-
 final _defaultPaint = Paint()
   ..color = defaultTreeLineColor
   ..strokeWidth = chartLineStrokeWidth;
 
+/// Custom painter that draws lines indicating how parent and child rows are
+/// connected to each other.
+///
+/// Each rows object contains a list of ticks that indicate the x coordinates of
+/// vertical lines connecting other rows need to be drawn within the vertical
+/// area of the current row. This approach has the advantage that a row contains
+/// all information required to render all content within it but has the
+/// disadvantage that the x coordinates of each line connecting rows must be
+/// computed in advance.
 class _RowPainter extends CustomPainter {
   _RowPainter(this.row, this._controller);
 
@@ -384,12 +393,16 @@ class _RowPainter extends CustomPainter {
     final bool showExpandCollapse = node.showExpandCollapse;
     for (int tick in row.ticks) {
       currentX = _controller.getDepthIndent(tick) - columnWidth * 0.5;
+      // Draw a vertical line for each tick identifying a connection between
+      // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
         Offset(currentX, 0.0),
         Offset(currentX, rowHeight),
         _defaultPaint,
       );
     }
+    // If this row is itself connected to a parent then draw the L shaped line
+    // to make that connection.
     if (row.lineToParent) {
       final paint = _defaultPaint;
       currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
@@ -404,13 +417,6 @@ class _RowPainter extends CustomPainter {
         Offset(currentX + width, rowHeight * 0.5),
         paint,
       );
-    }
-
-    // Render the main row content.
-
-    currentX = _controller.getDepthIndent(row.depth) - columnWidth;
-    if (!row.node.showExpandCollapse) {
-      currentX += columnWidth;
     }
   }
 
