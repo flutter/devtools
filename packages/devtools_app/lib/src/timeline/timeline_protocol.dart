@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../utils.dart';
+//import 'simple_trace_example.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
@@ -47,25 +48,17 @@ const Duration traceEventEpsilon = Duration(microseconds: 1000);
 const Duration traceEventDelay = Duration(milliseconds: 1000);
 
 /// Protocol for processing trace events and composing them into
-/// [TimelineEvents] and [TimelineFrames].
-class TimelineProtocol {
-  TimelineProtocol({
-    @required this.uiThreadId,
-    @required this.gpuThreadId,
-    @required this.timelineController,
-  });
-
-  static const durationBeginPhase = 'B';
-  static const durationEndPhase = 'E';
-  static const durationCompletePhase = 'X';
-  static const flowStartPhase = 's';
-  static const flowEndPhase = 'f';
-
-  // TODO(kenz): Remove the following members once ui/gpu distinction changes
-  //  and frame ids are available in the engine.
-  final int uiThreadId;
-  final int gpuThreadId;
-  final TimelineController timelineController;
+/// [SyncTimelineEvents] and [TimelineFrames].
+class FrameBasedTimelineProcessor extends TimelineProcessor {
+  FrameBasedTimelineProcessor({
+    @required int uiThreadId,
+    @required int gpuThreadId,
+    @required TimelineController timelineController,
+  }) : super(
+          uiThreadId: uiThreadId,
+          gpuThreadId: gpuThreadId,
+          timelineController: timelineController,
+        );
 
   /// Frames we are in the process of assembling.
   ///
@@ -75,27 +68,31 @@ class TimelineProtocol {
 
   /// Events we have collected and are waiting to add to their respective
   /// frames.
-  final List<TimelineEvent> pendingEvents = [];
+  final List<SyncTimelineEvent> pendingEvents = [];
 
   /// The current nodes in the tree structures of UI and GPU duration events.
-  final List<TimelineEvent> currentEventNodes = [null, null];
+  final List<SyncTimelineEvent> currentEventNodes = [null, null];
 
   /// The previously handled DurationEnd events for both UI and GPU.
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
-  List<TraceEvent> previousDurationEndEvents = [null, null];
+  final List<TraceEvent> _previousDurationEndEvents = [null, null];
 
   /// Heaps that order and store trace events as we receive them.
-  final List<HeapPriorityQueue<TraceEventWrapper>> heaps = List.generate(
+  final heaps = List.generate(
     2,
-    (_) => HeapPriorityQueue(),
+    (_) => HeapPriorityQueue<TraceEventWrapper>(),
   );
 
-  void processTraceEvent(TraceEvent event, {bool immediate = false}) {
+  void processTraceEvent(
+    TraceEventWrapper eventWrapper, {
+    bool immediate = false,
+  }) {
+    final event = eventWrapper.event;
     // TODO(kenz): stop manually setting the type once we have that data from
     // the engine.
-    event.type = _inferEventType(event);
+    event.type = inferEventType(event);
 
     if (!_shouldProcessTraceEvent(event)) return;
 
@@ -105,25 +102,24 @@ class TimelineProtocol {
     // lead to us creating Timeline frames where we shouldn't and therefore
     // showing bad data to the user.
     switch (event.phase) {
-      case flowStartPhase:
+      case TraceEvent.flowStartPhase:
         if (event.name.contains('PipelineItem')) {
           _handleFrameStartEvent(event);
         }
         break;
-      case flowEndPhase:
+      case TraceEvent.flowEndPhase:
         if (event.name.contains('PipelineItem')) {
           _handleFrameEndEvent(event);
         }
         break;
       default:
         if (immediate) {
-          _processDurationEvent(TraceEventWrapper(
-            event,
-            DateTime.now().millisecondsSinceEpoch,
-          ));
+          _processDurationEvent(eventWrapper);
         } else {
           // Add trace event to respective heap.
           final heap = heaps[event.type.index];
+
+          // Create a new [TraceEventWrapper] so that the delay starts now.
           heap.add(TraceEventWrapper(
             event,
             DateTime.now().millisecondsSinceEpoch,
@@ -132,20 +128,20 @@ class TimelineProtocol {
           executeWithDelay(
             Duration(milliseconds: traceEventDelay.inMilliseconds),
             () => _processDurationEvents(heap),
-            executeNow: shouldProcessTopEvent(heap),
+            executeNow: _shouldProcessTopEvent(heap),
           );
         }
     }
   }
 
-  bool shouldProcessTopEvent(HeapPriorityQueue<TraceEventWrapper> heap) {
+  bool _shouldProcessTopEvent(HeapPriorityQueue<TraceEventWrapper> heap) {
     return heap.isNotEmpty &&
         DateTime.now().millisecondsSinceEpoch - heap.first.timeReceived >=
             traceEventDelay.inMilliseconds;
   }
 
   void _processDurationEvents(HeapPriorityQueue<TraceEventWrapper> heap) {
-    while (heap.isNotEmpty && shouldProcessTopEvent(heap)) {
+    while (heap.isNotEmpty && _shouldProcessTopEvent(heap)) {
       _processDurationEvent(heap.removeFirst());
     }
   }
@@ -171,13 +167,13 @@ class TimelineProtocol {
     }
 
     switch (event.phase) {
-      case durationBeginPhase:
+      case TraceEvent.durationBeginPhase:
         _handleDurationBeginEvent(eventWrapper);
         break;
-      case durationEndPhase:
+      case TraceEvent.durationEndPhase:
         _handleDurationEndEvent(eventWrapper);
         break;
-      case durationCompletePhase:
+      case TraceEvent.durationCompletePhase:
         _handleDurationCompleteEvent(eventWrapper);
         break;
       // We do not need to handle other event types (phases 'b', 'n', 'e', etc.)
@@ -258,7 +254,7 @@ class TimelineProtocol {
       return;
     }
 
-    final timelineEvent = TimelineEvent(eventWrapper);
+    final timelineEvent = SyncTimelineEvent(eventWrapper);
 
     if (current != null) {
       current.addChild(timelineEvent);
@@ -268,7 +264,7 @@ class TimelineProtocol {
 
   void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
-    TimelineEvent current = currentEventNodes[event.type.index];
+    SyncTimelineEvent current = currentEventNodes[event.type.index];
 
     if (current == null) return;
 
@@ -278,7 +274,7 @@ class TimelineProtocol {
     if (event.name != current.name) {
       if (collectionEquals(
         event.json,
-        previousDurationEndEvents[event.type.index]?.json,
+        _previousDurationEndEvents[event.type.index]?.json,
       )) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
@@ -296,7 +292,7 @@ class TimelineProtocol {
         }
         return;
       } else if (current.name ==
-              previousDurationEndEvents[event.type.index]?.name &&
+              _previousDurationEndEvents[event.type.index]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
           collectionEquals(
@@ -346,10 +342,9 @@ class TimelineProtocol {
       }
     }
 
-    previousDurationEndEvents[event.type.index] = event;
+    _previousDurationEndEvents[event.type.index] = event;
 
-    current.time.end = Duration(microseconds: event.timestampMicros);
-    current.traceEvents.add(eventWrapper);
+    current.addEndEvent(eventWrapper);
 
     // Even if the event is well nested, we could still have a duplicate in the
     // tree that needs to be removed. Ex:
@@ -379,7 +374,7 @@ class TimelineProtocol {
 
   void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
-    final TimelineEvent timelineEvent = TimelineEvent(eventWrapper);
+    final timelineEvent = SyncTimelineEvent(eventWrapper);
 
     timelineEvent.time.end =
         Duration(microseconds: event.timestampMicros + event.duration);
@@ -407,15 +402,15 @@ class TimelineProtocol {
 
     // Sort _pendingEvents by their startTime. This ensures we will add the
     // first matching event within the time boundary to the frame.
-    pendingEvents.sort((TimelineEvent a, TimelineEvent b) {
+    pendingEvents.sort((SyncTimelineEvent a, SyncTimelineEvent b) {
       return a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds);
     });
 
     final List<TimelineFrame> frames = _getAndSortWellFormedFrames();
     for (TimelineFrame frame in frames) {
-      final List<TimelineEvent> eventsToRemove = [];
+      final eventsToRemove = [];
 
-      for (TimelineEvent event in pendingEvents) {
+      for (var event in pendingEvents) {
         final bool eventAdded = _maybeAddEventToFrame(event, frame);
         if (eventAdded) {
           eventsToRemove.add(event);
@@ -424,17 +419,14 @@ class TimelineProtocol {
       }
 
       if (eventsToRemove.isNotEmpty) {
-        // ignore: prefer_foreach
-        for (TimelineEvent event in eventsToRemove) {
-          pendingEvents.remove(event);
-        }
+        eventsToRemove.forEach(pendingEvents.remove);
       }
     }
   }
 
   /// Add event to an available frame in [pendingFrames] if we can, or
   /// otherwise add it to [pendingEvents].
-  void _maybeAddEvent(TimelineEvent event) {
+  void _maybeAddEvent(SyncTimelineEvent event) {
     if (!event.isUiEventFlow && !event.isGpuEventFlow) {
       // We do not care about events that are neither the main flow of UI
       // events nor the main flow of GPU events.
@@ -464,7 +456,7 @@ class TimelineProtocol {
 
   /// Attempts to add [event] to [frame], and returns a bool indicating whether
   /// the attempt was successful.
-  bool _maybeAddEventToFrame(TimelineEvent event, TimelineFrame frame) {
+  bool _maybeAddEventToFrame(SyncTimelineEvent event, TimelineFrame frame) {
     // Ensure the frame does not already have an event of this type and that
     // the event fits within the frame's time boundaries.
     if (frame.eventFlows[event.type.index] != null ||
@@ -499,7 +491,7 @@ class TimelineProtocol {
       timelineController.recordTraceForTimelineEvent(frame.gpuEventFlow);
       timelineController.recordTrace(frame.pipelineItemEndTrace.json);
 
-      timelineController.addFrame(frame);
+      timelineController.frameBasedTimeline.addFrame(frame);
       pendingFrames.remove(frame.id);
       frame.addedToTimeline = true;
 
@@ -507,7 +499,8 @@ class TimelineProtocol {
     }
   }
 
-  bool eventOccursWithinFrameBounds(TimelineEvent e, TimelineFrame f) {
+  @visibleForTesting
+  bool eventOccursWithinFrameBounds(SyncTimelineEvent e, TimelineFrame f) {
     // TODO(kenz): talk to the engine team about why we need the epsilon. Why
     // do event times extend slightly beyond the times we get from frame start
     // and end flow events.
@@ -566,23 +559,13 @@ class TimelineProtocol {
     return frames;
   }
 
-  TimelineEventType _inferEventType(TraceEvent event) {
-    if (event.threadId == uiThreadId) {
-      return TimelineEventType.ui;
-    } else if (event.threadId == gpuThreadId) {
-      return TimelineEventType.gpu;
-    } else {
-      return TimelineEventType.unknown;
-    }
-  }
-
   bool _shouldProcessTraceEvent(TraceEvent event) {
     final phaseWhitelist = {
-      flowStartPhase,
-      flowEndPhase,
-      durationBeginPhase,
-      durationEndPhase,
-      durationCompletePhase,
+      TraceEvent.flowStartPhase,
+      TraceEvent.flowEndPhase,
+      TraceEvent.durationBeginPhase,
+      TraceEvent.durationEndPhase,
+      TraceEvent.durationCompletePhase,
     };
     return phaseWhitelist.contains(event.phase) &&
         // Do not process Garbage Collection events.
@@ -593,5 +576,383 @@ class TimelineProtocol {
         event.name != 'MessageLoop::RunExpiredTasks' &&
         // Only process events from the UI or GPU thread.
         (event.isGpuEvent || event.isUiEvent);
+  }
+
+  @override
+  void reset() {
+    pendingFrames.clear();
+    pendingEvents.clear();
+    currentEventNodes.clear();
+    _previousDurationEndEvents.clear();
+    heaps.clear();
+  }
+}
+
+/// Processor for composing a recorded list of trace events into a timeline of
+/// [AsyncTimelineEvent]s and [SyncTimelineEvent]s.
+class FullTimelineProcessor extends TimelineProcessor {
+  FullTimelineProcessor({
+    @required int uiThreadId,
+    @required int gpuThreadId,
+    @required TimelineController timelineController,
+  }) : super(
+          uiThreadId: uiThreadId,
+          gpuThreadId: gpuThreadId,
+          timelineController: timelineController,
+        );
+
+  /// Async timeline events we have processed, mapped to their respective async
+  /// ids.
+  Map<String, AsyncTimelineEvent> asyncEventsById = {};
+
+  /// The current timeline event nodes for duration events.
+  ///
+  /// The events are mapped to their thread id. As we process duration events,
+  /// a timeline event on a single thread will be formed and completed before
+  /// another timeline event on the same thread begins.
+  final Map<int, SyncTimelineEvent> currentDurationEventNodes = {};
+
+  /// The previously handled DurationEnd events for each thread.
+  ///
+  /// We need this information to balance the tree structures of our event nodes
+  /// if they fall out of balance due to duplicate trace events.
+  final Map<int, TraceEvent> previousDurationEndEvents = {};
+
+  /// Pending root duration complete event that has not yet been added to the
+  /// timeline.
+  ///
+  /// A DC event is a root if we do not have a current duration event tracked
+  /// for the given thread.
+  ///
+  /// We keep this event around to avoid prematurely adding a root DC event to
+  /// the timeline. Once we have processed events beyond a DC event's end
+  /// timestamp, we know that the DC event has no more unprocessed children.
+  /// This is guaranteed because we process the events in timestamp order.
+  SyncTimelineEvent pendingRootCompleteEvent;
+
+  void processTimeline(List<TraceEventWrapper> traceEvents) async {
+// Uncomment this code for testing the timeline.
+//    traceEvents = simpleTraceEvents['traceEvents']
+//        .where((json) =>
+//            json.containsKey(TraceEvent.timestampKey)) // thread_name events
+//        .map((e) => TraceEventWrapper(
+//            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
+//        .toList();
+    final _traceEvents = (traceEvents
+        // Throw out timeline events that do not have a timestamp
+        // (e.g. thread_name events).
+        .where((event) => event.event.timestampMicros != null)
+        .toList())
+      // Events need to be in increasing timestamp order.
+      ..sort()
+      ..map((event) => event.event.json)
+          .toList()
+          .forEach(timelineController.recordTrace);
+
+    for (var eventWrapper in _traceEvents) {
+      // TODO(kenz): stop manually setting the type once we have that data
+      // from the engine.
+      eventWrapper.event.type = inferEventType(eventWrapper.event);
+
+      // Add [pendingRootCompleteEvent] to the timeline if it is ready.
+      _addPendingCompleteRootToTimeline(
+          currentProcessingTime: eventWrapper.event.timestampMicros);
+
+      switch (eventWrapper.event.phase) {
+        case TraceEvent.asyncBeginPhase:
+        case TraceEvent.asyncInstantPhase:
+          _addAsyncEvent(eventWrapper);
+          break;
+        case TraceEvent.asyncEndPhase:
+          _endAsyncEvent(eventWrapper);
+          break;
+        case TraceEvent.durationBeginPhase:
+          _handleDurationBeginEvent(eventWrapper);
+          break;
+        case TraceEvent.durationEndPhase:
+          _handleDurationEndEvent(eventWrapper);
+          break;
+        case TraceEvent.durationCompletePhase:
+          _handleDurationCompleteEvent(eventWrapper);
+          break;
+        case TraceEvent.flowStartPhase:
+        case TraceEvent.flowEndPhase:
+        // TODO(kenz): add support for flows.
+        default:
+          break;
+      }
+    }
+
+    for (var rootEvent in asyncEventsById.values.where((e) => e.isRoot)) {
+      // Do not add incomplete async trees to the timeline.
+      // TODO(kenz): infer missing end times based on other end times in the
+      // async event tree. Add these "repaired" events to the timeline.
+      if (!rootEvent.isWellFormedDeep) continue;
+
+      timelineController.fullTimeline.addTimelineEvent(rootEvent);
+    }
+
+    _addPendingCompleteRootToTimeline(force: true);
+
+    // TODO(kenz): we should do something smarter using the processed data
+    // [timelineController.fullTimeline.data] to set start and end times.
+    timelineController.fullTimeline.data.time
+      ..start = Duration(microseconds: _traceEvents.first.event.timestampMicros)
+      ..end = Duration(microseconds: _traceEvents.last.event.timestampMicros);
+  }
+
+  void _addPendingCompleteRootToTimeline({
+    int currentProcessingTime,
+    bool force = false,
+  }) {
+    assert(currentProcessingTime != null || force);
+    if (pendingRootCompleteEvent != null &&
+        (force ||
+            currentProcessingTime >
+                pendingRootCompleteEvent.time.end.inMicroseconds)) {
+      timelineController.fullTimeline
+          .addTimelineEvent(pendingRootCompleteEvent);
+      pendingRootCompleteEvent = null;
+    }
+  }
+
+  void _addAsyncEvent(TraceEventWrapper eventWrapper) {
+    final timelineEvent = AsyncTimelineEvent(eventWrapper);
+    if (eventWrapper.event.phase == TraceEvent.asyncInstantPhase) {
+      timelineEvent.time.end = timelineEvent.time.start;
+    }
+
+    // If parentId is specified, use it to define the async tree structure.
+    final parentId = timelineEvent.parentId;
+    if (parentId != null) {
+      final parent = asyncEventsById[parentId];
+      if (parent != null) {
+        parent.addChild(timelineEvent);
+      }
+      asyncEventsById[eventWrapper.event.id] = timelineEvent;
+      return;
+    }
+
+    final currentEventWithId = asyncEventsById[eventWrapper.event.id];
+
+    // If we already have a timeline event with the same async id as
+    // [timelineEvent] (e.g. [currentEventWithId]), then [timelineEvent] is
+    // either a child of [currentEventWithId] or a new root event with this id.
+    if (currentEventWithId != null) {
+      if (currentEventWithId.isWellFormedDeep) {
+        // [timelineEvent] is a new root with the same id as
+        // [currentEventWithId]. Since [currentEventWithId] is well formed, add
+        // it to the timeline.
+        timelineController.fullTimeline.addTimelineEvent(currentEventWithId);
+        asyncEventsById[eventWrapper.event.id] = timelineEvent;
+      } else {
+        assert(!currentEventWithId.isWellFormed);
+        // We know it must be a child because we process events in timestamp
+        // order.
+        currentEventWithId.addChild(timelineEvent);
+      }
+    } else {
+      asyncEventsById[eventWrapper.event.id] = timelineEvent;
+    }
+  }
+
+  void _endAsyncEvent(TraceEventWrapper eventWrapper) {
+    final root = asyncEventsById[eventWrapper.event.id];
+    if (root == null) {
+      // Since we process trace events in timestamp order, we can guarantee that
+      // we have not already processed the matching begin event. Discard the end
+      // event in this case.
+      return;
+    }
+    root.endAsyncEvent(eventWrapper);
+  }
+
+  void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
+    final current = currentDurationEventNodes[eventWrapper.event.threadId];
+    final timelineEvent = SyncTimelineEvent(eventWrapper);
+    if (current != null) {
+      current.addChild(timelineEvent);
+    }
+    currentDurationEventNodes[eventWrapper.event.threadId] = timelineEvent;
+  }
+
+  void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
+    final TraceEvent event = eventWrapper.event;
+    SyncTimelineEvent current = currentDurationEventNodes[event.threadId];
+
+    if (current == null) return;
+
+    // If the names of [event] and [current] do not match, our event nesting is
+    // off balance due to duplicate events from the engine. Balance the tree so
+    // we can continue processing trace events for [current].
+    if (event.name != current.name) {
+      if (collectionEquals(
+        event.json,
+        previousDurationEndEvents[event.threadId]?.json,
+      )) {
+        // This is a duplicate of the previous DurationEnd event we received.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        // Animator::BeginFrame - DurationBegin
+        // ...
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+        // Animator::BeginFrame - DurationEnd ([event] - duplicate)
+        // VSYNC - DurationEnd
+        //
+        if (debugTimeline) {
+          debugFrameTracking
+              .writeln('Duplicate duration end event: ${event.json}');
+        }
+        return;
+      } else if (current.name ==
+              previousDurationEndEvents[event.threadId]?.name &&
+          current.parent?.name == event.name &&
+          current.children.length == 1 &&
+          collectionEquals(
+            current.beginTraceEventJson,
+            current.children.first.beginTraceEventJson,
+          )) {
+        // There was a duplicate DurationBegin event associated with
+        // [previousDurationEndEvent]. [event] is actually the DurationEnd event
+        // for [current.parent]. Trim the extra layer created by the duplicate.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        // Animator::BeginFrame - DurationBegin (duplicate - remove this node)
+        // Animator::BeginFrame - DurationBegin
+        // ...
+        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+        // VSYNC - DurationEnd [event]
+        //
+        if (debugTimeline) {
+          debugFrameTracking.writeln(
+              'Duplicate duration begin event: ${current.beginTraceEventJson}');
+        }
+
+        current.parent.removeChild(current);
+        current = current.parent;
+        currentDurationEventNodes[event.threadId] = current;
+      } else {
+        // The current event node has fallen into an unrecoverable state. Reset
+        // the tracking node.
+        //
+        // Trace example:
+        // VSYNC - DurationBegin
+        //  Animator::BeginFrame - DurationBegin
+        //   VSYNC - DurationBegin (duplicate)
+        //    Animator::BeginFrame - DurationBegin (duplicate)
+        //     ...
+        //  Animator::BeginFrame - DurationEnd
+        // VSYNC - DurationEnd
+        if (debugTimeline) {
+          debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
+          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking
+              .writeln('Current: ${currentDurationEventNodes[event.threadId]}');
+        }
+        currentDurationEventNodes[event.threadId] = null;
+        return;
+      }
+    }
+
+    previousDurationEndEvents[event.threadId] = event;
+
+    current.addEndEvent(eventWrapper);
+
+    // Even if the event is well nested, we could still have a duplicate in the
+    // tree that needs to be removed. Ex:
+    //   VSYNC - StartTime 123
+    //      VSYNC - StartTime 123 (duplicate)
+    //      VSYNC - EndTime 234 (duplicate)
+    //   VSYNC - EndTime 234
+    current.maybeRemoveDuplicate();
+
+    // Since this event is complete, move back up the tree to the nearest
+    // incomplete event.
+    while (current.parent != null &&
+        current.parent.time.end?.inMicroseconds != null) {
+      current = current.parent;
+    }
+    currentDurationEventNodes[event.threadId] = current.parent;
+
+    // If we have reached a null parent, this event is fully formed.
+    if (current.parent == null) {
+      if (debugTimeline) {
+        debugFrameTracking.writeln('Trying to add event after DurationEnd:');
+        current.format(debugFrameTracking, '   ');
+      }
+      timelineController.fullTimeline.addTimelineEvent(current);
+    }
+  }
+
+  void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
+    final event = eventWrapper.event;
+    final timelineEvent = SyncTimelineEvent(eventWrapper)
+      ..time.end =
+          Duration(microseconds: event.timestampMicros + event.duration);
+
+    final current = currentDurationEventNodes[event.threadId];
+    if (current != null) {
+      if (current
+          .containsChildWithCondition((TimelineEvent event) => collectionEquals(
+                event.beginTraceEventJson,
+                timelineEvent.beginTraceEventJson,
+              ))) {
+        // This is a duplicate DurationComplete event. Return early.
+        return;
+      }
+      current.addChild(timelineEvent);
+    } else {
+      // Since we do not have a current duration event for this thread, this DC
+      // event is either a timeline root event or a child of
+      // [pendingRootCompleteEvent].
+      if (pendingRootCompleteEvent == null) {
+        pendingRootCompleteEvent = timelineEvent;
+      } else {
+        pendingRootCompleteEvent.addChild(timelineEvent);
+      }
+    }
+  }
+
+  @override
+  void reset() {
+    asyncEventsById.clear();
+    currentDurationEventNodes.clear();
+    previousDurationEndEvents.clear();
+    pendingRootCompleteEvent = null;
+  }
+}
+
+abstract class TimelineProcessor {
+  TimelineProcessor({
+    @required this.uiThreadId,
+    @required this.gpuThreadId,
+    @required this.timelineController,
+  });
+
+  // TODO(kenz): Remove the [uiThreadId] and [gpuThreadId] once ui/gpu
+  //  distinction changes and frame ids are available in the engine.
+  final int uiThreadId;
+
+  final int gpuThreadId;
+
+  final TimelineController timelineController;
+
+  void reset();
+
+  @visibleForTesting
+  TimelineEventType inferEventType(TraceEvent event) {
+    if (event.phase == TraceEvent.asyncBeginPhase ||
+        event.phase == TraceEvent.asyncInstantPhase ||
+        event.phase == TraceEvent.asyncEndPhase) {
+      return TimelineEventType.async;
+    } else if (event.threadId == uiThreadId) {
+      return TimelineEventType.ui;
+    } else if (event.threadId == gpuThreadId) {
+      return TimelineEventType.gpu;
+    } else {
+      return TimelineEventType.unknown;
+    }
   }
 }

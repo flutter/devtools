@@ -13,6 +13,12 @@ void main() {
       expect(treeNode3.depth, equals(1));
     });
 
+    test('isRoot', () {
+      expect(treeNode0.isRoot, isTrue);
+      expect(treeNode1.isRoot, isFalse);
+      expect(treeNode5.isRoot, isFalse);
+    });
+
     test('root', () {
       expect(treeNode2.root, equals(treeNode0));
     });

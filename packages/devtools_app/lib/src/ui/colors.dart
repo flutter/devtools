@@ -14,6 +14,8 @@ import 'theme.dart';
 /// https://material.io/design/color/the-color-system.html#tools-for-picking-colors.
 const mainUiColor = ThemedColor(mainUiColorLight, mainUiColorDark);
 const mainGpuColor = ThemedColor(mainGpuColorLight, mainGpuColorDark);
+final mainUnknownColor = ThemedColor.fromSingleColor(const Color(0xFFCAB8E9));
+final mainAsyncColor = ThemedColor.fromSingleColor(const Color(0xFF80CBC4));
 
 const mainUiColorLight = Color(0xFF81D4FA); // Light Blue 50 - 200
 const mainGpuColorLight = Color(0xFF0288D1); // Light Blue 50 - 700
@@ -50,6 +52,20 @@ final gpuColorPalette = [
   const ThemedColor(mainGpuColorLight, mainGpuColorDark),
   const ThemedColor(Color(0xFF0277BD), Color(0xFF1966D2)),
   const ThemedColor(Color(0xFF01579B), Color(0xFF1859BD)),
+];
+
+// Teal 200-400 - see https://material.io/design/color/#tools-for-picking-colors.
+final asyncColorPalette = [
+  mainAsyncColor,
+  ThemedColor.fromSingleColor(const Color(0xFF4DB6AC)),
+  ThemedColor.fromSingleColor(const Color(0xFF26A69A)),
+];
+
+// Slight variation on Deep purple 100-300 - see https://material.io/design/color/#tools-for-picking-colors.
+final unknownColorPalette = [
+  mainUnknownColor,
+  ThemedColor.fromSingleColor(const Color(0xFFB39DDB)),
+  ThemedColor.fromSingleColor(const Color(0xFF9D84CA)),
 ];
 
 const selectedFlameChartItemColor = ThemedColor(

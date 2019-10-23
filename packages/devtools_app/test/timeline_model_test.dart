@@ -13,20 +13,20 @@ import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('TimelineData', () {
-    TimelineData timelineData;
+  group('FrameBasedTimelineData', () {
+    FrameBasedTimelineData timelineData;
 
     setUp(() {
-      timelineData = TimelineData();
+      timelineData = FrameBasedTimelineData(displayRefreshRate: 60.0);
     });
 
-    test('init', () {
+    test('init', () async {
       expect(timelineData.traceEvents, isEmpty);
       expect(timelineData.frames, isEmpty);
       expect(timelineData.selectedFrame, isNull);
       expect(timelineData.selectedFrameId, isNull);
       expect(timelineData.selectedEvent, isNull);
-      expect(timelineData.displayRefreshRate, isNull);
+      expect(await timelineData.displayRefreshRate, 60.0);
       expect(timelineData.cpuProfileData, isNull);
     });
 
@@ -36,47 +36,51 @@ void main() {
           equals({
             TimelineData.traceEventsKey: [],
             TimelineData.cpuProfileKey: {},
-            TimelineData.selectedFrameIdKey: null,
+            FrameBasedTimelineData.selectedFrameIdKey: null,
             TimelineData.selectedEventKey: {},
-            TimelineData.displayRefreshRateKey: 60,
+            FrameBasedTimelineData.displayRefreshRateKey: 60,
             TimelineData.devToolsScreenKey: timelineScreenId,
           }));
 
-      timelineData
+      timelineData = FrameBasedTimelineData(displayRefreshRate: 60)
         ..traceEvents.add({'name': 'FakeTraceEvent'})
         ..cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson)
-        ..selectedEvent = vsyncEvent
-        ..displayRefreshRate = 60;
-
+        ..selectedEvent = vsyncEvent;
       expect(
-          timelineData.json,
-          equals({
-            TimelineData.traceEventsKey: [
-              {'name': 'FakeTraceEvent'}
-            ],
-            TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
-            TimelineData.selectedFrameIdKey: null,
-            TimelineData.selectedEventKey: vsyncEvent.json,
-            TimelineData.displayRefreshRateKey: 60,
-            TimelineData.devToolsScreenKey: timelineScreenId,
-          }));
+        timelineData.json,
+        equals({
+          TimelineData.traceEventsKey: [
+            {'name': 'FakeTraceEvent'}
+          ],
+          TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
+          FrameBasedTimelineData.selectedFrameIdKey: null,
+          TimelineData.selectedEventKey: vsyncEvent.json,
+          FrameBasedTimelineData.displayRefreshRateKey: 60,
+          TimelineData.devToolsScreenKey: timelineScreenId,
+        }),
+      );
     });
 
-    test('clear', () {
-      final frame = TimelineFrame('id_0');
-      timelineData
+    test('displayDepth', () {
+      timelineData.selectedFrame = testFrame;
+      expect(timelineData.selectedFrame.uiEventFlow.depth, equals(7));
+      expect(timelineData.selectedFrame.gpuEventFlow.depth, equals(2));
+      expect(timelineData.displayDepth, equals(9));
+    });
+
+    test('clear', () async {
+      timelineData = FrameBasedTimelineData(displayRefreshRate: 120)
         ..traceEvents.add({'test': 'trace event'})
-        ..frames.add(frame)
+        ..frames.add(testFrame)
         ..selectedEvent = vsyncEvent
-        ..selectedFrame = frame
-        ..displayRefreshRate = 120
+        ..selectedFrame = testFrame
         ..cpuProfileData = CpuProfileData.parse(jsonDecode(jsonEncode({})));
       expect(timelineData.traceEvents, isNotEmpty);
       expect(timelineData.frames, isNotEmpty);
       expect(timelineData.selectedFrame, isNotNull);
       expect(timelineData.selectedFrameId, 'id_0');
       expect(timelineData.selectedEvent, isNotNull);
-      expect(timelineData.displayRefreshRate, isNotNull);
+      expect(await timelineData.displayRefreshRate, equals(120));
       expect(timelineData.cpuProfileData, isNotNull);
 
       timelineData.clear();
@@ -85,8 +89,57 @@ void main() {
       expect(timelineData.selectedFrame, isNull);
       expect(timelineData.selectedFrameId, isNull);
       expect(timelineData.selectedEvent, isNull);
-      expect(timelineData.displayRefreshRate, isNull);
       expect(timelineData.cpuProfileData, isNull);
+    });
+  });
+
+  group('FullTimelineData', () {
+    FullTimelineData timelineData;
+    setUp(() {
+      timelineData = FullTimelineData(timelineEvents: [
+        goldenAsyncTimelineEvent,
+        goldenUiTimelineEvent,
+        goldenGpuTimelineEvent,
+        unknownEvent,
+      ]);
+    });
+
+    test('displayDepth', () {
+      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
+      expect(goldenUiTimelineEvent.displayDepth, equals(7));
+      expect(goldenGpuTimelineEvent.displayDepth, equals(2));
+      expect(unknownEvent.displayDepth, equals(1));
+      expect(timelineData.displayDepth, equals(16));
+    });
+
+    test('initializeEventBuckets', () {
+      expect(timelineData.eventBuckets, isEmpty);
+      timelineData.initializeEventBuckets();
+      expect(
+        timelineData.eventBuckets[FullTimelineData.uiKey].length,
+        equals(1),
+      );
+      expect(
+        timelineData.eventBuckets[FullTimelineData.gpuKey].length,
+        equals(1),
+      );
+      expect(
+        timelineData.eventBuckets[FullTimelineData.unknownKey].length,
+        equals(1),
+      );
+      expect(timelineData.eventBuckets['A'].length, equals(1));
+    });
+
+    test('event bucket compare', () {
+      expect(FullTimelineData.eventBucketComparator('UI', 'GPU'), equals(-1));
+      expect(FullTimelineData.eventBucketComparator('GPU', 'UI'), equals(1));
+      expect(FullTimelineData.eventBucketComparator('UI', 'UI'), equals(0));
+      expect(FullTimelineData.eventBucketComparator('UI', 'Async'), equals(1));
+      expect(FullTimelineData.eventBucketComparator('A', 'B'), equals(-1));
+      expect(
+        FullTimelineData.eventBucketComparator('Z', 'Unknown'),
+        equals(-1),
+      );
     });
   });
 
@@ -98,7 +151,7 @@ void main() {
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.selectedFrameId, isNull);
       expect(offlineData.selectedEvent, isNull);
-      expect(offlineData.displayRefreshRate, isNull);
+      expect(offlineData.displayRefreshRate, equals(60.0));
       expect(offlineData.cpuProfileData, isNull);
 
       offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
@@ -138,13 +191,13 @@ void main() {
     });
   });
 
-  group('TimelineEvent', () {
+  group('SyncTimelineEvent', () {
     test('maybeRemoveDuplicate', () {
       final goldenCopy = goldenUiTimelineEvent.deepCopy();
 
       // Event with no duplicates should be unchanged.
       goldenCopy.maybeRemoveDuplicate();
-      expect(goldenCopy.toString(), equals(goldenUiString()));
+      expect(goldenCopy.toString(), equals(goldenUiString));
 
       // Add a duplicate event in [goldenCopy]'s event tree.
       final duplicateEvent = goldenCopy.deepCopy();
@@ -155,10 +208,10 @@ void main() {
       goldenCopy.children
         ..clear()
         ..add(duplicateEvent);
-      expect(goldenCopy.toString(), isNot(equals(goldenUiString())));
+      expect(goldenCopy.toString(), isNot(equals(goldenUiString)));
 
       goldenCopy.maybeRemoveDuplicate();
-      expect(goldenCopy.toString(), equals(goldenUiString()));
+      expect(goldenCopy.toString(), equals(goldenUiString));
     });
 
     test('removeChild', () {
@@ -191,11 +244,11 @@ void main() {
 
     test('addChild', () {
       final TimelineEvent engineBeginFrame =
-          testTimelineEvent(engineBeginFrameJson);
+          testSyncTimelineEvent(engineBeginFrameTrace);
       expect(engineBeginFrame.children.isEmpty, isTrue);
 
       // Add child [animate] to a leaf [engineBeginFrame].
-      final TimelineEvent animate = testTimelineEvent(animateJson)
+      final TimelineEvent animate = testSyncTimelineEvent(animateTrace)
         ..time.end = const Duration(microseconds: 118039650871);
       engineBeginFrame.addChild(animate);
       expect(engineBeginFrame.children.length, equals(1));
@@ -203,14 +256,14 @@ void main() {
 
       // Add child [layout] where child is sibling of existing children
       // [animate].
-      final TimelineEvent layout = testTimelineEvent(layoutJson)
+      final TimelineEvent layout = testSyncTimelineEvent(layoutTrace)
         ..time.end = const Duration(microseconds: 118039651087);
       engineBeginFrame.addChild(layout);
       expect(engineBeginFrame.children.length, equals(2));
       expect(engineBeginFrame.children.last.name, equals(layoutEvent.name));
 
       // Add child [build] where existing child [layout] is parent of child.
-      final TimelineEvent build = testTimelineEvent(buildJson)
+      final TimelineEvent build = testSyncTimelineEvent(buildTrace)
         ..time.end = const Duration(microseconds: 118039651017);
       engineBeginFrame.addChild(build);
       expect(engineBeginFrame.children.length, equals(2));
@@ -219,7 +272,7 @@ void main() {
 
       // Add child [frame] child is parent of existing children [animate] and
       // [layout].
-      final TimelineEvent frame = testTimelineEvent(frameJson)
+      final TimelineEvent frame = testSyncTimelineEvent(frameTrace)
         ..time.end = const Duration(microseconds: 118039652334);
       engineBeginFrame.addChild(frame);
       expect(engineBeginFrame.children.length, equals(1));
@@ -227,6 +280,47 @@ void main() {
       expect(frame.children.length, equals(2));
       expect(frame.children.first.name, equals(animateEvent.name));
       expect(frame.children.last.name, equals(layoutEvent.name));
+    });
+  });
+
+  group('AsyncTimelineEvent', () {
+    test('isWellFormedDeep', () {
+      expect(goldenAsyncTimelineEvent.isWellFormedDeep, isTrue);
+    });
+
+    test('displayDepth', () {
+      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
+      expect(asyncEventB.displayDepth, equals(3));
+      expect(asyncEventC.displayDepth, equals(2));
+      expect(asyncEventD.displayDepth, equals(1));
+    });
+
+    test('hasOverlappingChildren', () {
+      expect(asyncEventA.hasOverlappingChildren, isTrue);
+      expect(asyncEventB.hasOverlappingChildren, isTrue);
+      expect(asyncEventC.hasOverlappingChildren, isFalse);
+      expect(asyncEventD.hasOverlappingChildren, isFalse);
+    });
+
+    test('couldBeParentOf', () {
+      expect(asyncEventA.couldBeParentOf(asyncEventB1), isFalse);
+      expect(asyncEventB.couldBeParentOf(asyncEventB1), isTrue);
+      expect(asyncEventB.couldBeParentOf(asyncEventC1), isFalse);
+      expect(asyncEventC.couldBeParentOf(asyncEventC1), isTrue);
+      expect(asyncParentId1.couldBeParentOf(asyncChildId1), isTrue);
+      expect(asyncParentId1.couldBeParentOf(asyncChildId2), isFalse);
+    });
+
+    test('addEndEvent', () {
+      final event = AsyncTimelineEvent(asyncStartATrace);
+      expect(event.endTraceEventJson, isNull);
+      expect(event.time.end, isNull);
+      event.addEndEvent(asyncEndATrace);
+      expect(event.endTraceEventJson, equals(asyncEndATrace.event.json));
+      expect(
+        event.time.end.inMicroseconds,
+        asyncEndATrace.event.timestampMicros,
+      );
     });
   });
 }

@@ -38,6 +38,8 @@ class TreeNode<T extends TreeNode<T>> {
 
   int _depth = 0;
 
+  bool get isRoot => parent == null;
+
   T get root {
     if (_root != null) {
       return _root;

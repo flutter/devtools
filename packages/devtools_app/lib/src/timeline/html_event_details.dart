@@ -74,12 +74,12 @@ class HtmlEventDetails extends CoreElement {
       ..add([
         _cpuProfiler = _CpuProfiler(
           _timelineController,
-          () => _timelineController.timelineData.cpuProfileData,
+          () => _timelineController.cpuProfileData,
         )..hidden(true),
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
         _gpuEventDetails = div(
-          text: 'CPU profiling is not available for GPU events.',
+          text: 'CPU profiling is only available for UI events.',
           c: 'centered-single-line-message',
         )..hidden(true),
       ]);
@@ -99,7 +99,8 @@ class HtmlEventDetails extends CoreElement {
   }
 
   void _initListeners() {
-    _timelineController.onSelectedFrame.listen((_) => reset());
+    _timelineController.frameBasedTimeline.onSelectedFrame
+        .listen((_) => reset());
 
     _timelineController.onSelectedTimelineEvent
         .listen((_) async => await update());
@@ -189,15 +190,17 @@ class _CpuProfiler extends HtmlCpuProfiler {
       return true;
     }
 
-    final cpuProfileData = _timelineController.timelineData.cpuProfileData;
+    final cpuProfileData = _timelineController.cpuProfileData;
     if (cpuProfileData != null && cpuProfileData.stackFrames.isEmpty) {
-      final frameOffset =
-          _timelineController.timelineData.selectedFrame.time.start;
+      final offset = _timelineController.timelineMode == TimelineMode.frameBased
+          ? _timelineController.frameBasedTimeline.data.selectedFrame.time.start
+          : _timelineController
+              .fullTimeline.data.timelineEvents.first.time.start;
       final startTime =
-          _timelineController.timelineData.selectedEvent.time.start -
-              frameOffset;
+          _timelineController.timelineData.selectedEvent.time.start - offset;
       final endTime =
-          _timelineController.timelineData.selectedEvent.time.end - frameOffset;
+          _timelineController.timelineData.selectedEvent.time.end - offset;
+
       showMessage(div(
           text: 'CPU profile unavailable for time range'
               ' [${msText(startTime, fractionDigits: 2)} -'

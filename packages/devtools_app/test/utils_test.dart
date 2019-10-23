@@ -130,6 +130,28 @@ void main() {
         timeRange.toString(unit: TimeUnit.milliseconds),
         equals('[1 ms - 8 ms]'),
       );
+
+      final t = TimeRange()
+        ..start = const Duration(milliseconds: 100)
+        ..end = const Duration(milliseconds: 200);
+      final overlapBeginning = TimeRange()
+        ..start = const Duration(milliseconds: 50)
+        ..end = const Duration(milliseconds: 150);
+      final overlapMiddle = TimeRange()
+        ..start = const Duration(milliseconds: 125)
+        ..end = const Duration(milliseconds: 175);
+      final overlapEnd = TimeRange()
+        ..start = const Duration(milliseconds: 150)
+        ..end = const Duration(milliseconds: 250);
+      final noOverlap = TimeRange()
+        ..start = const Duration(milliseconds: 300)
+        ..end = const Duration(milliseconds: 400);
+
+      expect(t.overlaps(t), isTrue);
+      expect(t.overlaps(overlapBeginning), isTrue);
+      expect(t.overlaps(overlapMiddle), isTrue);
+      expect(t.overlaps(overlapEnd), isTrue);
+      expect(t.overlaps(noOverlap), isFalse);
     });
 
     test('longestFittingSubstring', () {
