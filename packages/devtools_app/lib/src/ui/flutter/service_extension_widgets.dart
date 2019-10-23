@@ -293,11 +293,12 @@ class _RegisteredServiceExtensionButtonState
     return InkWell(
       onTap: _click,
       child: Container(
-        constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
         alignment: Alignment.center,
-        child: Row(children: [
-          getIconWidget(widget.serviceDescription.icon),
-        ]),
+        // TODO(djshuckerow): Just make these icons the right size to fit this box.
+        // The current size is a little tiny by comparison to our other
+        // material icons.
+        child: getIconWidget(widget.serviceDescription.icon),
       ),
     );
   }
