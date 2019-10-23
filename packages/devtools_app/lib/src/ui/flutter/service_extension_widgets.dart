@@ -6,11 +6,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
 import '../../utils.dart';
 import 'flutter_icon_renderer.dart';
+import 'label.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -43,9 +45,8 @@ class ExtensionState {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup> {
+    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
   List<ExtensionState> _extensionStates;
-  final List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _ServiceExtensionButtonGroupState
       // VMServiceManager.
       final extensionName = extension.description.extension;
       // Update the button state to match the latest state on the VM.
-      _subscriptions.add(serviceManager.serviceExtensionManager
+      autoDispose(serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName, (state) {
         setState(() {
           extension.isSelected =
@@ -69,8 +70,7 @@ class _ServiceExtensionButtonGroupState
         });
       }));
       // Track whether the extension is actually exposed by the VM.
-      _subscriptions
-          .add(serviceManager.serviceExtensionManager.hasServiceExtension(
+      autoDispose(serviceManager.serviceExtensionManager.hasServiceExtension(
         extensionName,
         (available) {
           setState(() {
@@ -79,15 +79,6 @@ class _ServiceExtensionButtonGroupState
         },
       ));
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    for (var subscription in _subscriptions) {
-      subscription.cancel();
-    }
-    _subscriptions.clear();
   }
 
   @override
@@ -112,19 +103,11 @@ class _ServiceExtensionButtonGroupState
     );
   }
 
-  Widget _buildExtension(ExtensionState extensionState, bool showLabels) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          getIconWidget(extensionState.description.icon),
-          if (showLabels)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(extensionState.description.description),
-            )
-        ],
-      ),
+  Widget _buildExtension(ExtensionState extensionState, bool showText) {
+    return Label(
+      extensionState.description.icon,
+      extensionState.description.description,
+      showText: showText,
     );
   }
 

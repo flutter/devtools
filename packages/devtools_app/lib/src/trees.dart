@@ -92,6 +92,9 @@ class TreeNode<T extends TreeNode<T>> {
     _isExpanded = true;
   }
 
+  // TODO(jacobr): cache the value of whether the node should be shown
+  // so that lookups on this class are O(1) invalidating the cache when nodes
+  // up the tree are expanded and collapsed.
   /// Whether this node should be shown in the tree.
   ///
   /// When using this, consider caching the value. It is O([level]) to compute.

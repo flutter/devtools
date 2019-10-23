@@ -38,11 +38,6 @@ class EmptyScreen extends Screen {
     Octicons.getIconData('pulse'),
   );
 
-  static final EmptyScreen performance = EmptyScreen(
-    'Performance',
-    Octicons.getIconData('dashboard'),
-  );
-
   static final EmptyScreen memory = EmptyScreen(
     'Memory',
     Octicons.getIconData('package'),
