@@ -154,27 +154,67 @@ List<Widget> getServiceExtensionWidgets() {
   ];
 }
 
-/// Class to use for a button that when clicked invokes a VM Service such as
-/// hot reload or hot restart.
+/// Button that performs a hot reload on the [serviceManager].
+class HotReloadButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _RegisteredServiceExtensionButton._(
+      serviceDescription: hotReload,
+      action: () => serviceManager.performHotReload(),
+      inProgressText: 'Performing hot reload',
+      completedText: 'Hot reload completed',
+      describeError: (error) => 'Unable to hot reload the app: $error',
+    );
+  }
+}
+
+/// Button that performs a hot restart on the [serviceManager].
+class HotRestartButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _RegisteredServiceExtensionButton._(
+      serviceDescription: hotRestart,
+      action: () => serviceManager.performHotRestart(),
+      inProgressText: 'Performing hot restart',
+      completedText: 'Hot restart completed',
+      describeError: (error) => 'Unable to hot restart the app: $error',
+    );
+  }
+}
+
+/// Button that when clicked invokes a VM Service , such as hot reload or hot
+/// restart.
 ///
-/// Callbacks on when the action is performed or an error occurs are provided
-/// to wire up cases such as hot reload where users need to be notified when
-/// the action completes.
-// TODO(jacobr): use this button to support hot reload.
-// It appears the matching class in service_extension_elements is not being
-// used but that is likely accidental.
-class RegisteredServiceExtensionButton extends StatefulWidget {
-  const RegisteredServiceExtensionButton(
-    this.serviceDescription,
-    this.action,
-    this.errorAction, {
-    this.showTitle = false,
+/// This button will attempt to register to the given service description,
+class _RegisteredServiceExtensionButton extends StatefulWidget {
+  const _RegisteredServiceExtensionButton._({
+    @required this.serviceDescription,
+    @required this.action,
+    @required this.inProgressText,
+    @required this.completedText,
+    @required this.describeError,
   });
 
+  /// The service to subscribe to.
   final RegisteredServiceDescription serviceDescription;
+
+  /// Callback to the method on [serviceManager] to invoke when clicked.
   final VoidAsyncFunction action;
-  final VoidFunctionWithArg errorAction;
-  final bool showTitle;
+
+  /// The text to show when the action is in progress.
+  ///
+  /// This will be shown in a [SnackBar] when completed.
+  final String inProgressText;
+
+  /// The text to show when the action is completed.
+  ///
+  /// This will be shown in a [SnackBar], replacing the [inProgressText].
+  final String completedText;
+
+  /// Callback that describes any error that occurs.
+  ///
+  /// This will replace the [inProgressText] in a [SnackBar].
+  final String Function(dynamic error) describeError;
 
   @override
   _RegisteredServiceExtensionButtonState createState() =>
@@ -182,7 +222,7 @@ class RegisteredServiceExtensionButton extends StatefulWidget {
 }
 
 class _RegisteredServiceExtensionButtonState
-    extends State<RegisteredServiceExtensionButton> {
+    extends State<_RegisteredServiceExtensionButton> {
   StreamSubscription<bool> _subscription;
 
   bool _disabled = false;
@@ -197,6 +237,7 @@ class _RegisteredServiceExtensionButtonState
       (registered) {
         setState(() {
           _hidden = !registered;
+          print(_hidden);
         });
       },
     );
@@ -209,13 +250,34 @@ class _RegisteredServiceExtensionButtonState
   }
 
   void _click() async {
+    if (_disabled) {
+      return;
+    }
+    setState(() {
+      _disabled = true;
+    });
+    // TODO(https://github.com/flutter/devtools/issues/1249): Avoid adding
+    // and removing snackbars so often as we do here.
+    Scaffold.of(context)
+        .removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
+    // Push a snackbar that the action is in progress.
+    final snackBar = Scaffold.of(context).showSnackBar(
+      SnackBar(content: Text(widget.inProgressText)),
+    );
     try {
-      setState(() {
-        _disabled = true;
-      });
       await widget.action();
+      // If the action was successful, remove the snack bar and show a new
+      // one with action success.
+      snackBar.close();
+      Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text(widget.completedText)),
+      );
     } catch (e) {
-      widget.errorAction(e);
+      // On a failure, remove the snack bar and replace it with the failure.
+      snackBar.close();
+      Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text(widget.describeError(e))),
+      );
     } finally {
       setState(() {
         _disabled = false;
@@ -227,16 +289,16 @@ class _RegisteredServiceExtensionButtonState
   Widget build(BuildContext context) {
     if (_hidden) return const SizedBox();
 
-    return FlatButton(
-      onPressed: _disabled ? null : _click,
-      child: Row(children: [
-        getIconWidget(widget.serviceDescription.icon),
-        if (widget.showTitle)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(widget.serviceDescription.title),
-          ),
-      ]),
+    return InkWell(
+      onTap: _click,
+      child: Container(
+        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
+        alignment: Alignment.center,
+        // TODO(djshuckerow): Just make these icons the right size to fit this box.
+        // The current size is a little tiny by comparison to our other
+        // material icons.
+        child: getIconWidget(widget.serviceDescription.icon),
+      ),
     );
   }
 }
