@@ -22,7 +22,7 @@ class RegisteredServiceDescription {
 const RegisteredServiceDescription hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
-  icon: FlutterIcons.hotReload,
+  icon: FlutterIcons.hotReloadWhite,
 );
 
 /// Hot restart service registered by Flutter Tools.
@@ -31,7 +31,7 @@ const RegisteredServiceDescription hotReload = RegisteredServiceDescription._(
 const RegisteredServiceDescription hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
-  icon: FlutterIcons.hotRestart,
+  icon: FlutterIcons.hotRestartWhite,
 );
 
 /// Flutter version service registered by Flutter Tools.
