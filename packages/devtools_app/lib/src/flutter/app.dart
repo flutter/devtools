@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
@@ -68,7 +69,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.timeline,
               const PerformanceScreen(),
               EmptyScreen.memory,
-              EmptyScreen.debugger,
+              if (kIsWeb) EmptyScreen.debugger,
               EmptyScreen.logging,
               const InfoScreen(),
             ],
