@@ -105,11 +105,11 @@ void main() {
     });
 
     test('displayDepth', () {
-      expect(goldenAsyncTimelineEvent.displayDepth, equals(7));
+      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
       expect(goldenUiTimelineEvent.displayDepth, equals(7));
       expect(goldenGpuTimelineEvent.displayDepth, equals(2));
       expect(unknownEvent.displayDepth, equals(1));
-      expect(timelineData.displayDepth, equals(17));
+      expect(timelineData.displayDepth, equals(16));
     });
 
     test('initializeEventBuckets', () {
@@ -289,7 +289,7 @@ void main() {
     });
 
     test('displayDepth', () {
-      expect(goldenAsyncTimelineEvent.displayDepth, equals(7));
+      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
       expect(asyncEventB.displayDepth, equals(3));
       expect(asyncEventC.displayDepth, equals(2));
       expect(asyncEventD.displayDepth, equals(1));
