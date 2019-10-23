@@ -38,8 +38,7 @@ import 'timeline_protocol.dart';
 
 // TODO(devoncarew): Have a timeline view thumbnail overview.
 
-// TODO(devoncarew): Switch to showing all timeline events, but highlighting the
-// area associated with the selected frame.
+// TODO(kenz): connect a frame's UI and GPU code in the full_timeline.
 
 const enableMultiModeTimeline = true;
 

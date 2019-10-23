@@ -243,11 +243,11 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   // canvas settings.
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
     final int startRow = math.max(rowIndexForY(rect.top), 0);
-    final int endRow = math.min(
-      rowIndexForY(rect.bottom) + 1,
+    final int endRowInclusive = math.min(
+      rowIndexForY(rect.bottom),
       rows.length - 1,
     );
-    for (int i = startRow; i <= endRow; i++) {
+    for (int i = startRow; i <= endRowInclusive; i++) {
       paintRow(canvas, i, rect);
     }
 

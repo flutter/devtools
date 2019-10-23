@@ -98,14 +98,8 @@ class TimelineController {
           : fullTimeline.data?.cpuProfileData;
 
   void selectTimelineEvent(TimelineEvent event) {
-    if (event == null) return;
-    if (timelineMode == TimelineMode.frameBased) {
-      if (frameBasedTimeline.data.selectedEvent == event) return;
-      frameBasedTimeline.data.selectedEvent = event;
-    } else {
-      if (fullTimeline.data.selectedEvent == event) return;
-      fullTimeline.data.selectedEvent = event;
-    }
+    if (event == null || timelineData.selectedEvent == event) return;
+    timelineData.selectedEvent = event;
     _selectedTimelineEventController.add(event);
   }
 
@@ -118,11 +112,7 @@ class TimelineController {
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
 
-    if (timelineMode == TimelineMode.frameBased) {
-      frameBasedTimeline.data.cpuProfileData = cpuProfileData;
-    } else {
-      fullTimeline.data.cpuProfileData = cpuProfileData;
-    }
+    timelineData.cpuProfileData = cpuProfileData;
     _cpuProfileTransformer.processData(cpuProfileData);
   }
 
@@ -194,9 +184,7 @@ class TimelineController {
   }
 
   void exitOfflineMode({bool clearTimeline = true}) {
-    if (clearTimeline) {
-      frameBasedTimeline.data.clear();
-    }
+    clearData();
     offlineTimelineData = null;
   }
 
@@ -210,10 +198,7 @@ class TimelineController {
   }
 
   void recordTrace(Map<String, dynamic> trace) {
-    final traceEvents = timelineMode == TimelineMode.frameBased
-        ? frameBasedTimeline.data.traceEvents
-        : fullTimeline.data.traceEvents;
-    traceEvents.add(trace);
+    timelineData.traceEvents.add(trace);
   }
 
   void recordTraceForTimelineEvent(TimelineEvent event) {

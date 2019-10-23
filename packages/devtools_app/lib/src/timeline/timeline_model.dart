@@ -115,15 +115,20 @@ class FullTimelineData extends TimelineData {
 
   void initializeEventBuckets() {
     for (TimelineEvent event in timelineEvents) {
-      if (event.isAsyncEvent) {
-        eventBuckets.putIfAbsent(event.name, () => [])..add(event);
-      } else if (event.isUiEvent) {
-        eventBuckets.putIfAbsent(uiKey, () => [])..add(event);
-      } else if (event.isGpuEvent) {
-        eventBuckets.putIfAbsent(gpuKey, () => [])..add(event);
-      } else {
-        eventBuckets.putIfAbsent(unknownKey, () => [])..add(event);
-      }
+      eventBuckets.putIfAbsent(_computeEventBucketKey(event), () => [])
+        ..add(event);
+    }
+  }
+
+  String _computeEventBucketKey(TimelineEvent event) {
+    if (event.isAsyncEvent) {
+      return event.name;
+    } else if (event.isUiEvent) {
+      return uiKey;
+    } else if (event.isGpuEvent) {
+      return gpuKey;
+    } else {
+      return unknownKey;
     }
   }
 
@@ -136,13 +141,14 @@ class FullTimelineData extends TimelineData {
     _displayDepth = null;
   }
 
+  // TODO(kenz): simplify this comparator if possible.
   @visibleForTesting
   static int eventBucketComparator(String a, String b) {
     if (a == b) return 0;
 
     // Order Unknown buckets last.
-    if (a == unknownKey && b != unknownKey) return 1;
-    if (a != unknownKey && b == unknownKey) return -1;
+    if (a == unknownKey) return 1;
+    if (b == unknownKey) return -1;
 
     // Order the GPU event bucket after the UI event bucket.
     if ((a == uiKey && b == gpuKey) || (a == gpuKey && b == uiKey)) {

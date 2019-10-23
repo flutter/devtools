@@ -577,6 +577,15 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
         // Only process events from the UI or GPU thread.
         (event.isGpuEvent || event.isUiEvent);
   }
+
+  @override
+  void reset() {
+    pendingFrames.clear();
+    pendingEvents.clear();
+    currentEventNodes.clear();
+    _previousDurationEndEvents.clear();
+    heaps.clear();
+  }
 }
 
 /// Processor for composing a recorded list of trace events into a timeline of
@@ -906,6 +915,7 @@ class FullTimelineProcessor extends TimelineProcessor {
     }
   }
 
+  @override
   void reset() {
     asyncEventsById.clear();
     currentDurationEventNodes.clear();
@@ -928,6 +938,8 @@ abstract class TimelineProcessor {
   final int gpuThreadId;
 
   final TimelineController timelineController;
+
+  void reset();
 
   @visibleForTesting
   TimelineEventType inferEventType(TraceEvent event) {
