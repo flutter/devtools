@@ -251,7 +251,9 @@ void main() {
           equals(appFixture.serviceUri.toString()));
     }, timeout: const Timeout.factor(10));
     // The API only works in release mode.
-  }, skip: !testInReleaseMode);
+    // TODO(dantup): Remove '|| true' once tests are not flaky.
+    //   https://github.com/flutter/devtools/issues/1236
+  }, skip: !testInReleaseMode || true);
 }
 
 Future<Map<String, dynamic>> launchDevTools({
