@@ -94,7 +94,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   final bool isProperty;
 
-  // TODO(albertusangga) :
+  // TODO(albertusangga): Confirm all new getter
   bool get isFlex => getBooleanMember('isFlex', false);
 
   String get constraints => getStringMember('constraints');
@@ -103,6 +103,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     getBooleanMember('shouldHighlightConstraints', false);
 
   bool get warning => getBooleanMember('warning', false);
+
+  Map<String, Object> get flexDetails => isFlex ? json['flex'] : null;
 
   @override
   bool operator ==(dynamic other) {

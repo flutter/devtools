@@ -148,10 +148,7 @@ class InspectorTreeNode {
     bool isSummaryTreeNode = false,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
-        _isExpanded = expandChildren,
-        _isSummaryTreeNode = isSummaryTreeNode;
-
-  final bool _isSummaryTreeNode;
+        _isExpanded = expandChildren;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
@@ -349,8 +346,6 @@ class InspectorTreeNode {
   }
 
   void appendChild(InspectorTreeNode child) {
-    // TODO(albertusangga): current hack not to show properties at summary tree
-    if (child._isSummaryTreeNode && child.isProperty) return;
     _children.add(child);
     child.parent = this;
     isDirty = true;

@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -626,34 +625,36 @@ class StoryOfYourFlexWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, Object> flexDetails = node.diagnostic?.json['flex'];
-    final int numOfChildren = node.diagnostic.childrenNow.length;
-    final List<Widget> children = node.diagnostic.childrenNow.map((RemoteDiagnosticsNode child) => Expanded(
-      flex: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.green,
-          border: Border.all(
-            color: Colors.black,
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black,
-              offset: Offset.zero,
-              blurRadius: 10.0,
+    final Map<String, Object> flexDetails = node.diagnostic.flexDetails;
+    final List<Widget> children = [
+      for (RemoteDiagnosticsNode child in node.diagnostic.childrenNow)
+        Expanded(
+          flex: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).backgroundColor,
+              border: Border.all(
+                color: Theme.of(context).primaryColor,
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).primaryColor,
+                  offset: Offset.zero,
+                  blurRadius: 10.0,
+                )
+              ],
+            ),
+            child: Center(
+              child: Text(child.description),
             )
-          ],
-        ),
-        child: Center(
-          child: Text(child.description),
+          ),
         )
-      ),
-    )).toList();
-
-    Widget flexWidget = (flexDetails['direction'] as String).contains('horizontal') ?
+    ];
+    final Widget flexWidget = (flexDetails['direction'] as String).contains('horizontal') ?
       Row(children: children) :
       Column(children: children);
+    final String flexWidgetName = flexWidget.runtimeType.toString();
     return Dialog(
       child: Container(
         margin: const EdgeInsets.all(16.0),
@@ -661,26 +662,29 @@ class StoryOfYourFlexWidget extends StatelessWidget {
           children: [
             Container(
               margin: const EdgeInsets.only(bottom: 4.0),
-              child: const Text('Story of Your Flex Widget', style: TextStyle(
+              child: Text('Story of the flex layout of your $flexWidgetName widget', style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
               )),
             ),
-            Center(
-              child: Text('${node.diagnostic?.json['flex']}'),
-            ),
-            Center(
-              child: Text('${node.diagnostic?.childrenNow}'),
-            ),
+//            Center(
+//              child: Text('${node.diagnostic?.json['flex']}'),
+//            ),
+//            Center(
+//              child: Text('${node.diagnostic?.childrenNow}'),
+//            ),
             Expanded(
               child: Container(
-                color: Colors.blue,
+                color: Theme.of(context).primaryColor,
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(flexWidget.runtimeType.toString()),
+                      Text(
+                        flexWidgetName,
+                        style: inspector_text_styles.regularBold,
+                      ),
                       Expanded(child: Container(
                         margin: const EdgeInsets.all(16.0),
                         child: flexWidget
