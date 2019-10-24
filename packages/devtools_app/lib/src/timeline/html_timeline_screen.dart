@@ -343,7 +343,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     return (timelineController.fullTimeline.data.displayDepth + 1) *
             rowHeightWithPadding +
         (timelineController.fullTimeline.data.eventBuckets.length) *
-            FullTimelineFlameChartCanvas.sectionSpacing;
+            sectionSpacing;
   }
 
   void _configureSplitter() {
