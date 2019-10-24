@@ -7,6 +7,7 @@ import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
 import '../charts/flame_chart_canvas.dart';
+import '../geometry.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -31,7 +32,7 @@ class FrameBasedTimelineFlameChartCanvas
   int get gpuSectionStartRow => data.uiEventFlow.depth;
 
   @override
-  void initRows() {
+  void initUiElements() {
     rows = List.generate(
       data.uiEventFlow.depth + data.gpuEventFlow.depth,
       (i) => FlameChartRow(nodes: [], index: i),
@@ -128,12 +129,10 @@ class FrameBasedTimelineFlameChartCanvas
   }
 }
 
-// TODO(kenz): color section backgrounds and alternate.
-// TODO(kenz): draw tree hierarchy lines between async events=
-// TODO(kenz): give top level children a secondary highlight color when a node
-// is selected.
 // TODO(kenz): make section label column resizeable.
 // TODO(kenz): make sections collapsible
+
+typedef LineSegmentSearchCondition = bool Function(LineSegment line, Rect rect);
 
 class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   FullTimelineFlameChartCanvas({
@@ -150,6 +149,13 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
           // overflow in zooming calculations?
           maxZoomLevel: 40000,
         );
+
+  static const guidelineWidth = 0.4;
+
+  static const guidelineColor = ThemedColor(
+    Colors.black,
+    Colors.white,
+  );
 
   static Map<String, double> sectionLabelWidths = {};
 
@@ -169,20 +175,28 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     return maxSectionLabelWidth + 18.0;
   }
 
+  /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
+  ///
+  /// We need to be able to look up a [FlameChartNode] based on its
+  /// corresponding [TimelineEvent] when we traverse the event tree.
+  final Map<TimelineEvent, FlameChartNode> chartNodesByEvent = {};
+
+  /// Async guideline segments drawn in the direction of the x-axis.
+  final List<HorizontalLineSegment> horizontalGuidelines = [];
+
+  /// Async guideline segments drawn in the direction of the y-axis.
+  final List<VerticalLineSegment> verticalGuidelines = [];
+
   int widestRow = -1;
 
   @override
-  void initRows() {
-    final int startTimeOffset = data.time.start.inMicroseconds;
-
+  void initUiElements() {
     double getTopForRow(int row, int section) {
       // This accounts for section spacing between different threads of events.
       final additionalPadding = section * sectionSpacing;
       return (row * rowHeightWithPadding + topOffset + additionalPadding)
           .toDouble();
     }
-
-    double maxRight = -1;
 
     void expandRowsToFitCurrentRow(int row) {
       if (row >= rows.length) {
@@ -193,6 +207,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       }
     }
 
+    final int startTimeOffset = data.time.start.inMicroseconds;
+    double maxRight = -1;
     void createChartNodes(TimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
       // missing start/end time based on ancestors/children. Skip for now.
@@ -246,6 +262,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
         (_) => event.name,
         startInset,
       );
+      chartNodesByEvent[event] = node;
 
       rows[row].nodes.add(node);
 
@@ -260,7 +277,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
     int currentRowIndex = 0;
     int currentSectionIndex = 0;
-
     for (String bucketName in data.eventBuckets.keys) {
       final List<TimelineEvent> bucket = data.eventBuckets[bucketName];
       int sectionDepth = 0;
@@ -313,6 +329,60 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       currentRowIndex += sectionDepth;
       currentSectionIndex++;
     }
+
+    _calculateAsyncGuidelines();
+  }
+
+  void _calculateAsyncGuidelines() {
+    assert(rows.isNotEmpty);
+    assert(chartNodesByEvent.isNotEmpty);
+    verticalGuidelines.clear();
+    horizontalGuidelines.clear();
+    for (var row in rows) {
+      for (var node in row.nodes) {
+        if (node.data is AsyncTimelineEvent) {
+          final event = node.data as AsyncTimelineEvent;
+          if (event.hasOverlappingChildren) {
+            // Vertical guideline that will connect [node] with its overlapping
+            // children nodes. The line will end at [node]'s last child.
+            final verticalGuidelineX = node.rect.left + 1;
+            // Subtract [topOffset] so the coordinates of the guidelines are
+            // based on a starting y of 0.
+            final verticalGuidelineStartY = node.rect.bottom - topOffset;
+            final verticalGuidelineEndY =
+                chartNodesByEvent[event.children.last].rect.centerLeft.dy -
+                    topOffset;
+            verticalGuidelines.add(VerticalLineSegment(
+              Point(verticalGuidelineX, verticalGuidelineStartY),
+              Point(verticalGuidelineX, verticalGuidelineEndY),
+              'vertical guideline ${event.name} --> '
+              '${event.children.last.name}',
+            ));
+
+            // Horizontal guidelines connecting each child to the vertical
+            // guideline above.
+            for (var child in event.children) {
+              final childNode = chartNodesByEvent[child];
+              final horizontalGuidelineStartX = verticalGuidelineX;
+              final horizontalGuidelineEndX = childNode.rect.left;
+              // Subtract [topOffset] so the coordinates of the guidelines are
+              // based on a starting y of 0.
+              final horizontalGuidelineY =
+                  childNode.rect.centerLeft.dy - topOffset;
+              horizontalGuidelines.add(HorizontalLineSegment(
+                Point(horizontalGuidelineStartX, horizontalGuidelineY),
+                Point(horizontalGuidelineEndX, horizontalGuidelineY),
+                'horizontal guideline --> ${childNode.data.name}',
+              ));
+            }
+          }
+        }
+      }
+    }
+
+    // Sort the lists in ascending order based on their cross axis coordinate.
+    verticalGuidelines.sort((a, b) => a.x.compareTo(b.x));
+    horizontalGuidelines.sort((a, b) => a.y.compareTo(b.y));
   }
 
   @override
@@ -321,6 +391,16 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
   @override
   num get zoomMultiplier => zoomLevel * 0.008;
+
+  @override
+  void updateChartForZoom() {
+    updateNodesForZoom();
+    // Re-calculate the positions of the async guidelines now that the nodes
+    // have been updated for zoom.
+    _calculateAsyncGuidelines();
+    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
+    rebuildAndPositionAfterZoom();
+  }
 
   @override
   double relativeYPosition(double absoluteY) {
@@ -332,6 +412,119 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
             ?.index ??
         0;
     return absoluteY - topOffset - (section * sectionSpacing);
+  }
+
+  @override
+  void paintCallback(CanvasRenderingContext2D canvas, Rect visible) {
+    paintSections(canvas, visible);
+    paintRows(canvas, visible);
+    _paintAsyncGuidelines(canvas, visible);
+    paintTimelineGrid(canvas, visible);
+  }
+
+  void _paintAsyncGuidelines(CanvasRenderingContext2D canvas, Rect visible) {
+    final firstVerticalGuideline = _binarySearchForVerticalLineSegment(visible);
+    final firstHorizontalGuideline =
+        _binarySearchForHorizontalLineSegment(visible);
+
+    // Only modify the canvas style if we have any guidelines to paint.
+    if (firstHorizontalGuideline != null || firstVerticalGuideline != null) {
+      canvas
+        ..strokeStyle = colorToCss(guidelineColor)
+        ..lineWidth = guidelineWidth;
+    }
+
+    if (firstVerticalGuideline != null) {
+      _paintGuidelines(
+        canvas,
+        visible,
+        verticalGuidelines,
+        firstVerticalGuideline,
+      );
+    }
+
+    if (firstHorizontalGuideline != null) {
+      _paintGuidelines(
+        canvas,
+        visible,
+        horizontalGuidelines,
+        firstHorizontalGuideline,
+      );
+    }
+  }
+
+  void _paintGuidelines(
+    CanvasRenderingContext2D canvas,
+    Rect visible,
+    List<LineSegment> guidelines,
+    LineSegment first,
+  ) {
+    final guidelinesToPaint = guidelines
+        .sublist(guidelines.indexOf(first))
+        .where((line) => line.intersects(visible));
+    for (var line in guidelinesToPaint) {
+      canvas
+        ..beginPath()
+        ..moveTo(line.start.x, line.start.y + topOffset)
+        ..lineTo(line.end.x, line.end.y + topOffset)
+        ..closePath()
+        ..stroke();
+    }
+  }
+
+  LineSegment _binarySearchForVerticalLineSegment(Rect rect) {
+    final LineSegmentSearchCondition shouldSearchFirstHalf =
+        (line, rect) => (line as VerticalLineSegment).x > rect.right;
+    final LineSegmentSearchCondition shouldSearchSecondHalf =
+        (line, rect) => (line as VerticalLineSegment).x < rect.left;
+    return _binarySearchForLineSegment(
+      verticalGuidelines,
+      rect,
+      shouldSearchFirstHalf,
+      shouldSearchSecondHalf,
+    );
+  }
+
+  LineSegment _binarySearchForHorizontalLineSegment(Rect rect) {
+    final LineSegmentSearchCondition shouldSearchFirstHalf =
+        (line, rect) => (line as HorizontalLineSegment).y > rect.bottom;
+    final LineSegmentSearchCondition shouldSearchSecondHalf =
+        (line, rect) => (line as HorizontalLineSegment).y < rect.top;
+    return _binarySearchForLineSegment(
+      horizontalGuidelines,
+      rect,
+      shouldSearchFirstHalf,
+      shouldSearchSecondHalf,
+    );
+  }
+
+  LineSegment _binarySearchForLineSegment(
+    List<LineSegment> lineSegments,
+    Rect visible,
+    LineSegmentSearchCondition shouldSearchFirstHalf,
+    LineSegmentSearchCondition shouldSearchSecondHalf,
+  ) {
+    int min = 0;
+    int max = lineSegments.length;
+    while (min < max) {
+      final mid = min + ((max - min) >> 1);
+      final line = lineSegments[mid];
+      final previousLine = mid != 0 ? lineSegments[mid - 1] : null;
+      if (line.crossAxisIntersects(visible)) {
+        if (previousLine == null ||
+            !previousLine.crossAxisIntersects(visible)) {
+          // This is the first line that should be drawn in this rect.
+          return line;
+        } else {
+          max = mid;
+        }
+      } else if (shouldSearchFirstHalf(line, visible)) {
+        max = mid;
+      } else if (shouldSearchSecondHalf(line, visible)) {
+        min = mid + 1;
+      }
+    }
+    return null;
   }
 }
 

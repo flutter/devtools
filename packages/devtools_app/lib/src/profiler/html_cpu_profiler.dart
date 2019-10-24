@@ -94,6 +94,10 @@ abstract class HtmlCpuProfiler extends CoreElement {
       showView(_selectedViewType);
     } catch (e) {
       showMessage(div(text: 'Error retrieving CPU profile: ${e.toString()}'));
+      assert(() {
+        // ignore: use_rethrow_when_possible
+        throw e;
+      }());
     } finally {
       spinner.remove();
     }

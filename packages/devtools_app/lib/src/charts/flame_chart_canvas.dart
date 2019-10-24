@@ -51,7 +51,7 @@ abstract class FlameChart<T> {
     @required this.startInset,
   })  : totalStartingWidth = width - startInset - sideInset,
         timelineGrid = TimelineGrid(duration, width, startInset) {
-    initRows();
+    initUiElements();
   }
 
   final T data;
@@ -91,7 +91,7 @@ abstract class FlameChart<T> {
   // scroll offset to reduce floating point error when zooming.
   num floatingPointScrollLeft = 0;
 
-  void initRows();
+  void initUiElements();
 
   double get calculatedWidth;
 
@@ -194,7 +194,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
           startInset: startInset,
         ) {
     _viewportCanvas = ViewportCanvas(
-      paintCallback: _paintCallback,
+      paintCallback: paintCallback,
       onTap: _onTap,
       classes: 'fill-section $classes',
     )..element.element.style.overflow = 'hidden';
@@ -244,19 +244,10 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 
   // TODO(kenz): optimize painting to canvas by grouping paints with the same
   // canvas settings.
-  void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
-    paintSections(canvas, rect);
-
-    final int startRow = math.max(rowIndexForY(rect.top), 0);
-    final int endRow = math.min(
-      rowIndexForY(rect.bottom) + 1,
-      rows.length,
-    );
-    for (int i = startRow; i < endRow; i++) {
-      paintRow(canvas, i, rect);
-    }
-
-    timelineGrid.paint(canvas, _viewportCanvas.viewport, rect);
+  void paintCallback(CanvasRenderingContext2D canvas, Rect visible) {
+    paintSections(canvas, visible);
+    paintRows(canvas, visible);
+    paintTimelineGrid(canvas, visible);
   }
 
   void paintSections(CanvasRenderingContext2D canvas, Rect visible) {
@@ -274,6 +265,21 @@ abstract class FlameChartCanvas<T> extends FlameChart {
                   sectionSpacing),
         );
     }
+  }
+
+  void paintRows(CanvasRenderingContext2D canvas, Rect visible) {
+    final int startRow = math.max(rowIndexForY(visible.top), 0);
+    final int endRow = math.min(
+      rowIndexForY(visible.bottom) + 1,
+      rows.length,
+    );
+    for (int i = startRow; i < endRow; i++) {
+      paintRow(canvas, i, visible);
+    }
+  }
+
+  void paintTimelineGrid(CanvasRenderingContext2D canvas, Rect visible) {
+    timelineGrid.paint(canvas, _viewportCanvas.viewport, visible);
   }
 
   void paintRow(
@@ -337,20 +343,25 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     }
     zoomLevel = newZoomLevel;
 
-    _updateChartForZoom();
+    updateChartForZoom();
   }
 
-  void _updateChartForZoom() {
+  void updateChartForZoom() {
+    updateNodesForZoom();
+    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
+    rebuildAndPositionAfterZoom();
+  }
+
+  void updateNodesForZoom() {
     for (FlameChartRow row in rows) {
       for (FlameChartNode node in row.nodes) {
         node.updateForZoom(zoom: zoomLevel);
       }
     }
+  }
 
-    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
-
+  void rebuildAndPositionAfterZoom() {
     forceRebuildForSize(calculatedWidthWithInsets, height);
-
     _viewportCanvas.element.element.scrollLeft =
         math.max(0, floatingPointScrollLeft.round());
   }
