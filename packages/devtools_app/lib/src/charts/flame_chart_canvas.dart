@@ -29,13 +29,14 @@ const _selectedNodeColor = ThemedColor(
 );
 
 const _shadedBackgroundColor =
-    ThemedColor(Color(0xFFF6F6F6), Color(0xFF202124));
+    ThemedColor(Color(0xFFF6F6F6), Color(0xFF2D2E31));
 
 const double fontSize = 14.0;
 const double _textOffsetY = 18.0;
 const double rowPadding = 2.0;
 const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
+const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 
@@ -76,6 +77,8 @@ abstract class FlameChart<T> {
   FlameChartNode selectedNode;
 
   List<FlameChartRow> rows = [];
+
+  List<FlameChartSection> sections = [];
 
   TimelineGrid timelineGrid;
 
@@ -164,7 +167,7 @@ abstract class FlameChart<T> {
     return FlameChartNode<TimelineEvent>(
       Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
       backgroundColor,
-      Colors.black,
+      title == 'GPU' ? Colors.white : Colors.black,
       Colors.black,
       null,
       (_) => title,
@@ -242,6 +245,8 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   // TODO(kenz): optimize painting to canvas by grouping paints with the same
   // canvas settings.
   void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
+    paintSections(canvas, rect);
+
     final int startRow = math.max(rowIndexForY(rect.top), 0);
     final int endRow = math.min(
       rowIndexForY(rect.bottom) + 1,
@@ -252,6 +257,23 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     }
 
     timelineGrid.paint(canvas, _viewportCanvas.viewport, rect);
+  }
+
+  void paintSections(CanvasRenderingContext2D canvas, Rect visible) {
+    final oddSections = sections.where((s) => s.index % 2 == 1).toList();
+    for (FlameChartSection section in oddSections) {
+      canvas
+        ..fillStyle = colorToCss(_shadedBackgroundColor)
+        ..fillRect(
+          visible.left,
+          section.absStartY,
+          visible.width,
+          math.min(
+              visible.bottom,
+              (section.endRow - section.startRow) * rowHeightWithPadding +
+                  sectionSpacing),
+        );
+    }
   }
 
   void paintRow(
@@ -350,6 +372,25 @@ class FlameChartRow {
 
   final List<FlameChartNode> nodes;
   final int index;
+}
+
+class FlameChartSection {
+  FlameChartSection(
+    this.index, {
+    @required this.startRow,
+    @required this.endRow,
+    this.absStartY,
+  });
+
+  final int index;
+
+  /// Start row (inclusive) for this section.
+  final int startRow;
+
+  /// End row (exclusive) for this section.
+  final int endRow;
+
+  double absStartY;
 }
 
 class FlameChartNode<T> {

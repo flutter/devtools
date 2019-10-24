@@ -169,11 +169,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     return maxSectionLabelWidth + 18.0;
   }
 
-  static const double sectionSpacing = 15.0;
-
   int widestRow = -1;
-
-  final List<FlameChartSection> sections = [];
 
   @override
   void initRows() {
@@ -262,59 +258,60 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       }
     }
 
-    int currentRow = 0;
-    int currentSection = 0;
+    int currentRowIndex = 0;
+    int currentSectionIndex = 0;
 
     for (String bucketName in data.eventBuckets.keys) {
+      final List<TimelineEvent> bucket = data.eventBuckets[bucketName];
+      int sectionDepth = 0;
+      for (TimelineEvent event in bucket) {
+        _resetColorOffsets();
+        sectionDepth = math.max(sectionDepth, event.displayDepth);
+        createChartNodes(event, currentRowIndex, currentSectionIndex);
+      }
+
       final section = FlameChartSection(
-        currentSection,
-        absStartY: getTopForRow(currentRow, currentSection),
+        currentSectionIndex,
+        startRow: currentRowIndex,
+        endRow: currentRowIndex + sectionDepth,
+        absStartY: getTopForRow(currentRowIndex, currentSectionIndex),
       );
       sections.add(section);
 
-      Color backgroundColor;
+      // Add section label node.
+      Color sectionLabelBackgroundColor;
       switch (bucketName) {
         case FullTimelineData.uiKey:
-          backgroundColor = mainUiColor;
+          sectionLabelBackgroundColor = mainUiColor;
           break;
         case FullTimelineData.gpuKey:
-          backgroundColor = mainGpuColor;
+          sectionLabelBackgroundColor = mainGpuColor;
           break;
         case FullTimelineData.unknownKey:
-          backgroundColor = mainUnknownColor;
+          sectionLabelBackgroundColor = mainUnknownColor;
           break;
         default:
-          backgroundColor = mainAsyncColor;
+          sectionLabelBackgroundColor = mainAsyncColor;
       }
 
       // Padding necessary to ensure section labels fit in their respective
       // [FlameChartNode]s.
       const sectionLabelPadding = 13.0;
 
-      // Add section label.
       final currentSectionLabel = sectionLabel(
         bucketName,
-        backgroundColor,
-        top: getTopForRow(currentRow, currentSection),
+        sectionLabelBackgroundColor,
+        top: getTopForRow(currentRowIndex, currentSectionIndex),
         width: math.max(
           FlameChartNode.minWidthForText,
           sectionLabelWidths[bucketName] + sectionLabelPadding,
         ),
       );
-      expandRowsToFitCurrentRow(currentRow);
-      rows[currentRow].nodes.add(currentSectionLabel);
+      rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
 
-      final List<TimelineEvent> bucket = data.eventBuckets[bucketName];
-
-      int maxBucketDepth = 0;
-      for (TimelineEvent event in bucket) {
-        _resetColorOffsets();
-        maxBucketDepth = math.max(maxBucketDepth, event.displayDepth);
-        createChartNodes(event, currentRow, currentSection);
-      }
-      currentRow += maxBucketDepth;
-
-      currentSection++;
+      // Increment for next section.
+      currentRowIndex += sectionDepth;
+      currentSectionIndex++;
     }
   }
 
@@ -336,14 +333,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
         0;
     return absoluteY - topOffset - (section * sectionSpacing);
   }
-}
-
-class FlameChartSection {
-  FlameChartSection(this.index, {this.absStartY});
-
-  final int index;
-
-  double absStartY;
 }
 
 int _uiColorOffset = 0;
