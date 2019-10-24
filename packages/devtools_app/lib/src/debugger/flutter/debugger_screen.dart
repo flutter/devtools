@@ -27,7 +27,10 @@ class DebuggerScreen extends Screen {
 class DebuggerScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const HtmlElementView(
+    // Don't build this in const because compile time const evaluation
+    // will fail on non-web apps.
+    // ignore:prefer_const_constructors
+    return HtmlElementView(
       viewType: 'DebuggerFlutterPlugin',
     );
   }
