@@ -263,17 +263,17 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
     for (String bucketName in data.eventBuckets.keys) {
       final List<TimelineEvent> bucket = data.eventBuckets[bucketName];
-      int maxBucketDepth = 0;
+      int sectionDepth = 0;
       for (TimelineEvent event in bucket) {
         _resetColorOffsets();
-        maxBucketDepth = math.max(maxBucketDepth, event.displayDepth);
+        sectionDepth = math.max(sectionDepth, event.displayDepth);
         createChartNodes(event, currentRowIndex, currentSectionIndex);
       }
 
       final section = FlameChartSection(
         currentSectionIndex,
         startRow: currentRowIndex,
-        endRow: currentRowIndex + maxBucketDepth,
+        endRow: currentRowIndex + sectionDepth,
         absStartY: getTopForRow(currentRowIndex, currentSectionIndex),
       );
       sections.add(section);
@@ -310,7 +310,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
 
       // Increment for next section.
-      currentRowIndex += maxBucketDepth;
+      currentRowIndex += sectionDepth;
       currentSectionIndex++;
     }
   }
