@@ -414,6 +414,7 @@ class HtmlDebuggerScreen extends HtmlScreen {
 
   @override
   void onContentAttached() {
+    assert(root.isConnected);
     // configure the navigation / editor splitter
     split.flexSplit(
       html.toDartHtmlElementList(

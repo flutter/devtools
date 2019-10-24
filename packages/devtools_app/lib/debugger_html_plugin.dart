@@ -6,11 +6,13 @@
 // This code may only be compiled into the web app.
 import 'dart:ui' as web_ui;
 
+import 'package:devtools_app/src/ui/html_elements.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:html_shim/html.dart' as html;
 
 import 'src/debugger/html_debugger_screen.dart';
-import 'src/ui/html_elements.dart';
+import 'src/framework/html_framework.dart';
 
 /// Debugger HTML view.
 ///
@@ -30,26 +32,35 @@ class DebuggerHtmlPlugin {
   /// [viewId] is used to distinguish between multiple instances of the same
   /// view, such as video players.  We can ignore it on DevTools.
   html.Element build(int viewId) {
-    return html.IFrameElement()
-      ..src = 'debugger_screen.html'
-      ..style.border = '0';
-    print('Building html framework');
-    // final framework = HtmlFramework();
-    print('Built framework, building screen.');
-    final screen = HtmlDebuggerScreen();
-    print('Building html contents');
-    final element = screen.createContent(null);
-    print('Element: ${element.element}');
-    element.attribute('full');
     final div = html.DivElement();
     html.HttpRequest.getString('debugger_screen.html').then((response) {
-      final fullContent = html.Element.html(response);
-      final content = fullContent.querySelector('#content')
-        ..children.clear()
-        ..children.add(element.element);
+      div.appendHtml(
+        response,
+        treeSanitizer: html.NodeTreeSanitizer.trusted,
+      );
 
-      div.replaceWith(content);
+      root = div;
+      print('Building html framework');
+      final framework = HtmlFramework();
+      print('Built framework, building screen.');
+      final screen = HtmlDebuggerScreen();
+      framework.addScreen(screen);
+      final observer = html.MutationObserver((mutations, observer) {
+        print('${div.shadowRoot}, ${div.isConnected}');
+        if (div.isConnected) {
+          observer.disconnect();
+          framework.load(screen);
+        }
+      });
+      observer.observe(html.document, subtree: true, childList: true);
     });
+    print('returning div');
     return div;
   }
+
+  /// Handles requests from Flutter of this view.
+  ///
+  /// Currently there is no API for interaction between the views,
+  /// so it supports no methods.
+  Future<dynamic> handleMethodCall(MethodCall call) async {}
 }

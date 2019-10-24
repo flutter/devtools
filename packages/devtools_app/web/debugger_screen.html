@@ -8,7 +8,7 @@
 
 <html>
 
-<head>
+<div fullbleed layout vertical>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script>
         const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
@@ -26,9 +26,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dart DevTools</title>
     <link href="favicon.png" rel="icon" sizes="64x64">
-
     <link href="packages/octicons_css/octicons_4.4.0.css" rel="stylesheet">
     <link href="packages/polymer_css/flex.css" rel="stylesheet">
     <link href="packages/devtools_app/src/debugger/debugger.css" rel="stylesheet">
@@ -39,35 +37,9 @@
     <link href="packages/devtools_app/src/info/info.css" rel="stylesheet">
     <link href="packages/devtools_app/src/timeline/timeline.css" rel="stylesheet">
 
-    <script type="text/javascript">
-        function supportsES6Classes() {
-            "use strict";
-            try { eval("class Foo {}"); }
-            catch (e) { return false; }
-            return true;
-        }
-
-        if (!supportsES6Classes()) {
-            window.location.href = '/unsupported-browser.html';
-        }
-
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            if (params.get('theme') == 'dark') {
-                document.write(
-                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0_dark.css">' +
-                    '<link rel="stylesheet" href="styles.css">' +
-                    '<link rel="stylesheet" href="styles_dark.css">'
-                );
-            } else {
-                document.write(
-                    '<link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">' +
-                    '<link rel="stylesheet" href="styles.css">' +
-                    '<link rel="stylesheet" href="styles_light.css">'
-                )
-            }
-        })();
-    </script>
+    <link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_light.css">
 
     <script src="packages/ansi_up/ansi_up.js"></script>
 
@@ -78,10 +50,65 @@
     <script type="text/javascript" src="packages/plotly_js/plotly.min.js"></script>
 
     <script type="text/javascript" src="packages/split/split.min.js"></script>
+    <header flex wrap none class="masthead legacy-dart" id="header" layout horizontal hidden>
+        <a class="masthead-logo" id="title">
+            <span class="optional-550">Dart DevTools</span>
+        </a>
 
-</head>
+        <div flex horiz-padding></div>
 
-<body fullbleed layout vertical>
+        <nav class="masthead-nav" id="main-nav">
+            <!-- add the known pages -->
+            <a disabled>
+                <span class="octicon octicon-device-mobile"></span>
+                <span>
+                    <span class="optional-1060">Flutter Inspector</span>
+                </span>
+            </a>
+            <a disabled>
+                <span class="octicon octicon-pulse"></span>
+                <span>
+                    <span class="optional-1060">Timeline</span>
+                </span>
+            </a>
+            <a disabled>
+                <span class="octicon octicon-dashboard"></span>
+                <span>
+                    <span class="optional-1060">Performance</span>
+                </span>
+            </a>
+            <a disabled>
+                <span class="octicon octicon-package"></span>
+                <span>
+                    <span class="optional-1060">Memory</span>
+                </span>
+            </a>
+            <a disabled>
+                <span class="octicon octicon-bug"></span>
+                <span>
+                    <span class="optional-1060">Debugger</span>
+                </span>
+            </a>
+            <a disabled>
+                <span class="octicon octicon-clippy"></span>
+                <span>
+                    <span class="optional-1060">Logging</span>
+                </span>
+            </a>
+        </nav>
+
+        <div id="global-actions" class="masthead-nav"></div>
+
+        <div class="masthead-nav">
+            <span horiz-padding class="masthead-item">•</span>
+            <div class="masthead-item action-button active" id="icon-nav">
+                <span class="octicon octicon-info"></span>
+            </div>
+            <div class="masthead-item action-button active" id="send-feedback-button" title="Send Feedback">
+                <span class="octicon octicon-comment"></span>
+            </div>
+        </div>
+    </header>
 
     <div id="messages-container" class="container legacy-dart"></div>
 
@@ -95,8 +122,22 @@
         </div>
     </div>
 
+    <footer flex layout horizontal none class="footer align-items-center legacy-dart" hidden>
+        <div class="footer-status" id="global-status" flex>
+            <select class="form-select select-sm" disabled></select>
+        </div>
+
+        <div class="footer-status text-center" id="page-status" flex horiz-padding>
+        </div>
+
+        <div class="footer-status text-right" id="auxiliary-status" flex>
+            &nbsp;
+        </div>
+    </footer>
+
     <div id="toast-container" class="legacy-dart">
     </div>
-</body>
+
+</div>
 
 </html>
