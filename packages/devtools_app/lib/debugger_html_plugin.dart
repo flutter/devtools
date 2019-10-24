@@ -32,9 +32,9 @@ class DebuggerHtmlPlugin {
   /// [viewId] is used to distinguish between multiple instances of the same
   /// view, such as video players.  We can ignore it on DevTools.
   html.Element build(int viewId) {
-    final div = html.DivElement();
+    final div = html.Element.tag('html');
     html.HttpRequest.getString('debugger_screen.html').then((response) {
-      div.appendHtml(
+      div.setInnerHtml(
         response,
         treeSanitizer: html.NodeTreeSanitizer.trusted,
       );
@@ -47,7 +47,7 @@ class DebuggerHtmlPlugin {
       framework.addScreen(screen);
       final observer = html.MutationObserver((mutations, observer) {
         print('${div.shadowRoot}, ${div.isConnected}');
-        if (div.isConnected) {
+        if (framework.mainElement.element.isConnected) {
           observer.disconnect();
           framework.load(screen);
         }
