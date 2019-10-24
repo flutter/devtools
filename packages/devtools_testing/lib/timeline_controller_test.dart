@@ -56,23 +56,24 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
 
-    // TODO(kenz): add tests for offline FullTimeline once that is supported.
     test('loadOfflineData', () async {
       await env.setupEnvironment();
 
-      final offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
-      timelineController.loadOfflineData(offlineData);
+      // Frame based timeline.
+      final offlineFrameBasedTimelineData = OfflineFrameBasedTimelineData.parse(
+          offlineFrameBasedTimelineDataJson);
+      timelineController.loadOfflineData(offlineFrameBasedTimelineData);
       expect(
         isFrameBasedTimelineDataEqual(
           timelineController.timelineData,
-          offlineData,
+          offlineFrameBasedTimelineData,
         ),
         isTrue,
       );
       expect(
         isFrameBasedTimelineDataEqual(
           timelineController.offlineTimelineData,
-          offlineData,
+          offlineFrameBasedTimelineData,
         ),
         isTrue,
       );
@@ -82,6 +83,27 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       );
       expect(
         timelineController.frameBasedTimeline.processor.gpuThreadId,
+        equals(testGpuThreadId),
+      );
+
+      // Full timeline.
+      final offlineFullTimelineData =
+          OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
+      timelineController.loadOfflineData(offlineFullTimelineData);
+      expect(timelineController.timelineMode, equals(TimelineMode.full));
+      expect(
+        isFullTimelineDataEqual(
+          timelineController.offlineTimelineData,
+          offlineFullTimelineData,
+        ),
+        isTrue,
+      );
+      expect(
+        timelineController.fullTimeline.processor.uiThreadId,
+        equals(testUiThreadId),
+      );
+      expect(
+        timelineController.fullTimeline.processor.gpuThreadId,
         equals(testGpuThreadId),
       );
 
@@ -159,6 +181,15 @@ bool isFrameBasedTimelineDataEqual(
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&
+      a.selectedEvent == b.selectedEvent &&
+      a.cpuProfileData == b.cpuProfileData;
+}
+
+bool isFullTimelineDataEqual(
+  FullTimelineData a,
+  FullTimelineData b,
+) {
+  return a.traceEvents == b.traceEvents &&
       a.selectedEvent == b.selectedEvent &&
       a.cpuProfileData == b.cpuProfileData;
 }

@@ -40,7 +40,7 @@ import 'timeline_protocol.dart';
 
 // TODO(kenz): connect a frame's UI and GPU code in the full_timeline.
 
-const enableMultiModeTimeline = false;
+const enableMultiModeTimeline = true;
 
 class HtmlTimelineScreen extends HtmlScreen {
   HtmlTimelineScreen({bool enabled, String disabledTooltip})
@@ -186,27 +186,25 @@ class HtmlTimelineScreen extends HtmlScreen {
         div(text: 'Show frames', c: 'checkbox-text')
       ]);
 
-    // TODO(kenz): once [enableMultiModeTimeline] is enabled by default,
-    // adjust collapsible-xxx CSS classes to account for timeline mode checkbox.
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group collapsible-885')
+        div(c: 'btn-group collapsible-1015')
           ..add([
             pauseButton,
             resumeButton,
             _startRecordingButton,
             _stopRecordingButton,
           ]),
-        div(c: 'btn-group collapsible-685')..add(clearButton),
+        div(c: 'btn-group collapsible-800')..add(clearButton),
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         if (enableMultiModeTimeline) _timelineModeSettingContainer,
         _profileGranularitySelector.selector..clazz('margin-left'),
-        div(c: 'btn-group collapsible-685 margin-left')
+        div(c: 'btn-group collapsible-800 margin-left')
           ..add(performanceOverlayButton.button),
-        div(c: 'btn-group collapsible-685')..add(exportButton),
+        div(c: 'btn-group collapsible-800')..add(exportButton),
       ]);
 
     _maybeAddDebugButtons();
@@ -235,30 +233,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   @override
   void onContentAttached() {
     timelineController.frameBasedTimeline.onSelectedFrame.listen((_) {
-      flameChartContainer
-        ..clear()
-        ..hidden(false);
-      final TimelineFrame frame =
-          timelineController.frameBasedTimeline.data.selectedFrame;
-      timelineFlameChartCanvas = FrameBasedTimelineFlameChartCanvas(
-        data: frame,
-        width: flameChartContainer.element.clientWidth.toDouble(),
-        height: math.max(
-          // Subtract [rowHeightWithPadding] to account for timeline at the top of
-          // the flame chart.
-          flameChartContainer.element.clientHeight.toDouble(),
-          // Add 1 to account for a row of padding at the bottom of the chart.
-          _frameBasedTimelineChartHeight(),
-        ),
-      );
-      timelineFlameChartCanvas.onNodeSelected.listen((node) {
-        eventDetails.titleBackgroundColor = node.backgroundColor;
-        eventDetails.titleTextColor = node.textColor;
-        timelineController.selectTimelineEvent(node.data);
-      });
-      flameChartContainer.add(timelineFlameChartCanvas.element);
-
-      _configureSplitter();
+      _selectFrame();
     });
 
     timelineController.fullTimeline
@@ -290,17 +265,27 @@ class HtmlTimelineScreen extends HtmlScreen {
       });
 
     timelineController.onLoadOfflineData.listen((_) {
-      // Relayout the plotly graph so that the frames bar chart reflects the
-      // display refresh rate from the imported snapshot.
-      framesBarChart.frameUIgraph.plotlyChart
-        ..displayRefreshRate =
-            timelineController.offlineTimelineData.displayRefreshRate
-        ..relayoutFPSTimeseriesLayout();
-      framesBarChart.hidden(false);
-      if (timelineController.offlineTimelineData.selectedFrameId == null) {
-        flameChartContainer.hidden(true);
-        _destroySplitter();
-      } else if (timelineController.offlineTimelineData.hasCpuProfileData()) {
+      if (timelineController.offlineTimelineData
+          is OfflineFrameBasedTimelineData) {
+        final offlineData = timelineController.offlineTimelineData
+            as OfflineFrameBasedTimelineData;
+        // Relayout the plotly graph so that the frames bar chart reflects the
+        // display refresh rate from the imported snapshot.
+        framesBarChart.frameUIgraph.plotlyChart
+          ..displayRefreshRate = offlineData.displayRefreshRate
+          ..relayoutFPSTimeseriesLayout();
+
+        flameChartContainer.hidden(offlineData.selectedFrameId == null);
+        eventDetails.hidden(offlineData.selectedFrameId == null);
+
+        if (offlineData.selectedFrameId == null) {
+          _destroySplitter();
+        } else {
+          _selectFrame();
+        }
+      }
+
+      if (timelineController.offlineTimelineData.hasCpuProfileData()) {
         splitter.setSizes([50, 50]);
       }
     });
@@ -340,6 +325,33 @@ class HtmlTimelineScreen extends HtmlScreen {
       );
     });
     observer.observe(flameChartContainer.element);
+  }
+
+  void _selectFrame() {
+    flameChartContainer
+      ..clear()
+      ..hidden(false);
+    final TimelineFrame frame =
+        timelineController.frameBasedTimeline.data.selectedFrame;
+    timelineFlameChartCanvas = FrameBasedTimelineFlameChartCanvas(
+      data: frame,
+      width: flameChartContainer.element.clientWidth.toDouble(),
+      height: math.max(
+        // Subtract [rowHeightWithPadding] to account for timeline at the top of
+        // the flame chart.
+        flameChartContainer.element.clientHeight.toDouble(),
+        // Add 1 to account for a row of padding at the bottom of the chart.
+        _frameBasedTimelineChartHeight(),
+      ),
+    );
+    timelineFlameChartCanvas.onNodeSelected.listen((node) {
+      eventDetails.titleBackgroundColor = node.backgroundColor;
+      eventDetails.titleTextColor = node.textColor;
+      timelineController.selectTimelineEvent(node.data);
+    });
+    flameChartContainer.add(timelineFlameChartCanvas.element);
+
+    _configureSplitter();
   }
 
   double _frameBasedTimelineChartHeight() {
@@ -392,6 +404,15 @@ class HtmlTimelineScreen extends HtmlScreen {
   void exiting() async {
     await _updateListeningState();
     _updateButtonStates();
+  }
+
+  Future<void> prepareViewForOfflineData(TimelineMode timelineMode) async {
+    await clearTimeline();
+    framesBarChart.hidden(timelineMode == TimelineMode.full);
+    flameChartContainer.clear();
+    flameChartContainer.hidden(timelineMode == TimelineMode.frameBased);
+    eventDetails.hidden(timelineMode == TimelineMode.frameBased);
+    _recordingInstructions.hidden(true);
   }
 
   Future<void> _exitOfflineMode() async {
@@ -470,7 +491,9 @@ class HtmlTimelineScreen extends HtmlScreen {
     // Update visibility and then reset - the order matters here.
     framesBarChart
       ..hidden(timelineMode == TimelineMode.full)
-      ..frameUIgraph.reset();
+      ..frameUIgraph.reset(
+          displayRefreshRate:
+              timelineController.frameBasedTimeline.displayRefreshRateCached);
 
     timelineFlameChartCanvas = null;
     flameChartContainer
@@ -510,8 +533,9 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..hidden(offlineMode ||
           timelineController.timelineMode == TimelineMode.frameBased);
     _timelineModeCheckbox.disabled = timelineController.fullTimeline.recording;
+    (_timelineModeCheckbox.element as html.InputElement).checked =
+        timelineController.timelineMode == TimelineMode.frameBased;
 
-    // TODO(kenz): support loading offline data in both modes.
     _timelineModeSettingContainer.hidden(offlineMode);
 
     clearButton
@@ -552,12 +576,15 @@ class HtmlTimelineScreen extends HtmlScreen {
       case TimelineMode.frameBased:
         debugHandledTraceEvents.clear();
         debugFrameTracking.clear();
-        framesBarChart.frameUIgraph.reset();
+        framesBarChart.frameUIgraph.reset(
+            displayRefreshRate:
+                await timelineController.frameBasedTimeline.displayRefreshRate);
         _destroySplitter();
         break;
       case TimelineMode.full:
         _recordingInstructions.hidden(false);
     }
+    _updateButtonStates();
   }
 
   void _exportTimeline() {

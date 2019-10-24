@@ -165,7 +165,17 @@ class HtmlFramework {
   }
 
   Future<void> _importTimeline(Map<String, dynamic> import) async {
-    final offlineData = OfflineTimelineData.parse(import);
+    TimelineData offlineData;
+    final timelineMode =
+        import[TimelineData.timelineModeKey] == TimelineMode.full.toString()
+            ? TimelineMode.full
+            : TimelineMode.frameBased;
+    if (timelineMode == TimelineMode.frameBased) {
+      offlineData = OfflineFrameBasedTimelineData.parse(import);
+    } else {
+      offlineData = OfflineFullTimelineData.parse(import);
+    }
+
     if (offlineData.isEmpty) {
       toast('Imported file does not contain timeline data.');
       return;
@@ -182,7 +192,7 @@ class HtmlFramework {
     }
     navigateTo(timelineScreenId);
 
-    await timelineScreen.clearTimeline();
+    await timelineScreen.prepareViewForOfflineData(timelineMode);
     timelineScreen.timelineController.loadOfflineData(offlineData);
   }
 

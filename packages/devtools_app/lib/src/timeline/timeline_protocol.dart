@@ -47,6 +47,10 @@ const Duration traceEventEpsilon = Duration(microseconds: 1000);
 /// Delay in ms for processing trace events.
 const Duration traceEventDelay = Duration(milliseconds: 1000);
 
+const String gpuEventName = 'GPURasterizer::Draw';
+
+const String uiEventName = 'VSYNC';
+
 /// Protocol for processing trace events and composing them into
 /// [SyncTimelineEvents] and [TimelineFrames].
 class FrameBasedTimelineProcessor extends TimelineProcessor {
@@ -249,8 +253,8 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     final TraceEvent event = eventWrapper.event;
     final current = currentEventNodes[event.type.index];
     if (current == null &&
-        !(event.name.contains('VSYNC') ||
-            event.name.contains('GPURasterizer::Draw'))) {
+        !(event.name.contains(uiEventName) ||
+            event.name.contains(gpuEventName))) {
       return;
     }
 
@@ -694,11 +698,17 @@ class FullTimelineProcessor extends TimelineProcessor {
 
     _addPendingCompleteRootToTimeline(force: true);
 
-    // TODO(kenz): we should do something smarter using the processed data
-    // [timelineController.fullTimeline.data] to set start and end times.
     timelineController.fullTimeline.data.time
+      // We process trace events in timestamp order, so we can ensure the first
+      // trace event has the earliest starting timestamp.
       ..start = Duration(microseconds: _traceEvents.first.event.timestampMicros)
-      ..end = Duration(microseconds: _traceEvents.last.event.timestampMicros);
+      // We cannot guarantee that the last trace event is the latest timestamp
+      // in the timeline. DurationComplete events' timestamps refer to their
+      // starting timestamp, but their end time is derived from the same trace
+      // via the "dur" field. For this reason, we use the cached value stored in
+      // [timelineController.fullTimeline].
+      ..end = Duration(
+          microseconds: timelineController.fullTimeline.latestTimestampMicros);
   }
 
   void _addPendingCompleteRootToTimeline({

@@ -1182,17 +1182,6 @@ span.strong {
  * with optional-text to be hidden when the page is below a certain threshold.
  */
 
-@media all and (max-width: 685px) {
-    .btn-group.collapsible-685 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-685 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
 @media all and (max-width: 750px) {
     .btn-group.collapsible-750 .optional-text span:not(.octicon) {
         display: none;
@@ -1243,6 +1232,17 @@ span.strong {
     }
 
     .btn-group.collapsible-1000 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 1015px) {
+    .btn-group.collapsible-1015 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-1015 .btn .flutter-icon {
         margin-right: 0;
         box-sizing: content-box;
     }

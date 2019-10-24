@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 
 import '../config_specific/logger.dart';
 import '../framework/html_framework.dart';
-import '../service_manager.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/html_elements.dart';
 import 'frames_bar_plotly.dart';
@@ -33,8 +33,7 @@ class FramesBarChart extends CoreElement with HtmlSetStateMixin {
     // Make sure DIV exist.
     setState(() {
       if (!_createdPlot) {
-        frameUIgraph.createPlot(frameUIgraph.element);
-        _createdPlot = true;
+        createFirstPlot();
       }
     });
 
@@ -42,6 +41,12 @@ class FramesBarChart extends CoreElement with HtmlSetStateMixin {
         .listen((TimelineFrame frame) {
       frameUIgraph.process(frame);
     });
+  }
+
+  Future<void> createFirstPlot() async {
+    frameUIgraph.createPlot(frameUIgraph.element,
+        await timelineController.frameBasedTimeline.displayRefreshRate);
+    _createdPlot = true;
   }
 
   static const int chartHeight = 140;
@@ -161,15 +166,13 @@ class PlotlyDivGraph extends CoreElement {
     plotFXHover(frameGraph, hoverDisplay);
   }
 
-  Future<void> createPlot(dynamic element) async {
+  void createPlot(dynamic element, double displayRefreshRate) {
     plotlyChart = FramesBarPlotly(
       frameGraph,
       element,
       useLogScale: false,
       showRangeSlider: false,
-      displayRefreshRate:
-          await timelineController.frameBasedTimeline.displayRefreshRate ??
-              defaultRefreshRate,
+      displayRefreshRate: displayRefreshRate,
     );
     plotlyChart.plotFPS();
 
@@ -207,7 +210,7 @@ class PlotlyDivGraph extends CoreElement {
     }
   }
 
-  void reset() {
+  void reset({@required double displayRefreshRate}) {
     dataIndexes.clear();
     uiDurations.clear();
     gpuDurations.clear();
@@ -215,6 +218,6 @@ class PlotlyDivGraph extends CoreElement {
     _frameIndex = FramesBarPlotly.xCoordFirst;
     _lastPlottedFrameIndex = -1;
     currentSelection = null;
-    createPlot(element);
+    createPlot(element, displayRefreshRate);
   }
 }

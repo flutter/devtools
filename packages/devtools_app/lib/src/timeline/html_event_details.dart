@@ -106,11 +106,21 @@ class HtmlEventDetails extends CoreElement {
         .listen((_) async => await update());
 
     _timelineController.onLoadOfflineData.listen((_) async {
-      // If there is no CPU profile data, there is no reason to show the event
+      // If there is no selected event, there is no reason to show the event
       // details section.
-      if (_timelineController.offlineTimelineData.hasCpuProfileData()) {
+      if (_timelineController.offlineTimelineData.selectedEvent != null) {
+        final selectedEvent =
+            _timelineController.offlineTimelineData.selectedEvent;
+        if (selectedEvent.isAsyncEvent) {
+          titleBackgroundColor = mainAsyncColor;
+        } else if (selectedEvent.isUiEvent) {
+          titleBackgroundColor = mainUiColor;
+        } else if (selectedEvent.isGpuEvent) {
+          titleBackgroundColor = mainGpuColor;
+        } else {
+          titleBackgroundColor = _defaultTitleBackground;
+        }
         titleTextColor = Colors.black;
-        titleBackgroundColor = mainUiColor;
         await update();
       }
     });
