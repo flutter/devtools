@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:convert';
+
 import 'package:html_shim/html.dart' as html;
 
 import '../globals.dart';
@@ -11,6 +13,7 @@ import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_elements.dart';
+import '../ui/primer.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
@@ -34,10 +37,10 @@ class HtmlEventDetails extends CoreElement {
     });
     observer.observe(element);
 
-    assert(_tabNav != null);
+    assert(_cpuProfilerTabNav != null && _summaryTabNav != null);
     assert(_content != null);
 
-    add([_tabNav.element, _content]);
+    add([_cpuProfilerTabNav.element, _summaryTabNav, _content]);
   }
 
   static const _defaultTitleText = '[No event selected]';
@@ -49,7 +52,13 @@ class HtmlEventDetails extends CoreElement {
 
   final TimelineController _timelineController;
 
-  HtmlCpuProfilerTabNav _tabNav;
+  HtmlCpuProfilerTabNav _cpuProfilerTabNav;
+
+  /// Summary tab nav to show when [_eventSummary] is visible.
+  ///
+  /// This tab nav will only contain one tab, "Summary", but we add the tab nav
+  /// so our UI looks consistent between UI events and non-UI events.
+  PTabNav _summaryTabNav;
 
   CoreElement _content;
 
@@ -57,7 +66,10 @@ class HtmlEventDetails extends CoreElement {
 
   _CpuProfiler _cpuProfiler;
 
-  CoreElement _nonUiEventDetails;
+  // TODO(kenz): Eventually, we should add a summary tab for UI events, as well,
+  // but we can wait to do this until we port this UI to flutter.
+  /// Event summary to show for non-UI events.
+  HtmlEventSummary _eventSummary;
 
   Color titleBackgroundColor = _defaultTitleBackground;
 
@@ -69,6 +81,18 @@ class HtmlEventDetails extends CoreElement {
       ..color = colorToCss(titleTextColor)
       ..backgroundColor = colorToCss(titleBackgroundColor);
 
+    _cpuProfilerTabNav = HtmlCpuProfilerTabNav(
+      _cpuProfiler,
+      CpuProfilerTabOrder(
+        first: CpuProfilerViewType.flameChart,
+        second: CpuProfilerViewType.callTree,
+        third: CpuProfilerViewType.bottomUp,
+      ),
+    );
+    _summaryTabNav = PTabNav([PTabNavTab('Summary')])
+      ..element.style.borderBottom = '0'
+      ..hidden(true);
+
     final details = div(c: 'event-details')
       ..layoutVertical()
       ..flex()
@@ -79,24 +103,14 @@ class HtmlEventDetails extends CoreElement {
         )..hidden(true),
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
-        _nonUiEventDetails = div(
-          text: 'CPU profiling is only available for UI events.',
-          c: 'centered-single-line-message',
-        )..hidden(true),
+        _eventSummary = HtmlEventSummary(
+            () => _timelineController.timeline.data.selectedEvent)
+          ..hidden(true),
       ]);
 
     _content = div(c: 'event-details-section section-border')
       ..flex()
       ..add(<CoreElement>[_title, details]);
-
-    _tabNav = HtmlCpuProfilerTabNav(
-      _cpuProfiler,
-      CpuProfilerTabOrder(
-        first: CpuProfilerViewType.flameChart,
-        second: CpuProfilerViewType.callTree,
-        third: CpuProfilerViewType.bottomUp,
-      ),
-    );
   }
 
   void _initListeners() {
@@ -130,11 +144,18 @@ class HtmlEventDetails extends CoreElement {
       ..color = colorToCss(titleTextColor);
 
     hidden(hide);
-    _nonUiEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
-    _cpuProfiler
-        .hidden(selectedEvent != null ? !selectedEvent.isUiEvent : true);
 
-    if (selectedEvent != null && selectedEvent.isUiEvent) {
+    final showEventSummary = selectedEvent != null && !selectedEvent.isUiEvent;
+    _summaryTabNav.hidden(!showEventSummary);
+    _eventSummary.hidden(!showEventSummary);
+    if (showEventSummary) {
+      _eventSummary.update();
+    }
+
+    final showCpuProfiler = selectedEvent?.isUiEvent ?? false;
+    _cpuProfiler.hidden(!showCpuProfiler);
+    _cpuProfilerTabNav.element.hidden(!showCpuProfiler);
+    if (showCpuProfiler) {
       await _cpuProfiler.update();
     }
   }
@@ -224,5 +245,62 @@ class _CpuProfiler extends HtmlCpuProfiler {
       return true;
     }
     return false;
+  }
+}
+
+typedef SelectedEventProvider = TimelineEvent Function();
+
+class HtmlEventSummary extends CoreElement {
+  HtmlEventSummary(this.selectedEventProvider)
+      : super('div', classes: 'event-summary') {
+    layoutVertical();
+    add([
+      category = div()..layoutHorizontal(),
+      thread = div()..layoutHorizontal(),
+      process = div()..layoutHorizontal(),
+      args = div()..layoutVertical(),
+    ]);
+  }
+
+  final SelectedEventProvider selectedEventProvider;
+
+  CoreElement category;
+
+  CoreElement thread;
+
+  CoreElement process;
+
+  CoreElement args;
+
+  void update() {
+    final event = selectedEventProvider();
+    if (event == null) return;
+
+    reset();
+
+    final firstTraceEvent = event.traceEvents.first.event;
+    category.add(
+        [span(text: 'Category: '), div(text: '${firstTraceEvent.category}')]);
+    thread.add(
+        [span(text: 'Thread id: '), div(text: '${firstTraceEvent.threadId}')]);
+    process.add([
+      span(text: 'Process id: '),
+      div(text: '${firstTraceEvent.processId}')
+    ]);
+    if (firstTraceEvent.args.isNotEmpty) {
+      const encoder = JsonEncoder.withIndent('  ');
+      final formattedArgs = encoder.convert(firstTraceEvent.args);
+      args.add([
+        span(text: 'Arguments: '),
+        div(text: formattedArgs, c: 'event-args'),
+      ]);
+    }
+  }
+
+  void reset() {
+    category.clear();
+    thread.clear();
+    process.clear();
+    args.clear();
   }
 }

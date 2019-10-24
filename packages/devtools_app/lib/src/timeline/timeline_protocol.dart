@@ -586,9 +586,16 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
   void reset() {
     pendingFrames.clear();
     pendingEvents.clear();
-    currentEventNodes.clear();
-    _previousDurationEndEvents.clear();
-    heaps.clear();
+    for (var heap in heaps) {
+      heap.clear();
+    }
+    // Reset initial states.
+    currentEventNodes
+      ..clear()
+      ..addAll([null, null]);
+    _previousDurationEndEvents
+      ..clear()
+      ..addAll([null, null]);
   }
 }
 

@@ -169,3 +169,21 @@
     /* 100% height minus the height of the event-details-heading */
     height: calc(100% - 27px);
 }
+
+.event-summary {
+    padding-top: 4px;
+    padding-left: 8px;
+    position: absolute;
+    overflow-y: scroll;
+    height: 100%;
+    width: 100%;
+}
+
+.event-summary span {
+    font-weight: bold;
+    padding-right: 4px;
+}
+
+.event-args {
+    white-space: pre-wrap;
+}
