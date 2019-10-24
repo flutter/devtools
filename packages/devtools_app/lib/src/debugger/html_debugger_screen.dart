@@ -414,7 +414,8 @@ class HtmlDebuggerScreen extends HtmlScreen {
 
   @override
   void onContentAttached() {
-    assert(root.isConnected);
+    // Enable this page to display in a shadow DOM from Flutter.
+    assert(overrideDocumentRoot.isConnected);
     // configure the navigation / editor splitter
     split.flexSplit(
       html.toDartHtmlElementList(

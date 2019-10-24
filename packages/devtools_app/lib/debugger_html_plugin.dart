@@ -46,7 +46,7 @@ class DebuggerHtmlPlugin {
         treeSanitizer: html.NodeTreeSanitizer.trusted,
       );
 
-      root = _viewRoot;
+      overrideDocumentRoot = _viewRoot;
       print('Building html framework');
       _framework = HtmlFramework();
       print('Built framework, building screen.');

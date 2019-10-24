@@ -5,11 +5,18 @@
 import 'dart:async';
 import 'package:html_shim/html.dart' hide Point;
 
-Element root;
+/// Override of the default document root to allow DevTools to work
+/// inside of a shadow DOM.
+///
+/// When this is not null, [querySelector] calls should use it
+/// instead of [document.querySelector(selectors)] to retrieve
+/// elements.
+Element overrideDocumentRoot;
 
 /// Finds the first descendant element of this document with the given id.
-Element queryId(String id) =>
-    root != null ? root.querySelector('#$id') : querySelector('#$id');
+Element queryId(String id) => overrideDocumentRoot != null
+    ? overrideDocumentRoot.querySelector('#$id')
+    : querySelector('#$id');
 
 CoreElement a({String text, String c, String a, String href, String target}) =>
     CoreElement('a', text: text, classes: c, attributes: a)
