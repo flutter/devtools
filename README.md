@@ -1,23 +1,25 @@
-# Dart DevTools (preview)
 
-[![Build Status](https://travis-ci.org/flutter/devtools.svg?branch=master)](https://travis-ci.org/flutter/devtools)
 
-## What is this?
+## start web
 
-Dart DevTools is a suite of performance tools for Dart and Flutter. 
-It’s currently in preview release, but we’re actively working on improvements and on shipping new versions.
+```bash
+cd packages/devtools_app
+alias build_runner="flutter pub run build_runner"
 
-## Getting started
+flutter packages get
+build_runner serve web
+```
 
-For documentation on installing and trying out DevTools, please see our
-[docs](https://flutter.dev/docs/development/tools/devtools/).
+## start app
 
-## Contributing and development
+```bash
+cd packages/devtools_app
 
-Contributions welcome! See our
-[contributing page](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
-for an overview of how to build and contribute to the project.
+flutter config --enable-web
+flutter run -d chrome
+```
 
-## Terms and Privacy
+## features
 
-By using Dart DevTools, you agree to the [Google Terms of Service](https://policies.google.com/terms).
+* add logging filter
+* hide system log

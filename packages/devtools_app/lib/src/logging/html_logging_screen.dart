@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:ansi_up/ansi_up.dart';
+import 'package:devtools_app/src/logging/checkout_box.dart';
 import 'package:html_shim/html.dart' as html;
+import 'package:html_shim/html.dart';
 import 'package:split/split.dart' as split;
+
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../html_tables.dart';
@@ -21,12 +26,11 @@ import '../ui/html_elements.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
-
+import 'config.dart';
 import 'logging_controller.dart';
 
 class HtmlLoggingScreen extends HtmlScreen {
-  HtmlLoggingScreen()
-      : super(name: 'Logging', id: 'logging', iconClass: 'octicon-clippy') {
+  HtmlLoggingScreen() : super(name: 'Logging', id: 'logging', iconClass: 'octicon-clippy') {
     logCountStatus = HtmlStatusItem();
     logCountStatus.element.text = '';
     addStatusItem(logCountStatus);
@@ -70,6 +74,37 @@ class HtmlLoggingScreen extends HtmlScreen {
       true,
     );
 
+    final _search = (String text) {
+      print('_search = $text');
+      controller.search(text);
+    };
+
+    final textFiled = CoreElement('input', classes: 'form-control input-sm')
+      ..setAttribute('type', 'text')
+      ..setAttribute('style', 'width:480px;')
+      ..setAttribute('placeholder', 'input text')
+      ..id = 'uri-field';
+
+    textFiled.element.onKeyDown.listen((KeyboardEvent event) {
+      if (config[realSearchTag]) {
+        if (event.charCode != null) {
+//          event.preventDefault();
+          Timer(const Duration(milliseconds: 20), () {
+            final html.InputElement inputElement = textFiled.element;
+            final String value = inputElement.value.trim();
+            _search(value);
+          });
+        }
+      } else {
+        if (event.keyCode == 13) {
+          event.preventDefault();
+          final html.InputElement inputElement = textFiled.element;
+          final String value = inputElement.value.trim();
+          _search(value);
+        }
+      }
+    });
+
     screenDiv.add(<CoreElement>[
       div(c: 'section')
         ..add(<CoreElement>[
@@ -83,6 +118,31 @@ class HtmlLoggingScreen extends HtmlScreen {
                   ga.select(ga.logging, ga.clearLogs);
                   controller.clear();
                 }),
+              div()..flex(),
+              textFiled,
+              PButton('Search')
+                ..small()
+                ..clazz('margin-left')
+                ..click(() {
+                  final html.InputElement inputElement = textFiled.element;
+                  final String value = inputElement.value.trim();
+                  _search(value);
+                }),
+              PButton('Clear')
+                ..small()
+                ..click(() {
+                  print('test button click');
+                  final html.InputElement inputElement = textFiled.element;
+                  inputElement.value = '';
+                  _search('');
+                }),
+              div()..flex(),
+              div()..flex(),
+              ToolBarCheckbox(ToolBarCheckboxDescription(name: 'hide some log', enabled: config[filterPlatformLogTag], tag: filterPlatformLogTag)).element,
+              div()..flex(),
+              ToolBarCheckbox(ToolBarCheckboxDescription(name: 'real search', enabled: config[realSearchTag], tag: realSearchTag)).element,
+              div()..flex(),
+              ToolBarCheckbox(ToolBarCheckboxDescription(name: 'filter only summary', enabled: config[filterSummaryTag], tag: filterSummaryTag)).element,
               div()..flex(),
               ServiceExtensionCheckbox(structuredErrors).element,
             ])
@@ -109,8 +169,7 @@ class HtmlLoggingScreen extends HtmlScreen {
   @override
   void onContentAttached() {
     split.fixedSplitBidirectional(
-      html.toDartHtmlElementList(
-          [_loggingTable.element.element, logDetailsUI.element]),
+      html.toDartHtmlElementList([_loggingTable.element.element, logDetailsUI.element]),
       gutterSize: defaultSplitterWidth,
       horizontalSizes: [60, 40],
       verticalSizes: [70, 30],
@@ -125,10 +184,7 @@ class HtmlLoggingScreen extends HtmlScreen {
 
   HtmlTable<LogData> _createTableView() {
     final table = HtmlTable<LogData>.virtual();
-    table.model
-      ..addColumn(LogWhenColumn())
-      ..addColumn(LogKindColumn())
-      ..addColumn(LogMessageColumn(logMessageToHtml));
+    table.model..addColumn(LogWhenColumn())..addColumn(LogKindColumn())..addColumn(LogMessageColumn(logMessageToHtml));
     return table;
   }
 }
@@ -168,9 +224,7 @@ class HtmlLogDetails extends CoreElement {
       onNodeAdded: null,
       treeType: FlutterTreeType.widget,
       onHover: (node, icon) {
-        element.style.cursor = (node?.diagnostic?.isDiagnosticableValue == true)
-            ? 'pointer'
-            : 'auto';
+        element.style.cursor = (node?.diagnostic?.isDiagnosticableValue == true) ? 'pointer' : 'auto';
       },
       onSelectionChange: onSelectionChange,
     );
@@ -188,9 +242,7 @@ Iterable<CoreElement> logMessageToElements(String message) sync* {
   for (var part in decodeAnsiColorEscapeCodes(message, AnsiUp())) {
     final style = part.style;
 
-    final element = part.url != null
-        ? a(text: part.text, href: part.url, target: '_blank;')
-        : span(text: part.text);
+    final element = part.url != null ? a(text: part.text, href: part.url, target: '_blank;') : span(text: part.text);
     if (style?.isNotEmpty ?? false) {
       element.element.setAttribute('style', style);
     }
