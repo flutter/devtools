@@ -20,6 +20,10 @@ import 'src/framework/html_framework.dart';
 class DebuggerHtmlPlugin {
   DebuggerHtmlPlugin();
 
+  HtmlFramework _framework;
+  HtmlDebuggerScreen _screen;
+  html.Element _viewRoot;
+
   static void registerWith(Registrar registrar) {
     final instance = DebuggerHtmlPlugin();
     // ignore:undefined_prefixed_name
@@ -32,30 +36,32 @@ class DebuggerHtmlPlugin {
   /// [viewId] is used to distinguish between multiple instances of the same
   /// view, such as video players.  We can ignore it on DevTools.
   html.Element build(int viewId) {
-    final div = html.Element.tag('html');
+    if (_viewRoot != null) {
+      return _viewRoot;
+    }
+    _viewRoot = html.Element.tag('html');
     html.HttpRequest.getString('debugger_screen.html').then((response) {
-      div.setInnerHtml(
+      _viewRoot.setInnerHtml(
         response,
         treeSanitizer: html.NodeTreeSanitizer.trusted,
       );
 
-      root = div;
+      root = _viewRoot;
       print('Building html framework');
-      final framework = HtmlFramework();
+      _framework = HtmlFramework();
       print('Built framework, building screen.');
-      final screen = HtmlDebuggerScreen();
-      framework.addScreen(screen);
+      _screen = HtmlDebuggerScreen();
+      _framework.addScreen(_screen);
       final observer = html.MutationObserver((mutations, observer) {
-        print('${div.shadowRoot}, ${div.isConnected}');
-        if (framework.mainElement.element.isConnected) {
+        if (_framework.mainElement.element.isConnected) {
           observer.disconnect();
-          framework.load(screen);
+          _framework.load(_screen);
         }
       });
       observer.observe(html.document, subtree: true, childList: true);
     });
     print('returning div');
-    return div;
+    return _viewRoot;
   }
 
   /// Handles requests from Flutter of this view.
