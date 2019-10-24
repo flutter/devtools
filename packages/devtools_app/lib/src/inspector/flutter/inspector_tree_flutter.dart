@@ -12,6 +12,7 @@ import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
+import '../inspector_controller.dart';
 import '../inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -151,14 +152,11 @@ class InspectorTreeControllerFlutter extends Object
     return _maxIndent;
   }
 
-  bool _showConstraints = false;
 
-  bool get showConstraints => _showConstraints;
+  final ValueNotifier<bool> debugLayoutMode = ValueNotifier(false);
 
-  void toggleShowConstraints() {
-    setState(() {
-      _showConstraints = !_showConstraints;
-    });
+  void toggleDebugLayoutMode() {
+    debugLayoutMode.value = !debugLayoutMode.value;
   }
 }
 
@@ -477,8 +475,8 @@ class InspectorRowContent extends StatelessWidget {
 
     final node = row.node;
     final List<Widget> children = [
-      node.showExpandCollapse
-        ? InkWell(
+      node.showExpandCollapse ?
+      InkWell(
         onTap: onToggle,
         child: RotationTransition(
           turns: expandAnimation,
@@ -486,24 +484,23 @@ class InspectorRowContent extends StatelessWidget {
             Icons.expand_more,
             size: 16.0,
           ),
-        ))
-        : const SizedBox(width: 16.0, height: 16.0),
-      SizedOverflowBox(
-        size: Size(controller.rowWidth, rowHeight),
-        alignment: Alignment.centerLeft,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-          ),
-          child: InkWell(
-            onTap: () {
-              controller.onSelectRow(row);
-            },
-            child: Container(
-              height: rowHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: DiagnosticsNodeDescription(node.diagnostic)),
-          ),
+        ),
+      ) : const SizedBox(width: 16.0, height: 16.0),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+        ),
+        child: InkWell(
+          onTap: () {
+            controller.onSelectRow(row);
+          },
+          child: Container(
+            height: rowHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: DiagnosticsNodeDescription(
+              node.diagnostic,
+              debugLayoutModeEnabled: controller.debugLayoutMode,
+            ),),
         ),
       ),
     ];
@@ -521,8 +518,8 @@ class InspectorRowContent extends StatelessWidget {
           ),
         ),
       );
-    if (controller.showConstraints)
-      children.add(ConstraintsDescriptor(node.diagnostic));
+
+    children.add(ConstraintsDescriptor(node.diagnostic, controller.debugLayoutMode));
 
     return CustomPaint(
       painter: _RowPainter(row, controller),
@@ -542,30 +539,77 @@ class InspectorRowContent extends StatelessWidget {
 }
 
 
-class ConstraintsDescriptor extends StatelessWidget {
-  const ConstraintsDescriptor(this.diagnostics, {Key key})
+class ConstraintsDescriptor extends StatefulWidget {
+  const ConstraintsDescriptor(this.diagnostics, this.debugLayoutModeEnabled, {Key key})
     : super(key: key);
 
   final RemoteDiagnosticsNode diagnostics;
+  final ValueNotifier<bool> debugLayoutModeEnabled;
+
+
+  @override
+  _ConstraintsDescriptorState createState() => _ConstraintsDescriptorState();
+}
+
+class _ConstraintsDescriptorState extends State<ConstraintsDescriptor>
+  with SingleTickerProviderStateMixin {
+
+  AnimationController _controller;
+  Animation _animation;
+
+  @override
+  void initState()  {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _animation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (diagnostics.constraints == null) {
+    if (widget.diagnostics.constraints == null) {
       return const SizedBox();
     }
-    TextStyle textStyle = inspector_text_styles.unimportant.merge(const TextStyle(
-      fontStyle: FontStyle.italic,
-    ));
-    if (diagnostics.shouldHighlightConstraints) {
-      textStyle = textStyle.merge(const TextStyle(
-        color: Colors.red
-      ))                 ;
+
+    TextStyle textStyle = inspector_text_styles.unimportant.merge(
+      const TextStyle(
+        fontStyle: FontStyle.italic,
+      ));
+
+    if (widget.diagnostics.shouldHighlightConstraints) {
+      textStyle = textStyle.merge(textStyleForLevel(DiagnosticLevel.warning));
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Text(
-        '// constraints: ${diagnostics.constraints}',
-        style: textStyle,
+    
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.debugLayoutModeEnabled,
+      builder: (context, debugLayoutMode, child) {
+        if (debugLayoutMode) {
+          _controller.forward();
+        } else {
+          _controller.reverse();
+        }
+        return child;
+      },
+      child: FadeTransition(
+        opacity: _animation,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: Text(
+            '// constraints: ${widget.diagnostics.constraints}',
+            style: textStyle,
+          ),
+        ),
       ),
     );
   }

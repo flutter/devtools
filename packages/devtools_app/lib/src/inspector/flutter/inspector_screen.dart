@@ -104,8 +104,24 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 800,
               ),
             ),
+            OutlineButton(
+              onPressed: summaryTreeController?.toggleDebugLayoutMode,
+              child: Label(
+                FlutterIcons.lightbulb,
+                'Layout',
+                minIncludeTextWidth: 800,
+              ),
+            ),
             const Spacer(),
-            Row(children: getServiceExtensionWidgets()),
+            Expanded(
+              flex: 3,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                runSpacing: 8.0,
+                crossAxisAlignment: WrapCrossAlignment.end,
+                children: getServiceExtensionWidgets(),
+              ),
+            ),
           ],
         ),
         Expanded(

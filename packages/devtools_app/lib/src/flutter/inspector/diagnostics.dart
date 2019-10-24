@@ -28,10 +28,45 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// See also:
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
-class DiagnosticsNodeDescription extends StatelessWidget {
-  const DiagnosticsNodeDescription(this.diagnostic);
+class DiagnosticsNodeDescription extends StatefulWidget {
+  const DiagnosticsNodeDescription(this.diagnostic,
+                                   {this.debugLayoutModeEnabled});
 
   final RemoteDiagnosticsNode diagnostic;
+
+  final ValueNotifier<bool> debugLayoutModeEnabled;
+
+  @override
+  _DiagnosticsNodeDescriptionState createState() =>
+    _DiagnosticsNodeDescriptionState();
+}
+
+class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
+  with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+  Animation<Color> _colorAnimation;
+
+  ColorTween _getColorTween() {
+    final Color beginColor = textStyleForLevel(widget.diagnostic.level).color;
+    final Color endColor = widget.diagnostic.warning ? textStyleForLevel(
+      DiagnosticLevel.warning).color : beginColor;
+    return ColorTween(begin: beginColor, end: endColor);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.diagnostic == null) return;
+    _animationController = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 500));
+    _colorAnimation = _getColorTween().animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+  }
 
   Widget _toFlutterIcon(DevToolsIcon icon) {
     return Padding(
@@ -40,17 +75,18 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  void _addDescription(
-    List<Widget> output,
-    String description,
-    TextStyle textStyle, {
-    bool isProperty,
-  }) {
-    if (diagnostic.isDiagnosticableValue) {
+  void _addDescription(List<Widget> output,
+                       String description,
+                       TextStyle textStyle, {
+                         bool isProperty,
+                       }) {
+    if (widget.diagnostic.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         output.add(Text(match.group(1), style: textStyle));
-        if (match.group(2).isNotEmpty) {
+        if (match
+          .group(2)
+          .isNotEmpty) {
           output.add(Text(
             match.group(2),
             style: inspector_text_styles.unimportant,
@@ -58,7 +94,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
         return;
       }
-    } else if (diagnostic.type == 'ErrorDescription') {
+    } else if (widget.diagnostic.type == 'ErrorDescription') {
       final match = assertionThrownBuildingError.firstMatch(description);
       if (match != null) {
         output.add(Text(match.group(1), style: textStyle));
@@ -67,37 +103,64 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     }
     if (description?.isNotEmpty == true) {
-      output.add(Text(description, style: textStyle));
+      if (widget.debugLayoutModeEnabled == null)
+        output.add(Text(description, style: textStyle));
+      else {
+        output.add(
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.debugLayoutModeEnabled,
+            builder: (_, debugLayoutModeEnabled, child) {
+              if (debugLayoutModeEnabled)
+                _animationController.forward();
+              else
+                _animationController.reverse();
+              return child;
+            },
+            child: AnimatedBuilder(
+              animation: _colorAnimation,
+                builder: (context, child) => Text(
+                  description,
+                  style: textStyle.merge(TextStyle(
+                    color: _colorAnimation.value
+                  ))
+                ),
+              ),
+          )
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (diagnostic == null) {
+    if (widget.diagnostic == null) {
       return const SizedBox();
     }
-    final icon = diagnostic.icon;
+    final icon = widget.diagnostic.icon;
     final children = <Widget>[];
 
     if (icon != null) {
       children.add(_toFlutterIcon(icon));
     }
-    final String name = diagnostic.name;
-    TextStyle textStyle = textStyleForLevel(diagnostic.level);
-    if (diagnostic.isProperty) {
-      // Display of inline properties.
-      final String propertyType = diagnostic.propertyType;
-      final Map<String, Object> properties = diagnostic.valuePropertiesJson;
+    final String name = widget.diagnostic.name;
+    TextStyle textStyle = textStyleForLevel(widget.diagnostic.level);
 
-      if (name?.isNotEmpty == true && diagnostic.showName) {
-        children.add(Text('$name${diagnostic.separator} ', style: textStyle));
+    if (widget.diagnostic.isProperty) {
+      // Display of inline properties.
+      final String propertyType = widget.diagnostic.propertyType;
+      final Map<String, Object> properties = widget.diagnostic
+        .valuePropertiesJson;
+
+      if (name?.isNotEmpty == true && widget.diagnostic.showName) {
+        children.add(
+          Text('$name${widget.diagnostic.separator} ', style: textStyle));
       }
 
-      if (diagnostic.isCreatedByLocalProject) {
+      if (widget.diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      String description = diagnostic.description;
+      String description = widget.diagnostic.description;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -111,22 +174,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                 description = '#${radix(red)}${radix(green)}${radix(blue)}';
               } else {
                 description =
-                    '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
+                '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
               }
 
               final Color color = Color.fromARGB(alpha, red, green, blue);
               children
-                  .add(_toFlutterIcon(_colorIconMaker.getCustomIcon(color)));
+                .add(_toFlutterIcon(_colorIconMaker.getCustomIcon(color)));
               break;
             }
 
           case 'IconData':
             {
               final int codePoint =
-                  JsonUtils.getIntMember(properties, 'codePoint');
+              JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
                 final DevToolsIcon icon =
-                    FlutterMaterialIcons.getIconForCodePoint(codePoint);
+                FlutterMaterialIcons.getIconForCodePoint(codePoint);
                 if (icon != null) {
                   children.add(_toFlutterIcon(icon));
                 }
@@ -137,7 +200,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       if (_showRenderObjectPropertiesAsLinks &&
-          propertyType == 'RenderObject') {
+        propertyType == 'RenderObject') {
         textStyle = textStyle..merge(inspector_text_styles.link);
       }
 
@@ -149,27 +212,28 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         isProperty: true,
       );
 
-      if (diagnostic.level == DiagnosticLevel.fine &&
-          diagnostic.hasDefaultValue) {
+      if (widget.diagnostic.level == DiagnosticLevel.fine &&
+        widget.diagnostic.hasDefaultValue) {
         children.add(const Text(' '));
         children.add(_toFlutterIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
+      if (name?.isNotEmpty == true && widget.diagnostic.showName &&
+        name != 'child') {
         if (name.startsWith('child ')) {
           children.add(Text(name, style: inspector_text_styles.unimportant));
         } else {
           children.add(Text(name, style: textStyle));
         }
 
-        if (diagnostic.showSeparator) {
+        if (widget.diagnostic.showSeparator) {
           children.add(Text(
-            diagnostic.separator,
+            widget.diagnostic.separator,
             style: inspector_text_styles.unimportant,
           ));
-          if (diagnostic.separator != ' ' &&
-              diagnostic.description.isNotEmpty) {
+          if (widget.diagnostic.separator != ' ' &&
+            widget.diagnostic.description.isNotEmpty) {
             children.add(Text(
               ' ',
               style: inspector_text_styles.unimportant,
@@ -178,13 +242,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
+      if (!widget.diagnostic.isSummaryTree &&
+        widget.diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       _addDescription(
         children,
-        diagnostic.description,
+        widget.diagnostic.description,
         textStyle,
         isProperty: false,
       );

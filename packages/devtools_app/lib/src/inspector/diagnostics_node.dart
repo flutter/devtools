@@ -98,8 +98,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   bool get isFlex => getBooleanMember('isFlex', false);
 
   String get constraints => getStringMember('constraints');
+
   bool get shouldHighlightConstraints =>
     getBooleanMember('shouldHighlightConstraints', false);
+
+  bool get warning => getBooleanMember('warning', false);
 
   @override
   bool operator ==(dynamic other) {
