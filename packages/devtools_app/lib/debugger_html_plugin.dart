@@ -6,13 +6,13 @@
 // This code may only be compiled into the web app.
 import 'dart:ui' as web_ui;
 
-import 'package:devtools_app/src/ui/html_elements.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:html_shim/html.dart' as html;
 
 import 'src/debugger/html_debugger_screen.dart';
 import 'src/framework/html_framework.dart';
+import 'src/ui/html_elements.dart';
 
 /// Debugger HTML view.
 ///
