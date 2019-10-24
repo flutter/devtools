@@ -47,9 +47,7 @@ class DebuggerHtmlPlugin {
       );
 
       overrideDocumentRoot = _viewRoot;
-      print('Building html framework');
       _framework = HtmlFramework();
-      print('Built framework, building screen.');
       _screen = HtmlDebuggerScreen();
       _framework.addScreen(_screen);
       final observer = html.MutationObserver((mutations, observer) {
@@ -60,7 +58,6 @@ class DebuggerHtmlPlugin {
       });
       observer.observe(html.document, subtree: true, childList: true);
     });
-    print('returning div');
     return _viewRoot;
   }
 
