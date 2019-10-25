@@ -4,7 +4,7 @@
 
 // This code imports dart:ui, but it uses API calls
 // that are only available in the web implementation of dart:ui.
-import 'dart:ui' as web_ui;
+import 'dart:ui' as dart_ui_web;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -34,10 +34,10 @@ class DebuggerHtmlPlugin {
     final instance = DebuggerHtmlPlugin();
     // This call is only defined for the web implementation of dart:ui.
     // The regular dart UI cannot resolve this method call.
-    // TODO(djshuckerow): Remove this 'ignore' after the APIs match between
-    // flutter and web.
+    // TODO(https://github.com/flutter/flutter/issues/43377): Remove 'ignore'
+    // after the APIs match between flutter and web.
     // ignore:undefined_prefixed_name
-    web_ui.platformViewRegistry.registerViewFactory(
+    dart_ui_web.platformViewRegistry.registerViewFactory(
       'DebuggerFlutterPlugin',
       instance.build,
     );
