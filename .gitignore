@@ -16,5 +16,6 @@ pubspec.lock
 # Generated files not intended to be checked in to version control
 flutter_export_environment.sh
 .flutter-plugins
+generated_plugin_registrant.dart
 Podfile
 Podfile.lock
