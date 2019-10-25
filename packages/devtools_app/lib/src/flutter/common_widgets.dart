@@ -250,7 +250,7 @@ class _SplitState extends State<Split> {
           child: GestureDetector(
             onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
             onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
-            child: Text(
+            child: const Text(
               ':::::::',
               textAlign: TextAlign.center,
             ),
@@ -264,21 +264,9 @@ class _SplitState extends State<Split> {
       ),
     ];
     if (widget.axis == Axis.horizontal) {
-      return Row(
-        children: [
-          Expanded(
-            child: Row(children: children),
-          )
-        ],
-      );
+      return Row(children: children);
     } else {
-      return Column(
-        children: [
-          Expanded(
-            child: Row(children: children),
-          )
-        ],
-      );
+      return Column(children: children);
     }
   }
 }
