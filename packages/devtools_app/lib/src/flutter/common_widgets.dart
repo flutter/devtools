@@ -113,3 +113,99 @@ class DefaultTaggedText extends StatelessWidget {
     );
   }
 }
+
+/// A widget that takes two children and lays them out along one axis.
+///
+/// The user can customize the amount of space allocated to each child by
+/// dragging a divider between them.
+class Split extends StatefulWidget {
+  /// Builds a [Split] with [Axis.horizontal] direction.
+  ///
+  /// [firstChild] will be placed before [secondChild] in a [Row].
+  const Split.horizontal({
+    Key key,
+    @required Widget firstChild,
+    @required Widget secondChild,
+  }) : this._(key, Axis.horizontal, firstChild, secondChild);
+
+  /// Builds a [Split] with [Axis.vertical] direction.
+  ///
+  /// [firstChild] will be placed before [secondChild] in a [Column].
+  const Split.vertical({
+    Key key,
+    @required Widget firstChild,
+    @required Widget secondChild,
+  }) : this._(key, Axis.vertical, firstChild, secondChild);
+
+  const Split._(
+    Key key,
+    this.axis,
+    this.firstChild,
+    this.secondChild,
+  ) : super(key: key);
+
+  /// The main axis the children will lay out on.
+  ///
+  /// If [Axis.horizontal], the children will be placed in a [Row]
+  /// and they will be horizontally resizable.
+  ///
+  /// If [Axis.vertical], the children will be placed in a [Column]
+  /// and they will be vertically resizable.
+  ///
+  /// Cannot be null.
+  final Axis axis;
+
+  /// The child that will be laid out first along [axis].
+  final Widget firstChild;
+
+  /// The child that will be laid out last along [axis].
+  final Widget secondChild;
+
+  @override
+  State<StatefulWidget> createState() => _SplitState();
+}
+
+class _SplitState extends State<Split> {
+  double firstFraction = 0.4;
+  double get secondFraction => 1 - firstFraction;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _buildLayout);
+  }
+
+  Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
+    final isHorizontal = widget.axis == Axis.horizontal;
+    final width = constraints.maxWidth;
+    final height = constraints.maxHeight;
+    final children = [
+      SizedBox(
+        width: isHorizontal ? firstFraction * width : width,
+        height: isHorizontal ? height : firstFraction * height,
+        child: widget.firstChild,
+      ),
+      SizedBox(
+        width: isHorizontal ? secondFraction * width : width,
+        height: isHorizontal ? height : secondFraction * height,
+        child: widget.secondChild,
+      ),
+    ];
+    if (widget.axis == Axis.horizontal) {
+      return Row(
+        children: [
+          Expanded(
+            child: Row(children: children),
+          )
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Expanded(
+            child: Row(children: children),
+          )
+        ],
+      );
+    }
+  }
+}
