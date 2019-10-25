@@ -101,9 +101,7 @@ class InspectorTreeControllerFlutter extends Object
   }
 
   @override
-  InspectorTreeNode createNode() {
-    return InspectorTreeNode(isSummaryTreeNode: config.summaryTree);
-  }
+  InspectorTreeNode createNode() => InspectorTreeNode();
 
   @override
   Rect getBoundingBox(InspectorTreeRow row) {

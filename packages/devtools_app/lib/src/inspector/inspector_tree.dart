@@ -145,7 +145,6 @@ class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode parent,
     bool expandChildren = true,
-    bool isSummaryTreeNode = false,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
         _isExpanded = expandChildren;
