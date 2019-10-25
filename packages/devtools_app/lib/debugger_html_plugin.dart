@@ -81,5 +81,12 @@ class DebuggerHtmlPlugin {
       }
     });
     observer.observe(html.document, subtree: true, childList: true);
+
+    _viewRoot.onWheel.listen((event) {
+      event.stopImmediatePropagation();
+    });
+    _viewRoot.onMouseWheel.listen((event) {
+      event.stopImmediatePropagation();
+    });
   }
 }

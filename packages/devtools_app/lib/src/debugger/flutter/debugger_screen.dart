@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -29,9 +30,27 @@ class DebuggerScreenBody extends StatelessWidget {
   Widget build(BuildContext context) {
     // Don't build this in const because compile time const evaluation
     // will fail on non-web apps.
-    // ignore:prefer_const_constructors
-    return HtmlElementView(
-      viewType: 'DebuggerFlutterPlugin',
+    return RawGestureDetector(
+      gestures: {
+        EagerGestureRecognizer: _EagerGestureFactory(PointerDeviceKind.mouse),
+      },
+      // ignore:prefer_const_constructors
+      child: HtmlElementView(
+        viewType: 'DebuggerFlutterPlugin',
+      ),
     );
   }
+}
+
+class _EagerGestureFactory
+    extends GestureRecognizerFactory<EagerGestureRecognizer> {
+  _EagerGestureFactory(this.kind);
+
+  final PointerDeviceKind kind;
+
+  @override
+  EagerGestureRecognizer constructor() => EagerGestureRecognizer(kind: kind);
+
+  @override
+  void initializer(EagerGestureRecognizer instance) {}
 }
