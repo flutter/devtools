@@ -220,7 +220,7 @@ class _SplitState extends State<Split> {
     final height = constraints.maxHeight;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
     // The fraction of the layout the divider needs to take up from each child.
-    final dividerFraction =
+    final halfDividerFraction =
         isHorizontal ? halfDivider / width : halfDivider / height;
 
     void updateSpacing(DragUpdateDetails dragDetails) {
@@ -231,8 +231,8 @@ class _SplitState extends State<Split> {
         // Update the fraction of space consumed by the children,
         // being sure not to allocate any of them negative space.
         firstFraction = max(
-          dividerFraction,
-          min(1.0 - dividerFraction, firstFraction + fractionalDelta),
+          halfDividerFraction,
+          min(1.0 - halfDividerFraction, firstFraction + fractionalDelta),
         );
       });
     }
