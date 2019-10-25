@@ -37,16 +37,19 @@ class DebuggerScreenBody extends StatelessWidget {
           .copyWith(color: theme.accentColor);
       return Center(
         child: Text(
-          'The debugger screen is only available on web.',
+          'The debugger screen is only available when running DevTools as a web'
+          'app.\n'
+          '\n'
+          'It is implemented as a webview, which is not available in Flutter '
+          'desktop embedding.',
           style: textStyle,
+          textAlign: TextAlign.center,
         ),
       );
     }
 
-    // Don't build this in const because compile time const evaluation
-    // will fail on non-web apps.
-    // TODO(djshuckerow): Follow up on this: if this code won't compile
-    // on desktop as a const, then the constructor shouldn't be const.
+    // TODO(https://github.com/flutter/flutter/issues/43532): Don't build const
+    // because compile time const evaluation will fail on non-web apps.
     // ignore:prefer_const_constructors
     final webView = HtmlElementView(
       viewType: 'DebuggerFlutterPlugin',
