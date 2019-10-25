@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--
-  Copyright 2018 The Chromium Authors. All rights reserved.
+  Copyright 2019 The Chromium Authors. All rights reserved.
   Use of this source code is governed by a BSD-style license that can be
   found in the LICENSE file.
 -->
@@ -29,12 +29,6 @@
     <link href="packages/octicons_css/octicons_4.4.0.css" rel="stylesheet">
     <link href="packages/polymer_css/flex.css" rel="stylesheet">
     <link href="packages/devtools_app/src/debugger/debugger.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/inspector/inspector.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/logging/logging.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/performance/performance.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/profiler/profiler.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/info/info.css" rel="stylesheet">
-    <link href="packages/devtools_app/src/timeline/timeline.css" rel="stylesheet">
 
     <link rel="stylesheet" href="packages/primer_css/primer_12.1.0.css">
     <link rel="stylesheet" href="styles.css">
@@ -47,13 +41,11 @@
         }
     </style>
 
+    <!-- TODO(https://github.com/flutter/devtools/issues/1181) remove this.-->
     <script src="packages/ansi_up/ansi_up.js"></script>
 
     <link href="packages/codemirror/codemirror.css" rel="stylesheet">
     <script src="packages/codemirror/codemirror.js"></script>
-
-    <script src="packages/devtools_app/src/ui/plotly.js"></script>
-    <script type="text/javascript" src="packages/plotly_js/plotly.min.js"></script>
 
     <script type="text/javascript" src="packages/split/split.min.js"></script>
 </head>
@@ -120,11 +112,11 @@
         </div>
     </header>
 
-    <div id="messages-container" class="container legacy-dart"></div>
+    <div hidden id="messages-container" class="container legacy-dart"></div>
 
-    <form id="ga-dialog" class="container legacy-dart"></form>
-    <form id="connect-dialog" class="container legacy-dart"></form>
-    <form id="snapshot-message" class="container legacy-dart"></form>
+    <form hidden id="ga-dialog" class="container legacy-dart"></form>
+    <form hidden id="connect-dialog" class="container legacy-dart"></form>
+    <form hidden id="snapshot-message" class="container legacy-dart"></form>
 
     <div id="content" class="container legacy-dart" flex layout vertical style="overflow: auto;">
         <div class="blankslate">

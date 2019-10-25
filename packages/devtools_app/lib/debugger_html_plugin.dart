@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// We actually use dart:html here, no shim.
-// This code may only be compiled into the web app.
+// This code imports dart:ui, but it uses API calls
+// that are only available in the web implementation of dart:ui.
 import 'dart:ui' as web_ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+// TODO(): switch this to dart:html when turning down html_shim.
+// This is web plugin code may only be compiled into the web app.
 import 'package:html_shim/html.dart' as html;
 
 import 'src/debugger/html_debugger_screen.dart';
 import 'src/framework/html_framework.dart';
 import 'src/ui/html_elements.dart';
 
-/// Debugger HTML view.
-///
-/// This is code that will run as a web-only Flutter plugin.
+/// A web-only Flutter plugin to show the [HtmlDebuggerScreen].
 class DebuggerHtmlPlugin {
   DebuggerHtmlPlugin();
 
@@ -24,8 +25,16 @@ class DebuggerHtmlPlugin {
   HtmlDebuggerScreen _screen;
   html.Element _viewRoot;
 
+  /// Registers this plugin with Flutter.
+  ///
+  /// The pubspec.yaml tells Flutter to look at this class for a plugin.
+  /// When it finds the class, it invokes this static method from
+  /// `generated_plugin_registrant.dart`.
   static void registerWith(Registrar registrar) {
     final instance = DebuggerHtmlPlugin();
+    // This call is only defined for the web implementation of dart:ui.
+    // The regular dart UI cannot resolve this method call.
+    // TODO(djshuckerow): Remove this later.
     // ignore:undefined_prefixed_name
     web_ui.platformViewRegistry
         .registerViewFactory('DebuggerFlutterPlugin', instance.build);
@@ -39,31 +48,38 @@ class DebuggerHtmlPlugin {
     if (_viewRoot != null) {
       return _viewRoot;
     }
+    // Flutter loads this view inside of a shadow DOM.
+    // To get our existing CSS to work, we wrap the shadow page with the regular
+    //
+    // <html><head></head><body></body></html>.
     _viewRoot = html.Element.tag('html');
-    html.HttpRequest.getString('debugger_screen.html').then((response) {
-      _viewRoot.setInnerHtml(
-        response,
-        treeSanitizer: html.NodeTreeSanitizer.trusted,
-      );
-
-      overrideDocumentRoot = _viewRoot;
-      _framework = HtmlFramework();
-      _screen = HtmlDebuggerScreen();
-      _framework.addScreen(_screen);
-      final observer = html.MutationObserver((mutations, observer) {
-        if (_framework.mainElement.element.isConnected) {
-          observer.disconnect();
-          _framework.load(_screen);
-        }
-      });
-      observer.observe(html.document, subtree: true, childList: true);
-    });
+    html.HttpRequest.getString('debugger_screen.html').then(_updateViewRoot);
     return _viewRoot;
   }
 
-  /// Handles requests from Flutter of this view.
-  ///
-  /// Currently there is no API for interaction between the views,
-  /// so it supports no methods.
-  Future<dynamic> handleMethodCall(MethodCall call) async {}
+  /// Loads the [HtmlDebuggerScreen] after receiving the debugger screen
+  /// template html.
+  void _updateViewRoot(String response) {
+    _viewRoot.setInnerHtml(
+      response,
+      treeSanitizer: html.NodeTreeSanitizer.trusted,
+    );
+
+    // Tell the DevTools html code that the root to query for elements from
+    // is under this overridden root.
+    overrideDocumentRoot = _viewRoot;
+    _framework = HtmlFramework();
+    _screen = HtmlDebuggerScreen();
+    _framework.addScreen(_screen);
+
+    // Wait for the content to attach to the page, then load the debugger
+    // screen.
+    final observer = html.MutationObserver((mutations, observer) {
+      if (_framework.mainElement.element.isConnected) {
+        observer.disconnect();
+        _framework.load(_screen);
+      }
+    });
+    observer.observe(html.document, subtree: true, childList: true);
+  }
 }
