@@ -129,7 +129,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               ))
               : const SizedBox(),
             const Spacer(),
-            ...getServiceExtensionWidgets(),
+            Row(children: getServiceExtensionWidgets()),
           ],
         ),
         Expanded(
