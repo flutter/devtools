@@ -88,12 +88,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final Widget summaryTree = Expanded(
+    final summaryTree = Expanded(
       child: InspectorTree(
         controller: summaryTreeController,
       ),
     );
-    final Widget detailsTree = Stack(
+    final detailsTree = Stack(
       children: [
         InspectorTree(
           controller: detailsTreeController,
@@ -109,25 +109,30 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           children: [
             ServiceExtensionButtonGroup(
               extensions: [extensions.toggleSelectWidgetMode],
-              minIncludeTextWidth: 700,
+              minIncludeTextWidth: 800,
             ),
             OutlineButton(
               onPressed: _refreshInspector,
               child: Label(
                 FlutterIcons.refresh,
                 'Refresh Tree',
-                minIncludeTextWidth: 800,
+                minIncludeTextWidth: 900,
               ),
             ),
-            summaryTreeController?.isExperimentalStoryOfLayoutEnabled == true
-              ? OutlineButton(
-              onPressed: summaryTreeController?.toggleDebugLayoutSummaryEnabled,
-              child: Label(
-                FlutterIcons.lightbulb,
-                'Layout',
-                minIncludeTextWidth: 900,
-              ))
-              : const SizedBox(),
+            if (summaryTreeController?.isExperimentalStoryOfLayoutEnabled ??
+                false)
+              Container(
+                margin: const EdgeInsets.only(left: 8.0),
+                child: OutlineButton(
+                  onPressed:
+                      summaryTreeController?.toggleDebugLayoutSummaryEnabled,
+                  child: Label(
+                    FlutterIcons.lightbulb,
+                    'Show Constraints',
+                    minIncludeTextWidth: 1000,
+                  ),
+                ),
+              ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],
@@ -137,10 +142,10 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
             children: [
               summaryTree,
               Expanded(
-                child: detailsTreeController?.isExperimentalStoryOfLayoutEnabled == true ?
-                  InspectorDetailsTabController(
-                    detailsTree: detailsTree
-                  ) : detailsTree,
+                child: InspectorDetailsTabController(
+                  detailsTree: detailsTree,
+                  controller: detailsTreeController,
+                ),
               ),
             ],
           ),

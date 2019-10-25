@@ -1,5 +1,5 @@
-import 'package:devtools_app/src/inspector/flutter/layout_tab.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
+import 'package:devtools_app/src/inspector/flutter/layout_models.dart';
+import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -24,7 +24,8 @@ void main() {
                       'height': 200.0,
                     },
                   };
-                  final FlexProperties flexProperties = FlexProperties.fromJson(flexJson);
+                  final FlexProperties flexProperties =
+                      FlexProperties.fromJson(flexJson);
                   expect(flexProperties.direction, direction);
                   expect(flexProperties.mainAxisAlignment, mainAxisAlignment);
                   expect(flexProperties.mainAxisSize, mainAxisSize);

@@ -100,7 +100,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   String get constraints => getStringMember('constraints');
 
   bool get shouldHighlightConstraints =>
-    getBooleanMember('shouldHighlightConstraints', false);
+      getBooleanMember('shouldHighlightConstraints', false);
 
   bool get warning => getBooleanMember('warning', false);
 
@@ -165,6 +165,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticsTreeStyle _style;
+
   set style(DiagnosticsTreeStyle style) {
     _style = style;
   }

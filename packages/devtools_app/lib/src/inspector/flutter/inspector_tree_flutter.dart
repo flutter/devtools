@@ -10,11 +10,11 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
-import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
-import '../inspector_controller.dart';
 import '../inspector_tree.dart';
+import 'layout_models.dart';
 import 'layout_tab.dart';
+import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -89,6 +89,7 @@ class InspectorTreeControllerFlutter extends Object
   /// Client the controller notifies to trigger changes to the UI.
   InspectorControllerClient get client => _client;
   InspectorControllerClient _client;
+
   set client(InspectorControllerClient value) {
     if (_client == value) return;
     // Do not set a new client if there is still an old client.
@@ -475,18 +476,19 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
-    final List<Widget> children = [
-      node.showExpandCollapse ?
-      InkWell(
-        onTap: onToggle,
-        child: RotationTransition(
-          turns: expandAnimation,
-          child: Icon(
-            Icons.expand_more,
-            size: 16.0,
-          ),
-        ),
-      ) : const SizedBox(width: 16.0, height: 16.0),
+    final children = <Widget>[
+      node.showExpandCollapse
+          ? InkWell(
+              onTap: onToggle,
+              child: RotationTransition(
+                turns: expandAnimation,
+                child: Icon(
+                  Icons.expand_more,
+                  size: 16.0,
+                ),
+              ),
+            )
+          : const SizedBox(width: 16.0, height: 16.0),
       DecoratedBox(
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -500,12 +502,13 @@ class InspectorRowContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: DiagnosticsNodeDescription(
               node.diagnostic,
-            ),),
+            ),
+          ),
         ),
       ),
     ];
 
-    if (controller.isExperimentalStoryOfLayoutEnabled) {
+    if (controller?.isExperimentalStoryOfLayoutEnabled ?? false) {
       if (node.diagnostic?.isFlex == true)
         children.add(
           Container(
@@ -514,13 +517,19 @@ class InspectorRowContent extends StatelessWidget {
               child: Icon(Icons.info, size: 16.0),
               onTap: () {
                 showDialog(
-                  context: context, child: StoryOfYourFlexWidget(node),
+                  context: context,
+                  child: StoryOfYourFlexWidget(
+                    diagnostic: node?.diagnostic,
+                    properties:
+                        FlexProperties.fromJson(node?.diagnostic?.flexDetails),
+                  ),
                 );
               },
             ),
           ),
         );
-      children.add(ConstraintsDescriptor(node.diagnostic, controller.isDebugLayoutSummaryEnabled));
+      children.add(ConstraintsDescription(
+          node.diagnostic, controller.isDebugLayoutSummaryEnabled));
     }
 
     return CustomPaint(
@@ -533,83 +542,6 @@ class InspectorRowContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             textBaseline: TextBaseline.alphabetic,
             children: children,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class ConstraintsDescriptor extends StatefulWidget {
-  const ConstraintsDescriptor(this.diagnostics, this.isDebugLayoutSummaryEnabled, {Key key})
-    : super(key: key);
-
-  final RemoteDiagnosticsNode diagnostics;
-  final ValueNotifier<bool> isDebugLayoutSummaryEnabled;
-
-
-  @override
-  _ConstraintsDescriptorState createState() => _ConstraintsDescriptorState();
-}
-
-class _ConstraintsDescriptorState extends State<ConstraintsDescriptor>
-  with SingleTickerProviderStateMixin {
-
-  AnimationController _controller;
-  Animation _animation;
-
-  @override
-  void initState()  {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _animation = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.diagnostics?.constraints == null) {
-      return const SizedBox();
-    }
-
-    TextStyle textStyle = inspector_text_styles.unimportant.merge(
-      const TextStyle(
-        fontStyle: FontStyle.italic,
-      ));
-
-    if (widget.diagnostics.shouldHighlightConstraints) {
-      textStyle = textStyle.merge(textStyleForLevel(DiagnosticLevel.warning));
-    }
-
-    return ValueListenableBuilder<bool>(
-      valueListenable: widget.isDebugLayoutSummaryEnabled,
-      builder: (context, debugLayoutMode, child) {
-        if (debugLayoutMode) {
-          _controller.forward();
-        } else {
-          _controller.reverse();
-        }
-        return child;
-      },
-      child: FadeTransition(
-        opacity: _animation,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Text(
-            '// constraints: ${widget.diagnostics.constraints}',
-            style: textStyle,
           ),
         ),
       ),

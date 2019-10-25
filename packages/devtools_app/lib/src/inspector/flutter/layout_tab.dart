@@ -1,34 +1,44 @@
+import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
-import '../inspector_tree.dart';
+import 'inspector_tree_flutter.dart';
+import 'layout_models.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
-  const InspectorDetailsTabController({this.detailsTree, Key key})
-    : super(key: key);
+  const InspectorDetailsTabController(
+      {this.detailsTree, this.controller, Key key})
+      : super(key: key);
 
+  final InspectorTreeControllerFlutter controller;
   final Widget detailsTree;
 
   @override
   Widget build(BuildContext context) {
+    final enableStoryOfLayout =
+        controller?.isExperimentalStoryOfLayoutEnabled ?? false;
+    final tabs = <Widget>[
+      const Tab(text: 'Details Tree'),
+      if (enableStoryOfLayout) const Tab(text: 'Layout Details')
+    ];
+    final tabViews = <Widget>[
+      detailsTree,
+      if (enableStoryOfLayout) Container(),
+    ];
     return DefaultTabController(
-      length: 2,
+      length: tabs.length,
       child: Column(
         children: <Widget>[
-          const TabBar(
-            tabs: [
-              Tab(text: 'Details Tree'),
-              Tab(text: 'Layout Details'),
-            ],
+          TabBar(
+            isScrollable: false,
+            labelPadding: const EdgeInsets.only(right: 10.0, left: 10.0),
+            tabs: tabs,
           ),
           Expanded(
             child: TabBarView(
-              children: [
-                detailsTree,
-                Container(),
-              ],
+              children: tabViews,
             ),
           ),
         ],
@@ -37,42 +47,35 @@ class InspectorDetailsTabController extends StatelessWidget {
   }
 }
 
-// TODO(albertusangga): Remove this linter ignore
-// ignore: must_be_immutable
+@immutable
 class StoryOfYourFlexWidget extends StatelessWidget {
-  StoryOfYourFlexWidget(this.node, {
+  const StoryOfYourFlexWidget({
+    this.diagnostic,
+    this.properties,
     Key key,
-  }) : super(key: key) {
-    properties = FlexProperties.fromJson(node.diagnostic.flexDetails);
-  }
+  }) : super(key: key);
 
-  final InspectorTreeNode node;
+  final RemoteDiagnosticsNode diagnostic;
 
-  // Deserialized information about Flex elements
-  FlexProperties properties;
+  // Information about Flex elements that has been deserialize
+  final FlexProperties properties;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Widget> children = [
-      for (RemoteDiagnosticsNode child in node.diagnostic.childrenNow)
+      for (var child in diagnostic.childrenNow)
         Expanded(
-          flex: 1,
           child: Container(
             decoration: BoxDecoration(
-              color: Theme
-                .of(context)
-                .backgroundColor,
+              color: theme.backgroundColor,
               border: Border.all(
-                color: Theme
-                  .of(context)
-                  .primaryColor,
+                color: theme.primaryColor,
                 width: 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Theme
-                    .of(context)
-                    .primaryColor,
+                  color: theme.primaryColor,
                   offset: Offset.zero,
                   blurRadius: 10.0,
                 )
@@ -80,12 +83,13 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             ),
             child: Center(
               child: Text(child.description),
-            )),
-        )
+            ),
+          ),
+        ),
     ];
     final Widget flexWidget = properties.type == Row
-      ? Row(children: children)
-      : Column(children: children);
+        ? Row(children: children)
+        : Column(children: children);
     final String flexWidgetName = properties.type.toString();
     return Dialog(
       child: Container(
@@ -95,17 +99,15 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 4.0),
               child: Text(
-                'Story of the flex layout of your $flexWidgetName widget',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                )),
+                  'Story of the flex layout of your $flexWidgetName widget',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                  )),
             ),
             Expanded(
               child: Container(
-                color: Theme
-                  .of(context)
-                  .primaryColor,
+                color: Theme.of(context).primaryColor,
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
                   child: Column(
@@ -117,8 +119,9 @@ class StoryOfYourFlexWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Container(
-                          margin: const EdgeInsets.all(16.0),
-                          child: flexWidget)),
+                            margin: const EdgeInsets.all(16.0),
+                            child: flexWidget),
+                      ),
                     ],
                   ),
                 ),
@@ -130,61 +133,3 @@ class StoryOfYourFlexWidget extends StatelessWidget {
     );
   }
 }
-
-@immutable
-class FlexProperties {
-  const FlexProperties({
-                         this.direction,
-                         this.mainAxisAlignment,
-                         this.mainAxisSize,
-                         this.crossAxisAlignment,
-                         this.textDirection,
-                         this.verticalDirection,
-                         this.textBaseline,
-                         this.size,
-                       });
-
-  final Axis direction;
-  final MainAxisAlignment mainAxisAlignment;
-  final MainAxisSize mainAxisSize;
-  final CrossAxisAlignment crossAxisAlignment;
-  final TextDirection textDirection;
-  final VerticalDirection verticalDirection;
-  final TextBaseline textBaseline;
-  final Size size;
-
-  // TODO(albertusangga): Research better way to serialzie & deserialize enum value in Dart
-  static Object enumFromString(List<Object> enumValues,
-                               String enumToStringValue) {
-    return enumValues.firstWhere(
-        (enumValue) => enumValue.toString() == enumToStringValue,
-      orElse: () => null,
-    );
-  }
-
-  /// Deserialize Flex properties from DiagnosticsNode to actual object
-  static FlexProperties fromJson(Map<String, Object> data) {
-    final Map<String, dynamic> sizeJson = data['size'];
-    final Size size =
-    sizeJson == null || sizeJson['height'] == null || sizeJson['width'] == null
-      ? null
-      : Size(sizeJson['width'], sizeJson['height']);
-    return FlexProperties(
-      direction: enumFromString(Axis.values, data['direction']),
-      mainAxisAlignment: enumFromString(
-        MainAxisAlignment.values, data['mainAxisAlignment']),
-      mainAxisSize: enumFromString(MainAxisSize.values, data['mainAxisSize']),
-      crossAxisAlignment: enumFromString(
-        CrossAxisAlignment.values, data['crossAxisAlignment']),
-      textDirection: enumFromString(
-        TextDirection.values, data['textDirection']),
-      verticalDirection: enumFromString(
-        VerticalDirection.values, data['verticalDirection']),
-      textBaseline: enumFromString(TextBaseline.values, data['textBaseline']),
-      size: size,
-    );
-  }
-
-  Type get type => direction == Axis.horizontal ? Row : Column;
-}
-
