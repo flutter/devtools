@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
@@ -126,7 +129,14 @@ class Split extends StatefulWidget {
     Key key,
     @required Widget firstChild,
     @required Widget secondChild,
-  }) : this._(key, Axis.horizontal, firstChild, secondChild);
+    double initialFirstFraction,
+  }) : this._(
+          key,
+          Axis.horizontal,
+          firstChild,
+          secondChild,
+          initialFirstFraction,
+        );
 
   /// Builds a [Split] with [Axis.vertical] direction.
   ///
@@ -135,14 +145,23 @@ class Split extends StatefulWidget {
     Key key,
     @required Widget firstChild,
     @required Widget secondChild,
-  }) : this._(key, Axis.vertical, firstChild, secondChild);
+    double initialFirstFraction,
+  }) : this._(
+          key,
+          Axis.vertical,
+          firstChild,
+          secondChild,
+          initialFirstFraction,
+        );
 
   const Split._(
     Key key,
     this.axis,
     this.firstChild,
     this.secondChild,
-  ) : super(key: key);
+    double initialFirstFraction,
+  )   : initialFirstFraction = initialFirstFraction ?? 0.5,
+        super(key: key);
 
   /// The main axis the children will lay out on.
   ///
@@ -161,6 +180,11 @@ class Split extends StatefulWidget {
   /// The child that will be laid out last along [axis].
   final Widget secondChild;
 
+  /// The fraction of the layout to allocate to [firstChild].
+  ///
+  /// [secondChild] will receive a fraction of `1 - initialFirstFraction`.
+  final double initialFirstFraction;
+
   /// The key passed to the divider between [firstChild] and [secondChild].
   ///
   /// Visible to grab it in tests.
@@ -176,8 +200,15 @@ class Split extends StatefulWidget {
 }
 
 class _SplitState extends State<Split> {
-  double firstFraction = 0.4;
+  double firstFraction;
   double get secondFraction => 1 - firstFraction;
+  bool get isHorizontal => widget.axis == Axis.horizontal;
+
+  @override
+  void initState() {
+    super.initState();
+    firstFraction = widget.initialFirstFraction;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,10 +216,25 @@ class _SplitState extends State<Split> {
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
-    final isHorizontal = widget.axis == Axis.horizontal;
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
+    final spacerFraction = isHorizontal
+        ? Split.dividerMainAxisSize / width
+        : Split.dividerMainAxisSize / height;
+
+    void updateSpacing(DragUpdateDetails dragDetails) {
+      final delta = dragDetails.delta;
+      final fractionalDelta =
+          isHorizontal ? delta.dx / width : delta.dy / height;
+      setState(() {
+        firstFraction = max(
+          spacerFraction,
+          min(1.0 - spacerFraction, firstFraction + fractionalDelta),
+        );
+      });
+    }
+
     final children = [
       SizedBox(
         width: isHorizontal ? firstFraction * width - halfDivider : width,
@@ -198,10 +244,14 @@ class _SplitState extends State<Split> {
       SizedBox(
         width: isHorizontal ? Split.dividerMainAxisSize : width,
         height: isHorizontal ? height : Split.dividerMainAxisSize,
-        child: const Center(
-          child: Text(
-            ':::::::',
-            textAlign: TextAlign.center,
+        child: Center(
+          child: GestureDetector(
+            onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
+            onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
+            child: Text(
+              ':::::::',
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),
