@@ -160,7 +160,7 @@ class InspectorTreeControllerFlutter extends Object
   }
 
   // TODO(albertusangga): Move this flag to InspectorController instead?
-  final bool isExperimentalStoryOfLayoutEnabled = true;
+  final bool isExperimentalStoryOfLayoutEnabled = false;
 }
 
 abstract class InspectorControllerClient {
@@ -502,7 +502,6 @@ class InspectorRowContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: DiagnosticsNodeDescription(
               node.diagnostic,
-              debugLayoutModeEnabled: controller.isDebugLayoutSummaryEnabled,
             ),),
         ),
       ),
@@ -545,11 +544,11 @@ class InspectorRowContent extends StatelessWidget {
 
 
 class ConstraintsDescriptor extends StatefulWidget {
-  const ConstraintsDescriptor(this.diagnostics, this.debugLayoutModeEnabled, {Key key})
+  const ConstraintsDescriptor(this.diagnostics, this.isDebugLayoutSummaryEnabled, {Key key})
     : super(key: key);
 
   final RemoteDiagnosticsNode diagnostics;
-  final ValueNotifier<bool> debugLayoutModeEnabled;
+  final ValueNotifier<bool> isDebugLayoutSummaryEnabled;
 
 
   @override
@@ -597,7 +596,7 @@ class _ConstraintsDescriptorState extends State<ConstraintsDescriptor>
     }
 
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.debugLayoutModeEnabled,
+      valueListenable: widget.isDebugLayoutSummaryEnabled,
       builder: (context, debugLayoutMode, child) {
         if (debugLayoutMode) {
           _controller.forward();
