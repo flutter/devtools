@@ -70,9 +70,7 @@ class Splitter {
   external void destroy([bool preserveStyles, bool preserveGutters]);
 }
 
-bool _isAttachedToDocument(Element element) {
-  return element.isConnected;
-}
+bool _isAttachedToDocument(Element element) => element.isConnected;
 
 /// Splitter that splits multiple elements using flex layout.
 ///
