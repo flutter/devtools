@@ -19,6 +19,7 @@ import '../flutter_widget.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
 import 'inspector_tree_flutter.dart';
+import 'layout_tab.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen() : super('Info');
@@ -87,6 +88,20 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    final Widget summaryTree = Expanded(
+      child: InspectorTree(
+        controller: summaryTreeController,
+      ),
+    );
+    final Widget detailsTree = Stack(
+      children: [
+        InspectorTree(
+          controller: detailsTreeController,
+        ),
+        if (_expandCollapseSupported) _expandCollapseButtons()
+      ],
+    );
+
     return Column(
       children: <Widget>[
         Row(
@@ -94,7 +109,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           children: [
             ServiceExtensionButtonGroup(
               extensions: [extensions.toggleSelectWidgetMode],
-              minIncludeTextWidth: 800,
+              minIncludeTextWidth: 700,
             ),
             OutlineButton(
               onPressed: _refreshInspector,
@@ -104,43 +119,29 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 800,
               ),
             ),
-            OutlineButton(
-              onPressed: summaryTreeController?.toggleDebugLayoutMode,
+            summaryTreeController?.isExperimentalStoryOfLayoutEnabled == true
+              ? OutlineButton(
+              onPressed: summaryTreeController?.toggleDebugLayoutSummaryEnabled,
               child: Label(
                 FlutterIcons.lightbulb,
                 'Layout',
-                minIncludeTextWidth: 800,
-              ),
-            ),
+                minIncludeTextWidth: 900,
+              ))
+              : const SizedBox(),
             const Spacer(),
-            Expanded(
-              flex: 3,
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                runSpacing: 8.0,
-                crossAxisAlignment: WrapCrossAlignment.end,
-                children: getServiceExtensionWidgets(),
-              ),
-            ),
+            ...getServiceExtensionWidgets(),
           ],
         ),
         Expanded(
           child: Row(
             children: [
+              summaryTree,
               Expanded(
-                  child: InspectorTree(
-                controller: summaryTreeController,
-              )),
-              Expanded(
-                child: Stack(
-                  children: [
-                    InspectorTree(
-                      controller: detailsTreeController,
-                    ),
-                    if (_expandCollapseSupported) _expandCollapseButtons()
-                  ],
-                ),
-              )
+                child: detailsTreeController?.isExperimentalStoryOfLayoutEnabled == true ?
+                  InspectorDetailsTabController(
+                    detailsTree: detailsTree
+                  ) : detailsTree,
+              ),
             ],
           ),
         ),

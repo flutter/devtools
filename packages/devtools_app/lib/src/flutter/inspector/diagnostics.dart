@@ -28,45 +28,13 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// See also:
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
-class DiagnosticsNodeDescription extends StatefulWidget {
+class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(this.diagnostic,
                                    {this.debugLayoutModeEnabled});
 
   final RemoteDiagnosticsNode diagnostic;
 
   final ValueNotifier<bool> debugLayoutModeEnabled;
-
-  @override
-  _DiagnosticsNodeDescriptionState createState() =>
-    _DiagnosticsNodeDescriptionState();
-}
-
-class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
-  with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation<Color> _colorAnimation;
-
-  ColorTween _getColorTween() {
-    final Color beginColor = textStyleForLevel(widget.diagnostic.level).color;
-    final Color endColor = widget.diagnostic.warning ? textStyleForLevel(
-      DiagnosticLevel.warning).color : beginColor;
-    return ColorTween(begin: beginColor, end: endColor);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.diagnostic == null) return;
-    _animationController = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 500));
-    _colorAnimation = _getColorTween().animate(_animationController);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _animationController.dispose();
-  }
 
   Widget _toFlutterIcon(DevToolsIcon icon) {
     return Padding(
@@ -80,7 +48,7 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
                        TextStyle textStyle, {
                          bool isProperty,
                        }) {
-    if (widget.diagnostic.isDiagnosticableValue) {
+    if (diagnostic.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         output.add(Text(match.group(1), style: textStyle));
@@ -94,7 +62,7 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
         }
         return;
       }
-    } else if (widget.diagnostic.type == 'ErrorDescription') {
+    } else if (diagnostic.type == 'ErrorDescription') {
       final match = assertionThrownBuildingError.firstMatch(description);
       if (match != null) {
         output.add(Text(match.group(1), style: textStyle));
@@ -103,64 +71,40 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
       }
     }
     if (description?.isNotEmpty == true) {
-      if (widget.debugLayoutModeEnabled == null)
-        output.add(Text(description, style: textStyle));
-      else {
-        output.add(
-          ValueListenableBuilder<bool>(
-            valueListenable: widget.debugLayoutModeEnabled,
-            builder: (_, debugLayoutModeEnabled, child) {
-              if (debugLayoutModeEnabled)
-                _animationController.forward();
-              else
-                _animationController.reverse();
-              return child;
-            },
-            child: AnimatedBuilder(
-              animation: _colorAnimation,
-                builder: (context, child) => Text(
-                  description,
-                  style: textStyle.merge(TextStyle(
-                    color: _colorAnimation.value
-                  ))
-                ),
-              ),
-          )
-        );
-      }
+      output.add(Text(description, style: textStyle));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.diagnostic == null) {
+    if (diagnostic == null) {
       return const SizedBox();
     }
-    final icon = widget.diagnostic.icon;
+    final icon = diagnostic.icon;
     final children = <Widget>[];
 
     if (icon != null) {
       children.add(_toFlutterIcon(icon));
     }
-    final String name = widget.diagnostic.name;
-    TextStyle textStyle = textStyleForLevel(widget.diagnostic.level);
+    final String name = diagnostic.name;
+    TextStyle textStyle = textStyleForLevel(diagnostic.level);
 
-    if (widget.diagnostic.isProperty) {
+    if (diagnostic.isProperty) {
       // Display of inline properties.
-      final String propertyType = widget.diagnostic.propertyType;
-      final Map<String, Object> properties = widget.diagnostic
+      final String propertyType = diagnostic.propertyType;
+      final Map<String, Object> properties = diagnostic
         .valuePropertiesJson;
 
-      if (name?.isNotEmpty == true && widget.diagnostic.showName) {
+      if (name?.isNotEmpty == true && diagnostic.showName) {
         children.add(
-          Text('$name${widget.diagnostic.separator} ', style: textStyle));
+          Text('$name${diagnostic.separator} ', style: textStyle));
       }
 
-      if (widget.diagnostic.isCreatedByLocalProject) {
+      if (diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      String description = widget.diagnostic.description;
+      String description = diagnostic.description;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -212,14 +156,14 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
         isProperty: true,
       );
 
-      if (widget.diagnostic.level == DiagnosticLevel.fine &&
-        widget.diagnostic.hasDefaultValue) {
+      if (diagnostic.level == DiagnosticLevel.fine &&
+        diagnostic.hasDefaultValue) {
         children.add(const Text(' '));
         children.add(_toFlutterIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true && widget.diagnostic.showName &&
+      if (name?.isNotEmpty == true && diagnostic.showName &&
         name != 'child') {
         if (name.startsWith('child ')) {
           children.add(Text(name, style: inspector_text_styles.unimportant));
@@ -227,13 +171,13 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
           children.add(Text(name, style: textStyle));
         }
 
-        if (widget.diagnostic.showSeparator) {
+        if (diagnostic.showSeparator) {
           children.add(Text(
-            widget.diagnostic.separator,
+            diagnostic.separator,
             style: inspector_text_styles.unimportant,
           ));
-          if (widget.diagnostic.separator != ' ' &&
-            widget.diagnostic.description.isNotEmpty) {
+          if (diagnostic.separator != ' ' &&
+            diagnostic.description.isNotEmpty) {
             children.add(Text(
               ' ',
               style: inspector_text_styles.unimportant,
@@ -242,14 +186,14 @@ class _DiagnosticsNodeDescriptionState extends State<DiagnosticsNodeDescription>
         }
       }
 
-      if (!widget.diagnostic.isSummaryTree &&
-        widget.diagnostic.isCreatedByLocalProject) {
+      if (!diagnostic.isSummaryTree &&
+        diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       _addDescription(
         children,
-        widget.diagnostic.description,
+        diagnostic.description,
         textStyle,
         isProperty: false,
       );

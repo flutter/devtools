@@ -14,6 +14,7 @@ import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import '../inspector_tree.dart';
+import 'layout_tab.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -152,12 +153,14 @@ class InspectorTreeControllerFlutter extends Object
     return _maxIndent;
   }
 
+  final ValueNotifier<bool> isDebugLayoutSummaryEnabled = ValueNotifier(false);
 
-  final ValueNotifier<bool> debugLayoutMode = ValueNotifier(false);
-
-  void toggleDebugLayoutMode() {
-    debugLayoutMode.value = !debugLayoutMode.value;
+  void toggleDebugLayoutSummaryEnabled() {
+    isDebugLayoutSummaryEnabled.value = !isDebugLayoutSummaryEnabled.value;
   }
+
+  // TODO(albertusangga): Move this flag to InspectorController instead?
+  final bool isExperimentalStoryOfLayoutEnabled = true;
 }
 
 abstract class InspectorControllerClient {
@@ -499,27 +502,29 @@ class InspectorRowContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: DiagnosticsNodeDescription(
               node.diagnostic,
-              debugLayoutModeEnabled: controller.debugLayoutMode,
+              debugLayoutModeEnabled: controller.isDebugLayoutSummaryEnabled,
             ),),
         ),
       ),
     ];
 
-    if (node.diagnostic?.isFlex == true)
-      children.add(
-        Container(
-          margin: const EdgeInsets.only(left: 4.0),
-          child: InkWell(
-            child: Icon(Icons.info, size: 16.0),
-            onTap: () {
-              showDialog(
-                context: context, child: StoryOfYourFlexWidget(node));
-            },
+    if (controller.isExperimentalStoryOfLayoutEnabled) {
+      if (node.diagnostic?.isFlex == true)
+        children.add(
+          Container(
+            margin: const EdgeInsets.only(left: 4.0),
+            child: InkWell(
+              child: Icon(Icons.info, size: 16.0),
+              onTap: () {
+                showDialog(
+                  context: context, child: StoryOfYourFlexWidget(node),
+                );
+              },
+            ),
           ),
-        ),
-      );
-
-    children.add(ConstraintsDescriptor(node.diagnostic, controller.debugLayoutMode));
+        );
+      children.add(ConstraintsDescriptor(node.diagnostic, controller.isDebugLayoutSummaryEnabled));
+    }
 
     return CustomPaint(
       painter: _RowPainter(row, controller),
@@ -609,92 +614,6 @@ class _ConstraintsDescriptorState extends State<ConstraintsDescriptor>
             '// constraints: ${widget.diagnostics.constraints}',
             style: textStyle,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class StoryOfYourFlexWidget extends StatelessWidget {
-  StoryOfYourFlexWidget(this.node, {
-    Key key,
-  }) : super(key: key);
-
-  InspectorTreeNode node;
-
-  @override
-  Widget build(BuildContext context) {
-    final Map<String, Object> flexDetails = node.diagnostic.flexDetails;
-    final List<Widget> children = [
-      for (RemoteDiagnosticsNode child in node.diagnostic.childrenNow)
-        Expanded(
-          flex: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).backgroundColor,
-              border: Border.all(
-                color: Theme.of(context).primaryColor,
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).primaryColor,
-                  offset: Offset.zero,
-                  blurRadius: 10.0,
-                )
-              ],
-            ),
-            child: Center(
-              child: Text(child.description),
-            )
-          ),
-        )
-    ];
-    final Widget flexWidget = (flexDetails['direction'] as String).contains('horizontal') ?
-      Row(children: children) :
-      Column(children: children);
-    final String flexWidgetName = flexWidget.runtimeType.toString();
-    return Dialog(
-      child: Container(
-        margin: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(bottom: 4.0),
-              child: Text('Story of the flex layout of your $flexWidgetName widget', style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-              )),
-            ),
-//            Center(
-//              child: Text('${node.diagnostic?.json['flex']}'),
-//            ),
-//            Center(
-//              child: Text('${node.diagnostic?.childrenNow}'),
-//            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).primaryColor,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        flexWidgetName,
-                        style: inspector_text_styles.regularBold,
-                      ),
-                      Expanded(child: Container(
-                        margin: const EdgeInsets.all(16.0),
-                        child: flexWidget
-                      )),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
