@@ -40,18 +40,17 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  void _addDescription(List<Widget> output,
-                       String description,
-                       TextStyle textStyle, {
-                         bool isProperty,
-                       }) {
+  void _addDescription(
+    List<Widget> output,
+    String description,
+    TextStyle textStyle, {
+    bool isProperty,
+  }) {
     if (diagnostic.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         output.add(Text(match.group(1), style: textStyle));
-        if (match
-          .group(2)
-          .isNotEmpty) {
+        if (match.group(2).isNotEmpty) {
           output.add(Text(
             match.group(2),
             style: inspector_text_styles.unimportant,
@@ -85,16 +84,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
     final String name = diagnostic.name;
     TextStyle textStyle = textStyleForLevel(diagnostic.level);
-
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
-      final Map<String, Object> properties = diagnostic
-        .valuePropertiesJson;
+      final Map<String, Object> properties = diagnostic.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
-        children.add(
-          Text('$name${diagnostic.separator} ', style: textStyle));
+        children.add(Text('$name${diagnostic.separator} ', style: textStyle));
       }
 
       if (diagnostic.isCreatedByLocalProject) {
@@ -115,22 +111,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                 description = '#${radix(red)}${radix(green)}${radix(blue)}';
               } else {
                 description =
-                '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
+                    '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
               }
 
               final Color color = Color.fromARGB(alpha, red, green, blue);
               children
-                .add(_toFlutterIcon(_colorIconMaker.getCustomIcon(color)));
+                  .add(_toFlutterIcon(_colorIconMaker.getCustomIcon(color)));
               break;
             }
 
           case 'IconData':
             {
               final int codePoint =
-              JsonUtils.getIntMember(properties, 'codePoint');
+                  JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
                 final DevToolsIcon icon =
-                FlutterMaterialIcons.getIconForCodePoint(codePoint);
+                    FlutterMaterialIcons.getIconForCodePoint(codePoint);
                 if (icon != null) {
                   children.add(_toFlutterIcon(icon));
                 }
@@ -141,7 +137,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       if (_showRenderObjectPropertiesAsLinks &&
-        propertyType == 'RenderObject') {
+          propertyType == 'RenderObject') {
         textStyle = textStyle..merge(inspector_text_styles.link);
       }
 
@@ -154,14 +150,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       );
 
       if (diagnostic.level == DiagnosticLevel.fine &&
-        diagnostic.hasDefaultValue) {
+          diagnostic.hasDefaultValue) {
         children.add(const Text(' '));
         children.add(_toFlutterIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true && diagnostic.showName &&
-        name != 'child') {
+      if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
         if (name.startsWith('child ')) {
           children.add(Text(name, style: inspector_text_styles.unimportant));
         } else {
@@ -174,7 +169,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             style: inspector_text_styles.unimportant,
           ));
           if (diagnostic.separator != ' ' &&
-            diagnostic.description.isNotEmpty) {
+              diagnostic.description.isNotEmpty) {
             children.add(Text(
               ' ',
               style: inspector_text_styles.unimportant,
@@ -183,8 +178,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnostic.isSummaryTree &&
-        diagnostic.isCreatedByLocalProject) {
+      if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
