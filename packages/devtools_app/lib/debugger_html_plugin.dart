@@ -9,7 +9,8 @@ import 'dart:ui' as web_ui;
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-// TODO(): switch this to dart:html when turning down html_shim.
+// TODO(https://github.com/flutter/devtools/issues/1258): switch to dart:html
+// when turning down html_shim.
 // This is web plugin code may only be compiled into the web app.
 import 'package:html_shim/html.dart' as html;
 
@@ -34,7 +35,8 @@ class DebuggerHtmlPlugin {
     final instance = DebuggerHtmlPlugin();
     // This call is only defined for the web implementation of dart:ui.
     // The regular dart UI cannot resolve this method call.
-    // TODO(djshuckerow): Remove this later.
+    // TODO(djshuckerow): Remove this 'ignore' after the APIs match between
+    // flutter and web.
     // ignore:undefined_prefixed_name
     web_ui.platformViewRegistry
         .registerViewFactory('DebuggerFlutterPlugin', instance.build);
@@ -82,6 +84,8 @@ class DebuggerHtmlPlugin {
     });
     observer.observe(html.document, subtree: true, childList: true);
 
+    // TODO(https://github.com/flutter/flutter/issues/43520): This works around
+    // Flutter taking the mouse wheel events.
     _viewRoot.onWheel.listen((event) {
       event.stopImmediatePropagation();
     });

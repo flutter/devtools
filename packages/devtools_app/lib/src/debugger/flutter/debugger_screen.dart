@@ -34,6 +34,8 @@ class DebuggerScreenBody extends StatelessWidget {
       gestures: {
         EagerGestureRecognizer: _EagerGestureFactory(PointerDeviceKind.mouse),
       },
+      // TODO(djshuckerow): Follow up on this: if this code won't compile
+      // on desktop as a const, then the constructor shouldn't be const.
       // ignore:prefer_const_constructors
       child: HtmlElementView(
         viewType: 'DebuggerFlutterPlugin',
