@@ -161,6 +161,16 @@ class Split extends StatefulWidget {
   /// The child that will be laid out last along [axis].
   final Widget secondChild;
 
+  /// The key passed to the divider between [firstChild] and [secondChild].
+  ///
+  /// Visible to grab it in tests.
+  @visibleForTesting
+  Key get dividerKey => Key('$this dividerKey');
+
+  /// The size of the divider between [firstChild] and [secondChild] in
+  /// logical pixels (dp, not px).
+  static const double dividerMainAxisSize = 10.0;
+
   @override
   State<StatefulWidget> createState() => _SplitState();
 }
@@ -178,15 +188,26 @@ class _SplitState extends State<Split> {
     final isHorizontal = widget.axis == Axis.horizontal;
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
+    const halfDivider = Split.dividerMainAxisSize / 2.0;
     final children = [
       SizedBox(
-        width: isHorizontal ? firstFraction * width : width,
-        height: isHorizontal ? height : firstFraction * height,
+        width: isHorizontal ? firstFraction * width - halfDivider : width,
+        height: isHorizontal ? height : firstFraction * height - halfDivider,
         child: widget.firstChild,
       ),
       SizedBox(
-        width: isHorizontal ? secondFraction * width : width,
-        height: isHorizontal ? height : secondFraction * height,
+        width: isHorizontal ? Split.dividerMainAxisSize : width,
+        height: isHorizontal ? height : Split.dividerMainAxisSize,
+        child: const Center(
+          child: Text(
+            ':::::::',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+      SizedBox(
+        width: isHorizontal ? secondFraction * width - halfDivider : width,
+        height: isHorizontal ? height : secondFraction * height - halfDivider,
         child: widget.secondChild,
       ),
     ];
