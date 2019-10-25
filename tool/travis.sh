@@ -80,7 +80,6 @@ else
 fi
 export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
 flutter config --no-analytics
-flutter config --enable-web
 flutter doctor
 # We should be using dart from ../flutter/bin/cache/dart-sdk/bin/dart.
 echo "which dart: " `which dart`
@@ -129,6 +128,7 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
+    flutter config --enable-web
     flutter build web
 
     # Run every test except for integration_tests.
@@ -141,6 +141,7 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
+    flutter config --enable-web
     flutter build web
 
     # Run every test except for integration_tests.
