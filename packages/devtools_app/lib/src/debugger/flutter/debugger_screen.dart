@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -28,18 +29,36 @@ class DebuggerScreen extends Screen {
 class DebuggerScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) {
+      final theme = Theme.of(context);
+      final textStyle = Theme.of(context)
+          .textTheme
+          .headline
+          .copyWith(color: theme.accentColor);
+      return Center(
+        child: Text(
+          'The debugger screen is only available on web.',
+          style: textStyle,
+        ),
+      );
+    }
+
     // Don't build this in const because compile time const evaluation
     // will fail on non-web apps.
+    // TODO(djshuckerow): Follow up on this: if this code won't compile
+    // on desktop as a const, then the constructor shouldn't be const.
+    // ignore:prefer_const_constructors
+    final webView = HtmlElementView(
+      viewType: 'DebuggerFlutterPlugin',
+    );
+
+    // Wrap the content with an EagerGestureRecognizer to pass all mouse
+    // events to the web view.
     return RawGestureDetector(
       gestures: {
         EagerGestureRecognizer: _EagerGestureFactory(PointerDeviceKind.mouse),
       },
-      // TODO(djshuckerow): Follow up on this: if this code won't compile
-      // on desktop as a const, then the constructor shouldn't be const.
-      // ignore:prefer_const_constructors
-      child: HtmlElementView(
-        viewType: 'DebuggerFlutterPlugin',
-      ),
+      child: webView,
     );
   }
 }

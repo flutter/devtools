@@ -38,8 +38,10 @@ class DebuggerHtmlPlugin {
     // TODO(djshuckerow): Remove this 'ignore' after the APIs match between
     // flutter and web.
     // ignore:undefined_prefixed_name
-    web_ui.platformViewRegistry
-        .registerViewFactory('DebuggerFlutterPlugin', instance.build);
+    web_ui.platformViewRegistry.registerViewFactory(
+      'DebuggerFlutterPlugin',
+      instance.build,
+    );
   }
 
   /// Builds the html content of the debugger plugin.

@@ -70,7 +70,7 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.timeline,
               const PerformanceScreen(),
               EmptyScreen.memory,
-              if (kIsWeb) const DebuggerScreen(),
+              const DebuggerScreen(),
               EmptyScreen.logging,
               const InfoScreen(),
             ],
