@@ -6,7 +6,6 @@
 // that are only available in the web implementation of dart:ui.
 import 'dart:ui' as web_ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/1258): switch to dart:html
