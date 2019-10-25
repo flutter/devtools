@@ -219,18 +219,20 @@ class _SplitState extends State<Split> {
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
-    final spacerFraction = isHorizontal
-        ? Split.dividerMainAxisSize / width
-        : Split.dividerMainAxisSize / height;
+    // The fraction of the layout the divider needs to take up from each child.
+    final dividerFraction =
+        isHorizontal ? halfDivider / width : halfDivider / height;
 
     void updateSpacing(DragUpdateDetails dragDetails) {
       final delta = dragDetails.delta;
       final fractionalDelta =
           isHorizontal ? delta.dx / width : delta.dy / height;
       setState(() {
+        // Update the fraction of space consumed by the children,
+        // being sure not to allocate any of them negative space.
         firstFraction = max(
-          spacerFraction,
-          min(1.0 - spacerFraction, firstFraction + fractionalDelta),
+          dividerFraction,
+          min(1.0 - dividerFraction, firstFraction + fractionalDelta),
         );
       });
     }
