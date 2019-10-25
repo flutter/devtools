@@ -29,12 +29,9 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 /// * [InspectorTree], which uses this class to display each node in the in
 ///   inspector tree.
 class DiagnosticsNodeDescription extends StatelessWidget {
-  const DiagnosticsNodeDescription(this.diagnostic,
-                                   {this.debugLayoutModeEnabled});
+  const DiagnosticsNodeDescription(this.diagnostic);
 
   final RemoteDiagnosticsNode diagnostic;
-
-  final ValueNotifier<bool> debugLayoutModeEnabled;
 
   Widget _toFlutterIcon(DevToolsIcon icon) {
     return Padding(
