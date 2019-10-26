@@ -213,7 +213,45 @@ void main() {
       });
     });
 
-    group('resizes contents', () {});
+    group('resizes contents', () {
+      testWidgets('in a horizontal layout', (WidgetTester tester) async {
+        buildSplitAndChildren(Axis.horizontal, initialFirstFraction: 0.0);
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 300.0, height: 300.0, child: _split),
+          ),
+        ));
+        expect(tester.element(find.byWidget(_w1)).size, const Size(0, 300));
+        expect(tester.element(find.byWidget(_w2)).size, const Size(290, 300));
+
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 200.0, height: 200.0, child: _split),
+          ),
+        ));
+        expect(tester.element(find.byWidget(_w1)).size, const Size(0, 200));
+        expect(tester.element(find.byWidget(_w2)).size, const Size(190, 200));
+      });
+
+      testWidgets('in a vertical layout', (WidgetTester tester) async {
+        buildSplitAndChildren(Axis.vertical, initialFirstFraction: 0.0);
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 300.0, height: 300.0, child: _split),
+          ),
+        ));
+        expect(tester.element(find.byWidget(_w1)).size, const Size(300, 0));
+        expect(tester.element(find.byWidget(_w2)).size, const Size(300, 290));
+
+        await tester.pumpWidget(wrap(
+          Center(
+            child: SizedBox(width: 200.0, height: 200.0, child: _split),
+          ),
+        ));
+        expect(tester.element(find.byWidget(_w1)).size, const Size(200, 0));
+        expect(tester.element(find.byWidget(_w2)).size, const Size(200, 190));
+      });
+    });
   });
 }
 
