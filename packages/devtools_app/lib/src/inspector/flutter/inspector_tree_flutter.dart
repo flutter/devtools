@@ -12,8 +12,6 @@ import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
-import 'layout_models.dart';
-import 'layout_tab.dart';
 import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
@@ -86,19 +84,22 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeControllerFlutter extends Object
     with InspectorTreeController, InspectorTreeFixedRowHeightController {
+
+  // Controller for controlling custom animation in the Tree
+  AnimationController animationController;
+
   /// Client the controller notifies to trigger changes to the UI.
-  InspectorControllerClient get client => _client;
-  InspectorControllerClient _client;
+  List<InspectorControllerClient> _clients = [];
 
-  set client(InspectorControllerClient value) {
-    if (_client == value) return;
-    // Do not set a new client if there is still an old client.
-    assert(value == null || _client == null);
-    _client = value;
+  void addClient(InspectorControllerClient client) {
+    config.onClientActiveChange(true);
+    _clients ??= [];
+    _clients.add(client);
+  }
 
-    if (config.onClientActiveChange != null) {
-      config.onClientActiveChange(value != null);
-    }
+  bool removeClient(InspectorControllerClient client) {
+    config.onClientActiveChange(false);
+    return _clients.remove(client);
   }
 
   @override
@@ -120,13 +121,15 @@ class InspectorTreeControllerFlutter extends Object
 
   @override
   void scrollToRect(Rect targetRect) {
-    client?.scrollToRect(targetRect);
+    for (var client in _clients)
+      client.scrollToRect(targetRect);
   }
 
   @override
   void setState(VoidCallback fn) {
     fn();
-    client?.onChanged();
+    for (var client in _clients)
+      client.onChanged();
   }
 
   /// Width each row in the tree should have ignoring its indent.
@@ -152,14 +155,19 @@ class InspectorTreeControllerFlutter extends Object
     return _maxIndent;
   }
 
-  final ValueNotifier<bool> isDebugLayoutSummaryEnabled = ValueNotifier(false);
+  bool get isDebugLayoutSummaryEnabled => _isDebugLayoutSummaryEnabled;
+  bool _isDebugLayoutSummaryEnabled = false;
 
   void toggleDebugLayoutSummaryEnabled() {
-    isDebugLayoutSummaryEnabled.value = !isDebugLayoutSummaryEnabled.value;
+    _isDebugLayoutSummaryEnabled = !_isDebugLayoutSummaryEnabled;
+    if (animationController == null) return;
+    if (_isDebugLayoutSummaryEnabled)
+      animationController.forward();
+    else
+      animationController.reverse();
   }
 
-  // TODO(albertusangga): Move this flag to InspectorController instead?
-  final bool isExperimentalStoryOfLayoutEnabled = false;
+  static const bool isExperimentalStoryOfLayoutEnabled = true;
 }
 
 abstract class InspectorControllerClient {
@@ -169,7 +177,10 @@ abstract class InspectorControllerClient {
 }
 
 class InspectorTree extends StatefulWidget {
-  const InspectorTree({Key key, this.controller}) : super(key: key);
+  const InspectorTree({
+    Key key,
+    this.controller,
+  }) : super(key: key);
 
   final InspectorTreeControllerFlutter controller;
 
@@ -178,7 +189,13 @@ class InspectorTree extends StatefulWidget {
 }
 
 class _InspectorTreeState extends State<InspectorTree>
-    implements InspectorControllerClient {
+    with
+        SingleTickerProviderStateMixin,
+        // AutomaticKeepAlive is necessary so that
+        //   the tree does not get recreated when we switch tabs
+        AutomaticKeepAliveClientMixin<InspectorTree>
+    implements
+        InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);
   final slowAnimationDuration = const Duration(milliseconds: 300);
 
@@ -190,6 +207,9 @@ class _InspectorTreeState extends State<InspectorTree>
   Future<void> currentAnimateY;
   Rect currentAnimateTarget;
 
+  // fade-in or fade-out animation for Constraints when toggling Show Constraints button
+  AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();
@@ -197,14 +217,20 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     _scrollControllerY.addListener(_onScrollYChange);
     _bindToController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
-    controller?.client = null;
+    controller?.removeClient(this);
+    controller?.animationController = null;
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
+    _animationController.dispose();
   }
 
   void _onScrollYChange() {
@@ -332,7 +358,8 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    controller?.client = this;
+    controller?.addClient(this);
+    controller?.animationController = _animationController;
   }
 
   @override
@@ -342,6 +369,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (controller == null) {
       // Indicate the tree is loading.
       return const Center(child: CircularProgressIndicator());
@@ -374,6 +402,9 @@ class _InspectorTreeState extends State<InspectorTree>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 final _defaultPaint = Paint()
@@ -508,28 +539,14 @@ class InspectorRowContent extends StatelessWidget {
       ),
     ];
 
-    if (controller?.isExperimentalStoryOfLayoutEnabled ?? false) {
-      if (node.diagnostic?.isFlex == true)
+    if (InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled) {
+      if (controller.animationController != null)
         children.add(
-          Container(
-            margin: const EdgeInsets.only(left: 4.0),
-            child: InkWell(
-              child: Icon(Icons.info, size: 16.0),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  child: StoryOfYourFlexWidget(
-                    diagnostic: node?.diagnostic,
-                    properties:
-                        FlexProperties.fromJson(node?.diagnostic?.flexDetails),
-                  ),
-                );
-              },
-            ),
+          ConstraintsDescription(
+            animationController: controller.animationController,
+            diagnostic: node.diagnostic,
           ),
         );
-      children.add(ConstraintsDescription(
-          node.diagnostic, controller.isDebugLayoutSummaryEnabled));
     }
 
     return CustomPaint(

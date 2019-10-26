@@ -104,7 +104,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get warning => getBooleanMember('warning', false);
 
-  Map<String, Object> get flexDetails => isFlex ? json['flex'] : null;
+  Map<String, Object> get renderObject => json['renderObject'];
 
   @override
   bool operator ==(dynamic other) {

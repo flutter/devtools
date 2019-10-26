@@ -21,6 +21,7 @@ import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/theme.dart';
 import 'diagnostics_node.dart';
+import 'inspector_controller.dart';
 import 'inspector_service.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
@@ -413,6 +414,9 @@ abstract class InspectorTreeController {
       _root = node;
     });
   }
+
+  // TODO(albertusangga) Stop exposing inspectorController directly
+  InspectorController inspectorController;
 
   RemoteDiagnosticsNode subtreeRoot; // Optional.
 

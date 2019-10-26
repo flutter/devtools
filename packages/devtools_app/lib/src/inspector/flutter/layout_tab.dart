@@ -1,5 +1,5 @@
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
@@ -9,41 +9,114 @@ import 'layout_models.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController(
-      {this.detailsTree, this.controller, Key key})
+      {this.detailsTree, this.summaryTreeController, Key key})
       : super(key: key);
 
-  final InspectorTreeControllerFlutter controller;
+  final InspectorTreeControllerFlutter summaryTreeController;
   final Widget detailsTree;
 
   @override
   Widget build(BuildContext context) {
     final enableStoryOfLayout =
-        controller?.isExperimentalStoryOfLayoutEnabled ?? false;
-    final tabs = <Widget>[
+        InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled;
+    final tabs = <Tab>[
       const Tab(text: 'Details Tree'),
       if (enableStoryOfLayout) const Tab(text: 'Layout Details')
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (enableStoryOfLayout) Container(),
+      if (enableStoryOfLayout)
+        LayoutDetailsTab(controller: summaryTreeController),
     ];
-    return DefaultTabController(
-      length: tabs.length,
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            isScrollable: false,
-            labelPadding: const EdgeInsets.only(right: 10.0, left: 10.0),
-            tabs: tabs,
-          ),
-          Expanded(
-            child: TabBarView(
-              children: tabViews,
+    final focusColor = Theme.of(context).focusColor;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: focusColor),
+      ),
+      child: DefaultTabController(
+        length: tabs.length,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Container(
+                color: Theme.of(context).focusColor,
+                child: TabBar(
+                  tabs: tabs,
+                  isScrollable: true,
+                ),
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: TabBarView(
+                children: tabViews,
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class LayoutDetailsTab extends StatefulWidget {
+  const LayoutDetailsTab({Key key, this.controller}) : super(key: key);
+
+  final InspectorTreeControllerFlutter controller;
+
+  @override
+  _LayoutDetailsTabState createState() => _LayoutDetailsTabState();
+}
+
+class _LayoutDetailsTabState extends State<LayoutDetailsTab>
+    with AutomaticKeepAliveClientMixin<LayoutDetailsTab>
+    implements InspectorControllerClient {
+  InspectorTreeControllerFlutter get controller => widget.controller;
+
+  RemoteDiagnosticsNode get selected => controller.selection?.diagnostic;
+
+  // Lifecycle hooks
+  @override
+  void initState() {
+    super.initState();
+    controller.addClient(this);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeClient(this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (selected == null)
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    if (!selected.isFlex)
+      return Container(
+        child: const Text('TODOs for Non Flex widget'),
+      );
+    return StoryOfYourFlexWidget(
+      diagnostic: selected,
+      properties: FlexProperties.fromJson(selected.renderObject),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void onChanged() {
+    setState(() {});
+  }
+
+  @override
+  void scrollToRect(Rect rect) {
+    // do nothing since we are not doing scrolling here
   }
 }
 
@@ -119,8 +192,9 @@ class StoryOfYourFlexWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: Container(
-                            margin: const EdgeInsets.all(16.0),
-                            child: flexWidget),
+                          margin: const EdgeInsets.all(16.0),
+                          child: flexWidget,
+                        ),
                       ),
                     ],
                   ),

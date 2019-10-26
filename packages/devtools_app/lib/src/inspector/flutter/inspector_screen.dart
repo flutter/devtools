@@ -119,8 +119,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 900,
               ),
             ),
-            if (summaryTreeController?.isExperimentalStoryOfLayoutEnabled ??
-                false)
+            if (InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled)
               Container(
                 margin: const EdgeInsets.only(left: 8.0),
                 child: OutlineButton(
@@ -144,7 +143,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               Expanded(
                 child: InspectorDetailsTabController(
                   detailsTree: detailsTree,
-                  controller: detailsTreeController,
+                  summaryTreeController: summaryTreeController,
                 ),
               ),
             ],
@@ -238,6 +237,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         treeType: FlutterTreeType.widget,
         onExpandCollapseSupported: _onExpandCollapseSupported,
       );
+      summaryTreeController.inspectorController = inspectorController;
+      detailsTreeController.inspectorController = inspectorController;
 
       // TODO(jacobr): move this notice display to once a day.
       if (!displayedWidgetTrackingNotice) {
