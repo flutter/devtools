@@ -218,39 +218,45 @@ class _SplitState extends State<Split> {
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
+    final axisSize = isHorizontal ? width : height;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
     // The fraction of the layout the divider needs to take up from each child.
-    final halfDividerFraction =
-        isHorizontal ? halfDivider / width : halfDivider / height;
+    final halfDividerFraction = halfDivider / axisSize;
+
+    final sanitizedFirstFraction =
+        firstFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
+    final sanitizedSecondFraction =
+        secondFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
+
+    final firstSize = axisSize * sanitizedFirstFraction - halfDivider;
+    final secondSize = axisSize * sanitizedSecondFraction - halfDivider;
 
     void updateSpacing(DragUpdateDetails dragDetails) {
-      final delta = dragDetails.delta;
-      final fractionalDelta =
-          isHorizontal ? delta.dx / width : delta.dy / height;
+      final delta = isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
+      final fractionalDelta = delta / axisSize;
       setState(() {
         // Update the fraction of space consumed by the children,
         // being sure not to allocate any of them negative space.
-        firstFraction = max(
-          halfDividerFraction,
-          min(1.0 - halfDividerFraction, firstFraction + fractionalDelta),
-        );
+        firstFraction += fractionalDelta;
+        firstFraction = firstFraction.clamp(0.0, 1.0);
       });
     }
 
     final children = [
       SizedBox(
-        width: isHorizontal ? firstFraction * width - halfDivider : width,
-        height: isHorizontal ? height : firstFraction * height - halfDivider,
+        width: isHorizontal ? firstSize : width,
+        height: isHorizontal ? height : firstSize,
         child: widget.firstChild,
       ),
-      SizedBox(
-        width: isHorizontal ? Split.dividerMainAxisSize : width,
-        height: isHorizontal ? height : Split.dividerMainAxisSize,
-        child: Center(
-          child: GestureDetector(
-            onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
-            onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
-            child: const Text(
+      GestureDetector(
+        key: widget.dividerKey,
+        onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
+        onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
+        child: SizedBox(
+          width: isHorizontal ? Split.dividerMainAxisSize : width,
+          height: isHorizontal ? height : Split.dividerMainAxisSize,
+          child: const Center(
+            child: Text(
               ':::::::',
               textAlign: TextAlign.center,
             ),
@@ -258,8 +264,8 @@ class _SplitState extends State<Split> {
         ),
       ),
       SizedBox(
-        width: isHorizontal ? secondFraction * width - halfDivider : width,
-        height: isHorizontal ? height : secondFraction * height - halfDivider,
+        width: isHorizontal ? secondSize : width,
+        height: isHorizontal ? height : secondSize,
         child: widget.secondChild,
       ),
     ];
