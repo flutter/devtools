@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
-import '../../flutter/inspector/diagnostics.dart';
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
+import 'diagnostics.dart';
 import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
