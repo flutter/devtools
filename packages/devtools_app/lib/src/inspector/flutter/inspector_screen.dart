@@ -18,8 +18,8 @@ import '../../ui/icons.dart';
 import '../flutter_widget.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
+import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
-import 'layout_tab.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen() : super('Info');
