@@ -27,15 +27,14 @@ class ConstraintsDescription extends AnimatedWidget {
     if (diagnostic?.shouldHighlightConstraints ?? false) {
       textStyle = textStyle.merge(textStyleForLevel(DiagnosticLevel.warning));
     }
-    final child =  Container(
+    final child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Text(
         '${diagnostic.constraints}',
         style: textStyle,
       ),
     );
-    if (listenable == null)
-      return child;
+    if (listenable == null) return child;
     return FadeTransition(
       opacity: listenable,
       child: child,

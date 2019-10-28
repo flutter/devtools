@@ -8,12 +8,18 @@ import 'inspector_tree_flutter.dart';
 import 'layout_models.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
-  const InspectorDetailsTabController(
-      {this.detailsTree, this.summaryTreeController, Key key})
-      : super(key: key);
+  const InspectorDetailsTabController({
+    this.detailsTree,
+    this.expandCollapseButtons,
+    this.expandCollapseSupported,
+    this.summaryTreeController,
+    Key key,
+  }) : super(key: key);
 
-  final InspectorTreeControllerFlutter summaryTreeController;
+  final bool expandCollapseSupported;
   final Widget detailsTree;
+  final Widget expandCollapseButtons;
+  final InspectorTreeControllerFlutter summaryTreeController;
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +45,22 @@ class InspectorDetailsTabController extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Container(
-                color: Theme.of(context).focusColor,
-                child: TabBar(
-                  tabs: tabs,
-                  isScrollable: true,
-                ),
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    color: Theme.of(context).focusColor,
+                    child: TabBar(
+                      tabs: tabs,
+                      isScrollable: true,
+                    ),
+                  ),
+                  if (expandCollapseSupported)
+                    Expanded(
+                      child: expandCollapseButtons,
+                    ),
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
               ),
             ),
             Expanded(

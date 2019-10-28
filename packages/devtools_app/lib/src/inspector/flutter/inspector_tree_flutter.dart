@@ -84,7 +84,6 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeControllerFlutter extends Object
     with InspectorTreeController, InspectorTreeFixedRowHeightController {
-
   // Controller for controlling custom animation in the Tree
   AnimationController animationController;
 
@@ -121,15 +120,13 @@ class InspectorTreeControllerFlutter extends Object
 
   @override
   void scrollToRect(Rect targetRect) {
-    for (var client in _clients)
-      client.scrollToRect(targetRect);
+    for (var client in _clients) client.scrollToRect(targetRect);
   }
 
   @override
   void setState(VoidCallback fn) {
     fn();
-    for (var client in _clients)
-      client.onChanged();
+    for (var client in _clients) client.onChanged();
   }
 
   /// Width each row in the tree should have ignoring its indent.

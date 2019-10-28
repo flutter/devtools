@@ -98,7 +98,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         InspectorTree(
           controller: detailsTreeController,
         ),
-        if (_expandCollapseSupported) _expandCollapseButtons()
       ],
     );
 
@@ -119,7 +118,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 900,
               ),
             ),
-            if (InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled)
+            if (InspectorTreeControllerFlutter
+                .isExperimentalStoryOfLayoutEnabled)
               Container(
                 margin: const EdgeInsets.only(left: 8.0),
                 child: OutlineButton(
@@ -144,6 +144,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 child: InspectorDetailsTabController(
                   detailsTree: detailsTree,
                   summaryTreeController: summaryTreeController,
+                  expandCollapseSupported: _expandCollapseSupported,
+                  expandCollapseButtons: _expandCollapseButtons(),
                 ),
               ),
             ],
