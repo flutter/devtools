@@ -1,6 +1,10 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 
-import 'package:devtools_app/src/inspector/flutter/data_models.dart';
+import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 

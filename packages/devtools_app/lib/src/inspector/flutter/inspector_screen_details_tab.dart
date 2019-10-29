@@ -1,10 +1,14 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
-import 'data_models.dart';
+import 'inspector_data_models.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
@@ -23,15 +27,15 @@ class InspectorDetailsTabController extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enableStoryOfLayout =
-        InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled;
+    final enableExperimentalStoryOfLayout =
+        InspectorTreeControllerFlutter.enableExperimentalStoryOfLayout;
     final tabs = <Tab>[
       const Tab(text: 'Details Tree'),
-      if (enableStoryOfLayout) const Tab(text: 'Layout Details')
+      if (enableExperimentalStoryOfLayout) const Tab(text: 'Layout Details')
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (enableStoryOfLayout)
+      if (enableExperimentalStoryOfLayout)
         LayoutDetailsTab(controller: summaryTreeController),
     ];
     final focusColor = Theme.of(context).focusColor;

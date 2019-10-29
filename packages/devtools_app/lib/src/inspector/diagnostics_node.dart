@@ -81,9 +81,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get constraints => json['constraints'];
 
-  bool get shouldHighlightConstraints =>
-      getBooleanMember('shouldHighlightConstraints', false);
-
   bool get warning => getBooleanMember('warning', false);
 
   Map<String, Object> get renderObject => json['renderObject'];
@@ -147,7 +144,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticsTreeStyle _style;
-
   set style(DiagnosticsTreeStyle style) {
     _style = style;
   }

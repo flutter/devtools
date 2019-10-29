@@ -21,7 +21,6 @@ import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/theme.dart';
 import 'diagnostics_node.dart';
-import 'inspector_controller.dart';
 import 'inspector_service.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
@@ -94,7 +93,9 @@ abstract class InspectorTreeNodeRenderBuilder<
     @required this.level,
     @required this.treeStyle,
   });
+
   void appendText(String text, TextStyle textStyle);
+
   void addIcon(DevToolsIcon icon);
 
   final DiagnosticLevel level;
@@ -156,6 +157,7 @@ class InspectorTreeNode {
 
   bool get isDirty => _isDirty;
   bool _isDirty = true;
+
   set isDirty(bool dirty) {
     if (dirty) {
       _isDirty = true;
@@ -198,6 +200,7 @@ class InspectorTreeNode {
   Iterable<InspectorTreeNode> get children => _children;
 
   bool get isCreatedByLocalProject => _diagnostic.isCreatedByLocalProject;
+
   bool get isProperty => diagnostic == null || diagnostic.isProperty;
 
   bool get isExpanded => _isExpanded;
@@ -409,14 +412,12 @@ abstract class InspectorTreeController {
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
+
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
     });
   }
-
-  // TODO(albertusangga) Stop exposing inspectorController directly
-  InspectorController inspectorController;
 
   RemoteDiagnosticsNode subtreeRoot; // Optional.
 
@@ -425,6 +426,7 @@ abstract class InspectorTreeController {
 
   InspectorTreeConfig get config => _config;
   InspectorTreeConfig _config;
+
   set config(InspectorTreeConfig value) {
     // Only allow setting config once.
     assert(_config == null);

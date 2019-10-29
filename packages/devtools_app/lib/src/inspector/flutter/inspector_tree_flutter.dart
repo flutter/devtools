@@ -164,7 +164,7 @@ class InspectorTreeControllerFlutter extends Object
       animationController.reverse();
   }
 
-  static const bool isExperimentalStoryOfLayoutEnabled = false;
+  static const bool enableExperimentalStoryOfLayout = false;
 }
 
 abstract class InspectorControllerClient {
@@ -185,14 +185,13 @@ class InspectorTree extends StatefulWidget {
   State<InspectorTree> createState() => _InspectorTreeState();
 }
 
+// AutomaticKeepAlive is necessary so that
+//   the tree does not get recreated when we switch tabs
 class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
-        // AutomaticKeepAlive is necessary so that
-        //   the tree does not get recreated when we switch tabs
         AutomaticKeepAliveClientMixin<InspectorTree>
-    implements
-        InspectorControllerClient {
+    implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);
   final slowAnimationDuration = const Duration(milliseconds: 300);
 
@@ -504,48 +503,6 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
-    final children = <Widget>[
-      node.showExpandCollapse
-          ? InkWell(
-              onTap: onToggle,
-              child: RotationTransition(
-                turns: expandAnimation,
-                child: Icon(
-                  Icons.expand_more,
-                  size: 16.0,
-                ),
-              ),
-            )
-          : const SizedBox(width: 16.0, height: 16.0),
-      DecoratedBox(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-        ),
-        child: InkWell(
-          onTap: () {
-            controller.onSelectRow(row);
-          },
-          child: Container(
-            height: rowHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: DiagnosticsNodeDescription(
-              node.diagnostic,
-            ),
-          ),
-        ),
-      ),
-    ];
-
-    if (InspectorTreeControllerFlutter.isExperimentalStoryOfLayoutEnabled) {
-      if (controller.animationController != null)
-        children.add(
-          ConstraintsDescription(
-            animationController: controller.animationController,
-            diagnostic: node.diagnostic,
-          ),
-        );
-    }
-
     return CustomPaint(
       painter: _RowPainter(row, controller),
       size: Size(currentX, rowHeight),
@@ -555,7 +512,44 @@ class InspectorRowContent extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             textBaseline: TextBaseline.alphabetic,
-            children: children,
+            children: [
+              node.showExpandCollapse
+                  ? InkWell(
+                      onTap: onToggle,
+                      child: RotationTransition(
+                        turns: expandAnimation,
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 16.0,
+                        ),
+                      ))
+                  : const SizedBox(width: 16.0, height: 16.0),
+              SizedOverflowBox(
+                size: Size(controller.rowWidth, rowHeight),
+                alignment: Alignment.centerLeft,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      controller.onSelectRow(row);
+                    },
+                    child: Container(
+                        height: rowHeight,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DiagnosticsNodeDescription(node.diagnostic)),
+                  ),
+                ),
+              ),
+              if (InspectorTreeControllerFlutter
+                      .enableExperimentalStoryOfLayout &&
+                  controller.animationController != null)
+                ConstraintsDescription(
+                  animationController: controller.animationController,
+                  diagnostic: node.diagnostic,
+                ),
+            ],
           ),
         ),
       ),

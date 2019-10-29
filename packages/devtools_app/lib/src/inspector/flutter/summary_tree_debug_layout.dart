@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
-import 'data_models.dart';
+import 'inspector_data_models.dart';
 
 class ConstraintsDescription extends AnimatedWidget {
   const ConstraintsDescription({
@@ -32,8 +32,12 @@ class ConstraintsDescription extends AnimatedWidget {
     if (constraints is BoxConstraints) {
       final textSpans = <TextSpan>[const TextSpan(text: 'BoxConstraints(')];
       if (!constraints.hasBoundedHeight && !constraints.hasBoundedWidth) {
-        textSpans.add(TextSpan(
-            text: 'unconstrained', style: inspector_text_styles.warning));
+        textSpans.add(
+          TextSpan(
+            text: 'unconstrained',
+            style: inspector_text_styles.warning,
+          ),
+        );
       } else {
         textSpans.add(
           !constraints.hasBoundedWidth
