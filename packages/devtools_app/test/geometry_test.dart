@@ -64,7 +64,7 @@ void main() {
 
     test('intersection', () {
       final line =
-      HorizontalLineSegment(const Offset(10, 10), const Offset(20, 10));
+          HorizontalLineSegment(const Offset(10, 10), const Offset(20, 10));
       var rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
       expect(line.crossAxisIntersects(rect), isFalse);
       expect(line.intersects(rect), isFalse);
