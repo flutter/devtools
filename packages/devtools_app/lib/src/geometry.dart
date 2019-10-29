@@ -1,5 +1,7 @@
 import 'ui/fake_flutter/fake_flutter.dart';
 
+// TODO(kenz): consolidate the logic between [VerticalLineSegment] and
+// [HorizontalLineSegment] by using [LineSegment] and switching on the main axis
 abstract class LineSegment {
   LineSegment(this.start, this.end);
 
@@ -25,7 +27,8 @@ abstract class LineSegment {
   String toString() => '$start --> $end';
 }
 
-class HorizontalLineSegment extends LineSegment implements Comparable {
+class HorizontalLineSegment extends LineSegment
+    implements Comparable<HorizontalLineSegment> {
   HorizontalLineSegment(Offset start, Offset end)
       : assert(start.dy == end.dy),
         super(start, end);
@@ -36,8 +39,7 @@ class HorizontalLineSegment extends LineSegment implements Comparable {
   bool crossAxisIntersects(Rect rect) => y >= rect.top && y <= rect.bottom;
 
   @override
-  int compareTo(dynamic other) {
-    assert(other is HorizontalLineSegment);
+  int compareTo(HorizontalLineSegment other) {
     final compare = y.compareTo(other.y);
     if (compare == 0) {
       return start.dx.compareTo(other.start.dx);
@@ -46,7 +48,8 @@ class HorizontalLineSegment extends LineSegment implements Comparable {
   }
 }
 
-class VerticalLineSegment extends LineSegment implements Comparable {
+class VerticalLineSegment extends LineSegment
+    implements Comparable<VerticalLineSegment> {
   VerticalLineSegment(Offset start, Offset end)
       : assert(start.dx == end.dx),
         super(start, end);
@@ -57,8 +60,7 @@ class VerticalLineSegment extends LineSegment implements Comparable {
   bool crossAxisIntersects(Rect rect) => x >= rect.left && x <= rect.right;
 
   @override
-  int compareTo(dynamic other) {
-    assert(other is VerticalLineSegment);
+  int compareTo(VerticalLineSegment other) {
     final compare = x.compareTo(other.x);
     if (compare == 0) {
       return start.dy.compareTo(other.start.dy);
