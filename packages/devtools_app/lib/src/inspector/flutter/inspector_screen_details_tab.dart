@@ -161,7 +161,6 @@ class StoryOfYourFlexWidget extends StatelessWidget {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: theme.backgroundColor,
                     border: Border.all(
                       color: theme.primaryColor,
                       width: 1.0,

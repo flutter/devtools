@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../enum_deserializer.dart';
+import '../enum_utils.dart';
 
 const Type boxConstraintsType = BoxConstraints;
 
@@ -42,21 +42,22 @@ class RenderFlexProperties {
   final TextDirection textDirection;
   final VerticalDirection verticalDirection;
   final TextBaseline textBaseline;
+
   // TODO(albertusangga) Add size & constraints in this class
 
-  static final directionDeserializer = EnumDeserializer<Axis>(Axis.values);
+  static final directionDeserializer = EnumUtils<Axis>(Axis.values);
   static final mainAxisAlignmentDeserializer =
-      EnumDeserializer<MainAxisAlignment>(MainAxisAlignment.values);
+      EnumUtils<MainAxisAlignment>(MainAxisAlignment.values);
   static final mainAxisSizeDeserializer =
-      EnumDeserializer<MainAxisSize>(MainAxisSize.values);
+      EnumUtils<MainAxisSize>(MainAxisSize.values);
   static final crossAxisAlignmentDeserializer =
-      EnumDeserializer<CrossAxisAlignment>(CrossAxisAlignment.values);
+      EnumUtils<CrossAxisAlignment>(CrossAxisAlignment.values);
   static final textDirectionDeserializer =
-      EnumDeserializer<TextDirection>(TextDirection.values);
+      EnumUtils<TextDirection>(TextDirection.values);
   static final verticalDirectionDeserializer =
-      EnumDeserializer<VerticalDirection>(VerticalDirection.values);
+      EnumUtils<VerticalDirection>(VerticalDirection.values);
   static final textBaselineDeserializer =
-      EnumDeserializer<TextBaseline>(TextBaseline.values);
+      EnumUtils<TextBaseline>(TextBaseline.values);
 
   static RenderFlexProperties fromJson(Map<String, Object> renderObjectJson) {
     final List<dynamic> properties = renderObjectJson['properties'];
@@ -71,17 +72,16 @@ class RenderFlexProperties {
     );
 
     return RenderFlexProperties(
-      direction: directionDeserializer.deserialize(data['direction']),
+      direction: directionDeserializer.getEnum(data['direction']),
       mainAxisAlignment:
-          mainAxisAlignmentDeserializer.deserialize(data['mainAxisAlignment']),
-      mainAxisSize: mainAxisSizeDeserializer.deserialize(data['mainAxisSize']),
-      crossAxisAlignment: crossAxisAlignmentDeserializer
-          .deserialize(data['crossAxisAlignment']),
-      textDirection:
-          textDirectionDeserializer.deserialize(data['textDirection']),
+          mainAxisAlignmentDeserializer.getEnum(data['mainAxisAlignment']),
+      mainAxisSize: mainAxisSizeDeserializer.getEnum(data['mainAxisSize']),
+      crossAxisAlignment:
+          crossAxisAlignmentDeserializer.getEnum(data['crossAxisAlignment']),
+      textDirection: textDirectionDeserializer.getEnum(data['textDirection']),
       verticalDirection:
-          verticalDirectionDeserializer.deserialize(data['verticalDirection']),
-      textBaseline: textBaselineDeserializer.deserialize(data['textBaseline']),
+          verticalDirectionDeserializer.getEnum(data['verticalDirection']),
+      textBaseline: textBaselineDeserializer.getEnum(data['textBaseline']),
     );
   }
 

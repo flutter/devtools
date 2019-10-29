@@ -11,25 +11,14 @@ import 'package:vm_service/vm_service.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
-import 'enum_deserializer.dart';
+import 'enum_utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
-Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
-    inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
+final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
-final Map<String, DiagnosticLevel> nameToDiagnosticLevel =
-    EnumDeserializer<DiagnosticLevel>(DiagnosticLevel.values).lookupTable;
-
-final Map<DiagnosticLevel, String> diagnosticLevelToName =
-    _invertMap(nameToDiagnosticLevel);
-
-final Map<String, DiagnosticsTreeStyle> nameToTreeStyle =
-    EnumDeserializer<DiagnosticsTreeStyle>(DiagnosticsTreeStyle.values)
-        .lookupTable;
-
-final Map<DiagnosticsTreeStyle, String> treeStyleToName =
-    _invertMap(nameToTreeStyle);
+final treeStyleUtils =
+    EnumUtils<DiagnosticsTreeStyle>(DiagnosticsTreeStyle.values);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -142,6 +131,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticsTreeStyle _style;
+
   set style(DiagnosticsTreeStyle style) {
     _style = style;
   }
@@ -348,7 +338,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = nameToDiagnosticLevel[value];
+    final level = diagnosticLevelUtils.getEnum(value);
     assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
@@ -362,7 +352,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = nameToTreeStyle[value];
+    final style = treeStyleUtils.getEnum(value);
     assert(style != null);
     return style ?? defaultValue;
   }

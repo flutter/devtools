@@ -121,8 +121,8 @@ class InspectorTreeNodeRenderHtmlBuilder
   InspectorTreeNodeHtmlRender build() {
     // The html renderer does not know what its size is.
     final classes = [
-      'inspector-level-${diagnosticLevelToName[level]}',
-      'inspector-style-${treeStyleToName[treeStyle]}',
+      'inspector-level-${diagnosticLevelUtils.getName(level)}',
+      'inspector-style-${treeStyleUtils.getName(treeStyle)}',
     ];
     if (!allowWrap) {
       classes.add('inspector-no-wrap');
