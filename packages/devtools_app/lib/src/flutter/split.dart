@@ -23,12 +23,14 @@ class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   const Split({
     Key key,
-    this.axis,
-    this.firstChild,
-    this.secondChild,
+    @required this.axis,
+    @required this.firstChild,
+    @required this.secondChild,
     double initialFirstFraction,
   })  : initialFirstFraction = initialFirstFraction ?? 0.5,
         assert(axis != null),
+        assert(firstChild != null),
+        assert(secondChild != null),
         super(key: key);
 
   /// The main axis the children will lay out on.
@@ -89,20 +91,19 @@ class _SplitState extends State<Split> {
     final axisSize = isHorizontal ? width : height;
     final crossAxisSize = isHorizontal ? height : width;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
-    // The fraction of the layout the divider needs to take up from each child.
-    final halfDividerFraction = halfDivider / axisSize;
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    final sanitizedFirstFraction =
-        firstFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
-    final sanitizedSecondFraction =
-        secondFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
+    double firstSize = axisSize * firstFraction;
+    double secondSize = axisSize * secondFraction;
 
-    // Get the sizes for each child, with space set aside for the divider in
-    // the middle.
-    final firstSize = axisSize * sanitizedFirstFraction - halfDivider;
-    final secondSize = axisSize * sanitizedSecondFraction - halfDivider;
+    // Clamp the sizes to be sure there is enough space for the dividers.
+    firstSize = firstSize.clamp(halfDivider, axisSize - halfDivider);
+    secondSize = secondSize.clamp(halfDivider, axisSize - halfDivider);
+
+    // Remove space from each child to place the divider in the middle.
+    firstSize = firstSize - halfDivider;
+    secondSize = secondSize - halfDivider;
 
     void updateSpacing(DragUpdateDetails dragDetails) {
       final delta = isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
@@ -117,8 +118,10 @@ class _SplitState extends State<Split> {
 
     // TODO(https://github.com/flutter/flutter/issues/43747): use an icon.
     // The material icon for a drag handle is not currently available.
-    // This indicator is 3 lines running in the direction of the main axis,
-    //like a hamburger menu.
+    // For now, draw an indicator that is 3 lines running in the direction
+    // of the main axis, like a hamburger menu.
+    // TODO(https://github.com/flutter/devtools/issues/1265): update mouse
+    // to indicate that this is resizable.
     final dragIndicator = Flex(
       direction: isHorizontal ? Axis.vertical : Axis.horizontal,
       mainAxisSize: MainAxisSize.min,
