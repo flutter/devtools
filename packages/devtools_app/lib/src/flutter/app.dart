@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
@@ -13,8 +14,10 @@ import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
+import 'navigation.dart';
 import 'scaffold.dart';
 import 'screen.dart';
+import 'theme.dart';
 
 /// Top-level configuration for the app.
 @immutable
@@ -30,9 +33,12 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
+  ThemeData theme;
+
   @override
   void initState() {
     super.initState();
+    theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
   }
 
   /// Generates routes, separating the path from URL query parameters.
@@ -40,6 +46,20 @@ class DevToolsAppState extends State<DevToolsApp> {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
 
+    // Update the theme based on the query parameters.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // On desktop, don't change the theme on route changes.
+      if (!kIsWeb) return;
+      setState(() {
+        final themeQueryParameter = uri.queryParameters['theme'];
+        // We refer to the legacy theme to make sure the
+        // debugging page stays in-sync with the rest of the app.
+        devtools_theme.initializeTheme(themeQueryParameter);
+        theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
+      });
+    });
+
+    // Provide the appropriate page route.
     if (_routes.containsKey(path)) {
       return MaterialPageRoute(settings: settings, builder: _routes[path]);
     }
@@ -79,12 +99,6 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   @override
   Widget build(BuildContext context) {
-    final theme =
-        devtools_theme.isDarkTheme ? ThemeData.dark() : ThemeData.light();
-    // TODO(jacobr): determine whether to update the theme to match the
-    // devtools_theme or update devtools_theme to match the flutter theme.
-    // For example, to match the devtools_theme we would wrtie:
-    // theme.copyWith(backgroundColor: devtools_theme.defaultBackground);
     return MaterialApp(
       theme: theme,
       onGenerateRoute: _generateRoute,
@@ -159,7 +173,9 @@ class _InitializerState extends State<Initializer> {
         // If this route is on top and the app is not loaded, then we navigate to
         // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
-        Navigator.of(context).pushNamed('/connect');
+        Navigator.of(context).pushNamed(
+          routeNameWithQueryParams(context, '/connect'),
+        );
       }
     });
   }
