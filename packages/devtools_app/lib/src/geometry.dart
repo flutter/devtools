@@ -25,7 +25,7 @@ abstract class LineSegment {
   String toString() => '$start --> $end';
 }
 
-class HorizontalLineSegment extends LineSegment {
+class HorizontalLineSegment extends LineSegment implements Comparable {
   HorizontalLineSegment(Offset start, Offset end)
       : assert(start.dy == end.dy),
         super(start, end);
@@ -34,9 +34,19 @@ class HorizontalLineSegment extends LineSegment {
 
   @override
   bool crossAxisIntersects(Rect rect) => y >= rect.top && y <= rect.bottom;
+
+  @override
+  int compareTo(dynamic other) {
+    assert(other is HorizontalLineSegment);
+    final compare = y.compareTo(other.y);
+    if (compare == 0) {
+      return start.dx.compareTo(other.start.dx);
+    }
+    return compare;
+  }
 }
 
-class VerticalLineSegment extends LineSegment {
+class VerticalLineSegment extends LineSegment implements Comparable {
   VerticalLineSegment(Offset start, Offset end)
       : assert(start.dx == end.dx),
         super(start, end);
@@ -45,4 +55,14 @@ class VerticalLineSegment extends LineSegment {
 
   @override
   bool crossAxisIntersects(Rect rect) => x >= rect.left && x <= rect.right;
+
+  @override
+  int compareTo(dynamic other) {
+    assert(other is VerticalLineSegment);
+    final compare = x.compareTo(other.x);
+    if (compare == 0) {
+      return start.dy.compareTo(other.start.dy);
+    }
+    return compare;
+  }
 }

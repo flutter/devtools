@@ -44,6 +44,29 @@ void main() {
       expect(line.crossAxisIntersects(rect), isTrue);
       expect(line.intersects(rect), isFalse);
     });
+
+    test('compareTo', () {
+      final a = VerticalLineSegment(
+        const Offset(0.0, 0.0),
+        const Offset(0.0, 10.0),
+      );
+      final b = VerticalLineSegment(
+        const Offset(1.0, 0.0),
+        const Offset(1.0, 10.0),
+      );
+      final c = VerticalLineSegment(
+        const Offset(2.0, 0.0),
+        const Offset(2.0, 10.0),
+      );
+      final d = VerticalLineSegment(
+        const Offset(0.0, 11.0),
+        const Offset(0.0, 20.0),
+      );
+      expect(a.compareTo(b), equals(-1));
+      expect(a.compareTo(d), equals(-1));
+      expect(d.compareTo(b), equals(-1));
+      expect(c.compareTo(b), equals(1));
+    });
   });
 
   group('HorizontalLineSegment', () {
@@ -80,6 +103,29 @@ void main() {
       rect = const Rect.fromLTRB(25.0, 5.0, 30.0, 15.0);
       expect(line.crossAxisIntersects(rect), isTrue);
       expect(line.intersects(rect), isFalse);
+    });
+
+    test('compareTo', () {
+      final a = HorizontalLineSegment(
+        const Offset(0.0, 0.0),
+        const Offset(10.0, 0.0),
+      );
+      final b = HorizontalLineSegment(
+        const Offset(0.0, 1.0),
+        const Offset(10.0, 1.0),
+      );
+      final c = HorizontalLineSegment(
+        const Offset(0.0, 2.0),
+        const Offset(10.0, 2.0),
+      );
+      final d = HorizontalLineSegment(
+        const Offset(11.0, 0.0),
+        const Offset(20.0, 0.0),
+      );
+      expect(a.compareTo(b), equals(-1));
+      expect(a.compareTo(d), equals(-1));
+      expect(d.compareTo(b), equals(-1));
+      expect(c.compareTo(b), equals(1));
     });
   });
 }

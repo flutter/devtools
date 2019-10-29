@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
@@ -380,8 +381,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     }
 
     // Sort the lists in ascending order based on their cross axis coordinate.
-    verticalGuidelines.sort((a, b) => a.x.compareTo(b.x));
-    horizontalGuidelines.sort((a, b) => a.y.compareTo(b.y));
+    verticalGuidelines.sort();
+    horizontalGuidelines.sort();
   }
 
   @override
@@ -422,10 +423,14 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   }
 
   void _paintAsyncGuidelines(CanvasRenderingContext2D canvas, Rect visible) {
-    final firstVerticalGuidelineIndex =
-        _binarySearchForVerticalLineSegment(visible);
-    final firstHorizontalGuidelineIndex =
-        _binarySearchForHorizontalLineSegment(visible);
+    final firstVerticalGuidelineIndex = lowerBound(
+      verticalGuidelines,
+      VerticalLineSegment(visible.topLeft, visible.bottomLeft),
+    );
+    final firstHorizontalGuidelineIndex = lowerBound(
+      horizontalGuidelines,
+      HorizontalLineSegment(visible.topLeft, visible.topRight),
+    );
 
     // Only modify the canvas style if we have any guidelines to paint.
     if (firstHorizontalGuidelineIndex != -1 ||
@@ -476,61 +481,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
           ..stroke();
       }
     }
-  }
-
-  int _binarySearchForVerticalLineSegment(Rect rect) {
-    final LineSegmentSearchCondition shouldSearchFirstHalf =
-        (line, rect) => (line as VerticalLineSegment).x > rect.right;
-    final LineSegmentSearchCondition shouldSearchSecondHalf =
-        (line, rect) => (line as VerticalLineSegment).x < rect.left;
-    return _binarySearchForLineSegment(
-      verticalGuidelines,
-      rect,
-      shouldSearchFirstHalf,
-      shouldSearchSecondHalf,
-    );
-  }
-
-  int _binarySearchForHorizontalLineSegment(Rect rect) {
-    final LineSegmentSearchCondition shouldSearchFirstHalf =
-        (line, rect) => (line as HorizontalLineSegment).y > rect.bottom;
-    final LineSegmentSearchCondition shouldSearchSecondHalf =
-        (line, rect) => (line as HorizontalLineSegment).y < rect.top;
-    return _binarySearchForLineSegment(
-      horizontalGuidelines,
-      rect,
-      shouldSearchFirstHalf,
-      shouldSearchSecondHalf,
-    );
-  }
-
-  int _binarySearchForLineSegment(
-    List<LineSegment> lineSegments,
-    Rect visible,
-    LineSegmentSearchCondition shouldSearchFirstHalf,
-    LineSegmentSearchCondition shouldSearchSecondHalf,
-  ) {
-    int min = 0;
-    int max = lineSegments.length;
-    while (min < max) {
-      final mid = min + ((max - min) >> 1);
-      final line = lineSegments[mid];
-      final previousLine = mid != 0 ? lineSegments[mid - 1] : null;
-      if (line.crossAxisIntersects(visible)) {
-        if (previousLine == null ||
-            !previousLine.crossAxisIntersects(visible)) {
-          // This is the first line that should be drawn in this rect.
-          return mid;
-        } else {
-          max = mid;
-        }
-      } else if (shouldSearchFirstHalf(line, visible)) {
-        max = mid;
-      } else if (shouldSearchSecondHalf(line, visible)) {
-        min = mid + 1;
-      }
-    }
-    return -1;
   }
 }
 
