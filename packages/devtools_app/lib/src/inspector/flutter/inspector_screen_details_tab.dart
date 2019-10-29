@@ -155,30 +155,33 @@ class StoryOfYourFlexWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final List<Widget> children = [
-      for (var child in diagnostic.childrenNow)
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.backgroundColor,
-              border: Border.all(
-                color: theme.primaryColor,
-                width: 1.0,
+    final List<Widget> children = diagnostic.hasChildren
+        ? [
+            for (var child in diagnostic.childrenNow)
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.backgroundColor,
+                    border: Border.all(
+                      color: theme.primaryColor,
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.primaryColor,
+                        offset: Offset.zero,
+                        blurRadius: 10.0,
+                      )
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(child.description),
+                  ),
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor,
-                  offset: Offset.zero,
-                  blurRadius: 10.0,
-                )
-              ],
-            ),
-            child: Center(
-              child: Text(child.description),
-            ),
-          ),
-        ),
-    ];
+            // TODO(albertusangga): handle when Flex does not have children
+          ]
+        : [const SizedBox()];
     final Widget flexWidget = properties.type == Row
         ? Row(children: children)
         : Column(children: children);

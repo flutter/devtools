@@ -164,7 +164,7 @@ class InspectorTreeControllerFlutter extends Object
       animationController.reverse();
   }
 
-  static const bool enableExperimentalStoryOfLayout = false;
+  static bool enableExperimentalStoryOfLayout = false;
 }
 
 abstract class InspectorControllerClient {

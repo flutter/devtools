@@ -81,8 +81,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get constraints => json['constraints'];
 
-  bool get warning => getBooleanMember('warning', false);
-
   Map<String, Object> get renderObject => json['renderObject'];
 
   @override
