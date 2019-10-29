@@ -40,7 +40,7 @@ import 'timeline_protocol.dart';
 
 // TODO(kenz): connect a frame's UI and GPU code in the full_timeline.
 
-const enableMultiModeTimeline = true;
+const enableMultiModeTimeline = false;
 
 class HtmlTimelineScreen extends HtmlScreen {
   HtmlTimelineScreen({bool enabled, String disabledTooltip})
