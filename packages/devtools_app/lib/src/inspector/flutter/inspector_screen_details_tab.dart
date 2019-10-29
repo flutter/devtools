@@ -117,10 +117,12 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
       );
     if (!selected.isFlex)
       return Container(
+        // TODO(albertusangga): Visualize non flex widget constraint with Bounding Box model
         child: const Text('TODOs for Non Flex widget'),
       );
     return StoryOfYourFlexWidget(
       diagnostic: selected,
+      // TODO(albertusangga): Optimize and cache deserialization instead of always calling it when state changes
       properties: RenderFlexProperties.fromJson(selected.renderObject),
     );
   }
@@ -148,8 +150,6 @@ class StoryOfYourFlexWidget extends StatelessWidget {
   }) : super(key: key);
 
   final RemoteDiagnosticsNode diagnostic;
-
-  // Information about Flex elements that has been deserialize
   final RenderFlexProperties properties;
 
   @override
@@ -191,11 +191,12 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 4.0),
               child: Text(
-                  'Story of the flex layout of your $flexWidgetName widget',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                  )),
+                'Story of the flex layout of your $flexWidgetName widget',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
             ),
             Expanded(
               child: Container(
