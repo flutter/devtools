@@ -287,7 +287,6 @@ class HtmlTimelineScreen extends HtmlScreen {
         _recordingStatusMessage.text = 'No timeline events recorded';
         _recordingStatus.hidden(false);
         _recordingSpinner.hidden(true);
-        ;
       });
 
     timelineController.onLoadOfflineData.listen((_) {
