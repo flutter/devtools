@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// A widget that takes two children, lays them out along [axis], and allows
@@ -18,45 +20,15 @@ import 'package:flutter/material.dart';
 /// the space allocated between [firstChild] and [secondChild].
 // TODO(djshuckerow): introduce support for a minimum fraction a child is allowed.
 class Split extends StatefulWidget {
-  /// Builds a [Split] with [Axis.horizontal] direction.
-  ///
-  /// [firstChild] will be placed before [secondChild] in a [Row].
-  const Split.horizontal({
-    Key key,
-    @required Widget firstChild,
-    @required Widget secondChild,
-    double initialFirstFraction,
-  }) : this._(
-          key,
-          Axis.horizontal,
-          firstChild,
-          secondChild,
-          initialFirstFraction,
-        );
-
-  /// Builds a [Split] with [Axis.vertical] direction.
-  ///
-  /// [firstChild] will be placed before [secondChild] in a [Column].
-  const Split.vertical({
-    Key key,
-    @required Widget firstChild,
-    @required Widget secondChild,
-    double initialFirstFraction,
-  }) : this._(
-          key,
-          Axis.vertical,
-          firstChild,
-          secondChild,
-          initialFirstFraction,
-        );
-
-  const Split._(
+  /// Builds a split oriented along [axis].
+  const Split({
     Key key,
     this.axis,
     this.firstChild,
     this.secondChild,
     double initialFirstFraction,
-  )   : initialFirstFraction = initialFirstFraction ?? 0.5,
+  })  : initialFirstFraction = initialFirstFraction ?? 0.5,
+        assert(axis != null),
         super(key: key);
 
   /// The main axis the children will lay out on.
@@ -115,15 +87,20 @@ class _SplitState extends State<Split> {
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
+    final crossAxisSize = isHorizontal ? height : width;
     const halfDivider = Split.dividerMainAxisSize / 2.0;
     // The fraction of the layout the divider needs to take up from each child.
     final halfDividerFraction = halfDivider / axisSize;
 
+    // Determine what fraction to give each child, including enough space to
+    // display the divider.
     final sanitizedFirstFraction =
         firstFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
     final sanitizedSecondFraction =
         secondFraction.clamp(halfDividerFraction, 1.0 - halfDividerFraction);
 
+    // Get the sizes for each child, with space set aside for the divider in
+    // the middle.
     final firstSize = axisSize * sanitizedFirstFraction - halfDivider;
     final secondSize = axisSize * sanitizedSecondFraction - halfDivider;
 
@@ -132,11 +109,39 @@ class _SplitState extends State<Split> {
       final fractionalDelta = delta / axisSize;
       setState(() {
         // Update the fraction of space consumed by the children,
-        // being sure not to allocate any of them negative space.
+        // being sure not to allocate any negative space.
         firstFraction += fractionalDelta;
         firstFraction = firstFraction.clamp(0.0, 1.0);
       });
     }
+
+    // TODO(https://github.com/flutter/flutter/issues/43747): use an icon.
+    // The material icon for a drag handle is not currently available.
+    // This indicator is 3 lines running in the direction of the main axis,
+    //like a hamburger menu.
+    final dragIndicator = Flex(
+      direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < min(crossAxisSize / 6.0, 3).floor(); i++)
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: isHorizontal ? 2.0 : 0.0,
+              horizontal: isHorizontal ? 0.0 : 2.0,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).indicatorColor,
+                borderRadius: BorderRadius.circular(Split.dividerMainAxisSize),
+              ),
+              child: SizedBox(
+                height: isHorizontal ? 2.0 : Split.dividerMainAxisSize - 2.0,
+                width: isHorizontal ? Split.dividerMainAxisSize - 2.0 : 2.0,
+              ),
+            ),
+          ),
+      ],
+    );
 
     final children = [
       SizedBox(
@@ -146,16 +151,14 @@ class _SplitState extends State<Split> {
       ),
       GestureDetector(
         key: widget.dividerKey,
+        behavior: HitTestBehavior.translucent,
         onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
         onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
         child: SizedBox(
           width: isHorizontal ? Split.dividerMainAxisSize : width,
           height: isHorizontal ? height : Split.dividerMainAxisSize,
-          child: const Center(
-            child: Text(
-              ':::::::',
-              textAlign: TextAlign.center,
-            ),
+          child: Center(
+            child: dragIndicator,
           ),
         ),
       ),
