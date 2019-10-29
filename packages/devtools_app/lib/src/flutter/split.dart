@@ -18,45 +18,15 @@ import 'package:flutter/material.dart';
 /// the space allocated between [firstChild] and [secondChild].
 // TODO(djshuckerow): introduce support for a minimum fraction a child is allowed.
 class Split extends StatefulWidget {
-  /// Builds a [Split] with [Axis.horizontal] direction.
-  ///
-  /// [firstChild] will be placed before [secondChild] in a [Row].
-  const Split.horizontal({
-    Key key,
-    @required Widget firstChild,
-    @required Widget secondChild,
-    double initialFirstFraction,
-  }) : this._(
-          key,
-          Axis.horizontal,
-          firstChild,
-          secondChild,
-          initialFirstFraction,
-        );
-
-  /// Builds a [Split] with [Axis.vertical] direction.
-  ///
-  /// [firstChild] will be placed before [secondChild] in a [Column].
-  const Split.vertical({
-    Key key,
-    @required Widget firstChild,
-    @required Widget secondChild,
-    double initialFirstFraction,
-  }) : this._(
-          key,
-          Axis.vertical,
-          firstChild,
-          secondChild,
-          initialFirstFraction,
-        );
-
-  const Split._(
+  /// Builds a split oriented along [axis].
+  const Split({
     Key key,
     this.axis,
     this.firstChild,
     this.secondChild,
     double initialFirstFraction,
-  )   : initialFirstFraction = initialFirstFraction ?? 0.5,
+  })  : initialFirstFraction = initialFirstFraction ?? 0.5,
+        assert(axis != null),
         super(key: key);
 
   /// The main axis the children will lay out on.
