@@ -125,7 +125,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 child: OutlineButton(
                   onPressed:
                       summaryTreeController?.toggleDebugLayoutSummaryEnabled,
-                  child: Label(
+                  child: const Label(
                     FlutterIcons.lightbulb,
                     'Show Constraints',
                     minIncludeTextWidth: 1000,

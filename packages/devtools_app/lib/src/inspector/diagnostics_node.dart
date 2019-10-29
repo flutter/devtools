@@ -11,40 +11,22 @@ import 'package:vm_service/vm_service.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
+import 'enum_deserializer.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
 Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
     inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
 
-const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
-  'hidden': DiagnosticLevel.hidden,
-  'fine': DiagnosticLevel.fine,
-  'debug': DiagnosticLevel.debug,
-  'info': DiagnosticLevel.info,
-  'warning': DiagnosticLevel.warning,
-  'hint': DiagnosticLevel.hint,
-  'summary': DiagnosticLevel.summary,
-  'error': DiagnosticLevel.error,
-  'off': DiagnosticLevel.off,
-};
+final Map<String, DiagnosticLevel> nameToDiagnosticLevel =
+    EnumDeserializer<DiagnosticLevel>(DiagnosticLevel.values).lookupTable;
 
 final Map<DiagnosticLevel, String> diagnosticLevelToName =
     _invertMap(nameToDiagnosticLevel);
 
-const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
-  'sparse': DiagnosticsTreeStyle.sparse,
-  'offstage': DiagnosticsTreeStyle.offstage,
-  'dense': DiagnosticsTreeStyle.dense,
-  'transition': DiagnosticsTreeStyle.transition,
-  'whitespace': DiagnosticsTreeStyle.whitespace,
-  'error': DiagnosticsTreeStyle.error,
-  'flat': DiagnosticsTreeStyle.flat,
-  'singleLine': DiagnosticsTreeStyle.singleLine,
-  'errorProperty': DiagnosticsTreeStyle.errorProperty,
-  'shallow': DiagnosticsTreeStyle.shallow,
-  'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
-};
+final Map<String, DiagnosticsTreeStyle> nameToTreeStyle =
+    EnumDeserializer<DiagnosticsTreeStyle>(DiagnosticsTreeStyle.values)
+        .lookupTable;
 
 final Map<DiagnosticsTreeStyle, String> treeStyleToName =
     _invertMap(nameToTreeStyle);
@@ -97,7 +79,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // TODO(albertusangga): Confirm all new getter
   bool get isFlex => getBooleanMember('isFlex', false);
 
-  String get constraints => getStringMember('constraints');
+  Map<String, Object> get constraints => json['constraints'];
 
   bool get shouldHighlightConstraints =>
       getBooleanMember('shouldHighlightConstraints', false);

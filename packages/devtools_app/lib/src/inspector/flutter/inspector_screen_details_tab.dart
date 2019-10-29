@@ -4,8 +4,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
+import 'data_models.dart';
 import 'inspector_tree_flutter.dart';
-import 'layout_models.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController({
@@ -117,7 +117,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
       );
     return StoryOfYourFlexWidget(
       diagnostic: selected,
-      properties: FlexProperties.fromJson(selected.renderObject),
+      properties: RenderFlexProperties.fromJson(selected.renderObject),
     );
   }
 
@@ -146,7 +146,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
   final RemoteDiagnosticsNode diagnostic;
 
   // Information about Flex elements that has been deserialize
-  final FlexProperties properties;
+  final RenderFlexProperties properties;
 
   @override
   Widget build(BuildContext context) {
