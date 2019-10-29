@@ -127,6 +127,7 @@ abstract class FlameChart<T> {
     final row = rows[rowIndex];
     final nodes = row.nodes;
 
+    // TODO(kenz): consolidate binary search logic into geometry helper.
     FlameChartNode binarySearchForNode() {
       int min = 0;
       int max = nodes.length;
@@ -288,6 +289,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     Rect visible,
   ) {
     final row = rows[index];
+    // TODO(kenz): use binary search technique here.
     for (FlameChartNode node in row.nodes) {
       if (node.rect.left + node.rect.width < visible.left) continue;
       if (node.rect.left > visible.right) break;

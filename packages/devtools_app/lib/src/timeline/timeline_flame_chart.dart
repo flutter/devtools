@@ -14,6 +14,8 @@ import '../ui/flutter_html_shim.dart';
 import '../ui/theme.dart';
 import 'timeline_model.dart';
 
+final String guidelineColorCss = colorToCss(treeGuidelineColor);
+
 class FrameBasedTimelineFlameChartCanvas
     extends FlameChartCanvas<TimelineFrame> {
   FrameBasedTimelineFlameChartCanvas({
@@ -151,11 +153,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
         );
 
   static const guidelineWidth = 0.4;
-
-  static const guidelineColor = ThemedColor(
-    Colors.black,
-    Colors.white,
-  );
 
   static Map<String, double> sectionLabelWidths = {};
 
@@ -330,6 +327,11 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       currentSectionIndex++;
     }
 
+    // Ensure the nodes in each row are sorted in ascending positional order.
+    for (var row in rows) {
+      row.nodes.sort((a, b) => a.rect.left.compareTo(b.rect.left));
+    }
+
     _calculateAsyncGuidelines();
   }
 
@@ -353,10 +355,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
                 chartNodesByEvent[event.children.last].rect.centerLeft.dy -
                     topOffset;
             verticalGuidelines.add(VerticalLineSegment(
-              Point(verticalGuidelineX, verticalGuidelineStartY),
-              Point(verticalGuidelineX, verticalGuidelineEndY),
-              'vertical guideline ${event.name} --> '
-              '${event.children.last.name}',
+              Offset(verticalGuidelineX, verticalGuidelineStartY),
+              Offset(verticalGuidelineX, verticalGuidelineEndY),
             ));
 
             // Horizontal guidelines connecting each child to the vertical
@@ -370,9 +370,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
               final horizontalGuidelineY =
                   childNode.rect.centerLeft.dy - topOffset;
               horizontalGuidelines.add(HorizontalLineSegment(
-                Point(horizontalGuidelineStartX, horizontalGuidelineY),
-                Point(horizontalGuidelineEndX, horizontalGuidelineY),
-                'horizontal guideline --> ${childNode.data.name}',
+                Offset(horizontalGuidelineStartX, horizontalGuidelineY),
+                Offset(horizontalGuidelineEndX, horizontalGuidelineY),
               ));
             }
           }
@@ -423,32 +422,34 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   }
 
   void _paintAsyncGuidelines(CanvasRenderingContext2D canvas, Rect visible) {
-    final firstVerticalGuideline = _binarySearchForVerticalLineSegment(visible);
-    final firstHorizontalGuideline =
+    final firstVerticalGuidelineIndex =
+        _binarySearchForVerticalLineSegment(visible);
+    final firstHorizontalGuidelineIndex =
         _binarySearchForHorizontalLineSegment(visible);
 
     // Only modify the canvas style if we have any guidelines to paint.
-    if (firstHorizontalGuideline != null || firstVerticalGuideline != null) {
+    if (firstHorizontalGuidelineIndex != -1 ||
+        firstVerticalGuidelineIndex != -1) {
       canvas
-        ..strokeStyle = colorToCss(guidelineColor)
+        ..strokeStyle = guidelineColorCss
         ..lineWidth = guidelineWidth;
     }
 
-    if (firstVerticalGuideline != null) {
+    if (firstVerticalGuidelineIndex != -1) {
       _paintGuidelines(
         canvas,
         visible,
         verticalGuidelines,
-        firstVerticalGuideline,
+        firstVerticalGuidelineIndex,
       );
     }
 
-    if (firstHorizontalGuideline != null) {
+    if (firstHorizontalGuidelineIndex != -1) {
       _paintGuidelines(
         canvas,
         visible,
         horizontalGuidelines,
-        firstHorizontalGuideline,
+        firstHorizontalGuidelineIndex,
       );
     }
   }
@@ -457,22 +458,27 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     CanvasRenderingContext2D canvas,
     Rect visible,
     List<LineSegment> guidelines,
-    LineSegment first,
+    int firstLineIndex,
   ) {
-    final guidelinesToPaint = guidelines
-        .sublist(guidelines.indexOf(first))
-        .where((line) => line.intersects(visible));
-    for (var line in guidelinesToPaint) {
-      canvas
-        ..beginPath()
-        ..moveTo(line.start.x, line.start.y + topOffset)
-        ..lineTo(line.end.x, line.end.y + topOffset)
-        ..closePath()
-        ..stroke();
+    for (int i = firstLineIndex; i < guidelines.length; i++) {
+      final line = guidelines[i];
+
+      // We are out of range on the cross axis.
+      if (!line.crossAxisIntersects(visible)) break;
+
+      // Only paint lines that intersect [visible] along both axes.
+      if (line.intersects(visible)) {
+        canvas
+          ..beginPath()
+          ..moveTo(line.start.dx, line.start.dy + topOffset)
+          ..lineTo(line.end.dx, line.end.dy + topOffset)
+          ..closePath()
+          ..stroke();
+      }
     }
   }
 
-  LineSegment _binarySearchForVerticalLineSegment(Rect rect) {
+  int _binarySearchForVerticalLineSegment(Rect rect) {
     final LineSegmentSearchCondition shouldSearchFirstHalf =
         (line, rect) => (line as VerticalLineSegment).x > rect.right;
     final LineSegmentSearchCondition shouldSearchSecondHalf =
@@ -485,7 +491,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     );
   }
 
-  LineSegment _binarySearchForHorizontalLineSegment(Rect rect) {
+  int _binarySearchForHorizontalLineSegment(Rect rect) {
     final LineSegmentSearchCondition shouldSearchFirstHalf =
         (line, rect) => (line as HorizontalLineSegment).y > rect.bottom;
     final LineSegmentSearchCondition shouldSearchSecondHalf =
@@ -498,7 +504,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     );
   }
 
-  LineSegment _binarySearchForLineSegment(
+  int _binarySearchForLineSegment(
     List<LineSegment> lineSegments,
     Rect visible,
     LineSegmentSearchCondition shouldSearchFirstHalf,
@@ -514,7 +520,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
         if (previousLine == null ||
             !previousLine.crossAxisIntersects(visible)) {
           // This is the first line that should be drawn in this rect.
-          return line;
+          return mid;
         } else {
           max = mid;
         }
@@ -524,7 +530,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
         min = mid + 1;
       }
     }
-    return null;
+    return -1;
   }
 }
 

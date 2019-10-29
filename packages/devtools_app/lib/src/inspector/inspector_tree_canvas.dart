@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
+import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_elements.dart';
@@ -351,7 +352,7 @@ class InspectorTreeCanvas extends InspectorTreeControllerLegacy
     for (int tick in row.ticks) {
       currentX = getDepthIndent(tick) - columnWidth * 0.5;
       if (isVisible(1.0)) {
-        _maybeStart(defaultTreeLineColor);
+        _maybeStart(treeGuidelineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight);
@@ -361,7 +362,7 @@ class InspectorTreeCanvas extends InspectorTreeControllerLegacy
       currentX = getDepthIndent(row.depth - 1) - columnWidth * 0.5;
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       if (isVisible(width)) {
-        _maybeStart(defaultTreeLineColor);
+        _maybeStart(treeGuidelineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight * 0.5)

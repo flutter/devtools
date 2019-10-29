@@ -10,6 +10,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
 import '../../flutter/inspector/diagnostics.dart';
+import '../../ui/colors.dart';
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
 
@@ -364,7 +365,8 @@ class _InspectorTreeState extends State<InspectorTree>
 }
 
 final _defaultPaint = Paint()
-  ..color = defaultTreeLineColor
+  // TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
+  ..color = treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 
 /// Custom painter that draws lines indicating how parent and child rows are

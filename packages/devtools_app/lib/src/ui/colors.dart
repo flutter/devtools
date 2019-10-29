@@ -91,3 +91,8 @@ const Color highwater16msColor = mainUiColorSelectedLight;
 const Color hoverTextHighContrastColor = Colors.white;
 
 const Color hoverTextColor = Colors.black;
+
+const treeGuidelineColor = ThemedColor(
+  Colors.black54,
+  Color.fromARGB(255, 200, 200, 200),
+);
