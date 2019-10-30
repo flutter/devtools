@@ -100,7 +100,6 @@ void main() {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (innerContext) {
-              print(isDarkTheme);
               onUnnamedRouteBuild(innerContext);
               return const SizedBox();
             }));
