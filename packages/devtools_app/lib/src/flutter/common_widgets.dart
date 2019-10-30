@@ -80,29 +80,16 @@ class DefaultTaggedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final defaultTextStyle = DefaultTextStyle.of(context).style;
     final _tagToTextSpanBuilder = {
       'bold': (text) => TextSpan(
             text: text,
-            style: defaultTextStyle.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: bold(defaultTextStyle),
           ),
-      'primary-color': (text) => TextSpan(
-            text: text,
-            style: defaultTextStyle.copyWith(
-              color: theme.primaryColor,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+      'primary-color': (text) =>
+          TextSpan(text: text, style: primaryColor(defaultTextStyle, context)),
       'primary-color-light': (text) => TextSpan(
-            text: text,
-            style: defaultTextStyle.copyWith(
-              color: theme.primaryColorLight,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
+          text: text, style: primaryColorLight(defaultTextStyle, context)),
     };
     return TaggedText(
       content: content,
@@ -112,4 +99,33 @@ class DefaultTaggedText extends StatelessWidget {
       style: defaultTextStyle,
     );
   }
+}
+
+/// Creates a bold version of [style].
+TextStyle bold(TextStyle style) => style.copyWith(fontWeight: FontWeight.w600);
+
+/// Creates a version of [style] that uses the primary color of [context].
+///
+/// When the app is in dark mode, it instead uses the accent color.
+TextStyle primaryColor(TextStyle style, BuildContext context) {
+  final theme = Theme.of(context);
+  return style.copyWith(
+    color: (theme.brightness == Brightness.light)
+        ? theme.primaryColor
+        : theme.accentColor,
+    fontWeight: FontWeight.w400,
+  );
+}
+
+/// Creates a version of [style] that uses the lighter primary color of
+/// [context].
+///
+/// In dark mode, the light primary color still has enough contrast to be
+/// visible, so we continue to use it.
+TextStyle primaryColorLight(TextStyle style, BuildContext context) {
+  final theme = Theme.of(context);
+  return style.copyWith(
+    color: theme.primaryColorLight,
+    fontWeight: FontWeight.w300,
+  );
 }
