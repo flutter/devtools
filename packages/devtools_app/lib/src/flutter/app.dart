@@ -21,16 +21,6 @@ import 'scaffold.dart';
 import 'screen.dart';
 import 'theme.dart';
 
-ThemeData buildDevToolsTheme() {
-  final ThemeData theme =
-      devtools_theme.isDarkTheme ? ThemeData.dark() : ThemeData.light();
-  // TODO(jacobr): determine whether to update the theme to match the
-  // devtools_theme or update devtools_theme to match the flutter theme.
-  // For example, to match the devtools_theme we would write:
-  // theme.copyWith(backgroundColor: devtools_theme.defaultBackground);
-  return theme.copyWith(buttonTheme: theme.buttonTheme.copyWith(minWidth: 36));
-}
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -126,7 +116,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: buildDevToolsTheme(),
+      theme: theme,
       onGenerateRoute: _generateRoute,
     );
   }
