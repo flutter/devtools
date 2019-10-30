@@ -65,7 +65,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   final bool isProperty;
 
-  // TODO(albertusangga): Confirm all new getter
   bool get isFlex => getBooleanMember('isFlex', false);
 
   Map<String, Object> get constraints => json['constraints'];
