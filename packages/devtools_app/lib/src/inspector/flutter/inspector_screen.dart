@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
 import '../../flutter/screen.dart';
+import '../../flutter/split.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
@@ -131,17 +132,14 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           ],
         ),
         Expanded(
-          child: Row(
-            children: [
-              Expanded(child: summaryTree),
-              Expanded(
-                child: InspectorDetailsTabController(
-                  detailsTree: detailsTree,
-                  controller: inspectorController,
-                  actionButtons: _expandCollapseButtons(),
-                ),
-              ),
-            ],
+          child: Split(
+            axis: Axis.horizontal,
+            firstChild: summaryTree,
+            secondChild: InspectorDetailsTabController(
+              detailsTree: detailsTree,
+              controller: inspectorController,
+              actionButtons: _expandCollapseButtons(),
+            ),
           ),
         ),
       ],
