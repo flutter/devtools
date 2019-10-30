@@ -185,6 +185,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 4.0),
               child: Text(
+                // TODO(albertusangga): Reuse existing material design header text style
                 'Story of the flex layout of your $flexType widget',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
