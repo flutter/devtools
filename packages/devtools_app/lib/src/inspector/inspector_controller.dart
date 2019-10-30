@@ -54,7 +54,8 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
 class InspectorController implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorService,
-    @required InspectorTreeFactory inspectorTreeFactory,
+    @required this.inspectorTree,
+    InspectorTreeController detailsTree,
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
@@ -64,18 +65,20 @@ class InspectorController implements InspectorServiceClient {
             InspectorObjectGroupManager(inspectorService, 'selection') {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
-    inspectorTree = inspectorTreeFactory(
+    assert(inspectorTree != null);
+    inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
       treeType: treeType,
       onNodeAdded: _onNodeAdded,
       onHover: highlightShowNode,
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
+      onClientActiveChange: _onClientChange,
     );
     if (isSummaryTree) {
       details = InspectorController(
         inspectorService: inspectorService,
-        inspectorTreeFactory: inspectorTreeFactory,
+        inspectorTree: detailsTree,
         treeType: treeType,
         parent: this,
         isSummaryTree: false,
@@ -92,6 +95,44 @@ class InspectorController implements InspectorServiceClient {
 
     _checkForExpandCollapseSupport();
   }
+
+  void _onClientChange(bool added) {
+    _clientCount += added ? 1 : -1;
+    assert(_clientCount >= 0);
+    if (_clientCount == 1) {
+      setVisibleToUser(true);
+      setActivate(true);
+    } else if (_clientCount == 0) {
+      setVisibleToUser(false);
+    }
+  }
+
+  final debugSummaryLayoutEnabled = ValueNotifier(false);
+
+  void toggleDebugSummaryLayout() {
+    debugSummaryLayoutEnabled.value = !debugSummaryLayoutEnabled.value;
+  }
+
+  // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
+  static bool enableExperimentalStoryOfLayout = false;
+
+  final List<Function> _selectionListeners = [];
+
+  void addSelectionListener(Function listener) {
+    _selectionListeners.add(listener);
+  }
+
+  void removeSelectionListener(Function listener) {
+    _selectionListeners.remove(listener);
+  }
+
+  void notifySelectionListeners() {
+    for (var notifyListener in _selectionListeners) {
+      notifyListener();
+    }
+  }
+
+  int _clientCount = 0;
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
   /// physical device with too many requests to recompute properties and trees.
@@ -115,8 +156,7 @@ class InspectorController implements InspectorServiceClient {
 
   InspectorController details;
 
-  InspectorTree inspectorTree;
-
+  InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
   final InspectorService inspectorService;
@@ -633,6 +673,8 @@ class InspectorController implements InspectorServiceClient {
     }
 
     animateTo(selectedNode);
+
+    notifySelectionListeners();
   }
 
   void _onExpand(InspectorTreeNode node) {
@@ -736,6 +778,7 @@ class InspectorController implements InspectorServiceClient {
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
+    debugSummaryLayoutEnabled.dispose();
     details?.dispose();
   }
 
@@ -764,9 +807,9 @@ class InspectorController implements InspectorServiceClient {
 
   Future<void> expandAllNodesInDetailsTree() async {
     await details.recomputeTreeRoot(
-      inspectorTree.selection.diagnostic,
+      inspectorTree.selection?.diagnostic,
       details.inspectorTree.selection?.diagnostic ??
-          details.inspectorTree.root.diagnostic,
+          details.inspectorTree.root?.diagnostic,
       false,
       subtreeDepth: maxJsInt,
     );

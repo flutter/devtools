@@ -61,10 +61,10 @@ class FlutterIcons {
   static const DevToolsIcon hotRefinal = UrlIcon('/icons/hot-refinal Icon.png');
   static const DevToolsIcon hotReload = UrlIcon('/icons/hot-reload.png');
   static const DevToolsIcon hotReloadWhite =
-      UrlIcon('icons/hot-reload-white.png');
+      UrlIcon('/icons/hot-reload-white.png');
   static const DevToolsIcon hotRestart = UrlIcon('/icons/hot-restart.png');
   static const DevToolsIcon hotRestartWhite =
-      UrlIcon('icons/hot-restart-white.png');
+      UrlIcon('/icons/hot-restart-white.png');
 
   static const DevToolsIcon iconRun = UrlIcon('/icons/refinal Icon_run.png');
   static const DevToolsIcon iconDebug =

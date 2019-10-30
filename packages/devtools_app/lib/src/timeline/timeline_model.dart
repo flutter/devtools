@@ -1,6 +1,10 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
+import 'dart:collection';
+import 'dart:math';
+
 import 'package:meta/meta.dart';
 
 import '../globals.dart';
@@ -11,26 +15,167 @@ import '../utils.dart';
 import 'timeline_controller.dart';
 
 /// Data model for DevTools Timeline.
-class TimelineData {
-  TimelineData({
+class FrameBasedTimelineData extends TimelineData {
+  FrameBasedTimelineData({
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
     this.selectedFrame,
+    TimelineEvent selectedEvent,
+    CpuProfileData cpuProfileData,
+    double displayRefreshRate,
+  })  : frames = frames ?? [],
+        _displayRefreshRate = displayRefreshRate,
+        super(
+          traceEvents: traceEvents ?? [],
+          selectedEvent: selectedEvent,
+          cpuProfileData: cpuProfileData,
+        );
+
+  static const displayRefreshRateKey = 'displayRefreshRate';
+
+  static const selectedFrameIdKey = 'selectedFrameId';
+
+  FutureOr<double> get displayRefreshRate async =>
+      _displayRefreshRate ??= await serviceManager.getDisplayRefreshRate();
+
+  double _displayRefreshRate;
+
+  /// All frames currently visible in the timeline.
+  List<TimelineFrame> frames = [];
+
+  TimelineFrame selectedFrame;
+
+  String get selectedFrameId => selectedFrame?.id;
+
+  @override
+  Map<String, dynamic> get json => {
+        selectedFrameIdKey: selectedFrame?.id,
+        displayRefreshRateKey: _displayRefreshRate ?? defaultRefreshRate,
+      }..addAll(super.json);
+
+  @override
+  int get displayDepth =>
+      selectedFrame.uiEventFlow.depth + selectedFrame.gpuEventFlow.depth;
+
+  @override
+  void clear() {
+    super.clear();
+    frames.clear();
+    selectedFrame = null;
+    _displayRefreshRate = null;
+  }
+}
+
+class FullTimelineData extends TimelineData {
+  FullTimelineData({
+    List<Map<String, dynamic>> traceEvents,
+    TimelineEvent selectedEvent,
+    CpuProfileData cpuProfileData,
+    List<TimelineEvent> timelineEvents,
+  })  : timelineEvents = timelineEvents ?? [],
+        super(
+          traceEvents: traceEvents ?? [],
+          selectedEvent: selectedEvent,
+          cpuProfileData: cpuProfileData,
+        );
+
+  static const uiKey = 'UI';
+
+  static const gpuKey = 'GPU';
+
+  static const unknownKey = 'Unknown';
+
+  final List<TimelineEvent> timelineEvents;
+
+  final SplayTreeMap<String, List<TimelineEvent>> eventBuckets =
+      SplayTreeMap(eventBucketComparator);
+
+  TimeRange time = TimeRange();
+
+  @override
+  int get displayDepth {
+    if (_displayDepth != null) return _displayDepth;
+
+    if (eventBuckets.isEmpty) {
+      initializeEventBuckets();
+    }
+
+    int depth = 0;
+    for (List<TimelineEvent> bucket in eventBuckets.values) {
+      int bucketDisplayDepth = 0;
+      for (TimelineEvent event in bucket) {
+        bucketDisplayDepth = max(bucketDisplayDepth, event.displayDepth);
+      }
+      depth += bucketDisplayDepth;
+    }
+    return depth;
+  }
+
+  int _displayDepth;
+
+  void initializeEventBuckets() {
+    for (TimelineEvent event in timelineEvents) {
+      eventBuckets.putIfAbsent(_computeEventBucketKey(event), () => [])
+        ..add(event);
+    }
+  }
+
+  String _computeEventBucketKey(TimelineEvent event) {
+    if (event.isAsyncEvent) {
+      return event.name;
+    } else if (event.isUiEvent) {
+      return uiKey;
+    } else if (event.isGpuEvent) {
+      return gpuKey;
+    } else {
+      return unknownKey;
+    }
+  }
+
+  @override
+  void clear() {
+    super.clear();
+    timelineEvents.clear();
+    eventBuckets.clear();
+    time = TimeRange();
+    _displayDepth = null;
+  }
+
+  // TODO(kenz): simplify this comparator if possible.
+  @visibleForTesting
+  static int eventBucketComparator(String a, String b) {
+    if (a == b) return 0;
+
+    // Order Unknown buckets last.
+    if (a == unknownKey) return 1;
+    if (b == unknownKey) return -1;
+
+    // Order the GPU event bucket after the UI event bucket.
+    if ((a == uiKey && b == gpuKey) || (a == gpuKey && b == uiKey)) {
+      return -1 * a.compareTo(b);
+    }
+
+    // Order non-UI and non-GPU buckets before the UI / GPU buckets.
+    if (a == uiKey || a == gpuKey) return 1;
+    if (b == uiKey || b == gpuKey) return -1;
+
+    // Alphabetize all other buckets.
+    return a.compareTo(b);
+  }
+}
+
+abstract class TimelineData {
+  TimelineData({
+    List<Map<String, dynamic>> traceEvents,
     this.selectedEvent,
     this.cpuProfileData,
-    this.displayRefreshRate,
-  })  : traceEvents = traceEvents ?? [],
-        frames = frames ?? [];
+  }) : traceEvents = traceEvents ?? [];
 
   static const traceEventsKey = 'traceEvents';
 
   static const cpuProfileKey = 'cpuProfile';
 
-  static const selectedFrameIdKey = 'selectedFrameId';
-
   static const selectedEventKey = 'selectedEvent';
-
-  static const displayRefreshRateKey = 'displayRefreshRate';
 
   static const devToolsScreenKey = 'dartDevToolsScreen';
 
@@ -41,36 +186,22 @@ class TimelineData {
   /// clicked, this will be part of the output.
   List<Map<String, dynamic>> traceEvents = [];
 
-  /// All frames currently visible in the timeline.
-  List<TimelineFrame> frames = [];
-
-  TimelineFrame selectedFrame;
-
   TimelineEvent selectedEvent;
 
   CpuProfileData cpuProfileData;
 
-  double displayRefreshRate;
-
-  String get selectedFrameId => selectedFrame?.id;
-
   Map<String, dynamic> get json => {
         traceEventsKey: traceEvents,
         cpuProfileKey: cpuProfileData?.json ?? {},
-        selectedFrameIdKey: selectedFrame?.id,
         selectedEventKey: selectedEvent?.json ?? {},
-        displayRefreshRateKey: displayRefreshRate ?? defaultRefreshRate,
         devToolsScreenKey: timelineScreenId,
       };
 
-  Future<void> clear() async {
+  int get displayDepth;
+
+  void clear() {
     traceEvents.clear();
-    frames.clear();
-    selectedFrame = null;
     selectedEvent = null;
-    displayRefreshRate = serviceManager?.connectedApp == null
-        ? null
-        : await serviceManager.getDisplayRefreshRate();
     cpuProfileData = null;
   }
 
@@ -79,7 +210,7 @@ class TimelineData {
   }
 }
 
-class OfflineTimelineData extends TimelineData {
+class OfflineTimelineData extends FrameBasedTimelineData {
   OfflineTimelineData._({
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
@@ -107,7 +238,8 @@ class OfflineTimelineData extends TimelineData {
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final String selectedFrameId = json[TimelineData.selectedFrameIdKey];
+    final String selectedFrameId =
+        json[FrameBasedTimelineData.selectedFrameIdKey];
 
     final Map<String, dynamic> selectedEventJson =
         json[TimelineData.selectedEventKey] ?? {};
@@ -120,7 +252,9 @@ class OfflineTimelineData extends TimelineData {
           )
         : null;
 
-    final double displayRefreshRate = json[TimelineData.displayRefreshRateKey];
+    final double displayRefreshRate =
+        json[FrameBasedTimelineData.displayRefreshRateKey] ??
+            defaultRefreshRate;
 
     return OfflineTimelineData._(
       traceEvents: traceEvents,
@@ -137,6 +271,10 @@ class OfflineTimelineData extends TimelineData {
   String get selectedFrameId => _selectedFrameId;
   final String _selectedFrameId;
 
+  @override
+  FutureOr<double> get displayRefreshRate =>
+      _displayRefreshRate ?? defaultRefreshRate;
+
   /// Creates a new instance of [OfflineTimelineData] with references to the
   /// same objects contained in this instance.
   ///
@@ -151,7 +289,7 @@ class OfflineTimelineData extends TimelineData {
       selectedFrame: selectedFrame,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
-      displayRefreshRate: displayRefreshRate,
+      displayRefreshRate: _displayRefreshRate,
       cpuProfileData: cpuProfileData,
     );
   }
@@ -166,7 +304,7 @@ class OfflineTimelineData extends TimelineData {
 ///
 /// We extend TimelineEvent so that our CPU profiler code requiring a selected
 /// timeline event will work as it does when we are not loading from offline.
-class OfflineTimelineEvent extends TimelineEvent {
+class OfflineTimelineEvent extends SyncTimelineEvent {
   OfflineTimelineEvent(
       String name, String eventType, int startMicros, int durationMicros)
       : super(TraceEventWrapper(
@@ -288,10 +426,11 @@ class TimelineFrame {
 enum TimelineEventType {
   ui,
   gpu,
+  async,
   unknown,
 }
 
-class TimelineEvent extends TreeNode<TimelineEvent> {
+abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
@@ -331,11 +470,20 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
 
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
-  bool get isUiEventFlow => containsChildWithCondition(
-      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
+  bool get isAsyncEvent => type == TimelineEventType.async;
 
-  bool get isGpuEventFlow => containsChildWithCondition(
-      (TimelineEvent event) => event.name.contains('PipelineConsume'));
+  bool get isWellFormed => time.start != null && time.end != null;
+
+  int get displayDepth;
+
+  bool get hasOverlappingChildren;
+
+  bool couldBeParentOf(TimelineEvent e);
+
+  void addEndEvent(TraceEventWrapper eventWrapper) {
+    time.end = Duration(microseconds: eventWrapper.event.timestampMicros);
+    traceEvents.add(eventWrapper);
+  }
 
   void maybeRemoveDuplicate() {
     void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
@@ -350,7 +498,7 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
             parent.endTraceEventJson,
             parent.children.first.endTraceEventJson,
           )) {
-        parent.removeChild(children.first);
+        parent.removeChild(parent.children.first);
       }
     }
 
@@ -373,7 +521,6 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
 
   @override
   void addChild(TimelineEvent child) {
-    // Places the child in it's correct position amongst the other children.
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
@@ -431,31 +578,6 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
     child.parent = this;
   }
 
-  bool couldBeParentOf(TimelineEvent e) {
-    final startTime = time.start.inMicroseconds;
-    final endTime = time.end?.inMicroseconds;
-    final eStartTime = e.time.start.inMicroseconds;
-    final eEndTime = e.time.end?.inMicroseconds;
-
-    if (endTime != null && eEndTime != null) {
-      if (startTime == eStartTime && endTime == eEndTime) {
-        return traceEvents.first.id < e.traceEvents.first.id;
-      }
-      return startTime <= eStartTime && endTime >= eEndTime;
-    } else if (endTime != null) {
-      // We don't use >= to compare [endTime] and [e.startTime] here because we
-      // don't want to falsely make [this] the parent of [e]. We do not know
-      // [e.endTime], meaning [e] could start at [endTime] and end later than
-      // [endTime] (unless e has a duration of 0). In this case, [this] would
-      // not be the parent of [e].
-      return startTime <= eStartTime && endTime > eStartTime;
-    } else if (startTime == eStartTime) {
-      return traceEvents.first.id < e.traceEvents.first.id;
-    } else {
-      return startTime < eStartTime;
-    }
-  }
-
   void format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name $time');
     for (TimelineEvent child in children) {
@@ -488,7 +610,9 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
 
   @visibleForTesting
   TimelineEvent deepCopy() {
-    final copy = TimelineEvent(traceEvents.first);
+    final copy = isAsyncEvent
+        ? AsyncTimelineEvent(traceEvents.first)
+        : SyncTimelineEvent(traceEvents.first);
     copy.time.end = time.end;
     copy.parent = parent;
     for (TimelineEvent child in children) {
@@ -503,6 +627,196 @@ class TimelineEvent extends TreeNode<TimelineEvent> {
     final buf = StringBuffer();
     format(buf, '  ');
     return buf.toString();
+  }
+}
+
+class SyncTimelineEvent extends TimelineEvent {
+  SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
+
+  bool get isUiEventFlow => containsChildWithCondition(
+      (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
+
+  bool get isGpuEventFlow => containsChildWithCondition(
+      (TimelineEvent event) => event.name.contains('PipelineConsume'));
+
+  @override
+  int get displayDepth => depth;
+
+  @override
+  bool get hasOverlappingChildren => false;
+
+  @override
+  bool couldBeParentOf(TimelineEvent e) {
+    final startTime = time.start.inMicroseconds;
+    final endTime = time.end?.inMicroseconds;
+    final eStartTime = e.time.start.inMicroseconds;
+    final eEndTime = e.time.end?.inMicroseconds;
+
+    if (endTime != null && eEndTime != null) {
+      if (startTime == eStartTime && endTime == eEndTime) {
+        return traceEvents.first.id < e.traceEvents.first.id;
+      }
+      return startTime <= eStartTime && endTime >= eEndTime;
+    } else if (endTime != null) {
+      // We don't use >= to compare [endTime] and [e.startTime] here because we
+      // don't want to falsely make [this] the parent of [e]. We do not know
+      // [e.endTime], meaning [e] could start at [endTime] and end later than
+      // [endTime] (unless e has a duration of 0). In this case, [this] would
+      // not be the parent of [e].
+      return startTime <= eStartTime && endTime > eStartTime;
+    } else if (startTime == eStartTime) {
+      return traceEvents.first.id < e.traceEvents.first.id;
+    } else {
+      return startTime < eStartTime;
+    }
+  }
+}
+
+class AsyncTimelineEvent extends TimelineEvent {
+  AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
+      : asyncId = firstTraceEvent.event.id,
+        parentId = firstTraceEvent.event.args[parentIdKey] != null
+            ? (firstTraceEvent.event.args[parentIdKey] as int).toRadixString(16)
+            : null,
+        super(firstTraceEvent) {
+    type = TimelineEventType.async;
+  }
+
+  static const parentIdKey = 'parentId';
+
+  final String asyncId;
+
+  /// Unique id for this async event's parent event.
+  ///
+  /// This field is not guaranteed to be non-null.
+  final String parentId;
+
+  bool get isWellFormedDeep => _isWellFormedDeep(this);
+
+  bool _isWellFormedDeep(AsyncTimelineEvent event) {
+    if (!event.isWellFormed) {
+      return false;
+    }
+    for (var child in event.children) {
+      return _isWellFormedDeep(child);
+    }
+    return true;
+  }
+
+  @override
+  int get displayDepth => _displayDepth ?? _calculateDisplayDepth();
+
+  int _displayDepth;
+
+  int _calculateDisplayDepth() {
+    // Base case.
+    if (children.isEmpty) {
+      return _displayDepth = 1;
+    }
+
+    var displayDepth = 1;
+    if (hasOverlappingChildren) {
+      // If any children have overlapping timestamps, display each child on its
+      // own row.
+      // TODO(kenz): save graph space by calculating when children can share a
+      // row in the flame chart.
+      for (var child in children) {
+        displayDepth += (child as AsyncTimelineEvent)._calculateDisplayDepth();
+      }
+    } else {
+      int maxChildDepth = -1;
+      for (var child in children) {
+        maxChildDepth = max(maxChildDepth,
+            (child as AsyncTimelineEvent)._calculateDisplayDepth());
+      }
+      displayDepth += maxChildDepth;
+    }
+    return _displayDepth = displayDepth;
+  }
+
+  @override
+  bool get hasOverlappingChildren {
+    if (_hasOverlappingChildren != null) return _hasOverlappingChildren;
+    for (int i = 0; i < children.length; i++) {
+      final currentChild = children[i];
+      // We do not have to look back because children will be ordered by their
+      // start times.
+      for (int j = i + 1; j < children.length; j++) {
+        final sibling = children[j];
+        // TODO(kenz): Check for deep timestamp overlap - since these events are
+        // async, children can extend the time bound of their parents, meaning
+        // we may still have display collisions even if parents do not overlap.
+        if (currentChild.time.overlaps(sibling.time)) {
+          return _hasOverlappingChildren = true;
+        }
+      }
+    }
+    return _hasOverlappingChildren = false;
+  }
+
+  bool _hasOverlappingChildren;
+
+  @override
+  void addChild(TimelineEvent child) {
+    final _child = child as AsyncTimelineEvent;
+    // Short circuit if we are using an explicit parentId.
+    if (_child.parentId != null &&
+        _child.parentId == traceEvents.first.event.id) {
+      _addChild(child);
+    } else {
+      super.addChild(child);
+    }
+  }
+
+  @override
+  bool couldBeParentOf(TimelineEvent e) {
+    final asyncEvent = e as AsyncTimelineEvent;
+
+    // If [asyncEvent] has an explicit parentId, use that as the truth.
+    if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
+
+    // Without an explicit parentId, two events must share an asyncId to be
+    // part of the same event tree.
+    if (asyncId != asyncEvent.asyncId) return false;
+
+    // When two events share an asyncId, determine parent / child relationships
+    // based on timestamps.
+    final startTime = time.start.inMicroseconds;
+    final endTime = time.end?.inMicroseconds;
+    final eStartTime = e.time.start.inMicroseconds;
+    final eEndTime = e.time.end?.inMicroseconds;
+
+    if (endTime != null && eEndTime != null) {
+      if (startTime == eStartTime && endTime == eEndTime) {
+        return int.parse(asyncId, radix: 16) <
+            int.parse(asyncEvent.asyncId, radix: 16);
+      }
+      return startTime <= eStartTime && endTime >= eEndTime;
+    } else if (endTime != null) {
+      // We don't use >= to compare [endTime] and [eStartTime] here because we
+      // don't want to falsely make [this] the parent of [e]. We do not know
+      // [eEndTime], meaning [e] could start at [endTime] and end later than
+      // [endTime] (unless e has a duration of 0). In this case, [this] would
+      // not be the parent of [e].
+      return startTime <= eStartTime && endTime > eStartTime;
+    } else if (startTime == eStartTime) {
+      return int.parse(asyncId, radix: 16) <
+          int.parse(asyncEvent.asyncId, radix: 16);
+    } else {
+      return startTime < eStartTime;
+    }
+  }
+
+  void endAsyncEvent(TraceEventWrapper eventWrapper) {
+    assert(asyncId == eventWrapper.event.id);
+    if (name == eventWrapper.event.name && endTraceEventJson == null) {
+      addEndEvent(eventWrapper);
+      return;
+    }
+
+    for (AsyncTimelineEvent child in children) {
+      child.endAsyncEvent(eventWrapper);
+    }
   }
 }
 
@@ -532,6 +846,15 @@ class TraceEvent {
   static const typeKey = 'type';
   static const idKey = 'id';
   static const scopeKey = 'scope';
+
+  static const asyncBeginPhase = 'b';
+  static const asyncEndPhase = 'e';
+  static const asyncInstantPhase = 'n';
+  static const durationBeginPhase = 'B';
+  static const durationEndPhase = 'E';
+  static const durationCompletePhase = 'X';
+  static const flowStartPhase = 's';
+  static const flowEndPhase = 'f';
 
   /// The original event JSON.
   final Map<String, dynamic> json;

@@ -8,6 +8,7 @@ import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 
 import '../config_specific/logger.dart';
 import '../framework/html_framework.dart';
+import '../service_manager.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/html_elements.dart';
 import 'frames_bar_plotly.dart';
@@ -37,7 +38,8 @@ class FramesBarChart extends CoreElement with HtmlSetStateMixin {
       }
     });
 
-    timelineController.onFrameAdded.listen((TimelineFrame frame) {
+    timelineController.frameBasedTimeline.onFrameAdded
+        .listen((TimelineFrame frame) {
       frameUIgraph.process(frame);
     });
   }
@@ -86,7 +88,11 @@ class PlotlyDivGraph extends CoreElement {
     final int dataLength = dataIndexes.length;
     if (dataLength > 0) {
       plotlyChart.plotFPSDataList(
-          dataIndexes, uiDurations, gpuDurations, timelineController.paused);
+        dataIndexes,
+        uiDurations,
+        gpuDurations,
+        timelineController.frameBasedTimeline.paused,
+      );
 
       dataIndexes.removeRange(0, dataLength);
       uiDurations.removeRange(0, dataLength);
@@ -127,7 +133,7 @@ class PlotlyDivGraph extends CoreElement {
 
       if (_frames.containsKey(xPosition)) {
         final TimelineFrame timelineFrame = _frames[xPosition];
-        timelineController.selectFrame(timelineFrame);
+        timelineController.frameBasedTimeline.selectFrame(timelineFrame);
         ga.selectFrame(
           ga.timeline,
           ga.timelineFrame,
@@ -161,7 +167,9 @@ class PlotlyDivGraph extends CoreElement {
       element,
       useLogScale: false,
       showRangeSlider: false,
-      displayRefreshRate: await timelineController.displayRefreshRate,
+      displayRefreshRate:
+          await timelineController.frameBasedTimeline.displayRefreshRate ??
+              defaultRefreshRate,
     );
     plotlyChart.plotFPS();
 

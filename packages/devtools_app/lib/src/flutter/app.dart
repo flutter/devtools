@@ -9,15 +9,27 @@ import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
 import '../../src/globals.dart';
+import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
+import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'navigation.dart';
 import 'scaffold.dart';
 import 'screen.dart';
 import 'theme.dart';
+
+ThemeData buildDevToolsTheme() {
+  final ThemeData theme =
+      devtools_theme.isDarkTheme ? ThemeData.dark() : ThemeData.light();
+  // TODO(jacobr): determine whether to update the theme to match the
+  // devtools_theme or update devtools_theme to match the flutter theme.
+  // For example, to match the devtools_theme we would write:
+  // theme.copyWith(backgroundColor: devtools_theme.defaultBackground);
+  return theme.copyWith(buttonTheme: theme.buttonTheme.copyWith(minWidth: 36));
+}
 
 /// Top-level configuration for the app.
 @immutable
@@ -61,7 +73,13 @@ class DevToolsAppState extends State<DevToolsApp> {
 
     // Provide the appropriate page route.
     if (_routes.containsKey(path)) {
-      return MaterialPageRoute(settings: settings, builder: _routes[path]);
+      var builder = _routes[path];
+      assert(() {
+        builder =
+            (context) => _AlternateCheckedModeBanner(builder: _routes[path]);
+        return true;
+      }());
+      return MaterialPageRoute(settings: settings, builder: builder);
     }
     // Return a page not found.
     return MaterialPageRoute(
@@ -88,9 +106,16 @@ class DevToolsAppState extends State<DevToolsApp> {
               EmptyScreen.timeline,
               const PerformanceScreen(),
               EmptyScreen.memory,
-              EmptyScreen.debugger,
+              const DebuggerScreen(),
               EmptyScreen.logging,
               const InfoScreen(),
+            ],
+            actions: [
+              HotReloadButton(),
+              HotRestartButton(),
+              const Padding(
+                padding: EdgeInsets.only(left: 8.0),
+              ),
             ],
           ),
         ),
@@ -100,7 +125,8 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: theme,
+      debugShowCheckedModeBanner: false,
+      theme: buildDevToolsTheme(),
       onGenerateRoute: _generateRoute,
     );
   }
@@ -188,5 +214,27 @@ class _InitializerState extends State<Initializer> {
     // loading animation here in cases where this route will remain visible
     // and we await an attempt to connect.
     return _checkLoaded() ? widget.builder(context) : const SizedBox();
+  }
+}
+
+/// Displays the checked mode banner in the bottom end corner instead of the
+/// top end corner.
+///
+/// This avoids issues with widgets in the appbar being hidden by the banner
+/// in a web or desktop app.
+class _AlternateCheckedModeBanner extends StatelessWidget {
+  const _AlternateCheckedModeBanner({Key key, this.builder}) : super(key: key);
+  final WidgetBuilder builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Banner(
+      message: 'DEBUG',
+      textDirection: TextDirection.ltr,
+      location: BannerLocation.bottomEnd,
+      child: Builder(
+        builder: builder,
+      ),
+    );
   }
 }

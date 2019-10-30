@@ -20,8 +20,8 @@ void main() {
     // If any of these expect statements fail, a golden was modified while the
     // tests were running. Do not modify the goldens. Instead, make a copy and
     // modify the copy.
-    expect(goldenUiString() == originalGoldenUiEvent.toString(), isTrue);
-    expect(goldenGpuString() == originalGoldenGpuEvent.toString(), isTrue);
+    expect(originalGoldenUiEvent.toString(), equals(goldenUiString));
+    expect(originalGoldenGpuEvent.toString(), equals(goldenGpuString));
     expect(
       collectionEquals(goldenUiTraceEvents, originalGoldenUiTraceEvents),
       isTrue,
@@ -32,70 +32,44 @@ void main() {
     );
   });
 
-  group('TimelineProtocol', () {
-    TimelineProtocol timelineProtocol;
+  group('FrameBasedTimelineProcessor', () {
+    FrameBasedTimelineProcessor processor;
 
     setUp(() {
-      timelineProtocol = TimelineProtocol(
+      processor = FrameBasedTimelineProcessor(
         uiThreadId: testUiThreadId,
         gpuThreadId: testGpuThreadId,
         timelineController: MockTimelineController(),
       );
     });
 
-    test('infers correct trace event type', () {
-      final uiEvent = goldenUiTraceEvents.first;
-      final gpuEvent = goldenGpuTraceEvents.first;
-      final unknownEvent = testTraceEvent({
-        'name': 'Random Event We Should Not Process',
-        'cat': 'Embedder',
-        'tid': testUnknownThreadId,
-        'pid': 2871,
-        'ts': 9193106475,
-        'ph': 'B',
-        'args': {}
-      });
-
-      expect(uiEvent.type, equals(TimelineEventType.unknown));
-      expect(gpuEvent.type, equals(TimelineEventType.unknown));
-      expect(unknownEvent.type, equals(TimelineEventType.unknown));
-      timelineProtocol.processTraceEvent(uiEvent);
-      timelineProtocol.processTraceEvent(gpuEvent);
-      timelineProtocol.processTraceEvent(unknownEvent);
-      expect(uiEvent.type, equals(TimelineEventType.ui));
-      expect(gpuEvent.type, equals(TimelineEventType.gpu));
-      expect(unknownEvent.type, equals(TimelineEventType.unknown));
-    });
-
     test('creates one new frame per id', () {
       // Start event followed by end event.
-      timelineProtocol.processTraceEvent(frameStartEvent);
-      expect(timelineProtocol.pendingFrames.length, equals(1));
-      expect(timelineProtocol.pendingFrames.containsKey('PipelineItem-f1'),
-          isTrue);
-      timelineProtocol.processTraceEvent(frameEndEvent);
-      expect(timelineProtocol.pendingFrames.length, equals(1));
+      processor.processTraceEvent(frameStartEvent);
+      expect(processor.pendingFrames.length, equals(1));
+      expect(processor.pendingFrames.containsKey('PipelineItem-f1'), isTrue);
+      processor.processTraceEvent(frameEndEvent);
+      expect(processor.pendingFrames.length, equals(1));
 
-      timelineProtocol.pendingFrames.clear();
+      processor.pendingFrames.clear();
 
       // End event followed by start event.
-      timelineProtocol.processTraceEvent(frameEndEvent);
-      expect(timelineProtocol.pendingFrames.length, equals(1));
-      expect(timelineProtocol.pendingFrames.containsKey('PipelineItem-f1'),
-          isTrue);
-      timelineProtocol.processTraceEvent(frameStartEvent);
-      expect(timelineProtocol.pendingFrames.length, equals(1));
+      processor.processTraceEvent(frameEndEvent);
+      expect(processor.pendingFrames.length, equals(1));
+      expect(processor.pendingFrames.containsKey('PipelineItem-f1'), isTrue);
+      processor.processTraceEvent(frameStartEvent);
+      expect(processor.pendingFrames.length, equals(1));
     });
 
     test('duration trace events form timeline event tree', () async {
-      expect(timelineProtocol.pendingEvents, isEmpty);
-      goldenUiTraceEvents.forEach(timelineProtocol.processTraceEvent);
+      expect(processor.pendingEvents, isEmpty);
+      goldenUiTraceEvents.forEach(processor.processTraceEvent);
 
       await delayForEventProcessing();
 
-      expect(timelineProtocol.pendingEvents.length, equals(1));
-      final processedUiEvent = timelineProtocol.pendingEvents.first;
-      expect(processedUiEvent.toString(), equals(goldenUiString()));
+      expect(processor.pendingEvents.length, equals(1));
+      final processedUiEvent = processor.pendingEvents.first;
+      expect(processedUiEvent.toString(), equals(goldenUiString));
     });
 
     test('event occurs within frame boundaries', () {
@@ -111,53 +85,46 @@ void main() {
           ..end = const Duration(microseconds: 5000));
 
       // Event fits within frame timestamps.
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isTrue);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event fits within epsilon of frame start.
       event.time = TimeRange()
         ..start = Duration(
             microseconds: frameStartTime - traceEventEpsilon.inMicroseconds)
         ..end = const Duration(microseconds: 5000);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isTrue);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame start.
       event.time = TimeRange()
         ..start = Duration(
             microseconds: frameStartTime - traceEventEpsilon.inMicroseconds - 1)
         ..end = const Duration(microseconds: 5000);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isFalse);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event with small duration uses smaller epsilon.
       event.time = TimeRange()
         ..start = const Duration(microseconds: frameStartTime - 100)
         ..end = const Duration(microseconds: frameStartTime + 100);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isTrue);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       event.time = TimeRange()
         ..start = const Duration(microseconds: frameStartTime - 101)
         ..end = const Duration(microseconds: frameStartTime + 100);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isFalse);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Event fits within epsilon of frame end.
       event.time = TimeRange()
         ..start = const Duration(microseconds: frameStartTime - 101)
         ..end = Duration(
             microseconds: frameEndTime + traceEventEpsilon.inMicroseconds);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isTrue);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isTrue);
 
       // Event does not fit within epsilon of frame end.
       event.time = TimeRange()
         ..start = const Duration(microseconds: frameStartTime - 101)
         ..end = Duration(
             microseconds: frameEndTime + traceEventEpsilon.inMicroseconds + 1);
-      expect(
-          timelineProtocol.eventOccursWithinFrameBounds(event, frame), isFalse);
+      expect(processor.eventOccursWithinFrameBounds(event, frame), isFalse);
 
       // Satisfies UI / GPU order.
       final uiEvent = event
@@ -169,14 +136,11 @@ void main() {
           ..start = const Duration(microseconds: 4000)
           ..end = const Duration(microseconds: 8000));
 
-      expect(timelineProtocol.eventOccursWithinFrameBounds(uiEvent, frame),
-          isTrue);
-      expect(timelineProtocol.eventOccursWithinFrameBounds(gpuEvent, frame),
-          isTrue);
+      expect(processor.eventOccursWithinFrameBounds(uiEvent, frame), isTrue);
+      expect(processor.eventOccursWithinFrameBounds(gpuEvent, frame), isTrue);
 
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(timelineProtocol.eventOccursWithinFrameBounds(gpuEvent, frame),
-          isFalse);
+      expect(processor.eventOccursWithinFrameBounds(gpuEvent, frame), isFalse);
 
       frame = TimelineFrame('frameId')
         ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
@@ -185,41 +149,39 @@ void main() {
       frame
         ..setEventFlow(null, type: TimelineEventType.ui)
         ..setEventFlow(gpuEvent, type: TimelineEventType.gpu);
-      expect(timelineProtocol.eventOccursWithinFrameBounds(uiEvent, frame),
-          isFalse);
+      expect(processor.eventOccursWithinFrameBounds(uiEvent, frame), isFalse);
     });
 
     test('frame completed', () async {
-      expect(timelineProtocol.pendingEvents, isEmpty);
-      goldenUiTraceEvents.forEach(timelineProtocol.processTraceEvent);
+      expect(processor.pendingEvents, isEmpty);
+      goldenUiTraceEvents.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(1));
+      expect(processor.pendingEvents.length, equals(1));
 
-      expect(timelineProtocol.pendingFrames.length, equals(0));
-      timelineProtocol.processTraceEvent(frameStartEvent);
-      timelineProtocol.processTraceEvent(frameEndEvent);
-      expect(timelineProtocol.pendingFrames.length, equals(1));
-      expect(timelineProtocol.pendingEvents, isEmpty);
+      expect(processor.pendingFrames.length, equals(0));
+      processor.processTraceEvent(frameStartEvent);
+      processor.processTraceEvent(frameEndEvent);
+      expect(processor.pendingFrames.length, equals(1));
+      expect(processor.pendingEvents, isEmpty);
 
-      final frame = timelineProtocol.pendingFrames.values.first;
+      final frame = processor.pendingFrames.values.first;
       expect(frame.addedToTimeline, isNull);
 
-      goldenGpuTraceEvents.forEach(timelineProtocol.processTraceEvent);
+      goldenGpuTraceEvents.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(0));
-      expect(timelineProtocol.pendingFrames.length, equals(0));
-      expect(frame.uiEventFlow.toString(), equals(goldenUiString()));
-      expect(frame.gpuEventFlow.toString(), equals(goldenGpuString()));
+      expect(processor.pendingEvents.length, equals(0));
+      expect(processor.pendingFrames.length, equals(0));
+      expect(frame.uiEventFlow.toString(), equals(goldenUiString));
+      expect(frame.gpuEventFlow.toString(), equals(goldenGpuString));
       expect(frame.addedToTimeline, isTrue);
     });
 
     test('handles out of order timestamps', () async {
-      final List<TraceEvent> traceEvents = List.of(goldenUiTraceEvents);
-      traceEvents.reversed.forEach(timelineProtocol.processTraceEvent);
+      final traceEvents = List.of(goldenUiTraceEvents);
+      traceEvents.reversed.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(1));
-      expect(timelineProtocol.pendingEvents.first.toString(),
-          equals(goldenUiString()));
+      expect(processor.pendingEvents.length, equals(1));
+      expect(processor.pendingEvents.first.toString(), equals(goldenUiString));
     });
 
     test('handles trace event duplicates', () async {
@@ -230,16 +192,15 @@ void main() {
       //     ...
       //  Animator::BeginFrame
       // VSYNC
-      List<TraceEvent> traceEvents = List.of(goldenUiTraceEvents);
+      var traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.insert(1, goldenUiTraceEvents[1]);
 
-      traceEvents.forEach(timelineProtocol.processTraceEvent);
+      traceEvents.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(1));
-      expect(timelineProtocol.pendingEvents.first.toString(),
-          equals(goldenUiString()));
+      expect(processor.pendingEvents.length, equals(1));
+      expect(processor.pendingEvents.first.toString(), equals(goldenUiString));
 
-      timelineProtocol.pendingEvents.clear();
+      processor.pendingEvents.clear();
 
       // Duplicate duration end event.
       // VSYNC
@@ -252,13 +213,12 @@ void main() {
       traceEvents.insert(goldenUiTraceEvents.length - 2,
           goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
-      traceEvents.forEach(timelineProtocol.processTraceEvent);
+      traceEvents.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(1));
-      expect(timelineProtocol.pendingEvents.first.toString(),
-          equals(goldenUiString()));
+      expect(processor.pendingEvents.length, equals(1));
+      expect(processor.pendingEvents.first.toString(), equals(goldenUiString));
 
-      timelineProtocol.pendingEvents.clear();
+      processor.pendingEvents.clear();
 
       // Unrecoverable state resets event tracking.
       // VSYNC
@@ -268,7 +228,7 @@ void main() {
       //     ...
       //  Animator::BeginFrame
       // VSYNC
-      final vsyncEvent = testTraceEvent({
+      final vsyncEvent = testTraceEventWrapper({
         'name': 'VSYNC',
         'cat': 'Embedder',
         'tid': testUiThreadId,
@@ -277,7 +237,7 @@ void main() {
         'ph': 'B',
         'args': {}
       });
-      final animatorBeginFrameEvent = testTraceEvent({
+      final animatorBeginFrameEvent = testTraceEventWrapper({
         'name': 'Animator::BeginFrame',
         'cat': 'Embedder',
         'tid': testUiThreadId,
@@ -296,11 +256,88 @@ void main() {
           .addAll(goldenUiTraceEvents.getRange(2, goldenUiTraceEvents.length));
       traceEvents.insert(2, goldenUiTraceEvents[0]);
       traceEvents.insert(3, goldenUiTraceEvents[1]);
-      traceEvents.forEach(timelineProtocol.processTraceEvent);
+      traceEvents.forEach(processor.processTraceEvent);
       await delayForEventProcessing();
-      expect(timelineProtocol.pendingEvents.length, equals(0));
-      expect(timelineProtocol.currentEventNodes[TimelineEventType.ui.index],
-          isNull);
+      expect(processor.pendingEvents.length, equals(0));
+      expect(processor.currentEventNodes[TimelineEventType.ui.index], isNull);
+    });
+  });
+
+  group('FullTimelineProcessor', () {
+    FullTimelineProcessor processor;
+
+    setUp(() {
+      processor = FullTimelineProcessor(
+        uiThreadId: testUiThreadId,
+        gpuThreadId: testGpuThreadId,
+        timelineController: MockTimelineController(),
+      );
+    });
+
+    test('processes all events', () {
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents,
+        isEmpty,
+      );
+      processor.processTimeline(asyncTraceEvents
+        ..addAll([...goldenUiTraceEvents, ...goldenGpuTraceEvents]));
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents.length,
+        equals(4),
+      );
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents[0]
+            .toString(),
+        equals(goldenUiString),
+      );
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents[1]
+            .toString(),
+        equals(goldenGpuString),
+      );
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents[2]
+            .toString(),
+        equals(goldenAsyncString),
+      );
+      expect(
+        processor.timelineController.fullTimeline.data.timelineEvents[3]
+            .toString(),
+        equals('  D [193937061035 μs - 193938741076 μs]\n'),
+      );
+    });
+  });
+
+  group('TimelineProcessor', () {
+    // [TimelineProcessor] is abstract, so it doesn't matter which implementation
+    // we use for [processor].
+    final processor = FullTimelineProcessor(
+      uiThreadId: testUiThreadId,
+      gpuThreadId: testGpuThreadId,
+      timelineController: MockTimelineController(),
+    );
+
+    test('inferEventType', () {
+      expect(
+        processor.inferEventType(asyncStartATrace.event),
+        equals(TimelineEventType.async),
+      );
+      expect(
+        processor.inferEventType(asyncEndATrace.event),
+        equals(TimelineEventType.async),
+      );
+      expect(
+        processor.inferEventType(vsyncTrace.event),
+        equals(TimelineEventType.ui),
+      );
+      expect(
+        processor.inferEventType(gpuRasterizerDrawTrace.event),
+        equals(TimelineEventType.gpu),
+      );
+      expect(
+        processor.inferEventType(unknownEventTrace.event),
+        equals(TimelineEventType.unknown),
+      );
     });
   });
 }
@@ -309,4 +346,22 @@ Future<void> delayForEventProcessing() async {
   await Future.delayed(const Duration(milliseconds: 1500));
 }
 
-class MockTimelineController extends Mock implements TimelineController {}
+class MockTimelineController extends Mock implements TimelineController {
+  @override
+  final frameBasedTimeline = MockFrameBasedTimeline();
+
+  @override
+  final fullTimeline = MockFullTimeline();
+}
+
+class MockFrameBasedTimeline extends Mock implements FrameBasedTimeline {}
+
+class MockFullTimeline extends Mock implements FullTimeline {
+  @override
+  final data = FullTimelineData();
+
+  @override
+  void addTimelineEvent(TimelineEvent event) {
+    data.timelineEvents.add(event);
+  }
+}

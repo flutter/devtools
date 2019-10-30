@@ -48,7 +48,7 @@ dependencies:
     ^0.0.2
 #    path: ../../third_party/packages/primer_css
   split:
-    ^0.0.5
+    ^0.0.7
 #    path: ../../third_party/packages/split
   plotly_js:
     ^0.0.2
@@ -57,6 +57,8 @@ dependencies:
   web_socket_channel:
     ^1.1.0
   flutter:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
   flutter_widgets: ^0.1.6
 
@@ -85,6 +87,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - web/widgets.json
     - web/icons/
     - web/icons/actions/
     - web/icons/custom/
@@ -109,3 +112,8 @@ flutter:
           weight: 700
         - asset: fonts/Roboto/Roboto-Black.ttf
           weight: 900
+  plugin:
+    platforms:
+      web:
+        pluginClass: DebuggerHtmlPlugin
+        fileName: debugger_html_plugin.dart

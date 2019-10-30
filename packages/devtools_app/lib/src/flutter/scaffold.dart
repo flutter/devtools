@@ -18,6 +18,7 @@ class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
     @required this.tabs,
+    this.actions,
   })  : assert(tabs != null),
         super(key: key);
 
@@ -31,10 +32,15 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 800.0;
+  static const double narrowWidthThreshold = 1200.0;
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
+
+  /// Actions that it's possible to perform in this Scaffold.
+  ///
+  /// These will generally be [RegisteredServiceExtensionButton]s.
+  final List<Widget> actions;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -147,6 +153,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           automaticallyImplyLeading: !kIsWeb,
           title: title,
           bottom: tabs,
+          actions: widget.actions,
         ),
       );
     }
@@ -171,6 +178,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               ),
           ],
         ),
+        actions: widget.actions,
       ),
     );
   }

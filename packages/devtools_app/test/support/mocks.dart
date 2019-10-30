@@ -11,14 +11,21 @@ import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
-// A mock of the serviceManager with enough mocked out to run the InfoController.
-// TODO(djshuckerow): Directly mock the InfoController to make testing easier.
 class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
   final VmServiceWrapper service = MockVmService();
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
+
+  @override
+  Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
+
+  @override
+  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
+
+  @override
+  final bool hasConnection = true;
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =

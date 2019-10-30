@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
+import '../timeline/timeline_model.dart';
 import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
@@ -28,13 +29,14 @@ const _selectedNodeColor = ThemedColor(
 );
 
 const _shadedBackgroundColor =
-    ThemedColor(Color(0xFFF6F6F6), Color(0xFF202124));
+    ThemedColor(Color(0xFFF6F6F6), Color(0xFF2D2E31));
 
-const double _fontSize = 14.0;
+const double fontSize = 14.0;
 const double _textOffsetY = 18.0;
 const double rowPadding = 2.0;
 const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
+const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 
@@ -46,20 +48,27 @@ abstract class FlameChart<T> {
     @required this.duration,
     @required this.width,
     @required this.height,
-  }) : timelineGrid = TimelineGrid(duration, width) {
-    initRows();
+    @required this.startInset,
+  })  : totalStartingWidth = width - startInset - sideInset,
+        timelineGrid = TimelineGrid(duration, width, startInset) {
+    initUiElements();
   }
 
   final T data;
 
   final Duration duration;
 
+  final double startInset;
+
+  final double totalStartingWidth;
+
   // These values are not final because the flame chart viewport can change in
   // size.
   double width;
   double height;
 
-  double get widthWithInsets => calculatedWidth + 2 * sideInset;
+  double get calculatedWidthWithInsets =>
+      calculatedWidth + startInset + sideInset;
 
   final _nodeSelectedController = StreamController<FlameChartNode>.broadcast();
 
@@ -69,18 +78,20 @@ abstract class FlameChart<T> {
 
   List<FlameChartRow> rows = [];
 
+  List<FlameChartSection> sections = [];
+
   TimelineGrid timelineGrid;
 
   num zoomLevel = 1;
 
-  num get _zoomMultiplier => zoomLevel * 0.003;
+  num get zoomMultiplier => zoomLevel * 0.003;
 
   // The DOM doesn't allow floating point scroll offsets so we track a
   // theoretical floating point scroll offset corresponding to the current
   // scroll offset to reduce floating point error when zooming.
   num floatingPointScrollLeft = 0;
 
-  void initRows();
+  void initUiElements();
 
   double get calculatedWidth;
 
@@ -116,6 +127,7 @@ abstract class FlameChart<T> {
     final row = rows[rowIndex];
     final nodes = row.nodes;
 
+    // TODO(kenz): consolidate binary search logic into geometry helper.
     FlameChartNode binarySearchForNode() {
       int min = 0;
       int max = nodes.length;
@@ -146,6 +158,23 @@ abstract class FlameChart<T> {
     }
     return math.max((relativeYPosition(y)) ~/ rowHeightWithPadding, 0);
   }
+
+  FlameChartNode sectionLabel(
+    String title,
+    Color backgroundColor, {
+    @required double top,
+    @required double width,
+  }) {
+    return FlameChartNode<TimelineEvent>(
+      Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
+      backgroundColor,
+      title == 'GPU' ? Colors.white : Colors.black,
+      Colors.black,
+      null,
+      (_) => title,
+      startInset,
+    );
+  }
 }
 
 abstract class FlameChartCanvas<T> extends FlameChart {
@@ -154,15 +183,19 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     @required Duration duration,
     @required double width,
     @required double height,
+    double startInset = sideInset,
     String classes,
-  }) : super(
+    int maxZoomLevel = 150,
+  })  : _maxZoomLevel = maxZoomLevel,
+        super(
           data: data,
           duration: duration,
           width: width,
           height: height,
+          startInset: startInset,
         ) {
     _viewportCanvas = ViewportCanvas(
-      paintCallback: _paintCallback,
+      paintCallback: paintCallback,
       onTap: _onTap,
       classes: 'fill-section $classes',
     )..element.element.style.overflow = 'hidden';
@@ -195,7 +228,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
   ///
   /// Arbitrary large number to accommodate spacing for some of the shortest
   /// events when zoomed in to [_maxZoomLevel].
-  final _maxZoomLevel = 150;
+  final int _maxZoomLevel;
   final _minZoomLevel = 1;
 
   void _initAsciiMeasurements() {
@@ -203,7 +236,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     if (_asciiMeasurements != null) return;
 
     final measurementCanvas = CanvasElement().context2D
-      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+      ..font = fontStyleToCss(const TextStyle(fontSize: fontSize));
     _asciiMeasurements = List.generate(
       128,
       (i) => measurementCanvas.measureText(ascii.decode([i])).width,
@@ -212,17 +245,42 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 
   // TODO(kenz): optimize painting to canvas by grouping paints with the same
   // canvas settings.
-  void _paintCallback(CanvasRenderingContext2D canvas, Rect rect) {
-    final int startRow = math.max(rowIndexForY(rect.top), 0);
+  void paintCallback(CanvasRenderingContext2D canvas, Rect visible) {
+    paintSections(canvas, visible);
+    paintRows(canvas, visible);
+    paintTimelineGrid(canvas, visible);
+  }
+
+  void paintSections(CanvasRenderingContext2D canvas, Rect visible) {
+    final oddSections = sections.where((s) => s.index % 2 == 1).toList();
+    for (FlameChartSection section in oddSections) {
+      canvas
+        ..fillStyle = colorToCss(_shadedBackgroundColor)
+        ..fillRect(
+          visible.left,
+          section.absStartY,
+          visible.width,
+          math.min(
+              visible.bottom,
+              (section.endRow - section.startRow) * rowHeightWithPadding +
+                  sectionSpacing),
+        );
+    }
+  }
+
+  void paintRows(CanvasRenderingContext2D canvas, Rect visible) {
+    final int startRow = math.max(rowIndexForY(visible.top), 0);
     final int endRow = math.min(
-      rowIndexForY(rect.bottom) + 1,
-      rows.length - 1,
+      rowIndexForY(visible.bottom) + 1,
+      rows.length,
     );
     for (int i = startRow; i < endRow; i++) {
-      paintRow(canvas, i, rect);
+      paintRow(canvas, i, visible);
     }
+  }
 
-    timelineGrid.paint(canvas, _viewportCanvas.viewport, rect);
+  void paintTimelineGrid(CanvasRenderingContext2D canvas, Rect visible) {
+    timelineGrid.paint(canvas, _viewportCanvas.viewport, visible);
   }
 
   void paintRow(
@@ -231,6 +289,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     Rect visible,
   ) {
     final row = rows[index];
+    // TODO(kenz): use binary search technique here.
     for (FlameChartNode node in row.nodes) {
       if (node.rect.left + node.rect.width < visible.left) continue;
       if (node.rect.left > visible.right) break;
@@ -263,7 +322,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
     assert(data != null);
 
     deltaY = deltaY.clamp(-maxScrollWheelDelta, maxScrollWheelDelta);
-    num newZoomLevel = zoomLevel + deltaY * _zoomMultiplier;
+    num newZoomLevel = zoomLevel + deltaY * zoomMultiplier;
     newZoomLevel = newZoomLevel.clamp(_minZoomLevel, _maxZoomLevel);
 
     if (newZoomLevel == zoomLevel) return;
@@ -275,31 +334,36 @@ abstract class FlameChartCanvas<T> extends FlameChart {
       lastScrollLeft = floatingPointScrollLeft;
     }
     // Position in the zoomable coordinate space that we want to keep fixed.
-    final num fixedX = mouseX + lastScrollLeft - sideInset;
+    final num fixedX = mouseX + lastScrollLeft - startInset;
     // Calculate and set our new horizontal scroll position.
     if (fixedX >= 0) {
       floatingPointScrollLeft =
-          fixedX * newZoomLevel / zoomLevel + sideInset - mouseX;
+          fixedX * newZoomLevel / zoomLevel + startInset - mouseX;
     } else {
       // No need to transform as we are in the fixed portion of the window.
       floatingPointScrollLeft = lastScrollLeft;
     }
     zoomLevel = newZoomLevel;
 
-    _updateChartForZoom();
+    updateChartForZoom();
   }
 
-  void _updateChartForZoom() {
+  void updateChartForZoom() {
+    updateNodesForZoom();
+    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
+    rebuildAndPositionAfterZoom();
+  }
+
+  void updateNodesForZoom() {
     for (FlameChartRow row in rows) {
       for (FlameChartNode node in row.nodes) {
         node.updateForZoom(zoom: zoomLevel);
       }
     }
+  }
 
-    timelineGrid.updateForZoom(zoomLevel, calculatedWidth);
-
-    forceRebuildForSize(widthWithInsets, height);
-
+  void rebuildAndPositionAfterZoom() {
+    forceRebuildForSize(calculatedWidthWithInsets, height);
     _viewportCanvas.element.element.scrollLeft =
         math.max(0, floatingPointScrollLeft.round());
   }
@@ -323,6 +387,25 @@ class FlameChartRow {
   final int index;
 }
 
+class FlameChartSection {
+  FlameChartSection(
+    this.index, {
+    @required this.startRow,
+    @required this.endRow,
+    this.absStartY,
+  });
+
+  final int index;
+
+  /// Start row (inclusive) for this section.
+  final int startRow;
+
+  /// End row (exclusive) for this section.
+  final int endRow;
+
+  double absStartY;
+}
+
 class FlameChartNode<T> {
   FlameChartNode(
     this.rect,
@@ -330,7 +413,8 @@ class FlameChartNode<T> {
     this.textColor,
     this.selectedTextColor,
     this.data,
-    this.displayTextProvider, {
+    this.displayTextProvider,
+    this.chartStartInset, {
     this.rounded = false,
   })  : startingLeft = rect.left,
         startingWidth = rect.width;
@@ -343,7 +427,7 @@ class FlameChartNode<T> {
     Color(0x5A1B1F23),
   );
 
-  static const minWidthForText = 20;
+  static const minWidthForText = 20.0;
 
   /// Left value for the flame chart item at zoom level 1.
   final num startingLeft;
@@ -360,6 +444,8 @@ class FlameChartNode<T> {
   final T data;
 
   final String Function(T) displayTextProvider;
+
+  final double chartStartInset;
 
   final bool rounded;
 
@@ -427,7 +513,7 @@ class FlameChartNode<T> {
     if (rect.width > minWidthForText) {
       canvas
         ..fillStyle = colorToCss(selected ? selectedTextColor : textColor)
-        ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize));
+        ..font = fontStyleToCss(const TextStyle(fontSize: fontSize));
 
       String displayText = text;
 
@@ -458,12 +544,15 @@ class FlameChartNode<T> {
   }
 
   void updateForZoom({@required num zoom}) {
+    // If the node has no data, it is a label and its zoom should not change.
+    if (data == null) return;
+
     // TODO(kenz): this comment may be dated now that we are drawing to
     // canvas. Look into it and delete it if necessary.
     // Do not round these values. Rounding the left could cause us to have
     // inaccurately placed events on the chart. Rounding the width could cause
     // us to lose very small events if the width rounds to zero.
-    final newLeft = (startingLeft - sideInset) * zoom + sideInset;
+    final newLeft = (startingLeft - chartStartInset) * zoom + chartStartInset;
     final newWidth = startingWidth * zoom;
 
     final updatedRect = Rect.fromLTWH(newLeft, rect.top, newWidth, rect.height);
@@ -472,7 +561,7 @@ class FlameChartNode<T> {
 }
 
 class TimelineGrid {
-  TimelineGrid(this._duration, this._flameChartWidth);
+  TimelineGrid(this._duration, this._flameChartWidth, this._chartStartInset);
 
   static const baseGridIntervalPx = 150;
   static const gridLineWidth = 0.4;
@@ -487,6 +576,8 @@ class TimelineGrid {
   );
 
   final Duration _duration;
+
+  final double _chartStartInset;
 
   num currentInterval = baseGridIntervalPx;
 
@@ -505,8 +596,15 @@ class TimelineGrid {
       rowHeight,
     );
 
-    num left = (visible.left - sideInset) ~/ currentInterval * currentInterval +
-        sideInset;
+    double left;
+    if (visible.left == 0.0) {
+      left = _chartStartInset;
+    } else {
+      left = (visible.left - _chartStartInset) ~/
+              currentInterval *
+              currentInterval +
+          _chartStartInset;
+    }
 
     final firstGridNodeText = msText(
       const Duration(microseconds: 0),
@@ -516,18 +614,18 @@ class TimelineGrid {
     // Set canvas styles and handle the first grid node since it will have a
     // different width than the rest.
     canvas
-      ..font = fontStyleToCss(const TextStyle(fontSize: _fontSize))
+      ..font = fontStyleToCss(const TextStyle(fontSize: fontSize))
       ..fillStyle = colorToCss(timestampColor)
       ..fillText(
         firstGridNodeText,
-        _timestampLeft(firstGridNodeText, 0, sideInset, canvas),
+        _timestampLeft(firstGridNodeText, 0, _chartStartInset, canvas),
         viewport.top + _textOffsetY,
       )
       ..strokeStyle = colorToCss(gridLineColor)
       ..lineWidth = gridLineWidth
       ..beginPath()
-      ..moveTo(sideInset, visible.top)
-      ..lineTo(sideInset, visible.bottom)
+      ..moveTo(_chartStartInset, visible.top)
+      ..lineTo(_chartStartInset, visible.bottom)
       ..closePath()
       ..stroke();
 
@@ -583,7 +681,7 @@ class TimelineGrid {
   /// Returns the timestamp rounded to the nearest microsecond for the
   /// x-position.
   int timestampForPosition(num gridItemEnd) {
-    return ((gridItemEnd - sideInset) /
+    return ((gridItemEnd - _chartStartInset) /
             _flameChartWidth *
             _duration.inMicroseconds)
         .round();

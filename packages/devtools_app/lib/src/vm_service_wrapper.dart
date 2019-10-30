@@ -393,8 +393,17 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Timestamp> getVMTimelineMicros() =>
-      _trackFuture('getVMTimelineMicros', _vmService.getVMTimelineMicros());
+  Future<Timestamp> getVMTimelineMicros() async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 3, minor: 21))) {
+      return _trackFuture(
+        'getVMTimelineMicros',
+        _vmService.getVMTimelineMicros(),
+      );
+    } else {
+      return null;
+    }
+  }
 
   @override
   Future<Version> getVersion() =>

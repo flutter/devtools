@@ -137,6 +137,8 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
+    unawaited(onClosed.then((_) => vmServiceClosed()));
+
     void handleServiceEvent(Event e) {
       if (e.kind == EventKind.kServiceRegistered) {
         if (!_registeredMethodsForService.containsKey(e.service)) {
@@ -162,8 +164,6 @@ class ServiceConnectionManager {
     service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
     service.onExtensionEvent
         .listen(_serviceExtensionManager._handleExtensionEvent);
-
-    unawaited(onClosed.then((_) => vmServiceClosed()));
 
     final streamIds = [
       EventStreams.kDebug,
@@ -229,6 +229,10 @@ class ServiceConnectionManager {
   }
 
   Future<double> getDisplayRefreshRate() async {
+    if (connectedApp == null || !await connectedApp.isAnyFlutterApp) {
+      return null;
+    }
+
     const unknownRefreshRate = 0.0;
 
     final flutterViewListResponse = await service.callServiceExtension(

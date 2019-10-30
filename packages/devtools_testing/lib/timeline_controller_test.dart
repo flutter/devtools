@@ -14,49 +14,15 @@ import 'support/flutter_test_environment.dart';
 import 'support/timeline_test_data.dart';
 
 Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
+  TimelineController timelineController;
+  env.afterNewSetup = () async {
+    timelineController = TimelineController();
+    await timelineController.timelineService.startTimeline();
+  };
+
   group('TimelineController', () {
-    TimelineController timelineController;
-
-    env.afterNewSetup = () async {
-      timelineController = TimelineController();
-      await timelineController.timelineService.startTimeline();
-    };
-
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
-    });
-
-    test('selection', () async {
-      await env.setupEnvironment();
-
-      // Select a frame.
-      final frame_0 = TimelineFrame('id_0');
-      expect(timelineController.timelineData.selectedFrame, isNull);
-      timelineController.selectFrame(frame_0);
-      expect(timelineController.timelineData.selectedFrame, equals(frame_0));
-
-      // Select a timeline event.
-      expect(timelineController.timelineData.selectedEvent, isNull);
-      expect(timelineController.timelineData.cpuProfileData, isNull);
-      timelineController.selectTimelineEvent(vsyncEvent);
-      expect(timelineController.timelineData.selectedEvent, equals(vsyncEvent));
-
-      // Select a different frame.
-      final frame_1 = TimelineFrame('id_1');
-      timelineController.selectFrame(frame_1);
-      expect(timelineController.timelineData.selectedFrame, equals(frame_1));
-      expect(timelineController.timelineData.selectedEvent, isNull);
-      expect(timelineController.timelineData.cpuProfileData, isNull);
-
-      await env.tearDownEnvironment();
-    });
-
-    test('add frame', () async {
-      await env.setupEnvironment();
-      expect(timelineController.timelineData.frames, isEmpty);
-      timelineController.addFrame(TimelineFrame('id'));
-      expect(timelineController.timelineData.frames.length, equals(1));
-      await env.tearDownEnvironment();
     });
 
     test('recordTraceForTimelineEvent', () async {
@@ -67,58 +33,129 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       expect(
         timelineController.timelineData.traceEvents,
         equals([
-          vsyncJson,
-          animatorBeginFrameJson,
-          frameworkWorkloadJson,
-          engineBeginFrameJson,
-          frameJson,
-          animateJson,
-          layoutJson,
-          buildJson,
-          compositingBitsJson,
-          paintJson,
-          compositingJson,
-          semanticsJson,
-          finalizeTreeJson,
-          endEngineBeginFrameJson,
-          endFrameworkWorkloadJson,
-          endAnimatorBeginFrameJson,
-          endVsyncJson,
+          vsyncTrace.json,
+          animatorBeginFrameTrace.json,
+          frameworkWorkloadTrace.json,
+          engineBeginFrameTrace.json,
+          frameTrace.json,
+          animateTrace.json,
+          layoutTrace.json,
+          buildTrace.json,
+          compositingBitsTrace.json,
+          paintTrace.json,
+          compositingTrace.json,
+          semanticsTrace.json,
+          finalizeTreeTrace.json,
+          endEngineBeginFrameTrace.json,
+          endFrameworkWorkloadTrace.json,
+          endAnimatorBeginFrameTrace.json,
+          endVsyncTrace.json,
         ]),
       );
 
       await env.tearDownEnvironment();
     });
 
+    // TODO(kenz): add tests for offline FullTimeline once that is supported.
     test('loadOfflineData', () async {
       await env.setupEnvironment();
 
       final offlineData = OfflineTimelineData.parse(offlineTimelineDataJson);
       timelineController.loadOfflineData(offlineData);
       expect(
-        isTimelineDataEqual(timelineController.timelineData, offlineData),
+        isFrameBasedTimelineDataEqual(
+          timelineController.timelineData,
+          offlineData,
+        ),
         isTrue,
       );
       expect(
-        isTimelineDataEqual(
-            timelineController.offlineTimelineData, offlineData),
+        isFrameBasedTimelineDataEqual(
+          timelineController.offlineTimelineData,
+          offlineData,
+        ),
         isTrue,
       );
       expect(
-        timelineController.timelineProtocol.uiThreadId,
+        timelineController.frameBasedTimeline.processor.uiThreadId,
         equals(testUiThreadId),
       );
       expect(
-        timelineController.timelineProtocol.gpuThreadId,
+        timelineController.frameBasedTimeline.processor.gpuThreadId,
         equals(testGpuThreadId),
       );
 
       await env.tearDownEnvironment();
     });
   });
+
+  group('FrameBasedTimeline', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
+    test('selection', () async {
+      await env.setupEnvironment();
+
+      // Select a frame.
+      final frame_0 = TimelineFrame('id_0');
+      expect(timelineController.frameBasedTimeline.data.selectedFrame, isNull);
+      timelineController.frameBasedTimeline.selectFrame(frame_0);
+      expect(
+        timelineController.frameBasedTimeline.data.selectedFrame,
+        equals(frame_0),
+      );
+
+      // Select a timeline event.
+      expect(timelineController.timelineData.selectedEvent, isNull);
+      expect(timelineController.timelineData.cpuProfileData, isNull);
+      timelineController.selectTimelineEvent(vsyncEvent);
+      expect(timelineController.timelineData.selectedEvent, equals(vsyncEvent));
+
+      // Select a different frame.
+      final frame_1 = TimelineFrame('id_1');
+      timelineController.frameBasedTimeline.selectFrame(frame_1);
+      expect(
+        timelineController.frameBasedTimeline.data.selectedFrame,
+        equals(frame_1),
+      );
+      expect(timelineController.timelineData.selectedEvent, isNull);
+      expect(timelineController.timelineData.cpuProfileData, isNull);
+
+      await env.tearDownEnvironment();
+    });
+
+    test('add frame', () async {
+      await env.setupEnvironment();
+      expect(timelineController.frameBasedTimeline.data.frames, isEmpty);
+      timelineController.frameBasedTimeline.addFrame(TimelineFrame('id'));
+      expect(
+        timelineController.frameBasedTimeline.data.frames.length,
+        equals(1),
+      );
+      await env.tearDownEnvironment();
+    });
+  });
+
+  group('FullTimeline', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
+    test('recording', () {
+      expect(timelineController.fullTimeline.recording, isFalse);
+      timelineController.fullTimeline.startRecording();
+      expect(timelineController.fullTimeline.recording, isTrue);
+      timelineController.fullTimeline.stopRecording();
+      expect(timelineController.fullTimeline.recording, isFalse);
+    });
+  });
 }
 
-bool isTimelineDataEqual(TimelineData a, TimelineData b) {
+bool isFrameBasedTimelineDataEqual(
+  FrameBasedTimelineData a,
+  FrameBasedTimelineData b,
+) {
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&

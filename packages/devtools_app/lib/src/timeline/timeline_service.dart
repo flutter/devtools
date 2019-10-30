@@ -41,12 +41,30 @@ class TimelineService {
       final List<Map<String, dynamic>> events =
           list.cast<Map<String, dynamic>>();
 
+      final bool shouldProcessEventForFrameBasedTimeline =
+          timelineController.timelineMode == TimelineMode.frameBased &&
+              !timelineController.frameBasedTimeline.manuallyPaused &&
+              !timelineController.frameBasedTimeline.paused;
+      final bool shouldProcessEventForFullTimeline =
+          timelineController.timelineMode == TimelineMode.full &&
+              timelineController.fullTimeline.recording;
+
       if (!offlineMode &&
-          !timelineController.manuallyPaused &&
-          !timelineController.paused) {
+          (shouldProcessEventForFrameBasedTimeline ||
+              shouldProcessEventForFullTimeline)) {
         for (Map<String, dynamic> json in events) {
-          final TraceEvent e = TraceEvent(json);
-          timelineController.timelineProtocol?.processTraceEvent(e);
+          final eventWrapper = TraceEventWrapper(
+            TraceEvent(json),
+            DateTime.now().millisecondsSinceEpoch,
+          );
+          timelineController.allTraceEvents.add(eventWrapper);
+
+          // For [TimelineMode.frameBased], process the events as we receive
+          // them.
+          if (timelineController.timelineMode == TimelineMode.frameBased) {
+            timelineController.frameBasedTimeline.processor
+                ?.processTraceEvent(eventWrapper);
+          }
         }
       }
     });
@@ -57,9 +75,11 @@ class TimelineService {
   }
 
   Future<void> startTimeline() async {
-    timelineController.timelineData = TimelineData(
-      displayRefreshRate: await serviceManager.getDisplayRefreshRate(),
-    );
+    if (await serviceManager.connectedApp.isAnyFlutterApp) {
+      timelineController.frameBasedTimeline.data = FrameBasedTimelineData(
+          displayRefreshRate: await serviceManager.getDisplayRefreshRate());
+    }
+    timelineController.fullTimeline.data = FullTimelineData();
 
     await serviceManager.serviceAvailable.future;
     await allowedError(serviceManager.service
@@ -109,7 +129,14 @@ class TimelineService {
           '$threadNames');
     }
 
-    timelineController.timelineProtocol = TimelineProtocol(
+    timelineController.frameBasedTimeline.processor =
+        FrameBasedTimelineProcessor(
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+      timelineController: timelineController,
+    );
+
+    timelineController.fullTimeline.processor = FullTimelineProcessor(
       uiThreadId: uiThreadId,
       gpuThreadId: gpuThreadId,
       timelineController: timelineController,
@@ -124,12 +151,12 @@ class TimelineService {
     if (shouldBeRunning && isRunning && !timelineController.hasStarted) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
-      timelineController.resume();
+      timelineController.frameBasedTimeline.resume();
       await allowedError(serviceManager.service
           .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
-      timelineController.pause();
+      timelineController.frameBasedTimeline.pause();
       await allowedError(serviceManager.service.setVMTimelineFlags(<String>[]));
     }
   }

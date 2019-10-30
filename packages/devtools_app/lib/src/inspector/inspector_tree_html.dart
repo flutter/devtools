@@ -10,7 +10,6 @@
 library inspector_tree_html;
 
 import 'package:html_shim/html.dart';
-
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
@@ -20,9 +19,9 @@ import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import 'diagnostics_node.dart';
-import 'inspector_service.dart';
 import 'inspector_text_styles.dart';
 import 'inspector_tree.dart';
+import 'inspector_tree_legacy.dart';
 import 'inspector_tree_web.dart';
 
 abstract class HtmlPaintEntry extends PaintEntry {
@@ -45,12 +44,6 @@ class IconPaintEntry extends HtmlPaintEntry {
   void paint(Element parent) {
     element = iconRenderer.createElement();
     parent.append(element);
-  }
-
-  @override
-  void attach(InspectorTree owner) {
-    // The browser handles painting images when they are available so we don't
-    // have to do anything.
   }
 }
 
@@ -127,21 +120,20 @@ class InspectorTreeNodeRenderHtmlBuilder
   InspectorTreeNodeHtmlRender build() {
     // The html renderer does not know what its size is.
     final classes = [
-      'inspector-level-${diagnosticLevelToName[level]}',
-      'inspector-style-${treeStyleToName[treeStyle]}',
+      'inspector-level-${diagnosticLevelUtils.name(level)}',
+      'inspector-style-${treeStyleUtils.name(treeStyle)}',
     ];
     if (!allowWrap) {
       classes.add('inspector-no-wrap');
     }
-    return InspectorTreeNodeHtmlRender(_entries, const Size(0, 0), classes);
+    return InspectorTreeNodeHtmlRender(_entries, classes);
   }
 }
 
 class InspectorTreeNodeHtmlRender
     extends InspectorTreeNodeRender<HtmlPaintEntry> {
-  InspectorTreeNodeHtmlRender(
-      List<HtmlPaintEntry> entries, Size size, this.cssClasses)
-      : super(entries, size);
+  InspectorTreeNodeHtmlRender(List<HtmlPaintEntry> entries, this.cssClasses)
+      : super(entries);
 
   final List<String> cssClasses;
 
@@ -162,7 +154,7 @@ class InspectorTreeNodeHtmlRender
   }
 }
 
-class InspectorTreeNodeHtml extends InspectorTreeNode {
+class InspectorTreeNodeHtml extends InspectorTreeNodeLegacy {
   @override
   InspectorTreeNodeRenderBuilder createRenderBuilder() {
     return InspectorTreeNodeRenderHtmlBuilder(
@@ -173,23 +165,9 @@ class InspectorTreeNodeHtml extends InspectorTreeNode {
   }
 }
 
-class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
-  InspectorTreeHtml({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  })  : _container = div(c: 'inspector-tree-html'),
-        super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        ) {
+class InspectorTreeHtml extends InspectorTreeControllerLegacy
+    with InspectorTreeWeb {
+  InspectorTreeHtml() : _container = div(c: 'inspector-tree-html') {
     _container.onClick.listen(onMouseClick);
     _container.element..setAttribute('tabIndex', '0');
 
@@ -217,7 +195,8 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
   }
 
   DevToolsIcon _resolveIcon(InspectorTreeRow row, Element e) {
-    final InspectorTreeNodeHtmlRender render = row?.node?.renderObject;
+    final InspectorTreeNodeHtml node = row?.node;
+    final InspectorTreeNodeHtmlRender render = node?.renderObject;
     if (render == null) {
       return null;
     }
@@ -243,10 +222,10 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
   bool _recomputeRows = false;
 
   @override
-  void setState(VoidCallback modifyState) {
+  void setState(VoidCallback fn) {
     // More closely match Flutter semantics where state is set immediately
     // instead of after a frame.
-    modifyState();
+    fn();
     if (!_recomputeRows) {
       _recomputeRows = true;
       window.requestAnimationFrame((_) => _rebuildData());
@@ -330,7 +309,8 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
         container.classes.add('property-value');
       }
       // final bool showExpandCollapse = node.showExpandCollapse;
-      final InspectorTreeNodeHtmlRender renderObject = node.renderObject;
+      final InspectorTreeNodeHtmlRender renderObject =
+          (row?.node as InspectorTreeNodeHtml).renderObject;
 
       // TODO(jacobr): port this code to work for the html renderer to support
       // drawing lines describing the tree. Likely the best way to render this
@@ -362,7 +342,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
         currentX = getDepthIndent(tick) - columnWidth * 0.5;
         if (isVisible(1.0)) {
           final highlight = row.highlightDepth == tick;
-          _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+          _maybeStart(highlight ? highlightLineColor : treeGuidelineColor);
           canvas
             ..moveTo(currentX, 0.0)
             ..lineTo(currentX, rowHeight);
@@ -373,7 +353,7 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
         currentX = getDepthIndent(row.depth - 1) - columnWidth * 0.5;
         final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
         if (isVisible(width)) {
-          _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+          _maybeStart(highlight ? highlightLineColor : treeGuidelineColor);
           canvas
             ..moveTo(currentX, 0.0)
             ..lineTo(currentX, rowHeight * 0.5)
@@ -413,7 +393,8 @@ class InspectorTreeHtml extends InspectorTree with InspectorTreeWeb {
     // TODO: implement animateToTargets
     window.requestAnimationFrame((_) {
       for (var target in targets.reversed) {
-        final InspectorTreeNodeHtmlRender renderObject = target.renderObject;
+        final InspectorTreeNodeHtmlRender renderObject =
+            (target as InspectorTreeNodeHtml).renderObject;
         // TODO(jacobr): be smarter about not calling this on all elements.
         renderObject?.element?.scrollIntoView();
       }

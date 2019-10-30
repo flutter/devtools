@@ -8,14 +8,15 @@ import 'dart:math';
 import 'package:html_shim/html.dart';
 import 'package:meta/meta.dart';
 
+import '../ui/colors.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/flutter_html_shim.dart';
 import '../ui/html_elements.dart';
 import '../ui/html_icon_renderer.dart';
 import '../ui/icons.dart';
 import '../ui/viewport_canvas.dart';
-import 'inspector_service.dart';
 import 'inspector_tree.dart';
+import 'inspector_tree_legacy.dart';
 import 'inspector_tree_web.dart';
 
 typedef CanvasPaintCallback = void Function(
@@ -29,6 +30,7 @@ abstract class CanvasPaintEntry extends PaintEntry {
   CanvasPaintEntry(this.x);
 
   final double x;
+
   double get right;
 
   void paint(CanvasRenderingContext2D canvas);
@@ -63,11 +65,12 @@ class IconPaintEntry extends CanvasPaintEntry {
   double get right => x + icon.iconWidth;
 
   @override
-  void attach(InspectorTree owner) {
+  void attach(InspectorTreeController owner) {
     final image = iconRenderer.image;
     if (image == null) {
       iconRenderer.loadImage().then((_) {
         // TODO(jacobr): only repaint what is needed.
+        // ignore: invalid_use_of_protected_member
         owner.setState(() {});
       });
     }
@@ -155,7 +158,7 @@ class InspectorTreeNodeRenderCanvasBuilder
 }
 
 class InspectorTreeNodeCanvasRender
-    extends InspectorTreeNodeRender<CanvasPaintEntry> {
+    extends InspectorTreeNodeRendererLegacy<CanvasPaintEntry> {
   InspectorTreeNodeCanvasRender(List<CanvasPaintEntry> entries, Size size)
       : super(entries, size);
 
@@ -188,7 +191,7 @@ class InspectorTreeNodeCanvasRender
   }
 }
 
-class InspectorTreeNodeCanvas extends InspectorTreeNode {
+class InspectorTreeNodeCanvas extends InspectorTreeNodeLegacy {
   @override
   InspectorTreeNodeRenderBuilder createRenderBuilder() {
     return InspectorTreeNodeRenderCanvasBuilder(
@@ -198,23 +201,9 @@ class InspectorTreeNodeCanvas extends InspectorTreeNode {
   }
 }
 
-class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
-    with InspectorTreeWeb {
-  InspectorTreeCanvas({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  }) : super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        ) {
+class InspectorTreeCanvas extends InspectorTreeControllerLegacy
+    with InspectorTreeWeb, InspectorTreeFixedRowHeightController {
+  InspectorTreeCanvas() {
     _viewportCanvas = ViewportCanvas(
       paintCallback: _paintCallback,
       onTap: onTap,
@@ -226,6 +215,20 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
 
     _viewportCanvas.element.element.tabIndex = 0;
     addKeyboardListeners(_viewportCanvas.element);
+  }
+
+  /// The future completes when the possible tooltip on hover is available.
+  ///
+  /// Generally only await this future for tests that check for the value shown
+  /// on hover matches the expected value.
+  Future<void> onMouseMove(Offset offset) async {
+    final row = getRow(offset);
+    if (row != null) {
+      final InspectorTreeNodeCanvas node = row.node;
+      await onHover(node, node?.renderObject?.hitTest(offset));
+    } else {
+      await onHover(null, null);
+    }
   }
 
   void _updateForContainerResize(Size size) {
@@ -244,10 +247,10 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
   bool _recomputeRows = false;
 
   @override
-  void setState(VoidCallback modifyState) {
+  void setState(VoidCallback fn) {
     // More closely match Flutter semantics where state is set immediately
     // instead of after a frame.
-    modifyState();
+    fn();
     if (!_recomputeRows) {
       _recomputeRows = true;
       window.requestAnimationFrame((_) => _rebuildData());
@@ -322,7 +325,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     if (row == null) {
       return;
     }
-    final node = row.node;
+    final InspectorTreeNodeCanvas node = row.node;
     final showExpandCollapse = node.showExpandCollapse;
     final InspectorTreeNodeCanvasRender renderObject = node.renderObject;
 
@@ -350,7 +353,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
     for (int tick in row.ticks) {
       currentX = getDepthIndent(tick) - columnWidth * 0.5;
       if (isVisible(1.0)) {
-        _maybeStart(defaultTreeLineColor);
+        _maybeStart(treeGuidelineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight);
@@ -360,7 +363,7 @@ class InspectorTreeCanvas extends InspectorTreeFixedRowHeight
       currentX = getDepthIndent(row.depth - 1) - columnWidth * 0.5;
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       if (isVisible(width)) {
-        _maybeStart(defaultTreeLineColor);
+        _maybeStart(treeGuidelineColor);
         canvas
           ..moveTo(currentX, 0.0)
           ..lineTo(currentX, rowHeight * 0.5)

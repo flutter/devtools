@@ -14,31 +14,22 @@ library inspector_tree;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/theme.dart';
-import '../utils.dart';
 import 'diagnostics_node.dart';
-import 'inspector_controller.dart';
 import 'inspector_service.dart';
-import 'inspector_text_styles.dart' as inspector_text_styles;
 
 /// Split text into two groups, word characters at the start of a string and all
 /// other characters.
-final RegExp _primaryDescriptionPattern = RegExp(r'^([\w ]+)(.*)$');
+final RegExp treeNodePrimaryDescriptionPattern = RegExp(r'^([\w ]+)(.*)$');
 // TODO(jacobr): temporary workaround for missing structure from assertion thrown building
 // widget errors.
-final RegExp _assertionThrownBuildingError = RegExp(
+final RegExp assertionThrownBuildingError = RegExp(
     r'^(The following assertion was thrown building [a-zA-Z]+)(\(.*\))(:)$');
-
-final ColorIconMaker _colorIconMaker = ColorIconMaker();
-final CustomIconMaker _customIconMaker = CustomIconMaker();
-
-const bool _showRenderObjectPropertiesAsLinks = false;
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 typedef TreeHoverEventCallback = void Function(
@@ -58,10 +49,6 @@ const Color highlightLineColor = ThemedColor(
   Colors.black,
   Color.fromARGB(255, 200, 200, 200),
 );
-const Color defaultTreeLineColor = ThemedColor(
-  Colors.grey,
-  Color.fromARGB(255, 150, 150, 150),
-);
 
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
@@ -69,7 +56,6 @@ const double columnWidth = 16.0;
 const double verticalPadding = 10.0;
 const double rowHeight = 24.0;
 const Color arrowColor = Colors.grey;
-final DevToolsIcon defaultIcon = _customIconMaker.fromInfo('Default');
 
 // TODO(jacobr): these arrows are a bit ugly.
 // We should create pngs instead of trying to stretch the material icons into
@@ -94,7 +80,7 @@ abstract class PaintEntry {
 
   DevToolsIcon get icon;
 
-  void attach(InspectorTree owner) {}
+  void attach(InspectorTreeController owner) {}
 }
 
 abstract class InspectorTreeNodeRenderBuilder<
@@ -103,7 +89,9 @@ abstract class InspectorTreeNodeRenderBuilder<
     @required this.level,
     @required this.treeStyle,
   });
+
   void appendText(String text, TextStyle textStyle);
+
   void addIcon(DevToolsIcon icon);
 
   final DiagnosticLevel level;
@@ -112,13 +100,21 @@ abstract class InspectorTreeNodeRenderBuilder<
   InspectorTreeNodeRender build();
 }
 
-abstract class InspectorTreeNodeRender<E extends PaintEntry> {
-  InspectorTreeNodeRender(this.entries, this.size);
+abstract class InspectorTreeNodeRender<E> {
+  InspectorTreeNodeRender(this.entries);
 
   final List<E> entries;
+
+  PaintEntry hitTest(Offset location);
+}
+
+abstract class InspectorTreeNodeRendererLegacy<E extends PaintEntry>
+    extends InspectorTreeNodeRender<E> {
+  InspectorTreeNodeRendererLegacy(List<E> entries, this.size) : super(entries);
+
   final Size size;
 
-  void attach(InspectorTree owner, Offset offset) {
+  void attach(InspectorTreeController owner, Offset offset) {
     if (_owner != owner) {
       _owner = owner;
     }
@@ -134,18 +130,16 @@ abstract class InspectorTreeNodeRender<E extends PaintEntry> {
   Offset get offset => _offset;
   Offset _offset;
 
-  InspectorTree _owner;
+  InspectorTreeController _owner;
 
   Rect get paintBounds => _offset & size;
-
-  PaintEntry hitTest(Offset location);
 }
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.
 // TODO(kenz): extend TreeNode class to share tree logic.
-abstract class InspectorTreeNode {
+class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode parent,
     bool expandChildren = true,
@@ -159,10 +153,11 @@ abstract class InspectorTreeNode {
 
   bool get isDirty => _isDirty;
   bool _isDirty = true;
+
   set isDirty(bool dirty) {
     if (dirty) {
-      _renderObject = null;
       _isDirty = true;
+      _shouldShow = null;
       if (_childrenCount == null) {
         // Already dirty.
         return;
@@ -176,135 +171,32 @@ abstract class InspectorTreeNode {
     }
   }
 
-  bool selected = false;
-
-  /// Override this method to define a tree node to build render objects
-  /// appropriate for a specific platform.
-  InspectorTreeNodeRenderBuilder createRenderBuilder();
-
-  /// This method defines the logic of how a RenderObject is converted to
-  /// a list of styled text and icons. If you want to change how tree content
-  /// is styled modify this message as it is the robust way for style changes
-  /// to apply to all ways inspector trees are rendered (html, canvas, Flutter
-  /// in the future).
-  /// If you change this rendering also change the matching logic in
-  /// src/io/flutter/view/DiagnosticsTreeCellRenderer.java
-  InspectorTreeNodeRender get renderObject {
-    if (_renderObject != null || diagnostic == null) {
-      return _renderObject;
+  /// Returns whether the node is currently visible in the tree.
+  void updateShouldShow(bool value) {
+    if (value != _shouldShow) {
+      _shouldShow = value;
+      for (var child in children) {
+        child.updateShouldShow(value);
+      }
     }
-
-    final builder = createRenderBuilder();
-    final icon = diagnostic.icon;
-    if (showExpandCollapse) {
-      builder.addIcon(isExpanded ? collapseArrow : expandArrow);
-    }
-    if (icon != null) {
-      builder.addIcon(icon);
-    }
-    final String name = diagnostic.name;
-    TextStyle textStyle = textStyleForLevel(diagnostic.level);
-    if (diagnostic.isProperty) {
-      // Display of inline properties.
-      final String propertyType = diagnostic.propertyType;
-      final Map<String, Object> properties = diagnostic.valuePropertiesJson;
-
-      if (name?.isNotEmpty == true && diagnostic.showName) {
-        builder.appendText('$name${diagnostic.separator} ', textStyle);
-      }
-
-      if (isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
-      }
-
-      String description = diagnostic.description;
-      if (propertyType != null && properties != null) {
-        switch (propertyType) {
-          case 'Color':
-            {
-              final int alpha = JsonUtils.getIntMember(properties, 'alpha');
-              final int red = JsonUtils.getIntMember(properties, 'red');
-              final int green = JsonUtils.getIntMember(properties, 'green');
-              final int blue = JsonUtils.getIntMember(properties, 'blue');
-              String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              if (alpha == 255) {
-                description = '#${radix(red)}${radix(green)}${radix(blue)}';
-              } else {
-                description =
-                    '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
-              }
-
-              final Color color = Color.fromARGB(alpha, red, green, blue);
-              builder.addIcon(_colorIconMaker.getCustomIcon(color));
-              break;
-            }
-
-          case 'IconData':
-            {
-              final int codePoint =
-                  JsonUtils.getIntMember(properties, 'codePoint');
-              if (codePoint > 0) {
-                final DevToolsIcon icon =
-                    FlutterMaterialIcons.getIconForCodePoint(codePoint);
-                if (icon != null) {
-                  builder.addIcon(icon);
-                }
-              }
-              break;
-            }
-        }
-      }
-
-      if (_showRenderObjectPropertiesAsLinks &&
-          propertyType == 'RenderObject') {
-        textStyle = textStyle..merge(inspector_text_styles.link);
-      }
-
-      // TODO(jacobr): custom display for units, iterables, and padding.
-      _renderDescription(builder, description, textStyle, isProperty: true);
-
-      if (diagnostic.level == DiagnosticLevel.fine &&
-          diagnostic.hasDefaultValue) {
-        builder.appendText(' ', textStyle);
-        builder.addIcon(defaultIcon);
-      }
-    } else {
-      // Non property, regular node case.
-      if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
-        if (name.startsWith('child ')) {
-          builder.appendText(name, inspector_text_styles.unimportant);
-        } else {
-          builder.appendText(name, textStyle);
-        }
-
-        if (diagnostic.showSeparator) {
-          builder.appendText(
-              diagnostic.separator, inspector_text_styles.unimportant);
-          if (diagnostic.separator != ' ' &&
-              diagnostic.description.isNotEmpty) {
-            builder.appendText(' ', inspector_text_styles.unimportant);
-          }
-        }
-      }
-
-      if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
-      }
-
-      _renderDescription(builder, diagnostic.description, textStyle,
-          isProperty: false);
-    }
-    _renderObject = builder.build();
-    return _renderObject;
   }
 
-  InspectorTreeNodeRender _renderObject;
+  bool get shouldShow {
+    _shouldShow ??= parent == null || parent.isExpanded && parent.shouldShow;
+    return _shouldShow;
+  }
+
+  bool _shouldShow;
+
+  bool selected = false;
+
   RemoteDiagnosticsNode _diagnostic;
   final List<InspectorTreeNode> _children;
 
   Iterable<InspectorTreeNode> get children => _children;
 
   bool get isCreatedByLocalProject => _diagnostic.isCreatedByLocalProject;
+
   bool get isProperty => diagnostic == null || diagnostic.isProperty;
 
   bool get isExpanded => _isExpanded;
@@ -321,6 +213,11 @@ abstract class InspectorTreeNode {
     if (value != _isExpanded) {
       _isExpanded = value;
       isDirty = true;
+      if (_shouldShow ?? false) {
+        for (var child in children) {
+          child.updateShouldShow(value);
+        }
+      }
     }
   }
 
@@ -457,34 +354,6 @@ abstract class InspectorTreeNode {
     _children.clear();
     isDirty = true;
   }
-
-  void _renderDescription(
-    InspectorTreeNodeRenderBuilder<InspectorTreeNodeRender<PaintEntry>> builder,
-    String description,
-    TextStyle textStyle, {
-    bool isProperty,
-  }) {
-    if (diagnostic.isDiagnosticableValue) {
-      final match = _primaryDescriptionPattern.firstMatch(description);
-      if (match != null) {
-        builder.appendText(match.group(1), textStyle);
-        if (match.group(2).isNotEmpty) {
-          builder.appendText(match.group(2), inspector_text_styles.unimportant);
-        }
-        return;
-      }
-    } else if (diagnostic.type == 'ErrorDescription') {
-      final match = _assertionThrownBuildingError.firstMatch(description);
-      if (match != null) {
-        builder.appendText(match.group(1), textStyle);
-        builder.appendText(match.group(3), textStyle);
-        return;
-      }
-    }
-    if (description?.isNotEmpty == true) {
-      builder.appendText(description, textStyle);
-    }
-  }
 }
 
 /// A row in the tree with all information required to render it.
@@ -508,38 +377,34 @@ class InspectorTreeRow {
   bool get isSelected => node.selected;
 }
 
-typedef InspectorTreeFactory = InspectorTree Function({
-  @required bool summaryTree,
-  @required FlutterTreeType treeType,
-  @required NodeAddedCallback onNodeAdded,
-  VoidCallback onSelectionChange,
-  TreeEventCallback onExpand,
-  TreeHoverEventCallback onHover,
-});
-
 /// Callback issued every time a node is added to the tree.
 typedef NodeAddedCallback = void Function(
     InspectorTreeNode node, RemoteDiagnosticsNode diagnosticsNode);
 
-abstract class InspectorTree {
-  InspectorTree({
+class InspectorTreeConfig {
+  InspectorTreeConfig({
     @required this.summaryTree,
     @required this.treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
+    @required this.onNodeAdded,
+    this.onClientActiveChange,
+    this.onSelectionChange,
     this.onExpand,
-    TreeHoverEventCallback onHover,
-  })  : _onHoverCallback = onHover,
-        _onSelectionChange = onSelectionChange,
-        _onNodeAdded = onNodeAdded;
+    this.onHover,
+  });
 
-  final TreeHoverEventCallback _onHoverCallback;
-
+  final bool summaryTree;
+  final FlutterTreeType treeType;
+  final NodeAddedCallback onNodeAdded;
+  final VoidCallback onSelectionChange;
+  final void Function(bool added) onClientActiveChange;
   final TreeEventCallback onExpand;
+  final TreeHoverEventCallback onHover;
+}
 
-  final VoidCallback _onSelectionChange;
-
-  final NodeAddedCallback _onNodeAdded;
+abstract class InspectorTreeController {
+  // Abstract method defined to avoid a direct Flutter dependency.
+  @protected
+  void setState(VoidCallback fn);
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
@@ -554,6 +419,15 @@ abstract class InspectorTree {
   InspectorTreeNode get selection => _selection;
   InspectorTreeNode _selection;
 
+  InspectorTreeConfig get config => _config;
+  InspectorTreeConfig _config;
+
+  set config(InspectorTreeConfig value) {
+    // Only allow setting config once.
+    assert(_config == null);
+    _config = value;
+  }
+
   set selection(InspectorTreeNode node) {
     if (node == _selection) return;
 
@@ -561,8 +435,8 @@ abstract class InspectorTree {
       _selection?.selected = false;
       _selection = node;
       _selection?.selected = true;
-      if (_onSelectionChange != null) {
-        _onSelectionChange();
+      if (config.onSelectionChange != null) {
+        config.onSelectionChange();
       }
     });
   }
@@ -570,13 +444,8 @@ abstract class InspectorTree {
   InspectorTreeNode get hover => _hover;
   InspectorTreeNode _hover;
 
-  final bool summaryTree;
-
-  final FlutterTreeType treeType;
-
   double lastContentWidth;
 
-  void setState(VoidCallback modifyState);
   InspectorTreeNode createNode();
 
   final List<InspectorTreeRow> cachedRows = [];
@@ -614,11 +483,7 @@ abstract class InspectorTree {
     });
   }
 
-  String get tooltip;
-  set tooltip(String value);
-
-  RemoteDiagnosticsNode _currentHoverDiagnostic;
-  bool _computingHover = false;
+  RemoteDiagnosticsNode currentHoverDiagnostic;
 
   void navigateUp() {
     _navigateHelper(-1);
@@ -673,68 +538,6 @@ abstract class InspectorTree {
         .getRow(
             (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
         ?.node;
-  }
-
-  Future<void> onHover(InspectorTreeNode node, PaintEntry entry) async {
-    if (_onHoverCallback != null) {
-      _onHoverCallback(node, entry?.icon);
-    }
-
-    final diagnostic = node?.diagnostic;
-    final lastHover = _currentHoverDiagnostic;
-    _currentHoverDiagnostic = diagnostic;
-    // Only show tooltips when we are hovering over specific content in a row
-    // rather than over the entire row.
-    // TODO(jacobr): consider showing the tooltip any time we are on a row with
-    // a diagnostics node to make tooltips more discoverable.
-    // To make this work well we would need to add custom tooltip rendering that
-    // more clearly links tooltips to the exact content in a row they apply to.
-    if (diagnostic == null || entry == null) {
-      tooltip = '';
-      _computingHover = false;
-      return;
-    }
-
-    if (entry.icon == defaultIcon) {
-      tooltip = 'Default value';
-      _computingHover = false;
-      return;
-    }
-
-    if (diagnostic.isEnumProperty()) {
-      // We can display a better tooltip than the one provied with the
-      // RemoteDiagnosticsNode as we have access to introspection
-      // via the vm service.
-
-      if (lastHover == diagnostic && _computingHover) {
-        // No need to spam the VMService. We are already computing the hover
-        // for this node.
-        return;
-      }
-      _computingHover = true;
-      Map<String, InstanceRef> properties;
-      try {
-        properties = await diagnostic.valueProperties;
-      } finally {
-        _computingHover = false;
-      }
-      if (lastHover != diagnostic) {
-        // Skipping as the tooltip is no longer relevant for the currently
-        // hovered over node.
-        return;
-      }
-      if (properties == null) {
-        // Something went wrong getting the enum value.
-        // Fall back to the regular tooltip;
-        tooltip = diagnostic.tooltip;
-        return;
-      }
-      tooltip = 'Allowed values:\n${properties.keys.join('\n')}';
-      return;
-    }
-
-    tooltip = diagnostic.tooltip;
-    _computingHover = false;
   }
 
   double get horizontalPadding => 10.0;
@@ -810,32 +613,22 @@ abstract class InspectorTree {
 
   void animateToTargets(List<InspectorTreeNode> targets);
 
-  void onTap(Offset offset) {
-    final row = getRow(offset);
-    if (row == null) {
-      return;
-    }
-
-    onTapIcon(row, row.node.renderObject?.hitTest(offset)?.icon);
+  void onExpandRow(InspectorTreeRow row) {
+    setState(() {
+      row.node.isExpanded = true;
+      if (config.onExpand != null) {
+        config.onExpand(row.node);
+      }
+    });
   }
 
-  void onTapIcon(InspectorTreeRow row, DevToolsIcon icon) {
-    if (icon == expandArrow) {
-      setState(() {
-        row.node.isExpanded = true;
-        if (onExpand != null) {
-          onExpand(row.node);
-        }
-      });
-      return;
-    }
-    if (icon == collapseArrow) {
-      setState(() {
-        row.node.isExpanded = false;
-      });
-      return;
-    }
-    // TODO(jacobr): add other interactive elements here.
+  void onCollapseRow(InspectorTreeRow row) {
+    setState(() {
+      row.node.isExpanded = false;
+    });
+  }
+
+  void onSelectRow(InspectorTreeRow row) {
     selection = row.node;
     expandPath(row.node);
   }
@@ -872,8 +665,8 @@ abstract class InspectorTree {
     assert(expandChildren != null);
     assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
-    if (_onNodeAdded != null) {
-      _onNodeAdded(node, diagnosticsNode);
+    if (config.onNodeAdded != null) {
+      config.onNodeAdded(node, diagnosticsNode);
     }
 
     if (diagnosticsNode.hasChildren ||
@@ -970,40 +763,10 @@ abstract class InspectorTree {
   }
 }
 
-abstract class InspectorTreeFixedRowHeight extends InspectorTree {
-  InspectorTreeFixedRowHeight({
-    @required bool summaryTree,
-    @required FlutterTreeType treeType,
-    @required NodeAddedCallback onNodeAdded,
-    VoidCallback onSelectionChange,
-    TreeEventCallback onExpand,
-    TreeHoverEventCallback onHover,
-  }) : super(
-          summaryTree: summaryTree,
-          treeType: treeType,
-          onNodeAdded: onNodeAdded,
-          onSelectionChange: onSelectionChange,
-          onExpand: onExpand,
-          onHover: onHover,
-        );
-
+mixin InspectorTreeFixedRowHeightController on InspectorTreeController {
   Rect getBoundingBox(InspectorTreeRow row);
 
   void scrollToRect(Rect targetRect);
-
-  /// The future completes when the possible tooltip on hover is available.
-  ///
-  /// Generally only await this future for tests that check for the value shown
-  /// on hover matches the expected value.
-  Future<void> onMouseMove(Offset offset) async {
-    final row = getRow(offset);
-    if (row != null) {
-      final node = row.node;
-      await onHover(node, node?.renderObject?.hitTest(offset));
-    } else {
-      await onHover(null, null);
-    }
-  }
 
   @override
   void animateToTargets(List<InspectorTreeNode> targets) {

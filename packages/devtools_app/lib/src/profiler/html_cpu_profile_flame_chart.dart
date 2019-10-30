@@ -84,7 +84,7 @@ class HtmlCpuFlameChart extends HtmlCpuProfilerView {
       // ensures that the grid lines in the chart will extend all the way to the
       // bottom of the container.
       canvas.forceRebuildForSize(
-        canvas.widthWithInsets,
+        canvas.calculatedWidthWithInsets,
         math.max(
           // Subtract [rowHeightWithPadding] to account for the size of
           // [stackFrameDetails] section at the bottom of the chart.
@@ -131,7 +131,7 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
   double get calculatedWidth => rows[0].nodes[0].rect.right - sideInset;
 
   @override
-  void initRows() {
+  void initUiElements() {
     for (int i = 0; i < data.cpuProfileRoot.depth; i++) {
       rows.add(FlameChartRow(nodes: [], index: i));
     }
@@ -178,6 +178,7 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
         Colors.black,
         stackFrame,
         (_) => stackFrame.name,
+        sideInset,
       );
 
       rows[row].nodes.add(node);
