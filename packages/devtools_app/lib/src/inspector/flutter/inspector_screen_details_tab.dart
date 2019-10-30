@@ -99,7 +99,6 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   @override
   void initState() {
     super.initState();
-    controller.onInspectorSelectionChanged();
     controller.addSelectionListener(onSelectionChanged);
   }
 
