@@ -1,9 +1,5 @@
-const String filterSummaryTag = 'filterSummary';
-const String realSearchTag = 'realSearch';
-const String filterPlatformLogTag = 'filterPlatformLog';
+const String platformLogTag = 'platformLog';
 
 Map<String, bool> config = {
-  filterSummaryTag: true,
-  realSearchTag: false,
-  filterPlatformLogTag: true,
+  platformLogTag: false,
 };

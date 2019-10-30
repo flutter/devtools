@@ -1,5 +1,3 @@
-//import 'package:devtools_app/src/ui/html_elements.dart';
-
 import 'package:html_shim/html.dart' as html;
 
 import '../../src/ui/html_elements.dart';
@@ -18,19 +16,13 @@ class ToolBarCheckbox {
     _checkboxElement.checked = extensionDescription.enabled;
     _checkboxElement.onChange.listen((_) {
       final bool selected = _checkboxElement.checked;
-      print('select = $selected');
       config[extensionDescription.tag] = selected;
     });
-//    _updateState();
   }
 
   final ToolBarCheckboxDescription extensionDescription;
   final CoreElement element;
   html.InputElement _checkboxElement;
-
-//  void _updateState() {
-//    _checkboxElement.checked = config[extensionDescription.tag];
-//  }
 }
 
 class ToolBarCheckboxDescription {

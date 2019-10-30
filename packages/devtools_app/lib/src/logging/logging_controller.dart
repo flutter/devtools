@@ -29,11 +29,6 @@ const int kMaxLogItemsLowerBound = 5000;
 const int kMaxLogItemsUpperBound = 5500;
 final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 
-// use summary for details to filter.
-bool get useSummaryFilter {
-  return config[filterSummaryTag];
-}
-
 bool _verboseDebugging = false;
 
 typedef OnLogCountStatusChanged = void Function(String status);
@@ -160,8 +155,8 @@ class LoggingController {
   }
 
   LoggingDetailsController detailsController;
-  static bool get hideSystemLog {
-    return config[filterPlatformLogTag];
+  bool get hideSystemLog {
+    return config[platformLogTag];
   }
 
   String searchText = '';
@@ -227,7 +222,9 @@ class LoggingController {
 
   void _updateStatus() {
     final int count = _loggingTableModel.rowCount;
-    final String label = count >= kMaxLogItemsLowerBound ? '${nf.format(kMaxLogItemsLowerBound)}+' : nf.format(count);
+    final String label = count >= kMaxLogItemsLowerBound
+        ? '${nf.format(kMaxLogItemsLowerBound)}+'
+        : nf.format(count);
     onLogCountStatusChanged('$label events');
   }
 
@@ -241,10 +238,7 @@ class LoggingController {
   void search(String text) {
     searchText = text;
     data = rawData.where((item) {
-      if (!useSummaryFilter) {
-        return item.details?.contains(searchText) ?? false;
-      }
-      return item.summary?.contains(searchText) ?? false;
+      return item.containText(searchText);
     }).toList();
     detailsController?.setData(null);
     _loggingTableModel.setRows(data);
@@ -252,11 +246,13 @@ class LoggingController {
 
   void _handleConnectionStart(VmServiceWrapper service) async {
     // Log stdout events.
-    final _StdoutEventHandler stdoutHandler = _StdoutEventHandler(this, 'stdout');
+    final _StdoutEventHandler stdoutHandler =
+        _StdoutEventHandler(this, 'stdout');
     _listen(service.onStdoutEvent, stdoutHandler.handle);
 
     // Log stderr events.
-    final _StdoutEventHandler stderrHandler = _StdoutEventHandler(this, 'stderr', isError: true);
+    final _StdoutEventHandler stderrHandler =
+        _StdoutEventHandler(this, 'stderr', isError: true);
     _listen(service.onStderrEvent, stderrHandler.handle);
 
     // Log GC events.
@@ -270,7 +266,9 @@ class LoggingController {
 
     await ensureInspectorServiceDependencies();
 
-    objectGroup = InspectorService.createGroup(service, 'console-group').catchError((e) => null, test: (e) => e is FlutterInspectorLibraryNotFound);
+    objectGroup = InspectorService.createGroup(service, 'console-group')
+        .catchError((e) => null,
+            test: (e) => e is FlutterInspectorLibraryNotFound);
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -282,8 +280,6 @@ class LoggingController {
       'Flutter.FirstFrame',
       'Flutter.FrameworkInitialization',
     };
-
-    print('_handleExtensionEvent: $e');
 
     // TODO(jacobr): make the list of filtered events configurable.
     const Set<String> filteredEvents = {
@@ -298,7 +294,8 @@ class LoggingController {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
       final String frameId = '#${frame.number}';
-      final String frameInfo = '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
+      final String frameInfo =
+          '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
       final String div = _createFrameDivHtml(frame);
 
       _log(LogData(
@@ -324,7 +321,8 @@ class LoggingController {
         summary: '',
       ));
     } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
-      final ServiceExtensionStateChangedInfo changedInfo = ServiceExtensionStateChangedInfo.from(e.extensionData.data);
+      final ServiceExtensionStateChangedInfo changedInfo =
+          ServiceExtensionStateChangedInfo.from(e.extensionData.data);
 
       _log(LogData(
         e.extensionKind.toLowerCase(),
@@ -335,7 +333,8 @@ class LoggingController {
     } else if (e.extensionKind == 'Flutter.Error') {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
-      final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
+      final RemoteDiagnosticsNode node =
+          RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
       // Workaround the fact that the error objects from the server don't have
       // style error.
       node.style = DiagnosticsTreeStyle.error;
@@ -394,9 +393,9 @@ class LoggingController {
     final VmServiceWrapper service = serviceManager.service;
 
     final dynamic logRecord = e.json['logRecord'];
-    print('_handleDeveloperLogEvent logRecord = $logRecord');
 
-    String loggerName = _valueAsString(InstanceRef.parse(logRecord['loggerName']));
+    String loggerName =
+        _valueAsString(InstanceRef.parse(logRecord['loggerName']));
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
@@ -416,17 +415,21 @@ class LoggingController {
     // stackTrace objects were non-null, we need to ask the VM for more
     // information in order to render the log entry. We do this asynchronously
     // on-demand using the `detailsComputer` Future.
-    if (messageRef.valueAsStringIsTruncated == true || _isNotNull(error) || _isNotNull(stackTrace)) {
+    if (messageRef.valueAsStringIsTruncated == true ||
+        _isNotNull(error) ||
+        _isNotNull(stackTrace)) {
       detailsComputer = Future<String>(() async {
         // Get the full string value of the message.
-        String result = await _retrieveFullStringValue(service, e.isolate, messageRef);
+        String result =
+            await _retrieveFullStringValue(service, e.isolate, messageRef);
 
         // Get information about the error object. Some users of the
         // dart:developer log call may pass a data payload in the `error`
         // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
           if (error.valueAsString != null) {
-            final String errorString = await _retrieveFullStringValue(service, e.isolate, error);
+            final String errorString =
+                await _retrieveFullStringValue(service, e.isolate, error);
             result += '\n\n$errorString';
           } else {
             // Call `toString()` on the error object and display that.
@@ -442,7 +445,8 @@ class LoggingController {
               final String errorString = _valueAsString(error);
               result += '\n\n$errorString';
             } else if (toStringResult is InstanceRef) {
-              final String str = await _retrieveFullStringValue(service, e.isolate, toStringResult);
+              final String str = await _retrieveFullStringValue(
+                  service, e.isolate, toStringResult);
               result += '\n\n$str';
             }
           }
@@ -479,7 +483,8 @@ class LoggingController {
       return stringRef.valueAsString;
     }
 
-    final dynamic result = await service.getObject(isolateRef.id, stringRef.id, offset: 0, count: stringRef.length);
+    final dynamic result = await service.getObject(isolateRef.id, stringRef.id,
+        offset: 0, count: stringRef.length);
     if (result is Instance) {
       final Instance obj = result;
       return obj.valueAsString;
@@ -492,14 +497,8 @@ class LoggingController {
 
   void _log(LogData log) {
     // Insert the new item and clamped the list to kMaxLogItemsLength.
-    if (searchText?.isNotEmpty ?? false) {
-      if (log.summary.contains(searchText) && useSummaryFilter) {
-        data.add(log);
-      }
-
-      if (log.details.contains(searchText) && !useSummaryFilter) {
-        data.add(log);
-      }
+    if (log.containText(searchText)) {
+      data.add(log);
     } else {
       data.add(log);
     }
@@ -526,9 +525,11 @@ class LoggingController {
       // immediate scroll because repeatedly smooth scrolling on the web means
       // you never reach your destination.
       final DateTime now = DateTime.now();
-      final bool smoothScroll = _lastScrollTime == null || _lastScrollTime.difference(now).inSeconds > 1;
+      final bool smoothScroll = _lastScrollTime == null ||
+          _lastScrollTime.difference(now).inSeconds > 1;
       _lastScrollTime = now;
-      _loggingTableModel.scrollTo(data.last, scrollBehavior: smoothScroll ? 'smooth' : 'auto');
+      _loggingTableModel.scrollTo(data.last,
+          scrollBehavior: smoothScroll ? 'smooth' : 'auto');
     } else {
       _hasPendingUiUpdates = true;
     }
@@ -577,7 +578,8 @@ class LoggingController {
 /// we wait for up to 1ms when we get the `foo` event, to see if the next event
 /// is a single newline. If so, we add the newline to the previous log message.
 class _StdoutEventHandler {
-  _StdoutEventHandler(this.loggingController, this.name, {this.isError = false});
+  _StdoutEventHandler(this.loggingController, this.name,
+      {this.isError = false});
 
   final LoggingController loggingController;
   final String name;
@@ -687,6 +689,13 @@ class LogData {
 
   bool get needsComputing => detailsComputer != null;
 
+  bool containText(String text) {
+    if (text?.isEmpty ?? true) {
+      return true;
+    }
+    return summary?.contains(text) ?? false;
+  }
+
   Future<void> compute() async {
     _details = await detailsComputer;
     detailsComputer = null;
@@ -730,7 +739,9 @@ class LogWhenColumn extends ColumnData<LogData> {
 
   @override
   String render(dynamic value) {
-    return value == null ? '' : timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
+    return value == null
+        ? ''
+        : timeFormat.format(DateTime.fromMillisecondsSinceEpoch(value));
   }
 }
 
@@ -771,7 +782,8 @@ class FrameInfo {
   static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
   static FrameInfo from(Map<String, dynamic> data) {
-    return FrameInfo(data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
+    return FrameInfo(
+        data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
   }
 
   final int number;
@@ -829,8 +841,11 @@ String getCssClassForEventKind(LogData item) {
 
 String _createFrameDivHtml(FrameInfo frame) {
   const double maxFrameEventBarMs = 100.0;
-  final String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs) ? 'frame-bar over-budget' : 'frame-bar';
+  final String classes = (frame.elapsedMs >= FrameInfo.kTargetMaxFrameTimeMs)
+      ? 'frame-bar over-budget'
+      : 'frame-bar';
 
-  final int pixelWidth = (math.min(frame.elapsedMs, maxFrameEventBarMs) * 3).round();
+  final int pixelWidth =
+      (math.min(frame.elapsedMs, maxFrameEventBarMs) * 3).round();
   return '<div class="$classes" style="width: ${pixelWidth}px"/>';
 }
