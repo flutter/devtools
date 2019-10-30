@@ -167,7 +167,8 @@ void main() {
             "defaultLevel": "info"
           }
         ]
-      }''');
+      }
+    ''');
     final RenderFlexProperties flexProperties =
         RenderFlexProperties.fromJson(flexJson);
     expect(flexProperties.direction, Axis.horizontal);

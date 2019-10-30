@@ -412,7 +412,6 @@ abstract class InspectorTreeController {
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
-
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;

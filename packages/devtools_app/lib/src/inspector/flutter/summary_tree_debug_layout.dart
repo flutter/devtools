@@ -12,15 +12,15 @@ import 'inspector_data_models.dart';
 class ConstraintsDescription extends AnimatedWidget {
   const ConstraintsDescription({
     this.diagnostic,
-    AnimationController animationController,
+    AnimationController listenable,
     Key key,
-  }) : super(key: key, listenable: animationController);
+  }) : super(key: key, listenable: listenable);
 
   final RemoteDiagnosticsNode diagnostic;
 
-  String describeDimension(double min, double max, String dim) {
-    if (min == max) return '$dim=${min.toStringAsFixed(1)}';
-    return '${min.toStringAsFixed(1)}<=$dim<=${max.toStringAsFixed(1)}';
+  String describeAxis(double min, double max, String axis) {
+    if (min == max) return '$axis=${min.toStringAsFixed(1)}';
+    return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
   }
 
   @override
@@ -46,7 +46,7 @@ class ConstraintsDescription extends AnimatedWidget {
                   style: inspector_text_styles.warning,
                 )
               : TextSpan(
-                  text: describeDimension(
+                  text: describeAxis(
                     constraints.minWidth,
                     constraints.maxWidth,
                     'w',
@@ -61,7 +61,7 @@ class ConstraintsDescription extends AnimatedWidget {
                   style: inspector_text_styles.warning,
                 )
               : TextSpan(
-                  text: describeDimension(
+                  text: describeAxis(
                     constraints.minHeight,
                     constraints.maxHeight,
                     'h',

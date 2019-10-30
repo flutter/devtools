@@ -88,15 +88,14 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = Expanded(
-      child: InspectorTree(
-        controller: summaryTreeController,
-      ),
+    final summaryTree = InspectorTree(
+      controller: inspectorController,
+      isSummaryTree: true,
     );
     final detailsTree = InspectorTree(
-      controller: detailsTreeController,
+      controller: inspectorController,
+      isSummaryTree: false,
     );
-
     return Column(
       children: <Widget>[
         Row(
@@ -114,12 +113,11 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 900,
               ),
             ),
-            if (InspectorTreeControllerFlutter.enableExperimentalStoryOfLayout)
+            if (InspectorController.enableExperimentalStoryOfLayout)
               Container(
                 margin: const EdgeInsets.only(left: 8.0),
                 child: OutlineButton(
-                  onPressed:
-                      summaryTreeController?.toggleDebugLayoutSummaryEnabled,
+                  onPressed: inspectorController?.toggleDebugLayoutSummary,
                   child: const Label(
                     FlutterIcons.lightbulb,
                     'Show Constraints',
@@ -134,13 +132,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Expanded(
           child: Row(
             children: [
-              summaryTree,
+              Expanded(child: summaryTree),
               Expanded(
                 child: InspectorDetailsTabController(
                   detailsTree: detailsTree,
-                  summaryTreeController: summaryTreeController,
-                  expandCollapseSupported: _expandCollapseSupported,
-                  expandCollapseButtons: _expandCollapseButtons(),
+                  controller: inspectorController,
+                  actionButtons: _expandCollapseButtons(),
                 ),
               ),
             ],
@@ -151,6 +148,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   Widget _expandCollapseButtons() {
+    if (!_expandCollapseSupported) return null;
     return Align(
       alignment: Alignment.topRight,
       child: Container(

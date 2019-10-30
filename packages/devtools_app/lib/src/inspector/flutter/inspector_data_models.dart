@@ -62,26 +62,24 @@ class RenderFlexProperties {
   static RenderFlexProperties fromJson(Map<String, Object> renderObjectJson) {
     final List<dynamic> properties = renderObjectJson['properties'];
     // TODO(albertusangga) should we do some checking in the validity of the API contract here?
-    final Map<String, Object> data = Map.fromEntries(
-      properties.map(
-        (property) => MapEntry<String, Object>(
-          property['name'],
-          property['description'],
-        ),
-      ),
+    final Map<String, Object> data = Map<String, Object>.fromIterable(
+      properties,
+      key: (property) => property['name'],
+      value: (property) => property['description'],
     );
 
     return RenderFlexProperties(
-      direction: directionDeserializer.getEnum(data['direction']),
+      direction: directionDeserializer.toEnumEntry(data['direction']),
       mainAxisAlignment:
-          mainAxisAlignmentDeserializer.getEnum(data['mainAxisAlignment']),
-      mainAxisSize: mainAxisSizeDeserializer.getEnum(data['mainAxisSize']),
-      crossAxisAlignment:
-          crossAxisAlignmentDeserializer.getEnum(data['crossAxisAlignment']),
-      textDirection: textDirectionDeserializer.getEnum(data['textDirection']),
+          mainAxisAlignmentDeserializer.toEnumEntry(data['mainAxisAlignment']),
+      mainAxisSize: mainAxisSizeDeserializer.toEnumEntry(data['mainAxisSize']),
+      crossAxisAlignment: crossAxisAlignmentDeserializer
+          .toEnumEntry(data['crossAxisAlignment']),
+      textDirection:
+          textDirectionDeserializer.toEnumEntry(data['textDirection']),
       verticalDirection:
-          verticalDirectionDeserializer.getEnum(data['verticalDirection']),
-      textBaseline: textBaselineDeserializer.getEnum(data['textBaseline']),
+          verticalDirectionDeserializer.toEnumEntry(data['verticalDirection']),
+      textBaseline: textBaselineDeserializer.toEnumEntry(data['textBaseline']),
     );
   }
 

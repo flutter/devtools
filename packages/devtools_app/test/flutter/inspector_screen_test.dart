@@ -8,9 +8,8 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen_details_tab.dart';
-import 'package:devtools_app/src/inspector/flutter/inspector_tree_flutter.dart';
 import 'package:devtools_app/src/inspector/flutter/summary_tree_debug_layout.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
@@ -182,7 +181,7 @@ void main() {
     group('test render depends on enableExperimentalStoryOfLayout value', () {
       testWidgets('Should not render toggle button when flag is disabled',
           (WidgetTester tester) async {
-        InspectorTreeControllerFlutter.enableExperimentalStoryOfLayout = false;
+        InspectorController.enableExperimentalStoryOfLayout = false;
         await setWindowSize(const Size(2600.0, 1200.0));
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.text('Show Constraints'), findsNothing);
@@ -191,7 +190,7 @@ void main() {
       testWidgets(
           'Should render button with full text when flag is enabled and screen is wide enough',
           (WidgetTester tester) async {
-        InspectorTreeControllerFlutter.enableExperimentalStoryOfLayout = true;
+        InspectorController.enableExperimentalStoryOfLayout = true;
         await setWindowSize(const Size(2600.0, 1200.0));
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.text('Show Constraints'), findsWidgets);
@@ -221,7 +220,7 @@ void main() {
         MaterialApp(
           home: ConstraintsDescription(
             diagnostic: node,
-            animationController: animationController,
+            listenable: animationController,
           ),
         ),
       );
@@ -242,34 +241,36 @@ void main() {
     });
 
     testWidgets('Test render LayoutDetailsTab', (WidgetTester tester) async {
-      final renderObjectJson = jsonDecode('''{
-"properties": [
-  {
-    "description": "horizontal",
-    "name": "direction"
-  },
-  {
-    "description": "start",
-    "name": "mainAxisAlignment"
-  },
-  {
-    "description": "max",
-    "name": "mainAxisSize"
-  },
-  {
-    "description": "center",
-    "name": "crossAxisAlignment"
-  },
-  {
-    "description": "ltr",
-    "name": "textDirection"
-  },
-  {
-    "description": "down",
-    "name": "verticalDirection"
-  }
-]
-}''');
+      final renderObjectJson = jsonDecode('''
+        {
+          "properties": [
+            {
+              "description": "horizontal",
+              "name": "direction"
+            },
+            {
+              "description": "start",
+              "name": "mainAxisAlignment"
+            },
+            {
+              "description": "max",
+              "name": "mainAxisSize"
+            },
+            {
+              "description": "center",
+              "name": "crossAxisAlignment"
+            },
+            {
+              "description": "ltr",
+              "name": "textDirection"
+            },
+            {
+              "description": "down",
+              "name": "verticalDirection"
+            }
+          ]
+        }
+      ''');
       final diagnostic = RemoteDiagnosticsNode(
         <String, Object>{
           'isFlex': true,
@@ -281,15 +282,8 @@ void main() {
         null,
       );
       final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-      final controller = InspectorTreeControllerFlutter();
-      controller.config = InspectorTreeConfig(
-        summaryTree: true,
-        treeType: FlutterTreeType.widget,
-        onNodeAdded: (n1, n2) {},
-        onClientActiveChange: (_) {},
-      );
-      controller.selection = treeNode;
-
+      final controller = MockInspectorController();
+      when(controller.selectedNode).thenReturn(treeNode);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -308,3 +302,5 @@ void main() {
     // that mode which would enable faster tests that run as unittests.
   });
 }
+
+class MockInspectorController extends Mock implements InspectorController {}

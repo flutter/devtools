@@ -107,6 +107,40 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
+  bool get debugSummaryLayoutEnabled => _debugLayoutSummaryEnabled.value;
+  final _debugLayoutSummaryEnabled = ValueNotifier(false);
+
+  void addDebugLayoutSummaryFlagListener(Function listener) {
+    _debugLayoutSummaryEnabled.addListener(listener);
+  }
+
+  void toggleDebugLayoutSummary() {
+    _debugLayoutSummaryEnabled.value = !_debugLayoutSummaryEnabled.value;
+  }
+
+  void removeDebugLayoutSummaryFlagListener(Function listener) {
+    _debugLayoutSummaryEnabled.removeListener(listener);
+  }
+
+  // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
+  static bool enableExperimentalStoryOfLayout = false;
+
+  final List<Function> _selectionListeners = [];
+
+  void addSelectionListener(Function listener) {
+    _selectionListeners.add(listener);
+  }
+
+  void removeSelectionListener(Function listener) {
+    _selectionListeners.remove(listener);
+  }
+
+  void notifySelectionListeners() {
+    for (var notifyListener in _selectionListeners) {
+      notifyListener();
+    }
+  }
+
   int _clientCount = 0;
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
@@ -524,6 +558,7 @@ class InspectorController implements InspectorServiceClient {
       return;
     }
     updateSelectionFromService(firstFrame: false);
+    notifySelectionListeners();
   }
 
   Future<void> updateSelectionFromService({@required bool firstFrame}) async {
@@ -648,6 +683,8 @@ class InspectorController implements InspectorServiceClient {
     }
 
     animateTo(selectedNode);
+
+    notifySelectionListeners();
   }
 
   void _onExpand(InspectorTreeNode node) {
@@ -752,6 +789,7 @@ class InspectorController implements InspectorServiceClient {
     _selectionGroups?.clear(false);
     _selectionGroups = null;
     details?.dispose();
+    _debugLayoutSummaryEnabled.dispose();
   }
 
   static String treeTypeDisplayName(FlutterTreeType treeType) {

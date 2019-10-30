@@ -11,15 +11,15 @@ void main() {
   final deserializer = EnumUtils<Color>(Color.values);
 
   test('getEnum', () {
-    expect(deserializer.getEnum('red'), Color.red);
-    expect(deserializer.getEnum('green'), Color.green);
-    expect(deserializer.getEnum('blue'), Color.blue);
-    expect(deserializer.getEnum('yellow'), null);
+    expect(deserializer.toEnumEntry('red'), Color.red);
+    expect(deserializer.toEnumEntry('green'), Color.green);
+    expect(deserializer.toEnumEntry('blue'), Color.blue);
+    expect(deserializer.toEnumEntry('yellow'), null);
   });
 
   test('getName', () {
-    expect(deserializer.getName(Color.red), 'red');
-    expect(deserializer.getName(Color.green), 'green');
-    expect(deserializer.getName(Color.blue), 'blue');
+    expect(deserializer.toName(Color.red), 'red');
+    expect(deserializer.toName(Color.green), 'green');
+    expect(deserializer.toName(Color.blue), 'blue');
   });
 }

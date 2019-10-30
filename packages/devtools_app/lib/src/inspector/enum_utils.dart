@@ -14,8 +14,8 @@ import '../ui/fake_flutter/fake_flutter.dart';
 /// }
 /// ```
 ///   EnumUtils<Color> colorUtils = EnumUtils(Color.values);
-///   colorUtils.getEnum('red'); -> Color.red
-///   colorUtils.getName(Color.red); -> 'red'
+///   colorUtils.getEnum('red'); // returns Color.red
+///   colorUtils.getName(Color.red); // returns 'red'
 /// ```
 class EnumUtils<T> {
   // currently there's no way to
@@ -30,7 +30,7 @@ class EnumUtils<T> {
   final Map<String, T> _lookupTable = {};
   final Map<T, String> _reverseLookupTable = {};
 
-  T getEnum(String value) => _lookupTable[value];
+  T toEnumEntry(String enumName) => _lookupTable[enumName];
 
-  String getName(T value) => _reverseLookupTable[value];
+  String toName(T enumEntry) => _reverseLookupTable[enumEntry];
 }

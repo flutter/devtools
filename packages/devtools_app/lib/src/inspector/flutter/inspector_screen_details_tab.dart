@@ -8,27 +8,26 @@ import 'package:flutter/widgets.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
+import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController({
     this.detailsTree,
-    this.expandCollapseButtons,
-    this.expandCollapseSupported,
-    this.summaryTreeController,
+    this.actionButtons,
+    this.controller,
     Key key,
   }) : super(key: key);
 
-  final bool expandCollapseSupported;
   final Widget detailsTree;
-  final Widget expandCollapseButtons;
-  final InspectorTreeControllerFlutter summaryTreeController;
+  final Widget actionButtons;
+  final InspectorController controller;
 
   @override
   Widget build(BuildContext context) {
     final enableExperimentalStoryOfLayout =
-        InspectorTreeControllerFlutter.enableExperimentalStoryOfLayout;
+        InspectorController.enableExperimentalStoryOfLayout;
     final tabs = <Tab>[
       const Tab(text: 'Details Tree'),
       if (enableExperimentalStoryOfLayout) const Tab(text: 'Layout Details')
@@ -36,7 +35,7 @@ class InspectorDetailsTabController extends StatelessWidget {
     final tabViews = <Widget>[
       detailsTree,
       if (enableExperimentalStoryOfLayout)
-        LayoutDetailsTab(controller: summaryTreeController),
+        LayoutDetailsTab(controller: controller),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
@@ -59,9 +58,9 @@ class InspectorDetailsTabController extends StatelessWidget {
                       isScrollable: true,
                     ),
                   ),
-                  if (expandCollapseSupported)
+                  if (actionButtons != null)
                     Expanded(
-                      child: expandCollapseButtons,
+                      child: actionButtons,
                     ),
                 ],
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -82,7 +81,7 @@ class InspectorDetailsTabController extends StatelessWidget {
 class LayoutDetailsTab extends StatefulWidget {
   const LayoutDetailsTab({Key key, this.controller}) : super(key: key);
 
-  final InspectorTreeControllerFlutter controller;
+  final InspectorController controller;
 
   @override
   _LayoutDetailsTabState createState() => _LayoutDetailsTabState();
@@ -91,38 +90,41 @@ class LayoutDetailsTab extends StatefulWidget {
 class _LayoutDetailsTabState extends State<LayoutDetailsTab>
     with AutomaticKeepAliveClientMixin<LayoutDetailsTab>
     implements InspectorControllerClient {
-  InspectorTreeControllerFlutter get controller => widget.controller;
+  InspectorController get controller => widget.controller;
 
-  RemoteDiagnosticsNode get selected => controller.selection?.diagnostic;
+  RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
 
-  // Lifecycle hooks
+  void onSelectionChanged() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
-    controller.addClient(this);
+    controller.onInspectorSelectionChanged();
+    controller.addSelectionListener(onSelectionChanged);
   }
 
   @override
   void dispose() {
+    controller.removeSelectionListener(onSelectionChanged);
     super.dispose();
-    controller.removeClient(this);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (selected == null)
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+    if (selected == null) return const SizedBox();
     if (!selected.isFlex)
+      // TODO(albertusangga): Visualize non-flex widget constraint model
       return Container(
-        // TODO(albertusangga): Visualize non flex widget constraint with Bounding Box model
-        child: const Text('TODOs for Non Flex widget'),
+        child: const Text(
+          'TODOs for Non Flex widget',
+        ),
       );
     return StoryOfYourFlexWidget(
       diagnostic: selected,
-      // TODO(albertusangga): Optimize and cache deserialization instead of always calling it when state changes
+      // TODO(albertusangga): Cache this instead of recomputing every build
       properties: RenderFlexProperties.fromJson(selected.renderObject),
     );
   }
@@ -152,39 +154,42 @@ class StoryOfYourFlexWidget extends StatelessWidget {
   final RemoteDiagnosticsNode diagnostic;
   final RenderFlexProperties properties;
 
+  List<Widget> visualizeChildren(BuildContext context) {
+    if (!diagnostic.hasChildren) return [const SizedBox()];
+    final theme = Theme.of(context);
+    return [
+      for (var child in diagnostic.childrenNow)
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: theme.primaryColor,
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.primaryColor,
+                  offset: Offset.zero,
+                  blurRadius: 10.0,
+                )
+              ],
+            ),
+            child: Center(
+              child: Text(child.description),
+            ),
+          ),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final List<Widget> children = diagnostic.hasChildren
-        ? [
-            for (var child in diagnostic.childrenNow)
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: theme.primaryColor,
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.primaryColor,
-                        offset: Offset.zero,
-                        blurRadius: 10.0,
-                      )
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(child.description),
-                  ),
-                ),
-              ),
-            // TODO(albertusangga): handle when Flex does not have children
-          ]
-        : [const SizedBox()];
-    final Widget flexWidget = properties.type == Row
-        ? Row(children: children)
-        : Column(children: children);
-    final String flexWidgetName = properties.type.toString();
+    final children = visualizeChildren(context);
+    final flexVisualizerWidget = Flex(
+      direction: properties.direction,
+      children: children,
+    );
+    final flexType = properties.type.toString();
     return Dialog(
       child: Container(
         margin: const EdgeInsets.all(16.0),
@@ -193,7 +198,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 4.0),
               child: Text(
-                'Story of the flex layout of your $flexWidgetName widget',
+                'Story of the flex layout of your $flexType widget',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
@@ -209,13 +214,13 @@ class StoryOfYourFlexWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        flexWidgetName,
+                        flexType,
                         style: inspector_text_styles.regularBold,
                       ),
                       Expanded(
                         child: Container(
                           margin: const EdgeInsets.all(16.0),
-                          child: flexWidget,
+                          child: flexVisualizerWidget,
                         ),
                       ),
                     ],
