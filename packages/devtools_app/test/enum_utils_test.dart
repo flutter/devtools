@@ -8,18 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 enum Color { red, green, blue }
 
 void main() {
-  final deserializer = EnumUtils<Color>(Color.values);
+  final colorUtils = EnumUtils<Color>(Color.values);
 
   test('getEnum', () {
-    expect(deserializer.toEnumEntry('red'), Color.red);
-    expect(deserializer.toEnumEntry('green'), Color.green);
-    expect(deserializer.toEnumEntry('blue'), Color.blue);
-    expect(deserializer.toEnumEntry('yellow'), null);
+    expect(colorUtils.toEnumEntry('red'), Color.red);
+    expect(colorUtils.toEnumEntry('green'), Color.green);
+    expect(colorUtils.toEnumEntry('blue'), Color.blue);
+    expect(colorUtils.toEnumEntry('yellow'), null);
   });
 
   test('getName', () {
-    expect(deserializer.toName(Color.red), 'red');
-    expect(deserializer.toName(Color.green), 'green');
-    expect(deserializer.toName(Color.blue), 'blue');
+    expect(colorUtils.toName(Color.red), 'red');
+    expect(colorUtils.toName(Color.green), 'green');
+    expect(colorUtils.toName(Color.blue), 'blue');
   });
 }

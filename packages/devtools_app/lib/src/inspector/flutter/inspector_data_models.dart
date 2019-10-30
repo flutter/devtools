@@ -45,18 +45,18 @@ class RenderFlexProperties {
 
   // TODO(albertusangga) Add size & constraints in this class
 
-  static final directionDeserializer = EnumUtils<Axis>(Axis.values);
-  static final mainAxisAlignmentDeserializer =
+  static final _directionUtils = EnumUtils<Axis>(Axis.values);
+  static final _mainAxisAlignmentUtils =
       EnumUtils<MainAxisAlignment>(MainAxisAlignment.values);
-  static final mainAxisSizeDeserializer =
+  static final _mainAxisSizeUtils =
       EnumUtils<MainAxisSize>(MainAxisSize.values);
-  static final crossAxisAlignmentDeserializer =
+  static final _crossAxisAlignmentUtils =
       EnumUtils<CrossAxisAlignment>(CrossAxisAlignment.values);
-  static final textDirectionDeserializer =
+  static final _textDirectionUtils =
       EnumUtils<TextDirection>(TextDirection.values);
-  static final verticalDirectionDeserializer =
+  static final _verticalDirectionUtils =
       EnumUtils<VerticalDirection>(VerticalDirection.values);
-  static final textBaselineDeserializer =
+  static final _textBaselineUtils =
       EnumUtils<TextBaseline>(TextBaseline.values);
 
   static RenderFlexProperties fromJson(Map<String, Object> renderObjectJson) {
@@ -69,17 +69,16 @@ class RenderFlexProperties {
     );
 
     return RenderFlexProperties(
-      direction: directionDeserializer.toEnumEntry(data['direction']),
+      direction: _directionUtils.toEnumEntry(data['direction']),
       mainAxisAlignment:
-          mainAxisAlignmentDeserializer.toEnumEntry(data['mainAxisAlignment']),
-      mainAxisSize: mainAxisSizeDeserializer.toEnumEntry(data['mainAxisSize']),
-      crossAxisAlignment: crossAxisAlignmentDeserializer
-          .toEnumEntry(data['crossAxisAlignment']),
-      textDirection:
-          textDirectionDeserializer.toEnumEntry(data['textDirection']),
+          _mainAxisAlignmentUtils.toEnumEntry(data['mainAxisAlignment']),
+      mainAxisSize: _mainAxisSizeUtils.toEnumEntry(data['mainAxisSize']),
+      crossAxisAlignment:
+          _crossAxisAlignmentUtils.toEnumEntry(data['crossAxisAlignment']),
+      textDirection: _textDirectionUtils.toEnumEntry(data['textDirection']),
       verticalDirection:
-          verticalDirectionDeserializer.toEnumEntry(data['verticalDirection']),
-      textBaseline: textBaselineDeserializer.toEnumEntry(data['textBaseline']),
+          _verticalDirectionUtils.toEnumEntry(data['verticalDirection']),
+      textBaseline: _textBaselineUtils.toEnumEntry(data['textBaseline']),
     );
   }
 
