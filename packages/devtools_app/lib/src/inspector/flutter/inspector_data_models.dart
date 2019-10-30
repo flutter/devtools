@@ -14,6 +14,7 @@ Constraints deserializeConstraints(Map<String, Object> json) {
   // TODO(albertusangga): Support SliverConstraint
   if (json == null || json['type'] != boxConstraintsType.toString())
     return null;
+  // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
   return BoxConstraints(
     minWidth: json['minWidth'],
     maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,
@@ -69,18 +70,19 @@ class RenderFlexProperties {
     );
 
     return RenderFlexProperties(
-      direction: _directionUtils.toEnumEntry(data['direction']),
+      direction: _directionUtils.enumEntry(data['direction']),
       mainAxisAlignment:
-          _mainAxisAlignmentUtils.toEnumEntry(data['mainAxisAlignment']),
-      mainAxisSize: _mainAxisSizeUtils.toEnumEntry(data['mainAxisSize']),
+          _mainAxisAlignmentUtils.enumEntry(data['mainAxisAlignment']),
+      mainAxisSize: _mainAxisSizeUtils.enumEntry(data['mainAxisSize']),
       crossAxisAlignment:
-          _crossAxisAlignmentUtils.toEnumEntry(data['crossAxisAlignment']),
-      textDirection: _textDirectionUtils.toEnumEntry(data['textDirection']),
+          _crossAxisAlignmentUtils.enumEntry(data['crossAxisAlignment']),
+      textDirection: _textDirectionUtils.enumEntry(data['textDirection']),
       verticalDirection:
-          _verticalDirectionUtils.toEnumEntry(data['verticalDirection']),
-      textBaseline: _textBaselineUtils.toEnumEntry(data['textBaseline']),
+          _verticalDirectionUtils.enumEntry(data['verticalDirection']),
+      textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
     );
   }
 
+  // TODO(albertusangga): Remove this getter since type is not that useful
   Type get type => direction == Axis.horizontal ? Row : Column;
 }

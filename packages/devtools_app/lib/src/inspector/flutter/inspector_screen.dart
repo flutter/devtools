@@ -89,11 +89,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   Widget build(BuildContext context) {
     final summaryTree = InspectorTree(
-      controller: inspectorController,
+      controller: summaryTreeController,
       isSummaryTree: true,
+      debugSummaryLayoutEnabled: inspectorController?.debugSummaryLayoutEnabled,
     );
     final detailsTree = InspectorTree(
-      controller: inspectorController,
+      controller: detailsTreeController,
       isSummaryTree: false,
     );
     return Column(
@@ -117,7 +118,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               Container(
                 margin: const EdgeInsets.only(left: 8.0),
                 child: OutlineButton(
-                  onPressed: inspectorController?.toggleDebugLayoutSummary,
+                  onPressed: inspectorController?.toggleDebugSummaryLayout,
                   child: const Label(
                     FlutterIcons.lightbulb,
                     'Show Constraints',

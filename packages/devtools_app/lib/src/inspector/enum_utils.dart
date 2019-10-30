@@ -4,9 +4,8 @@
 
 import '../ui/fake_flutter/fake_flutter.dart';
 
-/// A class for getting an enum object from its name or vice versa
-///  Will return null for invalid value
-///
+/// Class that converts enum value names to enum entries and vice versa.
+/// Will return null for invalid value
 ///
 /// Example usage:
 /// enum Color {
@@ -18,7 +17,6 @@ import '../ui/fake_flutter/fake_flutter.dart';
 ///   colorUtils.getName(Color.red); // returns 'red'
 /// ```
 class EnumUtils<T> {
-  // currently there's no way to
   EnumUtils(List<T> enumValues) {
     for (var val in enumValues) {
       final enumDescription = describeEnum(val);
@@ -30,7 +28,7 @@ class EnumUtils<T> {
   final Map<String, T> _lookupTable = {};
   final Map<T, String> _reverseLookupTable = {};
 
-  T toEnumEntry(String enumName) => _lookupTable[enumName];
+  T enumEntry(String enumName) => _lookupTable[enumName];
 
-  String toName(T enumEntry) => _reverseLookupTable[enumEntry];
+  String name(T enumEntry) => _reverseLookupTable[enumEntry];
 }

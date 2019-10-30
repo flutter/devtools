@@ -107,19 +107,10 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
-  bool get debugSummaryLayoutEnabled => _debugLayoutSummaryEnabled.value;
-  final _debugLayoutSummaryEnabled = ValueNotifier(false);
+  final debugSummaryLayoutEnabled = ValueNotifier(false);
 
-  void addDebugLayoutSummaryFlagListener(Function listener) {
-    _debugLayoutSummaryEnabled.addListener(listener);
-  }
-
-  void toggleDebugLayoutSummary() {
-    _debugLayoutSummaryEnabled.value = !_debugLayoutSummaryEnabled.value;
-  }
-
-  void removeDebugLayoutSummaryFlagListener(Function listener) {
-    _debugLayoutSummaryEnabled.removeListener(listener);
+  void toggleDebugSummaryLayout() {
+    debugSummaryLayoutEnabled.value = !debugSummaryLayoutEnabled.value;
   }
 
   // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
@@ -558,7 +549,6 @@ class InspectorController implements InspectorServiceClient {
       return;
     }
     updateSelectionFromService(firstFrame: false);
-    notifySelectionListeners();
   }
 
   Future<void> updateSelectionFromService({@required bool firstFrame}) async {
@@ -788,8 +778,8 @@ class InspectorController implements InspectorServiceClient {
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
+    debugSummaryLayoutEnabled.dispose();
     details?.dispose();
-    _debugLayoutSummaryEnabled.dispose();
   }
 
   static String treeTypeDisplayName(FlutterTreeType treeType) {

@@ -337,7 +337,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelUtils.toEnumEntry(value);
+    final level = diagnosticLevelUtils.enumEntry(value);
     assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
@@ -351,7 +351,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleUtils.toEnumEntry(value);
+    final style = treeStyleUtils.enumEntry(value);
     assert(style != null);
     return style ?? defaultValue;
   }

@@ -56,7 +56,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
       child: InspectorRowContent(
         row: widget.row,
         expandAnimation: expandAnimation,
-        controller: widget.inspectorTreeState.treeController,
+        controller: widget.inspectorTreeState.controller,
         onToggle: () {
           setExpanded(!isExpanded);
         },
@@ -74,9 +74,9 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     setState(() {
       final row = widget.row;
       if (expanded) {
-        widget.inspectorTreeState.treeController.onExpandRow(row);
+        widget.inspectorTreeState.controller.onExpandRow(row);
       } else {
-        widget.inspectorTreeState.treeController.onCollapseRow(row);
+        widget.inspectorTreeState.controller.onCollapseRow(row);
       }
     });
   }
@@ -163,11 +163,13 @@ abstract class InspectorControllerClient {
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
     Key key,
-    this.controller,
+    @required this.controller,
+    this.debugSummaryLayoutEnabled,
     this.isSummaryTree = false,
   }) : super(key: key);
 
-  final InspectorController controller;
+  final InspectorTreeController controller;
+  final ValueNotifier<bool> debugSummaryLayoutEnabled;
   final bool isSummaryTree;
 
   @override
@@ -183,13 +185,12 @@ class _InspectorTreeState extends State<InspectorTree>
   final defaultAnimationDuration = const Duration(milliseconds: 150);
   final slowAnimationDuration = const Duration(milliseconds: 300);
 
-  InspectorController get controller => widget.controller;
-
-  InspectorTreeControllerFlutter get treeController => isSummaryTree
-      ? controller?.inspectorTree
-      : controller?.details?.inspectorTree;
+  InspectorTreeControllerFlutter get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
+
+  ValueNotifier get debugSummaryLayoutEnabled =>
+      widget.debugSummaryLayoutEnabled;
 
   ScrollController _scrollControllerY;
   ScrollController _scrollControllerX;
@@ -216,8 +217,8 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    treeController?.client = null;
-    controller?.removeDebugLayoutSummaryFlagListener(
+    controller?.client = null;
+    debugSummaryLayoutEnabled?.removeListener(
       _listenToDebugSummaryLayoutChanges,
     );
     _scrollControllerX.dispose();
@@ -226,7 +227,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _onScrollYChange() {
-    if (treeController == null) return;
+    if (controller == null) return;
 
     // If the vertical position  is already being animated we should not trigger
     // a new animation of the horizontal position as a more direct animation of
@@ -246,7 +247,7 @@ class _InspectorTreeState extends State<InspectorTree>
   /// This enables animating the x scroll as the y scroll changes which helps
   /// keep the relevant content in view while scrolling a large list.
   double _computeTargetX(double y) {
-    final rowIndex = treeController.getRowIndex(y);
+    final rowIndex = controller.getRowIndex(y);
     double requiredOffset;
     double minOffset = double.infinity;
     // TODO(jacobr): use maxOffset as well to better handle the case where the
@@ -255,17 +256,17 @@ class _InspectorTreeState extends State<InspectorTree>
     // TODO(jacobr): if the first or last row is only partially visible, tween
     // between its indent and the next row to more smoothly change the target x
     // as the y coordinate changes.
-    if (rowIndex == treeController.numRows) {
+    if (rowIndex == controller.numRows) {
       return 0;
     }
     final endY = y += _scrollControllerY.position.viewportDimension;
-    for (int i = rowIndex; i < treeController.numRows; i++) {
-      final rowY = treeController.getRowY(i);
+    for (int i = rowIndex; i < controller.numRows; i++) {
+      final rowY = controller.getRowY(i);
       if (rowY >= endY) break;
 
-      final row = treeController.getCachedRow(i);
+      final row = controller.getCachedRow(i);
       if (row == null) continue;
-      final rowOffset = treeController.getRowOffset(i);
+      final rowOffset = controller.getRowOffset(i);
       if (row.isSelected) {
         requiredOffset = rowOffset;
       }
@@ -350,7 +351,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _listenToDebugSummaryLayoutChanges() {
-    if (controller.debugSummaryLayoutEnabled) {
+    if (debugSummaryLayoutEnabled.value) {
       constraintDisplayController.forward();
     } else {
       constraintDisplayController.reverse();
@@ -358,9 +359,9 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    treeController?.client = this;
+    controller?.client = this;
     if (isSummaryTree) {
-      controller?.addDebugLayoutSummaryFlagListener(
+      debugSummaryLayoutEnabled?.addListener(
         _listenToDebugSummaryLayoutChanges,
       );
     }
@@ -374,7 +375,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (treeController == null) {
+    if (controller == null) {
       // Indicate the tree is loading.
       return const Center(child: CircularProgressIndicator());
     }
@@ -384,21 +385,20 @@ class _InspectorTreeState extends State<InspectorTree>
         scrollDirection: Axis.horizontal,
         controller: _scrollControllerX,
         child: SizedBox(
-          width: treeController.rowWidth + treeController.maxRowIndent,
+          width: controller.rowWidth + controller.maxRowIndent,
           child: Scrollbar(
             child: ListView.custom(
               itemExtent: rowHeight,
               childrenDelegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final InspectorTreeRow row =
-                      treeController.root?.getRow(index);
+                  final InspectorTreeRow row = controller.root?.getRow(index);
                   return _InspectorTreeRowWidget(
                     key: PageStorageKey(row?.node),
                     inspectorTreeState: this,
                     row: row,
                   );
                 },
-                childCount: treeController.numRows,
+                childCount: controller.numRows,
               ),
               controller: _scrollControllerY,
             ),
