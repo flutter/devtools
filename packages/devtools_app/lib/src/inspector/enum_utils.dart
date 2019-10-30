@@ -5,7 +5,6 @@
 import '../ui/fake_flutter/fake_flutter.dart';
 
 /// Class that converts enum value names to enum entries and vice versa.
-/// Will return null for invalid value
 ///
 /// Example usage:
 /// enum Color {
