@@ -89,7 +89,9 @@ abstract class InspectorTreeNodeRenderBuilder<
     @required this.level,
     @required this.treeStyle,
   });
+
   void appendText(String text, TextStyle textStyle);
+
   void addIcon(DevToolsIcon icon);
 
   final DiagnosticLevel level;
@@ -151,6 +153,7 @@ class InspectorTreeNode {
 
   bool get isDirty => _isDirty;
   bool _isDirty = true;
+
   set isDirty(bool dirty) {
     if (dirty) {
       _isDirty = true;
@@ -193,6 +196,7 @@ class InspectorTreeNode {
   Iterable<InspectorTreeNode> get children => _children;
 
   bool get isCreatedByLocalProject => _diagnostic.isCreatedByLocalProject;
+
   bool get isProperty => diagnostic == null || diagnostic.isProperty;
 
   bool get isExpanded => _isExpanded;
@@ -417,6 +421,7 @@ abstract class InspectorTreeController {
 
   InspectorTreeConfig get config => _config;
   InspectorTreeConfig _config;
+
   set config(InspectorTreeConfig value) {
     // Only allow setting config once.
     assert(_config == null);

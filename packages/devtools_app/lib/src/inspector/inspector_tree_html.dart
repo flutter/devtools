@@ -10,7 +10,6 @@
 library inspector_tree_html;
 
 import 'package:html_shim/html.dart';
-
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
@@ -121,8 +120,8 @@ class InspectorTreeNodeRenderHtmlBuilder
   InspectorTreeNodeHtmlRender build() {
     // The html renderer does not know what its size is.
     final classes = [
-      'inspector-level-${diagnosticLevelToName[level]}',
-      'inspector-style-${treeStyleToName[treeStyle]}',
+      'inspector-level-${diagnosticLevelUtils.name(level)}',
+      'inspector-style-${treeStyleUtils.name(treeStyle)}',
     ];
     if (!allowWrap) {
       classes.add('inspector-no-wrap');

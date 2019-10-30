@@ -30,6 +30,7 @@ abstract class CanvasPaintEntry extends PaintEntry {
   CanvasPaintEntry(this.x);
 
   final double x;
+
   double get right;
 
   void paint(CanvasRenderingContext2D canvas);

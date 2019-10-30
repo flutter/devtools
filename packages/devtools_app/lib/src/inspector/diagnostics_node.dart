@@ -11,43 +11,14 @@ import 'package:vm_service/vm_service.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
+import 'enum_utils.dart';
 import 'flutter_widget.dart';
 import 'inspector_service.dart';
 
-Map<K, V> _invertMap<K, V>(Map<V, K> inverted) => Map.fromEntries(
-    inverted.entries.map((entry) => MapEntry(entry.value, entry.key)));
+final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
-const Map<String, DiagnosticLevel> nameToDiagnosticLevel = {
-  'hidden': DiagnosticLevel.hidden,
-  'fine': DiagnosticLevel.fine,
-  'debug': DiagnosticLevel.debug,
-  'info': DiagnosticLevel.info,
-  'warning': DiagnosticLevel.warning,
-  'hint': DiagnosticLevel.hint,
-  'summary': DiagnosticLevel.summary,
-  'error': DiagnosticLevel.error,
-  'off': DiagnosticLevel.off,
-};
-
-final Map<DiagnosticLevel, String> diagnosticLevelToName =
-    _invertMap(nameToDiagnosticLevel);
-
-const Map<String, DiagnosticsTreeStyle> nameToTreeStyle = {
-  'sparse': DiagnosticsTreeStyle.sparse,
-  'offstage': DiagnosticsTreeStyle.offstage,
-  'dense': DiagnosticsTreeStyle.dense,
-  'transition': DiagnosticsTreeStyle.transition,
-  'whitespace': DiagnosticsTreeStyle.whitespace,
-  'error': DiagnosticsTreeStyle.error,
-  'flat': DiagnosticsTreeStyle.flat,
-  'singleLine': DiagnosticsTreeStyle.singleLine,
-  'errorProperty': DiagnosticsTreeStyle.errorProperty,
-  'shallow': DiagnosticsTreeStyle.shallow,
-  'truncateChildren': DiagnosticsTreeStyle.truncateChildren,
-};
-
-final Map<DiagnosticsTreeStyle, String> treeStyleToName =
-    _invertMap(nameToTreeStyle);
+final treeStyleUtils =
+    EnumUtils<DiagnosticsTreeStyle>(DiagnosticsTreeStyle.values);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -93,6 +64,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<Map<String, InstanceRef>> _valueProperties;
 
   final bool isProperty;
+
+  bool get isFlex => getBooleanMember('isFlex', false);
+
+  Map<String, Object> get constraints => json['constraints'];
+
+  Map<String, Object> get renderObject => json['renderObject'];
 
   @override
   bool operator ==(dynamic other) {
@@ -153,6 +130,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticsTreeStyle _style;
+
   set style(DiagnosticsTreeStyle style) {
     _style = style;
   }
@@ -359,7 +337,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = nameToDiagnosticLevel[value];
+    final level = diagnosticLevelUtils.enumEntry(value);
     assert(level != null, 'Unabled to find level for $value');
     return level ?? defaultValue;
   }
@@ -373,7 +351,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = nameToTreeStyle[value];
+    final style = treeStyleUtils.enumEntry(value);
     assert(style != null);
     return style ?? defaultValue;
   }

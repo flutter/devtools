@@ -18,6 +18,7 @@ import '../../ui/icons.dart';
 import '../flutter_widget.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
+import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
@@ -87,6 +88,15 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    final summaryTree = InspectorTree(
+      controller: summaryTreeController,
+      isSummaryTree: true,
+      debugSummaryLayoutEnabled: inspectorController?.debugSummaryLayoutEnabled,
+    );
+    final detailsTree = InspectorTree(
+      controller: detailsTreeController,
+      isSummaryTree: false,
+    );
     return Column(
       children: <Widget>[
         Row(
@@ -101,9 +111,21 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               child: Label(
                 FlutterIcons.refresh,
                 'Refresh Tree',
-                minIncludeTextWidth: 800,
+                minIncludeTextWidth: 900,
               ),
             ),
+            if (InspectorController.enableExperimentalStoryOfLayout)
+              Container(
+                margin: const EdgeInsets.only(left: 8.0),
+                child: OutlineButton(
+                  onPressed: inspectorController?.toggleDebugSummaryLayout,
+                  child: const Label(
+                    FlutterIcons.lightbulb,
+                    'Show Constraints',
+                    minIncludeTextWidth: 1000,
+                  ),
+                ),
+              ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],
@@ -111,20 +133,14 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Expanded(
           child: Row(
             children: [
+              Expanded(child: summaryTree),
               Expanded(
-                  child: InspectorTree(
-                controller: summaryTreeController,
-              )),
-              Expanded(
-                child: Stack(
-                  children: [
-                    InspectorTree(
-                      controller: detailsTreeController,
-                    ),
-                    if (_expandCollapseSupported) _expandCollapseButtons()
-                  ],
+                child: InspectorDetailsTabController(
+                  detailsTree: detailsTree,
+                  controller: inspectorController,
+                  actionButtons: _expandCollapseButtons(),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -133,6 +149,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   Widget _expandCollapseButtons() {
+    if (!_expandCollapseSupported) return null;
     return Align(
       alignment: Alignment.topRight,
       child: Container(

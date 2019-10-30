@@ -107,6 +107,31 @@ class InspectorController implements InspectorServiceClient {
     }
   }
 
+  final debugSummaryLayoutEnabled = ValueNotifier(false);
+
+  void toggleDebugSummaryLayout() {
+    debugSummaryLayoutEnabled.value = !debugSummaryLayoutEnabled.value;
+  }
+
+  // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
+  static bool enableExperimentalStoryOfLayout = false;
+
+  final List<Function> _selectionListeners = [];
+
+  void addSelectionListener(Function listener) {
+    _selectionListeners.add(listener);
+  }
+
+  void removeSelectionListener(Function listener) {
+    _selectionListeners.remove(listener);
+  }
+
+  void notifySelectionListeners() {
+    for (var notifyListener in _selectionListeners) {
+      notifyListener();
+    }
+  }
+
   int _clientCount = 0;
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
@@ -648,6 +673,8 @@ class InspectorController implements InspectorServiceClient {
     }
 
     animateTo(selectedNode);
+
+    notifySelectionListeners();
   }
 
   void _onExpand(InspectorTreeNode node) {
@@ -751,6 +778,7 @@ class InspectorController implements InspectorServiceClient {
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
+    debugSummaryLayoutEnabled.dispose();
     details?.dispose();
   }
 

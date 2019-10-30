@@ -13,6 +13,9 @@ pubspec.lock
 # such as the position of icons or the choice of a background image.
 .DS_Store
 
-# A generated file not intended to be checked in to version control
+# Generated files not intended to be checked in to version control
 flutter_export_environment.sh
-
+.flutter-plugins
+generated_plugin_registrant.dart
+Podfile
+Podfile.lock

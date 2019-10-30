@@ -127,6 +127,10 @@ elif [ "$BOT" = "test_ddc" ]; then
 
     flutter pub get
 
+    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
+    flutter config --enable-web
+    flutter build web
+
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
@@ -135,6 +139,10 @@ elif [ "$BOT" = "test_ddc" ]; then
 
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
+
+    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
+    flutter config --enable-web
+    flutter build web
 
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
