@@ -90,6 +90,8 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   CoreElement _recordingStatusMessage;
 
+  HtmlSpinner _recordingSpinner;
+
   CoreElement upperButtonSection;
 
   CoreElement debugButtonSection;
@@ -139,7 +141,8 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..flex()
       ..add([
         _recordingStatusMessage = div(c: 'recording-status-message'),
-        HtmlSpinner.centered(classes: ['recording-spinner']),
+        _recordingSpinner =
+            HtmlSpinner.centered(classes: ['recording-spinner']),
       ]);
 
     exportButton = PButton.icon('Export', exportIcon)
@@ -258,27 +261,33 @@ class HtmlTimelineScreen extends HtmlScreen {
       _configureSplitter();
     });
 
-    timelineController.fullTimeline.onTimelineProcessed.listen((_) {
-      timelineFlameChartCanvas = FullTimelineFlameChartCanvas(
-        data: timelineController.fullTimeline.data,
-        width: flameChartContainer.element.clientWidth.toDouble(),
-        height: math.max(
-          // Subtract [rowHeightWithPadding] to account for timeline at the top of
-          // the flame chart.
-          flameChartContainer.element.clientHeight.toDouble(),
-          // Add 1 to account for a row of padding at the bottom of the chart.
-          _fullTimelineChartHeight(),
-        ),
-      );
-      timelineFlameChartCanvas.onNodeSelected.listen((node) {
-        eventDetails.titleBackgroundColor = node.backgroundColor;
-        eventDetails.titleTextColor = node.textColor;
-        timelineController.selectTimelineEvent(node.data);
-      });
-      flameChartContainer.add(timelineFlameChartCanvas.element);
+    timelineController.fullTimeline
+      ..onTimelineProcessed.listen((_) {
+        timelineFlameChartCanvas = FullTimelineFlameChartCanvas(
+          data: timelineController.fullTimeline.data,
+          width: flameChartContainer.element.clientWidth.toDouble(),
+          height: math.max(
+            // Subtract [rowHeightWithPadding] to account for timeline at the top of
+            // the flame chart.
+            flameChartContainer.element.clientHeight.toDouble(),
+            // Add 1 to account for a row of padding at the bottom of the chart.
+            _fullTimelineChartHeight(),
+          ),
+        );
+        timelineFlameChartCanvas.onNodeSelected.listen((node) {
+          eventDetails.titleBackgroundColor = node.backgroundColor;
+          eventDetails.titleTextColor = node.textColor;
+          timelineController.selectTimelineEvent(node.data);
+        });
+        flameChartContainer.add(timelineFlameChartCanvas.element);
 
-      _configureSplitter();
-    });
+        _configureSplitter();
+      })
+      ..onNoEventsRecorded.listen((_) {
+        _recordingStatusMessage.text = 'No timeline events recorded';
+        _recordingStatus.hidden(false);
+        _recordingSpinner.hidden(true);
+      });
 
     timelineController.onLoadOfflineData.listen((_) {
       // Relayout the plotly graph so that the frames bar chart reflects the
@@ -359,7 +368,7 @@ class HtmlTimelineScreen extends HtmlScreen {
         horizontal: false,
         gutterSize: defaultSplitterWidth,
         sizes: [75, 25],
-        minSize: [50, 50],
+        minSize: [50, 90],
       );
       splitterConfigured = true;
     }
@@ -432,6 +441,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     _recordingInstructions.hidden(true);
     _recordingStatusMessage.text = 'Recording timeline trace';
     _recordingStatus.hidden(false);
+    _recordingSpinner.hidden(false);
     _updateButtonStates();
   }
 

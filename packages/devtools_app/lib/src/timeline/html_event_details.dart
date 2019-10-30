@@ -56,7 +56,7 @@ class HtmlEventDetails extends CoreElement {
 
   _CpuProfiler _cpuProfiler;
 
-  CoreElement _gpuEventDetails;
+  CoreElement _nonUiEventDetails;
 
   Color titleBackgroundColor = _defaultTitleBackground;
 
@@ -78,7 +78,7 @@ class HtmlEventDetails extends CoreElement {
         )..hidden(true),
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
-        _gpuEventDetails = div(
+        _nonUiEventDetails = div(
           text: 'CPU profiling is only available for UI events.',
           c: 'centered-single-line-message',
         )..hidden(true),
@@ -127,8 +127,9 @@ class HtmlEventDetails extends CoreElement {
       ..color = colorToCss(titleTextColor);
 
     hidden(hide);
-    _gpuEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
-    _cpuProfiler.hidden(selectedEvent?.isGpuEvent ?? true);
+    _nonUiEventDetails.hidden(selectedEvent?.isUiEvent ?? true);
+    _cpuProfiler
+        .hidden(selectedEvent != null ? !selectedEvent.isUiEvent : true);
 
     if (selectedEvent != null && selectedEvent.isUiEvent) {
       await _cpuProfiler.update();

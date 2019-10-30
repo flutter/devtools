@@ -49,10 +49,6 @@ const Color highlightLineColor = ThemedColor(
   Colors.black,
   Color.fromARGB(255, 200, 200, 200),
 );
-const Color defaultTreeLineColor = ThemedColor(
-  Colors.grey,
-  Color.fromARGB(255, 150, 150, 150),
-);
 
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;

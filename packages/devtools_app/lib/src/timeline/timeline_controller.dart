@@ -297,7 +297,11 @@ class FullTimeline {
 
   final _timelineProcessedController = StreamController<bool>.broadcast();
 
+  final _noEventsRecordedController = StreamController<bool>.broadcast();
+
   Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
+
+  Stream<bool> get onNoEventsRecorded => _noEventsRecordedController.stream;
 
   FullTimelineData data;
 
@@ -316,7 +320,7 @@ class FullTimeline {
     recording = false;
 
     if (_timelineController.allTraceEvents.isEmpty) {
-      // TODO(kenz): show a no events recorded error message.
+      _noEventsRecordedController.add(true);
       return;
     }
 

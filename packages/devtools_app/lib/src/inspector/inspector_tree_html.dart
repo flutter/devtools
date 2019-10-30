@@ -342,7 +342,7 @@ class InspectorTreeHtml extends InspectorTreeControllerLegacy
         currentX = getDepthIndent(tick) - columnWidth * 0.5;
         if (isVisible(1.0)) {
           final highlight = row.highlightDepth == tick;
-          _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+          _maybeStart(highlight ? highlightLineColor : treeGuidelineColor);
           canvas
             ..moveTo(currentX, 0.0)
             ..lineTo(currentX, rowHeight);
@@ -353,7 +353,7 @@ class InspectorTreeHtml extends InspectorTreeControllerLegacy
         currentX = getDepthIndent(row.depth - 1) - columnWidth * 0.5;
         final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
         if (isVisible(width)) {
-          _maybeStart(highlight ? highlightLineColor : defaultTreeLineColor);
+          _maybeStart(highlight ? highlightLineColor : treeGuidelineColor);
           canvas
             ..moveTo(currentX, 0.0)
             ..lineTo(currentX, rowHeight * 0.5)
