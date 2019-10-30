@@ -10,8 +10,10 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/collapsible_mixin.dart';
 import '../diagnostics_node.dart';
+import '../inspector_controller.dart';
 import '../inspector_tree.dart';
 import 'diagnostics.dart';
+import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -58,6 +60,8 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         onToggle: () {
           setExpanded(!isExpanded);
         },
+        constraintDisplayController:
+            widget.inspectorTreeState.constraintDisplayController,
       ),
     );
   }
@@ -86,6 +90,7 @@ class InspectorTreeControllerFlutter extends Object
   /// Client the controller notifies to trigger changes to the UI.
   InspectorControllerClient get client => _client;
   InspectorControllerClient _client;
+
   set client(InspectorControllerClient value) {
     if (_client == value) return;
     // Do not set a new client if there is still an old client.
@@ -156,26 +161,43 @@ abstract class InspectorControllerClient {
 }
 
 class InspectorTree extends StatefulWidget {
-  const InspectorTree({Key key, this.controller}) : super(key: key);
+  const InspectorTree({
+    Key key,
+    @required this.controller,
+    this.debugSummaryLayoutEnabled,
+    this.isSummaryTree = false,
+  }) : super(key: key);
 
-  final InspectorTreeControllerFlutter controller;
+  final InspectorTreeController controller;
+  final ValueNotifier<bool> debugSummaryLayoutEnabled;
+  final bool isSummaryTree;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
 }
 
+// AutomaticKeepAlive is necessary so that the tree does not get recreated when we switch tabs.
 class _InspectorTreeState extends State<InspectorTree>
+    with
+        SingleTickerProviderStateMixin,
+        AutomaticKeepAliveClientMixin<InspectorTree>
     implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);
   final slowAnimationDuration = const Duration(milliseconds: 300);
 
   InspectorTreeControllerFlutter get controller => widget.controller;
 
+  bool get isSummaryTree => widget.isSummaryTree;
+
+  ValueNotifier get debugSummaryLayoutEnabled =>
+      widget.debugSummaryLayoutEnabled;
+
   ScrollController _scrollControllerY;
   ScrollController _scrollControllerX;
-
   Future<void> currentAnimateY;
   Rect currentAnimateTarget;
+
+  AnimationController constraintDisplayController;
 
   @override
   void initState() {
@@ -183,6 +205,12 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerX = ScrollController();
     _scrollControllerY = ScrollController();
     _scrollControllerY.addListener(_onScrollYChange);
+    if (isSummaryTree) {
+      constraintDisplayController = AnimationController(
+        vsync: this,
+        duration: slowAnimationDuration,
+      );
+    }
     _bindToController();
   }
 
@@ -190,8 +218,12 @@ class _InspectorTreeState extends State<InspectorTree>
   void dispose() {
     super.dispose();
     controller?.client = null;
+    debugSummaryLayoutEnabled?.removeListener(
+      _listenToDebugSummaryLayoutChanges,
+    );
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
+    constraintDisplayController?.dispose();
   }
 
   void _onScrollYChange() {
@@ -318,8 +350,21 @@ class _InspectorTreeState extends State<InspectorTree>
     _bindToController();
   }
 
+  void _listenToDebugSummaryLayoutChanges() {
+    if (debugSummaryLayoutEnabled.value) {
+      constraintDisplayController.forward();
+    } else {
+      constraintDisplayController.reverse();
+    }
+  }
+
   void _bindToController() {
     controller?.client = this;
+    if (isSummaryTree) {
+      debugSummaryLayoutEnabled?.addListener(
+        _listenToDebugSummaryLayoutChanges,
+      );
+    }
   }
 
   @override
@@ -329,6 +374,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (controller == null) {
       // Indicate the tree is loading.
       return const Center(child: CircularProgressIndicator());
@@ -361,6 +407,9 @@ class _InspectorTreeState extends State<InspectorTree>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 final _defaultPaint = Paint()
@@ -442,12 +491,14 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandAnimation,
+    @required this.constraintDisplayController,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
   final Animation<double> expandAnimation;
+  final AnimationController constraintDisplayController;
 
   @override
   Widget build(BuildContext context) {
@@ -470,6 +521,7 @@ class InspectorRowContent extends StatelessWidget {
         padding: EdgeInsets.only(left: currentX),
         child: ClipRect(
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             textBaseline: TextBaseline.alphabetic,
             children: [
@@ -482,26 +534,31 @@ class InspectorRowContent extends StatelessWidget {
                           Icons.expand_more,
                           size: 16.0,
                         ),
-                      ))
+                      ),
+                    )
                   : const SizedBox(width: 16.0, height: 16.0),
-              SizedOverflowBox(
-                size: Size(controller.rowWidth, rowHeight),
-                alignment: Alignment.centerLeft,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      controller.onSelectRow(row);
-                    },
-                    child: Container(
-                        height: rowHeight,
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DiagnosticsNodeDescription(node.diagnostic)),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                ),
+                child: InkWell(
+                  onTap: () {
+                    controller.onSelectRow(row);
+                  },
+                  child: Container(
+                    height: rowHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: DiagnosticsNodeDescription(node.diagnostic),
                   ),
                 ),
               ),
+              if (InspectorController.enableExperimentalStoryOfLayout &&
+                  // fadeConstraintsAnimation is null for details tree rows
+                  constraintDisplayController != null)
+                ConstraintsDescription(
+                  listenable: constraintDisplayController,
+                  diagnostic: node.diagnostic,
+                ),
             ],
           ),
         ),

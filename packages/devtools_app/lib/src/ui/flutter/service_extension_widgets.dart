@@ -142,11 +142,11 @@ List<Widget> getServiceExtensionWidgets() {
       extensions: [performanceOverlay, slowAnimations],
     ),
     ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1200,
+      minIncludeTextWidth: 1400,
       extensions: [debugPaint, debugPaintBaselines],
     ),
     ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1400,
+      minIncludeTextWidth: 1600,
       extensions: [repaintRainbow, debugAllowBanner],
     ),
     // TODO(jacobr): implement TogglePlatformSelector.
