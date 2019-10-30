@@ -10,7 +10,6 @@ import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
-import 'inspector_tree_flutter.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController({
@@ -88,8 +87,7 @@ class LayoutDetailsTab extends StatefulWidget {
 }
 
 class _LayoutDetailsTabState extends State<LayoutDetailsTab>
-    with AutomaticKeepAliveClientMixin<LayoutDetailsTab>
-    implements InspectorControllerClient {
+    with AutomaticKeepAliveClientMixin<LayoutDetailsTab> {
   InspectorController get controller => widget.controller;
 
   RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
@@ -131,16 +129,6 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void onChanged() {
-    setState(() {});
-  }
-
-  @override
-  void scrollToRect(Rect rect) {
-    // do nothing since we are not doing scrolling here
-  }
 }
 
 @immutable
