@@ -24,29 +24,62 @@ void main() {
       );
     });
 
-    test('getTrimmedUri', () {
+    test('normalizeVmServiceUri', () {
       expect(
-        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm')
+        normalizeVmServiceUri('http://127.0.0.1:60667/72K34Xmq0X0=/#/vm')
             .toString(),
         equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
       );
       expect(
-        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=')
-            .toString(),
+        normalizeVmServiceUri('http://127.0.0.1:60667/72K34Xmq0X0=').toString(),
         equals('http://127.0.0.1:60667/72K34Xmq0X0='),
       );
       expect(
-        getNormalizedTrimmedUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ')
+        normalizeVmServiceUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ')
             .toString(),
         equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
       );
       expect(
-        getNormalizedTrimmedUri('http://127.0.0.1:60667').toString(),
+        normalizeVmServiceUri('http://127.0.0.1:60667').toString(),
         equals('http://127.0.0.1:60667'),
       );
       expect(
-        getNormalizedTrimmedUri('http://127.0.0.1:60667/').toString(),
+        normalizeVmServiceUri('http://127.0.0.1:60667/').toString(),
         equals('http://127.0.0.1:60667/'),
+      );
+
+      // Leading and trailing characters
+      expect(
+        normalizeVmServiceUri('  http://127.0.0.1:60667/72K34Xmq0X0=/#/vm')
+            .toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
+      );
+      expect(
+        normalizeVmServiceUri('  http://127.0.0.1:60667/72K34Xmq0X0=/#/vm  ')
+            .toString(),
+        equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
+      );
+
+      // Url-encoded
+
+      expect(
+        normalizeVmServiceUri('http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D')
+            .toString(),
+        equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
+      );
+
+      expect(
+        normalizeVmServiceUri(
+          'http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D  ',
+        ).toString(),
+        equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
+      );
+
+      expect(
+        normalizeVmServiceUri(
+          '  http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D   ',
+        ).toString(),
+        equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
       );
     });
   });
