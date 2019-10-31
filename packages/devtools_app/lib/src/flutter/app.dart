@@ -15,6 +15,7 @@ import '../inspector/flutter/inspector_screen.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
+import 'common_widgets.dart';
 import 'connect_screen.dart';
 import 'navigation.dart';
 import 'scaffold.dart';
@@ -47,6 +48,7 @@ class DevToolsAppState extends State<DevToolsApp> {
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
+    print(uri);
 
     // Update the theme based on the query parameters.
     // TODO(djshuckerow): Update this with a NavigatorObserver to load the
@@ -65,10 +67,15 @@ class DevToolsAppState extends State<DevToolsApp> {
 
     // Provide the appropriate page route.
     if (_routes.containsKey(path)) {
-      var builder = _routes[path];
+      WidgetBuilder builder =
+          (context) => _routes[path](context, uri.queryParameters);
       assert(() {
-        builder =
-            (context) => _AlternateCheckedModeBanner(builder: _routes[path]);
+        builder = (context) => _AlternateCheckedModeBanner(
+              builder: (context) => _routes[path](
+                context,
+                uri.queryParameters,
+              ),
+            );
         return true;
       }());
       return MaterialPageRoute(settings: settings, builder: builder);
@@ -90,8 +97,9 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 
   /// The routes that the app exposes.
-  final Map<String, WidgetBuilder> _routes = {
-    '/': (_) => Initializer(
+  final Map<String, UrlParametersBuilder> _routes = {
+    '/': (_, params) => Initializer(
+          url: params['uri'],
           builder: (_) => DevToolsScaffold(
             tabs: [
               const InspectorScreen(),
@@ -111,7 +119,8 @@ class DevToolsAppState extends State<DevToolsApp> {
             ],
           ),
         ),
-    '/connect': (_) => DevToolsScaffold.withChild(child: ConnectScreenBody()),
+    '/connect': (_, __) =>
+        DevToolsScaffold.withChild(child: ConnectScreenBody()),
   };
 
   @override
@@ -124,6 +133,9 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
+typedef UrlParametersBuilder = Widget Function(
+    BuildContext, Map<String, String>);
+
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
 ///
@@ -134,7 +146,7 @@ class DevToolsAppState extends State<DevToolsApp> {
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {
-  const Initializer({Key key, @required this.builder})
+  const Initializer({Key key, this.url, @required this.builder})
       : assert(builder != null),
         super(key: key);
 
@@ -143,11 +155,15 @@ class Initializer extends StatefulWidget {
   /// Will only be built if [_InitializerState._checkLoaded] is true.
   final WidgetBuilder builder;
 
+  /// The url to attempt to load a vm service from.
+  final String url;
+
   @override
   _InitializerState createState() => _InitializerState();
 }
 
-class _InitializerState extends State<Initializer> {
+class _InitializerState extends State<Initializer>
+    with SingleTickerProviderStateMixin {
   final List<StreamSubscription> _subscriptions = [];
 
   /// Checks if the [service.serviceManager] is connected.
@@ -167,10 +183,14 @@ class _InitializerState extends State<Initializer> {
         // state.
         setState(() {});
         // If we've become disconnected, attempt to reconnect.
-        _connectToServiceManager();
+        _navigateToConnectPage();
       }),
     );
-    _connectToServiceManager();
+    if (widget.url != null) {
+      _attemptUrlConnection();
+    } else {
+      _navigateToConnectPage();
+    }
   }
 
   @override
@@ -181,13 +201,25 @@ class _InitializerState extends State<Initializer> {
     super.dispose();
   }
 
+  Future<void> _attemptUrlConnection() async {
+    final url = Uri.decodeFull(widget.url);
+    print('Decoding url: $url');
+    final bool connected = await FrameworkCore.initVmService(
+      '',
+      explicitUri: Uri.parse(url),
+      errorReporter: showErrorSnackBar(context),
+    );
+
+    if (!connected) {
+      _navigateToConnectPage();
+    }
+  }
+
   /// Loads the /connect page if the [service.serviceManager] is not currently connected.
-  void _connectToServiceManager() {
-    // TODO(https://github.com/flutter/devtools/issues/1150): Check the route
-    // parameters for a VM Service URL and attempt to connect to it without
-    // going to the /connect page.
+  void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
+        print(ModalRoute.of(context).settings);
         // If this route is on top and the app is not loaded, then we navigate to
         // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
@@ -200,12 +232,9 @@ class _InitializerState extends State<Initializer> {
 
   @override
   Widget build(BuildContext context) {
-    // SizedBox with no parameters is a generic no-op widget in Flutter.
-    // Its use here means to display nothing.
-    // TODO(https://github.com/flutter/devtools/issues/1150): we can add a
-    // loading animation here in cases where this route will remain visible
-    // and we await an attempt to connect.
-    return _checkLoaded() ? widget.builder(context) : const SizedBox();
+    return _checkLoaded()
+        ? widget.builder(context)
+        : const Center(child: CircularProgressIndicator());
   }
 }
 

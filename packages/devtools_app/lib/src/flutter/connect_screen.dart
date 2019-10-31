@@ -129,11 +129,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     final bool connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: (title, error) {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(title)),
-        );
-      },
+      errorReporter: showErrorSnackBar(context),
     );
 
     if (connected) {
