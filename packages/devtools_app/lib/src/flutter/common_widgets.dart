@@ -84,7 +84,7 @@ class DefaultTaggedText extends StatelessWidget {
     final _tagToTextSpanBuilder = {
       'bold': (text) => TextSpan(
             text: text,
-            style: bold(defaultTextStyle),
+            style: semibold(defaultTextStyle),
           ),
       'primary-color': (text) =>
           TextSpan(text: text, style: primaryColor(defaultTextStyle, context)),
@@ -101,8 +101,9 @@ class DefaultTaggedText extends StatelessWidget {
   }
 }
 
-/// Creates a bold version of [style].
-TextStyle bold(TextStyle style) => style.copyWith(fontWeight: FontWeight.w600);
+/// Creates a semibold version of [style].
+TextStyle semibold(TextStyle style) =>
+    style.copyWith(fontWeight: FontWeight.w600);
 
 /// Creates a version of [style] that uses the primary color of [context].
 ///

@@ -128,7 +128,7 @@ class _FlagList extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(flag.name, style: bold(defaultTextTheme)),
+                      Text(flag.name, style: semibold(defaultTextTheme)),
                       Text(flag.comment),
                     ],
                   ),
