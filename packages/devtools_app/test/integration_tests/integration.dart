@@ -352,10 +352,8 @@ class WebdevFixture {
       release ? '--release' : '--no-release'
     ];
 
-    // TODO(albertusangga): Remove previous build directories before running build
-    // Previously we use `flutter clean (_runFlutter(['clean']))` to do that
-    // flutter clean is removed here because of the change in latest dart sdk pub behavior
-    // https://github.com/dart-lang/pub/issues/2241
+    await (await _runFlutter(['clean'])).exitCode;
+    await (await _runFlutter(['pub', 'get'])).exitCode;
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
