@@ -261,6 +261,10 @@ class VmServiceWrapper implements VmService {
       // Build the trace events.
       for (final sample in cpuSamples.samples) {
         final tree = _CpuProfileTimelineTree.getTreeFromSample(sample);
+        // Skip the root
+        if (tree.frameId == kRootId) {
+          continue;
+        }
         traceObject[CpuProfileData.traceEventsKey].add({
           'ph': 'P', // kind = sample event
           'name': '', // Blank to keep about:tracing happy
