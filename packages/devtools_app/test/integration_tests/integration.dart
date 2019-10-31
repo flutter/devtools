@@ -341,8 +341,10 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    await (await _runFlutter(['clean'])).exitCode;
-    await (await _runFlutter(['pub', 'get'])).exitCode;
+    final clean = await _runFlutter(['clean']);
+    expect(await clean.exitCode, 0);
+    final pubGet = await _runFlutter(['pub', 'get']);
+    expect(await pubGet.exitCode, 0);
 
     final List<String> cliArgs = [
       'pub',
