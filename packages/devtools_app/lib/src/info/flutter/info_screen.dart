@@ -110,6 +110,7 @@ class _FlagList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultTextTheme = DefaultTextStyle.of(context).style;
     return Scrollbar(
       child: ListView.builder(
         key: InfoScreen.flagListKey,
@@ -124,17 +125,30 @@ class _FlagList extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Expanded(
-                  child: DefaultTaggedText(
-                    '<bold>${flag.name}</bold>\n'
-                    '${flag.comment}',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(flag.name, style: semibold(defaultTextTheme)),
+                      Text(flag.comment),
+                    ],
                   ),
                 ),
-                Container(
+                ConstrainedBox(
                   constraints: const BoxConstraints(minWidth: 100.0),
-                  child: DefaultTaggedText(
-                    '<primary-color>${flag.valueAsString}</primary-color>\n'
-                    '<primary-color-light>$modifiedStatusText</primary-color-light>',
-                    textAlign: TextAlign.end,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        flag.valueAsString,
+                        textAlign: TextAlign.end,
+                        style: primaryColor(defaultTextTheme, context),
+                      ),
+                      Text(
+                        modifiedStatusText,
+                        textAlign: TextAlign.end,
+                        style: primaryColorLight(defaultTextTheme, context),
+                      ),
+                    ],
                   ),
                 ),
               ],
