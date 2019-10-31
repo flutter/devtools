@@ -341,6 +341,9 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
+    await (await _runFlutter(['clean'])).exitCode;
+    await (await _runFlutter(['pub', 'get'])).exitCode;
+
     final List<String> cliArgs = [
       'pub',
       'run',
@@ -351,9 +354,6 @@ class WebdevFixture {
       '--delete-conflicting-outputs',
       release ? '--release' : '--no-release'
     ];
-
-    await (await _runFlutter(['clean'])).exitCode;
-    await (await _runFlutter(['pub', 'get'])).exitCode;
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
