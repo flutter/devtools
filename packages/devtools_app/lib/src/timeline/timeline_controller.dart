@@ -4,9 +4,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import '../config_specific/logger.dart';
 import '../globals.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
@@ -30,6 +31,7 @@ class TimelineController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
+    timelines = [frameBasedTimeline, fullTimeline];
   }
 
   /// Stream controller that notifies a timeline event was selected.
@@ -68,6 +70,8 @@ class TimelineController {
 
   FullTimeline fullTimeline;
 
+  List<Timeline> timelines;
+
   TimelineData offlineTimelineData;
 
   TimelineService timelineService;
@@ -93,30 +97,14 @@ class TimelineController {
   bool get hasStarted =>
       frameBasedTimeline.hasStarted && fullTimeline.hasStarted;
 
-  TimelineData get timelineData => timelineMode == TimelineMode.frameBased
-      ? frameBasedTimeline.data
-      : fullTimeline.data;
-  set timelineData(TimelineData data) {
-    if (timelineMode == TimelineMode.frameBased) {
-      frameBasedTimeline.data = data;
-    } else {
-      fullTimeline.data = data;
-    }
-  }
-
-  CpuProfileData get cpuProfileData =>
-      timelineMode == TimelineMode.frameBased || offlineMode
-          ? frameBasedTimeline.data?.cpuProfileData
-          : fullTimeline.data?.cpuProfileData;
-
   void selectTimelineEvent(TimelineEvent event) {
-    if (event == null || timelineData.selectedEvent == event) return;
-    timelineData.selectedEvent = event;
+    if (event == null || timeline.data.selectedEvent == event) return;
+    timeline.data.selectedEvent = event;
     _selectedTimelineEventController.add(event);
   }
 
   Future<void> getCpuProfileForSelectedEvent() async {
-    final selectedEvent = timelineData.selectedEvent;
+    final selectedEvent = timeline.data.selectedEvent;
     if (!selectedEvent.isUiEvent) return;
 
     final cpuProfileData = await _cpuProfilerService.getCpuProfile(
@@ -124,7 +112,7 @@ class TimelineController {
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
 
-    timelineData.cpuProfileData = cpuProfileData;
+    timeline.data.cpuProfileData = cpuProfileData;
     _cpuProfileTransformer.processData(cpuProfileData);
   }
 
@@ -144,32 +132,16 @@ class TimelineController {
 
     timelineMode = offlineData.timelineMode;
     offlineTimelineData = offlineData.shallowClone();
-
-    // Load the snapshot in the mode it was exported from.
-    if (offlineData is OfflineFrameBasedTimelineData) {
-      frameBasedTimeline.data = offlineData.shallowClone();
-      frameBasedTimeline.processor = FrameBasedTimelineProcessor(
+    timeline
+      ..data = offlineData.shallowClone()
+      ..initProcessor(
         uiThreadId: uiThreadId,
         gpuThreadId: gpuThreadId,
         timelineController: this,
-      );
+      )
+      ..processTraceEvents(traceEvents);
 
-      for (var event in traceEvents) {
-        frameBasedTimeline.processor.processTraceEvent(event, immediate: true);
-      }
-      // Make a final call to [maybeAddPendingEvents] so that we complete the
-      // processing for every frame in the snapshot.
-      frameBasedTimeline.processor.maybeAddPendingEvents();
-    } else if (offlineData is OfflineFullTimelineData) {
-      fullTimeline.data = offlineData.shallowClone();
-      fullTimeline.processor = FullTimelineProcessor(
-        uiThreadId: uiThreadId,
-        gpuThreadId: gpuThreadId,
-        timelineController: this,
-      )..processTimeline(traceEvents);
-    }
-
-    if (cpuProfileData != null) {
+    if (timeline.data.cpuProfileData != null) {
       _cpuProfileTransformer.processData(offlineData.cpuProfileData);
     }
 
@@ -236,7 +208,7 @@ class TimelineController {
     }
 
     if (eventToSelect != null) {
-      timelineData
+      timeline.data
         ..selectedEvent = eventToSelect
         ..cpuProfileData = offlineTimelineData.cpuProfileData;
     }
@@ -257,7 +229,7 @@ class TimelineController {
   }
 
   void recordTrace(Map<String, dynamic> trace) {
-    timelineData?.traceEvents?.add(trace);
+    timeline.data?.traceEvents?.add(trace);
   }
 
   void recordTraceForTimelineEvent(TimelineEvent event) {
@@ -380,12 +352,6 @@ class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
 
   Stream<bool> get onNoEventsRecorded => _noEventsRecordedController.stream;
 
-  /// The end timestamp for the data in this timeline.
-  ///
-  /// Track it here so that we can cache the value as we add timeline events.
-  int get endTimestampMicros => _endTimestampMicros;
-  int _endTimestampMicros = -1;
-
   /// Whether the timeline is being recorded.
   bool recording = false;
 
@@ -402,14 +368,11 @@ class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
     }
 
     processTraceEvents(_timelineController.allTraceEvents);
-    _timelineController.fullTimeline.data.initializeEventBuckets();
     _timelineProcessedController.add(true);
   }
 
   void addTimelineEvent(TimelineEvent event) {
-    data.timelineEvents.add(event);
-    _endTimestampMicros =
-        math.max(_endTimestampMicros, event.time.end.inMicroseconds);
+    data.addTimelineEvent(event);
   }
 
   @override
@@ -428,6 +391,7 @@ class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
   @override
   void processTraceEvents(List<TraceEventWrapper> traceEvents) {
     processor.processTimeline(traceEvents);
+    _timelineController.fullTimeline.data.initializeEventBuckets();
   }
 }
 

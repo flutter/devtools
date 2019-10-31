@@ -708,7 +708,8 @@ class FullTimelineProcessor extends TimelineProcessor {
       // via the "dur" field. For this reason, we use the cached value stored in
       // [timelineController.fullTimeline].
       ..end = Duration(
-          microseconds: timelineController.fullTimeline.endTimestampMicros);
+          microseconds:
+              timelineController.fullTimeline.data.endTimestampMicros);
   }
 
   void _addPendingCompleteRootToTimeline({

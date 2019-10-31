@@ -75,7 +75,7 @@ class HtmlEventDetails extends CoreElement {
       ..add([
         _cpuProfiler = _CpuProfiler(
           _timelineController,
-          () => _timelineController.cpuProfileData,
+          () => _timelineController.timeline.data?.cpuProfileData,
         )..hidden(true),
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
@@ -120,7 +120,7 @@ class HtmlEventDetails extends CoreElement {
   }
 
   Future<void> update({bool hide = false}) async {
-    final selectedEvent = _timelineController.timelineData?.selectedEvent;
+    final selectedEvent = _timelineController.timeline.data?.selectedEvent;
 
     _title.text = selectedEvent != null
         ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
@@ -181,7 +181,7 @@ class _CpuProfiler extends HtmlCpuProfiler {
   @override
   bool maybeShowMessageOnUpdate() {
     if (offlineMode &&
-        !collectionEquals(_timelineController.timelineData.selectedEvent.json,
+        !collectionEquals(_timelineController.timeline.data.selectedEvent.json,
             _timelineController.offlineTimelineData?.selectedEvent?.json)) {
       final offlineModeMessage = div()
         ..add(span(
@@ -206,16 +206,16 @@ class _CpuProfiler extends HtmlCpuProfiler {
       return true;
     }
 
-    final cpuProfileData = _timelineController.cpuProfileData;
+    final cpuProfileData = _timelineController.timeline.data?.cpuProfileData;
     if (cpuProfileData != null && cpuProfileData.stackFrames.isEmpty) {
       final offset = _timelineController.timelineMode == TimelineMode.frameBased
           ? _timelineController.frameBasedTimeline.data.selectedFrame.time.start
           : _timelineController
               .fullTimeline.data.timelineEvents.first.time.start;
       final startTime =
-          _timelineController.timelineData.selectedEvent.time.start - offset;
+          _timelineController.timeline.data.selectedEvent.time.start - offset;
       final endTime =
-          _timelineController.timelineData.selectedEvent.time.end - offset;
+          _timelineController.timeline.data.selectedEvent.time.end - offset;
 
       showMessage(div(
           text: 'CPU profile unavailable for time range'

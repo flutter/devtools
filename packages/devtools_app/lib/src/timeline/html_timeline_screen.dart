@@ -482,7 +482,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
     if (clearTimeline) {
-      timelineController.timelineData.clear();
+      timelineController.timeline.data.clear();
     }
 
     timelineController.timelineMode = timelineMode;
@@ -591,7 +591,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     // TODO(kenz): add analytics for this. It would be helpful to know how
     // complex the problems are that users are trying to solve.
     final String encodedTimelineData =
-        jsonEncode(timelineController.timelineData.json);
+        jsonEncode(timelineController.timeline.data.json);
     final now = DateTime.now();
     final timestamp =
         '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';

@@ -28,10 +28,10 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
     test('recordTraceForTimelineEvent', () async {
       await env.setupEnvironment();
 
-      expect(timelineController.timelineData.traceEvents, isEmpty);
+      expect(timelineController.timeline.data.traceEvents, isEmpty);
       timelineController.recordTraceForTimelineEvent(goldenUiTimelineEvent);
       expect(
-        timelineController.timelineData.traceEvents,
+        timelineController.timeline.data.traceEvents,
         equals([
           vsyncTrace.json,
           animatorBeginFrameTrace.json,
@@ -65,7 +65,7 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       timelineController.loadOfflineData(offlineFrameBasedTimelineData);
       expect(
         isFrameBasedTimelineDataEqual(
-          timelineController.timelineData,
+          timelineController.timeline.data,
           offlineFrameBasedTimelineData,
         ),
         isTrue,
@@ -129,10 +129,10 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       );
 
       // Select a timeline event.
-      expect(timelineController.timelineData.selectedEvent, isNull);
-      expect(timelineController.timelineData.cpuProfileData, isNull);
+      expect(timelineController.timeline.data.selectedEvent, isNull);
+      expect(timelineController.timeline.data.cpuProfileData, isNull);
       timelineController.selectTimelineEvent(vsyncEvent);
-      expect(timelineController.timelineData.selectedEvent, equals(vsyncEvent));
+      expect(timelineController.timeline.data.selectedEvent, equals(vsyncEvent));
 
       // Select a different frame.
       final frame_1 = TimelineFrame('id_1');
@@ -141,8 +141,8 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
         timelineController.frameBasedTimeline.data.selectedFrame,
         equals(frame_1),
       );
-      expect(timelineController.timelineData.selectedEvent, isNull);
-      expect(timelineController.timelineData.cpuProfileData, isNull);
+      expect(timelineController.timeline.data.selectedEvent, isNull);
+      expect(timelineController.timeline.data.cpuProfileData, isNull);
 
       await env.tearDownEnvironment();
     });

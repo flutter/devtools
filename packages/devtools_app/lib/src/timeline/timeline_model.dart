@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:collection';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -88,6 +88,13 @@ class FullTimelineData extends TimelineData {
 
   TimeRange time = TimeRange();
 
+  /// The end timestamp for the data in this timeline.
+  ///
+  /// Track it here so that we can cache the value as we add timeline events,
+  /// and eventually set [time.end] to this value after the data is processed.
+  int get endTimestampMicros => _endTimestampMicros;
+  int _endTimestampMicros = -1;
+
   @override
   int get displayDepth {
     if (_displayDepth != null) return _displayDepth;
@@ -100,7 +107,7 @@ class FullTimelineData extends TimelineData {
     for (List<TimelineEvent> bucket in eventBuckets.values) {
       int bucketDisplayDepth = 0;
       for (TimelineEvent event in bucket) {
-        bucketDisplayDepth = max(bucketDisplayDepth, event.displayDepth);
+        bucketDisplayDepth = math.max(bucketDisplayDepth, event.displayDepth);
       }
       depth += bucketDisplayDepth;
     }
@@ -114,6 +121,12 @@ class FullTimelineData extends TimelineData {
       eventBuckets.putIfAbsent(_computeEventBucketKey(event), () => [])
         ..add(event);
     }
+  }
+
+  void addTimelineEvent(TimelineEvent event) {
+    timelineEvents.add(event);
+    _endTimestampMicros =
+        math.max(_endTimestampMicros, event.time.end.inMicroseconds);
   }
 
   String _computeEventBucketKey(TimelineEvent event) {
@@ -135,6 +148,7 @@ class FullTimelineData extends TimelineData {
     eventBuckets.clear();
     time = TimeRange();
     _displayDepth = null;
+    _endTimestampMicros = -1;
   }
 
   // TODO(kenz): simplify this comparator if possible.
@@ -808,8 +822,10 @@ class AsyncTimelineEvent extends TimelineEvent {
     } else {
       int maxChildDepth = -1;
       for (var child in children) {
-        maxChildDepth = max(maxChildDepth,
-            (child as AsyncTimelineEvent)._calculateDisplayDepth());
+        maxChildDepth = math.max(
+          maxChildDepth,
+          (child as AsyncTimelineEvent)._calculateDisplayDepth(),
+        );
       }
       displayDepth += maxChildDepth;
     }

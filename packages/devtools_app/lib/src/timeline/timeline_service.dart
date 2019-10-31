@@ -9,9 +9,8 @@ import '../config_specific/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../vm_service_wrapper.dart';
-import 'timeline_controller.dart';
+import 'timeline_controller.dart' hide Timeline;
 import 'timeline_model.dart';
-import 'timeline_protocol.dart';
 
 /// Manages interactions between the Timeline and the VmService.
 class TimelineService {
@@ -129,18 +128,13 @@ class TimelineService {
           '$threadNames');
     }
 
-    timelineController.frameBasedTimeline.processor =
-        FrameBasedTimelineProcessor(
-      uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
-      timelineController: timelineController,
-    );
-
-    timelineController.fullTimeline.processor = FullTimelineProcessor(
-      uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
-      timelineController: timelineController,
-    );
+    for (var timeline in timelineController.timelines) {
+      timeline.initProcessor(
+        uiThreadId: uiThreadId,
+        gpuThreadId: gpuThreadId,
+        timelineController: timelineController,
+      );
+    }
   }
 
   Future<void> updateListeningState({
