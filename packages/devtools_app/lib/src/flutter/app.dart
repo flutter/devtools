@@ -49,6 +49,8 @@ class DevToolsAppState extends State<DevToolsApp> {
     final path = uri.path;
 
     // Update the theme based on the query parameters.
+    // TODO(djshuckerow): Update this with a NavigatorObserver to load the
+    // new theme a frame earlier.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // On desktop, don't change the theme on route changes.
       if (!kIsWeb) return;
