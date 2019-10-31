@@ -280,7 +280,7 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData {
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
-  OfflineFrameBasedTimelineData copy() {
+  OfflineFrameBasedTimelineData shallowClone() {
     return OfflineFrameBasedTimelineData._(
       traceEvents: traceEvents,
       frames: frames,
@@ -334,11 +334,11 @@ class OfflineFullTimelineData extends FullTimelineData {
   /// Creates a new instance of [OfflineFullTimelineData] with references to the
   /// same objects contained in this instance.
   ///
-  /// This is not a deep copy. We are not modifying the before-mentioned
+  /// This is not a deep clone. We are not modifying the before-mentioned
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
-  OfflineFullTimelineData copy() {
+  OfflineFullTimelineData shallowClone() {
     return OfflineFullTimelineData._(
       traceEvents: traceEvents,
       selectedEvent: selectedEvent,
@@ -374,6 +374,11 @@ class OfflineTimelineEvent extends TimelineEvent {
         (t) => t.toString() == eventType.toString(),
         orElse: () => TimelineEventType.unknown);
   }
+
+  // The following methods should never be called on an instance of
+  // [OfflineTimelineEvent]. The intended use for this class is to wrap a
+  // [TimelineEvent] for the purpose of importing and exporting timeline
+  // snapshots.
 
   @override
   bool couldBeParentOf(TimelineEvent e) {

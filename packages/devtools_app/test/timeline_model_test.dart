@@ -184,19 +184,19 @@ void main() {
       expect(offlineData.timelineMode, equals(TimelineMode.frameBased));
     });
 
-    test('copy', () {
+    test('shallowClone', () {
       final offlineData = OfflineFrameBasedTimelineData.parse(
           offlineFrameBasedTimelineDataJson);
-      final copy = offlineData.copy();
-      expect(offlineData.traceEvents, equals(copy.traceEvents));
-      expect(offlineData.frames, equals(copy.frames));
-      expect(offlineData.selectedFrame, equals(copy.selectedFrame));
-      expect(offlineData.selectedFrameId, equals(copy.selectedFrameId));
-      expect(offlineData.selectedEvent, equals(copy.selectedEvent));
-      expect(offlineData.displayRefreshRate, equals(copy.displayRefreshRate));
-      expect(offlineData.cpuProfileData, equals(copy.cpuProfileData));
-      expect(offlineData.timelineMode, equals(copy.timelineMode));
-      expect(identical(offlineData, copy), isFalse);
+      final clone = offlineData.shallowClone();
+      expect(offlineData.traceEvents, equals(clone.traceEvents));
+      expect(offlineData.frames, equals(clone.frames));
+      expect(offlineData.selectedFrame, equals(clone.selectedFrame));
+      expect(offlineData.selectedFrameId, equals(clone.selectedFrameId));
+      expect(offlineData.selectedEvent, equals(clone.selectedEvent));
+      expect(offlineData.displayRefreshRate, equals(clone.displayRefreshRate));
+      expect(offlineData.cpuProfileData, equals(clone.cpuProfileData));
+      expect(offlineData.timelineMode, equals(clone.timelineMode));
+      expect(identical(offlineData, clone), isFalse);
     });
   });
 
@@ -228,15 +228,15 @@ void main() {
       expect(offlineData.timelineMode, equals(TimelineMode.full));
     });
 
-    test('copy', () {
+    test('shallowClone', () {
       final offlineData =
           OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
-      final copy = offlineData.copy();
-      expect(offlineData.traceEvents, equals(copy.traceEvents));
-      expect(offlineData.selectedEvent, equals(copy.selectedEvent));
-      expect(offlineData.cpuProfileData, equals(copy.cpuProfileData));
-      expect(offlineData.timelineMode, equals(copy.timelineMode));
-      expect(identical(offlineData, copy), isFalse);
+      final clone = offlineData.shallowClone();
+      expect(offlineData.traceEvents, equals(clone.traceEvents));
+      expect(offlineData.selectedEvent, equals(clone.selectedEvent));
+      expect(offlineData.cpuProfileData, equals(clone.cpuProfileData));
+      expect(offlineData.timelineMode, equals(clone.timelineMode));
+      expect(identical(offlineData, clone), isFalse);
     });
   });
 

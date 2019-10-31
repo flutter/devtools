@@ -125,34 +125,25 @@ class TimelineController {
   }
 
   void loadOfflineData(TimelineData offlineData) {
-    final traceEvents = offlineData.traceEvents
-        .map((trace) => TraceEventWrapper(
-              TraceEvent(trace),
-              DateTime.now().microsecondsSinceEpoch,
-            ))
-        .toList();
+    final traceEvents = [
+      for (var trace in offlineData.traceEvents)
+        TraceEventWrapper(
+          TraceEvent(trace),
+          DateTime.now().microsecondsSinceEpoch,
+        )
+    ];
 
     // TODO(kenz): once each trace event has a ui/gpu distinction bit added to
     // the trace, we will not need to infer thread ids. This is not robust.
-    final uiThreadId = traceEvents
-            .firstWhere((trace) => trace.event.name == uiEventName,
-                orElse: () => null)
-            ?.event
-            ?.threadId ??
-        -1;
-    final gpuThreadId = traceEvents
-            .firstWhere((trace) => trace.event.name == gpuEventName,
-                orElse: () => null)
-            ?.event
-            ?.threadId ??
-        -1;
+    final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
+    final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
 
     timelineMode = offlineData.timelineMode;
 
     // Load the snapshot in the mode it was exported from.
     if (offlineData is OfflineFrameBasedTimelineData) {
-      offlineTimelineData = offlineData.copy();
-      frameBasedTimeline.data = offlineData.copy();
+      offlineTimelineData = offlineData.shallowClone();
+      frameBasedTimeline.data = offlineData.shallowClone();
       frameBasedTimeline.processor = FrameBasedTimelineProcessor(
         uiThreadId: uiThreadId,
         gpuThreadId: gpuThreadId,
@@ -166,8 +157,8 @@ class TimelineController {
       // processing for every frame in the snapshot.
       frameBasedTimeline.processor.maybeAddPendingEvents();
     } else if (offlineData is OfflineFullTimelineData) {
-      offlineTimelineData = offlineData.copy();
-      fullTimeline.data = offlineData.copy();
+      offlineTimelineData = offlineData.shallowClone();
+      fullTimeline.data = offlineData.shallowClone();
       fullTimeline.processor = FullTimelineProcessor(
         uiThreadId: uiThreadId,
         gpuThreadId: gpuThreadId,
@@ -192,6 +183,19 @@ class TimelineController {
     if (offlineTimelineData is OfflineFullTimelineData) {
       fullTimeline._timelineProcessedController.add(true);
     }
+  }
+
+  int _threadIdForEvent(
+    String targetEventName,
+    List<TraceEventWrapper> traceEvents,
+  ) {
+    const invalidThreadId = -1;
+    return traceEvents
+            .firstWhere((trace) => trace.event.name == targetEventName,
+                orElse: () => null)
+            ?.event
+            ?.threadId ??
+        invalidThreadId;
   }
 
   void setOfflineData() {
@@ -289,8 +293,6 @@ class FrameBasedTimeline {
     data?.displayRefreshRate = refreshRate;
     return refreshRate;
   }
-
-  double get displayRefreshRateCached => data?.displayRefreshRate;
 
   FrameBasedTimelineData data;
 

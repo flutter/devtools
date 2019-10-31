@@ -14,6 +14,7 @@ import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class HtmlEventDetails extends CoreElement {
   HtmlEventDetails(this._timelineController) : super('div') {
@@ -111,15 +112,7 @@ class HtmlEventDetails extends CoreElement {
       if (_timelineController.offlineTimelineData.selectedEvent != null) {
         final selectedEvent =
             _timelineController.offlineTimelineData.selectedEvent;
-        if (selectedEvent.isAsyncEvent) {
-          titleBackgroundColor = mainAsyncColor;
-        } else if (selectedEvent.isUiEvent) {
-          titleBackgroundColor = mainUiColor;
-        } else if (selectedEvent.isGpuEvent) {
-          titleBackgroundColor = mainGpuColor;
-        } else {
-          titleBackgroundColor = _defaultTitleBackground;
-        }
+        titleBackgroundColor = _backgroundColorForEvent(selectedEvent);
         titleTextColor = Colors.black;
         await update();
       }
@@ -150,6 +143,18 @@ class HtmlEventDetails extends CoreElement {
     titleTextColor = contrastForeground;
     titleBackgroundColor = _defaultTitleBackground;
     update(hide: hide);
+  }
+
+  Color _backgroundColorForEvent(TimelineEvent event) {
+    if (event.isAsyncEvent) {
+      return mainAsyncColor;
+    } else if (event.isUiEvent) {
+      return mainUiColor;
+    } else if (event.isGpuEvent) {
+      return mainGpuColor;
+    } else {
+      return _defaultTitleBackground;
+    }
   }
 }
 

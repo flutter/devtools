@@ -477,7 +477,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   void _setTimelineMode({
     @required TimelineMode timelineMode,
     bool clearTimeline = true,
-  }) {
+  }) async {
     // TODO(kenz): the two modes should be aware of one another and we should
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
@@ -493,7 +493,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..hidden(timelineMode == TimelineMode.full)
       ..frameUIgraph.reset(
           displayRefreshRate:
-              timelineController.frameBasedTimeline.displayRefreshRateCached);
+              await timelineController.frameBasedTimeline.displayRefreshRate);
 
     timelineFlameChartCanvas = null;
     flameChartContainer
