@@ -220,6 +220,10 @@ class VmServiceWrapper implements VmService {
       // and has been replaced by getCpuSamples. We need to do some processing to
       // get back to the format we expect.
       final cpuSamples = await getCpuSamples(isolateId, origin, extent);
+
+      // The root ID is associated with an artificial frame / node that is the root
+      // of all stacks, regardless of entrypoint. This should never be seen in the
+      // final output from this method.
       const int kRootId = 0;
       int nextId = kRootId;
       final traceObject = <String, dynamic>{
@@ -239,7 +243,7 @@ class VmServiceWrapper implements VmService {
         final id = nextId++;
         current.frameId = id;
 
-        // Skip the root
+        // Skip the root.
         if (id != kRootId) {
           final key = '$isolateId-$id';
           traceObject[CpuProfileData.stackFramesKey][key] = {
@@ -261,6 +265,10 @@ class VmServiceWrapper implements VmService {
       // Build the trace events.
       for (final sample in cpuSamples.samples) {
         final tree = _CpuProfileTimelineTree.getTreeFromSample(sample);
+        // Skip the root.
+        if (tree.frameId == kRootId) {
+          continue;
+        }
         traceObject[CpuProfileData.traceEventsKey].add({
           'ph': 'P', // kind = sample event
           'name': '', // Blank to keep about:tracing happy
