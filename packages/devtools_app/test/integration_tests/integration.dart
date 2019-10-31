@@ -341,6 +341,11 @@ class WebdevFixture {
     bool release = false,
     bool verbose = false,
   }) async {
+    final clean = await _runFlutter(['clean']);
+    expect(await clean.exitCode, 0);
+    final pubGet = await _runFlutter(['pub', 'get']);
+    expect(await pubGet.exitCode, 0);
+
     final List<String> cliArgs = [
       'pub',
       'run',
@@ -351,11 +356,6 @@ class WebdevFixture {
       '--delete-conflicting-outputs',
       release ? '--release' : '--no-release'
     ];
-
-    // TODO(albertusangga): Remove previous build directories before running build
-    // Previously we use `flutter clean (_runFlutter(['clean']))` to do that
-    // flutter clean is removed here because of the change in latest dart sdk pub behavior
-    // https://github.com/dart-lang/pub/issues/2241
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
