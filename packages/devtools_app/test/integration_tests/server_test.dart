@@ -311,9 +311,9 @@ Future<Map<String, dynamic>> _waitForClients({
     timeoutMessage += ' that are on page $requiredPage';
   }
 
-  final isOnPage = (Map<String, Object> c) => c['currentPage'] == requiredPage;
+  final isOnPage = (client) => client['currentPage'] == requiredPage;
   final hasConnectionState =
-      (Map<String, Object> c) => c['hasConnection'] == requiredConnectionState;
+      (client) => client['hasConnection'] == requiredConnectionState;
 
   await waitFor(
     () async {
