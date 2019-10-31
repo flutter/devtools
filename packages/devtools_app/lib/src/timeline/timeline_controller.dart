@@ -46,7 +46,7 @@ class TimelineController {
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
   /// new value of [timelineData].
-  final _loadOfflineDataController = StreamController<TimelineData>.broadcast();
+  final _loadOfflineDataController = StreamController<OfflineData>.broadcast();
 
   /// Stream controller that notifies the timeline screen when a non-fatal error
   /// should be logged for the timeline.
@@ -55,7 +55,7 @@ class TimelineController {
   Stream<TimelineEvent> get onSelectedTimelineEvent =>
       _selectedTimelineEventController.stream;
 
-  Stream<TimelineData> get onLoadOfflineData =>
+  Stream<OfflineData> get onLoadOfflineData =>
       _loadOfflineDataController.stream;
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
@@ -124,7 +124,7 @@ class TimelineController {
     _cpuProfileTransformer.processData(cpuProfileData);
   }
 
-  void loadOfflineData(TimelineData offlineData) {
+  void loadOfflineData(OfflineData offlineData) {
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -139,10 +139,10 @@ class TimelineController {
     final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
 
     timelineMode = offlineData.timelineMode;
+    offlineTimelineData = offlineData.shallowClone();
 
     // Load the snapshot in the mode it was exported from.
     if (offlineData is OfflineFrameBasedTimelineData) {
-      offlineTimelineData = offlineData.shallowClone();
       frameBasedTimeline.data = offlineData.shallowClone();
       frameBasedTimeline.processor = FrameBasedTimelineProcessor(
         uiThreadId: uiThreadId,
@@ -157,7 +157,6 @@ class TimelineController {
       // processing for every frame in the snapshot.
       frameBasedTimeline.processor.maybeAddPendingEvents();
     } else if (offlineData is OfflineFullTimelineData) {
-      offlineTimelineData = offlineData.shallowClone();
       fullTimeline.data = offlineData.shallowClone();
       fullTimeline.processor = FullTimelineProcessor(
         uiThreadId: uiThreadId,

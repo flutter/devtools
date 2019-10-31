@@ -165,7 +165,7 @@ class HtmlFramework {
   }
 
   Future<void> _importTimeline(Map<String, dynamic> import) async {
-    TimelineData offlineData;
+    OfflineData offlineData;
     final timelineMode =
         import[TimelineData.timelineModeKey] == TimelineMode.full.toString()
             ? TimelineMode.full

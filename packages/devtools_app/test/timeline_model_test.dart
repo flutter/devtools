@@ -83,7 +83,7 @@ void main() {
       expect(timelineData.selectedFrame, isNotNull);
       expect(timelineData.selectedFrameId, 'id_0');
       expect(timelineData.selectedEvent, isNotNull);
-      expect(await timelineData.displayRefreshRate, equals(120));
+      expect(timelineData.displayRefreshRate, equals(120));
       expect(timelineData.cpuProfileData, isNotNull);
 
       timelineData.clear();

@@ -214,7 +214,8 @@ abstract class TimelineData {
   }
 }
 
-class OfflineFrameBasedTimelineData extends FrameBasedTimelineData {
+class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
+    with OfflineData<OfflineFrameBasedTimelineData> {
   OfflineFrameBasedTimelineData._({
     List<Map<String, dynamic>> traceEvents,
     List<TimelineFrame> frames,
@@ -280,6 +281,7 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData {
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
+  @override
   OfflineFrameBasedTimelineData shallowClone() {
     return OfflineFrameBasedTimelineData._(
       traceEvents: traceEvents,
@@ -293,7 +295,8 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData {
   }
 }
 
-class OfflineFullTimelineData extends FullTimelineData {
+class OfflineFullTimelineData extends FullTimelineData
+    with OfflineData<OfflineFullTimelineData> {
   OfflineFullTimelineData._({
     List<Map<String, dynamic>> traceEvents,
     TimelineEvent selectedEvent,
@@ -338,6 +341,7 @@ class OfflineFullTimelineData extends FullTimelineData {
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
+  @override
   OfflineFullTimelineData shallowClone() {
     return OfflineFullTimelineData._(
       traceEvents: traceEvents,
@@ -345,6 +349,10 @@ class OfflineFullTimelineData extends FullTimelineData {
       cpuProfileData: cpuProfileData,
     );
   }
+}
+
+mixin OfflineData<T extends TimelineData> on TimelineData {
+  T shallowClone();
 }
 
 /// Wrapper class for [TimelineEvent] that only includes information we need for
