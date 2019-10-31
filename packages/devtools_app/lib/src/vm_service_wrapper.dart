@@ -220,6 +220,10 @@ class VmServiceWrapper implements VmService {
       // and has been replaced by getCpuSamples. We need to do some processing to
       // get back to the format we expect.
       final cpuSamples = await getCpuSamples(isolateId, origin, extent);
+      
+      // The root ID is associated with an artificial frame / node that is the root
+      // of all stacks, regardless of entrypoint. This should never be seen in the
+      // final output from this method.
       const int kRootId = 0;
       int nextId = kRootId;
       final traceObject = <String, dynamic>{
