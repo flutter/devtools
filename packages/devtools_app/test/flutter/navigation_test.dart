@@ -54,7 +54,8 @@ void main() {
       expect(generatedRoute, '/home?foo=bar&theme=dark');
     });
 
-    testWidgets('Respects light theme of the current route from the context',
+    testWidgets(
+        'Removes redundant light theme of the current route from the context',
         (WidgetTester tester) async {
       String generatedRoute;
       await tester.pumpWidget(
@@ -63,11 +64,11 @@ void main() {
               routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
         }, initialRoute: '/?theme=light'),
       );
-      expect(generatedRoute, '/home?foo=bar&theme=light');
+      expect(generatedRoute, '/home?foo=bar');
     });
 
     testWidgets(
-        'Overrides theme of the current route from the context when a theme is given',
+        'Overrides dark theme of the current route when a replacement theme is given',
         (WidgetTester tester) async {
       String generatedRoute;
       await tester.pumpWidget(

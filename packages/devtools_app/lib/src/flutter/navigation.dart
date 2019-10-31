@@ -35,8 +35,8 @@ String routeNameWithQueryParams(BuildContext context, String routeName,
   // Preserve the theme across app-triggered navigations.
   if (newQueryParams != null &&
       !newQueryParams.containsKey('theme') &&
-      previousQueryParams.containsKey('theme')) {
-    newQueryParams['theme'] = previousQueryParams['theme'];
+      previousQueryParams['theme'] == 'dark') {
+    newQueryParams['theme'] = 'dark';
   }
   return Uri.parse(routeName)
       .replace(queryParameters: newQueryParams)

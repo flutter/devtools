@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+/// Constructs the light or dark theme for the app.
 ThemeData themeFor({@required bool isDarkTheme}) {
   final theme = isDarkTheme ? _darkTheme() : _lightTheme();
   return theme;
@@ -34,16 +35,25 @@ ThemeData _lightTheme() {
 
 const buttonMinWidth = 36.0;
 
+/// Branded grey color.
+///
+/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
 const devtoolsGrey = ColorSwatch<int>(900, {
   900: Color(0xFF202124),
   600: Color(0xFF60646B),
   100: Color(0xFFD5D7Da),
 });
 
+/// Branded yellow color.
+///
+/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
 const devtoolsYellow = ColorSwatch<int>(700, {
   700: Color(0xFFFFC108),
 });
 
+/// Branded blue color.
+///
+/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
 const devtoolsBlue = ColorSwatch<int>(600, {
   700: Color(0xFF02569B),
   600: Color(0xFF0175C2),
