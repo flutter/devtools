@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../../src/framework/framework_core.dart';
 import 'common_widgets.dart';
+import 'navigation.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -136,8 +137,8 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     );
 
     if (connected) {
-      final uriQuery = 'uri=${Uri.encodeQueryComponent(controller.text)}';
-      return Navigator.popAndPushNamed(context, '/?$uriQuery');
+      return Navigator.popAndPushNamed(context,
+          routeNameWithQueryParams(context, '/', {'uri': controller.text}));
     }
   }
 }

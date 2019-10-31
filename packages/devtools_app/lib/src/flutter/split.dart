@@ -134,7 +134,7 @@ class _SplitState extends State<Split> {
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Theme.of(context).indicatorColor,
+                color: Theme.of(context).dividerColor,
                 borderRadius: BorderRadius.circular(Split.dividerMainAxisSize),
               ),
               child: SizedBox(
