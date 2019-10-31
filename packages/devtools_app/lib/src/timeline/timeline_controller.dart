@@ -369,6 +369,12 @@ class FullTimeline {
 
   bool get hasStarted => data != null;
 
+  /// The end timestamp for the data in this timeline.
+  ///
+  /// Track it here so that we can cache the value as we add timeline events.
+  int get endTimestampMicros => _endTimestampMicros;
+  int _endTimestampMicros = -1;
+
   /// Whether the timeline is being recorded.
   bool recording = false;
 
@@ -389,11 +395,10 @@ class FullTimeline {
     _timelineProcessedController.add(true);
   }
 
-  int latestTimestampMicros = -1;
   void addTimelineEvent(TimelineEvent event) {
     data.timelineEvents.add(event);
-    latestTimestampMicros =
-        math.max(latestTimestampMicros, event.time.end.inMicroseconds);
+    _endTimestampMicros =
+        math.max(_endTimestampMicros, event.time.end.inMicroseconds);
   }
 
   void clear() {

@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
+
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/timeline/timeline_protocol.dart';
@@ -361,7 +363,13 @@ class MockFullTimeline extends Mock implements FullTimeline {
   final data = FullTimelineData();
 
   @override
+  int get endTimestampMicros => _endTimestampMicros;
+  int _endTimestampMicros = -1;
+
+  @override
   void addTimelineEvent(TimelineEvent event) {
+    _endTimestampMicros =
+        math.max(_endTimestampMicros, event.time.end.inMicroseconds);
     data.timelineEvents.add(event);
   }
 }
