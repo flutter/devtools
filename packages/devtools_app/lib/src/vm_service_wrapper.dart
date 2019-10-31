@@ -243,7 +243,7 @@ class VmServiceWrapper implements VmService {
         final id = nextId++;
         current.frameId = id;
 
-        // Skip the root
+        // Skip the root.
         if (id != kRootId) {
           final key = '$isolateId-$id';
           traceObject[CpuProfileData.stackFramesKey][key] = {
@@ -265,7 +265,7 @@ class VmServiceWrapper implements VmService {
       // Build the trace events.
       for (final sample in cpuSamples.samples) {
         final tree = _CpuProfileTimelineTree.getTreeFromSample(sample);
-        // Skip the root
+        // Skip the root.
         if (tree.frameId == kRootId) {
           continue;
         }
