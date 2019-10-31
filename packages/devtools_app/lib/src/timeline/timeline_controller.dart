@@ -60,6 +60,10 @@ class TimelineController {
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
 
+  Timeline get timeline => timelineMode == TimelineMode.frameBased
+      ? frameBasedTimeline
+      : fullTimeline;
+
   final frameBasedTimeline = FrameBasedTimeline();
 
   FullTimeline fullTimeline;
@@ -269,7 +273,8 @@ class TimelineController {
   }
 }
 
-class FrameBasedTimeline {
+class FrameBasedTimeline
+    extends Timeline<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
   /// Stream controller that notifies a frame was added to the timeline.
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
@@ -292,12 +297,6 @@ class FrameBasedTimeline {
     data?.displayRefreshRate = refreshRate;
     return refreshRate;
   }
-
-  FrameBasedTimelineData data;
-
-  FrameBasedTimelineProcessor processor;
-
-  bool get hasStarted => data != null;
 
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
@@ -344,12 +343,31 @@ class FrameBasedTimeline {
     _frameAddedController.add(frame);
   }
 
-  void clear() {
-    data?.clear();
+  @override
+  void initProcessor({
+    @required int uiThreadId,
+    @required int gpuThreadId,
+    @required TimelineController timelineController,
+  }) {
+    processor = FrameBasedTimelineProcessor(
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+      timelineController: timelineController,
+    );
+  }
+
+  @override
+  void processTraceEvents(List<TraceEventWrapper> traceEvents) {
+    for (var event in traceEvents) {
+      processor.processTraceEvent(event, immediate: true);
+    }
+    // Make a final call to [maybeAddPendingEvents] so that we complete the
+    // processing for every frame in the snapshot.
+    processor.maybeAddPendingEvents();
   }
 }
 
-class FullTimeline {
+class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
   FullTimeline(this._timelineController);
 
   final TimelineController _timelineController;
@@ -361,12 +379,6 @@ class FullTimeline {
   Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
 
   Stream<bool> get onNoEventsRecorded => _noEventsRecordedController.stream;
-
-  FullTimelineData data;
-
-  FullTimelineProcessor processor;
-
-  bool get hasStarted => data != null;
 
   /// The end timestamp for the data in this timeline.
   ///
@@ -389,7 +401,7 @@ class FullTimeline {
       return;
     }
 
-    processor.processTimeline(_timelineController.allTraceEvents);
+    processTraceEvents(_timelineController.allTraceEvents);
     _timelineController.fullTimeline.data.initializeEventBuckets();
     _timelineProcessedController.add(true);
   }
@@ -399,6 +411,40 @@ class FullTimeline {
     _endTimestampMicros =
         math.max(_endTimestampMicros, event.time.end.inMicroseconds);
   }
+
+  @override
+  void initProcessor({
+    @required int uiThreadId,
+    @required int gpuThreadId,
+    @required TimelineController timelineController,
+  }) {
+    processor = FullTimelineProcessor(
+      uiThreadId: uiThreadId,
+      gpuThreadId: gpuThreadId,
+      timelineController: timelineController,
+    );
+  }
+
+  @override
+  void processTraceEvents(List<TraceEventWrapper> traceEvents) {
+    processor.processTimeline(traceEvents);
+  }
+}
+
+abstract class Timeline<T extends TimelineData, V extends TimelineProcessor> {
+  T data;
+
+  V processor;
+
+  bool get hasStarted => data != null;
+
+  void initProcessor({
+    @required int uiThreadId,
+    @required int gpuThreadId,
+    @required TimelineController timelineController,
+  });
+
+  void processTraceEvents(List<TraceEventWrapper> traceEvents);
 
   void clear() {
     data?.clear();
