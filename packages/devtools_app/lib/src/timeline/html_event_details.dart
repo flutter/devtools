@@ -14,6 +14,7 @@ import '../ui/html_elements.dart';
 import '../ui/theme.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
+import 'timeline_model.dart';
 
 class HtmlEventDetails extends CoreElement {
   HtmlEventDetails(this._timelineController) : super('div') {
@@ -74,7 +75,7 @@ class HtmlEventDetails extends CoreElement {
       ..add([
         _cpuProfiler = _CpuProfiler(
           _timelineController,
-          () => _timelineController.cpuProfileData,
+          () => _timelineController.timeline.data?.cpuProfileData,
         )..hidden(true),
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
@@ -106,18 +107,20 @@ class HtmlEventDetails extends CoreElement {
         .listen((_) async => await update());
 
     _timelineController.onLoadOfflineData.listen((_) async {
-      // If there is no CPU profile data, there is no reason to show the event
+      // If there is no selected event, there is no reason to show the event
       // details section.
-      if (_timelineController.offlineTimelineData.hasCpuProfileData()) {
+      if (_timelineController.offlineTimelineData.selectedEvent != null) {
+        final selectedEvent =
+            _timelineController.offlineTimelineData.selectedEvent;
+        titleBackgroundColor = _backgroundColorForEvent(selectedEvent);
         titleTextColor = Colors.black;
-        titleBackgroundColor = mainUiColor;
         await update();
       }
     });
   }
 
   Future<void> update({bool hide = false}) async {
-    final selectedEvent = _timelineController.timelineData?.selectedEvent;
+    final selectedEvent = _timelineController.timeline.data?.selectedEvent;
 
     _title.text = selectedEvent != null
         ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
@@ -140,6 +143,18 @@ class HtmlEventDetails extends CoreElement {
     titleTextColor = contrastForeground;
     titleBackgroundColor = _defaultTitleBackground;
     update(hide: hide);
+  }
+
+  Color _backgroundColorForEvent(TimelineEvent event) {
+    if (event.isAsyncEvent) {
+      return mainAsyncColor;
+    } else if (event.isUiEvent) {
+      return mainUiColor;
+    } else if (event.isGpuEvent) {
+      return mainGpuColor;
+    } else {
+      return _defaultTitleBackground;
+    }
   }
 }
 
@@ -166,7 +181,7 @@ class _CpuProfiler extends HtmlCpuProfiler {
   @override
   bool maybeShowMessageOnUpdate() {
     if (offlineMode &&
-        !collectionEquals(_timelineController.timelineData.selectedEvent.json,
+        !collectionEquals(_timelineController.timeline.data.selectedEvent.json,
             _timelineController.offlineTimelineData?.selectedEvent?.json)) {
       final offlineModeMessage = div()
         ..add(span(
@@ -191,16 +206,16 @@ class _CpuProfiler extends HtmlCpuProfiler {
       return true;
     }
 
-    final cpuProfileData = _timelineController.cpuProfileData;
+    final cpuProfileData = _timelineController.timeline.data?.cpuProfileData;
     if (cpuProfileData != null && cpuProfileData.stackFrames.isEmpty) {
       final offset = _timelineController.timelineMode == TimelineMode.frameBased
           ? _timelineController.frameBasedTimeline.data.selectedFrame.time.start
           : _timelineController
               .fullTimeline.data.timelineEvents.first.time.start;
       final startTime =
-          _timelineController.timelineData.selectedEvent.time.start - offset;
+          _timelineController.timeline.data.selectedEvent.time.start - offset;
       final endTime =
-          _timelineController.timelineData.selectedEvent.time.end - offset;
+          _timelineController.timeline.data.selectedEvent.time.end - offset;
 
       showMessage(div(
           text: 'CPU profile unavailable for time range'

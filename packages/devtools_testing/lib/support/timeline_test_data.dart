@@ -5,7 +5,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:devtools_app/src/timeline/timeline_controller.dart'
-    show timelineScreenId;
+    show timelineScreenId, TimelineMode;
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 
 import 'cpu_profile_test_data.dart';
@@ -725,11 +725,20 @@ final goldenTraceEventsJson = List.from(
     goldenUiTraceEvents.map((trace) => trace.json).toList()
       ..addAll(goldenGpuTraceEvents.map((trace) => trace.json).toList()));
 
-final offlineTimelineDataJson = {
+final offlineFrameBasedTimelineDataJson = {
   TimelineData.traceEventsKey: goldenTraceEventsJson,
   TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
   FrameBasedTimelineData.selectedFrameIdKey: 'PipelineItem-1',
   TimelineData.selectedEventKey: vsyncEvent.json,
   FrameBasedTimelineData.displayRefreshRateKey: 120.0,
+  TimelineData.timelineModeKey: TimelineMode.frameBased.toString(),
+  TimelineData.devToolsScreenKey: timelineScreenId,
+};
+
+final offlineFullTimelineDataJson = {
+  TimelineData.traceEventsKey: goldenTraceEventsJson,
+  TimelineData.cpuProfileKey: goldenCpuProfileDataJson,
+  TimelineData.selectedEventKey: vsyncEvent.json,
+  TimelineData.timelineModeKey: TimelineMode.full.toString(),
   TimelineData.devToolsScreenKey: timelineScreenId,
 };

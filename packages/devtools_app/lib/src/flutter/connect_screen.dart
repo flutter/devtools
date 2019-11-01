@@ -5,9 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pedantic/pedantic.dart';
 
 import '../../src/framework/framework_core.dart';
+import '../url_utils.dart';
 import 'common_widgets.dart';
+import 'initializer.dart';
 import 'navigation.dart';
 import 'screen.dart';
 
@@ -125,16 +128,9 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect([_]) async {
-    final uri = Uri.parse(controller.text);
-    final bool connected = await FrameworkCore.initVmService(
-      '',
-      explicitUri: uri,
-      errorReporter: showErrorSnackBar(context),
-    );
-
-    if (connected) {
-      return Navigator.popAndPushNamed(context,
-          routeNameWithQueryParams(context, '/', {'uri': controller.text}));
+    final route = await connectToVmService(context, controller.text);
+    if (route != null) {
+      unawaited(Navigator.popAndPushNamed(context, route));
     }
   }
 }

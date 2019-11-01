@@ -4,17 +4,20 @@
 
 import 'dart:async';
 
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'core/sse/sse_shim.dart';
 import 'vm_service_wrapper.dart';
 
-void _connectWithSse(
+Future<VmServiceWrapper> _connectWithSse(
   Uri uri,
-  Completer<VmServiceWrapper> connectedCompleter,
+  void onError(error),
   Completer<void> finishedCompleter,
-) {
+) async {
+  final serviceCompleter = Completer<VmServiceWrapper>();
+
   uri = uri.scheme == 'sse'
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
@@ -31,55 +34,81 @@ void _connectWithSse(
       finishedCompleter.complete();
       service.dispose();
     });
-
-    connectedCompleter.complete(service);
+    serviceCompleter.complete(service);
   });
 
-  stream?.drain()?.catchError((error) {
-    if (!connectedCompleter.isCompleted) {
-      connectedCompleter.completeError(error);
-    }
-  });
+  unawaited(stream?.drain()?.catchError(onError));
+  return serviceCompleter.future;
 }
 
-void _connectWithWebSocket(
+Future<VmServiceWrapper> _connectWithWebSocket(
   Uri uri,
-  Completer<VmServiceWrapper> connectedCompleter,
+  void onError(error),
   Completer<void> finishedCompleter,
-) {
+) async {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
   final ws = WebSocketChannel.connect(uri);
+  final stream = ws.stream.handleError(onError);
   final service = VmServiceWrapper.fromNewVmService(
-    ws.stream,
+    stream,
     (String message) {
       ws.sink.add(message);
     },
     uri,
   );
 
-  ws.sink.done.then((_) {
+  if (ws.closeCode != null) {
+    onError(null);
+    return service;
+  }
+  unawaited(ws.sink.done.then((_) {
     finishedCompleter.complete();
     service.dispose();
-  }, onError: (e) {
-    // TODO(jacobr): this may be obsolete code. This case is only useful if the
-    // sink throws an error immediately as otherwise the connectedCompleter will
-    // have already completed before we get here.
-    if (!connectedCompleter.isCompleted) {
-      connectedCompleter.completeError(e);
-    }
-  });
-  connectedCompleter.complete(service);
+  }, onError: onError));
+  return service;
 }
 
 Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
   final connectedCompleter = Completer<VmServiceWrapper>();
-  if (uri.scheme == 'sse' || uri.scheme == 'sses') {
-    _connectWithSse(uri, connectedCompleter, finishedCompleter);
-  } else {
-    _connectWithWebSocket(uri, connectedCompleter, finishedCompleter);
+
+  void onError(error) {
+    if (!connectedCompleter.isCompleted) {
+      connectedCompleter.completeError(error);
+    }
   }
+
+  // Connects to a VM Service but does not verify the connection was fully
+  // successful.
+  Future<VmServiceWrapper> connectHelper() async {
+    VmServiceWrapper service;
+    if (uri.scheme == 'sse' || uri.scheme == 'sses') {
+      service = await _connectWithSse(uri, onError, finishedCompleter);
+    } else {
+      service = await _connectWithWebSocket(uri, onError, finishedCompleter);
+    }
+    // Verify that the VM is alive enough to actually get the version before
+    // considering it successfully connected. Otherwise, VMService instances
+    // that failed part way through the connection may appear to be connected.
+    await service.getVersion();
+    return service;
+  }
+
+  connectHelper().then(
+    (service) {
+      if (!connectedCompleter.isCompleted) {
+        connectedCompleter.complete(service);
+      }
+    },
+    onError: onError,
+  );
+  finishedCompleter.future.then((_) {
+    // It is an error if we finish before we are connected.
+    if (!connectedCompleter.isCompleted) {
+      onError(null);
+    }
+  });
   return connectedCompleter.future;
 }
 

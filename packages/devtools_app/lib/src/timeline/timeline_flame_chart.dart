@@ -51,6 +51,10 @@ class FrameBasedTimelineFlameChartCanvas
           .toDouble();
     }
 
+    // Pixels per microsecond in order to fit the entire frame in view.
+    final double pxPerMicro =
+        totalStartingWidth / data.time.duration.inMicroseconds;
+
     // Add UI section label.
     final uiSectionLabel = sectionLabel(
       'UI',
@@ -70,10 +74,6 @@ class FrameBasedTimelineFlameChartCanvas
     rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
 
     void createChartNodes(TimelineEvent event, int row) {
-      // Pixels per microsecond in order to fit the entire frame in view.
-      final double pxPerMicro =
-          totalStartingWidth / data.time.duration.inMicroseconds;
-
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
@@ -157,9 +157,10 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
   static Map<String, double> sectionLabelWidths = {};
 
-  static double maxSectionLabelWidth = 0.0;
-
   static double _calculateStartInset(FullTimelineData data) {
+    sectionLabelWidths.clear();
+    var maxSectionLabelWidth = 0.0;
+
     final measurementCanvas = CanvasElement().context2D
       ..font = fontStyleToCss(const TextStyle(fontSize: fontSize));
     for (String bucketName in data.eventBuckets.keys) {
@@ -206,6 +207,11 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     }
 
     final int startTimeOffset = data.time.start.inMicroseconds;
+
+    // Pixels per microsecond in order to fit the entire frame in view.
+    final double pxPerMicro =
+        totalStartingWidth / data.time.duration.inMicroseconds;
+
     double maxRight = -1;
     void createChartNodes(TimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
@@ -213,10 +219,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       if (!event.isWellFormed) return;
 
       expandRowsToFitCurrentRow(row);
-
-      // Pixels per microsecond in order to fit the entire frame in view.
-      final double pxPerMicro =
-          totalStartingWidth / data.time.duration.inMicroseconds;
 
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause

@@ -165,7 +165,17 @@ class HtmlFramework {
   }
 
   Future<void> _importTimeline(Map<String, dynamic> import) async {
-    final offlineData = OfflineTimelineData.parse(import);
+    OfflineData offlineData;
+    final timelineMode =
+        import[TimelineData.timelineModeKey] == TimelineMode.full.toString()
+            ? TimelineMode.full
+            : TimelineMode.frameBased;
+    if (timelineMode == TimelineMode.frameBased) {
+      offlineData = OfflineFrameBasedTimelineData.parse(import);
+    } else {
+      offlineData = OfflineFullTimelineData.parse(import);
+    }
+
     if (offlineData.isEmpty) {
       toast('Imported file does not contain timeline data.');
       return;
@@ -182,7 +192,7 @@ class HtmlFramework {
     }
     navigateTo(timelineScreenId);
 
-    await timelineScreen.clearTimeline();
+    await timelineScreen.prepareViewForOfflineData(timelineMode);
     timelineScreen.timelineController.loadOfflineData(offlineData);
   }
 
@@ -789,7 +799,7 @@ class HtmlConnectDialog {
 
   void _tryConnect() {
     final InputElement inputElement = textfield.element;
-    String value = inputElement.value.trim();
+    final value = inputElement.value.trim();
     final int port = int.tryParse(value);
 
     void handleConnectError() {
@@ -808,12 +818,7 @@ class HtmlConnectDialog {
       });
     } else {
       try {
-        // Check to see if the user pasted in a urlencoded url ('://').
-        if (value.contains('%3A%2F%2F')) {
-          value = Uri.decodeFull(value);
-        }
-
-        final uri = getNormalizedTrimmedUri(value);
+        final uri = normalizeVmServiceUri(value);
         if (uri != null && uri.isAbsolute) {
           _connect(uri).catchError((dynamic error) {
             handleConnectError();
