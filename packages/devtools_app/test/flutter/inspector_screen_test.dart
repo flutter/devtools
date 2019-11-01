@@ -38,11 +38,11 @@ void main() {
 
     void mockExtensions() {
       fakeExtensionManager.extensionValueOnDevice = {
-        extensions.toggleSelectWidgetMode.extension: true,
+        extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.debugPaint.extension: false,
       };
       fakeExtensionManager
-          .fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension);
+          .fakeAddServiceExtension(extensions.toggleOnDeviceWidgetInspector.extension);
       fakeExtensionManager
           .fakeAddServiceExtension(extensions.debugPaint.extension);
       fakeExtensionManager.fakeFrame();
@@ -50,7 +50,7 @@ void main() {
 
     void mockNoExtensionsAvailable() {
       fakeExtensionManager.extensionValueOnDevice = {
-        extensions.toggleSelectWidgetMode.extension: true,
+        extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.debugPaint.extension: false,
       };
       // Don't actually send any events to the client indicating that service
@@ -68,7 +68,7 @@ void main() {
       await setWindowSize(const Size(2600.0, 1200.0));
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleSelectWidgetMode.description),
+      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
@@ -90,27 +90,27 @@ void main() {
       );
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleSelectWidgetMode.extension],
+            extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleSelectWidgetMode.description),
+      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       await tester.pump();
 
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleSelectWidgetMode.extension],
+            extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
       await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleSelectWidgetMode.extension],
+            extensions.toggleOnDeviceWidgetInspector.extension],
         isFalse,
       );
       // Verify the the other service extension's state hasn't changed.
@@ -121,10 +121,10 @@ void main() {
       );
 
       await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleSelectWidgetMode.extension],
+            extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
 
@@ -148,30 +148,30 @@ void main() {
       );
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleSelectWidgetMode.extension],
+            extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleSelectWidgetMode.description),
+      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       await tester.pump();
 
       await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
       // Verify the service extension state has not changed.
       expect(
           fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
+              extensions.toggleOnDeviceWidgetInspector.extension],
           isTrue);
       await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
       // Verify the service extension state has not changed.
       expect(
           fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleSelectWidgetMode.extension],
+              extensions.toggleOnDeviceWidgetInspector.extension],
           isTrue);
 
       // TODO(jacobr): also verify that the service extension buttons look

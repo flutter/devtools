@@ -80,7 +80,7 @@ class HtmlInspectorScreen extends HtmlScreen {
         div(c: 'btn-group collapsible-750 nowrap')
           ..add([
             ServiceExtensionButton(
-              extensions.toggleSelectWidgetMode,
+              extensions.toggleOnDeviceWidgetInspector,
             ).button,
             refreshTreeButton =
                 PButton.icon('Refresh Tree', FlutterIcons.refresh)

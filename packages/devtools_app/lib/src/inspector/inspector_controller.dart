@@ -150,6 +150,8 @@ class InspectorController implements InspectorServiceClient {
   final bool isSummaryTree;
 
   final VoidFunction onExpandCollapseSupported;
+  ValueListenable<bool> get selectModeSupported => _selectModeSupported;
+  final ValueNotifier<bool> _selectModeSupported = ValueNotifier<bool>(null);
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -818,6 +820,28 @@ class InspectorController implements InspectorServiceClient {
   void collapseDetailsToSelected() {
     details.inspectorTree.collapseToSelected();
     details.animateTo(details.inspectorTree.selection);
+  }
+
+  Future<bool> isSelectModeAvailable() async{
+    if (onExpandCollapseSupported == null) return;
+
+    serviceManager.hasRegisteredService(
+      registrations.flutterVersion.service,
+          (serviceAvailable) async {
+        if (serviceAvailable) {
+          final flutterVersion = FlutterVersion.parse(
+              (await serviceManager.getFlutterVersion()).json);
+          // Configurable subtree depth is available in versions of Flutter
+          // greater than or equal to 1.9.7, but the flutterVersion service is
+          // not available until 1.10.1, so we will check for 1.10.1 here.
+          if (flutterVersion.isSupported(
+              supportedVersion:
+              SemanticVersion(major: 1, minor: 10, patch: 1))) {
+            onExpandCollapseSupported();
+          }
+        }
+      },
+    );
   }
 
   void _checkForExpandCollapseSupport() {

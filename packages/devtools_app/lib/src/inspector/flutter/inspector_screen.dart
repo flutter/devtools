@@ -104,7 +104,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ServiceExtensionButtonGroup(
-              extensions: [extensions.toggleSelectWidgetMode],
+              extensions: [extensions.toggleOnDeviceWidgetInspector],
               minIncludeTextWidth: 800,
             ),
             OutlineButton(

@@ -170,14 +170,30 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   gaItem: ga.togglePlatform,
 );
 
-final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
+/// This extension should typically not be shown as a button when the
+final toggleOnDeviceWidgetInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.show',
+  // Technically this enables the on device widget inspector but for older
+  // versions of package:flutter it makes sense to describe this extension as
+  // toggling widget select mode as it is the only way to toggle that mode.
+  description: 'Select Widget Mode [OLD]',
+  icon: FlutterIcons.locate,
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Disable select widget mode',
+  disabledTooltip: 'Enable select widget mode',
+  gaScreenName: ga.inspector,
+  gaItem: ga.onDeviceInspector,
+);
+
+final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.inspector.selectMode',
   description: 'Select Widget Mode',
   icon: FlutterIcons.locate,
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Disable Select Widget Mode',
-  disabledTooltip: 'Enable Select Widget Mode',
+  enabledTooltip: 'Exit select widget mode',
+  disabledTooltip: 'Enter select widget mode',
   gaScreenName: ga.inspector,
   gaItem: ga.selectWidgetMode,
 );
@@ -205,7 +221,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   performanceOverlay,
   debugAllowBanner,
   profileWidgetBuilds,
-  toggleSelectWidgetMode,
+  toggleOnDeviceWidgetInspector,
   togglePlatformMode,
   slowAnimations,
   structuredErrors,
