@@ -264,11 +264,8 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
         json[TimelineData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
-            selectedEventJson[TimelineEvent.eventNameKey],
-            selectedEventJson[TimelineEvent.eventTypeKey],
-            selectedEventJson[TimelineEvent.eventStartTimeKey],
-            selectedEventJson[TimelineEvent.eventDurationKey],
-          )
+            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
+                .cast<String, dynamic>())
         : null;
 
     final double displayRefreshRate =
@@ -334,11 +331,8 @@ class OfflineFullTimelineData extends FullTimelineData
         json[TimelineData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
-            selectedEventJson[TimelineEvent.eventNameKey],
-            selectedEventJson[TimelineEvent.eventTypeKey],
-            selectedEventJson[TimelineEvent.eventStartTimeKey],
-            selectedEventJson[TimelineEvent.eventDurationKey],
-          )
+            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
+                .cast<String, dynamic>())
         : null;
 
     return OfflineFullTimelineData._(
@@ -380,20 +374,18 @@ mixin OfflineData<T extends TimelineData> on TimelineData {
 /// We extend TimelineEvent so that our CPU profiler code requiring a selected
 /// timeline event will work as it does when we are not loading from offline.
 class OfflineTimelineEvent extends TimelineEvent {
-  OfflineTimelineEvent(
-      String name, String eventType, int startMicros, int durationMicros)
+  OfflineTimelineEvent(Map<String, dynamic> firstTrace)
       : super(TraceEventWrapper(
-          TraceEvent({
-            TraceEvent.nameKey: name,
-            TraceEvent.timestampKey: startMicros,
-            TraceEvent.durationKey: durationMicros,
-            TraceEvent.argsKey: {TraceEvent.typeKey: eventType},
-          }),
+          TraceEvent(firstTrace),
           0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
         )) {
-    time.end = Duration(microseconds: startMicros + durationMicros);
+    time.end = Duration(
+        microseconds: firstTrace[TraceEvent.timestampKey] +
+            firstTrace[TraceEvent.durationKey]);
     type = TimelineEventType.values.firstWhere(
-        (t) => t.toString() == eventType.toString(),
+        (t) =>
+            t.toString() ==
+            firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
         orElse: () => TimelineEventType.unknown);
   }
 
@@ -533,6 +525,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
     time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
   }
 
+  static const firstTraceKey = 'firstTrace';
   static const eventNameKey = 'name';
   static const eventTypeKey = 'type';
   static const eventStartTimeKey = 'startMicros';
@@ -696,12 +689,14 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   }
 
   Map<String, dynamic> get json {
-    return {
-      eventNameKey: name,
-      eventTypeKey: type.toString(),
-      eventStartTimeKey: time.start.inMicroseconds,
-      eventDurationKey: time.duration.inMicroseconds,
-    };
+    final modifiedTrace = Map.from(beginTraceEventJson);
+    modifiedTrace[TraceEvent.argsKey]
+        .addAll({TraceEvent.typeKey: type.toString()});
+    if (!modifiedTrace.containsKey(TraceEvent.durationKey)) {
+      modifiedTrace
+          .addAll({TraceEvent.durationKey: time.duration.inMicroseconds});
+    }
+    return {firstTraceKey: modifiedTrace};
   }
 
   @visibleForTesting

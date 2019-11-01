@@ -169,15 +169,16 @@ void main() {
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.selectedFrameId, equals('PipelineItem-1'));
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
+
+      final expectedFirstTraceJson =
+          Map<String, dynamic>.from(vsyncEvent.beginTraceEventJson);
+      expectedFirstTraceJson[TraceEvent.argsKey]
+          .addAll({TraceEvent.typeKey: TimelineEventType.ui});
+      expectedFirstTraceJson.addAll(
+          {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
       expect(
         offlineData.selectedEvent.json,
-        equals({
-          TimelineEvent.eventNameKey: vsyncEvent.name,
-          TimelineEvent.eventTypeKey: vsyncEvent.type.toString(),
-          TimelineEvent.eventStartTimeKey: vsyncEvent.time.start.inMicroseconds,
-          TimelineEvent.eventDurationKey:
-              vsyncEvent.time.duration.inMicroseconds,
-        }),
+        equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
       expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
@@ -214,15 +215,16 @@ void main() {
         equals(goldenTraceEventsJson),
       );
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
+
+      final expectedFirstTraceJson =
+          Map<String, dynamic>.from(vsyncEvent.beginTraceEventJson);
+      expectedFirstTraceJson[TraceEvent.argsKey]
+          .addAll({TraceEvent.typeKey: TimelineEventType.ui});
+      expectedFirstTraceJson.addAll(
+          {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
       expect(
         offlineData.selectedEvent.json,
-        equals({
-          TimelineEvent.eventNameKey: vsyncEvent.name,
-          TimelineEvent.eventTypeKey: vsyncEvent.type.toString(),
-          TimelineEvent.eventStartTimeKey: vsyncEvent.time.start.inMicroseconds,
-          TimelineEvent.eventDurationKey:
-              vsyncEvent.time.duration.inMicroseconds,
-        }),
+        equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
       expect(offlineData.timelineMode, equals(TimelineMode.full));
