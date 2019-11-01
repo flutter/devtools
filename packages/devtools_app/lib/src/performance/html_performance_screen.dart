@@ -180,7 +180,7 @@ class _HtmlCpuProfiler extends HtmlCpuProfiler {
   ) : super(
           HtmlCpuFlameChart(profileDataProvider),
           HtmlCpuCallTree(profileDataProvider),
-          CpuBottomUp(profileDataProvider),
+          HtmlCpuBottomUp(profileDataProvider),
           defaultView: CpuProfilerViewType.callTree,
         );
 

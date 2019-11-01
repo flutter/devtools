@@ -37,7 +37,7 @@ abstract class HtmlCpuProfiler extends CoreElement {
 
   HtmlCpuFlameChart flameChart;
 
-  CpuBottomUp bottomUp;
+  HtmlCpuBottomUp bottomUp;
 
   HtmlCpuCallTree callTree;
 
