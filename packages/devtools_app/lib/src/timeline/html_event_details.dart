@@ -81,6 +81,11 @@ class HtmlEventDetails extends CoreElement {
       ..color = colorToCss(titleTextColor)
       ..backgroundColor = colorToCss(titleBackgroundColor);
 
+    _cpuProfiler = _CpuProfiler(
+      _timelineController,
+      () => _timelineController.timeline.data?.cpuProfileData,
+    )..hidden(true);
+
     _cpuProfilerTabNav = HtmlCpuProfilerTabNav(
       _cpuProfiler,
       CpuProfilerTabOrder(
@@ -89,6 +94,7 @@ class HtmlEventDetails extends CoreElement {
         third: CpuProfilerViewType.bottomUp,
       ),
     );
+
     _summaryTabNav = PTabNav([PTabNavTab('Summary')])
       ..element.style.borderBottom = '0'
       ..hidden(true);
@@ -97,10 +103,7 @@ class HtmlEventDetails extends CoreElement {
       ..layoutVertical()
       ..flex()
       ..add([
-        _cpuProfiler = _CpuProfiler(
-          _timelineController,
-          () => _timelineController.timeline.data?.cpuProfileData,
-        )..hidden(true),
+        _cpuProfiler,
         // TODO(kenz): eventually we should show something in this area that
         // is useful for GPU events as well (tips, links to docs, etc).
         _eventSummary = HtmlEventSummary(
