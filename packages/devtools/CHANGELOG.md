@@ -2,6 +2,7 @@
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
 * Fix a message manager bug.
+* Fix a bug with processing CPU profile responses.
 * Reduce race conditions in integration tests.
 
 ## 0.1.10 - 2019-10-18
