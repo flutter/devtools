@@ -44,7 +44,6 @@ class DevToolsAppState extends State<DevToolsApp> {
   Route _generateRoute(RouteSettings settings) {
     final uri = Uri.parse(settings.name);
     final path = uri.path;
-    print(uri);
 
     // Update the theme based on the query parameters.
     // TODO(djshuckerow): Update this with a NavigatorObserver to load the
