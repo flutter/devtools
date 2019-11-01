@@ -40,6 +40,9 @@ class HorizontalLineSegment extends LineSegment
 
   @override
   int compareTo(HorizontalLineSegment other) {
+    // We first compare by cross axis so that the line segments are in
+    // ascending order from top to bottom. If two line segments share a y value,
+    // order them based on their starting x values.
     final compare = y.compareTo(other.y);
     if (compare == 0) {
       return start.dx.compareTo(other.start.dx);
@@ -61,6 +64,9 @@ class VerticalLineSegment extends LineSegment
 
   @override
   int compareTo(VerticalLineSegment other) {
+    // We first compare by cross axis so that the line segments are in
+    // ascending order from left to right. If two line segments share an x
+    // value, order them based on their starting y values.
     final compare = x.compareTo(other.x);
     if (compare == 0) {
       return start.dy.compareTo(other.start.dy);
