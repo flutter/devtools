@@ -61,7 +61,7 @@ class TimelineController {
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
 
-  Timeline get timeline => timelineMode == TimelineMode.frameBased
+  TimelineBase get timeline => timelineMode == TimelineMode.frameBased
       ? frameBasedTimeline
       : fullTimeline;
 
@@ -69,7 +69,7 @@ class TimelineController {
 
   FullTimeline fullTimeline;
 
-  List<Timeline> timelines;
+  List<TimelineBase> timelines;
 
   TimelineData offlineTimelineData;
 
@@ -245,7 +245,7 @@ class TimelineController {
 }
 
 class FrameBasedTimeline
-    extends Timeline<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
+    extends TimelineBase<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
   /// Stream controller that notifies a frame was added to the timeline.
   ///
   /// Subscribers to this stream will be responsible for updating the UI for the
@@ -338,7 +338,8 @@ class FrameBasedTimeline
   }
 }
 
-class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
+class FullTimeline
+    extends TimelineBase<FullTimelineData, FullTimelineProcessor> {
   FullTimeline(this._timelineController);
 
   final TimelineController _timelineController;
@@ -394,7 +395,8 @@ class FullTimeline extends Timeline<FullTimelineData, FullTimelineProcessor> {
   }
 }
 
-abstract class Timeline<T extends TimelineData, V extends TimelineProcessor> {
+abstract class TimelineBase<T extends TimelineData,
+    V extends TimelineProcessor> {
   T data;
 
   V processor;

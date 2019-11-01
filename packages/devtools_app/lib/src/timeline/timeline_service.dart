@@ -9,7 +9,7 @@ import '../config_specific/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../vm_service_wrapper.dart';
-import 'timeline_controller.dart' hide Timeline;
+import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
 /// Manages interactions between the Timeline and the VmService.
