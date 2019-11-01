@@ -263,7 +263,9 @@ class OfflineFrameBasedTimelineData extends FrameBasedTimelineData
     final Map<String, dynamic> selectedEventJson =
         json[TimelineData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
-        ? OfflineTimelineEvent(selectedEventJson[TimelineEvent.firstTraceKey])
+        ? OfflineTimelineEvent(
+            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
+                .cast<String, dynamic>())
         : null;
 
     final double displayRefreshRate =
@@ -328,7 +330,9 @@ class OfflineFullTimelineData extends FullTimelineData
     final Map<String, dynamic> selectedEventJson =
         json[TimelineData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
-        ? OfflineTimelineEvent(selectedEventJson[TimelineEvent.firstTraceKey])
+        ? OfflineTimelineEvent(
+            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
+                .cast<String, dynamic>())
         : null;
 
     return OfflineFullTimelineData._(
