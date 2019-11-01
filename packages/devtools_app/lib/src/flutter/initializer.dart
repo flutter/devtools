@@ -60,6 +60,9 @@ class _InitializerState extends State<Initializer>
         // This setState call is alerting a change in the serviceManager's
         // state.
         setState(() {});
+        // TODO(https://github.com/flutter/devtools/issues/1285): On losing
+        // the connection, only provide an option to reconnect; don't
+        // immediately go to the connection page.
         // If we've become disconnected, attempt to reconnect.
         _navigateToConnectPage();
       }),

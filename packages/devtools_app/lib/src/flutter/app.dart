@@ -128,8 +128,11 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
+/// A [WidgetBuilder] that takes an additional map of URL query parameters.
 typedef UrlParametersBuilder = Widget Function(
-    BuildContext, Map<String, String>);
+  BuildContext,
+  Map<String, String>,
+);
 
 /// Displays the checked mode banner in the bottom end corner instead of the
 /// top end corner.
