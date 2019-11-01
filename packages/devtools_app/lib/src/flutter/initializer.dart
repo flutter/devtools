@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../url_utils.dart';
+import 'common_widgets.dart';
 import 'navigation.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -79,8 +80,13 @@ class _InitializerState extends State<Initializer>
   }
 
   Future<void> _attemptUrlConnection() async {
-    final String route = await connectToVmService(context, widget.url);
-    if (route == null) {
+    final uri = normalizeVmServiceUri(widget.url);
+    final connected = await FrameworkCore.initVmService(
+      '',
+      explicitUri: uri,
+      errorReporter: showErrorSnackBar(context),
+    );
+    if (!connected) {
       _navigateToConnectPage();
     }
   }
@@ -106,35 +112,4 @@ class _InitializerState extends State<Initializer>
         ? widget.builder(context)
         : const Center(child: CircularProgressIndicator());
   }
-}
-
-/// Connects the app to the VM Service located at [url].
-///
-/// Uses an [ErrorReporter] that shows a [SnackBar].
-///
-/// If the connection is successful, returns the name of the route that
-/// will show details on the given VM Service [url]. Callers can push
-/// that route to the stack.
-///
-/// If the connection fails, returns null.
-Future<String> connectToVmService(BuildContext context, String url) async {
-  final uri = normalizeVmServiceUri(url);
-
-  ErrorReporter showErrorSnackBar(BuildContext context) {
-    return (String title, dynamic error) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text(title),
-      ));
-    };
-  }
-
-  final connected = await FrameworkCore.initVmService(
-    '',
-    explicitUri: uri,
-    errorReporter: showErrorSnackBar(context),
-  );
-  if (connected) {
-    return routeNameWithQueryParams(context, '/', {'uri': '$uri'});
-  }
-  return null;
 }

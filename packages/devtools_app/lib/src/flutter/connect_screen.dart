@@ -128,9 +128,19 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   }
 
   Future<void> _connect([_]) async {
-    final route = await connectToVmService(context, controller.text);
-    if (route != null) {
-      unawaited(Navigator.popAndPushNamed(context, route));
+    final uri = normalizeVmServiceUri(controller.text);
+    final connected = await FrameworkCore.initVmService(
+      '',
+      explicitUri: uri,
+      errorReporter: showErrorSnackBar(context),
+    );
+    if (connected) {
+      unawaited(
+        Navigator.popAndPushNamed(
+          context,
+          routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
+        ),
+      );
     }
   }
 }

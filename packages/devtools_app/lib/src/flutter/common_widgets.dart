@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
@@ -129,4 +130,13 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
     color: theme.primaryColorLight,
     fontWeight: FontWeight.w300,
   );
+}
+
+/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
+ErrorReporter showErrorSnackBar(BuildContext context) {
+  return (String title, dynamic error) {
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text(title),
+    ));
+  };
 }
