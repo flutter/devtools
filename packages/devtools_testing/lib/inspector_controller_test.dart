@@ -154,8 +154,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
       final double y = detailsTree.getRowY(rowIndex);
       final textAlignRow = detailsTree.getRow(Offset(0, y));
       final FakeInspectorTreeNode node = textAlignRow.node;
-      final FakePaintEntry lastIconEntry =
-          node.renderObject.entries
+      final FakePaintEntry lastIconEntry = node.renderObject.entries
           .firstWhere((entry) => entry.icon == defaultIcon, orElse: () => null);
       // If the entry doesn't have the defaultIcon then the tree has changed
       // and the rest of this test case won't make sense.
