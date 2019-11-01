@@ -186,7 +186,7 @@ class _CpuProfiler extends HtmlCpuProfiler {
   ) : super(
           HtmlCpuFlameChart(profileDataProvider),
           HtmlCpuCallTree(profileDataProvider),
-          CpuBottomUp(profileDataProvider),
+          HtmlCpuBottomUp(profileDataProvider),
         );
 
   final TimelineController _timelineController;

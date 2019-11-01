@@ -11,7 +11,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
 import 'timeline_model.dart';
-import 'timeline_protocol.dart';
+import 'timeline_processor.dart';
 import 'timeline_service.dart';
 
 const String timelineScreenId = 'timeline';

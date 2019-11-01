@@ -28,7 +28,7 @@ import 'html_frames_bar_chart.dart';
 import 'timeline_controller.dart';
 import 'timeline_flame_chart.dart';
 import 'timeline_model.dart';
-import 'timeline_protocol.dart';
+import 'timeline_processor.dart';
 
 // TODO(devoncarew): show the Skia picture (gpu drawing commands) for a frame
 

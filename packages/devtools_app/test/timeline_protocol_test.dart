@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
-import 'package:devtools_app/src/timeline/timeline_protocol.dart';
+import 'package:devtools_app/src/timeline/timeline_processor.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/test_utils.dart';
 import 'package:devtools_testing/support/timeline_test_data.dart';

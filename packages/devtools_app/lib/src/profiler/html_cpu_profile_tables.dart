@@ -54,8 +54,8 @@ class HtmlCpuCallTree extends HtmlCpuProfilerView {
   void reset() => callTreeTable.model.setRows(<CpuStackFrame>[]);
 }
 
-class CpuBottomUp extends HtmlCpuProfilerView {
-  CpuBottomUp(CpuProfileDataProvider profileDataProvider)
+class HtmlCpuBottomUp extends HtmlCpuProfilerView {
+  HtmlCpuBottomUp(CpuProfileDataProvider profileDataProvider)
       : super(CpuProfilerViewType.bottomUp, profileDataProvider) {
     flex();
     layoutVertical();
