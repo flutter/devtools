@@ -23,7 +23,7 @@ class InspectorDetailsTabController extends StatelessWidget {
   final Widget actionButtons;
   final InspectorController controller;
 
-  Widget buildTab(String tabName) {
+  Widget _buildTab(String tabName) {
     return Tab(
       child: Text(
         tabName,
@@ -37,8 +37,8 @@ class InspectorDetailsTabController extends StatelessWidget {
     final enableExperimentalStoryOfLayout =
         InspectorController.enableExperimentalStoryOfLayout;
     final tabs = <Tab>[
-      buildTab('Details Tree'),
-      if (enableExperimentalStoryOfLayout) buildTab('Layout Details'),
+      _buildTab('Details Tree'),
+      if (enableExperimentalStoryOfLayout) _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
