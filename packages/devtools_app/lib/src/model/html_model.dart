@@ -40,6 +40,7 @@ class HtmlApp {
     // LoggingScreen
     _register<void>('logging.clearLogs', logsClearLogs);
     _register<int>('logging.logCount', logsLogCount);
+    _register<void>('logging.filterLogs', logsFilterLogs);
 
     // DebuggerScreen
     _register<String>('debugger.getState', debuggerGetState);
@@ -123,6 +124,11 @@ class HtmlApp {
   Future<int> logsLogCount([dynamic _]) async {
     final HtmlLoggingScreen screen = framework.getScreen('logging');
     return screen.controller.loggingTableModel.rowCount;
+  }
+
+  Future<void> logsFilterLogs([dynamic text]) async {
+    final HtmlLoggingScreen screen = framework.getScreen('logging');
+    return screen.controller.search(text);
   }
 
   Future<String> debuggerGetState([dynamic _]) async {

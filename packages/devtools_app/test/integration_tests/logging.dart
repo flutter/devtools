@@ -41,6 +41,35 @@ void loggingTests() {
     expect(await logs.logCount(), greaterThan(0));
   });
 
+  test('filter log data', () async {
+    final DevtoolsManager tools =
+        DevtoolsManager(tabInstance, webdevFixture.baseUri);
+    await tools.start(appFixture);
+    await tools.switchPage('logging');
+
+    final String currentPageId = await tools.currentPageId();
+    expect(currentPageId, 'logging');
+
+    // Cause app to log.
+    final LoggingManager logs = LoggingManager(tools);
+    await logs.clearLogs();
+
+    await appFixture.invoke('controller.emitLog()');
+    await appFixture.invoke('controller.emitLogTest()');
+    await waitFor(() async => await logs.logCount() > 0);
+    final countAll = await logs.logCount();
+
+    await logs.filterLogs('test');
+    final countFilter = await logs.logCount();
+
+    await logs.filterLogs('');
+    final countAllAfter = await logs.logCount();
+
+    // Verify the log data shows up in the UI.
+    expect(countAll, greaterThanOrEqualTo(countFilter));
+    expect(countAll, equals(countAllAfter));
+  });
+
   test('log screen postpones write when offscreen', () async {
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webdevFixture.baseUri);
@@ -80,6 +109,10 @@ class LoggingManager {
 
   Future<void> clearLogs() async {
     await tools.tabInstance.send('logging.clearLogs');
+  }
+
+  Future<void> filterLogs(String text) async {
+    await tools.tabInstance.send('logging.filterLogs', text);
   }
 
   Future<int> logCount() async {

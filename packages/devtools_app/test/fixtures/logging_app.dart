@@ -27,6 +27,13 @@ class Controller {
     log('emit log $count', name: 'logging');
   }
 
+  void emitLogTest() {
+    count++;
+
+    print('emitLog called test');
+    log('emit log $count', name: 'logging');
+  }
+
   void shutdown() {
     print('stopping app');
     log('stopping app');
