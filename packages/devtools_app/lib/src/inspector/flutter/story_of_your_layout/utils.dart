@@ -13,14 +13,14 @@ import 'package:flutter/widgets.dart';
 @immutable
 class GridPositioned extends StatelessWidget {
   const GridPositioned({
-                     Key key,
-                     this.left,
-                     this.top,
-                     this.right,
-                     this.bottom,
-                     @required this.center,
-                   })  : assert(center != null),
-      super(key: key);
+    Key key,
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    @required this.center,
+  })  : assert(center != null),
+        super(key: key);
 
   final Widget center;
   final Widget top;
@@ -43,20 +43,20 @@ class GridPositioned extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: crossAxisAlignment,
-      children: <Widget>[
-        if (top != null) top,
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (left != null) left,
-            Flexible(child: center),
-            if (right != null) right,
-          ],
-        ),
-        if (bottom != null) bottom,
-      ]);
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: crossAxisAlignment,
+        children: <Widget>[
+          if (top != null) top,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (left != null) left,
+              Flexible(child: center),
+              if (right != null) right,
+            ],
+          ),
+          if (bottom != null) bottom,
+        ]);
   }
 }

@@ -45,7 +45,11 @@ class StoryOfYourFlexWidget extends StatelessWidget {
     ];
   }
 
-  Widget _visualizeMainAxisAndCrossAxis(Widget child, double length, ThemeData theme) {
+  Widget _visualizeMainAxisAndCrossAxis(
+    Widget child,
+    double length,
+    ThemeData theme,
+  ) {
     return Center(
       child: GridPositioned(
         center: child,

@@ -246,10 +246,10 @@ class _ArrowPainter extends CustomPainter {
     this.strokeWidth = 2.0,
     this.color = Colors.white,
     @required this.strategy,
-  }) : assert(color != null),
-      assert(arrowHeadSize != null),
-      assert(strokeWidth != null),
-      assert(strategy != null);
+  })  : assert(color != null),
+        assert(arrowHeadSize != null),
+        assert(strokeWidth != null),
+        assert(strategy != null);
 
   final double arrowHeadSize;
   final double strokeWidth;
