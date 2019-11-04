@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../url_utils.dart';
+import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
 
@@ -41,9 +42,7 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer>
-    with SingleTickerProviderStateMixin {
-  final List<StreamSubscription> _subscriptions = [];
-
+    with SingleTickerProviderStateMixin, AutoDisposeMixin {
   /// Checks if the [service.serviceManager] is connected.
   ///
   /// This is a method and not a getter to communicate that its value may
@@ -53,7 +52,7 @@ class _InitializerState extends State<Initializer>
   @override
   void initState() {
     super.initState();
-    _subscriptions.add(
+    autoDispose(
       serviceManager.onStateChange.listen((_) {
         // Generally, empty setState calls in Flutter should be avoided.
         // However, serviceManager is an implicit part of this state.
@@ -74,14 +73,6 @@ class _InitializerState extends State<Initializer>
     }
   }
 
-  @override
-  void dispose() {
-    for (var s in _subscriptions) {
-      s.cancel();
-    }
-    super.dispose();
-  }
-
   Future<void> _attemptUrlConnection() async {
     final uri = normalizeVmServiceUri(widget.url);
     final connected = await FrameworkCore.initVmService(
@@ -98,7 +89,6 @@ class _InitializerState extends State<Initializer>
   void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        print(ModalRoute.of(context).settings);
         // If this route is on top and the app is not loaded, then we navigate to
         // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
