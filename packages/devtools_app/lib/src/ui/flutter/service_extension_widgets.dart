@@ -237,7 +237,6 @@ class _RegisteredServiceExtensionButtonState
       (registered) {
         setState(() {
           _hidden = !registered;
-          print(_hidden);
         });
       },
     );

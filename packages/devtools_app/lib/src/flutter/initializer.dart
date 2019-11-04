@@ -103,6 +103,8 @@ class _InitializerState extends State<Initializer>
   Widget build(BuildContext context) {
     return _checkLoaded()
         ? widget.builder(context)
-        : const Center(child: CircularProgressIndicator());
+        : const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
   }
 }
