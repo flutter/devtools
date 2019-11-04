@@ -63,7 +63,6 @@ class BidirectionalVerticalArrowWrapper extends StatelessWidget {
   const BidirectionalVerticalArrowWrapper({
     Key key,
     @required this.child,
-    this.height,
     this.arrowColor = Colors.white,
     this.arrowHeadSize = 16.0,
     this.arrowStrokeWidth = 2.0,
@@ -74,11 +73,10 @@ class BidirectionalVerticalArrowWrapper extends StatelessWidget {
   final double arrowHeadSize;
   final double arrowStrokeWidth;
   final Widget child;
-  final double height;
 
   @override
   Widget build(BuildContext context) {
-    final widget = Column(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
@@ -104,8 +102,6 @@ class BidirectionalVerticalArrowWrapper extends StatelessWidget {
         ),
       ],
     );
-    if (height == null) return widget;
-    return Container(height: height, child: widget);
   }
 }
 
@@ -118,7 +114,11 @@ class ArrowWidget extends StatelessWidget {
     Key key,
     this.strokeWidth = 2.0,
     @required this.type,
-  }) : super(key: key);
+  })  : assert(color != null),
+        assert(headSize != null),
+        assert(strokeWidth != null),
+        assert(type != null),
+        super(key: key);
 
   final Color color;
 
@@ -245,8 +245,11 @@ class _ArrowPainter extends CustomPainter {
     this.arrowHeadSize = 15.0,
     this.strokeWidth = 2.0,
     this.color = Colors.white,
-    this.strategy,
-  });
+    @required this.strategy,
+  }) : assert(color != null),
+      assert(arrowHeadSize != null),
+      assert(strokeWidth != null),
+      assert(strategy != null);
 
   final double arrowHeadSize;
   final double strokeWidth;

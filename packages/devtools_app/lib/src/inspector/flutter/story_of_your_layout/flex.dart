@@ -33,7 +33,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: theme.focusColor,
+                color: theme.secondaryHeaderColor,
                 width: 1.0,
               ),
             ),
@@ -45,42 +45,44 @@ class StoryOfYourFlexWidget extends StatelessWidget {
     ];
   }
 
-  Widget _visualizeMainAxisAndCrossAxis(Widget child, double length) {
+  Widget _visualizeMainAxisAndCrossAxis(Widget child, double length, ThemeData theme) {
     return Center(
-      child: GridAddOns(
-        child: child,
+      child: GridPositioned(
+        center: child,
         top: Container(
-          margin: const EdgeInsets.only(bottom: 16.0),
           child: BidirectionalHorizontalArrowWrapper(
+            arrowColor: theme.hintColor,
             child: Text(
               properties.horizontalDirectionDescription,
             ),
           ),
+          margin: const EdgeInsets.only(bottom: 16.0),
           width: length,
         ),
         left: Container(
+          child: BidirectionalVerticalArrowWrapper(
+            arrowColor: theme.hintColor,
+            child: Text(
+              properties.verticalDirectionDescription,
+            ),
+          ),
           height: length,
           margin: const EdgeInsets.only(right: 16.0, left: 8.0),
-          child: BidirectionalVerticalArrowWrapper(
-            child: Text(
-              properties.verticalDirectionDescription,
-            ),
-            height: length,
-          ),
         ),
         right: Container(
-          height: length,
-          margin: const EdgeInsets.only(left: 8.0, right: 8.0),
           child: BidirectionalVerticalArrowWrapper(
+            arrowColor: theme.hintColor,
             child: Text(
               properties.verticalDirectionDescription,
             ),
-            height: length,
           ),
+          height: length,
+          margin: const EdgeInsets.only(left: 8.0, right: 8.0),
         ),
         bottom: Container(
           margin: const EdgeInsets.only(top: 16.0),
           child: BidirectionalHorizontalArrowWrapper(
+            arrowColor: theme.hintColor,
             child: Text(
               properties.horizontalDirectionDescription,
             ),
@@ -162,6 +164,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
               return _visualizeMainAxisAndCrossAxis(
                 flexVisualizerWidget,
                 length,
+                theme,
               );
             }),
           ),

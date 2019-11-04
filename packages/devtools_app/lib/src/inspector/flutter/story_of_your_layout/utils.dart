@@ -6,22 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+/// A widget for positioning sized widgets that follows 2D grid layout:
 ///      | top    |
-/// left | child  | right
+/// left | center | right
 ///      | bottom |
 @immutable
-class GridAddOns extends StatelessWidget {
-  const GridAddOns({
+class GridPositioned extends StatelessWidget {
+  const GridPositioned({
                      Key key,
                      this.left,
                      this.top,
                      this.right,
                      this.bottom,
-                     @required this.child,
-                   })  : assert(child != null),
+                     @required this.center,
+                   })  : assert(center != null),
       super(key: key);
 
-  final Widget child;
+  final Widget center;
   final Widget top;
   final Widget left;
   final Widget right;
@@ -41,7 +42,6 @@ class GridAddOns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(crossAxisAlignment);
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -52,7 +52,7 @@ class GridAddOns extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             if (left != null) left,
-            Flexible(child: child),
+            Flexible(child: center),
             if (right != null) right,
           ],
         ),
