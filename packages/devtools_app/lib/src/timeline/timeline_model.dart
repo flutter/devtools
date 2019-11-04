@@ -766,9 +766,7 @@ class SyncTimelineEvent extends TimelineEvent {
 class AsyncTimelineEvent extends TimelineEvent {
   AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
       : asyncId = firstTraceEvent.event.id,
-        parentId = firstTraceEvent.event.args[parentIdKey] != null
-            ? (firstTraceEvent.event.args[parentIdKey] as int).toRadixString(16)
-            : null,
+        parentId = firstTraceEvent.event.args[parentIdKey],
         super(firstTraceEvent) {
     type = TimelineEventType.async;
   }

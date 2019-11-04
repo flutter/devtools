@@ -1,4 +1,4 @@
-## 0.1.11-dev.1
+## 0.1.11-dev.2
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
 * Fix a message manager bug.
