@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pedantic/pedantic.dart';
 
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
@@ -127,34 +128,18 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
 
   Future<void> _connect([_]) async {
     final uri = normalizeVmServiceUri(controller.text);
-    bool firstError = true;
-    void errorReporter([title, error]) {
-      if (!firstError) return;
-      firstError = false;
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            title ?? 'Unable to connect to VM service at "$uri"',
-          ),
-        ),
-      );
-    }
-
-    if (uri == null || !uri.isAbsolute) {
-      errorReporter();
-      return null;
-    }
-
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: errorReporter,
+      errorReporter: showErrorSnackBar(context),
     );
     if (connected) {
-      return Navigator.popAndPushNamed(context,
-          routeNameWithQueryParams(context, '/', {'uri': uri.toString()}));
-    } else {
-      errorReporter();
+      unawaited(
+        Navigator.popAndPushNamed(
+          context,
+          routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
+        ),
+      );
     }
   }
 }
