@@ -170,25 +170,28 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   gaItem: ga.togglePlatform,
 );
 
-/// This extension should typically not be shown as a button when the
-final toggleOnDeviceWidgetInspector = ToggleableServiceExtensionDescription<bool>._(
+// Legacy extension to show the inspector and enable inspector select mode.
+final toggleOnDeviceWidgetInspector =
+    ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.show',
   // Technically this enables the on device widget inspector but for older
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
-  description: 'Select Widget Mode [OLD]',
+  description: 'Select Widget Mode',
   icon: FlutterIcons.locate,
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable select widget mode',
   disabledTooltip: 'Enable select widget mode',
   gaScreenName: ga.inspector,
-  gaItem: ga.onDeviceInspector,
+  gaItem: ga.showOnDeviceInspector,
 );
 
+/// Toggle whether interacting with the device selects widgets or triggers
+/// normal interactions.
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.selectMode',
-  description: 'Select Widget Mode',
+  description: 'Select widget mode',
   icon: FlutterIcons.locate,
   enabledValue: true,
   disabledValue: false,
@@ -196,6 +199,23 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   disabledTooltip: 'Enter select widget mode',
   gaScreenName: ga.inspector,
   gaItem: ga.selectWidgetMode,
+);
+
+/// Toggle whether the inspector on device overlay is enabled.
+///
+/// When available, the inspector overlay can be enabled at any time as it will
+/// not interfere with user interaction with the app unless inspector select
+/// mode is triggered.
+final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.inspector.enable',
+  description: 'Enable on device inspector',
+  icon: FlutterIcons.locate,
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Exit on device inspector',
+  disabledTooltip: 'Enter on device inspector',
+  gaScreenName: ga.inspector,
+  gaItem: ga.enableOnDeviceInspector,
 );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
@@ -222,6 +242,8 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugAllowBanner,
   profileWidgetBuilds,
   toggleOnDeviceWidgetInspector,
+  toggleSelectWidgetMode,
+  enableOnDeviceInspector,
   togglePlatformMode,
   slowAnimations,
   structuredErrors,

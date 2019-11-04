@@ -211,6 +211,9 @@ class HtmlInspectorScreen extends HtmlScreen {
     inspectorController?.dispose();
     inspectorController = null;
 
+    inspectorService?.dispose();
+    inspectorService = null;
+
     splitterSubscription?.cancel();
     splitterSubscription = null;
   }

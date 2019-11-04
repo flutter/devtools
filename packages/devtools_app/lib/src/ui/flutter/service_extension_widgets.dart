@@ -6,11 +6,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
 import '../../utils.dart';
+import '../fake_flutter/fake_flutter.dart';
 import 'flutter_icon_renderer.dart';
 import 'label.dart';
 
@@ -45,7 +47,8 @@ class ExtensionState {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
+    extends State<ServiceExtensionButtonGroup>
+    with AutoDisposeBase, AutoDisposeMixin {
   List<ExtensionState> _extensionStates;
 
   @override
@@ -54,7 +57,10 @@ class _ServiceExtensionButtonGroupState
     // To use ToggleButtons we have to track states for all buttons in the
     // group here rather than tracking state with the individual button widgets
     // which would be more natural.
+    _initExtensionState();
+  }
 
+  void _initExtensionState() {
     _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
 
     for (var extension in _extensionStates) {
@@ -79,6 +85,16 @@ class _ServiceExtensionButtonGroupState
         },
       ));
     }
+  }
+
+  @override
+  void didUpdateWidget(ServiceExtensionButtonGroup oldWidget) {
+    if (!listEquals(oldWidget.extensions, widget.extensions)) {
+      cancel();
+      _initExtensionState();
+      setState(() {});
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

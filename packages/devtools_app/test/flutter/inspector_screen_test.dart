@@ -38,19 +38,24 @@ void main() {
 
     void mockExtensions() {
       fakeExtensionManager.extensionValueOnDevice = {
+        extensions.toggleSelectWidgetMode.extension: true,
+        extensions.enableOnDeviceInspector.extension: true,
         extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.debugPaint.extension: false,
       };
       fakeExtensionManager
-          .fakeAddServiceExtension(extensions.toggleOnDeviceWidgetInspector.extension);
-      fakeExtensionManager
-          .fakeAddServiceExtension(extensions.debugPaint.extension);
-      fakeExtensionManager.fakeFrame();
+        ..fakeAddServiceExtension(
+            extensions.toggleOnDeviceWidgetInspector.extension)
+        ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
+        ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
+        ..fakeAddServiceExtension(extensions.debugPaint.extension)
+        ..fakeFrame();
     }
 
     void mockNoExtensionsAvailable() {
       fakeExtensionManager.extensionValueOnDevice = {
         extensions.toggleOnDeviceWidgetInspector.extension: true,
+        extensions.toggleSelectWidgetMode.extension: false,
         extensions.debugPaint.extension: false,
       };
       // Don't actually send any events to the client indicating that service
@@ -68,8 +73,7 @@ void main() {
       await setWindowSize(const Size(2600.0, 1200.0));
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
-          findsOneWidget);
+      expect(find.text('Refresh Tree'), findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment
@@ -95,22 +99,24 @@ void main() {
       );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-      expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
-          findsOneWidget);
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
-      await tester.pump();
 
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleOnDeviceWidgetInspector.extension],
-        isTrue,
+            extensions.toggleSelectWidgetMode.extension],
+        true,
       );
+
+      // We need a frame to find out that the service extension state has changed.
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
+      expect(find.text(extensions.toggleSelectWidgetMode.description),
+          findsOneWidget);
+      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      await tester.pump();
       await tester
-          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
+          .tap(find.text(extensions.toggleSelectWidgetMode.description));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleOnDeviceWidgetInspector.extension],
+            extensions.toggleSelectWidgetMode.extension],
         isFalse,
       );
       // Verify the the other service extension's state hasn't changed.
@@ -121,10 +127,10 @@ void main() {
       );
 
       await tester
-          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
+          .tap(find.text(extensions.toggleSelectWidgetMode.description));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
-            extensions.toggleOnDeviceWidgetInspector.extension],
+            extensions.toggleSelectWidgetMode.extension],
         isTrue,
       );
 
@@ -153,6 +159,7 @@ void main() {
       );
 
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);

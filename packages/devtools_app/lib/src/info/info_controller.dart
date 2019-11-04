@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose.dart';
 import '../globals.dart';
 import '../service_registrations.dart' as registrations;
 import '../version.dart';
@@ -19,7 +20,8 @@ typedef OnFlutterVersionChanged = void Function(FlutterVersion version);
 
 typedef OnFlagListChanged = void Function(FlagList flagList);
 
-class InfoController {
+class InfoController extends DisposableController
+    with AutoDisposeBase, AutoDisposeControllerMixin {
   InfoController({
     @required this.onFlutterVersionChanged,
     @required this.onFlagListChanged,
@@ -38,18 +40,21 @@ class InfoController {
 
   Future<void> _listenForFlutterVersionChanges() async {
     if (await serviceManager.connectedApp.isAnyFlutterApp) {
-      serviceManager.hasRegisteredService(
-        registrations.flutterVersion.service,
-        (bool serviceAvailable) async {
-          if (serviceAvailable && !flutterVersionServiceAvailable.isCompleted) {
-            flutterVersionServiceAvailable.complete();
-            final FlutterVersion version = FlutterVersion.parse(
-                (await serviceManager.getFlutterVersion()).json);
-            onFlutterVersionChanged(version);
-          } else {
-            onFlutterVersionChanged(null);
-          }
-        },
+      autoDispose(
+        serviceManager.hasRegisteredService(
+          registrations.flutterVersion.service,
+          (bool serviceAvailable) async {
+            if (serviceAvailable &&
+                !flutterVersionServiceAvailable.isCompleted) {
+              flutterVersionServiceAvailable.complete();
+              final FlutterVersion version = FlutterVersion.parse(
+                  (await serviceManager.getFlutterVersion()).json);
+              onFlutterVersionChanged(version);
+            } else {
+              onFlutterVersionChanged(null);
+            }
+          },
+        ),
       );
     } else {
       onFlutterVersionChanged(null);
