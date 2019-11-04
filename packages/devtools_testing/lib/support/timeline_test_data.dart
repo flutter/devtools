@@ -514,7 +514,7 @@ final asyncStartBTrace = testTraceEventWrapper({
   'ts': 193937113560,
   'ph': 'b',
   'id': '2',
-  'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'},
+  'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndBTrace = testTraceEventWrapper({
   'name': 'B',
@@ -534,7 +534,7 @@ final asyncStartB1Trace = testTraceEventWrapper({
   'ts': 193937141769,
   'ph': 'b',
   'id': 'd',
-  'args': {'parentId': 2, 'isolateId': 'isolates/2139247553966975'},
+  'args': {'parentId': '2', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndB1Trace = testTraceEventWrapper({
   'name': 'B1',
@@ -554,7 +554,7 @@ final asyncStartB2Trace = testTraceEventWrapper({
   'ts': 193937173019,
   'ph': 'b',
   'id': 'e',
-  'args': {'parentId': 2, 'isolateId': 'isolates/2139247553966975'},
+  'args': {'parentId': '2', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndB2Trace = testTraceEventWrapper({
   'name': 'B2',
@@ -574,7 +574,7 @@ final asyncStartCTrace = testTraceEventWrapper({
   'ts': 193937168961,
   'ph': 'b',
   'id': '3',
-  'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'},
+  'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndCTrace = testTraceEventWrapper({
   'name': 'C',
@@ -594,7 +594,7 @@ final asyncStartC1Trace = testTraceEventWrapper({
   'ts': 193937220903,
   'ph': 'b',
   'id': '11',
-  'args': {'parentId': 3, 'isolateId': 'isolates/2139247553966975'}
+  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
 });
 final asyncEndC1Trace = testTraceEventWrapper({
   'name': 'C1',
@@ -614,7 +614,7 @@ final asyncStartC2Trace = testTraceEventWrapper({
   'ts': 193937378812,
   'ph': 'b',
   'id': '12',
-  'args': {'parentId': 3, 'isolateId': 'isolates/2139247553966975'}
+  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
 });
 final asyncEndC2Trace = testTraceEventWrapper({
   'name': 'C2',
