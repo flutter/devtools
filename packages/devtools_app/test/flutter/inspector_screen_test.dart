@@ -8,6 +8,7 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen_details_tab.dart';
+import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
 import 'package:devtools_app/src/inspector/flutter/summary_tree_debug_layout.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
