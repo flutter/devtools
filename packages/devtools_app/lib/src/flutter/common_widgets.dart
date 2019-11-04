@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
+import '../framework/framework_core.dart';
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
@@ -129,4 +131,13 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
     color: theme.primaryColorLight,
     fontWeight: FontWeight.w300,
   );
+}
+
+/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
+ErrorReporter showErrorSnackBar(BuildContext context) {
+  return (String title, dynamic error) {
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text(title),
+    ));
+  };
 }

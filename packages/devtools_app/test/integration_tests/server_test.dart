@@ -300,21 +300,34 @@ Future<Map<String, dynamic>> _waitForClients({
   String requiredPage,
 }) async {
   Map<String, dynamic> serverResponse;
+
+  String timeoutMessage = 'Server did not return any known clients';
+  if (requiredConnectionState != null) {
+    timeoutMessage += requiredConnectionState
+        ? ' that are connected'
+        : ' that are not connected';
+  }
+  if (requiredPage != null) {
+    timeoutMessage += ' that are on page $requiredPage';
+  }
+
+  final isOnPage = (client) => client['currentPage'] == requiredPage;
+  final hasConnectionState =
+      (client) => client['hasConnection'] == requiredConnectionState;
+
   await waitFor(
     () async {
       serverResponse = await _send('client.list');
       final clients = serverResponse['clients'];
       return clients is List &&
           clients.isNotEmpty &&
-          (requiredPage == null ||
-              clients.any((c) => c['currentPage'] == requiredPage)) &&
-          (requiredConnectionState == null ||
-              clients
-                  .any((c) => c['hasConnection'] == requiredConnectionState));
+          (requiredPage == null || clients.any(isOnPage)) &&
+          (requiredConnectionState == null || clients.any(hasConnectionState));
     },
     timeout: const Duration(seconds: 10),
-    timeoutMessage: 'Server did not return any known clients',
+    timeoutMessage: timeoutMessage,
     delay: const Duration(seconds: 1),
   );
+
   return serverResponse;
 }
