@@ -83,6 +83,12 @@ class RenderFlexProperties {
     );
   }
 
+  String get horizontalDirectionDescription =>
+      direction == Axis.horizontal ? 'main axis' : 'cross axis';
+
+  String get verticalDirectionDescription =>
+      direction == Axis.vertical ? 'main axis' : 'cross axis';
+
   // TODO(albertusangga): Remove this getter since type is not that useful
   Type get type => direction == Axis.horizontal ? Row : Column;
 }
