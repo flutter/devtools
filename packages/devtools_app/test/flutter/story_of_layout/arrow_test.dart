@@ -32,7 +32,7 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_unidirectional_left.png'),
         );
-      });
+      }, skip: kIsWeb);
       testWidgets('up', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.up);
         await tester.pumpWidget(widget);
@@ -40,7 +40,7 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_unidirectional_up.png'),
         );
-      });
+      }, skip: kIsWeb);
       testWidgets('right', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.right);
         await tester.pumpWidget(widget);
@@ -48,7 +48,7 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_unidirectional_right.png'),
         );
-      });
+      }, skip: kIsWeb);
       testWidgets('down', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.down);
         await tester.pumpWidget(widget);
@@ -56,8 +56,8 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_unidirectional_down.png'),
         );
-      });
-    }, skip: kIsWeb);
+      }, skip: kIsWeb);
+    });
     group('Bidirectional', () {
       Widget buildBidirectionalArrowWrapper(Axis direction) => wrap(
             Container(
@@ -79,7 +79,7 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_bidirectional_horizontal.png'),
         );
-      });
+      }, skip: kIsWeb);
       testWidgets('vertical', (WidgetTester tester) async {
         final widget = buildBidirectionalArrowWrapper(Axis.vertical);
         await tester.pumpWidget(widget);
@@ -87,7 +87,7 @@ void main() {
           find.byWidget(widget),
           matchesGoldenFile('goldens/arrow_bidirectional_vertical.png'),
         );
-      });
-    }, skip: kIsWeb);
+      }, skip: kIsWeb);
+    });
   });
 }
