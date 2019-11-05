@@ -13,6 +13,7 @@ import 'dart:developer';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import 'diagnostics_node.dart';
@@ -39,14 +40,22 @@ Future<void> ensureInspectorServiceDependencies() async {
 
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
-class InspectorService {
+class InspectorService extends DisposableController
+    with AutoDisposeBase, AutoDisposeControllerMixin {
   InspectorService(
     this.vmService,
     this.inspectorLibrary,
     this.supportedServiceMethods,
   ) : clients = {} {
-    vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved);
-    vmService.onDebugEvent.listen(onDebugVmServiceReceived);
+    autoDispose(
+        vmService.onExtensionEvent.listen(onExtensionVmServiceRecieved));
+    autoDispose(vmService.onDebugEvent.listen(onDebugVmServiceReceived));
+
+    autoDispose(serviceManager.isolateManager
+        .getSelectedIsolate((IsolateRef flutterIsolate) {
+      // Any time we have a new isolate it means the previous isolate stopped.
+      _onIsolateStopped();
+    }));
   }
 
   static int nextGroupId = 0;
@@ -104,6 +113,13 @@ class InspectorService {
       inspectorLibrary,
       supportedServiceMethods,
     );
+  }
+
+  void _onIsolateStopped() {
+    // Clear data that is obsolete on an isolate restart.
+    _currentSelection = null;
+    _cachedSelectionGroups?.clear(true);
+    _expectedSelectionChanges.clear();
   }
 
   /// Map from InspectorInstanceRef to list of timestamps when a selection
@@ -244,8 +260,10 @@ class InspectorService {
     return ObjectGroup(debugName, this);
   }
 
+  @override
   void dispose() {
     inspectorLibrary.dispose();
+    super.dispose();
   }
 
   Future<Object> forceRefresh() {
@@ -281,6 +299,7 @@ class InspectorService {
     if (!group.disposed &&
         !_isClientTriggeredSelectionChange(pendingSelection?.valueRef)) {
       _currentSelection = pendingSelection;
+      assert(group == _selectionGroups.next);
       _selectionGroups.promoteNext();
       for (InspectorServiceClient client in clients) {
         client.onInspectorSelectionChanged();

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/stream_value_listenable.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -48,6 +50,8 @@ class FakeServiceExtensionManager extends Fake
   final Map<String, StreamController<ServiceExtensionState>>
       _serviceExtensionStateController = {};
 
+  final Map<String, ValueListenable<bool>> _serviceExtensionListenables = {};
+
   /// All available service extensions.
   final _serviceExtensions = <String>{};
 
@@ -70,6 +74,25 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Map<String, dynamic> extensionValueOnDevice = {};
+
+  @override
+  ValueListenable<bool> hasServiceExtensionListener(String name) {
+    return _serviceExtensionListenables.putIfAbsent(
+      name,
+      () => StreamValueListenable<bool>(
+        (notifier) {
+          return hasServiceExtension(name, (value) {
+            notifier.value = value;
+          });
+        },
+        () => _hasServiceExtensionNow(name),
+      ),
+    );
+  }
+
+  bool _hasServiceExtensionNow(String name) {
+    return _serviceExtensions.contains(name);
+  }
 
   /// Hook for tests to call to simulate adding a service extension.
   Future<void> fakeAddServiceExtension(String name) async {

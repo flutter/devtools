@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
 import '../../flutter/screen.dart';
@@ -45,7 +46,7 @@ class InspectorScreenBody extends StatefulWidget {
 }
 
 class _InspectorScreenBodyState extends State<InspectorScreenBody>
-    with BlockingActionMixin, AutoDisposeMixin {
+    with BlockingActionMixin, AutoDisposeBase, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
   bool connectionInProgress = false;
   InspectorService inspectorService;
@@ -103,9 +104,20 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ServiceExtensionButtonGroup(
-              extensions: [extensions.toggleSelectWidgetMode],
-              minIncludeTextWidth: 800,
+            ValueListenableBuilder(
+              valueListenable: serviceManager.serviceExtensionManager
+                  .hasServiceExtensionListener(
+                      extensions.toggleSelectWidgetMode.extension),
+              builder: (_, selectModeSupported, __) {
+                return ServiceExtensionButtonGroup(
+                  extensions: [
+                    selectModeSupported
+                        ? extensions.toggleSelectWidgetMode
+                        : extensions.toggleOnDeviceWidgetInspector
+                  ],
+                  minIncludeTextWidth: 800,
+                );
+              },
             ),
             OutlineButton(
               onPressed: _refreshInspector,

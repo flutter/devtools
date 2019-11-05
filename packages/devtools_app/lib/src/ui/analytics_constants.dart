@@ -44,6 +44,8 @@ const String debugBanner = 'debugBanner';
 const String trackRebuilds = 'trackRebuilds';
 const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
+const String enableOnDeviceInspector = 'enableOnDeviceInspector';
+const String showOnDeviceInspector = 'showInspector';
 
 // Timeline UX actions:
 const String timelineFrame = 'frame'; // Frame selected in frame chart

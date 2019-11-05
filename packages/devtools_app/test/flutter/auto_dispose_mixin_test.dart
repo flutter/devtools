@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/auto_dispose.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,8 +19,11 @@ class AutoDisposedWidget extends StatefulWidget {
   _AutoDisposedWidgetState createState() => _AutoDisposedWidgetState();
 }
 
+class AutoDisposeContoller extends DisposableController
+    with AutoDisposeBase, AutoDisposeControllerMixin {}
+
 class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
-    with AutoDisposeMixin {
+    with AutoDisposeBase, AutoDisposeMixin {
   int eventCount = 0;
   @override
   void initState() {
@@ -38,7 +42,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
 }
 
 void main() {
-  testWidgets('Test auto dispose', (WidgetTester tester) async {
+  testWidgets('Test stream auto dispose', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     final key = GlobalKey();
     final controller = StreamController();
@@ -61,5 +65,45 @@ void main() {
     controller.add(null);
     await tester.pump();
     expect(state.eventCount, 2);
+  });
+
+  test('Test Listenable auto dispose', () async {
+    final controller = AutoDisposeContoller();
+    final notifier = ValueNotifier<int>(42);
+    final values = <int>[];
+    controller.addAutoDisposeListener(notifier, () {
+      values.add(notifier.value);
+    });
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
+    notifier.value = 13;
+    expect(values.length, equals(1));
+    expect(values.last, equals(13));
+    notifier.value = 15;
+    expect(values.length, equals(2));
+    expect(values.last, equals(15));
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
+    controller.cancel();
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isFalse);
+    notifier.value = 17;
+    // Verify listener not fired.
+    expect(values.length, equals(2));
+    expect(values.last, equals(15));
+    controller.addAutoDisposeListener(notifier, () {
+      values.add(notifier.value);
+    });
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
+    notifier.value = 19;
+    expect(values.length, equals(3));
+    expect(values.last, equals(19));
+    controller.dispose();
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isFalse);
+    notifier.value = 21;
+    expect(values.length, equals(3));
+    expect(values.last, equals(19));
   });
 }

@@ -14,12 +14,16 @@ import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
+import 'stream_value_listenable.dart';
+import 'ui/fake_flutter/fake_flutter.dart';
 import 'vm_service_wrapper.dart';
 
 // TODO(kenz): add an offline service manager implementation.
 
 const defaultRefreshRate = 60.0;
 
+// TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
+// instead of Streams.
 class ServiceConnectionManager {
   ServiceConnectionManager() {
     final isolateManager = IsolateManager();
@@ -419,6 +423,8 @@ class ServiceExtensionManager {
   final Map<String, StreamController<ServiceExtensionState>>
       _serviceExtensionStateController = {};
 
+  final Map<String, ValueListenable<bool>> _serviceExtensionListenables = {};
+
   /// All available service extensions.
   final Set<String> _serviceExtensions = {};
 
@@ -689,11 +695,29 @@ class ServiceExtensionManager {
         _pendingServiceExtensions.contains(name);
   }
 
+  ValueListenable<bool> hasServiceExtensionListener(String name) {
+    return _serviceExtensionListenables.putIfAbsent(
+      name,
+      () => StreamValueListenable<bool>(
+        (notifier) {
+          return hasServiceExtension(name, (value) {
+            notifier.value = value;
+          });
+        },
+        () => _hasServiceExtensionNow(name),
+      ),
+    );
+  }
+
+  bool _hasServiceExtensionNow(String name) {
+    return _serviceExtensions.contains(name);
+  }
+
   StreamSubscription<bool> hasServiceExtension(
     String name,
     void onData(bool value),
   ) {
-    if (_serviceExtensions.contains(name) && onData != null) {
+    if (_hasServiceExtensionNow(name) && onData != null) {
       onData(true);
     }
     final StreamController<bool> streamController =

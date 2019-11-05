@@ -44,18 +44,33 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
   FlutterVersion _flutterVersion;
 
   FlagList _flagList;
+  InfoController _controller;
 
   @override
   void initState() {
     super.initState();
-    InfoController(
-      onFlagListChanged: (flagList) => setState(() {
-        _flagList = flagList;
-      }),
-      onFlutterVersionChanged: (flutterVersion) => setState(() {
-        _flutterVersion = flutterVersion;
-      }),
+    _controller = InfoController(
+      onFlagListChanged: (flagList) {
+        if (!mounted) return;
+        setState(() {
+          _flagList = flagList;
+        });
+      },
+      onFlutterVersionChanged: (flutterVersion) {
+        if (!mounted) return;
+        setState(
+          () {
+            _flutterVersion = flutterVersion;
+          },
+        );
+      },
     )..entering();
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override

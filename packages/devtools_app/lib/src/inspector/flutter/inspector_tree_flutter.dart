@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
+import '../../auto_dispose.dart';
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
 import '../../ui/colors.dart';
 import '../diagnostics_node.dart';
@@ -181,7 +183,9 @@ class InspectorTree extends StatefulWidget {
 class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
-        AutomaticKeepAliveClientMixin<InspectorTree>
+        AutomaticKeepAliveClientMixin<InspectorTree>,
+        AutoDisposeBase,
+        AutoDisposeMixin
     implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);
   final slowAnimationDuration = const Duration(milliseconds: 300);
@@ -213,6 +217,18 @@ class _InspectorTreeState extends State<InspectorTree>
       );
     }
     _bindToController();
+  }
+
+  @override
+  void didUpdateWidget(InspectorTree oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      final InspectorTreeControllerFlutter oldController = oldWidget.controller;
+      oldController?.client = null;
+      cancel();
+
+      _bindToController();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -345,12 +361,6 @@ class _InspectorTreeState extends State<InspectorTree>
     return maxOffset - viewportDimension;
   }
 
-  @override
-  void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _bindToController();
-  }
-
   void _listenToDebugSummaryLayoutChanges() {
     if (debugSummaryLayoutEnabled.value) {
       constraintDisplayController.forward();
@@ -362,7 +372,8 @@ class _InspectorTreeState extends State<InspectorTree>
   void _bindToController() {
     controller?.client = this;
     if (isSummaryTree) {
-      debugSummaryLayoutEnabled?.addListener(
+      addAutoDisposeListener(
+        debugSummaryLayoutEnabled,
         _listenToDebugSummaryLayoutChanges,
       );
     }

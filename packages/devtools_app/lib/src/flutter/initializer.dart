@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../auto_dispose.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../url_utils.dart';
@@ -42,7 +43,7 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer>
-    with SingleTickerProviderStateMixin, AutoDisposeMixin {
+    with SingleTickerProviderStateMixin, AutoDisposeBase, AutoDisposeMixin {
   /// Checks if the [service.serviceManager] is connected.
   ///
   /// This is a method and not a getter to communicate that its value may
