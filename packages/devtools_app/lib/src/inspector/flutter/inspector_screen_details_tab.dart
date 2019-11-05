@@ -23,13 +23,22 @@ class InspectorDetailsTabController extends StatelessWidget {
   final Widget actionButtons;
   final InspectorController controller;
 
+  Widget _buildTab(String tabName) {
+    return Tab(
+      child: Text(
+        tabName,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final enableExperimentalStoryOfLayout =
         InspectorController.enableExperimentalStoryOfLayout;
     final tabs = <Tab>[
-      const Tab(text: 'Details Tree'),
-      if (enableExperimentalStoryOfLayout) const Tab(text: 'Layout Details')
+      _buildTab('Details Tree'),
+      if (enableExperimentalStoryOfLayout) _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
@@ -50,11 +59,13 @@ class InspectorDetailsTabController extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 children: <Widget>[
-                  Container(
-                    color: Theme.of(context).focusColor,
-                    child: TabBar(
-                      tabs: tabs,
-                      isScrollable: true,
+                  Flexible(
+                    child: Container(
+                      color: Theme.of(context).focusColor,
+                      child: TabBar(
+                        tabs: tabs,
+                        isScrollable: true,
+                      ),
                     ),
                   ),
                   if (actionButtons != null)
