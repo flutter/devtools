@@ -24,7 +24,7 @@ void main() {
               ),
             ),
           );
-      testWidgets('Unidirectional Left', (WidgetTester tester) async {
+      testWidgets('left', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.left);
         await tester.pumpWidget(widget);
         await expectLater(
@@ -32,7 +32,7 @@ void main() {
           matchesGoldenFile('goldens/arrow_unidirectional_left.png'),
         );
       });
-      testWidgets('Unidirectional Up', (WidgetTester tester) async {
+      testWidgets('up', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.up);
         await tester.pumpWidget(widget);
         await expectLater(
@@ -40,7 +40,7 @@ void main() {
           matchesGoldenFile('goldens/arrow_unidirectional_up.png'),
         );
       });
-      testWidgets('Unidirectional Right', (WidgetTester tester) async {
+      testWidgets('right', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.right);
         await tester.pumpWidget(widget);
         await expectLater(
@@ -48,7 +48,7 @@ void main() {
           matchesGoldenFile('goldens/arrow_unidirectional_right.png'),
         );
       });
-      testWidgets('Unidirectional Down', (WidgetTester tester) async {
+      testWidgets('down', (WidgetTester tester) async {
         final widget = buildUnidirectionalArrowWrapper(ArrowType.down);
         await tester.pumpWidget(widget);
         await expectLater(
@@ -71,7 +71,7 @@ void main() {
               ),
             ),
           );
-      testWidgets('Bidirectional Horizontal', (WidgetTester tester) async {
+      testWidgets('horizontal', (WidgetTester tester) async {
         final widget = buildBidirectionalArrowWrapper(Axis.horizontal);
         await tester.pumpWidget(widget);
         await expectLater(
@@ -79,7 +79,7 @@ void main() {
           matchesGoldenFile('goldens/arrow_bidirectional_horizontal.png'),
         );
       });
-      testWidgets('Bidirectional Vertical', (WidgetTester tester) async {
+      testWidgets('vertical', (WidgetTester tester) async {
         final widget = buildBidirectionalArrowWrapper(Axis.vertical);
         await tester.pumpWidget(widget);
         await expectLater(
