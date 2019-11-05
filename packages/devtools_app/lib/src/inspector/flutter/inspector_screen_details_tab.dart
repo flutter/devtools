@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
+
+import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController({
@@ -139,97 +140,4 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-@immutable
-class StoryOfYourFlexWidget extends StatelessWidget {
-  const StoryOfYourFlexWidget({
-    this.diagnostic,
-    this.properties,
-    Key key,
-  }) : super(key: key);
-
-  final RemoteDiagnosticsNode diagnostic;
-  final RenderFlexProperties properties;
-
-  List<Widget> visualizeChildren(BuildContext context) {
-    if (!diagnostic.hasChildren) return [const SizedBox()];
-    final theme = Theme.of(context);
-    return [
-      for (var child in diagnostic.childrenNow)
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: theme.primaryColor,
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor,
-                  offset: Offset.zero,
-                  blurRadius: 10.0,
-                )
-              ],
-            ),
-            child: Center(
-              child: Text(child.description),
-            ),
-          ),
-        ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final children = visualizeChildren(context);
-    final flexVisualizerWidget = Flex(
-      direction: properties.direction,
-      children: children,
-    );
-    final flexType = properties.type.toString();
-    return Dialog(
-      child: Container(
-        margin: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(bottom: 4.0),
-              child: Text(
-                // TODO(albertusangga): Reuse existing material design header text style
-                'Story of the flex layout of your $flexType widget',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).primaryColor,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        flexType,
-                        style: inspector_text_styles.regularBold,
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.all(16.0),
-                          child: flexVisualizerWidget,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
