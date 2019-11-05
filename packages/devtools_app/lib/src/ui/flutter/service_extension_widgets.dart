@@ -276,7 +276,7 @@ class _ServiceExtensionCheckbox extends _ServiceExtensionWidget {
 
 class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
     with _ServiceExtensionMixin, AutoDisposeMixin {
-  bool checked;
+  bool checked = false;
   @override
   void initState() {
     super.initState();
@@ -292,17 +292,23 @@ class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: _onClick,
-      child: Row(
-        children: <Widget>[
-          Checkbox(
-            value: checked,
-            onChanged: _onClick,
-          ),
-          Text(widget.service.description),
-          const Padding(padding: EdgeInsets.only(left: 8.0)),
-        ],
+    return Tooltip(
+      message: checked
+          ? widget.service.enabledTooltip
+          : widget.service.disabledTooltip,
+      waitDuration: const Duration(seconds: 1),
+      child: InkWell(
+        onTap: _onClick,
+        child: Row(
+          children: <Widget>[
+            Checkbox(
+              value: checked,
+              onChanged: _onClick,
+            ),
+            Text(widget.service.description),
+            const Padding(padding: EdgeInsets.only(left: 8.0)),
+          ],
+        ),
       ),
     );
   }
