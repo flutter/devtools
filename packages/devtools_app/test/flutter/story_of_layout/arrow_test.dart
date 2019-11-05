@@ -8,16 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget wrap(Widget widget) => MaterialApp(home: widget);
-
   group('Arrow Golden Tests', () {
     group('Unidirectional', () {
-      Widget buildUnidirectionalArrowWrapper(ArrowType type) => wrap(
-            Container(
+      Widget buildUnidirectionalArrowWrapper(ArrowType type) => Directionality(
+            textDirection: TextDirection.ltr,
+            child: Container(
               width: 100,
               height: 100,
               child: ArrowWrapper.unidirectional(
-                child: const Text('1'),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                ),
                 type: type,
                 arrowStrokeWidth: 2.0,
                 arrowColor: Colors.black,
@@ -58,13 +61,19 @@ void main() {
         );
       }, skip: kIsWeb);
     });
+
     group('Bidirectional', () {
-      Widget buildBidirectionalArrowWrapper(Axis direction) => wrap(
-            Container(
+      Widget buildBidirectionalArrowWrapper(Axis direction) => Directionality(
+            textDirection: TextDirection.ltr,
+            child: Container(
               width: 100,
               height: 100,
               child: ArrowWrapper.bidirectional(
-                child: const Text('1'),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                ),
                 direction: direction,
                 arrowStrokeWidth: 2.0,
                 arrowColor: Colors.black,
