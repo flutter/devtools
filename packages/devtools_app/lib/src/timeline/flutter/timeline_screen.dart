@@ -12,7 +12,6 @@ import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
-import '../../ui/icons.dart';
 import '../timeline_controller.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
@@ -79,16 +78,16 @@ class TimelineBodyState extends State<TimelineBody> {
         if (_timelineMode == TimelineMode.frameBased) ...[
           OutlineButton(
             onPressed: _pauseLiveTimeline,
-            child: const Label(
-              FlutterIcons.pause,
+            child: const MaterialIconLabel(
+              Icons.pause,
               'Pause',
               minIncludeTextWidth: 900,
             ),
           ),
           OutlineButton(
             onPressed: _resumeLiveTimeline,
-            child: const Label(
-              FlutterIcons.resume,
+            child: const MaterialIconLabel(
+              Icons.play_arrow,
               'Resume',
               minIncludeTextWidth: 900,
             ),
@@ -97,16 +96,16 @@ class TimelineBodyState extends State<TimelineBody> {
         if (_timelineMode == TimelineMode.full) ...[
           OutlineButton(
             onPressed: _startRecording,
-            child: const Label(
-              FlutterIcons.record,
+            child: const MaterialIconLabel(
+              Icons.fiber_manual_record,
               'Record',
               minIncludeTextWidth: 900,
             ),
           ),
           OutlineButton(
             onPressed: _stopRecording,
-            child: const Label(
-              FlutterIcons.stop,
+            child: const MaterialIconLabel(
+              Icons.stop,
               'Stop',
               minIncludeTextWidth: 900,
             ),
@@ -115,8 +114,8 @@ class TimelineBodyState extends State<TimelineBody> {
         const SizedBox(width: 8.0),
         OutlineButton(
           onPressed: _clearTimeline,
-          child: const Label(
-            FlutterIcons.clear,
+          child: const MaterialIconLabel(
+            Icons.block,
             'Clear',
             minIncludeTextWidth: 900,
           ),
@@ -152,8 +151,8 @@ class TimelineBodyState extends State<TimelineBody> {
         const SizedBox(width: 8.0),
         OutlineButton(
           onPressed: _exportTimeline,
-          child: const Label(
-            FlutterIcons.export,
+          child: MaterialIconLabel(
+            Icons.file_download,
             'Export',
             minIncludeTextWidth: 1100,
           ),

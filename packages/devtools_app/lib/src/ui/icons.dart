@@ -157,16 +157,6 @@ class FlutterIcons {
   static const DevToolsIcon debugBanner = UrlIcon('/icons/debug_banner.png');
   static const DevToolsIcon history = UrlIcon('/icons/history.png');
 
-  static const DevToolsIcon pause = MaterialIcon('pause', contrastForeground);
-  static const DevToolsIcon resume =
-      MaterialIcon('play_arrow', contrastForeground);
-  static const DevToolsIcon record =
-      MaterialIcon('fiber_manual_record', contrastForeground);
-  static const DevToolsIcon stop = MaterialIcon('stop', contrastForeground);
-  static const DevToolsIcon clear = MaterialIcon('block', contrastForeground);
-  static const DevToolsIcon export =
-      MaterialIcon('file_download', contrastForeground);
-
   static const UrlIcon pause_black_2x =
       UrlIcon('/icons/general/pause_black@2x.png', invertDark: true);
   // TODO(dantup): Remove the invertDark option from these...
