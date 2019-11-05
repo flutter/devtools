@@ -52,9 +52,9 @@ class BorderLayout extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (left != null) Expanded(child: left),
+            if (left != null) left,
             center,
-            if (right != null) Expanded(child: right),
+            if (right != null) right,
           ],
         ),
         if (bottom != null) bottom,

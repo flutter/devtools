@@ -57,7 +57,9 @@ class StoryOfYourFlexWidget extends StatelessWidget {
           arrowColor: theme.hintColor,
           child: Text(
             properties.horizontalDirectionDescription,
+            textAlign: TextAlign.center,
           ),
+          distanceToArrow: 4.0,
           type: ArrowType.right,
         ),
         margin: const EdgeInsets.only(bottom: 16.0),
@@ -68,31 +70,49 @@ class StoryOfYourFlexWidget extends StatelessWidget {
           arrowColor: theme.hintColor,
           child: Text(
             properties.verticalDirectionDescription,
+            textAlign: TextAlign.center,
           ),
+          distanceToArrow: 4.0,
           type: ArrowType.down,
         ),
         height: length,
-        margin: const EdgeInsets.only(right: 8.0),
+        width: length * 0.25,
       ),
       right: Container(
         child: ArrowWrapper.bidirectional(
-          arrowColor: theme.hintColor,
+          arrowColor: theme.splashColor,
           arrowStrokeWidth: 1.0,
-          child: Text(
-            '310 px',
+          child: Column(
+            children: <Widget>[
+              Text(
+                // TODO(albertusangga): Use real height
+                '${length.round()} px',
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                'height',
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
           direction: Axis.vertical,
         ),
         height: length,
-        margin: const EdgeInsets.only(left: 8.0),
+        width: length * 0.25,
       ),
       bottom: Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ArrowWrapper.bidirectional(
-          arrowColor: theme.hintColor,
+          arrowColor: theme.splashColor,
           arrowStrokeWidth: 1.0,
-          child: Text(
-            properties.horizontalDirectionDescription,
+          child: Column(
+            children: <Widget>[
+              Text(
+                // TODO(albertusangga): Use real width
+                '${length.round()} px',
+              ),
+              const Text('width'),
+            ],
           ),
           direction: Axis.horizontal,
         ),
@@ -115,6 +135,7 @@ class StoryOfYourFlexWidget extends StatelessWidget {
             child: Text(
               'Story of the flex layout of your $flexType widget',
               style: theme.textTheme.headline,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
