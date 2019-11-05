@@ -160,7 +160,7 @@ class HotReloadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _RegisteredServiceExtensionButton._(
       serviceDescription: hotReload,
-      action: () => serviceManager.performHotReload(),
+      action: serviceManager.performHotReload,
       inProgressText: 'Performing hot reload',
       completedText: 'Hot reload completed',
       describeError: (error) => 'Unable to hot reload the app: $error',
@@ -174,7 +174,7 @@ class HotRestartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _RegisteredServiceExtensionButton._(
       serviceDescription: hotRestart,
-      action: () => serviceManager.performHotRestart(),
+      action: serviceManager.performHotRestart,
       inProgressText: 'Performing hot restart',
       completedText: 'Hot restart completed',
       describeError: (error) => 'Unable to hot restart the app: $error',
@@ -186,20 +186,151 @@ class HotRestartButton extends StatelessWidget {
 /// restart.
 ///
 /// This button will attempt to register to the given service description,
-class _RegisteredServiceExtensionButton extends StatefulWidget {
+class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
   const _RegisteredServiceExtensionButton._({
     @required this.serviceDescription,
     @required this.action,
-    @required this.inProgressText,
-    @required this.completedText,
-    @required this.describeError,
-  });
+    @required String inProgressText,
+    @required String completedText,
+    @required String Function(dynamic error) describeError,
+  }) : super(
+            inProgressText: inProgressText,
+            completedText: completedText,
+            describeError: describeError);
 
   /// The service to subscribe to.
   final RegisteredServiceDescription serviceDescription;
 
-  /// Callback to the method on [serviceManager] to invoke when clicked.
+  /// The action to perform when clicked.
   final VoidAsyncFunction action;
+
+  @override
+  _RegisteredServiceExtensionButtonState createState() =>
+      _RegisteredServiceExtensionButtonState();
+}
+
+class _RegisteredServiceExtensionButtonState
+    extends State<_RegisteredServiceExtensionButton>
+    with _ServiceExtensionMixin, AutoDisposeMixin {
+  bool _hidden = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Only show the button if the device supports the given service.
+    autoDispose(
+      serviceManager.hasRegisteredService(
+        widget.serviceDescription.service,
+        (registered) {
+          setState(() {
+            _hidden = !registered;
+            print(_hidden);
+          });
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hidden) return const SizedBox();
+
+    return InkWell(
+      onTap: () => invokeAndCatchErrors(widget.action),
+      child: Container(
+        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
+        alignment: Alignment.center,
+        // TODO(djshuckerow): Just make these icons the right size to fit this box.
+        // The current size is a little tiny by comparison to our other
+        // material icons.
+        child: getIconWidget(widget.serviceDescription.icon),
+      ),
+    );
+  }
+}
+
+class StructuredErrorsCheckbox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _ServiceExtensionCheckbox(
+      service: structuredErrors,
+      describeError: (error) =>
+          'Failed to update structuredError settings: $error',
+    );
+  }
+}
+
+class _ServiceExtensionCheckbox extends _ServiceExtensionWidget {
+  const _ServiceExtensionCheckbox(
+      {Key key, this.service, @required String Function(dynamic) describeError})
+      : super(
+            key: key,
+            completedText: null,
+            inProgressText: null,
+            describeError: describeError);
+  final ToggleableServiceExtensionDescription service;
+  @override
+  _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
+      _ServiceExtensionCheckboxState();
+}
+
+class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
+    with _ServiceExtensionMixin, AutoDisposeMixin {
+  bool checked;
+  @override
+  void initState() {
+    super.initState();
+    autoDispose(serviceManager.serviceExtensionManager.getServiceExtensionState(
+      widget.service.extension,
+      (data) {
+        setState(() {
+          checked = data.enabled;
+        });
+      },
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _onClick,
+      child: Row(
+        children: <Widget>[
+          Checkbox(
+            value: checked,
+            onChanged: _onClick,
+          ),
+          Text(widget.service.description),
+          const Padding(padding: EdgeInsets.only(left: 8.0)),
+        ],
+      ),
+    );
+  }
+
+  void _onClick([_]) {
+    setState(() {
+      checked = !checked;
+    });
+
+    invokeAndCatchErrors(() async {
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        widget.service.extension,
+        checked,
+        checked ? widget.service.enabledValue : widget.service.disabledValue,
+      );
+    });
+  }
+}
+
+/// Widget that knows how to talk to a service extension and surface the relevant errors.
+abstract class _ServiceExtensionWidget extends StatefulWidget {
+  const _ServiceExtensionWidget(
+      {Key key,
+      @required this.inProgressText,
+      @required this.completedText,
+      @required this.describeError})
+      : assert(describeError != null),
+        super(key: key);
 
   /// The text to show when the action is in progress.
   ///
@@ -217,89 +348,60 @@ class _RegisteredServiceExtensionButton extends StatefulWidget {
   final String Function(dynamic error) describeError;
 
   @override
-  _RegisteredServiceExtensionButtonState createState() =>
-      _RegisteredServiceExtensionButtonState();
+  _ServiceExtensionMixin<_ServiceExtensionWidget> createState();
 }
 
-class _RegisteredServiceExtensionButtonState
-    extends State<_RegisteredServiceExtensionButton> {
-  StreamSubscription<bool> _subscription;
+/// State mixin that manages calling an async service extension
+/// and reporting errors consistently.
+mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
+  /// Whether an action is currently in progress.
+  ///
+  /// When [disabled], [invokeAndCatchErrors] will not accept new actions.
+  @protected
+  bool disabled = false;
 
-  bool _disabled = false;
-  bool _hidden = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Only show the button if the device supports the given service.
-    _subscription = serviceManager.hasRegisteredService(
-      widget.serviceDescription.service,
-      (registered) {
-        setState(() {
-          _hidden = !registered;
-          print(_hidden);
-        });
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
-
-  void _click() async {
-    if (_disabled) {
+  /// Invokes [action], showing [SnackBar]s for the action's progress,
+  /// completion, and any errors it produces.
+  @protected
+  Future<void> invokeAndCatchErrors(VoidAsyncFunction action) async {
+    if (disabled) {
       return;
     }
     setState(() {
-      _disabled = true;
+      disabled = true;
     });
     // TODO(https://github.com/flutter/devtools/issues/1249): Avoid adding
     // and removing snackbars so often as we do here.
-    Scaffold.of(context)
-        .removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
-    // Push a snackbar that the action is in progress.
-    final snackBar = Scaffold.of(context).showSnackBar(
-      SnackBar(content: Text(widget.inProgressText)),
-    );
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar;
+    if (widget.inProgressText != null) {
+      Scaffold.of(context)
+          .removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
+      // Push a snackbar that the action is in progress.
+      snackBar = Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text(widget.inProgressText)),
+      );
+    }
     try {
-      await widget.action();
+      await action();
       // If the action was successful, remove the snack bar and show a new
       // one with action success.
-      snackBar.close();
-      Scaffold.of(context).showSnackBar(
-        SnackBar(content: Text(widget.completedText)),
-      );
+      snackBar?.close();
+      if (widget.completedText != null) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(widget.completedText)),
+        );
+      }
     } catch (e) {
       // On a failure, remove the snack bar and replace it with the failure.
-      snackBar.close();
+      snackBar?.close();
       Scaffold.of(context).showSnackBar(
         SnackBar(content: Text(widget.describeError(e))),
       );
     } finally {
       setState(() {
-        _disabled = false;
+        disabled = false;
       });
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_hidden) return const SizedBox();
-
-    return InkWell(
-      onTap: _click,
-      child: Container(
-        constraints: const BoxConstraints.tightFor(width: 48.0, height: 48.0),
-        alignment: Alignment.center,
-        // TODO(djshuckerow): Just make these icons the right size to fit this box.
-        // The current size is a little tiny by comparison to our other
-        // material icons.
-        child: getIconWidget(widget.serviceDescription.icon),
-      ),
-    );
   }
 }
 
