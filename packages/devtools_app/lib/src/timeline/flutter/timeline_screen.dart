@@ -138,6 +138,15 @@ class TimelineBodyState extends State<TimelineBody> {
             )
           ],
         ),
+        if (_timelineMode == TimelineMode.frameBased) FlutterFramesChart(),
+        Expanded(
+          child: Split(
+            axis: Axis.vertical,
+            firstChild: TimelineFlameChart(),
+            secondChild: EventDetails(),
+            initialFirstFraction: 0.8,
+          ),
+        ),
       ],
     );
   }
