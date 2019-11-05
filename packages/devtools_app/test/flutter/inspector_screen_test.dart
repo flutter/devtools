@@ -103,13 +103,15 @@ void main() {
       expect(
         fakeExtensionManager.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
-        true,
+        isTrue,
       );
 
       // We need a frame to find out that the service extension state has changed.
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleSelectWidgetMode.description),
-          findsOneWidget);
+      expect(
+        find.text(extensions.toggleSelectWidgetMode.description),
+        findsOneWidget,
+      );
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
       await tester.pump();
       await tester
