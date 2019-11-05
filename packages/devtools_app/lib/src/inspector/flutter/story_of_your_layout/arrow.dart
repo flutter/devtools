@@ -48,8 +48,8 @@ class ArrowWrapper extends StatelessWidget {
             ? EdgeInsets.symmetric(horizontal: distanceToArrow)
             : EdgeInsets.symmetric(vertical: distanceToArrow),
         isBidirectional = false,
-        firstArrowType = type,
-        secondArrowType = type,
+        startArrowType = type,
+        endArrowType = type,
         super(key: key);
 
   ArrowWrapper.bidirectional({
@@ -70,9 +70,9 @@ class ArrowWrapper extends StatelessWidget {
             ? EdgeInsets.symmetric(horizontal: distanceToArrow)
             : EdgeInsets.symmetric(vertical: distanceToArrow),
         isBidirectional = true,
-        firstArrowType =
+        startArrowType =
             direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
-        secondArrowType =
+        endArrowType =
             direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
         super(key: key);
 
@@ -85,8 +85,8 @@ class ArrowWrapper extends StatelessWidget {
   final EdgeInsets distanceToArrow;
 
   final bool isBidirectional;
-  final ArrowType firstArrowType;
-  final ArrowType secondArrowType;
+  final ArrowType startArrowType;
+  final ArrowType endArrowType;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +100,11 @@ class ArrowWrapper extends StatelessWidget {
             color: arrowColor,
             headSize: arrowHeadSize,
             strokeWidth: arrowStrokeWidth,
-            type: firstArrowType,
-            shouldDrawHead: isBidirectional,
+            type: startArrowType,
+            shouldDrawHead: isBidirectional
+                ? true
+                : (startArrowType == ArrowType.left ||
+                    startArrowType == ArrowType.up),
           ),
         ),
         Container(
@@ -113,7 +116,11 @@ class ArrowWrapper extends StatelessWidget {
             color: arrowColor,
             headSize: arrowHeadSize,
             strokeWidth: arrowStrokeWidth,
-            type: secondArrowType,
+            type: endArrowType,
+            shouldDrawHead: isBidirectional
+                ? true
+                : (endArrowType == ArrowType.right ||
+                    endArrowType == ArrowType.down),
           ),
         ),
       ],
@@ -224,7 +231,7 @@ class _ArrowPainter extends CustomPainter {
           p3 = Offset(originX + headSizeDividedBy2, headHeight);
           break;
         case ArrowType.left:
-          p1 = Offset(originY, 0);
+          p1 = Offset(0, originY);
           p2 = Offset(headHeight, originY - headSizeDividedBy2);
           p3 = Offset(headHeight, originY + headSizeDividedBy2);
           break;
