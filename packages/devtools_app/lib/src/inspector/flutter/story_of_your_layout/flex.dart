@@ -53,32 +53,33 @@ class StoryOfYourFlexWidget extends StatelessWidget {
     return BorderLayout(
       center: child,
       top: Container(
-        child: BidirectionalArrowWrapper(
+        child: ArrowWrapper.unidirectional(
           arrowColor: theme.hintColor,
           child: Text(
             properties.horizontalDirectionDescription,
           ),
-          direction: Axis.horizontal,
+          type: ArrowType.right,
         ),
         margin: const EdgeInsets.only(bottom: 16.0),
         width: length,
       ),
       left: Container(
-        child: BidirectionalArrowWrapper(
+        child: ArrowWrapper.unidirectional(
           arrowColor: theme.hintColor,
           child: Text(
             properties.verticalDirectionDescription,
           ),
-          direction: Axis.vertical,
+          type: ArrowType.down,
         ),
         height: length,
         margin: const EdgeInsets.only(right: 8.0),
       ),
       right: Container(
-        child: BidirectionalArrowWrapper(
+        child: ArrowWrapper.bidirectional(
           arrowColor: theme.hintColor,
+          arrowStrokeWidth: 1.0,
           child: Text(
-            properties.verticalDirectionDescription,
+            '310 px',
           ),
           direction: Axis.vertical,
         ),
@@ -87,8 +88,9 @@ class StoryOfYourFlexWidget extends StatelessWidget {
       ),
       bottom: Container(
         margin: const EdgeInsets.only(top: 16.0),
-        child: BidirectionalArrowWrapper(
+        child: ArrowWrapper.bidirectional(
           arrowColor: theme.hintColor,
+          arrowStrokeWidth: 1.0,
           child: Text(
             properties.horizontalDirectionDescription,
           ),

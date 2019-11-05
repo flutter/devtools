@@ -13,14 +13,46 @@ const defaultArrowHeadSize = 16.0;
 const defaultArrowStrokeWidth = 2.0;
 const defaultDistanceToArrow = 8.0;
 
-enum ArrowType { up, left, right, down, body }
+enum ArrowType {
+  up,
+  left,
+  right,
+  down,
+}
+
+Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
+    ? Axis.vertical
+    : Axis.horizontal;
 
 /// Widget that draws a bidirectional arrow around another widget.
 ///
 /// This widget is typically used to help draw diagrams.
 @immutable
-class BidirectionalArrowWrapper extends StatelessWidget {
-  BidirectionalArrowWrapper({
+class ArrowWrapper extends StatelessWidget {
+  ArrowWrapper.unidirectional({
+    Key key,
+    @required this.child,
+    @required ArrowType type,
+    this.arrowColor = defaultArrowColor,
+    this.arrowHeadSize = defaultArrowHeadSize,
+    this.arrowStrokeWidth = defaultArrowStrokeWidth,
+    double distanceToArrow = defaultDistanceToArrow,
+  })  : assert(child != null),
+        assert(type != null),
+        assert(arrowColor != null),
+        assert(arrowHeadSize != null && arrowHeadSize > 0.0),
+        assert(arrowStrokeWidth != null && arrowHeadSize > 0.0),
+        assert(distanceToArrow != null && distanceToArrow > 0.0),
+        direction = axis(type),
+        distanceToArrow = axis(type) == Axis.horizontal
+            ? EdgeInsets.symmetric(horizontal: distanceToArrow)
+            : EdgeInsets.symmetric(vertical: distanceToArrow),
+        isBidirectional = false,
+        firstArrowType = type,
+        secondArrowType = type,
+        super(key: key);
+
+  ArrowWrapper.bidirectional({
     Key key,
     @required this.child,
     @required this.direction,
@@ -37,6 +69,11 @@ class BidirectionalArrowWrapper extends StatelessWidget {
         distanceToArrow = direction == Axis.horizontal
             ? EdgeInsets.symmetric(horizontal: distanceToArrow)
             : EdgeInsets.symmetric(vertical: distanceToArrow),
+        isBidirectional = true,
+        firstArrowType =
+            direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
+        secondArrowType =
+            direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
         super(key: key);
 
   final Color arrowColor;
@@ -46,6 +83,10 @@ class BidirectionalArrowWrapper extends StatelessWidget {
 
   final Axis direction;
   final EdgeInsets distanceToArrow;
+
+  final bool isBidirectional;
+  final ArrowType firstArrowType;
+  final ArrowType secondArrowType;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +100,8 @@ class BidirectionalArrowWrapper extends StatelessWidget {
             color: arrowColor,
             headSize: arrowHeadSize,
             strokeWidth: arrowStrokeWidth,
-            type: direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
+            type: firstArrowType,
+            shouldDrawHead: isBidirectional,
           ),
         ),
         Container(
@@ -71,8 +113,7 @@ class BidirectionalArrowWrapper extends StatelessWidget {
             color: arrowColor,
             headSize: arrowHeadSize,
             strokeWidth: arrowStrokeWidth,
-            type:
-                direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
+            type: secondArrowType,
           ),
         ),
       ],
@@ -87,17 +128,20 @@ class ArrowWidget extends StatelessWidget {
     this.color = defaultArrowColor,
     this.headSize = defaultArrowHeadSize,
     Key key,
+    this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
     @required this.type,
   })  : assert(color != null),
         assert(headSize != null && headSize > 0.0),
         assert(strokeWidth != null && strokeWidth > 0.0),
+        assert(shouldDrawHead != null),
         assert(type != null),
         _painter = _ArrowPainter(
           headSize: headSize,
           color: color,
           strokeWidth: strokeWidth,
           type: type,
+          shouldDrawHead: shouldDrawHead,
         ),
         super(key: key);
 
@@ -111,6 +155,8 @@ class ArrowWidget extends StatelessWidget {
   final ArrowType type;
 
   final CustomPainter _painter;
+
+  final bool shouldDrawHead;
 
   @override
   Widget build(BuildContext context) {
@@ -126,106 +172,28 @@ class _ArrowPainter extends CustomPainter {
     this.headSize = defaultArrowHeadSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,
+    this.shouldDrawHead = true,
     @required this.type,
   })  : assert(headSize != null),
         assert(color != null),
         assert(strokeWidth != null),
         assert(type != null),
+        assert(shouldDrawHead != null),
         // the height of an equilateral triangle
         headHeight = 0.5 * sqrt(3) * headSize;
 
-  final double headSize;
-  final double strokeWidth;
   final Color color;
+  final double headSize;
+  final bool shouldDrawHead;
+  final double strokeWidth;
   final ArrowType type;
 
   final double headHeight;
 
-  Path headPath(Size size) {
-    assert(type != ArrowType.body);
-    Offset p1, p2, p3;
-    final headSizeDividedBy2 = headSize / 2;
-    switch (type) {
-      case ArrowType.up:
-        p1 = Offset.zero;
-        p2 = Offset(-headSizeDividedBy2, headHeight);
-        p3 = Offset(headSizeDividedBy2, headHeight);
-        break;
-      case ArrowType.left:
-        p1 = Offset.zero;
-        p2 = Offset(headHeight, -headSizeDividedBy2);
-        p3 = Offset(headHeight, headSizeDividedBy2);
-        break;
-      case ArrowType.right:
-        final startingX = size.width - headHeight;
-        p1 = Offset(size.width, 0);
-        p2 = Offset(startingX, -headSizeDividedBy2);
-        p3 = Offset(startingX, headSizeDividedBy2);
-        break;
-      case ArrowType.down:
-        final startingY = size.height - headHeight;
-        p1 = Offset(0, size.height);
-        p2 = Offset(-headSizeDividedBy2, startingY);
-        p3 = Offset(headSizeDividedBy2, startingY);
-        break;
-      case ArrowType.body:
-        break;
-    }
-    return Path()
-      ..moveTo(p1.dx, p1.dy)
-      ..lineTo(p2.dx, p2.dy)
-      ..lineTo(p3.dx, p3.dy)
-      ..close();
-  }
-
-  Offset lineStartingPoint(Size size) {
-    Offset o = Offset.zero;
-    switch (type) {
-      case ArrowType.up:
-        o = Offset(0, headHeight);
-        break;
-      case ArrowType.left:
-        o = Offset(headHeight, 0);
-        break;
-      case ArrowType.right:
-      case ArrowType.down:
-      case ArrowType.body:
-        o = Offset.zero;
-        break;
-    }
-    return o;
-  }
-
-  Offset lineEndingPoint(Size size) {
-    Offset o = Offset.zero;
-    switch (type) {
-      case ArrowType.up:
-        o = Offset(0, size.height);
-        break;
-      case ArrowType.left:
-        o = Offset(size.width, 0);
-        break;
-      case ArrowType.right:
-        final arrowHeadStartingX = size.width - headHeight;
-        o = Offset(arrowHeadStartingX, 0);
-        break;
-      case ArrowType.down:
-        final headStartingY = size.height - headHeight;
-        o = Offset(0, headStartingY);
-        break;
-      case ArrowType.body:
-        o = Offset(size.width, size.height);
-        break;
-    }
-    return o;
-  }
-
   bool headIsGreaterThanConstraint(Size size) {
-    final startingPoint = lineStartingPoint(size);
-    final endingPoint = lineEndingPoint(size);
     if (type == ArrowType.left || type == ArrowType.right)
-      return headHeight > (endingPoint.dx - startingPoint.dx + 1);
-    return headHeight > (endingPoint.dy - startingPoint.dy + 1);
+      return headHeight >= (size.width);
+    return headHeight >= (size.height);
   }
 
   @override
@@ -241,12 +209,83 @@ class _ArrowPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..strokeWidth = strokeWidth;
-    if (type != ArrowType.body && !headIsGreaterThanConstraint(size)) {
-      canvas.drawPath(headPath(size), paint);
+
+    final originX = size.width / 2, originY = size.height / 2;
+    Offset lineStartingPoint = Offset.zero;
+    Offset lineEndingPoint = Offset.zero;
+
+    if (!headIsGreaterThanConstraint(size) && shouldDrawHead) {
+      Offset p1, p2, p3;
+      final headSizeDividedBy2 = headSize / 2;
+      switch (type) {
+        case ArrowType.up:
+          p1 = Offset(originX, 0);
+          p2 = Offset(originX - headSizeDividedBy2, headHeight);
+          p3 = Offset(originX + headSizeDividedBy2, headHeight);
+          break;
+        case ArrowType.left:
+          p1 = Offset(originY, 0);
+          p2 = Offset(headHeight, originY - headSizeDividedBy2);
+          p3 = Offset(headHeight, originY + headSizeDividedBy2);
+          break;
+        case ArrowType.right:
+          final startingX = size.width - headHeight;
+          p1 = Offset(size.width, originY);
+          p2 = Offset(startingX, originY - headSizeDividedBy2);
+          p3 = Offset(startingX, originY + headSizeDividedBy2);
+          break;
+        case ArrowType.down:
+          final startingY = size.height - headHeight;
+          p1 = Offset(originX, size.height);
+          p2 = Offset(originX - headSizeDividedBy2, startingY);
+          p3 = Offset(originX + headSizeDividedBy2, startingY);
+          break;
+      }
+      final path = Path()
+        ..moveTo(p1.dx, p1.dy)
+        ..lineTo(p2.dx, p2.dy)
+        ..lineTo(p3.dx, p3.dy)
+        ..close();
+      canvas.drawPath(path, paint);
+
+      switch (type) {
+        case ArrowType.up:
+          lineStartingPoint = Offset(originX, headHeight);
+          lineEndingPoint = Offset(originX, size.height);
+          break;
+        case ArrowType.left:
+          lineStartingPoint = Offset(headHeight, originY);
+          lineEndingPoint = Offset(size.width, originY);
+          break;
+        case ArrowType.right:
+          final arrowHeadStartingX = size.width - headHeight;
+          lineStartingPoint = Offset(0, originY);
+          lineEndingPoint = Offset(arrowHeadStartingX, originY);
+          break;
+        case ArrowType.down:
+          final headStartingY = size.height - headHeight;
+          lineStartingPoint = Offset(originX, 0);
+          lineEndingPoint = Offset(originX, headStartingY);
+          break;
+      }
+    } else {
+      // draw full line
+      switch (type) {
+        case ArrowType.up:
+        case ArrowType.down:
+          lineStartingPoint = Offset(originX, 0);
+          lineEndingPoint = Offset(originX, size.height);
+          break;
+        case ArrowType.left:
+        case ArrowType.right:
+          lineStartingPoint = Offset(0, originY);
+          lineEndingPoint = Offset(size.width, originY);
+          break;
+      }
     }
     canvas.drawLine(
-      lineStartingPoint(size),
-      lineEndingPoint(size),
+      lineStartingPoint,
+      lineEndingPoint,
       paint,
     );
   }
