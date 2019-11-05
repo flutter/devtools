@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../globals.dart';
-import '../../vm_flags.dart' as vm_flags;
+import '../../profiler/cpu_profile_service.dart';
+import '../../profiler/profile_granularity.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
@@ -21,6 +21,8 @@ class ProfileGranularityDropdown extends StatefulWidget {
 // https://github.com/flutter/devtools/issues/988.
 class ProfileGranularityDropdownState
     extends State<ProfileGranularityDropdown> {
+  final profilerService = CpuProfilerService();
+
   String dropdownValue = ProfileGranularity.medium.value;
 
   @override
@@ -43,43 +45,12 @@ class ProfileGranularityDropdownState
     );
   }
 
+  // TODO(kenz): show a warning when ProfileGranularity.high is selected.
   void _onProfileGranularityChanged(String newValue) {
     if (dropdownValue == newValue) return;
-    serviceManager.service.setFlag(vm_flags.profilePeriod, newValue);
+    profilerService.setProfilePeriod(newValue);
     setState(() {
       dropdownValue = newValue;
     });
-  }
-}
-
-enum ProfileGranularity {
-  low,
-  medium,
-  high,
-}
-
-extension ProfileGranularityExtension on ProfileGranularity {
-  String get display {
-    switch (this) {
-      case ProfileGranularity.low:
-        return 'Profile granularity: low';
-      case ProfileGranularity.medium:
-        return 'Profile granularity: medium';
-      case ProfileGranularity.high:
-      default:
-        return 'Profile granularity: high';
-    }
-  }
-
-  String get value {
-    switch (this) {
-      case ProfileGranularity.low:
-        return '1000';
-      case ProfileGranularity.medium:
-        return '250';
-      case ProfileGranularity.high:
-      default:
-        return '50';
-    }
   }
 }
