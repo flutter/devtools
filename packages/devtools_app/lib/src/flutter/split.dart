@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// A widget that takes two children, lays them out along [axis], and allows
@@ -157,6 +158,10 @@ class _SplitState extends State<Split> {
         behavior: HitTestBehavior.translucent,
         onHorizontalDragUpdate: isHorizontal ? updateSpacing : null,
         onVerticalDragUpdate: isHorizontal ? null : updateSpacing,
+        // DartStartBehavior.down is needed to keep the mouse pointer stuck to
+        // the drag bar. There still appears to be a few frame lag before the
+        // drag action triggers which is't ideal but isn't a launch blocker.
+        dragStartBehavior: DragStartBehavior.down,
         child: SizedBox(
           width: isHorizontal ? Split.dividerMainAxisSize : width,
           height: isHorizontal ? height : Split.dividerMainAxisSize,

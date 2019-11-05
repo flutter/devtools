@@ -307,7 +307,7 @@ class _TreeNodeState<T extends TreeNode<T>> extends State<_TreeNodeWidget<T>>
               widget.node.isExpandable
                   ? RotationTransition(
                       turns: expandAnimation,
-                      child: Icon(
+                      child: const Icon(
                         Icons.expand_more,
                         size: 16.0,
                       ),
