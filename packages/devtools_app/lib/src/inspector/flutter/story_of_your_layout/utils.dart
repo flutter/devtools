@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget for positioning sized widgets that follows 2D grid layout:
+/// A widget for positioning sized widgets that follows layout as follows:
 ///      | top    |
 /// left | center | right
 ///      | bottom |
 @immutable
-class GridPositioned extends StatelessWidget {
-  const GridPositioned({
+class BorderLayout extends StatelessWidget {
+  const BorderLayout({
     Key key,
     this.left,
     this.top,
@@ -20,6 +20,7 @@ class GridPositioned extends StatelessWidget {
     this.bottom,
     @required this.center,
   })  : assert(center != null),
+        assert(left != null || top != null || right != null || bottom != null),
         super(key: key);
 
   final Widget center;
@@ -43,20 +44,21 @@ class GridPositioned extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: crossAxisAlignment,
-        children: <Widget>[
-          if (top != null) top,
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (left != null) left,
-              Flexible(child: center),
-              if (right != null) right,
-            ],
-          ),
-          if (bottom != null) bottom,
-        ]);
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: crossAxisAlignment,
+      children: <Widget>[
+        if (top != null) top,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (left != null) left,
+            center,
+            if (right != null) right,
+          ],
+        ),
+        if (bottom != null) bottom,
+      ],
+    );
   }
 }

@@ -50,49 +50,51 @@ class StoryOfYourFlexWidget extends StatelessWidget {
     double length,
     ThemeData theme,
   ) {
-    return Center(
-      child: GridPositioned(
-        center: child,
-        top: Container(
-          child: BidirectionalHorizontalArrowWrapper(
-            arrowColor: theme.hintColor,
-            child: Text(
-              properties.horizontalDirectionDescription,
-            ),
+    return BorderLayout(
+      center: child,
+      top: Container(
+        child: BidirectionalArrowWrapper(
+          arrowColor: theme.hintColor,
+          child: Text(
+            properties.horizontalDirectionDescription,
           ),
-          margin: const EdgeInsets.only(bottom: 16.0),
-          width: length,
+          direction: Axis.horizontal,
         ),
-        left: Container(
-          child: BidirectionalVerticalArrowWrapper(
-            arrowColor: theme.hintColor,
-            child: Text(
-              properties.verticalDirectionDescription,
-            ),
+        margin: const EdgeInsets.only(bottom: 16.0),
+        width: length,
+      ),
+      left: Container(
+        child: BidirectionalArrowWrapper(
+          arrowColor: theme.hintColor,
+          child: Text(
+            properties.verticalDirectionDescription,
           ),
-          height: length,
-          margin: const EdgeInsets.only(right: 16.0, left: 8.0),
+          direction: Axis.vertical,
         ),
-        right: Container(
-          child: BidirectionalVerticalArrowWrapper(
-            arrowColor: theme.hintColor,
-            child: Text(
-              properties.verticalDirectionDescription,
-            ),
+        height: length,
+        margin: const EdgeInsets.only(right: 8.0),
+      ),
+      right: Container(
+        child: BidirectionalArrowWrapper(
+          arrowColor: theme.hintColor,
+          child: Text(
+            properties.verticalDirectionDescription,
           ),
-          height: length,
-          margin: const EdgeInsets.only(left: 8.0, right: 8.0),
+          direction: Axis.vertical,
         ),
-        bottom: Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: BidirectionalHorizontalArrowWrapper(
-            arrowColor: theme.hintColor,
-            child: Text(
-              properties.horizontalDirectionDescription,
-            ),
+        height: length,
+        margin: const EdgeInsets.only(left: 8.0),
+      ),
+      bottom: Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: BidirectionalArrowWrapper(
+          arrowColor: theme.hintColor,
+          child: Text(
+            properties.horizontalDirectionDescription,
           ),
-          width: length,
+          direction: Axis.horizontal,
         ),
+        width: length,
       ),
     );
   }
@@ -105,7 +107,6 @@ class StoryOfYourFlexWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 32.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             margin: const EdgeInsets.only(bottom: 36.0),
@@ -148,14 +149,18 @@ class StoryOfYourFlexWidget extends StatelessWidget {
               );
 
               final minDimension = min(
-                constraints.maxHeight * 0.75,
-                constraints.maxWidth * 0.75,
+                constraints.maxHeight * 0.5,
+                constraints.maxWidth * 0.5,
               );
               final length = min(minDimension, 800.0);
 
               final flexVisualizerWidget = Container(
-                width: length,
-                height: length,
+                constraints: BoxConstraints.tight(
+                  Size(
+                    length,
+                    length,
+                  ),
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: theme.accentColor,
