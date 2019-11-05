@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/arrow.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,7 +57,7 @@ void main() {
           matchesGoldenFile('goldens/arrow_unidirectional_down.png'),
         );
       });
-    });
+    }, skip: kIsWeb);
     group('Bidirectional', () {
       Widget buildBidirectionalArrowWrapper(Axis direction) => wrap(
             Container(
@@ -87,6 +88,6 @@ void main() {
           matchesGoldenFile('goldens/arrow_bidirectional_vertical.png'),
         );
       });
-    });
+    }, skip: kIsWeb);
   });
 }
