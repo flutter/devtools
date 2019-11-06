@@ -43,14 +43,20 @@ import 'timeline_processor.dart';
 const enableMultiModeTimeline = true;
 
 class HtmlTimelineScreen extends HtmlScreen {
-  HtmlTimelineScreen({bool enabled, String disabledTooltip})
-      : super(
+  HtmlTimelineScreen(
+    TimelineMode startMode, {
+    bool enabled,
+    String disabledTooltip,
+  }) : super(
           name: 'Timeline',
           id: timelineScreenId,
           iconClass: 'octicon-pulse',
           enabled: enabled,
           disabledTooltip: disabledTooltip,
-        );
+        ) {
+    _initContent();
+    _setTimelineMode(timelineMode: startMode);
+  }
 
   TimelineController timelineController = TimelineController();
 
@@ -100,12 +106,7 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   bool splitterConfigured = false;
 
-  @override
-  CoreElement createContent(HtmlFramework framework) {
-    ga_platform.setupDimensions();
-
-    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
-
+  void _initContent() {
     pauseButton = PButton.icon('Pause recording', FlutterIcons.pause_white_2x)
       ..small()
       ..primary()
@@ -207,21 +208,34 @@ class HtmlTimelineScreen extends HtmlScreen {
         div(c: 'btn-group collapsible-800')..add(exportButton),
       ]);
 
+    framesBarChart = FramesBarChart(timelineController);
+
+    flameChartContainer =
+        div(c: 'timeline-flame-chart-container section-border')
+          ..flex()
+          ..layoutVertical()
+          ..hidden(true);
+
+    eventDetails = HtmlEventDetails(timelineController)..hidden(true);
+  }
+
+  @override
+  CoreElement createContent(HtmlFramework framework) {
+    ga_platform.setupDimensions();
+
+    final CoreElement screenDiv = div(c: 'custom-scrollbar')..layoutVertical();
+
     _maybeAddDebugButtons();
 
     screenDiv.add(<CoreElement>[
       upperButtonSection,
-      framesBarChart = FramesBarChart(timelineController),
+      framesBarChart,
       div(c: 'section')
         ..layoutVertical()
         ..flex()
         ..add(<CoreElement>[
-          flameChartContainer =
-              div(c: 'timeline-flame-chart-container section-border')
-                ..flex()
-                ..layoutVertical()
-                ..hidden(true),
-          eventDetails = HtmlEventDetails(timelineController)..hidden(true),
+          flameChartContainer,
+          eventDetails,
         ]),
     ]);
 
@@ -430,10 +444,14 @@ class HtmlTimelineScreen extends HtmlScreen {
     // changes the value of [offlineMode], which the button states depend on.
     framework.exitOfflineMode();
 
-    // Revert to the previously selected mode on offline exit. We already
-    // cleared the timeline data - do not repeat this action.
+    // Revert to the previously selected mode on offline exit, unless there is
+    // only one allowed mode for the connected app. We already cleared the
+    // timeline data - do not repeat this action.
+    final mode = await serviceManager.connectedApp.isDartCliApp
+        ? TimelineMode.full
+        : timelineController.timelineMode;
     _setTimelineMode(
-      timelineMode: timelineController.timelineMode,
+      timelineMode: mode,
       clearTimeline: false,
     );
     _updateButtonStates();
@@ -482,7 +500,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     // share data. For simplicity, we will start by having each mode be aware of
     // only its own data and clearing on mode switch.
     if (clearTimeline) {
-      timelineController.timeline.data.clear();
+      timelineController.timeline.data?.clear();
     }
 
     timelineController.timelineMode = timelineMode;
@@ -515,7 +533,8 @@ class HtmlTimelineScreen extends HtmlScreen {
     }
   }
 
-  void _updateButtonStates() {
+  void _updateButtonStates() async {
+    final isDartCliApp = await serviceManager.connectedApp.isDartCliApp;
     pauseButton
       ..disabled = timelineController.frameBasedTimeline.manuallyPaused
       ..hidden(
@@ -536,7 +555,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     (_timelineModeCheckbox.element as html.InputElement).checked =
         timelineController.timelineMode == TimelineMode.frameBased;
 
-    _timelineModeSettingContainer.hidden(offlineMode);
+    _timelineModeSettingContainer.hidden(offlineMode || isDartCliApp);
 
     clearButton
       ..disabled = timelineController.fullTimeline.recording
@@ -544,7 +563,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     exportButton
       ..disabled = timelineController.fullTimeline.recording
       ..hidden(offlineMode);
-    performanceOverlayButton.button.hidden(offlineMode);
+    performanceOverlayButton.button.hidden(offlineMode || isDartCliApp);
     _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }

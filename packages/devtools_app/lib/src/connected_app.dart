@@ -36,6 +36,9 @@ class ConnectedApp {
 
   bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
 
+  Future<bool> get isDartCliApp async =>
+      isRunningOnDartVM && !(await isFlutterApp);
+
   Future<bool> _connectedToProfileBuild() async {
     assert(serviceManager.serviceAvailable.isCompleted);
     // Only flutter apps have profile and non-profile builds. If this changes in

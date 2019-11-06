@@ -188,7 +188,7 @@ class HtmlFramework {
       orElse: () => null,
     );
     if (timelineScreen == null) {
-      addScreen(timelineScreen = HtmlTimelineScreen());
+      addScreen(timelineScreen = HtmlTimelineScreen(timelineMode));
     }
     navigateTo(timelineScreenId);
 
