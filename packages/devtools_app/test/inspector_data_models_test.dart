@@ -170,7 +170,7 @@ void main() {
       }
     ''');
     final RenderFlexProperties flexProperties =
-        RenderFlexProperties.fromJson(flexJson);
+        RenderFlexProperties.fromJson(flexJson, []);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);

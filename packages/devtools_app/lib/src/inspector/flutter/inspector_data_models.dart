@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../diagnostics_node.dart';
 import '../enum_utils.dart';
 
 const Type boxConstraintsType = BoxConstraints;
@@ -39,6 +40,8 @@ class RenderFlexProperties {
     this.textDirection,
     this.verticalDirection,
     this.textBaseline,
+    this.totalFlex,
+    this.totalChildren,
   });
 
   final Axis direction;
@@ -49,7 +52,8 @@ class RenderFlexProperties {
   final VerticalDirection verticalDirection;
   final TextBaseline textBaseline;
 
-  // TODO(albertusangga) Add size & constraints in this class
+  final int totalFlex;
+  final int totalChildren;
 
   static final _directionUtils = EnumUtils<Axis>(Axis.values);
   static final _mainAxisAlignmentUtils =
@@ -65,14 +69,17 @@ class RenderFlexProperties {
   static final _textBaselineUtils =
       EnumUtils<TextBaseline>(TextBaseline.values);
 
-  static RenderFlexProperties fromJson(Map<String, Object> renderObjectJson) {
+  static RenderFlexProperties fromJson(Map<String, Object> renderObjectJson,
+      List<RemoteDiagnosticsNode> children) {
     final List<dynamic> properties = renderObjectJson['properties'];
-    // TODO(albertusangga) should we do some checking in the validity of the API contract here?
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
+
+    final totalFlex = [for (var child in children) child.flexFactor ?? 0]
+        .reduce((value, element) => value + element);
 
     return RenderFlexProperties(
       direction: _directionUtils.enumEntry(data['direction']),
@@ -85,6 +92,8 @@ class RenderFlexProperties {
       verticalDirection:
           _verticalDirectionUtils.enumEntry(data['verticalDirection']),
       textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
+      totalFlex: totalFlex,
+      totalChildren: children.length,
     );
   }
 

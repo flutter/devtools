@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
-
 import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
@@ -136,7 +135,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
       // TODO(albertusangga): Cache this instead of recomputing every build,
       constraints: deserializeConstraints(selected.constraints),
       size: deserializeSize(selected.size),
-      properties: RenderFlexProperties.fromJson(selected.renderObject),
+      properties: RenderFlexProperties.fromJson(
+          selected.renderObject, selected.childrenNow),
     );
   }
 
