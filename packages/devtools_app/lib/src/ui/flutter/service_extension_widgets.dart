@@ -307,7 +307,7 @@ class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
               onChanged: _onClick,
             ),
             Text(widget.service.description),
-            const Padding(padding: EdgeInsets.only(left: 8.0)),
+            const Padding(padding: EdgeInsets.only(left: 16.0)),
           ],
         ),
       ),
