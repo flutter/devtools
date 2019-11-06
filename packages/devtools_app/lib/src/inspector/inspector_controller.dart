@@ -54,7 +54,7 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
 ///
 /// No changes to this class are allowed to pull in dependencies on dart:html.
 class InspectorController extends DisposableController
-    with AutoDisposeBase, AutoDisposeControllerMixin
+    with AutoDisposeControllerMixin
     implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorService,

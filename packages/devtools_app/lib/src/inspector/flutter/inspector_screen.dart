@@ -46,7 +46,7 @@ class InspectorScreenBody extends StatefulWidget {
 }
 
 class _InspectorScreenBodyState extends State<InspectorScreenBody>
-    with BlockingActionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with BlockingActionMixin, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
   bool connectionInProgress = false;
   InspectorService inspectorService;

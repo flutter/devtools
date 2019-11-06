@@ -43,7 +43,7 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer>
-    with SingleTickerProviderStateMixin, AutoDisposeBase, AutoDisposeMixin {
+    with SingleTickerProviderStateMixin, AutoDisposeMixin {
   /// Checks if the [service.serviceManager] is connected.
   ///
   /// This is a method and not a getter to communicate that its value may

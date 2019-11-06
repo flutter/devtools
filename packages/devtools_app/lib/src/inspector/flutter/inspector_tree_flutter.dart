@@ -184,7 +184,6 @@ class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
         AutomaticKeepAliveClientMixin<InspectorTree>,
-        AutoDisposeBase,
         AutoDisposeMixin
     implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);

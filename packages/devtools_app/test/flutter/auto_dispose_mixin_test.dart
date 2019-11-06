@@ -20,10 +20,10 @@ class AutoDisposedWidget extends StatefulWidget {
 }
 
 class AutoDisposeContoller extends DisposableController
-    with AutoDisposeBase, AutoDisposeControllerMixin {}
+    with AutoDisposeControllerMixin {}
 
 class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
-    with AutoDisposeBase, AutoDisposeMixin {
+    with AutoDisposeMixin {
   int eventCount = 0;
   @override
   void initState() {
