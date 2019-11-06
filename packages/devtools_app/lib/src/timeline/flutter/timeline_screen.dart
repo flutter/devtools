@@ -54,8 +54,13 @@ class TimelineBodyState extends State<TimelineBody> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildLeftAlignedButtons(),
-            _buildRightAlignedButtons(),
+            Row(
+              children: _buildTimelineStateButtons(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: _buildSecondaryButtons(),
+            ),
           ],
         ),
         if (_timelineMode == TimelineMode.frameBased) FlutterFramesChart(),
@@ -71,94 +76,88 @@ class TimelineBodyState extends State<TimelineBody> {
     );
   }
 
-  Widget _buildLeftAlignedButtons() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (_timelineMode == TimelineMode.frameBased) ...[
-          OutlineButton(
-            onPressed: _pauseLiveTimeline,
-            child: const MaterialIconLabel(
-              Icons.pause,
-              'Pause',
-              minIncludeTextWidth: 900,
-            ),
-          ),
-          OutlineButton(
-            onPressed: _resumeLiveTimeline,
-            child: const MaterialIconLabel(
-              Icons.play_arrow,
-              'Resume',
-              minIncludeTextWidth: 900,
-            ),
-          ),
-        ],
-        if (_timelineMode == TimelineMode.full) ...[
-          OutlineButton(
-            onPressed: _startRecording,
-            child: const MaterialIconLabel(
-              Icons.fiber_manual_record,
-              'Record',
-              minIncludeTextWidth: 900,
-            ),
-          ),
-          OutlineButton(
-            onPressed: _stopRecording,
-            child: const MaterialIconLabel(
-              Icons.stop,
-              'Stop',
-              minIncludeTextWidth: 900,
-            ),
-          ),
-        ],
-        const SizedBox(width: 8.0),
+  List<Widget> _buildTimelineStateButtons() {
+    return [
+      if (_timelineMode == TimelineMode.frameBased) ...[
         OutlineButton(
-          onPressed: _clearTimeline,
+          onPressed: _pauseLiveTimeline,
           child: const MaterialIconLabel(
-            Icons.block,
-            'Clear',
+            Icons.pause,
+            'Pause',
             minIncludeTextWidth: 900,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Switch(
-                value: _timelineMode == TimelineMode.frameBased,
-                onChanged: _onTimelineModeChanged,
-              ),
-              const Text('Show frames'),
-            ],
+        OutlineButton(
+          onPressed: _resumeLiveTimeline,
+          child: const MaterialIconLabel(
+            Icons.play_arrow,
+            'Resume',
+            minIncludeTextWidth: 900,
           ),
         ),
       ],
-    );
+      if (_timelineMode == TimelineMode.full) ...[
+        OutlineButton(
+          onPressed: _startRecording,
+          child: const MaterialIconLabel(
+            Icons.fiber_manual_record,
+            'Record',
+            minIncludeTextWidth: 900,
+          ),
+        ),
+        OutlineButton(
+          onPressed: _stopRecording,
+          child: const MaterialIconLabel(
+            Icons.stop,
+            'Stop',
+            minIncludeTextWidth: 900,
+          ),
+        ),
+      ],
+      const SizedBox(width: 8.0),
+      OutlineButton(
+        onPressed: _clearTimeline,
+        child: const MaterialIconLabel(
+          Icons.block,
+          'Clear',
+          minIncludeTextWidth: 900,
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          children: [
+            Switch(
+              value: _timelineMode == TimelineMode.frameBased,
+              onChanged: _onTimelineModeChanged,
+            ),
+            const Text('Show frames'),
+          ],
+        ),
+      ),
+    ];
   }
 
-  Widget _buildRightAlignedButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ProfileGranularityDropdown(),
-        ),
-        ServiceExtensionButtonGroup(
+  List<Widget> _buildSecondaryButtons() {
+    return [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ProfileGranularityDropdown(),
+      ),
+      ServiceExtensionButtonGroup(
+        minIncludeTextWidth: 1100,
+        extensions: [performanceOverlay],
+      ),
+      const SizedBox(width: 8.0),
+      OutlineButton(
+        onPressed: _exportTimeline,
+        child: MaterialIconLabel(
+          Icons.file_download,
+          'Export',
           minIncludeTextWidth: 1100,
-          extensions: [performanceOverlay],
         ),
-        const SizedBox(width: 8.0),
-        OutlineButton(
-          onPressed: _exportTimeline,
-          child: MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            minIncludeTextWidth: 1100,
-          ),
-        ),
-      ],
-    );
+      ),
+    ];
   }
 
   void _pauseLiveTimeline() {
