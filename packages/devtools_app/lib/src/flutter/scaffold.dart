@@ -175,7 +175,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     Widget flexibleSpace;
     Size preferredSize;
     if (widget.tabs.length > 1) {
-      TabBar tabs = TabBar(
+      final tabs = TabBar(
         controller: _controller,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
@@ -195,16 +195,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         end: 0.0,
       ).evaluate(appBarCurve);
       flexibleSpace = Align(
-        alignment: Alignment.topRight,
-        child: Align(
-          alignment: animatedAlignment,
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 4.0,
-              right: animatedRightPadding,
-            ),
-            child: tabs,
+        alignment: animatedAlignment,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 4.0,
+            right: animatedRightPadding,
           ),
+          child: tabs,
         ),
       );
     }
@@ -231,60 +228,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       ),
     );
   }
-}
-
-/// AppBar that places the TabBar inline when it is wide enough.
-class SizeAnimatingAppBar extends StatefulWidget
-    implements PreferredSizeWidget {
-  const SizeAnimatingAppBar({
-    Key key,
-    @required this.actions,
-    @required this.title,
-    @required this.tabBar,
-    @required this.expanded,
-  }) : super(key: key);
-
-  final List<Widget> actions;
-  final Widget title;
-  final PreferredSizeWidget tabBar;
-  final bool expanded;
-
-  @override
-  SizeAnimatingAppBarState createState() => SizeAnimatingAppBarState();
-
-  @override
-  // TODO: implement preferredSize
-  Size get preferredSize => null;
-}
-
-class SizeAnimatingAppBarState extends State<SizeAnimatingAppBar> {
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return null;
-  }
-}
-
-/// Wrapper that places a [PreferredSizeWidget] in a [Hero] such that
-/// it can still be passed to fields like [Scaffold.appBar], which
-/// requires a [PreferredSizeWidget].
-class _PreferredSizeHero extends StatelessWidget
-    implements PreferredSizeWidget {
-  const _PreferredSizeHero({@required this.tag, @required this.child});
-
-  /// The tag to pass to [Hero.tag] when building the [Hero] widget.
-  final Object tag;
-
-  /// The [PreferredSizeWidget] to delegate to for the [preferredSize].
-  final PreferredSizeWidget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Hero(tag: tag, child: child);
-  }
-
-  @override
-  Size get preferredSize => child.preferredSize;
 }
 
 class _SimpleScreen extends Screen {
