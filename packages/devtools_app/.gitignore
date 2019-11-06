@@ -3,3 +3,6 @@ build/
 
 # Directory created by dartdoc
 doc/api/
+
+# Generated files not intended to be checked in to version control
+lib/generated_plugin_registrant.dart
