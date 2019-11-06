@@ -19,8 +19,10 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose.dart';
 import '../config_specific/logger.dart';
 import '../globals.dart';
+import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
@@ -51,7 +53,9 @@ TextStyle textStyleForLevel(DiagnosticLevel level) {
 /// plugin with some refactors to make it more of a true controller than a view.
 ///
 /// No changes to this class are allowed to pull in dependencies on dart:html.
-class InspectorController implements InspectorServiceClient {
+class InspectorController extends DisposableController
+    with AutoDisposeBase, AutoDisposeControllerMixin
+    implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorService,
     @required this.inspectorTree,
@@ -94,7 +98,27 @@ class InspectorController implements InspectorServiceClient {
     });
 
     _checkForExpandCollapseSupport();
+
+    // This logic only needs to be run once so run it in the outermost
+    // controller.
+    if (parent == null) {
+      // If select mode is available, enable the on device inspector as it
+      // won't interfere with users.
+      addAutoDisposeListener(_supportsToggleSelectWidgetMode, () {
+        if (_supportsToggleSelectWidgetMode.value) {
+          serviceManager.serviceExtensionManager.setServiceExtensionState(
+            extensions.enableOnDeviceInspector.extension,
+            true,
+            true,
+          );
+        }
+      });
+    }
   }
+
+  ValueListenable<bool> get _supportsToggleSelectWidgetMode => serviceManager
+      .serviceExtensionManager
+      .hasServiceExtensionListener(extensions.toggleSelectWidgetMode.extension);
 
   void _onClientChange(bool added) {
     _clientCount += added ? 1 : -1;
@@ -767,6 +791,7 @@ class InspectorController implements InspectorServiceClient {
     //  navigate operation.
   }
 
+  @override
   void dispose() {
     assert(!_disposed);
     _disposed = true;
@@ -780,6 +805,7 @@ class InspectorController implements InspectorServiceClient {
     _selectionGroups = null;
     debugSummaryLayoutEnabled.dispose();
     details?.dispose();
+    super.dispose();
   }
 
   static String treeTypeDisplayName(FlutterTreeType treeType) {
