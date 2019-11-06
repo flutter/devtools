@@ -299,7 +299,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
-  bool checked = false;
+  bool value = false;
   @override
   void initState() {
     super.initState();
@@ -307,7 +307,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
       widget.service.extension,
       (data) {
         setState(() {
-          checked = data.value == widget.service.enabledValue;
+          value = data.value == widget.service.enabledValue;
         });
       },
     ));
@@ -316,7 +316,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: checked
+      message: value
           ? widget.service.enabledTooltip
           : widget.service.disabledTooltip,
       waitDuration: const Duration(seconds: 1),
@@ -325,7 +325,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
         child: Row(
           children: <Widget>[
             Switch(
-              value: checked,
+              value: value,
               onChanged: _onClick,
             ),
             Text(widget.service.description),
@@ -340,14 +340,14 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
   void _onClick([_]) {
     setState(() {
-      checked = !checked;
+      value = !value;
     });
 
     invokeAndCatchErrors(() async {
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
-        checked,
-        checked ? widget.service.enabledValue : widget.service.disabledValue,
+        value,
+        value ? widget.service.enabledValue : widget.service.disabledValue,
       );
     });
   }
