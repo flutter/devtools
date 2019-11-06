@@ -265,10 +265,10 @@ class _RegisteredServiceExtensionButtonState
 }
 
 /// Checkbox that toggles the value of [structuredErrors].
-class StructuredErrorsCheckbox extends StatelessWidget {
+class StructuredErrorsToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _ServiceExtensionCheckbox(
+    return _ServiceExtensionSwitch(
       service: structuredErrors,
       describeError: (error) =>
           'Failed to update structuredError settings: $error',
@@ -276,22 +276,25 @@ class StructuredErrorsCheckbox extends StatelessWidget {
   }
 }
 
-class _ServiceExtensionCheckbox extends _ServiceExtensionWidget {
-  const _ServiceExtensionCheckbox(
-      {Key key, this.service, @required String Function(dynamic) describeError})
-      : super(
-            key: key,
-            // Don't show messages on success or when this toggle is in progress.
-            completedText: null,
-            inProgressText: null,
-            describeError: describeError);
+class _ServiceExtensionSwitch extends _ServiceExtensionWidget {
+  const _ServiceExtensionSwitch({
+    Key key,
+    this.service,
+    @required String Function(dynamic) describeError,
+  }) : super(
+          key: key,
+          // Don't show messages on success or when this toggle is in progress.
+          completedText: null,
+          inProgressText: null,
+          describeError: describeError,
+        );
   final ToggleableServiceExtensionDescription service;
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
       _ServiceExtensionCheckboxState();
 }
 
-class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
+class _ServiceExtensionCheckboxState extends State<_ServiceExtensionSwitch>
     with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
   bool checked = false;
   @override
@@ -318,11 +321,13 @@ class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
         onTap: _onClick,
         child: Row(
           children: <Widget>[
-            Checkbox(
+            Switch(
               value: checked,
               onChanged: _onClick,
             ),
             Text(widget.service.description),
+            // The switch is padded on its sides by 16dp.
+            // This balances out the tappable area.
             const Padding(padding: EdgeInsets.only(left: 16.0)),
           ],
         ),

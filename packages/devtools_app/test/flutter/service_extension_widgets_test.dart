@@ -112,7 +112,7 @@ void main() {
     });
   });
 
-  group('Structured Errors checkbox', () {
+  group('Structured Errors toggle', () {
     StreamSubscription serviceState;
     ServiceExtensionState mostRecentState;
     setUp(() {
@@ -133,7 +133,7 @@ void main() {
       await mockServiceManager.serviceExtensionManager
           .fakeAddServiceExtension(structuredErrors.extension);
 
-      final button = StructuredErrorsCheckbox();
+      final button = StructuredErrorsToggle();
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
@@ -149,19 +149,19 @@ void main() {
         (WidgetTester tester) async {
       await mockServiceManager.serviceExtensionManager
           .fakeAddServiceExtension(structuredErrors.extension);
-      final button = StructuredErrorsCheckbox();
+      final button = StructuredErrorsToggle();
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
 
       await mockServiceManager.serviceExtensionManager
           .setServiceExtensionState(structuredErrors.extension, true, true);
       await tester.pumpAndSettle();
-      expect(checkbox.value, true, reason: 'The extension is enabled.');
+      expect(toggle.value, true, reason: 'The extension is enabled.');
 
       await mockServiceManager.serviceExtensionManager
           .setServiceExtensionState(structuredErrors.extension, false, false);
       await tester.pumpAndSettle();
-      expect(checkbox.value, false, reason: 'The extension is disabled.');
+      expect(toggle.value, false, reason: 'The extension is disabled.');
     });
   });
 }
@@ -178,5 +178,4 @@ void registerServiceExtension(
   });
 }
 
-Checkbox get checkbox =>
-    find.byType(Checkbox).evaluate().first.widget as Checkbox;
+Switch get toggle => find.byType(Switch).evaluate().first.widget;

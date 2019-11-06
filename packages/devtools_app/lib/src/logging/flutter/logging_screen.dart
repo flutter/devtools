@@ -52,8 +52,11 @@ class _LoggingScreenState extends State<LoggingScreenBody> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          RaisedButton(onPressed: _clearLogs, child: const Text('Clear logs')),
-          StructuredErrorsCheckbox(),
+          RaisedButton(
+            onPressed: _clearLogs,
+            child: const Text('Clear logs'),
+          ),
+          StructuredErrorsToggle(),
         ],
       ),
     ]);
