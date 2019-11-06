@@ -276,6 +276,9 @@ class StructuredErrorsToggle extends StatelessWidget {
   }
 }
 
+/// [Switch] that stays synced with the value of a service extension.
+///
+/// Service extensions can be found in [service_extensions.dart].
 class _ServiceExtensionToggle extends _ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     Key key,
@@ -435,69 +438,6 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
 
 // TODO(jacobr): port these classes to Flutter.
 /*
-/// Checkbox that stays synced with the value of a service extension.
-///
-/// Service extensions can be found in [service_extensions.dart].
-///
-/// See also:
-/// * ServiceExtensionWidget, which provides the same functionality but uses
-///   a button instead of a button. In general, using a button makes the UI
-///   more compact but the checkbox makes the current state of the UI clearer.
-class ServiceExtensionCheckbox {
-  ServiceExtensionCheckbox(this.extensionDescription)
-      : element = CoreElement('label') {
-    final checkbox = CoreElement('input')
-      ..setAttribute('type', 'checkbox');
-    _checkboxElement = checkbox.element;
-
-    element.add(<CoreElement>[
-      checkbox,
-      span(text: ' ${extensionDescription.description}'),
-    ]);
-
-    final extensionName = extensionDescription.extension;
-
-    // Disable button for unavailable service extensions.
-    checkbox.disabled = !serviceManager.serviceExtensionManager
-        .isServiceExtensionAvailable(extensionName);
-    serviceManager.serviceExtensionManager.hasServiceExtension(
-        extensionName, (available) => checkbox.disabled = !available);
-
-    _checkboxElement.onChange.listen((_) {
-      ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
-
-      final bool selected = _checkboxElement.checked;
-      serviceManager.serviceExtensionManager.setServiceExtensionState(
-        extensionDescription.extension,
-        selected,
-        selected
-            ? extensionDescription.enabledValue
-            : extensionDescription.disabledValue,
-      );
-    });
-    _updateState();
-  }
-
-  final ToggleableServiceExtensionDescription extensionDescription;
-  final CoreElement element;
-  html.InputElement _checkboxElement;
-
-  void _updateState() {
-    serviceManager.serviceExtensionManager
-        .getServiceExtensionState(extensionDescription.extension, (state) {
-      final extensionEnabled = state.value == extensionDescription.enabledValue;
-      _checkboxElement.checked = extensionEnabled;
-      // We display the tooltips in the reverse order they show up in
-      // ServiceExtensionWidget as for a checkbox it makes more sense to show
-      // a tooltip for the current value instead of for the value clicking on
-      // the button would switch to.
-      element.tooltip = extensionEnabled
-          ? extensionDescription.disabledTooltip
-          : extensionDescription.enabledTooltip;
-    });
-  }
-}
-
 /// Dropdown selector that calls a service extension.
 ///
 /// Service extensions can be found in [service_extensions.dart].
