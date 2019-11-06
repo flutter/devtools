@@ -23,6 +23,11 @@ Constraints deserializeConstraints(Map<String, Object> json) {
   );
 }
 
+Size deserializeSize(Map<String, Object> json) {
+  if (json == null) return null;
+  return Size(json['width'], json['height']);
+}
+
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 @immutable
 class RenderFlexProperties {

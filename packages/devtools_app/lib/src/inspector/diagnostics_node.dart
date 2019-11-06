@@ -71,6 +71,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get renderObject => json['renderObject'];
 
+  Map<String, Object> get size => json['size'];
+
   @override
   bool operator ==(dynamic other) {
     if (other is! RemoteDiagnosticsNode) return false;

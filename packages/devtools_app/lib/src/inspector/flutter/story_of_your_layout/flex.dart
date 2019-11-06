@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
+import 'package:devtools_app/src/ui/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -16,107 +15,101 @@ import 'utils.dart';
 @immutable
 class StoryOfYourFlexWidget extends StatelessWidget {
   const StoryOfYourFlexWidget({
-    this.diagnostic,
-    this.properties,
+    @required this.diagnostic,
+    @required this.properties,
+    @required this.size,
+    @required this.constraints,
     Key key,
   }) : super(key: key);
 
   final RemoteDiagnosticsNode diagnostic;
+  final Constraints constraints;
+  final Size size;
   final RenderFlexProperties properties;
 
-  List<Widget> _visualizeChildren(BuildContext context) {
-    if (!diagnostic.hasChildren) return [const SizedBox()];
+  Widget _visualizeFlex(BuildContext context) {
+    if (!diagnostic.hasChildren)
+      return const Center(child: Text('No Children'));
     final theme = Theme.of(context);
-    return [
-      for (var child in diagnostic.childrenNow)
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: theme.secondaryHeaderColor,
-                width: 1.0,
-              ),
-            ),
-            child: Center(
-              child: Text(child.description),
+    final children = diagnostic.childrenNow;
+    return AspectRatio(
+      aspectRatio: size.width / size.height,
+      child: LayoutBuilder(builder: (context, constraints) {
+        final width = constraints.maxWidth * 0.95;
+        final height = constraints.maxHeight * 0.95;
+        final widget = Container(
+          width: width,
+          height: height,
+          child: Flex(
+            mainAxisSize: MainAxisSize.min,
+            direction: properties.direction,
+            mainAxisAlignment: properties.mainAxisAlignment,
+            crossAxisAlignment: properties.crossAxisAlignment,
+            children: [
+              for (var i = 0; i < children.length; i++)
+                FlexChildVisualizer(
+                  node: children[i],
+                  borderColor: i.isOdd ? mainUiColor : mainGpuColor,
+                  backgroundColor: i.isOdd ? mainGpuColor : mainUiColor,
+                  parentSize: size,
+                  screenSize: Size(width * 0.99, height * 0.99),
+                )
+            ],
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.accentColor,
+              width: 2.0,
             ),
           ),
-        ),
-    ];
+        );
+        return _visualizeMainAxisAndCrossAxis(
+          child: widget,
+          width: width,
+          height: height,
+          theme: theme,
+        );
+      }),
+    );
   }
 
-  Widget _visualizeMainAxisAndCrossAxis(
+  Widget _visualizeMainAxisAndCrossAxis({
     Widget child,
-    double length,
+    double width,
+    double height,
     ThemeData theme,
-  ) {
+  }) {
     return BorderLayout(
       center: child,
-      top: Container(
-        child: ArrowWrapper.unidirectional(
-          arrowColor: theme.hintColor,
-          child: Text(
-            properties.horizontalDirectionDescription,
-            textAlign: TextAlign.center,
-          ),
-          distanceToArrow: 4.0,
-          type: ArrowType.right,
-        ),
-        margin: const EdgeInsets.only(bottom: 16.0),
-        width: length,
-      ),
-      left: Container(
-        child: ArrowWrapper.unidirectional(
-          arrowColor: theme.hintColor,
-          child: Text(
-            properties.verticalDirectionDescription,
-            textAlign: TextAlign.center,
-          ),
-          distanceToArrow: 4.0,
-          type: ArrowType.down,
-        ),
-        height: length,
-        width: length * 0.25,
-      ),
       right: Container(
         child: ArrowWrapper.bidirectional(
           arrowColor: theme.splashColor,
           arrowStrokeWidth: 1.0,
-          child: Column(
-            children: <Widget>[
-              Text(
-                // TODO(albertusangga): Use real height
-                '${length.round()} px',
-                textAlign: TextAlign.center,
-              ),
-              const Text(
-                'height',
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: RotatedBox(
+            quarterTurns: 1,
+            child: Text(
+              'height: ${size.height} px',
+              textAlign: TextAlign.center,
+            ),
           ),
           direction: Axis.vertical,
         ),
-        height: length,
-        width: length * 0.25,
+        height: height,
+        width: width * 0.05,
       ),
       bottom: Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ArrowWrapper.bidirectional(
           arrowColor: theme.splashColor,
           arrowStrokeWidth: 1.0,
-          child: Column(
-            children: <Widget>[
-              Text(
-                // TODO(albertusangga): Use real width
-                '${length.round()} px',
-              ),
-              const Text('width'),
-            ],
+          child: Text(
+            'width: ${size.width} px',
+            textAlign: TextAlign.center,
           ),
           direction: Axis.horizontal,
         ),
-        width: length,
+        width: width,
+        height: 16,
       ),
     );
   }
@@ -131,76 +124,158 @@ class StoryOfYourFlexWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            margin: const EdgeInsets.only(bottom: 36.0),
+            margin: const EdgeInsets.only(bottom: 24.0),
             child: Text(
               'Story of the flex layout of your $flexType widget',
               style: theme.textTheme.headline,
               textAlign: TextAlign.center,
             ),
           ),
-          Expanded(
+          Flexible(
             child: LayoutBuilder(builder: (context, constraints) {
-              final children = _visualizeChildren(context);
-              final flexDirectionWrapper = Flex(
-                direction: properties.direction,
-                children: children,
-              );
-              final childrenVisualizerWidget = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    child: Text(
-                      properties.type.toString(),
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.accentColor,
-                    ),
-                    padding: const EdgeInsets.all(4.0),
-                  ),
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                        left: 16.0,
-                        right: 16.0,
-                        bottom: 16.0,
-                        top: 8.0,
+              final maxHeight = constraints.maxHeight * 0.95;
+              final maxWidth = constraints.maxWidth * 0.95;
+              const topArrowIndicatorHeight = 32.0;
+              const leftArrowIndicatorWidth = 32.0;
+              return Container(
+                constraints:
+                    BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+                child: Stack(
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                          top: topArrowIndicatorHeight,
+                          left: leftArrowIndicatorWidth + 8.0,
+                        ),
+                        child: WidgetVisualizer(
+                          widgetName: flexType,
+                          borderColor: theme.accentColor,
+                          backgroundColor: theme.primaryColor,
+                          child: _visualizeFlex(context),
+                        ),
                       ),
-                      child: flexDirectionWrapper,
                     ),
-                  ),
-                ],
-              );
-
-              final minDimension = min(
-                constraints.maxHeight * 0.5,
-                constraints.maxWidth * 0.5,
-              );
-              final length = min(minDimension, 800.0);
-
-              final flexVisualizerWidget = Container(
-                constraints: BoxConstraints.tight(
-                  Size(
-                    length,
-                    length,
-                  ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Container(
+                        height: double.infinity,
+                        width: leftArrowIndicatorWidth,
+                        child: ArrowWrapper.unidirectional(
+                          child: Text(
+                            properties.verticalDirectionDescription,
+                            textAlign: TextAlign.center,
+                          ),
+                          type: ArrowType.down,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        height: topArrowIndicatorHeight,
+                        child: ArrowWrapper.unidirectional(
+                          child: Text(
+                            properties.horizontalDirectionDescription,
+                            textAlign: TextAlign.center,
+                          ),
+                          type: ArrowType.right,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: theme.accentColor,
-                  ),
-                  color: theme.primaryColor,
-                ),
-                child: childrenVisualizerWidget,
-              );
-
-              return _visualizeMainAxisAndCrossAxis(
-                flexVisualizerWidget,
-                length,
-                theme,
               );
             }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class WidgetVisualizer extends StatelessWidget {
+  const WidgetVisualizer({
+    Key key,
+    @required this.widgetName,
+    @required this.borderColor,
+    @required this.backgroundColor,
+    this.child,
+  })  : assert(widgetName != null),
+        assert(borderColor != null),
+        assert(backgroundColor != null),
+        super(key: key);
+
+  final String widgetName;
+  final Color borderColor;
+  final Color backgroundColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            child: Text(widgetName),
+            decoration: BoxDecoration(
+              color: borderColor,
+            ),
+            padding: const EdgeInsets.all(4.0),
+          ),
+          if (child != null)
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(
+                  left: 16.0,
+                  top: 16.0,
+                ),
+                child: child,
+              ),
+            ),
+        ],
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: borderColor,
+        ),
+        color: backgroundColor,
+      ),
+    );
+    ;
+  }
+}
+
+class FlexChildVisualizer extends StatelessWidget {
+  const FlexChildVisualizer({
+    Key key,
+    this.node,
+    this.borderColor,
+    this.backgroundColor,
+    this.parentSize,
+    this.screenSize,
+  }) : super(key: key);
+
+  final RemoteDiagnosticsNode node;
+  final Color borderColor;
+  final Color backgroundColor;
+
+  final Size parentSize;
+  final Size screenSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = deserializeSize(node.size);
+    return Container(
+      width: (size.width / parentSize.width) * screenSize.width,
+      height: (size.height / parentSize.height) * screenSize.height,
+      child: WidgetVisualizer(
+        widgetName: node.description,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
       ),
     );
   }
