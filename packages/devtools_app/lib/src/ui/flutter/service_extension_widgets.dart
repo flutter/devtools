@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
@@ -47,8 +46,7 @@ class ExtensionState {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup>
-    with AutoDisposeBase, AutoDisposeMixin {
+    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
   List<ExtensionState> _extensionStates;
 
   @override

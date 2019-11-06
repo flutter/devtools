@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
 import '../../flutter/screen.dart';
