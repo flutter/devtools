@@ -268,7 +268,7 @@ class _RegisteredServiceExtensionButtonState
 class StructuredErrorsToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _ServiceExtensionSwitch(
+    return _ServiceExtensionToggle(
       service: structuredErrors,
       describeError: (error) =>
           'Failed to update structuredError settings: $error',
@@ -276,8 +276,8 @@ class StructuredErrorsToggle extends StatelessWidget {
   }
 }
 
-class _ServiceExtensionSwitch extends _ServiceExtensionWidget {
-  const _ServiceExtensionSwitch({
+class _ServiceExtensionToggle extends _ServiceExtensionWidget {
+  const _ServiceExtensionToggle({
     Key key,
     this.service,
     @required String Function(dynamic) describeError,
@@ -291,10 +291,10 @@ class _ServiceExtensionSwitch extends _ServiceExtensionWidget {
   final ToggleableServiceExtensionDescription service;
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
-      _ServiceExtensionCheckboxState();
+      _ServiceExtensionToggleState();
 }
 
-class _ServiceExtensionCheckboxState extends State<_ServiceExtensionSwitch>
+class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
   bool checked = false;
   @override
