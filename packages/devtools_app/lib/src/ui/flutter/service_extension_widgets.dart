@@ -224,7 +224,6 @@ class _RegisteredServiceExtensionButtonState
         (registered) {
           setState(() {
             _hidden = !registered;
-            print(_hidden);
           });
         },
       ),
@@ -249,6 +248,7 @@ class _RegisteredServiceExtensionButtonState
   }
 }
 
+/// Checkbox that toggles the value of [structuredErrors].
 class StructuredErrorsCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -265,6 +265,7 @@ class _ServiceExtensionCheckbox extends _ServiceExtensionWidget {
       {Key key, this.service, @required String Function(dynamic) describeError})
       : super(
             key: key,
+            // Don't show messages on success or when this toggle is in progress.
             completedText: null,
             inProgressText: null,
             describeError: describeError);
@@ -284,7 +285,7 @@ class _ServiceExtensionCheckboxState extends State<_ServiceExtensionCheckbox>
       widget.service.extension,
       (data) {
         setState(() {
-          checked = data.enabled;
+          checked = data.value == widget.service.enabledValue;
         });
       },
     ));
