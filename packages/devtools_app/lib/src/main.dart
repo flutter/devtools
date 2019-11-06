@@ -235,7 +235,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
     ));
     addScreen(HtmlTimelineScreen(
       isDartCliApp ? TimelineMode.full : TimelineMode.frameBased,
-      enabled: (isFlutterApp && !isFlutterWebApp) || isDartCliApp,
+      enabled: app.isRunningOnDartVM,
       disabledTooltip:
           isFlutterWebApp ? notFlutterWebMsg : notRunningFlutterMsg,
     ));

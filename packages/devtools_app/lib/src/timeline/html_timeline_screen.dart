@@ -44,7 +44,7 @@ const enableMultiModeTimeline = true;
 
 class HtmlTimelineScreen extends HtmlScreen {
   HtmlTimelineScreen(
-    TimelineMode startMode, {
+    this.startTimelineMode, {
     bool enabled,
     String disabledTooltip,
   }) : super(
@@ -55,8 +55,10 @@ class HtmlTimelineScreen extends HtmlScreen {
           disabledTooltip: disabledTooltip,
         ) {
     _initContent();
-    _setTimelineMode(timelineMode: startMode);
+    _setTimelineMode(timelineMode: startTimelineMode);
   }
+
+  final TimelineMode startTimelineMode;
 
   TimelineController timelineController = TimelineController();
 
@@ -444,14 +446,10 @@ class HtmlTimelineScreen extends HtmlScreen {
     // changes the value of [offlineMode], which the button states depend on.
     framework.exitOfflineMode();
 
-    // Revert to the previously selected mode on offline exit, unless there is
-    // only one allowed mode for the connected app. We already cleared the
-    // timeline data - do not repeat this action.
-    final mode = await serviceManager.connectedApp.isDartCliApp
-        ? TimelineMode.full
-        : timelineController.timelineMode;
+    // Revert to [startTimelineMode]. We already cleared the timeline data - do
+    // not repeat this action.
     _setTimelineMode(
-      timelineMode: mode,
+      timelineMode: startTimelineMode,
       clearTimeline: false,
     );
     _updateButtonStates();
