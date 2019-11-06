@@ -264,7 +264,7 @@ class _RegisteredServiceExtensionButtonState
   }
 }
 
-/// Checkbox that toggles the value of [structuredErrors].
+/// Control that toggles the value of [structuredErrors].
 class StructuredErrorsToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
