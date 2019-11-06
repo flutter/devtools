@@ -108,9 +108,6 @@ class DevToolsAppState extends State<DevToolsApp> {
             actions: [
               HotReloadButton(),
               HotRestartButton(),
-              const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-              ),
             ],
           ),
         ),

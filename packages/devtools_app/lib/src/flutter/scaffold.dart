@@ -32,7 +32,10 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The width at or below which we treat the scaffold as narrow-width.
-  static const double narrowWidthThreshold = 1200.0;
+  static const double narrowWidthThreshold = 1000.0;
+
+  /// The size that all actions on this widget are expected to have.
+  static const double actionWidgetSize = 48.0;
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -51,6 +54,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
   static const String _appBarTag = 'DevTools AppBar';
+
+  AnimationController appBarAnimation;
+  CurvedAnimation appBarCurve;
 
   /// The controller for animating between tabs.
   ///
@@ -80,9 +86,35 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
   }
 
+  bool get isNarrow =>
+      MediaQuery.of(context).size.width <=
+      DevToolsScaffold.narrowWidthThreshold;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // If the animations are null, initialize them.
+    appBarAnimation ??= AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+      value: isNarrow ? 1.0 : 0.0,
+    );
+    appBarCurve ??= CurvedAnimation(
+      parent: appBarAnimation,
+      curve: Curves.easeInOutCirc,
+    );
+    if (isNarrow) {
+      appBarAnimation.forward();
+    } else {
+      appBarAnimation.reverse();
+    }
+  }
+
   @override
   void dispose() {
     _controller?.dispose();
+    appBarAnimation?.dispose();
     super.dispose();
   }
 
@@ -121,9 +153,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
         ),
     ];
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: TabBarView(
+    return AnimatedBuilder(
+      animation: appBarCurve,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: _buildAppBar(),
+          body: child,
+        );
+      },
+      child: TabBarView(
         controller: _controller,
         children: tabBodies,
       ),
@@ -134,53 +172,96 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// depending on the screen width.
   Widget _buildAppBar() {
     const title = Text('Dart DevTools');
-    Widget tabs;
+    Widget flexibleSpace;
+    Size preferredSize;
     if (widget.tabs.length > 1) {
-      tabs = TabBar(
+      TabBar tabs = TabBar(
         controller: _controller,
         isScrollable: true,
         onTap: _pushScreenToLocalPageRoute,
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
-    }
-    if (MediaQuery.of(context).size.width <=
-        DevToolsScaffold.narrowWidthThreshold) {
-      return _PreferredSizeHero(
-        tag: _appBarTag,
-        child: AppBar(
-          key: DevToolsScaffold.narrowWidthKey,
-          // Turn off the appbar's back button on the web.
-          automaticallyImplyLeading: !kIsWeb,
-          title: title,
-          bottom: tabs,
-          actions: widget.actions,
+      preferredSize = Tween<Size>(
+        begin: Size.fromHeight(kToolbarHeight),
+        end: Size.fromHeight(kToolbarHeight + tabs.preferredSize.height),
+      ).evaluate(appBarCurve);
+      final animatedAlignment = Tween<Alignment>(
+        begin: Alignment.centerRight,
+        end: Alignment.bottomCenter,
+      ).evaluate(appBarCurve);
+      final animatedRightPadding = Tween<double>(
+        begin:
+            DevToolsScaffold.actionWidgetSize * (widget.actions?.length ?? 0.0),
+        end: 0.0,
+      ).evaluate(appBarCurve);
+      flexibleSpace = Align(
+        alignment: Alignment.topRight,
+        child: Align(
+          alignment: animatedAlignment,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 4.0,
+              right: animatedRightPadding,
+            ),
+            child: tabs,
+          ),
         ),
       );
     }
-    // Place the AppBar inside of a Hero widget to keep it the same
-    // across route transitions.
-    return _PreferredSizeHero(
-      tag: _appBarTag,
-      child: AppBar(
-        key: DevToolsScaffold.fullWidthKey,
-        // Turn off the appbar's back button on the web.
-        automaticallyImplyLeading: !kIsWeb,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            title,
-            if (tabs != null)
-              Padding(
-                padding:
-                    const EdgeInsets.only(top: 4.0, left: 32.0, right: 32.0),
-                child: tabs,
-              ),
-          ],
-        ),
-        actions: widget.actions,
+
+    final appBar = AppBar(
+      // Turn off the appbar's back button on the web.
+      automaticallyImplyLeading: !kIsWeb,
+      title: title,
+      actions: widget.actions,
+      flexibleSpace: flexibleSpace,
+    );
+
+    if (flexibleSpace == null) return appBar;
+    return PreferredSize(
+      key: isNarrow
+          ? DevToolsScaffold.narrowWidthKey
+          : DevToolsScaffold.fullWidthKey,
+      preferredSize: preferredSize,
+      // Place the AppBar inside of a Hero widget to keep it the same
+      // across route transitions.
+      child: Hero(
+        tag: _appBarTag,
+        child: appBar,
       ),
     );
+  }
+}
+
+/// AppBar that places the TabBar inline when it is wide enough.
+class SizeAnimatingAppBar extends StatefulWidget
+    implements PreferredSizeWidget {
+  const SizeAnimatingAppBar({
+    Key key,
+    @required this.actions,
+    @required this.title,
+    @required this.tabBar,
+    @required this.expanded,
+  }) : super(key: key);
+
+  final List<Widget> actions;
+  final Widget title;
+  final PreferredSizeWidget tabBar;
+  final bool expanded;
+
+  @override
+  SizeAnimatingAppBarState createState() => SizeAnimatingAppBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => null;
+}
+
+class SizeAnimatingAppBarState extends State<SizeAnimatingAppBar> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return null;
   }
 }
 
