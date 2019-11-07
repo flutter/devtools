@@ -8,12 +8,19 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/mocks.dart';
+
 void main() {
   group('Initializer', () {
+    DisconnectableMockServiceManager serviceManager;
     MaterialApp app;
     const Key connectKey = Key('connect');
     const Key initializedKey = Key('initialized');
-    setUp(() {
+    setUp(() async {
+      serviceManager = DisconnectableMockServiceManager();
+      await serviceManager.ensureInspectorDependencies();
+      setGlobal(ServiceConnectionManager, serviceManager);
+
       app = MaterialApp(
         routes: {
           '/connect': (_) => const SizedBox(key: connectKey),
@@ -26,10 +33,7 @@ void main() {
 
     testWidgets('navigates to the connection page when uninitialized',
         (WidgetTester tester) async {
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(hasConnection: false),
-      );
+      serviceManager._hasConnection = false;
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsOneWidget);
@@ -38,10 +42,7 @@ void main() {
 
     testWidgets('builds contents when initialized',
         (WidgetTester tester) async {
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(hasConnection: true),
-      );
+      serviceManager._hasConnection = true;
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsNothing);
@@ -50,9 +51,8 @@ void main() {
   });
 }
 
-class FakeServiceManager extends ServiceConnectionManager {
-  FakeServiceManager({@required this.hasConnection}) : super();
-
+class DisconnectableMockServiceManager extends MockServiceManager {
+  bool _hasConnection = false;
   @override
-  final bool hasConnection;
+  bool get hasConnection => _hasConnection;
 }

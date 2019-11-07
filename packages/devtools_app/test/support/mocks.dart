@@ -5,17 +5,19 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
-  final VmServiceWrapper service = MockVmService();
+  final MockVmService service = MockVmService();
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -32,6 +34,25 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
+
+  Future<void> ensureInspectorDependencies() async {
+    mockAllEventStreams();
+    when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+    Catalog.setCatalog(Catalog.decode(await widgetsJson()));
+  }
+
+  void mockAllEventStreams() {
+    when(onStateChange).thenAnswer((_) => const Stream.empty());
+    when(service.onStdoutEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onStderrEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onDebugEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onExtensionEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onServiceEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onGCEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onHeapSnapshotEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onIsolateEvent).thenAnswer((_) => const Stream.empty());
+    when(service.onLoggingEvent).thenAnswer((_) => const Stream.empty());
+  }
 }
 
 class MockVmService extends Mock implements VmServiceWrapper {}
