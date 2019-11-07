@@ -562,8 +562,7 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   void _updateVisibilityForTimelineMode() {
     _updateButtonStates();
-    framesBarChart
-        .hidden(timelineController.timelineMode == TimelineMode.full);
+    framesBarChart.hidden(timelineController.timelineMode == TimelineMode.full);
     flameChartContainer
         .hidden(timelineController.timelineMode == TimelineMode.frameBased);
     _recordingInstructions
