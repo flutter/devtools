@@ -60,6 +60,7 @@ class _ProviderState extends State<Provider> {
     super.initState();
     // Everything depends on the serviceManager being available.
     assert(serviceManager != null);
+
     _initializeProviderData();
   }
 

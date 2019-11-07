@@ -5,10 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../auto_dispose.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
+import '../inspector/flutter_widget.dart';
+import '../inspector/inspector_service.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
@@ -52,10 +55,18 @@ class _InitializerState extends State<Initializer>
   bool _checkLoaded() => serviceManager.hasConnection;
 
   bool _attemptingConnection = false;
+  bool _dependenciesLoaded = false;
 
   @override
   void initState() {
     super.initState();
+    ensureInspectorDependencies().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _dependenciesLoaded = true;
+      });
+    });
+
     autoDispose(
       serviceManager.onStateChange.listen((_) {
         // Generally, empty setState calls in Flutter should be avoided.
@@ -106,7 +117,7 @@ class _InitializerState extends State<Initializer>
 
   @override
   Widget build(BuildContext context) {
-    return _checkLoaded()
+    return _checkLoaded() && _dependenciesLoaded
         ? Provider(child: widget.builder(context))
         : _loadingScreen();
   }
@@ -133,4 +144,16 @@ class _InitializerState extends State<Initializer>
       ),
     );
   }
+}
+
+Future<void> ensureInspectorDependencies() async {
+  // TODO(jacobr): move this rootBundle loading code into
+  // InspectorController once the dart:html app is removed and Flutter
+  // conventions for loading assets can be the default.
+  if (Catalog.instance == null) {
+    final json = await rootBundle.loadString('web/widgets.json');
+    // ignore: invalid_use_of_visible_for_testing_member
+    Catalog.setCatalog(Catalog.decode(json));
+  }
+  await ensureInspectorServiceDependencies();
 }

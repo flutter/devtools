@@ -4,9 +4,12 @@
 
 import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
 
@@ -18,7 +21,9 @@ void main() {
     const Key initializedKey = Key('initialized');
     setUp(() async {
       serviceManager = DisconnectableMockServiceManager();
-      await serviceManager.ensureInspectorDependencies();
+      serviceManager.mockAllEventStreams();
+      Catalog.setCatalog(Catalog.decode(await widgetsJson()));
+      await ensureInspectorDependencies();
       setGlobal(ServiceConnectionManager, serviceManager);
 
       app = MaterialApp(
@@ -42,7 +47,7 @@ void main() {
 
     testWidgets('builds contents when initialized',
         (WidgetTester tester) async {
-      serviceManager._hasConnection = true;
+      print('running test');
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsNothing);
@@ -52,7 +57,7 @@ void main() {
 }
 
 class DisconnectableMockServiceManager extends MockServiceManager {
-  bool _hasConnection = false;
+  bool _hasConnection = true;
   @override
   bool get hasConnection => _hasConnection;
 }

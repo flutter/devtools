@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
+import '../../flutter/initializer.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
@@ -17,7 +17,6 @@ import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/icons.dart';
-import '../flutter_widget.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
 import 'inspector_screen_details_tab.dart';
@@ -209,17 +208,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     });
 
     try {
-      // TODO(jacobr): move this rootBundle loading code into
-      // InspectorController once the dart:html app is removed and Flutter
-      // conventions for loading assets can be the default.
-      if (Catalog.instance == null) {
-        final json = await rootBundle.loadString('web/widgets.json');
-        // ignore: invalid_use_of_visible_for_testing_member
-        Catalog.setCatalog(Catalog.decode(json));
-      }
-      await ensureInspectorServiceDependencies();
-
       // Init the inspector service, or return null.
+      await ensureInspectorDependencies();
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);
     } finally {

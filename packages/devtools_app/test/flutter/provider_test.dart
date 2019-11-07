@@ -20,6 +20,7 @@ void main() {
     });
 
     testWidgets('provides default data', (WidgetTester tester) async {
+      print('running test');
       ProviderData provider;
       await tester.pumpWidget(
         Provider(

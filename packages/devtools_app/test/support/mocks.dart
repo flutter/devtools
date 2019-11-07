@@ -32,12 +32,16 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   final bool hasConnection = true;
 
   @override
+  final IsolateManager isolateManager = MockIsolateManager();
+
+  @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
 
   Future<void> ensureInspectorDependencies() async {
     mockAllEventStreams();
     when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
+    when(isolateManager.getSelectedIsolate(any)).thenAnswer((_) => null);
     Catalog.setCatalog(Catalog.decode(await widgetsJson()));
   }
 
@@ -54,6 +58,8 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
     when(service.onLoggingEvent).thenAnswer((_) => const Stream.empty());
   }
 }
+
+class MockIsolateManager extends Mock implements IsolateManager {}
 
 class MockVmService extends Mock implements VmServiceWrapper {}
 
