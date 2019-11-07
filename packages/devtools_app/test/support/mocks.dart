@@ -14,9 +14,12 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-class MockServiceManager extends Mock implements ServiceConnectionManager {
+class FakeServiceManager extends Fake implements ServiceConnectionManager {
+  FakeServiceManager({bool useFakeService = false})
+      : service = useFakeService ? FakeVmService() : MockVmService();
+
   @override
-  final VmServiceWrapper service = MockVmService();
+  final VmServiceWrapper service;
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -33,9 +36,17 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
+
+  @override
+  StreamSubscription<bool> hasRegisteredService(
+    String name,
+    void onData(bool value),
+  ) {
+    return Stream.value(false).listen(onData);
+  }
 }
 
-class MockVmService extends Mock implements VmServiceWrapper {
+class FakeVmService extends Fake implements VmServiceWrapper {
   final flags = <String, dynamic>{
     'flags': <Flag>[],
   };
@@ -64,6 +75,10 @@ class MockVmService extends Mock implements VmServiceWrapper {
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
 }
+
+class MockServiceManager extends Mock implements ServiceConnectionManager {}
+
+class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
 

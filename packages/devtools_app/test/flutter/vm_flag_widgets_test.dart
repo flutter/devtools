@@ -15,12 +15,12 @@ import 'wrappers.dart';
 
 void main() {
   group('Profile Granularity Dropdown', () {
-    MockServiceManager mockServiceManager;
+    FakeServiceManager fakeServiceManager;
     ProfileGranularityDropdown dropdown;
 
     setUp(() {
-      mockServiceManager = MockServiceManager();
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       dropdown = ProfileGranularityDropdown();
     });
 
@@ -49,7 +49,7 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
-      var flagList = (await mockServiceManager.service.getFlagList()).flags;
+      var flagList = (await fakeServiceManager.service.getFlagList()).flags;
       expect(flagList, isEmpty);
 
       // Switch to low granularity.
@@ -61,7 +61,7 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.low.value));
 
-      flagList = (await mockServiceManager.service.getFlagList()).flags;
+      flagList = (await fakeServiceManager.service.getFlagList()).flags;
       var profilePeriodFlag = flagList[0];
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
@@ -78,7 +78,7 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.high.value));
 
-      flagList = (await mockServiceManager.service.getFlagList()).flags;
+      flagList = (await fakeServiceManager.service.getFlagList()).flags;
       profilePeriodFlag = flagList[0];
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(

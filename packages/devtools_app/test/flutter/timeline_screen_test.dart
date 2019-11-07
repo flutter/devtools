@@ -18,12 +18,12 @@ import 'wrappers.dart';
 
 void main() {
   TimelineScreen screen;
-  MockServiceManager mockServiceManager;
+  FakeServiceManager fakeServiceManager;
 
   group('TimelineScreen', () {
     setUp(() {
-      mockServiceManager = MockServiceManager();
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      fakeServiceManager = FakeServiceManager(useFakeService: true);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
       screen = const TimelineScreen();

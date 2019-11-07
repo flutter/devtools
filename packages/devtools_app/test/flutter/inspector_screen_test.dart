@@ -23,14 +23,14 @@ import 'wrappers.dart';
 
 void main() {
   InspectorScreen screen;
-  MockServiceManager mockServiceManager;
+  FakeServiceManager fakeServiceManager;
   FakeServiceExtensionManager fakeExtensionManager;
   group('Inspector Screen', () {
     setUp(() {
-      mockServiceManager = MockServiceManager();
-      fakeExtensionManager = mockServiceManager.serviceExtensionManager;
+      fakeServiceManager = FakeServiceManager();
+      fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
 
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(serviceManager.connectedApp.isAnyFlutterApp)
           .thenAnswer((_) => Future.value(true));
 
