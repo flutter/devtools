@@ -38,13 +38,13 @@ void main() {
         (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
       await setWindowSize(const Size(1599.0, 1000.0));
-      var body = TimelineScreenBody();
-      await tester.pumpWidget(wrap(body));
+      await tester.pumpWidget(wrap(TimelineScreenBody()));
       expect(find.byType(TimelineScreenBody), findsOneWidget);
-      body = tester.widget(find.byType(TimelineScreenBody));
+      final TimelineScreenBodyState state =
+          tester.state(find.byType(TimelineScreenBody));
 
       // Verify TimelineMode.frameBased content.
-      expect(body.controller.timelineMode, equals(TimelineMode.frameBased));
+      expect(state.controller.timelineMode, equals(TimelineMode.frameBased));
       expect(find.text('Pause'), findsOneWidget);
       expect(find.text('Resume'), findsOneWidget);
       expect(find.text('Record'), findsNothing);
@@ -58,7 +58,7 @@ void main() {
       await tester.pump();
 
       // Verify TimelineMode.full content.
-      expect(body.controller.timelineMode, equals(TimelineMode.full));
+      expect(state.controller.timelineMode, equals(TimelineMode.full));
       expect(find.text('Pause'), findsNothing);
       expect(find.text('Resume'), findsNothing);
       expect(find.text('Record'), findsOneWidget);

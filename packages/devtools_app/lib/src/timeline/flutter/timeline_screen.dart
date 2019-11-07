@@ -33,16 +33,13 @@ class TimelineScreen extends Screen {
 }
 
 class TimelineScreenBody extends StatefulWidget {
-  final controller = TimelineController();
-
   @override
   TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
 
 class TimelineScreenBodyState extends State<TimelineScreenBody> {
-  // TODO(kenz): remove this convenience getter once we can use an inherited
-  // widget to provide controllers.
-  TimelineController get controller => widget.controller;
+  @visibleForTesting
+  final controller = TimelineController();
 
   @override
   void initState() {
@@ -50,13 +47,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
   }
 
   @override
-  void didUpdateWidget(TimelineScreenBody oldWidget) {
-    if (oldWidget.controller != widget.controller) {
-      // TODO(kenz): make TimelineController disposable via
-      // DisposableController and dispose here.
-//      final TimelineController oldController = oldWidget.controller;
-    }
-    super.didUpdateWidget(oldWidget);
+  void dispose() {
+    // TODO(kenz): make TimelineController disposable via
+    // DisposableController and dispose here.
+    super.dispose();
   }
 
   @override

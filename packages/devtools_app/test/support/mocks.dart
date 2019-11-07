@@ -9,7 +9,6 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
-import 'package:devtools_app/src/vm_flags.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -37,13 +36,30 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
 }
 
 class MockVmService extends Mock implements VmServiceWrapper {
-  Map<String, dynamic> flags = {};
+  final flags = <String, dynamic>{
+    'flags': <Flag>[],
+  };
 
   @override
   Future<Success> setFlag(String name, String value) {
-    flags[profilePeriod] = value;
+    final List<Flag> flags = this.flags['flags'];
+    final existingFlag =
+        flags.firstWhere((f) => f.name == name, orElse: () => null);
+    if (existingFlag != null) {
+      existingFlag.valueAsString = value;
+    } else {
+      flags.add(Flag.parse({
+        'name': name,
+        'comment': 'Mock Flag',
+        'modified': true,
+        'valueAsString': value,
+      }));
+    }
     return Future.value(Success());
   }
+
+  @override
+  Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
