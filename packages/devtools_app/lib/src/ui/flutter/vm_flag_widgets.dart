@@ -14,6 +14,11 @@ class ProfileGranularityDropdown extends StatefulWidget {
   @override
   ProfileGranularityDropdownState createState() =>
       ProfileGranularityDropdownState();
+
+  /// The key to identify the dropdown button.
+  @visibleForTesting
+  static const Key dropdownKey =
+      Key('ProfileGranularityDropdown DropdownButton');
 }
 
 // TODO(kenz): listen for updates to 'profile_period' flag and update the
@@ -28,6 +33,7 @@ class ProfileGranularityDropdownState
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
+      key: ProfileGranularityDropdown.dropdownKey,
       value: dropdownValue,
       items: [
         _buildMenuItem(ProfileGranularity.low),

@@ -21,7 +21,7 @@ class TimelineScreen extends Screen {
   const TimelineScreen() : super('Timeline');
 
   @override
-  Widget build(BuildContext context) => const TimelineBody();
+  Widget build(BuildContext context) => TimelineScreenBody();
 
   @override
   Widget buildTab(BuildContext context) {
@@ -32,19 +32,31 @@ class TimelineScreen extends Screen {
   }
 }
 
-class TimelineBody extends StatefulWidget {
-  const TimelineBody();
+class TimelineScreenBody extends StatefulWidget {
+  final controller = TimelineController();
 
   @override
-  TimelineBodyState createState() => TimelineBodyState();
+  TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
 
-class TimelineBodyState extends State<TimelineBody> {
-  TimelineMode _timelineMode = TimelineMode.frameBased;
+class TimelineScreenBodyState extends State<TimelineScreenBody> {
+  // TODO(kenz): remove this convenience getter once we can use an inherited
+  // widget to provide controllers.
+  TimelineController get controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(TimelineScreenBody oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      final TimelineController oldController = oldWidget.controller;
+      // TODO(kenz): make TimelineController disposable via
+      // DisposableController and dispose here.
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -63,7 +75,8 @@ class TimelineBodyState extends State<TimelineBody> {
             ),
           ],
         ),
-        if (_timelineMode == TimelineMode.frameBased) FlutterFramesChart(),
+        if (controller.timelineMode == TimelineMode.frameBased)
+          FlutterFramesChart(),
         Expanded(
           child: Split(
             axis: Axis.vertical,
@@ -78,7 +91,7 @@ class TimelineBodyState extends State<TimelineBody> {
 
   List<Widget> _buildTimelineStateButtons() {
     return [
-      if (_timelineMode == TimelineMode.frameBased) ...[
+      if (controller.timelineMode == TimelineMode.frameBased) ...[
         OutlineButton(
           onPressed: _pauseLiveTimeline,
           child: const MaterialIconLabel(
@@ -96,7 +109,7 @@ class TimelineBodyState extends State<TimelineBody> {
           ),
         ),
       ],
-      if (_timelineMode == TimelineMode.full) ...[
+      if (controller.timelineMode == TimelineMode.full) ...[
         OutlineButton(
           onPressed: _startRecording,
           child: const MaterialIconLabel(
@@ -128,7 +141,7 @@ class TimelineBodyState extends State<TimelineBody> {
         child: Row(
           children: [
             Switch(
-              value: _timelineMode == TimelineMode.frameBased,
+              value: controller.timelineMode == TimelineMode.frameBased,
               onChanged: _onTimelineModeChanged,
             ),
             const Text('Show frames'),
@@ -186,7 +199,8 @@ class TimelineBodyState extends State<TimelineBody> {
 
   void _onTimelineModeChanged(bool frameBased) {
     setState(() {
-      _timelineMode = frameBased ? TimelineMode.frameBased : TimelineMode.full;
+      controller.timelineMode =
+          frameBased ? TimelineMode.frameBased : TimelineMode.full;
     });
   }
 }

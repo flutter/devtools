@@ -9,9 +9,11 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/vm_flags.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
@@ -34,7 +36,18 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
       FakeServiceExtensionManager();
 }
 
-class MockVmService extends Mock implements VmServiceWrapper {}
+class MockVmService extends Mock implements VmServiceWrapper {
+  Map<String, dynamic> flags = {};
+
+  @override
+  Future<Success> setFlag(String name, String value) {
+    flags[profilePeriod] = value;
+    return Future.value(Success());
+  }
+
+  @override
+  Stream<Event> onEvent(String streamName) => const Stream.empty();
+}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
 
