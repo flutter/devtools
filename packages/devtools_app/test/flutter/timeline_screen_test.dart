@@ -53,11 +53,9 @@ void main() {
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       expect(find.byType(EventDetails), findsOneWidget);
 
-      // Switch timeline mode and re-pump widget.
-      body = TimelineScreenBody()..controller.timelineMode = TimelineMode.full;
-      await tester.pumpWidget(wrap(body));
-      expect(find.byType(TimelineScreenBody), findsOneWidget);
-      body = tester.widget(find.byType(TimelineScreenBody));
+      // Switch timeline mode and pump.
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
 
       // Verify TimelineMode.full content.
       expect(body.controller.timelineMode, equals(TimelineMode.full));
