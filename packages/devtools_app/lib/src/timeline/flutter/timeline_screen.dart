@@ -52,9 +52,9 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
   @override
   void didUpdateWidget(TimelineScreenBody oldWidget) {
     if (oldWidget.controller != widget.controller) {
-      final TimelineController oldController = oldWidget.controller;
       // TODO(kenz): make TimelineController disposable via
       // DisposableController and dispose here.
+//      final TimelineController oldController = oldWidget.controller;
     }
     super.didUpdateWidget(oldWidget);
   }
