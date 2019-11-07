@@ -7,6 +7,9 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+// TODO(terry): Eliminate this typedef hack - used for callback signature.
+typedef VoidCallback = void Function();
+
 /// A widget that takes two children, lays them out along [axis], and allows
 /// the user to resize them.
 ///
@@ -28,6 +31,8 @@ class Split extends StatefulWidget {
     @required this.firstChild,
     @required this.secondChild,
     double initialFirstFraction,
+    // TODO(terry): Eliminate this hack - need to compute size during chart resize.
+    VoidCallback this.callback,
   })  : initialFirstFraction = initialFirstFraction ?? 0.5,
         assert(axis != null),
         assert(firstChild != null),
@@ -55,6 +60,10 @@ class Split extends StatefulWidget {
   ///
   /// [secondChild] will receive a fraction of `1 - initialFirstFraction`.
   final double initialFirstFraction;
+
+  /// TODO(terry): Eliminate this hack.
+  /// Callback function to invoke when resized.
+  final VoidCallback callback;
 
   /// The key passed to the divider between [firstChild] and [secondChild].
   ///
@@ -176,6 +185,10 @@ class _SplitState extends State<Split> {
         child: widget.secondChild,
       ),
     ];
+
+    // TODO(terry): Eliminate this hack.
+    if (widget.callback != null) widget.callback();
+
     return Flex(direction: widget.axis, children: children);
   }
 }

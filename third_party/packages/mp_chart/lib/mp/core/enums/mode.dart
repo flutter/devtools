@@ -1,0 +1,6 @@
+enum Mode {
+  LINEAR,
+  STEPPED,
+  CUBIC_BEZIER,
+  HORIZONTAL_BEZIER
+}

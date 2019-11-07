@@ -28,11 +28,6 @@ abstract class Screen {
 class EmptyScreen extends Screen {
   const EmptyScreen(String name, this.icon) : super(name);
 
-  static final EmptyScreen memory = EmptyScreen(
-    'Memory',
-    Octicons.getIconData('package'),
-  );
-
   static final EmptyScreen logging = EmptyScreen(
     'Logging',
     Octicons.getIconData('clippy'),
