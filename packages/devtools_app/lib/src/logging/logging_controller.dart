@@ -21,7 +21,6 @@ import '../table_data.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
-import 'config.dart';
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
@@ -155,9 +154,7 @@ class LoggingController {
   }
 
   LoggingDetailsController detailsController;
-  bool get hideSystemLog {
-    return config[platformLogTag];
-  }
+  bool hideSystemLog = false;
 
   String searchText = '';
 
@@ -242,6 +239,10 @@ class LoggingController {
     }).toList();
     detailsController?.setData(null);
     _loggingTableModel.setRows(data);
+  }
+
+  void setHideSystemLogProperty(bool isShow) {
+    hideSystemLog = !isShow;
   }
 
   void _handleConnectionStart(VmServiceWrapper service) async {

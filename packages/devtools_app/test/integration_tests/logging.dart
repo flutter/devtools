@@ -54,20 +54,34 @@ void loggingTests() {
     final LoggingManager logs = LoggingManager(tools);
     await logs.clearLogs();
 
-    await appFixture.invoke('controller.emitLog()');
-    await appFixture.invoke('controller.emitLogTest()');
+    await appFixture.invoke('controller.emitLogForString("string1")');
+    await appFixture.invoke('controller.emitLogForString("string1")');
+    await appFixture.invoke('controller.emitLogForString("string1")');
+    await appFixture.invoke('controller.emitLogForString("string2")');
+    await appFixture.invoke('controller.emitLogForString("string2")');
     await waitFor(() async => await logs.logCount() > 0);
     final countAll = await logs.logCount();
+    expect(countAll, equals(5));
 
-    await logs.filterLogs('test');
-    final countFilter = await logs.logCount();
+    await logs.filterLogs('string1');
+    final countStr1 = await logs.logCount();
+    expect(countStr1, equals(3));
+
+    await logs.filterLogs('string2');
+    final countStr2 = await logs.logCount();
+    expect(countStr2, equals(2));
+
+    await logs.filterLogs('string');
+    final countStr = await logs.logCount();
+    expect(countStr, equals(5));
+
+    await logs.filterLogs('string3');
+    final countStr3 = await logs.logCount();
+    expect(countStr3, equals(0));
 
     await logs.filterLogs('');
-    final countAllAfter = await logs.logCount();
-
-    // Verify the log data shows up in the UI.
-    expect(countAll, greaterThanOrEqualTo(countFilter));
-    expect(countAll, equals(countAllAfter));
+    final countStrEmpty = await logs.logCount();
+    expect(countStrEmpty, equals(5));
   });
 
   test('log screen postpones write when offscreen', () async {

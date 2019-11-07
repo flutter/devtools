@@ -27,11 +27,8 @@ class Controller {
     log('emit log $count', name: 'logging');
   }
 
-  void emitLogTest() {
-    count++;
-
-    print('emitLog called test');
-    log('emit log $count', name: 'logging');
+  void emitLogForString(String str) {
+    print('$str');
   }
 
   void shutdown() {

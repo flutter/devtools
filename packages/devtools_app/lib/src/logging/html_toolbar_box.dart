@@ -1,26 +1,29 @@
 import 'package:html_shim/html.dart' as html;
 
 import '../../src/ui/html_elements.dart';
-import 'config.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 
-class ToolBarCheckbox {
-  ToolBarCheckbox(this.extensionDescription) : element = CoreElement('label') {
+class HtmlToolBarCheckbox {
+  HtmlToolBarCheckbox(this.toolBarCheckboxDescription)
+      : element = CoreElement('label') {
     final checkbox = CoreElement('input')..setAttribute('type', 'checkbox');
     _checkboxElement = checkbox.element;
 
     element.add(<CoreElement>[
       checkbox,
-      span(text: ' ${extensionDescription.name}'),
+      span(text: ' ${toolBarCheckboxDescription.name}'),
     ]);
 
-    _checkboxElement.checked = extensionDescription.enabled;
+    _checkboxElement.checked = toolBarCheckboxDescription.enabled;
+    valueNotifier.value = _checkboxElement.checked;
     _checkboxElement.onChange.listen((_) {
       final bool selected = _checkboxElement.checked;
-      config[extensionDescription.tag] = selected;
+      valueNotifier.value = selected;
     });
   }
 
-  final ToolBarCheckboxDescription extensionDescription;
+  ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
+  final ToolBarCheckboxDescription toolBarCheckboxDescription;
   final CoreElement element;
   html.InputElement _checkboxElement;
 }

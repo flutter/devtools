@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:ansi_up/ansi_up.dart';
 import 'package:html_shim/html.dart' as html;
 import 'package:html_shim/html.dart';
@@ -25,8 +23,7 @@ import '../ui/html_elements.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
-import 'checkout_box.dart';
-import 'config.dart';
+import 'html_toolbar_box.dart';
 import 'logging_controller.dart';
 
 class HtmlLoggingScreen extends HtmlScreen {
@@ -75,25 +72,30 @@ class HtmlLoggingScreen extends HtmlScreen {
       true,
     );
 
-    final _search = (String text) {
+    final _filterString = (String text) {
       controller.search(text);
     };
 
-    final textFiled = CoreElement('input', classes: 'form-control input-sm')
+    final searchInput = CoreElement('input', classes: 'form-control input-sm')
       ..setAttribute('type', 'text')
       ..setAttribute('style', 'width:480px;')
-      ..setAttribute('placeholder', 'input text')
-      ..id = 'uri-field';
+      ..setAttribute('placeholder', 'input text');
 
-    textFiled.element.onKeyDown.listen((KeyboardEvent event) {
+    final html.InputElement searchInputElement = searchInput.element;
+
+    searchInput.element.onKeyDown.listen((KeyboardEvent event) {
       if (event.charCode != null) {
-//          event.preventDefault();
-        Timer(const Duration(milliseconds: 20), () {
-          final html.InputElement inputElement = textFiled.element;
-          final String value = inputElement.value.trim();
-          _search(value);
-        });
+        final String value = searchInputElement.value.trim();
+        _filterString(value);
       }
+    });
+
+    final platformLogFilterCheckBox = HtmlToolBarCheckbox(
+        ToolBarCheckboxDescription(
+            name: 'platform log', enabled: true, tag: ''));
+    platformLogFilterCheckBox.valueNotifier.addListener(() {
+      final isShow = platformLogFilterCheckBox.valueNotifier.value;
+      controller.setHideSystemLogProperty(isShow);
     });
 
     screenDiv.add(<CoreElement>[
@@ -110,29 +112,22 @@ class HtmlLoggingScreen extends HtmlScreen {
                   controller.clear();
                 }),
               div()..flex(),
-              textFiled,
+              searchInput,
               PButton('Search')
                 ..small()
                 ..clazz('margin-left')
                 ..click(() {
-                  final html.InputElement inputElement = textFiled.element;
-                  final String value = inputElement.value.trim();
-                  _search(value);
+                  final String value = searchInputElement.value.trim();
+                  _filterString(value);
                 }),
               PButton('Clear')
                 ..small()
                 ..click(() {
-                  final html.InputElement inputElement = textFiled.element;
-                  inputElement.value = '';
-                  _search('');
+                  searchInputElement.value = '';
+                  _filterString('');
                 }),
               div()..flex(),
-              div()..flex(),
-              ToolBarCheckbox(ToolBarCheckboxDescription(
-                      name: 'platform log',
-                      enabled: config[platformLogTag],
-                      tag: platformLogTag))
-                  .element,
+              platformLogFilterCheckBox.element,
               div()..flex(),
               ServiceExtensionCheckbox(structuredErrors).element,
             ])
