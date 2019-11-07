@@ -73,8 +73,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Map<String, Object> get size => json['size'];
 
-  int get flexFactor => json['flexFactor'];
-
   @override
   bool operator ==(dynamic other) {
     if (other is! RemoteDiagnosticsNode) return false;

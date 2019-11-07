@@ -2,30 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/colors.dart';
-import '../../diagnostics_node.dart';
 import '../../inspector_text_styles.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 
 class StoryOfYourFlexWidget extends StatefulWidget {
-  const StoryOfYourFlexWidget({
-    @required this.diagnostic,
-    @required this.properties,
-    @required this.size,
-    @required this.constraints,
+  const StoryOfYourFlexWidget(
+    this.properties, {
     Key key,
-  }) : super(key: key);
+  })  : assert(properties != null),
+        super(key: key);
 
-  final RemoteDiagnosticsNode diagnostic;
-  final Constraints constraints;
-  final Size size;
-  final RenderFlexProperties properties;
+  final FlexLayoutProperties properties;
 
   @override
   _StoryOfYourFlexWidgetState createState() => _StoryOfYourFlexWidgetState();
@@ -36,10 +31,34 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   MainAxisAlignment mainAxisAlignment;
   CrossAxisAlignment crossAxisAlignment;
 
+  double minimumMainAxisDimension, maximumMainAxisDimension;
+
+  Size get size => widget.properties.size;
+
+  FlexLayoutProperties get properties => widget.properties;
+
+  List<LayoutProperties> get children => widget.properties.childrenProperties;
+
+  Axis get direction => widget.properties.direction;
+
   void _update() {
-    totalFlexFactor = widget.properties.totalFlex;
-    mainAxisAlignment = widget.properties.mainAxisAlignment;
-    crossAxisAlignment = widget.properties.crossAxisAlignment;
+    totalFlexFactor = properties.totalFlex;
+    mainAxisAlignment = properties.mainAxisAlignment;
+    crossAxisAlignment = properties.crossAxisAlignment;
+
+    final childrenWidths = children
+        .where((child) => child.size.width != null)
+        .map((child) => child.size.width);
+    final childrenHeights = children
+        .where((child) => child.size.height != null)
+        .map((child) => child.size.height);
+    if (direction == Axis.horizontal) {
+      minimumMainAxisDimension = childrenWidths.reduce(min);
+      maximumMainAxisDimension = childrenWidths.reduce(max);
+    } else {
+      minimumMainAxisDimension = childrenHeights.reduce(min);
+      maximumMainAxisDimension = childrenHeights.reduce(max);
+    }
   }
 
   @override
@@ -56,13 +75,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
   Widget _visualizeChild({
     Key key,
-    RemoteDiagnosticsNode node,
+    LayoutProperties node,
     Color borderColor,
     Color backgroundColor,
     Size parentSize,
     Size screenSize,
   }) {
-    final size = deserializeSize(node.size);
+    final size = node.size;
     final int flexFactor = node.flexFactor;
 
     final unconstrained = flexFactor == 0 || flexFactor == null;
@@ -129,10 +148,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     if (unconstrained)
       return Container(
         constraints: BoxConstraints(
-          maxWidth: widget.properties.direction == Axis.horizontal
+          maxWidth: direction == Axis.horizontal
               ? ((size.width / parentSize.width) - 0.05) * screenSize.width
               : double.infinity,
-          maxHeight: widget.properties.direction == Axis.vertical
+          maxHeight: direction == Axis.vertical
               ? ((size.height / parentSize.height) - 0.05) * screenSize.height
               : double.infinity,
         ),
@@ -146,10 +165,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   }
 
   Widget _visualizeFlex(BuildContext context) {
-    if (!widget.diagnostic.hasChildren)
+    if (!properties.hasChildren)
       return const Center(child: Text('No Children'));
     final theme = Theme.of(context);
-    final children = widget.diagnostic.childrenNow;
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth;
       final height = constraints.maxHeight;
@@ -160,8 +178,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           overflow: Overflow.visible,
           children: <Widget>[
             Flex(
-              mainAxisSize: widget.properties.mainAxisSize,
-              direction: widget.properties.direction,
+              mainAxisSize: properties.mainAxisSize,
+              direction: properties.direction,
               mainAxisAlignment: mainAxisAlignment,
               crossAxisAlignment: crossAxisAlignment,
               children: [
@@ -170,24 +188,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                     node: children[i],
                     borderColor: i.isOdd ? mainUiColor : mainGpuColor,
                     backgroundColor: theme.backgroundColor,
-                    parentSize: widget.size,
+                    parentSize: size,
                     screenSize: Size(width, height),
                   )
               ],
-            ),
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                color: theme.backgroundColor,
-                child: Text(
-                  'Total Flex Factor: ${widget.properties.totalFlex}',
-                  textScaleFactor: 1.25,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -240,7 +244,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               child: RotatedBox(
                 quarterTurns: 1,
                 child: Text(
-                  'height: ${widget.size.height} px',
+                  'height: ${size.height} px',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -259,7 +263,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               arrowColor: theme.splashColor,
               arrowStrokeWidth: 1.0,
               child: Text(
-                'width: ${widget.size.width} px',
+                'width: ${size.width} px',
                 textAlign: TextAlign.center,
               ),
               direction: Axis.horizontal,
@@ -287,7 +291,17 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                     : crossAxisAlignment.toString(),
                 textScaleFactor: 1.25),
           ),
-        )
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Container(
+            child: Text(
+              'Total Flex Factor: ${widget.properties.totalFlex}',
+              textScaleFactor: 1.25,
+            ),
+            margin: const EdgeInsets.only(right: right + margin),
+          ),
+        ),
       ],
       overflow: Overflow.visible,
     );
@@ -502,7 +516,7 @@ class WidgetVisualizer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            child: FittedBox(fit: BoxFit.fitWidth, child: Text(widgetName)),
+            child: Text(widgetName),
             decoration: BoxDecoration(
               color: borderColor,
             ),

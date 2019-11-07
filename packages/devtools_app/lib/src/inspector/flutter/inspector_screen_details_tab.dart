@@ -131,12 +131,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
         ),
       );
     return StoryOfYourFlexWidget(
-      diagnostic: selected,
       // TODO(albertusangga): Cache this instead of recomputing every build,
-      constraints: deserializeConstraints(selected.constraints),
-      size: deserializeSize(selected.size),
-      properties: RenderFlexProperties.fromJson(
-          selected.renderObject, selected.childrenNow),
+      FlexLayoutProperties.fromRemoteDiagnosticsNode(selected),
     );
   }
 

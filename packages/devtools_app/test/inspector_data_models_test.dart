@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
@@ -169,8 +170,10 @@ void main() {
         ]
       }
     ''');
-    final RenderFlexProperties flexProperties =
-        RenderFlexProperties.fromJson(flexJson, []);
+    final diagnostics =
+        RemoteDiagnosticsNode({'renderObject': flexJson}, null, null, null);
+    final FlexLayoutProperties flexProperties =
+        FlexLayoutProperties.fromRemoteDiagnosticsNode(diagnostics);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);
