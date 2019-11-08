@@ -7,11 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
-
-/// Default period at which the VM will collect CPU samples.
-///
-/// This value is applied to the profile_period VM flag.
-const int defaultSamplePeriod = 250;
+import '../vm_flags.dart' as vm_flags;
 
 /// Manages interactions between the Cpu Profiler and the VmService.
 class CpuProfilerService {
@@ -26,8 +22,12 @@ class CpuProfilerService {
     );
   }
 
-  Future<Success> clearCpuSamples() async {
+  Future<Success> clearCpuSamples() {
     return serviceManager.service
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
+  }
+
+  Future<Success> setProfilePeriod(String value) {
+    return serviceManager.service.setFlag(vm_flags.profilePeriod, value);
   }
 }

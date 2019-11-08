@@ -15,15 +15,13 @@ import '../support/mocks.dart';
 
 void main() {
   group('Initializer', () {
-    DisconnectableMockServiceManager serviceManager;
+    FakeServiceManager serviceManager;
     MaterialApp app;
     const Key connectKey = Key('connect');
     const Key initializedKey = Key('initialized');
     setUp(() async {
-      serviceManager = DisconnectableMockServiceManager();
-      serviceManager.mockAllEventStreams();
-      Catalog.setCatalog(Catalog.decode(await widgetsJson()));
       await ensureInspectorDependencies();
+      serviceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, serviceManager);
 
       app = MaterialApp(
@@ -38,7 +36,8 @@ void main() {
 
     testWidgets('navigates to the connection page when uninitialized',
         (WidgetTester tester) async {
-      serviceManager._hasConnection = false;
+      serviceManager = FakeServiceManager(hasConnection: false);
+      setGlobal(ServiceConnectionManager, serviceManager);
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsOneWidget);
@@ -54,10 +53,4 @@ void main() {
       expect(find.byKey(initializedKey), findsOneWidget);
     });
   });
-}
-
-class DisconnectableMockServiceManager extends MockServiceManager {
-  bool _hasConnection = true;
-  @override
-  bool get hasConnection => _hasConnection;
 }

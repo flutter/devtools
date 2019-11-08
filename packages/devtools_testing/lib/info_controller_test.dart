@@ -9,6 +9,7 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/info/info_controller.dart';
 import 'package:devtools_app/src/version.dart';
+import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -60,13 +61,13 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
 
       for (var flag in [
         Flag.parse({
-          'name': 'causal_async_stacks',
+          'name': vm_flags.causalAsyncStacks,
           'comment': 'Improved async stacks',
           'modified': true,
           'valueAsString': 'true'
         }),
         Flag.parse({
-          'name': 'async_debugger',
+          'name': vm_flags.asyncDebugger,
           'comment': 'Debugger support async functions.',
           'modified': false,
           'valueAsString': 'true'

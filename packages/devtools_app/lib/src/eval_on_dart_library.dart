@@ -128,7 +128,7 @@ class EvalOnDartLibrary {
       }
       return result;
     } catch (e, stack) {
-      _handleError(e, stack);
+      _handleError('$e - $expression', stack);
     }
     return null;
   }

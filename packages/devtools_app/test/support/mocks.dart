@@ -5,19 +5,21 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
-import 'package:devtools_testing/support/file_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
-class MockServiceManager extends Mock implements ServiceConnectionManager {
+class FakeServiceManager extends Fake implements ServiceConnectionManager {
+  FakeServiceManager({bool useFakeService = false, this.hasConnection: true})
+      : service = useFakeService ? FakeVmService() : MockVmService();
+
   @override
-  final MockVmService service = MockVmService();
+  final VmServiceWrapper service;
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -29,7 +31,7 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
-  final bool hasConnection = true;
+  final bool hasConnection;
 
   @override
   final IsolateManager isolateManager = MockIsolateManager();
@@ -38,28 +40,66 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
 
-  Future<void> ensureInspectorDependencies() async {
-    mockAllEventStreams();
-    when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
-    when(isolateManager.getSelectedIsolate(any)).thenAnswer((_) => null);
-    Catalog.setCatalog(Catalog.decode(await widgetsJson()));
+  @override
+  StreamSubscription<bool> hasRegisteredService(
+    String name,
+    void onData(bool value),
+  ) {
+    return Stream.value(false).listen(onData);
   }
 
-  void mockAllEventStreams() {
-    when(onStateChange).thenAnswer((_) => const Stream.empty());
-    when(service.onStdoutEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onStderrEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onDebugEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onExtensionEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onServiceEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onGCEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onHeapSnapshotEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onIsolateEvent).thenAnswer((_) => const Stream.empty());
-    when(service.onLoggingEvent).thenAnswer((_) => const Stream.empty());
+  @override
+  Stream<bool> get onStateChange => const Stream.empty();
+}
+
+class FakeVmService extends Fake implements VmServiceWrapper {
+  final flags = <String, dynamic>{
+    'flags': <Flag>[],
+  };
+
+  @override
+  Future<Success> setFlag(String name, String value) {
+    final List<Flag> flags = this.flags['flags'];
+    final existingFlag =
+        flags.firstWhere((f) => f.name == name, orElse: () => null);
+    if (existingFlag != null) {
+      existingFlag.valueAsString = value;
+    } else {
+      flags.add(Flag.parse({
+        'name': name,
+        'comment': 'Mock Flag',
+        'modified': true,
+        'valueAsString': value,
+      }));
+    }
+    return Future.value(Success());
   }
+
+  @override
+  Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
+
+  @override
+  Stream<Event> onEvent(String streamName) => const Stream.empty();
+
+  @override
+  Stream<Event> get onStdoutEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onStderrEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onGCEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onLoggingEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onExtensionEvent => const Stream.empty();
 }
 
 class MockIsolateManager extends Mock implements IsolateManager {}
+
+class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
 class MockVmService extends Mock implements VmServiceWrapper {}
 

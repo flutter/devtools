@@ -4,6 +4,8 @@ import '../icons.dart';
 import 'flutter_icon_renderer.dart';
 
 /// Label including an icon and optional text.
+// TODO(kenz): this class can be removed in favor of [MaterialIconLabel] once we
+// no longer need to support icons for both the flutter app and the html app.
 class Label extends StatelessWidget {
   const Label(this.icon, this.text, {this.minIncludeTextWidth});
 
@@ -13,21 +15,48 @@ class Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(jacobr): animate showing and hiding the text.
-    final showText = minIncludeTextWidth == null ||
-        MediaQuery.of(context).size.width >= minIncludeTextWidth;
-
     // TODO(jacobr): display the label as a tooltip for the icon particularly
     // when the text is not shown.
     return Row(
       children: [
         getIconWidget(icon),
-        if (showText)
+        // TODO(jacobr): animate showing and hiding the text.
+        if (_showLabelText(context, minIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
-          )
+          ),
       ],
     );
   }
+}
+
+class MaterialIconLabel extends StatelessWidget {
+  const MaterialIconLabel(this.iconData, this.text, {this.minIncludeTextWidth});
+
+  final IconData iconData;
+  final String text;
+  final double minIncludeTextWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(jacobr): display the label as a tooltip for the icon particularly
+    // when the text is not shown.
+    return Row(
+      children: [
+        Icon(iconData, size: 18.0),
+        // TODO(jacobr): animate showing and hiding the text.
+        if (_showLabelText(context, minIncludeTextWidth))
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(text),
+          ),
+      ],
+    );
+  }
+}
+
+bool _showLabelText(BuildContext context, double minIncludeTextWidth) {
+  return minIncludeTextWidth == null ||
+      MediaQuery.of(context).size.width >= minIncludeTextWidth;
 }

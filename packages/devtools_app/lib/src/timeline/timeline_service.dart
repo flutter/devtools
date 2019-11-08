@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/allowed_error.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
+import '../profiler/profile_granularity.dart';
 import '../vm_service_wrapper.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
@@ -19,6 +20,8 @@ class TimelineService {
   }
 
   final TimelineController timelineController;
+
+  final profilerService = CpuProfilerService();
 
   void _initListeners() async {
     serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
@@ -32,7 +35,7 @@ class TimelineService {
 
   void _handleConnectionStart(VmServiceWrapper service) {
     allowedError(
-      serviceManager.service.setFlag('profile_period', '$defaultSamplePeriod'),
+      profilerService.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     );
     serviceManager.service.onEvent('Timeline').listen((Event event) {

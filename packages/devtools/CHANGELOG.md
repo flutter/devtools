@@ -1,6 +1,7 @@
-## 0.1.11-dev.2
+## 0.1.11 - 2019-11-08
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
+* Enable full timeline for Dart CLI applications.
 * Fix a message manager bug.
 * Fix a bug with processing CPU profile responses.
 * Reduce race conditions in integration tests.

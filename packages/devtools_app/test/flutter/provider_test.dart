@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/flutter/provider.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -14,8 +15,8 @@ import '../support/mocks.dart';
 void main() {
   group('Provider', () {
     setUp(() async {
-      final serviceManager = MockServiceManager();
-      await serviceManager.ensureInspectorDependencies();
+      await ensureInspectorDependencies();
+      final serviceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, serviceManager);
     });
 
