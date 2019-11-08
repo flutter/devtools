@@ -351,12 +351,9 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
             // Vertical guideline that will connect [node] with its overlapping
             // children nodes. The line will end at [node]'s last child.
             final verticalGuidelineX = node.rect.left + 1;
-            // Subtract [topOffset] so the coordinates of the guidelines are
-            // based on a starting y of 0.
-            final verticalGuidelineStartY = node.rect.bottom - topOffset;
+            final verticalGuidelineStartY = node.rect.bottom;
             final verticalGuidelineEndY =
-                chartNodesByEvent[event.children.last].rect.centerLeft.dy -
-                    topOffset;
+                chartNodesByEvent[event.children.last].rect.centerLeft.dy;
             verticalGuidelines.add(VerticalLineSegment(
               Offset(verticalGuidelineX, verticalGuidelineStartY),
               Offset(verticalGuidelineX, verticalGuidelineEndY),
@@ -368,10 +365,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
               final childNode = chartNodesByEvent[child];
               final horizontalGuidelineStartX = verticalGuidelineX;
               final horizontalGuidelineEndX = childNode.rect.left;
-              // Subtract [topOffset] so the coordinates of the guidelines are
-              // based on a starting y of 0.
-              final horizontalGuidelineY =
-                  childNode.rect.centerLeft.dy - topOffset;
+              final horizontalGuidelineY = childNode.rect.centerLeft.dy;
               horizontalGuidelines.add(HorizontalLineSegment(
                 Offset(horizontalGuidelineStartX, horizontalGuidelineY),
                 Offset(horizontalGuidelineEndX, horizontalGuidelineY),
@@ -477,8 +471,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       if (line.intersects(visible)) {
         canvas
           ..beginPath()
-          ..moveTo(line.start.dx, line.start.dy + topOffset)
-          ..lineTo(line.end.dx, line.end.dy + topOffset)
+          ..moveTo(line.start.dx, line.start.dy)
+          ..lineTo(line.end.dx, line.end.dy)
           ..closePath()
           ..stroke();
       }
