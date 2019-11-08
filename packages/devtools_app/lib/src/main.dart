@@ -21,6 +21,7 @@ import 'performance/html_performance_screen.dart';
 import 'server_api_client.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline/html_timeline_screen.dart';
+import 'timeline/timeline_controller.dart';
 import 'ui/analytics.dart' as ga;
 import 'ui/analytics_platform.dart' as ga_platform;
 import 'ui/html_custom.dart';
@@ -204,7 +205,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
     final isDartWebApp = await app.isDartWebApp;
     final isFlutterApp = await app.isFlutterApp;
-    final isDartCliApp = app.isRunningOnDartVM && !isFlutterApp;
+    final isDartCliApp = await app.isDartCliApp;
     final isFlutterVmApp = isFlutterApp && !isDartWebApp;
     final isFlutterVmProfileBuild =
         isFlutterVmApp && (await app.isProfileBuild);
@@ -233,7 +234,8 @@ class HtmlPerfToolFramework extends HtmlFramework {
           : notRunningFlutterMsg,
     ));
     addScreen(HtmlTimelineScreen(
-      enabled: isFlutterApp && !isFlutterWebApp,
+      isDartCliApp ? TimelineMode.full : TimelineMode.frameBased,
+      enabled: app.isRunningOnDartVM,
       disabledTooltip:
           isFlutterWebApp ? notFlutterWebMsg : notRunningFlutterMsg,
     ));

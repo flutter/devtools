@@ -261,7 +261,7 @@ Future<Map<String, dynamic>> launchDevTools({
   final launchEvent = events.where((e) => e['event'] == 'client.launch').first;
   await appFixture.serviceConnection.callMethod(
     registeredServices['launchDevTools'],
-    args: reuseWindows ? {'reuseWindows': true, 'page': page} : null,
+    args: {'reuseWindows': reuseWindows, 'page': page},
   );
   final response = await launchEvent;
   return response['params'];
