@@ -15,10 +15,11 @@ import 'package:mp_chart/mp/core/data_set/line_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
-import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
-import 'package:mp_chart/mp/core/enums/legend_form.dart';
-import 'package:mp_chart/mp/core/enums/legend_horizontal_alignment.dart';
-import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
+// TODO(terry): Enable legend when textsize is correct.
+// import 'package:mp_chart/mp/core/enums/legend_vertical_alignment.dart';
+// import 'package:mp_chart/mp/core/enums/legend_form.dart';
+// import 'package:mp_chart/mp/core/enums/legend_horizontal_alignment.dart';
+// import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
 import 'package:mp_chart/mp/core/image_loader.dart';
@@ -119,18 +120,16 @@ class MemoryChartState extends State<MemoryChart> {
         legendSettingFunction: (legend, controller) {
           legend.enabled = false;
           // TODO(terry): Need to support legend with a smaller text size.
-          /*
-           legend
-            ..shape = LegendForm.LINE
-            ..verticalAlignment = LegendVerticalAlignment.TOP
-            ..enabled = true
-            ..orientation = LegendOrientation.HORIZONTAL
-            ..typeface = legendTypeFace
-            ..xOffset = 20
-            ..drawInside = false
-            ..horizontalAlignment = LegendHorizontalAlignment.CENTER
-            ..textSize = 6.0;
-          */
+          // legend
+          //   ..shape = LegendForm.LINE
+          //   ..verticalAlignment = LegendVerticalAlignment.TOP
+          //   ..enabled = true
+          //   ..orientation = LegendOrientation.HORIZONTAL
+          //   ..typeface = legendTypeFace
+          //   ..xOffset = 20
+          //   ..drawInside = false
+          //   ..horizontalAlignment = LegendHorizontalAlignment.CENTER
+          //   ..textSize = 6.0;
         },
         highLightPerTapEnabled: true,
         backgroundColor: ColorUtils.WHITE,
@@ -213,6 +212,7 @@ class MemoryChartState extends State<MemoryChart> {
         timerDataIndex += 2;
       }
 
+      // TODO(terry): Consider moving live feed timer to MemoryController.
       updateChart();
     });
   }

@@ -98,7 +98,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     '/': (_, params) => Initializer(
           url: params['uri'],
           builder: (_) => DevToolsScaffold(
-            tabs: [
+            tabs: const [
               const InspectorScreen(),
               const TimelineScreen(),
               const PerformanceScreen(),

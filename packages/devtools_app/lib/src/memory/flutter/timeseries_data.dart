@@ -1116,7 +1116,7 @@ List<int> externalMemoryData = [
 ];
 
 // What a manual GC occurred.
-var gc_manual = [
+var gcManual = [
   1549029643793000,
   61434592,
   1549029715777000,
@@ -1124,7 +1124,7 @@ var gc_manual = [
 ];
 
 // Custom hover text for each GC.
-var gc_text_data = [
+var gcTextData = [
   'GC Reclaiming ~21.5 MB',
   'GC Reclaiming ~20.1 MB',
 ];
