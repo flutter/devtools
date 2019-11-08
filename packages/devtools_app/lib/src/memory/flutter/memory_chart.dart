@@ -207,6 +207,7 @@ class MemoryChartState extends State<MemoryChart> {
             []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
       }
 
+      // The state has changed a whole bunch of data added to the chart.
       setState(() {});
     });
   }
