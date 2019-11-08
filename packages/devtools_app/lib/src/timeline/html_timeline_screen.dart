@@ -300,7 +300,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       }
 
       if (timelineController.offlineTimelineData.hasCpuProfileData()) {
-        splitter.setSizes([50, 50]);
+        _configureSplitter(sizes: [50, 50]);
       }
     });
 
@@ -386,7 +386,8 @@ class HtmlTimelineScreen extends HtmlScreen {
             sectionSpacing;
   }
 
-  void _configureSplitter() {
+  void _configureSplitter({List<int> sizes}) {
+    assert(sizes == null || sizes.length == 2);
     // Configure the flame chart / event details splitter if we haven't
     // already.
     if (!splitterConfigured) {
@@ -398,10 +399,12 @@ class HtmlTimelineScreen extends HtmlScreen {
             [flameChartContainer.element, eventDetails.element]),
         horizontal: false,
         gutterSize: defaultSplitterWidth,
-        sizes: [75, 25],
+        sizes: sizes ?? [75, 25],
         minSize: [50, 90],
       );
       splitterConfigured = true;
+    } else if (sizes != null) {
+      splitter.setSizes(sizes);
     }
   }
 

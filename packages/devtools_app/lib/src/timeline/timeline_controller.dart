@@ -194,15 +194,16 @@ class TimelineController {
     } else if (offlineTimelineData is OfflineFullTimelineData) {
       final offlineData = offlineTimelineData as OfflineFullTimelineData;
       if (offlineData.selectedEvent != null) {
-        eventToSelect = fullTimeline.data.timelineEvents.firstWhere(
-          (event) =>
-              event.name == offlineData.selectedEvent.name &&
-              event.time.start.inMicroseconds ==
-                  offlineData.selectedEvent.time.start.inMicroseconds &&
-              event.time.end.inMicroseconds ==
-                  offlineData.selectedEvent.time.end.inMicroseconds,
-          orElse: () => null,
-        );
+        for (var timelineEvent in fullTimeline.data.timelineEvents) {
+          final e = timelineEvent.firstChildWithCondition((event) {
+            return event.name == offlineData.selectedEvent.name &&
+                event.time == offlineData.selectedEvent.time;
+          });
+          if (e != null) {
+            eventToSelect = e;
+            break;
+          }
+        }
       }
     }
 
@@ -210,6 +211,7 @@ class TimelineController {
       timeline.data
         ..selectedEvent = eventToSelect
         ..cpuProfileData = offlineTimelineData.cpuProfileData;
+      _selectedTimelineEventController.add(eventToSelect);
     }
   }
 
