@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
-import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
 import '../../ui/colors.dart';
@@ -184,7 +183,6 @@ class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
         AutomaticKeepAliveClientMixin<InspectorTree>,
-        AutoDisposeBase,
         AutoDisposeMixin
     implements InspectorControllerClient {
   final defaultAnimationDuration = const Duration(milliseconds: 150);

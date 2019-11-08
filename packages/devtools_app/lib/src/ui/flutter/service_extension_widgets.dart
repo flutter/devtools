@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
@@ -47,8 +46,7 @@ class ExtensionState {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup>
-    with AutoDisposeBase, AutoDisposeMixin {
+    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
   List<ExtensionState> _extensionStates;
 
   @override
@@ -227,7 +225,7 @@ class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
 
 class _RegisteredServiceExtensionButtonState
     extends State<_RegisteredServiceExtensionButton>
-    with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with _ServiceExtensionMixin, AutoDisposeMixin {
   bool _hidden = true;
 
   @override
@@ -298,7 +296,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
 }
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
-    with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with _ServiceExtensionMixin, AutoDisposeMixin {
   bool value = false;
   @override
   void initState() {

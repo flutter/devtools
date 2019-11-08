@@ -11,9 +11,11 @@ import 'ui/fake_flutter/fake_flutter.dart';
 /// Provides functionality to simplify listening to streams and ValueNotifiers.
 ///
 /// See also:
+/// * [AutoDisposeControllerMixin] which integrates this functionality
+///   with [DisposableController] objects.
 /// * [AutoDisposeMixin], which integrates this functionality with [State]
 ///   objects.
-mixin AutoDisposeBase {
+class Disposer {
   final List<StreamSubscription> _subscriptions = [];
 
   final List<Listenable> _listenables = [];
@@ -34,7 +36,7 @@ mixin AutoDisposeBase {
     listenable.addListener(listener);
   }
 
-  /// Cancel all listeners added.
+  /// Cancel all listeners added & stream subscriptions.
   ///
   /// It is fine to call this method and then add additional listeners.
   void cancel() {
@@ -53,7 +55,7 @@ mixin AutoDisposeBase {
 }
 
 /// Base class for controllers that need to manage their lifecycle.
-class DisposableController {
+abstract class DisposableController {
   @mustCallSuper
   void dispose() {}
 }
@@ -61,13 +63,33 @@ class DisposableController {
 /// Mixin to simplifying managing the lifetime of listeners used by a
 /// [DisposableController].
 ///
+/// This mixin works by delegating to a [Disposer]. It implements all of
+/// [Disposer]'s interface.
+///
 /// See also:
 /// * [AutoDisposeMixin], which provides the same functionality for a
 ///   [StatefulWidget].
-mixin AutoDisposeControllerMixin on DisposableController, AutoDisposeBase {
+mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
+  final Disposer _delegate = Disposer();
+
   @override
   void dispose() {
     cancel();
     super.dispose();
+  }
+
+  @override
+  void addAutoDisposeListener(Listenable listenable, listener) {
+    _delegate.addAutoDisposeListener(listenable, listener);
+  }
+
+  @override
+  void autoDispose(StreamSubscription subscription) {
+    _delegate.autoDispose(subscription);
+  }
+
+  @override
+  void cancel() {
+    _delegate.cancel();
   }
 }

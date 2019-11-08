@@ -9,7 +9,6 @@ import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../auto_dispose.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
 import '../url_utils.dart';
@@ -46,18 +45,21 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer>
-    with SingleTickerProviderStateMixin, AutoDisposeBase, AutoDisposeMixin {
-  bool _dependenciesLoaded = false;
-
+    with SingleTickerProviderStateMixin, AutoDisposeMixin {
   /// Checks if the [service.serviceManager] is connected.
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
   bool _checkLoaded() => serviceManager.hasConnection;
 
+  bool _dependenciesLoaded = false;
+
   @override
   void initState() {
     super.initState();
+
+    /// Ensure that we loaded the inspector dependencies before attempting to
+    /// build the Provider.
     ensureInspectorDependencies().then((_) {
       if (!mounted) return;
       setState(() {

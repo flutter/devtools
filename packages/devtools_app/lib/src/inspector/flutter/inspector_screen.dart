@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../auto_dispose.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
 import '../../flutter/initializer.dart';
@@ -45,7 +44,7 @@ class InspectorScreenBody extends StatefulWidget {
 }
 
 class _InspectorScreenBodyState extends State<InspectorScreenBody>
-    with BlockingActionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with BlockingActionMixin, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
   bool connectionInProgress = false;
   InspectorService inspectorService;
