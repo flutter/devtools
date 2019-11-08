@@ -4,19 +4,18 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/flutter/provider.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../auto_dispose.dart';
 import '../framework/framework_core.dart';
 import '../globals.dart';
-import '../inspector/flutter_widget.dart';
-import '../inspector/inspector_service.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
-import 'provider.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
@@ -48,14 +47,13 @@ class Initializer extends StatefulWidget {
 
 class _InitializerState extends State<Initializer>
     with SingleTickerProviderStateMixin, AutoDisposeBase, AutoDisposeMixin {
+  bool _dependenciesLoaded = false;
+
   /// Checks if the [service.serviceManager] is connected.
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
   bool _checkLoaded() => serviceManager.hasConnection;
-
-  bool _attemptingConnection = false;
-  bool _dependenciesLoaded = false;
 
   @override
   void initState() {
@@ -81,32 +79,31 @@ class _InitializerState extends State<Initializer>
         _navigateToConnectPage();
       }),
     );
+    if (widget.url != null) {
+      _attemptUrlConnection();
+    } else {
+      _navigateToConnectPage();
+    }
   }
 
-  /// Attempts to connect to the vm service from a query parameter URL.
-  ///
-  /// [scaffoldContext] is necessary for [showErrorSnackBar] to work.
-  Future<void> _attemptUrlConnection(BuildContext scaffoldContext) async {
-    assert(Scaffold.of(scaffoldContext) != null);
+  Future<void> _attemptUrlConnection() async {
     final uri = normalizeVmServiceUri(widget.url);
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: showErrorSnackBar(scaffoldContext),
+      errorReporter: showErrorSnackBar(context),
     );
     if (!connected) {
       _navigateToConnectPage();
     }
   }
 
-  /// Loads the /connect page if the [service.serviceManager] is not currently
-  /// connected.
+  /// Loads the /connect page if the [service.serviceManager] is not currently connected.
   void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        // If this route is on top and the app is not loaded, then we navigate
-        // to the /connect page to get a VM Service connection for
-        // serviceManager.
+        // If this route is on top and the app is not loaded, then we navigate to
+        // the /connect page to get a VM Service connection for serviceManager.
         // When it completes, the serviceManager will notify this instance.
         Navigator.of(context).pushNamed(
           routeNameWithQueryParams(context, '/connect'),
@@ -119,30 +116,9 @@ class _InitializerState extends State<Initializer>
   Widget build(BuildContext context) {
     return _checkLoaded() && _dependenciesLoaded
         ? Provider(child: widget.builder(context))
-        : _loadingScreen();
-  }
-
-  Widget _loadingScreen() {
-    return Scaffold(
-      body: Builder(
-        builder: (context) {
-          // The connection must be attempted from inside the context of a
-          // Scaffold to properly show snackbars. We do this here.
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (_attemptingConnection) return;
-            setState(() {
-              _attemptingConnection = true;
-            });
-            if (widget.url != null) {
-              _attemptUrlConnection(context);
-            } else {
-              _navigateToConnectPage();
-            }
-          });
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
+        : const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
   }
 }
 
@@ -155,5 +131,4 @@ Future<void> ensureInspectorDependencies() async {
     // ignore: invalid_use_of_visible_for_testing_member
     Catalog.setCatalog(Catalog.decode(json));
   }
-  await ensureInspectorServiceDependencies();
 }
