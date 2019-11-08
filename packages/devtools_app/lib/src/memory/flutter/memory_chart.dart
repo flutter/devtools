@@ -49,6 +49,8 @@ class MemoryChartState extends State<MemoryChart> {
   void initState() {
     _initController();
 
+    _setupChart();
+
     // Read canned data and startup the pseudo-live feed.
     _initLineData(true);
 
@@ -63,6 +65,14 @@ class MemoryChartState extends State<MemoryChart> {
     });
 
     super.initState();
+  }
+
+  var _img;
+
+  dynamic _loadImage() async => ImageLoader.loadImage('assets/img/star.png');
+
+  void _setupChart() async {
+    _img ??= await _loadImage();
   }
 
   String getTitle() => 'Memory Time Series';
@@ -136,38 +146,42 @@ class MemoryChartState extends State<MemoryChart> {
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
+  // Datapoint entry for each used heap value.
   final List<Entry> _used = <Entry>[];
+
+  // Datapoint entry for each capacity heap value.
   final List<Entry> _capacity = <Entry>[];
+
+  // Datapoint entry for each external memory value.
   final List<Entry> _externalHeap = <Entry>[];
 
-  var _img;
-
+  // Trace #1 Heap Used.
   LineDataSet usedHeapSet;
+
+  // Trace #2 Heap Capacity.
   LineDataSet capacityHeapSet;
+
+  // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  _loadImage() async => ImageLoader.loadImage('assets/img/star.png');
-
+  // Index into the raw data.
   int timerDataIndex;
+
+  // Active timer running.
   Timer _timer;
-  Future<void> startTimer(
-    List<Entry> capacity,
-    List<Entry> used,
-    List<Entry> externalHeap,
-  ) async {
+
+  Future<void> startFeed() async {
     // Fetch from the beginning of the canned data for the live feed.
     timerDataIndex = 0;
-
-    if (_img == null) await _loadImage();
 
     // Average rate is ~500-600 ms?
     _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
       if (timerDataIndex == 0) {
         // First time reset our plotted data.
         setState(() {
-          used.clear();
-          capacity.clear();
-          externalHeap.clear();
+          _used.clear();
+          _capacity.clear();
+          _externalHeap.clear();
         });
       }
 
@@ -192,31 +206,30 @@ class MemoryChartState extends State<MemoryChart> {
         final capacityEntry =
             Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
 
-        externalHeap.add(externalEntry);
-        used.add(usedEntry);
-        capacity.add(capacityEntry);
+        _externalHeap.add(externalEntry);
+        _used.add(usedEntry);
+        _capacity.add(capacityEntry);
 
         timerDataIndex += 2;
-
-        // Signal data has changed.
-        usedHeapSet.notifyDataSetChanged();
-        capacityHeapSet.notifyDataSetChanged();
-        externalMemorySet.notifyDataSetChanged();
-
-        _chartController.data = LineData.fromList(
-            []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
       }
 
-      // The state has changed a whole bunch of data added to the chart.
-      setState(() {});
+      updateChart();
     });
   }
 
-  Future<void> loadAllData(
-    List<Entry> capacity,
-    List<Entry> used,
-    List<Entry> externalHeap,
-  ) async {
+  void updateChart() {
+    setState(() {
+      // Signal data has changed.
+      usedHeapSet.notifyDataSetChanged();
+      capacityHeapSet.notifyDataSetChanged();
+      externalMemorySet.notifyDataSetChanged();
+
+      _chartController.data = LineData.fromList(
+          []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
+    });
+  }
+
+  Future<void> loadAllData() async {
     if (_img == null) await _loadImage();
 
     int index;
@@ -226,7 +239,7 @@ class MemoryChartState extends State<MemoryChart> {
       final x = externalMemoryData[index];
       final y = externalMemoryData[index + 1];
 
-      externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+      _externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
       index += 2;
     }
 
@@ -235,7 +248,7 @@ class MemoryChartState extends State<MemoryChart> {
       final x = usedHeapData[index];
       final y = usedHeapData[index + 1] + externalMemoryData[index + 1];
 
-      used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+      _used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
       index += 2;
     }
 
@@ -244,16 +257,16 @@ class MemoryChartState extends State<MemoryChart> {
       final x = heapCapacityData[index];
       final y = heapCapacityData[index + 1];
 
-      capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+      _capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
       index += 2;
     }
   }
 
   void _initLineData([bool simulateFeed = false]) async {
     if (!simulateFeed) {
-      await loadAllData(_capacity, _used, _externalHeap);
+      await loadAllData();
     } else if (_timer == null) {
-      await startTimer(_capacity, _used, _externalHeap);
+      await startFeed();
     } else {
       return;
     }
@@ -310,6 +323,7 @@ class MemoryChartState extends State<MemoryChart> {
     // Create a data object with all the data sets.
     _chartController.data = LineData.fromList(
         []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
+
     _chartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())
       ..setValueTextSize(9);
