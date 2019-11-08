@@ -33,7 +33,8 @@ void main() {
 
     testWidgets('navigates to the connection page when uninitialized',
         (WidgetTester tester) async {
-      serviceManager = FakeServiceManager(hasConnection: false);
+      serviceManager =
+          FakeServiceManager(useFakeService: true, hasConnection: false);
       setGlobal(ServiceConnectionManager, serviceManager);
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
