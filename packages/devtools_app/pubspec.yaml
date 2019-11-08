@@ -16,7 +16,7 @@ environment:
   # The flutter desktop support interacts with build scripts on the Flutter
   # side that are not yet stable, so it requires a very recent version of
   # Flutter. This version will increase regularly as the build scripts change.
-  flutter: '>=1.9.8-pre.31'
+  flutter: '>=1.10.0'
 
 dependencies:
   ansicolor: ^1.0.2
