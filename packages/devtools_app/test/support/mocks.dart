@@ -15,7 +15,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
-  FakeServiceManager({bool useFakeService = false, this.hasConnection: true})
+  FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
       : service = useFakeService ? FakeVmService() : MockVmService();
 
   @override

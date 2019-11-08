@@ -4,12 +4,9 @@
 
 import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_testing/support/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
 

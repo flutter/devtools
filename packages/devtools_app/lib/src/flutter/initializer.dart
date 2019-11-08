@@ -4,17 +4,17 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/flutter/provider.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../framework/framework_core.dart';
 import '../globals.dart';
+import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
+import 'provider.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
