@@ -31,7 +31,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   MainAxisAlignment mainAxisAlignment;
   CrossAxisAlignment crossAxisAlignment;
 
-  double minimumMainAxisDimension, maximumMainAxisDimension;
+  double smallestWidth, largestWidth;
+  double smallestHeight, largestHeight;
 
   Size get size => widget.properties.size;
 
@@ -40,6 +41,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   List<LayoutProperties> get children => widget.properties.childrenProperties;
 
   Axis get direction => widget.properties.direction;
+
+  bool get isRow => properties.direction == Axis.horizontal;
+
+  bool get isColumn => !isRow;
 
   void _update() {
     totalFlexFactor = properties.totalFlex;
@@ -52,13 +57,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     final childrenHeights = children
         .where((child) => child.size.height != null)
         .map((child) => child.size.height);
-    if (direction == Axis.horizontal) {
-      minimumMainAxisDimension = childrenWidths.reduce(min);
-      maximumMainAxisDimension = childrenWidths.reduce(max);
-    } else {
-      minimumMainAxisDimension = childrenHeights.reduce(min);
-      maximumMainAxisDimension = childrenHeights.reduce(max);
-    }
+    smallestWidth = childrenWidths.reduce(min);
+    largestWidth = childrenWidths.reduce(max);
+    smallestHeight = childrenHeights.reduce(min);
+    largestHeight = childrenHeights.reduce(max);
   }
 
   @override
@@ -145,21 +147,31 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       ),
     );
 
-    if (unconstrained)
-      return Container(
-        constraints: BoxConstraints(
-          maxWidth: direction == Axis.horizontal
-              ? ((size.width / parentSize.width) - 0.05) * screenSize.width
-              : double.infinity,
-          maxHeight: direction == Axis.vertical
-              ? ((size.height / parentSize.height) - 0.05) * screenSize.height
-              : double.infinity,
-        ),
-        child: child,
-      );
+    final smallestWidthPercentage = smallestWidth / parentSize.width;
+    final smallestHeightPercentage = smallestHeight / parentSize.height;
+    final largestWidthPercentage = largestWidth / parentSize.width;
+    final largestHeightPercentage = largestHeight / parentSize.height;
 
-    return Flexible(
-      flex: unconstrained ? 0 : flexFactor,
+    final smallestWidthOnScreen =
+        max(150, screenSize.width * smallestWidthPercentage);
+    final smallestHeightOnScreen =
+        max(150, screenSize.height * smallestHeightPercentage);
+    final largestWidthOnScreen =
+        screenSize.width * (isRow ? largestWidthPercentage : 1);
+    final largestHeightOnScreen =
+        screenSize.height * (isRow ? 1 : largestHeightPercentage);
+
+    final width = (size.width - smallestWidth) *
+            (largestWidthOnScreen - smallestWidthOnScreen) /
+            (largestWidth - smallestWidth) +
+        smallestWidthOnScreen;
+    final height = (size.height - smallestHeight) *
+            (largestHeightOnScreen - smallestHeightOnScreen) /
+            (largestHeight - smallestHeight) +
+        smallestHeightOnScreen;
+    return Container(
+      width: width,
+      height: height,
       child: child,
     );
   }
@@ -174,26 +186,24 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       final flex = Container(
         width: width,
         height: height,
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            Flex(
-              mainAxisSize: properties.mainAxisSize,
-              direction: properties.direction,
-              mainAxisAlignment: mainAxisAlignment,
-              crossAxisAlignment: crossAxisAlignment,
-              children: [
-                for (var i = 0; i < children.length; i++)
-                  _visualizeChild(
-                    node: children[i],
-                    borderColor: i.isOdd ? mainUiColor : mainGpuColor,
-                    backgroundColor: theme.backgroundColor,
-                    parentSize: size,
-                    screenSize: Size(width, height),
-                  )
-              ],
-            ),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: properties.direction,
+          child: Flex(
+            mainAxisSize: properties.mainAxisSize,
+            direction: properties.direction,
+            mainAxisAlignment: mainAxisAlignment,
+            crossAxisAlignment: crossAxisAlignment,
+            children: [
+              for (var i = 0; i < children.length; i++)
+                _visualizeChild(
+                  node: children[i],
+                  borderColor: i.isOdd ? mainGpuColor : mainUiColor,
+                  backgroundColor: theme.backgroundColor,
+                  parentSize: size,
+                  screenSize: Size(width, height),
+                )
+            ],
+          ),
         ),
         decoration: BoxDecoration(
           border: Border.all(
@@ -222,6 +232,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     const top = 16.0;
     const left = 16.0;
     const margin = 8.0;
+//    // TODO(albertusangga): Fix borderlayout
     return Stack(
       children: [
         Align(
@@ -305,40 +316,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       ],
       overflow: Overflow.visible,
     );
-//    // TODO(albertusangga): Fix borderlayout
-//    return BorderLayout(
-//      center: child,
-//      right: Container(
-//        child: ArrowWrapper.bidirectional(
-//          arrowColor: theme.splashColor,
-//          arrowStrokeWidth: 1.0,
-//          child: RotatedBox(
-//            quarterTurns: 1,
-//            child: Text(
-//              'height: ${widget.size.height} px',
-//              textAlign: TextAlign.center,
-//            ),
-//          ),
-//          direction: Axis.vertical,
-//        ),
-//        height: height,
-//        width: width * 0.05,
-//      ),
-//      bottom: Container(
-//        margin: const EdgeInsets.only(top: 16.0),
-//        child: ArrowWrapper.bidirectional(
-//          arrowColor: theme.splashColor,
-//          arrowStrokeWidth: 1.0,
-//          child: Text(
-//            'width: ${widget.size.width} px',
-//            textAlign: TextAlign.center,
-//          ),
-//          direction: Axis.horizontal,
-//        ),
-//        width: width,
-//        height: 16,
-//      ),
-//    );
   }
 
   @override
@@ -432,11 +409,16 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                         height: maxHeight - topArrowIndicatorHeight,
                         width: leftArrowIndicatorWidth,
                         child: ArrowWrapper.unidirectional(
-                          child: Text(
-                            widget.properties.verticalDirectionDescription,
-                            textAlign: TextAlign.center,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: Text(
+                              widget.properties.verticalDirectionDescription,
+                              textAlign: TextAlign.center,
+                              style: regularBold,
+                            ),
                           ),
                           type: ArrowType.down,
+                          arrowColor: theme.primaryColorLight,
                         ),
                       ),
                     ),
@@ -446,9 +428,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                         height: topArrowIndicatorHeight,
                         width: maxWidth - leftArrowIndicatorWidth - margin,
                         child: ArrowWrapper.unidirectional(
-                          child: Text(
-                            widget.properties.horizontalDirectionDescription,
-                            textAlign: TextAlign.center,
+                          child: FittedBox(
+                            child: Text(
+                              widget.properties.horizontalDirectionDescription,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                           type: ArrowType.right,
                         ),
