@@ -8,7 +8,7 @@ import '../auto_dispose.dart';
 import '../globals.dart';
 import '../logging/logging_controller.dart';
 
-/// Container for controlers that should outlive individual screens of the app.
+/// Container for controllers that should outlive individual screens of the app.
 @immutable
 class ProviderData implements DisposableController {
   const ProviderData({@required this.loggingController})
@@ -34,7 +34,10 @@ class ProviderData implements DisposableController {
   }
 }
 
-/// Provider for controlers that should outlive individual screens of the app.
+/// Provider for controllers that should outlive individual screens of the app.
+///
+/// [Initializer] builds a [Provider] after it has a connection to the VM
+/// service and it has loaded [ensureInspectorDependencies].
 class Provider extends StatefulWidget {
   const Provider({Key key, this.child, this.overrideProviders})
       : super(key: key);
