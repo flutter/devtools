@@ -21,7 +21,7 @@ typedef OnFlutterVersionChanged = void Function(FlutterVersion version);
 typedef OnFlagListChanged = void Function(FlagList flagList);
 
 class InfoController extends DisposableController
-    with AutoDisposeBase, AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin {
   InfoController({
     @required this.onFlutterVersionChanged,
     @required this.onFlagListChanged,

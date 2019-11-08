@@ -41,7 +41,7 @@ Future<void> ensureInspectorServiceDependencies() async {
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
 class InspectorService extends DisposableController
-    with AutoDisposeBase, AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin {
   InspectorService(
     this.vmService,
     this.inspectorLibrary,
