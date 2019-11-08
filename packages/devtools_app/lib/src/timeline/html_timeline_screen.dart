@@ -387,7 +387,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   void _configureSplitter({List<int> sizes}) {
-    assert(sizes?.length ?? 2 == 2);
+    assert(sizes == null || sizes.length == 2);
     // Configure the flame chart / event details splitter if we haven't
     // already.
     if (!splitterConfigured) {
