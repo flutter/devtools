@@ -19,6 +19,7 @@ ThemeData _darkTheme() {
       indicatorColor: devtoolsBlue[400],
       accentColor: devtoolsBlue[400],
       backgroundColor: devtoolsGrey[600],
+      toggleableActiveColor: devtoolsBlue[400],
       buttonTheme: theme.buttonTheme.copyWith(minWidth: buttonMinWidth));
 }
 
