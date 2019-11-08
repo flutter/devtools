@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/screen.dart';
@@ -17,7 +16,7 @@ class MemoryScreen extends Screen {
   const MemoryScreen() : super('Memory');
 
   @override
-  Widget build(BuildContext context) => MemoryBody();
+  Widget build(BuildContext context) => const MemoryBody();
 
   @override
   Widget buildTab(BuildContext context) {
@@ -29,15 +28,16 @@ class MemoryScreen extends Screen {
 }
 
 class MemoryBody extends StatefulWidget {
-  MemoryBody();
-
-  final MemoryController memoryController = MemoryController();
+  const MemoryBody();
 
   @override
   MemoryBodyState createState() => MemoryBodyState();
 }
 
 class MemoryBodyState extends State<MemoryBody> {
+  // Creation of the controller must be in the state.
+  final MemoryController memoryController = MemoryController();
+
   @override
   void initState() {
     super.initState();
@@ -57,21 +57,13 @@ class MemoryBodyState extends State<MemoryBody> {
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: MemoryChart(widget.memoryController),
+            firstChild: MemoryChart(memoryController),
             secondChild: const Text('Memory Panel TBD'),
             initialFirstFraction: 0.25,
-            // TODO(terry): Eliminate hack - fix resizing of chart canvas during Build phase.
-            callback: _updateChart,
           ),
         ),
       ],
     );
-  }
-
-  // TODO(terry): Eliminate hack need to recompute size of chart canvas during Build.
-  void _updateChart() {
-    // Update the chart using its new size.
-    SchedulerBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
   Widget _leftsideButtons() {
@@ -79,7 +71,7 @@ class MemoryBodyState extends State<MemoryBody> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         OutlineButton(
-          onPressed: widget.memoryController.paused ? null : _pauseLiveTimeline,
+          onPressed: memoryController.paused ? null : _pauseLiveTimeline,
           child: const MaterialIconLabel(
             Icons.pause,
             'Pause',
@@ -87,8 +79,7 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
         OutlineButton(
-          onPressed:
-              widget.memoryController.paused ? _resumeLiveTimeline : null,
+          onPressed: memoryController.paused ? _resumeLiveTimeline : null,
           child: const MaterialIconLabel(
             Icons.play_arrow,
             'Resume',
@@ -135,12 +126,14 @@ class MemoryBodyState extends State<MemoryBody> {
 
   void _pauseLiveTimeline() {
     // TODO(terry): Implement real pause when connected to live feed.
-    widget.memoryController.pauseTimer();
+    memoryController.pauseLiveFeed();
+    setState(() {});
   }
 
   void _resumeLiveTimeline() {
     // TODO(terry): Implement real resume when connected to live feed.
-    widget.memoryController.resumeTimer();
+    memoryController.resumeLiveFeed();
+    setState(() {});
   }
 
   void _snapshot() {
@@ -148,8 +141,10 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   void _reset() {
-    // TODO(terry): Implementation needed.
-    setState(() {});
+    // TODO(terry): Remove this sample code.
+    // Reset the can feed and replay again.
+    memoryController.notifyResetFeedListeners();
+    _resumeLiveTimeline();
   }
 
   void _gc() {

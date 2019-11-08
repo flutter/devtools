@@ -2,24 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// This library must not have direct dependencies on Flutter UI (widgets).
+///
+/// To control the state of the feed use these methods.
+
+library memory_controller;
+
+typedef chartStateListener = void Function();
+
 class MemoryController {
   MemoryController();
 
   bool _paused = false;
 
-  bool get paused =>_paused;
+  bool get paused => _paused;
 
-  void pauseTimer() {
+  void pauseLiveFeed() {
     _paused = true;
   }
 
-  void resumeTimer() {
+  void resumeLiveFeed() {
     _paused = false;
   }
 
-  bool _restartSample = false;
-  
-  void resetTimer() {
-    _restartSample = true;
+  /// Listeners to hookup modifying the MemoryChartState.
+  final List<chartStateListener> _resetFeedListeners = [];
+
+  void addResetFeedListener(chartStateListener listener) {
+    _resetFeedListeners.add(listener);
+  }
+
+  void removeResetFeedListener(chartStateListener listener) {
+    _resetFeedListeners.remove(listener);
+  }
+
+  // Call any ChartState listeners.
+  void notifyResetFeedListeners() {
+    for (var notifyListener in _resetFeedListeners) {
+      notifyListener();
+    }
   }
 }

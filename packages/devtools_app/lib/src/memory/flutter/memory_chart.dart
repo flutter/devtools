@@ -42,7 +42,6 @@ class MemoryChart extends StatefulWidget {
 
 class MemoryChartState extends State<MemoryChart> {
   LineChartController _chartController;
-  LineChart _lineChart;
 
   LineChartController get chartController => _chartController;
 
@@ -50,8 +49,18 @@ class MemoryChartState extends State<MemoryChart> {
   void initState() {
     _initController();
 
-    // Load the data either all at once or simulating a feed (if argument is true).
+    // Read canned data and startup the pseudo-live feed.
     _initLineData(true);
+
+    // TODO(terry): Remove when live feed is hooked up.
+    // Hookup to replay the canned data.
+    widget.memoryController.addResetFeedListener(() {
+      setState(() {
+        // Reset our starting index into the canned data and
+        // start feeding the live chart.
+        timerDataIndex = 0;
+      });
+    });
 
     super.initState();
   }
@@ -60,12 +69,8 @@ class MemoryChartState extends State<MemoryChart> {
 
   @override
   Widget build(BuildContext context) {
-    _lineChart = LineChart(_chartController);
-
     return Stack(
-      children: <Widget>[
-        _lineChart,
-      ],
+      children: <Widget>[LineChart(_chartController)],
     );
   }
 
@@ -82,7 +87,8 @@ class MemoryChartState extends State<MemoryChart> {
             ..setValueFormatter(LargeValueFormatter())
             ..drawGridLines = (true)
             ..granularityEnabled = (true)
-            ..setAxisMinimum(0)
+            ..setStartAtZero(
+                true) // Set to baseline min and auto track max axis range.
             ..textColor = const Color.fromARGB(255, 0, 0, 0);
         },
         axisRightSettingFunction: (axisRight, controller) {
@@ -142,61 +148,53 @@ class MemoryChartState extends State<MemoryChart> {
 
   _loadImage() async => ImageLoader.loadImage('assets/img/star.png');
 
-  int timerDataIndex = 0;
+  int timerDataIndex;
   Timer _timer;
   Future<void> startTimer(
     List<Entry> capacity,
     List<Entry> used,
     List<Entry> externalHeap,
   ) async {
+    // Fetch from the beginning of the canned data for the live feed.
+    timerDataIndex = 0;
+
     if (_img == null) await _loadImage();
 
-    used.clear();
-    capacity.clear();
-    externalHeap.clear();
-
-    // Prime the data.
-    if (timerDataIndex < externalMemoryData.length) {
-      int x;
-      int y;
-
-      x = externalMemoryData[timerDataIndex];
-      y = externalMemoryData[timerDataIndex + 1];
-      externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-
-      x = usedHeapData[timerDataIndex];
-      y = usedHeapData[timerDataIndex + 1] +
-          externalMemoryData[timerDataIndex + 1];
-      used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-
-      x = heapCapacityData[timerDataIndex];
-      y = heapCapacityData[timerDataIndex + 1];
-      capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-
-      timerDataIndex += 2;
-    }
-
     // Average rate is ~500-600 ms?
-    _timer = Timer.periodic(const Duration(milliseconds: 200), (Timer timer) {
-      // Pause pressed stop pumping out data simulating a live feed.
-      if (widget.memoryController.paused) return;
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
+      if (timerDataIndex == 0) {
+        // First time reset our plotted data.
+        setState(() {
+          used.clear();
+          capacity.clear();
+          externalHeap.clear();
+        });
+      }
 
-      if (timerDataIndex < externalMemoryData.length) {
+      // Pause pressed stop pumping out data simulating a live feed.
+      if (!widget.memoryController.paused &&
+          timerDataIndex < externalMemoryData.length) {
         int x;
         int y;
 
         x = externalMemoryData[timerDataIndex];
         y = externalMemoryData[timerDataIndex + 1];
-        externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+        final externalEntry =
+            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
 
         x = usedHeapData[timerDataIndex];
         y = usedHeapData[timerDataIndex + 1] +
             externalMemoryData[timerDataIndex + 1];
-        used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+        final usedEntry = Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
 
         x = heapCapacityData[timerDataIndex];
         y = heapCapacityData[timerDataIndex + 1];
-        capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
+        final capacityEntry =
+            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
+
+        externalHeap.add(externalEntry);
+        used.add(usedEntry);
+        capacity.add(capacityEntry);
 
         timerDataIndex += 2;
 
@@ -207,12 +205,9 @@ class MemoryChartState extends State<MemoryChart> {
 
         _chartController.data = LineData.fromList(
             []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
-
-        setState(() {});
-      } else {
-        _timer.cancel();
-        widget.memoryController.resumeTimer();
       }
+
+      setState(() {});
     });
   }
 
