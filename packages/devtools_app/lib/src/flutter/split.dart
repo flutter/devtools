@@ -176,7 +176,6 @@ class _SplitState extends State<Split> {
         child: widget.secondChild,
       ),
     ];
-
    return Flex(direction: widget.axis, children: children);
   }
 }
