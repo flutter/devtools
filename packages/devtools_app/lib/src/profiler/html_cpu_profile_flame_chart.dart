@@ -38,6 +38,8 @@ class HtmlCpuFlameChart extends HtmlCpuProfilerView {
 
   @override
   void rebuildView() {
+    reset();
+
     final CpuProfileData data = profileDataProvider();
     canvas = CpuFlameChartCanvas(
       data: data,
@@ -58,9 +60,7 @@ class HtmlCpuFlameChart extends HtmlCpuProfilerView {
 
     add(canvas.element);
 
-    stackFrameDetails
-      ..text = stackFrameDetailsDefaultText
-      ..hidden(false);
+    stackFrameDetails.hidden(false);
   }
 
   @override
