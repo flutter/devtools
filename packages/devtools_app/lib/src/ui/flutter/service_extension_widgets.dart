@@ -225,7 +225,7 @@ class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
 
 class _RegisteredServiceExtensionButtonState
     extends State<_RegisteredServiceExtensionButton>
-    with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with _ServiceExtensionMixin, AutoDisposeMixin {
   bool _hidden = true;
 
   @override
@@ -296,7 +296,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
 }
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
-    with _ServiceExtensionMixin, AutoDisposeBase, AutoDisposeMixin {
+    with _ServiceExtensionMixin, AutoDisposeMixin {
   bool value = false;
   @override
   void initState() {
