@@ -17,7 +17,7 @@ void main() {
   InfoScreen screen;
   group('Info Screen', () {
     setUp(() {
-      setGlobal(ServiceConnectionManager, MockServiceManager());
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
       when(serviceManager.service.getFlagList()).thenAnswer((_) => null);
       when(serviceManager.connectedApp.isAnyFlutterApp)
           .thenAnswer((_) => Future.value(true));

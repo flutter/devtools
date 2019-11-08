@@ -12,10 +12,14 @@ import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
-class MockServiceManager extends Mock implements ServiceConnectionManager {
+class FakeServiceManager extends Fake implements ServiceConnectionManager {
+  FakeServiceManager({bool useFakeService = false})
+      : service = useFakeService ? FakeVmService() : MockVmService();
+
   @override
-  final VmServiceWrapper service = MockVmService();
+  final VmServiceWrapper service;
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -32,7 +36,47 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
+
+  @override
+  StreamSubscription<bool> hasRegisteredService(
+    String name,
+    void onData(bool value),
+  ) {
+    return Stream.value(false).listen(onData);
+  }
 }
+
+class FakeVmService extends Fake implements VmServiceWrapper {
+  final flags = <String, dynamic>{
+    'flags': <Flag>[],
+  };
+
+  @override
+  Future<Success> setFlag(String name, String value) {
+    final List<Flag> flags = this.flags['flags'];
+    final existingFlag =
+        flags.firstWhere((f) => f.name == name, orElse: () => null);
+    if (existingFlag != null) {
+      existingFlag.valueAsString = value;
+    } else {
+      flags.add(Flag.parse({
+        'name': name,
+        'comment': 'Mock Flag',
+        'modified': true,
+        'valueAsString': value,
+      }));
+    }
+    return Future.value(Success());
+  }
+
+  @override
+  Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
+
+  @override
+  Stream<Event> onEvent(String streamName) => const Stream.empty();
+}
+
+class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
 class MockVmService extends Mock implements VmServiceWrapper {}
 

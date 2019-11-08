@@ -20,7 +20,8 @@ void main() {
   MockServiceManager mockServiceManager;
   setUp(() {
     mockServiceManager = MockServiceManager();
-
+    when(mockServiceManager.serviceExtensionManager)
+        .thenReturn(FakeServiceExtensionManager());
     setGlobal(
       ServiceConnectionManager,
       mockServiceManager,
@@ -116,7 +117,9 @@ void main() {
     StreamSubscription serviceState;
     ServiceExtensionState mostRecentState;
     setUp(() {
-      mockServiceManager.serviceExtensionManager.fakeFrame();
+      (mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager)
+          .fakeFrame();
       serviceState =
           mockServiceManager.serviceExtensionManager.getServiceExtensionState(
         structuredErrors.extension,
@@ -130,7 +133,8 @@ void main() {
       await serviceState.cancel();
     });
     testWidgets('toggles', (WidgetTester tester) async {
-      await mockServiceManager.serviceExtensionManager
+      await (mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
 
       final button = StructuredErrorsToggle();
@@ -138,7 +142,9 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
-      mockServiceManager.serviceExtensionManager.fakeFrame();
+      (mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager)
+          .fakeFrame();
       expect(mostRecentState.value, true);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
@@ -147,7 +153,8 @@ void main() {
 
     testWidgets('updates based on the service extension',
         (WidgetTester tester) async {
-      await mockServiceManager.serviceExtensionManager
+      await (mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
       final button = StructuredErrorsToggle();
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));

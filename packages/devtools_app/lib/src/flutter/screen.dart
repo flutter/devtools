@@ -28,11 +28,6 @@ abstract class Screen {
 class EmptyScreen extends Screen {
   const EmptyScreen(String name, this.icon) : super(name);
 
-  static final EmptyScreen timeline = EmptyScreen(
-    'Timeline',
-    Octicons.getIconData('pulse'),
-  );
-
   static final EmptyScreen memory = EmptyScreen(
     'Memory',
     Octicons.getIconData('package'),
