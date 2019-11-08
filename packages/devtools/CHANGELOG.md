@@ -1,4 +1,4 @@
-## 0.1.11-dev.2
+## 0.1.11-dev.3
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
 * Enable full timeline for Dart CLI applications.
