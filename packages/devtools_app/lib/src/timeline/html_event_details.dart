@@ -291,8 +291,11 @@ class HtmlEventSummary extends CoreElement {
       div(text: '${firstTraceEvent.processId}')
     ]);
     if (firstTraceEvent.args.isNotEmpty) {
+      // Merge args from all trace events.
+      final eventArgs = Map.from(firstTraceEvent.args)
+        ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
       const encoder = JsonEncoder.withIndent('  ');
-      final formattedArgs = encoder.convert(firstTraceEvent.args);
+      final formattedArgs = encoder.convert(eventArgs);
       args.add([
         span(text: 'Arguments: '),
         div(text: formattedArgs, c: 'event-args'),
