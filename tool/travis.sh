@@ -183,6 +183,7 @@ elif [ "$BOT" = "packages" ]; then
 
     # Analyze third_party/
     (cd third_party/packages/ansi_up; flutter pub get)
+    (cd third_party/packages/mp_chart; flutter pub get)
     (cd third_party/packages/plotly_js; flutter pub get)
     (cd third_party/packages/split; flutter pub get)
     (cd third_party/packages; flutter pub global run tuneup check)

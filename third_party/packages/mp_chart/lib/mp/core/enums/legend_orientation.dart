@@ -1,0 +1,1 @@
+enum LegendOrientation { HORIZONTAL, VERTICAL }
