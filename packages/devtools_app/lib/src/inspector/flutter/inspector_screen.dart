@@ -98,8 +98,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
       controller: detailsTreeController,
       isSummaryTree: false,
     );
-    final screenSize = MediaQuery.of(context).size;
-    final aspectRatio = screenSize.width / screenSize.height;
     return Column(
       children: <Widget>[
         Row(
@@ -145,9 +143,10 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
           ],
         ),
         Expanded(
-          child: Split(
-            axis: aspectRatio >= 1 ? Axis.horizontal : Axis.vertical,
-            initialFirstFraction: aspectRatio >= 1 ? 0.35 : 0.6,
+          child: ResponsiveSplit(
+            minHorizontalAspectRatio: 1.0,
+            horizontalFirstFraction: 0.35,
+            verticalFirstFraction: 0.6,
             firstChild: summaryTree,
             secondChild: InspectorDetailsTabController(
               detailsTree: detailsTree,

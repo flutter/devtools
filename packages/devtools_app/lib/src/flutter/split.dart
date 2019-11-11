@@ -179,3 +179,49 @@ class _SplitState extends State<Split> {
     return Flex(direction: widget.axis, children: children);
   }
 }
+
+/// A widget that determines the appropriate axis for laying out Split widget
+///  based on the screen aspect ratio it is given
+class ResponsiveSplit extends StatelessWidget {
+  const ResponsiveSplit({
+    Key key,
+    @required this.minHorizontalAspectRatio,
+    @required this.firstChild,
+    @required this.secondChild,
+    @required this.horizontalFirstFraction,
+    @required this.verticalFirstFraction,
+  }) : super(key: key);
+
+  final Widget firstChild;
+  final Widget secondChild;
+
+  /// minimum aspect ratio for laying out Split widget on Axis.horizontal
+  final double minHorizontalAspectRatio;
+
+  /// [Split.initialFirstFraction] when laid out on horizontal axis
+  final double horizontalFirstFraction;
+
+  /// [Split.initialFirstFaction] when laid out on vertical axis
+  final double verticalFirstFraction;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final aspectRatio = screenSize.width / screenSize.height;
+    Axis axis;
+    double initialFirstFraction;
+    if (aspectRatio >= minHorizontalAspectRatio) {
+      axis = Axis.horizontal;
+      initialFirstFraction = horizontalFirstFraction;
+    } else {
+      axis = Axis.vertical;
+      initialFirstFraction = verticalFirstFraction;
+    }
+    return Split(
+      axis: axis,
+      firstChild: firstChild,
+      secondChild: secondChild,
+      initialFirstFraction: initialFirstFraction,
+    );
+  }
+}
