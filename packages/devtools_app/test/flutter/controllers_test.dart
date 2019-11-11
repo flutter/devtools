@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+
+import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/initializer.dart';
-import 'package:devtools_app/src/flutter/provider.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ import 'package:mockito/mockito.dart';
 import '../support/mocks.dart';
 
 void main() {
-  group('Provider', () {
+  group('Controllers provider', () {
     setUp(() async {
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager(useFakeService: true);
@@ -23,12 +24,12 @@ void main() {
 
     testWidgets('provides default data', (WidgetTester tester) async {
       print('running test');
-      ProviderData provider;
+      ProvidedControllers provider;
       await tester.pumpWidget(
-        Provider(
+        Controllers(
           child: Builder(
             builder: (context) {
-              provider = Provider.of(context);
+              provider = Controllers.of(context);
               return const SizedBox();
             },
           ),
@@ -38,30 +39,42 @@ void main() {
     });
 
     testWidgets('disposes old provider data.', (WidgetTester tester) async {
-      final overridden1 = TestProviderData();
-      final overridden2 = TestProviderData();
+      final overridden1 = TestProvidedControllers();
+      final overridden2 = TestProvidedControllers();
       await tester.pumpWidget(
-        Provider(overrideProviders: () => overridden1, child: const SizedBox()),
+        Controllers.overridden(
+          overrideProviders: () => overridden1,
+          child: const SizedBox(),
+        ),
       );
       expect(disposed[overridden1], isFalse);
       expect(disposed[overridden2], isFalse);
       // Don't dispose when passing the same provider.
       await tester.pumpWidget(
-        Provider(overrideProviders: () => overridden1, child: const SizedBox()),
+        Controllers.overridden(
+          overrideProviders: () => overridden1,
+          child: const SizedBox(),
+        ),
       );
       expect(disposed[overridden1], isFalse);
       expect(disposed[overridden2], isFalse);
 
       // Dispose when passing a new provider.
       await tester.pumpWidget(
-        Provider(overrideProviders: () => overridden2, child: const SizedBox()),
+        Controllers.overridden(
+          overrideProviders: () => overridden2,
+          child: const SizedBox(),
+        ),
       );
       expect(disposed[overridden1], isTrue);
       expect(disposed[overridden2], isFalse);
 
       // This is weird, but expected.
       await tester.pumpWidget(
-        Provider(overrideProviders: () => overridden1, child: const SizedBox()),
+        Controllers.overridden(
+          overrideProviders: () => overridden1,
+          child: const SizedBox(),
+        ),
       );
       expect(disposed[overridden1], isTrue);
       expect(disposed[overridden2], isTrue);
@@ -69,8 +82,8 @@ void main() {
   });
 }
 
-class TestProviderData extends Fake implements ProviderData {
-  TestProviderData() {
+class TestProvidedControllers extends Fake implements ProvidedControllers {
+  TestProvidedControllers() {
     disposed[this] = false;
   }
   @override
@@ -79,4 +92,4 @@ class TestProviderData extends Fake implements ProviderData {
   }
 }
 
-final disposed = <TestProviderData, bool>{};
+final disposed = <TestProvidedControllers, bool>{};

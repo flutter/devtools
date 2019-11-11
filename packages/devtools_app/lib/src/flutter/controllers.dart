@@ -9,15 +9,17 @@ import '../globals.dart';
 import '../logging/logging_controller.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
+///
+/// Note that [dispose] should only be called when nothing will be using this
+/// particular [ProvidedControllers] instance again.
 @immutable
-class ProviderData implements DisposableController {
-  const ProviderData({@required this.loggingController})
-      : assert(loggingController != null);
+class ProvidedControllers implements DisposableController {
+  const ProvidedControllers({@required this.logging}) : assert(logging != null);
 
   /// Builds the default providers for the app.
-  factory ProviderData.defaultProviders() {
-    return ProviderData(
-      loggingController: LoggingController(
+  factory ProvidedControllers.defaults() {
+    return ProvidedControllers(
+      logging: LoggingController(
         onLogCountStatusChanged: (_) {},
         // TODO(djshuckerow): Use a notifier pattern for the logging controller.
         // That way, it is visible if it has listeners and invisible otherwise.
@@ -26,37 +28,46 @@ class ProviderData implements DisposableController {
     );
   }
 
-  final LoggingController loggingController;
+  final LoggingController logging;
 
   @override
   void dispose() {
-    loggingController.dispose();
+    logging.dispose();
   }
 }
 
 /// Provider for controllers that should outlive individual screens of the app.
 ///
-/// [Initializer] builds a [Provider] after it has a connection to the VM
+/// [Initializer] builds a [Controllers] after it has a connection to the VM
 /// service and it has loaded [ensureInspectorDependencies].
-class Provider extends StatefulWidget {
-  const Provider({Key key, this.child, this.overrideProviders})
+class Controllers extends StatefulWidget {
+  const Controllers({Key key, Widget child})
+      : this._(key: key, child: child, overrideProviders: null);
+
+  @visibleForTesting
+  const Controllers.overridden({Key key, this.child, this.overrideProviders});
+
+  const Controllers._({Key key, this.child, this.overrideProviders})
       : super(key: key);
 
-  final ProviderData Function() overrideProviders;
+  /// Callback that overrides [ProvidedControllers.defaults].
+  @visibleForTesting
+  final ProvidedControllers Function() overrideProviders;
+
   final Widget child;
 
   @override
-  _ProviderState createState() => _ProviderState();
+  _ControllersState createState() => _ControllersState();
 
-  static ProviderData of(BuildContext context) {
+  static ProvidedControllers of(BuildContext context) {
     final _InheritedProvider inherited =
         context.inheritFromWidgetOfExactType(_InheritedProvider);
     return inherited.data;
   }
 }
 
-class _ProviderState extends State<Provider> {
-  ProviderData data;
+class _ControllersState extends State<Controllers> {
+  ProvidedControllers data;
 
   @override
   void initState() {
@@ -68,7 +79,7 @@ class _ProviderState extends State<Provider> {
   }
 
   @override
-  void didUpdateWidget(Provider oldWidget) {
+  void didUpdateWidget(Controllers oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.overrideProviders != widget.overrideProviders) {
       _initializeProviderData();
@@ -91,7 +102,7 @@ class _ProviderState extends State<Provider> {
       }
     } else {
       data?.dispose();
-      data = ProviderData.defaultProviders();
+      data = ProvidedControllers.defaults();
     }
   }
 
@@ -111,7 +122,7 @@ class _InheritedProvider extends InheritedWidget {
   const _InheritedProvider({@required this.data, @required Widget child})
       : super(child: child);
 
-  final ProviderData data;
+  final ProvidedControllers data;
 
   @override
   bool updateShouldNotify(_InheritedProvider oldWidget) {

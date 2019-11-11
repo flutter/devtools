@@ -13,14 +13,15 @@ import '../support/mocks.dart';
 
 void main() {
   group('Initializer', () {
-    FakeServiceManager serviceManager;
     MaterialApp app;
     const Key connectKey = Key('connect');
     const Key initializedKey = Key('initialized');
     setUp(() async {
       await ensureInspectorDependencies();
-      serviceManager = FakeServiceManager(useFakeService: true);
-      setGlobal(ServiceConnectionManager, serviceManager);
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(useFakeService: true),
+      );
 
       app = MaterialApp(
         routes: {
@@ -34,9 +35,10 @@ void main() {
 
     testWidgets('navigates to the connection page when uninitialized',
         (WidgetTester tester) async {
-      serviceManager =
-          FakeServiceManager(useFakeService: true, hasConnection: false);
-      setGlobal(ServiceConnectionManager, serviceManager);
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(useFakeService: true, hasConnection: false),
+      );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsOneWidget);

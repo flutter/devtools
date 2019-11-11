@@ -13,8 +13,8 @@ import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
+import 'controllers.dart';
 import 'navigation.dart';
-import 'provider.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
@@ -117,7 +117,7 @@ class _InitializerState extends State<Initializer>
   @override
   Widget build(BuildContext context) {
     return _checkLoaded() && _dependenciesLoaded
-        ? Provider(child: widget.builder(context))
+        ? Controllers(child: widget.builder(context))
         : const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
