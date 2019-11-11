@@ -99,13 +99,13 @@ class DevToolsAppState extends State<DevToolsApp> {
           url: params['uri'],
           builder: (_) => DevToolsScaffold(
             tabs: const [
-              const InspectorScreen(),
-              const TimelineScreen(),
-              const PerformanceScreen(),
-              const MemoryScreen(),
-              const DebuggerScreen(),
-              const LoggingScreen(),
-              const InfoScreen(),
+              InspectorScreen(),
+              TimelineScreen(),
+              PerformanceScreen(),
+              MemoryScreen(),
+              DebuggerScreen(),
+              LoggingScreen(),
+              InfoScreen(),
             ],
             actions: [
               HotReloadButton(),

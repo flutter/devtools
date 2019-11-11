@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as dartUi;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -68,15 +69,11 @@ class MemoryChartState extends State<MemoryChart> {
     super.initState();
   }
 
-  var _img;
-
-  dynamic _loadImage() async => ImageLoader.loadImage('assets/img/star.png');
+  dartUi.Image _img;
 
   void _setupChart() async {
-    _img ??= await _loadImage();
+    _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
-
-  String getTitle() => 'Memory Time Series';
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +142,12 @@ class MemoryChartState extends State<MemoryChart> {
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   // Datapoint entry for each used heap value.
   final List<Entry> _used = <Entry>[];
 
@@ -173,8 +176,11 @@ class MemoryChartState extends State<MemoryChart> {
     // Fetch from the beginning of the canned data for the live feed.
     timerDataIndex = 0;
 
-    // Average rate is ~500-600 ms?
-    _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
+    // TODO(terry): Consider moving the timer to the MemoryController.
+    // TODO(terry): The chart should be notified when new data arrives from the controller
+    //              using a notifier pattern.
+    // Average VMSerice rate is ~500-600 ms?
+    _timer = Timer.periodic(const Duration(milliseconds: 400), (Timer timer) {
       if (timerDataIndex == 0) {
         // First time reset our plotted data.
         setState(() {
@@ -230,8 +236,6 @@ class MemoryChartState extends State<MemoryChart> {
   }
 
   Future<void> loadAllData() async {
-    if (_img == null) await _loadImage();
-
     int index;
 
     index = 0;
@@ -327,8 +331,6 @@ class MemoryChartState extends State<MemoryChart> {
     _chartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())
       ..setValueTextSize(9);
-
-    setState(() {});
   }
 }
 
