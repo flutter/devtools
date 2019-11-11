@@ -20,6 +20,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 import 'client_manager.dart';
 import 'handlers.dart';
 
+const protocolVersion = '1.0.0';
 const argHelp = 'help';
 const argEnableNotifications = 'enable-notifications';
 const argLaunchBrowser = 'launch-browser';
@@ -176,7 +177,12 @@ Future<HttpServer> serveDevTools({
         // are all on a newer version that uses `event`. We incorrectly used
         // `method` for the original releases.
         'method': 'server.started',
-        'params': {'host': server.address.host, 'port': server.port, 'pid': pid}
+        'params': {
+          'host': server.address.host,
+          'port': server.port,
+          'pid': pid,
+          'protocolVersion': protocolVersion,
+        }
       },
       machineMode: machineMode,
     );
