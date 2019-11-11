@@ -5,12 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../framework/framework_core.dart';
 import '../globals.dart';
+import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
+import 'controllers.dart';
 import 'navigation.dart';
 
 /// Widget that requires business logic to be loaded before building its
@@ -49,9 +52,21 @@ class _InitializerState extends State<Initializer>
   /// change between successive calls.
   bool _checkLoaded() => serviceManager.hasConnection;
 
+  bool _dependenciesLoaded = false;
+
   @override
   void initState() {
     super.initState();
+
+    /// Ensure that we loaded the inspector dependencies before attempting to
+    /// build the Provider.
+    ensureInspectorDependencies().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _dependenciesLoaded = true;
+      });
+    });
+
     autoDispose(
       serviceManager.onStateChange.listen((_) {
         // Generally, empty setState calls in Flutter should be avoided.
@@ -101,10 +116,25 @@ class _InitializerState extends State<Initializer>
 
   @override
   Widget build(BuildContext context) {
-    return _checkLoaded()
-        ? widget.builder(context)
+    return _checkLoaded() && _dependenciesLoaded
+        ? Controllers(child: widget.builder(context))
         : const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
+  }
+}
+
+/// Loads the widgets.json file from Flutter's [rootBundle].
+///
+/// This will fail if called in a test run with `--platform chrome`.
+/// Tests that call this method should be annotated `@TestOn('vm')`.
+Future<void> ensureInspectorDependencies() async {
+  // TODO(jacobr): move this rootBundle loading code into
+  // InspectorController once the dart:html app is removed and Flutter
+  // conventions for loading assets can be the default.
+  if (Catalog.instance == null) {
+    final json = await rootBundle.loadString('web/widgets.json');
+    // ignore: invalid_use_of_visible_for_testing_member
+    Catalog.setCatalog(Catalog.decode(json));
   }
 }

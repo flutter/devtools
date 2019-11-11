@@ -15,7 +15,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
-  FakeServiceManager({bool useFakeService = false})
+  FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
       : service = useFakeService ? FakeVmService() : MockVmService();
 
   @override
@@ -31,7 +31,10 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
-  final bool hasConnection = true;
+  final bool hasConnection;
+
+  @override
+  final IsolateManager isolateManager = MockIsolateManager();
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
@@ -44,6 +47,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   ) {
     return Stream.value(false).listen(onData);
   }
+
+  @override
+  Stream<bool> get onStateChange => const Stream.empty();
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
@@ -74,7 +80,24 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
+
+  @override
+  Stream<Event> get onStdoutEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onStderrEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onGCEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onLoggingEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onExtensionEvent => const Stream.empty();
 }
+
+class MockIsolateManager extends Mock implements IsolateManager {}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
