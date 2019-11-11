@@ -124,6 +124,10 @@ class _InitializerState extends State<Initializer>
   }
 }
 
+/// Loads the widgets.json file from Flutter's [rootBundle].
+///
+/// This will fail if called in a test run with `--platform chrome`.
+/// Tests that call this method should be annotated `@TestOn('vm')`.
 Future<void> ensureInspectorDependencies() async {
   // TODO(jacobr): move this rootBundle loading code into
   // InspectorController once the dart:html app is removed and Flutter

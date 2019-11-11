@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
 import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/flutter/provider.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_testing/support/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -17,7 +16,6 @@ import '../support/mocks.dart';
 void main() {
   group('Provider', () {
     setUp(() async {
-      Catalog.setCatalog(Catalog.decode(await widgetsJson()));
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, serviceManager);
