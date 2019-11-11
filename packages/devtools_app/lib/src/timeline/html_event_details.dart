@@ -121,7 +121,7 @@ class HtmlEventDetails extends CoreElement {
         .listen((_) => reset());
 
     _timelineController.onSelectedTimelineEvent
-        .listen((_) async => await update());
+        .listen((_) async => await _update());
 
     _timelineController.onLoadOfflineData.listen((_) async {
       // If there is no selected event, there is no reason to show the event
@@ -131,12 +131,12 @@ class HtmlEventDetails extends CoreElement {
             _timelineController.offlineTimelineData.selectedEvent;
         titleBackgroundColor = _backgroundColorForEvent(selectedEvent);
         titleTextColor = Colors.black;
-        await update();
+        await _update();
       }
     });
   }
 
-  Future<void> update({bool hide = false}) async {
+  Future<void> _update({bool hide = false}) async {
     final selectedEvent = _timelineController.timeline.data?.selectedEvent;
 
     _title.text = selectedEvent != null
@@ -166,7 +166,7 @@ class HtmlEventDetails extends CoreElement {
   void reset({bool hide = false}) {
     titleTextColor = contrastForeground;
     titleBackgroundColor = _defaultTitleBackground;
-    update(hide: hide);
+    _update(hide: hide);
   }
 
   Color _backgroundColorForEvent(TimelineEvent event) {
