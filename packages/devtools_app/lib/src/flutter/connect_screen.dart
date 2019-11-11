@@ -10,6 +10,7 @@ import 'package:pedantic/pedantic.dart';
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
 import 'common_widgets.dart';
+import 'initializer.dart';
 import 'navigation.dart';
 import 'screen.dart';
 
