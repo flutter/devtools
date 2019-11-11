@@ -46,12 +46,6 @@ matrix:
   # https://github.com/flutter/devtools/issues/963
   allow_failures:
     - os: windows
-    # TODO(https://github.com/flutter/devtools/issues/1311): ignore the linux unit tests
-    # until they can compile again.
-    - os: linux
-      env: BOT=test_ddc
-    - os: linux
-      env: BOT=test_dart2js
 
 env:
   - BOT=main
