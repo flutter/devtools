@@ -4,7 +4,9 @@
 
 import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_testing/support/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,6 +19,7 @@ void main() {
     const Key connectKey = Key('connect');
     const Key initializedKey = Key('initialized');
     setUp(() async {
+      Catalog.setCatalog(Catalog.decode(await widgetsJson()));
       await ensureInspectorDependencies();
       serviceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, serviceManager);
