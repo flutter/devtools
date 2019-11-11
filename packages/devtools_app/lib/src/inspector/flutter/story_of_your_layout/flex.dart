@@ -4,13 +4,13 @@
 
 import 'dart:math';
 
+import 'package:devtools_app/src/inspector/inspector_text_styles.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/colors.dart';
-import '../../inspector_text_styles.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
@@ -94,42 +94,34 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     const rightWidth = 16.0;
 
     final child = WidgetVisualizer(
-      widgetName: node.description,
-      topRight: Container(
+      title: node.description,
+      hint: Container(
         padding: const EdgeInsets.all(4.0),
-        child: Text(
-          'flex: ${node.flexFactor}',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Text(
+              'flex: ${node.flexFactor}',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            if (unconstrained)
+              Text(
+                'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                style: regularItalic.merge(warning),
+                maxLines: 2,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                textScaleFactor: 0.8,
+                textAlign: TextAlign.right,
+              ),
+          ],
         ),
       ),
       backgroundColor: backgroundColor,
       borderColor: borderColor,
       child: BorderLayout(
         topHeight: 16.0,
-        top: Container(
-            height: 16.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  child: ArrowWidget(
-                    type: ArrowType.right,
-                    headSize: 8.0,
-                  ),
-                  width: 16.0,
-                ),
-                Container(
-                  child: Text(
-                    '${constraints.hasBoundedWidth ? '${constraints.minWidth}<=w<=${constraints.maxWidth}' : 'unconstrained'}',
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                ),
-                Container(
-                  child: ArrowWidget(type: ArrowType.left, headSize: 8.0),
-                  width: 16.0,
-                ),
-              ],
-            )),
         right: Container(
           child: ArrowWrapper.bidirectional(
             child: RotatedBox(
@@ -156,16 +148,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           margin: const EdgeInsets.only(left: 8.0, right: 10.0),
         ),
         bottomHeight: 16.0,
-        center: unconstrained
-            ? Container(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Text(
-                  '${properties.direction == Axis.horizontal ? 'width' : 'height'} unconstrained',
-                  style: regularBold.merge(warning),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            : null,
+        center: Container(),
       ),
     );
 
@@ -175,7 +158,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     final largestHeightPercentage = largestHeight / parentSize.height;
 
     final smallestWidthOnScreen =
-        max(150, screenSize.width * smallestWidthPercentage);
+        max(170, screenSize.width * smallestWidthPercentage);
     final smallestHeightOnScreen =
         max(150, screenSize.height * smallestHeightPercentage);
     final largestWidthOnScreen =
@@ -380,8 +363,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                           left: leftArrowIndicatorWidth + margin,
                         ),
                         child: WidgetVisualizer(
-                          widgetName: flexType,
-                          topRight: Container(
+                          title: flexType,
+                          hint: Container(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
                               'Total Flex Factor: ${properties.totalFlex}',
@@ -480,18 +463,18 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
     Key key,
-    @required this.widgetName,
-    @required this.topRight,
+    @required this.title,
+    @required this.hint,
     @required this.borderColor,
     @required this.backgroundColor,
     this.child,
-  })  : assert(widgetName != null),
+  })  : assert(title != null),
         assert(borderColor != null),
         assert(backgroundColor != null),
         super(key: key);
 
-  final String widgetName;
-  final Widget topRight;
+  final String title;
+  final Widget hint;
   final Color borderColor;
   final Color backgroundColor;
   final Widget child;
@@ -500,25 +483,38 @@ class WidgetVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                child: Text(widgetName),
-                decoration: BoxDecoration(
-                  color: borderColor,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  child: Center(
+                    child: Text(
+                      title,
+                      textScaleFactor: 1.1,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: borderColor,
+                  ),
+                  padding: const EdgeInsets.all(4.0),
                 ),
-                padding: const EdgeInsets.all(4.0),
-              ),
-              if (topRight != null) topRight,
-            ],
+                if (hint != null)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: hint,
+                    ),
+                  ),
+              ],
+            ),
           ),
           if (child != null)
-            Flexible(
+            Expanded(
               child: child,
             ),
         ],
