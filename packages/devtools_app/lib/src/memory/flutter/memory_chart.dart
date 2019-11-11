@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as dartUi;
+import 'dart:ui' as dart_ui;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -69,7 +69,7 @@ class MemoryChartState extends State<MemoryChart> {
     super.initState();
   }
 
-  dartUi.Image _img;
+  dart_ui.Image _img;
 
   void _setupChart() async {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
