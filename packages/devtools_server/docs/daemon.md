@@ -24,12 +24,12 @@ Events are sent as objects with a string `event` field and a json object `params
 
 ```js
 {
-    'event': 'server.started',
-    'params': {
-        'host': 'localhost',
-        'port': 9100,
-        'pid': 9876,
-    }
+	'event': 'server.started',
+	'params': {
+		'host': 'localhost',
+		'port': 9100,
+		'pid': 9876,
+	}
 }
 ```
 
@@ -85,18 +85,18 @@ This request lists all DevTools instances that are currently connected back to t
 
 ```js
 {
-    "id": "123",
-    // The `method` field is populated based on the ServiceRegistered VM event
-	"method": "s2.launchDevTools",
-	"params": {
-		"notify": true,
-		"page": "inspector",
-		"queryParams": {
-			"hide": "debugger",
-			"ide": "VSCode",
-			"theme": "dark"
+	'id': '123',
+	// The `method` field is populated based on the ServiceRegistered VM event
+	'method': 's2.launchDevTools',
+	'params': {
+		'notify': true,
+		'page': 'inspector',
+		'queryParams': {
+			'hide': 'debugger',
+			'ide': 'VSCode',
+			'theme': 'dark'
 		},
-		"reuseWindows": true
+		'reuseWindows': true
 	}
 }
 ```
