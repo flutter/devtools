@@ -44,7 +44,6 @@ void main() {
 
     testWidgets('builds contents when initialized',
         (WidgetTester tester) async {
-      print('running test');
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byKey(connectKey), findsNothing);
