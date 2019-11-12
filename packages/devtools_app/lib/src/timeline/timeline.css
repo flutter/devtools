@@ -184,6 +184,10 @@
     padding-right: 4px;
 }
 
+.event-summary-section {
+    padding-bottom: 8px;
+}
+
 .event-args {
     white-space: pre-wrap;
 }

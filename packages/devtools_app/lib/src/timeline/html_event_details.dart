@@ -258,10 +258,15 @@ class HtmlEventSummary extends CoreElement {
       : super('div', classes: 'event-summary') {
     layoutVertical();
     add([
-      category = div()..layoutHorizontal(),
-      thread = div()..layoutHorizontal(),
-      process = div()..layoutHorizontal(),
-      args = div()..layoutVertical(),
+      category = div(c: 'event-summary-section')..layoutHorizontal(),
+      thread = div(c: 'event-summary-section')..layoutHorizontal(),
+      process = div(c: 'event-summary-section')..layoutHorizontal(),
+      connectedEvents = div(c: 'event-summary-section')
+        ..layoutVertical()
+        ..hidden(true),
+      args = div(c: 'event-summary-section')
+        ..layoutVertical()
+        ..hidden(true),
     ]);
   }
 
@@ -274,6 +279,8 @@ class HtmlEventSummary extends CoreElement {
   CoreElement process;
 
   CoreElement args;
+
+  CoreElement connectedEvents;
 
   void update() {
     final event = selectedEventProvider();
@@ -290,16 +297,39 @@ class HtmlEventSummary extends CoreElement {
       span(text: 'Process id: '),
       div(text: '${firstTraceEvent.processId}')
     ]);
-    if (firstTraceEvent.args.isNotEmpty) {
-      // Merge args from all trace events.
-      final eventArgs = Map.from(firstTraceEvent.args)
-        ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
+
+    final asyncInstantEvents = event.isAsyncEvent
+        ? [
+            ...event.children.where((e) =>
+                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+          ]
+        : [];
+    if (asyncInstantEvents.isNotEmpty) {
+      // TODO(kenz): eventually show flow events here as well.
+      connectedEvents
+        ..add([
+          span(text: 'Connected events: '),
+          for (var e in asyncInstantEvents)
+            div(
+                text: '${e.name} - {'
+                    'startTime: ${msText(e.time.start - event.time.start)}, '
+                    'args: ${e.traceEvents.first.event.args}}')
+        ])
+        ..hidden(false);
+    }
+
+    // Merge args from all trace events.
+    final eventArgs = Map.from(firstTraceEvent.args)
+      ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
+    if (eventArgs.isNotEmpty) {
       const encoder = JsonEncoder.withIndent('  ');
       final formattedArgs = encoder.convert(eventArgs);
-      args.add([
-        span(text: 'Arguments: '),
-        div(text: formattedArgs, c: 'event-args'),
-      ]);
+      args
+        ..add([
+          span(text: 'Arguments: '),
+          div(text: formattedArgs, c: 'event-args'),
+        ])
+        ..hidden(false);
     }
   }
 
@@ -307,6 +337,7 @@ class HtmlEventSummary extends CoreElement {
     category.clear();
     thread.clear();
     process.clear();
+    connectedEvents.clear();
     args.clear();
   }
 }
