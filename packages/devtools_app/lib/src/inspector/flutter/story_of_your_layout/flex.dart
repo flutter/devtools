@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:devtools_app/src/inspector/inspector_text_styles.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -36,7 +37,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   double smallestWidth, largestWidth;
   double smallestHeight, largestHeight;
 
-  Size get size => widget.properties.size;
+  Size get size => properties.size;
 
   FlexLayoutProperties get properties => widget.properties;
 
@@ -118,7 +119,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           ],
         ),
       ),
-      backgroundColor: backgroundColor,
       borderColor: borderColor,
       child: BorderLayout(
         topHeight: 16.0,
@@ -131,7 +131,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
             direction: Axis.vertical,
             arrowHeadSize: 8.0,
             distanceToArrow: 1.0,
-            arrowColor: arrowColor,
+            arrowColor: horizontalColor,
           ),
           width: rightWidth,
           margin: const EdgeInsets.only(bottom: 16.0),
@@ -142,7 +142,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
             child: Text('width: ${size.width.toStringAsFixed(1)}'),
             direction: Axis.horizontal,
             arrowHeadSize: 8.0,
-            arrowColor: arrowColor,
+            arrowColor: verticalColor,
           ),
           height: 16.0,
           margin: const EdgeInsets.only(left: 8.0, right: 10.0),
@@ -202,8 +202,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               for (var i = 0; i < children.length; i++)
                 _visualizeChild(
                   node: children[i],
-                  borderColor: i.isOdd ? mainGpuColor : mainUiColor,
-                  backgroundColor: theme.backgroundColor,
+                  borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
+                  backgroundColor: theme.primaryColor,
                   arrowColor: theme.textSelectionColor,
                   parentSize: size,
                   screenSize: Size(width, height),
@@ -213,7 +213,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: theme.accentColor,
+            color: theme.primaryColor,
             width: 2.0,
           ),
         ),
@@ -246,7 +246,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       topHeight: top + margin,
       right: Container(
         child: ArrowWrapper.bidirectional(
-          arrowColor: theme.textSelectionColor,
+          arrowColor: verticalColor,
           arrowStrokeWidth: 1.5,
           child: RotatedBox(
             quarterTurns: 1,
@@ -264,7 +264,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       bottom: Container(
         margin: const EdgeInsets.only(top: margin),
         child: ArrowWrapper.bidirectional(
-          arrowColor: theme.textSelectionColor,
+          arrowColor: horizontalColor,
           arrowStrokeWidth: 1.5,
           child: Text(
             'width: ${size.width}',
@@ -276,7 +276,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         height: bottom,
       ),
       top: Text(
-        widget.properties.direction == Axis.horizontal
+        properties.direction == Axis.horizontal
             ? mainAxisAlignment.toString()
             : crossAxisAlignment.toString(),
         textScaleFactor: 1.25,
@@ -284,19 +284,104 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       left: RotatedBox(
         quarterTurns: 3,
         child: Text(
-            widget.properties.direction == Axis.vertical
-                ? mainAxisAlignment.toString()
-                : crossAxisAlignment.toString(),
-            textScaleFactor: 1.25),
+          properties.direction == Axis.vertical
+              ? mainAxisAlignment.toString()
+              : crossAxisAlignment.toString(),
+          textScaleFactor: 1.25,
+        ),
       ),
+    );
+  }
+
+  Color get horizontalColor =>
+      properties.isHorizontalMainAxis ? mainAxisColor : crossAxisColor;
+
+  Color get verticalColor =>
+      properties.isVerticalMainAxis ? mainAxisColor : crossAxisColor;
+
+  String get flexType => properties.type.toString();
+
+  Widget _buildAxisAlignmentDropdown(Axis axis) {
+    Color color;
+    String axisDescription;
+    List<Object> alignmentEnumEntries;
+    Object selected;
+    if (axis == Axis.horizontal) {
+      color = horizontalColor;
+      axisDescription = properties.horizontalDirectionDescription;
+    } else {
+      color = verticalColor;
+      axisDescription = properties.verticalDirectionDescription;
+    }
+    if (axis == direction) {
+      alignmentEnumEntries = MainAxisAlignment.values;
+      selected = mainAxisAlignment;
+    } else {
+      alignmentEnumEntries = CrossAxisAlignment.values;
+      selected = crossAxisAlignment;
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          '$axisDescription Alignment: ',
+          style: TextStyle(color: color),
+          textScaleFactor: 1.2,
+        ),
+        Container(
+          margin: const EdgeInsets.only(left: 8.0),
+          child: DropdownButton(
+            itemHeight: 80,
+            value: selected,
+            items: [
+              for (var alignment in alignmentEnumEntries)
+                DropdownMenuItem(
+                  value: alignment,
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          describeEnum(alignment) + ':',
+                          style: TextStyle(
+                            color: color,
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(left: 8.0),
+                          child: Image.asset(
+                            (axis == direction)
+                                ? getMainAxisAssetImageUrl(alignment)
+                                : getCrossAxisAssetImageUrl(alignment),
+                            height: 32,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+            ],
+            onChanged: (Object newSelection) {
+              setState(() {
+                if (axis == direction) {
+                  mainAxisAlignment = newSelection;
+                } else {
+                  crossAxisAlignment = newSelection;
+                }
+              });
+            },
+          ),
+        )
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final flexType = widget.properties.type.toString();
     final theme = Theme.of(context);
-    final direction = widget.properties.direction;
     final horizontalDirectionAlignments = direction == Axis.horizontal
         ? MainAxisAlignment.values
         : CrossAxisAlignment.values;
@@ -316,32 +401,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               textAlign: TextAlign.center,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(widget.properties.horizontalDirectionDescription + ': '),
-              DropdownButton(
-                value: direction == Axis.horizontal
-                    ? mainAxisAlignment
-                    : crossAxisAlignment,
-                items: [
-                  for (var alignment in horizontalDirectionAlignments)
-                    DropdownMenuItem(
-                      value: alignment,
-                      child: Text(alignment.toString()),
-                    )
-                ],
-                onChanged: (newValue) {
-                  if (direction == Axis.horizontal) {
-                    mainAxisAlignment = newValue;
-                  } else {
-                    crossAxisAlignment = newValue;
-                  }
-                  setState(() {});
-                },
-              )
-            ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: _buildAxisAlignmentDropdown(Axis.horizontal),
           ),
           Flexible(
             child: LayoutBuilder(builder: (context, constraints) {
@@ -374,8 +436,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                               ),
                             ),
                           ),
-                          borderColor: theme.accentColor,
-                          backgroundColor: theme.primaryColor,
+                          borderColor: mainAxisColor,
                           child: Container(
                             margin: const EdgeInsets.only(
                               left: 8.0,
@@ -393,11 +454,15 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                         height: maxHeight - topArrowIndicatorHeight,
                         width: leftArrowIndicatorWidth,
                         child: ArrowWrapper.unidirectional(
+                          arrowColor: verticalColor,
                           child: RotatedBox(
                             quarterTurns: 3,
                             child: Text(
-                              widget.properties.verticalDirectionDescription,
+                              properties.verticalDirectionDescription,
                               textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: verticalColor,
+                              ),
                             ),
                           ),
                           type: ArrowType.down,
@@ -410,10 +475,14 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                         height: topArrowIndicatorHeight,
                         width: maxWidth - leftArrowIndicatorWidth - margin,
                         child: ArrowWrapper.unidirectional(
+                          arrowColor: horizontalColor,
                           child: FittedBox(
                             child: Text(
-                              widget.properties.horizontalDirectionDescription,
+                              properties.horizontalDirectionDescription,
                               textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: horizontalColor,
+                              ),
                             ),
                           ),
                           type: ArrowType.right,
@@ -425,34 +494,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               );
             }),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                margin: const EdgeInsets.only(left: 8.0),
-                child: DropdownButton(
-                  value: direction == Axis.vertical
-                      ? mainAxisAlignment
-                      : crossAxisAlignment,
-                  items: [
-                    for (var alignment in verticalDirectionAlignments)
-                      DropdownMenuItem(
-                        value: alignment,
-                        child: Text(alignment.toString()),
-                      )
-                  ],
-                  onChanged: (newValue) {
-                    if (direction == Axis.vertical) {
-                      mainAxisAlignment = newValue;
-                    } else {
-                      crossAxisAlignment = newValue;
-                    }
-                    setState(() {});
-                  },
-                ),
-              )
-            ],
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _buildAxisAlignmentDropdown(Axis.vertical),
           ),
         ],
       ),
@@ -466,17 +510,14 @@ class WidgetVisualizer extends StatelessWidget {
     @required this.title,
     @required this.hint,
     @required this.borderColor,
-    @required this.backgroundColor,
     this.child,
   })  : assert(title != null),
         assert(borderColor != null),
-        assert(backgroundColor != null),
         super(key: key);
 
   final String title;
   final Widget hint;
   final Color borderColor;
-  final Color backgroundColor;
   final Widget child;
 
   @override
@@ -493,9 +534,11 @@ class WidgetVisualizer extends StatelessWidget {
               children: <Widget>[
                 Container(
                   child: Center(
-                    child: Text(
-                      title,
-                      textScaleFactor: 1.1,
+                    child: FittedBox(
+                      child: Text(
+                        title,
+                        textScaleFactor: 1.0,
+                      ),
                     ),
                   ),
                   decoration: BoxDecoration(
@@ -523,9 +566,16 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
-        color: backgroundColor,
       ),
       margin: const EdgeInsets.all(1.0),
     );
   }
+}
+
+String getMainAxisAssetImageUrl(MainAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
+}
+
+String getCrossAxisAssetImageUrl(CrossAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
 }

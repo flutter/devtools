@@ -102,11 +102,15 @@ class FlexLayoutProperties extends LayoutProperties {
     );
   }
 
+  bool get isHorizontalMainAxis => direction == Axis.horizontal;
+
+  bool get isVerticalMainAxis => direction == Axis.vertical;
+
   String get horizontalDirectionDescription =>
-      direction == Axis.horizontal ? 'main axis' : 'cross axis';
+      direction == Axis.horizontal ? 'Main Axis' : 'Cross Axis';
 
   String get verticalDirectionDescription =>
-      direction == Axis.vertical ? 'main axis' : 'cross axis';
+      direction == Axis.vertical ? 'Main Axis' : 'Cross Axis';
 
   // TODO(albertusangga): Remove this getter since type is not that useful
   Type get type => direction == Axis.horizontal ? Row : Column;
