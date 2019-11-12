@@ -4,14 +4,13 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/inspector/inspector_text_styles.dart';
-import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
-import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/colors.dart';
+import '../../inspector_text_styles.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
@@ -89,7 +88,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   }) {
     final size = node.size;
     final int flexFactor = node.flexFactor;
-    final BoxConstraints constraints = node.constraints;
 
     final unconstrained = flexFactor == 0 || flexFactor == null;
     const rightWidth = 16.0;
@@ -157,6 +155,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     final largestWidthPercentage = largestWidth / parentSize.width;
     final largestHeightPercentage = largestHeight / parentSize.height;
 
+    final widthDifference =
+        largestWidth == smallestWidth ? 1 : (largestWidth - smallestWidth);
+    final heightDifference =
+        largestHeight == smallestHeight ? 1 : (largestHeight - smallestHeight);
+
     final smallestWidthOnScreen =
         max(170, screenSize.width * smallestWidthPercentage);
     final smallestHeightOnScreen =
@@ -168,11 +171,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
     final width = (size.width - smallestWidth) *
             (largestWidthOnScreen - smallestWidthOnScreen) /
-            (largestWidth - smallestWidth) +
+            widthDifference +
         smallestWidthOnScreen;
     final height = (size.height - smallestHeight) *
             (largestHeightOnScreen - smallestHeightOnScreen) /
-            (largestHeight - smallestHeight) +
+            heightDifference +
         smallestHeightOnScreen;
     return Container(
       width: width,
@@ -382,12 +385,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final horizontalDirectionAlignments = direction == Axis.horizontal
-        ? MainAxisAlignment.values
-        : CrossAxisAlignment.values;
-    final verticalDirectionAlignments = direction == Axis.vertical
-        ? MainAxisAlignment.values
-        : CrossAxisAlignment.values;
     return Container(
       padding: const EdgeInsets.only(top: 32.0),
       child: Column(
