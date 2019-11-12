@@ -76,7 +76,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
             axis: Axis.vertical,
             firstChild: TimelineFlameChart(),
             secondChild: EventDetails(),
-            initialFirstFraction: 0.8,
+            initialFirstFraction: 0.6,
           ),
         ),
       ],
