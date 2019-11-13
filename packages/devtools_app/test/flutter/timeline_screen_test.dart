@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/timeline/flutter/event_details.dart';
@@ -42,6 +43,12 @@ void main() {
       expect(find.byType(TimelineScreenBody), findsOneWidget);
       final TimelineScreenBodyState state =
           tester.state(find.byType(TimelineScreenBody));
+
+      // Verify the state of the splitter.
+      final splitFinder = find.byType(Split);
+      expect(splitFinder, findsOneWidget);
+      final Split splitter = tester.widget(splitFinder);
+      expect(splitter.initialFirstFraction, equals(0.6));
 
       // Verify TimelineMode.frameBased content.
       expect(state.controller.timelineMode, equals(TimelineMode.frameBased));

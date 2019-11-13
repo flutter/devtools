@@ -12,20 +12,10 @@ import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
 import '../timeline_model.dart';
 
-class EventDetails extends StatefulWidget {
-  @override
-  _EventDetailsState createState() => _EventDetailsState();
-}
+class EventDetails extends StatelessWidget {
+  const EventDetails(this.selectedEvent);
 
-class _EventDetailsState extends State<EventDetails> {
-  // TODO(kenz): use selected event from controller once data is hooked up.
-  TimelineEvent selectedEvent;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedEvent = stubUiEvent;
-  }
+  final TimelineEvent selectedEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -41,53 +31,36 @@ class _EventDetailsState extends State<EventDetails> {
         ),
         const PaddedDivider.thin(),
         Expanded(
-          child: Container(
-            child: Stack(
-              children: [
-                if (selectedEvent.isUiEvent) CpuProfilerView(),
-                if (!selectedEvent.isUiEvent) EventSummary(selectedEvent),
-              ],
-            ),
-          ),
+          child: selectedEvent.isUiEvent
+              ? CpuProfilerView()
+              : EventSummary(selectedEvent),
         ),
       ],
     );
   }
 }
 
-class EventSummary extends StatefulWidget {
-  const EventSummary(this.event);
+class EventSummary extends StatelessWidget {
+  EventSummary(this.event)
+      : _connectedEvents = event.isAsyncEvent
+            ? [
+                ...event.children.where((e) =>
+                    e.traceEvents.first.event.phase ==
+                    TraceEvent.asyncInstantPhase)
+              ]
+            : [],
+        _eventArgs = Map.from(event.traceEvents.first.event.args)
+          ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
+
+  static const encoder = JsonEncoder.withIndent('  ');
 
   final TimelineEvent event;
 
-  @override
-  _EventSummaryState createState() => _EventSummaryState();
-}
+  final List<AsyncTimelineEvent> _connectedEvents;
 
-class _EventSummaryState extends State<EventSummary> {
-  _EventSummaryState();
+  final Map<String, dynamic> _eventArgs;
 
-  static const encoder = JsonEncoder.withIndent('    ');
-
-  List<AsyncTimelineEvent> _connectedEvents;
-
-  Map<String, dynamic> _eventArgs;
-
-  TraceEvent get firstTraceEvent => widget.event.traceEvents.first.event;
-
-  @override
-  void initState() {
-    super.initState();
-    _connectedEvents ??= widget.event.isAsyncEvent
-        ? [
-            ...widget.event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
-          ]
-        : [];
-    _eventArgs ??= Map.from(firstTraceEvent.args)
-      ..addAll(
-          {for (var trace in widget.event.traceEvents) ...trace.event.args});
-  }
+  TraceEvent get firstTraceEvent => event.traceEvents.first.event;
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +100,7 @@ class _EventSummaryState extends State<EventSummary> {
 
   Widget _buildConnectedEvent(TimelineEvent e) {
     final eventArgs = {
-      'startTime': msText(e.time.start - widget.event.time.start),
+      'startTime': msText(e.time.start - event.time.start),
       'args': e.traceEvents.first.event.args,
     };
     return ListTile(
@@ -273,7 +246,9 @@ final stubGpuEvent = SyncTimelineEvent(TraceEventWrapper(
     'pid': 94955,
     'ts': 118039651469,
     'ph': 'B',
-    'args': {},
+    'args': {
+      'isolateId': 'id_001',
+    },
   }))),
   0,
 ))

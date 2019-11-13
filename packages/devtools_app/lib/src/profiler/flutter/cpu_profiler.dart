@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 
 class CpuProfilerView extends StatelessWidget {
+  // TODO(kenz): the summary tab should be available for UI events in the
+  // timeline.
   static const cpuProfilerTabs = [
     Tab(text: 'CPU Flame Chart'),
     Tab(text: 'Call Tree'),
@@ -33,6 +35,7 @@ class CpuProfilerView extends StatelessWidget {
     );
   }
 
+  // TODO(kenz): implement all of these views.
   List<Widget> _buildProfilerViews() {
     const cpuFlameChart = Center(
       child: Text(
