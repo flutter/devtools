@@ -724,13 +724,14 @@ class HtmlDebuggerScreen extends HtmlScreen {
       debuggerState.scripts = scripts;
 
       for (HtmlScriptsView scriptsViewer in scriptsViewers) {
-        scriptsViewer.matcher?.cancel();
+        scriptsView.matcher?.cancel();
         scriptsViewer.showScripts(
           scripts,
           debuggerState.rootLib.uri,
           debuggerState.commonScriptPrefix,
           selectRootScript: isRunning,
         );
+        scriptsViewer.matcher?.updateScripts();
       }
     }
   }
