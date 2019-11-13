@@ -14,6 +14,9 @@ class PaddedDivider extends StatelessWidget {
     this.padding = const EdgeInsets.only(bottom: 10.0),
   }) : super(key: key);
 
+  const PaddedDivider.thin({Key key})
+      : padding = const EdgeInsets.only(bottom: 4.0);
+
   /// The padding to place around the divider.
   final EdgeInsets padding;
 
