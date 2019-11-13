@@ -71,22 +71,22 @@ class BorderLayout extends StatelessWidget {
         if (top != null)
           Align(
             alignment: Alignment.topCenter,
-            child: top,
+            child: Container(height: topHeight, child: top),
           ),
         if (left != null)
           Align(
             alignment: Alignment.centerLeft,
-            child: left,
+            child: Container(width: leftWidth, child: left),
           ),
         if (right != null)
           Align(
             alignment: Alignment.centerRight,
-            child: right,
+            child: Container(width: rightWidth, child: right),
           ),
         if (bottom != null)
           Align(
             alignment: Alignment.bottomCenter,
-            child: bottom,
+            child: Container(height: bottomHeight, child: bottom),
           )
       ],
     );

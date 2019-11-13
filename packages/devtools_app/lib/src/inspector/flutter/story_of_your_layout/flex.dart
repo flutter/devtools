@@ -18,6 +18,14 @@ import 'utils.dart';
 const widthIndicatorColor = mainUiColor;
 const heightIndicatorColor = mainGpuColor;
 
+String getCrossAxisAssetImageUrl(CrossAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
+}
+
+String getMainAxisAssetImageUrl(MainAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
+}
+
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
@@ -32,18 +40,23 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 }
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
+  static const kBottomHeight = 16.0;
+  static const kRightWidth = 16.0;
+  static const kArrowHeadSize = 8.0;
+  static const kDistanceToArrow = 1.0;
+  static const kMargin = 8.0;
+  static const kRenderedMinWidth = 175.0;
+  static const kRenderedMinHeight = 150.0;
+
   int totalFlexFactor;
   MainAxisAlignment mainAxisAlignment;
   CrossAxisAlignment crossAxisAlignment;
-
-  double smallestWidth, largestWidth;
-  double smallestHeight, largestHeight;
 
   Size get size => properties.size;
 
   FlexLayoutProperties get properties => widget.properties;
 
-  List<LayoutProperties> get children => widget.properties.childrenProperties;
+  List<LayoutProperties> get children => widget.properties.children;
 
   Axis get direction => widget.properties.direction;
 
@@ -51,21 +64,18 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
   bool get isColumn => !isRow;
 
+  Color get horizontalColor =>
+      properties.isHorizontalMainAxis ? mainAxisColor : crossAxisColor;
+
+  Color get verticalColor =>
+      properties.isVerticalMainAxis ? mainAxisColor : crossAxisColor;
+
+  String get flexType => properties.type.toString();
+
   void _update() {
     totalFlexFactor = properties.totalFlex;
     mainAxisAlignment = properties.mainAxisAlignment;
     crossAxisAlignment = properties.crossAxisAlignment;
-
-    final childrenWidths = children
-        .where((child) => child.size.width != null)
-        .map((child) => child.size.width);
-    final childrenHeights = children
-        .where((child) => child.size.height != null)
-        .map((child) => child.size.height);
-    smallestWidth = childrenWidths.reduce(min);
-    largestWidth = childrenWidths.reduce(max);
-    smallestHeight = childrenHeights.reduce(min);
-    largestHeight = childrenHeights.reduce(max);
   }
 
   @override
@@ -80,48 +90,132 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     _update();
   }
 
+  Widget _visualizeFlex(BuildContext context) {
+    if (!properties.hasChildren)
+      return const Center(child: Text('No Children'));
+
+    const kHeightArrowIndicatorWidth = 32.0;
+    const kWidthArrowIndicatorHeight = 32.0;
+    final theme = Theme.of(context);
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final screenSize = Size(constraints.maxWidth, constraints.maxHeight);
+      final renderSmallestWidth = max(kRenderedMinWidth,
+          screenSize.width * properties.smallestWidthChildPercentage);
+      final renderSmallestHeight = max(kRenderedMinHeight,
+          screenSize.height * properties.smallestHeightChildPercentage);
+      final renderLargestWidth = screenSize.width *
+          (isRow ? properties.largestWidthChildPercentage : 1);
+      final renderLargestHeight = screenSize.height *
+          (isRow ? 1 : properties.largestHeightChildPercentage);
+
+      return BorderLayout(
+        center: Container(
+          child: SingleChildScrollView(
+            scrollDirection: properties.direction,
+            child: Flex(
+              mainAxisSize: properties.mainAxisSize,
+              direction: properties.direction,
+              mainAxisAlignment: mainAxisAlignment,
+              crossAxisAlignment: crossAxisAlignment,
+              children: [
+                for (var i = 0; i < children.length; i++)
+                  _visualizeChild(
+                    node: children[i],
+                    borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
+                    textColor: i.isOdd ? null : const Color(0xFF303030),
+                    renderSmallestHeight: renderSmallestHeight,
+                    renderLargestHeight: renderLargestHeight,
+                    renderSmallestWidth: renderSmallestWidth,
+                    renderLargestWidth: renderLargestWidth,
+                  )
+              ],
+            ),
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.primaryColorLight,
+              width: 1.0,
+            ),
+          ),
+        ),
+        right: Container(
+          child: ArrowWrapper.bidirectional(
+            arrowColor: heightIndicatorColor,
+            arrowStrokeWidth: 1.5,
+            child: RotatedBox(
+              quarterTurns: 1,
+              child: Text(
+                'height: ${size.height.toStringAsFixed(1)}',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            direction: Axis.vertical,
+          ),
+          height: screenSize.height - kWidthArrowIndicatorHeight - kMargin,
+          margin: const EdgeInsets.only(left: kMargin),
+        ),
+        rightWidth: kHeightArrowIndicatorWidth,
+        bottom: Container(
+          margin: const EdgeInsets.only(top: kMargin),
+          child: ArrowWrapper.bidirectional(
+            arrowColor: widthIndicatorColor,
+            arrowStrokeWidth: 1.5,
+            child: Text(
+              'width: ${size.width}',
+              textAlign: TextAlign.center,
+            ),
+            direction: Axis.horizontal,
+          ),
+          width: screenSize.width - kHeightArrowIndicatorWidth - kMargin,
+        ),
+        bottomHeight: kWidthArrowIndicatorHeight,
+      );
+    });
+  }
+
   Widget _visualizeChild({
-    Key key,
     LayoutProperties node,
     Color borderColor,
     Color textColor,
-    Size parentSize,
-    Size screenSize,
+    double renderSmallestWidth,
+    double renderSmallestHeight,
+    double renderLargestWidth,
+    double renderLargestHeight,
   }) {
     final size = node.size;
+    final width = size.width;
+    final height = size.height;
+
+    final smallestWidth = properties.smallestWidthChild.size.width;
+    final smallestHeight = properties.smallestHeightChild.size.height;
+    final largestWidth = properties.largestWidthChild.size.width;
+    final largestHeight = properties.largestHeightChild.size.height;
+
+    final widthDifference =
+        largestWidth == smallestWidth ? 1 : (largestWidth - smallestWidth);
+    final heightDifference =
+        largestHeight == smallestHeight ? 1 : (largestHeight - smallestHeight);
+
+    final renderWidthDiff = renderLargestWidth - renderSmallestWidth;
+    final renderHeightDiff = renderLargestHeight - renderSmallestHeight;
+
+    final renderWidth =
+        (width - smallestWidth) * renderWidthDiff / widthDifference +
+            renderSmallestWidth;
+    final renderHeight =
+        (height - smallestHeight) * renderHeightDiff / heightDifference +
+            renderSmallestHeight;
+
     final int flexFactor = node.flexFactor;
-
-    const rightWidth = 16.0;
-
-    final child = WidgetVisualizer(
-      title: node.description,
-//      hint: Container(
-//        padding: const EdgeInsets.all(4.0),
-//        child: Column(
-//          mainAxisAlignment: MainAxisAlignment.start,
-//          crossAxisAlignment: CrossAxisAlignment.end,
-//          children: <Widget>[
-//            Text(
-//              'flex: ${node.flexFactor}',
-//              style: TextStyle(fontWeight: FontWeight.bold),
-//            ),
-//            if (flexFactor == 0 || flexFactor == null)
-//              Text(
-//                'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-//                style: regularItalic.merge(warning),
-//                maxLines: 2,
-//                softWrap: true,
-//                overflow: TextOverflow.ellipsis,
-//                textScaleFactor: 0.8,
-//                textAlign: TextAlign.right,
-//              ),
-//          ],
-//        ),
-//      ),
-      borderColor: borderColor,
-      textColor: textColor,
-      child: BorderLayout(
-          topHeight: 16.0,
+    return Container(
+      width: renderWidth,
+      height: renderHeight,
+      child: WidgetVisualizer(
+        title: node.description,
+        borderColor: borderColor,
+        textColor: textColor,
+        child: BorderLayout(
           right: Container(
             child: ArrowWrapper.bidirectional(
               child: RotatedBox(
@@ -129,202 +223,55 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 child: Text('height: ${size.height}'),
               ),
               direction: Axis.vertical,
-              arrowHeadSize: 8.0,
-              distanceToArrow: 1.0,
+              arrowHeadSize: kArrowHeadSize,
               arrowColor: heightIndicatorColor,
+              distanceToArrow: kDistanceToArrow,
             ),
-            width: rightWidth,
-            margin: const EdgeInsets.only(bottom: 16.0),
+            margin: const EdgeInsets.only(bottom: kBottomHeight),
           ),
-          rightWidth: rightWidth,
+          rightWidth: kRightWidth,
           bottom: Container(
             child: ArrowWrapper.bidirectional(
               child: Text('width: ${size.width.toStringAsFixed(1)}'),
               direction: Axis.horizontal,
-              arrowHeadSize: 8.0,
+              arrowHeadSize: kArrowHeadSize,
               arrowColor: widthIndicatorColor,
+              distanceToArrow: kDistanceToArrow,
             ),
-            height: 16.0,
-            margin: const EdgeInsets.only(left: 8.0, right: 10.0),
+            margin: const EdgeInsets.symmetric(horizontal: kMargin),
           ),
-          bottomHeight: 16.0,
-          center: Container(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  'flex: ${node.flexFactor}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                if (flexFactor == 0 || flexFactor == null)
+          bottomHeight: kBottomHeight,
+          top: Align(
+            alignment: Alignment.topRight,
+            child: Container(
+              padding: const EdgeInsets.all(4.0),
+              margin: const EdgeInsets.only(right: kRightWidth + kMargin),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
                   Text(
-                    'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                    style: regularItalic.merge(warning),
-                    maxLines: 2,
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                    textScaleFactor: 0.8,
-                    textAlign: TextAlign.right,
+                    'flex: ${node.flexFactor}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-              ],
-            ),
-          )),
-    );
-
-    final smallestWidthPercentage = smallestWidth / parentSize.width;
-    final smallestHeightPercentage = smallestHeight / parentSize.height;
-    final largestWidthPercentage = largestWidth / parentSize.width;
-    final largestHeightPercentage = largestHeight / parentSize.height;
-
-    final widthDifference =
-        largestWidth == smallestWidth ? 1 : (largestWidth - smallestWidth);
-    final heightDifference =
-        largestHeight == smallestHeight ? 1 : (largestHeight - smallestHeight);
-
-    final smallestWidthOnScreen =
-        max(170, screenSize.width * smallestWidthPercentage);
-    final smallestHeightOnScreen =
-        max(150, screenSize.height * smallestHeightPercentage);
-    final largestWidthOnScreen =
-        screenSize.width * (isRow ? largestWidthPercentage : 1);
-    final largestHeightOnScreen =
-        screenSize.height * (isRow ? 1 : largestHeightPercentage);
-
-    final width = (size.width - smallestWidth) *
-            (largestWidthOnScreen - smallestWidthOnScreen) /
-            widthDifference +
-        smallestWidthOnScreen;
-    final height = (size.height - smallestHeight) *
-            (largestHeightOnScreen - smallestHeightOnScreen) /
-            heightDifference +
-        smallestHeightOnScreen;
-    return Container(
-      width: width,
-      height: height,
-      child: child,
-    );
-  }
-
-  Widget _visualizeFlex(BuildContext context) {
-    if (!properties.hasChildren)
-      return const Center(child: Text('No Children'));
-    final theme = Theme.of(context);
-    return LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.maxWidth;
-      final height = constraints.maxHeight;
-      final flex = Container(
-        width: width,
-        height: height,
-        child: SingleChildScrollView(
-          scrollDirection: properties.direction,
-          child: Flex(
-            mainAxisSize: properties.mainAxisSize,
-            direction: properties.direction,
-            mainAxisAlignment: mainAxisAlignment,
-            crossAxisAlignment: crossAxisAlignment,
-            children: [
-              for (var i = 0; i < children.length; i++)
-                _visualizeChild(
-                  node: children[i],
-                  borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-                  textColor: i.isOdd ? null : const Color(0xFF303030),
-                  parentSize: size,
-                  screenSize: Size(width, height),
-                )
-            ],
-          ),
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: theme.primaryColorLight,
-            width: 1.0,
-          ),
-        ),
-      );
-      return _visualizeMainAxisAndCrossAxis(
-        child: flex,
-        width: width,
-        height: height,
-        theme: theme,
-      );
-    });
-  }
-
-  Widget _visualizeMainAxisAndCrossAxis({
-    Widget child,
-    double width,
-    double height,
-    ThemeData theme,
-  }) {
-    const right = 16.0;
-    const bottom = 16.0;
-    const top = 16.0;
-    const left = 16.0;
-    const margin = 8.0;
-    return BorderLayout(
-      center: child,
-      leftWidth: left + margin,
-      rightWidth: right + margin,
-      bottomHeight: bottom + margin,
-      topHeight: top + margin,
-      right: Container(
-        child: ArrowWrapper.bidirectional(
-          arrowColor: heightIndicatorColor,
-          arrowStrokeWidth: 1.5,
-          child: RotatedBox(
-            quarterTurns: 1,
-            child: Text(
-              'height: ${size.height.toStringAsFixed(1)}',
-              textAlign: TextAlign.center,
+                  if (flexFactor == 0 || flexFactor == null)
+                    Text(
+                      'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                      style: regularItalic.merge(warning),
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      textScaleFactor: 0.8,
+                      textAlign: TextAlign.right,
+                    ),
+                ],
+              ),
             ),
           ),
-          direction: Axis.vertical,
-        ),
-        width: right,
-        height: height - bottom - top - 2 * margin,
-        margin: const EdgeInsets.only(left: margin),
-      ),
-      bottom: Container(
-        margin: const EdgeInsets.only(top: margin),
-        child: ArrowWrapper.bidirectional(
-          arrowColor: widthIndicatorColor,
-          arrowStrokeWidth: 1.5,
-          child: Text(
-            'width: ${size.width}',
-            textAlign: TextAlign.center,
-          ),
-          direction: Axis.horizontal,
-        ),
-        width: width - right - left - 2 * margin,
-        height: bottom,
-      ),
-      top: Text(
-        properties.direction == Axis.horizontal
-            ? mainAxisAlignment.toString()
-            : crossAxisAlignment.toString(),
-        textScaleFactor: 1.25,
-      ),
-      left: RotatedBox(
-        quarterTurns: 3,
-        child: Text(
-          properties.direction == Axis.vertical
-              ? mainAxisAlignment.toString()
-              : crossAxisAlignment.toString(),
-          textScaleFactor: 1.25,
         ),
       ),
     );
   }
-
-  Color get horizontalColor =>
-      properties.isHorizontalMainAxis ? mainAxisColor : crossAxisColor;
-
-  Color get verticalColor =>
-      properties.isVerticalMainAxis ? mainAxisColor : crossAxisColor;
-
-  String get flexType => properties.type.toString();
 
   Widget _buildAxisAlignmentDropdown(Axis axis) {
     Color color;
@@ -356,7 +303,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         Container(
           margin: const EdgeInsets.only(left: 8.0),
           child: DropdownButton(
-            itemHeight: 80,
+            itemHeight: 64,
             value: selected,
             items: [
               for (var alignment in alignmentEnumEntries)
@@ -364,7 +311,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                   value: alignment,
                   child: Container(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
@@ -478,9 +425,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                             child: Text(
                               properties.verticalDirectionDescription,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: verticalColor,
-                              ),
+                              textScaleFactor: 1.2,
                             ),
                           ),
                           type: ArrowType.down,
@@ -498,9 +443,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                             child: Text(
                               properties.horizontalDirectionDescription,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: horizontalColor,
-                              ),
+                              textScaleFactor: 1.2,
                             ),
                           ),
                           type: ArrowType.right,
@@ -512,9 +455,12 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               );
             }),
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _buildAxisAlignmentDropdown(Axis.vertical),
+          Container(
+            margin: const EdgeInsets.only(left: 8.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _buildAxisAlignmentDropdown(Axis.vertical),
+            ),
           ),
         ],
       ),
@@ -526,9 +472,9 @@ class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
     Key key,
     @required this.title,
-    @required this.hint,
+    this.hint,
     @required this.borderColor,
-    @required this.textColor,
+    this.textColor,
     this.child,
   })  : assert(title != null),
         assert(borderColor != null),
@@ -554,7 +500,7 @@ class WidgetVisualizer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  constraints: const BoxConstraints(maxWidth: 75.0),
+                  constraints: const BoxConstraints(maxWidth: 125.0),
                   child: Center(
                     child: Text(
                       title,
@@ -573,11 +519,8 @@ class WidgetVisualizer extends StatelessWidget {
                   padding: const EdgeInsets.all(4.0),
                 ),
                 if (hint != null)
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: hint,
-                    ),
+                  Flexible(
+                    child: hint,
                   ),
               ],
             ),
@@ -596,12 +539,4 @@ class WidgetVisualizer extends StatelessWidget {
       margin: const EdgeInsets.all(1.0),
     );
   }
-}
-
-String getMainAxisAssetImageUrl(MainAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
-}
-
-String getCrossAxisAssetImageUrl(CrossAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
 }

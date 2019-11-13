@@ -19,22 +19,68 @@ class LayoutProperties {
         constraints = deserializeConstraints(node?.constraints),
         isFlex = node?.isFlex,
         flexFactor = node?.flexFactor,
-        childrenProperties = copyLevel == 0
+        children = copyLevel == 0
             ? []
             : node?.childrenNow
                 ?.map((child) => LayoutProperties(child, copyLevel - 1))
-                ?.toList();
+                ?.toList(growable: false) {
+    if (node != null && children != null && children.isNotEmpty) {
+      _smallestHeightChild = children.reduce((value, element) =>
+          value.size.height < element.size.height ? value : element);
+      _smallestWidthChild = children.reduce((value, element) =>
+          value.size.width < element.size.width ? value : element);
+      _largestHeightChild = children.reduce((value, element) =>
+          value.size.height > element.size.height ? value : element);
+      _largestWidthChild = children.reduce((value, element) =>
+          value.size.width > element.size.width ? value : element);
+      if (size != null) {
+        _smallestHeightChildPercentage =
+            _smallestHeightChild.size.height / size.height;
+        _smallestWidthChildPercentage =
+            _smallestWidthChild.size.width / size.width;
+        _largestHeightChildPercentage =
+            _largestHeightChild.size.height / size.height;
+        _largestWidthChildPercentage =
+            _largestWidthChild.size.width / size.width;
+      }
+    }
+  }
 
-  final String description;
-  final Size size;
+  final List<LayoutProperties> children;
   final Constraints constraints;
-  final List<LayoutProperties> childrenProperties;
-  final bool isFlex;
+  final String description;
   final int flexFactor;
+  final bool isFlex;
+  final Size size;
 
-  int get totalChildren => childrenProperties.length;
+  LayoutProperties _smallestHeightChild;
+  LayoutProperties _smallestWidthChild;
+  LayoutProperties _largestHeightChild;
+  LayoutProperties _largestWidthChild;
+  double _smallestHeightChildPercentage;
+  double _smallestWidthChildPercentage;
+  double _largestHeightChildPercentage;
+  double _largestWidthChildPercentage;
 
-  bool get hasChildren => childrenProperties.isNotEmpty;
+  int get totalChildren => children.length;
+
+  bool get hasChildren => children.isNotEmpty;
+
+  LayoutProperties get smallestWidthChild => _smallestWidthChild;
+
+  LayoutProperties get smallestHeightChild => _smallestHeightChild;
+
+  LayoutProperties get largestWidthChild => _largestWidthChild;
+
+  LayoutProperties get largestHeightChild => _largestHeightChild;
+
+  double get smallestWidthChildPercentage => _smallestWidthChildPercentage;
+
+  double get smallestHeightChildPercentage => _smallestHeightChildPercentage;
+
+  double get largestWidthChildPercentage => _largestWidthChildPercentage;
+
+  double get largestHeightChildPercentage => _largestHeightChildPercentage;
 
   static Constraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
@@ -116,7 +162,7 @@ class FlexLayoutProperties extends LayoutProperties {
   Type get type => direction == Axis.horizontal ? Row : Column;
 
   int get totalFlex {
-    _totalFlex ??= childrenProperties
+    _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element);
     return _totalFlex;
