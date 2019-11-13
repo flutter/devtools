@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Constructs the light or dark theme for the app.
 ThemeData themeFor({@required bool isDarkTheme}) {
-  final theme = isDarkTheme ? _darkTheme() : _lightTheme();
+  final theme = false ? _darkTheme() : _lightTheme();
   return theme;
 }
 

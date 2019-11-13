@@ -15,6 +15,9 @@ import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
 
+const widthIndicatorColor = mainUiColor;
+const heightIndicatorColor = mainGpuColor;
+
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
@@ -81,73 +84,93 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     Key key,
     LayoutProperties node,
     Color borderColor,
-    Color backgroundColor,
-    Color arrowColor,
+    Color textColor,
     Size parentSize,
     Size screenSize,
   }) {
     final size = node.size;
     final int flexFactor = node.flexFactor;
 
-    final unconstrained = flexFactor == 0 || flexFactor == null;
     const rightWidth = 16.0;
 
     final child = WidgetVisualizer(
       title: node.description,
-      hint: Container(
-        padding: const EdgeInsets.all(4.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            Text(
-              'flex: ${node.flexFactor}',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if (unconstrained)
-              Text(
-                'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                style: regularItalic.merge(warning),
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-                textScaleFactor: 0.8,
-                textAlign: TextAlign.right,
-              ),
-          ],
-        ),
-      ),
+//      hint: Container(
+//        padding: const EdgeInsets.all(4.0),
+//        child: Column(
+//          mainAxisAlignment: MainAxisAlignment.start,
+//          crossAxisAlignment: CrossAxisAlignment.end,
+//          children: <Widget>[
+//            Text(
+//              'flex: ${node.flexFactor}',
+//              style: TextStyle(fontWeight: FontWeight.bold),
+//            ),
+//            if (flexFactor == 0 || flexFactor == null)
+//              Text(
+//                'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+//                style: regularItalic.merge(warning),
+//                maxLines: 2,
+//                softWrap: true,
+//                overflow: TextOverflow.ellipsis,
+//                textScaleFactor: 0.8,
+//                textAlign: TextAlign.right,
+//              ),
+//          ],
+//        ),
+//      ),
       borderColor: borderColor,
+      textColor: textColor,
       child: BorderLayout(
-        topHeight: 16.0,
-        right: Container(
-          child: ArrowWrapper.bidirectional(
-            child: RotatedBox(
-              quarterTurns: 1,
-              child: Text('height: ${size.height}'),
+          topHeight: 16.0,
+          right: Container(
+            child: ArrowWrapper.bidirectional(
+              child: RotatedBox(
+                quarterTurns: 1,
+                child: Text('height: ${size.height}'),
+              ),
+              direction: Axis.vertical,
+              arrowHeadSize: 8.0,
+              distanceToArrow: 1.0,
+              arrowColor: heightIndicatorColor,
             ),
-            direction: Axis.vertical,
-            arrowHeadSize: 8.0,
-            distanceToArrow: 1.0,
-            arrowColor: horizontalColor,
+            width: rightWidth,
+            margin: const EdgeInsets.only(bottom: 16.0),
           ),
-          width: rightWidth,
-          margin: const EdgeInsets.only(bottom: 16.0),
-        ),
-        rightWidth: rightWidth,
-        bottom: Container(
-          child: ArrowWrapper.bidirectional(
-            child: Text('width: ${size.width.toStringAsFixed(1)}'),
-            direction: Axis.horizontal,
-            arrowHeadSize: 8.0,
-            arrowColor: verticalColor,
+          rightWidth: rightWidth,
+          bottom: Container(
+            child: ArrowWrapper.bidirectional(
+              child: Text('width: ${size.width.toStringAsFixed(1)}'),
+              direction: Axis.horizontal,
+              arrowHeadSize: 8.0,
+              arrowColor: widthIndicatorColor,
+            ),
+            height: 16.0,
+            margin: const EdgeInsets.only(left: 8.0, right: 10.0),
           ),
-          height: 16.0,
-          margin: const EdgeInsets.only(left: 8.0, right: 10.0),
-        ),
-        bottomHeight: 16.0,
-        center: Container(),
-      ),
+          bottomHeight: 16.0,
+          center: Container(
+            padding: const EdgeInsets.all(4.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  'flex: ${node.flexFactor}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (flexFactor == 0 || flexFactor == null)
+                  Text(
+                    'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                    style: regularItalic.merge(warning),
+                    maxLines: 2,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    textScaleFactor: 0.8,
+                    textAlign: TextAlign.right,
+                  ),
+              ],
+            ),
+          )),
     );
 
     final smallestWidthPercentage = smallestWidth / parentSize.width;
@@ -206,8 +229,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 _visualizeChild(
                   node: children[i],
                   borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-                  backgroundColor: theme.primaryColor,
-                  arrowColor: theme.textSelectionColor,
+                  textColor: i.isOdd ? null : const Color(0xFF303030),
                   parentSize: size,
                   screenSize: Size(width, height),
                 )
@@ -216,8 +238,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: theme.primaryColor,
-            width: 2.0,
+            color: theme.primaryColorLight,
+            width: 1.0,
           ),
         ),
       );
@@ -249,7 +271,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       topHeight: top + margin,
       right: Container(
         child: ArrowWrapper.bidirectional(
-          arrowColor: verticalColor,
+          arrowColor: heightIndicatorColor,
           arrowStrokeWidth: 1.5,
           child: RotatedBox(
             quarterTurns: 1,
@@ -267,7 +289,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       bottom: Container(
         margin: const EdgeInsets.only(top: margin),
         child: ArrowWrapper.bidirectional(
-          arrowColor: horizontalColor,
+          arrowColor: widthIndicatorColor,
           arrowStrokeWidth: 1.5,
           child: Text(
             'width: ${size.width}',
@@ -329,7 +351,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       children: <Widget>[
         Text(
           '$axisDescription Alignment: ',
-          style: TextStyle(color: color),
           textScaleFactor: 1.2,
         ),
         Container(
@@ -507,15 +528,18 @@ class WidgetVisualizer extends StatelessWidget {
     @required this.title,
     @required this.hint,
     @required this.borderColor,
+    @required this.textColor,
     this.child,
   })  : assert(title != null),
         assert(borderColor != null),
         super(key: key);
 
   final String title;
-  final Widget hint;
-  final Color borderColor;
   final Widget child;
+  final Widget hint;
+
+  final Color borderColor;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -535,6 +559,12 @@ class WidgetVisualizer extends StatelessWidget {
                     child: Text(
                       title,
                       textScaleFactor: 1.0,
+                      style: textColor != null
+                          ? TextStyle(
+                              color: textColor,
+                            )
+                          : null,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   decoration: BoxDecoration(

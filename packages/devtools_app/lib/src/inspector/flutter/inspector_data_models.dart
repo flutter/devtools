@@ -15,10 +15,10 @@ const Type boxConstraintsType = BoxConstraints;
 class LayoutProperties {
   LayoutProperties(RemoteDiagnosticsNode node, [int copyLevel = 1])
       : description = node?.description,
-        size = deserializeSize(node?.json['size']),
-        constraints = deserializeConstraints(node?.json['constraints']),
-        isFlex = node?.json['isFlex'],
-        flexFactor = node?.json['flexFactor'],
+        size = deserializeSize(node?.size),
+        constraints = deserializeConstraints(node?.constraints),
+        isFlex = node?.isFlex,
+        flexFactor = node?.flexFactor,
         childrenProperties = copyLevel == 0
             ? []
             : node?.childrenNow

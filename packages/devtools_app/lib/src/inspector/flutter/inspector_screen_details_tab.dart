@@ -123,7 +123,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   Widget build(BuildContext context) {
     super.build(context);
     if (selected == null) return const SizedBox();
-    if (!selected.isFlex)
+    final properties = LayoutProperties(selected);
+    if (!properties.isFlex)
       // TODO(albertusangga): Visualize non-flex widget constraint model
       return Container(
         child: const Text(
