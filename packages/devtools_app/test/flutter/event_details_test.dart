@@ -36,6 +36,7 @@ void main() {
     });
   });
 
+  // TODO(kenz): add golden images for these tests.
   group('EventSummary', () {
     EventSummary eventSummary;
     testWidgets('event with connected events', (WidgetTester tester) async {

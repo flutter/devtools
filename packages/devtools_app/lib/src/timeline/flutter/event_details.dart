@@ -42,13 +42,11 @@ class EventDetails extends StatelessWidget {
 
 class EventSummary extends StatelessWidget {
   EventSummary(this.event)
-      : _connectedEvents = event.isAsyncEvent
-            ? [
-                ...event.children.where((e) =>
-                    e.traceEvents.first.event.phase ==
-                    TraceEvent.asyncInstantPhase)
-              ]
-            : [],
+      : _connectedEvents = [
+          if (event.isAsyncEvent)
+            ...event.children.where((e) =>
+                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+        ],
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
 
@@ -122,7 +120,11 @@ class EventSummary extends StatelessWidget {
 
   Widget _formattedArgs(Map<String, dynamic> args) {
     final formattedArgs = encoder.convert(args);
-    return Text(formattedArgs.replaceAll('"', ''));
+    return Text(
+      formattedArgs.replaceAll('"', ''),
+      // TODO(kenz): make monospace font work for flutter desktop.
+      style: const TextStyle(fontFamily: 'monospace'),
+    );
   }
 }
 
