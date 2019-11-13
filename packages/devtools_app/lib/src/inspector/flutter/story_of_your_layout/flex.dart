@@ -530,12 +530,11 @@ class WidgetVisualizer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
+                  constraints: const BoxConstraints(maxWidth: 75.0),
                   child: Center(
-                    child: FittedBox(
-                      child: Text(
-                        title,
-                        textScaleFactor: 1.0,
-                      ),
+                    child: Text(
+                      title,
+                      textScaleFactor: 1.0,
                     ),
                   ),
                   decoration: BoxDecoration(
