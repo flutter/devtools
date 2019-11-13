@@ -97,6 +97,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
       controller: detailsTreeController,
       isSummaryTree: false,
     );
+    final splitAxis = Split.axisFor(context, 1.0);
     return Column(
       children: <Widget>[
         Row(
@@ -143,7 +144,8 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
         Expanded(
           child: Split(
-            axis: Axis.horizontal,
+            axis: splitAxis,
+            initialFirstFraction: splitAxis == Axis.horizontal ? 0.35 : 0.6,
             firstChild: summaryTree,
             secondChild: InspectorDetailsTabController(
               detailsTree: detailsTree,

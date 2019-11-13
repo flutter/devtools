@@ -252,6 +252,27 @@ void main() {
         expect(tester.element(find.byKey(_w2)).size, const Size(200, 190));
       });
     });
+
+    group('axisFor', () {
+      testWidgets('return Axis.horizontal', (WidgetTester tester) async {
+        await setWindowSize(const Size(800, 800));
+        await tester.pumpWidget(wrap(Builder(
+          builder: (context) {
+            expectLater(Split.axisFor(context, 1.0), Axis.horizontal);
+            return Container();
+          },
+        )));
+      });
+      testWidgets('return Axis.vertical', (WidgetTester tester) async {
+        await setWindowSize(const Size(500, 800));
+        await tester.pumpWidget(wrap(Builder(
+          builder: (context) {
+            expectLater(Split.axisFor(context, 1.0), Axis.vertical);
+            return Container();
+          },
+        )));
+      });
+    });
   });
 }
 
