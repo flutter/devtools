@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' as html;
 
 import 'package:codemirror/codemirror.dart';
+import 'package:html_shim/html.dart' as html;
 import 'package:meta/meta.dart';
 import 'package:split/split.dart' as split;
 import 'package:vm_service/vm_service.dart';
@@ -724,12 +724,14 @@ class HtmlDebuggerScreen extends HtmlScreen {
       debuggerState.scripts = scripts;
 
       for (HtmlScriptsView scriptsViewer in scriptsViewers) {
+        scriptsView.matcher?.cancel();
         scriptsViewer.showScripts(
           scripts,
           debuggerState.rootLib.uri,
           debuggerState.commonScriptPrefix,
           selectRootScript: isRunning,
         );
+        scriptsViewer.matcher?.updateScripts();
       }
     }
   }
