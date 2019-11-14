@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:html_shim/html.dart' as html;
 
+import 'package:html_shim/html.dart' as html;
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger_state.dart';
@@ -413,6 +413,10 @@ class HtmlScriptsMatcher {
   void cancel() {
     revert();
     finish();
+  }
+
+  void updateScripts() {
+    matchingState[''] = _scriptsView.items;
   }
 
   void selectFirstItem() {
