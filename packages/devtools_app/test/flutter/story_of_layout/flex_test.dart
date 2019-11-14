@@ -246,7 +246,7 @@ void main() {
         find.byWidget(widget),
         matchesGoldenFile('goldens/story_of_row_layout.png'),
       );
-    }, skip: kIsWeb);
+    }, skip: kIsWeb || !isLinux);
   });
   group('Column', () {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
@@ -260,6 +260,6 @@ void main() {
         find.byWidget(widget),
         matchesGoldenFile('goldens/story_of_column_layout.png'),
       );
-    }, skip: kIsWeb);
+    }, skip: kIsWeb || !isLinux);
   });
 }
