@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -42,7 +40,6 @@ class TimelineScreenBody extends StatefulWidget {
 class TimelineScreenBodyState extends State<TimelineScreenBody> {
   TimelineController controller;
 
-  StreamSubscription selectedFrameSubscription;
 
   @override
   void didChangeDependencies() {
@@ -52,7 +49,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
 
   @override
   void dispose() {
-    selectedFrameSubscription.cancel();
     // TODO(kenz): make TimelineController disposable via
     // DisposableController and dispose here.
     super.dispose();
