@@ -96,3 +96,12 @@ const treeGuidelineColor = ThemedColor(
   Colors.black54,
   Color.fromARGB(255, 200, 200, 200),
 );
+
+// Story of Layout colors
+const mainAxisLightColor = Color(0xFFF597A8);
+const mainAxisDarkColor = Color(0xFFEA637C);
+const mainAxisColor = ThemedColor(mainAxisLightColor, mainAxisDarkColor);
+
+const crossAxisLightColor = Color(0xFFB3D25A);
+const crossAxisDarkColor = Color(0xFFB3D25A);
+const crossAxisColor = ThemedColor(crossAxisLightColor, crossAxisDarkColor);

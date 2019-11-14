@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
@@ -169,8 +170,10 @@ void main() {
         ]
       }
     ''');
-    final RenderFlexProperties flexProperties =
-        RenderFlexProperties.fromJson(flexJson);
+    final diagnostics =
+        RemoteDiagnosticsNode({'renderObject': flexJson}, null, null, null);
+    final FlexLayoutProperties flexProperties =
+        FlexLayoutProperties.fromRemoteDiagnosticsNode(diagnostics);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);
@@ -178,5 +181,143 @@ void main() {
     expect(flexProperties.textDirection, TextDirection.ltr);
     expect(flexProperties.verticalDirection, VerticalDirection.down);
     expect(flexProperties.textBaseline, TextBaseline.alphabetic);
+  });
+
+  test('LayoutProperties deserialize and compute min/max child correctly', () {
+    final json = jsonDecode('''
+       {
+        "description": "Row",
+        "type": "_ElementDiagnosticableTreeNode",
+        "style": "dense",
+        "hasChildren": true,
+        "allowWrap": false,
+        "objectId": "inspector-267513",
+        "valueId": "inspector-251",
+        "summaryTree": true,
+        "constraints": {
+            "type": "BoxConstraints",
+            "description": "BoxConstraints(w=432.0, h=56.0)",
+            "hasBoundedHeight": true,
+            "hasBoundedWidth": true,
+            "minWidth": 432.0,
+            "minHeight": 56.0,
+            "maxHeight": 56.0,
+            "maxWidth": 432.0
+        },
+        "size": {
+            "width": 432.0,
+            "height": 56.0
+        },
+        "isFlex": true,
+        "children": [
+            {
+                "description": "Container",
+                "type": "_ElementDiagnosticableTreeNode",
+                "style": "dense",
+                "hasChildren": true,
+                "allowWrap": false,
+                "objectId": "inspector-267524",
+                "valueId": "inspector-269",
+                "summaryTree": true,
+                "constraints": {
+                    "type": "BoxConstraints",
+                    "description": "BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)",
+                    "hasBoundedHeight": true,
+                    "hasBoundedWidth": false,
+                    "minWidth": 0.0,
+                    "minHeight": 0.0,
+                    "maxHeight": 56.0
+                },
+                "size": {
+                    "width": 56.0,
+                    "height": 56.0
+                },
+                "flexFactor": null,
+                "createdByLocalProject": true,
+                "children": [],
+                "widgetRuntimeType": "Container",
+                "stateful": false
+            },
+            {
+                "description": "Expanded",
+                "type": "_ElementDiagnosticableTreeNode",
+                "style": "dense",
+                "hasChildren": true,
+                "allowWrap": false,
+                "objectId": "inspector-267563",
+                "valueId": "inspector-332",
+                "summaryTree": true,
+                "constraints": {
+                    "type": "BoxConstraints",
+                    "description": "BoxConstraints(w=320.0, 0.0<=h<=56.0)",
+                    "hasBoundedHeight": true,
+                    "hasBoundedWidth": true,
+                    "minWidth": 320.0,
+                    "minHeight": 0.0,
+                    "maxHeight": 56.0,
+                    "maxWidth": 320.0
+                },
+                "size": {
+                    "width": 320.0,
+                    "height": 25.0
+                },
+                "flexFactor": 1,
+                "createdByLocalProject": true,
+                "children": [],
+                "widgetRuntimeType": "Expanded"
+            },
+            {
+                "description": "Container",
+                "type": "_ElementDiagnosticableTreeNode",
+                "style": "dense",
+                "hasChildren": true,
+                "allowWrap": false,
+                "objectId": "inspector-267653",
+                "valueId": "inspector-472",
+                "summaryTree": true,
+                "constraints": {
+                    "type": "BoxConstraints",
+                    "description": "BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)",
+                    "hasBoundedHeight": true,
+                    "hasBoundedWidth": false,
+                    "minWidth": 0.0,
+                    "minHeight": 0.0,
+                    "maxHeight": 56.0
+                },
+                "size": {
+                    "width": 56.0,
+                    "height": 56.0
+                },
+                "flexFactor": null,
+                "locationId": 41,
+                "createdByLocalProject": true,
+                "children": [],
+                "widgetRuntimeType": "Container"
+            }
+        ],
+        "widgetRuntimeType": "Row"
+    }
+    ''');
+    final node = RemoteDiagnosticsNode(json, null, false, null);
+    final layoutProperties = LayoutProperties(node);
+    expect(layoutProperties.size, const Size(432.0, 56.0));
+    expect(
+      layoutProperties.constraints,
+      const BoxConstraints(
+        minWidth: 432.0,
+        maxWidth: 432.0,
+        minHeight: 56.0,
+        maxHeight: 56.0,
+      ),
+    );
+    expect(layoutProperties.smallestWidthChild.size.width, 56.0);
+    expect(layoutProperties.smallestWidthChildPercentage, 56.0 / 432.0);
+    expect(layoutProperties.largestWidthChild.size.width, 320.0);
+    expect(layoutProperties.largestWidthChildPercentage, 320.0 / 432.0);
+
+    expect(layoutProperties.smallestHeightChild.size.height, 25.0);
+    expect(layoutProperties.smallestHeightChildPercentage, 25.0 / 56.0);
+    expect(layoutProperties.largestHeightChild.size.height, 56.0);
+    expect(layoutProperties.largestHeightChildPercentage, 56.0 / 56.0);
   });
 }

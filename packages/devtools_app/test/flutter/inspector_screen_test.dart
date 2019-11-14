@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen_details_tab.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
@@ -229,7 +230,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ConstraintsDescription(
-            diagnostic: node,
+            properties: LayoutProperties(node),
             listenable: animationController,
           ),
         ),
@@ -285,7 +286,8 @@ void main() {
         <String, Object>{
           'isFlex': true,
           'renderObject': renderObjectJson,
-          'hasChildren': false
+          'hasChildren': false,
+          'children': [],
         },
         null,
         false,

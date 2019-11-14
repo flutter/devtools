@@ -15,12 +15,19 @@ class BorderLayout extends StatelessWidget {
   const BorderLayout({
     Key key,
     this.left,
+    this.leftWidth,
     this.top,
+    this.topHeight,
     this.right,
+    this.rightWidth,
     this.bottom,
-    @required this.center,
-  })  : assert(center != null),
-        assert(left != null || top != null || right != null || bottom != null),
+    this.bottomHeight,
+    this.center,
+  })  : assert(left != null ||
+            top != null ||
+            right != null ||
+            bottom != null ||
+            center != null),
         super(key: key);
 
   final Widget center;
@@ -28,6 +35,11 @@ class BorderLayout extends StatelessWidget {
   final Widget left;
   final Widget right;
   final Widget bottom;
+
+  final double leftWidth;
+  final double rightWidth;
+  final double topHeight;
+  final double bottomHeight;
 
   CrossAxisAlignment get crossAxisAlignment {
     if (left != null && right != null) {
@@ -43,21 +55,39 @@ class BorderLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: crossAxisAlignment,
+    return Stack(
       children: <Widget>[
-        if (top != null) top,
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (left != null) left,
-            center,
-            if (right != null) right,
-          ],
+        Center(
+          child: Container(
+            margin: EdgeInsets.only(
+              left: leftWidth ?? 0,
+              right: rightWidth ?? 0,
+              top: topHeight ?? 0,
+              bottom: bottomHeight ?? 0,
+            ),
+            child: center,
+          ),
         ),
-        if (bottom != null) bottom,
+        if (top != null)
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(height: topHeight, child: top),
+          ),
+        if (left != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(width: leftWidth, child: left),
+          ),
+        if (right != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(width: rightWidth, child: right),
+          ),
+        if (bottom != null)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(height: bottomHeight, child: bottom),
+          )
       ],
     );
   }

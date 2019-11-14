@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
-
 import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
@@ -124,7 +123,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   Widget build(BuildContext context) {
     super.build(context);
     if (selected == null) return const SizedBox();
-    if (!selected.isFlex)
+    final properties = LayoutProperties(selected);
+    if (!properties.isFlex)
       // TODO(albertusangga): Visualize non-flex widget constraint model
       return Container(
         child: const Text(
@@ -132,9 +132,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
         ),
       );
     return StoryOfYourFlexWidget(
-      diagnostic: selected,
-      // TODO(albertusangga): Cache this instead of recomputing every build
-      properties: RenderFlexProperties.fromJson(selected.renderObject),
+      // TODO(albertusangga): Cache this instead of recomputing every build,
+      FlexLayoutProperties.fromRemoteDiagnosticsNode(selected),
     );
   }
 
