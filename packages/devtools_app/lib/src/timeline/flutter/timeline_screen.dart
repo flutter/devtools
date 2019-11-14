@@ -48,18 +48,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = Controllers.of(context).timeline;
-    controller.timelineService.updateListeningState(true);
-
-    selectedFrameSubscription?.cancel();
-    selectedFrameSubscription =
-        controller.frameBasedTimeline.onSelectedFrame.listen((_) {
-          setState(() {});
-        });
   }
 
   @override
   void dispose() {
-    controller.timelineService.updateListeningState(false);
     selectedFrameSubscription.cancel();
     // TODO(kenz): make TimelineController disposable via
     // DisposableController and dispose here.
