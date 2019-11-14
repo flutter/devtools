@@ -15,7 +15,7 @@ bool get isDarkTheme => _isDarkTheme;
 bool _isDarkTheme = false;
 
 void initializeTheme(String theme) {
-  _isDarkTheme = theme == 'dark';
+//  _isDarkTheme = theme == 'dark';
   clearColorCache();
 }
 

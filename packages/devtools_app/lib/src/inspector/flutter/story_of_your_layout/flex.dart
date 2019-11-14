@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/colors.dart';
-import '../../inspector_text_styles.dart';
+import '../../../ui/theme.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
@@ -47,6 +47,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   static const kMargin = 8.0;
   static const kRenderedMinWidth = 175.0;
   static const kRenderedMinHeight = 150.0;
+  static const kDropdownMaxWidth = 325.0;
 
   int totalFlexFactor;
   MainAxisAlignment mainAxisAlignment;
@@ -94,8 +95,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     if (!properties.hasChildren)
       return const Center(child: Text('No Children'));
 
-    const kHeightArrowIndicatorWidth = 32.0;
-    const kWidthArrowIndicatorHeight = 32.0;
+    const kHeightArrowIndicatorWidth = 24.0;
+    const kWidthArrowIndicatorHeight = 24.0;
     final theme = Theme.of(context);
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -111,6 +112,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
       return BorderLayout(
         center: Container(
+          margin: const EdgeInsets.only(top: kMargin * 2, left: kMargin * 2),
           child: SingleChildScrollView(
             scrollDirection: properties.direction,
             child: Flex(
@@ -257,7 +259,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                   if (flexFactor == 0 || flexFactor == null)
                     Text(
                       'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                      style: regularItalic.merge(warning),
+                      style: TextStyle(
+                        color: ThemedColor(
+                          const Color(0xFFD08A29),
+                          Colors.orange.shade700,
+                        ),
+                        fontStyle: FontStyle.italic,
+                      ),
                       maxLines: 2,
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
@@ -292,61 +300,63 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       alignmentEnumEntries = CrossAxisAlignment.values;
       selected = crossAxisAlignment;
     }
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          '$axisDescription Alignment: ',
-          textScaleFactor: 1.2,
-        ),
-        Container(
-          margin: const EdgeInsets.only(left: 8.0),
-          child: DropdownButton(
-            itemHeight: 64,
-            value: selected,
-            items: [
-              for (var alignment in alignmentEnumEntries)
-                DropdownMenuItem(
-                  value: alignment,
-                  child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          describeEnum(alignment) + ':',
-                          style: TextStyle(
-                            color: color,
+    return Container(
+      constraints: const BoxConstraints(maxWidth: kDropdownMaxWidth),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            '$axisDescription Alignment: ',
+            textScaleFactor: 1.2,
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 8.0),
+            child: DropdownButton(
+              isExpanded: true,
+              itemHeight: 56,
+              value: selected,
+              items: [
+                for (var alignment in alignmentEnumEntries)
+                  DropdownMenuItem(
+                    value: alignment,
+                    child: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            describeEnum(alignment),
+                            style: TextStyle(
+                              color: color,
+                            ),
                           ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(left: 8.0),
-                          child: Image.asset(
+                          Image.asset(
                             (axis == direction)
                                 ? getMainAxisAssetImageUrl(alignment)
                                 : getCrossAxisAssetImageUrl(alignment),
-                            height: 32,
-                            fit: BoxFit.cover,
+                            height: 24,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                )
-            ],
-            onChanged: (Object newSelection) {
-              setState(() {
-                if (axis == direction) {
-                  mainAxisAlignment = newSelection;
-                } else {
-                  crossAxisAlignment = newSelection;
-                }
-              });
-            },
-          ),
-        )
-      ],
+                  )
+              ],
+              onChanged: (Object newSelection) {
+                setState(() {
+                  if (axis == direction) {
+                    mainAxisAlignment = newSelection;
+                  } else {
+                    crossAxisAlignment = newSelection;
+                  }
+                });
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 

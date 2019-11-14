@@ -98,7 +98,7 @@ const treeGuidelineColor = ThemedColor(
 );
 
 // Story of Layout colors
-const mainAxisLightColor = Color(0xFFEA637C);
+const mainAxisLightColor = Color(0xFFF597A8);
 const mainAxisDarkColor = Color(0xFFEA637C);
 const mainAxisColor = ThemedColor(mainAxisLightColor, mainAxisDarkColor);
 
