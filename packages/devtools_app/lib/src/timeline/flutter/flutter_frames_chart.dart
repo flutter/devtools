@@ -47,10 +47,10 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
   /// Active timer running.
   Timer _timer;
 
-  /// Datapoint entry for each UI duration value (Stacked bars).
+  /// Datapoint entry for each frame duration (UI/GPU) for stacked bars.
   final List<BarEntry> _frameDurations = <BarEntry>[];
 
-  /// Trace #1 UI Duration.
+  /// Set of all duration information (the data, colors, etc).
   BarDataSet frameDurationsSet;
 
   @override
