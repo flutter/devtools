@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/src/scheduler/ticker.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
@@ -33,25 +34,29 @@ class FlatTable<T> extends StatefulWidget {
   _FlatTableState<T> createState() => _FlatTableState<T>();
 }
 
-class _FlatTableState<T> extends NestingTableState<T, FlatTable<T>> {
-  @override
-  bool get startAtBottom => true;
+class _FlatTableState<T> extends State<FlatTable<T>> {
+  List<double> columnWidths = [];
 
   @override
-  TreeNode<TreeNode> asTreeNode(T node) => null;
+  void initState() {
+    super.initState();
+    columnWidths = computeColumnWidths();
+  }
 
   @override
-  List<ColumnData<T>> get columns => widget.columns;
+  void didUpdateWidget(FlatTable<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    columnWidths = computeColumnWidths();
+  }
 
-  @override
-  List<double> computeColumnWidths(List<T> flattenedList) {
+  List<double> computeColumnWidths() {
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
       double width;
       if (column.fixedWidthPx != null) {
         width = column.fixedWidthPx;
       } else {
-        width = NestingTableState.defaultColumnWidth;
+        width = _Table.defaultColumnWidth;
       }
       widths.add(width);
     }
@@ -59,13 +64,26 @@ class _FlatTableState<T> extends NestingTableState<T, FlatTable<T>> {
   }
 
   @override
-  List<T> computeFlattenedChildList() => widget.data.toList();
+  Widget build(BuildContext context) {
+    return _Table<T>(
+      itemCount: widget.data.length,
+      columns: widget.columns,
+      columnWidths: columnWidths,
+      startAtBottom: true,
+      tableRowBuilder: _buildRow,
+    );
+  }
 
-  @override
-  String keyFactory(T node) => widget.keyFactory(node);
-
-  @override
-  TreeColumnData<TreeNode> get treeColumn => null;
+  Widget _buildRow(BuildContext context, int index) {
+    final node = widget.data[index];
+    return _TableRow(
+      key: PageStorageKey(widget.keyFactory(node)),
+      node: node,
+      onPressed: (_) {},
+      columns: widget.columns,
+      columnWidths: columnWidths,
+    );
+  }
 }
 
 /// A table that shows [TreeNode]s.
@@ -103,52 +121,54 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final T data;
 
   /// Factory that creates keys for each row in this table.
-  ///
-  /// It uses [PageStorageKey] to restore the table's state when re-opening
-  /// its page.
-  final String Function(T data) keyFactory;
+  final String Function(T) keyFactory;
 
   @override
   _TreeTableState<T> createState() => _TreeTableState<T>();
 }
 
-class _TreeTableState<T extends TreeNode<T>>
-    extends NestingTableState<T, TreeTable<T>> {
-  @override
-  List<ColumnData<T>> get columns => widget.columns;
+class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
+    with TickerProviderStateMixin {
+  List<T> items;
+  List<double> columnWidths;
+  final Map<T, bool> shouldShowCache = {};
 
   @override
-  TreeColumnData<TreeNode> get treeColumn => widget.treeColumn;
-
-  @override
-  TreeNode<TreeNode> asTreeNode(T node) {
-    return node;
+  void initState() {
+    super.initState();
+    _updateItems();
   }
 
   @override
-  String keyFactory(T node) => widget.keyFactory(node);
+  void didUpdateWidget(TreeTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateItems();
+  }
 
-  void _computeFlatListFromTree(
-      {T node, bool Function(T node) filter, @required List<T> flatList}) {
-    node ??= widget.data;
-    filter ??= (_) => true;
-    if (node == null) {
-      return;
-    }
-    flatList.add(node);
-    if (filter(node)) {
-      for (var child in node.children) {
-        _computeFlatListFromTree(
-          node: child,
-          filter: filter,
-          flatList: flatList,
-        );
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _updateItems() {
+    setState(() {
+      items = buildFlatList(widget.data);
+      columnWidths = computeColumnWidths(items);
+    });
+  }
+
+  void _onItemPressed(T node) {
+    /// Rebuilds the table whenever the tree structure has been updated
+    if (!node.isExpandable) return;
+    setState(() {
+      if (node.isExpanded) {
+        node.collapse();
+      } else {
+        node.expand();
       }
-    }
-    return;
+    });
   }
 
-  @override
   List<double> computeColumnWidths(List<T> flattenedList) {
     final root = widget.data;
     TreeNode deepest = root;
@@ -174,80 +194,76 @@ class _TreeTableState<T extends TreeNode<T>>
         // we are confident is the widest.  A reasonable heuristic is the row
         // with the longest text, but because of variable-width fonts, this is
         // not always true.
-        width += NestingTableState.defaultColumnWidth;
+        width += _Table.defaultColumnWidth;
       }
       widths.add(width);
     }
     return widths;
   }
 
+  void traverse(T node, ItemCallback callback) {
+    if (node == null) return;
+
+    callback(node);
+
+    for (var child in node.children) {
+      traverse(child, callback);
+    }
+  }
+
+  List<T> buildFlatList(T root) {
+    final flatList = <T>[];
+
+    traverse(root, (n) => flatList.add(n));
+    return flatList;
+  }
+
   @override
-  List<T> computeFlattenedChildList() {
-    final flattenedList = <T>[];
-    _computeFlatListFromTree(flatList: flattenedList);
-    return flattenedList;
+  Widget build(BuildContext context) {
+    return _Table<T>(
+      columns: widget.columns,
+      itemCount: items.length,
+      columnWidths: columnWidths,
+      tableRowBuilder: (c, i) => _buildRow(c, items[i]),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, T node) {
+    return Column(children: [
+      _tableRowFor(node),
+    ]);
+  }
+
+  Widget _tableRowFor(T node) {
+    return _TableRow<T>(
+      key: PageStorageKey(widget.keyFactory(node)),
+      node: node,
+      onPressed: _onItemPressed,
+      columns: widget.columns,
+      columnWidths: columnWidths,
+      expandableColumn: widget.treeColumn,
+      isExpanded: node.isExpanded,
+      isExpandable: node.isExpandable,
+      isParentExpanded: node.shouldShow(),
+    );
   }
 }
 
-/// A [State] for a table that may have nested rows.
-///
-/// Provides a consistent table layout for all rows.
-abstract class NestingTableState<T, S extends StatefulWidget> extends State<S> {
-  @override
-  void initState() {
-    super.initState();
-    _refreshTree();
-  }
+class _Table<T> extends StatelessWidget {
+  const _Table(
+      {Key key,
+      @required this.itemCount,
+      @required this.columns,
+      @required this.columnWidths,
+      @required this.tableRowBuilder,
+      this.startAtBottom = false})
+      : super(key: key);
 
-  @override
-  void didUpdateWidget(S oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // TODO(djshuckerow): Be selective about running this only
-    // when the members of the oldWidget have changed.
-    // We need to be careful that we don't ignore a change to the tree
-    // when the tree has had a child added to it but not been replaced.
-    // The TableData class may provide some utilities for managing computations
-    // necessary when the table is rebuilt.
-    _refreshTree();
-  }
-
-  void _refreshTree() {
-    setState(() {
-      _flattenedList = computeFlattenedChildList();
-      _columnWidths = computeColumnWidths(_flattenedList);
-    });
-  }
-
-  /// Recomputes the flattened list of the tree and the widths of the columns.
-  ///
-  /// In a nested this, this must inline the members of the list.
-  ///
-  /// This computation traverses every row to show in the table, which can become
-  /// expensive for large tables.
-  List<T> computeFlattenedChildList();
-
-  List<T> _flattenedList = <T>[];
-
-  /// Determines the width of all columns, including the columns that
-  /// use indentation to show the nesting of the table.
-  List<double> computeColumnWidths(List<T> flattenedList);
-
-  /// The width of each column in this table, including the
-  /// appropriate indentation for nested rows.
-  ///
-  /// This is computed in [_computeColumnWidths].
-  List<double> get columnWidths => _columnWidths;
-
-  List<double> _columnWidths;
-
-  /// The width of all columns in the table.
-  double get tableWidth {
-    double sum = 2 * rowHorizontalPadding;
-    for (var width in _columnWidths) {
-      sum += width;
-    }
-    return sum;
-  }
+  final int itemCount;
+  final bool startAtBottom;
+  final List<ColumnData<T>> columns;
+  final List<double> columnWidths;
+  final IndexedWidgetBuilder tableRowBuilder;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -262,54 +278,25 @@ abstract class NestingTableState<T, S extends StatefulWidget> extends State<S> {
   /// and end of each row in the table.
   static const rowHorizontalPadding = 16.0;
 
-  /// Returns [node] as a TreeNode, if it is a tree node, or null otherwise.
-  TreeNode asTreeNode(T node);
+  /// The width of all columns in the table, with additional padding.
+  double get tableWidth =>
+      columnWidths.reduce((x, y) => x + y) + (2 * rowHorizontalPadding);
 
-  /// Generates a key for [node].
-  String keyFactory(T node);
+  Widget _buildItem(BuildContext context, int index) {
+    if (startAtBottom) {
+      index = itemCount - index - 1;
+    }
 
-  /// The columns to show in the table.
-  List<ColumnData<T>> get columns;
-
-  /// The column from [columns] that should be used to show the table
-  /// nesting in a nested table.
-  TreeColumnData get treeColumn;
-
-  /// Whether to scroll from the top to the bottom or vice-versa.
-  ///
-  /// If false, the list view starts at the top and scrolls down.
-  ///
-  /// See [ScrollView.reverse] for more.
-  bool get startAtBottom => false;
-
-  /// Rebuilds the table whenever the tree structure has been updated
-  ///
-  /// [_TableRow]s call this method when they have told a [TreeNode]
-  /// to expand or collapse.
-  ///
-  /// Note that setState is being called in response to a change in
-  /// [widget.node] or its children, and it does not reflect a change in
-  /// an instance variable.
-  void onNodeExpansionChanged() {
-    setState(() {});
+    return tableRowBuilder(context, index);
   }
 
   @override
   Widget build(BuildContext context) {
     final itemDelegate = SliverChildBuilderDelegate(
-      (context, index) {
-        if (startAtBottom) {
-          index = _flattenedList.length - index - 1;
-        }
-        final node = _flattenedList[index];
-        return _TableRow(
-          key: PageStorageKey(keyFactory(node)),
-          tableState: this,
-          node: node,
-        );
-      },
-      childCount: _flattenedList.length,
+      _buildItem,
+      childCount: itemCount,
     );
+
     return LayoutBuilder(builder: (context, constraints) {
       return Scrollbar(
         child: SingleChildScrollView(
@@ -324,7 +311,9 @@ abstract class NestingTableState<T, S extends StatefulWidget> extends State<S> {
               children: [
                 _TableRow.tableHeader(
                   key: const Key('Table header'),
-                  tableState: this,
+                  columns: columns,
+                  columnWidths: columnWidths,
+                  onPressed: (_) {},
                 ),
                 Expanded(
                   child: Scrollbar(
@@ -343,6 +332,9 @@ abstract class NestingTableState<T, S extends StatefulWidget> extends State<S> {
   }
 }
 
+/// Callback for when a specific item in a table is selected.
+typedef ItemCallback<T> = void Function(T item);
+
 /// Presents a [node] as a row in a table.
 ///
 /// When the given [node] is null, this widget will instead present
@@ -351,63 +343,76 @@ class _TableRow<T> extends StatefulWidget {
   /// Constructs a [_TableRow] that presents the column values for
   /// [node].
   const _TableRow({
-    @required Key key,
+    Key key,
     @required this.node,
-    @required this.tableState,
+    @required this.columns,
+    @required this.onPressed,
+    @required this.columnWidths,
+    this.expandableColumn,
+    this.isExpanded = false,
+    this.isExpandable = false,
+    this.isParentExpanded = true,
   }) : super(key: key);
 
   /// Constructs a [_TableRow] that presents the column titles instead
   /// of any [TreeNode].
   const _TableRow.tableHeader({
-    @required Key key,
-    @required this.tableState,
+    Key key,
+    @required this.columns,
+    @required this.columnWidths,
+    @required this.onPressed,
   })  : node = null,
+        isExpanded = false,
+        isExpandable = false,
+        expandableColumn = null,
+        isParentExpanded = true,
         super(key: key);
 
-  final NestingTableState<T, StatefulWidget> tableState;
   final T node;
+  final List<ColumnData<T>> columns;
+  final ItemCallback onPressed;
+  final List<double> columnWidths;
+  final ColumnData<T> expandableColumn;
+  final bool isExpanded;
+  final bool isExpandable;
+  final bool isParentExpanded;
 
   @override
-  _TableRowState createState() => _TableRowState<T>();
+  _TableRowState<T> createState() => _TableRowState<T>();
 }
 
 class _TableRowState<T> extends State<_TableRow<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
-  TreeColumnData get treeColumn => widget.tableState.treeColumn;
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  List<ColumnData<T>> get columns => widget.tableState.columns;
-
-  void onListUpdated() => widget.tableState.onNodeExpansionChanged();
-
-  List<double> get columnWidths => widget.tableState.columnWidths;
-
-  TreeNode get treeNode => widget.tableState.asTreeNode(widget.node);
-
-  void _toggleExpanded() {
-    setExpanded(!(treeNode?.isExpanded ?? true));
+  @override
+  void didUpdateWidget(_TableRow<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setExpanded(widget.isExpanded);
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = tableRowFor(context);
+    final row = tableRowFor(context);
     return AnimatedBuilder(
       animation: showController,
       builder: (context, child) {
         return SizedBox(
-          height: NestingTableState.defaultRowHeight * showAnimation.value,
+          height: _Table.defaultRowHeight * showAnimation.value,
           child: Material(child: child),
         );
       },
       child: InkWell(
-        onTap: _toggleExpanded,
-        child: title,
+        onTap: () => widget.onPressed(widget.node),
+        child: row,
       ),
     );
   }
 
   /// Presents the content of this row.
-  // TODO(djshuckerow): Pull this out for use as a separate widget in unnested
-  // tables.
   Widget tableRowFor(BuildContext context) {
     Alignment alignmentFor(ColumnData<T> column) {
       switch (column.alignment) {
@@ -423,22 +428,23 @@ class _TableRowState<T> extends State<_TableRow<T>>
 
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
-      if (widget.node == null) {
+      final node = widget.node;
+      if (node == null) {
         content = Text(
           column.title,
           overflow: TextOverflow.ellipsis,
         );
       } else {
-        final padding = column.getNodeIndentPx(widget.node);
+        final padding = column.getNodeIndentPx(node);
         content = Text(
-          '${column.getDisplayValue(widget.node)}',
+          '${column.getDisplayValue(node)}',
           overflow: TextOverflow.ellipsis,
         );
-        if ((treeColumn as ColumnData<T>) == column && column != null) {
+        if (column == widget.expandableColumn) {
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              isExpanded
+              widget.isExpandable
                   ? RotationTransition(
                       turns: expandAnimation,
                       child: const Icon(
@@ -471,15 +477,15 @@ class _TableRowState<T> extends State<_TableRow<T>>
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: NestingTableState.rowHorizontalPadding,
+        horizontal: _Table.rowHorizontalPadding,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          for (var i = 0; i < columns.length; i++)
+          for (var i = 0; i < widget.columns.length; i++)
             columnFor(
-              columns[i],
-              columnWidths[i],
+              widget.columns[i],
+              widget.columnWidths[i],
             ),
         ],
       ),
@@ -487,20 +493,11 @@ class _TableRowState<T> extends State<_TableRow<T>>
   }
 
   @override
-  bool get isExpanded => treeNode?.isExpanded ?? false;
+  bool get isExpanded => widget.isExpanded;
 
   @override
-  void onExpandChanged(bool expanded) {
-    setState(() {
-      if (expanded) {
-        treeNode?.expand();
-      } else {
-        treeNode?.collapse();
-      }
-      onListUpdated();
-    });
-  }
+  void onExpandChanged(bool expanded) {}
 
   @override
-  bool shouldShow() => treeNode?.shouldShow() ?? true;
+  bool shouldShow() => widget.isParentExpanded;
 }
