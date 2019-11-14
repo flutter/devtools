@@ -11,6 +11,7 @@ import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
 import 'package:mp_chart/mp/core/axis/x_axis.dart';
+import 'package:mp_chart/mp/core/common_interfaces.dart';
 import 'package:mp_chart/mp/core/data/bar_data.dart';
 import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
@@ -34,28 +35,29 @@ class FlutterFramesChart extends StatefulWidget {
   FlutterFramesChartState createState() => FlutterFramesChartState();
 }
 
-class FlutterFramesChartState extends State<FlutterFramesChart> {
+class FlutterFramesChartState extends State<FlutterFramesChart>
+    implements OnChartValueSelectedListener {
   BarChartController _chartController;
 
   BarChartController get chartController => _chartController;
 
-  // Index into the raw data.
+  /// Index into the raw data.
   int timerDataIndex;
 
-  // Active timer running.
+  /// Active timer running.
   Timer _timer;
 
-  // Datapoint entry for each UI duration value (Stacked bars).
+  /// Datapoint entry for each UI duration value (Stacked bars).
   final List<BarEntry> _frameDurations = <BarEntry>[];
 
-  // Trace #1 UI Duration.
+  /// Trace #1 UI Duration.
   BarDataSet frameDurationsSet;
 
   @override
   void initState() {
     _initController();
 
-    // TODO(terry): Pass true to simulate live feed.
+    // True simulates charting a live feed, false to chart all canned data immediately.
     _initData(true);
 
     super.initState();
@@ -72,7 +74,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
   );
 
   final double groupSpace = 0.04;
-  final double barSpace = 0;
+  final double barSpace = 0.0;
 
   void _initController() {
     final desc = Description()..enabled = false;
@@ -82,6 +84,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
           ..typeface = lightTypeFace
           ..drawGridLines = false
           ..setStartAtZero(true)
+          ..setValueFormatter(YAxisUnitFormatter())
           ..addLimitLine(LimitLine(60, '60 FPS')
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
@@ -111,7 +114,9 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
 //      maxVisibleCount: 60,
       drawBarShadow: false,
       description: desc,
-      marker: CustomDataValues(onSelected: frameSelected),
+      highLightPerTapEnabled: true,
+      marker: SelectedDataPoint(onSelected: frameSelected),
+      selectionListener: this,
     );
 
     // Compute padding around chart.
@@ -128,10 +133,10 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
     print('Bar Charted item selected frame index = $frameIndex');
   }
 
-  // Light Blue 50 - 200
+  /// Light Blue 50 - 200
   static const mainUiColorLight = Color.fromARGB(0xff, 0x81, 0xD4, 0xFA);
 
-  // Light Blue 50 - 700
+  /// Light Blue 50 - 700
   static const mainGpuColorLight = Color.fromARGB(0xFF, 0x02, 0x88, 0xD1);
 
   void _initData([bool simulateFeed = false]) {
@@ -148,7 +153,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
     }
 
     // Create heap used dataset.
-    frameDurationsSet = BarDataSet(_frameDurations, 'UI')
+    frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
       ..setColors1([mainGpuColorLight, mainUiColorLight])
       ..setDrawValues(false);
 
@@ -166,7 +171,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
     final uiDurationValue = _cannedData[index + 1].toDouble();
     final gpuDurationValue = _cannedData[index + 2].toDouble();
 
-    // TODO(terry): Structured item 0 is UI vs item 1 is GPU if not stacked.
+    // TODO(terry): Structured class item 0 is GPU, item 1 is UI if not stacked.
     return BarEntry.fromListYVals(
       x: x,
       vals: [
@@ -176,7 +181,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
     );
   }
 
-  // Simulate live feed.
+  /// Simulate live feed.
   void _startFeed(int startIndex) {
     // Fetch from the beginning of the canned data for the live feed.
     timerDataIndex = startIndex; // Entry zero is already primed.
@@ -193,17 +198,17 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
         });
       }
 
-      // Pause pressed stop pumping out data simulating a live feed.
+      // Keep pumping out data, simulating a live feed.
       if (timerDataIndex < _cannedData.length) {
         _frameDurations.add(createBarEntry(timerDataIndex));
         timerDataIndex += 3;
       }
 
-      updateChart();
+      _updateChart();
     });
   }
 
-  void updateChart() {
+  void _updateChart() {
     _chartController.data = BarData([]..add(frameDurationsSet));
 
     setState(() {
@@ -227,25 +232,43 @@ class FlutterFramesChartState extends State<FlutterFramesChart> {
       child: BarChart(_chartController),
     );
   }
+
+  /// OnChartValueSelectedListener override.
+  @override
+  void onNothingSelected() {
+    print('Nothing Selected');
+  }
+
+  /// OnChartValueSelectedListener override.
+  @override
+  void onValueSelected(Entry e, Highlight h) {
+    // TODO(terry): Either use onTouchDown or add mouse position to laggy.
+    final yValues = (e as BarEntry).yVals;
+    print(
+      'onValueSelected - Frame Index = ${e.x}, '
+      'GPU = ${yValues[0]}, UI = ${yValues[1]}',
+    );
+  }
 }
 
-class YAxisMilliSecFormatter extends ValueFormatter {
+class YAxisUnitFormatter extends ValueFormatter {
   @override
-  String getFormattedValue1(double value) {
-    return value.toInt().toString();
-  }
+  String getFormattedValue1(double value) => '${value.toInt()} ms';
 }
 
 typedef SelectionCallback = void Function(int frameIndex);
 
-/*
- * Selection of a point in the Bar chart displays the data point values
- * UI duration and GPU duration. Also, highlight the selected stacked bar.
- * 
- * onSelected callback function invoked when bar entry is selected.
- */
-class CustomDataValues extends LineChartMarker {
-  CustomDataValues({
+/// Selection of a point in the Bar chart displays the data point values
+/// UI duration and GPU duration. Also, highlight the selected stacked bar.
+/// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
+/// onTapDown would be less laggy.
+///
+/// TODO(terry): Highlighting is not efficient, a faster mechanism to return
+/// the Entry being clicked is needed.
+///
+/// onSelected callback function invoked when bar entry is selected.
+class SelectedDataPoint extends LineChartMarker {
+  SelectedDataPoint({
     this.textColor,
     this.backColor,
     this.fontSize,
@@ -255,22 +278,28 @@ class CustomDataValues extends LineChartMarker {
     textColor ??= ColorUtils.WHITE;
     backColor ??= const Color.fromARGB(127, 0, 0, 0);
     fontSize ??= 10;
-//    fontSize ??= Utils.convertDpToPixel(2);
   }
 
   Entry _entry;
-  Highlight _highlight;
 
   DefaultValueFormatter _formatter;
+
   Color textColor;
+
   Color backColor;
+
   double fontSize;
 
   int _lastFrameIndex = -1;
+
   final SelectionCallback onSelected;
 
   @override
   void draw(Canvas canvas, double posX, double posY) {
+    const positionAboveBar = 15;
+    const paddingAroundText = 5;
+    const rectangleCurve = 5.0;
+
     final frameIndex = _entry.x.toInt();
     final yValues = (_entry as BarEntry).yVals;
 
@@ -301,17 +330,17 @@ class CustomDataValues extends LineChartMarker {
     painter.layout();
     final Offset pos = calculatePos(
       posX + offset.x,
-      posY + offset.y - 15,
+      posY + offset.y - positionAboveBar,
       painter.width,
       painter.height,
     );
     canvas.drawRRect(
       RRect.fromLTRBR(
-        pos.dx - 5,
-        pos.dy - 5,
-        pos.dx + painter.width + 5,
-        pos.dy + painter.height + 5,
-        const Radius.circular(5),
+        pos.dx - paddingAroundText,
+        pos.dy - paddingAroundText,
+        pos.dx + painter.width + paddingAroundText,
+        pos.dy + painter.height + paddingAroundText,
+        const Radius.circular(rectangleCurve),
       ),
       paint,
     );
@@ -328,7 +357,6 @@ class CustomDataValues extends LineChartMarker {
   @override
   void refreshContent(Entry e, Highlight highlight) {
     _entry = e;
-    _highlight = highlight;
   }
 }
 
