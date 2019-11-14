@@ -229,9 +229,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   Widget _buildRow(BuildContext context, T node) {
-    return Column(children: [
-      _tableRowFor(node),
-    ]);
+    return _tableRowFor(node);
   }
 
   Widget _tableRowFor(T node) {
