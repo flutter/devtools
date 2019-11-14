@@ -17,6 +17,31 @@ import 'utils.dart';
 
 const widthIndicatorColor = mainUiColor;
 const heightIndicatorColor = mainGpuColor;
+const margin = 8.0;
+
+const arrowHeadSize = 8.0;
+const distanceToArrow = 1.0;
+const arrowStrokeWidth = 1.5;
+
+/// Minimum size for scaling the flex children widget properly
+const renderedMinWidth = 175.0;
+const renderedMinHeight = 150.0;
+
+const widgetTitleMaxWidthPercentage = 0.75;
+
+/// Hardcoded arrow size respective to its cross axis (because it's unconstrained)
+const outerHeightArrowIndicatorSize = 24.0;
+const outerWidthArrowIndicatorSize = 24.0;
+const innerHeightArrowIndicatorSize = 16.0;
+const innerWidthArrowIndicatorSize = 16.0;
+const mainAxisArrowIndicatorSize = 32.0;
+const crossAxisArrowIndicatorSize = 32.0;
+
+const largeTextScaleFactor = 1.2;
+const smallTextScaleFactor = 0.8;
+
+const axisAlignmentAssetImageHeight = 24.0;
+const dropdownMaxWidth = 320.0;
 
 String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
   return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
@@ -40,30 +65,6 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 }
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
-  static const margin = 8.0;
-
-  static const arrowHeadSize = 8.0;
-  static const distanceToArrow = 1.0;
-  static const arrowStrokeWidth = 1.5;
-
-  /// Minimum size for scaling the flex children widget properly
-  static const renderedMinWidth = 175.0;
-  static const renderedMinHeight = 150.0;
-
-  /// Hardcoded arrow size respective to its cross axis (because it's unconstrained)
-  static const outerHeightArrowIndicatorSize = 24.0;
-  static const outerWidthArrowIndicatorSize = 24.0;
-  static const innerHeightArrowIndicatorSize = 16.0;
-  static const innerWidthArrowIndicatorSize = 16.0;
-  static const mainAxisArrowIndicatorSize = 32.0;
-  static const crossAxisArrowIndicatorSize = 32.0;
-
-  static const largeTextScaleFactor = 1.2;
-  static const smallTextScaleFactor = 0.8;
-
-  static const axisAlignmentAssetImageHeight = 24.0;
-  static const dropdownMaxWidth = 320.0;
-
   MainAxisAlignment mainAxisAlignment;
   CrossAxisAlignment crossAxisAlignment;
 
@@ -535,7 +536,7 @@ class WidgetVisualizer extends StatelessWidget {
                 Container(
                   constraints: const BoxConstraints(
                       maxWidth:
-                          _StoryOfYourFlexWidgetState.renderedMinWidth * 3 / 4),
+                          renderedMinWidth * widgetTitleMaxWidthPercentage),
                   child: Center(
                     child: Text(
                       title,

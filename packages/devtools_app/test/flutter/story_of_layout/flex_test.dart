@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../wrappers.dart';
 
 void main() {
-  const windowSize = Size(1920, 1080);
+  const windowSize = Size(1500, 1500);
 
   Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
       {
@@ -230,6 +230,8 @@ void main() {
       }
     }
     ''');
+
+  Widget wrap(Widget widget) => MaterialApp(home: Scaffold(body: widget));
 
   group('Row', () {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
