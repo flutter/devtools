@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/controllers.dart';
 import '../../flutter/screen.dart';
-
 import '../../flutter/split.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
@@ -38,16 +40,27 @@ class TimelineScreenBody extends StatefulWidget {
 }
 
 class TimelineScreenBodyState extends State<TimelineScreenBody> {
-  @visibleForTesting
-  final controller = TimelineController();
+  TimelineController controller;
+
+  StreamSubscription selectedFrameSubscription;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = Controllers.of(context).timeline;
+    controller.timelineService.updateListeningState(true);
+
+    selectedFrameSubscription?.cancel();
+    selectedFrameSubscription =
+        controller.frameBasedTimeline.onSelectedFrame.listen((_) {
+          setState(() {});
+        });
   }
 
   @override
   void dispose() {
+    controller.timelineService.updateListeningState(false);
+    selectedFrameSubscription.cancel();
     // TODO(kenz): make TimelineController disposable via
     // DisposableController and dispose here.
     super.dispose();
@@ -71,16 +84,18 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
         ),
         if (controller.timelineMode == TimelineMode.frameBased)
           FlutterFramesChart(),
-        Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            firstChild: TimelineFlameChart(),
-            // TODO(kenz): use StreamBuilder to get selected event from
-            // controller once data is hooked up.
-            secondChild: EventDetails(stubAsyncEvent),
-            initialFirstFraction: 0.6,
+        if (controller.timelineMode == TimelineMode.full ||
+            controller.frameBasedTimeline.data?.selectedFrame != null)
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              firstChild: TimelineFlameChart(),
+              // TODO(kenz): use StreamBuilder to get selected event from
+              // controller once data is hooked up.
+              secondChild: EventDetails(stubAsyncEvent),
+              initialFirstFraction: 0.6,
+            ),
           ),
-        ),
       ],
     );
   }
