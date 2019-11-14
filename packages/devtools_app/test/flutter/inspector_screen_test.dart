@@ -286,7 +286,8 @@ void main() {
         <String, Object>{
           'isFlex': true,
           'renderObject': renderObjectJson,
-          'hasChildren': false
+          'hasChildren': false,
+          'children': [],
         },
         null,
         false,

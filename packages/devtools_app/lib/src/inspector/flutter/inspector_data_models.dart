@@ -1,7 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +12,7 @@ const Type boxConstraintsType = BoxConstraints;
 
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
-  LayoutProperties(RemoteDiagnosticsNode node, [int copyLevel = 1])
+  LayoutProperties(RemoteDiagnosticsNode node, {int copyLevel = 1})
       : description = node?.description,
         size = deserializeSize(node?.size),
         constraints = deserializeConstraints(node?.constraints),
@@ -22,7 +21,8 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node?.childrenNow
-                ?.map((child) => LayoutProperties(child, copyLevel - 1))
+                ?.map((child) =>
+                    LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false) {
     if (node != null && children != null && children.isNotEmpty) {
       _smallestHeightChild = children.reduce((value, element) =>
@@ -62,9 +62,9 @@ class LayoutProperties {
   double _largestHeightChildPercentage;
   double _largestWidthChildPercentage;
 
-  int get totalChildren => children.length;
+  int get totalChildren => children?.length ?? 0;
 
-  bool get hasChildren => children.isNotEmpty;
+  bool get hasChildren => children?.isNotEmpty ?? false;
 
   LayoutProperties get smallestWidthChild => _smallestWidthChild;
 
@@ -162,6 +162,7 @@ class FlexLayoutProperties extends LayoutProperties {
   Type get type => direction == Axis.horizontal ? Row : Column;
 
   int get totalFlex {
+    if (children?.isEmpty ?? true) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element);
