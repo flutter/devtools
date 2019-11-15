@@ -39,17 +39,25 @@ class EventDetails extends StatelessWidget {
         const PaddedDivider.thin(),
         Expanded(
           child: selectedEvent != null
-              ? selectedEvent.isUiEvent
-                  ? CpuProfilerView()
-                  : EventSummary(selectedEvent)
-              : Center(
-                  child: Text(
-                    instructions,
-                    style: textTheme.subhead,
-                  ),
-                ),
+              ? _buildDetails()
+              : _buildInstructions(textTheme),
         ),
       ],
+    );
+  }
+
+  Widget _buildDetails() {
+    return selectedEvent.isUiEvent
+        ? CpuProfilerView()
+        : EventSummary(selectedEvent);
+  }
+
+  Widget _buildInstructions(TextTheme textTheme) {
+    return Center(
+      child: Text(
+        instructions,
+        style: textTheme.subhead,
+      ),
     );
   }
 }

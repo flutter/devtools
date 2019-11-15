@@ -89,8 +89,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             child: Split(
               axis: Axis.vertical,
               firstChild: TimelineFlameChart(),
-              // TODO(kenz): use StreamBuilder to get selected event from
-              // controller once data is hooked up.
               secondChild: EventDetails(controller.timeline.data.selectedEvent),
               initialFirstFraction: 0.6,
             ),
