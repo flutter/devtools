@@ -37,21 +37,21 @@ class FlatTable<T> extends StatefulWidget {
 }
 
 class _FlatTableState<T> extends State<FlatTable<T>> {
-  List<double> columnWidths = [];
+  List<double> columnWidths;
 
   @override
   void initState() {
     super.initState();
-    columnWidths = computeColumnWidths();
+    columnWidths = _computeColumnWidths();
   }
 
   @override
   void didUpdateWidget(FlatTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    columnWidths = computeColumnWidths();
+    columnWidths = _computeColumnWidths();
   }
 
-  List<double> computeColumnWidths() {
+  List<double> _computeColumnWidths() {
     final widths = <double>[];
     for (ColumnData<T> column in widget.columns) {
       double width;
@@ -153,8 +153,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _updateItems() {
     setState(() {
-      items = buildFlatList(widget.data);
-      columnWidths = computeColumnWidths(items);
+      items = _buildFlatList(widget.data);
+      columnWidths = _computeColumnWidths(items);
     });
   }
 
@@ -170,7 +170,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     });
   }
 
-  List<double> computeColumnWidths(List<T> flattenedList) {
+  List<double> _computeColumnWidths(List<T> flattenedList) {
     final root = widget.data;
     TreeNode deepest = root;
     // This will use the width of all rows in the table, even the rows
@@ -212,7 +212,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
   }
 
-  List<T> buildFlatList(T root) {
+  List<T> _buildFlatList(T root) {
     final flatList = <T>[];
 
     traverse(root, (n) => flatList.add(n));
