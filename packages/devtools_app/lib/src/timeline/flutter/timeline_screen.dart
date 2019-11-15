@@ -89,7 +89,9 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             child: Split(
               axis: Axis.vertical,
               firstChild: TimelineFlameChart(),
-              secondChild: EventDetails(controller.timeline.data.selectedEvent),
+              secondChild: EventDetails(
+                controller.timeline.data?.selectedEvent,
+              ),
               initialFirstFraction: 0.6,
             ),
           ),
