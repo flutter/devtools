@@ -210,6 +210,8 @@ class LoggingController {
 
   bool _hasPendingUiUpdates = false;
 
+  final Notifier onLogsUpdated = Notifier();
+
   /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
   Future<ObjectGroup> objectGroup;
 
@@ -224,7 +226,7 @@ class LoggingController {
   void clear() {
     data.clear();
     detailsController?.setData(null);
-    _loggingTableModel.setRows(data);
+    _loggingTableModel?.setRows(data);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) async {
@@ -503,12 +505,13 @@ class LoggingController {
     } else {
       _hasPendingUiUpdates = true;
     }
+    onLogsUpdated.notify();
   }
 
   void entering() {
     if (_hasPendingUiUpdates) {
-      _loggingTableModel.setRows(data);
-      _loggingTableModel.scrollTo(data.last, scrollBehavior: 'auto');
+      _loggingTableModel?.setRows(data);
+      _loggingTableModel?.scrollTo(data.last, scrollBehavior: 'auto');
       _hasPendingUiUpdates = false;
     }
   }
