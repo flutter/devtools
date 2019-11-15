@@ -28,7 +28,7 @@ class TimelineFlameChart extends StatelessWidget {
             border: Border.all(color: Theme.of(context).focusColor),
           ),
           child: controller.timelineMode == TimelineMode.frameBased
-              ? _FrameBasedTimelineFlameChart(
+              ? FrameBasedTimelineFlameChart(
                   controller.frameBasedTimeline.data.selectedFrame,
                   width: constraints.maxWidth,
                   height: math.max(
@@ -59,8 +59,8 @@ class TimelineFlameChart extends StatelessWidget {
 }
 
 // TODO(kenz): Abstract core flame chart logic for use in other flame charts.
-class _FrameBasedTimelineFlameChart extends StatefulWidget {
-  _FrameBasedTimelineFlameChart(
+class FrameBasedTimelineFlameChart extends StatefulWidget {
+  FrameBasedTimelineFlameChart(
     this.data, {
     @required this.height,
     @required double width,
@@ -88,12 +88,12 @@ class _FrameBasedTimelineFlameChart extends StatefulWidget {
       totalStartingWidth - startInset - sideInset;
 
   @override
-  _FrameBasedTimelineFlameChartState createState() =>
-      _FrameBasedTimelineFlameChartState();
+  FrameBasedTimelineFlameChartState createState() =>
+      FrameBasedTimelineFlameChartState();
 }
 
-class _FrameBasedTimelineFlameChartState
-    extends State<_FrameBasedTimelineFlameChart> with AutoDisposeMixin {
+class FrameBasedTimelineFlameChartState
+    extends State<FrameBasedTimelineFlameChart> with AutoDisposeMixin {
   static const startingScrollPosition = 0.0;
   ScrollController _scrollControllerX;
   ScrollController _scrollControllerY;
@@ -116,7 +116,7 @@ class _FrameBasedTimelineFlameChartState
   }
 
   @override
-  void didUpdateWidget(_FrameBasedTimelineFlameChart oldWidget) {
+  void didUpdateWidget(FrameBasedTimelineFlameChart oldWidget) {
     if (oldWidget.data != widget.data) {
       _scrollControllerX.jumpTo(startingScrollPosition);
       _scrollControllerY.jumpTo(startingScrollPosition);

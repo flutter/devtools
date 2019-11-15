@@ -5,10 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/controllers.dart';
 import '../../flutter/screen.dart';
-import '../../globals.dart';
-import '../../service_extensions.dart';
+import '../../flutter/table.dart';
+import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
+import '../logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
@@ -34,16 +36,22 @@ class LoggingScreenBody extends StatefulWidget {
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody> {
+  LoggingController controller;
+
   @override
-  void initState() {
-    super.initState();
-    // Enable structured errors by default as soon as the user opens the
-    // logging page.
-    serviceManager.serviceExtensionManager.setServiceExtensionState(
-      structuredErrors.extension,
-      true,
-      true,
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller?.onLogsUpdated?.unregister(this);
+    controller = Controllers.of(context).logging;
+    controller.onLogsUpdated.register(this, () {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.onLogsUpdated.unregister(this);
+    super.dispose();
   }
 
   @override
@@ -53,16 +61,71 @@ class _LoggingScreenState extends State<LoggingScreenBody> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           RaisedButton(
-            onPressed: _clearLogs,
             child: const Text('Clear logs'),
+            onPressed: _clearLogs,
           ),
           StructuredErrorsToggle(),
         ],
+      ),
+      Expanded(
+        child: LogsTable(
+          data: controller.data,
+        ),
       ),
     ]);
   }
 
   void _clearLogs() {
-    // TODO(https://github.com/flutter/devtools/issues/1286): do this.
+    setState(() {
+      controller.clear();
+    });
   }
+}
+
+class LogsTable extends StatelessWidget {
+  const LogsTable({Key key, this.data}) : super(key: key);
+  final List<LogData> data;
+
+  List<ColumnData<LogData>> get columns => [
+        _WhenColumn(),
+        _KindColumn(),
+        _MessageColumn((message) => message),
+      ];
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatTable<LogData>(
+      columns: columns,
+      data: data,
+      keyFactory: (LogData data) => '${data.timestamp}${data.summary}',
+    );
+  }
+}
+
+// TODO(https://github.com/flutter/devtools/issues/1258): merge these classes
+// with their parents when we turn down the html version of the app.
+
+class _WhenColumn extends LogWhenColumn {
+  @override
+  double get fixedWidthPx => 120;
+
+  @override
+  String getValue(LogData dataObject) => render(dataObject.timestamp);
+}
+
+class _KindColumn extends LogKindColumn {
+  @override
+  String getValue(LogData dataObject) => dataObject.kind;
+
+  @override
+  double get fixedWidthPx => 120;
+}
+
+class _MessageColumn extends LogMessageColumn {
+  _MessageColumn(String Function(String) logMessageToHtml)
+      : super(logMessageToHtml);
+
+  /// TODO(djshuckerow): Do better than showing raw HTML here.
+  @override
+  String getValue(LogData dataObject) => render(dataObject);
 }

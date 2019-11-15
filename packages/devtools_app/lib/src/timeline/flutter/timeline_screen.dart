@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -40,16 +42,29 @@ class TimelineScreenBody extends StatefulWidget {
 class TimelineScreenBodyState extends State<TimelineScreenBody> {
   TimelineController controller;
 
+  StreamSubscription selectedFrameSubscription;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = Controllers.of(context).timeline;
+    controller.timelineService.updateListeningState(true);
+
+    // TODO(kenz): use Notifier class to register and unregister listeners.
+    // TODO(terry): Add AutoDisposeMixin and remove selectedFrameSubscription.
+    selectedFrameSubscription?.cancel();
+    selectedFrameSubscription =
+        controller.frameBasedTimeline.onSelectedFrame.listen((_) {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     // TODO(kenz): make TimelineController disposable via
     // DisposableController and dispose here.
+    controller.timelineService.updateListeningState(false);
+    selectedFrameSubscription.cancel();
     super.dispose();
   }
 
