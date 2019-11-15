@@ -6,7 +6,7 @@ description: Main package implementing web-based performance tooling for Dart an
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 0.1.11
+version: 0.1.12-dev
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
@@ -55,7 +55,7 @@ dependencies:
   plotly_js:
     ^0.0.2
   #    path: ../../third_party/packages/plotly_js
-  sse: ^2.0.0
+  sse: ^3.0.0
   web_socket_channel:
     ^1.1.0
   flutter:

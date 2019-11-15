@@ -1,5 +1,8 @@
+## 0.1.13
+- Depend on the latest `package:sse`.
+
 ## 0.1.12
-- Change from HttpMultiServer to HttpServer. 
+- Change from HttpMultiServer to HttpServer.
 
 ## 0.1.11
 - Add APIs to persist enabling/disabling properties for GA and Surveys to a local file `~/.devtools`.

@@ -1,3 +1,6 @@
+## 0.1.12-dev
+* Depend on the latest `package:sse` to get retry logic.
+
 ## 0.1.11 - 2019-11-08
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
