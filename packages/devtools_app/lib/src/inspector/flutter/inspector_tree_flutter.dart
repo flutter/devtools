@@ -15,6 +15,7 @@ import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import '../inspector_tree.dart';
 import 'diagnostics.dart';
+import 'inspector_data_models.dart';
 import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
@@ -423,7 +424,7 @@ class _InspectorTreeState extends State<InspectorTree>
 }
 
 final _defaultPaint = Paint()
-  // TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
+// TODO(kenz): try to use color from Theme.of(context) for treeGuidelineColor
   ..color = treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 
@@ -568,7 +569,7 @@ class InspectorRowContent extends StatelessWidget {
                   constraintDisplayController != null)
                 ConstraintsDescription(
                   listenable: constraintDisplayController,
-                  diagnostic: node.diagnostic,
+                  properties: LayoutProperties(node.diagnostic),
                 ),
             ],
           ),

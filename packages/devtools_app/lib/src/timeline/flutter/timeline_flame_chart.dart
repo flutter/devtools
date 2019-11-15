@@ -15,6 +15,8 @@ import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
 class TimelineFlameChart extends StatelessWidget {
+  const TimelineFlameChart();
+
   @override
   Widget build(BuildContext context) {
     final controller = Controllers.of(context).timeline;

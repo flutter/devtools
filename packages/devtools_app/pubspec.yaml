@@ -22,14 +22,14 @@ dependencies:
   ansicolor: ^1.0.2
   ansi_up:
     ^0.0.1
-#   path: ../../third_party/packages/ansi_up
+  #   path: ../../third_party/packages/ansi_up
   codemirror: ^0.5.10
   collection: ^1.14.11
   devtools_server: 0.1.12
   flutter_icons: ^0.3.1
   http: ^0.12.0+1
   html_shim: ^0.0.2
-#    path: ../html_shim
+  #    path: ../html_shim
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
@@ -42,19 +42,19 @@ dependencies:
   # We would use local dependencies for these packages if pub publish allowed it.
   octicons_css:
     ^0.0.1
-#    path: ../../third_party/packages/octicons_css
+  #    path: ../../third_party/packages/octicons_css
   polymer_css:
     ^0.0.1
-#    path: ../../third_party/packages/polymer_css
+  #    path: ../../third_party/packages/polymer_css
   primer_css:
     ^0.0.2
-#    path: ../../third_party/packages/primer_css
+  #    path: ../../third_party/packages/primer_css
   split:
     ^0.0.7
-#    path: ../../third_party/packages/split
+  #    path: ../../third_party/packages/split
   plotly_js:
     ^0.0.2
-#    path: ../../third_party/packages/plotly_js
+  #    path: ../../third_party/packages/plotly_js
   sse: ^2.0.0
   web_socket_channel:
     ^1.1.0
@@ -98,7 +98,17 @@ flutter:
     - web/icons/inspector/
     - web/icons/memory/
     - web/icons/perf/
-    - assets/img/star.png
+    - assets/img/story_of_layout/main_axis_alignment/center.png
+    - assets/img/story_of_layout/main_axis_alignment/end.png
+    - assets/img/story_of_layout/main_axis_alignment/spaceAround.png
+    - assets/img/story_of_layout/main_axis_alignment/spaceBetween.png
+    - assets/img/story_of_layout/main_axis_alignment/spaceEvenly.png
+    - assets/img/story_of_layout/main_axis_alignment/start.png
+    - assets/img/story_of_layout/cross_axis_alignment/start.png
+    - assets/img/story_of_layout/cross_axis_alignment/end.png
+    - assets/img/story_of_layout/cross_axis_alignment/center.png
+    - assets/img/story_of_layout/cross_axis_alignment/stretch.png
+    - assets/img/story_of_layout/cross_axis_alignment/baseline.png
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
   fonts:

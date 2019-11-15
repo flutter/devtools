@@ -6,7 +6,7 @@ final unimportant = TextStyle(
 );
 const regular = TextStyle(color: defaultForeground);
 final warning = TextStyle(
-  color: ThemedColor(Colors.orange.shade500, Colors.orange.shade400),
+  color: ThemedColor(Colors.orange.shade900, Colors.orange.shade400),
 );
 final error = TextStyle(
   color: ThemedColor(Colors.red.shade500, Colors.red.shade400),

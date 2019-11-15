@@ -6,17 +6,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../inspector/inspector_text_styles.dart' as inspector_text_styles;
-import '../diagnostics_node.dart';
 import 'inspector_data_models.dart';
 
 class ConstraintsDescription extends AnimatedWidget {
   const ConstraintsDescription({
-    this.diagnostic,
+    @required this.properties,
     AnimationController listenable,
     Key key,
   }) : super(key: key, listenable: listenable);
 
-  final RemoteDiagnosticsNode diagnostic;
+  final LayoutProperties properties;
 
   String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
@@ -25,10 +24,10 @@ class ConstraintsDescription extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (diagnostic?.constraints == null) {
+    if (properties?.constraints == null) {
       return const SizedBox();
     }
-    final constraints = deserializeConstraints(diagnostic.constraints);
+    final constraints = properties.constraints;
     if (constraints is BoxConstraints) {
       final textSpans = <TextSpan>[const TextSpan(text: 'BoxConstraints(')];
       if (!constraints.hasBoundedHeight && !constraints.hasBoundedWidth) {
