@@ -290,7 +290,7 @@ class FrameBasedTimeline
 
   void selectFrame(TimelineFrame frame) {
     print(
-      'Selected Frame CPU = ${frame.uiDurationMs}, '
+      'Selected Frame UI = ${frame.uiDurationMs}, '
       'GPU = ${frame.gpuDurationMs}',
     );
 
