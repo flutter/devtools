@@ -60,13 +60,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
-  final flags = <String, dynamic>{
+  final _flags = <String, dynamic>{
     'flags': <Flag>[],
   };
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag> flags = this.flags['flags'];
+    final List<Flag> flags = this._flags['flags'];
     final existingFlag =
         flags.firstWhere((f) => f.name == name, orElse: () => null);
     if (existingFlag != null) {
@@ -83,22 +83,22 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
+  Future<FlagList> getFlagList() => Future.value(FlagList.parse(_flags));
 
-  final vmTimelineFlags = <String, dynamic>{
+  final _vmTimelineFlags = <String, dynamic>{
     'type': 'TimelineFlags',
     'recordedStreams': [],
   };
 
   @override
   Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
-    vmTimelineFlags['recordedStreams'] = recordedStreams;
+    _vmTimelineFlags['recordedStreams'] = recordedStreams;
     return Future.value(Success());
   }
 
   @override
   Future<TimelineFlags> getVMTimelineFlags() =>
-      Future.value(TimelineFlags.parse(vmTimelineFlags));
+      Future.value(TimelineFlags.parse(_vmTimelineFlags));
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
@@ -133,8 +133,6 @@ class MockTimelineController extends Mock implements TimelineController {}
 
 class MockFrameBasedTimelineData extends Mock
     implements FrameBasedTimelineData {}
-
-class MockTimelineFrame extends Mock implements TimelineFrame {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
