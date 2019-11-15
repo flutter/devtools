@@ -5,9 +5,13 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/flutter/controllers.dart';
+import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
+import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
@@ -20,6 +24,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final VmServiceWrapper service;
+
+  @override
+  final Completer serviceAvailable = Completer()..complete();
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -78,6 +85,21 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
 
+  final vmTimelineFlags = <String, dynamic>{
+    'type': 'TimelineFlags',
+    'recordedStreams': [],
+  };
+
+  @override
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
+    vmTimelineFlags['recordedStreams'] = recordedStreams;
+    return Future.value(Success());
+  }
+
+  @override
+  Future<TimelineFlags> getVMTimelineFlags() =>
+      Future.value(TimelineFlags.parse(vmTimelineFlags));
+
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
 
@@ -104,6 +126,15 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {}
 class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class MockLoggingController extends Mock implements LoggingController {}
+
+class MockTimelineController extends Mock implements TimelineController {}
+
+class MockFrameBasedTimelineData extends Mock
+    implements FrameBasedTimelineData {}
+
+class MockTimelineFrame extends Mock implements TimelineFrame {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
@@ -380,3 +411,15 @@ StreamController<T> _getStreamController<T>(
   );
   return streamControllers[name];
 }
+
+class TestProvidedControllers extends Fake implements ProvidedControllers {
+  TestProvidedControllers() {
+    disposed[this] = false;
+  }
+  @override
+  void dispose() {
+    disposed[this] = true;
+  }
+}
+
+final disposed = <TestProvidedControllers, bool>{};

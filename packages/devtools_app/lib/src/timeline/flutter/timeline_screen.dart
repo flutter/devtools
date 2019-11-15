@@ -40,7 +40,6 @@ class TimelineScreenBody extends StatefulWidget {
 class TimelineScreenBodyState extends State<TimelineScreenBody> {
   TimelineController controller;
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
