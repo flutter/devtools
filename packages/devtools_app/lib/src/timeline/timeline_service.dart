@@ -140,7 +140,21 @@ class TimelineService {
     }
   }
 
-  Future<void> updateListeningState({
+  Future<void> updateListeningState(bool isCurrentScreen) async {
+    final bool shouldBeRunning =
+        (!timelineController.frameBasedTimeline.manuallyPaused ||
+                timelineController.fullTimeline.recording) &&
+            !offlineMode &&
+            isCurrentScreen;
+    final bool isRunning = !timelineController.frameBasedTimeline.paused ||
+        timelineController.fullTimeline.recording;
+    await _updateListeningState(
+      shouldBeRunning: shouldBeRunning,
+      isRunning: isRunning,
+    );
+  }
+
+  Future<void> _updateListeningState({
     @required bool shouldBeRunning,
     @required bool isRunning,
   }) async {
