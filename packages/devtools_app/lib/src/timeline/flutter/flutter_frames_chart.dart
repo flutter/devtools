@@ -101,6 +101,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.dispose();
   }
 
+  @override
   void initState() {
     _initChartController();
 
