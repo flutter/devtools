@@ -45,11 +45,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
   StreamSubscription selectedFrameSubscription;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = Controllers.of(context).timeline;
