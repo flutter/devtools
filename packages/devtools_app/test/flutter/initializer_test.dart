@@ -9,6 +9,7 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../support/mocks.dart';
 
@@ -19,9 +20,12 @@ void main() {
     const Key initializedKey = Key('initialized');
     setUp(() async {
       await ensureInspectorDependencies();
+      final serviceManager = FakeServiceManager(useFakeService: true);
+      when(serviceManager.connectedApp.isDartWebApp)
+          .thenAnswer((_) => Future.value(false));
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(useFakeService: true),
+        serviceManager,
       );
 
       app = MaterialApp(

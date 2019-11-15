@@ -18,6 +18,8 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager(useFakeService: true);
+      when(serviceManager.connectedApp.isDartWebApp)
+          .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
     });
 
@@ -80,15 +82,3 @@ void main() {
     });
   });
 }
-
-class TestProvidedControllers extends Fake implements ProvidedControllers {
-  TestProvidedControllers() {
-    disposed[this] = false;
-  }
-  @override
-  void dispose() {
-    disposed[this] = true;
-  }
-}
-
-final disposed = <TestProvidedControllers, bool>{};

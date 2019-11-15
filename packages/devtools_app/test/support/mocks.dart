@@ -5,10 +5,15 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
+import 'package:devtools_app/src/flutter/controllers.dart';
+import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
+import 'package:devtools_app/src/timeline/timeline_controller.dart';
+import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:meta/meta.dart';
@@ -21,6 +26,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final VmServiceWrapper service;
+
+  @override
+  final Completer serviceAvailable = Completer()..complete();
 
   @override
   final ConnectedApp connectedApp = MockConnectedApp();
@@ -54,13 +62,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
-  final flags = <String, dynamic>{
+  final _flags = <String, dynamic>{
     'flags': <Flag>[],
   };
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag> flags = this.flags['flags'];
+    final List<Flag> flags = _flags['flags'];
     final existingFlag =
         flags.firstWhere((f) => f.name == name, orElse: () => null);
     if (existingFlag != null) {
@@ -77,7 +85,22 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<FlagList> getFlagList() => Future.value(FlagList.parse(flags));
+  Future<FlagList> getFlagList() => Future.value(FlagList.parse(_flags));
+
+  final _vmTimelineFlags = <String, dynamic>{
+    'type': 'TimelineFlags',
+    'recordedStreams': [],
+  };
+
+  @override
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
+    _vmTimelineFlags['recordedStreams'] = recordedStreams;
+    return Future.value(Success());
+  }
+
+  @override
+  Future<TimelineFlags> getVMTimelineFlags() =>
+      Future.value(TimelineFlags.parse(_vmTimelineFlags));
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
@@ -105,6 +128,13 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {}
 class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class MockLoggingController extends Mock implements LoggingController {}
+
+class MockTimelineController extends Mock implements TimelineController {}
+
+class MockFrameBasedTimelineData extends Mock
+    implements FrameBasedTimelineData {}
 
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
@@ -381,6 +411,18 @@ StreamController<T> _getStreamController<T>(
   );
   return streamControllers[name];
 }
+
+class TestProvidedControllers extends Fake implements ProvidedControllers {
+  TestProvidedControllers() {
+    disposed[this] = false;
+  }
+  @override
+  void dispose() {
+    disposed[this] = true;
+  }
+}
+
+final disposed = <TestProvidedControllers, bool>{};
 
 Future<void> ensureInspectorDependencies() async {
   assert(
