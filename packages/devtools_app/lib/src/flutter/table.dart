@@ -243,7 +243,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       expandableColumn: widget.treeColumn,
       isExpanded: node.isExpanded,
       isExpandable: node.isExpandable,
-      isParentExpanded: node.shouldShow(),
+      isShown: node.shouldShow(),
     );
   }
 }
@@ -350,11 +350,11 @@ class _TableRow<T> extends StatefulWidget {
     this.expandableColumn,
     this.isExpanded = false,
     this.isExpandable = false,
-    this.isParentExpanded = true,
+    this.isShown = true,
   }) : super(key: key);
 
   /// Constructs a [_TableRow] that presents the column titles instead
-  /// of any [TreeNode].
+  /// of any [node].
   const _TableRow.tableHeader({
     Key key,
     @required this.columns,
@@ -364,17 +364,36 @@ class _TableRow<T> extends StatefulWidget {
         isExpanded = false,
         isExpandable = false,
         expandableColumn = null,
-        isParentExpanded = true,
+        isShown = true,
         super(key: key);
 
   final T node;
   final List<ColumnData<T>> columns;
   final ItemCallback onPressed;
   final List<double> columnWidths;
+
+  /// Which column, if any, should show expansion affordances
+  /// and nested rows.
   final ColumnData<T> expandableColumn;
+
+  /// Whether or not this row is expanded.
+  ///
+  /// This dictates the orientation of the expansion arrow
+  /// that is drawn in the [expandableColumn].
+  ///
+  /// Only meaningful if [isExpanded] is true.
   final bool isExpanded;
+
+  /// Whether or not this row can be expanded.
+  ///
+  /// This dictates whether an expansion arrow is
+  /// drawn in the [expandableColumn].
   final bool isExpandable;
-  final bool isParentExpanded;
+
+  /// Whether or not this row is shown.
+  ///
+  /// When the value is toggled, this row will animate in or out.
+  final bool isShown;
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
@@ -494,5 +513,5 @@ class _TableRowState<T> extends State<_TableRow<T>>
   void onExpandChanged(bool expanded) {}
 
   @override
-  bool shouldShow() => widget.isParentExpanded;
+  bool shouldShow() => widget.isShown;
 }
