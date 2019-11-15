@@ -289,11 +289,6 @@ class FrameBasedTimeline
   }
 
   void selectFrame(TimelineFrame frame) {
-    print(
-      'Selected Frame UI = ${frame.uiDurationMs}, '
-      'GPU = ${frame.gpuDurationMs}',
-    );
-
     if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
