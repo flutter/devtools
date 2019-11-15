@@ -82,32 +82,30 @@ class _LoggingScreenState extends State<LoggingScreenBody> {
   }
 }
 
-class LogsTable extends StatefulWidget {
+class LogsTable extends StatelessWidget {
   const LogsTable({Key key, this.data}) : super(key: key);
   final List<LogData> data;
 
-  @override
-  _LogsTableState createState() => _LogsTableState();
-}
-
-class _LogsTableState extends State<LogsTable> {
-  final List<ColumnData<LogData>> columns = [
-    FlutterWhenColumn(),
-    FlutterKindColumn(),
-    FlutterMessageColumn((message) => message),
-  ];
+  List<ColumnData<LogData>> get columns => [
+        _WhenColumn(),
+        _KindColumn(),
+        _MessageColumn((message) => message),
+      ];
 
   @override
   Widget build(BuildContext context) {
     return FlatTable<LogData>(
       columns: columns,
-      data: widget.data,
+      data: data,
       keyFactory: (LogData data) => '${data.timestamp}${data.summary}',
     );
   }
 }
 
-class FlutterWhenColumn extends LogWhenColumn {
+// TODO(https://github.com/flutter/devtools/issues/1258): merge these classes
+// with their parents when we turn down the html version of the app.
+
+class _WhenColumn extends LogWhenColumn {
   @override
   double get fixedWidthPx => 120;
 
@@ -115,7 +113,7 @@ class FlutterWhenColumn extends LogWhenColumn {
   String getValue(LogData dataObject) => render(dataObject.timestamp);
 }
 
-class FlutterKindColumn extends LogKindColumn {
+class _KindColumn extends LogKindColumn {
   @override
   String getValue(LogData dataObject) => dataObject.kind;
 
@@ -123,8 +121,8 @@ class FlutterKindColumn extends LogKindColumn {
   double get fixedWidthPx => 120;
 }
 
-class FlutterMessageColumn extends LogMessageColumn {
-  FlutterMessageColumn(String Function(String) logMessageToHtml)
+class _MessageColumn extends LogMessageColumn {
+  _MessageColumn(String Function(String) logMessageToHtml)
       : super(logMessageToHtml);
 
   /// TODO(djshuckerow): Do better than showing raw HTML here.
