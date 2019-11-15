@@ -76,7 +76,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         if (frames.length > totalFramesToChart) {
           frames.removeAt(0);
           _frameDurations.removeAt(0);
-          // TODO(terry): Need a cleaner solution.
+          // TODO(terry): Need a cleaner solution - fixed width bar and
+          //              chart that scrolls.
           for (BarEntry entry in _frameDurations) {
             entry.x -= 1; // Fixup all indexes.
           }
@@ -100,7 +101,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.dispose();
   }
 
-  @override
   void initState() {
     _initChartController();
 
