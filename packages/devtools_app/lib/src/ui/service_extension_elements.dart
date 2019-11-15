@@ -182,7 +182,7 @@ class RegisteredServiceExtensionButton {
 
   final RegisteredServiceDescription serviceDescription;
   final VoidAsyncFunction action;
-  final VoidFunctionWithArg errorAction;
+  final void Function(dynamic arg) errorAction;
   PButton button;
 
   void _click() async {

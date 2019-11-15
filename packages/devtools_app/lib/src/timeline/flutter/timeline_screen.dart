@@ -86,16 +86,18 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
         ),
         if (controller.timelineMode == TimelineMode.frameBased)
           const FlutterFramesChart(),
-        Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            firstChild: TimelineFlameChart(),
-            // TODO(kenz): use StreamBuilder to get selected event from
-            // controller once data is hooked up.
-            secondChild: EventDetails(stubAsyncEvent),
-            initialFirstFraction: 0.6,
+        if (controller.timelineMode == TimelineMode.full ||
+            controller.frameBasedTimeline.data?.selectedFrame != null)
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              firstChild: TimelineFlameChart(),
+              // TODO(kenz): use StreamBuilder to get selected event from
+              // controller once data is hooked up.
+              secondChild: EventDetails(stubAsyncEvent),
+              initialFirstFraction: 0.6,
+            ),
           ),
-        ),
       ],
     );
   }
