@@ -5,7 +5,6 @@
 @TestOn('vm')
 
 import 'package:devtools_app/src/flutter/controllers.dart';
-import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';

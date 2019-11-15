@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
@@ -379,4 +380,15 @@ StreamController<T> _getStreamController<T>(
     () => StreamController<T>.broadcast(onListen: onFirstListenerSubscribed),
   );
   return streamControllers[name];
+}
+
+Future<void> ensureInspectorDependencies() async {
+  assert(
+    !identical(0.0, 0), // When compiled to js, 0.0 is identical to 0.
+    'Attempted to resolve a package path from web code.\n'
+    'Package path resolution uses dart:io, which is not available in web.'
+    '\n'
+    "To fix this, mark the failing test as @TestOn('vm')",
+  );
+  await initializer.ensureInspectorDependencies();
 }
