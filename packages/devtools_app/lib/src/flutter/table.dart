@@ -6,6 +6,11 @@ import '../table_data.dart';
 import '../trees.dart';
 import 'collapsible_mixin.dart';
 
+/// A table that displays in a collection of [data], based on a collection
+/// of [ColumnData].
+///
+/// The [ColumnData] gives this table information about how to size its
+/// columns, and how to present each row of `data`
 class FlatTable<T> extends StatefulWidget {
   const FlatTable({
     Key key,
@@ -25,8 +30,8 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Factory that creates keys for each row in this table.
   ///
-  /// It uses [PageStorageKey] to restore the table's state when re-opening
-  /// its page.
+  /// These keys are passed to [PageStorageKey] to restore the table's state
+  /// when re-opening its page.
   final String Function(T data) keyFactory;
 
   @override
@@ -94,9 +99,8 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
 /// columns, how to present each row of `data`, and which rows to show.
 ///
 /// To lay the contents out, this table's [_TreeTableState] creates a flattened
-/// list of the tree hierarchy. It then adds the nesting level of the
-/// deepest row in [data] that is currently visible with the prescribed
-/// width of each row in the table.
+/// list of the tree hierarchy. It then uses the nesting level of the
+/// deepest row in [data] to determine how wide to make the [treeColumn].
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   TreeTable({
     Key key,
@@ -381,11 +385,6 @@ class _TableRow<T> extends StatefulWidget {
 class _TableRowState<T> extends State<_TableRow<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didUpdateWidget(_TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setExpanded(widget.isExpanded);
@@ -438,18 +437,19 @@ class _TableRowState<T> extends State<_TableRow<T>>
           overflow: TextOverflow.ellipsis,
         );
         if (column == widget.expandableColumn) {
+          final expandIndicator = widget.isExpandable
+              ? RotationTransition(
+                  turns: expandAnimation,
+                  child: const Icon(
+                    Icons.expand_more,
+                    size: 16.0,
+                  ),
+                )
+              : const SizedBox(width: 16.0, height: 16.0);
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              widget.isExpandable
-                  ? RotationTransition(
-                      turns: expandAnimation,
-                      child: const Icon(
-                        Icons.expand_more,
-                        size: 16.0,
-                      ),
-                    )
-                  : const SizedBox(width: 16.0, height: 16.0),
+              expandIndicator,
               Expanded(child: content),
             ],
           );
