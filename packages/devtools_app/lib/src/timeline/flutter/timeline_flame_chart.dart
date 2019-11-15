@@ -1,12 +1,12 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/colors.dart';
 import '../../ui/theme.dart';
@@ -93,7 +93,7 @@ class _FrameBasedTimelineFlameChart extends StatefulWidget {
 }
 
 class _FrameBasedTimelineFlameChartState
-    extends State<_FrameBasedTimelineFlameChart> {
+    extends State<_FrameBasedTimelineFlameChart> with AutoDisposeMixin {
   static const startingScrollPosition = 0.0;
   ScrollController _scrollControllerX;
   ScrollController _scrollControllerY;
@@ -104,19 +104,15 @@ class _FrameBasedTimelineFlameChartState
 
   TimelineController _controller;
 
-  StreamSubscription _selectedEventSubscription;
-
   int get gpuSectionStartRow => widget.data.uiEventFlow.depth;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _controller = Controllers.of(context).timeline;
-    _selectedEventSubscription?.cancel();
-    _selectedEventSubscription =
-        _controller.onSelectedTimelineEvent.listen((_) {
+    autoDispose(_controller.onSelectedTimelineEvent.listen((_) {
       setState(() {});
-    });
+    }));
   }
 
   @override
@@ -152,7 +148,6 @@ class _FrameBasedTimelineFlameChartState
   void dispose() {
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
-    _selectedEventSubscription.cancel();
     // TODO(kenz): dispose [_controller] here.
     super.dispose();
   }
@@ -217,6 +212,8 @@ class _FrameBasedTimelineFlameChartState
     return nodesInViewport;
   }
 
+  // TODO(kenz): when optimizing this code, consider passing in the viewport
+  // to only construct FlameChartNode elements that are in view.
   void _buildFlameChartElements() {
     _resetColorOffsets();
 
@@ -273,6 +270,7 @@ class _FrameBasedTimelineFlameChartState
           event.isUiEvent ? _nextUiColor() : _nextGpuColor();
 
       final node = FlameChartNode<TimelineEvent>(
+        key: Key('${event.name} ${event.time.start.inMicroseconds}'),
         text: event.name,
         tooltip: '${event.name} - ${msText(event.time.duration)}',
         rect: Rect.fromLTRB(left, top, right, top + rowHeight),

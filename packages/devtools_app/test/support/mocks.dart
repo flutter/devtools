@@ -66,7 +66,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag> flags = this._flags['flags'];
+    final List<Flag> flags = _flags['flags'];
     final existingFlag =
         flags.firstWhere((f) => f.name == name, orElse: () => null);
     if (existingFlag != null) {
