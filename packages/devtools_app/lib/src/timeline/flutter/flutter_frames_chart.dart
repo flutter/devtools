@@ -174,7 +174,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   void frameSelected(int frameIndex) {
-    print('Bar Charted item selected frame index = $frameIndex');
     _controller.frameBasedTimeline.selectFrame(frames[frameIndex]);
   }
 

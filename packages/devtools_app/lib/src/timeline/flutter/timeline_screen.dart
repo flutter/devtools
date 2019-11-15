@@ -51,6 +51,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
     controller.timelineService.updateListeningState(true);
 
     // TODO(kenz): use Notifier class to register and unregister listeners.
+    // TODO(terry): Add AutoDisposeMixin and remove selectedFrameSubscription.
     selectedFrameSubscription?.cancel();
     selectedFrameSubscription =
         controller.frameBasedTimeline.onSelectedFrame.listen((_) {
