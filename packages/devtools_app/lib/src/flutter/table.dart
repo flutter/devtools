@@ -22,10 +22,8 @@ class FlatTable<T> extends StatefulWidget {
         assert(data != null),
         super(key: key);
 
-  /// The columns to show in this table.
   final List<ColumnData<T>> columns;
 
-  /// The tree structure of rows to show in this table.
   final List<T> data;
 
   /// Factory that creates keys for each row in this table.
