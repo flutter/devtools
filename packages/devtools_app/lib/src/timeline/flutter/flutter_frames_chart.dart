@@ -90,8 +90,9 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
             ..typeface = boldTypeFace
-            ..enableDashedLine(5, 5, 0)
-            ..lineColor = ColorUtils.HOLO_RED_LIGHT);
+            // TODO(terry): Below crashed Flutter.
+            // ..enableDashedLine(5, 5, 0)
+            ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
       },
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
