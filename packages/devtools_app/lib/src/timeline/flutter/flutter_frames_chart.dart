@@ -28,30 +28,59 @@ import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/controllers.dart';
+import '../../ui/fake_flutter/_real_flutter.dart';
+import '../timeline_controller.dart';
+import '../timeline_model.dart';
+
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart();
 
   @override
-  FlutterFramesChartState createState() => FlutterFramesChartState();
+  _FlutterFramesChartState createState() => _FlutterFramesChartState();
 }
 
-class FlutterFramesChartState extends State<FlutterFramesChart>
+class _FlutterFramesChartState extends State<FlutterFramesChart>
     implements OnChartValueSelectedListener {
+  TimelineController _controller;
+
+  List<TimelineFrame> frames = [];
+
   BarChartController _chartController;
 
   BarChartController get chartController => _chartController;
-
-  /// Index into the raw data.
-  int timerDataIndex;
-
-  /// Active timer running.
-  Timer _timer;
 
   /// Datapoint entry for each frame duration (UI/GPU) for stacked bars.
   final List<BarEntry> _frameDurations = <BarEntry>[];
 
   /// Set of all duration information (the data, colors, etc).
   BarDataSet frameDurationsSet;
+
+  int index = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller = Controllers.of(context).timeline;
+
+    // Process each timeline frame.
+    _controller.frameBasedTimeline.onFrameAdded.listen((extraFrames) {
+//      setState(() {
+        frames.add(extraFrames);
+        _frameDurations.add(createBarEntry(
+          index++,
+          extraFrames.uiDurationMs,
+          extraFrames.gpuDurationMs,
+        ));
+      });
+//    });
+  }
+
+  @override
+  void dispose() {
+    // TODO(kenz): dispose [_controller] here.
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -81,16 +110,19 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController = BarChartController(
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
+          // Constrain the y-axis so outliers don't blow the barchart scale.
+          // TODO(terry): Need to have a max where the hover value shows the real #s but the chart just looks pinned to the top.
+          ..setAxisMinimum(0)
+          ..setAxisMaximum(200)
           ..typeface = lightTypeFace
           ..drawGridLines = false
-          ..setStartAtZero(true)
           ..setValueFormatter(YAxisUnitFormatter())
           ..addLimitLine(LimitLine(60, '60 FPS')
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
             ..typeface = boldTypeFace
-            // TODO(terry): Below crashed Flutter.
+            // TODO(terry): Below crashed Flutter in Travis see issues/1338.
             // ..enableDashedLine(5, 5, 0)
             ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
       },
@@ -124,12 +156,6 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
   void frameSelected(int frameIndex) {
     print('Bar Charted item selected frame index = $frameIndex');
   }
@@ -141,17 +167,7 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
   static const mainGpuColorLight = Color.fromARGB(0xFF, 0x02, 0x88, 0xD1);
 
   void _initData([bool simulateFeed = false]) {
-    // Prime the dataset with the first entry.  A missing entry will cause a failure
-    // with a NAN.
-    _frameDurations.add(createBarEntry(0));
-
-    if (!simulateFeed) {
-      _loadAllData(3);
-    } else if (_timer == null) {
-      _startFeed(3);
-    } else {
-      return;
-    }
+//    _frameDurations.add(createBarEntry(index++, 0, 0));
 
     // Create heap used dataset.
     frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
@@ -166,47 +182,19 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   // TODO(terry): Consider grouped bars (UI/GPU) not stacked.
-  BarEntry createBarEntry(int index) {
-    assert(index < _cannedData.length);
-    final x = _cannedData[index].toDouble();
-    final uiDurationValue = _cannedData[index + 1].toDouble();
-    final gpuDurationValue = _cannedData[index + 2].toDouble();
-
+  BarEntry createBarEntry(int index, double uiDuration, double gpuDuration) {
     // TODO(terry): Structured class item 0 is GPU, item 1 is UI if not stacked.
-    return BarEntry.fromListYVals(
-      x: x,
+    final entry = BarEntry.fromListYVals(
+      x: index.toDouble(),
       vals: [
-        gpuDurationValue,
-        uiDurationValue,
+        gpuDuration,
+        uiDuration,
       ],
     );
-  }
 
-  /// Simulate live feed.
-  void _startFeed(int startIndex) {
-    // Fetch from the beginning of the canned data for the live feed.
-    timerDataIndex = startIndex; // Entry zero is already primed.
+    _updateChart();
 
-    // TODO(terry): Consider moving the timer to the MemoryController.
-    // TODO(terry): The chart should be notified when new data arrives from the controller
-    //              using a notifier pattern.
-    // Average VMSerice rate is ~500-600 ms?
-    _timer = Timer.periodic(const Duration(milliseconds: 60), (Timer timer) {
-      if (timerDataIndex == 0) {
-        // First time reset our plotted data.
-        setState(() {
-          _frameDurations.clear();
-        });
-      }
-
-      // Keep pumping out data, simulating a live feed.
-      if (timerDataIndex < _cannedData.length) {
-        _frameDurations.add(createBarEntry(timerDataIndex));
-        timerDataIndex += 3;
-      }
-
-      _updateChart();
-    });
+    return entry;
   }
 
   void _updateChart() {
@@ -218,19 +206,14 @@ class FlutterFramesChartState extends State<FlutterFramesChart>
     });
   }
 
-  void _loadAllData(int startIndex) {
-    int index = startIndex;
-    while (index < _cannedData.length) {
-      _frameDurations.add(createBarEntry(index));
-      index += 3;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200.0,
-      child: BarChart(_chartController),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Container(
+        height: 200.0,
+        child: BarChart(_chartController),
+      ),
     );
   }
 
