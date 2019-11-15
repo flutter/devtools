@@ -384,7 +384,7 @@ StreamController<T> _getStreamController<T>(
 
 Future<void> ensureInspectorDependencies() async {
   assert(
-    !identical(0.0, 0), // When compiled to js, 0.0 is identical to 0.
+    !kIsWeb,
     'Attempted to resolve a package path from web code.\n'
     'Package path resolution uses dart:io, which is not available in web.'
     '\n'
