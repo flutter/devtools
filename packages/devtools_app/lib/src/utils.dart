@@ -199,10 +199,6 @@ typedef VoidFunction = void Function();
 /// future.
 typedef VoidAsyncFunction = Future<void> Function();
 
-/// A typedef to represent a function taking a single argument and with no
-/// return value.
-typedef VoidFunctionWithArg<T> = void Function(T arg);
-
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].

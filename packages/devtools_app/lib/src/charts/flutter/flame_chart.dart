@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 
@@ -50,7 +51,6 @@ class FlameChartNode<T> extends StatelessWidget {
         onSelected = ((_) {});
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
-  static const _tooltipWaitDuration = Duration(milliseconds: 500);
 
   final Rect rect;
   final String text;
@@ -67,22 +67,23 @@ class FlameChartNode<T> extends StatelessWidget {
       rect: rect,
       child: Tooltip(
         message: tooltip,
-        waitDuration: _tooltipWaitDuration,
+        waitDuration: tooltipWait,
         preferBelow: false,
         child: InkWell(
           onTap: () => onSelected(data),
           child: Container(
-              padding: const EdgeInsets.only(left: 6.0),
-              alignment: Alignment.centerLeft,
-              color: selected ? _selectedNodeColor : backgroundColor,
-              child: Text(
-                text,
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected ? Colors.black : textColor,
-                ),
-              )),
+            padding: const EdgeInsets.only(left: 6.0),
+            alignment: Alignment.centerLeft,
+            color: selected ? _selectedNodeColor : backgroundColor,
+            child: Text(
+              text,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? Colors.black : textColor,
+              ),
+            ),
+          ),
         ),
       ),
     );

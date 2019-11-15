@@ -14,28 +14,10 @@ import '../../utils.dart';
 import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
-class TimelineFlameChart extends StatefulWidget {
-  @override
-  _TimelineFlameChartState createState() => _TimelineFlameChartState();
-}
-
-class _TimelineFlameChartState extends State<TimelineFlameChart> {
-  TimelineController _controller;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
-  }
-
-  @override
-  void dispose() {
-    // TODO(kenz): dispose [_controller] here.
-    super.dispose();
-  }
-
+class TimelineFlameChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final controller = Controllers.of(context).timeline;
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
@@ -43,17 +25,17 @@ class _TimelineFlameChartState extends State<TimelineFlameChart> {
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).focusColor),
           ),
-          child: _controller.timelineMode == TimelineMode.frameBased
+          child: controller.timelineMode == TimelineMode.frameBased
               ? _FrameBasedTimelineFlameChart(
-                  _controller.frameBasedTimeline.data.selectedFrame,
+                  controller.frameBasedTimeline.data.selectedFrame,
                   width: constraints.maxWidth,
                   height: math.max(
                     constraints.maxHeight,
-                    _frameBasedTimelineChartHeight(),
+                    _frameBasedTimelineChartHeight(controller),
                   ),
                   selectionProvider: () =>
-                      _controller.frameBasedTimeline.data.selectedEvent,
-                  onSelection: (e) => _controller.selectTimelineEvent(e),
+                      controller.frameBasedTimeline.data.selectedEvent,
+                  onSelection: (e) => controller.selectTimelineEvent(e),
                 )
               // TODO(kenz): implement full timeline flame chart.
               : Container(
@@ -67,8 +49,8 @@ class _TimelineFlameChartState extends State<TimelineFlameChart> {
     });
   }
 
-  double _frameBasedTimelineChartHeight() {
-    return (_controller.frameBasedTimeline.data.displayDepth + 2) *
+  double _frameBasedTimelineChartHeight(TimelineController controller) {
+    return (controller.frameBasedTimeline.data.displayDepth + 2) *
             rowHeightWithPadding +
         sectionSpacing;
   }
@@ -98,7 +80,7 @@ class _FrameBasedTimelineFlameChart extends StatefulWidget {
 
   final TimelineEvent Function() selectionProvider;
 
-  final VoidFunctionWithArg<TimelineEvent> onSelection;
+  final void Function(TimelineEvent event) onSelection;
 
   double get startingContentWidth =>
       totalStartingWidth - startInset - sideInset;
@@ -116,7 +98,7 @@ class _FrameBasedTimelineFlameChartState
   double scrollOffsetX = startingScrollPosition;
   double scrollOffsetY = startingScrollPosition;
 
-  final List<FlameChartRow> rows = [];
+  List<FlameChartRow> rows;
 
   TimelineController _controller;
 
@@ -138,10 +120,8 @@ class _FrameBasedTimelineFlameChartState
   @override
   void didUpdateWidget(_FrameBasedTimelineFlameChart oldWidget) {
     if (oldWidget.data != widget.data) {
-      setState(() {
-        _scrollControllerX.jumpTo(startingScrollPosition);
-        _scrollControllerY.jumpTo(startingScrollPosition);
-      });
+      _scrollControllerX.jumpTo(startingScrollPosition);
+      _scrollControllerY.jumpTo(startingScrollPosition);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -200,6 +180,7 @@ class _FrameBasedTimelineFlameChartState
     final width = math.max(constraints.maxWidth, widget.totalStartingWidth);
     final height = math.max(constraints.maxHeight, widget.height);
 
+    // TODO(kenz): rewrite this using slivers instead of a stack.
     return Stack(
       children: [
         Container(
@@ -218,6 +199,7 @@ class _FrameBasedTimelineFlameChartState
     // the widget tree.
     _buildFlameChartElements();
 
+    // TODO(kenz): Use binary search method we use in html full timeline here.
     final nodesInViewport = <FlameChartNode>[];
     for (var row in rows) {
       for (var node in row.nodes) {
@@ -236,12 +218,10 @@ class _FrameBasedTimelineFlameChartState
   void _buildFlameChartElements() {
     _resetColorOffsets();
 
-    rows
-      ..clear()
-      ..addAll(List.generate(
-        widget.data.uiEventFlow.depth + widget.data.gpuEventFlow.depth,
-        (i) => FlameChartRow(nodes: [], index: i),
-      ));
+    rows = List.generate(
+      widget.data.uiEventFlow.depth + widget.data.gpuEventFlow.depth,
+      (i) => FlameChartRow(nodes: [], index: i),
+    );
     final int frameStartOffset = widget.data.time.start.inMicroseconds;
 
     double getTopForRow(int row) {
@@ -249,8 +229,7 @@ class _FrameBasedTimelineFlameChartState
       // events.
       final additionalPadding =
           row >= gpuSectionStartRow ? sectionSpacing : 0.0;
-      return (row * rowHeightWithPadding + topOffset + additionalPadding)
-          .toDouble();
+      return row * rowHeightWithPadding + topOffset + additionalPadding;
     }
 
     // Pixels per microsecond in order to fit the entire frame in view.
