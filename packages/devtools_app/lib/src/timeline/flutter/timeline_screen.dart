@@ -70,7 +70,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
           ],
         ),
         if (controller.timelineMode == TimelineMode.frameBased)
-          FlutterFramesChart(),
+          const FlutterFramesChart(),
         Expanded(
           child: Split(
             axis: Axis.vertical,
