@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -56,7 +55,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   /// Set of all duration information (the data, colors, etc).
   BarDataSet frameDurationsSet;
 
-  int index = 0;
+  final int totalFramesToChart = 150;
 
   @override
   void didChangeDependencies() {
@@ -65,15 +64,34 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
     // Process each timeline frame.
     _controller.frameBasedTimeline.onFrameAdded.listen((extraFrames) {
-//      setState(() {
+      setState(() {
+        // If frames not in sync with charting data (_frameDurations)?
+        if (frames.isEmpty && _frameDurations.length == 1) {
+          // Works around a problem with chart appearing before
+          // any data so the chart data is primed with a entry.
+          _frameDurations.clear(); // Away the fake entry.
+        }
+
+        // Prune frames displayed to the last 150 frames.
+        if (frames.length > totalFramesToChart) {
+          frames.removeAt(0);
+          _frameDurations.removeAt(0);
+          // TODO(terry): Need a cleaner solution.
+          for (BarEntry entry in _frameDurations) {
+            entry.x -= 1; // Fixup all indexes.
+          }
+        }
+
         frames.add(extraFrames);
         _frameDurations.add(createBarEntry(
-          index++,
+          frames.length - 1, // Index into frames.
           extraFrames.uiDurationMs,
           extraFrames.gpuDurationMs,
         ));
+
+        _updateChart();
       });
-//    });
+    });
   }
 
   @override
@@ -84,7 +102,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   void initState() {
-    _initController();
+    _initChartController();
 
     // True simulates charting a live feed, false to chart all canned data immediately.
     _initData(true);
@@ -103,17 +121,18 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   );
 
   final double groupSpace = 0.04;
+
   final double barSpace = 0.0;
 
-  void _initController() {
+  void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
+          ..setStartAtZero(true)
           // Constrain the y-axis so outliers don't blow the barchart scale.
           // TODO(terry): Need to have a max where the hover value shows the real #s but the chart just looks pinned to the top.
-          ..setAxisMinimum(0)
-          ..setAxisMaximum(200)
+          ..setAxisMaximum(250)
           ..typeface = lightTypeFace
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
@@ -167,7 +186,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   static const mainGpuColorLight = Color.fromARGB(0xFF, 0x02, 0x88, 0xD1);
 
   void _initData([bool simulateFeed = false]) {
-//    _frameDurations.add(createBarEntry(index++, 0, 0));
+    // Create place holder for empty chart.
+    // TODO(terry): Look at fixing MPFlutterChart to handle empty data entries.
+    _frameDurations.add(createBarEntry(0, 0, 0));
 
     // Create heap used dataset.
     frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
@@ -191,8 +212,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         uiDuration,
       ],
     );
-
-    _updateChart();
 
     return entry;
   }
