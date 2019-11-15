@@ -63,7 +63,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _controller = Controllers.of(context).timeline;
 
     // Process each timeline frame.
-    _controller.frameBasedTimeline.onFrameAdded.listen((extraFrames) {
+    _controller.frameBasedTimeline.onFrameAdded.listen((newFrame) {
       setState(() {
         // If frames not in sync with charting data (_frameDurations)?
         if (frames.isEmpty && _frameDurations.length == 1) {
@@ -83,11 +83,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           }
         }
 
-        frames.add(extraFrames);
+        frames.add(newFrame);
         _frameDurations.add(createBarEntry(
           frames.length - 1, // Index into frames.
-          extraFrames.uiDurationMs,
-          extraFrames.gpuDurationMs,
+          newFrame.uiDurationMs,
+          newFrame.gpuDurationMs,
         ));
 
         _updateChart();
@@ -175,6 +175,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   void frameSelected(int frameIndex) {
     print('Bar Charted item selected frame index = $frameIndex');
+    _controller.frameBasedTimeline.selectFrame(frames[frameIndex]);
   }
 
   /// Light Blue 50 - 200
