@@ -101,10 +101,10 @@ class LayoutProperties {
   }
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
-// TODO(albertusangga): Support SliverConstraint
+    // TODO(albertusangga): Support SliverConstraint
     if (json == null || json['type'] != boxConstraintsType.toString())
       return null;
-// TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
+    // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
     return BoxConstraints(
       minWidth: json['minWidth'],
       maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,
