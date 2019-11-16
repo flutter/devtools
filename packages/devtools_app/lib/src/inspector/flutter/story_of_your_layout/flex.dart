@@ -99,9 +99,9 @@ List<double> computeRenderSizes({
   final n = sizes.length;
 
   if (ss == ls) {
-    /// It means that all widget have the same size
-    ///   and we can just divide the size evenly
-    ///   but it should be at least as big as [smallestRenderSize]
+    // It means that all widget have the same size
+    //   and we can just divide the size evenly
+    //   but it should be at least as big as [smallestRenderSize]
     final rs = max(srs, msa / n);
     return [for (var _ in sizes) rs];
   }
