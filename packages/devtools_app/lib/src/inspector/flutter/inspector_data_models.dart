@@ -33,21 +33,11 @@ class LayoutProperties {
           value.size.height > element.size.height ? value : element);
       _largestWidthChild = children.reduce((value, element) =>
           value.size.width > element.size.width ? value : element);
-      if (size != null) {
-        _smallestHeightChildPercentage =
-            _smallestHeightChild.size.height / size.height;
-        _smallestWidthChildPercentage =
-            _smallestWidthChild.size.width / size.width;
-        _largestHeightChildPercentage =
-            _largestHeightChild.size.height / size.height;
-        _largestWidthChildPercentage =
-            _largestWidthChild.size.width / size.width;
-      }
     }
   }
 
   final List<LayoutProperties> children;
-  final Constraints constraints;
+  final BoxConstraints constraints;
   final String description;
   final int flexFactor;
   final bool isFlex;
@@ -57,10 +47,6 @@ class LayoutProperties {
   LayoutProperties _smallestWidthChild;
   LayoutProperties _largestHeightChild;
   LayoutProperties _largestWidthChild;
-  double _smallestHeightChildPercentage;
-  double _smallestWidthChildPercentage;
-  double _largestHeightChildPercentage;
-  double _largestWidthChildPercentage;
 
   int get totalChildren => children?.length ?? 0;
 
@@ -74,15 +60,50 @@ class LayoutProperties {
 
   LayoutProperties get largestHeightChild => _largestHeightChild;
 
-  double get smallestWidthChildPercentage => _smallestWidthChildPercentage;
+  double get smallestWidthChildPercentage => _smallestWidthChild.width / width;
 
-  double get smallestHeightChildPercentage => _smallestHeightChildPercentage;
+  double get smallestHeightChildPercentage => _smallestHeightChild.height / height;
 
-  double get largestWidthChildPercentage => _largestWidthChildPercentage;
+  double get largestWidthChildPercentage => _largestWidthChild.width / width;
 
-  double get largestHeightChildPercentage => _largestHeightChildPercentage;
+  double get largestHeightChildPercentage => _largestHeightChild.height / height;
 
-  static Constraints deserializeConstraints(Map<String, Object> json) {
+  double get width => size?.width;
+
+  double get height => size?.height;
+
+  Iterable<double> get childrenWidth => children?.map((child) => child.width);
+
+  Iterable<double> get childrenHeight => children?.map((child) => child.height);
+
+  String describeWidthConstraints() {
+    if (constraints.hasBoundedWidth)
+      return describeAxis(constraints.minWidth, constraints.maxWidth, 'w');
+    return 'w=unconstrained';
+  }
+
+  String describeHeightConstraints() {
+    if (constraints.hasBoundedHeight)
+      return describeAxis(constraints.minHeight, constraints.maxHeight, 'h');
+    return 'h=unconstrained';
+  }
+
+  String describeWidth() {
+    return 'w=' + size.width.toStringAsFixed(fractionDigits);
+  }
+
+  String describeHeight() {
+    return 'h=' + size.height.toStringAsFixed(fractionDigits);
+  }
+
+  static const int fractionDigits = 1;
+
+  static String describeAxis(double min, double max, String axis) {
+    if (min == max) return '$axis=${min.toStringAsFixed(1)}';
+    return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
+  }
+
+  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
     if (json == null || json['type'] != boxConstraintsType.toString())
       return null;

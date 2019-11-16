@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../wrappers.dart';
 
 void main() {
-  const windowSize = Size(1500, 1500);
+  const windowSize = Size(1750, 1750);
 
   Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
       {
@@ -248,6 +248,7 @@ void main() {
       );
     }, skip: kIsWeb || !isLinux);
   });
+
   group('Column', () {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
     final node = RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
@@ -261,5 +262,39 @@ void main() {
         matchesGoldenFile('goldens/story_of_column_layout.png'),
       );
     }, skip: kIsWeb || !isLinux);
+  });
+
+  test('sum', () {
+    expect(sum([1.0, 2.0, 3.0]), 6.0);
+  });
+
+  group('computeRenderSizes', () {
+    test('shouldForceToOccupyMaxSize=false', () {
+      final renderSizes = computeRenderSizes(
+        sizes: [100.0, 200.0, 300.0],
+        smallestSize: 100.0,
+        largestSize: 300.0,
+        smallestRenderSize: 200.0,
+        largestRenderSize: 600.0,
+        maxSize: 2000,
+        shouldForceToOccupyMaxSize: false,
+      );
+      expect(renderSizes, [200.0, 400.0, 600.0]);
+      expect(sum(renderSizes), lessThan(2000));
+    });
+
+    test('shouldForceToOccupyMaxSize=true', () {
+      final renderSizes = computeRenderSizes(
+        sizes: [100.0, 200.0, 300.0],
+        smallestSize: 100.0,
+        largestSize: 300.0,
+        smallestRenderSize: 200.0,
+        largestRenderSize: 600.0,
+        maxSize: 2000,
+        shouldForceToOccupyMaxSize: true,
+      );
+      expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
+      expect(sum(renderSizes) - 2000.0, lessThan(0.01));
+    });
   });
 }
