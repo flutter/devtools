@@ -28,11 +28,11 @@ void main() {
       final table = FlatTable<TestData>(
         columns: [_FlatNameColumn()],
         data: [TestData('empty', 0)],
-        keyFactory: (d) => d.name,
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('empty')), findsOneWidget);
+      expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
     testWidgets('displays with tree column first', (WidgetTester tester) async {
@@ -43,19 +43,19 @@ void main() {
           _NumberColumn(),
         ],
         data: flatData,
-        keyFactory: (data) => data.name,
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Foo')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Bar')), findsOneWidget);
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
       // Note that two keys with the same name are allowed but not necessarily a
       // good idea. We should be using unique identifiers for keys.
-      expect(find.byKey(const PageStorageKey('Baz')), findsNWidgets(2));
-      expect(find.byKey(const PageStorageKey('Qux')), findsNWidgets(2));
-      expect(find.byKey(const PageStorageKey('Snap')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Crackle')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Pop')), findsOneWidget);
+      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Crackle')), findsOneWidget);
+      expect(find.byKey(const Key('Pop')), findsOneWidget);
       await resetWindowSize();
     });
 
@@ -68,7 +68,7 @@ void main() {
           _CombinedColumn(),
         ],
         data: flatData,
-        keyFactory: (data) => data.name,
+        keyFactory: (data) => Key(data.name),
       );
       await tester.pumpWidget(wrap(
         SizedBox(
@@ -86,7 +86,7 @@ void main() {
           FlatTable<TestData>(
             columns: [_FlatNameColumn()],
             data: null,
-            keyFactory: (d) => d.name,
+            keyFactory: (d) => Key(d.name),
           );
         },
         throwsAssertionError,
@@ -131,13 +131,11 @@ void main() {
         columns: [treeColumn],
         data: TestData('empty', 0),
         treeColumn: treeColumn,
-        keyFactory: (d) {
-          return d.name;
-        },
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('empty')), findsOneWidget);
+      expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
     testWidgets('displays with tree column first', (WidgetTester tester) async {
@@ -149,19 +147,19 @@ void main() {
         ],
         data: tree,
         treeColumn: treeColumn,
-        keyFactory: (data) => data.name,
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Foo')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Bar')), findsOneWidget);
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
       // Note that two keys with the same name are allowed but not necessarily a
       // good idea. We should be using unique identifiers for keys.
-      expect(find.byKey(const PageStorageKey('Baz')), findsNWidgets(2));
-      expect(find.byKey(const PageStorageKey('Qux')), findsNWidgets(2));
-      expect(find.byKey(const PageStorageKey('Snap')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Crackle')), findsOneWidget);
-      expect(find.byKey(const PageStorageKey('Pop')), findsOneWidget);
+      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Crackle')), findsOneWidget);
+      expect(find.byKey(const Key('Pop')), findsOneWidget);
       await resetWindowSize();
     });
 
@@ -175,7 +173,7 @@ void main() {
         ],
         data: tree,
         treeColumn: treeColumn,
-        keyFactory: (data) => data.name,
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(
         SizedBox(
@@ -196,18 +194,18 @@ void main() {
         ],
         data: tree,
         treeColumn: treeColumn,
-        keyFactory: (data) => data.name,
+        keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
       expect(tree.isExpanded, true);
-      await tester.tap(find.byKey(const PageStorageKey('Foo')));
+      await tester.tap(find.byKey(const Key('Foo')));
       await tester.pumpAndSettle();
       expect(tree.isExpanded, false);
-      await tester.tap(find.byKey(const PageStorageKey('Foo')));
+      await tester.tap(find.byKey(const Key('Foo')));
       await tester.pumpAndSettle();
       expect(tree.isExpanded, true);
-      await tester.tap(find.byKey(const PageStorageKey('Bar')));
+      await tester.tap(find.byKey(const Key('Bar')));
       await tester.pumpAndSettle();
       expect(tree.children[0].isExpanded, false);
     });
@@ -219,7 +217,7 @@ void main() {
             columns: [treeColumn],
             data: null,
             treeColumn: treeColumn,
-            keyFactory: (d) => d.name,
+            keyFactory: (d) => Key(d.name),
           );
         },
         throwsAssertionError,
@@ -243,7 +241,7 @@ void main() {
           columns: [treeColumn],
           data: tree,
           treeColumn: null,
-          keyFactory: (data) => data.name,
+          keyFactory: (d) => Key(d.name),
         );
       }, throwsAssertionError);
 
@@ -252,7 +250,7 @@ void main() {
           columns: const [],
           data: tree,
           treeColumn: treeColumn,
-          keyFactory: (data) => data.name,
+          keyFactory: (d) => Key(d.name),
         );
       }, throwsAssertionError);
     });

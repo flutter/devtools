@@ -24,7 +24,7 @@ Widget wrap(Widget widget) {
   );
 }
 
-Widget wrapWithProvidedController(
+Widget wrapWithControllers(
   Widget widget, {
   LoggingController loggingController,
   TimelineController timelineController,
