@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../utils.dart';
 import '../diagnostics_node.dart';
 import '../enum_utils.dart';
 
@@ -86,14 +87,12 @@ class LayoutProperties {
       : 'h=unconstrained';
 
   String describeWidth() {
-    return 'w=${size.width.toStringAsFixed(fractionDigits)}';
+    return 'w=${toStringAsFixed(size.width)}';
   }
 
   String describeHeight() {
-    return 'h=${size.height.toStringAsFixed(fractionDigits)}';
+    return 'h=${toStringAsFixed(size.height)}';
   }
-
-  static const int fractionDigits = 1;
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';

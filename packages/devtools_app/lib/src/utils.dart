@@ -443,3 +443,7 @@ double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
   }
   return ifNotFinite;
 }
+
+String toStringAsFixed(double num, [int fractionDigit = 1]) {
+  return num.toStringAsFixed(fractionDigit);
+}
