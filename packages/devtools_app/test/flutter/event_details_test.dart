@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
 import 'package:devtools_app/src/timeline/flutter/event_details.dart';
+import 'package:devtools_testing/support/timeline_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'wrappers.dart';
@@ -12,27 +13,43 @@ void main() {
   group('EventDetails', () {
     EventDetails eventDetails;
     testWidgets('builds for UI event', (WidgetTester tester) async {
-      eventDetails = EventDetails(stubUiEvent);
+      eventDetails = EventDetails(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventDetails));
       expect(find.byType(EventDetails), findsOneWidget);
       expect(find.byType(CpuProfilerView), findsOneWidget);
       expect(find.byType(EventSummary), findsNothing);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
     });
 
     testWidgets('builds for GPU event', (WidgetTester tester) async {
-      eventDetails = EventDetails(stubGpuEvent);
+      eventDetails = EventDetails(goldenGpuTimelineEvent);
       await tester.pumpWidget(wrap(eventDetails));
       expect(find.byType(EventDetails), findsOneWidget);
       expect(find.byType(CpuProfilerView), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
     });
 
     testWidgets('builds for ASYNC event', (WidgetTester tester) async {
-      eventDetails = EventDetails(stubAsyncEvent);
+      eventDetails = EventDetails(asyncEventWithInstantChildren);
       await tester.pumpWidget(wrap(eventDetails));
       expect(find.byType(EventDetails), findsOneWidget);
       expect(find.byType(CpuProfilerView), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
+    });
+
+    testWidgets('builds UI for null event', (WidgetTester tester) async {
+      eventDetails = const EventDetails(null);
+      await tester.pumpWidget(wrap(eventDetails));
+      expect(find.byType(EventDetails), findsOneWidget);
+      expect(find.byType(CpuProfilerView), findsNothing);
+      expect(find.byType(EventSummary), findsNothing);
+      expect(find.text(EventDetails.noEventSelected), findsOneWidget);
+      expect(find.text(EventDetails.instructions), findsOneWidget);
     });
   });
 
@@ -40,7 +57,7 @@ void main() {
   group('EventSummary', () {
     EventSummary eventSummary;
     testWidgets('event with connected events', (WidgetTester tester) async {
-      eventSummary = EventSummary(stubAsyncEvent);
+      eventSummary = EventSummary(asyncEventWithInstantChildren);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
@@ -50,7 +67,7 @@ void main() {
     });
 
     testWidgets('event without connected events', (WidgetTester tester) async {
-      eventSummary = EventSummary(stubUiEvent);
+      eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
@@ -60,7 +77,7 @@ void main() {
     });
 
     testWidgets('event with args', (WidgetTester tester) async {
-      eventSummary = EventSummary(stubGpuEvent);
+      eventSummary = EventSummary(goldenGpuTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
@@ -70,7 +87,7 @@ void main() {
     });
 
     testWidgets('event without args', (WidgetTester tester) async {
-      eventSummary = EventSummary(stubUiEvent);
+      eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);

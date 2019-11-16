@@ -417,14 +417,14 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   @override
   void entering() async {
-    await _updateListeningState();
+    await timelineController.timelineService.updateListeningState(true);
     _updateButtonStates();
     await _profileGranularitySelector.setGranularity();
   }
 
   @override
   void exiting() async {
-    await _updateListeningState();
+    await timelineController.timelineService.updateListeningState(false);
     _updateButtonStates();
   }
 
@@ -466,7 +466,8 @@ class HtmlTimelineScreen extends HtmlScreen {
     timelineController.frameBasedTimeline.pause(manual: true);
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
-    await _updateListeningState();
+    await timelineController.timelineService
+        .updateListeningState(isCurrentScreen);
   }
 
   Future<void> _resumeFrameRecording() async {
@@ -474,7 +475,8 @@ class HtmlTimelineScreen extends HtmlScreen {
     timelineController.frameBasedTimeline.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
-    await _updateListeningState();
+    await timelineController.timelineService
+        .updateListeningState(isCurrentScreen);
   }
 
   Future<void> _startFullRecording() async {
@@ -573,20 +575,6 @@ class HtmlTimelineScreen extends HtmlScreen {
     _recordingStatus.hidden(true);
     eventDetails
         .hidden(timelineController.timelineMode == TimelineMode.frameBased);
-  }
-
-  Future<void> _updateListeningState() async {
-    final bool shouldBeRunning =
-        (!timelineController.frameBasedTimeline.manuallyPaused ||
-                timelineController.fullTimeline.recording) &&
-            !offlineMode &&
-            isCurrentScreen;
-    final bool isRunning = !timelineController.frameBasedTimeline.paused ||
-        timelineController.fullTimeline.recording;
-    await timelineController.timelineService.updateListeningState(
-      shouldBeRunning: shouldBeRunning,
-      isRunning: isRunning,
-    );
   }
 
   Future<void> clearTimeline() async {

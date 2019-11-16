@@ -5,7 +5,6 @@
 @TestOn('vm')
 
 import 'package:devtools_app/src/flutter/controllers.dart';
-import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager(useFakeService: true);
+      when(serviceManager.connectedApp.isDartWebApp)
+          .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
     });
 
@@ -81,15 +82,3 @@ void main() {
     });
   });
 }
-
-class TestProvidedControllers extends Fake implements ProvidedControllers {
-  TestProvidedControllers() {
-    disposed[this] = false;
-  }
-  @override
-  void dispose() {
-    disposed[this] = true;
-  }
-}
-
-final disposed = <TestProvidedControllers, bool>{};

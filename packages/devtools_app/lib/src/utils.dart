@@ -199,10 +199,6 @@ typedef VoidFunction = void Function();
 /// future.
 typedef VoidAsyncFunction = Future<void> Function();
 
-/// A typedef to represent a function taking a single argument and with no
-/// return value.
-typedef VoidFunctionWithArg = void Function(dynamic arg);
-
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].
@@ -442,6 +438,45 @@ double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
     }
   }
   return ifNotFinite;
+}
+
+/// A simple change notifier.
+///
+/// When disposing, any object with a registered listener should [unregister]
+/// itself.
+///
+/// Generally, a registering object should use `this` as its key.
+///
+/// Only the object that created this notifier should call [notify].
+class Notifier {
+  final Map<Object, void Function()> _listeners = {};
+
+  /// Adds [callback] to this notifier, associated with [key].
+  ///
+  /// If [key] is already registered on this notifier, the previous callback
+  /// will be overridden.
+  void register(Object key, void Function() callback) {
+    _listeners[key] = callback;
+  }
+
+  /// Removes the listener associated with [key].
+  void unregister(Object key) {
+    _listeners.remove(key);
+  }
+
+  /// Whether or not this object has any event listeners registered.
+  bool get hasListeners => _listeners.isNotEmpty;
+
+  /// Notifies all listeners of a change.
+  ///
+  /// This does not do any change propagation, so if
+  /// a notification callback leads to a change in the listeners,
+  /// only the original listeners will be called.
+  void notify() {
+    for (var callback in _listeners.values.toList()) {
+      callback();
+    }
+  }
 }
 
 String toStringAsFixed(double num, [int fractionDigit = 1]) {

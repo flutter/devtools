@@ -7,6 +7,103 @@ import 'package:flutter_test/flutter_test.dart';
 import 'wrappers.dart';
 
 void main() {
+  group('FlatTable view', () {
+    List<TestData> flatData;
+
+    setUp(() {
+      flatData = [
+        TestData('Foo', 0),
+        TestData('Bar', 1),
+        TestData('Baz', 2),
+        TestData('Qux', 3),
+        TestData('Snap', 4),
+        TestData('Crackle', 5),
+        TestData('Pop', 5),
+        TestData('Baz', 6),
+        TestData('Qux', 7),
+      ];
+    });
+
+    testWidgets('displays with simple content', (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [_FlatNameColumn()],
+        data: [TestData('empty', 0)],
+        keyFactory: (d) => d.name,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('empty')), findsOneWidget);
+    });
+
+    testWidgets('displays with tree column first', (WidgetTester tester) async {
+      await setWindowSize(const Size(800.0, 1200.0));
+      final table = FlatTable<TestData>(
+        columns: [
+          _FlatNameColumn(),
+          _NumberColumn(),
+        ],
+        data: flatData,
+        keyFactory: (data) => data.name,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Foo')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Bar')), findsOneWidget);
+      // Note that two keys with the same name are allowed but not necessarily a
+      // good idea. We should be using unique identifiers for keys.
+      expect(find.byKey(const PageStorageKey('Baz')), findsNWidgets(2));
+      expect(find.byKey(const PageStorageKey('Qux')), findsNWidgets(2));
+      expect(find.byKey(const PageStorageKey('Snap')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Crackle')), findsOneWidget);
+      expect(find.byKey(const PageStorageKey('Pop')), findsOneWidget);
+      await resetWindowSize();
+    });
+
+    testWidgets('displays with many columns', (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          _NumberColumn(),
+          _CombinedColumn(),
+          _FlatNameColumn(),
+          _CombinedColumn(),
+        ],
+        data: flatData,
+        keyFactory: (data) => data.name,
+      );
+      await tester.pumpWidget(wrap(
+        SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: table,
+        ),
+      ));
+      expect(find.byWidget(table), findsOneWidget);
+    });
+
+    test('fails with no data', () {
+      expect(
+        () {
+          FlatTable<TestData>(
+            columns: [_FlatNameColumn()],
+            data: null,
+            keyFactory: (d) => d.name,
+          );
+        },
+        throwsAssertionError,
+      );
+    });
+
+    test('fails when a TreeNode cannot provide a key', () {
+      expect(() {
+        FlatTable<TestData>(
+          columns: [_FlatNameColumn()],
+          data: flatData,
+          keyFactory: null,
+        );
+      }, throwsAssertionError);
+    });
+  });
+
   group('TreeTable view', () {
     TestData tree;
     TreeColumnData<TestData> treeColumn;
@@ -34,7 +131,9 @@ void main() {
         columns: [treeColumn],
         data: TestData('empty', 0),
         treeColumn: treeColumn,
-        keyFactory: (d) => d.name,
+        keyFactory: (d) {
+          return d.name;
+        },
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -181,6 +280,16 @@ class _NumberColumn extends ColumnData<TestData> {
 
   @override
   double get fixedWidthPx => 400.0;
+}
+
+class _FlatNameColumn extends ColumnData<TestData> {
+  _FlatNameColumn() : super('Name');
+
+  @override
+  String getValue(TestData dataObject) => dataObject.name;
+
+  @override
+  double get fixedWidthPx => 300.0;
 }
 
 class _CombinedColumn extends ColumnData<TestData> {

@@ -5,8 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/controllers.dart';
 import '../../flutter/screen.dart';
-
 import '../../flutter/split.dart';
 import '../../service_extensions.dart';
 import '../../ui/flutter/label.dart';
@@ -37,19 +38,30 @@ class TimelineScreenBody extends StatefulWidget {
   TimelineScreenBodyState createState() => TimelineScreenBodyState();
 }
 
-class TimelineScreenBodyState extends State<TimelineScreenBody> {
-  @visibleForTesting
-  final controller = TimelineController();
+class TimelineScreenBodyState extends State<TimelineScreenBody>
+    with AutoDisposeMixin {
+  TimelineController controller;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = Controllers.of(context).timeline;
+    controller.timelineService.updateListeningState(true);
+
+    cancel();
+    autoDispose(controller.frameBasedTimeline.onSelectedFrame.listen((_) {
+      setState(() {});
+    }));
+    autoDispose(controller.onSelectedTimelineEvent.listen((_) {
+      setState(() {});
+    }));
   }
 
   @override
   void dispose() {
     // TODO(kenz): make TimelineController disposable via
     // DisposableController and dispose here.
+    controller.timelineService.updateListeningState(false);
     super.dispose();
   }
 
@@ -70,17 +82,19 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
           ],
         ),
         if (controller.timelineMode == TimelineMode.frameBased)
-          FlutterFramesChart(),
-        Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            firstChild: TimelineFlameChart(),
-            // TODO(kenz): use StreamBuilder to get selected event from
-            // controller once data is hooked up.
-            secondChild: EventDetails(stubAsyncEvent),
-            initialFirstFraction: 0.6,
+          const FlutterFramesChart(),
+        if (controller.timelineMode == TimelineMode.full ||
+            controller.frameBasedTimeline.data?.selectedFrame != null)
+          Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              firstChild: TimelineFlameChart(),
+              secondChild: EventDetails(
+                controller.timeline.data?.selectedEvent,
+              ),
+              initialFirstFraction: 0.6,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -193,6 +207,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody> {
     // TODO(kenz): implement.
   }
 
+  // TODO(kenz): consider making timeline mode a ValueNotifier on the controller
   void _onTimelineModeChanged(bool frameBased) {
     setState(() {
       controller.timelineMode =
