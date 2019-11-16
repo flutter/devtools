@@ -313,14 +313,14 @@ void main() {
         ),
       );
       expect(layoutProperties.smallestWidthChild.size.width, 56.0);
-      expect(layoutProperties.smallestWidthChildPercentage, 56.0 / 432.0);
+      expect(layoutProperties.smallestWidthChildFraction, 56.0 / 432.0);
       expect(layoutProperties.largestWidthChild.size.width, 320.0);
-      expect(layoutProperties.largestWidthChildPercentage, 320.0 / 432.0);
+      expect(layoutProperties.largestWidthChildFraction, 320.0 / 432.0);
 
       expect(layoutProperties.smallestHeightChild.size.height, 25.0);
-      expect(layoutProperties.smallestHeightChildPercentage, 25.0 / 56.0);
+      expect(layoutProperties.smallestHeightChildFraction, 25.0 / 56.0);
       expect(layoutProperties.largestHeightChild.size.height, 56.0);
-      expect(layoutProperties.largestHeightChildPercentage, 56.0 / 56.0);
+      expect(layoutProperties.largestHeightChildFraction, 56.0 / 56.0);
     });
 
     group('describeWidthConstraints and describeHeightConstraints', () {
@@ -381,9 +381,8 @@ void main() {
           ''');
         final layoutProperties =
             LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
-        expect(
-            layoutProperties.describeHeightConstraints(), 'h: unconstrained');
-        expect(layoutProperties.describeWidthConstraints(), 'w: unconstrained');
+        expect(layoutProperties.describeHeightConstraints(), 'h=unconstrained');
+        expect(layoutProperties.describeWidthConstraints(), 'w=unconstrained');
       });
     });
 
@@ -394,14 +393,14 @@ void main() {
                 "type": "Size",
                 "description": "Size(432.5, 56.0)",
                 "width": 432.55,
-                "height": 56.05,
+                "height": 56.05
               }
             }
           ''');
       final layoutProperties =
           LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
       expect(layoutProperties.describeHeight(), 'h=56.0');
-      expect(layoutProperties.describeWidth(), 'w=432.0');
+      expect(layoutProperties.describeWidth(), 'w=432.6');
     });
   });
 }

@@ -277,7 +277,7 @@ void main() {
         smallestRenderSize: 200.0,
         largestRenderSize: 600.0,
         maxSize: 2000,
-        shouldForceToOccupyMaxSize: false,
+        forceToOccupyMaxSize: false,
       );
       expect(renderSizes, [200.0, 400.0, 600.0]);
       expect(sum(renderSizes), lessThan(2000));
@@ -291,7 +291,7 @@ void main() {
         smallestRenderSize: 200.0,
         largestRenderSize: 600.0,
         maxSize: 2000,
-        shouldForceToOccupyMaxSize: true,
+        forceToOccupyMaxSize: true,
       );
       expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
       expect(sum(renderSizes) - 2000.0, lessThan(0.01));

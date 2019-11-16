@@ -60,13 +60,14 @@ class LayoutProperties {
 
   LayoutProperties get largestHeightChild => _largestHeightChild;
 
-  double get smallestWidthChildPercentage => _smallestWidthChild.width / width;
+  double get smallestWidthChildFraction => _smallestWidthChild.width / width;
 
-  double get smallestHeightChildPercentage => _smallestHeightChild.height / height;
+  double get smallestHeightChildFraction =>
+      _smallestHeightChild.height / height;
 
-  double get largestWidthChildPercentage => _largestWidthChild.width / width;
+  double get largestWidthChildFraction => _largestWidthChild.width / width;
 
-  double get largestHeightChildPercentage => _largestHeightChild.height / height;
+  double get largestHeightChildFraction => _largestHeightChild.height / height;
 
   double get width => size?.width;
 
@@ -76,24 +77,20 @@ class LayoutProperties {
 
   Iterable<double> get childrenHeight => children?.map((child) => child.height);
 
-  String describeWidthConstraints() {
-    if (constraints.hasBoundedWidth)
-      return describeAxis(constraints.minWidth, constraints.maxWidth, 'w');
-    return 'w=unconstrained';
-  }
+  String describeWidthConstraints() => constraints.hasBoundedWidth
+      ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
+      : 'w=unconstrained';
 
-  String describeHeightConstraints() {
-    if (constraints.hasBoundedHeight)
-      return describeAxis(constraints.minHeight, constraints.maxHeight, 'h');
-    return 'h=unconstrained';
-  }
+  String describeHeightConstraints() => constraints.hasBoundedHeight
+      ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
+      : 'h=unconstrained';
 
   String describeWidth() {
-    return 'w=' + size.width.toStringAsFixed(fractionDigits);
+    return 'w=${size.width.toStringAsFixed(fractionDigits)}';
   }
 
   String describeHeight() {
-    return 'h=' + size.height.toStringAsFixed(fractionDigits);
+    return 'h=${size.height.toStringAsFixed(fractionDigits)}';
   }
 
   static const int fractionDigits = 1;
@@ -104,10 +101,10 @@ class LayoutProperties {
   }
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
-    // TODO(albertusangga): Support SliverConstraint
+// TODO(albertusangga): Support SliverConstraint
     if (json == null || json['type'] != boxConstraintsType.toString())
       return null;
-    // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
+// TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
     return BoxConstraints(
       minWidth: json['minWidth'],
       maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,

@@ -23,7 +23,7 @@ const arrowHeadSize = 8.0;
 const distanceToArrow = 1.0;
 const arrowStrokeWidth = 1.5;
 
-/// Hardcoded sizes for scaling the flex children widget properly
+/// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 200.0;
 const minRenderHeight = 300.0;
 const defaultMaxRenderWidth = 300.0;
@@ -31,7 +31,7 @@ const defaultMaxRenderHeight = 300.0;
 
 const widgetTitleMaxWidthPercentage = 0.75;
 
-/// Hardcoded arrow size respective to its cross axis (because it's unconstrained)
+/// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
 const heightArrowIndicatorSize = 48.0;
 const widthArrowIndicatorSize = 42.0;
 const mainAxisArrowIndicatorSize = 32.0;
@@ -58,7 +58,7 @@ List<double> computeRenderSizes({
   @required double smallestRenderSize,
   @required double largestRenderSize,
   @required double maxSize,
-  bool shouldForceToOccupyMaxSize = true,
+  bool forceToOccupyMaxSize = true,
 }) {
   final transformToRenderSize = (largestRenderSize) => [
         for (var s in sizes)
@@ -68,7 +68,7 @@ List<double> computeRenderSizes({
               smallestRenderSize
       ];
   var renderSizes = transformToRenderSize(largestRenderSize);
-  if (shouldForceToOccupyMaxSize) {
+  if (forceToOccupyMaxSize) {
     final total = sum(renderSizes);
     if (total < maxSize) {
       double largestRenderSize = maxSize - sizes.length * smallestRenderSize;
@@ -156,9 +156,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               '${properties.describeHeight()}\n'
               '(${properties.describeHeightConstraints()})',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                height: 1.0,
-              ),
+              style: const TextStyle(height: 1.0),
             ),
           ),
           direction: Axis.vertical,
@@ -213,15 +211,19 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           final maxHeight = constraints.maxHeight;
 
           // TODO(albertusangga): Remove ternary checking after visualizing empty space
-          final largestRenderWidth = isColumn ? maxWidth : max(
-              min(maxWidth * properties.largestWidthChildPercentage,
-                  defaultMaxRenderWidth),
-              minRenderWidth);
+          final largestRenderWidth = isColumn
+              ? maxWidth
+              : max(
+                  min(maxWidth * properties.largestWidthChildFraction,
+                      defaultMaxRenderWidth),
+                  minRenderWidth);
           // TODO(albertusangga): Remove ternary checking after visualizing empty space
-          final largestRenderHeight = isRow ? maxHeight : max(
-              min(maxHeight * properties.largestHeightChildPercentage,
-                  defaultMaxRenderHeight),
-              minRenderHeight);
+          final largestRenderHeight = isRow
+              ? maxHeight
+              : max(
+                  min(maxHeight * properties.largestHeightChildFraction,
+                      defaultMaxRenderHeight),
+                  minRenderHeight);
 
           final renderHeights = computeRenderSizes(
             sizes: properties.childrenHeight,
@@ -239,7 +241,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
             smallestRenderSize: minRenderWidth,
             largestRenderSize: largestRenderWidth,
             maxSize: maxWidth,
-
           );
 
           return SingleChildScrollView(
