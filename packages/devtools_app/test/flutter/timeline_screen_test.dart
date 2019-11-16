@@ -4,7 +4,6 @@
 
 @TestOn('vm')
 
-import 'package:devtools_app/src/flutter/initializer.dart';
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';

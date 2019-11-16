@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
+
+import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
@@ -421,3 +423,14 @@ class TestProvidedControllers extends Fake implements ProvidedControllers {
 }
 
 final disposed = <TestProvidedControllers, bool>{};
+
+Future<void> ensureInspectorDependencies() async {
+  assert(
+    !kIsWeb,
+    'Attempted to resolve a package path from web code.\n'
+    'Package path resolution uses dart:io, which is not available in web.'
+    '\n'
+    "To fix this, mark the failing test as @TestOn('vm')",
+  );
+  await initializer.ensureInspectorDependencies();
+}

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/flutter/initializer.dart';
+import 'package:devtools_app/src/flutter/initializer.dart'
+    hide ensureInspectorDependencies;
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
