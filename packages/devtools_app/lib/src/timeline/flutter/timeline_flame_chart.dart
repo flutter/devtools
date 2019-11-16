@@ -108,6 +108,7 @@ class FrameBasedTimelineFlameChartState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _controller = Controllers.of(context).timeline;
+    cancel();
     autoDispose(_controller.onSelectedTimelineEvent.listen((_) {
       setState(() {});
     }));

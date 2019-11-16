@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+import 'dart:convert';
 
 import 'package:devtools_app/src/timeline/timeline_controller.dart'
     show timelineScreenId, TimelineMode;
@@ -399,7 +400,9 @@ final gpuRasterizerDrawTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 118039651469,
   'ph': 'B',
-  'args': {}
+  'args': {
+    'isolateId': 'id_001',
+  }
 });
 final pipelineConsumeTrace = testTraceEventWrapper({
   'name': 'PipelineConsume',
@@ -430,6 +433,91 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
 });
 
 // Mark: AsyncTimelineData
+final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
+  TraceEvent(jsonDecode(jsonEncode({
+    'name': 'PipelineItem',
+    'cat': 'Embedder',
+    'tid': 19333,
+    'pid': 94955,
+    'ts': 118039650806,
+    'ph': 's',
+    'id': 'f1',
+    'args': {
+      'isolateId': 'id_001',
+      'parentId': '07bf',
+    },
+  }))),
+  0,
+))
+  ..addEndEvent(TraceEventWrapper(
+    TraceEvent(jsonDecode(jsonEncode({
+      'name': 'PipelineItem',
+      'cat': 'Embedder',
+      'tid': 19334,
+      'pid': 94955,
+      'ts': 118039679872,
+      'ph': 'f',
+      'bp': 'e',
+      'id': 'f1',
+      'args': {},
+    }))),
+    1,
+  ))
+  ..type = TimelineEventType.async
+  ..children.addAll([
+    instantAsync1..time.end = instantAsync1.time.start,
+    instantAsync2..time.end = instantAsync2.time.start,
+    instantAsync3..time.end = instantAsync3.time.start,
+  ]);
+
+final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
+  TraceEvent(jsonDecode(jsonEncode({
+    'name': 'Connection established',
+    'cat': 'Dart',
+    'tid': 19333,
+    'pid': 94955,
+    'ts': 118039660806,
+    'ph': 'n',
+    'id': 'f1',
+    'args': {
+      'isolateId': 'id_001',
+    },
+  }))),
+  0,
+));
+
+final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
+  TraceEvent(jsonDecode(jsonEncode({
+    'name': 'Connection established',
+    'cat': 'Dart',
+    'tid': 19334,
+    'pid': 94955,
+    'ts': 118039665806,
+    'ph': 'n',
+    'id': 'f1',
+    'args': {
+      'isolateId': 'id_001',
+    },
+  }))),
+  1,
+));
+
+final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
+  TraceEvent(jsonDecode(jsonEncode({
+    'name': 'Connection established',
+    'cat': 'Dart',
+    'tid': 19334,
+    'pid': 94955,
+    'ts': 118039670806,
+    'ph': 'n',
+    'id': 'f1',
+    'args': {
+      'isolateId': 'id_001',
+    },
+  }))),
+  1,
+));
+
 final goldenAsyncTimelineEvent = asyncEventA
   ..children.addAll([
     asyncEventB..children.addAll([asyncEventB1, asyncEventB2]),
