@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart';
-
 import 'globals.dart';
+import 'service_extensions.dart' as extensions;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
@@ -45,21 +44,12 @@ class ConnectedApp {
     // the future (flutter web), we can modify this check.
     if (!isRunningOnDartVM || !await isFlutterApp) return false;
 
-    try {
-      final Isolate isolate = await serviceManager.service
-          .getIsolate(serviceManager.isolateManager.isolates.first.id);
-      // This evaluate statement will throw an error in a profile build.
-      await serviceManager.service.evaluate(
-        isolate.id,
-        isolate.rootLib.id,
-        '1+1',
-      );
-      // If we reach this return statement, no error was thrown and this is not
-      // a profile build.
-      return false;
-    } on RPCError catch (_) {
-      return true;
-    }
+    await serviceManager.serviceExtensionManager.extensionStatesUpdated.future;
+
+    // The debugAllowBanner extension is only available in debug builds.
+    final hasDebugExtension = serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
+    return !hasDebugExtension;
   }
 
   Future<bool> _libraryUriAvailable(String uri) async {
