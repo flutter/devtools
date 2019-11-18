@@ -1,3 +1,6 @@
+## 0.1.12-dev.1
+* Check for a debug service extension instead of using eval to distinguish between debug and profile builds.
+
 ## 0.1.11 - 2019-11-08
 * Add full timeline mode with support for async and recorded tracing.
 * Add event summary section that shows metadata for non-ui events on the Timeline page.
