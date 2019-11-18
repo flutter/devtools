@@ -478,3 +478,7 @@ class Notifier {
     }
   }
 }
+
+String toStringAsFixed(double num, [int fractionDigit = 1]) {
+  return num.toStringAsFixed(fractionDigit);
+}

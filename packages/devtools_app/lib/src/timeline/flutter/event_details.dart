@@ -15,27 +15,49 @@ import '../timeline_model.dart';
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent);
 
+  static const instructions =
+      'Select an event from the Timeline to view details';
+  static const noEventSelected = '[No event selected]';
+
   final TimelineEvent selectedEvent;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: Text(
-            '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}',
-            style: Theme.of(context).textTheme.title,
+            selectedEvent != null
+                ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
+                : noEventSelected,
+            style: textTheme.title,
           ),
         ),
         const PaddedDivider.thin(),
         Expanded(
-          child: selectedEvent.isUiEvent
-              ? CpuProfilerView()
-              : EventSummary(selectedEvent),
+          child: selectedEvent != null
+              ? _buildDetails()
+              : _buildInstructions(textTheme),
         ),
       ],
+    );
+  }
+
+  Widget _buildDetails() {
+    return selectedEvent.isUiEvent
+        ? CpuProfilerView()
+        : EventSummary(selectedEvent);
+  }
+
+  Widget _buildInstructions(TextTheme textTheme) {
+    return Center(
+      child: Text(
+        instructions,
+        style: textTheme.subhead,
+      ),
     );
   }
 }
@@ -127,143 +149,3 @@ class EventSummary extends StatelessWidget {
     );
   }
 }
-
-// TODO(kenz): remove stub data once timeline is hooked up to real data.
-final stubAsyncEvent = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'PipelineItem',
-    'cat': 'Embedder',
-    'tid': 19333,
-    'pid': 94955,
-    'ts': 118039650806,
-    'ph': 's',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-      'parentId': '07bf',
-    },
-  }))),
-  0,
-))
-  ..addEndEvent(TraceEventWrapper(
-    TraceEvent(jsonDecode(jsonEncode({
-      'name': 'PipelineItem',
-      'cat': 'Embedder',
-      'tid': 19334,
-      'pid': 94955,
-      'ts': 118039679872,
-      'ph': 'f',
-      'bp': 'e',
-      'id': 'f1',
-      'args': {},
-    }))),
-    1,
-  ))
-  ..type = TimelineEventType.async
-  ..children.addAll([
-    instantAsync1..time.end = instantAsync1.time.start,
-    instantAsync2..time.end = instantAsync2.time.start,
-    instantAsync3..time.end = instantAsync3.time.start,
-  ]);
-
-final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19333,
-    'pid': 94955,
-    'ts': 118039660806,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  0,
-));
-
-final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19334,
-    'pid': 94955,
-    'ts': 118039665806,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  1,
-));
-
-final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19334,
-    'pid': 94955,
-    'ts': 118039670806,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  1,
-));
-
-final stubUiEvent = SyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'VSYNC',
-    'cat': 'Embedder',
-    'tid': 19333,
-    'pid': 94955,
-    'ts': 118039650802,
-    'ph': 'B',
-    'args': {},
-  }))),
-  0,
-))
-  ..addEndEvent(TraceEventWrapper(
-    TraceEvent(jsonDecode(jsonEncode({
-      'name': 'VSYNC',
-      'cat': 'Embedder',
-      'tid': 19333,
-      'pid': 94955,
-      'ts': 118039652422,
-      'ph': 'E',
-      'args': {},
-    }))),
-    1,
-  ))
-  ..type = TimelineEventType.ui;
-
-final stubGpuEvent = SyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'GPURasterizer::Draw',
-    'cat': 'Embedder',
-    'tid': 19334,
-    'pid': 94955,
-    'ts': 118039651469,
-    'ph': 'B',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  0,
-))
-  ..addEndEvent(TraceEventWrapper(
-    TraceEvent(jsonDecode(jsonEncode({
-      'name': 'GPURasterizer::Draw',
-      'cat': 'Embedder',
-      'tid': 19334,
-      'pid': 94955,
-      'ts': 118039679873,
-      'ph': 'E',
-      'args': {},
-    }))),
-    1,
-  ))
-  ..type = TimelineEventType.gpu;

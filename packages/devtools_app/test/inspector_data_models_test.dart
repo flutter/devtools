@@ -183,8 +183,9 @@ void main() {
     expect(flexProperties.textBaseline, TextBaseline.alphabetic);
   });
 
-  test('LayoutProperties deserialize and compute min/max child correctly', () {
-    final json = jsonDecode('''
+  group('LayoutProperties', () {
+    test('deserialize and compute min/max child correctly', () {
+      final json = jsonDecode('''
        {
         "description": "Row",
         "type": "_ElementDiagnosticableTreeNode",
@@ -298,26 +299,108 @@ void main() {
         "widgetRuntimeType": "Row"
     }
     ''');
-    final node = RemoteDiagnosticsNode(json, null, false, null);
-    final layoutProperties = LayoutProperties(node);
-    expect(layoutProperties.size, const Size(432.0, 56.0));
-    expect(
-      layoutProperties.constraints,
-      const BoxConstraints(
-        minWidth: 432.0,
-        maxWidth: 432.0,
-        minHeight: 56.0,
-        maxHeight: 56.0,
-      ),
-    );
-    expect(layoutProperties.smallestWidthChild.size.width, 56.0);
-    expect(layoutProperties.smallestWidthChildPercentage, 56.0 / 432.0);
-    expect(layoutProperties.largestWidthChild.size.width, 320.0);
-    expect(layoutProperties.largestWidthChildPercentage, 320.0 / 432.0);
+      final node = RemoteDiagnosticsNode(json, null, false, null);
+      final layoutProperties = LayoutProperties(node);
 
-    expect(layoutProperties.smallestHeightChild.size.height, 25.0);
-    expect(layoutProperties.smallestHeightChildPercentage, 25.0 / 56.0);
-    expect(layoutProperties.largestHeightChild.size.height, 56.0);
-    expect(layoutProperties.largestHeightChildPercentage, 56.0 / 56.0);
+      expect(layoutProperties.size, const Size(432.0, 56.0));
+      expect(
+        layoutProperties.constraints,
+        const BoxConstraints(
+          minWidth: 432.0,
+          maxWidth: 432.0,
+          minHeight: 56.0,
+          maxHeight: 56.0,
+        ),
+      );
+      expect(layoutProperties.smallestWidthChild.size.width, 56.0);
+      expect(layoutProperties.smallestWidthChildFraction, 56.0 / 432.0);
+      expect(layoutProperties.largestWidthChild.size.width, 320.0);
+      expect(layoutProperties.largestWidthChildFraction, 320.0 / 432.0);
+
+      expect(layoutProperties.smallestHeightChild.size.height, 25.0);
+      expect(layoutProperties.smallestHeightChildFraction, 25.0 / 56.0);
+      expect(layoutProperties.largestHeightChild.size.height, 56.0);
+      expect(layoutProperties.largestHeightChildFraction, 56.0 / 56.0);
+    });
+
+    group('describeWidthConstraints and describeHeightConstraints', () {
+      test('single value', () {
+        final Map<String, Object> json = jsonDecode('''
+            {
+               "constraints": {
+                "type": "BoxConstraints",
+                "description": "BoxConstraints(w=432.0, h=56.0)",
+                "hasBoundedHeight": true,
+                "hasBoundedWidth": true,
+                "minWidth": 25.0,
+                "maxWidth": 25.0,
+                "minHeight": 56.0,
+                "maxHeight": 56.0
+              }
+            }
+          ''');
+        final layoutProperties =
+            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        expect(layoutProperties.describeHeightConstraints(), 'h=56.0');
+        expect(layoutProperties.describeWidthConstraints(), 'w=25.0');
+      });
+
+      test('range value', () {
+        final Map<String, Object> json = jsonDecode('''
+            {
+               "constraints": {
+                "type": "BoxConstraints",
+                "description": "BoxConstraints(w=432.0, h=56.0)",
+                "hasBoundedHeight": true,
+                "hasBoundedWidth": true,
+                "minWidth": 25.0,
+                "maxWidth": 50.0,
+                "minHeight": 75.0,
+                "maxHeight": 100.0
+              }
+            }
+          ''');
+        final layoutProperties =
+            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        expect(layoutProperties.describeHeightConstraints(), '75.0<=h<=100.0');
+        expect(layoutProperties.describeWidthConstraints(), '25.0<=w<=50.0');
+      });
+
+      test('unconstrained', () {
+        final Map<String, Object> json = jsonDecode('''
+            {
+               "constraints": {
+                "type": "BoxConstraints",
+                "description": "BoxConstraints(w=432.0, h=56.0)",
+                "hasBoundedHeight": false,
+                "hasBoundedWidth": false,
+                "minWidth": 25.0,
+                "minHeight": 75.0
+              }
+            }
+          ''');
+        final layoutProperties =
+            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        expect(layoutProperties.describeHeightConstraints(), 'h=unconstrained');
+        expect(layoutProperties.describeWidthConstraints(), 'w=unconstrained');
+      });
+    });
+
+    test('describeWidth and describeHeight', () {
+      final Map<String, Object> json = jsonDecode('''
+            {
+               "size": {
+                "type": "Size",
+                "description": "Size(432.5, 56.0)",
+                "width": 432.55,
+                "height": 56.05
+              }
+            }
+          ''');
+      final layoutProperties =
+          LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+      expect(layoutProperties.describeHeight(), 'h=56.0');
+      expect(layoutProperties.describeWidth(), 'w=432.6');
+    });
   });
 }
