@@ -314,26 +314,27 @@ Future<void> runServiceManagerTestsWithDriverFactory(
     test('all extension types', () async {
       // TODO(kenz): Uncomment this once
       // https://github.com/flutter/devtools/issues/1351 is fixed.
-
+      /*
       // Enable a boolean extension on the test device.
-//      final boolExtensionDescription = extensions.debugPaint;
-//      final boolArgs = {'enabled': true};
-//      const boolEvalExpression = 'debugPaintSizeEnabled';
-//      final boolLibrary = EvalOnDartLibrary(
-//        [
-//          'package:flutter/src/rendering/debug.dart',
-//          'package:flutter_web/src/rendering/debug.dart',
-//        ],
-//        service,
-//        isolateId: _flutterIsolateId,
-//      );
-//
-//      await _enableExtensionOnTestDevice(
-//        boolExtensionDescription,
-//        boolArgs,
-//        boolEvalExpression,
-//        boolLibrary,
-//      );
+      final boolExtensionDescription = extensions.debugPaint;
+      final boolArgs = {'enabled': true};
+      const boolEvalExpression = 'debugPaintSizeEnabled';
+      final boolLibrary = EvalOnDartLibrary(
+        [
+          'package:flutter/src/rendering/debug.dart',
+          'package:flutter_web/src/rendering/debug.dart',
+        ],
+        service,
+        isolateId: _flutterIsolateId,
+      );
+
+      await _enableExtensionOnTestDevice(
+        boolExtensionDescription,
+        boolArgs,
+        boolEvalExpression,
+        boolLibrary,
+      );
+      */
 
       // Enable a String extension on the test device.
       final stringExtensionDescription = extensions.togglePlatformMode;
@@ -389,11 +390,13 @@ Future<void> runServiceManagerTestsWithDriverFactory(
           .serviceExtensionManager.extensionStatesUpdated.future;
       // TODO(kenz): Uncomment this once
       // https://github.com/flutter/devtools/issues/1351 is fixed.
-//      await _verifyExtensionStateInServiceManager(
-//        boolExtensionDescription.extension,
-//        true,
-//        boolExtensionDescription.enabledValue,
-//      );
+      /*
+      await _verifyExtensionStateInServiceManager(
+        boolExtensionDescription.extension,
+        true,
+        boolExtensionDescription.enabledValue,
+      );
+      */
       await _verifyExtensionStateInServiceManager(
         stringExtensionDescription.extension,
         true,
