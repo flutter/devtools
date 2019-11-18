@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/flutter/initializer.dart';
-import 'package:devtools_app/src/flutter/table.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
@@ -13,7 +11,6 @@ import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
