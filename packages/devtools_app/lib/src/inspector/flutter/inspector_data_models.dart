@@ -86,13 +86,9 @@ class LayoutProperties {
       ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
       : 'h=unconstrained';
 
-  String describeWidth() {
-    return 'w=${toStringAsFixed(size.width)}';
-  }
+  String describeWidth() => 'w=${toStringAsFixed(size.width)}';
 
-  String describeHeight() {
-    return 'h=${toStringAsFixed(size.height)}';
-  }
+  String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
@@ -185,6 +181,9 @@ class FlexLayoutProperties extends LayoutProperties {
         .reduce((value, element) => value + element);
     return _totalFlex;
   }
+
+  Axis get crossDirection =>
+      direction == Axis.horizontal ? Axis.vertical : Axis.horizontal;
 
   static final _directionUtils = EnumUtils<Axis>(Axis.values);
   static final _mainAxisAlignmentUtils =
