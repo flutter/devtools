@@ -84,13 +84,18 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       await tester.pumpAndSettle();
       expect(find.byType(LogsTable), findsOneWidget);
-      expect(find.byKey(ValueKey(fakeLogData.last)), findsOneWidget,
-          reason: 'the most recently added logdata should show in the list by '
-              'default.');
-      expect(find.byKey(ValueKey(fakeLogData.first)), findsNothing,
-          reason:
-              'the least recently added logdata should be at the top of the '
-              'list, hidden from view.');
+      expect(
+        find.byKey(ValueKey(fakeLogData.last)),
+        findsOneWidget,
+        reason: 'the most recently added logdata should show in the list by '
+            'default.',
+      );
+      expect(
+        find.byKey(ValueKey(fakeLogData.first)),
+        findsNothing,
+        reason: 'the least recently added logdata should be at the top of the '
+            'list, hidden from view.',
+      );
     });
   });
 }
