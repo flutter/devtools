@@ -245,20 +245,31 @@ void main() {
 
   Widget wrap(Widget widget) {
     return MaterialApp(
-      home: Scaffold(
-        body: widget,
-      ),
+      home: Scaffold(body: widget),
     );
+  }
+
+  /// current workaround for flaky image asset testing.
+  /// https://github.com/flutter/flutter/issues/38997
+  Future<void> pump(WidgetTester tester, Widget w) async {
+    await tester.runAsync(() async {
+      await tester.pumpWidget(w);
+      for (var element in find.byType(Image).evaluate()) {
+        final Image widget = element.widget;
+        final ImageProvider image = widget.image;
+        await precacheImage(image, element);
+        await tester.pumpAndSettle();
+      }
+    });
   }
 
   testWidgets('Row golden test', (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
     final node = RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
-
     await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
-    await tester.pumpWidget(widget);
+    await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
       matchesGoldenFile('goldens/story_of_row_layout.png'),
@@ -271,7 +282,7 @@ void main() {
     await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
-    await tester.pumpWidget(widget);
+    await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
       matchesGoldenFile('goldens/story_of_column_layout.png'),
