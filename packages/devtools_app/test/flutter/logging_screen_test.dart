@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/flutter/logging_screen.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -58,7 +61,22 @@ void main() {
     });
 
     testWidgets('can toggle structured errors', (WidgetTester tester) async {
+      final serviceManager = FakeServiceManager(useFakeService: false);
+      setGlobal(
+        ServiceConnectionManager,
+        serviceManager,
+      );
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      Switch toggle = tester.widget(find.byType(Switch));
+      expect(toggle.value, false);
+
+      serviceManager.serviceExtensionManager
+          .fakeServiceExtensionStateChanged(structuredErrors.extension, 'true');
+      await tester.pumpAndSettle();
+      toggle = tester.widget(find.byType(Switch));
+      expect(toggle.value, true);
+
+      // TODO(djshuckerow): Hook up fake extension state querying.
     });
 
     testWidgets('shows most recent logs first', (WidgetTester tester) async {
