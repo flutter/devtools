@@ -7,6 +7,8 @@ import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../framework/framework_core.dart';
 
+const tooltipWait = Duration(milliseconds: 500);
+
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({

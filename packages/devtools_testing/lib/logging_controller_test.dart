@@ -282,7 +282,9 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
-  }, timeout: const Timeout.factor(8));
+    // TODO(kenz): Unskip this once
+    // https://github.com/flutter/devtools/issues/1351 is fixed.
+  }, skip: true, timeout: const Timeout.factor(8));
 }
 
 /// Normalize text in error messages that is likely unstable.

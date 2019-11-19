@@ -5,4 +5,4 @@
 /// The DevTools application version.
 // Note: when updating this, please update the corresponding version in the
 // pubspec.
-const String version = '0.1.12-dev';
+const String version = '0.1.12-dev.1';

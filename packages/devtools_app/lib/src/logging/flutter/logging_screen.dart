@@ -97,7 +97,7 @@ class LogsTable extends StatelessWidget {
     return FlatTable<LogData>(
       columns: columns,
       data: data,
-      keyFactory: (LogData data) => '${data.timestamp}${data.summary}',
+      keyFactory: (LogData data) => ValueKey<LogData>(data),
     );
   }
 }

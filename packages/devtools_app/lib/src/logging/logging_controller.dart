@@ -666,6 +666,9 @@ class LogData {
     _details = await detailsComputer;
     detailsComputer = null;
   }
+
+  @override
+  String toString() => 'LogData($kind, $timestamp)';
 }
 
 class LogKindColumn extends ColumnData<LogData> {

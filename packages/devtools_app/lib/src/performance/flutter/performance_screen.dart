@@ -102,7 +102,7 @@ class CpuCallTreeTable extends StatelessWidget {
       data: data.cpuProfileRoot,
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (frame) => frame.id,
+      keyFactory: (frame) => PageStorageKey<String>(frame.id),
     );
   }
 }

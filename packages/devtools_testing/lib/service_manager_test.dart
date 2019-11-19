@@ -90,7 +90,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await _verifyExtensionStateInServiceManager(extensionName, true, true);
 
       await env.tearDownEnvironment();
-    });
+      // TODO(kenz): Unskip this once
+      // https://github.com/flutter/devtools/issues/1351 is fixed.
+    }, skip: true);
 
     test('toggle String service extension', () async {
       await env.setupEnvironment();
@@ -310,6 +312,9 @@ Future<void> runServiceManagerTestsWithDriverFactory(
     }
 
     test('all extension types', () async {
+      // TODO(kenz): Uncomment this once
+      // https://github.com/flutter/devtools/issues/1351 is fixed.
+      /*
       // Enable a boolean extension on the test device.
       final boolExtensionDescription = extensions.debugPaint;
       final boolArgs = {'enabled': true};
@@ -322,12 +327,14 @@ Future<void> runServiceManagerTestsWithDriverFactory(
         service,
         isolateId: _flutterIsolateId,
       );
+
       await _enableExtensionOnTestDevice(
         boolExtensionDescription,
         boolArgs,
         boolEvalExpression,
         boolLibrary,
       );
+      */
 
       // Enable a String extension on the test device.
       final stringExtensionDescription = extensions.togglePlatformMode;
@@ -381,12 +388,15 @@ Future<void> runServiceManagerTestsWithDriverFactory(
       );
       await serviceManager
           .serviceExtensionManager.extensionStatesUpdated.future;
-
+      // TODO(kenz): Uncomment this once
+      // https://github.com/flutter/devtools/issues/1351 is fixed.
+      /*
       await _verifyExtensionStateInServiceManager(
         boolExtensionDescription.extension,
         true,
         boolExtensionDescription.enabledValue,
       );
+      */
       await _verifyExtensionStateInServiceManager(
         stringExtensionDescription.extension,
         true,
