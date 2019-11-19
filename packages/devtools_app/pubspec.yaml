@@ -109,6 +109,7 @@ flutter:
     - assets/img/story_of_layout/cross_axis_alignment/center.png
     - assets/img/story_of_layout/cross_axis_alignment/stretch.png
     - assets/img/story_of_layout/cross_axis_alignment/baseline.png
+    - assets/img/story_of_layout/empty_space.png
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
   fonts:

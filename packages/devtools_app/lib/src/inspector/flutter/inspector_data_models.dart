@@ -78,21 +78,21 @@ class LayoutProperties {
 
   Iterable<double> get childrenHeight => children?.map((child) => child.height);
 
-  String describeWidthConstraints() => constraints.hasBoundedWidth
-      ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
-      : 'w=unconstrained';
-
-  String describeHeightConstraints() => constraints.hasBoundedHeight
-      ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
-      : 'h=unconstrained';
-
-  String describeWidth() {
-    return 'w=${toStringAsFixed(size.width)}';
+  String describeWidthConstraints() {
+    return constraints.hasBoundedWidth
+        ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
+        : 'w=unconstrained';
   }
 
-  String describeHeight() {
-    return 'h=${toStringAsFixed(size.height)}';
+  String describeHeightConstraints() {
+    return constraints.hasBoundedHeight
+        ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
+        : 'h=unconstrained';
   }
+
+  String describeWidth() => 'w=${toStringAsFixed(size.width)}';
+
+  String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
@@ -141,8 +141,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   int _totalFlex;
 
-  static FlexLayoutProperties fromRemoteDiagnosticsNode(
-      RemoteDiagnosticsNode node) {
+  static FlexLayoutProperties fromDiagnostics(RemoteDiagnosticsNode node) {
     final Map<String, Object> renderObjectJson = node.json['renderObject'];
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
@@ -169,11 +168,13 @@ class FlexLayoutProperties extends LayoutProperties {
 
   bool get isVerticalMainAxis => direction == Axis.vertical;
 
-  String get horizontalDirectionDescription =>
-      direction == Axis.horizontal ? 'Main Axis' : 'Cross Axis';
+  String get horizontalDirectionDescription {
+    return direction == Axis.horizontal ? 'Main Axis' : 'Cross Axis';
+  }
 
-  String get verticalDirectionDescription =>
-      direction == Axis.vertical ? 'Main Axis' : 'Cross Axis';
+  String get verticalDirectionDescription {
+    return direction == Axis.vertical ? 'Main Axis' : 'Cross Axis';
+  }
 
   // TODO(albertusangga): Remove this getter since type is not that useful
   Type get type => direction == Axis.horizontal ? Row : Column;
@@ -184,6 +185,10 @@ class FlexLayoutProperties extends LayoutProperties {
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element);
     return _totalFlex;
+  }
+
+  Axis get crossAxisDirection {
+    return direction == Axis.horizontal ? Axis.vertical : Axis.horizontal;
   }
 
   static final _directionUtils = EnumUtils<Axis>(Axis.values);

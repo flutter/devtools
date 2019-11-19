@@ -133,7 +133,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
       );
     return StoryOfYourFlexWidget(
       // TODO(albertusangga): Cache this instead of recomputing every build,
-      FlexLayoutProperties.fromRemoteDiagnosticsNode(selected),
+      FlexLayoutProperties.fromDiagnostics(selected),
     );
   }
 

@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../ui/colors.dart';
 import '../../../ui/theme.dart';
+import '../../../utils.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
@@ -32,10 +33,13 @@ const defaultMaxRenderHeight = 300.0;
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-const heightArrowIndicatorSize = 48.0;
-const widthArrowIndicatorSize = 42.0;
+const heightAndConstraintIndicatorSize = 48.0;
+const widthAndConstraintIndicatorSize = 42.0;
 const mainAxisArrowIndicatorSize = 32.0;
 const crossAxisArrowIndicatorSize = 32.0;
+
+const heightOnlyIndicatorSize = 24.0;
+const widthOnlyIndicatorSize = 24.0;
 
 const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
@@ -168,6 +172,12 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     crossAxisAlignment = properties.crossAxisAlignment;
   }
 
+  double crossAxisDimension(LayoutProperties properties) =>
+      direction == Axis.horizontal ? properties.height : properties.width;
+
+  double mainAxisDimension(LayoutProperties properties) =>
+      direction == Axis.vertical ? properties.height : properties.width;
+
   @override
   void initState() {
     super.initState();
@@ -180,7 +190,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     _update();
   }
 
-  Widget _visualizeWidthAndHeight({
+  Widget _visualizeWidthAndHeightWithConstraints({
     @required Widget widget,
     @required LayoutProperties properties,
     double arrowHeadSize = defaultArrowHeadSize,
@@ -207,10 +217,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         margin: const EdgeInsets.only(
           top: margin,
           left: margin,
-          bottom: widthArrowIndicatorSize,
+          bottom: widthAndConstraintIndicatorSize,
         ),
       ),
-      rightWidth: heightArrowIndicatorSize,
+      rightWidth: heightAndConstraintIndicatorSize,
       bottom: Container(
         child: ArrowWrapper.bidirectional(
           arrowColor: widthIndicatorColor,
@@ -229,13 +239,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         ),
         margin: const EdgeInsets.only(
           top: margin,
-          right: heightArrowIndicatorSize,
+          right: heightAndConstraintIndicatorSize,
           // so that the arrow does not overlap with each other
           bottom: margin,
           left: margin,
         ),
       ),
-      bottomHeight: widthArrowIndicatorSize,
+      bottomHeight: widthAndConstraintIndicatorSize,
     );
   }
 
@@ -245,7 +255,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
     final theme = Theme.of(context);
 
-    return _visualizeWidthAndHeight(
+    return _visualizeWidthAndHeightWithConstraints(
       widget: Container(
         margin: const EdgeInsets.only(top: margin, left: margin),
         child: LayoutBuilder(builder: (context, constraints) {
@@ -308,6 +318,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                       textColor: i.isOdd ? null : const Color(0xFF303030),
                       renderHeight: renderHeights[i],
                       renderWidth: renderWidths[i],
+                      maxWidth: constraints.maxWidth,
+                      maxHeight: constraints.maxHeight,
                     )
                 ]),
           );
@@ -329,16 +341,18 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     Color textColor,
     double renderWidth,
     double renderHeight,
+    double maxWidth,
+    double maxHeight,
   }) {
-    final int flexFactor = childProperties.flexFactor;
-    return Container(
+    final flexFactor = childProperties.flexFactor;
+    final renderChildWidget = Container(
       width: renderWidth,
       height: renderHeight,
       child: WidgetVisualizer(
         title: childProperties.description,
         borderColor: borderColor,
         textColor: textColor,
-        child: _visualizeWidthAndHeight(
+        child: _visualizeWidthAndHeightWithConstraints(
           arrowHeadSize: arrowHeadSize,
           widget: Align(
             alignment: Alignment.topRight,
@@ -379,6 +393,56 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         ),
       ),
     );
+
+    // cross axis does not have any empty space.
+    if (crossAxisDimension(childProperties) == crossAxisDimension(properties) ||
+        crossAxisAlignment == CrossAxisAlignment.stretch) {
+      return renderChildWidget;
+    }
+
+    double emptySpaceRenderWidth, emptySpaceRenderHeight;
+    double emptySpaceWidth, emptySpaceHeight;
+
+    double calculateEmptySpace(double maxDimension, double usedDimension) {
+      double emptySpace = max(0.0, maxDimension - usedDimension);
+      if (crossAxisAlignment == CrossAxisAlignment.center) emptySpace *= 0.5;
+      return emptySpace;
+    }
+
+    if (direction == Axis.horizontal) {
+      emptySpaceWidth = childProperties.width;
+      emptySpaceRenderWidth = renderWidth;
+
+      emptySpaceHeight =
+          calculateEmptySpace(properties.height, childProperties.height);
+      emptySpaceRenderHeight = calculateEmptySpace(maxHeight, renderHeight);
+    } else {
+      emptySpaceHeight = childProperties.height;
+      emptySpaceRenderHeight = renderHeight;
+
+      emptySpaceWidth =
+          calculateEmptySpace(properties.width, childProperties.width);
+      emptySpaceRenderWidth = calculateEmptySpace(maxWidth, renderWidth);
+    }
+
+    Widget describeEmptySpace() {
+      return EmptySpaceVisualizerWidget(
+        width: emptySpaceWidth,
+        height: emptySpaceHeight,
+        renderWidth: emptySpaceRenderWidth,
+        renderHeight: emptySpaceRenderHeight,
+      );
+    }
+
+    return Flex(
+      direction: properties.crossAxisDirection,
+      children: <Widget>[
+        if (crossAxisAlignment != CrossAxisAlignment.start)
+          describeEmptySpace(),
+        renderChildWidget,
+        if (crossAxisAlignment != CrossAxisAlignment.end) describeEmptySpace(),
+      ],
+    );
   }
 
   Widget _buildAxisAlignmentDropdown(Axis axis) {
@@ -397,7 +461,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       alignmentEnumEntries = MainAxisAlignment.values;
       selected = mainAxisAlignment;
     } else {
-      alignmentEnumEntries = CrossAxisAlignment.values;
+      alignmentEnumEntries = CrossAxisAlignment.values.toList(growable: true);
+      if (properties.textBaseline == null) {
+        // TODO(albertusangga): Look for ways to visualize baseline when it is null
+        alignmentEnumEntries.remove(CrossAxisAlignment.baseline);
+      }
       selected = crossAxisAlignment;
     }
     return Container(
@@ -657,5 +725,78 @@ class WidgetVisualizer extends StatelessWidget {
       ),
       margin: const EdgeInsets.all(1.0),
     );
+  }
+}
+
+class EmptySpaceVisualizerWidget extends StatelessWidget {
+  const EmptySpaceVisualizerWidget({
+    Key key,
+    @required this.width,
+    @required this.height,
+    @required this.renderWidth,
+    @required this.renderHeight,
+  }) : super(key: key);
+
+  // width and height to be displayed on Text
+  final double width;
+  final double height;
+
+  // width and height for rendering/sizing the widget
+  final double renderWidth;
+  final double renderHeight;
+
+  static const assetName = 'assets/img/story_of_layout/empty_space.png';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: renderWidth,
+        height: renderHeight,
+        child: Stack(children: <Widget>[
+          Positioned.fill(
+            child: Image.asset(
+              assetName,
+              width: renderWidth,
+              height: renderHeight,
+              fit: BoxFit.fill,
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: widthOnlyIndicatorSize,
+              margin: const EdgeInsets.only(
+                left: margin,
+                right: heightOnlyIndicatorSize,
+              ),
+              child: ArrowWrapper.bidirectional(
+                child: Text(
+                  'w=${toStringAsFixed(width)}',
+                ),
+                arrowColor: widthIndicatorColor,
+                direction: Axis.horizontal,
+                arrowHeadSize: arrowHeadSize,
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: heightOnlyIndicatorSize,
+              margin: const EdgeInsets.symmetric(vertical: margin),
+              child: ArrowWrapper.bidirectional(
+                child: RotatedBox(
+                  quarterTurns: 1,
+                  child: Text(
+                    'h=${toStringAsFixed(height)}',
+                  ),
+                ),
+                arrowColor: heightIndicatorColor,
+                direction: Axis.vertical,
+                arrowHeadSize: arrowHeadSize,
+              ),
+            ),
+          ),
+        ]));
   }
 }
