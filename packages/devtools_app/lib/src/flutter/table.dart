@@ -27,10 +27,7 @@ class FlatTable<T> extends StatefulWidget {
   final List<T> data;
 
   /// Factory that creates keys for each row in this table.
-  ///
-  /// These keys are passed to [PageStorageKey] to restore the table's state
-  /// when re-opening its page.
-  final String Function(T data) keyFactory;
+  final Key Function(T data) keyFactory;
 
   @override
   _FlatTableState<T> createState() => _FlatTableState<T>();
@@ -79,7 +76,7 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
   Widget _buildRow(BuildContext context, int index) {
     final node = widget.data[index];
     return _TableRow(
-      key: PageStorageKey(widget.keyFactory(node)),
+      key: widget.keyFactory(node),
       node: node,
       onPressed: (_) {},
       columns: widget.columns,
@@ -122,7 +119,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final T data;
 
   /// Factory that creates keys for each row in this table.
-  final String Function(T) keyFactory;
+  final Key Function(T) keyFactory;
 
   @override
   _TreeTableState<T> createState() => _TreeTableState<T>();
@@ -235,7 +232,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   Widget _tableRowFor(T node) {
     return _TableRow<T>(
-      key: PageStorageKey(widget.keyFactory(node)),
+      key: widget.keyFactory(node),
       node: node,
       onPressed: _onItemPressed,
       columns: widget.columns,
