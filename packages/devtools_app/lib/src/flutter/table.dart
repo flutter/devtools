@@ -240,7 +240,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       isExpanded: node.isExpanded,
       isExpandable: node.isExpandable,
       isShown: node.shouldShow(),
-      // TODO(djshuckerow): Set table row colors alternating, even when the table has collapsed rows.
+      // TODO(https://github.com/flutter/devtools/issues/1361): alternate table
+      // row colors, even when the table has collapsed rows.
     );
   }
 }
