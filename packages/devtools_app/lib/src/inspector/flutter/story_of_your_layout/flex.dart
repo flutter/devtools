@@ -394,59 +394,53 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
       ),
     );
 
-    // cross axis does not have any empty space
+    // cross axis does not have any empty space.
     if (crossAxisDimension(childProperties) == crossAxisDimension(properties) ||
         crossAxisAlignment == CrossAxisAlignment.stretch) {
       return renderChildWidget;
     }
 
-    // cross axis have empty space so we need to visualize it
     double emptySpaceRenderWidth, emptySpaceRenderHeight;
     double emptySpaceWidth, emptySpaceHeight;
+
+    double calculateEmptySpace(double maxDimension, double usedDimension) {
+      double emptySpace = max(0.0, maxDimension - usedDimension);
+      if (crossAxisAlignment == CrossAxisAlignment.center) emptySpace *= 0.5;
+      return emptySpace;
+    }
+
     if (direction == Axis.horizontal) {
       emptySpaceWidth = childProperties.width;
       emptySpaceRenderWidth = renderWidth;
 
-      emptySpaceHeight = properties.height - childProperties.height;
-
-      emptySpaceRenderHeight = max(maxHeight - renderHeight, 0);
-      if (crossAxisAlignment == CrossAxisAlignment.center) {
-        emptySpaceHeight /= 2.0;
-        emptySpaceRenderHeight /= 2.0;
-      }
+      emptySpaceHeight =
+          calculateEmptySpace(properties.height, childProperties.height);
+      emptySpaceRenderHeight = calculateEmptySpace(maxHeight, renderHeight);
     } else {
       emptySpaceHeight = childProperties.height;
       emptySpaceRenderHeight = renderHeight;
 
-      emptySpaceWidth = properties.width - childProperties.width;
-      emptySpaceRenderWidth = max(maxWidth - renderWidth, 0.0);
-      if (crossAxisAlignment == CrossAxisAlignment.center) {
-        emptySpaceWidth /= 2.0;
-        emptySpaceRenderWidth /= 2.0;
-      }
+      emptySpaceWidth =
+          calculateEmptySpace(properties.width, childProperties.width);
+      emptySpaceRenderWidth = calculateEmptySpace(maxWidth, renderWidth);
     }
+
+    Widget describeEmptySpace() {
+      return EmptySpaceVisualizerWidget(
+        width: emptySpaceWidth,
+        height: emptySpaceHeight,
+        renderWidth: emptySpaceRenderWidth,
+        renderHeight: emptySpaceRenderHeight,
+      );
+    }
+
     return Flex(
-      direction: properties.crossDirection,
+      direction: properties.crossAxisDirection,
       children: <Widget>[
         if (crossAxisAlignment != CrossAxisAlignment.start)
-          Expanded(
-            child: EmptySpaceVisualizerWidget(
-              width: emptySpaceWidth,
-              height: emptySpaceHeight,
-              renderWidth: emptySpaceRenderWidth,
-              renderHeight: emptySpaceRenderHeight,
-            ),
-          ),
+          describeEmptySpace(),
         renderChildWidget,
-        if (crossAxisAlignment != CrossAxisAlignment.end)
-          Expanded(
-            child: EmptySpaceVisualizerWidget(
-              width: emptySpaceWidth,
-              height: emptySpaceHeight,
-              renderWidth: emptySpaceRenderWidth,
-              renderHeight: emptySpaceRenderHeight,
-            ),
-          ),
+        if (crossAxisAlignment != CrossAxisAlignment.end) describeEmptySpace(),
       ],
     );
   }
@@ -469,7 +463,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     } else {
       alignmentEnumEntries = CrossAxisAlignment.values.toList(growable: true);
       if (properties.textBaseline == null) {
-        // TODO(albertusangga): Look for ways to visualize baseline when its null
+        // TODO(albertusangga): Look for ways to visualize baseline when it is null
         alignmentEnumEntries.remove(CrossAxisAlignment.baseline);
       }
       selected = crossAxisAlignment;

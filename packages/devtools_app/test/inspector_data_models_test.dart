@@ -173,7 +173,7 @@ void main() {
     final diagnostics =
         RemoteDiagnosticsNode({'renderObject': flexJson}, null, null, null);
     final FlexLayoutProperties flexProperties =
-        FlexLayoutProperties.fromRemoteDiagnosticsNode(diagnostics);
+        FlexLayoutProperties.fromDiagnostics(diagnostics);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);
