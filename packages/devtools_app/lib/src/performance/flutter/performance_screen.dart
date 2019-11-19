@@ -38,6 +38,7 @@ class PerformanceBody extends StatefulWidget {
 
 class PerformanceBodyState extends State<PerformanceBody> {
   final PerformanceController _controller = PerformanceController();
+
   CpuProfileData _data;
 
   @override
@@ -60,7 +61,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
         // expand/collapse all by default.
         _data.cpuProfileRoot.expandCascading();
       });
-    });
+    }).catchError((_) {});
   }
 
   @override
