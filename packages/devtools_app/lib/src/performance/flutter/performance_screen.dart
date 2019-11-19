@@ -45,7 +45,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
     super.initState();
     // TODO(djshuckerow): add in buttons to control the CPU recording.
     _controller.startRecording();
-    Future.delayed(const Duration(seconds: 15)).then((_) async {
+    Future.delayed(const Duration(seconds: 3)).then((_) async {
       await _controller.stopRecording();
       _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
       setState(() {
