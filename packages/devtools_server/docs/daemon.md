@@ -69,12 +69,11 @@ This request is only used for testing purposes so is currently "undocumented"
 This request lists all DevTools instances that are currently connected back to the server along with which VM services they're connected to and the pages they are showing. The request requires no `params`.
 -->
 
-### devTools.launch Request / launchDevTools VM Service
+### devTools.launch Request
 
-DevTools can be launched either through the daemon API using the `devTools.launch` request or via the VM Service protocol by calling the `launchDevTools` service.
+DevTools can be launched in a browser using the `devTools.launch` request with the following parameters.
 
-Both methods take the same parameters.
-
+- `vmServiceUri` - the URI of the VM service that DevTools should connect to
 - `reuseWindows` - whether an existing DevTools instance that is not connected to a VM (or is connected to the same one) should be reused
 - `notify` - whether to send a browser notification to the user in the case where a DevTools instance is reused, to help them find the window
 - `page` - the page to launch DevTools on (matches the IDs used in DevTools that show in the URL fragments) or - if reusing a window - to switch to
@@ -88,10 +87,32 @@ Both methods take the same parameters.
 ```js
 {
 	'id': '123',
-	// The `method` field is populated based on the ServiceRegistered VM event
-	// if sending over the VM Service protocol.
-	// 'method': 's2.launchDevTools',
 	'method': 'devTools.launch',
+	'params': {
+		'vmServiceUri': 'ws://127.0.0.1/ABCDEF=/ws',
+		'notify': true,
+		'page': 'inspector',
+		'queryParams': {
+			'hide': 'debugger',
+			'ide': 'VSCode',
+			'theme': 'dark'
+		},
+		'reuseWindows': true
+	}
+}
+```
+
+### launchDevTools VM Service
+
+DevTools can also be launched via the VM Service protocol by calling the `launchDevTools` service. It takes the same parameters as the `devTools.launch` request, except without the `vmServiceUri` parameter since that's already known by the service.
+
+#### Example
+
+```js
+{
+	'id': '123',
+	// The `method` field is populated based on the ServiceRegistered VM event
+	'method': 's2.launchDevTools',
 	'params': {
 		'notify': true,
 		'page': 'inspector',
