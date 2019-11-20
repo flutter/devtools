@@ -284,7 +284,9 @@ class FlexLayoutProperties extends LayoutProperties {
         );
       } else {
         // uniform cross axis sizes.
-        final size = largestSize / dimension(axis) * maxSizeAvailable(axis);
+        final size = crossAxisAlignment == CrossAxisAlignment.stretch
+            ? maxSizeAvailable(axis)
+            : largestSize / dimension(axis) * maxSizeAvailable(axis);
         return sizes.map((_) => size).toList();
       }
     }

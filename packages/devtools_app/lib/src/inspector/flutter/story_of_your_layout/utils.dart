@@ -10,13 +10,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 double sum(Iterable<double> numbers) =>
-  numbers.fold(0, (sum, cur) => sum + cur);
+    numbers.fold(0, (sum, cur) => sum + cur);
 
 double minimum(Iterable<double> numbers) =>
-  numbers.fold(double.infinity, (minimum, cur) => min(minimum, cur));
+    numbers.fold(double.infinity, (minimum, cur) => min(minimum, cur));
 
 double maximum(Iterable<double> numbers) =>
-  numbers.fold(-double.infinity, (minimum, cur) => max(minimum, cur));
+    numbers.fold(-double.infinity, (minimum, cur) => max(minimum, cur));
 
 String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
   return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
