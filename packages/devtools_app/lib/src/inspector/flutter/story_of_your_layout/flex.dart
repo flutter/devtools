@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -47,89 +45,6 @@ const smallTextScaleFactor = 0.8;
 const axisAlignmentAssetImageHeight = 24.0;
 const dropdownMaxWidth = 320.0;
 
-String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
-}
-
-/// Compute real widget sizes into rendered sizes to be displayed on the details tab.
-/// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
-/// In the case where it is greater, we should render it with scrolling capability.
-///
-/// if [forceToOccupyMaxSizeAvailable] is set to true,
-///   this method will ignore the largestRenderSize
-///   and compute it's own largestRenderSize to force
-///   the sum of the render size to be equals to [maxSpaceAvailable]
-///
-/// Formula for computing render size:
-///   rs_i = (s_i - ss) * (lrs - srs) / (ls - ss) + srs
-/// Variables:
-/// - rs_i: render size for element index i
-/// - s_i: real size for element at index i (sizes[i])
-/// - ss: [smallestSize] (the smallest element in the array [sizes])
-/// - ls: [largestSize] (the largest element in the array [sizes])
-/// - srs: [smallestRenderSize] (render size for [smallestSize])
-/// - lrs: [largestRenderSize] (render size for [largestSize])
-/// Explanation:
-/// - The computation formula for transforming size to renderSize is based on these two things:
-///   - [smallestSize] will be rendered to [smallestRenderSize]
-///   - [largestSize] will be rendered to [largestRenderSize]
-///   - any other size will be scaled accordingly
-/// - The formula above is derived from:
-///    (rs_i - srs) / (lrs - srs) = (s_i - ss) / (s - ss)
-///
-/// Formula for computing forced [largestRenderSize]:
-///   lrs = (msa - n * srs) * (ls - ss) / sum(s_i - ss) + srs
-/// Variables:
-///   - n: [sizes.length]
-///   - msa: [maxSizeAvailable]
-/// Explanation:
-/// - This formula is derived from the equation:
-///    sum(rs_i) = msa
-///
-List<double> computeRenderSizes({
-  @required Iterable<double> sizes,
-  @required double smallestSize,
-  @required double largestSize,
-  @required double smallestRenderSize,
-  @required double largestRenderSize,
-  @required double maxSizeAvailable,
-  bool forceToOccupyMaxSizeAvailable = false,
-}) {
-  /// Assign from parameters and abbreviate variable names for similarity to formula
-  final ss = smallestSize, srs = smallestRenderSize;
-  final ls = largestSize;
-  double lrs = largestRenderSize;
-  final msa = maxSizeAvailable;
-  final n = sizes.length;
-
-  if (ss == ls) {
-    // It means that all widget have the same size
-    //   and we can just divide the size evenly
-    //   but it should be at least as big as [smallestRenderSize]
-    final rs = max(srs, msa / n);
-    return [for (var _ in sizes) rs];
-  }
-
-  List<double> transformToRenderSize(double lrs) =>
-      [for (var s in sizes) (s - ss) * (lrs - srs) / (ls - ss) + srs];
-
-  var renderSizes = transformToRenderSize(largestRenderSize);
-
-  if (forceToOccupyMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
-    lrs =
-        (msa - n * srs) * (ls - ss) / sum([for (var s in sizes) s - ss]) + srs;
-    renderSizes = transformToRenderSize(lrs);
-  }
-  return renderSizes;
-}
-
-String mainAxisAssetImageUrl(MainAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
-}
-
-double sum(Iterable<double> numbers) =>
-    numbers.fold(0, (sum, cur) => sum + cur);
-
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
@@ -144,9 +59,6 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 }
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
-  MainAxisAlignment mainAxisAlignment;
-  CrossAxisAlignment crossAxisAlignment;
-
   Size get size => properties.size;
 
   FlexLayoutProperties get properties => widget.properties;
@@ -160,35 +72,22 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
   bool get isColumn => !isRow;
 
   Color get horizontalColor =>
-      properties.isHorizontalMainAxis ? mainAxisColor : crossAxisColor;
+      properties.isMainAxisHorizontal ? mainAxisColor : crossAxisColor;
 
   Color get verticalColor =>
-      properties.isVerticalMainAxis ? mainAxisColor : crossAxisColor;
+      properties.isMainAxisVertical ? mainAxisColor : crossAxisColor;
 
-  String get flexType => properties.type.toString();
+  String get flexType => properties.type;
 
-  void _update() {
-    mainAxisAlignment = properties.mainAxisAlignment;
-    crossAxisAlignment = properties.crossAxisAlignment;
-  }
+  MainAxisAlignment get mainAxisAlignment => properties.mainAxisAlignment;
+
+  CrossAxisAlignment get crossAxisAlignment => properties.crossAxisAlignment;
 
   double crossAxisDimension(LayoutProperties properties) =>
       direction == Axis.horizontal ? properties.height : properties.width;
 
   double mainAxisDimension(LayoutProperties properties) =>
       direction == Axis.vertical ? properties.height : properties.width;
-
-  @override
-  void initState() {
-    super.initState();
-    _update();
-  }
-
-  @override
-  void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _update();
-  }
 
   Widget _visualizeWidthAndHeightWithConstraints({
     @required Widget widget,
@@ -249,12 +148,73 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     );
   }
 
+  Widget _visualizeChild({
+    LayoutProperties childProperties,
+    Color borderColor,
+    Color textColor,
+    Size renderSize,
+    Offset renderOffset,
+  }) {
+    final flexFactor = childProperties.flexFactor;
+    return Positioned(
+      top: renderOffset.dy,
+      left: renderOffset.dx,
+      child: Container(
+        width: renderSize.width,
+        height: renderSize.height,
+        child: WidgetVisualizer(
+          title: childProperties.description,
+          borderColor: borderColor,
+          textColor: textColor,
+          child: _visualizeWidthAndHeightWithConstraints(
+            arrowHeadSize: arrowHeadSize,
+            widget: Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                margin: const EdgeInsets.only(
+                  top: margin,
+                  left: margin,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      'flex: $flexFactor',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (flexFactor == 0 || flexFactor == null)
+                      Text(
+                        'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                        style: TextStyle(
+                          color: ThemedColor(
+                            const Color(0xFFD08A29),
+                            Colors.orange.shade700,
+                          ),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
+                        textScaleFactor: smallTextScaleFactor,
+                        textAlign: TextAlign.right,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            properties: childProperties,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _visualizeFlex(BuildContext context) {
     if (!properties.hasChildren)
       return const Center(child: Text('No Children'));
 
     final theme = Theme.of(context);
-
     return _visualizeWidthAndHeightWithConstraints(
       widget: Container(
         margin: const EdgeInsets.only(top: margin, left: margin),
@@ -262,66 +222,61 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           final maxWidth = constraints.maxWidth;
           final maxHeight = constraints.maxHeight;
 
-          // TODO(albertusangga): Remove ternary checking after visualizing empty space
-          final largestRenderWidth = isColumn
-              ? maxWidth
-              : max(
-                  min(
-                    maxWidth * properties.largestWidthChildFraction,
-                    defaultMaxRenderWidth,
-                  ),
-                  minRenderWidth,
-                );
-          // TODO(albertusangga): Remove ternary checking after visualizing empty space
-          final largestRenderHeight = isRow
-              ? maxHeight
-              : max(
-                  min(
-                    maxHeight * properties.largestHeightChildFraction,
-                    defaultMaxRenderHeight,
-                  ),
-                  minRenderHeight,
-                );
-
-          final renderHeights = computeRenderSizes(
-            sizes: properties.childrenHeight,
-            smallestSize: properties.smallestHeightChild.height,
-            largestSize: properties.largestHeightChild.height,
-            smallestRenderSize: minRenderHeight,
-            largestRenderSize: largestRenderHeight,
-            maxSizeAvailable: maxHeight,
-            forceToOccupyMaxSizeAvailable: true,
+          final renderInfo = properties.childrenRenderInformation(
+            smallestRenderWidth: minRenderWidth,
+            largestRenderWidth: defaultMaxRenderWidth,
+            smallestRenderHeight: minRenderHeight,
+            largestRenderHeight: defaultMaxRenderHeight,
+            maxWidthAvailable: maxWidth,
+            maxHeightAvailable: maxHeight,
           );
 
-          final renderWidths = computeRenderSizes(
-            sizes: properties.childrenWidth,
-            smallestSize: properties.smallestWidthChild.width,
-            largestSize: properties.largestWidthChild.width,
-            smallestRenderSize: minRenderWidth,
-            largestRenderSize: largestRenderWidth,
-            maxSizeAvailable: maxWidth,
-            forceToOccupyMaxSizeAvailable: true,
-          );
+          final widgetChildren = <Widget>[
+            for (var i = 0; i < children.length; i++)
+              _visualizeChild(
+                childProperties: children[i],
+                borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
+                textColor: i.isOdd ? null : const Color(0xFF303030),
+                renderSize: renderInfo[i].size,
+                renderOffset: renderInfo[i].offset,
+              )
+          ];
+
+          final crossAxisSpaces = <Widget>[
+            for (var spaceRenderInfo in properties.crossAxisSpaces(
+              childrenRenderInfo: renderInfo,
+              maxWidthAvailable: maxWidth,
+              maxHeightAvailable: maxHeight,
+            ))
+              Positioned(
+                top: spaceRenderInfo.dy,
+                left: spaceRenderInfo.dx,
+                child: EmptySpaceVisualizerWidget(
+                  width: spaceRenderInfo.realWidth,
+                  height: spaceRenderInfo.realHeight,
+                  renderWidth: spaceRenderInfo.width,
+                  renderHeight: spaceRenderInfo.height,
+                ),
+              )
+          ];
 
           return SingleChildScrollView(
             scrollDirection: properties.direction,
-            child: Flex(
-                mainAxisSize: properties.mainAxisSize,
-                direction: properties.direction,
-                mainAxisAlignment: mainAxisAlignment,
-                crossAxisAlignment: crossAxisAlignment,
-                children: [
-                  for (var i = 0; i < children.length; i++)
-                    _visualizeChild(
-                      childProperties: children[i],
-                      borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-                      textColor: i.isOdd ? null : const Color(0xFF303030),
-                      renderHeight: renderHeights[i],
-                      renderWidth: renderWidths[i],
-                      maxWidth: constraints.maxWidth,
-                      maxHeight: constraints.maxHeight,
-                    )
-                ]),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: maxWidth,
+                minHeight: maxHeight,
+                maxWidth: direction == Axis.horizontal
+                    ? sum(renderInfo.map((renderSize) => renderSize.width))
+                    : maxWidth,
+                maxHeight: direction == Axis.vertical
+                    ? sum(renderInfo.map((renderSize) => renderSize.height))
+                    : maxHeight,
+              ),
+              child: Stack(
+                children: [...widgetChildren, ...crossAxisSpaces],
+              ),
+            ),
           );
         }),
         decoration: BoxDecoration(
@@ -332,116 +287,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
         ),
       ),
       properties: properties,
-    );
-  }
-
-  Widget _visualizeChild({
-    LayoutProperties childProperties,
-    Color borderColor,
-    Color textColor,
-    double renderWidth,
-    double renderHeight,
-    double maxWidth,
-    double maxHeight,
-  }) {
-    final flexFactor = childProperties.flexFactor;
-    final renderChildWidget = Container(
-      width: renderWidth,
-      height: renderHeight,
-      child: WidgetVisualizer(
-        title: childProperties.description,
-        borderColor: borderColor,
-        textColor: textColor,
-        child: _visualizeWidthAndHeightWithConstraints(
-          arrowHeadSize: arrowHeadSize,
-          widget: Align(
-            alignment: Alignment.topRight,
-            child: Container(
-              margin: const EdgeInsets.only(
-                top: margin,
-                left: margin,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    'flex: $flexFactor',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  if (flexFactor == 0 || flexFactor == null)
-                    Text(
-                      'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                      style: TextStyle(
-                        color: ThemedColor(
-                          const Color(0xFFD08A29),
-                          Colors.orange.shade700,
-                        ),
-                        fontStyle: FontStyle.italic,
-                      ),
-                      maxLines: 2,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      textScaleFactor: smallTextScaleFactor,
-                      textAlign: TextAlign.right,
-                    ),
-                ],
-              ),
-            ),
-          ),
-          properties: childProperties,
-        ),
-      ),
-    );
-
-    // cross axis does not have any empty space.
-    if (crossAxisDimension(childProperties) == crossAxisDimension(properties) ||
-        crossAxisAlignment == CrossAxisAlignment.stretch) {
-      return renderChildWidget;
-    }
-
-    double emptySpaceRenderWidth, emptySpaceRenderHeight;
-    double emptySpaceWidth, emptySpaceHeight;
-
-    double calculateEmptySpace(double maxDimension, double usedDimension) {
-      double emptySpace = max(0.0, maxDimension - usedDimension);
-      if (crossAxisAlignment == CrossAxisAlignment.center) emptySpace *= 0.5;
-      return emptySpace;
-    }
-
-    if (direction == Axis.horizontal) {
-      emptySpaceWidth = childProperties.width;
-      emptySpaceRenderWidth = renderWidth;
-
-      emptySpaceHeight =
-          calculateEmptySpace(properties.height, childProperties.height);
-      emptySpaceRenderHeight = calculateEmptySpace(maxHeight, renderHeight);
-    } else {
-      emptySpaceHeight = childProperties.height;
-      emptySpaceRenderHeight = renderHeight;
-
-      emptySpaceWidth =
-          calculateEmptySpace(properties.width, childProperties.width);
-      emptySpaceRenderWidth = calculateEmptySpace(maxWidth, renderWidth);
-    }
-
-    Widget describeEmptySpace() {
-      return EmptySpaceVisualizerWidget(
-        width: emptySpaceWidth,
-        height: emptySpaceHeight,
-        renderWidth: emptySpaceRenderWidth,
-        renderHeight: emptySpaceRenderHeight,
-      );
-    }
-
-    return Flex(
-      direction: properties.crossAxisDirection,
-      children: <Widget>[
-        if (crossAxisAlignment != CrossAxisAlignment.start)
-          describeEmptySpace(),
-        renderChildWidget,
-        if (crossAxisAlignment != CrossAxisAlignment.end) describeEmptySpace(),
-      ],
     );
   }
 
@@ -516,9 +361,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               onChanged: (Object newSelection) {
                 setState(() {
                   if (axis == direction) {
-                    mainAxisAlignment = newSelection;
+                    properties.mainAxisAlignment = newSelection;
                   } else {
-                    crossAxisAlignment = newSelection;
+                    properties.crossAxisAlignment = newSelection;
                   }
                 });
               },
@@ -750,9 +595,10 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: renderWidth,
-        height: renderHeight,
-        child: Stack(children: <Widget>[
+      width: renderWidth,
+      height: renderHeight,
+      child: Stack(
+        children: <Widget>[
           Positioned.fill(
             child: Image.asset(
               assetName,
@@ -797,6 +643,8 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
               ),
             ),
           ),
-        ]));
+        ],
+      ),
+    );
   }
 }
