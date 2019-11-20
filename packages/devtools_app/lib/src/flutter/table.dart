@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 
 import '../table_data.dart';
@@ -403,9 +404,7 @@ class _TableRow<T> extends StatefulWidget {
   /// Gets a color to use for this row at a given index.
   static Color colorFor(BuildContext context, int index) {
     final theme = Theme.of(context);
-    final alternateColor = theme.brightness == Brightness.dark
-        ? devtoolsGrey[900]
-        : devtoolsGrey[100];
+    final alternateColor = ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
     return index % 2 == 0 ? alternateColor : theme.canvasColor;
   }
 

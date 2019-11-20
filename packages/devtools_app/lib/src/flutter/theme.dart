@@ -39,10 +39,11 @@ const buttonMinWidth = 36.0;
 /// Branded grey color.
 ///
 /// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
-const devtoolsGrey = ColorSwatch<int>(900, {
+const ColorSwatch<int> devtoolsGrey = ColorSwatch<int>(0xFF202124, {
   900: Color(0xFF202124),
   600: Color(0xFF60646B),
   100: Color(0xFFD5D7Da),
+  50: Color(0xFFEAEBEC), // Lerped between grey100 and white
 });
 
 /// Branded yellow color.
