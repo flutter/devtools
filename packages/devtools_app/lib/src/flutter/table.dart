@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
+import '../ui/theme.dart';
 import 'collapsible_mixin.dart';
 import 'theme.dart';
 
