@@ -142,8 +142,8 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// Builds an [ErrorReporter] for a context that shows a [SnackBar].
 ErrorReporter showErrorSnackBar(BuildContext context) {
   return (String title, dynamic error) {
-    // TODO(kenz): this isn't the cleanest - we should fix the issue in a better
-    // way.
+    // TODO: This is a workaround - need to fix
+    // https://github.com/flutter/devtools/issues/1369.
     SchedulerBinding.instance.scheduleTask(
       () => Scaffold.of(context).showSnackBar(
         SnackBar(
