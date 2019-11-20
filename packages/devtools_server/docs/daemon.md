@@ -69,9 +69,11 @@ This request is only used for testing purposes so is currently "undocumented"
 This request lists all DevTools instances that are currently connected back to the server along with which VM services they're connected to and the pages they are showing. The request requires no `params`.
 -->
 
-### launchDevTools Request (VM Service)
+### devTools.launch Request / launchDevTools VM Service
 
-`launchDevTools` is registered as a VM service (it is *not* sent over stdin to the server) and takes the following params:
+DevTools can be launched either through the daemon API using the `devTools.launch` request or via the VM Service protocol by calling the `launchDevTools` service.
+
+Both methods take the same parameters.
 
 - `reuseWindows` - whether an existing DevTools instance that is not connected to a VM (or is connected to the same one) should be reused
 - `notify` - whether to send a browser notification to the user in the case where a DevTools instance is reused, to help them find the window
@@ -87,7 +89,9 @@ This request lists all DevTools instances that are currently connected back to t
 {
 	'id': '123',
 	// The `method` field is populated based on the ServiceRegistered VM event
-	'method': 's2.launchDevTools',
+	// if sending over the VM Service protocol.
+	// 'method': 's2.launchDevTools',
+	'method': 'devTools.launch',
 	'params': {
 		'notify': true,
 		'page': 'inspector',
@@ -103,4 +107,5 @@ This request lists all DevTools instances that are currently connected back to t
 
 ## Changelog
 
+- 1.1.0: Add a `devTools.launch` request to launch DevTools directly via the server API
 - 1.0.0: Initial documentation for DevTools server API

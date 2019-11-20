@@ -20,7 +20,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 import 'client_manager.dart';
 import 'handlers.dart';
 
-const protocolVersion = '1.0.0';
+const protocolVersion = '1.1.0';
 const argHelp = 'help';
 const argEnableNotifications = 'enable-notifications';
 const argLaunchBrowser = 'launch-browser';
@@ -218,6 +218,15 @@ Future<HttpServer> serveDevTools({
             devToolsUrl,
           );
           break;
+        case 'devTools.launch':
+          await _handleDevToolsLaunch(
+            id,
+            params,
+            machineMode,
+            headlessMode,
+            devToolsUrl,
+          );
+          break;
         case 'client.list':
           await _handleClientsList(id, params, machineMode);
           break;
@@ -255,12 +264,9 @@ Future<void> _handleVmRegister(
     );
   }
 
-  // json['uri'] should contain a vm service uri.
+  // params['uri'] should contain a vm service uri.
   final uri = Uri.tryParse(params['uri']);
 
-  // Lots of things are considered valid URIs (including empty strings
-  // and single letters) since they can be relative, so we need to do some
-  // extra checks.
   if (_isValidVmServiceUri(uri)) {
     await registerLaunchDevToolsService(
         uri, id, devToolsUrl, machineMode, headlessMode);
@@ -270,6 +276,57 @@ Future<void> _handleVmRegister(
       {
         'id': id,
         'error': 'Uri must be absolute with a http, https, ws or wss scheme',
+      },
+      machineMode: machineMode,
+    );
+  }
+}
+
+Future<void> _handleDevToolsLaunch(
+  dynamic id,
+  Map<String, dynamic> params,
+  bool machineMode,
+  bool headlessMode,
+  String devToolsUrl,
+) async {
+  if (!params.containsKey('vmServiceUri')) {
+    printOutput(
+      'Invalid input: $params does not contain the key \'vmServiceUri\'',
+      {
+        'id': id,
+        'error':
+            'Invalid input: $params does not contain the key \'vmServiceUri\'',
+      },
+      machineMode: machineMode,
+    );
+  }
+
+  // params['vmServiceUri'] should contain a vm service uri.
+  final vmServiceUri = Uri.tryParse(params['vmServiceUri']);
+
+  if (_isValidVmServiceUri(vmServiceUri)) {
+    try {
+      final result = await launchDevTools(
+          params, vmServiceUri, devToolsUrl, headlessMode, machineMode);
+      printOutput(
+        'DevTools launched',
+        {'id': id, 'result': result},
+        machineMode: machineMode,
+      );
+    } catch (e, s) {
+      printOutput(
+        'Failed to launch browser: $e\n$s',
+        {'id': id, 'error': 'Failed to launch browser: $e\n$s'},
+        machineMode: machineMode,
+      );
+    }
+  } else {
+    printOutput(
+      'VM Service URI must be absolute with a http, https, ws or wss scheme',
+      {
+        'id': id,
+        'error':
+            'VM Service Uri must be absolute with a http, https, ws or wss scheme',
       },
       machineMode: machineMode,
     );
@@ -399,8 +456,12 @@ Future<void> registerLaunchDevToolsService(
   }
 }
 
-Future<void> launchDevTools(Map<String, dynamic> params, Uri vmServiceUri,
-    String devToolsUrl, bool headlessMode, bool machineMode) async {
+Future<Map<String, dynamic>> launchDevTools(
+    Map<String, dynamic> params,
+    Uri vmServiceUri,
+    String devToolsUrl,
+    bool headlessMode,
+    bool machineMode) async {
   // Prints a launch event to stdout so consumers of the DevTools server
   // can see when clients are being launched/reused.
   void emitLaunchEvent({@required bool reused, @required bool notified}) {
@@ -430,7 +491,7 @@ Future<void> launchDevTools(Map<String, dynamic> params, Uri vmServiceUri,
         shouldNotify,
       )) {
     emitLaunchEvent(reused: true, notified: shouldNotify);
-    return {'result': Success().toJson()};
+    return {'reused': true, 'notified': shouldNotify};
   }
 
   final uriParams = <String, dynamic>{};
@@ -477,8 +538,8 @@ Future<void> launchDevTools(Map<String, dynamic> params, Uri vmServiceUri,
         : <String>[];
     await Chrome.start([uriToLaunch.toString()], args: args);
   }
-
   emitLaunchEvent(reused: false, notified: false);
+  return {'reused': false, 'notified': false};
 }
 
 // TODO(dantup): This method was adapted from devtools and should be upstreamed
@@ -501,6 +562,9 @@ bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
 }
 
 bool _isValidVmServiceUri(Uri uri) =>
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
     uri != null &&
     uri.isAbsolute &&
     (uri.isScheme('ws') ||
