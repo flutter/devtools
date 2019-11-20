@@ -50,7 +50,7 @@ void main() {
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: TimelineController()
-          ..timelineMode = TimelineMode.full,
+          ..timelineModeNotifier.value = TimelineMode.full,
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsNothing);
       expect(find.text('TODO Full Timeline Flame Chart'), findsOneWidget);

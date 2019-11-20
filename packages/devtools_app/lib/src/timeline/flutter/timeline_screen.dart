@@ -21,6 +21,14 @@ import 'timeline_flame_chart.dart';
 class TimelineScreen extends Screen {
   const TimelineScreen() : super('Timeline');
 
+  static const clearButtonKey = Key('Clear Button');
+  static const emptyTimelineRecordingKey = Key('Empty Timeline Recording');
+  static const flameChartSectionKey = Key('Flame Chart Section');
+  static const recordButtonKey = Key('Record Button');
+  static const recordingInstructionsKey = Key('Recording Instructions');
+  static const recordingStatusKey = Key('Recording Status');
+  static const stopRecordingButtonKey = Key('Stop Recording Button');
+
   @override
   Widget build(BuildContext context) => TimelineScreenBody();
 
@@ -47,14 +55,6 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     super.didChangeDependencies();
     controller = Controllers.of(context).timeline;
     controller.timelineService.updateListeningState(true);
-
-    cancel();
-    autoDispose(controller.frameBasedTimeline.onSelectedFrame.listen((_) {
-      setState(() {});
-    }));
-    autoDispose(controller.onSelectedTimelineEvent.listen((_) {
-      setState(() {});
-    }));
   }
 
   @override
@@ -67,79 +67,58 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ValueListenableBuilder(
+      valueListenable: controller.timelineModeNotifier,
+      builder: (context, mode, _) {
+        return Column(
           children: [
             Row(
-              children: _buildTimelineStateButtons(),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTimelineStateButtons(mode),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: _buildSecondaryButtons(),
+                ),
+              ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: _buildSecondaryButtons(),
+            if (mode == TimelineMode.frameBased) const FlutterFramesChart(),
+            ValueListenableBuilder(
+              valueListenable:
+                  controller.frameBasedTimeline.selectedFrameNotifier,
+              builder: (context, selectedFrame, _) {
+                return (mode == TimelineMode.full || selectedFrame != null)
+                    ? Expanded(
+                        child: Split(
+                          axis: Axis.vertical,
+                          firstChild: _buildFlameChartSection(mode),
+                          secondChild: ValueListenableBuilder(
+                            valueListenable:
+                                controller.selectedTimelineEventNotifier,
+                            builder: (context, selectedEvent, _) {
+                              return EventDetails(selectedEvent);
+                            },
+                          ),
+                          initialFirstFraction: 0.6,
+                        ),
+                      )
+                    : const SizedBox();
+              },
             ),
           ],
-        ),
-        if (controller.timelineMode == TimelineMode.frameBased)
-          const FlutterFramesChart(),
-        if (controller.timelineMode == TimelineMode.full ||
-            controller.frameBasedTimeline.data?.selectedFrame != null)
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              firstChild: TimelineFlameChart(),
-              secondChild: EventDetails(
-                controller.timeline.data?.selectedEvent,
-              ),
-              initialFirstFraction: 0.6,
-            ),
-          ),
-      ],
+        );
+      },
     );
   }
 
-  List<Widget> _buildTimelineStateButtons() {
-    return [
-      if (controller.timelineMode == TimelineMode.frameBased) ...[
-        OutlineButton(
-          onPressed: _pauseLiveTimeline,
-          child: const MaterialIconLabel(
-            Icons.pause,
-            'Pause',
-            minIncludeTextWidth: 900,
-          ),
-        ),
-        OutlineButton(
-          onPressed: _resumeLiveTimeline,
-          child: const MaterialIconLabel(
-            Icons.play_arrow,
-            'Resume',
-            minIncludeTextWidth: 900,
-          ),
-        ),
-      ],
-      if (controller.timelineMode == TimelineMode.full) ...[
-        OutlineButton(
-          onPressed: _startRecording,
-          child: const MaterialIconLabel(
-            Icons.fiber_manual_record,
-            'Record',
-            minIncludeTextWidth: 900,
-          ),
-        ),
-        OutlineButton(
-          onPressed: _stopRecording,
-          child: const MaterialIconLabel(
-            Icons.stop,
-            'Stop',
-            minIncludeTextWidth: 900,
-          ),
-        ),
-      ],
+  Widget _buildTimelineStateButtons(TimelineMode mode) {
+    final sharedWidgets = [
       const SizedBox(width: 8.0),
       OutlineButton(
-        onPressed: _clearTimeline,
+        key: TimelineScreen.clearButtonKey,
+        onPressed: () async {
+          await _clearTimeline();
+        },
         child: const MaterialIconLabel(
           Icons.block,
           'Clear',
@@ -151,7 +130,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         child: Row(
           children: [
             Switch(
-              value: controller.timelineMode == TimelineMode.frameBased,
+              value: mode == TimelineMode.frameBased,
               onChanged: _onTimelineModeChanged,
             ),
             const Text('Show frames'),
@@ -159,6 +138,63 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
         ),
       ),
     ];
+    if (mode == TimelineMode.frameBased) {
+      return ValueListenableBuilder(
+        valueListenable: controller.frameBasedTimeline.pausedNotifier,
+        builder: (context, paused, _) {
+          return Row(
+            children: [
+              OutlineButton(
+                onPressed: paused ? null : _pauseLiveTimeline,
+                child: const MaterialIconLabel(
+                  Icons.pause,
+                  'Pause',
+                  minIncludeTextWidth: 900,
+                ),
+              ),
+              OutlineButton(
+                onPressed: !paused ? null : _resumeLiveTimeline,
+                child: const MaterialIconLabel(
+                  Icons.play_arrow,
+                  'Resume',
+                  minIncludeTextWidth: 900,
+                ),
+              ),
+              ...sharedWidgets,
+            ],
+          );
+        },
+      );
+    } else {
+      return ValueListenableBuilder(
+        valueListenable: controller.fullTimeline.recordingNotifier,
+        builder: (context, recording, _) {
+          return Row(
+            children: [
+              OutlineButton(
+                key: TimelineScreen.recordButtonKey,
+                onPressed: recording ? null : _startRecording,
+                child: const MaterialIconLabel(
+                  Icons.fiber_manual_record,
+                  'Record',
+                  minIncludeTextWidth: 900,
+                ),
+              ),
+              OutlineButton(
+                key: TimelineScreen.stopRecordingButtonKey,
+                onPressed: !recording ? null : _stopRecording,
+                child: const MaterialIconLabel(
+                  Icons.stop,
+                  'Stop',
+                  minIncludeTextWidth: 900,
+                ),
+              ),
+              ...sharedWidgets,
+            ],
+          );
+        },
+      );
+    }
   }
 
   List<Widget> _buildSecondaryButtons() {
@@ -183,24 +219,99 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     ];
   }
 
+  Widget _buildFlameChartSection(TimelineMode mode) {
+    Widget content;
+    final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
+    if (mode == TimelineMode.full && fullTimelineEmpty) {
+      content = ValueListenableBuilder(
+        valueListenable: controller.fullTimeline.emptyRecordingNotifier,
+        builder: (context, emptyRecording, _) {
+          if (emptyRecording)
+            return const Center(
+              key: TimelineScreen.emptyTimelineRecordingKey,
+              child: Text('No timeline events recorded'),
+            );
+          else {
+            final recordingInstructions = Column(
+              key: TimelineScreen.recordingInstructionsKey,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text('Click the record button '),
+                    Icon(Icons.fiber_manual_record),
+                    Text(' to start recording timeline trace.')
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text('Click the stop button '),
+                    Icon(Icons.stop),
+                    Text(' to end the recording.')
+                  ],
+                ),
+              ],
+            );
+            final recordingStatus = Column(
+              key: TimelineScreen.recordingStatusKey,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text('Recording timeline trace'),
+                SizedBox(height: 16.0),
+                CircularProgressIndicator(),
+              ],
+            );
+            return ValueListenableBuilder(
+              valueListenable: controller.fullTimeline.recordingNotifier,
+              builder: (context, recording, _) {
+                return Center(
+                  child: recording ? recordingStatus : recordingInstructions,
+                );
+              },
+            );
+          }
+        },
+      );
+    } else {
+      content = TimelineFlameChart();
+    }
+
+    return Container(
+      key: TimelineScreen.flameChartSectionKey,
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+      ),
+      child: content,
+    );
+  }
+
   void _pauseLiveTimeline() {
-    // TODO(kenz): implement.
+    setState(() {
+      controller.frameBasedTimeline.pause(manual: true);
+      controller.timelineService.updateListeningState(true);
+    });
   }
 
   void _resumeLiveTimeline() {
-    // TODO(kenz): implement.
+    setState(() {
+      controller.frameBasedTimeline.resume();
+      controller.timelineService.updateListeningState(true);
+    });
   }
 
-  void _startRecording() {
-    // TODO(kenz): implement.
+  void _startRecording() async {
+    await _clearTimeline();
+    controller.fullTimeline.startRecording();
   }
 
   void _stopRecording() {
-    // TODO(kenz): implement.
+    controller.fullTimeline.stopRecording();
   }
 
-  void _clearTimeline() {
-    // TODO(kenz): implement.
+  Future<void> _clearTimeline() async {
+    await controller.clearData();
   }
 
   void _exportTimeline() {
@@ -208,10 +319,9 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   // TODO(kenz): consider making timeline mode a ValueNotifier on the controller
-  void _onTimelineModeChanged(bool frameBased) {
-    setState(() {
-      controller.timelineMode =
-          frameBased ? TimelineMode.frameBased : TimelineMode.full;
-    });
+  void _onTimelineModeChanged(bool frameBased) async {
+    await _clearTimeline();
+    controller.timelineModeNotifier.value =
+        frameBased ? TimelineMode.frameBased : TimelineMode.full;
   }
 }

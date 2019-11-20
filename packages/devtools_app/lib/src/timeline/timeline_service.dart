@@ -44,12 +44,13 @@ class TimelineService {
           list.cast<Map<String, dynamic>>();
 
       final bool shouldProcessEventForFrameBasedTimeline =
-          timelineController.timelineMode == TimelineMode.frameBased &&
+          timelineController.timelineModeNotifier.value ==
+                  TimelineMode.frameBased &&
               !timelineController.frameBasedTimeline.manuallyPaused &&
-              !timelineController.frameBasedTimeline.paused;
+              !timelineController.frameBasedTimeline.pausedNotifier.value;
       final bool shouldProcessEventForFullTimeline =
-          timelineController.timelineMode == TimelineMode.full &&
-              timelineController.fullTimeline.recording;
+          timelineController.timelineModeNotifier.value == TimelineMode.full &&
+              timelineController.fullTimeline.recordingNotifier.value;
 
       if (!offlineMode &&
           (shouldProcessEventForFrameBasedTimeline ||
@@ -63,7 +64,8 @@ class TimelineService {
 
           // For [TimelineMode.frameBased], process the events as we receive
           // them.
-          if (timelineController.timelineMode == TimelineMode.frameBased) {
+          if (timelineController.timelineModeNotifier.value ==
+              TimelineMode.frameBased) {
             timelineController.frameBasedTimeline.processor
                 ?.processTraceEvent(eventWrapper);
           }
@@ -143,11 +145,12 @@ class TimelineService {
   Future<void> updateListeningState(bool isCurrentScreen) async {
     final bool shouldBeRunning =
         (!timelineController.frameBasedTimeline.manuallyPaused ||
-                timelineController.fullTimeline.recording) &&
+                timelineController.fullTimeline.recordingNotifier.value) &&
             !offlineMode &&
             isCurrentScreen;
-    final bool isRunning = !timelineController.frameBasedTimeline.paused ||
-        timelineController.fullTimeline.recording;
+    final bool isRunning =
+        !timelineController.frameBasedTimeline.pausedNotifier.value ||
+            timelineController.fullTimeline.recordingNotifier.value;
     await _updateListeningState(
       shouldBeRunning: shouldBeRunning,
       isRunning: isRunning,

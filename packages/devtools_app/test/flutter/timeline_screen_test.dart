@@ -23,7 +23,43 @@ import 'wrappers.dart';
 
 void main() {
   TimelineScreen screen;
+  TimelineScreenBodyState state;
   FakeServiceManager fakeServiceManager;
+
+  Future<void> buildTimelineScreen(
+    WidgetTester tester,
+    TimelineMode mode, {
+    TimelineController controller,
+  }) async {
+    // Set a wide enough screen width that we do not run into overflow.
+    await setWindowSize(const Size(1599.0, 1000.0));
+    await tester.pumpWidget(wrapWithControllers(
+      TimelineScreenBody(),
+      timelineController: controller ?? TimelineController()
+        ..timelineModeNotifier.value = mode,
+    ));
+    expect(find.byType(TimelineScreenBody), findsOneWidget);
+
+    state = tester.state(find.byType(TimelineScreenBody));
+    expect(
+      state.controller.timelineModeNotifier.value,
+      equals(mode),
+    );
+  }
+
+  Future<void> buildTimelineWithSelectedFrame(WidgetTester tester) async {
+    final mockData = MockFrameBasedTimelineData();
+    when(mockData.displayDepth).thenReturn(8);
+    when(mockData.selectedFrame).thenReturn(testFrame);
+    final controllerWithData = TimelineController()
+      ..frameBasedTimeline.data = mockData
+      ..frameBasedTimeline.selectedFrameNotifier.value = testFrame;
+    await buildTimelineScreen(
+      tester,
+      TimelineMode.frameBased,
+      controller: controllerWithData,
+    );
+  }
 
   group('TimelineScreen', () {
     setUp(() async {
@@ -41,42 +77,27 @@ void main() {
     });
 
     testWidgets('builds proper content for state', (WidgetTester tester) async {
-      // Set a wide enough screen width that we do not run into overflow.
-      await setWindowSize(const Size(1599.0, 1000.0));
-      await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
-        timelineController: TimelineController(),
-      ));
-      expect(find.byType(TimelineScreenBody), findsOneWidget);
-      final TimelineScreenBodyState state =
-          tester.state(find.byType(TimelineScreenBody));
+      await buildTimelineScreen(tester, TimelineMode.frameBased);
 
       final splitFinder = find.byType(Split);
 
       // Verify TimelineMode.frameBased content.
-      expect(state.controller.timelineMode, equals(TimelineMode.frameBased));
       expect(splitFinder, findsNothing);
       expect(find.text('Pause'), findsOneWidget);
       expect(find.text('Resume'), findsOneWidget);
       expect(find.text('Record'), findsNothing);
       expect(find.text('Stop'), findsNothing);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byType(TimelineFlameChart), findsNothing);
+      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsNothing);
       expect(find.byType(EventDetails), findsNothing);
 
       // Add a selected frame and ensure the flame chart and event details
       // section appear.
-      final mockData = MockFrameBasedTimelineData();
-      when(mockData.displayDepth).thenReturn(8);
-      when(mockData.selectedFrame).thenReturn(testFrame);
-      final controllerWithData = TimelineController()
-        ..frameBasedTimeline.data = mockData;
-      await tester.pumpWidget(wrapWithControllers(
-        TimelineScreenBody(),
-        timelineController: controllerWithData,
-      ));
+      await buildTimelineWithSelectedFrame(tester);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
       expect(find.byType(EventDetails), findsOneWidget);
 
       // Switch timeline mode and pump.
@@ -84,19 +105,119 @@ void main() {
       await tester.pump();
 
       // Verify TimelineMode.full content.
-      expect(state.controller.timelineMode, equals(TimelineMode.full));
+      expect(
+        state.controller.timelineModeNotifier.value,
+        equals(TimelineMode.full),
+      );
       expect(find.text('Pause'), findsNothing);
       expect(find.text('Resume'), findsNothing);
       expect(find.text('Record'), findsOneWidget);
       expect(find.text('Stop'), findsOneWidget);
       expect(find.byType(FlutterFramesChart), findsNothing);
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
+      expect(find.byType(TimelineFlameChart), findsNothing);
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
       expect(find.byType(EventDetails), findsOneWidget);
 
       // Verify the state of the splitter.
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
       expect(splitter.initialFirstFraction, equals(0.6));
+    });
+
+    testWidgets('record', (WidgetTester tester) async {
+      await buildTimelineScreen(tester, TimelineMode.full);
+
+      // Verify initial state.
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(TimelineScreen.recordingStatusKey),
+        findsNothing,
+      );
+
+      // Start recording.
+      await tester.tap(find.byKey(TimelineScreen.recordButtonKey));
+      await tester.pump();
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.recordingStatusKey),
+        findsOneWidget,
+      );
+
+      // Stop recording.
+      await tester.tap(find.byKey(TimelineScreen.stopRecordingButtonKey));
+      await tester.pump();
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.recordingStatusKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('clear', (WidgetTester tester) async {
+      // Clear the frame-based timeline.
+      await buildTimelineWithSelectedFrame(tester);
+      expect(find.byType(FlutterFramesChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
+      expect(find.byType(TimelineFlameChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
+      expect(find.byType(EventDetails), findsOneWidget);
+
+      await tester.tap(find.byKey(TimelineScreen.clearButtonKey));
+      await tester.pump();
+      expect(find.byType(FlutterFramesChart), findsOneWidget);
+      expect(find.byKey(TimelineScreen.flameChartSectionKey), findsNothing);
+      expect(find.byType(EventDetails), findsNothing);
+
+      // Clear the full timeline.
+      await buildTimelineScreen(tester, TimelineMode.full);
+      await tester.tap(find.byKey(TimelineScreen.recordButtonKey));
+      await tester.pump();
+      await tester.tap(find.byKey(TimelineScreen.stopRecordingButtonKey));
+      await tester.pump();
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.recordingStatusKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(TimelineScreen.clearButtonKey));
+      await tester.pump();
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(TimelineScreen.recordingStatusKey),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TimelineScreen.emptyTimelineRecordingKey),
+        findsNothing,
+      );
     });
   });
 }

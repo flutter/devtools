@@ -54,7 +54,7 @@ class HtmlTimelineScreen extends HtmlScreen {
           enabled: enabled,
           disabledTooltip: disabledTooltip,
         ) {
-    timelineController.timelineMode = startTimelineMode;
+    timelineController.timelineModeNotifier.value = startTimelineMode;
   }
 
   final TimelineMode startTimelineMode;
@@ -135,7 +135,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     _stopRecordingButton = PButton.icon('Stop', stop)
       ..small()
       ..clazz('margin-left')
-      ..disabled = !timelineController.fullTimeline.recording
+      ..disabled = !timelineController.fullTimeline.recordingNotifier.value
       ..click(_stopFullRecording);
 
     _recordingInstructions = createRecordingInstructions(
@@ -178,7 +178,8 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..setAttribute('type', 'checkbox');
     final html.InputElement checkbox = _timelineModeCheckbox.element;
     checkbox
-      ..checked = timelineController.timelineMode == TimelineMode.frameBased
+      ..checked = timelineController.timelineModeNotifier.value ==
+          TimelineMode.frameBased
       ..onChange.listen((_) => _setTimelineMode(
           timelineMode:
               checkbox.checked ? TimelineMode.frameBased : TimelineMode.full));
@@ -242,11 +243,11 @@ class HtmlTimelineScreen extends HtmlScreen {
   @override
   void onContentAttached() {
     _updateVisibilityForTimelineMode();
-    if (timelineController.timelineMode == TimelineMode.full) {
+    if (timelineController.timelineModeNotifier.value == TimelineMode.full) {
       _configureSplitter();
     }
 
-    timelineController.frameBasedTimeline.onSelectedFrame.listen((_) {
+    timelineController.frameBasedTimeline.selectedFrameNotifier.addListener(() {
       _selectFrame();
     });
 
@@ -272,7 +273,7 @@ class HtmlTimelineScreen extends HtmlScreen {
 
         _configureSplitter();
       })
-      ..onNoEventsRecorded.listen((_) {
+      ..emptyRecordingNotifier.addListener(() {
         _recordingStatusMessage.text = 'No timeline events recorded';
         _recordingStatus.hidden(false);
         _recordingSpinner.hidden(true);
@@ -315,13 +316,14 @@ class HtmlTimelineScreen extends HtmlScreen {
     // https://github.com/dart-lang/sdk/issues/36798 is fixed.
     final observer = html.ResizeObserver((List<dynamic> entries, _) {
       if (timelineFlameChartCanvas == null ||
-          (timelineController.timelineMode == TimelineMode.frameBased &&
+          (timelineController.timelineModeNotifier.value ==
+                  TimelineMode.frameBased &&
               timelineController.frameBasedTimeline.data.selectedFrame ==
                   null)) {
         return;
       }
 
-      final dataHeight = timelineController.timelineMode ==
+      final dataHeight = timelineController.timelineModeNotifier.value ==
               TimelineMode.frameBased
           ? // Add 1 to account for a row of padding at the bottom of the chart.
           _frameBasedTimelineChartHeight()
@@ -462,7 +464,8 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   Future<void> _pauseFrameRecording() async {
-    assert(timelineController.timelineMode == TimelineMode.frameBased);
+    assert(timelineController.timelineModeNotifier.value ==
+        TimelineMode.frameBased);
     timelineController.frameBasedTimeline.pause(manual: true);
     ga.select(ga.timeline, ga.pause);
     _updateButtonStates();
@@ -471,7 +474,8 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   Future<void> _resumeFrameRecording() async {
-    assert(timelineController.timelineMode == TimelineMode.frameBased);
+    assert(timelineController.timelineModeNotifier.value ==
+        TimelineMode.frameBased);
     timelineController.frameBasedTimeline.resume();
     ga.select(ga.timeline, ga.resume);
     _updateButtonStates();
@@ -480,7 +484,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   Future<void> _startFullRecording() async {
-    assert(timelineController.timelineMode == TimelineMode.full);
+    assert(timelineController.timelineModeNotifier.value == TimelineMode.full);
     await clearTimeline();
     timelineController.fullTimeline.startRecording();
     _recordingInstructions.hidden(true);
@@ -491,7 +495,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   void _stopFullRecording() {
-    assert(timelineController.timelineMode == TimelineMode.full);
+    assert(timelineController.timelineModeNotifier.value == TimelineMode.full);
     _recordingStatusMessage.text = 'Processing timeline trace';
     timelineController.fullTimeline.stopRecording();
     _recordingStatus.hidden(true);
@@ -509,7 +513,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       timelineController.timeline.data?.clear();
     }
 
-    timelineController.timelineMode = timelineMode;
+    timelineController.timelineModeNotifier.value = timelineMode;
 
     // Update visibility and then do resets - the order matters here.
     _updateVisibilityForTimelineMode();
@@ -534,31 +538,35 @@ class HtmlTimelineScreen extends HtmlScreen {
     final isDartCliApp = await serviceManager.connectedApp.isDartCliApp;
     pauseButton
       ..disabled = timelineController.frameBasedTimeline.manuallyPaused
-      ..hidden(
-          offlineMode || timelineController.timelineMode == TimelineMode.full);
+      ..hidden(offlineMode ||
+          timelineController.timelineModeNotifier.value == TimelineMode.full);
     resumeButton
       ..disabled = !timelineController.frameBasedTimeline.manuallyPaused
-      ..hidden(
-          offlineMode || timelineController.timelineMode == TimelineMode.full);
+      ..hidden(offlineMode ||
+          timelineController.timelineModeNotifier.value == TimelineMode.full);
     _startRecordingButton
-      ..disabled = timelineController.fullTimeline.recording
+      ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode ||
-          timelineController.timelineMode == TimelineMode.frameBased);
+          timelineController.timelineModeNotifier.value ==
+              TimelineMode.frameBased);
     _stopRecordingButton
-      ..disabled = !timelineController.fullTimeline.recording
+      ..disabled = !timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode ||
-          timelineController.timelineMode == TimelineMode.frameBased);
-    _timelineModeCheckbox.disabled = timelineController.fullTimeline.recording;
+          timelineController.timelineModeNotifier.value ==
+              TimelineMode.frameBased);
+    _timelineModeCheckbox.disabled =
+        timelineController.fullTimeline.recordingNotifier.value;
     (_timelineModeCheckbox.element as html.InputElement).checked =
-        timelineController.timelineMode == TimelineMode.frameBased;
+        timelineController.timelineModeNotifier.value ==
+            TimelineMode.frameBased;
 
     _timelineModeSettingContainer.hidden(offlineMode || isDartCliApp);
 
     clearButton
-      ..disabled = timelineController.fullTimeline.recording
+      ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode);
     exportButton
-      ..disabled = timelineController.fullTimeline.recording
+      ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode);
     performanceOverlayButton.button.hidden(offlineMode || isDartCliApp);
     _profileGranularitySelector.selector.hidden(offlineMode);
@@ -567,28 +575,31 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   void _updateVisibilityForTimelineMode() {
     _updateButtonStates();
-    framesBarChart.hidden(timelineController.timelineMode == TimelineMode.full);
-    flameChartContainer
-        .hidden(timelineController.timelineMode == TimelineMode.frameBased);
-    _recordingInstructions
-        .hidden(timelineController.timelineMode == TimelineMode.frameBased);
+    framesBarChart.hidden(
+        timelineController.timelineModeNotifier.value == TimelineMode.full);
+    flameChartContainer.hidden(timelineController.timelineModeNotifier.value ==
+        TimelineMode.frameBased);
+    _recordingInstructions.hidden(
+        timelineController.timelineModeNotifier.value ==
+            TimelineMode.frameBased);
     _recordingStatus.hidden(true);
-    eventDetails
-        .hidden(timelineController.timelineMode == TimelineMode.frameBased);
+    eventDetails.hidden(timelineController.timelineModeNotifier.value ==
+        TimelineMode.frameBased);
   }
 
   Future<void> clearTimeline() async {
     await timelineController.clearData();
     _setFlameChart(_emptyFlameChart);
-    flameChartContainer
-        .hidden(timelineController.timelineMode == TimelineMode.frameBased);
+    flameChartContainer.hidden(timelineController.timelineModeNotifier.value ==
+        TimelineMode.frameBased);
     timelineFlameChartCanvas?.element?.element?.remove();
     timelineFlameChartCanvas = null;
     eventDetails.reset(
-        hide: timelineController.timelineMode == TimelineMode.frameBased);
+        hide: timelineController.timelineModeNotifier.value ==
+            TimelineMode.frameBased);
     _recordingStatus.hidden(true);
 
-    switch (timelineController.timelineMode) {
+    switch (timelineController.timelineModeNotifier.value) {
       case TimelineMode.frameBased:
         debugHandledTraceEvents.clear();
         debugFrameTracking.clear();
