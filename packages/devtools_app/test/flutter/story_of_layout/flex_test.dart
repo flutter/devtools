@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -265,10 +266,12 @@ void main() {
 
   testWidgets('Row golden test', (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
-    final node = RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+    final diagnostic =
+        RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
     await setWindowSize(windowSize);
     final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
@@ -278,10 +281,12 @@ void main() {
 
   testWidgets('Column golden test', (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
-    final node = RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
+    final diagnostic =
+        RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
     await setWindowSize(windowSize);
     final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),

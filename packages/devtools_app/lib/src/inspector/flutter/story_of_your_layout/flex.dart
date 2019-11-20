@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import '../../../ui/colors.dart';
 import '../../../ui/theme.dart';
 import '../../../utils.dart';
+import '../../inspector_controller.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
 import 'utils.dart';
@@ -48,11 +49,18 @@ const dropdownMaxWidth = 320.0;
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
+    this.highlightChild,
+    this.inspectorController,
     Key key,
   })  : assert(properties != null),
         super(key: key);
 
   final FlexLayoutProperties properties;
+
+  // index of child to be highlighted
+  final int highlightChild;
+
+  final InspectorController inspectorController;
 
   @override
   _StoryOfYourFlexWidgetState createState() => _StoryOfYourFlexWidgetState();
@@ -150,6 +158,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
 
   Widget _visualizeChild({
     LayoutProperties childProperties,
+    Color backgroundColor,
     Color borderColor,
     Color textColor,
     Size renderSize,
@@ -159,51 +168,64 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
-      child: Container(
-        width: renderSize.width,
-        height: renderSize.height,
-        child: WidgetVisualizer(
-          title: childProperties.description,
-          borderColor: borderColor,
-          textColor: textColor,
-          child: _visualizeWidthAndHeightWithConstraints(
-            arrowHeadSize: arrowHeadSize,
-            widget: Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                margin: const EdgeInsets.only(
-                  top: margin,
-                  left: margin,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      'flex: $flexFactor',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    if (flexFactor == 0 || flexFactor == null)
+      child: InkWell(
+        onTap: () async {
+          final controller = widget.inspectorController;
+          final diagnostic = childProperties.node.diagnostic;
+          // TODO(albertusangga) fix/investigate why calling setSelectedNode is not sufficient
+          controller.refreshSelection(diagnostic, diagnostic, false);
+          controller.setSelectedNode(childProperties.node);
+          final inspectorService = await diagnostic.inspectorService;
+          await inspectorService.setSelectionInspector(
+              diagnostic.valueRef, true);
+        },
+        child: Container(
+          width: renderSize.width,
+          height: renderSize.height,
+          child: WidgetVisualizer(
+            backgroundColor: backgroundColor,
+            title: childProperties.description,
+            borderColor: borderColor,
+            textColor: textColor,
+            child: _visualizeWidthAndHeightWithConstraints(
+              arrowHeadSize: arrowHeadSize,
+              widget: Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  margin: const EdgeInsets.only(
+                    top: margin,
+                    left: margin,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
                       Text(
-                        'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                        style: TextStyle(
-                          color: ThemedColor(
-                            const Color(0xFFD08A29),
-                            Colors.orange.shade700,
-                          ),
-                          fontStyle: FontStyle.italic,
-                        ),
-                        maxLines: 2,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        textScaleFactor: smallTextScaleFactor,
-                        textAlign: TextAlign.right,
+                        'flex: $flexFactor',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                  ],
+                      if (flexFactor == 0 || flexFactor == null)
+                        Text(
+                          'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                          style: TextStyle(
+                            color: ThemedColor(
+                              const Color(0xFFD08A29),
+                              Colors.orange.shade700,
+                            ),
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          textScaleFactor: smallTextScaleFactor,
+                          textAlign: TextAlign.right,
+                        ),
+                    ],
+                  ),
                 ),
               ),
+              properties: childProperties,
             ),
-            properties: childProperties,
           ),
         ),
       ),
@@ -234,6 +256,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           final widgetChildren = <Widget>[
             for (var i = 0; i < children.length; i++)
               _visualizeChild(
+                backgroundColor:
+                    widget.highlightChild != null && i == widget.highlightChild
+                        ? theme.backgroundColor
+                        : theme.cardColor,
                 childProperties: children[i],
                 borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
                 textColor: i.isOdd ? null : const Color(0xFF303030),
@@ -505,6 +531,7 @@ class WidgetVisualizer extends StatelessWidget {
     Key key,
     @required this.title,
     this.hint,
+    this.backgroundColor,
     @required this.borderColor,
     this.textColor,
     this.child,
@@ -518,6 +545,7 @@ class WidgetVisualizer extends StatelessWidget {
 
   final Color borderColor;
   final Color textColor;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -567,6 +595,7 @@ class WidgetVisualizer extends StatelessWidget {
         border: Border.all(
           color: borderColor,
         ),
+        color: backgroundColor,
       ),
       margin: const EdgeInsets.all(1.0),
     );

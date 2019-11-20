@@ -569,7 +569,7 @@ class InspectorRowContent extends StatelessWidget {
                   constraintDisplayController != null)
                 ConstraintsDescription(
                   listenable: constraintDisplayController,
-                  properties: LayoutProperties(node.diagnostic),
+                  properties: LayoutProperties(node),
                 ),
             ],
           ),

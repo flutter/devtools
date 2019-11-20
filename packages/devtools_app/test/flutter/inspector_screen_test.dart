@@ -226,7 +226,8 @@ void main() {
         vsync: const TestVSync(),
         duration: const Duration(milliseconds: 1),
       );
-      final node = RemoteDiagnosticsNode(jsonNode, null, false, null);
+      final diagnostic = RemoteDiagnosticsNode(jsonNode, null, false, null);
+      final node = InspectorTreeNode()..diagnostic = diagnostic;
       await tester.pumpWidget(
         MaterialApp(
           home: ConstraintsDescription(

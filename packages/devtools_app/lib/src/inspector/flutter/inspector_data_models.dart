@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import '../../utils.dart';
 import '../diagnostics_node.dart';
 import '../enum_utils.dart';
+import '../inspector_tree.dart';
 import 'story_of_your_layout/utils.dart';
 
 const Type boxConstraintsType = BoxConstraints;
@@ -93,19 +94,20 @@ List<double> computeRenderSizes({
 
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
-  LayoutProperties(RemoteDiagnosticsNode node, {int copyLevel = 1})
-      : description = node?.description,
-        size = deserializeSize(node?.size),
-        constraints = deserializeConstraints(node?.constraints),
-        isFlex = node?.isFlex,
-        flexFactor = node?.flexFactor,
+  LayoutProperties(this.node, {int copyLevel = 1})
+      : description = node.diagnostic?.description,
+        size = deserializeSize(node.diagnostic?.size),
+        constraints = deserializeConstraints(node.diagnostic?.constraints),
+        isFlex = node.diagnostic?.isFlex,
+        flexFactor = node.diagnostic?.flexFactor,
         children = copyLevel == 0
             ? []
-            : node?.childrenNow
+            : node.children
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false);
 
+  final InspectorTreeNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
   final String description;
@@ -174,7 +176,7 @@ class LayoutProperties {
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties._(
-    RemoteDiagnosticsNode node, {
+    InspectorTreeNode node, {
     this.direction,
     this.mainAxisAlignment,
     this.mainAxisSize,
@@ -184,8 +186,9 @@ class FlexLayoutProperties extends LayoutProperties {
     this.textBaseline,
   }) : super(node);
 
-  factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
-    final Map<String, Object> renderObjectJson = node.json['renderObject'];
+  factory FlexLayoutProperties.fromNode(InspectorTreeNode node) {
+    final Map<String, Object> renderObjectJson =
+        node.diagnostic.json['renderObject'];
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,
