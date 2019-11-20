@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../table_data.dart';
 import '../trees.dart';
+import '../ui/theme.dart';
 import 'collapsible_mixin.dart';
+import 'theme.dart';
 
 /// A table that displays in a collection of [data], based on a collection
 /// of [ColumnData].
@@ -75,12 +77,13 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
 
   Widget _buildRow(BuildContext context, int index) {
     final node = widget.data[index];
-    return _TableRow(
+    return _TableRow<T>(
       key: widget.keyFactory(node),
       node: node,
       onPressed: (_) {},
       columns: widget.columns,
       columnWidths: columnWidths,
+      backgroundColor: _TableRow.colorFor(context, index),
     );
   }
 }
@@ -222,15 +225,12 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       columns: widget.columns,
       itemCount: items.length,
       columnWidths: columnWidths,
-      tableRowBuilder: (c, i) => _buildRow(c, items[i]),
+      tableRowBuilder: _buildRow,
     );
   }
 
-  Widget _buildRow(BuildContext context, T node) {
-    return _tableRowFor(node);
-  }
-
-  Widget _tableRowFor(T node) {
+  Widget _buildRow(BuildContext context, int index) {
+    final node = items[index];
     return _TableRow<T>(
       key: widget.keyFactory(node),
       node: node,
@@ -241,6 +241,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       isExpanded: node.isExpanded,
       isExpandable: node.isExpandable,
       isShown: node.shouldShow(),
+      // TODO(https://github.com/flutter/devtools/issues/1361): alternate table
+      // row colors, even when the table has collapsed rows.
     );
   }
 }
@@ -344,6 +346,7 @@ class _TableRow<T> extends StatefulWidget {
     @required this.columns,
     @required this.onPressed,
     @required this.columnWidths,
+    this.backgroundColor,
     this.expandableColumn,
     this.isExpanded = false,
     this.isExpandable = false,
@@ -362,6 +365,7 @@ class _TableRow<T> extends StatefulWidget {
         isExpandable = false,
         expandableColumn = null,
         isShown = true,
+        backgroundColor = null,
         super(key: key);
 
   final T node;
@@ -392,6 +396,18 @@ class _TableRow<T> extends StatefulWidget {
   /// When the value is toggled, this row will animate in or out.
   final bool isShown;
 
+  /// The background color of the row.
+  ///
+  /// If null, defaults to `Theme.of(context).canvasColor`.
+  final Color backgroundColor;
+
+  /// Gets a color to use for this row at a given index.
+  static Color colorFor(BuildContext context, int index) {
+    final theme = Theme.of(context);
+    final alternateColor = ThemedColor(devtoolsGrey[50], devtoolsGrey[900]);
+    return index % 2 == 0 ? alternateColor : theme.canvasColor;
+  }
+
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
 }
@@ -412,7 +428,10 @@ class _TableRowState<T> extends State<_TableRow<T>>
       builder: (context, child) {
         return SizedBox(
           height: _Table.defaultRowHeight * showAnimation.value,
-          child: Material(child: child),
+          child: Material(
+            child: child,
+            color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+          ),
         );
       },
       child: InkWell(
