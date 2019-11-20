@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/utils.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -171,10 +172,11 @@ void main() {
         ]
       }
     ''');
-    final diagnostics =
+    final diagnostic =
         RemoteDiagnosticsNode({'renderObject': flexJson}, null, null, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
     final FlexLayoutProperties flexProperties =
-        FlexLayoutProperties.fromDiagnostics(diagnostics);
+        FlexLayoutProperties.fromNode(node);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);
@@ -300,8 +302,9 @@ void main() {
         "widgetRuntimeType": "Row"
     }
     ''');
-      final node = RemoteDiagnosticsNode(json, null, false, null);
-      final layoutProperties = LayoutProperties(node);
+      final diagnostic = RemoteDiagnosticsNode(json, null, false, null);
+      final layoutProperties =
+          LayoutProperties(InspectorTreeNode()..diagnostic = diagnostic);
 
       expect(layoutProperties.size, const Size(432.0, 56.0));
       expect(
@@ -331,8 +334,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), 'h=56.0');
         expect(layoutProperties.describeWidthConstraints(), 'w=25.0');
       });
@@ -352,8 +355,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), '75.0<=h<=100.0');
         expect(layoutProperties.describeWidthConstraints(), '25.0<=w<=50.0');
       });
@@ -371,8 +374,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), 'h=unconstrained');
         expect(layoutProperties.describeWidthConstraints(), 'w=unconstrained');
       });
@@ -389,8 +392,8 @@ void main() {
               }
             }
           ''');
-      final layoutProperties =
-          LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+      final layoutProperties = LayoutProperties(InspectorTreeNode()
+        ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
       expect(layoutProperties.describeHeight(), 'h=56.0');
       expect(layoutProperties.describeWidth(), 'w=432.6');
     });
