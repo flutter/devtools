@@ -352,86 +352,14 @@ Future<void> registerLaunchDevToolsService(
     final VmService service = await _connectToVmService(vmServiceUri);
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
-      // Prints a launch event to stdout so consumers of the DevTools server
-      // can see when clients are being launched/reused.
-      void emitLaunchEvent({@required bool reused, @required bool notified}) {
-        printOutput(
-          null,
-          {
-            'event': 'client.launch',
-            'params': {'reused': reused, 'notified': notified},
-          },
-          machineMode: machineMode,
-        );
-      }
-
       try {
-        // First see if we have an existing DevTools client open that we can
-        // reuse.
-        final canReuse = params != null &&
-            params.containsKey('reuseWindows') &&
-            params['reuseWindows'] == true;
-        final shouldNotify = params != null &&
-            params.containsKey('notify') &&
-            params['notify'] == true;
-        final page = params != null ? params['page'] : null;
-        if (canReuse &&
-            await _tryReuseExistingDevToolsInstance(
-              vmServiceUri,
-              page,
-              shouldNotify,
-            )) {
-          emitLaunchEvent(reused: true, notified: shouldNotify);
-          return {'result': Success().toJson()};
-        }
-
-        final uriParams = <String, dynamic>{};
-
-        // Copy over queryParams passed by the client
-        if (params != null) {
-          params['queryParams']
-              ?.forEach((key, value) => uriParams[key] = value);
-        }
-
-        // Add the URI to the VM service
-        uriParams['uri'] = vmServiceUri.toString();
-
-        final devToolsUri = Uri.parse(devToolsUrl);
-        final uriToLaunch = devToolsUri.replace(
-          // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
-          // ChromeOS fails to detect that it's a port that's tunneled, and will
-          // quietly replace the IP with "penguin.linux.test". This is not valid
-          // for us since the server isn't bound to the containers IP (it's bound
-          // to the containers loopback IP).
-          path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
-          queryParameters: uriParams,
-          fragment: page,
+        await launchDevTools(
+          params,
+          vmServiceUri,
+          devToolsUrl,
+          headlessMode,
+          machineMode,
         );
-
-        // TODO(dantup): When ChromeOS has support for tunneling all ports we
-        // can change this to always use the native browser for ChromeOS
-        // and may wish to handle this inside `browser_launcher`.
-        //   https://crbug.com/848063
-        final useNativeBrowser = _isChromeOS &&
-            _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
-            _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
-        if (useNativeBrowser) {
-          await Process.start('x-www-browser', [uriToLaunch.toString()]);
-        } else {
-          final args = headlessMode
-              ? [
-                  '--headless',
-                  // When running headless, Chrome will quit immediately after loading
-                  // the page unless we have the debug port open.
-                  '--remote-debugging-port=9223',
-                  '--disable-gpu',
-                  '--no-sandbox',
-                ]
-              : <String>[];
-          await Chrome.start([uriToLaunch.toString()], args: args);
-        }
-
-        emitLaunchEvent(reused: false, notified: false);
         return {'result': Success().toJson()};
       } catch (e, s) {
         // Note: It's critical that we return responses in exactly the right format
@@ -474,6 +402,88 @@ Future<void> registerLaunchDevToolsService(
       machineMode: machineMode,
     );
   }
+}
+
+Future<void> launchDevTools(Map<String, dynamic> params, Uri vmServiceUri,
+    String devToolsUrl, bool headlessMode, bool machineMode) async {
+  // Prints a launch event to stdout so consumers of the DevTools server
+  // can see when clients are being launched/reused.
+  void emitLaunchEvent({@required bool reused, @required bool notified}) {
+    printOutput(
+      null,
+      {
+        'event': 'client.launch',
+        'params': {'reused': reused, 'notified': notified},
+      },
+      machineMode: machineMode,
+    );
+  }
+
+  // First see if we have an existing DevTools client open that we can
+  // reuse.
+  final canReuse = params != null &&
+      params.containsKey('reuseWindows') &&
+      params['reuseWindows'] == true;
+  final shouldNotify = params != null &&
+      params.containsKey('notify') &&
+      params['notify'] == true;
+  final page = params != null ? params['page'] : null;
+  if (canReuse &&
+      await _tryReuseExistingDevToolsInstance(
+        vmServiceUri,
+        page,
+        shouldNotify,
+      )) {
+    emitLaunchEvent(reused: true, notified: shouldNotify);
+    return {'result': Success().toJson()};
+  }
+
+  final uriParams = <String, dynamic>{};
+
+  // Copy over queryParams passed by the client
+  if (params != null) {
+    params['queryParams']?.forEach((key, value) => uriParams[key] = value);
+  }
+
+  // Add the URI to the VM service
+  uriParams['uri'] = vmServiceUri.toString();
+
+  final devToolsUri = Uri.parse(devToolsUrl);
+  final uriToLaunch = devToolsUri.replace(
+    // If path is empty, we generate 'http://foo:8000?uri=' (missing `/`) and
+    // ChromeOS fails to detect that it's a port that's tunneled, and will
+    // quietly replace the IP with "penguin.linux.test". This is not valid
+    // for us since the server isn't bound to the containers IP (it's bound
+    // to the containers loopback IP).
+    path: devToolsUri.path.isEmpty ? '/' : devToolsUri.path,
+    queryParameters: uriParams,
+    fragment: page,
+  );
+
+  // TODO(dantup): When ChromeOS has support for tunneling all ports we
+  // can change this to always use the native browser for ChromeOS
+  // and may wish to handle this inside `browser_launcher`.
+  //   https://crbug.com/848063
+  final useNativeBrowser = _isChromeOS &&
+      _isAccessibleToChromeOSNativeBrowser(Uri.parse(devToolsUrl)) &&
+      _isAccessibleToChromeOSNativeBrowser(vmServiceUri);
+  if (useNativeBrowser) {
+    await Process.start('x-www-browser', [uriToLaunch.toString()]);
+  } else {
+    final args = headlessMode
+        ? [
+            '--headless',
+            // When running headless, Chrome will quit immediately after loading
+            // the page unless we have the debug port open.
+            '--remote-debugging-port=9223',
+            '--disable-gpu',
+            '--no-sandbox',
+          ]
+        : <String>[];
+    await Chrome.start([uriToLaunch.toString()], args: args);
+  }
+
+  emitLaunchEvent(reused: false, notified: false);
 }
 
 // TODO(dantup): This method was adapted from devtools and should be upstreamed
