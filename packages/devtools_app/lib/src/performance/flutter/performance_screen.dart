@@ -38,6 +38,7 @@ class PerformanceBody extends StatefulWidget {
 
 class PerformanceBodyState extends State<PerformanceBody> {
   final PerformanceController _controller = PerformanceController();
+
   CpuProfileData _data;
 
   @override
@@ -46,6 +47,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
     // TODO(djshuckerow): add in buttons to control the CPU recording.
     _controller.startRecording();
     Future.delayed(const Duration(seconds: 3)).then((_) async {
+      if (!mounted) return;
       await _controller.stopRecording();
       _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
       setState(() {
