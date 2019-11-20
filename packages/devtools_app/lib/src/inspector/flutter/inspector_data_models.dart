@@ -1,7 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:math' show max;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,36 +18,39 @@ const Type boxConstraintsType = BoxConstraints;
 /// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
 /// In the case where it is greater, we should render it with scrolling capability.
 ///
-/// if [forceToOccupyMaxSizeAvailable] is set to true,
-///   this method will ignore the largestRenderSize
-///   and compute it's own largestRenderSize to force
-///   the sum of the render size to be equals to [maxSpaceAvailable]
+/// Variables:
+/// - [sizes] : real size for widgets that want to be rendered / scaled
+/// - [smallestSize] : the smallest element in the array [sizes]
+/// - [largestSize] : the largest element in the array [sizes]
+/// - [smallestRenderSize] : render size for smallest element
+/// - [largestRenderSize] : render size for largest element
+/// - [maxSizeAvailable] : maximum size available for rendering the widget
+/// - [useMaxSizeAvailable] : flag for forcing the widget dimension to be at least [maxSizeAvailable]
+///
+/// if [useMaxSizeAvailable] is set to true,
+/// this method will ignore the largestRenderSize
+/// and compute it's own largestRenderSize to force
+/// the sum of the render size to be equals to [maxSizeAvailable]
 ///
 /// Formula for computing render size:
-///   rs_i = (s_i - ss) * (lrs - srs) / (ls - ss) + srs
-/// Variables:
-/// - rs_i: render size for element index i
-/// - s_i: real size for element at index i (sizes[i])
-/// - ss: [smallestSize], the smallest element in the array [sizes]
-/// - ls: [largestSize], the largest element in the array [sizes]
-/// - srs: [smallestRenderSize] (render size for smallest element)
-/// - lrs: [largestRenderSize] (render size for largest element)
+///   renderSize[i] = (size[i] - smallestSize)
+///               * (largestRenderSize - smallestRenderSize)
+///               / (largestSize - smallestSize) + smallestRenderSize
 /// Explanation:
 /// - The computation formula for transforming size to renderSize is based on these two things:
 ///   - smallest element will be rendered to [smallestRenderSize]
 ///   - largest element will be rendered to [largestRenderSize]
 ///   - any other size will be scaled accordingly
 /// - The formula above is derived from:
-///    (rs_i - srs) / (lrs - srs) = (s_i - ss) / (s - ss)
+///    (renderSize[i] - smallestRenderSize) / (largestRenderSize - smallestRenderSize)
+///     = (size[i] - smallestSize) / (size[i] - smallestSize)
 ///
 /// Formula for computing forced [largestRenderSize]:
-///   lrs = (msa - n * srs) * (ls - ss) / sum(s_i - ss) + srs
-/// Variables:
-///   - n: [sizes.length]
-///   - msa: [maxSizeAvailable]
+///   largestRenderSize = (maxSizeAvailable - sizes.length * smallestRenderSize)
+///     * (largestSize - smallestSize) / sum(s[i] - ss) + smallestRenderSize
 /// Explanation:
 /// - This formula is derived from the equation:
-///    sum(rs_i) = msa
+///    sum(renderSize) = maxSizeAvailable
 ///
 List<double> computeRenderSizes({
   @required Iterable<double> sizes,
@@ -56,32 +59,34 @@ List<double> computeRenderSizes({
   @required double smallestRenderSize,
   @required double largestRenderSize,
   @required double maxSizeAvailable,
-  bool forceToOccupyMaxSizeAvailable = true,
+  bool useMaxSizeAvailable = true,
 }) {
-  /// Assign from parameters and abbreviate variable names for similarity to formula
-  final ss = smallestSize, srs = smallestRenderSize;
-  final ls = largestSize;
-  double lrs = largestRenderSize;
-  final msa = maxSizeAvailable;
   final n = sizes.length;
 
-  if (ss == ls) {
+  if (smallestSize == largestSize) {
     // It means that all widget have the same size
-    //   and we can just divide the size evenly
-    //   but it should be at least as big as [smallestRenderSize]
-    final rs = max(srs, msa / n);
-    return [for (var _ in sizes) rs];
+    // and we can just divide the size evenly
+    // but it should be at least as big as [smallestRenderSize]
+    final renderSize = math.max(smallestRenderSize, maxSizeAvailable / n);
+    return [for (var _ in sizes) renderSize];
   }
 
-  List<double> transformToRenderSize(double lrs) =>
-      [for (var s in sizes) (s - ss) * (lrs - srs) / (ls - ss) + srs];
+  List<double> transformToRenderSize(double largestRenderSize) => [
+        for (var s in sizes)
+          (s - smallestSize) *
+                  (largestRenderSize - smallestRenderSize) /
+                  (largestSize - smallestSize) +
+              smallestRenderSize
+      ];
 
   var renderSizes = transformToRenderSize(largestRenderSize);
 
-  if (forceToOccupyMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
-    lrs =
-        (msa - n * srs) * (ls - ss) / sum([for (var s in sizes) s - ss]) + srs;
-    renderSizes = transformToRenderSize(lrs);
+  if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
+    largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
+            (largestSize - smallestSize) /
+            sum([for (var s in sizes) s - smallestSize]) +
+        smallestRenderSize;
+    renderSizes = transformToRenderSize(largestRenderSize);
   }
   return renderSizes;
 }
@@ -269,8 +274,8 @@ class FlexLayoutProperties extends LayoutProperties {
 
     List<double> renderSizes(Axis axis) {
       final sizes = childrenDimensions(axis);
-      final smallestSize = minimum(sizes);
-      final largestSize = maximum(sizes);
+      final smallestSize = min(sizes);
+      final largestSize = max(sizes);
       if (axis == direction ||
           (crossAxisAlignment != CrossAxisAlignment.stretch &&
               smallestSize != largestSize)) {
@@ -303,7 +308,7 @@ class FlexLayoutProperties extends LayoutProperties {
     if (crossAxisAlignment == CrossAxisAlignment.start ||
         crossAxisAlignment == CrossAxisAlignment.stretch ||
         maxDimension == usedDimension) return 0.0;
-    final emptySpace = max(0.0, maxDimension - usedDimension);
+    final emptySpace = math.max(0.0, maxDimension - usedDimension);
     if (crossAxisAlignment == CrossAxisAlignment.end) return emptySpace;
     return emptySpace * 0.5;
   }
@@ -375,7 +380,7 @@ class FlexLayoutProperties extends LayoutProperties {
         continue;
 
       final renderInfo = childrenRenderInfo[i];
-      final space = renderInfo.copy();
+      final space = renderInfo.clone();
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
@@ -384,8 +389,8 @@ class FlexLayoutProperties extends LayoutProperties {
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
         space.crossAxisRealDimension *= 0.5;
-        spaces.add(space.copy()..crossAxisOffset = 0.0);
-        spaces.add(space.copy()
+        spaces.add(space.clone()..crossAxisOffset = 0.0);
+        spaces.add(space.clone()
           ..crossAxisOffset =
               renderInfo.crossAxisDimension + renderInfo.crossAxisOffset);
       } else {
@@ -490,7 +495,7 @@ class RenderInfo {
       realWidth = newVal;
   }
 
-  RenderInfo copy() {
+  RenderInfo clone() {
     return RenderInfo(axis, size, offset, realSize);
   }
 }

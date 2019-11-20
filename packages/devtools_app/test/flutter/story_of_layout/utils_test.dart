@@ -10,9 +10,9 @@ void main() {
     expect(sum([1.0, 2.0, 3.0]), 6.0);
   });
   test('minimum', () {
-    expect(minimum([1.0, 2.0, 3.0]), 1.0);
+    expect(min([1.0, 2.0, 3.0]), 1.0);
   });
   test('maximum', () {
-    expect(maximum([1.0, 2.0, 3.0]), 3.0);
+    expect(max([1.0, 2.0, 3.0]), 3.0);
   });
 }
