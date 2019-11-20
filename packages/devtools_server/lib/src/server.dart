@@ -261,12 +261,7 @@ Future<void> _handleVmRegister(
   // Lots of things are considered valid URIs (including empty strings
   // and single letters) since they can be relative, so we need to do some
   // extra checks.
-  if (uri != null &&
-      uri.isAbsolute &&
-      (uri.isScheme('ws') ||
-          uri.isScheme('wss') ||
-          uri.isScheme('http') ||
-          uri.isScheme('https'))) {
+  if (_isValidVmServiceUri(uri)) {
     await registerLaunchDevToolsService(
         uri, id, devToolsUrl, machineMode, headlessMode);
   } else {
@@ -504,6 +499,14 @@ bool _isAccessibleToChromeOSNativeBrowser(Uri uri) {
   const tunneledPorts = {8000, 8008, 8080, 8085, 8888, 9005, 3000, 4200, 5000};
   return uri != null && uri.hasPort && tunneledPorts.contains(uri.port);
 }
+
+bool _isValidVmServiceUri(Uri uri) =>
+    uri != null &&
+    uri.isAbsolute &&
+    (uri.isScheme('ws') ||
+        uri.isScheme('wss') ||
+        uri.isScheme('http') ||
+        uri.isScheme('https'));
 
 Future<VmService> _connectToVmService(Uri uri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
