@@ -462,19 +462,6 @@ Future<Map<String, dynamic>> launchDevTools(
     String devToolsUrl,
     bool headlessMode,
     bool machineMode) async {
-  // Prints a launch event to stdout so consumers of the DevTools server
-  // can see when clients are being launched/reused.
-  void emitLaunchEvent({@required bool reused, @required bool notified}) {
-    printOutput(
-      null,
-      {
-        'event': 'client.launch',
-        'params': {'reused': reused, 'notified': notified},
-      },
-      machineMode: machineMode,
-    );
-  }
-
   // First see if we have an existing DevTools client open that we can
   // reuse.
   final canReuse = params != null &&
@@ -490,7 +477,8 @@ Future<Map<String, dynamic>> launchDevTools(
         page,
         shouldNotify,
       )) {
-    emitLaunchEvent(reused: true, notified: shouldNotify);
+    _emitLaunchEvent(
+        reused: true, notified: shouldNotify, machineMode: machineMode);
     return {'reused': true, 'notified': shouldNotify};
   }
 
@@ -538,8 +526,24 @@ Future<Map<String, dynamic>> launchDevTools(
         : <String>[];
     await Chrome.start([uriToLaunch.toString()], args: args);
   }
-  emitLaunchEvent(reused: false, notified: false);
+  _emitLaunchEvent(reused: false, notified: false, machineMode: machineMode);
   return {'reused': false, 'notified': false};
+}
+
+/// Prints a launch event to stdout so consumers of the DevTools server
+/// can see when clients are being launched/reused.
+void _emitLaunchEvent(
+    {@required bool reused,
+    @required bool notified,
+    @required bool machineMode}) {
+  printOutput(
+    null,
+    {
+      'event': 'client.launch',
+      'params': {'reused': reused, 'notified': notified},
+    },
+    machineMode: machineMode,
+  );
 }
 
 // TODO(dantup): This method was adapted from devtools and should be upstreamed
