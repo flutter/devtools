@@ -43,7 +43,7 @@ void main() {
     testWidgets('builds proper content for state', (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
       await setWindowSize(const Size(1599.0, 1000.0));
-      await tester.pumpWidget(wrapWithProvidedController(
+      await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: TimelineController(),
       ));
@@ -71,7 +71,7 @@ void main() {
       when(mockData.selectedFrame).thenReturn(testFrame);
       final controllerWithData = TimelineController()
         ..frameBasedTimeline.data = mockData;
-      await tester.pumpWidget(wrapWithProvidedController(
+      await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: controllerWithData,
       ));

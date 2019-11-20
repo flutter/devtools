@@ -46,7 +46,7 @@ class PerformanceBodyState extends State<PerformanceBody> {
     super.initState();
     // TODO(djshuckerow): add in buttons to control the CPU recording.
     _controller.startRecording();
-    Future.delayed(const Duration(seconds: 15)).then((_) async {
+    Future.delayed(const Duration(seconds: 3)).then((_) async {
       if (!mounted) return;
       await _controller.stopRecording();
       _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
@@ -104,7 +104,7 @@ class CpuCallTreeTable extends StatelessWidget {
       data: data.cpuProfileRoot,
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (frame) => frame.id,
+      keyFactory: (frame) => PageStorageKey<String>(frame.id),
     );
   }
 }

@@ -3,15 +3,27 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../wrappers.dart';
+
+// TODO(albertusangga) Investigate flaky asset test
+/// This is current workaround for golden testing asset
+/// Currently we are preventing testing the assets since it seems to be flaky.
+class MockAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    return ByteData.view(Uint8List.fromList([0]).buffer);
+  }
+}
 
 void main() {
   const windowSize = Size(1750, 1750);
@@ -231,38 +243,51 @@ void main() {
     }
     ''');
 
-  Widget wrap(Widget widget) => MaterialApp(home: Scaffold(body: widget));
+  Widget wrap(Widget widget) {
+    return MaterialApp(
+      home: Scaffold(body: widget),
+    );
+  }
 
-  group('Row', () {
+  /// current workaround for flaky image asset testing.
+  /// https://github.com/flutter/flutter/issues/38997
+  Future<void> pump(WidgetTester tester, Widget w) async {
+    await tester.runAsync(() async {
+      await tester.pumpWidget(w);
+      for (var element in find.byType(Image).evaluate()) {
+        final Image widget = element.widget;
+        final ImageProvider image = widget.image;
+        await precacheImage(image, element);
+        await tester.pumpAndSettle();
+      }
+    });
+  }
+
+  testWidgets('Row golden test', (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
     final node = RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+    await setWindowSize(windowSize);
+    final widget =
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+    await pump(tester, widget);
+    await expectLater(
+      find.byWidget(widget),
+      matchesGoldenFile('goldens/story_of_row_layout.png'),
+    );
+  }, skip: kIsWeb || !isLinux);
 
-    testWidgets('Golden test', (WidgetTester tester) async {
-      await setWindowSize(windowSize);
-      final widget = wrap(StoryOfYourFlexWidget(
-          FlexLayoutProperties.fromRemoteDiagnosticsNode(node)));
-      await tester.pumpWidget(widget);
-      await expectLater(
-        find.byWidget(widget),
-        matchesGoldenFile('goldens/story_of_row_layout.png'),
-      );
-    }, skip: kIsWeb || !isLinux);
-  });
-
-  group('Column', () {
+  testWidgets('Column golden test', (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
     final node = RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
-    testWidgets('Golden test', (WidgetTester tester) async {
-      await setWindowSize(windowSize);
-      final widget = wrap(StoryOfYourFlexWidget(
-          FlexLayoutProperties.fromRemoteDiagnosticsNode(node)));
-      await tester.pumpWidget(widget);
-      await expectLater(
-        find.byWidget(widget),
-        matchesGoldenFile('goldens/story_of_column_layout.png'),
-      );
-    }, skip: kIsWeb || !isLinux);
-  });
+    await setWindowSize(windowSize);
+    final widget =
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+    await pump(tester, widget);
+    await expectLater(
+      find.byWidget(widget),
+      matchesGoldenFile('goldens/story_of_column_layout.png'),
+    );
+  }, skip: kIsWeb || !isLinux);
 
   test('sum', () {
     expect(sum([1.0, 2.0, 3.0]), 6.0);

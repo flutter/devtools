@@ -8,7 +8,7 @@ The `devtools` tool supports running in a server mode for use by IDEs and other 
 pub global run devtools --machine
 ```
 
-This runs a persistent, JSON-RPC based server. IDEs and other tools can start DevTools in this mode and get in order to launch browser windows (or reuse existing ones) and track which DevTools instances are connected to VMs.
+This runs a persistent, JSON-RPC based server. IDEs and other tools can start DevTools in this mode in order to launch browser windows (or reuse existing ones) and track which DevTools instances are connected to VMs.
 
 ### Additional Command-Line Flags
 
