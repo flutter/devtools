@@ -14,6 +14,123 @@ const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 
+abstract class FlameChart<T, V> extends StatefulWidget {
+  const FlameChart(
+    this.data, {
+    @required this.duration,
+    @required this.height,
+    @required this.totalStartingWidth,
+    @required this.startInset,
+    @required this.selectionNotifier,
+    @required this.onSelection,
+  });
+
+  final T data;
+
+  final Duration duration;
+
+  final double totalStartingWidth;
+
+  final double height;
+
+  final double startInset;
+
+  final ValueListenable<V> selectionNotifier;
+
+  final void Function(V event) onSelection;
+
+  double get startingContentWidth =>
+      totalStartingWidth - startInset - sideInset;
+}
+
+mixin FlameChartStateMixin<T extends FlameChart> on State<T> {
+  static const startingScrollPosition = 0.0;
+  ScrollController scrollControllerX;
+  ScrollController scrollControllerY;
+  double scrollOffsetX = startingScrollPosition;
+  double scrollOffsetY = startingScrollPosition;
+
+  List<FlameChartRow> rows;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // TODO(kenz): improve this so we are not rebuilding on every scroll.
+    scrollControllerX = ScrollController()
+      ..addListener(() {
+        setState(() {
+          scrollOffsetX = scrollControllerX.offset;
+        });
+      });
+
+    scrollControllerY = ScrollController()
+      ..addListener(() {
+        setState(() {
+          scrollOffsetY = scrollControllerY.offset;
+        });
+      });
+  }
+
+  @override
+  void didUpdateWidget(T oldWidget) {
+    if (widget.data != oldWidget.data) {
+      scrollControllerX.jumpTo(startingScrollPosition);
+      scrollControllerY.jumpTo(startingScrollPosition);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    scrollControllerX.dispose();
+    scrollControllerY.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(kenz): switch to creating a list of scroll views with a linked
+    // scroll controller.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          child: SingleChildScrollView(
+            controller: scrollControllerX,
+            scrollDirection: Axis.horizontal,
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                controller: scrollControllerY,
+                scrollDirection: Axis.vertical,
+                child: buildFlameChartBody(constraints),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildFlameChartBody(BoxConstraints constraints);
+
+  List<FlameChartNode> nodesInViewport(BoxConstraints constraints) {
+    // TODO(kenz): Use binary search method we use in html full timeline here.
+    final nodesInViewport = <FlameChartNode>[];
+    for (var row in rows) {
+      for (var node in row.nodes) {
+        final fitsHorizontally = node.rect.right >= scrollOffsetX &&
+            node.rect.left - scrollOffsetX <= constraints.maxWidth;
+        final fitsVertically = node.rect.bottom >= scrollOffsetY &&
+            node.rect.top - scrollOffsetY <= constraints.maxHeight;
+        if (fitsHorizontally && fitsVertically) {
+          nodesInViewport.add(node);
+        }
+      }
+    }
+    return nodesInViewport;
+  }
+}
+
 class FlameChartRow {
   const FlameChartRow({
     @required this.nodes,

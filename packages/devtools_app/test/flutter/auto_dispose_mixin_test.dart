@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/auto_dispose.dart';
+import 'package:devtools_app/src/flutter/auto_dispose_mixin.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:devtools_app/src/flutter/auto_dispose_mixin.dart';
 
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key key}) : super(key: key);

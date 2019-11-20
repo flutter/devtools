@@ -37,9 +37,8 @@ class FramesBarChart extends CoreElement with HtmlSetStateMixin {
       }
     });
 
-    timelineController.frameBasedTimeline.onFrameAdded
-        .listen((TimelineFrame frame) {
-      frameUIgraph.process(frame);
+    timelineController.frameBasedTimeline.frameAddedNotifier.addListener(() {
+      frameUIgraph.processNextFrame();
     });
   }
 
@@ -96,7 +95,7 @@ class PlotlyDivGraph extends CoreElement {
         dataIndexes,
         uiDurations,
         gpuDurations,
-        timelineController.frameBasedTimeline.paused,
+        timelineController.frameBasedTimeline.pausedNotifier.value,
       );
 
       dataIndexes.removeRange(0, dataLength);
@@ -191,7 +190,9 @@ class PlotlyDivGraph extends CoreElement {
   }
 
   // Add current frame data to chunks of data for later plotting.
-  void process(TimelineFrame frame) async {
+  void processNextFrame() async {
+    final frame =
+        timelineController.frameBasedTimeline.frameAddedNotifier.value;
     if (frame.uiDurationMs > 0 && frame.gpuDurationMs > 0) {
       dataIndexes.add(_frameIndex);
       uiDurations.add(frame.uiDurationMs);

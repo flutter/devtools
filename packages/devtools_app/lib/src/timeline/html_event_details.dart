@@ -117,11 +117,11 @@ class HtmlEventDetails extends CoreElement {
   }
 
   void _initListeners() {
-    _timelineController.frameBasedTimeline.onSelectedFrame
-        .listen((_) => reset());
+    _timelineController.frameBasedTimeline.selectedFrameNotifier
+        .addListener(() => reset());
 
-    _timelineController.onSelectedTimelineEvent
-        .listen((_) async => await _update());
+    _timelineController.selectedTimelineEventNotifier
+        .addListener(() async => await _update());
 
     _timelineController.onLoadOfflineData.listen((_) async {
       // If there is no selected event, there is no reason to show the event
@@ -232,7 +232,8 @@ class _CpuProfiler extends HtmlCpuProfiler {
 
     final cpuProfileData = _timelineController.timeline.data?.cpuProfileData;
     if (cpuProfileData != null && cpuProfileData.stackFrames.isEmpty) {
-      final offset = _timelineController.timelineMode == TimelineMode.frameBased
+      final offset = _timelineController.timelineModeNotifier.value ==
+              TimelineMode.frameBased
           ? _timelineController.frameBasedTimeline.data.selectedFrame.time.start
           : _timelineController
               .fullTimeline.data.timelineEvents.first.time.start;

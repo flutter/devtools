@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
-import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/colors.dart';
 import '../../ui/theme.dart';
@@ -21,32 +21,40 @@ class TimelineFlameChart extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).focusColor),
-          ),
-          child: controller.timelineMode == TimelineMode.frameBased
-              ? FrameBasedTimelineFlameChart(
-                  controller.frameBasedTimeline.data.selectedFrame,
-                  width: constraints.maxWidth,
-                  height: math.max(
-                    constraints.maxHeight,
-                    _frameBasedTimelineChartHeight(controller),
-                  ),
-                  selectionProvider: () =>
-                      controller.frameBasedTimeline.data.selectedEvent,
-                  onSelection: (e) => controller.selectTimelineEvent(e),
-                )
-              // TODO(kenz): implement full timeline flame chart.
-              : Container(
-                  color: Colors.black26,
-                  child: const Center(
-                    child: Text('TODO Full Timeline Flame Chart'),
-                  ),
-                ),
-        ),
+        child: controller.timelineModeNotifier.value == TimelineMode.frameBased
+            ? _buildFrameBasedTimeline(controller, constraints)
+            : _buildFullTimeline(controller, constraints),
       );
     });
+  }
+
+  Widget _buildFrameBasedTimeline(
+    TimelineController controller,
+    BoxConstraints constraints,
+  ) {
+    return FrameBasedTimelineFlameChart(
+      controller.frameBasedTimeline.data.selectedFrame,
+      width: constraints.maxWidth,
+      height: math.max(
+        constraints.maxHeight,
+        _frameBasedTimelineChartHeight(controller),
+      ),
+      selectionNotifier: controller.selectedTimelineEventNotifier,
+      onSelection: (e) => controller.selectTimelineEvent(e),
+    );
+  }
+
+  Widget _buildFullTimeline(
+    TimelineController controller,
+    BoxConstraints constraints,
+  ) {
+    // TODO(kenz): implement full timeline flame chart.
+    return Container(
+      color: Colors.black26,
+      child: const Center(
+        child: Text('TODO Full Timeline Flame Chart'),
+      ),
+    );
   }
 
   double _frameBasedTimelineChartHeight(TimelineController controller) {
@@ -56,34 +64,23 @@ class TimelineFlameChart extends StatelessWidget {
   }
 }
 
-// TODO(kenz): Abstract core flame chart logic for use in other flame charts.
-class FrameBasedTimelineFlameChart extends StatefulWidget {
+class FrameBasedTimelineFlameChart
+    extends FlameChart<TimelineFrame, TimelineEvent> {
   FrameBasedTimelineFlameChart(
-    this.data, {
-    @required this.height,
+    TimelineFrame data, {
+    @required double height,
     @required double width,
-    @required this.selectionProvider,
-    @required this.onSelection,
-  })  : duration = data.time.duration,
-        startInset = sideInset,
-        totalStartingWidth = width;
-
-  final TimelineFrame data;
-
-  final Duration duration;
-
-  final double startInset;
-
-  final double totalStartingWidth;
-
-  final double height;
-
-  final TimelineEvent Function() selectionProvider;
-
-  final void Function(TimelineEvent event) onSelection;
-
-  double get startingContentWidth =>
-      totalStartingWidth - startInset - sideInset;
+    @required ValueListenable selectionNotifier,
+    @required Function(TimelineEvent event) onSelection,
+  }) : super(
+          data,
+          duration: data.time.duration,
+          height: height,
+          totalStartingWidth: width,
+          startInset: sideInset,
+          selectionNotifier: selectionNotifier,
+          onSelection: onSelection,
+        );
 
   @override
   FrameBasedTimelineFlameChartState createState() =>
@@ -91,129 +88,50 @@ class FrameBasedTimelineFlameChart extends StatefulWidget {
 }
 
 class FrameBasedTimelineFlameChartState
-    extends State<FrameBasedTimelineFlameChart> with AutoDisposeMixin {
-  static const startingScrollPosition = 0.0;
-  ScrollController _scrollControllerX;
-  ScrollController _scrollControllerY;
-  double scrollOffsetX = startingScrollPosition;
-  double scrollOffsetY = startingScrollPosition;
-
-  List<FlameChartRow> rows;
-
-  TimelineController _controller;
-
+    extends State<FrameBasedTimelineFlameChart>
+    with FlameChartStateMixin<FrameBasedTimelineFlameChart> {
   int get gpuSectionStartRow => widget.data.uiEventFlow.depth;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
-    cancel();
-    autoDispose(_controller.onSelectedTimelineEvent.listen((_) {
-      setState(() {});
-    }));
-  }
+  Widget buildFlameChartBody(BoxConstraints constraints) {
+    final width = math.max(constraints.maxWidth, widget.totalStartingWidth);
+    final height = math.max(constraints.maxHeight, widget.height);
 
-  @override
-  void didUpdateWidget(FrameBasedTimelineFlameChart oldWidget) {
-    if (oldWidget.data != widget.data) {
-      _scrollControllerX.jumpTo(startingScrollPosition);
-      _scrollControllerY.jumpTo(startingScrollPosition);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // TODO(kenz): improve this so we are not rebuilding on every scroll.
-    _scrollControllerX = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetX = _scrollControllerX.offset;
-        });
-      });
-
-    _scrollControllerY = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetY = _scrollControllerY.offset;
-        });
-      });
-  }
-
-  @override
-  void dispose() {
-    _scrollControllerX.dispose();
-    _scrollControllerY.dispose();
-    // TODO(kenz): dispose [_controller] here.
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scrollbar(
-          child: SingleChildScrollView(
-            controller: _scrollControllerX,
-            scrollDirection: Axis.horizontal,
-            child: Scrollbar(
-              child: SingleChildScrollView(
-                controller: _scrollControllerY,
-                scrollDirection: Axis.vertical,
-                child: _flameChartBody(constraints),
-              ),
+    // TODO(kenz): rewrite this using slivers or flows.
+    return ValueListenableBuilder(
+      valueListenable: widget.selectionNotifier,
+      builder: (context, selectedEvent, _) {
+        return Stack(
+          children: [
+            Container(
+              width: width,
+              height: height,
             ),
-          ),
+            ..._buildNodesInViewport(
+              constraints,
+              selectedEvent,
+            ), // pick what to show
+          ],
         );
       },
     );
   }
 
-  Widget _flameChartBody(BoxConstraints constraints) {
-    final width = math.max(constraints.maxWidth, widget.totalStartingWidth);
-    final height = math.max(constraints.maxHeight, widget.height);
-
-    // TODO(kenz): rewrite this using slivers instead of a stack.
-    return Stack(
-      children: [
-        Container(
-          width: width,
-          height: height,
-        ),
-        ..._nodesInViewport(constraints), // pick what to show
-      ],
-    );
-  }
-
-  List<FlameChartNode> _nodesInViewport(BoxConstraints constraints) {
+  List<FlameChartNode> _buildNodesInViewport(
+    BoxConstraints constraints,
+    TimelineEvent selectedEvent,
+  ) {
     // TODO(kenz): is creating all the FlameChartNode objects expensive even if
     // we won't add them to the view? We create all the FlameChartNode objects
     // and place them in FlameChart rows, but we only add [nodesInViewport] to
     // the widget tree.
-    _buildFlameChartElements();
-
-    // TODO(kenz): Use binary search method we use in html full timeline here.
-    final nodesInViewport = <FlameChartNode>[];
-    for (var row in rows) {
-      for (var node in row.nodes) {
-        final fitsHorizontally = node.rect.right >= scrollOffsetX &&
-            node.rect.left - scrollOffsetX <= constraints.maxWidth;
-        final fitsVertically = node.rect.bottom >= scrollOffsetY &&
-            node.rect.top - scrollOffsetY <= constraints.maxHeight;
-        if (fitsHorizontally && fitsVertically) {
-          nodesInViewport.add(node);
-        }
-      }
-    }
-    return nodesInViewport;
+    _buildFlameChartElements(selectedEvent);
+    return nodesInViewport(constraints);
   }
 
   // TODO(kenz): when optimizing this code, consider passing in the viewport
   // to only construct FlameChartNode elements that are in view.
-  void _buildFlameChartElements() {
+  void _buildFlameChartElements(TimelineEvent selectedEvent) {
     _resetColorOffsets();
 
     rows = List.generate(
@@ -278,7 +196,7 @@ class FrameBasedTimelineFlameChartState
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selected: event == widget.selectionProvider(),
+        selected: event == selectedEvent,
         onSelected: (dynamic event) => widget.onSelection(event),
       );
 
@@ -294,14 +212,6 @@ class FrameBasedTimelineFlameChartState
 
     createChartNodes(widget.data.uiEventFlow, 0);
     createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
-  }
-
-  double get calculatedContentWidth {
-    // The farthest right node in the graph will either be the root UI event or
-    // the root GPU event.
-    return math.max(rows[gpuSectionStartRow].nodes.last.rect.right,
-            rows[gpuSectionStartRow].nodes.last.rect.right) -
-        widget.startInset;
   }
 }
 

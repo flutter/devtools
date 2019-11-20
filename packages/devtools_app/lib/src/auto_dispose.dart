@@ -29,7 +29,7 @@ class Disposer {
 
   /// Add a listener to a Listenable object that is automatically removed when
   /// cancel is called.
-  void addAutoDisposeListener(Listenable listenable, VoidCallback listener) {
+  void addAutoDisposeListener(Listenable listenable, [VoidCallback listener]) {
     if (listenable == null || listener == null) return;
     _listenables.add(listenable);
     _listeners.add(listener);
@@ -79,7 +79,7 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void addAutoDisposeListener(Listenable listenable, listener) {
+  void addAutoDisposeListener(Listenable listenable, [VoidCallback listener]) {
     _delegate.addAutoDisposeListener(listenable, listener);
   }
 
