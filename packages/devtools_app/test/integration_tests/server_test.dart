@@ -121,7 +121,7 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a request to launch DevTools in a browser.
-        await launchDevTools(useVmService: useVmService);
+        await _sendLaunchDevToolsRequest(useVmService: useVmService);
 
         final serverResponse =
             await _waitForClients(requiredConnectionState: true);
@@ -137,7 +137,8 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a request to launch at a certain page.
-        await launchDevTools(useVmService: useVmService, page: 'memory');
+        await _sendLaunchDevToolsRequest(
+            useVmService: useVmService, page: 'memory');
 
         final serverResponse = await _waitForClients(requiredPage: 'memory');
         expect(serverResponse, isNotNull);
@@ -152,11 +153,12 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Launch on the memory page and wait for the connection.
-        await launchDevTools(useVmService: useVmService, page: 'memory');
+        await _sendLaunchDevToolsRequest(
+            useVmService: useVmService, page: 'memory');
         await _waitForClients(requiredPage: 'memory');
 
         // Re-launch, allowing reuse and with a different page.
-        await launchDevTools(
+        await _sendLaunchDevToolsRequest(
             useVmService: useVmService,
             reuseWindows: true,
             page: 'performance');
@@ -177,7 +179,7 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a request to launch DevTools in a browser.
-        await launchDevTools(useVmService: useVmService);
+        await _sendLaunchDevToolsRequest(useVmService: useVmService);
 
         // Wait for the DevTools to inform server that it's connected.
         await _waitForClients(requiredConnectionState: true);
@@ -205,7 +207,7 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a request to launch DevTools in a browser.
-        await launchDevTools(useVmService: useVmService);
+        await _sendLaunchDevToolsRequest(useVmService: useVmService);
 
         {
           final serverResponse =
@@ -215,7 +217,7 @@ void main() {
 
         // Request again, allowing reuse, and server emits an event saying the
         // window was reused.
-        final launchResponse = await launchDevTools(
+        final launchResponse = await _sendLaunchDevToolsRequest(
             useVmService: useVmService, reuseWindows: true);
         expect(launchResponse['reused'], isTrue);
 
@@ -232,7 +234,7 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a request to launch DevTools in a browser.
-        await launchDevTools(useVmService: useVmService);
+        await _sendLaunchDevToolsRequest(useVmService: useVmService);
 
         // Wait for the DevTools to inform server that it's connected.
         await _waitForClients(requiredConnectionState: true);
@@ -248,7 +250,8 @@ void main() {
         await _send('vm.register', {'uri': appFixture.serviceUri.toString()});
 
         // Send a new request to launch.
-        await launchDevTools(useVmService: useVmService, reuseWindows: true);
+        await _sendLaunchDevToolsRequest(
+            useVmService: useVmService, reuseWindows: true);
 
         // Ensure we now have a single connected client.
         final serverResponse =
@@ -263,7 +266,7 @@ void main() {
   }
 }
 
-Future<Map<String, dynamic>> launchDevTools({
+Future<Map<String, dynamic>> _sendLaunchDevToolsRequest({
   @required bool useVmService,
   String page,
   bool reuseWindows = false,
