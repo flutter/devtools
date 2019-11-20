@@ -12,6 +12,7 @@ import '../../../ui/theme.dart';
 import '../../../utils.dart';
 import '../../inspector_controller.dart';
 import '../inspector_data_models.dart';
+import '../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
 import 'utils.dart';
 
@@ -384,14 +385,21 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                     ),
                   )
               ],
-              onChanged: (Object newSelection) {
-                setState(() {
-                  if (axis == direction) {
-                    properties.mainAxisAlignment = newSelection;
-                  } else {
-                    properties.crossAxisAlignment = newSelection;
-                  }
-                });
+              onChanged: (Object newSelection) async {
+                if (axis == direction) {
+                  properties.mainAxisAlignment = newSelection;
+                } else {
+                  properties.crossAxisAlignment = newSelection;
+                }
+                final service =
+                    await properties.node.diagnostic.inspectorService;
+                final arg = properties.node.diagnostic.valueRef;
+                await service.invokeTweakFlexProperties(
+                  arg,
+                  properties.mainAxisAlignment,
+                  properties.crossAxisAlignment,
+                );
+                setState(() {});
               },
             ),
           )

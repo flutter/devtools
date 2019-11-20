@@ -269,6 +269,9 @@ void main() {
     final diagnostic =
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
     final node = InspectorTreeNode()..diagnostic = diagnostic;
+    for (var child in diagnostic.childrenNow) {
+      node.appendChild(InspectorTreeNode()..diagnostic = child);
+    }
     await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
@@ -284,6 +287,9 @@ void main() {
     final diagnostic =
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
     final node = InspectorTreeNode()..diagnostic = diagnostic;
+    for (var child in diagnostic.childrenNow) {
+      node.appendChild(InspectorTreeNode()..diagnostic = child);
+    }
     await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
