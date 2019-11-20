@@ -272,10 +272,9 @@ void main() {
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
-      matchesGoldenFile(
-          'goldens/story_of_row_layout${isMacOS ? '_mac' : ''}.png'),
+      matchesGoldenFile('goldens/story_of_row_layout.png'),
     );
-  }, skip: kIsWeb || (!isLinux && !isMacOS));
+  }, skip: kIsWeb || !isLinux);
 
   testWidgets('Column golden test', (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
@@ -286,8 +285,7 @@ void main() {
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
-      matchesGoldenFile(
-          'goldens/story_of_column_layout${isMacOS ? '_mac' : ''}.png'),
+      matchesGoldenFile('goldens/story_of_column_layout.png'),
     );
-  }, skip: kIsWeb || (!isLinux) && !isMacOS);
+  }, skip: kIsWeb || !isLinux);
 }
