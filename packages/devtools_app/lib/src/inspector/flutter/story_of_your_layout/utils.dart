@@ -2,9 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+double sum(Iterable<double> numbers) =>
+    numbers.fold(0, (sum, cur) => sum + cur);
+
+double min(Iterable<double> numbers) =>
+    numbers.fold(double.infinity, (minimum, cur) => math.min(minimum, cur));
+
+double max(Iterable<double> numbers) =>
+    numbers.fold(-double.infinity, (minimum, cur) => math.max(minimum, cur));
+
+String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
+}
+
+String mainAxisAssetImageUrl(MainAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
+}
 
 /// A widget for positioning sized widgets that follows layout as follows:
 ///      | top    |

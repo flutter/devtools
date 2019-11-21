@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -265,10 +266,15 @@ void main() {
 
   testWidgets('Row golden test', (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
-    final node = RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+    final diagnostic =
+        RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
+    for (var child in diagnostic.childrenNow) {
+      node.appendChild(InspectorTreeNode()..diagnostic = child);
+    }
     await setWindowSize(windowSize);
     final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
@@ -278,68 +284,19 @@ void main() {
 
   testWidgets('Column golden test', (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
-    final node = RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
+    final diagnostic =
+        RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
+    for (var child in diagnostic.childrenNow) {
+      node.appendChild(InspectorTreeNode()..diagnostic = child);
+    }
     await setWindowSize(windowSize);
     final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromDiagnostics(node)));
+        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
       matchesGoldenFile('goldens/story_of_column_layout.png'),
     );
   }, skip: kIsWeb || !isLinux);
-
-  test('sum', () {
-    expect(sum([1.0, 2.0, 3.0]), 6.0);
-  });
-
-  group('computeRenderSizes', () {
-    test(
-        'scale sizes so the largestSize maps to largestRenderSize with forceToOccupyMaxSize=false',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 200.0,
-        largestRenderSize: 600.0,
-        maxSizeAvailable: 2000,
-        forceToOccupyMaxSizeAvailable: false,
-      );
-      expect(renderSizes, [200.0, 400.0, 600.0]);
-      expect(sum(renderSizes), lessThan(2000));
-    });
-
-    test(
-        'scale sizes so the items fit maxSizeAvailable with forceToOccupyMaxSize=true',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 200.0,
-        largestRenderSize: 600.0,
-        maxSizeAvailable: 2000,
-        forceToOccupyMaxSizeAvailable: true,
-      );
-      expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
-      expect(sum(renderSizes) - 2000.0, lessThan(0.01));
-    });
-
-    test(
-        'scale sizes when the items exceeds maxSizeAvailable with forceToOccupyMaxSize=true should not change any behavior',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 300.0,
-        largestRenderSize: 900.0,
-        maxSizeAvailable: 250.0,
-        forceToOccupyMaxSizeAvailable: true,
-      );
-      expect(renderSizes, [300.0, 600.0, 900.0]);
-      expect(sum(renderSizes), greaterThan(250.0));
-    });
-  });
 }

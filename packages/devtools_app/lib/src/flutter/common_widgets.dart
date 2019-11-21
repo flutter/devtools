@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../framework/framework_core.dart';
@@ -141,8 +142,15 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// Builds an [ErrorReporter] for a context that shows a [SnackBar].
 ErrorReporter showErrorSnackBar(BuildContext context) {
   return (String title, dynamic error) {
-    Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text(title),
-    ));
+    // TODO: This is a workaround - need to fix
+    // https://github.com/flutter/devtools/issues/1369.
+    SchedulerBinding.instance.scheduleTask(
+      () => Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(title),
+        ),
+      ),
+      Priority.idle,
+    );
   };
 }

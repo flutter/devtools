@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
+import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/utils.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -170,10 +172,11 @@ void main() {
         ]
       }
     ''');
-    final diagnostics =
+    final diagnostic =
         RemoteDiagnosticsNode({'renderObject': flexJson}, null, null, null);
+    final node = InspectorTreeNode()..diagnostic = diagnostic;
     final FlexLayoutProperties flexProperties =
-        FlexLayoutProperties.fromDiagnostics(diagnostics);
+        FlexLayoutProperties.fromNode(node);
     expect(flexProperties.direction, Axis.horizontal);
     expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
     expect(flexProperties.mainAxisSize, MainAxisSize.max);
@@ -299,8 +302,9 @@ void main() {
         "widgetRuntimeType": "Row"
     }
     ''');
-      final node = RemoteDiagnosticsNode(json, null, false, null);
-      final layoutProperties = LayoutProperties(node);
+      final diagnostic = RemoteDiagnosticsNode(json, null, false, null);
+      final layoutProperties =
+          LayoutProperties(InspectorTreeNode()..diagnostic = diagnostic);
 
       expect(layoutProperties.size, const Size(432.0, 56.0));
       expect(
@@ -312,15 +316,6 @@ void main() {
           maxHeight: 56.0,
         ),
       );
-      expect(layoutProperties.smallestWidthChild.size.width, 56.0);
-      expect(layoutProperties.smallestWidthChildFraction, 56.0 / 432.0);
-      expect(layoutProperties.largestWidthChild.size.width, 320.0);
-      expect(layoutProperties.largestWidthChildFraction, 320.0 / 432.0);
-
-      expect(layoutProperties.smallestHeightChild.size.height, 25.0);
-      expect(layoutProperties.smallestHeightChildFraction, 25.0 / 56.0);
-      expect(layoutProperties.largestHeightChild.size.height, 56.0);
-      expect(layoutProperties.largestHeightChildFraction, 56.0 / 56.0);
     });
 
     group('describeWidthConstraints and describeHeightConstraints', () {
@@ -339,8 +334,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), 'h=56.0');
         expect(layoutProperties.describeWidthConstraints(), 'w=25.0');
       });
@@ -360,8 +355,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), '75.0<=h<=100.0');
         expect(layoutProperties.describeWidthConstraints(), '25.0<=w<=50.0');
       });
@@ -379,8 +374,8 @@ void main() {
               }
             }
           ''');
-        final layoutProperties =
-            LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+        final layoutProperties = LayoutProperties(InspectorTreeNode()
+          ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
         expect(layoutProperties.describeHeightConstraints(), 'h=unconstrained');
         expect(layoutProperties.describeWidthConstraints(), 'w=unconstrained');
       });
@@ -397,10 +392,60 @@ void main() {
               }
             }
           ''');
-      final layoutProperties =
-          LayoutProperties(RemoteDiagnosticsNode(json, null, false, null));
+      final layoutProperties = LayoutProperties(InspectorTreeNode()
+        ..diagnostic = RemoteDiagnosticsNode(json, null, false, null));
       expect(layoutProperties.describeHeight(), 'h=56.0');
       expect(layoutProperties.describeWidth(), 'w=432.6');
+    });
+  });
+
+  group('computeRenderSizes', () {
+    test(
+        'scale sizes so the largestSize maps to largestRenderSize with forceToOccupyMaxSize=false',
+        () {
+      final renderSizes = computeRenderSizes(
+        sizes: [100.0, 200.0, 300.0],
+        smallestSize: 100.0,
+        largestSize: 300.0,
+        smallestRenderSize: 200.0,
+        largestRenderSize: 600.0,
+        maxSizeAvailable: 2000,
+        useMaxSizeAvailable: false,
+      );
+      expect(renderSizes, [200.0, 400.0, 600.0]);
+      expect(sum(renderSizes), lessThan(2000));
+    });
+
+    test(
+        'scale sizes so the items fit maxSizeAvailable with forceToOccupyMaxSize=true',
+        () {
+      final renderSizes = computeRenderSizes(
+        sizes: [100.0, 200.0, 300.0],
+        smallestSize: 100.0,
+        largestSize: 300.0,
+        smallestRenderSize: 200.0,
+        largestRenderSize: 600.0,
+        maxSizeAvailable: 2000,
+        useMaxSizeAvailable: true,
+      );
+      expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
+      expect(sum(renderSizes) - 2000.0, lessThan(0.01));
+    });
+
+    test(
+        'scale sizes when the items exceeds maxSizeAvailable with forceToOccupyMaxSize=true should not change any behavior',
+        () {
+      final renderSizes = computeRenderSizes(
+        sizes: [100.0, 200.0, 300.0],
+        smallestSize: 100.0,
+        largestSize: 300.0,
+        smallestRenderSize: 300.0,
+        largestRenderSize: 900.0,
+        maxSizeAvailable: 250.0,
+        useMaxSizeAvailable: true,
+      );
+      expect(renderSizes, [300.0, 600.0, 900.0]);
+      expect(sum(renderSizes), greaterThan(250.0));
     });
   });
 }
