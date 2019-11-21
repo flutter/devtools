@@ -295,8 +295,8 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
           'some kind', '{"firstValue": "value", "otherValue": "value2"}', 1);
       final nullDetails = LogData('some kind', null, 1);
       const prettyJson = '{\n'
-          '    "firstValue": "value",\n'
-          '    "otherValue": "value2"\n'
+          '  "firstValue": "value",\n'
+          '  "otherValue": "value2"\n'
           '}';
 
       expect(json.prettyPrinted, prettyJson);
