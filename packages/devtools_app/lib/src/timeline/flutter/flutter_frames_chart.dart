@@ -145,6 +145,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
+      // TODO(kenz): make this a general background color for use throughout
+      // devtools.
       backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
