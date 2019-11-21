@@ -90,7 +90,10 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       final offlineFullTimelineData =
           OfflineFullTimelineData.parse(offlineFullTimelineDataJson);
       timelineController.loadOfflineData(offlineFullTimelineData);
-      expect(timelineController.timelineMode, equals(TimelineMode.full));
+      expect(
+        timelineController.timelineModeNotifier.value,
+        equals(TimelineMode.full),
+      );
       expect(
         isFullTimelineDataEqual(
           timelineController.offlineTimelineData,
@@ -132,7 +135,8 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
       expect(timelineController.timeline.data.selectedEvent, isNull);
       expect(timelineController.timeline.data.cpuProfileData, isNull);
       timelineController.selectTimelineEvent(vsyncEvent);
-      expect(timelineController.timeline.data.selectedEvent, equals(vsyncEvent));
+      expect(
+          timelineController.timeline.data.selectedEvent, equals(vsyncEvent));
 
       // Select a different frame.
       final frame_1 = TimelineFrame('id_1');
@@ -165,11 +169,11 @@ Future<void> runTimelineControllerTests(FlutterTestEnvironment env) async {
     });
 
     test('recording', () {
-      expect(timelineController.fullTimeline.recording, isFalse);
+      expect(timelineController.fullTimeline.recordingNotifier.value, isFalse);
       timelineController.fullTimeline.startRecording();
-      expect(timelineController.fullTimeline.recording, isTrue);
+      expect(timelineController.fullTimeline.recordingNotifier.value, isTrue);
       timelineController.fullTimeline.stopRecording();
-      expect(timelineController.fullTimeline.recording, isFalse);
+      expect(timelineController.fullTimeline.recordingNotifier.value, isFalse);
     });
   });
 }
