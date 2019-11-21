@@ -34,13 +34,14 @@ void main() {
       when(mockData.displayDepth).thenReturn(8);
       when(mockData.selectedFrame).thenReturn(testFrame0);
       final controllerWithData = TimelineController()
-        ..frameBasedTimeline.data = mockData;
+        ..frameBasedTimeline.data = mockData
+        ..frameBasedTimeline.selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: controllerWithData,
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsOneWidget);
-      expect(find.text('TODO Full Timeline Flame Chart'), findsNothing);
+      expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
     });
 
     testWidgets('builds full timeline', (WidgetTester tester) async {
@@ -53,7 +54,10 @@ void main() {
           ..selectTimelineMode(TimelineMode.full),
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsNothing);
-      expect(find.text('TODO Full Timeline Flame Chart'), findsOneWidget);
+      expect(
+        find.byKey(TimelineScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
     });
   });
 }
