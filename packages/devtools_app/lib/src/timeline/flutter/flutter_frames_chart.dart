@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
@@ -31,6 +30,7 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
+import '../../ui/theme.dart';
 import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
