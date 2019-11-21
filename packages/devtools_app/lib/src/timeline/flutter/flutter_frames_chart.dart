@@ -30,6 +30,7 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
+import '../../ui/theme.dart';
 import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
@@ -144,10 +145,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
+      // TODO(kenz): make this a general background color for use throughout
+      // devtools.
+      backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
           ..typeface = lightTypeFace
+          ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
           ..addLimitLine(LimitLine(60, '60 FPS')
@@ -163,10 +168,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         axisRight.enabled = false;
       },
       xAxisSettingFunction: (XAxis xAxis, controller) {
-        xAxis.enabled = true;
-        xAxis.drawLabels = true;
-        xAxis.setLabelCount1(3);
-        xAxis.position = XAxisPosition.BOTTOM;
+        xAxis
+          ..enabled = true
+          ..drawLabels = true
+          ..setLabelCount1(3)
+          ..textColor = defaultForeground
+          ..position = XAxisPosition.BOTTOM;
       },
       legendSettingFunction: (legend, controller) {
         legend.enabled = false;
