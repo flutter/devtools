@@ -38,7 +38,7 @@ void main() {
       TimelineScreenBody(),
       timelineController:
           controller = timelineController ?? TimelineController()
-            ..timelineModeNotifier.value = mode,
+            ..selectTimelineMode(mode),
     ));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
 
@@ -49,11 +49,11 @@ void main() {
   Future<void> pumpTimelineWithSelectedFrame(WidgetTester tester) async {
     final mockData = MockFrameBasedTimelineData();
     when(mockData.displayDepth).thenReturn(8);
-    when(mockData.selectedFrame).thenReturn(testFrame);
+    when(mockData.selectedFrame).thenReturn(testFrame0);
     final controllerWithData = TimelineController()
       ..allTraceEvents.addAll(goldenUiTraceEvents)
       ..frameBasedTimeline.data = mockData
-      ..frameBasedTimeline.selectedFrameNotifier.value = testFrame;
+      ..frameBasedTimeline.selectFrame(testFrame1);
     await pumpTimelineScreen(
       tester,
       TimelineMode.frameBased,

@@ -32,7 +32,7 @@ void main() {
 
       final mockData = MockFrameBasedTimelineData();
       when(mockData.displayDepth).thenReturn(8);
-      when(mockData.selectedFrame).thenReturn(testFrame);
+      when(mockData.selectedFrame).thenReturn(testFrame0);
       final controllerWithData = TimelineController()
         ..frameBasedTimeline.data = mockData;
       await tester.pumpWidget(wrapWithControllers(
@@ -50,7 +50,7 @@ void main() {
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: TimelineController()
-          ..timelineModeNotifier.value = TimelineMode.full,
+          ..selectTimelineMode(TimelineMode.full),
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsNothing);
       expect(find.text('TODO Full Timeline Flame Chart'), findsOneWidget);

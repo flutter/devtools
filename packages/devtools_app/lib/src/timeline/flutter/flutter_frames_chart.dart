@@ -64,6 +64,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.didChangeDependencies();
     _controller = Controllers.of(context).timeline;
 
+    cancel();
     autoDispose(_controller.onTimelineCleared.listen((_) {
       setState(() {
         frames.clear();
@@ -373,7 +374,7 @@ class SelectedDataPoint extends LineChartMarker {
       // during paint. This task scheduling is a hack.
       SchedulerBinding.instance.scheduleTask(
         () => onSelected(frameIndex),
-        Priority.idle,
+        Priority.animation,
       );
       _lastFrameIndex = frameIndex;
     }

@@ -343,7 +343,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   void _onTimelineModeChanged(bool frameBased) async {
     await _clearTimeline();
-    controller.timelineModeNotifier.value =
-        frameBased ? TimelineMode.frameBased : TimelineMode.full;
+    controller.selectTimelineMode(
+        frameBased ? TimelineMode.frameBased : TimelineMode.full);
   }
 }

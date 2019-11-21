@@ -39,7 +39,11 @@ final frameEndEvent = testTraceEventWrapper({
   'args': {}
 });
 
-final testFrame = TimelineFrame('id_0')
+final testFrame0 = TimelineFrame('id_0')
+  ..setEventFlow(goldenUiTimelineEvent)
+  ..setEventFlow(goldenGpuTimelineEvent);
+
+final testFrame1 = TimelineFrame('id_1')
   ..setEventFlow(goldenUiTimelineEvent)
   ..setEventFlow(goldenGpuTimelineEvent);
 

@@ -35,7 +35,9 @@ class TimelineController {
   }
 
   /// Notifies that a timeline event was selected.
-  final selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
+  ValueListenable get selectedTimelineEventNotifier =>
+      _selectedTimelineEventNotifier;
+  final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
 
   /// Stream controller that notifies that offline data was loaded into the
   /// timeline.
@@ -77,7 +79,8 @@ class TimelineController {
 
   final _cpuProfilerService = CpuProfilerService();
 
-  final timelineModeNotifier =
+  ValueListenable get timelineModeNotifier => _timelineModeNotifier;
+  final _timelineModeNotifier =
       ValueNotifier<TimelineMode>(TimelineMode.frameBased);
 
   /// Trace events we received while listening to the Timeline event stream.
@@ -95,10 +98,14 @@ class TimelineController {
   bool get hasStarted =>
       frameBasedTimeline.hasStarted && fullTimeline.hasStarted;
 
+  void selectTimelineMode(TimelineMode mode) {
+    _timelineModeNotifier.value = mode;
+  }
+
   void selectTimelineEvent(TimelineEvent event) {
     if (event == null || timeline.data.selectedEvent == event) return;
     timeline.data.selectedEvent = event;
-    selectedTimelineEventNotifier.value = event;
+    _selectedTimelineEventNotifier.value = event;
   }
 
   Future<void> getCpuProfileForSelectedEvent() async {
@@ -128,7 +135,7 @@ class TimelineController {
     final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
     final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
 
-    timelineModeNotifier.value = offlineData.timelineMode;
+    _timelineModeNotifier.value = offlineData.timelineMode;
     offlineTimelineData = offlineData.shallowClone();
     timeline
       ..data = offlineData.shallowClone()
@@ -150,7 +157,7 @@ class TimelineController {
       // TODO(kenz): the flame chart should listen to this stream and
       // programmatically select the flame chart node that corresponds to
       // the selected event.
-      selectedTimelineEventNotifier.value = offlineTimelineData.selectedEvent;
+      _selectedTimelineEventNotifier.value = offlineTimelineData.selectedEvent;
     }
 
     if (offlineTimelineData is OfflineFullTimelineData) {
@@ -183,7 +190,7 @@ class TimelineController {
         frameBasedTimeline.data.selectedFrame = frameToSelect;
         // TODO(kenz): frames bar chart should listen to this stream and
         // programmatially select the frame from the offline snapshot.
-        frameBasedTimeline.selectedFrameNotifier.value = frameToSelect;
+        frameBasedTimeline._selectedFrameNotifier.value = frameToSelect;
 
         if (offlineTimelineData.selectedEvent != null) {
           eventToSelect = frameToSelect
@@ -210,7 +217,7 @@ class TimelineController {
       timeline.data
         ..selectedEvent = eventToSelect
         ..cpuProfileData = offlineTimelineData.cpuProfileData;
-      selectedTimelineEventNotifier.value = eventToSelect;
+      _selectedTimelineEventNotifier.value = eventToSelect;
     }
   }
 
@@ -226,7 +233,7 @@ class TimelineController {
     frameBasedTimeline.clear();
     fullTimeline.clear();
     allTraceEvents.clear();
-    selectedTimelineEventNotifier.value = null;
+    _selectedTimelineEventNotifier.value = null;
     _clearController.add(true);
   }
 
@@ -250,10 +257,12 @@ class TimelineController {
 class FrameBasedTimeline
     extends TimelineBase<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
   /// Notifies that a frame has been added to the timeline.
-  final frameAddedNotifier = ValueNotifier<TimelineFrame>(null);
+  ValueListenable get frameAddedNotifier => _frameAddedNotifier;
+  final _frameAddedNotifier = ValueNotifier<TimelineFrame>(null);
 
   /// Notifies that a timeline frame has been selected.
-  final selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
+  ValueListenable get selectedFrameNotifier => _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
   Future<double> get displayRefreshRate async {
     final refreshRate =
@@ -266,23 +275,24 @@ class FrameBasedTimeline
   bool manuallyPaused = false;
 
   /// Notifies that the timeline has been paused.
-  final pausedNotifier = ValueNotifier<bool>(false);
+  ValueListenable get pausedNotifier => _pausedNotifier;
+  final _pausedNotifier = ValueNotifier<bool>(false);
 
   void pause({bool manual = false}) {
     manuallyPaused = manual;
-    pausedNotifier.value = true;
+    _pausedNotifier.value = true;
   }
 
   void resume() {
     manuallyPaused = false;
-    pausedNotifier.value = false;
+    _pausedNotifier.value = false;
   }
 
   void selectFrame(TimelineFrame frame) {
     if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
-    selectedFrameNotifier.value = frame;
+    _selectedFrameNotifier.value = frame;
     data.selectedFrame = frame;
     data.selectedEvent = null;
     data.cpuProfileData = null;
@@ -303,7 +313,7 @@ class FrameBasedTimeline
 
   void addFrame(TimelineFrame frame) {
     data.frames.add(frame);
-    frameAddedNotifier.value = frame;
+    _frameAddedNotifier.value = frame;
   }
 
   @override
@@ -332,9 +342,9 @@ class FrameBasedTimeline
   @override
   void clear() {
     super.clear();
-    frameAddedNotifier.value = null;
-    selectedFrameNotifier.value = null;
-    pausedNotifier.value = false;
+    _frameAddedNotifier.value = null;
+    _selectedFrameNotifier.value = null;
+    _pausedNotifier.value = false;
   }
 }
 
@@ -347,22 +357,24 @@ class FullTimeline
   final _timelineProcessedController = StreamController<bool>.broadcast();
 
   /// Notifies when an empty timeline recording finishes
-  final emptyRecordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable get emptyRecordingNotifier => _emptyRecordingNotifier;
+  final _emptyRecordingNotifier = ValueNotifier<bool>(false);
 
   Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
 
   /// Notifies that the timeline is currently being recorded.
-  final recordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable get recordingNotifier => _recordingNotifier;
+  final _recordingNotifier = ValueNotifier<bool>(false);
 
   void startRecording() async {
-    recordingNotifier.value = true;
+    _recordingNotifier.value = true;
   }
 
   void stopRecording() {
-    recordingNotifier.value = false;
+    _recordingNotifier.value = false;
 
     if (_timelineController.allTraceEvents.isEmpty) {
-      emptyRecordingNotifier.value = true;
+      _emptyRecordingNotifier.value = true;
       return;
     }
 
@@ -396,8 +408,8 @@ class FullTimeline
   @override
   void clear() {
     super.clear();
-    recordingNotifier.value = false;
-    emptyRecordingNotifier.value = false;
+    _recordingNotifier.value = false;
+    _emptyRecordingNotifier.value = false;
   }
 }
 

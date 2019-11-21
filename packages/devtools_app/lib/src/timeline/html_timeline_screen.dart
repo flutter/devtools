@@ -54,7 +54,7 @@ class HtmlTimelineScreen extends HtmlScreen {
           enabled: enabled,
           disabledTooltip: disabledTooltip,
         ) {
-    timelineController.timelineModeNotifier.value = startTimelineMode;
+    timelineController.selectTimelineMode(startTimelineMode);
   }
 
   final TimelineMode startTimelineMode;
@@ -513,7 +513,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       timelineController.timeline.data?.clear();
     }
 
-    timelineController.timelineModeNotifier.value = timelineMode;
+    timelineController.selectTimelineMode(timelineMode);
 
     // Update visibility and then do resets - the order matters here.
     _updateVisibilityForTimelineMode();
