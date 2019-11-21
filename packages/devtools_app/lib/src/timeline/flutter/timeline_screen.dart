@@ -18,6 +18,9 @@ import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'timeline_flame_chart.dart';
 
+// TODO(kenz): handle small screen widths better by using Wrap instead of Row
+// where applicable.
+
 class TimelineScreen extends Screen {
   const TimelineScreen() : super('Timeline');
 
