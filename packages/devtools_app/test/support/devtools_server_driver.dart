@@ -10,6 +10,10 @@ import 'chrome.dart';
 
 const verbose = true;
 
+// TODO(dantup): Remove this when the live Pub version supports devTools.launch.
+final bool serverDevToolsLaunchViaStdin =
+    Platform.environment['USE_LOCAL_DEPENDENCIES'] == 'true';
+
 class DevToolsServerDriver {
   DevToolsServerDriver._(this._process, this._stdin, Stream<String> _stdout,
       Stream<String> _stderr)
