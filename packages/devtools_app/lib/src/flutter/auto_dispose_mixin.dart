@@ -27,6 +27,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
     super.dispose();
   }
 
+  void refresh() => setState(() {});
+
   @override
   void addAutoDisposeListener(Listenable listenable, listener) {
     _delegate.addAutoDisposeListener(listenable, listener);
