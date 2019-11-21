@@ -91,6 +91,79 @@ List<double> computeRenderSizes({
   return renderSizes;
 }
 
+double computeSpaceBeforeChildren({
+  @required MainAxisAlignment mainAxisAlignment,
+  @required double freeSpace,
+  @required int childrenLength,
+}) {
+  if (childrenLength == 0) return 0.0;
+  switch (mainAxisAlignment) {
+    case MainAxisAlignment.start:
+      return 0.0;
+    case MainAxisAlignment.end:
+      return freeSpace;
+    case MainAxisAlignment.center:
+      return freeSpace * 0.5;
+    case MainAxisAlignment.spaceBetween:
+      return 0.0;
+    case MainAxisAlignment.spaceAround:
+      final spaceBetweenChildren = freeSpace / childrenLength;
+      return spaceBetweenChildren * 0.5;
+    case MainAxisAlignment.spaceEvenly:
+      return freeSpace / (childrenLength + 1);
+    default:
+      return 0.0;
+  }
+}
+
+double computeSpaceAfterChildren({
+  @required MainAxisAlignment mainAxisAlignment,
+  @required double freeSpace,
+  @required int childrenLength,
+}) {
+  if (childrenLength == 0) return 0.0;
+  switch (mainAxisAlignment) {
+    case MainAxisAlignment.start:
+      return freeSpace;
+    case MainAxisAlignment.end:
+      return 0.0;
+    case MainAxisAlignment.center:
+      return freeSpace * 0.5;
+    case MainAxisAlignment.spaceBetween:
+      return 0.0;
+    case MainAxisAlignment.spaceAround:
+      final spaceBetweenChildren = freeSpace / childrenLength;
+      return spaceBetweenChildren * 0.5;
+    case MainAxisAlignment.spaceEvenly:
+      return freeSpace / (childrenLength + 1);
+    default:
+      return 0.0;
+  }
+}
+
+double computeSpaceBetweenChildren({
+  @required MainAxisAlignment mainAxisAlignment,
+  @required double freeSpace,
+  @required int childrenLength,
+}) {
+  if (childrenLength == 0) return 0.0;
+  switch (mainAxisAlignment) {
+    case MainAxisAlignment.start:
+    case MainAxisAlignment.end:
+    case MainAxisAlignment.center:
+      return 0.0;
+    case MainAxisAlignment.spaceBetween:
+      if (childrenLength == 1) return freeSpace;
+      return freeSpace / (childrenLength - 1);
+    case MainAxisAlignment.spaceAround:
+      return freeSpace / childrenLength;
+    case MainAxisAlignment.spaceEvenly:
+      return freeSpace / (childrenLength + 1);
+    default:
+      return 0.0;
+  }
+}
+
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
@@ -257,17 +330,15 @@ class FlexLayoutProperties extends LayoutProperties {
 
   double get crossAxisDimension => dimension(crossAxisDirection);
 
-  List<Size> childrenRenderSizes({
+  List<RenderProps> childrenRenderProps({
     @required double smallestRenderWidth,
     @required double largestRenderWidth,
     @required double smallestRenderHeight,
     @required double largestRenderHeight,
-    @required double maxWidthAvailable,
-    @required double maxHeightAvailable,
+    @required double Function(Axis) maxSizeAvailable,
   }) {
-    double maxSizeAvailable(Axis axis) {
-      return axis == Axis.horizontal ? maxWidthAvailable : maxHeightAvailable;
-    }
+    /// calculate the render empty spaces
+    final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
 
     double smallestRenderSize(Axis axis) {
       return axis == Axis.horizontal
@@ -284,6 +355,10 @@ class FlexLayoutProperties extends LayoutProperties {
 
     List<double> renderSizes(Axis axis) {
       final sizes = childrenDimensions(axis);
+      if (freeSpace > 0.0 && axis == direction) {
+        /// include free space in the computation
+        sizes.add(freeSpace);
+      }
       final smallestSize = min(sizes);
       final largestSize = max(sizes);
       if (axis == direction ||
@@ -308,93 +383,139 @@ class FlexLayoutProperties extends LayoutProperties {
 
     final widths = renderSizes(Axis.horizontal);
     final heights = renderSizes(Axis.vertical);
-    assert(widths.length == heights.length);
-    return [
-      for (var i = 0; i < widths.length; ++i) Size(widths[i], heights[i])
-    ];
-  }
 
-  double _calculateCrossAxisOffset(double maxDimension, double usedDimension) {
-    if (crossAxisAlignment == CrossAxisAlignment.start ||
-        crossAxisAlignment == CrossAxisAlignment.stretch ||
-        maxDimension == usedDimension) return 0.0;
-    final emptySpace = math.max(0.0, maxDimension - usedDimension);
-    if (crossAxisAlignment == CrossAxisAlignment.end) return emptySpace;
-    return emptySpace * 0.5;
-  }
+    final renderFreeSpace = freeSpace > 0.0
+        ? (isMainAxisHorizontal ? widths.last : heights.last)
+        : 0.0;
 
-  List<Offset> childrenRenderOffsets({
-    @required List<Size> childrenRenderSizes,
-    @required double maxWidthAvailable,
-    @required double maxHeightAvailable,
-  }) {
-    final offsets = <Offset>[];
-    for (var i = 0; i < children.length; ++i) {
-      double dx, dy;
-      if (direction == Axis.horizontal) {
-        dx = i == 0 ? 0.0 : offsets.last.dx + childrenRenderSizes[i - 1].width;
-        dy = _calculateCrossAxisOffset(
-            maxHeightAvailable, childrenRenderSizes[i].height);
-      } else {
-        dy = i == 0 ? 0.0 : offsets.last.dy + childrenRenderSizes[i - 1].height;
-        dx = _calculateCrossAxisOffset(
-            maxWidthAvailable, childrenRenderSizes[i].width);
-      }
-      offsets.add(Offset(dx, dy));
+    double spaceBeforeChildren(double freeSpace) {
+      return computeSpaceBeforeChildren(
+          mainAxisAlignment: mainAxisAlignment,
+          freeSpace: freeSpace,
+          childrenLength: children.length);
     }
-    return offsets;
+
+    double spaceBetweenChildren(double freeSpace) {
+      return computeSpaceBetweenChildren(
+          mainAxisAlignment: mainAxisAlignment,
+          freeSpace: freeSpace,
+          childrenLength: children.length);
+    }
+
+    double spaceAfterChildren(double freeSpace) {
+      return computeSpaceAfterChildren(
+          mainAxisAlignment: mainAxisAlignment,
+          freeSpace: freeSpace,
+          childrenLength: children.length);
+    }
+
+    final renderSpaceBeforeChildren = spaceBeforeChildren(renderFreeSpace);
+    final renderSpaceBetweenChildren = spaceBetweenChildren(renderFreeSpace);
+    final renderSpaceAfterChildren = spaceAfterChildren(renderFreeSpace);
+
+    final childrenRenderProps = <RenderProps>[];
+
+    double lastMainAxisOffset() {
+      if (childrenRenderProps.isEmpty) return 0.0;
+      return childrenRenderProps.last.mainAxisOffset;
+    }
+
+    double lastMainAxisDimension() {
+      if (childrenRenderProps.isEmpty) return 0.0;
+      return childrenRenderProps.last.mainAxisDimension;
+    }
+
+    double space(int index) {
+      if (index == 0) return renderSpaceBeforeChildren;
+      return renderSpaceBetweenChildren;
+    }
+
+    double calculateMainAxisOffset(int i) {
+      return lastMainAxisOffset() + lastMainAxisDimension() + space(i);
+    }
+
+    double calculateCrossAxisOffset(int i) {
+      final maxDimension = maxSizeAvailable(crossAxisDirection);
+      final usedDimension =
+          crossAxisDirection == Axis.horizontal ? widths[i] : heights[i];
+
+      if (crossAxisAlignment == CrossAxisAlignment.start ||
+          crossAxisAlignment == CrossAxisAlignment.stretch ||
+          maxDimension == usedDimension) return 0.0;
+      final emptySpace = math.max(0.0, maxDimension - usedDimension);
+      if (crossAxisAlignment == CrossAxisAlignment.end) return emptySpace;
+      return emptySpace * 0.5;
+    }
+
+    for (var i = 0; i < children.length; ++i) {
+      childrenRenderProps.add(
+        RenderProps(
+          axis: direction,
+          size: Size(widths[i], heights[i]),
+          offset: Offset.zero,
+          realSize: children[i].size,
+        )
+          ..mainAxisOffset = calculateMainAxisOffset(i)
+          ..crossAxisOffset = calculateCrossAxisOffset(i),
+      );
+    }
+
+    final spaces = <RenderProps>[];
+
+    final realSpaceBeforeChildren = spaceBeforeChildren(freeSpace);
+    final realSpaceBetweenChildren = spaceBetweenChildren(freeSpace);
+    final realSpaceAfterChildren = spaceAfterChildren(freeSpace);
+    final renderPropsWithFullCrossAxisDimension =
+        RenderProps(axis: direction, isFreeSpace: true)
+          ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
+          ..crossAxisRealDimension = dimension(crossAxisDirection)
+          ..crossAxisOffset = 0.0;
+    if (realSpaceBeforeChildren > 0.0) {
+      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
+        ..mainAxisOffset = 0.0
+        ..mainAxisDimension = renderSpaceBeforeChildren
+        ..mainAxisRealDimension = realSpaceBeforeChildren);
+    }
+    if (realSpaceBetweenChildren > 0.0)
+      for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
+        final child = childrenRenderProps[i];
+        spaces.add(renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisDimension = renderSpaceBetweenChildren
+          ..mainAxisRealDimension = realSpaceBetweenChildren
+          ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
+      }
+    if (realSpaceAfterChildren > 0.0) {
+      final lastChildren = childrenRenderProps.last;
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisDimension = renderSpaceAfterChildren
+          ..mainAxisRealDimension = realSpaceAfterChildren
+          ..mainAxisOffset =
+              lastChildren.mainAxisOffset + lastChildren.mainAxisDimension,
+      );
+    }
+    return [...childrenRenderProps, ...spaces];
   }
 
-  List<RenderInfo> childrenRenderInformation({
-    @required double smallestRenderWidth,
-    @required double largestRenderWidth,
-    @required double smallestRenderHeight,
-    @required double largestRenderHeight,
-    @required double maxWidthAvailable,
-    @required double maxHeightAvailable,
-  }) {
-    final renderSizes = childrenRenderSizes(
-      smallestRenderWidth: smallestRenderWidth,
-      largestRenderWidth: largestRenderWidth,
-      smallestRenderHeight: smallestRenderHeight,
-      largestRenderHeight: largestRenderHeight,
-      maxWidthAvailable: maxWidthAvailable,
-      maxHeightAvailable: maxHeightAvailable,
-    );
-    final renderOffsets = childrenRenderOffsets(
-      childrenRenderSizes: renderSizes,
-      maxWidthAvailable: maxWidthAvailable,
-      maxHeightAvailable: maxHeightAvailable,
-    );
-    return [
-      for (var i = 0; i < children.length; ++i)
-        RenderInfo(
-            direction, renderSizes[i], renderOffsets[i], children[i].size)
-    ];
-  }
-
-  List<RenderInfo> crossAxisSpaces({
-    List<RenderInfo> childrenRenderInfo,
-    double maxWidthAvailable,
-    double maxHeightAvailable,
+  List<RenderProps> crossAxisSpaces({
+    @required List<RenderProps> childrenRenderProps,
+    @required double Function(Axis) maxSizeAvailable,
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
-    final spaces = <RenderInfo>[];
-    final maxSizeAvailable = crossAxisDirection == Axis.horizontal
-        ? maxWidthAvailable
-        : maxHeightAvailable;
+    final spaces = <RenderProps>[];
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
               children[i].dimension(crossAxisDirection) ||
-          childrenRenderInfo[i].crossAxisDimension == maxSizeAvailable)
-        continue;
+          childrenRenderProps[i].crossAxisDimension ==
+              maxSizeAvailable(crossAxisDirection)) continue;
 
-      final renderInfo = childrenRenderInfo[i];
+      final renderInfo = childrenRenderProps[i];
       final space = renderInfo.clone();
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
-      space.crossAxisDimension = maxSizeAvailable - space.crossAxisDimension;
+      space.crossAxisDimension =
+          maxSizeAvailable(crossAxisDirection) - space.crossAxisDimension;
 
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
@@ -428,17 +549,23 @@ class FlexLayoutProperties extends LayoutProperties {
       EnumUtils<TextBaseline>(TextBaseline.values);
 }
 
-class RenderInfo {
-  RenderInfo(this.axis, Size size, Offset offset, Size realSize)
-      : width = size.width,
-        height = size.height,
-        realWidth = realSize.width,
-        realHeight = realSize.height,
-        dx = offset.dx,
-        dy = offset.dy;
+class RenderProps {
+  RenderProps({
+    @required this.axis,
+    Size size,
+    Offset offset,
+    Size realSize,
+    this.isFreeSpace = false,
+  })  : width = size?.width,
+        height = size?.height,
+        realWidth = realSize?.width,
+        realHeight = realSize?.height,
+        dx = offset?.dx,
+        dy = offset?.dy;
 
   final Axis axis;
 
+  bool isFreeSpace;
   double dx, dy;
   double width, height;
   double realWidth, realHeight;
@@ -505,7 +632,13 @@ class RenderInfo {
       realWidth = newVal;
   }
 
-  RenderInfo clone() {
-    return RenderInfo(axis, size, offset, realSize);
+  RenderProps clone() {
+    return RenderProps(
+      axis: axis,
+      size: size,
+      offset: offset,
+      realSize: realSize,
+      isFreeSpace: isFreeSpace,
+    );
   }
 }
