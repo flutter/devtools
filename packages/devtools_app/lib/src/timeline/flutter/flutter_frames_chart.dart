@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -188,7 +188,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       drawBarShadow: false,
       description: desc,
       highLightPerTapEnabled: true,
-      marker: SelectedDataPoint(onSelected: frameSelected),
+      marker: SelectedDataPoint(onSelected: onBarSelected),
       selectionListener: this,
     );
 
@@ -196,8 +196,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
-  void frameSelected(int frameIndex) {
-    _controller.frameBasedTimeline.selectFrame(frames[frameIndex]);
+  void onBarSelected(int index) {
+    // TODO(terry): this is a hack. See
+    // https://github.com/flutter/devtools/issues/1381.
+    Timer(
+      const Duration(microseconds: 1),
+      () => _controller.frameBasedTimeline.selectFrame(frames[index]),
+    );
   }
 
   /// Light Blue 50 - 200
@@ -330,7 +335,6 @@ class SelectedDataPoint extends LineChartMarker {
     const paddingAroundText = 5;
     const rectangleCurve = 5.0;
 
-    final frameIndex = _entry.x.toInt();
     final yValues = (_entry as BarEntry).yVals;
 
     final num uiDuration = yValues[1];
@@ -376,21 +380,15 @@ class SelectedDataPoint extends LineChartMarker {
     );
     painter.paint(canvas, pos);
     canvas.restore();
-
-    if (onSelected != null && _lastFrameIndex != frameIndex) {
-      // Only fire when a different frame is selected.
-      // TODO(terry): reconfigure this code as selection should not be happening
-      // during paint. This task scheduling is a hack.
-      SchedulerBinding.instance.scheduleTask(
-        () => onSelected(frameIndex),
-        Priority.animation,
-      );
-      _lastFrameIndex = frameIndex;
-    }
   }
 
   @override
-  void refreshContent(Entry e, Highlight highlight) {
+  void refreshContent(Entry e, Highlight highlight) async {
     _entry = e;
+    final frameIndex = _entry.x.toInt();
+    if (onSelected != null && _lastFrameIndex != frameIndex) {
+      _lastFrameIndex = frameIndex;
+      onSelected(e.x.toInt());
+    }
   }
 }
