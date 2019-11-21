@@ -31,6 +31,7 @@ class TimelineController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
+    frameBasedTimeline = FrameBasedTimeline(this);
     timelines = [frameBasedTimeline, fullTimeline];
   }
 
@@ -65,7 +66,7 @@ class TimelineController {
           ? frameBasedTimeline
           : fullTimeline;
 
-  final frameBasedTimeline = FrameBasedTimeline();
+  FrameBasedTimeline frameBasedTimeline;
 
   FullTimeline fullTimeline;
 
@@ -256,6 +257,10 @@ class TimelineController {
 
 class FrameBasedTimeline
     extends TimelineBase<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
+  FrameBasedTimeline(this._timelineController);
+
+  final TimelineController _timelineController;
+
   /// Notifies that a frame has been added to the timeline.
   ValueListenable get frameAddedNotifier => _frameAddedNotifier;
   final _frameAddedNotifier = ValueNotifier<TimelineFrame>(null);
@@ -294,6 +299,8 @@ class FrameBasedTimeline
     }
     _selectedFrameNotifier.value = frame;
     data.selectedFrame = frame;
+
+    _timelineController._selectedTimelineEventNotifier.value = null;
     data.selectedEvent = null;
     data.cpuProfileData = null;
 

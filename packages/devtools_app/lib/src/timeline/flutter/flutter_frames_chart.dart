@@ -62,7 +62,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
+    final newController = Controllers.of(context).timeline;
+    if (newController == _controller) return;
+    _controller = newController;
 
     cancel();
     autoDispose(_controller.onTimelineCleared.listen((_) {

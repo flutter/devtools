@@ -66,11 +66,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller = Controllers.of(context).timeline;
+    final newController = Controllers.of(context).timeline;
+    if (newController == controller) return;
+    controller = newController;
+
     controller.timelineService.updateListeningState(true);
 
     cancel();
-    addAutoDisposeListener(controller.timelineModeNotifier, refresh);
+    addAutoDisposeListener(controller.timelineModeNotifier);
   }
 
   @override
