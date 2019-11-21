@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
@@ -144,10 +145,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
+      backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
           ..typeface = lightTypeFace
+          ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
           ..addLimitLine(LimitLine(60, '60 FPS')
@@ -163,10 +166,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         axisRight.enabled = false;
       },
       xAxisSettingFunction: (XAxis xAxis, controller) {
-        xAxis.enabled = true;
-        xAxis.drawLabels = true;
-        xAxis.setLabelCount1(3);
-        xAxis.position = XAxisPosition.BOTTOM;
+        xAxis
+          ..enabled = true
+          ..drawLabels = true
+          ..setLabelCount1(3)
+          ..textColor = defaultForeground
+          ..position = XAxisPosition.BOTTOM;
       },
       legendSettingFunction: (legend, controller) {
         legend.enabled = false;
