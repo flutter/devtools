@@ -213,6 +213,7 @@ class _LogDetailsState extends State<LogDetails>
   Widget _buildInspector(BuildContext context, LogData log) => const SizedBox();
 
   Widget _buildSimpleLog(BuildContext context, LogData log) {
+    // TODO(https://github.com/flutter/devtools/issues/1339): Present with monospaced fonts.
     return Scrollbar(
       child: SingleChildScrollView(
         child: Text(

@@ -660,7 +660,7 @@ class LogData {
   String _details;
   Future<String> Function() detailsComputer;
 
-  static const JsonEncoder prettyPrinter = JsonEncoder.withIndent('    ');
+  static const JsonEncoder prettyPrinter = JsonEncoder.withIndent('  ');
 
   String get details => _details;
 
