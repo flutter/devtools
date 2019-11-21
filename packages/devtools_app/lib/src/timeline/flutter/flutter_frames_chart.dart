@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
+import 'package:flutter/scheduler.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -14,10 +14,10 @@ import 'package:mp_chart/mp/core/common_interfaces.dart';
 import 'package:mp_chart/mp/core/data/bar_data.dart';
 import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
-import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/entry/bar_entry.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
+import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';
 import 'package:mp_chart/mp/core/marker/line_chart_marker.dart';
@@ -27,6 +27,7 @@ import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../timeline_controller.dart';
@@ -40,6 +41,7 @@ class FlutterFramesChart extends StatefulWidget {
 }
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
+    with AutoDisposeMixin
     implements OnChartValueSelectedListener {
   TimelineController _controller;
 
@@ -60,10 +62,24 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
+    final newController = Controllers.of(context).timeline;
+    if (newController == _controller) return;
+    _controller = newController;
+
+    cancel();
+    autoDispose(_controller.onTimelineCleared.listen((_) {
+      setState(() {
+        frames.clear();
+        _frameDurations.clear();
+        _updateChart();
+      });
+    }));
 
     // Process each timeline frame.
-    _controller.frameBasedTimeline.onFrameAdded.listen((newFrame) {
+    addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
+        () {
+      final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
+      if (newFrame == null) return;
       setState(() {
         // If frames not in sync with charting data (_frameDurations)?
         if (frames.isEmpty && _frameDurations.length == 1) {
@@ -356,7 +372,12 @@ class SelectedDataPoint extends LineChartMarker {
 
     if (onSelected != null && _lastFrameIndex != frameIndex) {
       // Only fire when a different frame is selected.
-      onSelected(frameIndex);
+      // TODO(terry): reconfigure this code as selection should not be happening
+      // during paint. This task scheduling is a hack.
+      SchedulerBinding.instance.scheduleTask(
+        () => onSelected(frameIndex),
+        Priority.animation,
+      );
       _lastFrameIndex = frameIndex;
     }
   }

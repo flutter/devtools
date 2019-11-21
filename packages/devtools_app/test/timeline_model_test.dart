@@ -65,7 +65,7 @@ void main() {
     });
 
     test('displayDepth', () {
-      timelineData.selectedFrame = testFrame;
+      timelineData.selectedFrame = testFrame0;
       expect(timelineData.selectedFrame.uiEventFlow.depth, equals(7));
       expect(timelineData.selectedFrame.gpuEventFlow.depth, equals(2));
       expect(timelineData.displayDepth, equals(9));
@@ -74,9 +74,9 @@ void main() {
     test('clear', () async {
       timelineData = FrameBasedTimelineData(displayRefreshRate: 120)
         ..traceEvents.add({'test': 'trace event'})
-        ..frames.add(testFrame)
+        ..frames.add(testFrame0)
         ..selectedEvent = vsyncEvent
-        ..selectedFrame = testFrame
+        ..selectedFrame = testFrame0
         ..cpuProfileData = CpuProfileData.parse(jsonDecode(jsonEncode({})));
       expect(timelineData.traceEvents, isNotEmpty);
       expect(timelineData.frames, isNotEmpty);

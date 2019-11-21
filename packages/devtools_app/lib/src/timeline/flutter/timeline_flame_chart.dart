@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
@@ -21,32 +22,40 @@ class TimelineFlameChart extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).focusColor),
-          ),
-          child: controller.timelineMode == TimelineMode.frameBased
-              ? FrameBasedTimelineFlameChart(
-                  controller.frameBasedTimeline.data.selectedFrame,
-                  width: constraints.maxWidth,
-                  height: math.max(
-                    constraints.maxHeight,
-                    _frameBasedTimelineChartHeight(controller),
-                  ),
-                  selectionProvider: () =>
-                      controller.frameBasedTimeline.data.selectedEvent,
-                  onSelection: (e) => controller.selectTimelineEvent(e),
-                )
-              // TODO(kenz): implement full timeline flame chart.
-              : Container(
-                  color: Colors.black26,
-                  child: const Center(
-                    child: Text('TODO Full Timeline Flame Chart'),
-                  ),
-                ),
-        ),
+        child: controller.timelineModeNotifier.value == TimelineMode.frameBased
+            ? _buildFrameBasedTimeline(controller, constraints)
+            : _buildFullTimeline(controller, constraints),
       );
     });
+  }
+
+  Widget _buildFrameBasedTimeline(
+    TimelineController controller,
+    BoxConstraints constraints,
+  ) {
+    return FrameBasedTimelineFlameChart(
+      controller.frameBasedTimeline.data.selectedFrame,
+      width: constraints.maxWidth,
+      height: math.max(
+        constraints.maxHeight,
+        _frameBasedTimelineChartHeight(controller),
+      ),
+      selectionNotifier: controller.selectedTimelineEventNotifier,
+      onSelection: (e) => controller.selectTimelineEvent(e),
+    );
+  }
+
+  Widget _buildFullTimeline(
+    TimelineController controller,
+    BoxConstraints constraints,
+  ) {
+    // TODO(kenz): implement full timeline flame chart.
+    return Container(
+      color: Colors.black26,
+      child: const Center(
+        child: Text('TODO Full Timeline Flame Chart'),
+      ),
+    );
   }
 
   double _frameBasedTimelineChartHeight(TimelineController controller) {
@@ -62,7 +71,7 @@ class FrameBasedTimelineFlameChart extends StatefulWidget {
     this.data, {
     @required this.height,
     @required double width,
-    @required this.selectionProvider,
+    @required this.selectionNotifier,
     @required this.onSelection,
   })  : duration = data.time.duration,
         startInset = sideInset,
@@ -78,7 +87,7 @@ class FrameBasedTimelineFlameChart extends StatefulWidget {
 
   final double height;
 
-  final TimelineEvent Function() selectionProvider;
+  final ValueNotifier<TimelineEvent> selectionNotifier;
 
   final void Function(TimelineEvent event) onSelection;
 
@@ -100,19 +109,7 @@ class FrameBasedTimelineFlameChartState
 
   List<FlameChartRow> rows;
 
-  TimelineController _controller;
-
   int get gpuSectionStartRow => widget.data.uiEventFlow.depth;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
-    cancel();
-    autoDispose(_controller.onSelectedTimelineEvent.listen((_) {
-      setState(() {});
-    }));
-  }
 
   @override
   void didUpdateWidget(FrameBasedTimelineFlameChart oldWidget) {
@@ -177,23 +174,34 @@ class FrameBasedTimelineFlameChartState
     final height = math.max(constraints.maxHeight, widget.height);
 
     // TODO(kenz): rewrite this using slivers instead of a stack.
-    return Stack(
-      children: [
-        Container(
-          width: width,
-          height: height,
-        ),
-        ..._nodesInViewport(constraints), // pick what to show
-      ],
+    return ValueListenableBuilder(
+      valueListenable: widget.selectionNotifier,
+      builder: (context, selectedEvent, _) {
+        return Stack(
+          children: [
+            Container(
+              width: width,
+              height: height,
+            ),
+            ..._nodesInViewport(
+              constraints,
+              selectedEvent,
+            ), // pick what to show
+          ],
+        );
+      },
     );
   }
 
-  List<FlameChartNode> _nodesInViewport(BoxConstraints constraints) {
+  List<FlameChartNode> _nodesInViewport(
+    BoxConstraints constraints,
+    TimelineEvent selectedEvent,
+  ) {
     // TODO(kenz): is creating all the FlameChartNode objects expensive even if
     // we won't add them to the view? We create all the FlameChartNode objects
     // and place them in FlameChart rows, but we only add [nodesInViewport] to
     // the widget tree.
-    _buildFlameChartElements();
+    _buildFlameChartElements(selectedEvent);
 
     // TODO(kenz): Use binary search method we use in html full timeline here.
     final nodesInViewport = <FlameChartNode>[];
@@ -213,7 +221,7 @@ class FrameBasedTimelineFlameChartState
 
   // TODO(kenz): when optimizing this code, consider passing in the viewport
   // to only construct FlameChartNode elements that are in view.
-  void _buildFlameChartElements() {
+  void _buildFlameChartElements(TimelineEvent selectedEvent) {
     _resetColorOffsets();
 
     rows = List.generate(
@@ -278,7 +286,7 @@ class FrameBasedTimelineFlameChartState
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selected: event == widget.selectionProvider(),
+        selected: event == selectedEvent,
         onSelected: (dynamic event) => widget.onSelection(event),
       );
 
