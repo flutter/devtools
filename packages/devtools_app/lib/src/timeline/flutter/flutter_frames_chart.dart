@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -198,12 +197,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   void onBarSelected(int index) {
-    // TODO(terry): this is a hack. See
-    // https://github.com/flutter/devtools/issues/1381.
-    Timer(
-      const Duration(microseconds: 1),
-      () => _controller.frameBasedTimeline.selectFrame(frames[index]),
-    );
+    _controller.frameBasedTimeline.selectFrame(frames[index]);
   }
 
   void _initData([bool simulateFeed = false]) {
@@ -383,7 +377,8 @@ class SelectedDataPoint extends LineChartMarker {
     final frameIndex = _entry.x.toInt();
     if (onSelected != null && _lastFrameIndex != frameIndex) {
       _lastFrameIndex = frameIndex;
-      onSelected(e.x.toInt());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => onSelected(frameIndex));
     }
   }
 }
