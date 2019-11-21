@@ -173,6 +173,8 @@ class LayoutProperties {
   }
 }
 
+final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
+
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties._(
@@ -187,6 +189,13 @@ class FlexLayoutProperties extends LayoutProperties {
   }) : super(node);
 
   factory FlexLayoutProperties.fromNode(InspectorTreeNode node) {
+    // Cache the properties on an expando so that local tweaks to
+    // FlexLayoutProperties persist across multiple lookups from an
+    // InspectorTreeNode.
+    return _flexLayoutExpando[node] ??= _buildNode(node);
+  }
+
+  static FlexLayoutProperties _buildNode(InspectorTreeNode node) {
     final Map<String, Object> renderObjectJson =
         node.diagnostic.json['renderObject'];
     final List<dynamic> properties = renderObjectJson['properties'];
