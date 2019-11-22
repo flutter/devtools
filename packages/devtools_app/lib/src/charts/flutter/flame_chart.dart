@@ -1,8 +1,12 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:flutter_widgets/flutter_widgets.dart';
+
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
@@ -14,7 +18,8 @@ const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 
-abstract class FlameChart<T, V> extends StatefulWidget {
+abstract class FlameChart<T, V extends FlameChartNodeDataMixin>
+    extends StatefulWidget {
   const FlameChart(
     this.data, {
     @required this.duration,
@@ -43,92 +48,130 @@ abstract class FlameChart<T, V> extends StatefulWidget {
       totalStartingWidth - startInset - sideInset;
 }
 
-mixin FlameChartStateMixin<T extends FlameChart> on State<T> {
-  static const startingScrollPosition = 0.0;
-  ScrollController scrollControllerX;
-  ScrollController scrollControllerY;
-  double scrollOffsetX = startingScrollPosition;
-  double scrollOffsetY = startingScrollPosition;
+abstract class FlameChartState<T extends FlameChart> extends State<T>
+    with AutoDisposeMixin {
+  LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
   List<FlameChartRow> rows;
 
   @override
   void initState() {
     super.initState();
-
-    // TODO(kenz): improve this so we are not rebuilding on every scroll.
-    scrollControllerX = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetX = scrollControllerX.offset;
-        });
-      });
-
-    scrollControllerY = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetY = scrollControllerY.offset;
-        });
-      });
+    addAutoDisposeListener(widget.selectionNotifier);
+    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
   }
 
   @override
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
-      scrollControllerX.jumpTo(startingScrollPosition);
-      scrollControllerY.jumpTo(startingScrollPosition);
+      _linkedScrollControllerGroup.resetScroll();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  void dispose() {
-    scrollControllerX.dispose();
-    scrollControllerY.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // TODO(kenz): switch to creating a list of scroll views with a linked
-    // scroll controller.
+    // Initialize the flame chart elements before building.
+    initFlameChartElements();
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Scrollbar(
-          child: SingleChildScrollView(
-            controller: scrollControllerX,
-            scrollDirection: Axis.horizontal,
-            child: Scrollbar(
-              child: SingleChildScrollView(
-                controller: scrollControllerY,
-                scrollDirection: Axis.vertical,
-                child: buildFlameChartBody(constraints),
-              ),
-            ),
-          ),
+        return ListView.builder(
+          itemCount: rows.length,
+          itemBuilder: (context, index) {
+            return ScrollingFlameChartRow(
+              linkedScrollControllerGroup: _linkedScrollControllerGroup,
+              row: rows[index],
+              width: math.max(constraints.maxWidth, widget.totalStartingWidth),
+            );
+          },
         );
       },
     );
   }
 
-  Widget buildFlameChartBody(BoxConstraints constraints);
+  void initFlameChartElements();
+}
 
-  List<FlameChartNode> nodesInViewport(BoxConstraints constraints) {
-    // TODO(kenz): Use binary search method we use in html full timeline here.
-    final nodesInViewport = <FlameChartNode>[];
-    for (var row in rows) {
-      for (var node in row.nodes) {
-        final fitsHorizontally = node.rect.right >= scrollOffsetX &&
-            node.rect.left - scrollOffsetX <= constraints.maxWidth;
-        final fitsVertically = node.rect.bottom >= scrollOffsetY &&
-            node.rect.top - scrollOffsetY <= constraints.maxHeight;
-        if (fitsHorizontally && fitsVertically) {
-          nodesInViewport.add(node);
-        }
-      }
-    }
-    return nodesInViewport;
+class ScrollingFlameChartRow extends StatefulWidget {
+  const ScrollingFlameChartRow({
+    @required this.linkedScrollControllerGroup,
+    @required this.row,
+    @required this.width,
+  });
+
+  final LinkedScrollControllerGroup linkedScrollControllerGroup;
+
+  final FlameChartRow row;
+
+  final double width;
+
+  @override
+  _ScrollingFlameChartRowState createState() => _ScrollingFlameChartRowState();
+}
+
+class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
+    with AutoDisposeMixin {
+  ScrollController scrollController;
+
+  @override
+  void initState() {
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    super.initState();
   }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      child: widget.row.nodes.isEmpty
+          ? SizedBox(
+              height: sectionSpacing,
+              width: widget.width,
+            )
+          // TODO(kenz): consider using a Flow layout or a custom multi-child
+          // layout.
+          : Stack(
+              children: [
+                Container(
+                  height: rowHeightWithPadding,
+                  width: widget.width,
+                ),
+                // TODO(kenz): reevaluate passing in all the data once we have a
+                // large data set to test with.
+                ...widget.row.nodes,
+              ],
+            ),
+    );
+  }
+
+// TODO(kenz): consider using this method when we have a larger data set to
+// test with.
+//  List<FlameChartNode> rowNodesInViewport(
+//    List<FlameChartNode> nodes,
+//    BoxConstraints constraints,
+//  ) {
+//    // TODO(kenz): Use binary search method we use in html full timeline here.
+//    final nodesInViewport = <FlameChartNode>[];
+//    for (var node in nodes) {
+//      final horizontalScrollOffset = scrollController.hasClients
+//          ? scrollController.offset
+//          : scrollController.initialScrollOffset;
+//      final fitsHorizontally = node.rect.right >= horizontalScrollOffset &&
+//          node.rect.left - horizontalScrollOffset <= constraints.maxWidth;
+//      if (fitsHorizontally) {
+//        nodesInViewport.add(node);
+//      }
+//    }
+//    return nodesInViewport;
+//  }
 }
 
 class FlameChartRow {
@@ -141,7 +184,8 @@ class FlameChartRow {
   final int index;
 }
 
-class FlameChartNode<T> extends StatelessWidget {
+class FlameChartNode<T extends FlameChartNodeDataMixin>
+    extends StatelessWidget {
   const FlameChartNode({
     Key key,
     @required this.text,
@@ -150,7 +194,6 @@ class FlameChartNode<T> extends StatelessWidget {
     @required this.backgroundColor,
     @required this.textColor,
     @required this.data,
-    @required this.selected,
     @required this.onSelected,
   }) : super(key: key);
 
@@ -164,7 +207,6 @@ class FlameChartNode<T> extends StatelessWidget {
   })  : rect = Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
         tooltip = '',
         data = null,
-        selected = false,
         onSelected = ((_) {});
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
@@ -175,11 +217,11 @@ class FlameChartNode<T> extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final T data;
-  final bool selected;
   final void Function(T) onSelected;
 
   @override
   Widget build(BuildContext context) {
+    final selected = data?.selected ?? false;
     return Positioned.fromRect(
       rect: rect,
       child: Tooltip(
@@ -205,4 +247,8 @@ class FlameChartNode<T> extends StatelessWidget {
       ),
     );
   }
+}
+
+mixin FlameChartNodeDataMixin {
+  bool selected = false;
 }

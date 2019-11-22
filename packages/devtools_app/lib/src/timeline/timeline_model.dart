@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
+import '../charts/flutter/flame_chart.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../service_manager.dart';
 import '../trees.dart';
@@ -518,7 +519,8 @@ enum TimelineEventType {
   unknown,
 }
 
-abstract class TimelineEvent extends TreeNode<TimelineEvent> {
+abstract class TimelineEvent extends TreeNode<TimelineEvent>
+    with FlameChartNodeDataMixin {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {

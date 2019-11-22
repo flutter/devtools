@@ -374,6 +374,7 @@ class SelectedDataPoint extends LineChartMarker {
   @override
   void refreshContent(Entry e, Highlight highlight) async {
     _entry = e;
+    // TODO(kenz): see if we can make `x` an int - double seems strange.
     final frameIndex = _entry.x.toInt();
     if (onSelected != null && _lastFrameIndex != frameIndex) {
       _lastFrameIndex = frameIndex;

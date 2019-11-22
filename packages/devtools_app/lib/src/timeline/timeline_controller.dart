@@ -105,7 +105,9 @@ class TimelineController {
 
   void selectTimelineEvent(TimelineEvent event) {
     if (event == null || timeline.data.selectedEvent == event) return;
+    timeline.data.selectedEvent?.selected = false;
     timeline.data.selectedEvent = event;
+    timeline.data.selectedEvent.selected = true;
     _selectedTimelineEventNotifier.value = event;
   }
 

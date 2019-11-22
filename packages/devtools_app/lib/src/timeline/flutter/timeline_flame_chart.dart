@@ -34,7 +34,9 @@ class TimelineFlameChart extends StatelessWidget {
   ) {
     return FrameBasedTimelineFlameChart(
       controller.frameBasedTimeline.data.selectedFrame,
-      width: constraints.maxWidth,
+      // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+      // test horizontal scrolling functionality.
+      width: constraints.maxWidth * 2,
       height: math.max(
         constraints.maxHeight,
         _frameBasedTimelineChartHeight(controller),
@@ -88,86 +90,57 @@ class FrameBasedTimelineFlameChart
 }
 
 class FrameBasedTimelineFlameChartState
-    extends State<FrameBasedTimelineFlameChart>
-    with FlameChartStateMixin<FrameBasedTimelineFlameChart> {
-  int get gpuSectionStartRow => widget.data.uiEventFlow.depth;
+    extends FlameChartState<FrameBasedTimelineFlameChart> {
+  static const _rowOffsetForTopTimeline = 1;
+  static const _rowOffsetForBottomTimeline = 1;
+  static const _rowOffsetForSectionSpacer = 1;
 
-  @override
-  Widget buildFlameChartBody(BoxConstraints constraints) {
-    final width = math.max(constraints.maxWidth, widget.totalStartingWidth);
-    final height = math.max(constraints.maxHeight, widget.height);
-
-    // TODO(kenz): rewrite this using slivers or flows.
-    return ValueListenableBuilder(
-      valueListenable: widget.selectionNotifier,
-      builder: (context, selectedEvent, _) {
-        return Stack(
-          children: [
-            Container(
-              width: width,
-              height: height,
-            ),
-            ..._buildNodesInViewport(
-              constraints,
-              selectedEvent,
-            ), // pick what to show
-          ],
-        );
-      },
-    );
-  }
-
-  List<FlameChartNode> _buildNodesInViewport(
-    BoxConstraints constraints,
-    TimelineEvent selectedEvent,
-  ) {
-    // TODO(kenz): is creating all the FlameChartNode objects expensive even if
-    // we won't add them to the view? We create all the FlameChartNode objects
-    // and place them in FlameChart rows, but we only add [nodesInViewport] to
-    // the widget tree.
-    _buildFlameChartElements(selectedEvent);
-    return nodesInViewport(constraints);
-  }
+  // Add one for the spacer offset between UI and GPU nodes.
+  int get gpuSectionStartRow =>
+      widget.data.uiEventFlow.depth +
+      _rowOffsetForTopTimeline +
+      _rowOffsetForSectionSpacer;
 
   // TODO(kenz): when optimizing this code, consider passing in the viewport
   // to only construct FlameChartNode elements that are in view.
-  void _buildFlameChartElements(TimelineEvent selectedEvent) {
+  @override
+  void initFlameChartElements() {
     _resetColorOffsets();
 
     rows = List.generate(
-      widget.data.uiEventFlow.depth + widget.data.gpuEventFlow.depth,
+      widget.data.uiEventFlow.depth +
+          widget.data.gpuEventFlow.depth +
+          _rowOffsetForTopTimeline +
+          _rowOffsetForSectionSpacer +
+          _rowOffsetForBottomTimeline,
       (i) => FlameChartRow(nodes: [], index: i),
     );
-    final int frameStartOffset = widget.data.time.start.inMicroseconds;
 
-    double getTopForRow(int row) {
-      // This accounts for the section spacing between the UI events and the GPU
-      // events.
-      final additionalPadding =
-          row >= gpuSectionStartRow ? sectionSpacing : 0.0;
-      return row * rowHeightWithPadding + topOffset + additionalPadding;
-    }
+    final int frameStartOffset = widget.data.time.start.inMicroseconds;
 
     // Pixels per microsecond in order to fit the entire frame in view.
     final double pxPerMicro =
         widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+
+    // Top is always 0 because each node is positioned inside its own stack.
+    const top = 0.0;
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
       text: 'UI',
       textColor: Colors.black,
       backgroundColor: mainUiColor,
-      top: getTopForRow(0),
+      top: top,
       width: 28.0,
     );
-    rows[0].nodes.add(uiSectionLabel);
+    rows[0 + _rowOffsetForTopTimeline].nodes.add(uiSectionLabel);
 
     // Add GPU section label.
     final gpuSectionLabel = FlameChartNode.sectionLabel(
       text: 'GPU',
       textColor: Colors.white,
       backgroundColor: mainGpuColor,
-      top: getTopForRow(gpuSectionStartRow),
+      top: top,
       width: 42.0,
     );
     rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
@@ -182,7 +155,6 @@ class FrameBasedTimelineFlameChartState
       final double right =
           (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro +
               widget.startInset;
-      final top = getTopForRow(row);
       final backgroundColor =
           event.isUiEvent ? _nextUiColor() : _nextGpuColor();
 
@@ -190,13 +162,12 @@ class FrameBasedTimelineFlameChartState
         key: Key('${event.name} ${event.time.start.inMicroseconds}'),
         text: event.name,
         tooltip: '${event.name} - ${msText(event.time.duration)}',
-        rect: Rect.fromLTRB(left, top, right, top + rowHeight),
+        rect: Rect.fromLTRB(left, top, right, rowHeight),
         backgroundColor: backgroundColor,
         textColor: event.isUiEvent
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selected: event == selectedEvent,
         onSelected: (dynamic event) => widget.onSelection(event),
       );
 
@@ -210,7 +181,7 @@ class FrameBasedTimelineFlameChartState
       }
     }
 
-    createChartNodes(widget.data.uiEventFlow, 0);
+    createChartNodes(widget.data.uiEventFlow, _rowOffsetForTopTimeline);
     createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
   }
 }
