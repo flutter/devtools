@@ -65,15 +65,21 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   final bool isProperty;
 
-  bool get isFlex => getBooleanMember('isFlex', false);
+  bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
 
-  int get flexFactor => json['flexFactor'];
+  int get flexFactor => cachedProperties
+      ?.firstWhere((property) => property.name == 'flex', orElse: () => null)
+      ?.getIntMember('value');
 
-  Map<String, Object> get constraints => json['constraints'];
+  RemoteDiagnosticsNode get constraints => renderObject?.cachedProperties
+      ?.firstWhere((property) => property.name == 'constraints');
 
-  Map<String, Object> get renderObject => json['renderObject'];
+  RemoteDiagnosticsNode _renderObject;
 
-  Map<String, Object> get size => json['size'];
+  RemoteDiagnosticsNode get renderObject => _renderObject;
+
+  RemoteDiagnosticsNode get size => renderObject?.cachedProperties
+      ?.firstWhere((property) => property.name == 'size');
 
   @override
   bool operator ==(dynamic other) {
@@ -326,6 +332,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   String getStringMember(String memberName) {
     return JsonUtils.getStringMember(json, memberName);
+  }
+
+  int getIntMember(String memberName) {
+    return JsonUtils.getIntMember(json, memberName);
   }
 
   bool getBooleanMember(String memberName, bool defaultValue) {
@@ -663,6 +673,19 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
     await (await inspectorService)
         ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+  }
+
+  Future<void> getRenderObject() async {
+    if (_renderObject != null) return;
+    final service = await inspectorService;
+    _renderObject = await service.renderObject(valueRef);
+    if (isFlex && _children != null)
+      for (var i = 0; i < _children.length; ++i) {
+        final List<dynamic> children =
+            _renderObject.json['children'];
+        _children[i]._renderObject = RemoteDiagnosticsNode(
+            children[i], inspectorService, true, _children[i]);
+      }
   }
 }
 

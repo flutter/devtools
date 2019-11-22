@@ -34,16 +34,13 @@ class InspectorDetailsTabController extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enableExperimentalStoryOfLayout =
-        InspectorController.enableExperimentalStoryOfLayout;
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      if (enableExperimentalStoryOfLayout) _buildTab('Layout Details'),
+      _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (enableExperimentalStoryOfLayout)
-        LayoutDetailsTab(controller: controller),
+      LayoutDetailsTab(controller: controller),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
@@ -103,7 +100,15 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   InspectorTreeNode get selected => controller?.selectedNode;
 
-  void onSelectionChanged() {
+  Future<void> loadRenderObject() async {
+    final nearestFlex = selected.diagnostic.isFlex
+        ? selected.diagnostic
+        : selected.parent.diagnostic;
+    await nearestFlex.getRenderObject();
+  }
+
+  void onSelectionChanged() async {
+    await loadRenderObject();
     setState(() {});
   }
 
@@ -111,6 +116,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   void initState() {
     super.initState();
     controller.addSelectionListener(onSelectionChanged);
+    loadRenderObject();
   }
 
   @override

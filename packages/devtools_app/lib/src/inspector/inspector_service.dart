@@ -954,6 +954,31 @@ class ObjectGroup {
       args,
     ));
   }
+
+  Future<RemoteDiagnosticsNode> renderObject(InspectorInstanceRef ref) async {
+    // TODO(albertusangga): Make this new Service Extension in flutter/flutter
+    String command = '''
+      final id = '${ref.id}';
+      final instance = WidgetInspectorService.instance;
+      final Element object = WidgetInspectorService.instance.toObject(id);
+      final RenderObject renderObject = object.renderObject;
+      return instance._safeJsonEncode(
+        instance._nodeToJson(
+          renderObject.toDiagnosticsNode(),
+          _SerializationDelegate(
+            groupName: '',
+            service: instance,
+            includeProperties: true,
+          ),
+      ));
+    ''';
+    command = '((){${command.split('\n').join()})()';
+    final val = await inspectorLibrary.eval(
+      command,
+      isAlive: this,
+    );
+    return parseDiagnosticsNodeObservatory(val);
+  }
 }
 
 enum FlutterTreeType {

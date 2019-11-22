@@ -13,8 +13,6 @@ import '../enum_utils.dart';
 import '../inspector_tree.dart';
 import 'story_of_your_layout/utils.dart';
 
-const Type boxConstraintsType = BoxConstraints;
-
 /// Compute real widget sizes into rendered sizes to be displayed on the details tab.
 /// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
 /// In the case where it is greater, we should render it with scrolling capability.
@@ -95,11 +93,11 @@ List<double> computeRenderSizes({
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
-      : description = node.diagnostic?.description,
-        size = deserializeSize(node.diagnostic?.size),
-        constraints = deserializeConstraints(node.diagnostic?.constraints),
-        isFlex = node.diagnostic?.isFlex,
-        flexFactor = node.diagnostic?.flexFactor,
+      : description = node.diagnostic.description,
+        size = deserializeSize(node.diagnostic.size),
+        constraints = deserializeConstraints(node.diagnostic.constraints),
+        isFlex = node.diagnostic.isFlex,
+        flexFactor = node.diagnostic.flexFactor,
         children = copyLevel == 0
             ? []
             : node.children
@@ -154,22 +152,75 @@ class LayoutProperties {
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
   }
 
-  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
+  /// Return the string inside the parentheses
+  /// example:
+  /// getValue('BoxConstraints(value)'); # returns 'value'
+  static String getValue(String description) {
+    return description.substring(
+        description.indexOf('(') + 1, description.indexOf(')'));
+  }
+
+  /// This method implementation is based on [BoxConstraints].toString() implementation
+  static BoxConstraints deserializeConstraints(
+      RemoteDiagnosticsNode constraints) {
     // TODO(albertusangga): Support SliverConstraint
-    if (json == null || json['type'] != boxConstraintsType.toString())
-      return null;
-    // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
+    if (constraints == null) return null;
+    final value = getValue(constraints.description);
+    if (value.contains('unconstrained'))
+      return const BoxConstraints(
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+      );
+    if (value.contains('biggest'))
+      return const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: double.infinity,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+      );
+    final widthAndHeight = value.split(', ');
+    final width = widthAndHeight[0];
+    final height = widthAndHeight[1];
+    double minWidth, maxWidth, minHeight, maxHeight;
+    List<double> parseRangeValue(String value) {
+      // '0.0<=dim<=100.0' should be split as ['0.0', 'dim', '100.0']
+      final split = value.split('<='); // after the split it should conta
+      return [double.parse(split.first), double.parse(split.last)];
+    }
+
+    if (width.startsWith('w='))
+      minWidth = maxWidth = double.parse(width.substring(2));
+    else {
+      final rangeValue = parseRangeValue(width);
+      minWidth = rangeValue.first;
+      maxWidth = rangeValue.last;
+    }
+    if (height.startsWith('h='))
+      minHeight = maxHeight = double.parse(height.substring(2));
+    else {
+      final rangeValue = parseRangeValue(height);
+      minHeight = rangeValue.first;
+      maxHeight = rangeValue.last;
+    }
     return BoxConstraints(
-      minWidth: json['minWidth'],
-      maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,
-      minHeight: json['minHeight'],
-      maxHeight: json['hasBoundedHeight'] ? json['maxHeight'] : double.infinity,
+      minWidth: minWidth,
+      minHeight: minHeight,
+      maxWidth: maxWidth,
+      maxHeight: maxHeight,
     );
   }
 
-  static Size deserializeSize(Map<String, Object> json) {
-    if (json == null) return null;
-    return Size(json['width'], json['height']);
+  static Size deserializeSize(RemoteDiagnosticsNode size) {
+    if (size == null) return null;
+    // size.description will look like 'Size(100.0, 50.0)'
+    final value = getValue(size.description); // value will be '100.0, 50.0'
+    final split = value.split(', ');
+    return Size(
+      double.parse(split.first),
+      double.parse(split.last),
+    );
   }
 }
 
@@ -192,12 +243,13 @@ class FlexLayoutProperties extends LayoutProperties {
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
     // InspectorTreeNode.
+    return _buildNode(node);
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
   static FlexLayoutProperties _buildNode(InspectorTreeNode node) {
     final Map<String, Object> renderObjectJson =
-        node.diagnostic.json['renderObject'];
+        node.diagnostic.renderObject.json;
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,
