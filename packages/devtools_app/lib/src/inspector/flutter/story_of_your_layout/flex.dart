@@ -382,9 +382,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  textDirection: axis == Axis.horizontal
-                      ? TextDirection.ltr
-                      : TextDirection.rtl,
                   children: <Widget>[
                     Expanded(
                       child: Container(
@@ -420,9 +417,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    textDirection: axis == Axis.vertical
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
                     children: <Widget>[
                       Expanded(
                         child: Container(
@@ -451,6 +445,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               )
           ],
           onChanged: (Object newSelection) async {
+            // newSelection is an object instead of type here because
+            // the type is dependent on the `axis` parameter
+            // if the axis is the main axis the type should be [MainAxisAlignment]
+            // if the axis is the cross axis the type should be [CrossAxisAlignment]
             if (axis == direction) {
               properties.mainAxisAlignment = newSelection;
             } else {
