@@ -67,16 +67,61 @@ class StoryOfYourFlexWidget extends StatefulWidget {
   _StoryOfYourFlexWidgetState createState() => _StoryOfYourFlexWidgetState();
 }
 
-class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
+class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
+    with TickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+    expandedEntrance = AnimationController(
+      vsync: this,
+      duration: const Duration(microseconds: 400),
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed) {
+          setState(() {
+            _previousProperties = null;
+            expandedEntrance.forward();
+          });
+        }
+      });
+    _updateProperties();
+  }
+
+  @override
+  void dispose() {
+    expandedEntrance.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.properties.node != widget.properties.node) {
+      _previousProperties = oldWidget.properties;
+    }
+    _updateProperties();
+  }
+
+  void _updateProperties() {
+    if (_previousProperties != null) {
+      expandedEntrance.reverse();
+    } else {
+      expandedEntrance.forward();
+    }
+  }
+
+  AnimationController expandedEntrance;
+
   Size get size => properties.size;
 
-  FlexLayoutProperties get properties => widget.properties;
+  FlexLayoutProperties get properties =>
+      _previousProperties ?? widget.properties;
+  FlexLayoutProperties _previousProperties;
 
-  List<LayoutProperties> get children => widget.properties.children;
+  List<LayoutProperties> get children => properties.children;
 
-  Axis get direction => widget.properties.direction;
+  Axis get direction => properties.direction;
 
-  bool get isRow => properties.direction == Axis.horizontal;
+  bool get isRow => direction == Axis.horizontal;
 
   bool get isColumn => !isRow;
 
@@ -166,66 +211,75 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
     Offset renderOffset,
   }) {
     final flexFactor = childProperties.flexFactor;
-    return Positioned(
-      top: renderOffset.dy,
-      left: renderOffset.dx,
-      child: InkWell(
-        onTap: () async {
-          final controller = widget.inspectorController;
-          final diagnostic = childProperties.node.diagnostic;
-          // TODO(albertusangga) fix/investigate why calling setSelectedNode is not sufficient
-          controller.refreshSelection(diagnostic, diagnostic, false);
-          controller.setSelectedNode(childProperties.node);
-          final inspectorService = await diagnostic.inspectorService;
-          await inspectorService.setSelectionInspector(
-              diagnostic.valueRef, true);
-        },
-        child: Container(
-          width: renderSize.width,
-          height: renderSize.height,
-          child: WidgetVisualizer(
-            backgroundColor: backgroundColor,
-            title: childProperties.description,
-            borderColor: borderColor,
-            textColor: textColor,
-            child: _visualizeWidthAndHeightWithConstraints(
-              arrowHeadSize: arrowHeadSize,
-              widget: Align(
-                alignment: Alignment.topRight,
-                child: Container(
-                  margin: const EdgeInsets.only(
-                    top: margin,
-                    left: margin,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Text(
-                        'flex: $flexFactor',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      if (flexFactor == 0 || flexFactor == null)
+    return AnimatedBuilder(
+      animation: expandedEntrance,
+      builder: (context, child) {
+        return Opacity(
+          opacity: expandedEntrance.value,
+          child: child,
+        );
+      },
+      child: Positioned(
+        top: renderOffset.dy,
+        left: renderOffset.dx,
+        child: InkWell(
+          onTap: () async {
+            final controller = widget.inspectorController;
+            final diagnostic = childProperties.node.diagnostic;
+            // TODO(albertusangga) fix/investigate why calling setSelectedNode is not sufficient
+            controller.refreshSelection(diagnostic, diagnostic, false);
+            controller.setSelectedNode(childProperties.node);
+            final inspectorService = await diagnostic.inspectorService;
+            await inspectorService.setSelectionInspector(
+                diagnostic.valueRef, true);
+          },
+          child: Container(
+            width: renderSize.width,
+            height: renderSize.height,
+            child: WidgetVisualizer(
+              backgroundColor: backgroundColor,
+              title: childProperties.description,
+              borderColor: borderColor,
+              textColor: textColor,
+              child: _visualizeWidthAndHeightWithConstraints(
+                arrowHeadSize: arrowHeadSize,
+                widget: Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    margin: const EdgeInsets.only(
+                      top: margin,
+                      left: margin,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
                         Text(
-                          'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                          style: TextStyle(
-                            color: ThemedColor(
-                              const Color(0xFFD08A29),
-                              Colors.orange.shade700,
-                            ),
-                            fontStyle: FontStyle.italic,
-                          ),
-                          maxLines: 2,
-                          softWrap: true,
-                          overflow: TextOverflow.ellipsis,
-                          textScaleFactor: smallTextScaleFactor,
-                          textAlign: TextAlign.right,
+                          'flex: $flexFactor',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                    ],
+                        if (flexFactor == 0 || flexFactor == null)
+                          Text(
+                            'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
+                            style: TextStyle(
+                              color: ThemedColor(
+                                const Color(0xFFD08A29),
+                                Colors.orange.shade700,
+                              ),
+                              fontStyle: FontStyle.italic,
+                            ),
+                            maxLines: 2,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            textScaleFactor: smallTextScaleFactor,
+                            textAlign: TextAlign.right,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
+                properties: childProperties,
               ),
-              properties: childProperties,
             ),
           ),
         ),
