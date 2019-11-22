@@ -26,9 +26,13 @@ const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 225.0;
-const minRenderHeight = 275.0;
-const defaultMaxRenderWidth = 300.0;
-const defaultMaxRenderHeight = 300.0;
+const minRenderHeight = 250.0;
+
+/// The size to shrink a widget by when animating it in.
+const entranceMargin = 60;
+
+const defaultMaxRenderWidth = 400.0;
+const defaultMaxRenderHeight = 400.0;
 
 const widgetTitleMaxWidthPercentage = 0.75;
 
@@ -243,18 +247,23 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
               if (childProperties.flexFactor != null) {
                 size = SizeTween(
                   begin: Size(
-                    horizontal ? minRenderWidth : renderSize.width,
-                    vertical ? minRenderHeight : renderSize.height,
+                    horizontal
+                        ? minRenderWidth - entranceMargin
+                        : renderSize.width,
+                    vertical
+                        ? minRenderHeight - entranceMargin
+                        : renderSize.height,
                   ),
                   end: renderSize,
                 ).evaluate(expandedEntrance);
               }
               return Opacity(
-                opacity: min([allEntrance.value * 2, 1.0]),
+                opacity: min([allEntrance.value * 5, 1.0]),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                      horizontal: (renderSize.width - size.width) / 2,
-                      vertical: (renderSize.height - size.height) / 2),
+                    horizontal: (renderSize.width - size.width) / 2,
+                    vertical: (renderSize.height - size.height) / 2,
+                  ),
                   child: child,
                 ),
               );
@@ -363,7 +372,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 ),
               )
           ];
-
           return SingleChildScrollView(
             scrollDirection: properties.direction,
             child: ConstrainedBox(
@@ -376,7 +384,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 maxHeight: direction == Axis.vertical
                     ? sum(renderInfo.map((renderSize) => renderSize.height))
                     : maxHeight,
-              ),
+              ).normalize(),
               child: Stack(
                 children: [...widgetChildren, ...crossAxisSpaces],
               ),
