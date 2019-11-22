@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../inspector_controller.dart';
+import '../inspector_service.dart';
 import '../inspector_tree.dart';
 import 'inspector_data_models.dart';
 import 'story_of_your_layout/flex.dart';
@@ -100,23 +102,50 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   InspectorTreeNode get selected => controller?.selectedNode;
 
-  Future<void> loadRenderObject() async {
-    final nearestFlex = selected.diagnostic.isFlex
-        ? selected.diagnostic
-        : selected.parent.diagnostic;
-    await nearestFlex.getRenderObject();
-  }
+  InspectorObjectGroupManager objectGroupManager;
+
+  RemoteDiagnosticsNode root;
 
   void onSelectionChanged() async {
-    await loadRenderObject();
+    objectGroupManager.cancelNext();
+    setState(() {
+      root = null;
+    });
+    final nextObjectGroup = objectGroupManager.next;
+    if (selected?.diagnostic ?? false) {
+      final root = await nextObjectGroup.getDetailsSubtree(
+        selected?.diagnostic,
+        subtreeDepth: 1,
+      );
+      if (!nextObjectGroup.disposed) {
+        assert(objectGroupManager.next == nextObjectGroup);
+        objectGroupManager.promoteNext();
+      }
+    }
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    updateObjectGroupManager();
     controller.addSelectionListener(onSelectionChanged);
-    loadRenderObject();
+  }
+
+  void updateObjectGroupManager() {
+    final service = controller.inspectorService;
+    if (service != objectGroupManager?.inspectorService) {
+      objectGroupManager = InspectorObjectGroupManager(
+        service,
+        'flex-layout',
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(Widget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateObjectGroupManager();
   }
 
   @override
