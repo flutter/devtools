@@ -330,7 +330,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   double get crossAxisDimension => dimension(crossAxisDirection);
 
-  List<RenderProps> childrenRenderProps({
+  List<RenderProperties> childrenRenderProps({
     @required double smallestRenderWidth,
     @required double largestRenderWidth,
     @required double smallestRenderHeight,
@@ -413,7 +413,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final renderSpaceBetweenChildren = spaceBetweenChildren(renderFreeSpace);
     final renderSpaceAfterChildren = spaceAfterChildren(renderFreeSpace);
 
-    final childrenRenderProps = <RenderProps>[];
+    final childrenRenderProps = <RenderProperties>[];
 
     double lastMainAxisOffset() {
       if (childrenRenderProps.isEmpty) return 0.0;
@@ -449,7 +449,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
     for (var i = 0; i < children.length; ++i) {
       childrenRenderProps.add(
-        RenderProps(
+        RenderProperties(
           axis: direction,
           size: Size(widths[i], heights[i]),
           offset: Offset.zero,
@@ -460,13 +460,13 @@ class FlexLayoutProperties extends LayoutProperties {
       );
     }
 
-    final spaces = <RenderProps>[];
+    final spaces = <RenderProperties>[];
 
     final realSpaceBeforeChildren = spaceBeforeChildren(freeSpace);
     final realSpaceBetweenChildren = spaceBetweenChildren(freeSpace);
     final realSpaceAfterChildren = spaceAfterChildren(freeSpace);
     final renderPropsWithFullCrossAxisDimension =
-        RenderProps(axis: direction, isFreeSpace: true)
+        RenderProperties(axis: direction, isFreeSpace: true)
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
           ..crossAxisOffset = 0.0;
@@ -497,12 +497,12 @@ class FlexLayoutProperties extends LayoutProperties {
     return [...childrenRenderProps, ...spaces];
   }
 
-  List<RenderProps> crossAxisSpaces({
-    @required List<RenderProps> childrenRenderProps,
+  List<RenderProperties> crossAxisSpaces({
+    @required List<RenderProperties> childrenRenderProps,
     @required double Function(Axis) maxSizeAvailable,
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
-    final spaces = <RenderProps>[];
+    final spaces = <RenderProperties>[];
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
               children[i].dimension(crossAxisDirection) ||
@@ -549,8 +549,8 @@ class FlexLayoutProperties extends LayoutProperties {
       EnumUtils<TextBaseline>(TextBaseline.values);
 }
 
-class RenderProps {
-  RenderProps({
+class RenderProperties {
+  RenderProperties({
     @required this.axis,
     Size size,
     Offset offset,
@@ -632,8 +632,8 @@ class RenderProps {
       realWidth = newVal;
   }
 
-  RenderProps clone() {
-    return RenderProps(
+  RenderProperties clone() {
+    return RenderProperties(
       axis: axis,
       size: size,
       offset: offset,

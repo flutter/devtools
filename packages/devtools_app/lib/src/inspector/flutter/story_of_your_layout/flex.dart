@@ -74,6 +74,8 @@ const crossAxisDarkTextColor = Color(0xFFB3D25A);
 const crossAxisTextColor =
     ThemedColor(crossAxisLightTextColor, crossAxisDarkTextColor);
 
+const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
+
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
@@ -304,7 +306,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
             maxSizeAvailable: maxSizeAvailable,
           );
 
-          final childrenRenderWidget = <Widget>[
+          final childrenRenderWidgets = <Widget>[
             for (var i = 0; i < children.length; i++)
               _visualizeChild(
                 backgroundColor:
@@ -320,15 +322,18 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           ];
 
           final freeSpacesWidgets = <Widget>[
-            for (var renderProps in [...mainAxisSpaces, ...crossAxisSpaces])
+            for (var renderProperties in [
+              ...mainAxisSpaces,
+              ...crossAxisSpaces
+            ])
               Positioned(
-                top: renderProps.dy,
-                left: renderProps.dx,
+                top: renderProperties.dy,
+                left: renderProperties.dx,
                 child: EmptySpaceVisualizerWidget(
-                  width: renderProps.realWidth,
-                  height: renderProps.realHeight,
-                  renderWidth: renderProps.width,
-                  renderHeight: renderProps.height,
+                  width: renderProperties.realWidth,
+                  height: renderProperties.realHeight,
+                  renderWidth: renderProperties.width,
+                  renderHeight: renderProperties.height,
                 ),
               )
           ];
@@ -352,13 +357,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 children: [
                   Positioned.fill(
                     child: Image.asset(
-                      emptySpaceAssetName,
+                      freeSpaceAssetName,
                       width: maxWidth,
                       height: maxHeight,
                       fit: BoxFit.fill,
                     ),
                   ),
-                  ...childrenRenderWidget,
+                  ...childrenRenderWidgets,
                   ...freeSpacesWidgets
                 ],
               ),
@@ -705,8 +710,6 @@ class WidgetVisualizer extends StatelessWidget {
   }
 }
 
-const emptySpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
-
 class EmptySpaceVisualizerWidget extends StatelessWidget {
   // width and height to be displayed on Text
   // width and height for rendering/sizing the widget
@@ -718,11 +721,10 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
     @required this.renderWidth,
     @required this.renderHeight,
   }) : super(key: key);
-  final double width;
 
+  final double width;
   final double height;
   final double renderWidth;
-
   final double renderHeight;
 
   @override
@@ -732,14 +734,6 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
       height: renderHeight,
       child: Stack(
         children: <Widget>[
-//          Positioned.fill(
-//            child: Image.asset(
-//              emptySpaceAssetName,
-//              width: renderWidth,
-//              height: renderHeight,
-//              fit: BoxFit.fill,
-//            ),
-//          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
