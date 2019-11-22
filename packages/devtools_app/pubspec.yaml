@@ -112,6 +112,7 @@ flutter:
     - assets/img/story_of_layout/empty_space.png
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
+  # TODO(https://github.com/flutter/devtools/issues/1339): Include a monospaced font.
   fonts:
     - family: Roboto
       fonts:
