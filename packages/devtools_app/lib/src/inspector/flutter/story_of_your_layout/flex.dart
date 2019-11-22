@@ -72,23 +72,27 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   @override
   void initState() {
     super.initState();
-    expandedEntrance = AnimationController(
+    entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(microseconds: 400),
+      duration: const Duration(milliseconds: 500),
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           setState(() {
             _previousProperties = null;
-            expandedEntrance.forward();
+            entranceController.forward();
           });
         }
       });
+    expandedEntrance =
+        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
+    allEntrance =
+        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
     _updateProperties();
   }
 
   @override
   void dispose() {
-    expandedEntrance.dispose();
+    entranceController.dispose();
     super.dispose();
   }
 
@@ -103,13 +107,15 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   void _updateProperties() {
     if (_previousProperties != null) {
-      expandedEntrance.reverse();
+      entranceController.reverse();
     } else {
-      expandedEntrance.forward();
+      entranceController.forward();
     }
   }
 
-  AnimationController expandedEntrance;
+  AnimationController entranceController;
+  CurvedAnimation expandedEntrance;
+  CurvedAnimation allEntrance;
 
   Size get size => properties.size;
 
@@ -211,31 +217,48 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     Offset renderOffset,
   }) {
     final flexFactor = childProperties.flexFactor;
-    return AnimatedBuilder(
-      animation: expandedEntrance,
-      builder: (context, child) {
-        return Opacity(
-          opacity: expandedEntrance.value,
-          child: child,
-        );
-      },
-      child: Positioned(
-        top: renderOffset.dy,
-        left: renderOffset.dx,
-        child: InkWell(
-          onTap: () async {
-            final controller = widget.inspectorController;
-            final diagnostic = childProperties.node.diagnostic;
-            // TODO(albertusangga) fix/investigate why calling setSelectedNode is not sufficient
-            controller.refreshSelection(diagnostic, diagnostic, false);
-            controller.setSelectedNode(childProperties.node);
-            final inspectorService = await diagnostic.inspectorService;
-            await inspectorService.setSelectionInspector(
-                diagnostic.valueRef, true);
-          },
-          child: Container(
-            width: renderSize.width,
-            height: renderSize.height,
+    return Positioned(
+      top: renderOffset.dy,
+      left: renderOffset.dx,
+      child: InkWell(
+        onTap: () async {
+          final controller = widget.inspectorController;
+          final diagnostic = childProperties.node.diagnostic;
+          // TODO(albertusangga) fix/investigate why calling setSelectedNode is not sufficient
+          controller.refreshSelection(diagnostic, diagnostic, false);
+          controller.setSelectedNode(childProperties.node);
+          final inspectorService = await diagnostic.inspectorService;
+          await inspectorService.setSelectionInspector(
+              diagnostic.valueRef, true);
+        },
+        child: SizedBox(
+          width: renderSize.width,
+          height: renderSize.height,
+          child: AnimatedBuilder(
+            animation: entranceController,
+            builder: (context, child) {
+              final vertical = properties.isMainAxisVertical;
+              final horizontal = properties.isMainAxisHorizontal;
+              Size size = renderSize;
+              if (childProperties.flexFactor != null) {
+                size = SizeTween(
+                  begin: Size(
+                    horizontal ? minRenderWidth : renderSize.width,
+                    vertical ? minRenderHeight : renderSize.height,
+                  ),
+                  end: renderSize,
+                ).evaluate(expandedEntrance);
+              }
+              return Opacity(
+                opacity: min([allEntrance.value * 2, 1.0]),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: (renderSize.width - size.width) / 2,
+                      vertical: (renderSize.height - size.height) / 2),
+                  child: child,
+                ),
+              );
+            },
             child: WidgetVisualizer(
               backgroundColor: backgroundColor,
               title: childProperties.description,
