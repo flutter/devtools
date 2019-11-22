@@ -29,6 +29,7 @@ void main() {
         columns: [_FlatNameColumn()],
         data: [TestData('empty', 0)],
         keyFactory: (d) => Key(d.name),
+        onItemSelected: noop,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -43,6 +44,7 @@ void main() {
           _NumberColumn(),
         ],
         data: flatData,
+        onItemSelected: noop,
         keyFactory: (d) => Key(d.name),
       );
       await tester.pumpWidget(wrap(table));
@@ -68,6 +70,7 @@ void main() {
           _CombinedColumn(),
         ],
         data: flatData,
+        onItemSelected: noop,
         keyFactory: (data) => Key(data.name),
       );
       await tester.pumpWidget(wrap(
@@ -80,6 +83,24 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
+    testWidgets('can select an item', (WidgetTester tester) async {
+      TestData selected;
+      final testData = TestData('empty', 0);
+      const key = Key('empty');
+      final table = FlatTable<TestData>(
+        columns: [_FlatNameColumn()],
+        data: [testData],
+        keyFactory: (d) => Key(d.name),
+        onItemSelected: (item) => selected = item,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.byKey(key), findsOneWidget);
+      expect(selected, isNull);
+      await tester.tap(find.byKey(key));
+      expect(selected, testData);
+    });
+
     test('fails with no data', () {
       expect(
         () {
@@ -87,6 +108,7 @@ void main() {
             columns: [_FlatNameColumn()],
             data: null,
             keyFactory: (d) => Key(d.name),
+            onItemSelected: noop,
           );
         },
         throwsAssertionError,
@@ -99,6 +121,7 @@ void main() {
           columns: [_FlatNameColumn()],
           data: flatData,
           keyFactory: null,
+          onItemSelected: noop,
         );
       }, throwsAssertionError);
     });
@@ -300,3 +323,5 @@ class _CombinedColumn extends ColumnData<TestData> {
   @override
   double get fixedWidthPx => 400.0;
 }
+
+void noop(TestData data) {}
