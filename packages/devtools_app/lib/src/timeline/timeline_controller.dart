@@ -10,6 +10,7 @@ import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_service.dart';
@@ -30,17 +31,14 @@ class TimelineController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
+    frameBasedTimeline = FrameBasedTimeline(this);
     timelines = [frameBasedTimeline, fullTimeline];
   }
 
-  /// Stream controller that notifies a timeline event was selected.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [timelineData.selectedEvent]. We send the
-  /// [FrameFlameChartItem] so that we can persist the colors through to the
-  /// event details view.
-  final _selectedTimelineEventController =
-      StreamController<TimelineEvent>.broadcast();
+  /// Notifies that a timeline event was selected.
+  ValueListenable get selectedTimelineEventNotifier =>
+      _selectedTimelineEventNotifier;
+  final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
 
   /// Stream controller that notifies that offline data was loaded into the
   /// timeline.
@@ -53,19 +51,22 @@ class TimelineController {
   /// should be logged for the timeline.
   final _nonFatalErrorController = StreamController<String>.broadcast();
 
-  Stream<TimelineEvent> get onSelectedTimelineEvent =>
-      _selectedTimelineEventController.stream;
+  /// Stream controller that notifies the timeline has been cleared.
+  final _clearController = StreamController<bool>.broadcast();
+
+  Stream<bool> get onTimelineCleared => _clearController.stream;
 
   Stream<OfflineData> get onLoadOfflineData =>
       _loadOfflineDataController.stream;
 
   Stream<String> get onNonFatalError => _nonFatalErrorController.stream;
 
-  TimelineBase get timeline => timelineMode == TimelineMode.frameBased
-      ? frameBasedTimeline
-      : fullTimeline;
+  TimelineBase get timeline =>
+      timelineModeNotifier.value == TimelineMode.frameBased
+          ? frameBasedTimeline
+          : fullTimeline;
 
-  final frameBasedTimeline = FrameBasedTimeline();
+  FrameBasedTimeline frameBasedTimeline;
 
   FullTimeline fullTimeline;
 
@@ -79,13 +80,15 @@ class TimelineController {
 
   final _cpuProfilerService = CpuProfilerService();
 
-  TimelineMode timelineMode = TimelineMode.frameBased;
+  ValueListenable get timelineModeNotifier => _timelineModeNotifier;
+  final _timelineModeNotifier =
+      ValueNotifier<TimelineMode>(TimelineMode.frameBased);
 
   /// Trace events we received while listening to the Timeline event stream.
   ///
   /// This does not include events that we receive while paused (if
-  /// [timelineMode] == [TimelineMode.frameBased]) or stopped (if
-  /// [timelineMode] == [TimelineMode.full]).
+  /// [timelineModeNotifier] == [TimelineMode.frameBased]) or stopped (if
+  /// [timelineModeNotifier] == [TimelineMode.full]).
   ///
   /// These events will be used to switch timeline modes (frameBased vs full).
   /// The selected mode will process these events using the respective processor
@@ -96,10 +99,14 @@ class TimelineController {
   bool get hasStarted =>
       frameBasedTimeline.hasStarted && fullTimeline.hasStarted;
 
+  void selectTimelineMode(TimelineMode mode) {
+    _timelineModeNotifier.value = mode;
+  }
+
   void selectTimelineEvent(TimelineEvent event) {
     if (event == null || timeline.data.selectedEvent == event) return;
     timeline.data.selectedEvent = event;
-    _selectedTimelineEventController.add(event);
+    _selectedTimelineEventNotifier.value = event;
   }
 
   Future<void> getCpuProfileForSelectedEvent() async {
@@ -129,7 +136,7 @@ class TimelineController {
     final uiThreadId = _threadIdForEvent(uiEventName, traceEvents);
     final gpuThreadId = _threadIdForEvent(gpuEventName, traceEvents);
 
-    timelineMode = offlineData.timelineMode;
+    _timelineModeNotifier.value = offlineData.timelineMode;
     offlineTimelineData = offlineData.shallowClone();
     timeline
       ..data = offlineData.shallowClone()
@@ -151,7 +158,7 @@ class TimelineController {
       // TODO(kenz): the flame chart should listen to this stream and
       // programmatically select the flame chart node that corresponds to
       // the selected event.
-      _selectedTimelineEventController.add(offlineTimelineData.selectedEvent);
+      _selectedTimelineEventNotifier.value = offlineTimelineData.selectedEvent;
     }
 
     if (offlineTimelineData is OfflineFullTimelineData) {
@@ -184,7 +191,7 @@ class TimelineController {
         frameBasedTimeline.data.selectedFrame = frameToSelect;
         // TODO(kenz): frames bar chart should listen to this stream and
         // programmatially select the frame from the offline snapshot.
-        frameBasedTimeline._selectedFrameController.add(frameToSelect);
+        frameBasedTimeline._selectedFrameNotifier.value = frameToSelect;
 
         if (offlineTimelineData.selectedEvent != null) {
           eventToSelect = frameToSelect
@@ -211,7 +218,7 @@ class TimelineController {
       timeline.data
         ..selectedEvent = eventToSelect
         ..cpuProfileData = offlineTimelineData.cpuProfileData;
-      _selectedTimelineEventController.add(eventToSelect);
+      _selectedTimelineEventNotifier.value = eventToSelect;
     }
   }
 
@@ -227,6 +234,8 @@ class TimelineController {
     frameBasedTimeline.clear();
     fullTimeline.clear();
     allTraceEvents.clear();
+    _selectedTimelineEventNotifier.value = null;
+    _clearController.add(true);
   }
 
   void recordTrace(Map<String, dynamic> trace) {
@@ -248,21 +257,17 @@ class TimelineController {
 
 class FrameBasedTimeline
     extends TimelineBase<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
-  /// Stream controller that notifies a frame was added to the timeline.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [frameBasedTimelineData.frames].
-  final _frameAddedController = StreamController<TimelineFrame>.broadcast();
+  FrameBasedTimeline(this._timelineController);
 
-  /// Stream controller that notifies a frame was selected.
-  ///
-  /// Subscribers to this stream will be responsible for updating the UI for the
-  /// new value of [frameBasedTimelineData.selectedFrame].
-  final _selectedFrameController = StreamController<TimelineFrame>.broadcast();
+  final TimelineController _timelineController;
 
-  Stream<TimelineFrame> get onFrameAdded => _frameAddedController.stream;
+  /// Notifies that a frame has been added to the timeline.
+  ValueListenable get frameAddedNotifier => _frameAddedNotifier;
+  final _frameAddedNotifier = ValueNotifier<TimelineFrame>(null);
 
-  Stream<TimelineFrame> get onSelectedFrame => _selectedFrameController.stream;
+  /// Notifies that a timeline frame has been selected.
+  ValueListenable get selectedFrameNotifier => _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
 
   Future<double> get displayRefreshRate async {
     final refreshRate =
@@ -274,28 +279,30 @@ class FrameBasedTimeline
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
 
-  bool get paused => _paused;
-
-  bool _paused = false;
+  /// Notifies that the timeline has been paused.
+  ValueListenable get pausedNotifier => _pausedNotifier;
+  final _pausedNotifier = ValueNotifier<bool>(false);
 
   void pause({bool manual = false}) {
     manuallyPaused = manual;
-    _paused = true;
+    _pausedNotifier.value = true;
   }
 
   void resume() {
     manuallyPaused = false;
-    _paused = false;
+    _pausedNotifier.value = false;
   }
 
   void selectFrame(TimelineFrame frame) {
     if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
+    _selectedFrameNotifier.value = frame;
     data.selectedFrame = frame;
+
+    _timelineController._selectedTimelineEventNotifier.value = null;
     data.selectedEvent = null;
     data.cpuProfileData = null;
-    _selectedFrameController.add(frame);
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
@@ -313,7 +320,7 @@ class FrameBasedTimeline
 
   void addFrame(TimelineFrame frame) {
     data.frames.add(frame);
-    _frameAddedController.add(frame);
+    _frameAddedNotifier.value = frame;
   }
 
   @override
@@ -338,6 +345,14 @@ class FrameBasedTimeline
     // processing for every frame in the snapshot.
     processor.maybeAddPendingEvents();
   }
+
+  @override
+  void clear() {
+    super.clear();
+    _frameAddedNotifier.value = null;
+    _selectedFrameNotifier.value = null;
+    _pausedNotifier.value = false;
+  }
 }
 
 class FullTimeline
@@ -348,24 +363,25 @@ class FullTimeline
 
   final _timelineProcessedController = StreamController<bool>.broadcast();
 
-  final _noEventsRecordedController = StreamController<bool>.broadcast();
+  /// Notifies when an empty timeline recording finishes
+  ValueListenable get emptyRecordingNotifier => _emptyRecordingNotifier;
+  final _emptyRecordingNotifier = ValueNotifier<bool>(false);
 
   Stream<bool> get onTimelineProcessed => _timelineProcessedController.stream;
 
-  Stream<bool> get onNoEventsRecorded => _noEventsRecordedController.stream;
-
-  /// Whether the timeline is being recorded.
-  bool recording = false;
+  /// Notifies that the timeline is currently being recorded.
+  ValueListenable get recordingNotifier => _recordingNotifier;
+  final _recordingNotifier = ValueNotifier<bool>(false);
 
   void startRecording() async {
-    recording = true;
+    _recordingNotifier.value = true;
   }
 
   void stopRecording() {
-    recording = false;
+    _recordingNotifier.value = false;
 
     if (_timelineController.allTraceEvents.isEmpty) {
-      _noEventsRecordedController.add(true);
+      _emptyRecordingNotifier.value = true;
       return;
     }
 
@@ -394,6 +410,13 @@ class FullTimeline
   void processTraceEvents(List<TraceEventWrapper> traceEvents) {
     processor.processTimeline(traceEvents);
     _timelineController.fullTimeline.data.initializeEventBuckets();
+  }
+
+  @override
+  void clear() {
+    super.clear();
+    _recordingNotifier.value = false;
+    _emptyRecordingNotifier.value = false;
   }
 }
 

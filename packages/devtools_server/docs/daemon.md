@@ -69,10 +69,11 @@ This request is only used for testing purposes so is currently "undocumented"
 This request lists all DevTools instances that are currently connected back to the server along with which VM services they're connected to and the pages they are showing. The request requires no `params`.
 -->
 
-### launchDevTools Request (VM Service)
+### devTools.launch Request
 
-`launchDevTools` is registered as a VM service (it is *not* sent over stdin to the server) and takes the following params:
+DevTools can be launched in a browser using the `devTools.launch` request with the following parameters.
 
+- `vmServiceUri` - the URI of the VM service that DevTools should connect to
 - `reuseWindows` - whether an existing DevTools instance that is not connected to a VM (or is connected to the same one) should be reused
 - `notify` - whether to send a browser notification to the user in the case where a DevTools instance is reused, to help them find the window
 - `page` - the page to launch DevTools on (matches the IDs used in DevTools that show in the URL fragments) or - if reusing a window - to switch to
@@ -80,6 +81,30 @@ This request lists all DevTools instances that are currently connected back to t
   - `theme` - allows using the `dark` theme
   - `ide` - the client (eg. `VSCode`) to be logged in analytics
   - `hide` - IDs of pages to hide (eg. `debugger` when launching from an IDE with its own debugger)
+
+#### Example
+
+```js
+{
+	'id': '123',
+	'method': 'devTools.launch',
+	'params': {
+		'vmServiceUri': 'ws://127.0.0.1/ABCDEF=/ws',
+		'notify': true,
+		'page': 'inspector',
+		'queryParams': {
+			'hide': 'debugger',
+			'ide': 'VSCode',
+			'theme': 'dark'
+		},
+		'reuseWindows': true
+	}
+}
+```
+
+### launchDevTools VM Service
+
+DevTools can also be launched via the VM Service protocol by calling the `launchDevTools` service. It takes the same parameters as the `devTools.launch` request, except without the `vmServiceUri` parameter since that's already known by the service.
 
 #### Example
 
@@ -103,4 +128,5 @@ This request lists all DevTools instances that are currently connected back to t
 
 ## Changelog
 
+- 1.1.0: Add a `devTools.launch` request to launch DevTools directly via the server API
 - 1.0.0: Initial documentation for DevTools server API

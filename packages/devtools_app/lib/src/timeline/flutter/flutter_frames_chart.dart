@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
 import 'package:mp_chart/mp/core/adapter_android_mp.dart';
@@ -14,10 +13,10 @@ import 'package:mp_chart/mp/core/common_interfaces.dart';
 import 'package:mp_chart/mp/core/data/bar_data.dart';
 import 'package:mp_chart/mp/core/data_set/bar_data_set.dart';
 import 'package:mp_chart/mp/core/description.dart';
-import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
-import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/entry/bar_entry.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
+import 'package:mp_chart/mp/core/enums/limite_label_postion.dart';
+import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/limit_line.dart';
 import 'package:mp_chart/mp/core/marker/line_chart_marker.dart';
@@ -27,8 +26,11 @@ import 'package:mp_chart/mp/core/utils/painter_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
+import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
+import '../../ui/theme.dart';
 import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
@@ -40,6 +42,7 @@ class FlutterFramesChart extends StatefulWidget {
 }
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
+    with AutoDisposeMixin
     implements OnChartValueSelectedListener {
   TimelineController _controller;
 
@@ -60,10 +63,24 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller = Controllers.of(context).timeline;
+    final newController = Controllers.of(context).timeline;
+    if (newController == _controller) return;
+    _controller = newController;
+
+    cancel();
+    autoDispose(_controller.onTimelineCleared.listen((_) {
+      setState(() {
+        frames.clear();
+        _frameDurations.clear();
+        _updateChart();
+      });
+    }));
 
     // Process each timeline frame.
-    _controller.frameBasedTimeline.onFrameAdded.listen((newFrame) {
+    addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
+        () {
+      final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
+      if (newFrame == null) return;
       setState(() {
         // If frames not in sync with charting data (_frameDurations)?
         if (frames.isEmpty && _frameDurations.length == 1) {
@@ -128,10 +145,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   void _initChartController() {
     final desc = Description()..enabled = false;
     _chartController = BarChartController(
+      // TODO(kenz): make this a general background color for use throughout
+      // devtools.
+      backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
           ..typeface = lightTypeFace
+          ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
           ..addLimitLine(LimitLine(60, '60 FPS')
@@ -147,10 +168,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         axisRight.enabled = false;
       },
       xAxisSettingFunction: (XAxis xAxis, controller) {
-        xAxis.enabled = true;
-        xAxis.drawLabels = true;
-        xAxis.setLabelCount1(3);
-        xAxis.position = XAxisPosition.BOTTOM;
+        xAxis
+          ..enabled = true
+          ..drawLabels = true
+          ..setLabelCount1(3)
+          ..textColor = defaultForeground
+          ..position = XAxisPosition.BOTTOM;
       },
       legendSettingFunction: (legend, controller) {
         legend.enabled = false;
@@ -165,7 +188,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       drawBarShadow: false,
       description: desc,
       highLightPerTapEnabled: true,
-      marker: SelectedDataPoint(onSelected: frameSelected),
+      marker: SelectedDataPoint(onSelected: onBarSelected),
       selectionListener: this,
     );
 
@@ -173,15 +196,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
-  void frameSelected(int frameIndex) {
-    _controller.frameBasedTimeline.selectFrame(frames[frameIndex]);
+  void onBarSelected(int index) {
+    _controller.frameBasedTimeline.selectFrame(frames[index]);
   }
-
-  /// Light Blue 50 - 200
-  static const mainUiColorLight = Color.fromARGB(0xff, 0x81, 0xD4, 0xFA);
-
-  /// Light Blue 50 - 700
-  static const mainGpuColorLight = Color.fromARGB(0xFF, 0x02, 0x88, 0xD1);
 
   void _initData([bool simulateFeed = false]) {
     // Create place holder for empty chart.
@@ -190,7 +207,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
     // Create heap used dataset.
     frameDurationsSet = BarDataSet(_frameDurations, 'Durations')
-      ..setColors1([mainGpuColorLight, mainUiColorLight])
+      ..setColors1([mainGpuColor, mainUiColor])
       ..setDrawValues(false);
 
     // Create a data object with all the data sets - stacked bar.
@@ -307,7 +324,6 @@ class SelectedDataPoint extends LineChartMarker {
     const paddingAroundText = 5;
     const rectangleCurve = 5.0;
 
-    final frameIndex = _entry.x.toInt();
     final yValues = (_entry as BarEntry).yVals;
 
     final num uiDuration = yValues[1];
@@ -353,16 +369,16 @@ class SelectedDataPoint extends LineChartMarker {
     );
     painter.paint(canvas, pos);
     canvas.restore();
-
-    if (onSelected != null && _lastFrameIndex != frameIndex) {
-      // Only fire when a different frame is selected.
-      onSelected(frameIndex);
-      _lastFrameIndex = frameIndex;
-    }
   }
 
   @override
-  void refreshContent(Entry e, Highlight highlight) {
+  void refreshContent(Entry e, Highlight highlight) async {
     _entry = e;
+    final frameIndex = _entry.x.toInt();
+    if (onSelected != null && _lastFrameIndex != frameIndex) {
+      _lastFrameIndex = frameIndex;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => onSelected(frameIndex));
+    }
   }
 }

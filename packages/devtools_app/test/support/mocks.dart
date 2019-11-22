@@ -5,9 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
-
-import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/flutter/controllers.dart';
+import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
@@ -101,6 +100,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<TimelineFlags> getVMTimelineFlags() =>
       Future.value(TimelineFlags.parse(_vmTimelineFlags));
+
+  @override
+  Future<Success> clearVMTimeline() => Future.value(Success());
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();

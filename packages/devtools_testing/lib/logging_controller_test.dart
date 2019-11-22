@@ -282,9 +282,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
       await env.tearDownEnvironment();
     });
-    // TODO(kenz): Unskip this once
-    // https://github.com/flutter/devtools/issues/1351 is fixed.
-  }, skip: true, timeout: const Timeout.factor(8));
+  }, timeout: const Timeout.factor(8));
 
   group('LogData', () {
     test(
