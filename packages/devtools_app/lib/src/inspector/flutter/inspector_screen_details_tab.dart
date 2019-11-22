@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'inspector_data_models.dart';
 import 'story_of_your_layout/flex.dart';
