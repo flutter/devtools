@@ -25,8 +25,8 @@ const distanceToArrow = 1.0;
 const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
-const minRenderWidth = 200.0;
-const minRenderHeight = 200.0;
+const minRenderWidth = 215.0;
+const minRenderHeight = 275.0;
 const defaultMaxRenderWidth = 300.0;
 const defaultMaxRenderHeight = 300.0;
 
