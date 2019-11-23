@@ -91,79 +91,6 @@ List<double> computeRenderSizes({
   return renderSizes;
 }
 
-double computeSpaceBeforeChildren({
-  @required MainAxisAlignment mainAxisAlignment,
-  @required double freeSpace,
-  @required int childrenLength,
-}) {
-  if (childrenLength == 0) return 0.0;
-  switch (mainAxisAlignment) {
-    case MainAxisAlignment.start:
-      return 0.0;
-    case MainAxisAlignment.end:
-      return freeSpace;
-    case MainAxisAlignment.center:
-      return freeSpace * 0.5;
-    case MainAxisAlignment.spaceBetween:
-      return 0.0;
-    case MainAxisAlignment.spaceAround:
-      final spaceBetweenChildren = freeSpace / childrenLength;
-      return spaceBetweenChildren * 0.5;
-    case MainAxisAlignment.spaceEvenly:
-      return freeSpace / (childrenLength + 1);
-    default:
-      return 0.0;
-  }
-}
-
-double computeSpaceAfterChildren({
-  @required MainAxisAlignment mainAxisAlignment,
-  @required double freeSpace,
-  @required int childrenLength,
-}) {
-  if (childrenLength == 0) return 0.0;
-  switch (mainAxisAlignment) {
-    case MainAxisAlignment.start:
-      return freeSpace;
-    case MainAxisAlignment.end:
-      return 0.0;
-    case MainAxisAlignment.center:
-      return freeSpace * 0.5;
-    case MainAxisAlignment.spaceBetween:
-      return 0.0;
-    case MainAxisAlignment.spaceAround:
-      final spaceBetweenChildren = freeSpace / childrenLength;
-      return spaceBetweenChildren * 0.5;
-    case MainAxisAlignment.spaceEvenly:
-      return freeSpace / (childrenLength + 1);
-    default:
-      return 0.0;
-  }
-}
-
-double computeSpaceBetweenChildren({
-  @required MainAxisAlignment mainAxisAlignment,
-  @required double freeSpace,
-  @required int childrenLength,
-}) {
-  if (childrenLength == 0) return 0.0;
-  switch (mainAxisAlignment) {
-    case MainAxisAlignment.start:
-    case MainAxisAlignment.end:
-    case MainAxisAlignment.center:
-      return 0.0;
-    case MainAxisAlignment.spaceBetween:
-      if (childrenLength == 1) return freeSpace;
-      return freeSpace / (childrenLength - 1);
-    case MainAxisAlignment.spaceAround:
-      return freeSpace / childrenLength;
-    case MainAxisAlignment.spaceEvenly:
-      return freeSpace / (childrenLength + 1);
-    default:
-      return 0.0;
-  }
-}
-
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
@@ -330,7 +257,9 @@ class FlexLayoutProperties extends LayoutProperties {
 
   double get crossAxisDimension => dimension(crossAxisDirection);
 
-  List<RenderProperties> childrenRenderProps({
+  /// render properties for laying out rendered Flex & Flex children widgets
+  /// the computation is similar to [RenderFlex].performLayout() method
+  List<RenderProperties> childrenRenderProperties({
     @required double smallestRenderWidth,
     @required double largestRenderWidth,
     @required double smallestRenderHeight,
@@ -339,6 +268,45 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
+
+    double leadingSpace(double freeSpace) {
+      if (children.isEmpty) return 0.0;
+      switch (mainAxisAlignment) {
+        case MainAxisAlignment.start:
+        case MainAxisAlignment.end:
+          return freeSpace;
+        case MainAxisAlignment.center:
+          return freeSpace * 0.5;
+        case MainAxisAlignment.spaceBetween:
+          return 0.0;
+        case MainAxisAlignment.spaceAround:
+          final spaceBetweenChildren = freeSpace / children.length;
+          return spaceBetweenChildren * 0.5;
+        case MainAxisAlignment.spaceEvenly:
+          return freeSpace / (children.length + 1);
+        default:
+          return 0.0;
+      }
+    }
+
+    double betweenSpace(double freeSpace) {
+      if (children.isEmpty) return 0.0;
+      switch (mainAxisAlignment) {
+        case MainAxisAlignment.start:
+        case MainAxisAlignment.end:
+        case MainAxisAlignment.center:
+          return 0.0;
+        case MainAxisAlignment.spaceBetween:
+          if (children.length == 1) return freeSpace;
+          return freeSpace / (children.length - 1);
+        case MainAxisAlignment.spaceAround:
+          return freeSpace / children.length;
+        case MainAxisAlignment.spaceEvenly:
+          return freeSpace / (children.length + 1);
+        default:
+          return 0.0;
+      }
+    }
 
     double smallestRenderSize(Axis axis) {
       return axis == Axis.horizontal
@@ -388,30 +356,8 @@ class FlexLayoutProperties extends LayoutProperties {
         ? (isMainAxisHorizontal ? widths.last : heights.last)
         : 0.0;
 
-    double spaceBeforeChildren(double freeSpace) {
-      return computeSpaceBeforeChildren(
-          mainAxisAlignment: mainAxisAlignment,
-          freeSpace: freeSpace,
-          childrenLength: children.length);
-    }
-
-    double spaceBetweenChildren(double freeSpace) {
-      return computeSpaceBetweenChildren(
-          mainAxisAlignment: mainAxisAlignment,
-          freeSpace: freeSpace,
-          childrenLength: children.length);
-    }
-
-    double spaceAfterChildren(double freeSpace) {
-      return computeSpaceAfterChildren(
-          mainAxisAlignment: mainAxisAlignment,
-          freeSpace: freeSpace,
-          childrenLength: children.length);
-    }
-
-    final renderSpaceBeforeChildren = spaceBeforeChildren(renderFreeSpace);
-    final renderSpaceBetweenChildren = spaceBetweenChildren(renderFreeSpace);
-    final renderSpaceAfterChildren = spaceAfterChildren(renderFreeSpace);
+    final renderLeadingSpace = leadingSpace(renderFreeSpace);
+    final renderBetweenSpace = betweenSpace(renderFreeSpace);
 
     final childrenRenderProps = <RenderProperties>[];
 
@@ -426,8 +372,11 @@ class FlexLayoutProperties extends LayoutProperties {
     }
 
     double space(int index) {
-      if (index == 0) return renderSpaceBeforeChildren;
-      return renderSpaceBetweenChildren;
+      if (index == 0) {
+        if (mainAxisAlignment == MainAxisAlignment.start) return 0.0;
+        return renderLeadingSpace;
+      }
+      return renderBetweenSpace;
     }
 
     double calculateMainAxisOffset(int i) {
@@ -461,38 +410,35 @@ class FlexLayoutProperties extends LayoutProperties {
     }
 
     final spaces = <RenderProperties>[];
-
-    final realSpaceBeforeChildren = spaceBeforeChildren(freeSpace);
-    final realSpaceBetweenChildren = spaceBetweenChildren(freeSpace);
-    final realSpaceAfterChildren = spaceAfterChildren(freeSpace);
+    final actualLeadingSpace = leadingSpace(freeSpace);
+    final actualBetweenSpace = betweenSpace(freeSpace);
     final renderPropsWithFullCrossAxisDimension =
         RenderProperties(axis: direction, isFreeSpace: true)
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
           ..crossAxisOffset = 0.0;
-    if (realSpaceBeforeChildren > 0.0) {
+    if (actualLeadingSpace > 0.0 &&
+        mainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
         ..mainAxisOffset = 0.0
-        ..mainAxisDimension = renderSpaceBeforeChildren
-        ..mainAxisRealDimension = realSpaceBeforeChildren);
+        ..mainAxisDimension = renderLeadingSpace
+        ..mainAxisRealDimension = actualLeadingSpace);
     }
-    if (realSpaceBetweenChildren > 0.0)
+    if (actualBetweenSpace > 0.0)
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
         spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisDimension = renderSpaceBetweenChildren
-          ..mainAxisRealDimension = realSpaceBetweenChildren
+          ..mainAxisDimension = renderBetweenSpace
+          ..mainAxisRealDimension = actualBetweenSpace
           ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
       }
-    if (realSpaceAfterChildren > 0.0) {
-      final lastChildren = childrenRenderProps.last;
-      spaces.add(
-        renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisDimension = renderSpaceAfterChildren
-          ..mainAxisRealDimension = realSpaceAfterChildren
-          ..mainAxisOffset =
-              lastChildren.mainAxisOffset + lastChildren.mainAxisDimension,
-      );
+    if (actualLeadingSpace > 0.0 &&
+        mainAxisAlignment != MainAxisAlignment.end) {
+      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
+        ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
+            childrenRenderProps.last.mainAxisOffset
+        ..mainAxisDimension = renderLeadingSpace
+        ..mainAxisRealDimension = actualLeadingSpace);
     }
     return [...childrenRenderProps, ...spaces];
   }

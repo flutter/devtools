@@ -287,7 +287,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           }
 
           final childrenAndMainAxisSpacesRenderProps =
-              properties.childrenRenderProps(
+              properties.childrenRenderProperties(
             smallestRenderWidth: minRenderWidth,
             largestRenderWidth: defaultMaxRenderWidth,
             smallestRenderHeight: minRenderHeight,
@@ -575,6 +575,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                                     quarterTurns: 3,
                                     child: Text(
                                       properties.verticalDirectionDescription,
+                                      overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.center,
                                       textScaleFactor: largeTextScaleFactor,
                                       style:
@@ -603,6 +604,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                                   child: FittedBox(
                                     child: Text(
                                       properties.horizontalDirectionDescription,
+                                      overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.center,
                                       textScaleFactor: largeTextScaleFactor,
                                       style:
@@ -762,6 +764,7 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
                   quarterTurns: 1,
                   child: Text(
                     'h=${toStringAsFixed(height)}',
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 arrowColor: heightIndicatorColor,
