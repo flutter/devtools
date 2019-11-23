@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import '../../utils.dart';
 import '../diagnostics_node.dart';
 import '../enum_utils.dart';
-import '../inspector_tree.dart';
 import 'story_of_your_layout/utils.dart';
 
 const Type boxConstraintsType = BoxConstraints;
@@ -95,19 +94,19 @@ List<double> computeRenderSizes({
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
-      : description = node.diagnostic?.description,
-        size = deserializeSize(node.diagnostic?.size),
-        constraints = deserializeConstraints(node.diagnostic?.constraints),
-        isFlex = node.diagnostic?.isFlex,
-        flexFactor = node.diagnostic?.flexFactor,
+      : description = node?.description,
+        size = deserializeSize(node?.size),
+        constraints = deserializeConstraints(node?.constraints),
+        isFlex = node?.isFlex,
+        flexFactor = node?.flexFactor,
         children = copyLevel == 0
             ? []
-            : node.children
+            : node?.childrenNow
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false);
 
-  final InspectorTreeNode node;
+  final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
   final String description;
@@ -178,7 +177,7 @@ final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties._(
-    InspectorTreeNode node, {
+    RemoteDiagnosticsNode node, {
     this.direction,
     this.mainAxisAlignment,
     this.mainAxisSize,
@@ -188,16 +187,15 @@ class FlexLayoutProperties extends LayoutProperties {
     this.textBaseline,
   }) : super(node);
 
-  factory FlexLayoutProperties.fromNode(InspectorTreeNode node) {
+  factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
-    // InspectorTreeNode.
+    // RemoteDiagnosticsNode.
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
-  static FlexLayoutProperties _buildNode(InspectorTreeNode node) {
-    final Map<String, Object> renderObjectJson =
-        node.diagnostic.json['renderObject'];
+  static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
+    final Map<String, Object> renderObjectJson = node.json['renderObject'];
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,

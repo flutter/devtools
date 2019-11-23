@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import '../inspector_tree.dart';
 import 'inspector_data_models.dart';
 import 'story_of_your_layout/flex.dart';
 
@@ -101,7 +101,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
     with AutomaticKeepAliveClientMixin<LayoutDetailsTab> {
   InspectorController get controller => widget.controller;
 
-  InspectorTreeNode get selected => controller?.selectedNode;
+  RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
 
   void onSelectionChanged() {
     setState(() {});
@@ -122,16 +122,15 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final diagnostic = selected?.diagnostic;
     // TODO(albertusangga): Visualize non-flex widget constraint model
-    if (diagnostic == null ||
-        (!diagnostic.isFlex && !(diagnostic.parent?.isFlex ?? false)))
+    if (selected == null ||
+        (!selected.isFlex && !(selected.parent?.isFlex ?? false)))
       return const SizedBox();
-    final flexLayoutProperties = FlexLayoutProperties.fromNode(
-        diagnostic.isFlex ? selected : selected.parent);
-    final highlightChild = diagnostic.isFlex
-        ? null
-        : diagnostic.parent.childrenNow.indexOf(diagnostic);
+    final flexLayoutProperties = FlexLayoutProperties.fromDiagnostics(
+      selected.isFlex ? selected : selected.parent,
+    );
+    final highlightChild =
+        selected.isFlex ? null : selected.parent.childrenNow.indexOf(selected);
     return StoryOfYourFlexWidget(
       // TODO(albertusangga): Cache this instead of recomputing every build,
       flexLayoutProperties,

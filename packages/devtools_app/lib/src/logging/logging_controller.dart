@@ -276,14 +276,16 @@ class LoggingController {
       final FrameInfo frame = FrameInfo.from(e.extensionData.data);
 
       final String frameId = '#${frame.number}';
-      final String frameInfo =
-          '<span class="pre">$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms </span>';
+      final String frameInfoText =
+          '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
+      final String frameInfo = '<span class="pre">$frameInfoText</span>';
       final String div = _createFrameDivHtml(frame);
 
       _log(LogData(
         e.extensionKind.toLowerCase(),
         jsonEncode(e.extensionData.data),
         e.timestamp,
+        summary: frameInfoText,
         summaryHtml: '$frameInfo$div',
       ));
     } else if (e.extensionKind == NavigationInfo.eventName) {
@@ -387,7 +389,7 @@ class LoggingController {
     final InstanceRef stackTrace = InstanceRef.parse(logRecord['stackTrace']);
 
     final String details = summary;
-    Future<String> detailsComputer;
+    Future<String> Function() detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
     // stackTrace objects were non-null, we need to ask the VM for more
@@ -396,7 +398,7 @@ class LoggingController {
     if (messageRef.valueAsStringIsTruncated == true ||
         _isNotNull(error) ||
         _isNotNull(stackTrace)) {
-      detailsComputer = Future<String>(() async {
+      detailsComputer = () async {
         // Get the full string value of the message.
         String result =
             await _retrieveFullStringValue(service, e.isolate, messageRef);
@@ -436,7 +438,7 @@ class LoggingController {
         }
 
         return result;
-      });
+      };
     }
 
     const int severeIssue = 1000;
@@ -656,15 +658,26 @@ class LogData {
 
   final RemoteDiagnosticsNode node;
   String _details;
-  Future<String> detailsComputer;
+  Future<String> Function() detailsComputer;
+
+  static const JsonEncoder prettyPrinter = JsonEncoder.withIndent('  ');
 
   String get details => _details;
 
   bool get needsComputing => detailsComputer != null;
 
   Future<void> compute() async {
-    _details = await detailsComputer;
+    _details = await detailsComputer();
     detailsComputer = null;
+  }
+
+  String get prettyPrinted {
+    if (needsComputing) return details;
+    try {
+      return prettyPrinter.convert(jsonDecode(details));
+    } catch (_) {
+      return details;
+    }
   }
 
   @override
