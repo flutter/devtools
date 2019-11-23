@@ -25,7 +25,7 @@ const distanceToArrow = 1.0;
 const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
-const minRenderWidth = 225.0;
+const minRenderWidth = 215.0;
 const minRenderHeight = 275.0;
 const defaultMaxRenderWidth = 300.0;
 const defaultMaxRenderHeight = 300.0;
@@ -73,6 +73,8 @@ const crossAxisLightTextColor = Color(0xFF66672C);
 const crossAxisDarkTextColor = Color(0xFFB3D25A);
 const crossAxisTextColor =
     ThemedColor(crossAxisLightTextColor, crossAxisDarkTextColor);
+
+const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
@@ -280,16 +282,31 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
           final maxWidth = constraints.maxWidth;
           final maxHeight = constraints.maxHeight;
 
-          final renderInfo = properties.childrenRenderInformation(
+          double maxSizeAvailable(Axis axis) {
+            return axis == Axis.horizontal ? maxWidth : maxHeight;
+          }
+
+          final childrenAndMainAxisSpacesRenderProps =
+              properties.childrenRenderProperties(
             smallestRenderWidth: minRenderWidth,
             largestRenderWidth: defaultMaxRenderWidth,
             smallestRenderHeight: minRenderHeight,
             largestRenderHeight: defaultMaxRenderHeight,
-            maxWidthAvailable: maxWidth,
-            maxHeightAvailable: maxHeight,
+            maxSizeAvailable: maxSizeAvailable,
           );
 
-          final widgetChildren = <Widget>[
+          final renderProps = childrenAndMainAxisSpacesRenderProps
+              .where((renderProps) => !renderProps.isFreeSpace)
+              .toList();
+          final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
+              .where((renderProps) => renderProps.isFreeSpace)
+              .toList();
+          final crossAxisSpaces = properties.crossAxisSpaces(
+            childrenRenderProps: renderProps,
+            maxSizeAvailable: maxSizeAvailable,
+          );
+
+          final childrenRenderWidgets = <Widget>[
             for (var i = 0; i < children.length; i++)
               _visualizeChild(
                 backgroundColor:
@@ -299,25 +316,24 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 childProperties: children[i],
                 borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
                 textColor: i.isOdd ? null : const Color(0xFF303030),
-                renderSize: renderInfo[i].size,
-                renderOffset: renderInfo[i].offset,
+                renderSize: renderProps[i].size,
+                renderOffset: renderProps[i].offset,
               )
           ];
 
-          final crossAxisSpaces = <Widget>[
-            for (var spaceRenderInfo in properties.crossAxisSpaces(
-              childrenRenderInfo: renderInfo,
-              maxWidthAvailable: maxWidth,
-              maxHeightAvailable: maxHeight,
-            ))
+          final freeSpacesWidgets = <Widget>[
+            for (var renderProperties in [
+              ...mainAxisSpaces,
+              ...crossAxisSpaces
+            ])
               Positioned(
-                top: spaceRenderInfo.dy,
-                left: spaceRenderInfo.dx,
+                top: renderProperties.dy,
+                left: renderProperties.dx,
                 child: EmptySpaceVisualizerWidget(
-                  width: spaceRenderInfo.realWidth,
-                  height: spaceRenderInfo.realHeight,
-                  renderWidth: spaceRenderInfo.width,
-                  renderHeight: spaceRenderInfo.height,
+                  width: renderProperties.realWidth,
+                  height: renderProperties.realHeight,
+                  renderWidth: renderProperties.width,
+                  renderHeight: renderProperties.height,
                 ),
               )
           ];
@@ -329,14 +345,27 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                 minWidth: maxWidth,
                 minHeight: maxHeight,
                 maxWidth: direction == Axis.horizontal
-                    ? sum(renderInfo.map((renderSize) => renderSize.width))
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.width))
                     : maxWidth,
                 maxHeight: direction == Axis.vertical
-                    ? sum(renderInfo.map((renderSize) => renderSize.height))
+                    ? sum(childrenAndMainAxisSpacesRenderProps
+                        .map((renderSize) => renderSize.height))
                     : maxHeight,
               ),
               child: Stack(
-                children: [...widgetChildren, ...crossAxisSpaces],
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      freeSpaceAssetName,
+                      width: maxWidth,
+                      height: maxHeight,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  ...childrenRenderWidgets,
+                  ...freeSpacesWidgets
+                ],
               ),
             ),
           );
@@ -546,6 +575,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                                     quarterTurns: 3,
                                     child: Text(
                                       properties.verticalDirectionDescription,
+                                      overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.center,
                                       textScaleFactor: largeTextScaleFactor,
                                       style:
@@ -574,6 +604,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
                                   child: FittedBox(
                                     child: Text(
                                       properties.horizontalDirectionDescription,
+                                      overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.center,
                                       textScaleFactor: largeTextScaleFactor,
                                       style:
@@ -677,12 +708,14 @@ class WidgetVisualizer extends StatelessWidget {
         ),
         color: backgroundColor,
       ),
-      margin: const EdgeInsets.all(1.0),
     );
   }
 }
 
 class EmptySpaceVisualizerWidget extends StatelessWidget {
+  // width and height to be displayed on Text
+  // width and height for rendering/sizing the widget
+
   const EmptySpaceVisualizerWidget({
     Key key,
     @required this.width,
@@ -691,15 +724,10 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
     @required this.renderHeight,
   }) : super(key: key);
 
-  // width and height to be displayed on Text
   final double width;
   final double height;
-
-  // width and height for rendering/sizing the widget
   final double renderWidth;
   final double renderHeight;
-
-  static const assetName = 'assets/img/story_of_layout/empty_space.png';
 
   @override
   Widget build(BuildContext context) {
@@ -708,14 +736,6 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
       height: renderHeight,
       child: Stack(
         children: <Widget>[
-          Positioned.fill(
-            child: Image.asset(
-              assetName,
-              width: renderWidth,
-              height: renderHeight,
-              fit: BoxFit.fill,
-            ),
-          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -744,6 +764,7 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
                   quarterTurns: 1,
                   child: Text(
                     'h=${toStringAsFixed(height)}',
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 arrowColor: heightIndicatorColor,
