@@ -47,9 +47,6 @@ Widget wrapWithControllers(
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].
-///
-/// This must be reset on after each test invocation that calls
-/// by using [resetWindowSize].
 @isTest
 void testWidgetsWithSize(
     String name, Size windowSize, WidgetTesterCallback test,
