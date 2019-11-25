@@ -105,32 +105,25 @@ class FrameBasedTimelineFlameChartState
   // to only construct FlameChartNode elements that are in view.
   @override
   void initFlameChartElements() {
-    _resetColorOffsets();
+    super.initFlameChartElements();
 
+    final uiEventFlowDepth = widget.data.uiEventFlow.depth;
+    final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
     rows = List.generate(
-      widget.data.uiEventFlow.depth +
-          widget.data.gpuEventFlow.depth +
+      uiEventFlowDepth +
+          gpuEventFlowDepth +
           _rowOffsetForTopTimeline +
           _rowOffsetForSectionSpacer +
           _rowOffsetForBottomTimeline,
       (i) => FlameChartRow(nodes: [], index: i),
     );
 
-    final int frameStartOffset = widget.data.time.start.inMicroseconds;
-
-    // Pixels per microsecond in order to fit the entire frame in view.
-    final double pxPerMicro =
-        widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
-
-    // Top is always 0 because each node is positioned inside its own stack.
-    const top = 0.0;
-
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
       text: 'UI',
       textColor: Colors.black,
       backgroundColor: mainUiColor,
-      top: top,
+      top: flameChartNodeTop,
       width: 28.0,
     );
     rows[0 + _rowOffsetForTopTimeline].nodes.add(uiSectionLabel);
@@ -140,7 +133,7 @@ class FrameBasedTimelineFlameChartState
       text: 'GPU',
       textColor: Colors.white,
       backgroundColor: mainGpuColor,
-      top: top,
+      top: flameChartNodeTop,
       width: 42.0,
     );
     rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
@@ -149,25 +142,25 @@ class FrameBasedTimelineFlameChartState
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
-      final double left =
-          (event.time.start.inMicroseconds - frameStartOffset) * pxPerMicro +
-              widget.startInset;
-      final double right =
-          (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro +
-              widget.startInset;
-      final backgroundColor =
-          event.isUiEvent ? _nextUiColor() : _nextGpuColor();
+      final double left = (event.time.start.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+      final double right = (event.time.end.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+      final backgroundColor = event.isUiEvent ? nextUiColor() : nextGpuColor();
 
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.time.start.inMicroseconds}'),
         text: event.name,
         tooltip: '${event.name} - ${msText(event.time.duration)}',
-        rect: Rect.fromLTRB(left, top, right, rowHeight),
+        rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         backgroundColor: backgroundColor,
         textColor: event.isUiEvent
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
+        selectionListenable: widget.selectionNotifier,
         onSelected: (dynamic event) => widget.onSelection(event),
       );
 
@@ -186,23 +179,9 @@ class FrameBasedTimelineFlameChartState
   }
 }
 
-int _uiColorOffset = 0;
 
-Color _nextUiColor() {
-  final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
-  _uiColorOffset++;
-  return color;
 }
 
-int _gpuColorOffset = 0;
 
-Color _nextGpuColor() {
-  final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
-  _gpuColorOffset++;
-  return color;
-}
 
-void _resetColorOffsets() {
-  _uiColorOffset = 0;
-  _gpuColorOffset = 0;
 }

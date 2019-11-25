@@ -66,7 +66,7 @@ class Controllers extends StatefulWidget {
   _ControllersState createState() => _ControllersState();
 
   static ProvidedControllers of(BuildContext context) {
-    final _InheritedProvider inherited =
+    final inherited =
         context.dependOnInheritedWidgetOfExactType<_InheritedProvider>();
     return inherited.data;
   }

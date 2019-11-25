@@ -49,14 +49,26 @@ abstract class FlameChart<T, V extends FlameChartNodeDataMixin>
 }
 
 abstract class FlameChartState<T extends FlameChart> extends State<T>
-    with AutoDisposeMixin {
+    with AutoDisposeMixin, FlameChartColorMixin {
+  // The "top" positional value for each flame chart node will be 0.0 because
+  // each node is positioned inside its own stack.
+  final flameChartNodeTop = 0.0;
+
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
-  List<FlameChartRow> rows;
+  List<FlameChartRow> rows = [];
+
+  /// Starting pixels per microsecond in order to fit all the data in view at
+  /// start.
+  double get startingPxPerMicro =>
+      widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+
+  int get startTimeOffset => widget.data.time.start.inMicroseconds;
 
   @override
   void initState() {
     super.initState();
+    initFlameChartElements();
     addAutoDisposeListener(widget.selectionNotifier);
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
   }
@@ -65,15 +77,13 @@ abstract class FlameChartState<T extends FlameChart> extends State<T>
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       _linkedScrollControllerGroup.resetScroll();
+      initFlameChartElements();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the flame chart elements before building.
-    initFlameChartElements();
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView.builder(
@@ -81,7 +91,8 @@ abstract class FlameChartState<T extends FlameChart> extends State<T>
           itemBuilder: (context, index) {
             return ScrollingFlameChartRow(
               linkedScrollControllerGroup: _linkedScrollControllerGroup,
-              row: rows[index],
+              sortedNodes: rows[index].nodes
+                ..sort((a, b) => a.rect.left.compareTo(b.rect.left)),
               width: math.max(constraints.maxWidth, widget.totalStartingWidth),
             );
           },
@@ -90,19 +101,23 @@ abstract class FlameChartState<T extends FlameChart> extends State<T>
     );
   }
 
-  void initFlameChartElements();
+  // This method must be overridden by all subclasses.
+  @mustCallSuper
+  void initFlameChartElements() {
+    resetColorOffsets();
+  }
 }
 
 class ScrollingFlameChartRow extends StatefulWidget {
   const ScrollingFlameChartRow({
     @required this.linkedScrollControllerGroup,
-    @required this.row,
+    @required this.sortedNodes,
     @required this.width,
   });
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
-  final FlameChartRow row;
+  final List<FlameChartNode> sortedNodes;
 
   final double width;
 
@@ -116,14 +131,14 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
 
   @override
   void initState() {
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
     super.initState();
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
   }
 
   @override
   void dispose() {
-    scrollController.dispose();
     super.dispose();
+    scrollController.dispose();
   }
 
   @override
@@ -131,7 +146,7 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
     return SingleChildScrollView(
       controller: scrollController,
       scrollDirection: Axis.horizontal,
-      child: widget.row.nodes.isEmpty
+      child: widget.sortedNodes.isEmpty
           ? SizedBox(
               height: sectionSpacing,
               width: widget.width,
@@ -146,7 +161,7 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
                 ),
                 // TODO(kenz): reevaluate passing in all the data once we have a
                 // large data set to test with.
-                ...widget.row.nodes,
+                ...widget.sortedNodes,
               ],
             ),
     );
@@ -194,7 +209,9 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
     @required this.backgroundColor,
     @required this.textColor,
     @required this.data,
+    @required this.selectionListenable,
     @required this.onSelected,
+    this.selectable = true,
   }) : super(key: key);
 
   FlameChartNode.sectionLabel({
@@ -207,7 +224,9 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
   })  : rect = Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
         tooltip = '',
         data = null,
-        onSelected = ((_) {});
+        selectionListenable = ValueNotifier(null),
+        onSelected = ((_) {}),
+        selectable = false;
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
@@ -217,11 +236,12 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
   final Color backgroundColor;
   final Color textColor;
   final T data;
+  final ValueListenable<T> selectionListenable;
   final void Function(T) onSelected;
+  final bool selectable;
 
   @override
   Widget build(BuildContext context) {
-    final selected = data?.selected ?? false;
     return Positioned.fromRect(
       rect: rect,
       child: Tooltip(
@@ -230,18 +250,24 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
         preferBelow: false,
         child: InkWell(
           onTap: () => onSelected(data),
-          child: Container(
-            padding: const EdgeInsets.only(left: 6.0),
-            alignment: Alignment.centerLeft,
-            color: selected ? _selectedNodeColor : backgroundColor,
-            child: Text(
-              text,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: selected ? Colors.black : textColor,
-              ),
-            ),
+          child: ValueListenableBuilder(
+            valueListenable: selectionListenable,
+            builder: (context, selected, _) {
+              final isSelected = selectable ? data == selected : false;
+              return Container(
+                padding: const EdgeInsets.only(left: 6.0),
+                alignment: Alignment.centerLeft,
+                color: isSelected ? _selectedNodeColor : backgroundColor,
+                child: Text(
+                  text,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isSelected ? Colors.black : textColor,
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -251,4 +277,25 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
 
 mixin FlameChartNodeDataMixin {
   bool selected = false;
+}
+
+mixin FlameChartColorMixin {
+  int _uiColorOffset = 0;
+  Color nextUiColor() {
+    final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
+    _uiColorOffset++;
+    return color;
+  }
+
+  int _gpuColorOffset = 0;
+  Color nextGpuColor() {
+    final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
+    _gpuColorOffset++;
+    return color;
+  }
+
+  void resetColorOffsets() {
+    _uiColorOffset = 0;
+    _gpuColorOffset = 0;
+  }
 }
