@@ -123,7 +123,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
       });
 
       final nextObjectGroup = objectGroupManager.next;
-      root = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
+      root = await nextObjectGroup.getNodeWithRenderObject(
         selected.isFlex ? selected : selected.parent,
         subtreeDepth: 1,
       );

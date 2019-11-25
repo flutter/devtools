@@ -69,8 +69,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   int get flexFactor => json['flexFactor'];
 
-  RemoteDiagnosticsNode get renderObject =>
-      RemoteDiagnosticsNode(json['renderObject'], inspectorService, false, this);
+  RemoteDiagnosticsNode get renderObject => RemoteDiagnosticsNode(
+      json['renderObject'], inspectorService, false, this);
 
   Map<String, Object> get constraints => json['constraints'];
 

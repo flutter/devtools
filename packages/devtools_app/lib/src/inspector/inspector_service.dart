@@ -974,7 +974,7 @@ class ObjectGroup {
             subtreeDepth: $subtreeDepth,
             includeProperties: true,
             service: WidgetInspectorService.instance,
-            addAdditionalPropertiesCallback: (node, delegate) {
+            addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
               final Map<String, Object> additionalJson = <String, Object>{};
               final Object value = node.value;
               if (value is Element) {
@@ -1022,6 +1022,117 @@ class ObjectGroup {
     command = '((){${command.split('\n').join()}})()';
     final result = await inspectorLibrary.eval(command, isAlive: this);
     return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
+  }
+
+  static const getDetailsSubtreeWithRenderObjectServiceExtensionName =
+      'getDetailsSubtreeWithRenderObject';
+
+  Future<RemoteDiagnosticsNode> getNodeWithRenderObject(
+      RemoteDiagnosticsNode node,
+      {int subtreeDepth = 1}) async {
+    if (node == null) return null;
+    if (!serviceManager.serviceExtensionManager.isServiceExtensionAvailable(
+        'ext.flutter.inspector.$getDetailsSubtreeWithRenderObjectServiceExtensionName')) {
+      String command = '''
+      print('start registering...');
+      final innerCallback = (DiagnosticsNode node, _SerializationDelegate delegate) {
+        final Map<String, Object> additionalJson = <String, Object>{};
+          final Object value = node.value;
+          if (value is Element) {
+            final renderObject = value.renderObject;
+            additionalJson['renderObject'] = renderObject.toDiagnosticsNode()?.toJsonMap(
+              delegate.copyWith(
+                subtreeDepth: 0,
+                includeProperties: true,
+              ),
+            );
+            final Constraints constraints = renderObject.constraints;
+            if (constraints != null) {
+              final Map<String, Object> constraintsProperty = <String, Object>{
+                'type': constraints.runtimeType.toString(),
+                'description': constraints.toString(),
+              };
+              if (constraints is BoxConstraints) {
+                constraintsProperty.addAll(<String, Object>{
+                  'minWidth': constraints.minWidth.toStringAsFixed(1),
+                  'minHeight': constraints.minHeight.toStringAsFixed(1),
+                  'maxWidth': constraints.maxWidth.toStringAsFixed(1),
+                  'maxHeight': constraints.maxHeight.toStringAsFixed(1),
+                });
+              }
+              additionalJson['constraints'] = constraintsProperty;
+            }
+            if (renderObject is RenderBox) {
+              additionalJson['size'] = <String, Object>{
+                'width': renderObject.size.width.toStringAsFixed(1),
+                'height': renderObject.size.height.toStringAsFixed(1),
+              };             
+              
+              final ParentData parentData = renderObject.parentData;
+              if (parentData is FlexParentData) {
+                additionalJson['flexFactor'] = parentData.flex;
+              }
+            }
+          }
+          return additionalJson;
+      };
+      final getDetailsSubtreeWithRenderObject = (
+          String id,
+          String groupName,
+          int subtreeDepth,
+          ) {
+        final DiagnosticsNode root = WidgetInspectorService.instance.toObject(id);
+        if (root == null) {
+          return null;
+        }
+        return WidgetInspectorService.instance._nodeToJson(
+          root,
+          _SerializationDelegate(
+              groupName: groupName,
+              summaryTree: false,
+              subtreeDepth: subtreeDepth,
+              includeProperties: true,
+              service: WidgetInspectorService.instance,
+              addAdditionalPropertiesCallback: innerCallback,
+          ),
+        );
+      };
+      print(getDetailsSubtreeWithRenderObject);
+      final callback =  (Map<String, String> parameters) {
+        print('inside callback...');
+        assert(parameters.containsKey('objectGroup'));
+        final String subtreeDepth = parameters['subtreeDepth'];
+        return Future<Map<String, Object>>.value(<String,Object>{
+          'result': getDetailsSubtreeWithRenderObject(
+            parameters['arg'],
+            parameters['objectGroup'],
+            subtreeDepth != null ? int.parse(subtreeDepth) : 2,
+          ),
+        });
+      };
+      print(callback);
+      return WidgetInspectorService.instance.registerServiceExtension(
+        name: 'getDetailsSubtreeWithRenderObject',
+        callback: callback,
+      );
+      ''';
+      command = '((){${command.split('\n').join()}})()';
+      final result = await inspectorLibrary.eval(
+        command,
+        isAlive: this,
+      );
+      print(result);
+    }
+    final args = {
+      'objectGroup': groupName,
+      'arg': node.dartDiagnosticRef.id,
+      'subtreeDepth': '$subtreeDepth',
+    };
+
+    return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemonParams(
+      getDetailsSubtreeWithRenderObjectServiceExtensionName,
+      args,
+    ));
   }
 }
 
