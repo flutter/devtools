@@ -11,7 +11,7 @@ import 'wrappers.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
-    testWidgetsWithSize(
+    testWidgetsWithWindowSize(
         'displays in narrow mode without error', const Size(800.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(
@@ -24,7 +24,7 @@ void main() {
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
     });
 
-    testWidgetsWithSize(
+    testWidgetsWithWindowSize(
         'displays in full-width mode without error', const Size(1203.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(

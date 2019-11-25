@@ -251,7 +251,7 @@ void main() {
     });
   }
 
-  testWidgetsWithSize('Row golden test', windowSize,
+  testWidgetsWithWindowSize('Row golden test', windowSize,
       (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
     final diagnostics =
@@ -265,7 +265,7 @@ void main() {
     );
   }, skip: kIsWeb || !isLinux);
 
-  testWidgetsWithSize('Column golden test', windowSize,
+  testWidgetsWithWindowSize('Column golden test', windowSize,
       (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
     final diagnostics =

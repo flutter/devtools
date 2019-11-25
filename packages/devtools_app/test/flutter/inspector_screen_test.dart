@@ -72,7 +72,7 @@ void main() {
       expect(find.text('Flutter Inspector'), findsOneWidget);
     });
 
-    testWidgetsWithSize('builds with no data', windowSize,
+    testWidgetsWithWindowSize('builds with no data', windowSize,
         (WidgetTester tester) async {
       // Make sure the window is wide enough to display description text.
 
@@ -88,7 +88,8 @@ void main() {
       // expect(find.text(extensions.debugPaint.description), findsOneWidget);
     });
 
-    testWidgetsWithSize('Test toggling service extension buttons', windowSize,
+    testWidgetsWithWindowSize(
+        'Test toggling service extension buttons', windowSize,
         (WidgetTester tester) async {
       mockExtensions();
       expect(
@@ -148,7 +149,7 @@ void main() {
       );
     });
 
-    testWidgetsWithSize(
+    testWidgetsWithWindowSize(
         'Test toggling service extension buttons with no extensions available',
         windowSize, (WidgetTester tester) async {
       mockNoExtensionsAvailable();
@@ -191,7 +192,7 @@ void main() {
     });
 
     group('test render depends on enableExperimentalStoryOfLayout value', () {
-      testWidgetsWithSize(
+      testWidgetsWithWindowSize(
           'Should not render toggle button when flag is disabled', windowSize,
           (WidgetTester tester) async {
         InspectorController.enableExperimentalStoryOfLayout = false;
@@ -199,7 +200,7 @@ void main() {
         expect(find.text('Show Constraints'), findsNothing);
       });
 
-      testWidgetsWithSize(
+      testWidgetsWithWindowSize(
           'Should render button with full text when flag is enabled and screen is wide enough',
           windowSize, (WidgetTester tester) async {
         InspectorController.enableExperimentalStoryOfLayout = true;
@@ -252,7 +253,7 @@ void main() {
       animationController.dispose();
     });
 
-    testWidgetsWithSize('Test render LayoutDetailsTab', windowSize,
+    testWidgetsWithWindowSize('Test render LayoutDetailsTab', windowSize,
         (WidgetTester tester) async {
       final renderObjectJson = jsonDecode('''
         {

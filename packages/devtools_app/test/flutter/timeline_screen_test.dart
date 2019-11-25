@@ -77,7 +77,7 @@ void main() {
       expect(find.text('Timeline'), findsOneWidget);
     });
 
-    testWidgetsWithSize('builds proper content for state', windowSize,
+    testWidgetsWithWindowSize('builds proper content for state', windowSize,
         (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.frameBased);
 
@@ -130,7 +130,7 @@ void main() {
       expect(splitter.initialFirstFraction, equals(0.6));
     });
 
-    testWidgetsWithSize('pauses and resumes', windowSize,
+    testWidgetsWithWindowSize('pauses and resumes', windowSize,
         (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.frameBased);
 
@@ -151,7 +151,7 @@ void main() {
       expect(controller.frameBasedTimeline.manuallyPaused, isFalse);
     });
 
-    testWidgetsWithSize('starts and stops recording', windowSize,
+    testWidgetsWithWindowSize('starts and stops recording', windowSize,
         (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.full);
 
@@ -182,7 +182,7 @@ void main() {
       expect(controller.fullTimeline.recordingNotifier.value, isFalse);
     });
 
-    testWidgetsWithSize('clears timeline on clear', windowSize,
+    testWidgetsWithWindowSize('clears timeline on clear', windowSize,
         (WidgetTester tester) async {
       // Clear the frame-based timeline.
       await pumpTimelineWithSelectedFrame(tester);

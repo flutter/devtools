@@ -36,7 +36,7 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgetsWithSize(
+    testWidgetsWithWindowSize(
         'displays with tree column first', const Size(800.0, 1200.0),
         (WidgetTester tester) async {
       final table = FlatTable<TestData>(
@@ -161,7 +161,7 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgetsWithSize(
+    testWidgetsWithWindowSize(
         'displays with tree column first', const Size(800.0, 1200.0),
         (WidgetTester tester) async {
       final table = TreeTable<TestData>(

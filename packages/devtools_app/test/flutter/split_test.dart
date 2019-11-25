@@ -254,7 +254,7 @@ void main() {
     });
 
     group('axisFor', () {
-      testWidgetsWithSize('return Axis.horizontal', const Size(800, 800),
+      testWidgetsWithWindowSize('return Axis.horizontal', const Size(800, 800),
           (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(
           builder: (context) {
@@ -263,7 +263,7 @@ void main() {
           },
         )));
       });
-      testWidgetsWithSize('return Axis.vertical', const Size(500, 800),
+      testWidgetsWithWindowSize('return Axis.vertical', const Size(500, 800),
           (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(
           builder: (context) {

@@ -48,9 +48,12 @@ Widget wrapWithControllers(
 
 /// Runs a test with the size of the app window under test to [windowSize].
 @isTest
-void testWidgetsWithSize(
-    String name, Size windowSize, WidgetTesterCallback test,
-    {bool skip = false}) {
+void testWidgetsWithWindowSize(
+  String name,
+  Size windowSize,
+  WidgetTesterCallback test, {
+  bool skip = false,
+}) {
   testWidgets(name, (WidgetTester tester) async {
     await _setWindowSize(windowSize);
     await test(tester);
