@@ -21,9 +21,16 @@ class TimelineFlameChart extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: controller.timelineModeNotifier.value == TimelineMode.frameBased
-            ? _buildFrameBasedTimeline(controller, constraints)
-            : _buildFullTimeline(controller, constraints),
+        child: ValueListenableBuilder(
+          valueListenable: controller.selectedTimelineEventNotifier,
+          builder: (context, selectedEvent, _) {
+            return controller.timelineModeNotifier.value ==
+                    TimelineMode.frameBased
+                ? _buildFrameBasedTimeline(
+                    controller, constraints, selectedEvent)
+                : _buildFullTimeline(controller, constraints, selectedEvent);
+          },
+        ),
       );
     });
   }
@@ -31,6 +38,7 @@ class TimelineFlameChart extends StatelessWidget {
   Widget _buildFrameBasedTimeline(
     TimelineController controller,
     BoxConstraints constraints,
+    TimelineEvent selectedEvent,
   ) {
     return FrameBasedTimelineFlameChart(
       controller.frameBasedTimeline.data.selectedFrame,
@@ -41,14 +49,15 @@ class TimelineFlameChart extends StatelessWidget {
         constraints.maxHeight,
         _frameBasedTimelineChartHeight(controller),
       ),
-      selectionNotifier: controller.selectedTimelineEventNotifier,
-      onSelection: (e) => controller.selectTimelineEvent(e),
+      selected: selectedEvent,
+      onSelected: (e) => controller.selectTimelineEvent(e),
     );
   }
 
   Widget _buildFullTimeline(
     TimelineController controller,
     BoxConstraints constraints,
+    TimelineEvent selectedEvent,
   ) {
     // TODO(kenz): implement full timeline flame chart.
     return Container(
@@ -72,16 +81,16 @@ class FrameBasedTimelineFlameChart
     TimelineFrame data, {
     @required double height,
     @required double width,
-    @required ValueListenable selectionNotifier,
-    @required Function(TimelineEvent event) onSelection,
+    @required TimelineEvent selected,
+    @required Function(TimelineEvent event) onSelected,
   }) : super(
           data,
           duration: data.time.duration,
           height: height,
           totalStartingWidth: width,
           startInset: sideInset,
-          selectionNotifier: selectionNotifier,
-          onSelection: onSelection,
+          selected: selected,
+          onSelected: onSelected,
         );
 
   @override
@@ -160,8 +169,8 @@ class FrameBasedTimelineFlameChartState
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selectionListenable: widget.selectionNotifier,
-        onSelected: (dynamic event) => widget.onSelection(event),
+        selected: event == widget.selected,
+        onSelected: (dynamic event) => widget.onSelected(event),
       );
 
       rows[row].nodes.add(node);

@@ -28,8 +28,8 @@ abstract class FlameChart<T, V extends FlameChartNodeDataMixin>
     @required this.height,
     @required this.totalStartingWidth,
     @required this.startInset,
-    @required this.selectionNotifier,
-    @required this.onSelection,
+    @required this.selected,
+    @required this.onSelected,
   });
 
   final T data;
@@ -42,9 +42,9 @@ abstract class FlameChart<T, V extends FlameChartNodeDataMixin>
 
   final double startInset;
 
-  final ValueListenable<V> selectionNotifier;
+  final V selected;
 
-  final void Function(V event) onSelection;
+  final void Function(V data) onSelected;
 
   double get startingContentWidth =>
       totalStartingWidth - startInset - sideInset;
@@ -71,7 +71,6 @@ abstract class FlameChartState<T extends FlameChart> extends State<T>
   void initState() {
     super.initState();
     initFlameChartElements();
-    addAutoDisposeListener(widget.selectionNotifier);
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
   }
 
@@ -211,9 +210,8 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
     @required this.backgroundColor,
     @required this.textColor,
     @required this.data,
-    @required this.selectionListenable,
+    @required this.selected,
     @required this.onSelected,
-    this.selectable = true,
   }) : super(key: key);
 
   FlameChartNode.sectionLabel({
@@ -226,9 +224,8 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
   })  : rect = Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
         tooltip = '',
         data = null,
-        selectionListenable = ValueNotifier(null),
-        onSelected = ((_) {}),
-        selectable = false;
+        selected = false,
+        onSelected = ((_) {});
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
@@ -238,9 +235,8 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
   final Color backgroundColor;
   final Color textColor;
   final T data;
-  final ValueListenable<T> selectionListenable;
+  final bool selected;
   final void Function(T) onSelected;
-  final bool selectable;
 
   @override
   Widget build(BuildContext context) {
@@ -252,24 +248,18 @@ class FlameChartNode<T extends FlameChartNodeDataMixin>
         preferBelow: false,
         child: InkWell(
           onTap: () => onSelected(data),
-          child: ValueListenableBuilder(
-            valueListenable: selectionListenable,
-            builder: (context, selected, _) {
-              final isSelected = selectable ? data == selected : false;
-              return Container(
-                padding: const EdgeInsets.only(left: 6.0),
-                alignment: Alignment.centerLeft,
-                color: isSelected ? _selectedNodeColor : backgroundColor,
-                child: Text(
-                  text,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isSelected ? Colors.black : textColor,
-                  ),
-                ),
-              );
-            },
+          child: Container(
+            padding: const EdgeInsets.only(left: 6.0),
+            alignment: Alignment.centerLeft,
+            color: selected ? _selectedNodeColor : backgroundColor,
+            child: Text(
+              text,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? Colors.black : textColor,
+              ),
+            ),
           ),
         ),
       ),
