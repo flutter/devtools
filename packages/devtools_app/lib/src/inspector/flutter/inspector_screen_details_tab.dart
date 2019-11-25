@@ -105,20 +105,26 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   RemoteDiagnosticsNode root;
 
+  RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
+    if (!StoryOfYourFlexWidget.shouldDisplay(node)) return null;
+    if (node.isFlex) return node;
+    return node.parent;
+  }
+
   void onSelectionChanged() async {
-    if (!selected.isFlex && selected.parent != null && !selected.parent.isFlex)
-      return;
-    objectGroupManager.cancelNext();
+    if (!StoryOfYourFlexWidget.shouldDisplay(selected)) return;
+    final shouldFetch =
+        root?.dartDiagnosticRef?.id != getRoot(selected)?.dartDiagnosticRef?.id;
+    if (shouldFetch) {
+      objectGroupManager.cancelNext();
+      // TODO(albertusangga) show loading animation when root is null?
+      setState(() {
+        root = null;
+      });
 
-    // TODO(albertusangga) show loading animation when root is null?
-    setState(() {
-      root = null;
-    });
-
-    final nextObjectGroup = objectGroupManager.next;
-    if (selected != null) {
+      final nextObjectGroup = objectGroupManager.next;
       root = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
-        selected,
+        selected.isFlex ? selected : selected.parent,
         subtreeDepth: 1,
       );
       if (!nextObjectGroup.disposed) {

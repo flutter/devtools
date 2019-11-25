@@ -71,15 +71,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       ?.firstWhere((property) => property.name == 'flex', orElse: () => null)
       ?.getIntMember('value');
 
-  RemoteDiagnosticsNode get constraints => renderObject?.cachedProperties
-      ?.firstWhere((property) => property.name == 'constraints');
+  RemoteDiagnosticsNode get renderObject =>
+      RemoteDiagnosticsNode(json['renderObject'], inspectorService, false, this);
 
-  RemoteDiagnosticsNode _renderObject;
+  Map<String, Object> get constraints => json['constraints'];
 
-  RemoteDiagnosticsNode get renderObject => _renderObject;
-
-  RemoteDiagnosticsNode get size => renderObject?.cachedProperties
-      ?.firstWhere((property) => property.name == 'size');
+  Map<String, Object> get size => json['size'];
 
   @override
   bool operator ==(dynamic other) {

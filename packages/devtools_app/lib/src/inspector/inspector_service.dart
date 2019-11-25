@@ -959,75 +959,68 @@ class ObjectGroup {
 
   Future<RemoteDiagnosticsNode> getDetailsSubtreeWithRenderObject(RemoteDiagnosticsNode node, { int subtreeDepth = 1 }) async {
     if (node == null) return null;
-    if (!serviceManager.serviceExtensionManager.isServiceExtensionAvailable(getDetailsSubtreeWithRenderObjectServiceExtensionName)) {
-      String command = '''
-      print('start registering...');
-      WidgetInspectorService.instance.registerServiceExtension(
-        name: 'getDetailsSubtreeWithRenderObject',
-        callback: (Map<String, String> parameters) async {
-          print('inside callback...');
-          Map<String, Object> _getDetailsSubtreeWithRenderObject(
-              String id,
-              String groupName,
-              int subtreeDepth,
-              ) {
-            final DiagnosticsNode root = WidgetInspectorService.instance.toObject(id);
-            if (root == null) {
-              return null;
-            }
-            return WidgetInspectorService.instance._nodeToJson(
-              root,
-              _SerializationDelegate(
-                  groupName: groupName,
-                  summaryTree: false,
-                  subtreeDepth: subtreeDepth,
-                  includeProperties: true,
-                  service: WidgetInspectorService.instance,
-                  addAdditionalPropertiesCallback: (node, delegate) {
-                    final Map<String, Object> additionalJson = <String, Object>{};
-                    final Object value = node.value;
-                    if (value is Element) {
-                      additionalJson['renderObject'] = value.renderObject.toDiagnosticsNode()?.toJsonMap(
-                        delegate.copyWith(
-                          subtreeDepth: 0,
-                          includeProperties: true,
-                        ),
-                      );
-                    }
-                    return additionalJson;
+    final id = node.dartDiagnosticRef.id;
+    String command = '''
+      final root = WidgetInspectorService.instance.toObject('$id');
+      if (root == null) {
+        return null;
+      }
+      final result =  WidgetInspectorService.instance._nodeToJson(
+        root,
+        _SerializationDelegate(
+            groupName: '$groupName',
+            summaryTree: false,
+            subtreeDepth: $subtreeDepth,
+            includeProperties: true,
+            service: WidgetInspectorService.instance,
+            addAdditionalPropertiesCallback: (node, delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                final renderObject = value.renderObject;
+                additionalJson['renderObject'] = renderObject.toDiagnosticsNode()?.toJsonMap(
+                  delegate.copyWith(
+                    subtreeDepth: 0,
+                    includeProperties: true,
+                  ),
+                );
+                final Constraints constraints = renderObject.constraints;
+                if (constraints != null) {
+                  final Map<String, Object> constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toStringAsFixed(1),
+                      'minHeight': constraints.minHeight.toStringAsFixed(1),
+                      'maxWidth': constraints.maxWidth.toStringAsFixed(1),
+                      'maxHeight': constraints.maxHeight.toStringAsFixed(1),
+                    });
                   }
-              ),
-            );
-          }
-          assert(parameters.containsKey('objectGroup'));
-          final String subtreeDepth = parameters['subtreeDepth'];
-          return <String, Object>{
-            'result': _getDetailsSubtreeWithRenderObject(
-              parameters['arg'],
-              parameters['objectGroup'],
-              subtreeDepth != null ? int.parse(subtreeDepth) : 2,
-            ),
-          };
-        },
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+                if (renderObject is RenderBox) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toStringAsFixed(1),
+                    'height': renderObject.size.height.toStringAsFixed(1),
+                  };             
+                  
+                  final ParentData parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex;
+                  }
+                }
+              }
+              return additionalJson;
+            }
+        ),
       );
-      print('finish registering...');
-      ''';
-      command = '((){${command.split('\n').join()}})()';
-      await inspectorLibrary.eval(
-        command,
-        isAlive: this,
-      );
-    }
-    final args = {
-      'objectGroup': groupName,
-      'arg': node.dartDiagnosticRef.id,
-      'subtreeDepth': '$subtreeDepth',
-    };
-
-    return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemonParams(
-      getDetailsSubtreeWithRenderObjectServiceExtensionName,
-      args,
-    ));
+      return WidgetInspectorService.instance._safeJsonEncode(result);
+    ''';
+    command = '((){${command.split('\n').join()}})()';
+    final result = await inspectorLibrary.eval(command, isAlive: this);
+    return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
   }
 }
 

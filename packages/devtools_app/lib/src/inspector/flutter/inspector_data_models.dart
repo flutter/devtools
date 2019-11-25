@@ -159,66 +159,23 @@ class LayoutProperties {
         description.indexOf('(') + 1, description.indexOf(')'));
   }
 
-  /// This method implementation is based on [BoxConstraints].toString() implementation
-  static BoxConstraints deserializeConstraints(
-      RemoteDiagnosticsNode constraints) {
+  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
-    if (constraints == null) return null;
-    final value = getValue(constraints.description);
-    if (value.contains('unconstrained'))
-      return const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
-        maxWidth: double.infinity,
-        maxHeight: double.infinity,
-      );
-    if (value.contains('biggest'))
-      return const BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: double.infinity,
-        maxWidth: double.infinity,
-        maxHeight: double.infinity,
-      );
-    final widthAndHeight = value.split(', ');
-    final width = widthAndHeight[0];
-    final height = widthAndHeight[1];
-    double minWidth, maxWidth, minHeight, maxHeight;
-    List<double> parseRangeValue(String value) {
-      // '0.0<=dim<=100.0' should be split as ['0.0', 'dim', '100.0']
-      final split = value.split('<='); // after the split it should conta
-      return [double.parse(split.first), double.parse(split.last)];
-    }
-
-    if (width.startsWith('w='))
-      minWidth = maxWidth = double.parse(width.substring(2));
-    else {
-      final rangeValue = parseRangeValue(width);
-      minWidth = rangeValue.first;
-      maxWidth = rangeValue.last;
-    }
-    if (height.startsWith('h='))
-      minHeight = maxHeight = double.parse(height.substring(2));
-    else {
-      final rangeValue = parseRangeValue(height);
-      minHeight = rangeValue.first;
-      maxHeight = rangeValue.last;
-    }
+    if (json == null || json['type'] != 'BoxConstraints') return null;
+    // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
     return BoxConstraints(
-      minWidth: minWidth,
-      minHeight: minHeight,
-      maxWidth: maxWidth,
-      maxHeight: maxHeight,
+      minWidth: double.parse(json['minWidth']),
+      maxWidth: double.parse(json['maxWidth']),
+      minHeight: double.parse(json['minHeight']),
+      maxHeight: double.parse(json['maxHeight']),
     );
   }
 
-  static Size deserializeSize(RemoteDiagnosticsNode size) {
-    if (size == null) return null;
-    // size.description will look like 'Size(100.0, 50.0)'
-    final value = getValue(size.description); // value will be '100.0, 50.0'
-    final split = value.split(', ');
+  static Size deserializeSize(Map<String, Object> json) {
+    if (json == null) return null;
     return Size(
-      double.parse(split.first),
-      double.parse(split.last),
+      double.parse(json['width']),
+      double.parse(json['height']),
     );
   }
 }
