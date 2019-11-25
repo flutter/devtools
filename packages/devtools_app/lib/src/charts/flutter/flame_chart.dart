@@ -122,7 +122,6 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final double width;
 
-
   final V selected;
   @override
   _ScrollingFlameChartRowState createState() => _ScrollingFlameChartRowState();
@@ -208,8 +207,8 @@ class FlameChartNode<T> {
     @required this.backgroundColor,
     @required this.textColor,
     @required this.data,
-    @required this.selected,
     @required this.onSelected,
+    this.selectable = true,
   });
 
   FlameChartNode.sectionLabel({
@@ -220,10 +219,10 @@ class FlameChartNode<T> {
     @required double top,
     @required double width,
   })  : rect = Rect.fromLTRB(rowPadding, top, width, top + rowHeight),
-        tooltip = '',
+        tooltip = text,
         data = null,
-        selected = false,
-        onSelected = ((_) {});
+        onSelected = ((_) {}),
+        selectable = false;
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
@@ -234,10 +233,11 @@ class FlameChartNode<T> {
   final Color backgroundColor;
   final Color textColor;
   final T data;
-  final bool selected;
   final void Function(T) onSelected;
+  final bool selectable;
 
   Widget buildWidget(bool selected) {
+    selected = selectable ? selected : false;
     return Positioned.fromRect(
       key: key,
       rect: rect,

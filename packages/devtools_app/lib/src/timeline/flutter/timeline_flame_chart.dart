@@ -172,7 +172,6 @@ class FrameBasedTimelineFlameChartState
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selected: event == widget.selected,
         onSelected: (dynamic event) => widget.onSelected(event),
       );
 
