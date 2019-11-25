@@ -674,19 +674,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     await (await inspectorService)
         ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
   }
-
-  Future<void> getRenderObject() async {
-    if (_renderObject != null) return;
-    final service = await inspectorService;
-    _renderObject = await service.renderObject(valueRef);
-    if (isFlex && _children != null)
-      for (var i = 0; i < _children.length; ++i) {
-        final List<dynamic> children =
-            _renderObject.json['children'];
-        _children[i]._renderObject = RemoteDiagnosticsNode(
-            children[i], inspectorService, true, _children[i]);
-      }
-  }
 }
 
 class InspectorSourceLocation {

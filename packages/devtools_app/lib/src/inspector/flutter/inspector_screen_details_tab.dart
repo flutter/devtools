@@ -106,13 +106,18 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   RemoteDiagnosticsNode root;
 
   void onSelectionChanged() async {
+    if (!selected.isFlex && selected.parent != null && !selected.parent.isFlex)
+      return;
     objectGroupManager.cancelNext();
+
+    // TODO(albertusangga) show loading animation when root is null?
     setState(() {
       root = null;
     });
+
     final nextObjectGroup = objectGroupManager.next;
-    if (selected ?? false) {
-      final root = await nextObjectGroup.getDetailsSubtree(
+    if (selected != null) {
+      root = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
         selected,
         subtreeDepth: 1,
       );
@@ -139,6 +144,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
         'flex-layout',
       );
     }
+    onSelectionChanged();
   }
 
   @override
@@ -157,12 +163,8 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   Widget build(BuildContext context) {
     super.build(context);
     // TODO(albertusangga): Visualize non-flex widget constraint model
-    if (selected == null ||
-        (!selected.isFlex && !(selected.parent?.isFlex ?? false)))
-      return const SizedBox();
-    final flexLayoutProperties = FlexLayoutProperties.fromDiagnostics(
-      selected.isFlex ? selected : selected.parent,
-    );
+    if (root == null) return const SizedBox();
+    final flexLayoutProperties = FlexLayoutProperties.fromDiagnostics(root);
     final highlightChild =
         selected.isFlex ? null : selected.parent.childrenNow.indexOf(selected);
     return StoryOfYourFlexWidget(
