@@ -29,7 +29,7 @@ const minRenderWidth = 215.0;
 const minRenderHeight = 275.0;
 
 /// The size to shrink a widget by when animating it in.
-const entranceMargin = 60;
+const entranceMargin = 60.0;
 
 const defaultMaxRenderWidth = 400.0;
 const defaultMaxRenderHeight = 400.0;
