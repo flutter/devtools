@@ -19,9 +19,11 @@ class FlatTable<T> extends StatefulWidget {
     @required this.columns,
     @required this.data,
     @required this.keyFactory,
+    @required this.onItemSelected,
   })  : assert(columns != null),
         assert(keyFactory != null),
         assert(data != null),
+        assert(onItemSelected != null),
         super(key: key);
 
   final List<ColumnData<T>> columns;
@@ -30,6 +32,8 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
+
+  final ItemCallback<T> onItemSelected;
 
   @override
   _FlatTableState<T> createState() => _FlatTableState<T>();
@@ -80,7 +84,7 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
     return _TableRow<T>(
       key: widget.keyFactory(node),
       node: node,
-      onPressed: (_) {},
+      onPressed: widget.onItemSelected,
       columns: widget.columns,
       columnWidths: columnWidths,
       backgroundColor: _TableRow.colorFor(context, index),
@@ -370,7 +374,7 @@ class _TableRow<T> extends StatefulWidget {
 
   final T node;
   final List<ColumnData<T>> columns;
-  final ItemCallback onPressed;
+  final ItemCallback<T> onPressed;
   final List<double> columnWidths;
 
   /// Which column, if any, should show expansion affordances
