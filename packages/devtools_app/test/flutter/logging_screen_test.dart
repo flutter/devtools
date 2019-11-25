@@ -31,7 +31,7 @@ void main() {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
-      when(mockLoggingController.onLogsUpdated).thenReturn(Notifier());
+      when(mockLoggingController.onLogsUpdated).thenReturn(Reporter());
 
       setGlobal(
         ServiceConnectionManager,

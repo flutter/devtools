@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/flutter/auto_dispose_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
@@ -35,23 +36,15 @@ class LoggingScreenBody extends StatefulWidget {
   _LoggingScreenState createState() => _LoggingScreenState();
 }
 
-class _LoggingScreenState extends State<LoggingScreenBody> {
-  LoggingController controller;
+class _LoggingScreenState extends State<LoggingScreenBody>
+    with AutoDisposeMixin {
+  LoggingController get controller => Controllers.of(context).logging;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller?.onLogsUpdated?.unregister(this);
-    controller = Controllers.of(context).logging;
-    controller.onLogsUpdated.register(this, () {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    controller.onLogsUpdated.unregister(this);
-    super.dispose();
+    cancel();
+    addAutoDisposeListener(controller.onLogsUpdated);
   }
 
   @override

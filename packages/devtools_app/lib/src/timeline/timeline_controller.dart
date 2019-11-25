@@ -11,6 +11,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
+import '../utils.dart';
 import 'timeline_model.dart';
 import 'timeline_processor.dart';
 import 'timeline_service.dart';
@@ -262,12 +263,13 @@ class FrameBasedTimeline
   final TimelineController _timelineController;
 
   /// Notifies that a frame has been added to the timeline.
-  ValueListenable get frameAddedNotifier => _frameAddedNotifier;
-  final _frameAddedNotifier = ValueNotifier<TimelineFrame>(null);
+  ValueListenable<TimelineFrame> get frameAddedNotifier => _frameAddedNotifier;
+  final _frameAddedNotifier = ValueReporter<TimelineFrame>(null);
 
   /// Notifies that a timeline frame has been selected.
-  ValueListenable get selectedFrameNotifier => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<TimelineFrame>(null);
+  ValueListenable<TimelineFrame> get selectedFrameNotifier =>
+      _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueReporter<TimelineFrame>(null);
 
   Future<double> get displayRefreshRate async {
     final refreshRate =
