@@ -26,7 +26,7 @@ const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 215.0;
-const minRenderHeight = 2750.0;
+const minRenderHeight = 275.0;
 
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 60;
