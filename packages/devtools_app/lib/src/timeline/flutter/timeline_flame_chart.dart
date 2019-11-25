@@ -102,7 +102,7 @@ class FrameBasedTimelineFlameChart
 }
 
 class FrameBasedTimelineFlameChartState
-    extends FlameChartState<FrameBasedTimelineFlameChart> {
+    extends FlameChartState<FrameBasedTimelineFlameChart, TimelineEvent> {
   static const _rowOffsetForTopTimeline = 1;
   static const _rowOffsetForBottomTimeline = 1;
   static const _rowOffsetForSectionSpacer = 1;
