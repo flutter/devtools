@@ -66,9 +66,9 @@ class Controllers extends StatefulWidget {
   _ControllersState createState() => _ControllersState();
 
   static ProvidedControllers of(BuildContext context) {
-    final _InheritedProvider inherited =
-        context.dependOnInheritedWidgetOfExactType(aspect: _InheritedProvider);
-    return inherited.data;
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedProvider>();
+    return provider.data;
   }
 }
 

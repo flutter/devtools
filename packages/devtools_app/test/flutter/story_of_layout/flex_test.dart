@@ -246,11 +246,11 @@ void main() {
     });
   }
 
-  testWidgets('Row golden test', (WidgetTester tester) async {
+  testWidgetsWithWindowSize('Row golden test', windowSize,
+      (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
     final diagnostics =
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
-    await setWindowSize(windowSize);
     final widget = wrap(StoryOfYourFlexWidget(
         FlexLayoutProperties.fromDiagnostics(diagnostics)));
     await pump(tester, widget);
@@ -260,11 +260,11 @@ void main() {
     );
   }, skip: kIsWeb || !isLinux);
 
-  testWidgets('Column golden test', (WidgetTester tester) async {
+  testWidgetsWithWindowSize('Column golden test', windowSize,
+      (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
     final diagnostics =
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
-    await setWindowSize(windowSize);
     final widget = wrap(StoryOfYourFlexWidget(
         FlexLayoutProperties.fromDiagnostics(diagnostics)));
     await pump(tester, widget);

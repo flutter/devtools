@@ -11,10 +11,9 @@ import 'wrappers.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
-    testWidgets('displays in narrow mode without error',
+    testWidgetsWithWindowSize(
+        'displays in narrow mode without error', const Size(800.0, 1200.0),
         (WidgetTester tester) async {
-      await setWindowSize(const Size(800.0, 1200.0));
-
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
@@ -23,13 +22,11 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
-      await resetWindowSize();
     });
 
-    testWidgets('displays in full-width mode without error',
+    testWidgetsWithWindowSize(
+        'displays in full-width mode without error', const Size(1203.0, 1200.0),
         (WidgetTester tester) async {
-      await setWindowSize(const Size(1203.0, 1200.0));
-
       await tester.pumpWidget(wrap(
         const DevToolsScaffold(
           tabs: [screen1, screen2, screen3, screen4, screen5],
@@ -38,7 +35,6 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
-      await resetWindowSize();
     });
 
     testWidgets('displays no tabs when only one is given',

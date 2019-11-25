@@ -26,6 +26,8 @@ void main() {
   InspectorScreen screen;
   FakeServiceManager fakeServiceManager;
   FakeServiceExtensionManager fakeExtensionManager;
+  const windowSize = Size(2600.0, 1200.0);
+
   group('Inspector Screen', () {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
@@ -70,9 +72,10 @@ void main() {
       expect(find.text('Flutter Inspector'), findsOneWidget);
     });
 
-    testWidgets('builds with no data', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds with no data', windowSize,
+        (WidgetTester tester) async {
       // Make sure the window is wide enough to display description text.
-      await setWindowSize(const Size(2600.0, 1200.0));
+
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text('Refresh Tree'), findsOneWidget);
@@ -85,9 +88,9 @@ void main() {
       // expect(find.text(extensions.debugPaint.description), findsOneWidget);
     });
 
-    testWidgets('Test toggling service extension buttons',
+    testWidgetsWithWindowSize(
+        'Test toggling service extension buttons', windowSize,
         (WidgetTester tester) async {
-      await setWindowSize(const Size(2600.0, 1200.0));
       mockExtensions();
       expect(
         fakeExtensionManager
@@ -146,10 +149,9 @@ void main() {
       );
     });
 
-    testWidgets(
+    testWidgetsWithWindowSize(
         'Test toggling service extension buttons with no extensions available',
-        (WidgetTester tester) async {
-      await setWindowSize(const Size(2600.0, 1200.0));
+        windowSize, (WidgetTester tester) async {
       mockNoExtensionsAvailable();
       expect(
         fakeExtensionManager
@@ -190,19 +192,18 @@ void main() {
     });
 
     group('test render depends on enableExperimentalStoryOfLayout value', () {
-      testWidgets('Should not render toggle button when flag is disabled',
+      testWidgetsWithWindowSize(
+          'Should not render toggle button when flag is disabled', windowSize,
           (WidgetTester tester) async {
         InspectorController.enableExperimentalStoryOfLayout = false;
-        await setWindowSize(const Size(2600.0, 1200.0));
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.text('Show Constraints'), findsNothing);
       });
 
-      testWidgets(
+      testWidgetsWithWindowSize(
           'Should render button with full text when flag is enabled and screen is wide enough',
-          (WidgetTester tester) async {
+          windowSize, (WidgetTester tester) async {
         InspectorController.enableExperimentalStoryOfLayout = true;
-        await setWindowSize(const Size(2600.0, 1200.0));
         await tester.pumpWidget(wrap(Builder(builder: screen.build)));
         expect(find.text('Show Constraints'), findsWidgets);
       });
@@ -251,7 +252,8 @@ void main() {
       animationController.dispose();
     });
 
-    testWidgets('Test render LayoutDetailsTab', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Test render LayoutDetailsTab', windowSize,
+        (WidgetTester tester) async {
       final renderObjectJson = jsonDecode('''
         {
           "properties": [

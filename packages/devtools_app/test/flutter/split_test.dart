@@ -254,8 +254,8 @@ void main() {
     });
 
     group('axisFor', () {
-      testWidgets('return Axis.horizontal', (WidgetTester tester) async {
-        await setWindowSize(const Size(800, 800));
+      testWidgetsWithWindowSize('return Axis.horizontal', const Size(800, 800),
+          (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(
           builder: (context) {
             expectLater(Split.axisFor(context, 1.0), Axis.horizontal);
@@ -263,8 +263,8 @@ void main() {
           },
         )));
       });
-      testWidgets('return Axis.vertical', (WidgetTester tester) async {
-        await setWindowSize(const Size(500, 800));
+      testWidgetsWithWindowSize('return Axis.vertical', const Size(500, 800),
+          (WidgetTester tester) async {
         await tester.pumpWidget(wrap(Builder(
           builder: (context) {
             expectLater(Split.axisFor(context, 1.0), Axis.vertical);
