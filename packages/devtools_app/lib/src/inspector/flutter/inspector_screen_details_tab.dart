@@ -44,7 +44,7 @@ class InspectorDetailsTabController extends StatelessWidget {
       detailsTree,
       if (enableExperimentalStoryOfLayout)
         Banner(
-          message: 'EXPERIMENT',
+          message: 'PROTOTYPE',
           location: BannerLocation.topStart,
           child: LayoutDetailsTab(controller: controller),
         ),
