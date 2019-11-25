@@ -29,16 +29,14 @@ void main() {
         "constraints": {
             "type": "BoxConstraints",
             "description": "BoxConstraints(w=300.0, h=60.0)",
-            "hasBoundedHeight": true,
-            "hasBoundedWidth": true,
-            "minWidth": 300.0,
-            "minHeight": 60.0,
-            "maxHeight": 60.0,
-            "maxWidth": 300.0
+            "minWidth": "300.0",
+            "minHeight": "60.0",
+            "maxHeight": "60.0",
+            "maxWidth": "300.0"
         },
         "size": {
-            "width": 300.0,
-            "height": 60.0
+            "width": "300.0",
+            "height": "60.0"
         },
         "isFlex": true,
         "children": [
@@ -54,15 +52,14 @@ void main() {
                 "constraints": {
                     "type": "BoxConstraints",
                     "description": "BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)",
-                    "hasBoundedHeight": true,
-                    "hasBoundedWidth": false,
-                    "minWidth": 0.0,
-                    "minHeight": 0.0,
-                    "maxHeight": 56.0
+                    "minWidth": "0.0",
+                    "minHeight": "0.0",
+                    "maxHeight": "56.0",
+                    "maxWidth": "Infinity"
                 },
                 "size": {
-                    "width": 56.0,
-                    "height": 25.0
+                    "width": "56.0",
+                    "height": "25.0"
                 },
                 "flexFactor": null,
                 "createdByLocalProject": true,
@@ -82,16 +79,14 @@ void main() {
                 "constraints": {
                     "type": "BoxConstraints",
                     "description": "BoxConstraints(w=40.0, 0.0<=h<=56.0)",
-                    "hasBoundedHeight": true,
-                    "hasBoundedWidth": true,
-                    "minWidth": 40.0,
-                    "minHeight": 0.0,
-                    "maxHeight": 56.0,
-                    "maxWidth": 40.0
+                    "minWidth": "40.0",
+                    "minHeight": "0.0",
+                    "maxHeight": "56.0",
+                    "maxWidth": "40.0"
                 },
                 "size": {
-                    "width": 40.0,
-                    "height": 31.0
+                    "width": "40.0",
+                    "height": "31.0"
                 },
                 "flexFactor": 1,
                 "createdByLocalProject": true,

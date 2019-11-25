@@ -175,7 +175,6 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
     final highlightChild =
         selected.isFlex ? null : selected.parent.childrenNow.indexOf(selected);
     return StoryOfYourFlexWidget(
-      // TODO(albertusangga): Cache this instead of recomputing every build,
       flexLayoutProperties,
       highlightChild: highlightChild,
       inspectorController: controller,
