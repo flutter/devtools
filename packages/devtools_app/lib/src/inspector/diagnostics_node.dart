@@ -67,9 +67,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
 
-  int get flexFactor => cachedProperties
-      ?.firstWhere((property) => property.name == 'flex', orElse: () => null)
-      ?.getIntMember('value');
+  int get flexFactor => json['flexFactor'];
 
   RemoteDiagnosticsNode get renderObject =>
       RemoteDiagnosticsNode(json['renderObject'], inspectorService, false, this);
@@ -329,10 +327,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   String getStringMember(String memberName) {
     return JsonUtils.getStringMember(json, memberName);
-  }
-
-  int getIntMember(String memberName) {
-    return JsonUtils.getIntMember(json, memberName);
   }
 
   bool getBooleanMember(String memberName, bool defaultValue) {

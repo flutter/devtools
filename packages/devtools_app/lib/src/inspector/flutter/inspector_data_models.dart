@@ -151,14 +151,6 @@ class LayoutProperties {
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
   }
 
-  /// Return the string inside the parentheses
-  /// example:
-  /// getValue('BoxConstraints(value)'); # returns 'value'
-  static String getValue(String description) {
-    return description.substring(
-        description.indexOf('(') + 1, description.indexOf(')'));
-  }
-
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
     if (json == null || json['type'] != 'BoxConstraints') return null;
