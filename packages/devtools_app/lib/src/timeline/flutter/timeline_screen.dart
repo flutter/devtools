@@ -77,6 +77,9 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     cancel();
     addAutoDisposeListener(controller.timelineModeNotifier);
+    autoDispose(controller.fullTimeline.onTimelineProcessed.listen((_) {
+      setState(() {});
+    }));
   }
 
   @override
@@ -341,6 +344,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   Future<void> _clearTimeline() async {
     await controller.clearData();
+    setState(() {});
   }
 
   void _exportTimeline() {
