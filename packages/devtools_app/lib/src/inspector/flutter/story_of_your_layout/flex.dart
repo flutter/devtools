@@ -266,6 +266,31 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     Size renderSize,
     Offset renderOffset,
   }) {
+    Widget buildEntranceAnimation(BuildContext context, Widget child) {
+      final vertical = properties.isMainAxisVertical;
+      final horizontal = properties.isMainAxisHorizontal;
+      Size size = renderSize;
+      if (childProperties.flexFactor != null) {
+        size = SizeTween(
+          begin: Size(
+            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+            vertical ? minRenderHeight - entranceMargin : renderSize.height,
+          ),
+          end: renderSize,
+        ).evaluate(expandedEntrance);
+      }
+      return Opacity(
+        opacity: min([allEntrance.value * 5, 1.0]),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: (renderSize.width - size.width) / 2,
+            vertical: (renderSize.height - size.height) / 2,
+          ),
+          child: child,
+        ),
+      );
+    }
+
     final flexFactor = childProperties.flexFactor;
     return Positioned(
       top: renderOffset.dy,
@@ -277,34 +302,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           height: renderSize.height,
           child: AnimatedBuilder(
             animation: entranceController,
-            builder: (context, child) {
-              final vertical = properties.isMainAxisVertical;
-              final horizontal = properties.isMainAxisHorizontal;
-              Size size = renderSize;
-              if (childProperties.flexFactor != null) {
-                size = SizeTween(
-                  begin: Size(
-                    horizontal
-                        ? minRenderWidth - entranceMargin
-                        : renderSize.width,
-                    vertical
-                        ? minRenderHeight - entranceMargin
-                        : renderSize.height,
-                  ),
-                  end: renderSize,
-                ).evaluate(expandedEntrance);
-              }
-              return Opacity(
-                opacity: min([allEntrance.value * 5, 1.0]),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: (renderSize.width - size.width) / 2,
-                    vertical: (renderSize.height - size.height) / 2,
-                  ),
-                  child: child,
-                ),
-              );
-            },
+            builder: buildEntranceAnimation,
             child: WidgetVisualizer(
               backgroundColor: backgroundColor,
               title: childProperties.description,
