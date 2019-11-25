@@ -18,6 +18,8 @@ const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 
+// TODO(kenz): consider cleaning up by changing to a flame chart code to use a
+// composition pattern instead of a class extension pattern.
 abstract class FlameChart<T, V extends FlameChartNodeDataMixin>
     extends StatefulWidget {
   const FlameChart(
