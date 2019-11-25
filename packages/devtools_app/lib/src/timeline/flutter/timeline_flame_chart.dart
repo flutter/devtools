@@ -178,10 +178,3 @@ class FrameBasedTimelineFlameChartState
     createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
   }
 }
-
-
-}
-
-
-
-}
