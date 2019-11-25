@@ -98,20 +98,12 @@ flutter:
     - web/icons/inspector/
     - web/icons/memory/
     - web/icons/perf/
-    - assets/img/story_of_layout/main_axis_alignment/center.png
-    - assets/img/story_of_layout/main_axis_alignment/end.png
-    - assets/img/story_of_layout/main_axis_alignment/spaceAround.png
-    - assets/img/story_of_layout/main_axis_alignment/spaceBetween.png
-    - assets/img/story_of_layout/main_axis_alignment/spaceEvenly.png
-    - assets/img/story_of_layout/main_axis_alignment/start.png
-    - assets/img/story_of_layout/cross_axis_alignment/start.png
-    - assets/img/story_of_layout/cross_axis_alignment/end.png
-    - assets/img/story_of_layout/cross_axis_alignment/center.png
-    - assets/img/story_of_layout/cross_axis_alignment/stretch.png
-    - assets/img/story_of_layout/cross_axis_alignment/baseline.png
-    - assets/img/story_of_layout/empty_space.png
+    - assets/img/story_of_layout/
+    - assets/img/story_of_layout/main_axis_alignment/
+    - assets/img/story_of_layout/cross_axis_alignment/
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
+  # TODO(https://github.com/flutter/devtools/issues/1339): Include a monospaced font.
   fonts:
     - family: Roboto
       fonts:

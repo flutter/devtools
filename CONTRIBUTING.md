@@ -48,6 +48,10 @@ From the packages/devtools_app directory:
 
 - `flutter run -d chrome`
 
+To test release performance:
+
+- `flutter run -d web-server --release --dart-define=FLUTTER_WEB_USE_SKIA=true`
+
 You can also use `-d headless-server`, which will start a headless server that serves the HTML
 files for the DevTools Flutter app.
 

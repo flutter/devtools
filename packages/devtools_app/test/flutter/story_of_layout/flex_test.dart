@@ -3,28 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../wrappers.dart';
-
-// TODO(albertusangga) Investigate flaky asset test
-/// This is current workaround for golden testing asset
-/// Currently we are preventing testing the assets since it seems to be flaky.
-class MockAssetBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async {
-    return ByteData.view(Uint8List.fromList([0]).buffer);
-  }
-}
 
 void main() {
   const windowSize = Size(1750, 1750);
@@ -267,14 +254,10 @@ void main() {
   testWidgetsWithSize('Row golden test', windowSize,
       (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
-    final diagnostic =
+    final diagnostics =
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
-    final node = InspectorTreeNode()..diagnostic = diagnostic;
-    for (var child in diagnostic.childrenNow) {
-      node.appendChild(InspectorTreeNode()..diagnostic = child);
-    }
-    final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
+    final widget = wrap(StoryOfYourFlexWidget(
+        FlexLayoutProperties.fromDiagnostics(diagnostics)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
@@ -285,14 +268,10 @@ void main() {
   testWidgetsWithSize('Column golden test', windowSize,
       (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
-    final diagnostic =
+    final diagnostics =
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
-    final node = InspectorTreeNode()..diagnostic = diagnostic;
-    for (var child in diagnostic.childrenNow) {
-      node.appendChild(InspectorTreeNode()..diagnostic = child);
-    }
-    final widget =
-        wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
+    final widget = wrap(StoryOfYourFlexWidget(
+        FlexLayoutProperties.fromDiagnostics(diagnostics)));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
