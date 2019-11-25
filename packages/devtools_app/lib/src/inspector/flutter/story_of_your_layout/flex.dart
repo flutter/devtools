@@ -478,11 +478,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            if (axis == direction) {
-              properties.mainAxisAlignment = newSelection;
-            } else {
-              properties.crossAxisAlignment = newSelection;
-            }
+            setState(() {
+              if (axis == direction) {
+                properties.mainAxisAlignment = newSelection;
+              } else {
+                properties.crossAxisAlignment = newSelection;
+              }
+            });
             final service = await properties.node.inspectorService;
             final arg = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
@@ -490,7 +492,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget> {
               properties.mainAxisAlignment,
               properties.crossAxisAlignment,
             );
-            setState(() {});
           },
         ),
       ),
