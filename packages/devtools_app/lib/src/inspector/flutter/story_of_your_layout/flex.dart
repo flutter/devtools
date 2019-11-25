@@ -80,6 +80,8 @@ const crossAxisTextColor =
 
 const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
+const entranceAnimationDuration = Duration(milliseconds: 500);
+
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
     this.properties, {
@@ -107,7 +109,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     super.initState();
     entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: entranceAnimationDuration,
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           setState(() {
