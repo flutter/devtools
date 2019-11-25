@@ -35,8 +35,9 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgets('displays with tree column first', (WidgetTester tester) async {
-      await setWindowSize(const Size(800.0, 1200.0));
+    testWidgetsWithSize(
+        'displays with tree column first', const Size(800.0, 1200.0),
+        (WidgetTester tester) async {
       final table = FlatTable<TestData>(
         columns: [
           _FlatNameColumn(),
@@ -56,7 +57,6 @@ void main() {
       expect(find.byKey(const Key('Snap')), findsOneWidget);
       expect(find.byKey(const Key('Crackle')), findsOneWidget);
       expect(find.byKey(const Key('Pop')), findsOneWidget);
-      await resetWindowSize();
     });
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
@@ -138,8 +138,9 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgets('displays with tree column first', (WidgetTester tester) async {
-      await setWindowSize(const Size(800.0, 1200.0));
+    testWidgetsWithSize(
+        'displays with tree column first', const Size(800.0, 1200.0),
+        (WidgetTester tester) async {
       final table = TreeTable<TestData>(
         columns: [
           treeColumn,
@@ -160,7 +161,6 @@ void main() {
       expect(find.byKey(const Key('Snap')), findsOneWidget);
       expect(find.byKey(const Key('Crackle')), findsOneWidget);
       expect(find.byKey(const Key('Pop')), findsOneWidget);
-      await resetWindowSize();
     });
 
     testWidgets('displays with many columns', (WidgetTester tester) async {

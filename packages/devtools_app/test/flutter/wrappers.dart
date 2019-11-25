@@ -9,6 +9,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
 import '../support/mocks.dart';
 
@@ -45,11 +46,22 @@ Widget wrapWithControllers(
   );
 }
 
-/// Sets the size of the app window under test to [windowSize].
+/// Runs a test with the size of the app window under test to [windowSize].
 ///
 /// This must be reset on after each test invocation that calls
 /// by using [resetWindowSize].
-Future<void> setWindowSize(Size windowSize) async {
+@isTest
+void testWidgetsWithSize(
+    String name, Size windowSize, WidgetTesterCallback test,
+    {bool skip = false}) {
+  testWidgets(name, (WidgetTester tester) async {
+    await _setWindowSize(windowSize);
+    await test(tester);
+    await _resetWindowSize();
+  }, skip: skip);
+}
+
+Future<void> _setWindowSize(Size windowSize) async {
   final TestWidgetsFlutterBinding binding =
       TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
@@ -57,6 +69,6 @@ Future<void> setWindowSize(Size windowSize) async {
   binding.window.devicePixelRatioTestValue = 1.0;
 }
 
-Future<void> resetWindowSize() async {
-  await setWindowSize(const Size(800.0, 1200.0));
+Future<void> _resetWindowSize() async {
+  await _setWindowSize(const Size(800.0, 600.0));
 }

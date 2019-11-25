@@ -26,9 +26,10 @@ void main() {
           .thenAnswer((_) => Future.value(false));
     });
 
-    testWidgets('builds frame based timeline', (WidgetTester tester) async {
+    testWidgetsWithSize(
+        'builds frame based timeline', const Size(1599.0, 1000.0),
+        (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
-      await setWindowSize(const Size(1599.0, 1000.0));
 
       final mockData = MockFrameBasedTimelineData();
       when(mockData.displayDepth).thenReturn(8);
@@ -44,10 +45,9 @@ void main() {
       expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
     });
 
-    testWidgets('builds full timeline', (WidgetTester tester) async {
+    testWidgetsWithSize('builds full timeline', const Size(1599.0, 1000.0),
+        (WidgetTester tester) async {
       // Set a wide enough screen width that we do not run into overflow.
-      await setWindowSize(const Size(1599.0, 1000.0));
-
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
         timelineController: TimelineController()

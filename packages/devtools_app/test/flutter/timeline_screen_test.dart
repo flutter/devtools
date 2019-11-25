@@ -33,7 +33,6 @@ void main() {
     TimelineController timelineController,
   }) async {
     // Set a wide enough screen width that we do not run into overflow.
-    await setWindowSize(const Size(1599.0, 1000.0));
     await tester.pumpWidget(wrapWithControllers(
       TimelineScreenBody(),
       timelineController:
@@ -61,6 +60,8 @@ void main() {
     );
   }
 
+  const windowSize = Size(1599.0, 1000.0);
+
   group('TimelineScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
@@ -76,7 +77,8 @@ void main() {
       expect(find.text('Timeline'), findsOneWidget);
     });
 
-    testWidgets('builds proper content for state', (WidgetTester tester) async {
+    testWidgetsWithSize('builds proper content for state', windowSize,
+        (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.frameBased);
 
       final splitFinder = find.byType(Split);
@@ -126,11 +128,10 @@ void main() {
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
       expect(splitter.initialFirstFraction, equals(0.6));
-
-      await resetWindowSize();
     });
 
-    testWidgets('pauses and resumes', (WidgetTester tester) async {
+    testWidgetsWithSize('pauses and resumes', windowSize,
+        (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.frameBased);
 
       // Verify initial state.
@@ -150,7 +151,8 @@ void main() {
       expect(controller.frameBasedTimeline.manuallyPaused, isFalse);
     });
 
-    testWidgets('starts and stops recording', (WidgetTester tester) async {
+    testWidgetsWithSize('starts and stops recording', windowSize,
+        (WidgetTester tester) async {
       await pumpTimelineScreen(tester, TimelineMode.full);
 
       // Verify initial state.
@@ -178,11 +180,10 @@ void main() {
         findsOneWidget,
       );
       expect(controller.fullTimeline.recordingNotifier.value, isFalse);
-
-      await resetWindowSize();
     });
 
-    testWidgets('clears timeline on clear', (WidgetTester tester) async {
+    testWidgetsWithSize('clears timeline on clear', windowSize,
+        (WidgetTester tester) async {
       // Clear the frame-based timeline.
       await pumpTimelineWithSelectedFrame(tester);
 
@@ -224,8 +225,6 @@ void main() {
         find.byKey(TimelineScreen.emptyTimelineRecordingKey),
         findsNothing,
       );
-
-      await resetWindowSize();
     });
   });
 }

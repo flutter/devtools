@@ -264,7 +264,8 @@ void main() {
     });
   }
 
-  testWidgets('Row golden test', (WidgetTester tester) async {
+  testWidgetsWithSize('Row golden test', windowSize,
+      (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
     final diagnostic =
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
@@ -272,7 +273,6 @@ void main() {
     for (var child in diagnostic.childrenNow) {
       node.appendChild(InspectorTreeNode()..diagnostic = child);
     }
-    await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
@@ -282,7 +282,8 @@ void main() {
     );
   }, skip: kIsWeb || !isLinux);
 
-  testWidgets('Column golden test', (WidgetTester tester) async {
+  testWidgetsWithSize('Column golden test', windowSize,
+      (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
     final diagnostic =
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
@@ -290,7 +291,6 @@ void main() {
     for (var child in diagnostic.childrenNow) {
       node.appendChild(InspectorTreeNode()..diagnostic = child);
     }
-    await setWindowSize(windowSize);
     final widget =
         wrap(StoryOfYourFlexWidget(FlexLayoutProperties.fromNode(node)));
     await pump(tester, widget);
