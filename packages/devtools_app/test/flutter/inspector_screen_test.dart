@@ -231,7 +231,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ConstraintsDescription(
-            properties: LayoutProperties(node),
+            properties: LayoutProperties(node.diagnostic),
             listenable: animationController,
           ),
         ),
