@@ -76,9 +76,12 @@ abstract class FlameChartState<T extends FlameChart> extends State<T>
 
   @override
   void didUpdateWidget(T oldWidget) {
-    if (widget.data != oldWidget.data) {
-      _linkedScrollControllerGroup.resetScroll();
+    if (widget.data != oldWidget.data ||
+        widget.selected != oldWidget.selected) {
       initFlameChartElements();
+      if (widget.data != oldWidget.data) {
+        _linkedScrollControllerGroup.resetScroll();
+      }
     }
     super.didUpdateWidget(oldWidget);
   }

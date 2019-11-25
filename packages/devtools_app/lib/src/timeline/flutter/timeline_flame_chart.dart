@@ -27,7 +27,10 @@ class TimelineFlameChart extends StatelessWidget {
             return controller.timelineModeNotifier.value ==
                     TimelineMode.frameBased
                 ? _buildFrameBasedTimeline(
-                    controller, constraints, selectedEvent)
+                    controller,
+                    constraints,
+                    selectedEvent,
+                  )
                 : _buildFullTimeline(controller, constraints, selectedEvent);
           },
         ),
