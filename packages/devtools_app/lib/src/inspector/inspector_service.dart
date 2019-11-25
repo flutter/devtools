@@ -955,9 +955,10 @@ class ObjectGroup {
     ));
   }
 
-  static const getDetailsSubtreeWithRenderObjectServiceExtensionName = 'getDetailsSubtreeWithRenderObject';
-
-  Future<RemoteDiagnosticsNode> getDetailsSubtreeWithRenderObject(RemoteDiagnosticsNode node, { int subtreeDepth = 1 }) async {
+  Future<RemoteDiagnosticsNode> getDetailsSubtreeWithRenderObject(
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 1,
+  }) async {
     if (node == null) return null;
     final id = node.dartDiagnosticRef.id;
     String command = '''
