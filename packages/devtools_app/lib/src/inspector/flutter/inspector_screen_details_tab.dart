@@ -37,11 +37,17 @@ class InspectorDetailsTabController extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      _buildTab('Layout Details'),
+      if (InspectorController.enableExperimentalStoryOfLayout)
+        _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
-      LayoutDetailsTab(controller: controller),
+      if (InspectorController.enableExperimentalStoryOfLayout)
+        Banner(
+          message: 'PROTOTYPE',
+          location: BannerLocation.topStart,
+          child: LayoutDetailsTab(controller: controller),
+        ),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
