@@ -135,14 +135,16 @@ class FrameBasedTimelineFlameChartState
 
     final uiEventFlowDepth = widget.data.uiEventFlow.depth;
     final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
-    rows = List.generate(
-      uiEventFlowDepth +
-          gpuEventFlowDepth +
-          _rowOffsetForTopTimeline +
-          _rowOffsetForSectionSpacer +
-          _rowOffsetForBottomTimeline,
-      (i) => FlameChartRow(nodes: [], index: i),
-    );
+    rows
+      ..clear()
+      ..addAll(List.generate(
+        uiEventFlowDepth +
+            gpuEventFlowDepth +
+            _rowOffsetForTopTimeline +
+            _rowOffsetForSectionSpacer +
+            _rowOffsetForBottomTimeline,
+        (i) => FlameChartRow(nodes: [], index: i),
+      ));
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(

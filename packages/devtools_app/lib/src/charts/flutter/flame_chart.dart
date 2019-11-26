@@ -58,9 +58,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
-  List<FlameChartRow> rows = [];
+  final List<FlameChartRow> rows = [];
 
-  List<FlameChartSection> sections = [];
+  final List<FlameChartSection> sections = [];
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -149,7 +149,6 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
   void initState() {
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
-    cancel();
     addAutoDisposeListener(scrollController);
   }
 
