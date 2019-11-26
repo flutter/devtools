@@ -327,6 +327,89 @@ void main() {
         expect(safeDivide(-50.0, 0.0, ifNotFinite: 10.0), 10.0);
       });
     });
+
+    group('Reporter', () {
+      int called = 0;
+      Reporter reporter;
+      void call() {
+        called++;
+      }
+
+      setUp(() {
+        called = 0;
+        reporter = Reporter();
+      });
+      test('notifies listeners', () {
+        expect(reporter.hasListeners, false);
+        reporter.addListener(call);
+        expect(called, 0);
+        expect(reporter.hasListeners, true);
+        reporter.notify();
+        expect(called, 1);
+        reporter.notify();
+        reporter.notify();
+        expect(called, 3);
+        reporter.removeListener(call);
+        expect(called, 3);
+      });
+
+      test('notifies multiple listeners', () {
+        reporter.addListener(() => called++);
+        reporter.addListener(() => called++);
+        reporter.addListener(() => called++);
+        reporter.notify();
+        expect(called, 3);
+        // Note that because we passed in anonymous callbacks, there's no way
+        // to remove them.
+      });
+
+      test('deduplicates listeners', () {
+        reporter.addListener(call);
+        reporter.addListener(call);
+        reporter.notify();
+        expect(called, 1);
+        reporter.removeListener(call);
+        reporter.notify();
+        expect(called, 1);
+      });
+
+      test('safely removes multiple times', () {
+        reporter.removeListener(call);
+        reporter.addListener(call);
+        reporter.notify();
+        expect(called, 1);
+        reporter.removeListener(call);
+        reporter.removeListener(call);
+        reporter.notify();
+        expect(called, 1);
+      });
+    });
+
+    group('ValueReporter', () {
+      int called = 0;
+      void call() {
+        called++;
+      }
+
+      ValueReporter<String> reporter;
+      setUp(() {
+        reporter = ValueReporter(null);
+      });
+      test('notifies listeners', () {
+        expect(reporter.hasListeners, false);
+        reporter.addListener(call);
+        expect(called, 0);
+        expect(reporter.hasListeners, true);
+        reporter.value = 'first call';
+        expect(called, 1);
+        reporter.value = 'second call';
+        reporter.value = 'third call';
+        expect(called, 3);
+        reporter.removeListener(call);
+        reporter.value = 'fourth call';
+        expect(called, 3);
+      });
+    });
   });
 }
 
