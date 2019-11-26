@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
-import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../ui/colors.dart';
 import '../../ui/theme.dart';
@@ -22,9 +21,19 @@ class TimelineFlameChart extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: controller.timelineModeNotifier.value == TimelineMode.frameBased
-            ? _buildFrameBasedTimeline(controller, constraints)
-            : _buildFullTimeline(controller, constraints),
+        child: ValueListenableBuilder(
+          valueListenable: controller.selectedTimelineEventNotifier,
+          builder: (context, selectedEvent, _) {
+            return controller.timelineModeNotifier.value ==
+                    TimelineMode.frameBased
+                ? _buildFrameBasedTimeline(
+                    controller,
+                    constraints,
+                    selectedEvent,
+                  )
+                : _buildFullTimeline(controller, constraints, selectedEvent);
+          },
+        ),
       );
     });
   }
@@ -32,22 +41,26 @@ class TimelineFlameChart extends StatelessWidget {
   Widget _buildFrameBasedTimeline(
     TimelineController controller,
     BoxConstraints constraints,
+    TimelineEvent selectedEvent,
   ) {
     return FrameBasedTimelineFlameChart(
       controller.frameBasedTimeline.data.selectedFrame,
-      width: constraints.maxWidth,
+      // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+      // test horizontal scrolling functionality.
+      width: constraints.maxWidth * 2,
       height: math.max(
         constraints.maxHeight,
         _frameBasedTimelineChartHeight(controller),
       ),
-      selectionNotifier: controller.selectedTimelineEventNotifier,
-      onSelection: (e) => controller.selectTimelineEvent(e),
+      selected: selectedEvent,
+      onSelected: (e) => controller.selectTimelineEvent(e),
     );
   }
 
   Widget _buildFullTimeline(
     TimelineController controller,
     BoxConstraints constraints,
+    TimelineEvent selectedEvent,
   ) {
     // TODO(kenz): implement full timeline flame chart.
     return Container(
@@ -65,34 +78,23 @@ class TimelineFlameChart extends StatelessWidget {
   }
 }
 
-// TODO(kenz): Abstract core flame chart logic for use in other flame charts.
-class FrameBasedTimelineFlameChart extends StatefulWidget {
+class FrameBasedTimelineFlameChart
+    extends FlameChart<TimelineFrame, TimelineEvent> {
   FrameBasedTimelineFlameChart(
-    this.data, {
-    @required this.height,
+    TimelineFrame data, {
+    @required double height,
     @required double width,
-    @required this.selectionNotifier,
-    @required this.onSelection,
-  })  : duration = data.time.duration,
-        startInset = sideInset,
-        totalStartingWidth = width;
-
-  final TimelineFrame data;
-
-  final Duration duration;
-
-  final double startInset;
-
-  final double totalStartingWidth;
-
-  final double height;
-
-  final ValueNotifier<TimelineEvent> selectionNotifier;
-
-  final void Function(TimelineEvent event) onSelection;
-
-  double get startingContentWidth =>
-      totalStartingWidth - startInset - sideInset;
+    @required TimelineEvent selected,
+    @required Function(TimelineEvent event) onSelected,
+  }) : super(
+          data,
+          duration: data.time.duration,
+          height: height,
+          totalStartingWidth: width,
+          startInset: sideInset,
+          selected: selected,
+          onSelected: onSelected,
+        );
 
   @override
   FrameBasedTimelineFlameChartState createState() =>
@@ -100,164 +102,50 @@ class FrameBasedTimelineFlameChart extends StatefulWidget {
 }
 
 class FrameBasedTimelineFlameChartState
-    extends State<FrameBasedTimelineFlameChart> with AutoDisposeMixin {
-  static const startingScrollPosition = 0.0;
-  ScrollController _scrollControllerX;
-  ScrollController _scrollControllerY;
-  double scrollOffsetX = startingScrollPosition;
-  double scrollOffsetY = startingScrollPosition;
+    extends FlameChartState<FrameBasedTimelineFlameChart, TimelineEvent> {
+  static const _rowOffsetForTopTimeline = 1;
+  static const _rowOffsetForBottomTimeline = 1;
+  static const _rowOffsetForSectionSpacer = 1;
 
-  List<FlameChartRow> rows;
-
-  int get gpuSectionStartRow => widget.data.uiEventFlow.depth;
-
-  @override
-  void didUpdateWidget(FrameBasedTimelineFlameChart oldWidget) {
-    if (oldWidget.data != widget.data) {
-      _scrollControllerX.jumpTo(startingScrollPosition);
-      _scrollControllerY.jumpTo(startingScrollPosition);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // TODO(kenz): improve this so we are not rebuilding on every scroll.
-    _scrollControllerX = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetX = _scrollControllerX.offset;
-        });
-      });
-
-    _scrollControllerY = ScrollController()
-      ..addListener(() {
-        setState(() {
-          scrollOffsetY = _scrollControllerY.offset;
-        });
-      });
-  }
-
-  @override
-  void dispose() {
-    _scrollControllerX.dispose();
-    _scrollControllerY.dispose();
-    // TODO(kenz): dispose [_controller] here.
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scrollbar(
-          child: SingleChildScrollView(
-            controller: _scrollControllerX,
-            scrollDirection: Axis.horizontal,
-            child: Scrollbar(
-              child: SingleChildScrollView(
-                controller: _scrollControllerY,
-                scrollDirection: Axis.vertical,
-                child: _flameChartBody(constraints),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _flameChartBody(BoxConstraints constraints) {
-    final width = math.max(constraints.maxWidth, widget.totalStartingWidth);
-    final height = math.max(constraints.maxHeight, widget.height);
-
-    // TODO(kenz): rewrite this using slivers instead of a stack.
-    return ValueListenableBuilder(
-      valueListenable: widget.selectionNotifier,
-      builder: (context, selectedEvent, _) {
-        return Stack(
-          children: [
-            Container(
-              width: width,
-              height: height,
-            ),
-            ..._nodesInViewport(
-              constraints,
-              selectedEvent,
-            ), // pick what to show
-          ],
-        );
-      },
-    );
-  }
-
-  List<FlameChartNode> _nodesInViewport(
-    BoxConstraints constraints,
-    TimelineEvent selectedEvent,
-  ) {
-    // TODO(kenz): is creating all the FlameChartNode objects expensive even if
-    // we won't add them to the view? We create all the FlameChartNode objects
-    // and place them in FlameChart rows, but we only add [nodesInViewport] to
-    // the widget tree.
-    _buildFlameChartElements(selectedEvent);
-
-    // TODO(kenz): Use binary search method we use in html full timeline here.
-    final nodesInViewport = <FlameChartNode>[];
-    for (var row in rows) {
-      for (var node in row.nodes) {
-        final fitsHorizontally = node.rect.right >= scrollOffsetX &&
-            node.rect.left - scrollOffsetX <= constraints.maxWidth;
-        final fitsVertically = node.rect.bottom >= scrollOffsetY &&
-            node.rect.top - scrollOffsetY <= constraints.maxHeight;
-        if (fitsHorizontally && fitsVertically) {
-          nodesInViewport.add(node);
-        }
-      }
-    }
-    return nodesInViewport;
-  }
+  // Add one for the spacer offset between UI and GPU nodes.
+  int get gpuSectionStartRow =>
+      widget.data.uiEventFlow.depth +
+      _rowOffsetForTopTimeline +
+      _rowOffsetForSectionSpacer;
 
   // TODO(kenz): when optimizing this code, consider passing in the viewport
   // to only construct FlameChartNode elements that are in view.
-  void _buildFlameChartElements(TimelineEvent selectedEvent) {
-    _resetColorOffsets();
+  @override
+  void initFlameChartElements() {
+    super.initFlameChartElements();
 
+    final uiEventFlowDepth = widget.data.uiEventFlow.depth;
+    final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
     rows = List.generate(
-      widget.data.uiEventFlow.depth + widget.data.gpuEventFlow.depth,
+      uiEventFlowDepth +
+          gpuEventFlowDepth +
+          _rowOffsetForTopTimeline +
+          _rowOffsetForSectionSpacer +
+          _rowOffsetForBottomTimeline,
       (i) => FlameChartRow(nodes: [], index: i),
     );
-    final int frameStartOffset = widget.data.time.start.inMicroseconds;
-
-    double getTopForRow(int row) {
-      // This accounts for the section spacing between the UI events and the GPU
-      // events.
-      final additionalPadding =
-          row >= gpuSectionStartRow ? sectionSpacing : 0.0;
-      return row * rowHeightWithPadding + topOffset + additionalPadding;
-    }
-
-    // Pixels per microsecond in order to fit the entire frame in view.
-    final double pxPerMicro =
-        widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
       text: 'UI',
       textColor: Colors.black,
       backgroundColor: mainUiColor,
-      top: getTopForRow(0),
+      top: flameChartNodeTop,
       width: 28.0,
     );
-    rows[0].nodes.add(uiSectionLabel);
+    rows[0 + _rowOffsetForTopTimeline].nodes.add(uiSectionLabel);
 
     // Add GPU section label.
     final gpuSectionLabel = FlameChartNode.sectionLabel(
       text: 'GPU',
       textColor: Colors.white,
       backgroundColor: mainGpuColor,
-      top: getTopForRow(gpuSectionStartRow),
+      top: flameChartNodeTop,
       width: 42.0,
     );
     rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
@@ -266,28 +154,25 @@ class FrameBasedTimelineFlameChartState
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
-      final double left =
-          (event.time.start.inMicroseconds - frameStartOffset) * pxPerMicro +
-              widget.startInset;
-      final double right =
-          (event.time.end.inMicroseconds - frameStartOffset) * pxPerMicro +
-              widget.startInset;
-      final top = getTopForRow(row);
-      final backgroundColor =
-          event.isUiEvent ? _nextUiColor() : _nextGpuColor();
+      final double left = (event.time.start.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+      final double right = (event.time.end.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+      final backgroundColor = event.isUiEvent ? nextUiColor() : nextGpuColor();
 
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.time.start.inMicroseconds}'),
         text: event.name,
         tooltip: '${event.name} - ${msText(event.time.duration)}',
-        rect: Rect.fromLTRB(left, top, right, top + rowHeight),
+        rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         backgroundColor: backgroundColor,
         textColor: event.isUiEvent
             ? ThemedColor.fromSingleColor(Colors.black)
             : ThemedColor.fromSingleColor(contrastForegroundWhite),
         data: event,
-        selected: event == selectedEvent,
-        onSelected: (dynamic event) => widget.onSelection(event),
+        onSelected: (dynamic event) => widget.onSelected(event),
       );
 
       rows[row].nodes.add(node);
@@ -300,36 +185,7 @@ class FrameBasedTimelineFlameChartState
       }
     }
 
-    createChartNodes(widget.data.uiEventFlow, 0);
+    createChartNodes(widget.data.uiEventFlow, _rowOffsetForTopTimeline);
     createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
   }
-
-  double get calculatedContentWidth {
-    // The farthest right node in the graph will either be the root UI event or
-    // the root GPU event.
-    return math.max(rows[gpuSectionStartRow].nodes.last.rect.right,
-            rows[gpuSectionStartRow].nodes.last.rect.right) -
-        widget.startInset;
-  }
-}
-
-int _uiColorOffset = 0;
-
-Color _nextUiColor() {
-  final color = uiColorPalette[_uiColorOffset % uiColorPalette.length];
-  _uiColorOffset++;
-  return color;
-}
-
-int _gpuColorOffset = 0;
-
-Color _nextGpuColor() {
-  final color = gpuColorPalette[_gpuColorOffset % gpuColorPalette.length];
-  _gpuColorOffset++;
-  return color;
-}
-
-void _resetColorOffsets() {
-  _uiColorOffset = 0;
-  _gpuColorOffset = 0;
 }
