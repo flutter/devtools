@@ -12,6 +12,7 @@ import '../../../ui/theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
+import '../../inspector_service.dart';
 import '../inspector_data_models.dart';
 import '../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
@@ -83,19 +84,70 @@ const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
 const entranceAnimationDuration = Duration(milliseconds: 500);
 
+Widget _visualizeWidthAndHeightWithConstraints({
+  @required Widget widget,
+  @required LayoutProperties properties,
+  double arrowHeadSize = defaultArrowHeadSize,
+}) {
+  return BorderLayout(
+    center: widget,
+    right: Container(
+      child: ArrowWrapper.bidirectional(
+        arrowColor: heightIndicatorColor,
+        arrowStrokeWidth: arrowStrokeWidth,
+        arrowHeadSize: arrowHeadSize,
+        child: RotatedBox(
+          quarterTurns: 1,
+          child: Text(
+            '${properties.describeHeight()}\n'
+            '(${properties.describeHeightConstraints()})',
+            textAlign: TextAlign.center,
+            style: const TextStyle(height: 1.0),
+          ),
+        ),
+        direction: Axis.vertical,
+        distanceToArrow: distanceToArrow,
+      ),
+      margin: const EdgeInsets.only(
+        top: margin,
+        left: margin,
+        bottom: widthAndConstraintIndicatorSize,
+      ),
+    ),
+    rightWidth: heightAndConstraintIndicatorSize,
+    bottom: Container(
+      child: ArrowWrapper.bidirectional(
+        arrowColor: widthIndicatorColor,
+        arrowHeadSize: arrowHeadSize,
+        arrowStrokeWidth: arrowStrokeWidth,
+        child: Text(
+          '${properties.describeWidth()}\n'
+          '(${properties.describeWidthConstraints()})',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            height: 1.0,
+          ),
+        ),
+        direction: Axis.horizontal,
+        distanceToArrow: distanceToArrow,
+      ),
+      margin: const EdgeInsets.only(
+        top: margin,
+        right: heightAndConstraintIndicatorSize,
+        // so that the arrow does not overlap with each other
+        bottom: margin,
+        left: margin,
+      ),
+    ),
+    bottomHeight: widthAndConstraintIndicatorSize,
+  );
+}
+
 class StoryOfYourFlexWidget extends StatefulWidget {
   const StoryOfYourFlexWidget(
-    this.properties, {
-    this.highlightChild,
-    this.inspectorController,
+    this.inspectorController, {
     Key key,
-  })  : assert(properties != null),
-        super(key: key);
-
-  final FlexLayoutProperties properties;
-
-  // index of child to be highlighted
-  final int highlightChild;
+  }) : super(key: key);
 
   final InspectorController inspectorController;
 
@@ -109,67 +161,15 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     with TickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-    entranceController = AnimationController(
-      vsync: this,
-      duration: entranceAnimationDuration,
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          setState(() {
-            _previousProperties = null;
-            entranceController.forward();
-          });
-        }
-      });
-    expandedEntrance =
-        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
-    allEntrance =
-        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
-    _updateProperties();
-  }
-
-  @override
-  void dispose() {
-    entranceController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.properties.node != widget.properties.node) {
-      _previousProperties = oldWidget.properties;
-    }
-    _updateProperties();
-  }
-
-  void _updateProperties() {
-    if (_previousProperties != null) {
-      entranceController.reverse();
-    } else {
-      entranceController.forward();
-    }
-  }
-
-  AnimationController entranceController;
-  CurvedAnimation expandedEntrance;
-  CurvedAnimation allEntrance;
+  /// custom getters
+  RemoteDiagnosticsNode get selectedNode =>
+      inspectorController?.selectedNode?.diagnostic;
 
   Size get size => properties.size;
-
-  FlexLayoutProperties get properties =>
-      _previousProperties ?? widget.properties;
-  FlexLayoutProperties _previousProperties;
 
   List<LayoutProperties> get children => properties.children;
 
   Axis get direction => properties.direction;
-
-  bool get isRow => direction == Axis.horizontal;
-
-  bool get isColumn => !isRow;
 
   Color get horizontalColor =>
       properties.isMainAxisHorizontal ? mainAxisColor : crossAxisColor;
@@ -185,9 +185,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   String get flexType => properties.type;
 
-  MainAxisAlignment get mainAxisAlignment => properties.mainAxisAlignment;
+  InspectorController get inspectorController => widget.inspectorController;
 
-  CrossAxisAlignment get crossAxisAlignment => properties.crossAxisAlignment;
+  RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
+    if (!StoryOfYourFlexWidget.shouldDisplay(node)) return null;
+    if (node.isFlex) return node;
+    return node.parent;
+  }
 
   double crossAxisDimension(LayoutProperties properties) =>
       direction == Axis.horizontal ? properties.height : properties.width;
@@ -195,170 +199,144 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   double mainAxisDimension(LayoutProperties properties) =>
       direction == Axis.vertical ? properties.height : properties.width;
 
-  Widget _visualizeWidthAndHeightWithConstraints({
-    @required Widget widget,
-    @required LayoutProperties properties,
-    double arrowHeadSize = defaultArrowHeadSize,
-  }) {
-    return BorderLayout(
-      center: widget,
-      right: Container(
-        child: ArrowWrapper.bidirectional(
-          arrowColor: heightIndicatorColor,
-          arrowStrokeWidth: arrowStrokeWidth,
-          arrowHeadSize: arrowHeadSize,
-          child: RotatedBox(
-            quarterTurns: 1,
-            child: Text(
-              '${properties.describeHeight()}\n'
-              '(${properties.describeHeightConstraints()})',
-              textAlign: TextAlign.center,
-              style: const TextStyle(height: 1.0),
-            ),
-          ),
-          direction: Axis.vertical,
-          distanceToArrow: distanceToArrow,
-        ),
-        margin: const EdgeInsets.only(
-          top: margin,
-          left: margin,
-          bottom: widthAndConstraintIndicatorSize,
-        ),
-      ),
-      rightWidth: heightAndConstraintIndicatorSize,
-      bottom: Container(
-        child: ArrowWrapper.bidirectional(
-          arrowColor: widthIndicatorColor,
-          arrowHeadSize: arrowHeadSize,
-          arrowStrokeWidth: arrowStrokeWidth,
-          child: Text(
-            '${properties.describeWidth()}\n'
-            '(${properties.describeWidthConstraints()})',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              height: 1.0,
-            ),
-          ),
-          direction: Axis.horizontal,
-          distanceToArrow: distanceToArrow,
-        ),
-        margin: const EdgeInsets.only(
-          top: margin,
-          right: heightAndConstraintIndicatorSize,
-          // so that the arrow does not overlap with each other
-          bottom: margin,
-          left: margin,
-        ),
-      ),
-      bottomHeight: widthAndConstraintIndicatorSize,
+  /// state variables
+  InspectorObjectGroupManager objectGroupManager;
+  AnimationController entranceController;
+  CurvedAnimation expandedEntrance;
+  CurvedAnimation allEntrance;
+
+  FlexLayoutProperties get properties => _previousProperties ?? _properties;
+  FlexLayoutProperties _previousProperties;
+  FlexLayoutProperties _properties;
+
+  LayoutProperties highlighted;
+
+  @override
+  void initState() {
+    super.initState();
+    inspectorController.addSelectionListener(_onInspectorSelectionChanged);
+    _initAnimationStates();
+    _updateObjectGroupManager();
+    _updateProperties();
+  }
+
+  @override
+  void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateObjectGroupManager();
+    _updateProperties();
+  }
+
+  @override
+  void dispose() {
+    print('disposed');
+    entranceController.dispose();
+    inspectorController.removeSelectionListener(_onInspectorSelectionChanged);
+    super.dispose();
+  }
+
+  /// required for getting all information required for visualizing Flex layout
+  Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
+    objectGroupManager?.cancelNext();
+    final nextObjectGroup = objectGroupManager.next;
+    final node = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
+      getRoot(selectedNode),
+      subtreeDepth: 1,
     );
+    if (!nextObjectGroup.disposed) {
+      assert(objectGroupManager.next == nextObjectGroup);
+      objectGroupManager.promoteNext();
+    }
+    return FlexLayoutProperties.fromDiagnostics(node);
+  }
+
+  String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
+
+  void _onInspectorSelectionChanged() async {
+    if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
+      return;
+    }
+    final prevRootId = id(_properties?.node);
+    final newRootId = id(getRoot(selectedNode));
+    final shouldFetch = prevRootId != newRootId;
+    FlexLayoutProperties newSelection = _properties;
+    if (shouldFetch) {
+      newSelection = await fetchFlexLayoutProperties();
+    }
+    setProperties(newSelection);
+  }
+
+  void updateHighlighted(FlexLayoutProperties newProperties) {
+    if (selectedNode.isFlex) {
+      highlighted = newProperties;
+    } else {
+      final idx = selectedNode.parent.childrenNow.indexOf(selectedNode);
+      if (idx != -1) highlighted = newProperties.children[idx];
+    }
+  }
+
+  void setProperties(FlexLayoutProperties newProperties) {
+    updateHighlighted(newProperties);
+    if (_properties == newProperties) {
+      // update highlighted child
+      setState(() {});
+      return;
+    }
+    if (_properties == null) {
+      _properties = newProperties;
+      setState(() {});
+    }
+    _previousProperties = _properties;
+    _properties = newProperties;
+    _updateProperties();
+  }
+
+  void _initAnimationStates() {
+    entranceController = AnimationController(
+      vsync: this,
+      duration: entranceAnimationDuration,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed) {
+          setState(() {
+            _previousProperties = null;
+            entranceController.forward();
+          });
+        }
+      });
+    expandedEntrance =
+        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
+    allEntrance =
+        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
+  }
+
+  void _updateObjectGroupManager() {
+    final service = inspectorController.inspectorService;
+    if (service != objectGroupManager?.inspectorService) {
+      objectGroupManager = InspectorObjectGroupManager(
+        service,
+        'flex-layout',
+      );
+    }
+    _onInspectorSelectionChanged();
+  }
+
+  void _updateProperties() async {
+    if (_previousProperties != null) {
+      entranceController.reverse();
+    } else {
+      entranceController.forward();
+    }
   }
 
   Future<void> _onTap(LayoutProperties properties) async {
-    final controller = widget.inspectorController;
-    final diagnostic = properties.node;
-    controller.refreshSelection(diagnostic, diagnostic, false);
-    final inspectorService = await diagnostic.inspectorService;
-    await inspectorService.setSelectionInspector(
-      diagnostic.valueRef,
-      true,
-    );
+    highlighted = properties;
+    final node = properties.node;
+    inspectorController.refreshSelection(node, node, false);
   }
 
-  Widget _visualizeChild({
-    LayoutProperties childProperties,
-    Color backgroundColor,
-    Color borderColor,
-    Color textColor,
-    Size renderSize,
-    Offset renderOffset,
-  }) {
-    Widget buildEntranceAnimation(BuildContext context, Widget child) {
-      final vertical = properties.isMainAxisVertical;
-      final horizontal = properties.isMainAxisHorizontal;
-      Size size = renderSize;
-      if (childProperties.flexFactor != null) {
-        size = SizeTween(
-          begin: Size(
-            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-            vertical ? minRenderHeight - entranceMargin : renderSize.height,
-          ),
-          end: renderSize,
-        ).evaluate(expandedEntrance);
-      }
-      return Opacity(
-        opacity: min([allEntrance.value * 5, 1.0]),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: (renderSize.width - size.width) / 2,
-            vertical: (renderSize.height - size.height) / 2,
-          ),
-          child: child,
-        ),
-      );
-    }
-
-    final flexFactor = childProperties.flexFactor;
-    return Positioned(
-      top: renderOffset.dy,
-      left: renderOffset.dx,
-      child: InkWell(
-        onTap: () => _onTap(childProperties),
-        child: SizedBox(
-          width: renderSize.width,
-          height: renderSize.height,
-          child: AnimatedBuilder(
-            animation: entranceController,
-            builder: buildEntranceAnimation,
-            child: WidgetVisualizer(
-              backgroundColor: backgroundColor,
-              title: childProperties.description,
-              borderColor: borderColor,
-              textColor: textColor,
-              child: _visualizeWidthAndHeightWithConstraints(
-                arrowHeadSize: arrowHeadSize,
-                widget: Align(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    margin: const EdgeInsets.only(
-                      top: margin,
-                      left: margin,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Text(
-                          'flex: $flexFactor',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (flexFactor == 0 || flexFactor == null)
-                          Text(
-                            'unconstrained ${isRow ? 'horizontal' : 'vertical'}',
-                            style: TextStyle(
-                              color: ThemedColor(
-                                const Color(0xFFD08A29),
-                                Colors.orange.shade700,
-                              ),
-                              fontStyle: FontStyle.italic,
-                            ),
-                            maxLines: 2,
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                            textScaleFactor: smallTextScaleFactor,
-                            textAlign: TextAlign.right,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                properties: childProperties,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  Future<void> refresh() async {
+    setProperties(await fetchFlexLayoutProperties());
+    setState(() {});
   }
 
   Widget _visualizeFlex(BuildContext context) {
@@ -386,29 +364,28 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             maxSizeAvailable: maxSizeAvailable,
           );
 
-          final renderProps = childrenAndMainAxisSpacesRenderProps
+          final renderProperties = childrenAndMainAxisSpacesRenderProps
               .where((renderProps) => !renderProps.isFreeSpace)
               .toList();
           final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
               .where((renderProps) => renderProps.isFreeSpace)
               .toList();
           final crossAxisSpaces = properties.crossAxisSpaces(
-            childrenRenderProps: renderProps,
+            childrenRenderProperties: renderProperties,
             maxSizeAvailable: maxSizeAvailable,
           );
 
           final childrenRenderWidgets = <Widget>[
             for (var i = 0; i < children.length; i++)
-              _visualizeChild(
-                backgroundColor:
-                    widget.highlightChild != null && i == widget.highlightChild
-                        ? activeBackgroundColor(theme)
-                        : inActiveBackgroundColor(theme),
-                childProperties: children[i],
+              FlexChildVisualizer(
+                state: this,
+                notifyParent: refresh,
+                backgroundColor: highlighted == children[i]
+                    ? activeBackgroundColor(theme)
+                    : inActiveBackgroundColor(theme),
                 borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
                 textColor: i.isOdd ? null : const Color(0xFF303030),
-                renderSize: renderProps[i].size,
-                renderOffset: renderProps[i].offset,
+                renderProperties: renderProperties[i],
               )
           ];
 
@@ -417,16 +394,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
               ...mainAxisSpaces,
               ...crossAxisSpaces
             ])
-              Positioned(
-                top: renderProperties.dy,
-                left: renderProperties.dx,
-                child: EmptySpaceVisualizerWidget(
-                  width: renderProperties.realWidth,
-                  height: renderProperties.realHeight,
-                  renderWidth: renderProperties.width,
-                  renderHeight: renderProperties.height,
-                ),
-              )
+              EmptySpaceVisualizerWidget(renderProperties),
           ];
           return SingleChildScrollView(
             scrollDirection: properties.direction,
@@ -477,14 +445,14 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     Object selected;
     if (axis == direction) {
       alignmentEnumEntries = MainAxisAlignment.values;
-      selected = mainAxisAlignment;
+      selected = properties.mainAxisAlignment;
     } else {
       alignmentEnumEntries = CrossAxisAlignment.values.toList(growable: true);
       if (properties.textBaseline == null) {
         // TODO(albertusangga): Look for ways to visualize baseline when it is null
         alignmentEnumEntries.remove(CrossAxisAlignment.baseline);
       }
-      selected = crossAxisAlignment;
+      selected = properties.crossAxisAlignment;
     }
     return RotatedBox(
       quarterTurns: axis == Axis.vertical ? 3 : 0,
@@ -568,13 +536,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            setState(() {
-              if (axis == direction) {
-                properties.mainAxisAlignment = newSelection;
-              } else {
-                properties.crossAxisAlignment = newSelection;
-              }
-            });
+            if (axis == direction) {
+              properties.mainAxisAlignment = newSelection;
+            } else {
+              properties.crossAxisAlignment = newSelection;
+            }
             final service = await properties.node.inspectorService;
             final arg = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
@@ -582,6 +548,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
               properties.mainAxisAlignment,
               properties.crossAxisAlignment,
             );
+            setProperties(await fetchFlexLayoutProperties());
           },
         ),
       ),
@@ -590,6 +557,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (_properties == null) return const SizedBox();
     final theme = Theme.of(context);
     return Container(
       child: Column(
@@ -625,7 +593,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                             onTap: () => _onTap(properties),
                             child: WidgetVisualizer(
                               title: flexType,
-                              backgroundColor: widget.highlightChild == null
+                              backgroundColor: highlighted == properties
                                   ? activeBackgroundColor(theme)
                                   : null,
                               hint: Container(
@@ -722,6 +690,169 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 }
 
+/// Widget that represents and visualize a direct child of Flex widget.
+class FlexChildVisualizer extends StatelessWidget {
+  const FlexChildVisualizer({
+    Key key,
+    @required this.state,
+    @required this.renderProperties,
+    @required this.backgroundColor,
+    @required this.borderColor,
+    @required this.textColor,
+    @required this.notifyParent,
+  }) : super(key: key);
+
+  final _StoryOfYourFlexWidgetState state;
+
+  /// callback to notify parent when child value changes
+  final Function notifyParent;
+
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color textColor;
+
+  final RenderProperties renderProperties;
+
+  FlexLayoutProperties get root => state.properties;
+
+  LayoutProperties get properties => renderProperties.actualProperties;
+
+  void onChangeFlexFactor(int newFlexFactor) async {
+    final node = properties.node;
+    final inspectorService = await node.inspectorService;
+    await inspectorService.invokeTweakFlexFactor(
+      node.valueRef,
+      newFlexFactor,
+    );
+    properties.flexFactor = newFlexFactor;
+    notifyParent();
+  }
+
+  Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
+    Widget buildMenuitemChild(int flexFactor) {
+      return Text(
+        'flex: $flexFactor',
+        style: flexFactor == properties.flexFactor
+            ? TextStyle(
+                fontWeight: FontWeight.bold,
+              )
+            : null,
+      );
+    }
+
+    DropdownMenuItem<int> buildMenuItem(int flexFactor) {
+      return DropdownMenuItem(
+        value: flexFactor,
+        child: buildMenuitemChild(flexFactor),
+      );
+    }
+
+    return DropdownButton<int>(
+      value: properties.flexFactor,
+      items: <DropdownMenuItem<int>>[
+        buildMenuItem(null),
+        for (var i = 0; i <= maximumFlexFactor; ++i) buildMenuItem(i),
+      ],
+      onChanged: onChangeFlexFactor,
+    );
+  }
+
+  Widget _buildContent() {
+    return Container(
+      margin: const EdgeInsets.only(
+        top: margin,
+        left: margin,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          _buildFlexFactorChangerDropdown(maximumFlexFactor),
+          if (!properties.hasFlexFactor)
+            Text(
+              'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
+              style: TextStyle(
+                color: ThemedColor(
+                  const Color(0xFFD08A29),
+                  Colors.orange.shade700,
+                ),
+                fontStyle: FontStyle.italic,
+              ),
+              maxLines: 2,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              textScaleFactor: smallTextScaleFactor,
+              textAlign: TextAlign.right,
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final renderSize = renderProperties.size;
+    final renderOffset = renderProperties.offset;
+
+    Widget buildEntranceAnimation(BuildContext context, Widget child) {
+      final vertical = root.isMainAxisVertical;
+      final horizontal = root.isMainAxisHorizontal;
+      Size size = renderSize;
+      if (properties.hasFlexFactor) {
+        size = SizeTween(
+          begin: Size(
+            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+            vertical ? minRenderHeight - entranceMargin : renderSize.height,
+          ),
+          end: renderSize,
+        ).evaluate(state.expandedEntrance);
+      }
+      return Opacity(
+        opacity: min([state.allEntrance.value * 5, 1.0]),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: (renderSize.width - size.width) / 2,
+            vertical: (renderSize.height - size.height) / 2,
+          ),
+          child: child,
+        ),
+      );
+    }
+
+    return Positioned(
+      top: renderOffset.dy,
+      left: renderOffset.dx,
+      child: InkWell(
+        onTap: () => state._onTap(properties),
+        child: SizedBox(
+          width: renderSize.width,
+          height: renderSize.height,
+          child: AnimatedBuilder(
+            animation: state.entranceController,
+            builder: buildEntranceAnimation,
+            child: WidgetVisualizer(
+              backgroundColor: backgroundColor,
+              title: properties.description,
+              borderColor: borderColor,
+              textColor: textColor,
+              child: _visualizeWidthAndHeightWithConstraints(
+                arrowHeadSize: arrowHeadSize,
+                widget: Align(
+                  alignment: Alignment.topRight,
+                  child: _buildContent(),
+                ),
+                properties: properties,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static const maximumFlexFactor = 5;
+}
+
 /// Widget that draws bounding box with the title (usually widget name) in its top left
 ///
 /// [hint] is an optional widget to be placed in the top right of the box
@@ -804,67 +935,62 @@ class WidgetVisualizer extends StatelessWidget {
 }
 
 class EmptySpaceVisualizerWidget extends StatelessWidget {
-  // width and height to be displayed on Text
-  // width and height for rendering/sizing the widget
-
-  const EmptySpaceVisualizerWidget({
+  const EmptySpaceVisualizerWidget(
+    this.renderProperties, {
     Key key,
-    @required this.width,
-    @required this.height,
-    @required this.renderWidth,
-    @required this.renderHeight,
   }) : super(key: key);
 
-  final double width;
-  final double height;
-  final double renderWidth;
-  final double renderHeight;
+  final RenderProperties renderProperties;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: renderWidth,
-      height: renderHeight,
-      child: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: widthOnlyIndicatorSize,
-              margin: const EdgeInsets.only(
-                left: margin,
-                right: heightOnlyIndicatorSize,
-              ),
-              child: ArrowWrapper.bidirectional(
-                child: Text(
-                  'w=${toStringAsFixed(width)}',
+    return Positioned(
+      top: renderProperties.offset.dy,
+      left: renderProperties.offset.dx,
+      child: Container(
+        width: renderProperties.width,
+        height: renderProperties.height,
+        child: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: widthOnlyIndicatorSize,
+                margin: const EdgeInsets.only(
+                  left: margin,
+                  right: heightOnlyIndicatorSize,
                 ),
-                arrowColor: widthIndicatorColor,
-                direction: Axis.horizontal,
-                arrowHeadSize: arrowHeadSize,
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              width: heightOnlyIndicatorSize,
-              margin: const EdgeInsets.symmetric(vertical: margin),
-              child: ArrowWrapper.bidirectional(
-                child: RotatedBox(
-                  quarterTurns: 1,
+                child: ArrowWrapper.bidirectional(
                   child: Text(
-                    'h=${toStringAsFixed(height)}',
-                    overflow: TextOverflow.ellipsis,
+                    'w=${toStringAsFixed(renderProperties.realWidth)}',
                   ),
+                  arrowColor: widthIndicatorColor,
+                  direction: Axis.horizontal,
+                  arrowHeadSize: arrowHeadSize,
                 ),
-                arrowColor: heightIndicatorColor,
-                direction: Axis.vertical,
-                arrowHeadSize: arrowHeadSize,
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: heightOnlyIndicatorSize,
+                margin: const EdgeInsets.symmetric(vertical: margin),
+                child: ArrowWrapper.bidirectional(
+                  child: RotatedBox(
+                    quarterTurns: 1,
+                    child: Text(
+                      'h=${toStringAsFixed(renderProperties.realHeight)}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  arrowColor: heightIndicatorColor,
+                  direction: Axis.vertical,
+                  arrowHeadSize: arrowHeadSize,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

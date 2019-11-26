@@ -21,4 +21,20 @@ extension InspectorFlutterService on ObjectGroup {
     );
     return val;
   }
+
+  Future<InstanceRef> invokeTweakFlexFactor(
+      InspectorInstanceRef ref, int flexFactor) async {
+    final command = '((){'
+        '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
+        '  final render = object.renderObject;'
+        '  final FlexParentData parentData = render.parentData;'
+        '  parentData.flex = $flexFactor;'
+        '  render.markNeedsLayout();'
+        '})()';
+    final val = await inspectorLibrary.eval(
+      command,
+      isAlive: this,
+    );
+    return val;
+  }
 }
