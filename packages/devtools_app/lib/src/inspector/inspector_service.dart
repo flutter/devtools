@@ -968,7 +968,7 @@ class ObjectGroup {
       }
       final result =  WidgetInspectorService.instance._nodeToJson(
         root,
-        _SerializationDelegate(
+        InspectorSerializationDelegate(
             groupName: '$groupName',
             summaryTree: false,
             subtreeDepth: $subtreeDepth,

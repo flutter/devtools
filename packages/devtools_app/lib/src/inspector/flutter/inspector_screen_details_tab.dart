@@ -112,7 +112,10 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   }
 
   void onSelectionChanged() async {
-    if (!StoryOfYourFlexWidget.shouldDisplay(selected)) return;
+    if (!StoryOfYourFlexWidget.shouldDisplay(selected)) {
+      setState(() => root = null);
+      return;
+    }
     final shouldFetch =
         root?.dartDiagnosticRef?.id != getRoot(selected)?.dartDiagnosticRef?.id;
     if (shouldFetch) {
