@@ -8,8 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import '../inspector_service.dart';
-import 'inspector_data_models.dart';
 import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
@@ -37,17 +35,15 @@ class InspectorDetailsTabController extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      if (InspectorController.enableExperimentalStoryOfLayout)
-        _buildTab('Layout Details'),
+      _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (InspectorController.enableExperimentalStoryOfLayout)
-        Banner(
-          message: 'PROTOTYPE',
-          location: BannerLocation.topStart,
-          child: LayoutDetailsTab(controller: controller),
-        ),
+      Banner(
+        message: 'PROTOTYPE',
+        location: BannerLocation.topStart,
+        child: LayoutDetailsTab(controller: controller),
+      ),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
@@ -92,6 +88,7 @@ class InspectorDetailsTabController extends StatelessWidget {
   }
 }
 
+/// Tab that acts as a proxy to decide which widget to be displayed
 class LayoutDetailsTab extends StatefulWidget {
   const LayoutDetailsTab({Key key, this.controller}) : super(key: key);
 
@@ -107,65 +104,25 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
 
-  InspectorObjectGroupManager objectGroupManager;
+  RemoteDiagnosticsNode previousSelection;
 
-  RemoteDiagnosticsNode root;
-
-  RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
-    if (!StoryOfYourFlexWidget.shouldDisplay(node)) return null;
-    if (node.isFlex) return node;
-    return node.parent;
+  Widget rootWidget(RemoteDiagnosticsNode node) {
+    if (StoryOfYourFlexWidget.shouldDisplay(node))
+      return StoryOfYourFlexWidget(controller);
+    return const SizedBox();
   }
 
-  void onSelectionChanged() async {
-    if (!StoryOfYourFlexWidget.shouldDisplay(selected)) {
-      setState(() => root = null);
-      return;
+  void onSelectionChanged() {
+    if (rootWidget(previousSelection).runtimeType !=
+        rootWidget(selected).runtimeType) {
+      setState(() => previousSelection = selected);
     }
-    final shouldFetch =
-        root?.dartDiagnosticRef?.id != getRoot(selected)?.dartDiagnosticRef?.id;
-    if (shouldFetch) {
-      objectGroupManager.cancelNext();
-      // TODO(albertusangga) show loading animation when root is null?
-      setState(() {
-        root = null;
-      });
-
-      final nextObjectGroup = objectGroupManager.next;
-      root = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
-        selected.isFlex ? selected : selected.parent,
-        subtreeDepth: 1,
-      );
-      if (!nextObjectGroup.disposed) {
-        assert(objectGroupManager.next == nextObjectGroup);
-        objectGroupManager.promoteNext();
-      }
-    }
-    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    updateObjectGroupManager();
     controller.addSelectionListener(onSelectionChanged);
-  }
-
-  void updateObjectGroupManager() {
-    final service = controller.inspectorService;
-    if (service != objectGroupManager?.inspectorService) {
-      objectGroupManager = InspectorObjectGroupManager(
-        service,
-        'flex-layout',
-      );
-    }
-    onSelectionChanged();
-  }
-
-  @override
-  void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    updateObjectGroupManager();
   }
 
   @override
@@ -177,17 +134,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // TODO(albertusangga): Visualize non-flex widget constraint model
-    if (root == null || !StoryOfYourFlexWidget.shouldDisplay(selected))
-      return const SizedBox();
-    final flexLayoutProperties = FlexLayoutProperties.fromDiagnostics(root);
-    final highlightChild =
-        selected.isFlex ? null : selected.parent.childrenNow.indexOf(selected);
-    return StoryOfYourFlexWidget(
-      flexLayoutProperties,
-      highlightChild: highlightChild,
-      inspectorController: controller,
-    );
+    return rootWidget(selected);
   }
 
   @override
