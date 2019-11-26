@@ -116,8 +116,6 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
     if (rootWidget(previousSelection).runtimeType !=
         rootWidget(selected).runtimeType) {
       setState(() => previousSelection = selected);
-    } else {
-      previousSelection = selected;
     }
   }
 

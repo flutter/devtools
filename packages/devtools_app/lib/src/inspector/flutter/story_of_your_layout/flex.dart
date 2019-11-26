@@ -90,10 +90,17 @@ Widget _visualizeWidthAndHeightWithConstraints({
   double arrowHeadSize = defaultArrowHeadSize,
 }) {
   final right = Container(
+    margin: const EdgeInsets.only(
+      top: margin,
+      left: margin,
+      bottom: widthAndConstraintIndicatorSize,
+    ),
     child: ArrowWrapper.bidirectional(
       arrowColor: heightIndicatorColor,
       arrowStrokeWidth: arrowStrokeWidth,
       arrowHeadSize: arrowHeadSize,
+      direction: Axis.vertical,
+      distanceToArrow: distanceToArrow,
       child: RotatedBox(
         quarterTurns: 1,
         child: Text(
@@ -103,20 +110,22 @@ Widget _visualizeWidthAndHeightWithConstraints({
           style: const TextStyle(height: 1.0),
         ),
       ),
-      direction: Axis.vertical,
-      distanceToArrow: distanceToArrow,
-    ),
-    margin: const EdgeInsets.only(
-      top: margin,
-      left: margin,
-      bottom: widthAndConstraintIndicatorSize,
     ),
   );
   final bottom = Container(
+    margin: const EdgeInsets.only(
+      top: margin,
+      right: heightAndConstraintIndicatorSize,
+      // so that the arrow does not overlap with each other
+      bottom: margin,
+      left: margin,
+    ),
     child: ArrowWrapper.bidirectional(
       arrowColor: widthIndicatorColor,
       arrowHeadSize: arrowHeadSize,
       arrowStrokeWidth: arrowStrokeWidth,
+      direction: Axis.horizontal,
+      distanceToArrow: distanceToArrow,
       child: Text(
         '${properties.describeWidth()}\n'
         '(${properties.describeWidthConstraints()})',
@@ -125,15 +134,6 @@ Widget _visualizeWidthAndHeightWithConstraints({
           height: 1.0,
         ),
       ),
-      direction: Axis.horizontal,
-      distanceToArrow: distanceToArrow,
-    ),
-    margin: const EdgeInsets.only(
-      top: margin,
-      right: heightAndConstraintIndicatorSize,
-      // so that the arrow does not overlap with each other
-      bottom: margin,
-      left: margin,
     ),
   );
   return BorderLayout(
@@ -343,97 +343,95 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       return const Center(child: Text('No Children'));
 
     final theme = Theme.of(context);
-    return _visualizeWidthAndHeightWithConstraints(
-      widget: Container(
-        margin: const EdgeInsets.only(top: margin, left: margin),
-        child: LayoutBuilder(builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          final maxHeight = constraints.maxHeight;
-
-          double maxSizeAvailable(Axis axis) {
-            return axis == Axis.horizontal ? maxWidth : maxHeight;
-          }
-
-          final childrenAndMainAxisSpacesRenderProps =
-              properties.childrenRenderProperties(
-            smallestRenderWidth: minRenderWidth,
-            largestRenderWidth: defaultMaxRenderWidth,
-            smallestRenderHeight: minRenderHeight,
-            largestRenderHeight: defaultMaxRenderHeight,
-            maxSizeAvailable: maxSizeAvailable,
-          );
-
-          final renderProperties = childrenAndMainAxisSpacesRenderProps
-              .where((renderProps) => !renderProps.isFreeSpace)
-              .toList();
-          final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
-              .where((renderProps) => renderProps.isFreeSpace)
-              .toList();
-          final crossAxisSpaces = properties.crossAxisSpaces(
-            childrenRenderProperties: renderProperties,
-            maxSizeAvailable: maxSizeAvailable,
-          );
-
-          final childrenRenderWidgets = <Widget>[
-            for (var i = 0; i < children.length; i++)
-              FlexChildVisualizer(
-                state: this,
-                notifyParent: refresh,
-                backgroundColor: highlighted == children[i]
-                    ? activeBackgroundColor(theme)
-                    : inActiveBackgroundColor(theme),
-                borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
-                textColor: i.isOdd ? null : const Color(0xFF303030),
-                renderProperties: renderProperties[i],
-              )
-          ];
-
-          final freeSpacesWidgets = <Widget>[
-            for (var renderProperties in [
-              ...mainAxisSpaces,
-              ...crossAxisSpaces
-            ])
-              EmptySpaceVisualizerWidget(renderProperties),
-          ];
-          return SingleChildScrollView(
-            scrollDirection: properties.direction,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: maxWidth,
-                minHeight: maxHeight,
-                maxWidth: direction == Axis.horizontal
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.width))
-                    : maxWidth,
-                maxHeight: direction == Axis.vertical
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.height))
-                    : maxHeight,
-              ).normalize(),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Image.asset(
-                      freeSpaceAssetName,
-                      width: maxWidth,
-                      height: maxHeight,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  ...childrenRenderWidgets,
-                  ...freeSpacesWidgets
-                ],
-              ),
-            ),
-          );
-        }),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: theme.primaryColorLight,
-            width: 1.0,
-          ),
+    final widget = Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: theme.primaryColorLight,
+          width: 1.0,
         ),
       ),
+      margin: const EdgeInsets.only(top: margin, left: margin),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final maxHeight = constraints.maxHeight;
+
+        double maxSizeAvailable(Axis axis) {
+          return axis == Axis.horizontal ? maxWidth : maxHeight;
+        }
+
+        final childrenAndMainAxisSpacesRenderProps =
+            properties.childrenRenderProperties(
+          smallestRenderWidth: minRenderWidth,
+          largestRenderWidth: defaultMaxRenderWidth,
+          smallestRenderHeight: minRenderHeight,
+          largestRenderHeight: defaultMaxRenderHeight,
+          maxSizeAvailable: maxSizeAvailable,
+        );
+
+        final renderProperties = childrenAndMainAxisSpacesRenderProps
+            .where((renderProps) => !renderProps.isFreeSpace)
+            .toList();
+        final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
+            .where((renderProps) => renderProps.isFreeSpace)
+            .toList();
+        final crossAxisSpaces = properties.crossAxisSpaces(
+          childrenRenderProperties: renderProperties,
+          maxSizeAvailable: maxSizeAvailable,
+        );
+
+        final childrenRenderWidgets = <Widget>[
+          for (var i = 0; i < children.length; i++)
+            FlexChildVisualizer(
+              state: this,
+              notifyParent: refresh,
+              backgroundColor: highlighted == children[i]
+                  ? activeBackgroundColor(theme)
+                  : inActiveBackgroundColor(theme),
+              borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
+              textColor: i.isOdd ? null : const Color(0xFF303030),
+              renderProperties: renderProperties[i],
+            )
+        ];
+
+        final freeSpacesWidgets = <Widget>[
+          for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
+            EmptySpaceVisualizerWidget(renderProperties),
+        ];
+        return SingleChildScrollView(
+          scrollDirection: properties.direction,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: maxWidth,
+              minHeight: maxHeight,
+              maxWidth: direction == Axis.horizontal
+                  ? sum(childrenAndMainAxisSpacesRenderProps
+                      .map((renderSize) => renderSize.width))
+                  : maxWidth,
+              maxHeight: direction == Axis.vertical
+                  ? sum(childrenAndMainAxisSpacesRenderProps
+                      .map((renderSize) => renderSize.height))
+                  : maxHeight,
+            ).normalize(),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    freeSpaceAssetName,
+                    width: maxWidth,
+                    height: maxHeight,
+                    fit: BoxFit.fill,
+                  ),
+                ),
+                ...childrenRenderWidgets,
+                ...freeSpacesWidgets
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+    return _visualizeWidthAndHeightWithConstraints(
+      widget: widget,
       properties: properties,
     );
   }
@@ -749,11 +747,11 @@ class FlexChildVisualizer extends StatelessWidget {
 
     return DropdownButton<int>(
       value: properties.flexFactor,
+      onChanged: onChangeFlexFactor,
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),
         for (var i = 0; i <= maximumFlexFactor; ++i) buildMenuItem(i),
       ],
-      onChanged: onChangeFlexFactor,
     );
   }
 
@@ -767,7 +765,7 @@ class FlexChildVisualizer extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          _buildFlexFactorChangerDropdown(maximumFlexFactor),
+          _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
           if (!properties.hasFlexFactor)
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
@@ -850,7 +848,9 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  static const maximumFlexFactor = 5;
+  /// define the number of flex factor to be shown in the flex dropdown button
+  /// for example if it's set to 5 the dropdown will consist of 6 items (null and 0..5)
+  static const maximumFlexFactorOptions = 5;
 }
 
 /// Widget that draws bounding box with the title (usually widget name) in its top left
