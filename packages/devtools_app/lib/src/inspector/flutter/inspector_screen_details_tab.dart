@@ -135,6 +135,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   @override
   Widget build(BuildContext context) {
+    // this call to super is required because of [AutomaticKeepAliveClientMixin]
     super.build(context);
     return responsibleWidget(selected);
   }
