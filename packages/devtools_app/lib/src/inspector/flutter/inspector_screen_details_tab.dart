@@ -106,15 +106,15 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
 
   RemoteDiagnosticsNode previousSelection;
 
-  Widget responsibleWidget(RemoteDiagnosticsNode node) {
+  Widget rootWidget(RemoteDiagnosticsNode node) {
     if (StoryOfYourFlexWidget.shouldDisplay(node))
       return StoryOfYourFlexWidget(controller);
     return const SizedBox();
   }
 
   void onSelectionChanged() {
-    if (responsibleWidget(previousSelection).runtimeType !=
-        responsibleWidget(selected).runtimeType) {
+    if (rootWidget(previousSelection).runtimeType !=
+        rootWidget(selected).runtimeType) {
       setState(() => previousSelection = selected);
     } else {
       previousSelection = selected;
@@ -137,7 +137,7 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   Widget build(BuildContext context) {
     // this call to super is required because of [AutomaticKeepAliveClientMixin]
     super.build(context);
-    return responsibleWidget(selected);
+    return rootWidget(selected);
   }
 
   @override
