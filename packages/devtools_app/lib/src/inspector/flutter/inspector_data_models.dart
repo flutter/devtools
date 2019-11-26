@@ -103,18 +103,13 @@ class LayoutProperties {
             : node?.childrenNow
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
-                ?.toList(growable: false) {
-    for (var child in children) {
-      child.parent = this;
-    }
-  }
+                ?.toList(growable: false);
 
-  LayoutProperties parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
   final String description;
-  int flexFactor;
+  final int flexFactor;
   final bool isFlex;
   final Size size;
 

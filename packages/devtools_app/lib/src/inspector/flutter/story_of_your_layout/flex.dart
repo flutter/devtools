@@ -89,56 +89,58 @@ Widget _visualizeWidthAndHeightWithConstraints({
   @required LayoutProperties properties,
   double arrowHeadSize = defaultArrowHeadSize,
 }) {
+  final right = Container(
+    child: ArrowWrapper.bidirectional(
+      arrowColor: heightIndicatorColor,
+      arrowStrokeWidth: arrowStrokeWidth,
+      arrowHeadSize: arrowHeadSize,
+      child: RotatedBox(
+        quarterTurns: 1,
+        child: Text(
+          '${properties.describeHeight()}\n'
+          '(${properties.describeHeightConstraints()})',
+          textAlign: TextAlign.center,
+          style: const TextStyle(height: 1.0),
+        ),
+      ),
+      direction: Axis.vertical,
+      distanceToArrow: distanceToArrow,
+    ),
+    margin: const EdgeInsets.only(
+      top: margin,
+      left: margin,
+      bottom: widthAndConstraintIndicatorSize,
+    ),
+  );
+  final bottom = Container(
+    child: ArrowWrapper.bidirectional(
+      arrowColor: widthIndicatorColor,
+      arrowHeadSize: arrowHeadSize,
+      arrowStrokeWidth: arrowStrokeWidth,
+      child: Text(
+        '${properties.describeWidth()}\n'
+        '(${properties.describeWidthConstraints()})',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          height: 1.0,
+        ),
+      ),
+      direction: Axis.horizontal,
+      distanceToArrow: distanceToArrow,
+    ),
+    margin: const EdgeInsets.only(
+      top: margin,
+      right: heightAndConstraintIndicatorSize,
+      // so that the arrow does not overlap with each other
+      bottom: margin,
+      left: margin,
+    ),
+  );
   return BorderLayout(
     center: widget,
-    right: Container(
-      child: ArrowWrapper.bidirectional(
-        arrowColor: heightIndicatorColor,
-        arrowStrokeWidth: arrowStrokeWidth,
-        arrowHeadSize: arrowHeadSize,
-        child: RotatedBox(
-          quarterTurns: 1,
-          child: Text(
-            '${properties.describeHeight()}\n'
-            '(${properties.describeHeightConstraints()})',
-            textAlign: TextAlign.center,
-            style: const TextStyle(height: 1.0),
-          ),
-        ),
-        direction: Axis.vertical,
-        distanceToArrow: distanceToArrow,
-      ),
-      margin: const EdgeInsets.only(
-        top: margin,
-        left: margin,
-        bottom: widthAndConstraintIndicatorSize,
-      ),
-    ),
+    right: right,
     rightWidth: heightAndConstraintIndicatorSize,
-    bottom: Container(
-      child: ArrowWrapper.bidirectional(
-        arrowColor: widthIndicatorColor,
-        arrowHeadSize: arrowHeadSize,
-        arrowStrokeWidth: arrowStrokeWidth,
-        child: Text(
-          '${properties.describeWidth()}\n'
-          '(${properties.describeWidthConstraints()})',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            height: 1.0,
-          ),
-        ),
-        direction: Axis.horizontal,
-        distanceToArrow: distanceToArrow,
-      ),
-      margin: const EdgeInsets.only(
-        top: margin,
-        right: heightAndConstraintIndicatorSize,
-        // so that the arrow does not overlap with each other
-        bottom: margin,
-        left: margin,
-      ),
-    ),
+    bottom: bottom,
     bottomHeight: widthAndConstraintIndicatorSize,
   );
 }
@@ -266,27 +268,25 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   void updateHighlighted(FlexLayoutProperties newProperties) {
-    if (selectedNode.isFlex) {
-      highlighted = newProperties;
-    } else {
-      final idx = selectedNode.parent.childrenNow.indexOf(selectedNode);
-      if (idx != -1) highlighted = newProperties.children[idx];
-    }
+    setState(() {
+      if (selectedNode.isFlex) {
+        highlighted = newProperties;
+      } else {
+        final idx = selectedNode.parent.childrenNow.indexOf(selectedNode);
+        if (idx != -1) highlighted = newProperties.children[idx];
+      }
+    });
   }
 
   void setProperties(FlexLayoutProperties newProperties) {
     updateHighlighted(newProperties);
     if (_properties == newProperties) {
-      // update highlighted child
-      setState(() {});
       return;
     }
-    if (_properties == null) {
+    setState(() {
+      _previousProperties = _properties;
       _properties = newProperties;
-      setState(() {});
-    }
-    _previousProperties = _properties;
-    _properties = newProperties;
+    });
     _updateProperties();
   }
 
@@ -535,11 +535,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            if (axis == direction) {
-              properties.mainAxisAlignment = newSelection;
-            } else {
-              properties.crossAxisAlignment = newSelection;
-            }
+            setState(() {
+              if (axis == direction) {
+                properties.mainAxisAlignment = newSelection;
+              } else {
+                properties.crossAxisAlignment = newSelection;
+              }
+            });
             final service = await properties.node.inspectorService;
             final arg = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
@@ -723,7 +725,6 @@ class FlexChildVisualizer extends StatelessWidget {
       node.valueRef,
       newFlexFactor,
     );
-    properties.flexFactor = newFlexFactor;
     notifyParent();
   }
 

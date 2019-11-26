@@ -8,8 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import '../inspector_service.dart';
-import 'inspector_data_models.dart';
 import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
@@ -37,17 +35,15 @@ class InspectorDetailsTabController extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      if (InspectorController.enableExperimentalStoryOfLayout)
-        _buildTab('Layout Details'),
+      _buildTab('Layout Details'),
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (InspectorController.enableExperimentalStoryOfLayout)
-        Banner(
-          message: 'PROTOTYPE',
-          location: BannerLocation.topStart,
-          child: LayoutDetailsTab(controller: controller),
-        ),
+      Banner(
+        message: 'PROTOTYPE',
+        location: BannerLocation.topStart,
+        child: LayoutDetailsTab(controller: controller),
+      ),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
@@ -119,9 +115,10 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   void onSelectionChanged() {
     if (responsibleWidget(previousSelection).runtimeType !=
         responsibleWidget(selected).runtimeType) {
-      setState(() {});
+      setState(() => previousSelection = selected);
+    } else {
+      previousSelection = selected;
     }
-    previousSelection = selected;
   }
 
   @override

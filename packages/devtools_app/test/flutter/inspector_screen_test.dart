@@ -228,11 +228,10 @@ void main() {
         duration: const Duration(milliseconds: 1),
       );
       final diagnostic = RemoteDiagnosticsNode(jsonNode, null, false, null);
-      final node = InspectorTreeNode()..diagnostic = diagnostic;
       await tester.pumpWidget(
         MaterialApp(
           home: ConstraintsDescription(
-            properties: LayoutProperties(node.diagnostic),
+            properties: LayoutProperties(diagnostic),
             listenable: animationController,
           ),
         ),
@@ -344,31 +343,37 @@ class MockInspectorService extends Mock implements InspectorService {}
 class MockInspectorTreeController extends Mock
     implements InspectorTreeController {}
 
-class TestInspectorController extends Mock implements InspectorController {
-  factory TestInspectorController() {
-    final controller = TestInspectorController._();
-    when(controller.selectedNode).thenAnswer((_) => controller.node);
-    when(controller.addSelectionListener(any)).thenAnswer((invocation) {
-      final Function listener = invocation.positionalArguments.first;
-      controller.listeners.add(listener);
-    });
-    when(controller.setSelectedNode(any)).thenAnswer((invocation) {
-      final InspectorTreeNode newSelection =
-          invocation.positionalArguments.first;
-      controller.node = newSelection;
-      for (var listener in controller.listeners) {
-        listener();
-      }
-    });
-    when(controller.removeSelectionListener(any)).thenAnswer((invocation) {
-      final listener = invocation.positionalArguments.first;
-      controller.listeners.remove(listener);
-    });
-    return controller;
-  }
-
-  TestInspectorController._();
-
+class TestInspectorController extends Fake implements InspectorController {
+  InspectorService service = MockInspectorService();
   InspectorTreeNode node;
   List<Function> listeners = [];
+
+  @override
+  InspectorTreeNode get selectedNode => node;
+  @override
+  set selectedNode(InspectorTreeNode newNode) => node = newNode;
+
+  @override
+  void addSelectionListener(Function listener) {
+    listeners.add(listener);
+  }
+
+  @override
+  void notifySelectionListeners() {
+    for (var listener in listeners) listener();
+  }
+
+  @override
+  void removeSelectionListener(Function listener) {
+    listeners.remove(listener);
+  }
+
+  @override
+  void setSelectedNode(InspectorTreeNode newSelection) {
+    selectedNode = newSelection;
+    notifySelectionListeners();
+  }
+
+  @override
+  InspectorService get inspectorService => service;
 }
