@@ -229,7 +229,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   @override
   void dispose() {
-    print('disposed');
     entranceController.dispose();
     inspectorController.removeSelectionListener(_onInspectorSelectionChanged);
     super.dispose();
@@ -715,7 +714,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   FlexLayoutProperties get root => state.properties;
 
-  LayoutProperties get properties => renderProperties.actualProperties;
+  LayoutProperties get properties => renderProperties.layoutProperties;
 
   void onChangeFlexFactor(int newFlexFactor) async {
     final node = properties.node;

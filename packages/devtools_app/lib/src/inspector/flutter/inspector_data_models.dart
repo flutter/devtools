@@ -415,7 +415,7 @@ class FlexLayoutProperties extends LayoutProperties {
         )
           ..mainAxisOffset = calculateMainAxisOffset(i)
           ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..actualProperties = children[i],
+          ..layoutProperties = children[i],
       );
     }
 
@@ -466,7 +466,7 @@ class FlexLayoutProperties extends LayoutProperties {
               maxSizeAvailable(crossAxisDirection)) continue;
 
       final renderProperties = childrenRenderProperties[i];
-      final space = renderProperties.clone()..actualProperties = null;
+      final space = renderProperties.clone()..layoutProperties = null;
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
@@ -512,7 +512,7 @@ class RenderProperties {
     Size size,
     Offset offset,
     Size realSize,
-    this.actualProperties,
+    this.layoutProperties,
   })  : width = size?.width,
         height = size?.height,
         realWidth = realSize?.width,
@@ -523,13 +523,13 @@ class RenderProperties {
   final Axis axis;
 
   /// represents which node is rendered for this object.
-  LayoutProperties actualProperties;
+  LayoutProperties layoutProperties;
 
   double dx, dy;
   double width, height;
   double realWidth, realHeight;
 
-  bool get isFreeSpace => actualProperties == null;
+  bool get isFreeSpace => layoutProperties == null;
 
   Size get size => Size(width, height);
 
@@ -599,7 +599,7 @@ class RenderProperties {
       size: size,
       offset: offset,
       realSize: realSize,
-      actualProperties: actualProperties,
+      layoutProperties: layoutProperties,
     );
   }
 }
