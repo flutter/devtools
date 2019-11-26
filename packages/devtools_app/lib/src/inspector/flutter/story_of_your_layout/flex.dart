@@ -122,6 +122,23 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
     allEntrance =
         CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
+    changeController = AnimationController(
+      vsync: this,
+      duration: entranceAnimationDuration,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            _properties = _animatedProperties.end;
+            _animatedProperties = null;
+            changeController.value = 0.0;
+          });
+        }
+      });
+    changeAnimation = CurvedAnimation(
+      parent: changeController,
+      curve: Curves.easeInOut,
+    );
+    _properties = widget.properties;
     _updateProperties();
   }
 
@@ -134,6 +151,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   @override
   void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _properties = widget.properties;
     if (oldWidget.properties.node != widget.properties.node) {
       _previousProperties = oldWidget.properties;
     }
@@ -141,6 +159,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   void _updateProperties() {
+    if (_animatedProperties != null) {
+      changeController.forward();
+    }
     if (_previousProperties != null) {
       entranceController.reverse();
     } else {
@@ -151,12 +172,29 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   AnimationController entranceController;
   CurvedAnimation expandedEntrance;
   CurvedAnimation allEntrance;
+  AnimationController changeController;
+  CurvedAnimation changeAnimation;
 
   Size get size => properties.size;
 
   FlexLayoutProperties get properties =>
-      _previousProperties ?? widget.properties;
+      _previousProperties ?? _animatedProperties ?? _properties;
+
+  AnimatedFlexLayoutProperties _animatedProperties;
   FlexLayoutProperties _previousProperties;
+  FlexLayoutProperties _properties;
+
+  void _animateProperties(FlexLayoutProperties nextProperties) {
+    setState(() {
+      _animatedProperties = AnimatedFlexLayoutProperties(
+        // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
+        _animatedProperties?.copyWith() ?? _properties,
+        nextProperties,
+        changeAnimation,
+      );
+      changeController.forward(from: 0.0);
+    });
+  }
 
   List<LayoutProperties> get children => properties.children;
 
@@ -324,7 +362,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         Text(
-                          'flex: $flexFactor',
+                          'flex: ${flexFactor?.toInt()}',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         if (flexFactor == 0 || flexFactor == null)
@@ -445,7 +483,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                       freeSpaceAssetName,
                       width: maxWidth,
                       height: maxHeight,
-                      fit: BoxFit.fill,
+                      repeat: ImageRepeat.repeat,
+                      fit: BoxFit.none,
+                      alignment: Alignment.topLeft,
                     ),
                   ),
                   ...childrenRenderWidgets,
@@ -563,13 +603,14 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            setState(() {
-              if (axis == direction) {
-                properties.mainAxisAlignment = newSelection;
-              } else {
-                properties.crossAxisAlignment = newSelection;
-              }
-            });
+            FlexLayoutProperties nextProperties;
+            if (axis == direction) {
+              _animateProperties(
+                  properties.copyWith(mainAxisAlignment: newSelection));
+            } else {
+              _animateProperties(
+                  properties.copyWith(crossAxisAlignment: newSelection));
+            }
             final service = await properties.node.inspectorService;
             final arg = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
@@ -601,114 +642,122 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             child: Container(
               margin: const EdgeInsets.all(margin),
               padding: const EdgeInsets.only(bottom: margin, right: margin),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxHeight = constraints.maxHeight;
-                final maxWidth = constraints.maxWidth;
-                return Container(
-                  constraints:
-                      BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-                  child: Stack(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                            top: mainAxisArrowIndicatorSize,
-                            left: crossAxisArrowIndicatorSize + margin,
-                          ),
-                          child: InkWell(
-                            onTap: () => _onTap(properties),
-                            child: WidgetVisualizer(
-                              title: flexType,
-                              backgroundColor: widget.highlightChild == null
-                                  ? activeBackgroundColor(theme)
-                                  : null,
-                              hint: Container(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text(
-                                  'Total Flex Factor: ${properties?.totalFlex}',
-                                  textScaleFactor: largeTextScaleFactor,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+              child: AnimatedBuilder(
+                animation: changeController,
+                builder: (context, child) {
+                  return LayoutBuilder(builder: (context, constraints) {
+                    final maxHeight = constraints.maxHeight;
+                    final maxWidth = constraints.maxWidth;
+                    return Container(
+                      constraints: BoxConstraints(
+                          maxWidth: maxWidth, maxHeight: maxHeight),
+                      child: Stack(
+                        children: <Widget>[
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.only(
+                                top: mainAxisArrowIndicatorSize,
+                                left: crossAxisArrowIndicatorSize + margin,
+                              ),
+                              child: InkWell(
+                                onTap: () => _onTap(properties),
+                                child: WidgetVisualizer(
+                                  title: flexType,
+                                  backgroundColor: widget.highlightChild == null
+                                      ? activeBackgroundColor(theme)
+                                      : null,
+                                  hint: Container(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text(
+                                      'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
+                                      textScaleFactor: largeTextScaleFactor,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  borderColor: mainAxisColor,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(
+                                      /// margin for the outer width/height
+                                      ///  so that they don't stick to the corner
+                                      right: margin,
+                                      bottom: margin,
+                                    ),
+                                    child: _visualizeFlex(context),
                                   ),
                                 ),
-                              ),
-                              borderColor: mainAxisColor,
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                  /// margin for the outer width/height
-                                  ///  so that they don't stick to the corner
-                                  right: margin,
-                                  bottom: margin,
-                                ),
-                                child: _visualizeFlex(context),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Container(
-                          height: maxHeight - mainAxisArrowIndicatorSize,
-                          width: crossAxisArrowIndicatorSize,
-                          child: Column(
-                            children: <Widget>[
-                              Expanded(
-                                child: ArrowWrapper.unidirectional(
-                                  arrowColor: verticalColor,
-                                  child: RotatedBox(
-                                    quarterTurns: 3,
-                                    child: Text(
-                                      properties.verticalDirectionDescription,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      textScaleFactor: largeTextScaleFactor,
-                                      style:
-                                          TextStyle(color: verticalTextColor),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Container(
+                              height: maxHeight - mainAxisArrowIndicatorSize,
+                              width: crossAxisArrowIndicatorSize,
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: ArrowWrapper.unidirectional(
+                                      arrowColor: verticalColor,
+                                      child: RotatedBox(
+                                        quarterTurns: 3,
+                                        child: Text(
+                                          properties
+                                              .verticalDirectionDescription,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          textScaleFactor: largeTextScaleFactor,
+                                          style: TextStyle(
+                                              color: verticalTextColor),
+                                        ),
+                                      ),
+                                      type: ArrowType.down,
                                     ),
                                   ),
-                                  type: ArrowType.down,
-                                ),
+                                  _buildAxisAlignmentDropdown(Axis.vertical),
+                                ],
                               ),
-                              _buildAxisAlignmentDropdown(Axis.vertical),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          height: mainAxisArrowIndicatorSize,
-                          width:
-                              maxWidth - crossAxisArrowIndicatorSize - margin,
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: ArrowWrapper.unidirectional(
-                                  arrowColor: horizontalColor,
-                                  child: FittedBox(
-                                    child: Text(
-                                      properties.horizontalDirectionDescription,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      textScaleFactor: largeTextScaleFactor,
-                                      style:
-                                          TextStyle(color: horizontalTextColor),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              height: mainAxisArrowIndicatorSize,
+                              width: maxWidth -
+                                  crossAxisArrowIndicatorSize -
+                                  margin,
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: ArrowWrapper.unidirectional(
+                                      arrowColor: horizontalColor,
+                                      child: FittedBox(
+                                        child: Text(
+                                          properties
+                                              .horizontalDirectionDescription,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          textScaleFactor: largeTextScaleFactor,
+                                          style: TextStyle(
+                                              color: horizontalTextColor),
+                                        ),
+                                      ),
+                                      type: ArrowType.right,
                                     ),
                                   ),
-                                  type: ArrowType.right,
-                                ),
+                                  _buildAxisAlignmentDropdown(Axis.horizontal),
+                                ],
                               ),
-                              _buildAxisAlignmentDropdown(Axis.horizontal),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }),
+                    );
+                  });
+                },
+              ),
             ),
           ),
         ],

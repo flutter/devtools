@@ -89,6 +89,23 @@ List<double> computeRenderSizes({
     renderSizes = transformToRenderSize(largestRenderSize);
   }
   return renderSizes;
+
+  ScrollController linkedController;
+  List<dynamic> nodes;
+  ListView.builder(
+    scrollDirection: Axis.horizontal,
+    controller: linkedController,
+    itemBuilder: (context, index) {
+      final node = nodes[index];
+      final next = index == nodes.length - 1 ? null : nodes[index + 1];
+      return Padding(
+        padding:
+            EdgeInsets.only(right: next == null ? 0.0 : next.left - node.right),
+        child: node.buildWidget(context, node.selected),
+      );
+    },
+    itemCount: nodes.length,
+  );
 }
 
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
@@ -106,11 +123,33 @@ class LayoutProperties {
                     LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false);
 
+  LayoutProperties._({
+    @required this.node,
+    @required this.children,
+    @required this.constraints,
+    @required this.description,
+    @required this.flexFactor,
+    @required this.isFlex,
+    @required this.size,
+  });
+  factory LayoutProperties.lerp(
+      LayoutProperties begin, LayoutProperties end, double t) {
+    return LayoutProperties._(
+      node: end.node,
+      children: end.children,
+      constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
+      description: end.description,
+      flexFactor: begin.flexFactor + (begin.flexFactor - end.flexFactor) * t,
+      isFlex: begin.isFlex && end.isFlex,
+      size: Size.lerp(begin.size, end.size, t),
+    );
+  }
+
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
   final String description;
-  final int flexFactor;
+  final num flexFactor;
   final bool isFlex;
   final Size size;
 
@@ -176,7 +215,32 @@ final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
-  FlexLayoutProperties._(
+  FlexLayoutProperties({
+    Size size,
+    List<LayoutProperties> children,
+    RemoteDiagnosticsNode node,
+    BoxConstraints constraints,
+    bool isFlex,
+    String description,
+    num flexFactor,
+    this.direction,
+    this.mainAxisAlignment,
+    this.crossAxisAlignment,
+    this.mainAxisSize,
+    this.textDirection,
+    this.verticalDirection,
+    this.textBaseline,
+  }) : super._(
+          size: size,
+          children: children,
+          node: node,
+          constraints: constraints,
+          isFlex: isFlex,
+          description: description,
+          flexFactor: flexFactor,
+        );
+
+  FlexLayoutProperties._fromNode(
     RemoteDiagnosticsNode node, {
     this.direction,
     this.mainAxisAlignment,
@@ -194,6 +258,38 @@ class FlexLayoutProperties extends LayoutProperties {
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
+  FlexLayoutProperties copyWith(
+      {Size size,
+      List<LayoutProperties> children,
+      BoxConstraints constraints,
+      bool isFlex,
+      String description,
+      num flexFactor,
+      Axis direction,
+      MainAxisAlignment mainAxisAlignment,
+      MainAxisSize mainAxisSize,
+      CrossAxisAlignment crossAxisAlignment,
+      TextDirection textDirection,
+      VerticalDirection verticalDirection,
+      TextBaseline textBaseline}) {
+    return FlexLayoutProperties(
+      size: size ?? this.size,
+      children: children ?? this.children,
+      node: node,
+      constraints: constraints ?? this.constraints,
+      isFlex: isFlex ?? this.isFlex,
+      description: description ?? this.description,
+      flexFactor: flexFactor ?? this.flexFactor,
+      direction: direction ?? this.direction,
+      mainAxisAlignment: mainAxisAlignment ?? this.mainAxisAlignment,
+      mainAxisSize: mainAxisSize ?? this.mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment ?? this.crossAxisAlignment,
+      textDirection: textDirection ?? this.textDirection,
+      verticalDirection: verticalDirection ?? this.verticalDirection,
+      textBaseline: textBaseline ?? this.textBaseline,
+    );
+  }
+
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object> renderObjectJson = node.json['renderObject'];
     final List<dynamic> properties = renderObjectJson['properties'];
@@ -202,7 +298,7 @@ class FlexLayoutProperties extends LayoutProperties {
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
-    return FlexLayoutProperties._(
+    return FlexLayoutProperties._fromNode(
       node,
       direction: _directionUtils.enumEntry(data['direction']),
       mainAxisAlignment:
@@ -218,8 +314,8 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   final Axis direction;
-  MainAxisAlignment mainAxisAlignment;
-  CrossAxisAlignment crossAxisAlignment;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
   final MainAxisSize mainAxisSize;
   final TextDirection textDirection;
   final VerticalDirection verticalDirection;
@@ -241,7 +337,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   String get type => direction == Axis.horizontal ? 'Row' : 'Column';
 
-  int get totalFlex {
+  num get totalFlex {
     if (children?.isEmpty ?? true) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
