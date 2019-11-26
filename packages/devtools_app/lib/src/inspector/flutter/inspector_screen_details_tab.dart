@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import '../inspector_service.dart';
 import 'story_of_your_layout/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {

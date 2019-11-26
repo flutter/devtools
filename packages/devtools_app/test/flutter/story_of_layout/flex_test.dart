@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';

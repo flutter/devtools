@@ -314,22 +314,22 @@ void main() {
 
       testWidgetsWithWindowSize(
           'should listen to controller selection event', windowSize,
-              (WidgetTester tester) async {
-            final controller = TestInspectorController();
-            await tester.pumpWidget(
-              MaterialApp(
-                home: Scaffold(
-                  body: LayoutDetailsTab(
-                    controller: controller,
-                  ),
-                ),
+          (WidgetTester tester) async {
+        final controller = TestInspectorController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LayoutDetailsTab(
+                controller: controller,
               ),
-            );
-            expect(find.byType(StoryOfYourFlexWidget), findsNothing);
-            controller.setSelectedNode(treeNode);
-            await tester.pumpAndSettle();
-            expect(find.byType(StoryOfYourFlexWidget), findsOneWidget);
-          });
+            ),
+          ),
+        );
+        expect(find.byType(StoryOfYourFlexWidget), findsNothing);
+        controller.setSelectedNode(treeNode);
+        await tester.pumpAndSettle();
+        expect(find.byType(StoryOfYourFlexWidget), findsOneWidget);
+      });
     });
 
     // TODO(jacobr): add screenshot tests that connect to a test application
@@ -341,7 +341,8 @@ void main() {
 
 class MockInspectorService extends Mock implements InspectorService {}
 
-class MockInspectorTreeController extends Mock implements InspectorTreeController {}
+class MockInspectorTreeController extends Mock
+    implements InspectorTreeController {}
 
 class TestInspectorController extends Mock implements InspectorController {
   factory TestInspectorController() {
@@ -352,7 +353,8 @@ class TestInspectorController extends Mock implements InspectorController {
       controller.listeners.add(listener);
     });
     when(controller.setSelectedNode(any)).thenAnswer((invocation) {
-      final InspectorTreeNode newSelection = invocation.positionalArguments.first;
+      final InspectorTreeNode newSelection =
+          invocation.positionalArguments.first;
       controller.node = newSelection;
       for (var listener in controller.listeners) {
         listener();
@@ -369,5 +371,4 @@ class TestInspectorController extends Mock implements InspectorController {
 
   InspectorTreeNode node;
   List<Function> listeners = [];
-
 }
