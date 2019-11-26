@@ -12,8 +12,6 @@ import '../diagnostics_node.dart';
 import '../enum_utils.dart';
 import 'story_of_your_layout/utils.dart';
 
-const Type boxConstraintsType = BoxConstraints;
-
 /// Compute real widget sizes into rendered sizes to be displayed on the details tab.
 /// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
 /// In the case where it is greater, we should render it with scrolling capability.
@@ -155,20 +153,22 @@ class LayoutProperties {
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
-    if (json == null || json['type'] != boxConstraintsType.toString())
-      return null;
+    if (json == null || json['type'] != 'BoxConstraints') return null;
     // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
     return BoxConstraints(
-      minWidth: json['minWidth'],
-      maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,
-      minHeight: json['minHeight'],
-      maxHeight: json['hasBoundedHeight'] ? json['maxHeight'] : double.infinity,
+      minWidth: double.parse(json['minWidth']),
+      maxWidth: double.parse(json['maxWidth']),
+      minHeight: double.parse(json['minHeight']),
+      maxHeight: double.parse(json['maxHeight']),
     );
   }
 
   static Size deserializeSize(Map<String, Object> json) {
     if (json == null) return null;
-    return Size(json['width'], json['height']);
+    return Size(
+      double.parse(json['width']),
+      double.parse(json['height']),
+    );
   }
 }
 
@@ -195,7 +195,8 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object> renderObjectJson = node.json['renderObject'];
+    final Map<String, Object> renderObjectJson = node?.renderObject;
+    if (renderObjectJson == null) return null;
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,

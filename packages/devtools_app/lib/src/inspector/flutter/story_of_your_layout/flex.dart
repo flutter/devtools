@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import '../../../ui/colors.dart';
 import '../../../ui/theme.dart';
 import '../../../utils.dart';
+import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../inspector_data_models.dart';
 import '../inspector_service_flutter_extension.dart';
@@ -97,6 +98,10 @@ class StoryOfYourFlexWidget extends StatefulWidget {
   final int highlightChild;
 
   final InspectorController inspectorController;
+
+  static bool shouldDisplay(RemoteDiagnosticsNode node) {
+    return (node?.isFlex ?? false) || (node?.parent?.isFlex ?? false);
+  }
 
   @override
   _StoryOfYourFlexWidgetState createState() => _StoryOfYourFlexWidgetState();

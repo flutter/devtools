@@ -954,6 +954,75 @@ class ObjectGroup {
       args,
     ));
   }
+
+  Future<RemoteDiagnosticsNode> getDetailsSubtreeWithRenderObject(
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 1,
+  }) async {
+    if (node == null) return null;
+    final id = node.dartDiagnosticRef.id;
+    String command = '''
+      final root = WidgetInspectorService.instance.toObject('$id');
+      if (root == null) {
+        return null;
+      }
+      final result =  WidgetInspectorService.instance._nodeToJson(
+        root,
+        InspectorSerializationDelegate(
+            groupName: '$groupName',
+            summaryTree: false,
+            subtreeDepth: $subtreeDepth,
+            includeProperties: true,
+            service: WidgetInspectorService.instance,
+            addAdditionalPropertiesCallback: (node, delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                final renderObject = value.renderObject;
+                additionalJson['renderObject'] = renderObject.toDiagnosticsNode()?.toJsonMap(
+                  delegate.copyWith(
+                    subtreeDepth: 0,
+                    includeProperties: true,
+                  ),
+                );
+                final Constraints constraints = renderObject.constraints;
+                if (constraints != null) {
+                  final Map<String, Object> constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toStringAsFixed(1),
+                      'minHeight': constraints.minHeight.toStringAsFixed(1),
+                      'maxWidth': constraints.maxWidth.toStringAsFixed(1),
+                      'maxHeight': constraints.maxHeight.toStringAsFixed(1),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+                if (renderObject is RenderBox) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toStringAsFixed(1),
+                    'height': renderObject.size.height.toStringAsFixed(1),
+                  };             
+                  
+                  final ParentData parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex;
+                  }
+                }
+              }
+              return additionalJson;
+            }
+        ),
+      );
+      return WidgetInspectorService.instance._safeJsonEncode(result);
+    ''';
+    command = '((){${command.split('\n').join()}})()';
+    final result = await inspectorLibrary.eval(command, isAlive: this);
+    return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
+  }
 }
 
 enum FlutterTreeType {
