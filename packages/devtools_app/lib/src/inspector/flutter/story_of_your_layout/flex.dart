@@ -214,9 +214,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   @override
   void initState() {
     super.initState();
-    inspectorController.addSelectionListener(_onInspectorSelectionChanged);
     _initAnimationStates();
     _updateObjectGroupManager();
+    inspectorController.addSelectionListener(_onInspectorSelectionChanged);
     _updateProperties();
   }
 

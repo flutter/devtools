@@ -7,10 +7,12 @@ import 'dart:convert';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../inspector_screen_test.dart';
 import '../wrappers.dart';
 
 void main() {
@@ -249,11 +251,13 @@ void main() {
   testWidgetsWithWindowSize('Row golden test', windowSize,
       (WidgetTester tester) async {
     final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
-    final diagnostics =
+    final diagnostic =
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
-    final widget = wrap(StoryOfYourFlexWidget(
-        FlexLayoutProperties.fromDiagnostics(diagnostics)));
+    final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
+    final controller = TestInspectorController()..setSelectedNode(treeNode);
+    final widget = wrap(StoryOfYourFlexWidget(controller));
     await pump(tester, widget);
+    await tester.pumpAndSettle();
     await expectLater(
       find.byWidget(widget),
       matchesGoldenFile('goldens/story_of_row_layout.png'),
@@ -263,10 +267,11 @@ void main() {
   testWidgetsWithWindowSize('Column golden test', windowSize,
       (WidgetTester tester) async {
     final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
-    final diagnostics =
+    final diagnostic =
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
-    final widget = wrap(StoryOfYourFlexWidget(
-        FlexLayoutProperties.fromDiagnostics(diagnostics)));
+    final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
+    final controller = TestInspectorController()..setSelectedNode(treeNode);
+    final widget = wrap(StoryOfYourFlexWidget(controller));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
