@@ -66,9 +66,9 @@ class TimelineFlameChart extends StatelessWidget {
     return !fullTimelineEmpty
         ? FullTimelineFlameChart(
             controller.fullTimeline.data,
-            // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+            // TODO(kenz): remove * 4 once zooming is possible. This is so that we can
             // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 2,
+            width: constraints.maxWidth * 4,
             height: math.max(
               constraints.maxHeight,
               _fullTimelineChartHeight(controller),
@@ -229,7 +229,7 @@ class FullTimelineFlameChart
     // is resizeable. It would need to link scroll controllers with the list
     // view holding the flame chart nodes. This would make section labels sticky
     // to the left as an inherent bonus.
-    return 150.0;
+    return 140.0;
   }
 
   @override
@@ -313,6 +313,7 @@ class _FullTimelineFlameChartState
       rows[row].nodes.add(node);
     }
 
+    expandRows(_rowOffsetForTopTimeline);
     int currentRowIndex = _rowOffsetForTopTimeline;
     int currentSectionIndex = 0;
     for (String groupName in widget.data.eventGroups.keys) {
