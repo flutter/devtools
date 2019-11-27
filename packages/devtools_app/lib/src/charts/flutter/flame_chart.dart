@@ -109,6 +109,14 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   @mustCallSuper
   void initFlameChartElements() {
     resetColorOffsets();
+    rows.clear();
+    sections.clear();
+  }
+
+  void expandRows(int newRows) {
+    for (int i = rows.length; i < rows.length + newRows; i++) {
+      rows.add(FlameChartRow());
+    }
   }
 }
 
@@ -292,8 +300,7 @@ class FlameChartSection {
 }
 
 class FlameChartRow {
-  FlameChartRow({@required this.nodes});
-  final List<FlameChartNode> nodes;
+  final List<FlameChartNode> nodes = [];
 }
 
 class FlameChartNode<T> {

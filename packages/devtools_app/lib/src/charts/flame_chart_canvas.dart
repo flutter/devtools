@@ -76,9 +76,9 @@ abstract class FlameChart<T> {
 
   FlameChartNode selectedNode;
 
-  List<FlameChartRow> rows = [];
+  final List<FlameChartRow> rows = [];
 
-  List<FlameChartSection> sections = [];
+  final List<FlameChartSection> sections = [];
 
   TimelineGrid timelineGrid;
 
@@ -91,9 +91,19 @@ abstract class FlameChart<T> {
   // scroll offset to reduce floating point error when zooming.
   num floatingPointScrollLeft = 0;
 
-  void initUiElements();
+  @mustCallSuper
+  void initUiElements() {
+    rows.clear();
+    sections.clear();
+  }
 
   double get calculatedWidth;
+
+  void expandRows(int newRows) {
+    for (int i = rows.length; i < rows.length + newRows; i++) {
+      rows.add(FlameChartRow());
+    }
+  }
 
   void selectNodeAtOffset(Offset offset) {
     final node = nodeAtOffset(offset);
@@ -378,8 +388,7 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 }
 
 class FlameChartRow {
-  FlameChartRow({@required this.nodes});
-  final List<FlameChartNode> nodes;
+  final List<FlameChartNode> nodes = [];
 }
 
 class FlameChartSection {

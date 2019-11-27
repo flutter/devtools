@@ -135,16 +135,12 @@ class FrameBasedTimelineFlameChartState
 
     final uiEventFlowDepth = widget.data.uiEventFlow.depth;
     final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
-    rows
-      ..clear()
-      ..addAll(List.generate(
-        uiEventFlowDepth +
-            gpuEventFlowDepth +
-            _rowOffsetForTopTimeline +
-            _rowOffsetForSectionSpacer +
-            _rowOffsetForBottomTimeline,
-        (_) => FlameChartRow(nodes: []),
-      ));
+
+    expandRows(uiEventFlowDepth +
+        gpuEventFlowDepth +
+        _rowOffsetForTopTimeline +
+        _rowOffsetForSectionSpacer +
+        _rowOffsetForBottomTimeline);
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
@@ -243,7 +239,6 @@ class FullTimelineFlameChart
 class _FullTimelineFlameChartState
     extends FlameChartState<FullTimelineFlameChart, TimelineEvent> {
   static const _rowOffsetForTopTimeline = 1;
-  static const _rowOffsetForBottomTimeline = 1;
   static const _rowOffsetForSectionSpacer = 1;
 
   static Map<String, double> sectionLabelWidths = {};
@@ -260,31 +255,23 @@ class _FullTimelineFlameChartState
   void initFlameChartElements() {
     super.initFlameChartElements();
 
-    void expandRowsToFitCurrentRow(int row) {
-      if (row >= rows.length) {
-        rows.addAll(List.generate(
-          row - (rows.length - 1) + _rowOffsetForBottomTimeline,
-          (_) => FlameChartRow(nodes: []),
-        ));
-      }
+    double leftForEvent(TimelineEvent event) {
+      return (event.time.start.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
     }
 
-    double leftForEvent(TimelineEvent event) =>
-        (event.time.start.inMicroseconds - startTimeOffset) *
-            startingPxPerMicro +
-        widget.startInset;
-
-    double rightForEvent(TimelineEvent event) =>
-        (event.time.end.inMicroseconds - startTimeOffset) * startingPxPerMicro +
-        widget.startInset;
+    double rightForEvent(TimelineEvent event) {
+      return (event.time.end.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+    }
 
     double maxRight = -1;
     void createChartNode(TimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
       // missing start/end time based on ancestors/children. Skip for now.
       if (!event.isWellFormed) return;
-
-      expandRowsToFitCurrentRow(row);
 
       final double left = leftForEvent(event);
       final double right = rightForEvent(event);
@@ -331,18 +318,16 @@ class _FullTimelineFlameChartState
     for (String groupName in widget.data.eventGroups.keys) {
       final FullTimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
-      rows.addAll(List.generate(
-        group.eventsByRow.length,
-        (_) => FlameChartRow(nodes: []),
-      ));
+      final groupDisplaySize =
+          group.eventsByRow.length + _rowOffsetForSectionSpacer;
+      expandRows(groupDisplaySize);
 
-      for (int rowInGroup = 0;
-          rowInGroup < group.eventsByRow.length;
-          rowInGroup++) {
-        for (var event in group.eventsByRow[rowInGroup]) {
+      for (int i = 0; i < group.eventsByRow.length; i++) {
+        final row = group.eventsByRow[i];
+        for (var event in row) {
           createChartNode(
             event,
-            currentRowIndex + rowInGroup,
+            currentRowIndex + i,
             currentSectionIndex,
           );
         }
@@ -382,7 +367,7 @@ class _FullTimelineFlameChartState
       rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
 
       // Increment for next section.
-      currentRowIndex += group.eventsByRow.length + _rowOffsetForSectionSpacer;
+      currentRowIndex += groupDisplaySize;
       currentSectionIndex++;
     }
 

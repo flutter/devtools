@@ -331,6 +331,17 @@ void main() {
         expect(safeDivide(-50.0, 0.0, ifNotFinite: 10.0), 10.0);
       });
     });
+
+    group('null safe list', () {
+      test('nullSafeLast', () {
+        final list = [];
+        expect(list.nullSafeLast(), isNull);
+        list.addAll([1, 2, 3]);
+        expect(list.nullSafeLast(), equals(3));
+        list.add(null);
+        expect(list.nullSafeLast(), isNull);
+      });
+    });
   });
 }
 

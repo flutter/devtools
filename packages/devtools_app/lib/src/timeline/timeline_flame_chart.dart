@@ -36,10 +36,9 @@ class FrameBasedTimelineFlameChartCanvas
 
   @override
   void initUiElements() {
-    rows = List.generate(
-      data.uiEventFlow.depth + data.gpuEventFlow.depth,
-      (_) => FlameChartRow(nodes: []),
-    );
+    super.initUiElements();
+    expandRows(data.uiEventFlow.depth + data.gpuEventFlow.depth);
+
     final int frameStartOffset = data.time.start.inMicroseconds;
     double getTopForRow(int row) {
       // This accounts for the section spacing between the UI events and the GPU
@@ -189,6 +188,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
   @override
   void initUiElements() {
+    super.initUiElements();
     final int startTimeOffset = data.time.start.inMicroseconds;
 
     // Pixels per microsecond in order to fit the entire frame in view.
@@ -264,18 +264,14 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     for (String groupName in data.eventGroups.keys) {
       final FullTimelineEventGroup group = data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
-      rows.addAll(List.generate(
-        group.eventsByRow.length,
-        (_) => FlameChartRow(nodes: []),
-      ));
+      expandRows(group.eventsByRow.length);
 
-      for (int rowInGroup = 0;
-          rowInGroup < group.eventsByRow.length;
-          rowInGroup++) {
-        for (var event in group.eventsByRow[rowInGroup]) {
+      for (int i = 0; i < group.eventsByRow.length; i++) {
+        final row = group.eventsByRow[i];
+        for (var event in row) {
           createChartNode(
             event,
-            currentRowIndex + rowInGroup,
+            currentRowIndex + i,
             currentSectionIndex,
           );
         }

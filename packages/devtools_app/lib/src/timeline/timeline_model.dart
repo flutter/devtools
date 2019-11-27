@@ -176,9 +176,10 @@ class FullTimelineData extends TimelineData {
   }
 }
 
+// TODO(kenz): add tests for this class.
 class FullTimelineEventGroup {
   /// At each index in the list, this stores a list of timeline events that will
-  /// be painted at row (index) in the visualization of the event group.
+  /// be painted in the same row in the visualization of the event group.
   ///
   /// We store events by row within the group in order to display overlapping
   /// events in the flame chart UI. This allows us to reuse space where possible
@@ -205,37 +206,39 @@ class FullTimelineEventGroup {
 
   void addEventAtCalculatedRow(TimelineEvent event) {
     final currentLargestRowIndex = eventsByRow.length;
-    var displayRowIndex = 0;
-    while (displayRowIndex < currentLargestRowIndex) {
+    var displayRow = 0;
+    while (displayRow < currentLargestRowIndex) {
       // Ensure that [event] and its children do not overlap with events at all
       // current offsets.
-      var eventFitsAtDisplayRow = true;
-      for (int eventLevel = 0;
-          eventLevel <
-              math.min(
-                  event.displayDepth, currentLargestRowIndex - displayRowIndex);
-          eventLevel++) {
-        final lastEventAtDisplayRow =
-            eventsByRow[displayRowIndex + eventLevel].isNotEmpty
-                ? eventsByRow[displayRowIndex + eventLevel].last
-                : null;
-        final firstNewEventAtLevel = event.firstNodeAtLevel(eventLevel);
-        if ((lastEventAtDisplayRow != null && firstNewEventAtLevel != null) &&
-            lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time)) {
-          // Events overlap - break and try the next display offset.
-          eventFitsAtDisplayRow = false;
-          break;
-        }
-      }
+      final eventFitsAtDisplayRow = _eventFitsAtDisplayRow(
+        event,
+        displayRow,
+        currentLargestRowIndex,
+      );
       if (eventFitsAtDisplayRow) break;
-
-      displayRowIndex++;
+      displayRow++;
     }
-
-    _addEventAtRow(event, displayRowIndex);
+    _addEvent(event, row: displayRow);
   }
 
-  void _addEventAtRow(TimelineEvent event, int row) {
+  bool _eventFitsAtDisplayRow(
+      TimelineEvent event, int displayRow, int currentLargestRowIndex) {
+    final maxLevelToVerify =
+        math.min(event.displayDepth, currentLargestRowIndex - displayRow);
+    for (int level = 0; level < maxLevelToVerify; level++) {
+      final lastEventAtDisplayRow =
+          eventsByRow[displayRow + level].nullSafeLast();
+      final firstNewEventAtLevel = event.firstNodeAtLevel(level);
+      if ((lastEventAtDisplayRow != null && firstNewEventAtLevel != null) &&
+          lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time)) {
+        // Events overlap, so [event] does not fit at [displayRow].
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _addEvent(TimelineEvent event, {@required int row}) {
     if (row == eventsByRow.length) {
       eventsByRow.add([event]);
     } else {
@@ -249,9 +252,9 @@ class FullTimelineEventGroup {
       if (i != 0 && event.hasOverlappingChildren) {
         final previousChild = event.children[i - 1];
         overlappingChildrenOffset += previousChild.displayDepth;
-        _addEventAtRow(child, nextRow + overlappingChildrenOffset);
+        _addEvent(child, row: nextRow + overlappingChildrenOffset);
       } else {
-        _addEventAtRow(child, nextRow);
+        _addEvent(child, row: nextRow);
       }
     }
   }
@@ -554,13 +557,11 @@ class TimelineFrame {
       pipelineItemTime.start?.inMicroseconds != null &&
       pipelineItemTime.end?.inMicroseconds != null;
 
-  int get uiDuration =>
-      uiEventFlow != null ? uiEventFlow.time.duration.inMicroseconds : null;
+  int get uiDuration => uiEventFlow?.time?.duration?.inMicroseconds;
 
   double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
 
-  int get gpuDuration =>
-      gpuEventFlow != null ? gpuEventFlow.time.duration.inMicroseconds : null;
+  int get gpuDuration => gpuEventFlow?.time?.duration?.inMicroseconds;
 
   double get gpuDurationMs => gpuDuration != null ? gpuDuration / 1000 : null;
 
