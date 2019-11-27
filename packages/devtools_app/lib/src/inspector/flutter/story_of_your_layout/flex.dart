@@ -287,7 +287,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
   void _onInspectorSelectionChanged() async {
-    print('Inspector selection has changed');
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
@@ -316,7 +315,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   void _setProperties(FlexLayoutProperties newProperties) {
     _updateHighlighted(newProperties);
     if (_properties == newProperties) {
-      _animateProperties();
       return;
     }
     setState(() {
@@ -379,40 +377,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   Future<void> updateChildFlex(
       LayoutProperties oldProperties, LayoutProperties newProperties) async {
-    final index = properties.children.indexOf(oldProperties);
-    if (index != -1) {
-      final newChildren = properties.children.toList();
-      newChildren[index] = newProperties;
-      // Recompute the sizes of the children.
-      double mainAxisSizes = 0.0;
-      num flexes = 0;
-      for (var child in newChildren) {
-        if (!child.hasFlexFactor) {
-          mainAxisSizes += child.dimension(properties.direction);
-        } else {
-          flexes += child.flexFactor;
-        }
-      }
-      final remainingSpace = properties.mainAxisDimension - mainAxisSizes;
-      // Lay out flex space.
-      for (var i = 0; i < newChildren.length; i++) {
-        final child = newChildren[i];
-        if (child.hasFlexFactor) {
-          final flexFraction = remainingSpace * child.flexFactor / flexes;
-          final width = properties.isMainAxisHorizontal
-              ? flexFraction
-              : child.dimension(Axis.horizontal);
-          final height = properties.isMainAxisVertical
-              ? flexFraction
-              : child.dimension(Axis.vertical);
-          newChildren[i] = child.copyWith(
-            size: Size(width, height),
-          );
-        }
-      }
-      newProperties = properties.copyWith(children: newChildren);
-      _changeProperties(newProperties);
-    }
     // TODO(DO NOT SUBMIT): don't overwrite a running animation to make this change.
     // Fetch the updated sizes after the app re-lays-out its children.
     final updatedProperties = await fetchFlexLayoutProperties();
@@ -616,21 +580,23 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
+            FlexLayoutProperties changedProperties;
             if (axis == direction) {
-              _changeProperties(
-                  properties.copyWith(mainAxisAlignment: newSelection));
+              changedProperties =
+                  properties.copyWith(mainAxisAlignment: newSelection);
             } else {
-              _changeProperties(
-                  properties.copyWith(crossAxisAlignment: newSelection));
+              changedProperties =
+                  properties.copyWith(crossAxisAlignment: newSelection);
             }
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
               valueRef,
-              properties.mainAxisAlignment,
-              properties.crossAxisAlignment,
+              changedProperties.mainAxisAlignment,
+              changedProperties.crossAxisAlignment,
             );
-            // final updatedProperties = await fetchFlexLayoutProperties();
+            final updatedProperties = await fetchFlexLayoutProperties();
+            _changeProperties(updatedProperties);
           },
         ),
       ),
