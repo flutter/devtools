@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
@@ -96,7 +95,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
               linkedScrollControllerGroup: _linkedScrollControllerGroup,
               nodes: rows[index].nodes,
               width: math.max(constraints.maxWidth, widget.totalStartingWidth),
-              constraints: constraints,
               selected: widget.selected,
             );
           },
@@ -126,7 +124,6 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.nodes,
     @required this.width,
-    @required this.constraints,
     @required this.selected,
   });
 
@@ -135,8 +132,6 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final List<FlameChartNode> nodes;
 
   final double width;
-
-  final BoxConstraints constraints;
 
   final V selected;
 
@@ -148,139 +143,59 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
 
-  var lastStartNodeIndexInViewport = -1;
-
-  double get horizontalScrollOffset => scrollController.hasClients
-      ? scrollController.offset
-      : scrollController.initialScrollOffset;
+  /// Convenience getter for widget.nodes.
+  List<FlameChartNode> get nodes => widget.nodes;
 
   @override
   void initState() {
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
-    addAutoDisposeListener(scrollController);
+  }
+
+  @override
+  void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     super.dispose();
     scrollController.dispose();
-    lastStartNodeIndexInViewport = -1;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: scrollController,
-      scrollDirection: Axis.horizontal,
-      child: widget.nodes.isEmpty
-          ? SizedBox(
-              height: sectionSpacing,
-              width: widget.width,
-            )
-          // TODO(kenz): use Flow instead of stack.
-          : Stack(
-              children: [
-                Container(
-                  height: rowHeightWithPadding,
-                  width: widget.width,
-                ),
-                ...rowNodesInViewport(),
-              ],
+    return nodes.isEmpty
+        ? SizedBox(
+            height: sectionSpacing,
+            width: widget.width,
+          )
+        : SizedBox(
+            height: rowHeightWithPadding,
+            width: widget.width,
+            child: ListView.builder(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              itemCount: nodes.length,
+              itemBuilder: (context, index) {
+                final node = nodes[index];
+                final nextNode =
+                    index == nodes.length - 1 ? null : nodes[index + 1];
+                final paddingLeft = index == 0 ? node.rect.left : 0.0;
+                final paddingRight = nextNode == null
+                    ? widget.width - node.rect.right
+                    : nextNode.rect.left - node.rect.right;
+                return Padding(
+                  padding: EdgeInsets.only(
+                    left: paddingLeft,
+                    right: paddingRight,
+                    bottom: rowPadding,
+                  ),
+                  child: node.buildWidget(node.data == widget.selected),
+                );
+              },
             ),
-    );
-  }
-
-  List<Widget> rowNodesInViewport() {
-    final nodes = widget.nodes;
-    final nodesInViewport = <Widget>[];
-    final startNodeIndex = findFirstIndexInView(nodes);
-    if (startNodeIndex != -1) {
-      for (int i = startNodeIndex; i < nodes.length; i++) {
-        final node = nodes[i];
-        if (!nodeFitsInViewport(node)) {
-          break;
-        }
-        nodesInViewport.add(node.buildWidget(node.data == widget.selected));
-      }
-    }
-    lastStartNodeIndexInViewport = startNodeIndex;
-    return nodesInViewport;
-  }
-
-  int findFirstIndexInView(List<FlameChartNode> nodes) {
-    // If we know the previous start node index, start there to find the current
-    // start node index.
-    if (lastStartNodeIndexInViewport != -1) {
-      var index = lastStartNodeIndexInViewport;
-      while (index >= 0 && index < nodes.length) {
-        final node = nodes[index];
-        if (nodeFitsInViewport(node)) {
-          if (index > 0 && nodeFitsInViewport(nodes[index - 1])) {
-            // Since the previous node also fits in the viewport, keep looking
-            // left for the first fitting index.
-            index--;
-          } else {
-            // [index] is the first fitting index.
-            break;
-          }
-        } else {
-          index++;
-        }
-      }
-      // No nodes in this row fit within the viewport.
-      if (index == nodes.length) return -1;
-      return index;
-    }
-    // If we don't know the previous start node index, binary search to find the
-    // first fitting index (if one exists).
-    else {
-      final index = lowerBound(
-        nodes,
-        // Dummy node that has the left edge of the visible viewport.
-        FlameChartNode(
-          text: null,
-          tooltip: null,
-          rect: Rect.fromLTRB(
-            horizontalScrollOffset,
-            0,
-            horizontalScrollOffset + 1,
-            rowHeightWithPadding,
-          ),
-          backgroundColor: null,
-          textColor: null,
-          data: null,
-          onSelected: null,
-          selectable: false,
-        ),
-        compare: (FlameChartNode a, FlameChartNode b) =>
-            a.rect.left.compareTo(b.rect.left),
-      );
-
-      if (index == nodes.length) {
-        // If index == nodes.length, then the left edge of all nodes is left of
-        // the visible viewport. Check if the last node still overlaps with the
-        // viewport, and if so, return the index of the last node. Otherwise,
-        // return -1.
-        if (index != 0 && nodeFitsInViewport(nodes[index - 1])) {
-          return index - 1;
-        } else {
-          return -1;
-        }
-      } else if (!nodeFitsInViewport(nodes[index])) {
-        // If nodes[index] met the lower bound check but is still not in the
-        // viewport, then it must be positioned beyond the right bound of the
-        // viewport.
-        return -1;
-      } else {
-        return index;
-      }
-    }
-  }
-
-  bool nodeFitsInViewport(FlameChartNode node) {
-    return node.rect.right >= horizontalScrollOffset &&
-        node.rect.left - horizontalScrollOffset <= widget.constraints.maxWidth;
+          );
   }
 }
 
@@ -344,9 +259,9 @@ class FlameChartNode<T> {
 
   Widget buildWidget(bool selected) {
     selected = selectable ? selected : false;
-    return Positioned.fromRect(
-      key: key,
-      rect: rect,
+    return SizedBox(
+      width: rect.width,
+      height: rect.height,
       child: Tooltip(
         message: tooltip,
         waitDuration: tooltipWait,
