@@ -65,13 +65,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   final bool isProperty;
 
-  bool get isFlex => getBooleanMember('isFlex', false);
+  // TODO(albertusangga): Refactor to cleaner/more robust solution
+  bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
 
   int get flexFactor => json['flexFactor'];
 
-  Map<String, Object> get constraints => json['constraints'];
-
   Map<String, Object> get renderObject => json['renderObject'];
+
+  Map<String, Object> get constraints => json['constraints'];
 
   Map<String, Object> get size => json['size'];
 

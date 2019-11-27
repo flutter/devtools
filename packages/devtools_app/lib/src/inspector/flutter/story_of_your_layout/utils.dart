@@ -224,6 +224,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   double get width => size.width;
+
+  @override
+  bool get hasFlexFactor => begin.hasFlexFactor && end.hasFlexFactor;
 }
 
 class AnimatedFlexLayoutProperties
@@ -268,10 +271,14 @@ class AnimatedFlexLayoutProperties
       result.add(
         RenderProperties(
           axis: endProps.axis,
-          isFreeSpace: endProps.isFreeSpace,
           offset: Offset.lerp(beginProps.offset, endProps.offset, t),
           size: Size.lerp(beginProps.size, endProps.size, t),
           realSize: Size.lerp(beginProps.realSize, endProps.realSize, t),
+          layoutProperties: AnimatedLayoutProperties(
+            beginProps.layoutProperties,
+            endProps.layoutProperties,
+            animation,
+          ),
         ),
       );
     }
@@ -294,10 +301,10 @@ class AnimatedFlexLayoutProperties
 
   @override
   List<RenderProperties> crossAxisSpaces(
-      {List<RenderProperties> childrenRenderProps,
+      {List<RenderProperties> childrenRenderProperties,
       double Function(Axis) maxSizeAvailable}) {
     return end.crossAxisSpaces(
-      childrenRenderProps: childrenRenderProps,
+      childrenRenderProperties: childrenRenderProperties,
       maxSizeAvailable: maxSizeAvailable,
     );
   }
@@ -344,6 +351,9 @@ class AnimatedFlexLayoutProperties
   @override
   String get verticalDirectionDescription => end.verticalDirectionDescription;
 
+  /// Returns a frozen copy of these FlexLayoutProperties that does not animate.
+  ///
+  /// Useful for interrupting an animation with a transition to another [FlexLayoutProperties].
   @override
   FlexLayoutProperties copyWith(
       {Size size,
