@@ -14,6 +14,7 @@ extension InspectorFlutterService on ObjectGroup {
         '  final render = object.renderObject;'
         '  render.mainAxisAlignment = $mainAxisAlignment;'
         '  render.crossAxisAlignment = $crossAxisAlignment;'
+        '  render.markNeedsLayout();'
         '})()';
     final val = await inspectorLibrary.eval(
       command,

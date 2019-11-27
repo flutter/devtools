@@ -121,7 +121,9 @@ class BorderLayout extends StatelessWidget {
 class AnimatedLayoutProperties<T extends LayoutProperties>
     implements LayoutProperties {
   AnimatedLayoutProperties(this.begin, this.end, this.animation)
-      : assert(begin.children.length == end.children.length),
+      : assert(begin != null),
+        assert(end != null),
+        assert(begin.children?.length == end.children?.length),
         _children = [
           for (var i = 0; i < begin.children.length; i++)
             AnimatedLayoutProperties(
@@ -137,7 +139,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   final List<LayoutProperties> _children;
 
   @override
-  List<LayoutProperties> get children => _children;
+  List<LayoutProperties> get children {
+    return _children;
+  }
 
   List<double> _lerpList(List<double> l1, List<double> l2) {
     assert(l1.length == l2.length);
@@ -163,8 +167,14 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
       _lerpList(begin.childrenWidths, end.childrenWidths);
 
   @override
-  BoxConstraints get constraints =>
-      BoxConstraints.lerp(begin.constraints, end.constraints, animation.value);
+  BoxConstraints get constraints {
+    try {
+      return BoxConstraints.lerp(
+          begin.constraints, end.constraints, animation.value);
+    } catch (e) {
+      return end.constraints;
+    }
+  }
 
   @override
   String describeWidthConstraints() {
@@ -227,6 +237,25 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   bool get hasFlexFactor => begin.hasFlexFactor && end.hasFlexFactor;
+
+  @override
+  LayoutProperties copyWith(
+      {List<LayoutProperties> children,
+      BoxConstraints constraints,
+      String description,
+      int flexFactor,
+      bool isFlex,
+      Size size}) {
+    return LayoutProperties.values(
+      node: node,
+      children: children ?? this.children,
+      constraints: constraints ?? this.constraints,
+      description: description ?? this.description,
+      flexFactor: flexFactor ?? this.flexFactor,
+      isFlex: isFlex ?? this.isFlex,
+      size: size ?? this.size,
+    );
+  }
 }
 
 class AnimatedFlexLayoutProperties
@@ -234,7 +263,9 @@ class AnimatedFlexLayoutProperties
     implements FlexLayoutProperties {
   AnimatedFlexLayoutProperties(FlexLayoutProperties begin,
       FlexLayoutProperties end, Animation<double> animation)
-      : super(begin, end, animation);
+      : super(begin, end, animation) {
+    print('Animating from $begin to $end');
+  }
 
   @override
   CrossAxisAlignment get crossAxisAlignment => end.crossAxisAlignment;
@@ -264,7 +295,7 @@ class AnimatedFlexLayoutProperties
       maxSizeAvailable: maxSizeAvailable,
     );
     final result = <RenderProperties>[];
-    for (var i = 0; i < children.length; i++) {
+    for (var i = 0; i < children?.length; i++) {
       final beginProps = beginRenderProperties[i];
       final endProps = endRenderProperties[i];
       final t = animation.value;

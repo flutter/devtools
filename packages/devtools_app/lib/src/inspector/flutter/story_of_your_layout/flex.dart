@@ -256,7 +256,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   void _changeProperties(FlexLayoutProperties nextProperties) {
+    if (!mounted || nextProperties == null) return;
     setState(() {
+      print('Changing to $nextProperties from $properties');
       _animatedProperties = AnimatedFlexLayoutProperties(
         // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
         _animatedProperties?.copyWith() ?? _properties,
@@ -340,7 +342,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     changeController = AnimationController(
       vsync: this,
       duration: entranceAnimationDuration,
-    )..addStatusListener((status) {
+    )
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _properties = _animatedProperties.end;
@@ -348,6 +351,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             changeController.value = 0.0;
           });
         }
+      })
+      ..addListener(() {
+        print(
+            'Changing ${changeController.value}: ${_animatedProperties?.children?.elementAt(1)?.size}');
       });
     changeAnimation = CurvedAnimation(
       parent: changeController,
@@ -372,9 +379,48 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     inspectorController.refreshSelection(node, node, false);
   }
 
-  Future<void> refresh() async {
-    setProperties(await fetchFlexLayoutProperties());
-    setState(() {});
+  Future<void> updateChildFlex(
+      LayoutProperties oldProperties, LayoutProperties newProperties) async {
+    final index = properties.children.indexOf(oldProperties);
+    if (index != -1) {
+      print('updating child properties $index');
+      final newChildren = properties.children.toList();
+      newChildren[index] = newProperties;
+      // Recompute the sizes of the children.
+      double mainAxisSizes = 0.0;
+      num flexes = 0;
+      for (var child in newChildren) {
+        if (!child.hasFlexFactor) {
+          mainAxisSizes += child.dimension(properties.direction);
+        } else {
+          flexes += child.flexFactor;
+        }
+      }
+      final remainingSpace = properties.mainAxisDimension - mainAxisSizes;
+      // Lay out flex space.
+      for (var i = 0; i < newChildren.length; i++) {
+        final child = newChildren[i];
+        if (child.hasFlexFactor) {
+          final flexFraction = remainingSpace * child.flexFactor / flexes;
+          final width = properties.isMainAxisHorizontal
+              ? flexFraction
+              : child.dimension(Axis.horizontal);
+          final height = properties.isMainAxisVertical
+              ? flexFraction
+              : child.dimension(Axis.vertical);
+          newChildren[i] = child.copyWith(
+            size: Size(width, height),
+          );
+        }
+      }
+      newProperties = properties.copyWith(children: newChildren);
+      _changeProperties(newProperties);
+    }
+    // Fetch the updated sizes after the app re-lays-out its children.
+    final updatedProperties = await fetchFlexLayoutProperties();
+    setState(() {
+      _properties = updatedProperties;
+    });
   }
 
   Widget _visualizeFlex(BuildContext context) {
@@ -422,7 +468,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           for (var i = 0; i < children.length; i++)
             FlexChildVisualizer(
               state: this,
-              notifyParent: refresh,
+              notifyParent: updateChildFlex,
               backgroundColor: highlighted == children[i]
                   ? activeBackgroundColor(theme)
                   : inActiveBackgroundColor(theme),
@@ -574,7 +620,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            FlexLayoutProperties nextProperties;
             if (axis == direction) {
               _changeProperties(
                   properties.copyWith(mainAxisAlignment: newSelection));
@@ -583,13 +628,16 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                   properties.copyWith(crossAxisAlignment: newSelection));
             }
             final service = await properties.node.inspectorService;
-            final arg = properties.node.valueRef;
+            final valueRef = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
-              arg,
+              valueRef,
               properties.mainAxisAlignment,
               properties.crossAxisAlignment,
             );
-            setProperties(await fetchFlexLayoutProperties());
+            final updatedProperties = await fetchFlexLayoutProperties();
+            setState(() {
+              _properties = updatedProperties;
+            });
           },
         ),
       ),
@@ -754,7 +802,9 @@ class FlexChildVisualizer extends StatelessWidget {
   final _StoryOfYourFlexWidgetState state;
 
   /// callback to notify parent when child value changes
-  final Function notifyParent;
+  final void Function(
+          LayoutProperties oldProperties, LayoutProperties newProperties)
+      notifyParent;
 
   final Color backgroundColor;
   final Color borderColor;
@@ -773,7 +823,7 @@ class FlexChildVisualizer extends StatelessWidget {
       node.valueRef,
       newFlexFactor,
     );
-    notifyParent();
+    notifyParent(properties, properties.copyWith(flexFactor: newFlexFactor));
   }
 
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
@@ -796,7 +846,7 @@ class FlexChildVisualizer extends StatelessWidget {
     }
 
     return DropdownButton<int>(
-      value: properties.flexFactor,
+      value: properties.flexFactor?.toInt()?.clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),

@@ -122,7 +122,7 @@ class LayoutProperties {
                     LayoutProperties(child, copyLevel: copyLevel - 1))
                 ?.toList(growable: false);
 
-  LayoutProperties._({
+  LayoutProperties.values({
     @required this.node,
     @required this.children,
     @required this.constraints,
@@ -131,9 +131,10 @@ class LayoutProperties {
     @required this.isFlex,
     @required this.size,
   });
+
   factory LayoutProperties.lerp(
       LayoutProperties begin, LayoutProperties end, double t) {
-    return LayoutProperties._(
+    return LayoutProperties.values(
       node: end.node,
       children: end.children,
       constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
@@ -211,6 +212,25 @@ class LayoutProperties {
       double.parse(json['height']),
     );
   }
+
+  LayoutProperties copyWith({
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    String description,
+    int flexFactor,
+    bool isFlex,
+    Size size,
+  }) {
+    return LayoutProperties.values(
+      node: node,
+      children: children ?? this.children,
+      constraints: constraints ?? this.constraints,
+      description: description ?? this.description,
+      flexFactor: flexFactor ?? this.flexFactor,
+      isFlex: isFlex ?? this.isFlex,
+      size: size ?? this.size,
+    );
+  }
 }
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
@@ -232,7 +252,7 @@ class FlexLayoutProperties extends LayoutProperties {
     this.textDirection,
     this.verticalDirection,
     this.textBaseline,
-  }) : super._(
+  }) : super.values(
           size: size,
           children: children,
           node: node,
@@ -345,7 +365,8 @@ class FlexLayoutProperties extends LayoutProperties {
     if (children?.isEmpty ?? true) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
-        .reduce((value, element) => value + element);
+        .reduce((value, element) => value + element)
+        .toInt();
     return _totalFlex;
   }
 
