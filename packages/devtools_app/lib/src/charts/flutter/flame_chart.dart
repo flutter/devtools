@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
@@ -57,7 +58,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
-  List<FlameChartRow> rows = [];
+  final List<FlameChartRow> rows = [];
+
+  final List<FlameChartSection> sections = [];
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -93,6 +96,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
               linkedScrollControllerGroup: _linkedScrollControllerGroup,
               nodes: rows[index].nodes,
               width: math.max(constraints.maxWidth, widget.totalStartingWidth),
+              constraints: constraints,
               selected: widget.selected,
             );
           },
@@ -105,6 +109,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   @mustCallSuper
   void initFlameChartElements() {
     resetColorOffsets();
+    rows.clear();
+    sections.clear();
+  }
+
+  void expandRows(int newRowLength) {
+    final currentLength = rows.length;
+    for (int i = currentLength; i < newRowLength; i++) {
+      rows.add(FlameChartRow());
+    }
   }
 }
 
@@ -113,6 +126,7 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.nodes,
     @required this.width,
+    @required this.constraints,
     @required this.selected,
   });
 
@@ -122,7 +136,10 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final double width;
 
+  final BoxConstraints constraints;
+
   final V selected;
+
   @override
   _ScrollingFlameChartRowState createState() => _ScrollingFlameChartRowState();
 }
@@ -131,16 +148,24 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
 
+  var lastStartNodeIndexInViewport = -1;
+
+  double get horizontalScrollOffset => scrollController.hasClients
+      ? scrollController.offset
+      : scrollController.initialScrollOffset;
+
   @override
   void initState() {
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    addAutoDisposeListener(scrollController);
   }
 
   @override
   void dispose() {
     super.dispose();
     scrollController.dispose();
+    lastStartNodeIndexInViewport = -1;
   }
 
   @override
@@ -153,49 +178,130 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
               height: sectionSpacing,
               width: widget.width,
             )
+          // TODO(kenz): use Flow instead of stack.
           : Stack(
               children: [
                 Container(
                   height: rowHeightWithPadding,
                   width: widget.width,
                 ),
-                for (var node in widget.nodes)
-                  node.buildWidget(node.data == widget.selected),
+                ...rowNodesInViewport(),
               ],
             ),
     );
   }
 
-// TODO(kenz): consider using this method when we have a larger data set to
-// test with.
-//  List<FlameChartNode> rowNodesInViewport(
-//    List<FlameChartNode> nodes,
-//    BoxConstraints constraints,
-//  ) {
-//    // TODO(kenz): Use binary search method we use in html full timeline here.
-//    final nodesInViewport = <FlameChartNode>[];
-//    for (var node in nodes) {
-//      final horizontalScrollOffset = scrollController.hasClients
-//          ? scrollController.offset
-//          : scrollController.initialScrollOffset;
-//      final fitsHorizontally = node.rect.right >= horizontalScrollOffset &&
-//          node.rect.left - horizontalScrollOffset <= constraints.maxWidth;
-//      if (fitsHorizontally) {
-//        nodesInViewport.add(node);
-//      }
-//    }
-//    return nodesInViewport;
-//  }
+  List<Widget> rowNodesInViewport() {
+    final nodes = widget.nodes;
+    final nodesInViewport = <Widget>[];
+    final startNodeIndex = findFirstIndexInView(nodes);
+    if (startNodeIndex != -1) {
+      for (int i = startNodeIndex; i < nodes.length; i++) {
+        final node = nodes[i];
+        if (!nodeFitsInViewport(node)) {
+          break;
+        }
+        nodesInViewport.add(node.buildWidget(node.data == widget.selected));
+      }
+    }
+    lastStartNodeIndexInViewport = startNodeIndex;
+    return nodesInViewport;
+  }
+
+  int findFirstIndexInView(List<FlameChartNode> nodes) {
+    // If we know the previous start node index, start there to find the current
+    // start node index.
+    if (lastStartNodeIndexInViewport != -1) {
+      var index = lastStartNodeIndexInViewport;
+      while (index >= 0 && index < nodes.length) {
+        final node = nodes[index];
+        if (nodeFitsInViewport(node)) {
+          if (index > 0 && nodeFitsInViewport(nodes[index - 1])) {
+            // Since the previous node also fits in the viewport, keep looking
+            // left for the first fitting index.
+            index--;
+          } else {
+            // [index] is the first fitting index.
+            break;
+          }
+        } else {
+          index++;
+        }
+      }
+      // No nodes in this row fit within the viewport.
+      if (index == nodes.length) return -1;
+      return index;
+    }
+    // If we don't know the previous start node index, binary search to find the
+    // first fitting index (if one exists).
+    else {
+      final index = lowerBound(
+        nodes,
+        // Dummy node that has the left edge of the visible viewport.
+        FlameChartNode(
+          text: null,
+          tooltip: null,
+          rect: Rect.fromLTRB(
+            horizontalScrollOffset,
+            0,
+            horizontalScrollOffset + 1,
+            rowHeightWithPadding,
+          ),
+          backgroundColor: null,
+          textColor: null,
+          data: null,
+          onSelected: null,
+          selectable: false,
+        ),
+        compare: (FlameChartNode a, FlameChartNode b) =>
+            a.rect.left.compareTo(b.rect.left),
+      );
+
+      if (index == nodes.length) {
+        // If index == nodes.length, then the left edge of all nodes is left of
+        // the visible viewport. Check if the last node still overlaps with the
+        // viewport, and if so, return the index of the last node. Otherwise,
+        // return -1.
+        if (index != 0 && nodeFitsInViewport(nodes[index - 1])) {
+          return index - 1;
+        } else {
+          return -1;
+        }
+      } else if (!nodeFitsInViewport(nodes[index])) {
+        // If nodes[index] met the lower bound check but is still not in the
+        // viewport, then it must be positioned beyond the right bound of the
+        // viewport.
+        return -1;
+      } else {
+        return index;
+      }
+    }
+  }
+
+  bool nodeFitsInViewport(FlameChartNode node) {
+    return node.rect.right >= horizontalScrollOffset &&
+        node.rect.left - horizontalScrollOffset <= widget.constraints.maxWidth;
+  }
+}
+
+class FlameChartSection {
+  FlameChartSection(
+    this.index, {
+    @required this.startRow,
+    @required this.endRow,
+  });
+
+  final int index;
+
+  /// Start row (inclusive) for this section.
+  final int startRow;
+
+  /// End row (exclusive) for this section.
+  final int endRow;
 }
 
 class FlameChartRow {
-  const FlameChartRow({
-    @required this.nodes,
-    @required this.index,
-  });
-
-  final List<FlameChartNode> nodes;
-  final int index;
+  final List<FlameChartNode> nodes = [];
 }
 
 class FlameChartNode<T> {
@@ -281,8 +387,26 @@ mixin FlameChartColorMixin {
     return color;
   }
 
+  int _asyncColorOffset = 0;
+  Color nextAsyncColor() {
+    final color =
+        asyncColorPalette[_asyncColorOffset % asyncColorPalette.length];
+    _asyncColorOffset++;
+    return color;
+  }
+
+  int _unknownColorOffset = 0;
+  Color nextUnknownColor() {
+    final color =
+        unknownColorPalette[_unknownColorOffset % unknownColorPalette.length];
+    _unknownColorOffset++;
+    return color;
+  }
+
   void resetColorOffsets() {
+    _asyncColorOffset = 0;
     _uiColorOffset = 0;
     _gpuColorOffset = 0;
+    _unknownColorOffset = 0;
   }
 }

@@ -12,8 +12,6 @@ import '../diagnostics_node.dart';
 import '../enum_utils.dart';
 import 'story_of_your_layout/utils.dart';
 
-const Type boxConstraintsType = BoxConstraints;
-
 /// Compute real widget sizes into rendered sizes to be displayed on the details tab.
 /// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
 /// In the case where it is greater, we should render it with scrolling capability.
@@ -92,6 +90,7 @@ List<double> computeRenderSizes({
 }
 
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
+/// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node?.description,
@@ -113,6 +112,8 @@ class LayoutProperties {
   final int flexFactor;
   final bool isFlex;
   final Size size;
+
+  bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
 
   int get totalChildren => children?.length ?? 0;
 
@@ -155,20 +156,21 @@ class LayoutProperties {
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
-    if (json == null || json['type'] != boxConstraintsType.toString())
-      return null;
-    // TODO(albertusangga): Simplify this json (i.e: when maxWidth is null it means it is unbounded)
+    if (json == null || json['type'] != 'BoxConstraints') return null;
     return BoxConstraints(
-      minWidth: json['minWidth'],
-      maxWidth: json['hasBoundedWidth'] ? json['maxWidth'] : double.infinity,
-      minHeight: json['minHeight'],
-      maxHeight: json['hasBoundedHeight'] ? json['maxHeight'] : double.infinity,
+      minWidth: double.parse(json['minWidth']),
+      maxWidth: double.parse(json['maxWidth']),
+      minHeight: double.parse(json['minHeight']),
+      maxHeight: double.parse(json['maxHeight']),
     );
   }
 
   static Size deserializeSize(Map<String, Object> json) {
     if (json == null) return null;
-    return Size(json['width'], json['height']);
+    return Size(
+      double.parse(json['width']),
+      double.parse(json['height']),
+    );
   }
 }
 
@@ -188,6 +190,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }) : super(node);
 
   factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
+    if (node == null) return null;
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
     // RemoteDiagnosticsNode.
@@ -195,7 +198,8 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object> renderObjectJson = node.json['renderObject'];
+    final Map<String, Object> renderObjectJson = node?.renderObject;
+    if (renderObjectJson == null) return null;
     final List<dynamic> properties = renderObjectJson['properties'];
     final Map<String, Object> data = Map<String, Object>.fromIterable(
       properties,
@@ -405,7 +409,8 @@ class FlexLayoutProperties extends LayoutProperties {
           realSize: children[i].size,
         )
           ..mainAxisOffset = calculateMainAxisOffset(i)
-          ..crossAxisOffset = calculateCrossAxisOffset(i),
+          ..crossAxisOffset = calculateCrossAxisOffset(i)
+          ..layoutProperties = children[i],
       );
     }
 
@@ -413,7 +418,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final actualLeadingSpace = leadingSpace(freeSpace);
     final actualBetweenSpace = betweenSpace(freeSpace);
     final renderPropsWithFullCrossAxisDimension =
-        RenderProperties(axis: direction, isFreeSpace: true)
+        RenderProperties(axis: direction)
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
           ..crossAxisOffset = 0.0;
@@ -444,7 +449,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   List<RenderProperties> crossAxisSpaces({
-    @required List<RenderProperties> childrenRenderProps,
+    @required List<RenderProperties> childrenRenderProperties,
     @required double Function(Axis) maxSizeAvailable,
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
@@ -452,28 +457,28 @@ class FlexLayoutProperties extends LayoutProperties {
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
               children[i].dimension(crossAxisDirection) ||
-          childrenRenderProps[i].crossAxisDimension ==
+          childrenRenderProperties[i].crossAxisDimension ==
               maxSizeAvailable(crossAxisDirection)) continue;
 
-      final renderInfo = childrenRenderProps[i];
-      final space = renderInfo.clone();
+      final renderProperties = childrenRenderProperties[i];
+      final space = renderProperties.clone()..layoutProperties = null;
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
       space.crossAxisDimension =
           maxSizeAvailable(crossAxisDirection) - space.crossAxisDimension;
-
+      if (space.crossAxisDimension <= 0.0) continue;
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
         space.crossAxisRealDimension *= 0.5;
         spaces.add(space.clone()..crossAxisOffset = 0.0);
         spaces.add(space.clone()
-          ..crossAxisOffset =
-              renderInfo.crossAxisDimension + renderInfo.crossAxisOffset);
+          ..crossAxisOffset = renderProperties.crossAxisDimension +
+              renderProperties.crossAxisOffset);
       } else {
         space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
             ? 0
-            : renderInfo.crossAxisDimension;
+            : renderProperties.crossAxisDimension;
         spaces.add(space);
       }
     }
@@ -495,13 +500,14 @@ class FlexLayoutProperties extends LayoutProperties {
       EnumUtils<TextBaseline>(TextBaseline.values);
 }
 
+/// RenderProperties contains information for rendering a [LayoutProperties] node
 class RenderProperties {
   RenderProperties({
     @required this.axis,
     Size size,
     Offset offset,
     Size realSize,
-    this.isFreeSpace = false,
+    this.layoutProperties,
   })  : width = size?.width,
         height = size?.height,
         realWidth = realSize?.width,
@@ -511,10 +517,14 @@ class RenderProperties {
 
   final Axis axis;
 
-  bool isFreeSpace;
+  /// represents which node is rendered for this object.
+  LayoutProperties layoutProperties;
+
   double dx, dy;
   double width, height;
   double realWidth, realHeight;
+
+  bool get isFreeSpace => layoutProperties == null;
 
   Size get size => Size(width, height);
 
@@ -584,7 +594,7 @@ class RenderProperties {
       size: size,
       offset: offset,
       realSize: realSize,
-      isFreeSpace: isFreeSpace,
+      layoutProperties: layoutProperties,
     );
   }
 }

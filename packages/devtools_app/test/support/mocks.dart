@@ -89,6 +89,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final _vmTimelineFlags = <String, dynamic>{
     'type': 'TimelineFlags',
     'recordedStreams': [],
+    'availableStreams': [],
   };
 
   @override

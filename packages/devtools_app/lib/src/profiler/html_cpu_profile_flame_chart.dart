@@ -132,9 +132,8 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
 
   @override
   void initUiElements() {
-    for (int i = 0; i < data.cpuProfileRoot.depth; i++) {
-      rows.add(FlameChartRow(nodes: [], index: i));
-    }
+    super.initUiElements();
+    expandRows(data.cpuProfileRoot.depth);
 
     final totalWidth = width - 2 * sideInset;
 

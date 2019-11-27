@@ -387,10 +387,7 @@ class TimeRange {
 
   Duration get duration => end - start;
 
-  bool overlaps(TimeRange t) {
-    return (t.start >= start && t.start <= end) ||
-        (t.end >= start && t.end <= end);
-  }
+  bool overlaps(TimeRange t) => t.end > start && t.start < end;
 
   @override
   String toString({TimeUnit unit}) {
@@ -507,4 +504,13 @@ class ValueReporter<T> extends Reporter implements ValueListenable<T> {
 
 String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
+}
+
+extension NullSafeLast<T> on List<T> {
+  T nullSafeLast() {
+    if (isEmpty) {
+      return null;
+    }
+    return last;
+  }
 }

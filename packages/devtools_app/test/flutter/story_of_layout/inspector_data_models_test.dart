@@ -201,14 +201,14 @@ void main() {
             "description": "BoxConstraints(w=432.0, h=56.0)",
             "hasBoundedHeight": true,
             "hasBoundedWidth": true,
-            "minWidth": 432.0,
-            "minHeight": 56.0,
-            "maxHeight": 56.0,
-            "maxWidth": 432.0
+            "minWidth": "432.0",
+            "minHeight": "56.0",
+            "maxHeight": "56.0",
+            "maxWidth": "432.0"
         },
         "size": {
-            "width": 432.0,
-            "height": 56.0
+            "width": "432.0",
+            "height": "56.0"
         },
         "isFlex": true,
         "children": [
@@ -224,15 +224,14 @@ void main() {
                 "constraints": {
                     "type": "BoxConstraints",
                     "description": "BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)",
-                    "hasBoundedHeight": true,
-                    "hasBoundedWidth": false,
-                    "minWidth": 0.0,
-                    "minHeight": 0.0,
-                    "maxHeight": 56.0
+                    "minWidth": "0.0",
+                    "minHeight": "0.0",
+                    "maxHeight": "56.0",
+                    "maxWidth": "Infinity"
                 },
                 "size": {
-                    "width": 56.0,
-                    "height": 56.0
+                    "width": "56.0",
+                    "height": "56.0"
                 },
                 "flexFactor": null,
                 "createdByLocalProject": true,
@@ -252,16 +251,14 @@ void main() {
                 "constraints": {
                     "type": "BoxConstraints",
                     "description": "BoxConstraints(w=320.0, 0.0<=h<=56.0)",
-                    "hasBoundedHeight": true,
-                    "hasBoundedWidth": true,
-                    "minWidth": 320.0,
-                    "minHeight": 0.0,
-                    "maxHeight": 56.0,
-                    "maxWidth": 320.0
+                    "minWidth": "320.0",
+                    "minHeight": "0.0",
+                    "maxHeight": "56.0",
+                    "maxWidth": "320.0"
                 },
                 "size": {
-                    "width": 320.0,
-                    "height": 25.0
+                    "width": "320.0",
+                    "height": "25.0"
                 },
                 "flexFactor": 1,
                 "createdByLocalProject": true,
@@ -280,15 +277,14 @@ void main() {
                 "constraints": {
                     "type": "BoxConstraints",
                     "description": "BoxConstraints(0.0<=w<=Infinity, 0.0<=h<=56.0)",
-                    "hasBoundedHeight": true,
-                    "hasBoundedWidth": false,
-                    "minWidth": 0.0,
-                    "minHeight": 0.0,
-                    "maxHeight": 56.0
+                    "minWidth": "0.0",
+                    "minHeight": "0.0",
+                    "maxHeight": "56.0",
+                    "maxWidth": "Infinity"
                 },
                 "size": {
-                    "width": 56.0,
-                    "height": 56.0
+                    "width": "56.0",
+                    "height": "56.0"
                 },
                 "flexFactor": null,
                 "locationId": 41,
@@ -324,10 +320,10 @@ void main() {
                 "description": "BoxConstraints(w=432.0, h=56.0)",
                 "hasBoundedHeight": true,
                 "hasBoundedWidth": true,
-                "minWidth": 25.0,
-                "maxWidth": 25.0,
-                "minHeight": 56.0,
-                "maxHeight": 56.0
+                "minWidth": "25.0",
+                "maxWidth": "25.0",
+                "minHeight": "56.0",
+                "maxHeight": "56.0"
               }
             }
           ''');
@@ -345,10 +341,10 @@ void main() {
                 "description": "BoxConstraints(w=432.0, h=56.0)",
                 "hasBoundedHeight": true,
                 "hasBoundedWidth": true,
-                "minWidth": 25.0,
-                "maxWidth": 50.0,
-                "minHeight": 75.0,
-                "maxHeight": 100.0
+                "minWidth": "25.0",
+                "maxWidth": "50.0",
+                "minHeight": "75.0",
+                "maxHeight": "100.0"
               }
             }
           ''');
@@ -364,10 +360,10 @@ void main() {
                "constraints": {
                 "type": "BoxConstraints",
                 "description": "BoxConstraints(w=432.0, h=56.0)",
-                "hasBoundedHeight": false,
-                "hasBoundedWidth": false,
-                "minWidth": 25.0,
-                "minHeight": 75.0
+                "minWidth": "25.0",
+                "minHeight": "75.0",
+                "maxWidth": "Infinity",
+                "maxHeight": "Infinity"
               }
             }
           ''');
@@ -384,8 +380,8 @@ void main() {
                "size": {
                 "type": "Size",
                 "description": "Size(432.5, 56.0)",
-                "width": 432.55,
-                "height": 56.05
+                "width": "432.55",
+                "height": "56.05"
               }
             }
           ''');

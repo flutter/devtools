@@ -248,7 +248,9 @@ class HtmlTimelineScreen extends HtmlScreen {
     }
 
     timelineController.frameBasedTimeline.selectedFrameNotifier.addListener(() {
-      _selectFrame();
+      final frame = timelineController.frameBasedTimeline.data.selectedFrame;
+      if (frame == null) return;
+      _selectFrame(frame);
     });
 
     timelineController.fullTimeline
@@ -296,7 +298,8 @@ class HtmlTimelineScreen extends HtmlScreen {
         if (offlineData.selectedFrameId == null) {
           _destroySplitter();
         } else {
-          _selectFrame();
+          _selectFrame(
+              timelineController.frameBasedTimeline.data.selectedFrame);
         }
       }
 
@@ -350,10 +353,8 @@ class HtmlTimelineScreen extends HtmlScreen {
     flameChartContainer.replace(0, flameChart);
   }
 
-  void _selectFrame() {
+  void _selectFrame(TimelineFrame frame) {
     flameChartContainer.hidden(false);
-    final TimelineFrame frame =
-        timelineController.frameBasedTimeline.data.selectedFrame;
     timelineFlameChartCanvas = FrameBasedTimelineFlameChartCanvas(
       data: frame,
       width: flameChartContainer.element.clientWidth.toDouble(),
@@ -376,7 +377,8 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   double _frameBasedTimelineChartHeight() {
-    return (timelineController.frameBasedTimeline.data.displayDepth + 1) *
+    // +2 for an extra row at top and bottom of the chart.
+    return (timelineController.frameBasedTimeline.data.displayDepth + 2) *
             rowHeightWithPadding +
         FrameBasedTimelineFlameChartCanvas.sectionSpacing;
   }
@@ -384,7 +386,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   double _fullTimelineChartHeight() {
     return (timelineController.fullTimeline.data.displayDepth + 1) *
             rowHeightWithPadding +
-        (timelineController.fullTimeline.data.eventBuckets.length) *
+        (timelineController.fullTimeline.data.eventGroups.length) *
             sectionSpacing;
   }
 
