@@ -274,11 +274,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
+    print('selection changed');
     final prevRootId = id(_properties?.node);
     final newRootId = id(getRoot(selectedNode));
     final shouldFetch = prevRootId != newRootId;
     FlexLayoutProperties newSelection = _properties;
     if (shouldFetch) {
+      print('fetching new node');
       newSelection = await fetchFlexLayoutProperties();
     }
     setProperties(newSelection);
@@ -344,10 +346,30 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     }
   }
 
+  // update selected widget in the device without triggering selection listener event.
+  // this is required so that we don't change focus
+  //   when tapping on a child is also Flex-based widget.
+  Future<void> setSelectionInspector(RemoteDiagnosticsNode node) async {
+    final service = await node.inspectorService;
+    await service.setSelectionInspector(node.valueRef, false);
+  }
+
+  // update selected widget and trigger selection listener event to change focus.
+  void refreshSelection(RemoteDiagnosticsNode node) {
+    inspectorController.refreshSelection(node, node, true);
+  }
+
   Future<void> _onTap(LayoutProperties properties) async {
-    highlighted = properties;
-    final node = properties.node;
-    inspectorController.refreshSelection(node, node, false);
+    if (properties.isFlex) {
+      setState(() => highlighted = properties);
+      await setSelectionInspector(properties.node);
+    } else {
+      refreshSelection(properties.node);
+    }
+  }
+
+  void _onDoubleTap(LayoutProperties properties) {
+    refreshSelection(properties.node);
   }
 
   Future<void> refresh() async {
@@ -851,6 +873,8 @@ class FlexChildVisualizer extends StatelessWidget {
       left: renderOffset.dx,
       child: InkWell(
         onTap: () => state._onTap(properties),
+        onDoubleTap: () => state._onDoubleTap(properties),
+        onLongPress: () => state._onDoubleTap(properties),
         child: SizedBox(
           width: renderSize.width,
           height: renderSize.height,
