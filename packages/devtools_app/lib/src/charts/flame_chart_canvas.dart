@@ -100,7 +100,8 @@ abstract class FlameChart<T> {
   double get calculatedWidth;
 
   void expandRows(int newRows) {
-    for (int i = rows.length; i < rows.length + newRows; i++) {
+    final currentLength = rows.length;
+    for (int i = currentLength; i < currentLength + newRows; i++) {
       rows.add(FlameChartRow());
     }
   }

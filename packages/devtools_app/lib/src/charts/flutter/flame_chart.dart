@@ -114,7 +114,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   }
 
   void expandRows(int newRows) {
-    for (int i = rows.length; i < rows.length + newRows; i++) {
+    final currentLength = rows.length;
+    for (int i = currentLength; i < currentLength + newRows; i++) {
       rows.add(FlameChartRow());
     }
   }
