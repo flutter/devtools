@@ -297,8 +297,8 @@ class FrameBasedTimeline
     if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
-    _selectedFrameNotifier.value = frame;
     data.selectedFrame = frame;
+    _selectedFrameNotifier.value = frame;
 
     _timelineController._selectedTimelineEventNotifier.value = null;
     data.selectedEvent = null;

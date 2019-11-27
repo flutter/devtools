@@ -143,6 +143,9 @@ void main() {
       final overlapEnd = TimeRange()
         ..start = const Duration(milliseconds: 150)
         ..end = const Duration(milliseconds: 250);
+      final overlapAll = TimeRange()
+        ..start = const Duration(milliseconds: 50)
+        ..end = const Duration(milliseconds: 250);
       final noOverlap = TimeRange()
         ..start = const Duration(milliseconds: 300)
         ..end = const Duration(milliseconds: 400);
@@ -151,6 +154,7 @@ void main() {
       expect(t.overlaps(overlapBeginning), isTrue);
       expect(t.overlaps(overlapMiddle), isTrue);
       expect(t.overlaps(overlapEnd), isTrue);
+      expect(t.overlaps(overlapAll), isTrue);
       expect(t.overlaps(noOverlap), isFalse);
     });
 

@@ -137,6 +137,18 @@ class TreeNode<T extends TreeNode<T>> {
       returnCondition: condition,
     );
   }
+
+  T firstNodeAtLevel(int level) {
+    if (level >= depth) return null;
+    var node = this;
+    while (node.level < level) {
+      // Walk down the tree until we find the node at [level].
+      if (node.children.isNotEmpty) {
+        node = node.children.firstWhere((n) => n.depth > level - n.level);
+      }
+    }
+    return node;
+  }
 }
 
 /// Traverses a tree in breadth-first order.
@@ -147,8 +159,11 @@ class TreeNode<T extends TreeNode<T>> {
 /// searching for. [action] specifies an action that we will execute on each
 /// node. For example, if we need to traverse a tree and change a property on
 /// every single node, we would do this through the [action] param.
-T breadthFirstTraversal<T extends TreeNode<T>>(T root,
-    {bool returnCondition(T node), void action(T node)}) {
+T breadthFirstTraversal<T extends TreeNode<T>>(
+  T root, {
+  bool returnCondition(T node),
+  void action(T node),
+}) {
   final queue = Queue.of([root]);
   while (queue.isNotEmpty) {
     final node = queue.removeFirst();

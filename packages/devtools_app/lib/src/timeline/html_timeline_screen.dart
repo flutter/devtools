@@ -384,7 +384,7 @@ class HtmlTimelineScreen extends HtmlScreen {
   double _fullTimelineChartHeight() {
     return (timelineController.fullTimeline.data.displayDepth + 1) *
             rowHeightWithPadding +
-        (timelineController.fullTimeline.data.eventBuckets.length) *
+        (timelineController.fullTimeline.data.eventGroups.length) *
             sectionSpacing;
   }
 

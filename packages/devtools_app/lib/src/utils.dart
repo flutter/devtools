@@ -389,7 +389,8 @@ class TimeRange {
 
   bool overlaps(TimeRange t) {
     return (t.start >= start && t.start <= end) ||
-        (t.end >= start && t.end <= end);
+        (t.end >= start && t.end <= end) ||
+        (t.start <= start && t.end >= end);
   }
 
   @override

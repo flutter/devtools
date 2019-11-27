@@ -378,13 +378,8 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 }
 
 class FlameChartRow {
-  const FlameChartRow({
-    @required this.nodes,
-    @required this.index,
-  });
-
+  FlameChartRow({@required this.nodes});
   final List<FlameChartNode> nodes;
-  final int index;
 }
 
 class FlameChartSection {

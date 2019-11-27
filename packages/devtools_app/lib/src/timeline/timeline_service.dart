@@ -148,9 +148,9 @@ class TimelineService {
                 timelineController.fullTimeline.recordingNotifier.value) &&
             !offlineMode &&
             isCurrentScreen;
-    final bool isRunning =
-        !timelineController.frameBasedTimeline.pausedNotifier.value ||
-            timelineController.fullTimeline.recordingNotifier.value;
+    final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
+        (!timelineController.frameBasedTimeline.pausedNotifier.value ||
+            timelineController.fullTimeline.recordingNotifier.value);
     await _updateListeningState(
       shouldBeRunning: shouldBeRunning,
       isRunning: isRunning,

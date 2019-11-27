@@ -83,8 +83,8 @@ class FullTimelineData extends TimelineData {
 
   final List<TimelineEvent> timelineEvents;
 
-  final SplayTreeMap<String, List<TimelineEvent>> eventBuckets =
-      SplayTreeMap(eventBucketComparator);
+  final SplayTreeMap<String, FullTimelineEventGroup> eventGroups =
+      SplayTreeMap(eventGroupComparator);
 
   TimeRange time = TimeRange();
 
@@ -95,21 +95,20 @@ class FullTimelineData extends TimelineData {
   int get endTimestampMicros => _endTimestampMicros;
   int _endTimestampMicros = -1;
 
+  /// Returns the number of rows needed to display this data.
+  ///
+  /// This factors in offsets necessary to display overlapping events.
   @override
   int get displayDepth {
     if (_displayDepth != null) return _displayDepth;
 
-    if (eventBuckets.isEmpty) {
+    if (eventGroups.isEmpty) {
       initializeEventBuckets();
     }
 
     int depth = 0;
-    for (List<TimelineEvent> bucket in eventBuckets.values) {
-      int bucketDisplayDepth = 0;
-      for (TimelineEvent event in bucket) {
-        bucketDisplayDepth = math.max(bucketDisplayDepth, event.displayDepth);
-      }
-      depth += bucketDisplayDepth;
+    for (var eventGroup in eventGroups.values) {
+      depth += eventGroup.displayDepth;
     }
     return depth;
   }
@@ -117,9 +116,12 @@ class FullTimelineData extends TimelineData {
   int _displayDepth;
 
   void initializeEventBuckets() {
+    timelineEvents.sort((a, b) =>
+        a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
     for (TimelineEvent event in timelineEvents) {
-      eventBuckets.putIfAbsent(_computeEventBucketKey(event), () => [])
-        ..add(event);
+      eventGroups.putIfAbsent(
+          _computeEventBucketKey(event), () => FullTimelineEventGroup())
+        ..addEventAtCalculatedRow(event);
     }
   }
 
@@ -145,7 +147,7 @@ class FullTimelineData extends TimelineData {
   void clear() {
     super.clear();
     timelineEvents.clear();
-    eventBuckets.clear();
+    eventGroups.clear();
     time = TimeRange();
     _displayDepth = null;
     _endTimestampMicros = -1;
@@ -153,7 +155,7 @@ class FullTimelineData extends TimelineData {
 
   // TODO(kenz): simplify this comparator if possible.
   @visibleForTesting
-  static int eventBucketComparator(String a, String b) {
+  static int eventGroupComparator(String a, String b) {
     if (a == b) return 0;
 
     // Order Unknown buckets last.
@@ -171,6 +173,87 @@ class FullTimelineData extends TimelineData {
 
     // Alphabetize all other buckets.
     return a.compareTo(b);
+  }
+}
+
+class FullTimelineEventGroup {
+  /// At each index in the list, this stores a list of timeline events that will
+  /// be painted at row (index) in the visualization of the event group.
+  ///
+  /// We store events by row within the group in order to display overlapping
+  /// events in the flame chart UI. This allows us to reuse space where possible
+  /// and avoid collisions.  We will draw overlapping events on a new flame
+  /// chart row.
+  ///
+  /// If we have events A, B, C, and D, where all belong in a single
+  /// [FullTimelineEventGroup] but some overlap, the UI will look
+  /// like this:
+  ///
+  ///    [timeline_event_A]    [timeline_event_C]    <-- row 0
+  ///               [timeline_event_B]               <-- row 1
+  ///                            [timeline_event_D]  <-- row 2
+  ///
+  /// The contents of [eventsByRow] would look like this:
+  /// [
+  ///   [timeline_event_A, timeline_event_C],
+  ///   [timeline_event_B],
+  ///   [timeline_event_D],
+  /// ]
+  final List<List<TimelineEvent>> eventsByRow = [];
+
+  int get displayDepth => eventsByRow.length;
+
+  void addEventAtCalculatedRow(TimelineEvent event) {
+    final currentLargestRowIndex = eventsByRow.length;
+    var displayRowIndex = 0;
+    while (displayRowIndex < currentLargestRowIndex) {
+      // Ensure that [event] and its children do not overlap with events at all
+      // current offsets.
+      var eventFitsAtDisplayRow = true;
+      for (int eventLevel = 0;
+          eventLevel <
+              math.min(
+                  event.displayDepth, currentLargestRowIndex - displayRowIndex);
+          eventLevel++) {
+        final lastEventAtDisplayRow =
+            eventsByRow[displayRowIndex + eventLevel].isNotEmpty
+                ? eventsByRow[displayRowIndex + eventLevel].last
+                : null;
+        final firstNewEventAtLevel = event.firstNodeAtLevel(eventLevel);
+        if ((lastEventAtDisplayRow != null && firstNewEventAtLevel != null) &&
+            lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time)) {
+          // Events overlap - break and try the next display offset.
+          eventFitsAtDisplayRow = false;
+          break;
+        }
+      }
+      if (eventFitsAtDisplayRow) break;
+
+      displayRowIndex++;
+    }
+
+    _addEventAtRow(event, displayRowIndex);
+  }
+
+  void _addEventAtRow(TimelineEvent event, int row) {
+    if (row == eventsByRow.length) {
+      eventsByRow.add([event]);
+    } else {
+      eventsByRow[row].add(event);
+    }
+
+    var overlappingChildrenOffset = 0;
+    for (int i = 0; i < event.children.length; i++) {
+      final child = event.children[i];
+      final nextRow = row + 1;
+      if (i != 0 && event.hasOverlappingChildren) {
+        final previousChild = event.children[i - 1];
+        overlappingChildrenOffset += previousChild.displayDepth;
+        _addEventAtRow(child, nextRow + overlappingChildrenOffset);
+      } else {
+        _addEventAtRow(child, nextRow);
+      }
+    }
   }
 }
 
