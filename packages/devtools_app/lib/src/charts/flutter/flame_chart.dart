@@ -89,6 +89,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView.builder(
+          addAutomaticKeepAlives: false,
           itemCount: rows.length,
           itemBuilder: (context, index) {
             return ScrollingFlameChartRow<V>(
@@ -174,6 +175,10 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
             height: rowHeightWithPadding,
             width: widget.width,
             child: ListView.builder(
+              addAutomaticKeepAlives: false,
+              // The flame chart nodes are inexpensive to paint, so removing the
+              // repaint boundary improves efficiency.
+              addRepaintBoundaries: false,
               controller: scrollController,
               scrollDirection: Axis.horizontal,
               itemCount: nodes.length,
@@ -247,6 +252,8 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
+  static const _minWidthForText = 16.0;
+
   final Key key;
   final Rect rect;
   final String text;
@@ -259,28 +266,28 @@ class FlameChartNode<T> {
 
   Widget buildWidget(bool selected) {
     selected = selectable ? selected : false;
-    return SizedBox(
-      width: rect.width,
-      height: rect.height,
-      child: Tooltip(
-        message: tooltip,
-        waitDuration: tooltipWait,
-        preferBelow: false,
-        child: InkWell(
-          onTap: () => onSelected(data),
-          child: Container(
-            padding: const EdgeInsets.only(left: 6.0),
-            alignment: Alignment.centerLeft,
-            color: selected ? _selectedNodeColor : backgroundColor,
-            child: Text(
-              text,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: selected ? Colors.black : textColor,
-              ),
-            ),
-          ),
+    return Tooltip(
+      message: tooltip,
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      child: GestureDetector(
+        onTap: () => onSelected(data),
+        child: Container(
+          width: rect.width,
+          height: rect.height,
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          alignment: Alignment.centerLeft,
+          color: selected ? _selectedNodeColor : backgroundColor,
+          child: rect.width > _minWidthForText
+              ? Text(
+                  text,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected ? Colors.black : textColor,
+                  ),
+                )
+              : const SizedBox(),
         ),
       ),
     );
