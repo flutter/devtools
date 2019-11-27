@@ -234,6 +234,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateObjectGroupManager();
+    _animateProperties();
   }
 
   @override
@@ -258,7 +259,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   void _changeProperties(FlexLayoutProperties nextProperties) {
     if (!mounted || nextProperties == null) return;
     setState(() {
-      print('Changing to $nextProperties from $properties');
       _animatedProperties = AnimatedFlexLayoutProperties(
         // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
         _animatedProperties?.copyWith() ?? _properties,
@@ -287,20 +287,22 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
   void _onInspectorSelectionChanged() async {
+    print('Inspector selection has changed');
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
     final prevRootId = id(_properties?.node);
     final newRootId = id(getRoot(selectedNode));
     final shouldFetch = prevRootId != newRootId;
-    FlexLayoutProperties newSelection = _properties;
     if (shouldFetch) {
-      newSelection = await fetchFlexLayoutProperties();
+      final newSelection = await fetchFlexLayoutProperties();
+      _setProperties(newSelection);
+    } else {
+      _setProperties(FlexLayoutProperties.fromDiagnostics(selectedNode));
     }
-    setProperties(newSelection);
   }
 
-  void updateHighlighted(FlexLayoutProperties newProperties) {
+  void _updateHighlighted(FlexLayoutProperties newProperties) {
     setState(() {
       if (selectedNode.isFlex) {
         highlighted = newProperties;
@@ -311,9 +313,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     });
   }
 
-  void setProperties(FlexLayoutProperties newProperties) {
-    updateHighlighted(newProperties);
+  void _setProperties(FlexLayoutProperties newProperties) {
+    _updateHighlighted(newProperties);
     if (_properties == newProperties) {
+      _animateProperties();
       return;
     }
     setState(() {
@@ -342,8 +345,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     changeController = AnimationController(
       vsync: this,
       duration: entranceAnimationDuration,
-    )
-      ..addStatusListener((status) {
+    )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _properties = _animatedProperties.end;
@@ -351,10 +353,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             changeController.value = 0.0;
           });
         }
-      })
-      ..addListener(() {
-        print(
-            'Changing ${changeController.value}: ${_animatedProperties?.children?.elementAt(1)?.size}');
       });
     changeAnimation = CurvedAnimation(
       parent: changeController,
@@ -383,7 +381,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       LayoutProperties oldProperties, LayoutProperties newProperties) async {
     final index = properties.children.indexOf(oldProperties);
     if (index != -1) {
-      print('updating child properties $index');
       final newChildren = properties.children.toList();
       newChildren[index] = newProperties;
       // Recompute the sizes of the children.
@@ -416,11 +413,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       newProperties = properties.copyWith(children: newChildren);
       _changeProperties(newProperties);
     }
+    // TODO(DO NOT SUBMIT): don't overwrite a running animation to make this change.
     // Fetch the updated sizes after the app re-lays-out its children.
     final updatedProperties = await fetchFlexLayoutProperties();
-    setState(() {
-      _properties = updatedProperties;
-    });
+    _changeProperties(updatedProperties);
   }
 
   Widget _visualizeFlex(BuildContext context) {
@@ -634,10 +630,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
               properties.mainAxisAlignment,
               properties.crossAxisAlignment,
             );
-            final updatedProperties = await fetchFlexLayoutProperties();
-            setState(() {
-              _properties = updatedProperties;
-            });
+            // final updatedProperties = await fetchFlexLayoutProperties();
           },
         ),
       ),

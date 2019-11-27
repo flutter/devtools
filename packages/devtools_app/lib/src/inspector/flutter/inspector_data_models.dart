@@ -87,23 +87,6 @@ List<double> computeRenderSizes({
     renderSizes = transformToRenderSize(largestRenderSize);
   }
   return renderSizes;
-
-  ScrollController linkedController;
-  List<dynamic> nodes;
-  ListView.builder(
-    scrollDirection: Axis.horizontal,
-    controller: linkedController,
-    itemBuilder: (context, index) {
-      final node = nodes[index];
-      final next = index == nodes.length - 1 ? null : nodes[index + 1];
-      return Padding(
-        padding:
-            EdgeInsets.only(right: next == null ? 0.0 : next.left - node.right),
-        child: node.buildWidget(context, node.selected),
-      );
-    },
-    itemCount: nodes.length,
-  );
 }
 
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
