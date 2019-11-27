@@ -252,6 +252,8 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
+  static const _minWidthForText = 16.0;
+
   final Key key;
   final Rect rect;
   final String text;
@@ -273,10 +275,10 @@ class FlameChartNode<T> {
         child: Container(
           width: rect.width,
           height: rect.height,
-          padding: const EdgeInsets.only(left: 6.0),
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
           alignment: Alignment.centerLeft,
           color: selected ? _selectedNodeColor : backgroundColor,
-          child: rect.width > 10.0
+          child: rect.width > _minWidthForText
               ? Text(
                   text,
                   textAlign: TextAlign.left,
