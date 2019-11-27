@@ -442,6 +442,10 @@ double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
 /// Unlike [ChangeNotifier], [Reporter] stores listeners in a set.  This allows
 /// O(1) addition/removal of listeners and O(N) listener dispatch.
 ///
+/// For small N (~ <20), [ChangeNotifier] implementations can be faster because
+/// array access is more efficient than set access. Use [Reporter] instead in
+/// cases where N is larger.
+///
 /// When disposing, any object with a registered listener should [unregister]
 /// itself.
 ///
@@ -485,6 +489,10 @@ class Reporter implements Listenable {
 ///
 /// Similar to [ValueNotifier], but with the same performance
 /// benefits as [Reporter].
+///
+/// For small N (~ <20), [ValueNotifier] implementations can be faster because
+/// array access is more efficient than set access. Use [ValueReporter] instead
+/// in cases where N is larger.
 class ValueReporter<T> extends Reporter implements ValueListenable<T> {
   ValueReporter(this._value);
   @override
