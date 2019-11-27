@@ -143,6 +143,9 @@ void main() {
       final overlapEnd = TimeRange()
         ..start = const Duration(milliseconds: 150)
         ..end = const Duration(milliseconds: 250);
+      final overlapAll = TimeRange()
+        ..start = const Duration(milliseconds: 50)
+        ..end = const Duration(milliseconds: 250);
       final noOverlap = TimeRange()
         ..start = const Duration(milliseconds: 300)
         ..end = const Duration(milliseconds: 400);
@@ -151,6 +154,7 @@ void main() {
       expect(t.overlaps(overlapBeginning), isTrue);
       expect(t.overlaps(overlapMiddle), isTrue);
       expect(t.overlaps(overlapEnd), isTrue);
+      expect(t.overlaps(overlapAll), isTrue);
       expect(t.overlaps(noOverlap), isFalse);
     });
 
@@ -325,6 +329,17 @@ void main() {
       test('produces the safe value on division by zero', () {
         expect(safeDivide(1.0, 0.0), 0.0);
         expect(safeDivide(-50.0, 0.0, ifNotFinite: 10.0), 10.0);
+      });
+    });
+
+    group('null safe list', () {
+      test('nullSafeLast', () {
+        final list = [];
+        expect(list.nullSafeLast(), isNull);
+        list.addAll([1, 2, 3]);
+        expect(list.nullSafeLast(), equals(3));
+        list.add(null);
+        expect(list.nullSafeLast(), isNull);
       });
     });
   });

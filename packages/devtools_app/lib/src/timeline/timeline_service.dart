@@ -148,9 +148,12 @@ class TimelineService {
                 timelineController.fullTimeline.recordingNotifier.value) &&
             !offlineMode &&
             isCurrentScreen;
-    final bool isRunning =
-        !timelineController.frameBasedTimeline.pausedNotifier.value ||
-            timelineController.fullTimeline.recordingNotifier.value;
+    final bool isRunning = serviceManager.serviceAvailable.isCompleted &&
+        (!timelineController.frameBasedTimeline.pausedNotifier.value ||
+            timelineController.fullTimeline.recordingNotifier.value) &&
+        (await serviceManager.service.getVMTimelineFlags())
+            .recordedStreams
+            .isNotEmpty;
     await _updateListeningState(
       shouldBeRunning: shouldBeRunning,
       isRunning: isRunning,
@@ -162,12 +165,10 @@ class TimelineService {
     @required bool isRunning,
   }) async {
     await serviceManager.serviceAvailable.future;
-    if (shouldBeRunning && isRunning && !timelineController.hasStarted) {
+    if (shouldBeRunning) {
       await startTimeline();
     } else if (shouldBeRunning && !isRunning) {
       timelineController.frameBasedTimeline.resume();
-      await allowedError(serviceManager.service
-          .setVMTimelineFlags(<String>['GC', 'Dart', 'Embedder']));
     } else if (!shouldBeRunning && isRunning) {
       // TODO(devoncarew): turn off the events
       timelineController.frameBasedTimeline.pause();

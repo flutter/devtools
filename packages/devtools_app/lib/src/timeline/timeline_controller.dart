@@ -297,11 +297,11 @@ class FrameBasedTimeline
     if (frame == null || data.selectedFrame == frame || !hasStarted) {
       return;
     }
-    _selectedFrameNotifier.value = frame;
     data.selectedFrame = frame;
+    _selectedFrameNotifier.value = frame;
 
-    _timelineController._selectedTimelineEventNotifier.value = null;
     data.selectedEvent = null;
+    _timelineController._selectedTimelineEventNotifier.value = null;
     data.cpuProfileData = null;
 
     if (debugTimeline && frame != null) {
@@ -409,7 +409,7 @@ class FullTimeline
   @override
   void processTraceEvents(List<TraceEventWrapper> traceEvents) {
     processor.processTimeline(traceEvents);
-    _timelineController.fullTimeline.data.initializeEventBuckets();
+    _timelineController.fullTimeline.data.initializeEventGroups();
   }
 
   @override
