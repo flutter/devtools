@@ -144,6 +144,8 @@ class TreeNode<T extends TreeNode<T>> {
     while (node.level < level) {
       // Walk down the tree until we find the node at [level].
       if (node.children.isNotEmpty) {
+        // Since we have already ensured that [level] < [depth], at least one
+        // child is guaranteed to meet the firstWhere condition.
         node = node.children.firstWhere((n) => n.depth > level - n.level);
       }
     }
