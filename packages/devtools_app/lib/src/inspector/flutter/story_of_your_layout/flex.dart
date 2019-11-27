@@ -19,7 +19,7 @@ import 'arrow.dart';
 import 'utils.dart';
 
 const widthIndicatorColor = mainUiColor;
-const heightIndicatorColor = mainGpuColor;
+const heightIndicatorColor = Color(0xFF27AAE1);
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
@@ -93,47 +93,64 @@ Widget _visualizeWidthAndHeightWithConstraints({
     margin: const EdgeInsets.only(
       top: margin,
       left: margin,
+      // custom margin so that the text does not stick with the border
+      right: 2.0,
       bottom: widthAndConstraintIndicatorSize,
     ),
-    child: ArrowWrapper.bidirectional(
-      arrowColor: heightIndicatorColor,
-      arrowStrokeWidth: arrowStrokeWidth,
-      arrowHeadSize: arrowHeadSize,
-      direction: Axis.vertical,
-      distanceToArrow: distanceToArrow,
-      child: RotatedBox(
-        quarterTurns: 1,
-        child: Text(
-          '${properties.describeHeight()}\n'
-          '(${properties.describeHeightConstraints()})',
-          textAlign: TextAlign.center,
-          style: const TextStyle(height: 1.0),
+    child: Row(
+      children: <Widget>[
+        Expanded(
+          child: ArrowWrapper.bidirectional(
+            arrowColor: heightIndicatorColor,
+            arrowStrokeWidth: arrowStrokeWidth,
+            arrowHeadSize: arrowHeadSize,
+            direction: Axis.vertical,
+          ),
         ),
-      ),
+        Expanded(
+          flex: 2,
+          child: RotatedBox(
+            quarterTurns: 1,
+            child: Text(
+              '${properties.describeHeight()}\n'
+              '(${properties.describeHeightConstraints()})',
+              textAlign: TextAlign.center,
+              style: const TextStyle(height: 1.0),
+            ),
+          ),
+        ),
+      ],
     ),
   );
   final bottom = Container(
     margin: const EdgeInsets.only(
       top: margin,
-      right: heightAndConstraintIndicatorSize,
-      // so that the arrow does not overlap with each other
-      bottom: margin,
       left: margin,
+      right: heightAndConstraintIndicatorSize,
+      bottom: 2.0, // custom margin so that the text does not stick with border
     ),
-    child: ArrowWrapper.bidirectional(
-      arrowColor: widthIndicatorColor,
-      arrowHeadSize: arrowHeadSize,
-      arrowStrokeWidth: arrowStrokeWidth,
-      direction: Axis.horizontal,
-      distanceToArrow: distanceToArrow,
-      child: Text(
-        '${properties.describeWidth()}\n'
-        '(${properties.describeWidthConstraints()})',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          height: 1.0,
+    child: Column(
+      children: <Widget>[
+        Flexible(
+          child: ArrowWrapper.bidirectional(
+            arrowColor: widthIndicatorColor,
+            arrowHeadSize: arrowHeadSize,
+            arrowStrokeWidth: arrowStrokeWidth,
+            direction: Axis.horizontal,
+          ),
         ),
-      ),
+        Expanded(
+          flex: 4,
+          child: Text(
+            '${properties.describeWidth()} '
+            '(${properties.describeWidthConstraints()})',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              height: 1.0,
+            ),
+          ),
+        ),
+      ],
     ),
   );
   return BorderLayout(
@@ -627,23 +644,30 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                           child: Column(
                             children: <Widget>[
                               Expanded(
+                                flex: 2,
                                 child: ArrowWrapper.unidirectional(
                                   arrowColor: verticalColor,
-                                  child: RotatedBox(
-                                    quarterTurns: 3,
-                                    child: Text(
-                                      properties.verticalDirectionDescription,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      textScaleFactor: largeTextScaleFactor,
-                                      style:
-                                          TextStyle(color: verticalTextColor),
+                                  child: Flexible(
+                                    child: RotatedBox(
+                                      quarterTurns: 3,
+                                      child: Text(
+                                        properties.verticalDirectionDescription,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        textScaleFactor: largeTextScaleFactor,
+                                        style:
+                                            TextStyle(color: verticalTextColor),
+                                      ),
                                     ),
                                   ),
                                   type: ArrowType.down,
                                 ),
                               ),
-                              _buildAxisAlignmentDropdown(Axis.vertical),
+                              Flexible(
+                                child: _buildAxisAlignmentDropdown(
+                                  Axis.vertical,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -657,9 +681,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                           child: Row(
                             children: <Widget>[
                               Expanded(
+                                flex: 2,
                                 child: ArrowWrapper.unidirectional(
                                   arrowColor: horizontalColor,
-                                  child: FittedBox(
+                                  child: Flexible(
                                     child: Text(
                                       properties.horizontalDirectionDescription,
                                       overflow: TextOverflow.ellipsis,
@@ -672,7 +697,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                                   type: ArrowType.right,
                                 ),
                               ),
-                              _buildAxisAlignmentDropdown(Axis.horizontal),
+                              Flexible(
+                                child: _buildAxisAlignmentDropdown(
+                                  Axis.horizontal,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -780,7 +809,7 @@ class FlexChildVisualizer extends StatelessWidget {
               softWrap: true,
               overflow: TextOverflow.ellipsis,
               textScaleFactor: smallTextScaleFactor,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.center,
             ),
         ],
       ),
@@ -892,24 +921,27 @@ class WidgetVisualizer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  constraints: const BoxConstraints(
-                      maxWidth: minRenderWidth * widgetTitleMaxWidthPercentage),
-                  child: Center(
-                    child: Text(
-                      title,
-                      style: textColor != null
-                          ? TextStyle(
-                              color: textColor,
-                            )
-                          : null,
-                      overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: Container(
+                    constraints: const BoxConstraints(
+                        maxWidth:
+                            minRenderWidth * widgetTitleMaxWidthPercentage),
+                    child: Center(
+                      child: Text(
+                        title,
+                        style: textColor != null
+                            ? TextStyle(
+                                color: textColor,
+                              )
+                            : null,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    decoration: BoxDecoration(
+                      color: borderColor,
+                    ),
+                    padding: const EdgeInsets.all(4.0),
                   ),
-                  decoration: BoxDecoration(
-                    color: borderColor,
-                  ),
-                  padding: const EdgeInsets.all(4.0),
                 ),
                 if (hint != null)
                   Flexible(
@@ -978,9 +1010,16 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
                 child: ArrowWrapper.bidirectional(
                   child: RotatedBox(
                     quarterTurns: 1,
-                    child: Text(
-                      'h=${toStringAsFixed(renderProperties.realHeight)}',
-                      overflow: TextOverflow.ellipsis,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Container(
+                          width: constraints.maxHeight,
+                          child: Text(
+                            'h=${toStringAsFixed(renderProperties.realHeight)}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   arrowColor: heightIndicatorColor,
