@@ -264,7 +264,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
     for (String groupName in data.eventGroups.keys) {
       final FullTimelineEventGroup group = data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
-      expandRows(group.eventsByRow.length);
+      assert(rows.length == currentRowIndex);
+      expandRows(rows.length + group.eventsByRow.length);
 
       for (int i = 0; i < group.eventsByRow.length; i++) {
         final row = group.eventsByRow[i];

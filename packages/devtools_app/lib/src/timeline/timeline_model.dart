@@ -103,7 +103,7 @@ class FullTimelineData extends TimelineData {
     if (_displayDepth != null) return _displayDepth;
 
     if (eventGroups.isEmpty) {
-      initializeEventBuckets();
+      initializeEventGroups();
     }
 
     int depth = 0;
@@ -115,7 +115,7 @@ class FullTimelineData extends TimelineData {
 
   int _displayDepth;
 
-  void initializeEventBuckets() {
+  void initializeEventGroups() {
     timelineEvents.sort((a, b) =>
         a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
     for (TimelineEvent event in timelineEvents) {

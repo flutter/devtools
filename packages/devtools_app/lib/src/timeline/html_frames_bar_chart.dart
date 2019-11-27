@@ -193,6 +193,8 @@ class PlotlyDivGraph extends CoreElement {
   void processNextFrame() async {
     final frame =
         timelineController.frameBasedTimeline.frameAddedNotifier.value;
+    if (frame == null) return;
+
     if (frame.uiDurationMs > 0 && frame.gpuDurationMs > 0) {
       dataIndexes.add(_frameIndex);
       uiDurations.add(frame.uiDurationMs);

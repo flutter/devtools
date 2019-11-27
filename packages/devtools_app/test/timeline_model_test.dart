@@ -117,7 +117,7 @@ void main() {
 
     test('initializeEventBuckets', () {
       expect(timelineData.eventGroups, isEmpty);
-      timelineData.initializeEventBuckets();
+      timelineData.initializeEventGroups();
       expect(
         timelineData.eventGroups[FullTimelineData.uiKey].eventsByRow[0].length,
         equals(1),

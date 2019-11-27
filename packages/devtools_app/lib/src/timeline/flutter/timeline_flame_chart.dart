@@ -318,9 +318,10 @@ class _FullTimelineFlameChartState
     for (String groupName in widget.data.eventGroups.keys) {
       final FullTimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
+      assert(rows.length == currentRowIndex);
       final groupDisplaySize =
           group.eventsByRow.length + _rowOffsetForSectionSpacer;
-      expandRows(groupDisplaySize);
+      expandRows(rows.length + groupDisplaySize);
 
       for (int i = 0; i < group.eventsByRow.length; i++) {
         final row = group.eventsByRow[i];
