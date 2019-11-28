@@ -1024,7 +1024,7 @@ class ObjectGroup {
     InstanceRef result;
     while (true) {
       result = await inspectorLibrary.eval(command, isAlive: this);
-      if(result != null) break;
+      if (result != null) break;
     }
     return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
   }
