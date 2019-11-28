@@ -240,7 +240,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
+    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
       getRoot(selectedNode),
       subtreeDepth: 1,
     );
