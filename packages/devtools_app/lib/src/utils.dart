@@ -437,31 +437,37 @@ double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
   return ifNotFinite;
 }
 
-/// A simple change notifier.
+/// A change reporter that can be listened to.
+///
+/// Unlike [ChangeNotifier], [Reporter] stores listeners in a set.  This allows
+/// O(1) addition/removal of listeners and O(N) listener dispatch.
+///
+/// For small N (~ <20), [ChangeNotifier] implementations can be faster because
+/// array access is more efficient than set access. Use [Reporter] instead in
+/// cases where N is larger.
 ///
 /// When disposing, any object with a registered listener should [unregister]
 /// itself.
 ///
-/// Generally, a registering object should use `this` as its key.
-///
-/// Only the object that created this notifier should call [notify].
-class Notifier {
-  final Map<Object, void Function()> _listeners = {};
+/// Only the object that created this reporter should call [notify].
+class Reporter implements Listenable {
+  final Set<VoidCallback> _listeners = {};
 
-  /// Adds [callback] to this notifier, associated with [key].
+  /// Adds [callback] to this reporter.
   ///
-  /// If [key] is already registered on this notifier, the previous callback
-  /// will be overridden.
-  void register(Object key, void Function() callback) {
-    _listeners[key] = callback;
+  /// If [callback] is already registered to this reporter, nothing will happen.
+  @override
+  void addListener(VoidCallback callback) {
+    _listeners.add(callback);
   }
 
-  /// Removes the listener associated with [key].
-  void unregister(Object key) {
-    _listeners.remove(key);
+  /// Removes the listener [callback].
+  @override
+  void removeListener(VoidCallback callback) {
+    _listeners.remove(callback);
   }
 
-  /// Whether or not this object has any event listeners registered.
+  /// Whether or not this object has any listeners registered.
   bool get hasListeners => _listeners.isNotEmpty;
 
   /// Notifies all listeners of a change.
@@ -470,10 +476,38 @@ class Notifier {
   /// a notification callback leads to a change in the listeners,
   /// only the original listeners will be called.
   void notify() {
-    for (var callback in _listeners.values.toList()) {
+    for (var callback in _listeners.toList()) {
       callback();
     }
   }
+
+  @override
+  String toString() => '${describeIdentity(this)}';
+}
+
+/// A [Reporter] that notifies when its [value] changes.
+///
+/// Similar to [ValueNotifier], but with the same performance
+/// benefits as [Reporter].
+///
+/// For small N (~ <20), [ValueNotifier] implementations can be faster because
+/// array access is more efficient than set access. Use [ValueReporter] instead
+/// in cases where N is larger.
+class ValueReporter<T> extends Reporter implements ValueListenable<T> {
+  ValueReporter(this._value);
+  @override
+  T get value => _value;
+
+  set value(T value) {
+    if (_value == value) return;
+    _value = value;
+    notify();
+  }
+
+  T _value;
+
+  @override
+  String toString() => '${describeIdentity(this)}($value)';
 }
 
 String toStringAsFixed(double num, [int fractionDigit = 1]) {

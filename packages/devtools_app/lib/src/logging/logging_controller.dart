@@ -210,7 +210,7 @@ class LoggingController {
 
   bool _hasPendingUiUpdates = false;
 
-  final Notifier onLogsUpdated = Notifier();
+  final Reporter onLogsUpdated = Reporter();
 
   /// ObjectGroup for Flutter (completes with null for non-Flutter apps).
   Future<ObjectGroup> objectGroup;
