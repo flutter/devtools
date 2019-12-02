@@ -264,6 +264,7 @@ class FlexLayoutProperties extends LayoutProperties {
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
+  @override
   FlexLayoutProperties copyWith({
     Size size,
     List<LayoutProperties> children,
