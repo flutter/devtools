@@ -286,7 +286,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
-  void _onInspectorSelectionChanged() async {
+  Future<void> _onInspectorSelectionChanged() async {
+    if (!mounted) return;
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
@@ -297,7 +298,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       final newSelection = await fetchFlexLayoutProperties();
       _setProperties(newSelection);
     } else {
-      _setProperties(FlexLayoutProperties.fromDiagnostics(selectedNode));
+      _setProperties(_properties);
     }
   }
 
@@ -502,7 +503,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       quarterTurns: axis == Axis.vertical ? 3 : 0,
       child: Container(
         constraints: const BoxConstraints(
-            maxWidth: dropdownMaxSize, maxHeight: dropdownMaxSize),
+          maxWidth: dropdownMaxSize,
+          maxHeight: dropdownMaxSize,
+        ),
         child: DropdownButton(
           value: selected,
           isExpanded: true,
@@ -624,122 +627,125 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
               padding: const EdgeInsets.only(bottom: margin, right: margin),
               child: AnimatedBuilder(
                 animation: changeController,
-                builder: (context, child) {
-                  return LayoutBuilder(builder: (context, constraints) {
-                    final maxHeight = constraints.maxHeight;
-                    final maxWidth = constraints.maxWidth;
-                    return Container(
-                      constraints: BoxConstraints(
-                          maxWidth: maxWidth, maxHeight: maxHeight),
-                      child: Stack(
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.only(
-                                top: mainAxisArrowIndicatorSize,
-                                left: crossAxisArrowIndicatorSize + margin,
-                              ),
-                              child: InkWell(
-                                onTap: () => _onTap(properties),
-                                child: WidgetVisualizer(
-                                  title: flexType,
-                                  backgroundColor: highlighted == properties
-                                      ? activeBackgroundColor(theme)
-                                      : null,
-                                  hint: Container(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Text(
-                                      'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
-                                      textScaleFactor: largeTextScaleFactor,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  borderColor: mainAxisColor,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(
-                                      /// margin for the outer width/height
-                                      ///  so that they don't stick to the corner
-                                      right: margin,
-                                      bottom: margin,
-                                    ),
-                                    child: _visualizeFlex(context),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Container(
-                              height: maxHeight - mainAxisArrowIndicatorSize,
-                              width: crossAxisArrowIndicatorSize,
-                              child: Column(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: ArrowWrapper.unidirectional(
-                                      arrowColor: verticalColor,
-                                      child: RotatedBox(
-                                        quarterTurns: 3,
-                                        child: Text(
-                                          properties
-                                              .verticalDirectionDescription,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                          textScaleFactor: largeTextScaleFactor,
-                                          style: TextStyle(
-                                              color: verticalTextColor),
-                                        ),
-                                      ),
-                                      type: ArrowType.down,
-                                    ),
-                                  ),
-                                  _buildAxisAlignmentDropdown(Axis.vertical),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              height: mainAxisArrowIndicatorSize,
-                              width: maxWidth -
-                                  crossAxisArrowIndicatorSize -
-                                  margin,
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: ArrowWrapper.unidirectional(
-                                      arrowColor: horizontalColor,
-                                      child: FittedBox(
-                                        child: Text(
-                                          properties
-                                              .horizontalDirectionDescription,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                          textScaleFactor: largeTextScaleFactor,
-                                          style: TextStyle(
-                                              color: horizontalTextColor),
-                                        ),
-                                      ),
-                                      type: ArrowType.right,
-                                    ),
-                                  ),
-                                  _buildAxisAlignmentDropdown(Axis.horizontal),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  });
+                builder: (context, _) {
+                  return LayoutBuilder(builder: _buildLayout);
                 },
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
+    final theme = Theme.of(context);
+    final maxHeight = constraints.maxHeight;
+    final maxWidth = constraints.maxWidth;
+    final flexDescription = Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(
+          top: mainAxisArrowIndicatorSize,
+          left: crossAxisArrowIndicatorSize + margin,
+        ),
+        child: InkWell(
+          onTap: () => _onTap(properties),
+          child: WidgetVisualizer(
+            title: flexType,
+            backgroundColor:
+                highlighted == properties ? activeBackgroundColor(theme) : null,
+            hint: Container(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
+                textScaleFactor: largeTextScaleFactor,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            borderColor: mainAxisColor,
+            child: Container(
+              margin: const EdgeInsets.only(
+                /// margin for the outer width/height
+                ///  so that they don't stick to the corner
+                right: margin,
+                bottom: margin,
+              ),
+              child: _visualizeFlex(context),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final verticalAxisDescription = Align(
+      alignment: Alignment.bottomLeft,
+      child: Container(
+        height: maxHeight - mainAxisArrowIndicatorSize,
+        width: crossAxisArrowIndicatorSize,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ArrowWrapper.unidirectional(
+                arrowColor: verticalColor,
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    properties.verticalDirectionDescription,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    textScaleFactor: largeTextScaleFactor,
+                    style: TextStyle(
+                      color: verticalTextColor,
+                    ),
+                  ),
+                ),
+                type: ArrowType.down,
+              ),
+            ),
+            _buildAxisAlignmentDropdown(Axis.vertical),
+          ],
+        ),
+      ),
+    );
+
+    final horizontalAxisDescription = Align(
+      alignment: Alignment.topRight,
+      child: Container(
+        height: mainAxisArrowIndicatorSize,
+        width: maxWidth - crossAxisArrowIndicatorSize - margin,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: ArrowWrapper.unidirectional(
+                arrowColor: horizontalColor,
+                child: FittedBox(
+                  child: Text(
+                    properties.horizontalDirectionDescription,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    textScaleFactor: largeTextScaleFactor,
+                    style: TextStyle(color: horizontalTextColor),
+                  ),
+                ),
+                type: ArrowType.right,
+              ),
+            ),
+            _buildAxisAlignmentDropdown(Axis.horizontal),
+          ],
+        ),
+      ),
+    );
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+      child: Stack(
+        children: <Widget>[
+          flexDescription,
+          verticalAxisDescription,
+          horizontalAxisDescription,
         ],
       ),
     );

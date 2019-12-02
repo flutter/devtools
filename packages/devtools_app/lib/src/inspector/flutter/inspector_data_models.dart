@@ -264,20 +264,21 @@ class FlexLayoutProperties extends LayoutProperties {
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
-  FlexLayoutProperties copyWith(
-      {Size size,
-      List<LayoutProperties> children,
-      BoxConstraints constraints,
-      bool isFlex,
-      String description,
-      num flexFactor,
-      Axis direction,
-      MainAxisAlignment mainAxisAlignment,
-      MainAxisSize mainAxisSize,
-      CrossAxisAlignment crossAxisAlignment,
-      TextDirection textDirection,
-      VerticalDirection verticalDirection,
-      TextBaseline textBaseline}) {
+  FlexLayoutProperties copyWith({
+    Size size,
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    bool isFlex,
+    String description,
+    num flexFactor,
+    Axis direction,
+    MainAxisAlignment mainAxisAlignment,
+    MainAxisSize mainAxisSize,
+    CrossAxisAlignment crossAxisAlignment,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection,
+    TextBaseline textBaseline,
+  }) {
     return FlexLayoutProperties(
       size: size ?? this.size,
       children: children ?? this.children,
