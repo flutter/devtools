@@ -46,6 +46,7 @@ class InspectorScreenBody extends StatefulWidget {
 class _InspectorScreenBodyState extends State<InspectorScreenBody>
     with BlockingActionMixin, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
+  bool _layoutDetailsSupported = false;
   bool connectionInProgress = false;
   InspectorService inspectorService;
 
@@ -151,6 +152,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
               detailsTree: detailsTree,
               controller: inspectorController,
               actionButtons: _expandCollapseButtons(),
+              layoutDetailsSupported: _layoutDetailsSupported,
             ),
           ),
         ),
@@ -203,6 +205,12 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     });
   }
 
+  void _onLayoutDetailsSupported() {
+    setState(() {
+      _layoutDetailsSupported = true;
+    });
+  }
+
   void _handleConnectionStart(VmService service) async {
     setState(() {
       connectionInProgress = true;
@@ -233,6 +241,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         inspectorService: inspectorService,
         treeType: FlutterTreeType.widget,
         onExpandCollapseSupported: _onExpandCollapseSupported,
+        onLayoutDetailsSupported: _onLayoutDetailsSupported,
       );
 
       // TODO(jacobr): move this notice display to once a day.
