@@ -41,12 +41,7 @@ class InspectorDetailsTabController extends StatelessWidget {
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (layoutDetailsSupported)
-        Banner(
-          message: 'PROTOTYPE',
-          location: BannerLocation.topStart,
-          child: LayoutDetailsTab(controller: controller),
-        ),
+      if (layoutDetailsSupported) LayoutDetailsTab(controller: controller),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
