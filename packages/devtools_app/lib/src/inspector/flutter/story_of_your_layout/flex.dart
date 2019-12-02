@@ -378,8 +378,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   Future<void> updateChildFlex(
       LayoutProperties oldProperties, LayoutProperties newProperties) async {
-    // TODO(DO NOT SUBMIT): don't overwrite a running animation to make this change.
-    // Fetch the updated sizes after the app re-lays-out its children.
     final updatedProperties = await fetchFlexLayoutProperties();
     _changeProperties(updatedProperties);
   }
