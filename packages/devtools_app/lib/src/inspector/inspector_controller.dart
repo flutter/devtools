@@ -852,7 +852,7 @@ class InspectorController extends DisposableController
   }
 
   /// execute given [callback] when minimum Flutter [version] is met.
-  void _onVersionSupported(SemanticVersion version, Function callback) {
+  void _onVersionSupported(SemanticVersion version, VoidCallback callback) {
     serviceManager.hasRegisteredService(
       registrations.flutterVersion.service,
       (serviceAvailable) async {
