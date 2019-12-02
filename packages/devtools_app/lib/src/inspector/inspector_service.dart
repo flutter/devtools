@@ -962,7 +962,7 @@ class ObjectGroup {
     if (node == null) return null;
     final id = node.dartDiagnosticRef.id;
     String command = '''
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) return null; 
+      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) return '{}'; 
       final root = WidgetInspectorService.instance.toObject('$id');
       if (root == null) {
         return null;
@@ -1022,10 +1022,10 @@ class ObjectGroup {
     ''';
     command = '((){${command.split('\n').join()}})()';
     InstanceRef result;
-    while (true) {
+    do {
       result = await inspectorLibrary.eval(command, isAlive: this);
-      if (result != null) break;
-    }
+    } while ((result?.length ?? 0) <= 2);
+
     return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
   }
 }
