@@ -272,12 +272,13 @@ class AnimatedFlexLayoutProperties
   MainAxisAlignment get mainAxisAlignment => end.mainAxisAlignment;
 
   @override
-  List<RenderProperties> childrenRenderProperties(
-      {double smallestRenderWidth,
-      double largestRenderWidth,
-      double smallestRenderHeight,
-      double largestRenderHeight,
-      double Function(Axis) maxSizeAvailable}) {
+  List<RenderProperties> childrenRenderProperties({
+    double smallestRenderWidth,
+    double largestRenderWidth,
+    double smallestRenderHeight,
+    double largestRenderHeight,
+    double Function(Axis) maxSizeAvailable,
+  }) {
     final beginRenderProperties = begin.childrenRenderProperties(
       smallestRenderHeight: smallestRenderHeight,
       smallestRenderWidth: smallestRenderWidth,
@@ -329,9 +330,10 @@ class AnimatedFlexLayoutProperties
   Axis get crossAxisDirection => end.crossAxisDirection;
 
   @override
-  List<RenderProperties> crossAxisSpaces(
-      {List<RenderProperties> childrenRenderProperties,
-      double Function(Axis) maxSizeAvailable}) {
+  List<RenderProperties> crossAxisSpaces({
+    List<RenderProperties> childrenRenderProperties,
+    double Function(Axis) maxSizeAvailable,
+  }) {
     return end.crossAxisSpaces(
       childrenRenderProperties: childrenRenderProperties,
       maxSizeAvailable: maxSizeAvailable,
@@ -384,20 +386,21 @@ class AnimatedFlexLayoutProperties
   ///
   /// Useful for interrupting an animation with a transition to another [FlexLayoutProperties].
   @override
-  FlexLayoutProperties copyWith(
-      {Size size,
-      List<LayoutProperties> children,
-      BoxConstraints constraints,
-      bool isFlex,
-      String description,
-      num flexFactor,
-      Axis direction,
-      MainAxisAlignment mainAxisAlignment,
-      MainAxisSize mainAxisSize,
-      CrossAxisAlignment crossAxisAlignment,
-      TextDirection textDirection,
-      VerticalDirection verticalDirection,
-      TextBaseline textBaseline}) {
+  FlexLayoutProperties copyWith({
+    Size size,
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    bool isFlex,
+    String description,
+    num flexFactor,
+    Axis direction,
+    MainAxisAlignment mainAxisAlignment,
+    MainAxisSize mainAxisSize,
+    CrossAxisAlignment crossAxisAlignment,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection,
+    TextBaseline textBaseline,
+  }) {
     return FlexLayoutProperties(
       size: size ?? this.size,
       children: children ?? this.children,
