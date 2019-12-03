@@ -56,7 +56,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   final rowOffsetForSectionSpacer = 1;
 
   // The "top" positional value for each flame chart node will be 0.0 because
-  // each node is positioned inside its own stack.
+  // each node is positioned inside its own list.
   final flameChartNodeTop = 0.0;
 
   LinkedScrollControllerGroup _linkedScrollControllerGroup;

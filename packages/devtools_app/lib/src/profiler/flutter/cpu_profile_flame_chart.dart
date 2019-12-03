@@ -34,38 +34,14 @@ class _CpuProfileFlameChartState
 
   int _colorOffset = 0;
 
+  final Map<String, double> stackFrameLefts = {};
+
   @override
   void initFlameChartElements() {
     super.initFlameChartElements();
     expandRows(widget.data.cpuProfileRoot.depth +
         rowOffsetForTopPadding +
         rowOffsetForBottomPadding);
-
-    final Map<String, double> stackFrameLefts = {};
-
-    double leftForStackFrame(CpuStackFrame stackFrame) {
-      final CpuStackFrame parent = stackFrame.parent;
-      double left;
-      if (parent == null) {
-        left = widget.startInset;
-      } else {
-        final stackFrameIndex = stackFrame.index;
-        if (stackFrameIndex == 0) {
-          // This is the first child of parent. [left] should equal the left
-          // value of [stackFrame]'s parent.
-          left = stackFrameLefts[parent.id];
-        } else {
-          assert(stackFrameIndex != -1);
-          // [stackFrame] is not the first child of its parent. [left] should
-          // equal the right value of its previous sibling.
-          final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
-          left = stackFrameLefts[previous.id] +
-              (widget.startingContentWidth * previous.totalTimeRatio);
-        }
-      }
-      stackFrameLefts[stackFrame.id] = left;
-      return left;
-    }
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
       final double width =
@@ -78,7 +54,7 @@ class _CpuProfileFlameChartState
         key: Key('${stackFrame.id}'),
         text: stackFrame.name,
         tooltip: '${stackFrame.name} - ${msText(stackFrame.totalTime)}',
-        rect: Rect.fromLTRB(left, flameChartNodeTop, left + width, rowHeight),
+        rect: Rect.fromLTWH(left, flameChartNodeTop, width, rowHeight),
         backgroundColor: backgroundColor,
         textColor: Colors.black,
         data: stackFrame,
@@ -93,6 +69,30 @@ class _CpuProfileFlameChartState
     }
 
     createChartNodes(widget.data.cpuProfileRoot, rowOffsetForTopPadding);
+  }
+
+  double leftForStackFrame(CpuStackFrame stackFrame) {
+    final CpuStackFrame parent = stackFrame.parent;
+    double left;
+    if (parent == null) {
+      left = widget.startInset;
+    } else {
+      final stackFrameIndex = stackFrame.index;
+      if (stackFrameIndex == 0) {
+        // This is the first child of parent. [left] should equal the left
+        // value of [stackFrame]'s parent.
+        left = stackFrameLefts[parent.id];
+      } else {
+        assert(stackFrameIndex != -1);
+        // [stackFrame] is not the first child of its parent. [left] should
+        // equal the right value of its previous sibling.
+        final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
+        left = stackFrameLefts[previous.id] +
+            (widget.startingContentWidth * previous.totalTimeRatio);
+      }
+    }
+    stackFrameLefts[stackFrame.id] = left;
+    return left;
   }
 
   // TODO(kenz): base colors on categories (Widget, Render, Layer, User code,
