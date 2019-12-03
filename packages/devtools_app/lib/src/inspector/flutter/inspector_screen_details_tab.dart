@@ -59,8 +59,9 @@ class InspectorDetailsTabController extends StatelessWidget {
                 children: <Widget>[
                   Flexible(
                     child: Container(
-                      color: Theme.of(context).focusColor,
+                      color: focusColor,
                       child: TabBar(
+                        labelColor: Theme.of(context).textTheme.body1.color,
                         tabs: tabs,
                         isScrollable: true,
                       ),

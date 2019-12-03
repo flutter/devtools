@@ -28,6 +28,7 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/theme.dart';
@@ -147,7 +148,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController = BarChartController(
       // TODO(kenz): make this a general background color for use throughout
       // devtools.
-      backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
+      backgroundColor: chartBackgroundColor,
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)

@@ -28,6 +28,7 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/theme.dart';
 import 'memory_controller.dart';
 
 // TODO(terry): Remove canned data.
@@ -129,7 +130,7 @@ class MemoryChartState extends State<MemoryChart> {
           //   ..textSize = 6.0;
         },
         highLightPerTapEnabled: true,
-        backgroundColor: ColorUtils.WHITE,
+        backgroundColor: chartBackgroundColor,
         drawGridBackground: false,
         dragXEnabled: true,
         dragYEnabled: true,
