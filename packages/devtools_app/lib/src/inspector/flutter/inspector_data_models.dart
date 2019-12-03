@@ -98,13 +98,20 @@ class LayoutProperties {
         constraints = deserializeConstraints(node?.constraints),
         isFlex = node?.isFlex,
         flexFactor = node?.flexFactor,
+        offset = null,
         children = copyLevel == 0
             ? []
             : node?.childrenNow
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
-                ?.toList(growable: false);
+                ?.toList(growable: false) {
+    if (children?.isNotEmpty ?? false)
+      for (var child in children) {
+        child.parent = this;
+      }
+  }
 
+  LayoutProperties parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
@@ -112,6 +119,7 @@ class LayoutProperties {
   final int flexFactor;
   final bool isFlex;
   final Size size;
+  final Offset offset;
 
   bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
 
@@ -148,6 +156,18 @@ class LayoutProperties {
   String describeWidth() => 'w=${toStringAsFixed(size.width)}';
 
   String describeHeight() => 'h=${toStringAsFixed(size.height)}';
+
+  bool get overflowWidth {
+    return width > parent.width;
+  }
+
+  bool get overflowHeight {
+    return height > parent.height;
+  }
+
+  bool get hidden {
+    return offset.dx > parent.width || offset.dy > parent.height;
+  }
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
@@ -260,6 +280,21 @@ class FlexLayoutProperties extends LayoutProperties {
   double get mainAxisDimension => dimension(direction);
 
   double get crossAxisDimension => dimension(crossAxisDirection);
+
+  @override
+  bool get overflowWidth {
+    if (direction == Axis.horizontal) return width < sum(childrenWidths);
+    return width < max(childrenWidths);
+  }
+
+  @override
+  bool get overflowHeight {
+    if (direction == Axis.vertical) return height < sum(childrenHeights);
+    return height < max(childrenHeights);
+  }
+
+  @override
+  bool get hidden => false;
 
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method

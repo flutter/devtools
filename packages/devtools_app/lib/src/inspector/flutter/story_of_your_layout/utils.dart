@@ -18,12 +18,19 @@ double min(Iterable<double> numbers) =>
 double max(Iterable<double> numbers) =>
     numbers.fold(-double.infinity, (minimum, cur) => math.max(minimum, cur));
 
-String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
+String flexType(Axis direction) {
+  if (direction == Axis.horizontal) return 'Row';
+  return 'Column';
 }
 
-String mainAxisAssetImageUrl(MainAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
+String crossAxisAssetImageUrl(Axis direction, CrossAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/cross_axis_alignment/'
+      '${flexType(direction).toLowerCase()}_${describeEnum(alignment)}.png';
+}
+
+String mainAxisAssetImageUrl(Axis direction, MainAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/main_axis_alignment/'
+      '${flexType(direction).toLowerCase()}_${describeEnum(alignment)}.png';
 }
 
 /// A widget for positioning sized widgets that follows layout as follows:
