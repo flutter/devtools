@@ -1,41 +1,129 @@
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../diagnostics_node.dart';
 import '../inspector_service.dart';
 
 extension InspectorFlutterService on ObjectGroup {
+  /// retry eval until the resulting json is not empty,
+  /// when result is null we should stop retrying because
+  /// it means the object does not exist anymore.
+  Future<InstanceRef> _evalUntilJsonIsNotEmpty(String command) async {
+    InstanceRef result;
+    do {
+      result = await inspectorLibrary.eval(
+        command,
+        isAlive: this,
+      );
+    } while (result != null && (result.length ?? 0) <= 2);
+    return result;
+  }
+
   Future<InstanceRef> invokeTweakFlexProperties(
     InspectorInstanceRef ref,
     MainAxisAlignment mainAxisAlignment,
     CrossAxisAlignment crossAxisAlignment,
   ) async {
+    if (ref == null) return null;
     final command = '((){'
+        '  if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)'
+        '    return "{}";'
         '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
+        '  if (object == null) return null;'
         '  final render = object.renderObject;'
         '  render.mainAxisAlignment = $mainAxisAlignment;'
         '  render.crossAxisAlignment = $crossAxisAlignment;'
         '  render.markNeedsLayout();'
         '})()';
-    final val = await inspectorLibrary.eval(
-      command,
-      isAlive: this,
-    );
-    return val;
+    return await _evalUntilJsonIsNotEmpty(command);
   }
 
   Future<InstanceRef> invokeTweakFlexFactor(
-      InspectorInstanceRef ref, int flexFactor) async {
+    InspectorInstanceRef ref,
+    int flexFactor,
+  ) async {
+    if (ref == null) return null;
     final command = '((){'
+        '  if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)'
+        '    return "{}";'
         '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
+        '  if (object == null) return null;'
         '  final render = object.renderObject;'
         '  final FlexParentData parentData = render.parentData;'
         '  parentData.flex = $flexFactor;'
         '  render.markNeedsLayout();'
         '})()';
-    final val = await inspectorLibrary.eval(
-      command,
-      isAlive: this,
+    return await _evalUntilJsonIsNotEmpty(command);
+  }
+
+  Future<RemoteDiagnosticsNode> getSummarySubtreeWithRenderObject(
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 1,
+  }) async {
+    if (node == null) return null;
+    final id = node.dartDiagnosticRef.id;
+    String command = '''
+      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) return '{}'; 
+      final root = WidgetInspectorService.instance.toObject('$id');
+      if (root == null) {
+        return null;
+      }
+      final result =  WidgetInspectorService.instance._nodeToJson(
+        root,
+        InspectorSerializationDelegate(
+            groupName: '$groupName',
+            summaryTree: true,
+            subtreeDepth: $subtreeDepth,
+            includeProperties: false,
+            service: WidgetInspectorService.instance,
+            addAdditionalPropertiesCallback: (node, delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                final renderObject = value.renderObject;
+                additionalJson['renderObject'] = renderObject.toDiagnosticsNode()?.toJsonMap(
+                  delegate.copyWith(
+                    subtreeDepth: 0,
+                    includeProperties: true,
+                  ),
+                );
+                final Constraints constraints = renderObject.constraints;
+                if (constraints != null) {
+                  final Map<String, Object> constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toStringAsFixed(1),
+                      'minHeight': constraints.minHeight.toStringAsFixed(1),
+                      'maxWidth': constraints.maxWidth.toStringAsFixed(1),
+                      'maxHeight': constraints.maxHeight.toStringAsFixed(1),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+                if (renderObject is RenderBox) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toStringAsFixed(1),
+                    'height': renderObject.size.height.toStringAsFixed(1),
+                  };             
+                  
+                  final ParentData parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex;
+                  }
+                }
+              }
+              return additionalJson;
+            }
+        ),
+      );
+      return WidgetInspectorService.instance._safeJsonEncode(result);
+    ''';
+    command = '((){${command.split('\n').join()}})()';
+    return await parseDiagnosticsNodeDaemon(
+      instanceRefToJson(await _evalUntilJsonIsNotEmpty(command)),
     );
-    return val;
   }
 }
