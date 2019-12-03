@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -129,7 +130,7 @@ class MemoryChartState extends State<MemoryChart> {
           //   ..textSize = 6.0;
         },
         highLightPerTapEnabled: true,
-        backgroundColor: ColorUtils.WHITE,
+        backgroundColor: chartBackgroundColor,
         drawGridBackground: false,
         dragXEnabled: true,
         dragYEnabled: true,

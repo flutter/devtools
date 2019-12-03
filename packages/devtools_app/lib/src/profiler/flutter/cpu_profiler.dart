@@ -21,7 +21,8 @@ class CpuProfilerView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const TabBar(
+          TabBar(
+            labelColor: Theme.of(context).textTheme.body1.color,
             isScrollable: true,
             tabs: cpuProfilerTabs,
           ),

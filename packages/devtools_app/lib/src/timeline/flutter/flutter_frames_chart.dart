@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
@@ -147,7 +148,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _chartController = BarChartController(
       // TODO(kenz): make this a general background color for use throughout
       // devtools.
-      backgroundColor: ThemedColor(Colors.white, Colors.grey[850]),
+      backgroundColor: chartBackgroundColor,
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..setStartAtZero(true)
