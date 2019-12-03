@@ -156,15 +156,17 @@ class HtmlPerformanceScreen extends HtmlScreen {
   }
 
   void _clear() {
-    _performanceController.reset();
+    _performanceController.clear();
     _updateCpuProfilerVisibility(hidden: true);
     _recordingInstructions.hidden(false);
   }
 
   void _updateButtonStates() {
-    _startRecordingButton.disabled = _performanceController.recording;
-    _clearButton.disabled = _performanceController.recording;
-    _stopRecordingButton.disabled = !_performanceController.recording;
+    _startRecordingButton.disabled =
+        _performanceController.recordingNotifier.value;
+    _clearButton.disabled = _performanceController.recordingNotifier.value;
+    _stopRecordingButton.disabled =
+        !_performanceController.recordingNotifier.value;
   }
 
   void _updateCpuProfilerVisibility({@required bool hidden}) {
@@ -188,7 +190,7 @@ class _HtmlCpuProfiler extends HtmlCpuProfiler {
 
   @override
   Future<void> prepareCpuProfile() async {
-    _performanceController.cpuProfileTransformer
+    _performanceController.cpuProfilerController.transformer
         .processData(_performanceController.cpuProfileData);
   }
 

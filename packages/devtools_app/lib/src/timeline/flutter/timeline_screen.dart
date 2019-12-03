@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -122,18 +123,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
+    const double minIncludeTextWidth = 900;
     final sharedWidgets = [
       const SizedBox(width: 8.0),
-      OutlineButton(
+      clearButton(
         key: TimelineScreen.clearButtonKey,
+        minIncludeTextWidth: minIncludeTextWidth,
         onPressed: () async {
           await _clearTimeline();
         },
-        child: const MaterialIconLabel(
-          Icons.block,
-          'Clear',
-          minIncludeTextWidth: 900,
-        ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -149,11 +147,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       ),
     ];
     return timelineMode == TimelineMode.frameBased
-        ? _buildFrameBasedTimelineButtons(sharedWidgets)
-        : _buildFullTimelineButtons(sharedWidgets);
+        ? _buildFrameBasedTimelineButtons(sharedWidgets, minIncludeTextWidth)
+        : _buildFullTimelineButtons(sharedWidgets, minIncludeTextWidth);
   }
 
-  Widget _buildFrameBasedTimelineButtons(List<Widget> sharedWidgets) {
+  Widget _buildFrameBasedTimelineButtons(
+    List<Widget> sharedWidgets,
+    double minIncludeTextWidth,
+  ) {
     return ValueListenableBuilder(
       valueListenable: controller.frameBasedTimeline.pausedNotifier,
       builder: (context, paused, _) {
@@ -162,19 +163,19 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
             OutlineButton(
               key: TimelineScreen.pauseButtonKey,
               onPressed: paused ? null : _pauseLiveTimeline,
-              child: const MaterialIconLabel(
+              child: MaterialIconLabel(
                 Icons.pause,
                 'Pause',
-                minIncludeTextWidth: 900,
+                minIncludeTextWidth: minIncludeTextWidth,
               ),
             ),
             OutlineButton(
               key: TimelineScreen.resumeButtonKey,
               onPressed: !paused ? null : _resumeLiveTimeline,
-              child: const MaterialIconLabel(
+              child: MaterialIconLabel(
                 Icons.play_arrow,
                 'Resume',
-                minIncludeTextWidth: 900,
+                minIncludeTextWidth: minIncludeTextWidth,
               ),
             ),
             ...sharedWidgets,
@@ -184,29 +185,22 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildFullTimelineButtons(List<Widget> sharedWidgets) {
+  Widget _buildFullTimelineButtons(
+    List<Widget> sharedWidgets,
+    double minIncludeTextWidth,
+  ) {
     return ValueListenableBuilder(
       valueListenable: controller.fullTimeline.recordingNotifier,
       builder: (context, recording, _) {
         return Row(
           children: [
-            OutlineButton(
-              key: TimelineScreen.recordButtonKey,
-              onPressed: recording ? null : _startRecording,
-              child: const MaterialIconLabel(
-                Icons.fiber_manual_record,
-                'Record',
-                minIncludeTextWidth: 900,
-              ),
-            ),
-            OutlineButton(
-              key: TimelineScreen.stopRecordingButtonKey,
-              onPressed: !recording ? null : _stopRecording,
-              child: const MaterialIconLabel(
-                Icons.stop,
-                'Stop',
-                minIncludeTextWidth: 900,
-              ),
+            ...recordStopButtons(
+              recordKey: TimelineScreen.recordButtonKey,
+              stopKey: TimelineScreen.stopRecordingButtonKey,
+              minIncludeTextWidth: minIncludeTextWidth,
+              recording: recording,
+              onRecord: _startRecording,
+              onStop: _stopRecording,
             ),
             ...sharedWidgets,
           ],
@@ -269,42 +263,14 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildRecordingInfo() {
-    final recordingInstructions = Column(
-      key: TimelineScreen.recordingInstructionsKey,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the record button '),
-            Icon(Icons.fiber_manual_record),
-            Text(' to start recording timeline trace.')
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the stop button '),
-            Icon(Icons.stop),
-            Text(' to end the recording.')
-          ],
-        ),
-      ],
-    );
-    final recordingStatus = Column(
-      key: TimelineScreen.recordingStatusKey,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        Text('Recording timeline trace'),
-        SizedBox(height: 16.0),
-        CircularProgressIndicator(),
-      ],
-    );
     return ValueListenableBuilder(
       valueListenable: controller.fullTimeline.recordingNotifier,
       builder: (context, recording, _) {
-        return Center(
-          child: recording ? recordingStatus : recordingInstructions,
+        return recordingInfo(
+          instructionsKey: TimelineScreen.recordingInstructionsKey,
+          statusKey: TimelineScreen.recordingStatusKey,
+          recording: recording,
+          recordedObject: 'timeline trace',
         );
       },
     );

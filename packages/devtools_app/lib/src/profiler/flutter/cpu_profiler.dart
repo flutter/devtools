@@ -88,6 +88,10 @@ class CpuProfiler extends StatelessWidget {
         onSelected: (sf) => onStackFrameSelected(sf),
       );
     });
+
+    // TODO(kenz): tree table is extremely slow with large data set. It should
+    // be optimized before including in the profiler.
+    //    final callTree = CpuCallTreeTable(data);
     const callTree = Center(
       child: Text(
         'TODO CPU call tree',

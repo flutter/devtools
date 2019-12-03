@@ -8,6 +8,7 @@ import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
@@ -15,6 +16,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -42,7 +44,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final bool hasConnection;
 
   @override
-  final IsolateManager isolateManager = MockIsolateManager();
+  final IsolateManager isolateManager = FakeIsolateManager();
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
@@ -106,6 +108,18 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearVMTimeline() => Future.value(Success());
 
   @override
+  Future<CpuProfileData> getCpuProfileTimeline(
+    String isolateId,
+    int origin,
+    int extent,
+  ) {
+    return Future.value(CpuProfileData.parse(goldenCpuProfileDataJson));
+  }
+
+  @override
+  Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
+
+  @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
 
   @override
@@ -124,7 +138,10 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Stream<Event> get onExtensionEvent => const Stream.empty();
 }
 
-class MockIsolateManager extends Mock implements IsolateManager {}
+class FakeIsolateManager extends Fake implements IsolateManager {
+  @override
+  IsolateRef get selectedIsolate => IsolateRef.parse({'id': 'fake_isolate_id'});
+}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
