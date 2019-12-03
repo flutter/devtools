@@ -121,6 +121,8 @@ class CpuProfileData {
 
   Map<String, CpuStackFrame> stackFrames = {};
 
+  CpuStackFrame selectedStackFrame;
+
   Map<String, dynamic> get json => {
         'type': '_CpuProfileTimeline',
         samplePeriodKey: profileMetaData.samplePeriod,
@@ -131,6 +133,8 @@ class CpuProfileData {
         stackFramesKey: stackFramesJson,
         traceEventsKey: stackTraceEvents,
       };
+
+  bool get isEmpty => profileMetaData.sampleCount == 0;
 }
 
 class CpuProfileMetaData {

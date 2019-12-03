@@ -17,6 +17,7 @@ const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
 const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
+const double sideInsetSmall = 40.0;
 
 // TODO(kenz): consider cleaning up by changing to a flame chart code to use a
 // composition pattern instead of a class extension pattern.
@@ -24,11 +25,11 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
     this.data, {
     @required this.duration,
-    @required this.height,
     @required this.totalStartingWidth,
-    @required this.startInset,
     @required this.selected,
     @required this.onSelected,
+    this.startInset = sideInset,
+    this.endInset = sideInset,
   });
 
   final T data;
@@ -37,20 +38,23 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final double totalStartingWidth;
 
-  final double height;
-
   final double startInset;
+
+  final double endInset;
 
   final V selected;
 
   final void Function(V data) onSelected;
 
-  double get startingContentWidth =>
-      totalStartingWidth - startInset - sideInset;
+  double get startingContentWidth => totalStartingWidth - startInset - endInset;
 }
 
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin {
+  final rowOffsetForTopPadding = 1;
+  final rowOffsetForBottomPadding = 1;
+  final rowOffsetForSectionSpacer = 1;
+
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own stack.
   final flameChartNodeTop = 0.0;

@@ -1,8 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -48,10 +46,6 @@ class TimelineFlameChart extends StatelessWidget {
       // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
       // test horizontal scrolling functionality.
       width: constraints.maxWidth * 2,
-      height: math.max(
-        constraints.maxHeight,
-        _frameBasedTimelineChartHeight(controller),
-      ),
       selected: selectedEvent,
       onSelected: (e) => controller.selectTimelineEvent(e),
     );
@@ -69,26 +63,10 @@ class TimelineFlameChart extends StatelessWidget {
             // TODO(kenz): remove * 4 once zooming is possible. This is so that we can
             // test horizontal scrolling functionality.
             width: constraints.maxWidth * 4,
-            height: math.max(
-              constraints.maxHeight,
-              _fullTimelineChartHeight(controller),
-            ),
             selected: selectedEvent,
             onSelection: (e) => controller.selectTimelineEvent(e),
           )
         : const SizedBox();
-  }
-
-  double _frameBasedTimelineChartHeight(TimelineController controller) {
-    return (controller.frameBasedTimeline.data.displayDepth + 2) *
-            rowHeightWithPadding +
-        sectionSpacing;
-  }
-
-  double _fullTimelineChartHeight(TimelineController controller) {
-    return (controller.fullTimeline.data.displayDepth + 1) *
-            rowHeightWithPadding +
-        (controller.fullTimeline.data.eventGroups.length) * sectionSpacing;
   }
 }
 
@@ -96,16 +74,13 @@ class FrameBasedTimelineFlameChart
     extends FlameChart<TimelineFrame, TimelineEvent> {
   FrameBasedTimelineFlameChart(
     TimelineFrame data, {
-    @required double height,
     @required double width,
     @required TimelineEvent selected,
     @required Function(TimelineEvent event) onSelected,
   }) : super(
           data,
           duration: data.time.duration,
-          height: height,
           totalStartingWidth: width,
-          startInset: sideInset,
           selected: selected,
           onSelected: onSelected,
         );
@@ -117,15 +92,11 @@ class FrameBasedTimelineFlameChart
 
 class FrameBasedTimelineFlameChartState
     extends FlameChartState<FrameBasedTimelineFlameChart, TimelineEvent> {
-  static const _rowOffsetForTopTimeline = 1;
-  static const _rowOffsetForBottomTimeline = 1;
-  static const _rowOffsetForSectionSpacer = 1;
-
   // Add one for the spacer offset between UI and GPU nodes.
   int get gpuSectionStartRow =>
       widget.data.uiEventFlow.depth +
-      _rowOffsetForTopTimeline +
-      _rowOffsetForSectionSpacer;
+      rowOffsetForTopPadding +
+      rowOffsetForSectionSpacer;
 
   // TODO(kenz): when optimizing this code, consider passing in the viewport
   // to only construct FlameChartNode elements that are in view.
@@ -138,9 +109,9 @@ class FrameBasedTimelineFlameChartState
 
     expandRows(uiEventFlowDepth +
         gpuEventFlowDepth +
-        _rowOffsetForTopTimeline +
-        _rowOffsetForSectionSpacer +
-        _rowOffsetForBottomTimeline);
+        rowOffsetForTopPadding +
+        rowOffsetForSectionSpacer +
+        rowOffsetForBottomPadding);
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
@@ -150,7 +121,7 @@ class FrameBasedTimelineFlameChartState
       top: flameChartNodeTop,
       width: 28.0,
     );
-    rows[0 + _rowOffsetForTopTimeline].nodes.add(uiSectionLabel);
+    rows[0 + rowOffsetForTopPadding].nodes.add(uiSectionLabel);
 
     // Add GPU section label.
     final gpuSectionLabel = FlameChartNode.sectionLabel(
@@ -190,14 +161,11 @@ class FrameBasedTimelineFlameChartState
       rows[row].nodes.add(node);
 
       for (TimelineEvent child in event.children) {
-        createChartNodes(
-          child,
-          row + 1,
-        );
+        createChartNodes(child, row + 1);
       }
     }
 
-    createChartNodes(widget.data.uiEventFlow, _rowOffsetForTopTimeline);
+    createChartNodes(widget.data.uiEventFlow, rowOffsetForTopPadding);
     createChartNodes(widget.data.gpuEventFlow, gpuSectionStartRow);
   }
 }
@@ -206,14 +174,12 @@ class FullTimelineFlameChart
     extends FlameChart<FullTimelineData, TimelineEvent> {
   FullTimelineFlameChart(
     FullTimelineData data, {
-    @required double height,
     @required double width,
     @required TimelineEvent selected,
     @required Function(TimelineEvent event) onSelection,
   }) : super(
           data,
           duration: data.time.duration,
-          height: height,
           totalStartingWidth: width,
           startInset: _calculateStartInset(data),
           selected: selected,
@@ -238,11 +204,6 @@ class FullTimelineFlameChart
 
 class _FullTimelineFlameChartState
     extends FlameChartState<FullTimelineFlameChart, TimelineEvent> {
-  static const _rowOffsetForTopTimeline = 1;
-  static const _rowOffsetForSectionSpacer = 1;
-
-  static Map<String, double> sectionLabelWidths = {};
-
   /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
   ///
   /// We need to be able to look up a [FlameChartNode] based on its
@@ -313,15 +274,15 @@ class _FullTimelineFlameChartState
       rows[row].nodes.add(node);
     }
 
-    expandRows(_rowOffsetForTopTimeline);
-    int currentRowIndex = _rowOffsetForTopTimeline;
+    expandRows(rowOffsetForTopPadding);
+    int currentRowIndex = rowOffsetForTopPadding;
     int currentSectionIndex = 0;
     for (String groupName in widget.data.eventGroups.keys) {
       final FullTimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
       final groupDisplaySize =
-          group.eventsByRow.length + _rowOffsetForSectionSpacer;
+          group.eventsByRow.length + rowOffsetForSectionSpacer;
       expandRows(rows.length + groupDisplaySize);
 
       for (int i = 0; i < group.eventsByRow.length; i++) {
