@@ -39,8 +39,8 @@ const defaultMaxRenderHeight = 400.0;
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-const heightAndConstraintIndicatorSize = 60.0;
-const widthAndConstraintIndicatorSize = 60.0;
+const heightAndConstraintIndicatorSize = 56.0;
+const widthAndConstraintIndicatorSize = 56.0;
 const mainAxisArrowIndicatorSize = 48.0;
 const crossAxisArrowIndicatorSize = 48.0;
 
@@ -133,7 +133,6 @@ Widget _visualizeWidthAndHeightWithConstraints({
     margin: const EdgeInsets.only(
       top: margin,
       left: margin,
-      right: margin,
       bottom: bottomHeight,
     ),
     child: Row(
@@ -184,7 +183,6 @@ Widget _visualizeWidthAndHeightWithConstraints({
       top: margin,
       left: margin,
       right: rightWidth,
-      bottom: margin,
     ),
     child: Column(
       children: <Widget>[
@@ -1109,8 +1107,8 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
 
   final RenderProperties renderProperties;
 
-  static const heightArrowColor = Color(0xFF000099);
-  static const widthArrowColor = Color(0xFF064959);
+  static const heightArrowColor = mainUiColor;
+  static const widthArrowColor = Color(0xFF000099);
 
   @override
   Widget build(BuildContext context) {

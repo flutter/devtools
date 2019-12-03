@@ -481,9 +481,11 @@ class FlexLayoutProperties extends LayoutProperties {
         );
       } else {
         // uniform cross axis sizes.
-        final size = crossAxisAlignment == CrossAxisAlignment.stretch
+        double size = crossAxisAlignment == CrossAxisAlignment.stretch
             ? maxSizeAvailable(axis)
-            : largestSize / dimension(axis) * maxSizeAvailable(axis);
+            : largestSize /
+                math.max(dimension(axis) * maxSizeAvailable(axis), 1.0);
+        size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
     }
