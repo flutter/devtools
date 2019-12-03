@@ -470,7 +470,7 @@ OverflowSide overflowSide(LayoutProperties properties) {
 /// See also:
 /// * [DebugOverflowIndicatorMixin]
 class OverflowIndicatorPainter extends CustomPainter {
-  const OverflowIndicatorPainter(this.side, [this.size = 8.0]);
+  const OverflowIndicatorPainter(this.side, this.size);
 
   final OverflowSide side;
   final double size;

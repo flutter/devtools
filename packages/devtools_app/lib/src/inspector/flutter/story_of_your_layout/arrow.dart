@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 const defaultArrowColor = Colors.white;
 const defaultArrowHeadSize = 16.0;
 const defaultArrowStrokeWidth = 2.0;
-const defaultDistanceToArrow = 8.0;
+const defaultDistanceToArrow = 4.0;
 
 enum ArrowType {
   up,
