@@ -245,6 +245,19 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     with TickerProviderStateMixin {
+  AnimationController entranceController;
+  CurvedAnimation expandedEntrance;
+  CurvedAnimation allEntrance;
+  AnimationController changeController;
+  CurvedAnimation changeAnimation;
+
+  FlexLayoutProperties get properties =>
+      _previousProperties ?? _animatedProperties ?? _properties;
+
+  AnimatedFlexLayoutProperties _animatedProperties;
+  FlexLayoutProperties _previousProperties;
+  FlexLayoutProperties _properties;
+
   /// custom getters
   RemoteDiagnosticsNode get selectedNode =>
       inspectorController?.selectedNode?.diagnostic;
@@ -285,13 +298,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   /// state variables
   InspectorObjectGroupManager objectGroupManager;
-  AnimationController entranceController;
-  CurvedAnimation expandedEntrance;
-  CurvedAnimation allEntrance;
-
-  FlexLayoutProperties get properties => _previousProperties ?? _properties;
-  FlexLayoutProperties _previousProperties;
-  FlexLayoutProperties _properties;
 
   LayoutProperties highlighted;
 
@@ -300,29 +306,56 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     super.initState();
     _initAnimationStates();
     _updateObjectGroupManager();
+    // TODO(djshuckerow): put inspector controller in Controllers and
+    // update on didChangeDependencies.
     inspectorController.addSelectionListener(_onInspectorSelectionChanged);
-    _updateProperties();
+    _animateProperties();
   }
 
   @override
   void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateObjectGroupManager();
-    _updateProperties();
+    _animateProperties();
   }
 
   @override
   void dispose() {
     entranceController.dispose();
+    changeController.dispose();
     inspectorController.removeSelectionListener(_onInspectorSelectionChanged);
     super.dispose();
+  }
+
+  void _animateProperties() {
+    if (_animatedProperties != null) {
+      changeController.forward();
+    }
+    if (_previousProperties != null) {
+      entranceController.reverse();
+    } else {
+      entranceController.forward();
+    }
+  }
+
+  void _changeProperties(FlexLayoutProperties nextProperties) {
+    if (!mounted || nextProperties == null) return;
+    setState(() {
+      _animatedProperties = AnimatedFlexLayoutProperties(
+        // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
+        _animatedProperties?.copyWith() ?? _properties,
+        nextProperties,
+        changeAnimation,
+      );
+      changeController.forward(from: 0.0);
+    });
   }
 
   /// required for getting all information required for visualizing Flex layout
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
+    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
       getRoot(selectedNode),
       subtreeDepth: 1,
     );
@@ -335,21 +368,23 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
-  void _onInspectorSelectionChanged() async {
+  Future<void> _onInspectorSelectionChanged() async {
+    if (!mounted) return;
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
     final prevRootId = id(_properties?.node);
     final newRootId = id(getRoot(selectedNode));
     final shouldFetch = prevRootId != newRootId;
-    FlexLayoutProperties newSelection = _properties;
     if (shouldFetch) {
-      newSelection = await fetchFlexLayoutProperties();
+      final newSelection = await fetchFlexLayoutProperties();
+      _setProperties(newSelection);
+    } else {
+      _setProperties(_properties);
     }
-    setProperties(newSelection);
   }
 
-  void updateHighlighted(FlexLayoutProperties newProperties) {
+  void _updateHighlighted(FlexLayoutProperties newProperties) {
     setState(() {
       if (selectedNode.isFlex) {
         highlighted = newProperties;
@@ -360,16 +395,16 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     });
   }
 
-  void setProperties(FlexLayoutProperties newProperties) {
-    updateHighlighted(newProperties);
+  void _setProperties(FlexLayoutProperties newProperties) {
+    _updateHighlighted(newProperties);
     if (_properties == newProperties) {
       return;
     }
     setState(() {
-      _previousProperties = _properties;
+      _previousProperties ??= _properties;
       _properties = newProperties;
     });
-    _updateProperties();
+    _animateProperties();
   }
 
   void _initAnimationStates() {
@@ -388,6 +423,22 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
     allEntrance =
         CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
+    changeController = AnimationController(
+      vsync: this,
+      duration: entranceAnimationDuration,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            _properties = _animatedProperties.end;
+            _animatedProperties = null;
+            changeController.value = 0.0;
+          });
+        }
+      });
+    changeAnimation = CurvedAnimation(
+      parent: changeController,
+      curve: Curves.easeInOut,
+    );
   }
 
   void _updateObjectGroupManager() {
@@ -399,14 +450,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       );
     }
     _onInspectorSelectionChanged();
-  }
-
-  void _updateProperties() async {
-    if (_previousProperties != null) {
-      entranceController.reverse();
-    } else {
-      entranceController.forward();
-    }
   }
 
   // update selected widget in the device without triggering selection listener event.
@@ -435,9 +478,12 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     refreshSelection(properties.node);
   }
 
-  Future<void> refresh() async {
-    setProperties(await fetchFlexLayoutProperties());
-    setState(() {});
+  Future<void> updateChildFlex(
+    LayoutProperties oldProperties,
+    LayoutProperties newProperties,
+  ) async {
+    final updatedProperties = await fetchFlexLayoutProperties();
+    _changeProperties(updatedProperties);
   }
 
   Widget _visualizeFlex(BuildContext context) {
@@ -485,7 +531,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           for (var i = 0; i < children.length; i++)
             FlexChildVisualizer(
               state: this,
-              notifyParent: refresh,
+              notifyParent: updateChildFlex,
               backgroundColor: highlighted == children[i]
                   ? activeBackgroundColor(theme)
                   : inActiveBackgroundColor(theme),
@@ -521,7 +567,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                     freeSpaceAssetName,
                     width: maxWidth,
                     height: maxHeight,
-                    fit: BoxFit.fill,
+                    repeat: ImageRepeat.repeat,
+                    fit: BoxFit.none,
+                    alignment: Alignment.topLeft,
                   ),
                 ),
                 ...childrenRenderWidgets,
@@ -630,21 +678,23 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             // the type is dependent on the `axis` parameter
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
-            setState(() {
-              if (axis == direction) {
-                properties.mainAxisAlignment = newSelection;
-              } else {
-                properties.crossAxisAlignment = newSelection;
-              }
-            });
+            FlexLayoutProperties changedProperties;
+            if (axis == direction) {
+              changedProperties =
+                  properties.copyWith(mainAxisAlignment: newSelection);
+            } else {
+              changedProperties =
+                  properties.copyWith(crossAxisAlignment: newSelection);
+            }
             final service = await properties.node.inspectorService;
-            final arg = properties.node.valueRef;
+            final valueRef = properties.node.valueRef;
             await service.invokeTweakFlexProperties(
-              arg,
-              properties.mainAxisAlignment,
-              properties.crossAxisAlignment,
+              valueRef,
+              changedProperties.mainAxisAlignment,
+              changedProperties.crossAxisAlignment,
             );
-            setProperties(await fetchFlexLayoutProperties());
+            final updatedProperties = await fetchFlexLayoutProperties();
+            _changeProperties(updatedProperties);
           },
         ),
       ),
@@ -670,110 +720,127 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             child: Container(
               margin: const EdgeInsets.all(margin),
               padding: const EdgeInsets.only(bottom: margin, right: margin),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxHeight = constraints.maxHeight;
-                final maxWidth = constraints.maxWidth;
-                return Container(
-                  constraints:
-                      BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-                  child: Stack(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                            top: mainAxisArrowIndicatorSize,
-                            left: crossAxisArrowIndicatorSize + margin,
-                          ),
-                          child: InkWell(
-                            onTap: () => _onTap(properties),
-                            child: WidgetVisualizer(
-                              title: flexType,
-                              backgroundColor: highlighted == properties
-                                  ? activeBackgroundColor(theme)
-                                  : null,
-                              hint: Container(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text(
-                                  'Total Flex Factor: ${properties?.totalFlex}',
-                                  textScaleFactor: largeTextScaleFactor,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              borderColor: mainAxisColor,
-                              child: _visualizeFlex(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Container(
-                          height: maxHeight - mainAxisArrowIndicatorSize,
-                          width: crossAxisArrowIndicatorSize,
-                          child: Column(
-                            children: <Widget>[
-                              Expanded(
-                                child: ArrowWrapper.unidirectional(
-                                  arrowColor: verticalColor,
-                                  child: RotatedBox(
-                                    quarterTurns: 3,
-                                    child: Text(
-                                      properties.verticalDirectionDescription,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      textScaleFactor: largeTextScaleFactor,
-                                      style:
-                                          TextStyle(color: verticalTextColor),
-                                    ),
-                                  ),
-                                  type: ArrowType.down,
-                                ),
-                              ),
-                              _buildAxisAlignmentDropdown(
-                                Axis.vertical,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          height: mainAxisArrowIndicatorSize,
-                          width:
-                              maxWidth - crossAxisArrowIndicatorSize - margin,
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: ArrowWrapper.unidirectional(
-                                  arrowColor: horizontalColor,
-                                  child: Text(
-                                    properties.horizontalDirectionDescription,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    textScaleFactor: largeTextScaleFactor,
-                                    style:
-                                        TextStyle(color: horizontalTextColor),
-                                  ),
-                                  type: ArrowType.right,
-                                ),
-                              ),
-                              _buildAxisAlignmentDropdown(
-                                Axis.horizontal,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+              child: AnimatedBuilder(
+                animation: changeController,
+                builder: (context, _) {
+                  return LayoutBuilder(builder: _buildLayout);
+                },
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
+    final theme = Theme.of(context);
+    final maxHeight = constraints.maxHeight;
+    final maxWidth = constraints.maxWidth;
+    final flexDescription = Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(
+          top: mainAxisArrowIndicatorSize,
+          left: crossAxisArrowIndicatorSize + margin,
+        ),
+        child: InkWell(
+          onTap: () => _onTap(properties),
+          child: WidgetVisualizer(
+            title: flexType,
+            backgroundColor:
+                highlighted == properties ? activeBackgroundColor(theme) : null,
+            hint: Container(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
+                textScaleFactor: largeTextScaleFactor,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            borderColor: mainAxisColor,
+            child: Container(
+              margin: const EdgeInsets.only(
+                /// margin for the outer width/height
+                ///  so that they don't stick to the corner
+                right: margin,
+                bottom: margin,
+              ),
+              child: _visualizeFlex(context),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final verticalAxisDescription = Align(
+      alignment: Alignment.bottomLeft,
+      child: Container(
+        height: maxHeight - mainAxisArrowIndicatorSize,
+        width: crossAxisArrowIndicatorSize,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ArrowWrapper.unidirectional(
+                arrowColor: verticalColor,
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    properties.verticalDirectionDescription,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    textScaleFactor: largeTextScaleFactor,
+                    style: TextStyle(
+                      color: verticalTextColor,
+                    ),
+                  ),
+                ),
+                type: ArrowType.down,
+              ),
+            ),
+            _buildAxisAlignmentDropdown(Axis.vertical),
+          ],
+        ),
+      ),
+    );
+
+    final horizontalAxisDescription = Align(
+      alignment: Alignment.topRight,
+      child: Container(
+        height: mainAxisArrowIndicatorSize,
+        width: maxWidth - crossAxisArrowIndicatorSize - margin,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: ArrowWrapper.unidirectional(
+                arrowColor: horizontalColor,
+                child: FittedBox(
+                  child: Text(
+                    properties.horizontalDirectionDescription,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    textScaleFactor: largeTextScaleFactor,
+                    style: TextStyle(color: horizontalTextColor),
+                  ),
+                ),
+                type: ArrowType.right,
+              ),
+            ),
+            _buildAxisAlignmentDropdown(Axis.horizontal),
+          ],
+        ),
+      ),
+    );
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+      child: Stack(
+        children: <Widget>[
+          flexDescription,
+          verticalAxisDescription,
+          horizontalAxisDescription,
         ],
       ),
     );
@@ -795,7 +862,9 @@ class FlexChildVisualizer extends StatelessWidget {
   final _StoryOfYourFlexWidgetState state;
 
   /// callback to notify parent when child value changes
-  final Function notifyParent;
+  final void Function(
+          LayoutProperties oldProperties, LayoutProperties newProperties)
+      notifyParent;
 
   final Color backgroundColor;
   final Color borderColor;
@@ -814,7 +883,7 @@ class FlexChildVisualizer extends StatelessWidget {
       node.valueRef,
       newFlexFactor,
     );
-    notifyParent();
+    notifyParent(properties, properties.copyWith(flexFactor: newFlexFactor));
   }
 
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
@@ -837,7 +906,7 @@ class FlexChildVisualizer extends StatelessWidget {
     }
 
     return DropdownButton<int>(
-      value: properties.flexFactor,
+      value: properties.flexFactor?.toInt()?.clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),

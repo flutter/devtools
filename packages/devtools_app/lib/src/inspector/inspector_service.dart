@@ -955,13 +955,14 @@ class ObjectGroup {
     ));
   }
 
-  Future<RemoteDiagnosticsNode> getDetailsSubtreeWithRenderObject(
+  Future<RemoteDiagnosticsNode> getSummarySubtreeWithRenderObject(
     RemoteDiagnosticsNode node, {
     int subtreeDepth = 1,
   }) async {
     if (node == null) return null;
     final id = node.dartDiagnosticRef.id;
     String command = '''
+      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) return '{}'; 
       final root = WidgetInspectorService.instance.toObject('$id');
       if (root == null) {
         return null;
@@ -970,9 +971,9 @@ class ObjectGroup {
         root,
         InspectorSerializationDelegate(
             groupName: '$groupName',
-            summaryTree: false,
+            summaryTree: true,
             subtreeDepth: $subtreeDepth,
-            includeProperties: true,
+            includeProperties: false,
             service: WidgetInspectorService.instance,
             addAdditionalPropertiesCallback: (node, delegate) {
               final Map<String, Object> additionalJson = <String, Object>{};
@@ -1020,7 +1021,11 @@ class ObjectGroup {
       return WidgetInspectorService.instance._safeJsonEncode(result);
     ''';
     command = '((){${command.split('\n').join()}})()';
-    final result = await inspectorLibrary.eval(command, isAlive: this);
+    InstanceRef result;
+    do {
+      result = await inspectorLibrary.eval(command, isAlive: this);
+    } while ((result?.length ?? 0) <= 2);
+
     return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
   }
 }

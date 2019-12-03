@@ -1,4 +1,5 @@
-## 0.1.12-dev.1
+## 0.1.12-dev.2
+* Fix bug causing async events with the same name to overlap each other in the Timeline.
 * Check for a debug service extension instead of using eval to distinguish between debug and profile builds.
 * Depend on the latest `package:sse`.
 

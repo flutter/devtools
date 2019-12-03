@@ -36,12 +36,10 @@ class FrameBasedTimelineFlameChartCanvas
 
   @override
   void initUiElements() {
-    rows = List.generate(
-      data.uiEventFlow.depth + data.gpuEventFlow.depth,
-      (i) => FlameChartRow(nodes: [], index: i),
-    );
-    final int frameStartOffset = data.time.start.inMicroseconds;
+    super.initUiElements();
+    expandRows(data.uiEventFlow.depth + data.gpuEventFlow.depth);
 
+    final int frameStartOffset = data.time.start.inMicroseconds;
     double getTopForRow(int row) {
       // This accounts for the section spacing between the UI events and the GPU
       // events.
@@ -163,7 +161,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
     final measurementCanvas = CanvasElement().context2D
       ..font = fontStyleToCss(const TextStyle(fontSize: fontSize));
-    for (String bucketName in data.eventBuckets.keys) {
+    for (String bucketName in data.eventGroups.keys) {
       final measuredWidth =
           measurementCanvas.measureText(bucketName).width.toDouble();
       maxSectionLabelWidth = measuredWidth > maxSectionLabelWidth
@@ -190,6 +188,13 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
   @override
   void initUiElements() {
+    super.initUiElements();
+    final int startTimeOffset = data.time.start.inMicroseconds;
+
+    // Pixels per microsecond in order to fit the entire frame in view.
+    final double pxPerMicro =
+        totalStartingWidth / data.time.duration.inMicroseconds;
+
     double getTopForRow(int row, int section) {
       // This accounts for section spacing between different threads of events.
       final additionalPadding = section * sectionSpacing;
@@ -197,39 +202,26 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
           .toDouble();
     }
 
-    void expandRowsToFitCurrentRow(int row) {
-      if (row >= rows.length) {
-        rows.addAll(List.generate(
-          row - rows.length + 1,
-          (i) => FlameChartRow(nodes: [], index: i),
-        ));
-      }
-    }
+    double leftForEvent(TimelineEvent event) =>
+        (event.time.start.inMicroseconds - startTimeOffset) * pxPerMicro +
+        startInset;
 
-    final int startTimeOffset = data.time.start.inMicroseconds;
-
-    // Pixels per microsecond in order to fit the entire frame in view.
-    final double pxPerMicro =
-        totalStartingWidth / data.time.duration.inMicroseconds;
+    double rightForEvent(TimelineEvent event) =>
+        (event.time.end.inMicroseconds - startTimeOffset) * pxPerMicro +
+        startInset;
 
     double maxRight = -1;
-    void createChartNodes(TimelineEvent event, int row, int section) {
+    void createChartNode(TimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
       // missing start/end time based on ancestors/children. Skip for now.
       if (!event.isWellFormed) return;
-
-      expandRowsToFitCurrentRow(row);
 
       // Do not round these values. Rounding the left could cause us to have
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
       final top = getTopForRow(row, section);
-      final double left =
-          (event.time.start.inMicroseconds - startTimeOffset) * pxPerMicro +
-              startInset;
-      final double right =
-          (event.time.end.inMicroseconds - startTimeOffset) * pxPerMicro +
-              startInset;
+      final double left = leftForEvent(event);
+      final double right = rightForEvent(event);
       if (right > maxRight) {
         maxRight = right;
         widestRow = row;
@@ -265,38 +257,38 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       chartNodesByEvent[event] = node;
 
       rows[row].nodes.add(node);
-
-      var nextRow = row + 1;
-      for (var child in event.children) {
-        createChartNodes(child, nextRow, section);
-        if (event.hasOverlappingChildren) {
-          nextRow += child.displayDepth;
-        }
-      }
     }
 
     int currentRowIndex = 0;
     int currentSectionIndex = 0;
-    for (String bucketName in data.eventBuckets.keys) {
-      final List<TimelineEvent> bucket = data.eventBuckets[bucketName];
-      int sectionDepth = 0;
-      for (TimelineEvent event in bucket) {
-        _resetColorOffsets();
-        sectionDepth = math.max(sectionDepth, event.displayDepth);
-        createChartNodes(event, currentRowIndex, currentSectionIndex);
+    for (String groupName in data.eventGroups.keys) {
+      final FullTimelineEventGroup group = data.eventGroups[groupName];
+      // Expand rows to fit nodes in [group].
+      assert(rows.length == currentRowIndex);
+      expandRows(rows.length + group.eventsByRow.length);
+
+      for (int i = 0; i < group.eventsByRow.length; i++) {
+        final row = group.eventsByRow[i];
+        for (var event in row) {
+          createChartNode(
+            event,
+            currentRowIndex + i,
+            currentSectionIndex,
+          );
+        }
       }
 
       final section = FlameChartSection(
         currentSectionIndex,
         startRow: currentRowIndex,
-        endRow: currentRowIndex + sectionDepth,
+        endRow: currentRowIndex + group.displayDepth,
         absStartY: getTopForRow(currentRowIndex, currentSectionIndex),
       );
       sections.add(section);
 
       // Add section label node.
       Color sectionLabelBackgroundColor;
-      switch (bucketName) {
+      switch (groupName) {
         case FullTimelineData.uiKey:
           sectionLabelBackgroundColor = mainUiColor;
           break;
@@ -315,18 +307,18 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       const sectionLabelPadding = 13.0;
 
       final currentSectionLabel = sectionLabel(
-        bucketName,
+        groupName,
         sectionLabelBackgroundColor,
         top: getTopForRow(currentRowIndex, currentSectionIndex),
         width: math.max(
           FlameChartNode.minWidthForText,
-          sectionLabelWidths[bucketName] + sectionLabelPadding,
+          sectionLabelWidths[groupName] + sectionLabelPadding,
         ),
       );
       rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
 
       // Increment for next section.
-      currentRowIndex += sectionDepth;
+      currentRowIndex += group.eventsByRow.length;
       currentSectionIndex++;
     }
 
@@ -511,11 +503,4 @@ Color _nextUnknownColor() {
       unknownColorPalette[_unknownColorOffset % unknownColorPalette.length];
   _unknownColorOffset++;
   return color;
-}
-
-void _resetColorOffsets() {
-  _asyncColorOffset = 0;
-  _uiColorOffset = 0;
-  _gpuColorOffset = 0;
-  _unknownColorOffset = 0;
 }

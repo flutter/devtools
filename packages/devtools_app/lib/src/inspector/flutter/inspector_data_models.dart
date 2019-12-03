@@ -98,7 +98,6 @@ class LayoutProperties {
         constraints = deserializeConstraints(node?.constraints),
         isFlex = node?.isFlex,
         flexFactor = node?.flexFactor,
-        offset = null,
         children = copyLevel == 0
             ? []
             : node?.childrenNow
@@ -111,15 +110,44 @@ class LayoutProperties {
       }
   }
 
+  LayoutProperties.values({
+    @required this.node,
+    @required this.children,
+    @required this.constraints,
+    @required this.description,
+    @required this.flexFactor,
+    @required this.isFlex,
+    @required this.size,
+  }) {
+    for (var child in children) {
+      child.parent = this;
+    }
+  }
+
+  factory LayoutProperties.lerp(
+    LayoutProperties begin,
+    LayoutProperties end,
+    double t,
+  ) {
+    return LayoutProperties.values(
+      node: end.node,
+      children: end.children,
+      constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
+      description: end.description,
+      flexFactor: begin.flexFactor + (begin.flexFactor - end.flexFactor) * t,
+      isFlex: begin.isFlex && end.isFlex,
+      size: Size.lerp(begin.size, end.size, t),
+    );
+  }
+
   LayoutProperties parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
   final String description;
-  final int flexFactor;
+  final num flexFactor;
   final bool isFlex;
   final Size size;
-  final Offset offset;
 
   bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
 
@@ -188,13 +216,57 @@ class LayoutProperties {
       double.parse(json['height']),
     );
   }
+
+  LayoutProperties copyWith({
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    String description,
+    int flexFactor,
+    bool isFlex,
+    Size size,
+  }) {
+    return LayoutProperties.values(
+      node: node,
+      children: children ?? this.children,
+      constraints: constraints ?? this.constraints,
+      description: description ?? this.description,
+      flexFactor: flexFactor ?? this.flexFactor,
+      isFlex: isFlex ?? this.isFlex,
+      size: size ?? this.size,
+    );
+  }
 }
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
-  FlexLayoutProperties._(
+  FlexLayoutProperties({
+    Size size,
+    List<LayoutProperties> children,
+    RemoteDiagnosticsNode node,
+    BoxConstraints constraints,
+    bool isFlex,
+    String description,
+    num flexFactor,
+    this.direction,
+    this.mainAxisAlignment,
+    this.crossAxisAlignment,
+    this.mainAxisSize,
+    this.textDirection,
+    this.verticalDirection,
+    this.textBaseline,
+  }) : super.values(
+          size: size,
+          children: children,
+          node: node,
+          constraints: constraints,
+          isFlex: isFlex,
+          description: description,
+          flexFactor: flexFactor,
+        );
+
+  FlexLayoutProperties._fromNode(
     RemoteDiagnosticsNode node, {
     this.direction,
     this.mainAxisAlignment,
@@ -213,6 +285,40 @@ class FlexLayoutProperties extends LayoutProperties {
     return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
+  @override
+  FlexLayoutProperties copyWith({
+    Size size,
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    bool isFlex,
+    String description,
+    num flexFactor,
+    Axis direction,
+    MainAxisAlignment mainAxisAlignment,
+    MainAxisSize mainAxisSize,
+    CrossAxisAlignment crossAxisAlignment,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection,
+    TextBaseline textBaseline,
+  }) {
+    return FlexLayoutProperties(
+      size: size ?? this.size,
+      children: children ?? this.children,
+      node: node,
+      constraints: constraints ?? this.constraints,
+      isFlex: isFlex ?? this.isFlex,
+      description: description ?? this.description,
+      flexFactor: flexFactor ?? this.flexFactor,
+      direction: direction ?? this.direction,
+      mainAxisAlignment: mainAxisAlignment ?? this.mainAxisAlignment,
+      mainAxisSize: mainAxisSize ?? this.mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment ?? this.crossAxisAlignment,
+      textDirection: textDirection ?? this.textDirection,
+      verticalDirection: verticalDirection ?? this.verticalDirection,
+      textBaseline: textBaseline ?? this.textBaseline,
+    );
+  }
+
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object> renderObjectJson = node?.renderObject;
     if (renderObjectJson == null) return null;
@@ -222,7 +328,7 @@ class FlexLayoutProperties extends LayoutProperties {
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
-    return FlexLayoutProperties._(
+    return FlexLayoutProperties._fromNode(
       node,
       direction: _directionUtils.enumEntry(data['direction']),
       mainAxisAlignment:
@@ -238,8 +344,8 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   final Axis direction;
-  MainAxisAlignment mainAxisAlignment;
-  CrossAxisAlignment crossAxisAlignment;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
   final MainAxisSize mainAxisSize;
   final TextDirection textDirection;
   final VerticalDirection verticalDirection;
@@ -261,11 +367,12 @@ class FlexLayoutProperties extends LayoutProperties {
 
   String get type => direction == Axis.horizontal ? 'Row' : 'Column';
 
-  int get totalFlex {
+  num get totalFlex {
     if (children?.isEmpty ?? true) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
-        .reduce((value, element) => value + element);
+        .reduce((value, element) => value + element)
+        .toInt();
     return _totalFlex;
   }
 

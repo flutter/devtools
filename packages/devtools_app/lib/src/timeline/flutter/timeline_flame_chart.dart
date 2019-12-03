@@ -66,9 +66,9 @@ class TimelineFlameChart extends StatelessWidget {
     return !fullTimelineEmpty
         ? FullTimelineFlameChart(
             controller.fullTimeline.data,
-            // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+            // TODO(kenz): remove * 4 once zooming is possible. This is so that we can
             // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 2,
+            width: constraints.maxWidth * 4,
             height: math.max(
               constraints.maxHeight,
               _fullTimelineChartHeight(controller),
@@ -88,7 +88,7 @@ class TimelineFlameChart extends StatelessWidget {
   double _fullTimelineChartHeight(TimelineController controller) {
     return (controller.fullTimeline.data.displayDepth + 1) *
             rowHeightWithPadding +
-        (controller.fullTimeline.data.eventBuckets.length) * sectionSpacing;
+        (controller.fullTimeline.data.eventGroups.length) * sectionSpacing;
   }
 }
 
@@ -135,16 +135,12 @@ class FrameBasedTimelineFlameChartState
 
     final uiEventFlowDepth = widget.data.uiEventFlow.depth;
     final gpuEventFlowDepth = widget.data.gpuEventFlow.depth;
-    rows
-      ..clear()
-      ..addAll(List.generate(
-        uiEventFlowDepth +
-            gpuEventFlowDepth +
-            _rowOffsetForTopTimeline +
-            _rowOffsetForSectionSpacer +
-            _rowOffsetForBottomTimeline,
-        (i) => FlameChartRow(nodes: [], index: i),
-      ));
+
+    expandRows(uiEventFlowDepth +
+        gpuEventFlowDepth +
+        _rowOffsetForTopTimeline +
+        _rowOffsetForSectionSpacer +
+        _rowOffsetForBottomTimeline);
 
     // Add UI section label.
     final uiSectionLabel = FlameChartNode.sectionLabel(
@@ -233,7 +229,7 @@ class FullTimelineFlameChart
     // is resizeable. It would need to link scroll controllers with the list
     // view holding the flame chart nodes. This would make section labels sticky
     // to the left as an inherent bonus.
-    return 150.0;
+    return 140.0;
   }
 
   @override
@@ -243,7 +239,6 @@ class FullTimelineFlameChart
 class _FullTimelineFlameChartState
     extends FlameChartState<FullTimelineFlameChart, TimelineEvent> {
   static const _rowOffsetForTopTimeline = 1;
-  static const _rowOffsetForBottomTimeline = 1;
   static const _rowOffsetForSectionSpacer = 1;
 
   static Map<String, double> sectionLabelWidths = {};
@@ -260,29 +255,26 @@ class _FullTimelineFlameChartState
   void initFlameChartElements() {
     super.initFlameChartElements();
 
-    void expandRowsToFitCurrentRow(int row) {
-      if (row >= rows.length) {
-        rows.addAll(List.generate(
-          row - (rows.length - 1) + _rowOffsetForBottomTimeline,
-          (i) => FlameChartRow(nodes: [], index: i),
-        ));
-      }
+    double leftForEvent(TimelineEvent event) {
+      return (event.time.start.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
+    }
+
+    double rightForEvent(TimelineEvent event) {
+      return (event.time.end.inMicroseconds - startTimeOffset) *
+              startingPxPerMicro +
+          widget.startInset;
     }
 
     double maxRight = -1;
-    void createChartNodes(TimelineEvent event, int row, int section) {
+    void createChartNode(TimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
       // missing start/end time based on ancestors/children. Skip for now.
       if (!event.isWellFormed) return;
 
-      expandRowsToFitCurrentRow(row);
-
-      final double left = (event.time.start.inMicroseconds - startTimeOffset) *
-              startingPxPerMicro +
-          widget.startInset;
-      final double right = (event.time.end.inMicroseconds - startTimeOffset) *
-              startingPxPerMicro +
-          widget.startInset;
+      final double left = leftForEvent(event);
+      final double right = rightForEvent(event);
       if (right > maxRight) {
         maxRight = right;
         widestRow = row;
@@ -316,41 +308,43 @@ class _FullTimelineFlameChartState
         data: event,
         onSelected: (dynamic event) => widget.onSelected(event),
       );
-
       chartNodesByEvent[event] = node;
 
       rows[row].nodes.add(node);
-
-      var nextRow = row + 1;
-      for (var child in event.children) {
-        createChartNodes(child, nextRow, section);
-        if (event.hasOverlappingChildren) {
-          nextRow += child.displayDepth;
-        }
-      }
     }
 
+    expandRows(_rowOffsetForTopTimeline);
     int currentRowIndex = _rowOffsetForTopTimeline;
     int currentSectionIndex = 0;
-    for (String bucketName in widget.data.eventBuckets.keys) {
-      final List<TimelineEvent> bucket = widget.data.eventBuckets[bucketName];
-      int sectionDepth = 0;
-      for (TimelineEvent event in bucket) {
-        resetColorOffsets();
-        sectionDepth = math.max(sectionDepth, event.displayDepth);
-        createChartNodes(event, currentRowIndex, currentSectionIndex);
+    for (String groupName in widget.data.eventGroups.keys) {
+      final FullTimelineEventGroup group = widget.data.eventGroups[groupName];
+      // Expand rows to fit nodes in [group].
+      assert(rows.length == currentRowIndex);
+      final groupDisplaySize =
+          group.eventsByRow.length + _rowOffsetForSectionSpacer;
+      expandRows(rows.length + groupDisplaySize);
+
+      for (int i = 0; i < group.eventsByRow.length; i++) {
+        final row = group.eventsByRow[i];
+        for (var event in row) {
+          createChartNode(
+            event,
+            currentRowIndex + i,
+            currentSectionIndex,
+          );
+        }
       }
 
       final section = FlameChartSection(
         currentSectionIndex,
         startRow: currentRowIndex,
-        endRow: currentRowIndex + sectionDepth,
+        endRow: currentRowIndex + group.displayDepth,
       );
       sections.add(section);
 
       // Add section label node.
       Color sectionLabelBackgroundColor;
-      switch (bucketName) {
+      switch (groupName) {
         case FullTimelineData.uiKey:
           sectionLabelBackgroundColor = mainUiColor;
           break;
@@ -365,17 +359,17 @@ class _FullTimelineFlameChartState
       }
 
       final currentSectionLabel = FlameChartNode.sectionLabel(
-        text: bucketName,
+        text: groupName,
         textColor: Colors.black,
         backgroundColor: sectionLabelBackgroundColor,
         top: flameChartNodeTop,
-        width: 135.0,
+        width: 120.0,
       );
 
       rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
 
       // Increment for next section.
-      currentRowIndex += sectionDepth + _rowOffsetForSectionSpacer;
+      currentRowIndex += groupDisplaySize;
       currentSectionIndex++;
     }
 
@@ -383,5 +377,7 @@ class _FullTimelineFlameChartState
     for (var row in rows) {
       row.nodes.sort((a, b) => a.rect.left.compareTo(b.rect.left));
     }
+
+    // TODO(kenz): calculate async guidelines here.
   }
 }

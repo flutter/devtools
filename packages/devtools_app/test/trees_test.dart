@@ -94,27 +94,35 @@ void main() {
       expect(parent.children.first, equals(child));
       expect(child.parent, equals(parent));
     });
-  });
 
-  test('containsChildWithCondition', () {
-    expect(
-      treeNode0.containsChildWithCondition((TestTreeNode node) {
-        return node == treeNode1;
-      }),
-      isTrue,
-    );
-    expect(
-      treeNode0.containsChildWithCondition((TestTreeNode node) {
-        return node.children.length == 2;
-      }),
-      isTrue,
-    );
-    expect(
-      treeNode0.containsChildWithCondition((TestTreeNode node) {
-        return node.isExpanded;
-      }),
-      isFalse,
-    );
+    test('containsChildWithCondition', () {
+      expect(
+        treeNode0.containsChildWithCondition((TestTreeNode node) {
+          return node == treeNode1;
+        }),
+        isTrue,
+      );
+      expect(
+        treeNode0.containsChildWithCondition((TestTreeNode node) {
+          return node.children.length == 2;
+        }),
+        isTrue,
+      );
+      expect(
+        treeNode0.containsChildWithCondition((TestTreeNode node) {
+          return node.isExpanded;
+        }),
+        isFalse,
+      );
+    });
+
+    test('firstNodeAtLevel', () {
+      expect(testTreeNode.firstNodeAtLevel(0), equals(treeNode0));
+      expect(testTreeNode.firstNodeAtLevel(1), equals(treeNode1));
+      expect(testTreeNode.firstNodeAtLevel(2), equals(treeNode3));
+      expect(testTreeNode.firstNodeAtLevel(3), equals(treeNode5));
+      expect(testTreeNode.firstNodeAtLevel(4), isNull);
+    });
   });
 }
 
