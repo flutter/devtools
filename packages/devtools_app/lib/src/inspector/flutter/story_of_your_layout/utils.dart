@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -147,6 +148,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   LayoutProperties get parent => end.parent;
+
   @override
   set parent(LayoutProperties _parent) {
     end.parent = _parent;
@@ -438,5 +440,66 @@ class AnimatedFlexLayoutProperties
       verticalDirection: verticalDirection ?? this.verticalDirection,
       textBaseline: textBaseline ?? this.textBaseline,
     );
+  }
+}
+
+/// Enum object to represent which side of the widget is overflowing.
+///
+/// See also:
+/// * [OverflowIndicatorPainter]
+enum OverflowSide {
+  right,
+  bottom,
+}
+
+OverflowSide overflowSide(LayoutProperties properties) {
+  if (properties.overflowWidth) return OverflowSide.right;
+  if (properties.overflowHeight) return OverflowSide.bottom;
+  return null;
+}
+
+/// CustomPainter for drawing [DebugOverflowIndicatorMixin] patterned background.
+/// Will draw overflow pattern on the [OverflowSide] of the widget.
+/// If [side] is set to [OverflowSide.right],
+///   the pattern will occupy the whole height
+///   and the width will be the given [size].
+/// If [side] is set to [OverflowSide.bottom],
+///   the pattern will occupy the whole width
+///   and the height will be the given [size].
+///
+/// See also:
+/// * [DebugOverflowIndicatorMixin]
+class OverflowIndicatorPainter extends CustomPainter {
+  const OverflowIndicatorPainter(this.side, [this.size = 8.0]);
+
+  final OverflowSide side;
+  final double size;
+
+  static const Color black = Color(0xBF000000);
+  static const Color yellow = Color(0xBFFFFF00);
+  static final Paint indicatorPaint = Paint()
+    ..shader = ui.Gradient.linear(
+      const Offset(0.0, 0.0),
+      const Offset(10.0, 10.0),
+      <Color>[black, yellow, yellow, black],
+      <double>[0.25, 0.25, 0.75, 0.75],
+      TileMode.repeated,
+    );
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bottomOverflow = OverflowSide.bottom == side;
+    final width = bottomOverflow ? size.width : this.size;
+    final height = !bottomOverflow ? size.height : this.size;
+
+    final left = bottomOverflow ? 0.0 : size.width - width;
+    final top = side == OverflowSide.right ? 0.0 : size.height - height;
+    final rect = Rect.fromLTWH(left, top, width, height);
+    canvas.drawRect(rect, indicatorPaint);
+  }
+
+  @override
+  bool shouldRepaint(OverflowIndicatorPainter oldDelegate) {
+    return side != oldDelegate.side;
   }
 }

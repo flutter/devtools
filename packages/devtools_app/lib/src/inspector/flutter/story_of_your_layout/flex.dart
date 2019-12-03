@@ -750,6 +750,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             title: flexType,
             backgroundColor:
                 highlighted == properties ? activeBackgroundColor(theme) : null,
+            borderColor: mainAxisColor,
+            overflowSide: overflowSide(properties),
             hint: Container(
               padding: const EdgeInsets.all(4.0),
               child: Text(
@@ -760,7 +762,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 ),
               ),
             ),
-            borderColor: mainAxisColor,
             child: Container(
               margin: const EdgeInsets.only(
                 /// margin for the outer width/height
@@ -995,6 +996,7 @@ class FlexChildVisualizer extends StatelessWidget {
               title: properties.description,
               borderColor: borderColor,
               textColor: textColor,
+              overflowSide: overflowSide(properties),
               child: _visualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
                 widget: Align(
@@ -1030,6 +1032,7 @@ class WidgetVisualizer extends StatelessWidget {
     @required this.borderColor,
     this.textColor,
     this.child,
+    this.overflowSide,
   })  : assert(title != null),
         assert(borderColor != null),
         super(key: key);
@@ -1041,52 +1044,65 @@ class WidgetVisualizer extends StatelessWidget {
   final Color borderColor;
   final Color textColor;
   final Color backgroundColor;
+  final OverflowSide overflowSide;
+
+  bool get drawOverflow => overflowSide != null;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Flexible(
-                  child: Container(
-                    constraints: const BoxConstraints(
-                        maxWidth:
-                            minRenderWidth * widgetTitleMaxWidthPercentage),
-                    child: Center(
-                      child: Text(
-                        title,
-                        style: textColor != null
-                            ? TextStyle(
-                                color: textColor,
-                              )
-                            : null,
-                        overflow: TextOverflow.ellipsis,
+      child: Stack(
+        children: <Widget>[
+          if (drawOverflow)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: OverflowIndicatorPainter(overflowSide),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Flexible(
+                      child: Container(
+                        constraints: const BoxConstraints(
+                            maxWidth:
+                                minRenderWidth * widgetTitleMaxWidthPercentage),
+                        child: Center(
+                          child: Text(
+                            title,
+                            style: textColor != null
+                                ? TextStyle(
+                                    color: textColor,
+                                  )
+                                : null,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          color: borderColor,
+                        ),
+                        padding: const EdgeInsets.all(4.0),
                       ),
                     ),
-                    decoration: BoxDecoration(
-                      color: borderColor,
-                    ),
-                    padding: const EdgeInsets.all(4.0),
-                  ),
+                    if (hint != null)
+                      Flexible(
+                        child: hint,
+                      ),
+                  ],
                 ),
-                if (hint != null)
-                  Flexible(
-                    child: hint,
-                  ),
-              ],
-            ),
+              ),
+              if (child != null)
+                Expanded(
+                  child: child,
+                ),
+            ],
           ),
-          if (child != null)
-            Expanded(
-              child: child,
-            ),
         ],
       ),
       decoration: BoxDecoration(
