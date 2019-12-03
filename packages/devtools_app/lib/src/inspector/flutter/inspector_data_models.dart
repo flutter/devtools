@@ -165,10 +165,6 @@ class LayoutProperties {
     return height > parent.height;
   }
 
-  bool get hidden {
-    return offset.dx > parent.width || offset.dy > parent.height;
-  }
-
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
@@ -292,9 +288,6 @@ class FlexLayoutProperties extends LayoutProperties {
     if (direction == Axis.vertical) return height < sum(childrenHeights);
     return height < max(childrenHeights);
   }
-
-  @override
-  bool get hidden => false;
 
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method

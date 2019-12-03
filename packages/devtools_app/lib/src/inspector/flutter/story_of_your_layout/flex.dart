@@ -39,8 +39,8 @@ const defaultMaxRenderHeight = 400.0;
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-const heightAndConstraintIndicatorSize = 48.0;
-const widthAndConstraintIndicatorSize = 48.0;
+const heightAndConstraintIndicatorSize = 56.0;
+const widthAndConstraintIndicatorSize = 60.0;
 const mainAxisArrowIndicatorSize = 48.0;
 const crossAxisArrowIndicatorSize = 48.0;
 
@@ -70,15 +70,25 @@ const crossAxisLightColor = Color(0xFFB3D25A);
 const crossAxisDarkColor = Color(0xFFB3D25A);
 const crossAxisColor = ThemedColor(crossAxisLightColor, crossAxisDarkColor);
 
-const mainAxisLightTextColor = Color(0xFF913549);
-const mainAxisDarkTextColor = Color(0xFFEA637C);
+const mainAxisTextColorLight = Color(0xFF913549);
+const mainAxisTextColorDark = Color(0xFFEA637C);
 const mainAxisTextColor =
-    ThemedColor(mainAxisLightTextColor, mainAxisDarkTextColor);
+    ThemedColor(mainAxisTextColorLight, mainAxisTextColorDark);
 
-const crossAxisLightTextColor = Color(0xFF66672C);
-const crossAxisDarkTextColor = Color(0xFFB3D25A);
+const crossAxisTextColorLight = Color(0xFF66672C);
+const crossAxisTextColorsDark = Color(0xFFB3D25A);
 const crossAxisTextColor =
-    ThemedColor(crossAxisLightTextColor, crossAxisDarkTextColor);
+    ThemedColor(crossAxisTextColorLight, crossAxisTextColorsDark);
+
+const overflowBackgroundColorDark = Color(0xFFCF6679);
+const overflowBackgroundColorLight = Color(0xFFB00020);
+const overflowBackgroundColor =
+    ThemedColor(overflowBackgroundColorLight, overflowBackgroundColorDark);
+
+const overflowTextColorDark = Color(0xFF000000);
+const overflowTextColorLight = Color(0xFFFFFFFF);
+const overflowTextColor =
+    ThemedColor(overflowTextColorLight, overflowTextColorDark);
 
 const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
@@ -88,23 +98,43 @@ const defaultDimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
 );
 
-const overflowIndicatorTextStyle = TextStyle(
-  color: ThemedColor(Color(0xFFCC1F36), Color(0xFFF7A9AC)),
-  height: 1.0,
-);
+Widget _dimensionDescription(TextSpan description, bool overflow) {
+  final text = Text.rich(
+    description,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      height: 1.0,
+      color: overflow ? overflowTextColor : null,
+    ),
+    overflow: TextOverflow.ellipsis,
+  );
+  if (overflow)
+    return Container(
+      padding: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: overflowBackgroundColor,
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: text,
+    );
+  return text;
+}
 
 Widget _visualizeWidthAndHeightWithConstraints({
   @required Widget widget,
   @required LayoutProperties properties,
   double arrowHeadSize = defaultArrowHeadSize,
 }) {
+  final showChildrenWidthsSum =
+      properties is FlexLayoutProperties && properties.overflowWidth;
+  const bottomHeight = widthAndConstraintIndicatorSize;
+  const rightWidth = heightAndConstraintIndicatorSize;
   final right = Container(
     margin: const EdgeInsets.only(
       top: margin,
       left: margin,
-      // custom margin so that the text does not stick with the border
-      right: 2.0,
-      bottom: widthAndConstraintIndicatorSize,
+      right: margin,
+      bottom: bottomHeight,
     ),
     child: Row(
       children: <Widget>[
@@ -120,7 +150,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
         Expanded(
           child: RotatedBox(
             quarterTurns: 1,
-            child: Text.rich(
+            child: _dimensionDescription(
               TextSpan(
                 children: [
                   TextSpan(
@@ -136,15 +166,11 @@ Widget _visualizeWidthAndHeightWithConstraints({
                       properties.overflowHeight)
                     TextSpan(
                       text:
-                          'children takes: ${sum(properties.childrenHeights)}',
+                          '\nchildren takes: ${sum(properties.childrenHeights)}',
                     ),
                 ],
               ),
-              textAlign: TextAlign.center,
-              style: defaultDimensionIndicatorTextStyle.merge(
-                  properties.overflowHeight
-                      ? overflowIndicatorTextStyle
-                      : const TextStyle()),
+              properties.overflowHeight,
             ),
           ),
         ),
@@ -155,8 +181,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
     margin: const EdgeInsets.only(
       top: margin,
       left: margin,
-      right: heightAndConstraintIndicatorSize,
-      bottom: 2.0, // custom margin so that the text does not stick with border
+      right: rightWidth,
+      bottom: margin,
     ),
     child: Column(
       children: <Widget>[
@@ -170,25 +196,23 @@ Widget _visualizeWidthAndHeightWithConstraints({
           ),
         ),
         Expanded(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: '${properties.describeWidth()} '),
-                TextSpan(
-                  text: '(${properties.describeWidthConstraints()})',
-                ),
-                if (properties is FlexLayoutProperties &&
-                    properties.overflowWidth)
+          child: Center(
+            child: _dimensionDescription(
+              TextSpan(
+                children: [
+                  TextSpan(text: '${properties.describeWidth()}; '),
                   TextSpan(
-                    text: '\nchildren takes ${sum(properties.childrenWidths)}',
-                  )
-              ],
+                    text: '(${properties.describeWidthConstraints()})',
+                  ),
+                  if (showChildrenWidthsSum)
+                    TextSpan(
+                      text:
+                          '\nchildren takes ${sum(properties.childrenWidths)}',
+                    )
+                ],
+              ),
+              properties.overflowWidth,
             ),
-            textAlign: TextAlign.center,
-            style: defaultDimensionIndicatorTextStyle.merge(
-                properties.overflowWidth
-                    ? overflowIndicatorTextStyle
-                    : const TextStyle()),
           ),
         ),
       ],
@@ -197,9 +221,9 @@ Widget _visualizeWidthAndHeightWithConstraints({
   return BorderLayout(
     center: widget,
     right: right,
-    rightWidth: heightAndConstraintIndicatorSize,
+    rightWidth: rightWidth,
     bottom: bottom,
-    bottomHeight: widthAndConstraintIndicatorSize,
+    bottomHeight: bottomHeight,
   );
 }
 
@@ -315,13 +339,11 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
       return;
     }
-    print('selection changed');
     final prevRootId = id(_properties?.node);
     final newRootId = id(getRoot(selectedNode));
     final shouldFetch = prevRootId != newRootId;
     FlexLayoutProperties newSelection = _properties;
     if (shouldFetch) {
-      print('fetching new node');
       newSelection = await fetchFlexLayoutProperties();
     }
     setProperties(newSelection);
@@ -681,15 +703,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                                 ),
                               ),
                               borderColor: mainAxisColor,
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                  /// margin for the outer width/height
-                                  ///  so that they don't stick to the corner
-                                  right: margin,
-                                  bottom: margin,
-                                ),
-                                child: _visualizeFlex(context),
-                              ),
+                              child: _visualizeFlex(context),
                             ),
                           ),
                         ),
@@ -1029,13 +1043,16 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heightDescription =
+        'h=${toStringAsFixed(renderProperties.realHeight)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final bottom = Container(
       margin: const EdgeInsets.only(
         left: margin,
         right: heightOnlyIndicatorSize,
-        bottom: margin,
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Container(
             margin: const EdgeInsets.symmetric(vertical: arrowMargin),
@@ -1043,13 +1060,16 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
               arrowColor: heightArrowColor,
               direction: Axis.horizontal,
               arrowHeadSize: arrowHeadSize,
-              childMarginFromArrow: 0.0,
             ),
           ),
           Expanded(
-            child: Text(
-              'w=${toStringAsFixed(renderProperties.realWidth)}',
-              overflow: TextOverflow.ellipsis,
+            child: Center(
+              child: _dimensionDescription(
+                TextSpan(
+                  text: widthDescription,
+                ),
+                false,
+              ),
             ),
           ),
         ],
@@ -1075,9 +1095,11 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
           Expanded(
             child: RotatedBox(
               quarterTurns: 1,
-              child: Text(
-                'h=${toStringAsFixed(renderProperties.realHeight)}',
-                overflow: TextOverflow.ellipsis,
+              child: _dimensionDescription(
+                TextSpan(
+                  text: heightDescription,
+                ),
+                false,
               ),
             ),
           ),
@@ -1090,11 +1112,14 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
       child: Container(
         width: renderProperties.width,
         height: renderProperties.height,
-        child: BorderLayout(
-          right: right,
-          rightWidth: heightOnlyIndicatorSize,
-          bottom: bottom,
-          bottomHeight: widthOnlyIndicatorSize,
+        child: Tooltip(
+          message: '$widthDescription\n$heightDescription',
+          child: BorderLayout(
+            right: right,
+            rightWidth: heightOnlyIndicatorSize,
+            bottom: bottom,
+            bottomHeight: widthOnlyIndicatorSize,
+          ),
         ),
       ),
     );
