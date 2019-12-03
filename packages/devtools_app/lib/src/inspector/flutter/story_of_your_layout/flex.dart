@@ -39,7 +39,7 @@ const defaultMaxRenderHeight = 400.0;
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-const heightAndConstraintIndicatorSize = 56.0;
+const heightAndConstraintIndicatorSize = 60.0;
 const widthAndConstraintIndicatorSize = 60.0;
 const mainAxisArrowIndicatorSize = 48.0;
 const crossAxisArrowIndicatorSize = 48.0;
@@ -150,27 +150,29 @@ Widget _visualizeWidthAndHeightWithConstraints({
         Expanded(
           child: RotatedBox(
             quarterTurns: 1,
-            child: _dimensionDescription(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '${properties.describeHeight()}',
-                  ),
-                  if (properties is! FlexLayoutProperties ||
-                      !properties.overflowHeight)
-                    const TextSpan(text: '\n'),
-                  TextSpan(
-                    text: ' (${properties.describeHeightConstraints()})\n',
-                  ),
-                  if (properties is FlexLayoutProperties &&
-                      properties.overflowHeight)
+            child: Center(
+              child: _dimensionDescription(
+                TextSpan(
+                  children: [
                     TextSpan(
-                      text:
-                          '\nchildren takes: ${sum(properties.childrenHeights)}',
+                      text: '${properties.describeHeight()}',
                     ),
-                ],
+                    if (properties is! FlexLayoutProperties ||
+                        !properties.overflowHeight)
+                      const TextSpan(text: '\n'),
+                    TextSpan(
+                      text: ' (${properties.describeHeightConstraints()})',
+                    ),
+                    if (properties is FlexLayoutProperties &&
+                        properties.overflowHeight)
+                      TextSpan(
+                        text:
+                            '\nchildren takes: ${sum(properties.childrenHeights)}',
+                      ),
+                  ],
+                ),
+                properties.overflowHeight,
               ),
-              properties.overflowHeight,
             ),
           ),
         ),
