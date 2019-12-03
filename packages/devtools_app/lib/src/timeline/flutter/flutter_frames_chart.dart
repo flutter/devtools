@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:mp_chart/mp/chart/bar_chart.dart';
 import 'package:mp_chart/mp/controller/bar_chart_controller.dart';
@@ -29,6 +28,7 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/theme.dart';

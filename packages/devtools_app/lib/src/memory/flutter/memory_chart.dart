@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui' as dart_ui;
 
-import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -29,6 +28,7 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/theme.dart';
 import 'memory_controller.dart';
 
 // TODO(terry): Remove canned data.
