@@ -21,7 +21,9 @@ class MainFlutterWindow: NSWindow {
     // See https://github.com/flutter/flutter/issues/46005.
     let project = FlutterDartProject.init()
     let arguments = [
-      "--enable-dart-profiling"
+      "--enable-dart-profiling",
+      "--trace-systrace",
+      "--trace-skia"
     ]
     project.engineSwitches = arguments
     let flutterViewController = FlutterViewController.init(project: project)
