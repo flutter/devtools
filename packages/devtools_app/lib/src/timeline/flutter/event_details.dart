@@ -7,9 +7,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/controllers.dart';
+import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
+import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
 class EventDetails extends StatelessWidget {
@@ -23,6 +26,7 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Controllers.of(context).timeline;
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,17 +43,35 @@ class EventDetails extends StatelessWidget {
         const PaddedDivider.thin(),
         Expanded(
           child: selectedEvent != null
-              ? _buildDetails()
+              ? _buildDetails(controller)
               : _buildInstructions(textTheme),
         ),
       ],
     );
   }
 
-  Widget _buildDetails() {
+  Widget _buildDetails(TimelineController controller) {
     return selectedEvent.isUiEvent
-        ? CpuProfilerView()
+        ? ValueListenableBuilder(
+            valueListenable: controller.cpuProfileDataNotifier,
+            builder: (context, cpuProfileData, _) {
+              return _buildCpuProfiler(cpuProfileData, controller);
+            },
+          )
         : EventSummary(selectedEvent);
+  }
+
+  Widget _buildCpuProfiler(CpuProfileData data, TimelineController controller) {
+    return ValueListenableBuilder(
+      valueListenable: controller.selectedCpuStackFrameNotifier,
+      builder: (context, selectedStackFrame, _) {
+        return CpuProfiler(
+          data: data,
+          selectedStackFrame: selectedStackFrame,
+          onStackFrameSelected: (sf) => controller.selectCpuStackFrame(sf),
+        );
+      },
+    );
   }
 
   Widget _buildInstructions(TextTheme textTheme) {

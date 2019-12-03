@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
 import '../globals.dart';
+import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../service_manager.dart';
@@ -39,6 +40,15 @@ class TimelineController {
   ValueListenable get selectedTimelineEventNotifier =>
       _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
+
+  /// Notifies that new cpu profile data is available.
+  ValueListenable get cpuProfileDataNotifier => _cpuProfileDataNotifier;
+  final _cpuProfileDataNotifier = ValueNotifier<CpuProfileData>(null);
+
+  /// Notifies that a cpu stack frame was selected.
+  ValueListenable get selectedCpuStackFrameNotifier =>
+      _selectedCpuStackFrameNotifier;
+  final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
   /// Stream controller that notifies that offline data was loaded into the
   /// timeline.
@@ -105,7 +115,18 @@ class TimelineController {
 
   void selectTimelineEvent(TimelineEvent event) {
     if (event == null || timeline.data.selectedEvent == event) return;
+
     timeline.data.selectedEvent = event;
+
+    // Reset the cpu profile notifiers.
+    _cpuProfileDataNotifier.value = null;
+    _selectedCpuStackFrameNotifier.value = null;
+
+    // Fetch a profile if we are not in offline mode.
+    if (!offlineMode || offlineTimelineData == null) {
+      getCpuProfileForSelectedEvent();
+    }
+
     _selectedTimelineEventNotifier.value = event;
   }
 
@@ -120,6 +141,13 @@ class TimelineController {
 
     timeline.data.cpuProfileData = cpuProfileData;
     _cpuProfileTransformer.processData(cpuProfileData);
+    _cpuProfileDataNotifier.value = cpuProfileData;
+  }
+
+  void selectCpuStackFrame(CpuStackFrame stackFrame) {
+    if (stackFrame == timeline.data.cpuProfileData.selectedStackFrame) return;
+    timeline.data.cpuProfileData.selectedStackFrame = stackFrame;
+    _selectedCpuStackFrameNotifier.value = stackFrame;
   }
 
   void loadOfflineData(OfflineData offlineData) {
@@ -231,10 +259,11 @@ class TimelineController {
     if (serviceManager.hasConnection) {
       await serviceManager.service.clearVMTimeline();
     }
-    frameBasedTimeline.clear();
-    fullTimeline.clear();
+    for (var timeline in timelines) timeline.clear();
     allTraceEvents.clear();
     _selectedTimelineEventNotifier.value = null;
+    _cpuProfileDataNotifier.value = null;
+    _selectedCpuStackFrameNotifier.value = null;
     _clearController.add(true);
   }
 
@@ -303,6 +332,7 @@ class FrameBasedTimeline
     data.selectedEvent = null;
     _timelineController._selectedTimelineEventNotifier.value = null;
     data.cpuProfileData = null;
+    _timelineController._cpuProfileDataNotifier.value = null;
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
