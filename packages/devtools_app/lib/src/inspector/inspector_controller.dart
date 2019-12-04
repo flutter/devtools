@@ -175,7 +175,7 @@ class InspectorController extends DisposableController
 
   final bool isSummaryTree;
 
-  final VoidFunction onExpandCollapseSupported;
+  final void Function() onExpandCollapseSupported;
 
   final VoidFunction onLayoutDetailsSupported;
 

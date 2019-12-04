@@ -191,14 +191,6 @@ class Property<T> {
   Stream<T> get onValueChange => _changeController.stream;
 }
 
-/// A typedef to represent a function taking no arguments and with no return
-/// value.
-typedef VoidFunction = void Function();
-
-/// A typedef to represent a function taking no arguments and returning a void
-/// future.
-typedef VoidAsyncFunction = Future<void> Function();
-
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].
@@ -208,12 +200,12 @@ class DelayedTimer {
   final Duration minDelay;
   final Duration maxDelay;
 
-  VoidFunction _closure;
+  void Function() _closure;
 
   Timer _minTimer;
   Timer _maxTimer;
 
-  void invoke(VoidFunction closure) {
+  void invoke(void Function() closure) {
     _closure = closure;
 
     if (_minTimer == null) {
