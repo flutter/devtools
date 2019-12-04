@@ -391,7 +391,7 @@ class InspectorService extends DisposableController
     return json['result'];
   }
 
-  void removeListener(InspectorServiceClient client) {
+  void removeClient(InspectorServiceClient client) {
     clients.remove(client);
   }
 }

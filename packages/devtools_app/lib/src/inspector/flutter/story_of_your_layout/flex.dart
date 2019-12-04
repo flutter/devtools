@@ -299,6 +299,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   InspectorObjectGroupManager objectGroupManager;
 
+  _StoryOfYourFlexWidgetState() {
+    _onSelectionChangedCallback = onSelectionChanged;
+  }
+
   LayoutProperties highlighted;
 
   RemoteDiagnosticsNode get selectedNode =>
@@ -337,6 +341,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     return node.parent;
   }
 
+  Future<void> Function() _onSelectionChangedCallback;
+
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
     if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
@@ -349,16 +355,25 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       final newSelection = await fetchFlexLayoutProperties();
       _setProperties(newSelection);
     } else {
-      _setProperties(_properties);
+      _updateHighlighted(_properties);
     }
+  }
+
+  void _registerInspectorControllerService() {
+    inspectorController?.addSelectionListener(_onSelectionChangedCallback);
+    inspectorService?.addClient(this);
+  }
+
+  void _unregisterInspectorControllerService() {
+    inspectorController?.removeSelectionListener(_onSelectionChangedCallback);
+    inspectorService?.removeClient(this);
   }
 
   @override
   void initState() {
     super.initState();
     rateLimiter = RateLimiter(maxRequestsPerSecond, refresh);
-    inspectorController?.addSelectionListener(onSelectionChanged);
-    inspectorService?.addClient(this);
+    _registerInspectorControllerService();
     _initAnimationStates();
     _updateObjectGroupManager();
     // TODO(djshuckerow): put inspector controller in Controllers and
@@ -371,14 +386,17 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     super.didUpdateWidget(oldWidget);
     _updateObjectGroupManager();
     _animateProperties();
+    if (oldWidget.inspectorController != inspectorController) {
+      _unregisterInspectorControllerService();
+      _registerInspectorControllerService();
+    }
   }
 
   @override
   void dispose() {
     entranceController.dispose();
     changeController.dispose();
-    inspectorController?.removeSelectionListener(onSelectionChanged);
-    inspectorService?.removeListener(this);
+    _unregisterInspectorControllerService();
     super.dispose();
   }
 
