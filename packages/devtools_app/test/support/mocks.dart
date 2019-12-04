@@ -50,11 +50,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       FakeServiceExtensionManager();
 
   @override
-  ValueListenable<bool> registeredServiceListenable(
-    String name,
-  ) {
-    final ValueListenable listenable = ImmediateValueNotifier(false);
-    return listenable;
+  ValueListenable<bool> registeredServiceListenable(String name) {
+    return ImmediateValueNotifier(false);
   }
 
   @override
