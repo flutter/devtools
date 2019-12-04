@@ -25,7 +25,7 @@ void main() {
       controller.selectCpuStackFrame(testStackFrame);
       expect(
         controller.dataNotifier.value,
-        isNot(equals(controller.dummyEmptyCpuProfileData)),
+        isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
       expect(
         controller.selectedCpuStackFrameNotifier.value,
@@ -36,20 +36,20 @@ void main() {
     test('pullAndProcessProfile', () async {
       expect(
         controller.dataNotifier.value,
-        equals(controller.dummyEmptyCpuProfileData),
+        equals(CpuProfilerController.baseStateCpuProfileData),
       );
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(
         controller.dataNotifier.value,
-        isNot(equals(controller.dummyEmptyCpuProfileData)),
+        isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
 
       await controller.clear();
       expect(
         controller.dataNotifier.value,
-        equals(controller.dummyEmptyCpuProfileData),
+        equals(CpuProfilerController.baseStateCpuProfileData),
       );
     });
 
@@ -78,12 +78,12 @@ void main() {
       controller.resetNotifiers();
       expect(
         controller.dataNotifier.value,
-        equals(controller.dummyEmptyCpuProfileData),
+        equals(CpuProfilerController.baseStateCpuProfileData),
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
 
       await pullProfileAndSelectFrame();
-      controller.resetNotifiers(useDummyData: false);
+      controller.resetNotifiers(useBaseStateData: false);
       expect(controller.dataNotifier.value, isNull);
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
     });

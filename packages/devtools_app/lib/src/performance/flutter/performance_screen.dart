@@ -11,6 +11,7 @@ import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
+import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
@@ -59,7 +60,7 @@ class PerformanceScreenBody extends StatelessWidget {
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
-                  controller.cpuProfilerController.dummyEmptyCpuProfileData) {
+                  CpuProfilerController.baseStateCpuProfileData) {
                 return _buildRecordingInfo();
               }
               return _buildCpuProfiler(cpuProfileData);
@@ -77,23 +78,23 @@ class PerformanceScreenBody extends StatelessWidget {
       builder: (context, recording, _) {
         return Row(
           children: [
-            ...recordStopButtons(
-              recordKey: PerformanceScreen.recordButtonKey,
-              stopKey: PerformanceScreen.stopRecordingButtonKey,
-              minIncludeTextWidth: minIncludeTextWidth,
+            recordButton(
+              key: PerformanceScreen.recordButtonKey,
               recording: recording,
-              onRecord: _startRecording,
-              onStop: _stopRecording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _startRecording,
+            ),
+            stopRecordingButton(
+              key: PerformanceScreen.stopRecordingButtonKey,
+              recording: recording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _stopRecording,
             ),
             const SizedBox(width: 8.0),
             clearButton(
               key: PerformanceScreen.clearButtonKey,
               minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: recording
-                  ? null
-                  : () async {
-                      await _clear();
-                    },
+              onPressed: recording ? null : _clear,
             ),
           ],
         );

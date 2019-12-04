@@ -12,28 +12,24 @@ import '../profiler/cpu_profile_transformer.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 
 class CpuProfilerController {
-  CpuProfilerController() {
-    dummyEmptyCpuProfileData = CpuProfileData.parse({});
-    _dataNotifier = ValueNotifier<CpuProfileData>(dummyEmptyCpuProfileData);
-  }
+  /// Data for the initial value and reset value of [_dataNotifier].
+  ///
+  /// When this data is the value of [_dataNotifier], the CPU profiler is in a
+  /// base state where recording instructions should be shown.
+  static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
 
   /// Notifies that new cpu profile data is available.
   ValueListenable get dataNotifier => _dataNotifier;
-  ValueNotifier<CpuProfileData> _dataNotifier;
+  final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
 
   /// Notifies that a cpu stack frame was selected.
   ValueListenable get selectedCpuStackFrameNotifier =>
       _selectedCpuStackFrameNotifier;
   final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
-  final CpuProfilerService service = CpuProfilerService();
+  final service = CpuProfilerService();
 
-  final CpuProfileTransformer transformer = CpuProfileTransformer();
-
-  /// Dummy data for the initial value of [_dataNotifier].
-  ///
-  /// This dummy data will also be set upon clearing the controller.
-  CpuProfileData dummyEmptyCpuProfileData;
+  final transformer = CpuProfileTransformer();
 
   Future<void> pullAndProcessProfile({
     @required int startMicros,
@@ -58,8 +54,8 @@ class CpuProfilerController {
     await service.clearCpuSamples();
   }
 
-  void resetNotifiers({bool useDummyData = true}) {
+  void resetNotifiers({bool useBaseStateData = true}) {
     _selectedCpuStackFrameNotifier.value = null;
-    _dataNotifier.value = useDummyData ? dummyEmptyCpuProfileData : null;
+    _dataNotifier.value = useBaseStateData ? baseStateCpuProfileData : null;
   }
 }

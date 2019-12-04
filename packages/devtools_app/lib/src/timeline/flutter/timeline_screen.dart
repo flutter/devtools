@@ -194,13 +194,17 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       builder: (context, recording, _) {
         return Row(
           children: [
-            ...recordStopButtons(
-              recordKey: TimelineScreen.recordButtonKey,
-              stopKey: TimelineScreen.stopRecordingButtonKey,
-              minIncludeTextWidth: minIncludeTextWidth,
+            recordButton(
+              key: TimelineScreen.recordButtonKey,
               recording: recording,
-              onRecord: _startRecording,
-              onStop: _stopRecording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _startRecording,
+            ),
+            stopRecordingButton(
+              key: TimelineScreen.stopRecordingButtonKey,
+              recording: recording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _stopRecording,
             ),
             ...sharedWidgets,
           ],

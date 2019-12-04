@@ -87,6 +87,8 @@ class CpuProfileData {
     );
   }
 
+  static CpuProfileData empty() => parse({});
+
   // Key fields from the VM response JSON.
   static const nameKey = 'name';
   static const categoryKey = 'category';

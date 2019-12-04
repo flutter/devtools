@@ -157,7 +157,12 @@ ErrorReporter showErrorSnackBar(BuildContext context) {
   };
 }
 
-Widget clearButton({
+/// Button to clear data in the UI.
+///
+/// * `minIncludeTextWidth`: The minimum width the button can be before the text
+///    is omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget clearButton({
   Key key,
   double minIncludeTextWidth,
   @required VoidFunction onPressed,
@@ -173,34 +178,50 @@ Widget clearButton({
   );
 }
 
-List<Widget> recordStopButtons({
-  Key recordKey,
-  Key stopKey,
-  double minIncludeTextWidth,
+/// Button to start recording data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `minIncludeTextWidth`: The minimum width the button can be before the text
+///    is omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget recordButton({
+  Key key,
   @required bool recording,
-  @required VoidFunction onRecord,
-  @required VoidFunction onStop,
+  double minIncludeTextWidth,
+  @required VoidFunction onPressed,
 }) {
-  return [
-    OutlineButton(
-      key: recordKey,
-      onPressed: recording ? null : onRecord,
-      child: MaterialIconLabel(
-        Icons.fiber_manual_record,
-        'Record',
-        minIncludeTextWidth: minIncludeTextWidth,
-      ),
+  return OutlineButton(
+    key: key,
+    onPressed: recording ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.fiber_manual_record,
+      'Record',
+      minIncludeTextWidth: minIncludeTextWidth,
     ),
-    OutlineButton(
-      key: stopKey,
-      onPressed: !recording ? null : onStop,
-      child: MaterialIconLabel(
-        Icons.stop,
-        'Stop',
-        minIncludeTextWidth: minIncludeTextWidth,
-      ),
+  );
+}
+
+/// Button to stop recording data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `minIncludeTextWidth`: The minimum width the button can be before the text
+///    is omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget stopRecordingButton({
+  Key key,
+  @required bool recording,
+  double minIncludeTextWidth,
+  @required VoidFunction onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: !recording ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.stop,
+      'Stop',
+      minIncludeTextWidth: minIncludeTextWidth,
     ),
-  ];
+  );
 }
 
 Widget recordingInfo({
