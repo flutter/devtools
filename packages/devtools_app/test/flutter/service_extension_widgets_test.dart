@@ -179,7 +179,7 @@ void registerServiceExtension(
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
-  when(mockServiceManager.getRegisteredServiceListenable(description.service))
+  when(mockServiceManager.registeredServiceListenable(description.service))
       .thenAnswer((invocation) {
     final listenable = ImmediateValueNotifier(serviceAvailable);
     return listenable;

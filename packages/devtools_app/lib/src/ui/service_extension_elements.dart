@@ -170,8 +170,8 @@ class RegisteredServiceExtensionButton {
       ..hidden(true);
 
     // Only show the button if the device supports the given service.
-    final serviceRegisteredListenable = serviceManager
-        .getRegisteredServiceListenable(serviceDescription.service);
+    final serviceRegisteredListenable =
+        serviceManager.registeredServiceListenable(serviceDescription.service);
     serviceRegisteredListenable.addListener(() {
       final registered = serviceRegisteredListenable.value;
       button.hidden(!registered);

@@ -857,7 +857,7 @@ class InspectorController extends DisposableController
     VoidCallback callback,
   ) {
     final flutterVersionServiceListenable = serviceManager
-        .getRegisteredServiceListenable(registrations.flutterVersion.service);
+        .registeredServiceListenable(registrations.flutterVersion.service);
     addAutoDisposeListener(flutterVersionServiceListenable, () async {
       final registered = flutterVersionServiceListenable.value;
       if (registered) {

@@ -234,7 +234,7 @@ class _RegisteredServiceExtensionButtonState
 
     // Only show the button if the device supports the given service.
     final serviceRegisteredListenable = serviceManager
-        .getRegisteredServiceListenable(widget.serviceDescription.service);
+        .registeredServiceListenable(widget.serviceDescription.service);
     addAutoDisposeListener(serviceRegisteredListenable, () {
       final registered = serviceRegisteredListenable.value;
       setState(() {

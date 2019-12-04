@@ -99,7 +99,7 @@ class ServiceConnectionManager {
     );
   }
 
-  ValueListenable<bool> getRegisteredServiceListenable(String name) {
+  ValueListenable<bool> registeredServiceListenable(String name) {
     final listenable = _registeredServiceNotifiers.putIfAbsent(
       name,
       () => ImmediateValueNotifier(false),

@@ -278,7 +278,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
   void _initHotReloadRestartServiceListeners() {
     final hotReloadListenable = serviceManager
-        .getRegisteredServiceListenable(registrations.hotReload.service);
+        .registeredServiceListenable(registrations.hotReload.service);
     hotReloadListenable.addListener(() {
       final reloadServiceAvailable = hotReloadListenable.value;
       if (reloadServiceAvailable) {
@@ -289,7 +289,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
     });
 
     final hotRestartListenable = serviceManager
-        .getRegisteredServiceListenable(registrations.hotReload.service);
+        .registeredServiceListenable(registrations.hotReload.service);
     hotRestartListenable.addListener(() {
       final restartServiceAvailable = hotRestartListenable.value;
       if (restartServiceAvailable) {
