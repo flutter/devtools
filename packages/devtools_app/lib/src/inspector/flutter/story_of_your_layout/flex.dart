@@ -116,6 +116,8 @@ final overflowingDimensionIndicatorTextStyle =
   ),
 );
 
+const maxRequestsPerSecond = 3.0;
+
 Widget _dimensionDescription(TextSpan description, bool overflow) {
   final text = Text.rich(
     description,
@@ -162,7 +164,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           ),
           if (properties is FlexLayoutProperties && properties.overflowHeight)
             TextSpan(
-              text: '\nchildren takes: ${sum(properties.childrenHeights)}',
+              text:
+                  '\nchildren takes: ${toStringAsFixed(sum(properties.childrenHeights))}',
             ),
         ],
       ),
@@ -213,7 +216,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
         ),
         if (showChildrenWidthsSum)
           TextSpan(
-            text: '\nchildren takes ${sum(properties.childrenWidths)}',
+            text:
+                '\nchildren takes ${toStringAsFixed(sum(properties.childrenWidths))}',
           )
       ],
     ),
@@ -278,15 +282,21 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 }
 
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin
+    implements InspectorServiceClient {
+  _StoryOfYourFlexWidgetState() {
+    _onSelectionChangedCallback = onSelectionChanged;
+  }
+
   AnimationController entranceController;
   CurvedAnimation expandedEntrance;
   CurvedAnimation allEntrance;
   AnimationController changeController;
-  CurvedAnimation changeAnimation;
 
+  CurvedAnimation changeAnimation;
   AnimatedFlexLayoutProperties _animatedProperties;
   FlexLayoutProperties _previousProperties;
+
   FlexLayoutProperties _properties;
 
   FlexLayoutProperties get properties =>
@@ -321,20 +331,55 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   InspectorController get inspectorController => widget.inspectorController;
 
+  InspectorService get inspectorService =>
+      inspectorController?.inspectorService;
+
+  RateLimiter rateLimiter;
+
   RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
     if (!StoryOfYourFlexWidget.shouldDisplay(node)) return null;
     if (node.isFlex) return node;
     return node.parent;
   }
 
+  Future<void> Function() _onSelectionChangedCallback;
+
+  Future<void> onSelectionChanged() async {
+    if (!mounted) return;
+    if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
+      return;
+    }
+    final prevRootId = id(_properties?.node);
+    final newRootId = id(getRoot(selectedNode));
+    final shouldFetch = prevRootId != newRootId;
+    if (shouldFetch) {
+      _dirty = false;
+      final newSelection = await fetchFlexLayoutProperties();
+      _setProperties(newSelection);
+    } else {
+      _updateHighlighted(_properties);
+    }
+  }
+
+  void _registerInspectorControllerService() {
+    inspectorController?.addSelectionListener(_onSelectionChangedCallback);
+    inspectorService?.addClient(this);
+  }
+
+  void _unregisterInspectorControllerService() {
+    inspectorController?.removeSelectionListener(_onSelectionChangedCallback);
+    inspectorService?.removeClient(this);
+  }
+
   @override
   void initState() {
     super.initState();
+    rateLimiter = RateLimiter(maxRequestsPerSecond, refresh);
+    _registerInspectorControllerService();
     _initAnimationStates();
     _updateObjectGroupManager();
     // TODO(djshuckerow): put inspector controller in Controllers and
     // update on didChangeDependencies.
-    inspectorController.addSelectionListener(_onInspectorSelectionChanged);
     _animateProperties();
   }
 
@@ -343,13 +388,17 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     super.didUpdateWidget(oldWidget);
     _updateObjectGroupManager();
     _animateProperties();
+    if (oldWidget.inspectorController != inspectorController) {
+      _unregisterInspectorControllerService();
+      _registerInspectorControllerService();
+    }
   }
 
   @override
   void dispose() {
     entranceController.dispose();
     changeController.dispose();
-    inspectorController.removeSelectionListener(_onInspectorSelectionChanged);
+    _unregisterInspectorControllerService();
     super.dispose();
   }
 
@@ -366,6 +415,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   void _changeProperties(FlexLayoutProperties nextProperties) {
     if (!mounted || nextProperties == null) return;
+    _updateHighlighted(nextProperties);
     setState(() {
       _animatedProperties = AnimatedFlexLayoutProperties(
         // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
@@ -394,22 +444,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
-  Future<void> _onInspectorSelectionChanged() async {
-    if (!mounted) return;
-    if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
-      return;
-    }
-    final prevRootId = id(_properties?.node);
-    final newRootId = id(getRoot(selectedNode));
-    final shouldFetch = prevRootId != newRootId;
-    if (shouldFetch) {
-      final newSelection = await fetchFlexLayoutProperties();
-      _setProperties(newSelection);
-    } else {
-      _setProperties(_properties);
-    }
-  }
-
   void _updateHighlighted(FlexLayoutProperties newProperties) {
     setState(() {
       if (selectedNode.isFlex) {
@@ -422,6 +456,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   void _setProperties(FlexLayoutProperties newProperties) {
+    if (!mounted) return;
     _updateHighlighted(newProperties);
     if (_properties == newProperties) {
       return;
@@ -475,7 +510,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         'flex-layout',
       );
     }
-    _onInspectorSelectionChanged();
+    onSelectionChanged();
   }
 
   // update selected widget in the device without triggering selection listener event.
@@ -491,23 +526,18 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     inspectorController.refreshSelection(node, node, true);
   }
 
-  Future<void> _onTap(LayoutProperties properties) async {
-    if (properties.isFlex) {
-      setState(() => highlighted = properties);
-      await setSelectionInspector(properties.node);
-    } else {
-      refreshSelection(properties.node);
-    }
+  Future<void> onTap(LayoutProperties properties) async {
+    setState(() => highlighted = properties);
+    await setSelectionInspector(properties.node);
   }
 
-  void _onDoubleTap(LayoutProperties properties) {
+  void onDoubleTap(LayoutProperties properties) {
     refreshSelection(properties.node);
   }
 
-  Future<void> updateChildFlex(
-    LayoutProperties oldProperties,
-    LayoutProperties newProperties,
-  ) async {
+  Future<void> refresh() async {
+    if (!_dirty) return;
+    _dirty = false;
     final updatedProperties = await fetchFlexLayoutProperties();
     _changeProperties(updatedProperties);
   }
@@ -557,7 +587,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           for (var i = 0; i < children.length; i++)
             FlexChildVisualizer(
               state: this,
-              notifyParent: updateChildFlex,
               backgroundColor: highlighted == children[i]
                   ? theme.activeBackgroundColor
                   : theme.inActiveBackgroundColor,
@@ -714,13 +743,12 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             }
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
+            markAsDirty();
             await service.invokeTweakFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
               changedProperties.crossAxisAlignment,
             );
-            final updatedProperties = await fetchFlexLayoutProperties();
-            _changeProperties(updatedProperties);
           },
         ),
       ),
@@ -771,7 +799,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           left: crossAxisArrowIndicatorSize + margin,
         ),
         child: InkWell(
-          onTap: () => _onTap(properties),
+          onTap: () => onTap(properties),
           child: WidgetVisualizer(
             title: flexType,
             backgroundColor:
@@ -864,6 +892,34 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
       ),
     );
   }
+
+  bool _dirty = false;
+
+  @override
+  void onFlutterFrame() {
+    if (!mounted) return;
+    if (_dirty) {
+      rateLimiter.scheduleRequest();
+    }
+  }
+
+  // TODO(albertusangga): Investigate why onForceRefresh is not getting called.
+  @override
+  Future<Object> onForceRefresh() async {
+    _setProperties(await fetchFlexLayoutProperties());
+    return null;
+  }
+
+  /// Currently this is not working so we should listen to controller selection event instead.
+  @override
+  Future<void> onInspectorSelectionChanged() {
+    return null;
+  }
+
+  /// Register callback to be executed once Flutter frame is ready.
+  void markAsDirty() {
+    _dirty = true;
+  }
 }
 
 /// Widget that represents and visualize a direct child of Flex widget.
@@ -875,15 +931,9 @@ class FlexChildVisualizer extends StatelessWidget {
     @required this.backgroundColor,
     @required this.borderColor,
     @required this.textColor,
-    @required this.notifyParent,
   }) : super(key: key);
 
   final _StoryOfYourFlexWidgetState state;
-
-  /// callback to notify parent when child value changes
-  final void Function(
-          LayoutProperties oldProperties, LayoutProperties newProperties)
-      notifyParent;
 
   final Color backgroundColor;
   final Color borderColor;
@@ -898,11 +948,11 @@ class FlexChildVisualizer extends StatelessWidget {
   void onChangeFlexFactor(int newFlexFactor) async {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
+    state.markAsDirty();
     await inspectorService.invokeTweakFlexFactor(
       node.valueRef,
       newFlexFactor,
     );
-    notifyParent(properties, properties.copyWith(flexFactor: newFlexFactor));
   }
 
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
@@ -1000,9 +1050,9 @@ class FlexChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: InkWell(
-        onTap: () => state._onTap(properties),
-        onDoubleTap: () => state._onDoubleTap(properties),
-        onLongPress: () => state._onDoubleTap(properties),
+        onTap: () => state.onTap(properties),
+        onDoubleTap: () => state.onDoubleTap(properties),
+        onLongPress: () => state.onDoubleTap(properties),
         child: SizedBox(
           width: renderSize.width,
           height: renderSize.height,
@@ -1172,12 +1222,14 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: arrowMargin),
-            child: ArrowWrapper.bidirectional(
-              arrowColor: heightArrowColor,
-              direction: Axis.horizontal,
-              arrowHeadSize: arrowHeadSize,
+          Flexible(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+              child: ArrowWrapper.bidirectional(
+                arrowColor: heightArrowColor,
+                direction: Axis.horizontal,
+                arrowHeadSize: arrowHeadSize,
+              ),
             ),
           ),
           Expanded(

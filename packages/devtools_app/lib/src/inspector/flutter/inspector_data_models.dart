@@ -484,7 +484,8 @@ class FlexLayoutProperties extends LayoutProperties {
         double size = crossAxisAlignment == CrossAxisAlignment.stretch
             ? maxSizeAvailable(axis)
             : largestSize /
-                math.max(dimension(axis) * maxSizeAvailable(axis), 1.0);
+                math.max(dimension(axis), 1.0) *
+                maxSizeAvailable(axis);
         size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
