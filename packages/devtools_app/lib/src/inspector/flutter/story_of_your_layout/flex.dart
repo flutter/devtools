@@ -149,7 +149,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
   double arrowHeadSize = defaultArrowHeadSize,
 }) {
   final showChildrenWidthsSum =
-      properties is FlexLayoutProperties && properties.overflowWidth;
+      properties is FlexLayoutProperties && properties.isOverflowWidth;
   const bottomHeight = widthAndConstraintIndicatorSize;
   const rightWidth = heightAndConstraintIndicatorSize;
 
@@ -161,19 +161,20 @@ Widget _visualizeWidthAndHeightWithConstraints({
           TextSpan(
             text: '${properties.describeHeight()}',
           ),
-          if (properties is! FlexLayoutProperties || !properties.overflowHeight)
+          if (properties is! FlexLayoutProperties ||
+              !properties.isOverflowHeight)
             const TextSpan(text: '\n'),
           TextSpan(
             text: ' (${properties.describeHeightConstraints()})',
           ),
-          if (properties is FlexLayoutProperties && properties.overflowHeight)
+          if (properties is FlexLayoutProperties && properties.isOverflowHeight)
             TextSpan(
               text:
                   '\nchildren takes: ${toStringAsFixed(sum(properties.childrenHeights))}',
             ),
         ],
       ),
-      properties.overflowHeight,
+      properties.isOverflowHeight,
     ),
   );
   final right = Container(
@@ -225,7 +226,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
           )
       ],
     ),
-    properties.overflowWidth,
+    properties.isOverflowWidth,
   );
   final bottom = Container(
     margin: const EdgeInsets.only(
