@@ -15,6 +15,7 @@ import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:meta/meta.dart';
@@ -51,11 +52,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       FakeServiceExtensionManager();
 
   @override
-  StreamSubscription<bool> hasRegisteredService(
-    String name,
-    void onData(bool value),
-  ) {
-    return Stream.value(false).listen(onData);
+  ValueListenable<bool> registeredServiceListenable(String name) {
+    return ImmediateValueNotifier(false);
   }
 
   @override

@@ -9,6 +9,7 @@ import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart';
 import 'package:devtools_app/src/ui/flutter/service_extension_widgets.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -178,10 +179,10 @@ void registerServiceExtension(
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
-  when(mockServiceManager.hasRegisteredService(description.service, any))
+  when(mockServiceManager.registeredServiceListenable(description.service))
       .thenAnswer((invocation) {
-    final onData = invocation.positionalArguments[1];
-    return Stream<bool>.value(serviceAvailable).listen(onData);
+    final listenable = ImmediateValueNotifier(serviceAvailable);
+    return listenable;
   });
 }
 

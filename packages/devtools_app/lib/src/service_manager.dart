@@ -16,6 +16,7 @@ import 'service_extensions.dart' as extensions;
 import 'service_registrations.dart' as registrations;
 import 'stream_value_listenable.dart';
 import 'ui/fake_flutter/fake_flutter.dart';
+import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
 // TODO(kenz): add an offline service manager implementation.
@@ -50,12 +51,11 @@ class ServiceConnectionManager {
     return _serviceCapabilities;
   }
 
-  final Map<String, StreamController<bool>> _serviceRegistrationController =
-      <String, StreamController<bool>>{};
-  final Map<String, List<String>> _registeredMethodsForService = {};
+  final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
 
   Map<String, List<String>> get registeredMethodsForService =>
       _registeredMethodsForService;
+  final Map<String, List<String>> _registeredMethodsForService = {};
 
   IsolateManager _isolateManager;
   ServiceExtensionManager _serviceExtensionManager;
@@ -99,27 +99,12 @@ class ServiceConnectionManager {
     );
   }
 
-  StreamSubscription<bool> hasRegisteredService(
-    String name,
-    void onData(bool value),
-  ) {
-    if (_registeredMethodsForService.containsKey(name) && onData != null) {
-      onData(true);
-    }
-    final StreamController<bool> streamController =
-        _getServiceRegistrationController(name);
-    return streamController.stream.listen(onData);
-  }
-
-  StreamController<bool> _getServiceRegistrationController(String name) {
-    return _getStreamController(
+  ValueListenable<bool> registeredServiceListenable(String name) {
+    final listenable = _registeredServiceNotifiers.putIfAbsent(
       name,
-      _serviceRegistrationController,
-      onFirstListenerSubscribed: () {
-        _serviceRegistrationController[name]
-            .add(_registeredMethodsForService.containsKey(name));
-      },
+      () => ImmediateValueNotifier(false),
     );
+    return listenable;
   }
 
   Future<void> vmServiceOpened(
@@ -145,14 +130,25 @@ class ServiceConnectionManager {
 
     void handleServiceEvent(Event e) {
       if (e.kind == EventKind.kServiceRegistered) {
-        if (!_registeredMethodsForService.containsKey(e.service)) {
-          _registeredMethodsForService[e.service] = [e.method];
-          final StreamController<bool> streamController =
-              _getServiceRegistrationController(e.service);
-          streamController.add(true);
-        } else {
-          _registeredMethodsForService[e.service].add(e.method);
-        }
+        final serviceName = e.service;
+        _registeredMethodsForService
+            .putIfAbsent(serviceName, () => [])
+            .add(e.method);
+        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
+          serviceName,
+          () => ImmediateValueNotifier(true),
+        );
+        serviceNotifier.value = true;
+      }
+
+      if (e.kind == EventKind.kServiceUnregistered) {
+        final serviceName = e.service;
+        _registeredMethodsForService.remove(serviceName);
+        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
+          serviceName,
+          () => ImmediateValueNotifier(false),
+        );
+        serviceNotifier.value = false;
       }
     }
 

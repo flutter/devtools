@@ -175,9 +175,9 @@ class InspectorController extends DisposableController
 
   final bool isSummaryTree;
 
-  final VoidFunction onExpandCollapseSupported;
+  final VoidCallback onExpandCollapseSupported;
 
-  final VoidFunction onLayoutDetailsSupported;
+  final VoidCallback onLayoutDetailsSupported;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -852,19 +852,22 @@ class InspectorController extends DisposableController
   }
 
   /// execute given [callback] when minimum Flutter [version] is met.
-  void _onVersionSupported(SemanticVersion version, VoidCallback callback) {
-    serviceManager.hasRegisteredService(
-      registrations.flutterVersion.service,
-      (serviceAvailable) async {
-        if (serviceAvailable) {
-          final flutterVersion = FlutterVersion.parse(
-              (await serviceManager.getFlutterVersion()).json);
-          if (flutterVersion.isSupported(supportedVersion: version)) {
-            callback();
-          }
+  void _onVersionSupported(
+    SemanticVersion version,
+    VoidCallback callback,
+  ) {
+    final flutterVersionServiceListenable = serviceManager
+        .registeredServiceListenable(registrations.flutterVersion.service);
+    addAutoDisposeListener(flutterVersionServiceListenable, () async {
+      final registered = flutterVersionServiceListenable.value;
+      if (registered) {
+        final flutterVersion = FlutterVersion.parse(
+            (await serviceManager.getFlutterVersion()).json);
+        if (flutterVersion.isSupported(supportedVersion: version)) {
+          callback();
         }
-      },
-    );
+      }
+    });
   }
 
   void _checkForExpandCollapseSupport() {
@@ -879,7 +882,7 @@ class InspectorController extends DisposableController
   }
 
   void _checkForLayoutDetailsSupport() {
-    if (onExpandCollapseSupported == null) return;
+    if (onLayoutDetailsSupported == null) return;
     _onVersionSupported(
       SemanticVersion(major: 1, minor: 12, patch: 16),
       onLayoutDetailsSupported,

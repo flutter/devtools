@@ -40,22 +40,19 @@ class InfoController extends DisposableController
 
   Future<void> _listenForFlutterVersionChanges() async {
     if (await serviceManager.connectedApp.isAnyFlutterApp) {
-      autoDispose(
-        serviceManager.hasRegisteredService(
-          registrations.flutterVersion.service,
-          (bool serviceAvailable) async {
-            if (serviceAvailable &&
-                !flutterVersionServiceAvailable.isCompleted) {
-              flutterVersionServiceAvailable.complete();
-              final FlutterVersion version = FlutterVersion.parse(
-                  (await serviceManager.getFlutterVersion()).json);
-              onFlutterVersionChanged(version);
-            } else {
-              onFlutterVersionChanged(null);
-            }
-          },
-        ),
-      );
+      final flutterVersionServiceListenable = serviceManager
+          .registeredServiceListenable(registrations.flutterVersion.service);
+      addAutoDisposeListener(flutterVersionServiceListenable, () async {
+        final serviceAvailable = flutterVersionServiceListenable.value;
+        if (serviceAvailable && !flutterVersionServiceAvailable.isCompleted) {
+          flutterVersionServiceAvailable.complete();
+          final FlutterVersion version = FlutterVersion.parse(
+              (await serviceManager.getFlutterVersion()).json);
+          onFlutterVersionChanged(version);
+        } else {
+          onFlutterVersionChanged(null);
+        }
+      });
     } else {
       onFlutterVersionChanged(null);
     }

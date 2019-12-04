@@ -5,9 +5,9 @@
 library inspector;
 
 import 'dart:async';
+
 import 'package:html_shim/html.dart' show Element;
 import 'package:html_shim/html.dart' as html;
-
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 

@@ -514,6 +514,18 @@ String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
 
+/// A value notifier that calls each listener immediately when registered.
+class ImmediateValueNotifier<T> extends ValueNotifier<T> {
+  ImmediateValueNotifier(T value) : super(value);
+
+  /// Adds a listener and calls the listener upon registration.
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    listener();
+  }
+}
+
 extension NullSafeLast<T> on List<T> {
   T nullSafeLast() {
     if (isEmpty) {
