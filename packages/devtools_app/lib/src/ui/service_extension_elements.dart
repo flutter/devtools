@@ -8,7 +8,6 @@ import '../globals.dart';
 import '../service_extensions.dart';
 import '../service_manager.dart' show ServiceExtensionState;
 import '../service_registrations.dart';
-import '../utils.dart';
 import 'analytics.dart' as ga;
 import 'html_elements.dart';
 import 'primer.dart';
