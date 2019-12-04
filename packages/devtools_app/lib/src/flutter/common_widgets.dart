@@ -8,7 +8,6 @@ import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
-import '../utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -165,7 +164,7 @@ ErrorReporter showErrorSnackBar(BuildContext context) {
 StatelessWidget clearButton({
   Key key,
   double minIncludeTextWidth,
-  @required VoidFunction onPressed,
+  @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
@@ -188,7 +187,7 @@ StatelessWidget recordButton({
   Key key,
   @required bool recording,
   double minIncludeTextWidth,
-  @required VoidFunction onPressed,
+  @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
@@ -211,7 +210,7 @@ StatelessWidget stopRecordingButton({
   Key key,
   @required bool recording,
   double minIncludeTextWidth,
-  @required VoidFunction onPressed,
+  @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,

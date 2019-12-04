@@ -200,12 +200,12 @@ class DelayedTimer {
   final Duration minDelay;
   final Duration maxDelay;
 
-  void Function() _closure;
+  VoidCallback _closure;
 
   Timer _minTimer;
   Timer _maxTimer;
 
-  void invoke(void Function() closure) {
+  void invoke(VoidCallback closure) {
     _closure = closure;
 
     if (_minTimer == null) {
