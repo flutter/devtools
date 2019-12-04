@@ -5,9 +5,9 @@
 library inspector;
 
 import 'dart:async';
+
 import 'package:html_shim/html.dart' show Element;
 import 'package:html_shim/html.dart' as html;
-
 import 'package:split/split.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -23,6 +23,7 @@ import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
+import '../utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
@@ -164,7 +165,7 @@ class HtmlInspectorScreen extends HtmlScreen {
       detailsTree: detailsInspectorTree,
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
-      onExpandCollapseSupported: _onExpandCollapseSupported,
+      onExpandCollapseSupported: SingleRunCallback(_onExpandCollapseSupported),
     );
 
     final elements = <Element>[

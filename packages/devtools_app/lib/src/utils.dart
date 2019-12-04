@@ -199,6 +199,21 @@ typedef VoidFunction = void Function();
 /// future.
 typedef VoidAsyncFunction = Future<void> Function();
 
+class SingleRunCallback {
+  SingleRunCallback(this._callback);
+
+  final VoidFunction _callback;
+
+  bool hasRan = false;
+
+  void run() {
+    if (!hasRan) {
+      _callback();
+      hasRan = true;
+    }
+  }
+}
+
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].

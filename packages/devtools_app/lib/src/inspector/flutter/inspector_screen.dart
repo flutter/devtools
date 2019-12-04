@@ -16,6 +16,7 @@ import '../../service_extensions.dart' as extensions;
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/icons.dart';
+import '../../utils.dart';
 import '../inspector_controller.dart';
 import '../inspector_service.dart';
 import 'inspector_screen_details_tab.dart';
@@ -240,8 +241,9 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         detailsTree: detailsTreeController,
         inspectorService: inspectorService,
         treeType: FlutterTreeType.widget,
-        onExpandCollapseSupported: _onExpandCollapseSupported,
-        onLayoutDetailsSupported: _onLayoutDetailsSupported,
+        onExpandCollapseSupported:
+            SingleRunCallback(_onExpandCollapseSupported),
+        onLayoutDetailsSupported: SingleRunCallback(_onLayoutDetailsSupported),
       );
 
       // TODO(jacobr): move this notice display to once a day.
