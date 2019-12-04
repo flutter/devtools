@@ -18,6 +18,17 @@ final Map<String, dynamic> goldenCpuProfileDataJson = {
   'traceEvents': goldenCpuProfileTraceEvents,
 };
 
+final Map<String, dynamic> emptyCpuProfileDataJson = {
+  'type': '_CpuProfileTimeline',
+  'samplePeriod': 50,
+  'sampleCount': 0,
+  'stackDepth': 128,
+  'timeOriginMicros': 47377796685,
+  'timeExtentMicros': 0,
+  'stackFrames': {},
+  'traceEvents': [],
+};
+
 const goldenCpuProfileString = '''
   all - children: 2 - excl: 0 - incl: 8
     thread_start - children: 1 - excl: 0 - incl: 2

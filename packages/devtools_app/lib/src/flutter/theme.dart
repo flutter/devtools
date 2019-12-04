@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../ui/theme.dart';
+
 /// Constructs the light or dark theme for the app.
 ThemeData themeFor({@required bool isDarkTheme}) {
   final theme = isDarkTheme ? _darkTheme() : _lightTheme();
@@ -61,3 +63,5 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   600: Color(0xFF0175C2),
   400: Color(0xFF13B9FD),
 });
+
+final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
