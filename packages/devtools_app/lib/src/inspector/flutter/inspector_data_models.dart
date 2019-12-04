@@ -103,7 +103,12 @@ class LayoutProperties {
             : node?.childrenNow
                 ?.map((child) =>
                     LayoutProperties(child, copyLevel: copyLevel - 1))
-                ?.toList(growable: false);
+                ?.toList(growable: false) {
+    if (children?.isNotEmpty ?? false)
+      for (var child in children) {
+        child.parent = this;
+      }
+  }
 
   LayoutProperties.values({
     @required this.node,
@@ -113,10 +118,17 @@ class LayoutProperties {
     @required this.flexFactor,
     @required this.isFlex,
     @required this.size,
-  });
+  }) {
+    for (var child in children) {
+      child.parent = this;
+    }
+  }
 
   factory LayoutProperties.lerp(
-      LayoutProperties begin, LayoutProperties end, double t) {
+    LayoutProperties begin,
+    LayoutProperties end,
+    double t,
+  ) {
     return LayoutProperties.values(
       node: end.node,
       children: end.children,
@@ -128,6 +140,7 @@ class LayoutProperties {
     );
   }
 
+  LayoutProperties parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints constraints;
@@ -171,6 +184,14 @@ class LayoutProperties {
   String describeWidth() => 'w=${toStringAsFixed(size.width)}';
 
   String describeHeight() => 'h=${toStringAsFixed(size.height)}';
+
+  bool get overflowWidth {
+    return width > parent.width;
+  }
+
+  bool get overflowHeight {
+    return height > parent.height;
+  }
 
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
@@ -344,7 +365,7 @@ class FlexLayoutProperties extends LayoutProperties {
     return direction == Axis.vertical ? 'Main Axis' : 'Cross Axis';
   }
 
-  String get type => direction == Axis.horizontal ? 'Row' : 'Column';
+  String get type => direction.flexType;
 
   num get totalFlex {
     if (children?.isEmpty ?? true) return 0;
@@ -362,6 +383,18 @@ class FlexLayoutProperties extends LayoutProperties {
   double get mainAxisDimension => dimension(direction);
 
   double get crossAxisDimension => dimension(crossAxisDirection);
+
+  @override
+  bool get overflowWidth {
+    if (direction == Axis.horizontal) return width < sum(childrenWidths);
+    return width < max(childrenWidths);
+  }
+
+  @override
+  bool get overflowHeight {
+    if (direction == Axis.vertical) return height < sum(childrenHeights);
+    return height < max(childrenHeights);
+  }
 
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method
@@ -448,9 +481,12 @@ class FlexLayoutProperties extends LayoutProperties {
         );
       } else {
         // uniform cross axis sizes.
-        final size = crossAxisAlignment == CrossAxisAlignment.stretch
+        double size = crossAxisAlignment == CrossAxisAlignment.stretch
             ? maxSizeAvailable(axis)
-            : largestSize / dimension(axis) * maxSizeAvailable(axis);
+            : largestSize /
+                math.max(dimension(axis), 1.0) *
+                maxSizeAvailable(axis);
+        size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
     }

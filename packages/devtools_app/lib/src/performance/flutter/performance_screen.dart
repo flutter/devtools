@@ -7,18 +7,30 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
-import '../../flutter/table.dart';
 import '../../performance/performance_controller.dart';
-import '../../profiler/cpu_profile_columns.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../table_data.dart';
+import '../../profiler/cpu_profiler_controller.dart';
+import '../../profiler/flutter/cpu_profiler.dart';
+import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
   const PerformanceScreen() : super('Performance');
 
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const recordButtonKey = Key('Record Button');
+  @visibleForTesting
+  static const stopRecordingButtonKey = Key('Stop Recording Button');
+  @visibleForTesting
+  static const recordingInstructionsKey = Key('Recording Instructions');
+  @visibleForTesting
+  static const recordingStatusKey = Key('Recording Status');
+
   @override
-  Widget build(BuildContext context) => const PerformanceBody();
+  Widget build(BuildContext context) => PerformanceScreenBody();
 
   @override
   Widget buildTab(BuildContext context) {
@@ -29,82 +41,105 @@ class PerformanceScreen extends Screen {
   }
 }
 
-class PerformanceBody extends StatefulWidget {
-  const PerformanceBody();
-
-  @override
-  PerformanceBodyState createState() => PerformanceBodyState();
-}
-
-class PerformanceBodyState extends State<PerformanceBody> {
-  final PerformanceController _controller = PerformanceController();
-
-  CpuProfileData _data;
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO(djshuckerow): add in buttons to control the CPU recording.
-    _controller.startRecording();
-    Future.delayed(const Duration(seconds: 3)).then((_) async {
-      if (!mounted) return;
-      await _controller.stopRecording();
-      _controller.cpuProfileTransformer.processData(_controller.cpuProfileData);
-      setState(() {
-        // Note: it's not really clear what the source of truth for data is.
-        // We're copying a value out of the controller and storing it in
-        // this state. There's no real reason to not just use it directly
-        // from the controller. We also want a way of making sure that
-        // the controller doesn't change this value without an update to this
-        // State instance.
-        _data = _controller.cpuProfileData;
-        // TODO(djshuckerow): remove when this screen includes buttons to
-        // expand/collapse all by default.
-        _data.cpuProfileRoot.expandCascading();
-      });
-    });
-  }
+class PerformanceScreenBody extends StatelessWidget {
+  final PerformanceController controller = PerformanceController();
 
   @override
   Widget build(BuildContext context) {
-    return _data == null
-        ? const Center(child: CircularProgressIndicator())
-        : CpuCallTreeTable(data: _data);
-  }
-
-  void handleProfile(CpuProfileData value) {
-    setState(() {
-      _data = value;
-    });
-  }
-}
-
-/// A table of the CPU's call tree.
-class CpuCallTreeTable extends StatelessWidget {
-  factory CpuCallTreeTable({Key key, CpuProfileData data}) {
-    final treeColumn = MethodNameColumn();
-    final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
-      TotalTimeColumn(),
-      SelfTimeColumn(),
-      treeColumn,
-      SourceColumn(),
-    ]);
-    return CpuCallTreeTable._(key, data, treeColumn, columns);
-  }
-  const CpuCallTreeTable._(Key key, this.data, this.treeColumn, this.columns)
-      : super(key: key);
-
-  final TreeColumnData<CpuStackFrame> treeColumn;
-  final List<ColumnData<CpuStackFrame>> columns;
-
-  final CpuProfileData data;
-  @override
-  Widget build(BuildContext context) {
-    return TreeTable<CpuStackFrame>(
-      data: data.cpuProfileRoot,
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (frame) => PageStorageKey<String>(frame.id),
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildStateControls(),
+            ProfileGranularityDropdown(),
+          ],
+        ),
+        Expanded(
+          child: ValueListenableBuilder(
+            valueListenable: controller.cpuProfilerController.dataNotifier,
+            builder: (context, cpuProfileData, _) {
+              if (cpuProfileData ==
+                  CpuProfilerController.baseStateCpuProfileData) {
+                return _buildRecordingInfo();
+              }
+              return _buildCpuProfiler(cpuProfileData);
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  Widget _buildStateControls() {
+    const double minIncludeTextWidth = 600;
+    return ValueListenableBuilder(
+      valueListenable: controller.recordingNotifier,
+      builder: (context, recording, _) {
+        return Row(
+          children: [
+            recordButton(
+              key: PerformanceScreen.recordButtonKey,
+              recording: recording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _startRecording,
+            ),
+            stopRecordingButton(
+              key: PerformanceScreen.stopRecordingButtonKey,
+              recording: recording,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: _stopRecording,
+            ),
+            const SizedBox(width: 8.0),
+            clearButton(
+              key: PerformanceScreen.clearButtonKey,
+              minIncludeTextWidth: minIncludeTextWidth,
+              onPressed: recording ? null : _clear,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRecordingInfo() {
+    return ValueListenableBuilder(
+      valueListenable: controller.recordingNotifier,
+      builder: (context, recording, _) {
+        return recordingInfo(
+          instructionsKey: PerformanceScreen.recordingInstructionsKey,
+          statusKey: PerformanceScreen.recordingStatusKey,
+          recording: recording,
+          recordedObject: 'CPU samples',
+        );
+      },
+    );
+  }
+
+  Widget _buildCpuProfiler(CpuProfileData data) {
+    return ValueListenableBuilder(
+      valueListenable:
+          controller.cpuProfilerController.selectedCpuStackFrameNotifier,
+      builder: (context, selectedStackFrame, _) {
+        return CpuProfiler(
+          data: data,
+          selectedStackFrame: selectedStackFrame,
+          onStackFrameSelected: (sf) =>
+              controller.cpuProfilerController.selectCpuStackFrame(sf),
+        );
+      },
+    );
+  }
+
+  Future<void> _startRecording() async {
+    await controller.startRecording();
+  }
+
+  Future<void> _stopRecording() async {
+    await controller.stopRecording();
+  }
+
+  Future<void> _clear() async {
+    await controller.clear();
   }
 }

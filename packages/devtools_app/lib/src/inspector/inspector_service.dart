@@ -390,6 +390,10 @@ class InspectorService extends DisposableController
     }
     return json['result'];
   }
+
+  void removeClient(InspectorServiceClient client) {
+    clients.remove(client);
+  }
 }
 
 /// Class managing a group of inspector objects that can be freed by

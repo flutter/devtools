@@ -230,17 +230,16 @@ class _RegisteredServiceExtensionButtonState
   @override
   void initState() {
     super.initState();
+
     // Only show the button if the device supports the given service.
-    autoDispose(
-      serviceManager.hasRegisteredService(
-        widget.serviceDescription.service,
-        (registered) {
-          setState(() {
-            _hidden = !registered;
-          });
-        },
-      ),
-    );
+    final serviceRegisteredListenable = serviceManager
+        .registeredServiceListenable(widget.serviceDescription.service);
+    addAutoDisposeListener(serviceRegisteredListenable, () {
+      final registered = serviceRegisteredListenable.value;
+      setState(() {
+        _hidden = !registered;
+      });
+    });
   }
 
   @override
