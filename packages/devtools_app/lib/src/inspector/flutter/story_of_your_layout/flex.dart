@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -16,6 +18,7 @@ import '../../inspector_service.dart';
 import '../inspector_data_models.dart';
 import '../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
+import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
@@ -47,7 +50,7 @@ const widthAndConstraintIndicatorSize = 56.0;
 const mainAxisArrowIndicatorSize = 48.0;
 const crossAxisArrowIndicatorSize = 48.0;
 
-const heightOnlyIndicatorSize = 32.0;
+const heightOnlyIndicatorSize = 72.0;
 const widthOnlyIndicatorSize = 32.0;
 
 /// Minimum size to display width/height inside the arrow
@@ -99,7 +102,7 @@ extension LayoutThemeDataExtension on ThemeData {
   Color get inActiveBackgroundColor => cardColor;
 }
 
-const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
+const freeSpaceAssetName = 'assets/img/story_of_layout/free_space.png';
 
 const entranceAnimationDuration = Duration(milliseconds: 500);
 
@@ -118,7 +121,8 @@ final overflowingDimensionIndicatorTextStyle =
 
 const maxRequestsPerSecond = 3.0;
 
-Widget _dimensionDescription(TextSpan description, bool overflow) {
+/// Text widget for displaying width / height.
+Widget dimensionDescription(TextSpan description, bool overflow) {
   final text = Text.rich(
     description,
     textAlign: TextAlign.center,
@@ -151,7 +155,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
 
   final heightDescription = RotatedBox(
     quarterTurns: 1,
-    child: _dimensionDescription(
+    child: dimensionDescription(
       TextSpan(
         children: [
           TextSpan(
@@ -206,7 +210,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
     }),
   );
 
-  final widthDescription = _dimensionDescription(
+  final widthDescription = dimensionDescription(
     TextSpan(
       children: [
         TextSpan(text: '${properties.describeWidth()}; '),
@@ -598,7 +602,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
         final freeSpacesWidgets = [
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
-            EmptySpaceVisualizerWidget(renderProperties),
+            FreeSpaceVisualizerWidget(renderProperties),
         ];
         return SingleChildScrollView(
           scrollDirection: properties.direction,
@@ -627,8 +631,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                     alignment: Alignment.topLeft,
                   ),
                 ),
+                ...freeSpacesWidgets,
                 ...childrenRenderWidgets,
-                ...freeSpacesWidgets
               ],
             ),
           ),
@@ -1193,104 +1197,6 @@ class WidgetVisualizer extends StatelessWidget {
           color: borderColor,
         ),
         color: backgroundColor,
-      ),
-    );
-  }
-}
-
-class EmptySpaceVisualizerWidget extends StatelessWidget {
-  const EmptySpaceVisualizerWidget(
-    this.renderProperties, {
-    Key key,
-  }) : super(key: key);
-
-  final RenderProperties renderProperties;
-
-  static const heightArrowColor = mainUiColor;
-  static const widthArrowColor = Color(0xFF000099);
-
-  @override
-  Widget build(BuildContext context) {
-    final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
-    final bottom = Container(
-      margin: const EdgeInsets.only(
-        left: margin,
-        right: heightOnlyIndicatorSize,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Flexible(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: arrowMargin),
-              child: ArrowWrapper.bidirectional(
-                arrowColor: heightArrowColor,
-                direction: Axis.horizontal,
-                arrowHeadSize: arrowHeadSize,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: _dimensionDescription(
-                TextSpan(
-                  text: widthDescription,
-                ),
-                false,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    final right = Container(
-      margin: const EdgeInsets.only(
-        top: margin,
-        right: margin,
-        bottom: widthOnlyIndicatorSize,
-      ),
-      child: Row(
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
-            child: ArrowWrapper.bidirectional(
-              arrowColor: widthArrowColor,
-              direction: Axis.vertical,
-              arrowHeadSize: arrowHeadSize,
-              childMarginFromArrow: 0.0,
-            ),
-          ),
-          Expanded(
-            child: RotatedBox(
-              quarterTurns: 1,
-              child: _dimensionDescription(
-                TextSpan(
-                  text: heightDescription,
-                ),
-                false,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    return Positioned(
-      top: renderProperties.offset.dy,
-      left: renderProperties.offset.dx,
-      child: Container(
-        width: renderProperties.width,
-        height: renderProperties.height,
-        child: Tooltip(
-          message: '$widthDescription\n$heightDescription',
-          child: BorderLayout(
-            right: right,
-            rightWidth: heightOnlyIndicatorSize,
-            bottom: bottom,
-            bottomHeight: widthOnlyIndicatorSize,
-          ),
-        ),
       ),
     );
   }
