@@ -120,18 +120,18 @@ extension InspectorFlutterService on ObjectGroup {
                   };
                   if (constraints is BoxConstraints) {
                     constraintsProperty.addAll(<String, Object>{
-                      'minWidth': constraints.minWidth.toStringAsFixed(1),
-                      'minHeight': constraints.minHeight.toStringAsFixed(1),
-                      'maxWidth': constraints.maxWidth.toStringAsFixed(1),
-                      'maxHeight': constraints.maxHeight.toStringAsFixed(1),
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
                     });
                   }
                   additionalJson['constraints'] = constraintsProperty;
                 }
                 if (renderObject is RenderBox) {
                   additionalJson['size'] = <String, Object>{
-                    'width': renderObject.size.width.toStringAsFixed(1),
-                    'height': renderObject.size.height.toStringAsFixed(1),
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
                   };             
                   
                   final ParentData parentData = renderObject.parentData;

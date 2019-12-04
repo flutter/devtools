@@ -272,10 +272,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   }
 
   @override
-  bool get overflowWidth => end.overflowWidth;
+  bool get isOverflowWidth => end.isOverflowWidth;
 
   @override
-  bool get overflowHeight => end.overflowHeight;
+  bool get isOverflowHeight => end.isOverflowHeight;
 
   @override
   FlexFit get flexFit => end.flexFit;
@@ -447,8 +447,8 @@ class AnimatedFlexLayoutProperties
 /// LayoutProperties extension to be reused on LayoutProperties and AnimatedLayoutProperties
 extension LayoutPropertiesExtension on LayoutProperties {
   OverflowSide get overflowSide {
-    if (overflowWidth) return OverflowSide.right;
-    if (overflowHeight) return OverflowSide.bottom;
+    if (isOverflowWidth) return OverflowSide.right;
+    if (isOverflowHeight) return OverflowSide.bottom;
     return null;
   }
 }

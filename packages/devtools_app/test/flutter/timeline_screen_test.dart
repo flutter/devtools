@@ -85,10 +85,10 @@ void main() {
 
       // Verify TimelineMode.frameBased content.
       expect(splitFinder, findsNothing);
-      expect(find.text('Pause'), findsOneWidget);
-      expect(find.text('Resume'), findsOneWidget);
-      expect(find.text('Record'), findsNothing);
-      expect(find.text('Stop'), findsNothing);
+      expect(find.byKey(TimelineScreen.pauseButtonKey), findsOneWidget);
+      expect(find.byKey(TimelineScreen.resumeButtonKey), findsOneWidget);
+      expect(find.byKey(TimelineScreen.recordButtonKey), findsNothing);
+      expect(find.byKey(TimelineScreen.stopRecordingButtonKey), findsNothing);
       expect(find.byType(FlutterFramesChart), findsOneWidget);
       expect(find.byKey(TimelineScreen.flameChartSectionKey), findsNothing);
       expect(find.byType(EventDetails), findsNothing);
@@ -111,10 +111,10 @@ void main() {
         state.controller.timelineModeNotifier.value,
         equals(TimelineMode.full),
       );
-      expect(find.text('Pause'), findsNothing);
-      expect(find.text('Resume'), findsNothing);
-      expect(find.text('Record'), findsOneWidget);
-      expect(find.text('Stop'), findsOneWidget);
+      expect(find.byKey(TimelineScreen.pauseButtonKey), findsNothing);
+      expect(find.byKey(TimelineScreen.resumeButtonKey), findsNothing);
+      expect(find.byKey(TimelineScreen.recordButtonKey), findsOneWidget);
+      expect(find.byKey(TimelineScreen.stopRecordingButtonKey), findsOneWidget);
       expect(find.byType(FlutterFramesChart), findsNothing);
       expect(find.byKey(TimelineScreen.flameChartSectionKey), findsOneWidget);
       expect(find.byType(TimelineFlameChart), findsNothing);

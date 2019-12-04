@@ -191,14 +191,6 @@ class Property<T> {
   Stream<T> get onValueChange => _changeController.stream;
 }
 
-/// A typedef to represent a function taking no arguments and with no return
-/// value.
-typedef VoidFunction = void Function();
-
-/// A typedef to represent a function taking no arguments and returning a void
-/// future.
-typedef VoidAsyncFunction = Future<void> Function();
-
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].
@@ -208,12 +200,12 @@ class DelayedTimer {
   final Duration minDelay;
   final Duration maxDelay;
 
-  VoidFunction _closure;
+  VoidCallback _closure;
 
   Timer _minTimer;
   Timer _maxTimer;
 
-  void invoke(VoidFunction closure) {
+  void invoke(VoidCallback closure) {
     _closure = closure;
 
     if (_minTimer == null) {
@@ -512,6 +504,18 @@ class ValueReporter<T> extends Reporter implements ValueListenable<T> {
 
 String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
+}
+
+/// A value notifier that calls each listener immediately when registered.
+class ImmediateValueNotifier<T> extends ValueNotifier<T> {
+  ImmediateValueNotifier(T value) : super(value);
+
+  /// Adds a listener and calls the listener upon registration.
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    listener();
+  }
 }
 
 extension NullSafeLast<T> on List<T> {

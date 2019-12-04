@@ -12,6 +12,8 @@ import '../diagnostics_node.dart';
 import '../enum_utils.dart';
 import 'story_of_your_layout/utils.dart';
 
+const overflowEpsilon = 0.1;
+
 /// Compute real widget sizes into rendered sizes to be displayed on the details tab.
 /// The sum of the resulting render sizes may or may not be greater than the [maxSizeAvailable]
 /// In the case where it is greater, we should render it with scrolling capability.
@@ -189,12 +191,12 @@ class LayoutProperties {
 
   String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
-  bool get overflowWidth {
-    return width > parent.width;
+  bool get isOverflowWidth {
+    return width > parent.width + overflowEpsilon;
   }
 
-  bool get overflowHeight {
-    return height > parent.height;
+  bool get isOverflowHeight {
+    return height > parent.height + overflowEpsilon;
   }
 
   static String describeAxis(double min, double max, String axis) {
@@ -402,15 +404,17 @@ class FlexLayoutProperties extends LayoutProperties {
   double get crossAxisDimension => dimension(crossAxisDirection);
 
   @override
-  bool get overflowWidth {
-    if (direction == Axis.horizontal) return width < sum(childrenWidths);
-    return width < max(childrenWidths);
+  bool get isOverflowWidth {
+    if (direction == Axis.horizontal)
+      return width + overflowEpsilon < sum(childrenWidths);
+    return width + overflowEpsilon < max(childrenWidths);
   }
 
   @override
-  bool get overflowHeight {
-    if (direction == Axis.vertical) return height < sum(childrenHeights);
-    return height < max(childrenHeights);
+  bool get isOverflowHeight {
+    if (direction == Axis.vertical)
+      return height + overflowEpsilon < sum(childrenHeights);
+    return height + overflowEpsilon < max(childrenHeights);
   }
 
   /// render properties for laying out rendered Flex & Flex children widgets
@@ -576,7 +580,9 @@ class FlexLayoutProperties extends LayoutProperties {
         RenderProperties(axis: direction)
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
-          ..crossAxisOffset = 0.0;
+          ..crossAxisOffset = 0.0
+          ..isFreeSpace = true
+          ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
         mainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(renderPropsWithFullCrossAxisDimension.clone()
@@ -616,7 +622,7 @@ class FlexLayoutProperties extends LayoutProperties {
               maxSizeAvailable(crossAxisDirection)) continue;
 
       final renderProperties = childrenRenderProperties[i];
-      final space = renderProperties.clone()..layoutProperties = null;
+      final space = renderProperties.clone()..isFreeSpace = true;
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
@@ -663,6 +669,7 @@ class RenderProperties {
     Offset offset,
     Size realSize,
     this.layoutProperties,
+    this.isFreeSpace = false,
   })  : width = size?.width,
         height = size?.height,
         realWidth = realSize?.width,
@@ -679,7 +686,7 @@ class RenderProperties {
   double width, height;
   double realWidth, realHeight;
 
-  bool get isFreeSpace => layoutProperties == null;
+  bool isFreeSpace;
 
   Size get size => Size(width, height);
 
@@ -750,6 +757,7 @@ class RenderProperties {
       offset: offset,
       realSize: realSize,
       layoutProperties: layoutProperties,
+      isFreeSpace: isFreeSpace,
     );
   }
 }

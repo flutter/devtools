@@ -8,7 +8,6 @@ import '../globals.dart';
 import '../service_extensions.dart';
 import '../service_manager.dart' show ServiceExtensionState;
 import '../service_registrations.dart';
-import '../utils.dart';
 import 'analytics.dart' as ga;
 import 'html_elements.dart';
 import 'primer.dart';
@@ -170,19 +169,19 @@ class RegisteredServiceExtensionButton {
       ..hidden(true);
 
     // Only show the button if the device supports the given service.
-    serviceManager.hasRegisteredService(
-      serviceDescription.service,
-      (registered) {
-        button.hidden(!registered);
-      },
-    );
+    final serviceRegisteredListenable =
+        serviceManager.registeredServiceListenable(serviceDescription.service);
+    serviceRegisteredListenable.addListener(() {
+      final registered = serviceRegisteredListenable.value;
+      button.hidden(!registered);
+    });
 
     button.click(() => _click());
   }
 
   final RegisteredServiceDescription serviceDescription;
-  final VoidAsyncFunction action;
-  final void Function(dynamic arg) errorAction;
+  final Future<void> Function() action;
+  final void Function(dynamic) errorAction;
   PButton button;
 
   void _click() async {

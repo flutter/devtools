@@ -53,7 +53,7 @@ class EventDetails extends StatelessWidget {
   Widget _buildDetails(TimelineController controller) {
     return selectedEvent.isUiEvent
         ? ValueListenableBuilder(
-            valueListenable: controller.cpuProfileDataNotifier,
+            valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               return _buildCpuProfiler(cpuProfileData, controller);
             },
@@ -63,12 +63,14 @@ class EventDetails extends StatelessWidget {
 
   Widget _buildCpuProfiler(CpuProfileData data, TimelineController controller) {
     return ValueListenableBuilder(
-      valueListenable: controller.selectedCpuStackFrameNotifier,
+      valueListenable:
+          controller.cpuProfilerController.selectedCpuStackFrameNotifier,
       builder: (context, selectedStackFrame, _) {
         return CpuProfiler(
           data: data,
           selectedStackFrame: selectedStackFrame,
-          onStackFrameSelected: (sf) => controller.selectCpuStackFrame(sf),
+          onStackFrameSelected: (sf) =>
+              controller.cpuProfilerController.selectCpuStackFrame(sf),
         );
       },
     );

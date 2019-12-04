@@ -7,9 +7,8 @@ import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
 import '../globals.dart';
-import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
+import '../profiler/cpu_profiler_controller.dart';
 import '../service_manager.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import 'timeline_model.dart';
@@ -36,19 +35,12 @@ class TimelineController {
     timelines = [frameBasedTimeline, fullTimeline];
   }
 
+  final CpuProfilerController cpuProfilerController = CpuProfilerController();
+
   /// Notifies that a timeline event was selected.
   ValueListenable get selectedTimelineEventNotifier =>
       _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
-
-  /// Notifies that new cpu profile data is available.
-  ValueListenable get cpuProfileDataNotifier => _cpuProfileDataNotifier;
-  final _cpuProfileDataNotifier = ValueNotifier<CpuProfileData>(null);
-
-  /// Notifies that a cpu stack frame was selected.
-  ValueListenable get selectedCpuStackFrameNotifier =>
-      _selectedCpuStackFrameNotifier;
-  final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
   /// Stream controller that notifies that offline data was loaded into the
   /// timeline.
@@ -86,10 +78,6 @@ class TimelineController {
 
   TimelineService timelineService;
 
-  final _cpuProfileTransformer = CpuProfileTransformer();
-
-  final _cpuProfilerService = CpuProfilerService();
-
   ValueListenable get timelineModeNotifier => _timelineModeNotifier;
   final _timelineModeNotifier =
       ValueNotifier<TimelineMode>(TimelineMode.frameBased);
@@ -118,9 +106,7 @@ class TimelineController {
 
     timeline.data.selectedEvent = event;
 
-    // Reset the cpu profile notifiers.
-    _cpuProfileDataNotifier.value = null;
-    _selectedCpuStackFrameNotifier.value = null;
+    cpuProfilerController.resetNotifiers(useBaseStateData: false);
 
     // Fetch a profile if we are not in offline mode.
     if (!offlineMode || offlineTimelineData == null) {
@@ -134,20 +120,11 @@ class TimelineController {
     final selectedEvent = timeline.data.selectedEvent;
     if (!selectedEvent.isUiEvent) return;
 
-    final cpuProfileData = await _cpuProfilerService.getCpuProfile(
+    await cpuProfilerController.pullAndProcessProfile(
       startMicros: selectedEvent.time.start.inMicroseconds,
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
-
-    timeline.data.cpuProfileData = cpuProfileData;
-    _cpuProfileTransformer.processData(cpuProfileData);
-    _cpuProfileDataNotifier.value = cpuProfileData;
-  }
-
-  void selectCpuStackFrame(CpuStackFrame stackFrame) {
-    if (stackFrame == timeline.data.cpuProfileData.selectedStackFrame) return;
-    timeline.data.cpuProfileData.selectedStackFrame = stackFrame;
-    _selectedCpuStackFrameNotifier.value = stackFrame;
+    timeline.data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
   void loadOfflineData(OfflineData offlineData) {
@@ -176,7 +153,7 @@ class TimelineController {
       ..processTraceEvents(traceEvents);
 
     if (timeline.data.cpuProfileData != null) {
-      _cpuProfileTransformer.processData(offlineData.cpuProfileData);
+      cpuProfilerController.transformer.processData(offlineData.cpuProfileData);
     }
 
     setOfflineData();
@@ -262,8 +239,7 @@ class TimelineController {
     for (var timeline in timelines) timeline.clear();
     allTraceEvents.clear();
     _selectedTimelineEventNotifier.value = null;
-    _cpuProfileDataNotifier.value = null;
-    _selectedCpuStackFrameNotifier.value = null;
+    cpuProfilerController.resetNotifiers();
     _clearController.add(true);
   }
 
@@ -332,7 +308,7 @@ class FrameBasedTimeline
     data.selectedEvent = null;
     _timelineController._selectedTimelineEventNotifier.value = null;
     data.cpuProfileData = null;
-    _timelineController._cpuProfileDataNotifier.value = null;
+    _timelineController.cpuProfilerController.resetNotifiers();
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
