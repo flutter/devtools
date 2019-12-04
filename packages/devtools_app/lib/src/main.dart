@@ -33,6 +33,8 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
+bool enableFlutterWebTesting = false;
+
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
@@ -79,6 +81,13 @@ class HtmlPerfToolFramework extends HtmlFramework {
       html.window
           .open('https://github.com/flutter/devtools/issues', '_feedback');
     });
+
+    if (enableFlutterWebTesting) {
+      // Listen for clicks on the 'Try DevTools on Flutter Web' button.
+      queryId('try-flutter-web-devtools').onClick.listen((_) {
+        // TODO(kenz): launch flutter web app.
+      });
+    }
 
     await serviceManager.serviceAvailable.future;
     await addScreens();
