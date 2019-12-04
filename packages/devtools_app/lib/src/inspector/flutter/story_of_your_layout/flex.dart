@@ -284,24 +284,25 @@ class StoryOfYourFlexWidget extends StatefulWidget {
 class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     with TickerProviderStateMixin
     implements InspectorServiceClient {
+  _StoryOfYourFlexWidgetState() {
+    _onSelectionChangedCallback = onSelectionChanged;
+  }
+
   AnimationController entranceController;
   CurvedAnimation expandedEntrance;
   CurvedAnimation allEntrance;
   AnimationController changeController;
-  CurvedAnimation changeAnimation;
 
+  CurvedAnimation changeAnimation;
   AnimatedFlexLayoutProperties _animatedProperties;
   FlexLayoutProperties _previousProperties;
+
   FlexLayoutProperties _properties;
 
   FlexLayoutProperties get properties =>
       _previousProperties ?? _animatedProperties ?? _properties;
 
   InspectorObjectGroupManager objectGroupManager;
-
-  _StoryOfYourFlexWidgetState() {
-    _onSelectionChangedCallback = onSelectionChanged;
-  }
 
   LayoutProperties highlighted;
 
@@ -352,6 +353,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     final newRootId = id(getRoot(selectedNode));
     final shouldFetch = prevRootId != newRootId;
     if (shouldFetch) {
+      _dirty = false;
       final newSelection = await fetchFlexLayoutProperties();
       _setProperties(newSelection);
     } else {
@@ -534,6 +536,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   Future<void> refresh() async {
+    if (!_dirty) return;
+    _dirty = false;
     final updatedProperties = await fetchFlexLayoutProperties();
     _changeProperties(updatedProperties);
   }
@@ -739,7 +743,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             }
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
-            marksDirty();
+            markAsDirty();
             await service.invokeTweakFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
@@ -896,11 +900,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (!mounted) return;
     if (_dirty) {
       rateLimiter.scheduleRequest();
-      _dirty = false;
     }
   }
 
-  // TODO(albertusangga): investigate why onForceRefresh is not getting called
+  // TODO(albertusangga): Investigate why onForceRefresh is not getting called.
   @override
   Future<Object> onForceRefresh() async {
     _setProperties(await fetchFlexLayoutProperties());
@@ -914,7 +917,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   /// Register callback to be executed once Flutter frame is ready.
-  void marksDirty() {
+  void markAsDirty() {
     _dirty = true;
   }
 }
@@ -945,7 +948,7 @@ class FlexChildVisualizer extends StatelessWidget {
   void onChangeFlexFactor(int newFlexFactor) async {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
-    state.marksDirty();
+    state.markAsDirty();
     await inspectorService.invokeTweakFlexFactor(
       node.valueRef,
       newFlexFactor,
