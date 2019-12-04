@@ -69,9 +69,6 @@ extension InspectorFlutterService on ObjectGroup {
       if (root == null) {
         return null;
       }
-      String toStringAsFixed(double num) {
-        return num.toStringAsFixed(3);
-      }
       final result =  WidgetInspectorService.instance._nodeToJson(
         root,
         InspectorSerializationDelegate(
@@ -99,18 +96,18 @@ extension InspectorFlutterService on ObjectGroup {
                   };
                   if (constraints is BoxConstraints) {
                     constraintsProperty.addAll(<String, Object>{
-                      'minWidth': toStringAsFixed(constraints.minWidth),
-                      'minHeight': toStringAsFixed(constraints.minHeight),
-                      'maxWidth': toStringAsFixed(constraints.maxWidth),
-                      'maxHeight': toStringAsFixed(constraints.maxHeight),
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
                     });
                   }
                   additionalJson['constraints'] = constraintsProperty;
                 }
                 if (renderObject is RenderBox) {
                   additionalJson['size'] = <String, Object>{
-                    'width': toStringAsFixed(renderObject.size.width),
-                    'height': toStringAsFixed(renderObject.size.height),
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
                   };             
                   
                   final ParentData parentData = renderObject.parentData;
