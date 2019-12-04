@@ -16,6 +16,7 @@ import '../../inspector_service.dart';
 import '../inspector_data_models.dart';
 import '../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
+import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
 const widthIndicatorColor = mainUiColor;
@@ -29,6 +30,8 @@ const arrowStrokeWidth = 1.5;
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 250.0;
 const minRenderHeight = 300.0;
+
+const minPadding = 2.0;
 
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
@@ -54,16 +57,12 @@ const minHeightToDisplayHeightInsideArrow = 200.0;
 const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
 
-/// height for limiting asset image (selected one in the drop down).
+/// Height for limiting asset image (selected one in the drop down).
 const axisAlignmentAssetImageHeight = 24.0;
 
-/// width for limiting asset image (when drop down menu is open for the vertical).
+/// Width for limiting asset image (when drop down menu is open for the vertical).
 const axisAlignmentAssetImageWidth = 96.0;
 const dropdownMaxSize = 220.0;
-
-Color activeBackgroundColor(ThemeData theme) => theme.backgroundColor;
-
-Color inActiveBackgroundColor(ThemeData theme) => theme.cardColor;
 
 // Story of Layout colors
 const mainAxisLightColor = Color(0xFFF597A8);
@@ -94,29 +93,41 @@ const overflowTextColorLight = Color(0xFFFFFFFF);
 const overflowTextColor =
     ThemedColor(overflowTextColorLight, overflowTextColorDark);
 
+extension LayoutThemeDataExtension on ThemeData {
+  Color get activeBackgroundColor => backgroundColor;
+
+  Color get inActiveBackgroundColor => cardColor;
+}
+
 const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
 const entranceAnimationDuration = Duration(milliseconds: 500);
 
-const defaultDimensionIndicatorTextStyle = TextStyle(
+const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
+  letterSpacing: 1.1,
+);
+
+final overflowingDimensionIndicatorTextStyle =
+    dimensionIndicatorTextStyle.merge(
+  TextStyle(
+    fontWeight: FontWeight.bold,
+    color: overflowTextColor,
+  ),
 );
 
 Widget _dimensionDescription(TextSpan description, bool overflow) {
   final text = Text.rich(
     description,
     textAlign: TextAlign.center,
-    style: TextStyle(
-      height: 1.0,
-      color: overflow ? overflowTextColor : null,
-      fontWeight: overflow ? FontWeight.bold : FontWeight.normal,
-      letterSpacing: 1.1,
-    ),
+    style: overflow
+        ? overflowingDimensionIndicatorTextStyle
+        : dimensionIndicatorTextStyle,
     overflow: TextOverflow.ellipsis,
   );
   if (overflow)
     return Container(
-      padding: const EdgeInsets.all(2.0),
+      padding: const EdgeInsets.all(minPadding),
       decoration: BoxDecoration(
         color: overflowBackgroundColor,
         borderRadius: BorderRadius.circular(4.0),
@@ -163,13 +174,13 @@ Widget _visualizeWidthAndHeightWithConstraints({
       top: margin,
       left: margin,
       bottom: bottomHeight,
-      right: 2.0, // custom margin for not sticking to the corner
+      right: minPadding, // custom margin for not sticking to the corner
     ),
     child: LayoutBuilder(builder: (context, constraints) {
       final displayHeightOutsideArrow =
           constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
       return Row(
-        children: <Widget>[
+        children: [
           Flexible(
             flex: displayHeightOutsideArrow ? 0 : 1,
             child: Container(
@@ -219,7 +230,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       final displayWidthOutsideArrow =
           maxWidth < minWidthToDisplayWidthInsideArrow;
       return Column(
-        children: <Widget>[
+        children: [
           Flexible(
             flex: displayWidthOutsideArrow ? 0 : 1,
             child: Container(
@@ -274,14 +285,17 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   AnimationController changeController;
   CurvedAnimation changeAnimation;
 
-  FlexLayoutProperties get properties =>
-      _previousProperties ?? _animatedProperties ?? _properties;
-
   AnimatedFlexLayoutProperties _animatedProperties;
   FlexLayoutProperties _previousProperties;
   FlexLayoutProperties _properties;
 
-  /// custom getters
+  FlexLayoutProperties get properties =>
+      _previousProperties ?? _animatedProperties ?? _properties;
+
+  InspectorObjectGroupManager objectGroupManager;
+
+  LayoutProperties highlighted;
+
   RemoteDiagnosticsNode get selectedNode =>
       inspectorController?.selectedNode?.diagnostic;
 
@@ -312,17 +326,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (node.isFlex) return node;
     return node.parent;
   }
-
-  double crossAxisDimension(LayoutProperties properties) =>
-      direction == Axis.horizontal ? properties.height : properties.width;
-
-  double mainAxisDimension(LayoutProperties properties) =>
-      direction == Axis.vertical ? properties.height : properties.width;
-
-  /// state variables
-  InspectorObjectGroupManager objectGroupManager;
-
-  LayoutProperties highlighted;
 
   @override
   void initState() {
@@ -374,7 +377,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     });
   }
 
-  /// required for getting all information required for visualizing Flex layout
+  /// Required for getting all information required to visualize the Flex layout.
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
@@ -550,21 +553,21 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           maxSizeAvailable: maxSizeAvailable,
         );
 
-        final childrenRenderWidgets = <Widget>[
+        final childrenRenderWidgets = [
           for (var i = 0; i < children.length; i++)
             FlexChildVisualizer(
               state: this,
               notifyParent: updateChildFlex,
               backgroundColor: highlighted == children[i]
-                  ? activeBackgroundColor(theme)
-                  : inActiveBackgroundColor(theme),
+                  ? theme.activeBackgroundColor
+                  : theme.inActiveBackgroundColor,
               borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
               textColor: i.isOdd ? null : const Color(0xFF303030),
               renderProperties: renderProperties[i],
             )
         ];
 
-        final freeSpacesWidgets = <Widget>[
+        final freeSpacesWidgets = [
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
             EmptySpaceVisualizerWidget(renderProperties),
         ];
@@ -640,7 +643,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
+                  children: [
                     Expanded(
                       flex: 2,
                       child: Container(
@@ -673,7 +676,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
+                    children: [
                       Expanded(
                         child: Container(
                           child: Text(
@@ -772,9 +775,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           child: WidgetVisualizer(
             title: flexType,
             backgroundColor:
-                highlighted == properties ? activeBackgroundColor(theme) : null,
+                highlighted == properties ? theme.activeBackgroundColor : null,
             borderColor: mainAxisColor,
-            overflowSide: overflowSide(properties),
+            overflowSide: properties.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
               child: Text(
@@ -797,7 +800,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         height: maxHeight - mainAxisArrowIndicatorSize,
         width: crossAxisArrowIndicatorSize,
         child: Column(
-          children: <Widget>[
+          children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: verticalColor,
@@ -828,7 +831,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         height: mainAxisArrowIndicatorSize,
         width: maxWidth - crossAxisArrowIndicatorSize - margin,
         child: Row(
-          children: <Widget>[
+          children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: horizontalColor,
@@ -853,7 +856,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
       child: Stack(
-        children: <Widget>[
+        children: [
           flexDescription,
           verticalAxisDescription,
           horizontalAxisDescription,
@@ -940,7 +943,7 @@ class FlexChildVisualizer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
+        children: [
           _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
           if (!properties.hasFlexFactor)
             Text(
@@ -1011,7 +1014,7 @@ class FlexChildVisualizer extends StatelessWidget {
               title: properties.description,
               borderColor: borderColor,
               textColor: textColor,
-              overflowSide: overflowSide(properties),
+              overflowSide: properties.overflowSide,
               child: _visualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
                 widget: Align(
@@ -1069,7 +1072,7 @@ class WidgetVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Stack(
-        children: <Widget>[
+        children: [
           if (drawOverflow)
             Positioned.fill(
               child: CustomPaint(
@@ -1096,7 +1099,7 @@ class WidgetVisualizer extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Flexible(
                         child: Container(
                           constraints: const BoxConstraints(
@@ -1168,7 +1171,7 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
+        children: [
           Container(
             margin: const EdgeInsets.symmetric(vertical: arrowMargin),
             child: ArrowWrapper.bidirectional(
@@ -1197,7 +1200,7 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
         bottom: widthOnlyIndicatorSize,
       ),
       child: Row(
-        children: <Widget>[
+        children: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
             child: ArrowWrapper.bidirectional(

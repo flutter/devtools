@@ -365,7 +365,7 @@ class FlexLayoutProperties extends LayoutProperties {
     return direction == Axis.vertical ? 'Main Axis' : 'Cross Axis';
   }
 
-  String get type => direction == Axis.horizontal ? 'Row' : 'Column';
+  String get type => direction.flexType;
 
   num get totalFlex {
     if (children?.isEmpty ?? true) return 0;
