@@ -142,13 +142,13 @@ class InspectorController extends DisposableController
   // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
   static bool enableExperimentalStoryOfLayout = false;
 
-  final List<Function> _selectionListeners = [];
+  final List<VoidCallback> _selectionListeners = [];
 
-  void addSelectionListener(Function listener) {
+  void addSelectionListener(VoidCallback listener) {
     _selectionListeners.add(listener);
   }
 
-  void removeSelectionListener(Function listener) {
+  void removeSelectionListener(VoidCallback listener) {
     _selectionListeners.remove(listener);
   }
 
