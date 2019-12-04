@@ -32,9 +32,11 @@ extension InspectorFlutterService on ObjectGroup {
         '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
         '  if (object == null) return null;'
         '  final render = object.renderObject;'
-        '  render.mainAxisAlignment = $mainAxisAlignment;'
-        '  render.crossAxisAlignment = $crossAxisAlignment;'
-        '  render.markNeedsLayout();'
+        '  if (render is RenderFlex) {'
+        '    render.mainAxisAlignment = $mainAxisAlignment;'
+        '    render.crossAxisAlignment = $crossAxisAlignment;'
+        '    render.markNeedsLayout();'
+        '  }'
         '})()';
     return await _evalUntilJsonIsNotEmpty(command);
   }
@@ -50,9 +52,31 @@ extension InspectorFlutterService on ObjectGroup {
         '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
         '  if (object == null) return null;'
         '  final render = object.renderObject;'
-        '  final FlexParentData parentData = render.parentData;'
-        '  parentData.flex = $flexFactor;'
-        '  render.markNeedsLayout();'
+        '  final parentData = render.parentData;'
+        '  if (parentData is FlexParentData) {'
+        '    parentData.flex = $flexFactor;'
+        '    render.markNeedsLayout();'
+        '  }'
+        '})()';
+    return await _evalUntilJsonIsNotEmpty(command);
+  }
+
+  Future<InstanceRef> invokeTweakFlexFit(
+    InspectorInstanceRef ref,
+    FlexFit flexFit,
+  ) async {
+    if (ref == null) return null;
+    final command = '((){'
+        '  if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)'
+        '    return "{}";'
+        '  dynamic object = WidgetInspectorService.instance.toObject("${ref?.id}");'
+        '  if (object == null) return null;'
+        '  final render = object.renderObject;'
+        '  final parentData = render.parentData;'
+        '  if (parentData is FlexParentData) {'
+        '    parentData.fit = $flexFit;'
+        '    render.markNeedsLayout();'
+        '  }'
         '})()';
     return await _evalUntilJsonIsNotEmpty(command);
   }
@@ -113,6 +137,7 @@ extension InspectorFlutterService on ObjectGroup {
                   final ParentData parentData = renderObject.parentData;
                   if (parentData is FlexParentData) {
                     additionalJson['flexFactor'] = parentData.flex;
+                    additionalJson['flexFit'] = describeEnum(parentData.fit ?? FlexFit.loose);
                   }
                 }
               }
