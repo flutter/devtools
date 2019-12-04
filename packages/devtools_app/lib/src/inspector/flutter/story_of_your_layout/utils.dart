@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';
 import '../inspector_data_models.dart';
+import 'overflow_indicator_painter.dart';
 
 double sum(Iterable<double> numbers) =>
     numbers.fold(0, (sum, cur) => sum + cur);
@@ -23,12 +24,14 @@ double min(Iterable<double> numbers) =>
 double max(Iterable<double> numbers) =>
     numbers.fold(-double.infinity, (minimum, cur) => math.max(minimum, cur));
 
-String crossAxisAssetImageUrl(CrossAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/cross_axis_alignment/${describeEnum(alignment)}.png';
+String crossAxisAssetImageUrl(Axis direction, CrossAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/cross_axis_alignment/'
+      '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
 }
 
-String mainAxisAssetImageUrl(MainAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/main_axis_alignment/${describeEnum(alignment)}.png';
+String mainAxisAssetImageUrl(Axis direction, MainAxisAlignment alignment) {
+  return 'assets/img/story_of_layout/main_axis_alignment/'
+      '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
 }
 
 /// A widget for positioning sized widgets that follows layout as follows:
@@ -139,6 +142,14 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   final List<LayoutProperties> _children;
 
   @override
+  LayoutProperties get parent => end.parent;
+
+  @override
+  set parent(LayoutProperties _parent) {
+    end.parent = _parent;
+  }
+
+  @override
   List<LayoutProperties> get children {
     return _children;
   }
@@ -239,13 +250,14 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   bool get hasFlexFactor => begin.hasFlexFactor && end.hasFlexFactor;
 
   @override
-  LayoutProperties copyWith(
-      {List<LayoutProperties> children,
-      BoxConstraints constraints,
-      String description,
-      int flexFactor,
-      bool isFlex,
-      Size size}) {
+  LayoutProperties copyWith({
+    List<LayoutProperties> children,
+    BoxConstraints constraints,
+    String description,
+    int flexFactor,
+    bool isFlex,
+    Size size,
+  }) {
     return LayoutProperties.values(
       node: node,
       children: children ?? this.children,
@@ -256,6 +268,12 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
       size: size ?? this.size,
     );
   }
+
+  @override
+  bool get overflowWidth => end.overflowWidth;
+
+  @override
+  bool get overflowHeight => end.overflowHeight;
 }
 
 class AnimatedFlexLayoutProperties
@@ -417,5 +435,26 @@ class AnimatedFlexLayoutProperties
       verticalDirection: verticalDirection ?? this.verticalDirection,
       textBaseline: textBaseline ?? this.textBaseline,
     );
+  }
+}
+
+/// LayoutProperties extension to be reused on LayoutProperties and AnimatedLayoutProperties
+extension LayoutPropertiesExtension on LayoutProperties {
+  OverflowSide get overflowSide {
+    if (overflowWidth) return OverflowSide.right;
+    if (overflowHeight) return OverflowSide.bottom;
+    return null;
+  }
+}
+
+extension AxisExtension on Axis {
+  String get flexType {
+    switch (this) {
+      case Axis.horizontal:
+        return 'Row';
+      case Axis.vertical:
+      default:
+        return 'Column';
+    }
   }
 }

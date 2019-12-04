@@ -16,19 +16,22 @@ import '../../inspector_service.dart';
 import '../inspector_data_models.dart';
 import '../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
+import 'overflow_indicator_painter.dart';
 import 'utils.dart';
 
 const widthIndicatorColor = mainUiColor;
-const heightIndicatorColor = mainGpuColor;
+const heightIndicatorColor = Color(0xFF27AAE1);
 const margin = 8.0;
 
 const arrowHeadSize = 8.0;
-const distanceToArrow = 1.0;
+const arrowMargin = 4.0;
 const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 250.0;
 const minRenderHeight = 300.0;
+
+const minPadding = 2.0;
 
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
@@ -40,26 +43,26 @@ const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
 const heightAndConstraintIndicatorSize = 48.0;
-const widthAndConstraintIndicatorSize = 42.0;
+const widthAndConstraintIndicatorSize = 56.0;
 const mainAxisArrowIndicatorSize = 48.0;
 const crossAxisArrowIndicatorSize = 48.0;
 
-const heightOnlyIndicatorSize = 24.0;
-const widthOnlyIndicatorSize = 24.0;
+const heightOnlyIndicatorSize = 32.0;
+const widthOnlyIndicatorSize = 32.0;
+
+/// Minimum size to display width/height inside the arrow
+const minWidthToDisplayWidthInsideArrow = 200.0;
+const minHeightToDisplayHeightInsideArrow = 200.0;
 
 const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
 
-/// height for limiting asset image (selected one in the drop down).
+/// Height for limiting asset image (selected one in the drop down).
 const axisAlignmentAssetImageHeight = 24.0;
 
-/// width for limiting asset image (when drop down menu is open for the vertical).
+/// Width for limiting asset image (when drop down menu is open for the vertical).
 const axisAlignmentAssetImageWidth = 96.0;
-const dropdownMaxSize = 300.0;
-
-Color activeBackgroundColor(ThemeData theme) => theme.backgroundColor;
-
-Color inActiveBackgroundColor(ThemeData theme) => theme.cardColor;
+const dropdownMaxSize = 220.0;
 
 // Story of Layout colors
 const mainAxisLightColor = Color(0xFFF597A8);
@@ -70,78 +73,191 @@ const crossAxisLightColor = Color(0xFFB3D25A);
 const crossAxisDarkColor = Color(0xFFB3D25A);
 const crossAxisColor = ThemedColor(crossAxisLightColor, crossAxisDarkColor);
 
-const mainAxisLightTextColor = Color(0xFF913549);
-const mainAxisDarkTextColor = Color(0xFFEA637C);
+const mainAxisTextColorLight = Color(0xFF913549);
+const mainAxisTextColorDark = Color(0xFFEA637C);
 const mainAxisTextColor =
-    ThemedColor(mainAxisLightTextColor, mainAxisDarkTextColor);
+    ThemedColor(mainAxisTextColorLight, mainAxisTextColorDark);
 
-const crossAxisLightTextColor = Color(0xFF66672C);
-const crossAxisDarkTextColor = Color(0xFFB3D25A);
+const crossAxisTextColorLight = Color(0xFF66672C);
+const crossAxisTextColorsDark = Color(0xFFB3D25A);
 const crossAxisTextColor =
-    ThemedColor(crossAxisLightTextColor, crossAxisDarkTextColor);
+    ThemedColor(crossAxisTextColorLight, crossAxisTextColorsDark);
+
+const overflowBackgroundColorDark = Color(0xFFB00020);
+const overflowBackgroundColorLight = Color(0xFFB00020);
+const overflowBackgroundColor =
+    ThemedColor(overflowBackgroundColorLight, overflowBackgroundColorDark);
+
+const overflowTextColorDark = Color(0xFFFFFFFF);
+const overflowTextColorLight = Color(0xFFFFFFFF);
+const overflowTextColor =
+    ThemedColor(overflowTextColorLight, overflowTextColorDark);
+
+extension LayoutThemeDataExtension on ThemeData {
+  Color get activeBackgroundColor => backgroundColor;
+
+  Color get inActiveBackgroundColor => cardColor;
+}
 
 const freeSpaceAssetName = 'assets/img/story_of_layout/empty_space.png';
 
 const entranceAnimationDuration = Duration(milliseconds: 500);
+
+const dimensionIndicatorTextStyle = TextStyle(
+  height: 1.0,
+  letterSpacing: 1.1,
+);
+
+final overflowingDimensionIndicatorTextStyle =
+    dimensionIndicatorTextStyle.merge(
+  TextStyle(
+    fontWeight: FontWeight.bold,
+    color: overflowTextColor,
+  ),
+);
+
+Widget _dimensionDescription(TextSpan description, bool overflow) {
+  final text = Text.rich(
+    description,
+    textAlign: TextAlign.center,
+    style: overflow
+        ? overflowingDimensionIndicatorTextStyle
+        : dimensionIndicatorTextStyle,
+    overflow: TextOverflow.ellipsis,
+  );
+  if (overflow)
+    return Container(
+      padding: const EdgeInsets.all(minPadding),
+      decoration: BoxDecoration(
+        color: overflowBackgroundColor,
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Center(child: text),
+    );
+  return text;
+}
 
 Widget _visualizeWidthAndHeightWithConstraints({
   @required Widget widget,
   @required LayoutProperties properties,
   double arrowHeadSize = defaultArrowHeadSize,
 }) {
+  final showChildrenWidthsSum =
+      properties is FlexLayoutProperties && properties.overflowWidth;
+  const bottomHeight = widthAndConstraintIndicatorSize;
+  const rightWidth = heightAndConstraintIndicatorSize;
+
+  final heightDescription = RotatedBox(
+    quarterTurns: 1,
+    child: _dimensionDescription(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '${properties.describeHeight()}',
+          ),
+          if (properties is! FlexLayoutProperties || !properties.overflowHeight)
+            const TextSpan(text: '\n'),
+          TextSpan(
+            text: ' (${properties.describeHeightConstraints()})',
+          ),
+          if (properties is FlexLayoutProperties && properties.overflowHeight)
+            TextSpan(
+              text: '\nchildren takes: ${sum(properties.childrenHeights)}',
+            ),
+        ],
+      ),
+      properties.overflowHeight,
+    ),
+  );
   final right = Container(
     margin: const EdgeInsets.only(
       top: margin,
       left: margin,
-      bottom: widthAndConstraintIndicatorSize,
+      bottom: bottomHeight,
+      right: minPadding, // custom margin for not sticking to the corner
     ),
-    child: ArrowWrapper.bidirectional(
-      arrowColor: heightIndicatorColor,
-      arrowStrokeWidth: arrowStrokeWidth,
-      arrowHeadSize: arrowHeadSize,
-      direction: Axis.vertical,
-      distanceToArrow: distanceToArrow,
-      child: RotatedBox(
-        quarterTurns: 1,
-        child: Text(
-          '${properties.describeHeight()}\n'
-          '(${properties.describeHeightConstraints()})',
-          textAlign: TextAlign.center,
-          style: const TextStyle(height: 1.0),
+    child: LayoutBuilder(builder: (context, constraints) {
+      final displayHeightOutsideArrow =
+          constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
+      return Row(
+        children: [
+          Flexible(
+            flex: displayHeightOutsideArrow ? 0 : 1,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+              child: ArrowWrapper.bidirectional(
+                arrowColor: heightIndicatorColor,
+                arrowStrokeWidth: arrowStrokeWidth,
+                arrowHeadSize: arrowHeadSize,
+                direction: Axis.vertical,
+                child: displayHeightOutsideArrow ? null : heightDescription,
+              ),
+            ),
+          ),
+          if (displayHeightOutsideArrow)
+            Expanded(
+              child: heightDescription,
+            ),
+        ],
+      );
+    }),
+  );
+
+  final widthDescription = _dimensionDescription(
+    TextSpan(
+      children: [
+        TextSpan(text: '${properties.describeWidth()}; '),
+        if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
+        TextSpan(
+          text: '(${properties.describeWidthConstraints()})',
         ),
-      ),
+        if (showChildrenWidthsSum)
+          TextSpan(
+            text: '\nchildren takes ${sum(properties.childrenWidths)}',
+          )
+      ],
     ),
+    properties.overflowWidth,
   );
   final bottom = Container(
     margin: const EdgeInsets.only(
       top: margin,
-      right: heightAndConstraintIndicatorSize,
-      // so that the arrow does not overlap with each other
-      bottom: margin,
       left: margin,
+      right: rightWidth,
     ),
-    child: ArrowWrapper.bidirectional(
-      arrowColor: widthIndicatorColor,
-      arrowHeadSize: arrowHeadSize,
-      arrowStrokeWidth: arrowStrokeWidth,
-      direction: Axis.horizontal,
-      distanceToArrow: distanceToArrow,
-      child: Text(
-        '${properties.describeWidth()}\n'
-        '(${properties.describeWidthConstraints()})',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          height: 1.0,
-        ),
-      ),
-    ),
+    child: LayoutBuilder(builder: (context, constraints) {
+      final maxWidth = constraints.maxWidth;
+      final displayWidthOutsideArrow =
+          maxWidth < minWidthToDisplayWidthInsideArrow;
+      return Column(
+        children: [
+          Flexible(
+            flex: displayWidthOutsideArrow ? 0 : 1,
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+              child: ArrowWrapper.bidirectional(
+                arrowColor: widthIndicatorColor,
+                arrowHeadSize: arrowHeadSize,
+                arrowStrokeWidth: arrowStrokeWidth,
+                direction: Axis.horizontal,
+                child: displayWidthOutsideArrow ? null : widthDescription,
+              ),
+            ),
+          ),
+          if (displayWidthOutsideArrow)
+            Expanded(
+              child: widthDescription,
+            ),
+        ],
+      );
+    }),
   );
   return BorderLayout(
     center: widget,
     right: right,
-    rightWidth: heightAndConstraintIndicatorSize,
+    rightWidth: rightWidth,
     bottom: bottom,
-    bottomHeight: widthAndConstraintIndicatorSize,
+    bottomHeight: bottomHeight,
   );
 }
 
@@ -169,14 +285,17 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   AnimationController changeController;
   CurvedAnimation changeAnimation;
 
-  FlexLayoutProperties get properties =>
-      _previousProperties ?? _animatedProperties ?? _properties;
-
   AnimatedFlexLayoutProperties _animatedProperties;
   FlexLayoutProperties _previousProperties;
   FlexLayoutProperties _properties;
 
-  /// custom getters
+  FlexLayoutProperties get properties =>
+      _previousProperties ?? _animatedProperties ?? _properties;
+
+  InspectorObjectGroupManager objectGroupManager;
+
+  LayoutProperties highlighted;
+
   RemoteDiagnosticsNode get selectedNode =>
       inspectorController?.selectedNode?.diagnostic;
 
@@ -207,17 +326,6 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (node.isFlex) return node;
     return node.parent;
   }
-
-  double crossAxisDimension(LayoutProperties properties) =>
-      direction == Axis.horizontal ? properties.height : properties.width;
-
-  double mainAxisDimension(LayoutProperties properties) =>
-      direction == Axis.vertical ? properties.height : properties.width;
-
-  /// state variables
-  InspectorObjectGroupManager objectGroupManager;
-
-  LayoutProperties highlighted;
 
   @override
   void initState() {
@@ -269,7 +377,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     });
   }
 
-  /// required for getting all information required for visualizing Flex layout
+  /// Required for getting all information required to visualize the Flex layout.
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
@@ -370,14 +478,36 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     _onInspectorSelectionChanged();
   }
 
-  Future<void> _onTap(LayoutProperties selected) async {
-    highlighted = selected;
-    final node = selected.node;
-    inspectorController.refreshSelection(node, node, false);
+  // update selected widget in the device without triggering selection listener event.
+  // this is required so that we don't change focus
+  //   when tapping on a child is also Flex-based widget.
+  Future<void> setSelectionInspector(RemoteDiagnosticsNode node) async {
+    final service = await node.inspectorService;
+    await service.setSelectionInspector(node.valueRef, false);
+  }
+
+  // update selected widget and trigger selection listener event to change focus.
+  void refreshSelection(RemoteDiagnosticsNode node) {
+    inspectorController.refreshSelection(node, node, true);
+  }
+
+  Future<void> _onTap(LayoutProperties properties) async {
+    if (properties.isFlex) {
+      setState(() => highlighted = properties);
+      await setSelectionInspector(properties.node);
+    } else {
+      refreshSelection(properties.node);
+    }
+  }
+
+  void _onDoubleTap(LayoutProperties properties) {
+    refreshSelection(properties.node);
   }
 
   Future<void> updateChildFlex(
-      LayoutProperties oldProperties, LayoutProperties newProperties) async {
+    LayoutProperties oldProperties,
+    LayoutProperties newProperties,
+  ) async {
     final updatedProperties = await fetchFlexLayoutProperties();
     _changeProperties(updatedProperties);
   }
@@ -423,21 +553,21 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           maxSizeAvailable: maxSizeAvailable,
         );
 
-        final childrenRenderWidgets = <Widget>[
+        final childrenRenderWidgets = [
           for (var i = 0; i < children.length; i++)
             FlexChildVisualizer(
               state: this,
               notifyParent: updateChildFlex,
               backgroundColor: highlighted == children[i]
-                  ? activeBackgroundColor(theme)
-                  : inActiveBackgroundColor(theme),
+                  ? theme.activeBackgroundColor
+                  : theme.inActiveBackgroundColor,
               borderColor: i.isOdd ? mainAxisColor : crossAxisColor,
               textColor: i.isOdd ? null : const Color(0xFF303030),
               renderProperties: renderProperties[i],
             )
         ];
 
-        final freeSpacesWidgets = <Widget>[
+        final freeSpacesWidgets = [
           for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
             EmptySpaceVisualizerWidget(renderProperties),
         ];
@@ -507,15 +637,15 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         child: DropdownButton(
           value: selected,
           isExpanded: true,
-          itemHeight: axis == Axis.vertical ? 100.0 : null,
           selectedItemBuilder: (context) {
             return [
               for (var alignment in alignmentEnumEntries)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
+                  children: [
                     Expanded(
+                      flex: 2,
                       child: Container(
                         child: Text(
                           describeEnum(alignment),
@@ -524,16 +654,13 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: RotatedBox(
-                        quarterTurns: axis == Axis.vertical ? 2 : 0,
-                        child: Image.asset(
-                          (axis == direction)
-                              ? mainAxisAssetImageUrl(alignment)
-                              : crossAxisAssetImageUrl(alignment),
-                          height: axisAlignmentAssetImageHeight,
-                          fit: BoxFit.contain,
-                        ),
+                    Flexible(
+                      child: Image.asset(
+                        (axis == direction)
+                            ? mainAxisAssetImageUrl(direction, alignment)
+                            : crossAxisAssetImageUrl(direction, alignment),
+                        height: axisAlignmentAssetImageHeight,
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                   ],
@@ -549,7 +676,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
+                    children: [
                       Expanded(
                         child: Container(
                           child: Text(
@@ -559,16 +686,12 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: RotatedBox(
-                          quarterTurns: axis == Axis.vertical ? 1 : 0,
-                          child: Image.asset(
-                            (axis == direction)
-                                ? mainAxisAssetImageUrl(alignment)
-                                : crossAxisAssetImageUrl(alignment),
-                            width: axisAlignmentAssetImageWidth,
-                            fit: BoxFit.contain,
-                          ),
+                      Flexible(
+                        child: Image.asset(
+                          (axis == direction)
+                              ? mainAxisAssetImageUrl(direction, alignment)
+                              : crossAxisAssetImageUrl(direction, alignment),
+                          fit: BoxFit.fitHeight,
                         ),
                       ),
                     ],
@@ -652,7 +775,9 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
           child: WidgetVisualizer(
             title: flexType,
             backgroundColor:
-                highlighted == properties ? activeBackgroundColor(theme) : null,
+                highlighted == properties ? theme.activeBackgroundColor : null,
+            borderColor: mainAxisColor,
+            overflowSide: properties.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
               child: Text(
@@ -663,16 +788,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 ),
               ),
             ),
-            borderColor: mainAxisColor,
-            child: Container(
-              margin: const EdgeInsets.only(
-                /// margin for the outer width/height
-                ///  so that they don't stick to the corner
-                right: margin,
-                bottom: margin,
-              ),
-              child: _visualizeFlex(context),
-            ),
+            child: _visualizeFlex(context),
           ),
         ),
       ),
@@ -684,7 +800,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         height: maxHeight - mainAxisArrowIndicatorSize,
         width: crossAxisArrowIndicatorSize,
         child: Column(
-          children: <Widget>[
+          children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: verticalColor,
@@ -715,7 +831,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
         height: mainAxisArrowIndicatorSize,
         width: maxWidth - crossAxisArrowIndicatorSize - margin,
         child: Row(
-          children: <Widget>[
+          children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: horizontalColor,
@@ -740,7 +856,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
       child: Stack(
-        children: <Widget>[
+        children: [
           flexDescription,
           verticalAxisDescription,
           horizontalAxisDescription,
@@ -827,7 +943,7 @@ class FlexChildVisualizer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
+        children: [
           _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
           if (!properties.hasFlexFactor)
             Text(
@@ -843,7 +959,7 @@ class FlexChildVisualizer extends StatelessWidget {
               softWrap: true,
               overflow: TextOverflow.ellipsis,
               textScaleFactor: smallTextScaleFactor,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.center,
             ),
         ],
       ),
@@ -885,6 +1001,8 @@ class FlexChildVisualizer extends StatelessWidget {
       left: renderOffset.dx,
       child: InkWell(
         onTap: () => state._onTap(properties),
+        onDoubleTap: () => state._onDoubleTap(properties),
+        onLongPress: () => state._onDoubleTap(properties),
         child: SizedBox(
           width: renderSize.width,
           height: renderSize.height,
@@ -896,6 +1014,7 @@ class FlexChildVisualizer extends StatelessWidget {
               title: properties.description,
               borderColor: borderColor,
               textColor: textColor,
+              overflowSide: properties.overflowSide,
               child: _visualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
                 widget: Align(
@@ -931,6 +1050,7 @@ class WidgetVisualizer extends StatelessWidget {
     @required this.borderColor,
     this.textColor,
     this.child,
+    this.overflowSide,
   })  : assert(title != null),
         assert(borderColor != null),
         super(key: key);
@@ -942,49 +1062,80 @@ class WidgetVisualizer extends StatelessWidget {
   final Color borderColor;
   final Color textColor;
   final Color backgroundColor;
+  final OverflowSide overflowSide;
+
+  static const overflowIndicatorSize = 20.0;
+
+  bool get drawOverflow => overflowSide != null;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Container(
-                  constraints: const BoxConstraints(
-                      maxWidth: minRenderWidth * widgetTitleMaxWidthPercentage),
-                  child: Center(
-                    child: Text(
-                      title,
-                      style: textColor != null
-                          ? TextStyle(
-                              color: textColor,
-                            )
-                          : null,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  decoration: BoxDecoration(
-                    color: borderColor,
-                  ),
-                  padding: const EdgeInsets.all(4.0),
+          if (drawOverflow)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: OverflowIndicatorPainter(
+                  overflowSide,
+                  overflowIndicatorSize,
                 ),
-                if (hint != null)
-                  Flexible(
-                    child: hint,
+              ),
+            ),
+          Container(
+            margin: EdgeInsets.only(
+              right: overflowSide == OverflowSide.right
+                  ? overflowIndicatorSize
+                  : 0.0,
+              bottom: overflowSide == OverflowSide.bottom
+                  ? overflowIndicatorSize
+                  : 0.0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                              maxWidth: minRenderWidth *
+                                  widgetTitleMaxWidthPercentage),
+                          child: Center(
+                            child: Text(
+                              title,
+                              style: textColor != null
+                                  ? TextStyle(
+                                      color: textColor,
+                                    )
+                                  : null,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          decoration: BoxDecoration(
+                            color: borderColor,
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                        ),
+                      ),
+                      if (hint != null)
+                        Flexible(
+                          child: hint,
+                        ),
+                    ],
+                  ),
+                ),
+                if (child != null)
+                  Expanded(
+                    child: child,
                   ),
               ],
             ),
           ),
-          if (child != null)
-            Expanded(
-              child: child,
-            ),
         ],
       ),
       decoration: BoxDecoration(
@@ -1005,54 +1156,88 @@ class EmptySpaceVisualizerWidget extends StatelessWidget {
 
   final RenderProperties renderProperties;
 
+  static const heightArrowColor = mainUiColor;
+  static const widthArrowColor = Color(0xFF000099);
+
   @override
   Widget build(BuildContext context) {
+    final heightDescription =
+        'h=${toStringAsFixed(renderProperties.realHeight)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+    final bottom = Container(
+      margin: const EdgeInsets.only(
+        left: margin,
+        right: heightOnlyIndicatorSize,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+            child: ArrowWrapper.bidirectional(
+              arrowColor: heightArrowColor,
+              direction: Axis.horizontal,
+              arrowHeadSize: arrowHeadSize,
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: _dimensionDescription(
+                TextSpan(
+                  text: widthDescription,
+                ),
+                false,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    final right = Container(
+      margin: const EdgeInsets.only(
+        top: margin,
+        right: margin,
+        bottom: widthOnlyIndicatorSize,
+      ),
+      child: Row(
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+            child: ArrowWrapper.bidirectional(
+              arrowColor: widthArrowColor,
+              direction: Axis.vertical,
+              arrowHeadSize: arrowHeadSize,
+              childMarginFromArrow: 0.0,
+            ),
+          ),
+          Expanded(
+            child: RotatedBox(
+              quarterTurns: 1,
+              child: _dimensionDescription(
+                TextSpan(
+                  text: heightDescription,
+                ),
+                false,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
     return Positioned(
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
       child: Container(
         width: renderProperties.width,
         height: renderProperties.height,
-        child: Stack(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: widthOnlyIndicatorSize,
-                margin: const EdgeInsets.only(
-                  left: margin,
-                  right: heightOnlyIndicatorSize,
-                ),
-                child: ArrowWrapper.bidirectional(
-                  child: Text(
-                    'w=${toStringAsFixed(renderProperties.realWidth)}',
-                  ),
-                  arrowColor: widthIndicatorColor,
-                  direction: Axis.horizontal,
-                  arrowHeadSize: arrowHeadSize,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                width: heightOnlyIndicatorSize,
-                margin: const EdgeInsets.symmetric(vertical: margin),
-                child: ArrowWrapper.bidirectional(
-                  child: RotatedBox(
-                    quarterTurns: 1,
-                    child: Text(
-                      'h=${toStringAsFixed(renderProperties.realHeight)}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  arrowColor: heightIndicatorColor,
-                  direction: Axis.vertical,
-                  arrowHeadSize: arrowHeadSize,
-                ),
-              ),
-            ),
-          ],
+        child: Tooltip(
+          message: '$widthDescription\n$heightDescription',
+          child: BorderLayout(
+            right: right,
+            rightWidth: heightOnlyIndicatorSize,
+            bottom: bottom,
+            bottomHeight: widthOnlyIndicatorSize,
+          ),
         ),
       ),
     );

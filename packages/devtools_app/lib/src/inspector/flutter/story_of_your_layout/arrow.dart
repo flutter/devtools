@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 const defaultArrowColor = Colors.white;
 const defaultArrowHeadSize = 16.0;
 const defaultArrowStrokeWidth = 2.0;
-const defaultDistanceToArrow = 8.0;
+const defaultDistanceToArrow = 4.0;
 
 enum ArrowType {
   up,
@@ -31,44 +31,36 @@ Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
 class ArrowWrapper extends StatelessWidget {
   ArrowWrapper.unidirectional({
     Key key,
-    @required this.child,
+    this.child,
     @required ArrowType type,
     this.arrowColor = defaultArrowColor,
     this.arrowHeadSize = defaultArrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
-    double distanceToArrow = defaultDistanceToArrow,
-  })  : assert(child != null),
-        assert(type != null),
+    this.childMarginFromArrow = defaultDistanceToArrow,
+  })  : assert(type != null),
         assert(arrowColor != null),
         assert(arrowHeadSize != null && arrowHeadSize > 0.0),
         assert(arrowStrokeWidth != null && arrowHeadSize > 0.0),
-        assert(distanceToArrow != null && distanceToArrow > 0.0),
+        assert(childMarginFromArrow != null && childMarginFromArrow > 0.0),
         direction = axis(type),
-        distanceToArrow = axis(type) == Axis.horizontal
-            ? EdgeInsets.symmetric(horizontal: distanceToArrow)
-            : EdgeInsets.symmetric(vertical: distanceToArrow),
         isBidirectional = false,
         startArrowType = type,
         endArrowType = type,
         super(key: key);
 
-  ArrowWrapper.bidirectional({
+  const ArrowWrapper.bidirectional({
     Key key,
-    @required this.child,
+    this.child,
     @required this.direction,
     this.arrowColor = defaultArrowColor,
     this.arrowHeadSize = defaultArrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
-    double distanceToArrow = defaultDistanceToArrow,
-  })  : assert(child != null),
-        assert(direction != null),
+    this.childMarginFromArrow = defaultDistanceToArrow,
+  })  : assert(direction != null),
         assert(arrowColor != null),
-        assert(arrowHeadSize != null && arrowHeadSize > 0.0),
-        assert(arrowStrokeWidth != null && arrowHeadSize > 0.0),
-        assert(distanceToArrow != null && distanceToArrow > 0.0),
-        distanceToArrow = direction == Axis.horizontal
-            ? EdgeInsets.symmetric(horizontal: distanceToArrow)
-            : EdgeInsets.symmetric(vertical: distanceToArrow),
+        assert(arrowHeadSize != null && arrowHeadSize >= 0.0),
+        assert(arrowStrokeWidth != null && arrowHeadSize >= 0.0),
+        assert(childMarginFromArrow != null && childMarginFromArrow >= 0.0),
         isBidirectional = true,
         startArrowType =
             direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
@@ -82,45 +74,64 @@ class ArrowWrapper extends StatelessWidget {
   final Widget child;
 
   final Axis direction;
-  final EdgeInsets distanceToArrow;
+  final double childMarginFromArrow;
 
   final bool isBidirectional;
   final ArrowType startArrowType;
   final ArrowType endArrowType;
 
+  double get verticalMarginFromArrow {
+    if (child == null || direction == Axis.horizontal) return 0.0;
+    return childMarginFromArrow;
+  }
+
+  double get horizontalMarginFromArrow {
+    if (child == null || direction == Axis.vertical) return 0.0;
+    return childMarginFromArrow;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Flex(
       direction: direction,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Expanded(
-          child: ArrowWidget(
-            color: arrowColor,
-            headSize: arrowHeadSize,
-            strokeWidth: arrowStrokeWidth,
-            type: startArrowType,
-            shouldDrawHead: isBidirectional
-                ? true
-                : (startArrowType == ArrowType.left ||
-                    startArrowType == ArrowType.up),
+          child: Container(
+            margin: EdgeInsets.only(
+              bottom: verticalMarginFromArrow,
+              right: horizontalMarginFromArrow,
+            ),
+            child: ArrowWidget(
+              color: arrowColor,
+              headSize: arrowHeadSize,
+              strokeWidth: arrowStrokeWidth,
+              type: startArrowType,
+              shouldDrawHead: isBidirectional
+                  ? true
+                  : (startArrowType == ArrowType.left ||
+                      startArrowType == ArrowType.up),
+            ),
           ),
         ),
-        Container(
-          child: child,
-          margin: distanceToArrow,
-        ),
+        if (child != null) child,
         Expanded(
-          child: ArrowWidget(
-            color: arrowColor,
-            headSize: arrowHeadSize,
-            strokeWidth: arrowStrokeWidth,
-            type: endArrowType,
-            shouldDrawHead: isBidirectional
-                ? true
-                : (endArrowType == ArrowType.right ||
-                    endArrowType == ArrowType.down),
+          child: Container(
+            margin: EdgeInsets.only(
+              top: verticalMarginFromArrow,
+              left: horizontalMarginFromArrow,
+            ),
+            child: ArrowWidget(
+              color: arrowColor,
+              headSize: arrowHeadSize,
+              strokeWidth: arrowStrokeWidth,
+              type: endArrowType,
+              shouldDrawHead: isBidirectional
+                  ? true
+                  : (endArrowType == ArrowType.right ||
+                      endArrowType == ArrowType.down),
+            ),
           ),
         ),
       ],
