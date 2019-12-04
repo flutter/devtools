@@ -175,9 +175,9 @@ class InspectorController extends DisposableController
 
   final bool isSummaryTree;
 
-  final SingleRunCallback onExpandCollapseSupported;
+  final VoidCallback onExpandCollapseSupported;
 
-  final SingleRunCallback onLayoutDetailsSupported;
+  final VoidCallback onLayoutDetailsSupported;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -854,20 +854,20 @@ class InspectorController extends DisposableController
   /// execute given [callback] when minimum Flutter [version] is met.
   void _onVersionSupported(
     SemanticVersion version,
-    SingleRunCallback callback,
+    VoidCallback callback,
   ) {
-    autoDispose(serviceManager.hasRegisteredService(
-      registrations.flutterVersion.service,
-      (serviceAvailable) async {
-        if (serviceAvailable) {
-          final flutterVersion = FlutterVersion.parse(
-              (await serviceManager.getFlutterVersion()).json);
-          if (flutterVersion.isSupported(supportedVersion: version)) {
-            callback.run();
-          }
+    final flutterVersionServiceListenable = serviceManager
+        .getRegisteredServiceListenable(registrations.flutterVersion.service);
+    addAutoDisposeListener(flutterVersionServiceListenable, () async {
+      final registered = flutterVersionServiceListenable.value;
+      if (registered) {
+        final flutterVersion = FlutterVersion.parse(
+            (await serviceManager.getFlutterVersion()).json);
+        if (flutterVersion.isSupported(supportedVersion: version)) {
+          callback();
         }
-      },
-    ));
+      }
+    });
   }
 
   void _checkForExpandCollapseSupport() {

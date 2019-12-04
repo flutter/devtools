@@ -199,21 +199,6 @@ typedef VoidFunction = void Function();
 /// future.
 typedef VoidAsyncFunction = Future<void> Function();
 
-class SingleRunCallback {
-  SingleRunCallback(this._callback);
-
-  final VoidFunction _callback;
-
-  bool hasRan = false;
-
-  void run() {
-    if (!hasRan) {
-      _callback();
-      hasRan = true;
-    }
-  }
-}
-
 /// Batch up calls to the given closure. Repeated calls to [invoke] will
 /// overwrite the closure to be called. We'll delay at least [minDelay] before
 /// calling the closure, but will not delay more than [maxDelay].
@@ -527,6 +512,18 @@ class ValueReporter<T> extends Reporter implements ValueListenable<T> {
 
 String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
+}
+
+/// A value notifier that calls each listener immediately when registered.
+class ImmediateValueNotifier<T> extends ValueNotifier<T> {
+  ImmediateValueNotifier(T value) : super(value);
+
+  /// Adds a listener and calls the listener upon registration.
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    listener();
+  }
 }
 
 extension NullSafeLast<T> on List<T> {

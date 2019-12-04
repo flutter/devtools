@@ -277,27 +277,27 @@ class HtmlPerfToolFramework extends HtmlFramework {
   }
 
   void _initHotReloadRestartServiceListeners() {
-    serviceManager.hasRegisteredService(
-      registrations.hotReload.service,
-      (bool reloadServiceAvailable) {
-        if (reloadServiceAvailable) {
-          _buildReloadButton();
-        } else {
-          removeGlobalAction(_reloadActionId);
-        }
-      },
-    );
+    final hotReloadListenable = serviceManager
+        .getRegisteredServiceListenable(registrations.hotReload.service);
+    hotReloadListenable.addListener(() {
+      final reloadServiceAvailable = hotReloadListenable.value;
+      if (reloadServiceAvailable) {
+        _buildReloadButton();
+      } else {
+        removeGlobalAction(_reloadActionId);
+      }
+    });
 
-    serviceManager.hasRegisteredService(
-      registrations.hotRestart.service,
-      (bool reloadServiceAvailable) {
-        if (reloadServiceAvailable) {
-          _buildRestartButton();
-        } else {
-          removeGlobalAction(_restartActionId);
-        }
-      },
-    );
+    final hotRestartListenable = serviceManager
+        .getRegisteredServiceListenable(registrations.hotReload.service);
+    hotRestartListenable.addListener(() {
+      final restartServiceAvailable = hotRestartListenable.value;
+      if (restartServiceAvailable) {
+        _buildRestartButton();
+      } else {
+        removeGlobalAction(_restartActionId);
+      }
+    });
   }
 
   void _buildReloadButton() async {

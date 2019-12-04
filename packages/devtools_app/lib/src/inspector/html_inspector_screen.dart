@@ -23,7 +23,6 @@ import '../ui/icons.dart';
 import '../ui/primer.dart';
 import '../ui/service_extension_elements.dart';
 import '../ui/ui_utils.dart';
-import '../utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
@@ -165,7 +164,7 @@ class HtmlInspectorScreen extends HtmlScreen {
       detailsTree: detailsInspectorTree,
       inspectorService: inspectorService,
       treeType: FlutterTreeType.widget,
-      onExpandCollapseSupported: SingleRunCallback(_onExpandCollapseSupported),
+      onExpandCollapseSupported: _onExpandCollapseSupported,
     );
 
     final elements = <Element>[
