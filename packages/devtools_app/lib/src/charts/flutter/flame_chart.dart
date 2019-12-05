@@ -169,46 +169,48 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
 
   @override
   Widget build(BuildContext context) {
-    return nodes.isEmpty
-        ? SizedBox(
-            height: sectionSpacing,
-            width: widget.width,
-          )
-        // Having each row handle gestures instead of each node handling its own
-        // gestures improves performance.
-        : GestureDetector(
-            onTapUp: (details) => _handleTapUp(details, context),
-            child: SizedBox(
-              height: rowHeightWithPadding,
-              width: widget.width,
-              child: ListView.builder(
-                addAutomaticKeepAlives: false,
-                // The flame chart nodes are inexpensive to paint, so removing the
-                // repaint boundary improves efficiency.
-                addRepaintBoundaries: false,
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                itemCount: nodes.length,
-                itemBuilder: (context, index) {
-                  final node = nodes[index];
-                  final nextNode =
-                      index == nodes.length - 1 ? null : nodes[index + 1];
-                  final paddingLeft = index == 0 ? node.rect.left : 0.0;
-                  final paddingRight = nextNode == null
-                      ? widget.width - node.rect.right
-                      : nextNode.rect.left - node.rect.right;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      left: paddingLeft,
-                      right: paddingRight,
-                      bottom: rowPadding,
-                    ),
-                    child: node.buildWidget(node.data == widget.selected),
-                  );
-                },
+    if (nodes.isEmpty) {
+      return SizedBox(
+        height: sectionSpacing,
+        width: widget.width,
+      );
+    }
+    // Having each row handle gestures instead of each node handling its own
+    // gestures improves performance.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (details) => _handleTapUp(details, context),
+      child: SizedBox(
+        height: rowHeightWithPadding,
+        width: widget.width,
+        child: ListView.builder(
+          addAutomaticKeepAlives: false,
+          // The flame chart nodes are inexpensive to paint, so removing the
+          // repaint boundary improves efficiency.
+          addRepaintBoundaries: false,
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          itemCount: nodes.length,
+          itemBuilder: (context, index) {
+            final node = nodes[index];
+            final nextNode =
+                index == nodes.length - 1 ? null : nodes[index + 1];
+            final paddingLeft = index == 0 ? node.rect.left : 0.0;
+            final paddingRight = nextNode == null
+                ? widget.width - node.rect.right
+                : nextNode.rect.left - node.rect.right;
+            return Padding(
+              padding: EdgeInsets.only(
+                left: paddingLeft,
+                right: paddingRight,
+                bottom: rowPadding,
               ),
-            ),
-          );
+              child: node.buildWidget(node.data == widget.selected),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void _handleTapUp(TapUpDetails details, BuildContext context) {
@@ -306,7 +308,9 @@ class FlameChartNode<T> {
     selected = selectable ? selected : false;
     // TODO(kenz): figure out a way to add tooltips without crippling
     // performance. The html app does not have tooltips, so removing them for
-    // now is not a regression.
+    // now is not a regression. Possibly have each row handle tooltips and
+    // modify text based on which node is being moused over. Look into
+    // MouseRegion: https://api.flutter.dev/flutter/widgets/MouseRegion-class.html.
     return Container(
       width: rect.width,
       height: rect.height,
