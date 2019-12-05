@@ -35,6 +35,7 @@ const minRenderWidth = 250.0;
 const minRenderHeight = 300.0;
 
 const minPadding = 2.0;
+const overflowTextHorizontalPadding = 8.0;
 
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
@@ -136,7 +137,10 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
   );
   if (overflow)
     return Container(
-      padding: const EdgeInsets.all(minPadding),
+      padding: const EdgeInsets.symmetric(
+        vertical: minPadding,
+        horizontal: overflowTextHorizontalPadding,
+      ),
       decoration: BoxDecoration(
         color: overflowBackgroundColor,
         borderRadius: BorderRadius.circular(4.0),
@@ -206,7 +210,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
             ),
           ),
           if (displayHeightOutsideArrow)
-            Expanded(
+            Flexible(
               child: heightDescription,
             ),
         ],
@@ -236,6 +240,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       top: margin,
       left: margin,
       right: rightWidth,
+      bottom: minPadding,
     ),
     child: LayoutBuilder(builder: (context, constraints) {
       final maxWidth = constraints.maxWidth;
@@ -257,8 +262,11 @@ Widget _visualizeWidthAndHeightWithConstraints({
             ),
           ),
           if (displayWidthOutsideArrow)
-            Expanded(
-              child: widthDescription,
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.only(top: minPadding),
+                child: widthDescription,
+              ),
             ),
         ],
       );
