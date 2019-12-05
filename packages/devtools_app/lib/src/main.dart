@@ -33,7 +33,7 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-bool enableFlutterWebTesting = false;
+bool enableFlutterWebTesting = true;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
@@ -87,7 +87,17 @@ class HtmlPerfToolFramework extends HtmlFramework {
       queryId('try-flutter-web-devtools')
         ..hidden = false
         ..onClick.listen((_) {
-          html.window.location.href = '/flutter.html';
+          String href = '/flutter.html#/';
+          // Preserve query parameters when opening the Flutter demo so the
+          // user does not need to go through the connect dialog again.
+          final flutterQueryParams =
+              Uri.tryParse(html.window.location.href).queryParameters ?? {};
+          if (flutterQueryParams.isNotEmpty) {
+            href += Uri(
+              queryParameters: flutterQueryParams,
+            ).toString();
+          }
+          html.window.location.href = href;
         });
     }
 
