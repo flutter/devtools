@@ -64,7 +64,7 @@ class InspectorController extends DisposableController
     this.parent,
     this.isSummaryTree = true,
     this.onExpandCollapseSupported,
-    this.onLayoutDetailsSupported,
+    this.onLayoutExplorerSupported,
   })  : _treeGroups = InspectorObjectGroupManager(inspectorService, 'tree'),
         _selectionGroups =
             InspectorObjectGroupManager(inspectorService, 'selection') {
@@ -177,7 +177,7 @@ class InspectorController extends DisposableController
 
   final VoidCallback onExpandCollapseSupported;
 
-  final VoidCallback onLayoutDetailsSupported;
+  final VoidCallback onLayoutExplorerSupported;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -882,10 +882,10 @@ class InspectorController extends DisposableController
   }
 
   void _checkForLayoutDetailsSupport() {
-    if (onLayoutDetailsSupported == null) return;
+    if (onLayoutExplorerSupported == null) return;
     _onVersionSupported(
       SemanticVersion(major: 1, minor: 12, patch: 16),
-      onLayoutDetailsSupported,
+      onLayoutExplorerSupported,
     );
   }
 }
