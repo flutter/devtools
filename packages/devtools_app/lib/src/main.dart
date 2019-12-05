@@ -84,9 +84,11 @@ class HtmlPerfToolFramework extends HtmlFramework {
 
     if (enableFlutterWebTesting) {
       // Listen for clicks on the 'Try DevTools on Flutter Web' button.
-      queryId('try-flutter-web-devtools').onClick.listen((_) {
-        // TODO(kenz): launch flutter web app.
-      });
+      queryId('try-flutter-web-devtools')
+        ..hidden = false
+        ..onClick.listen((_) {
+          // TODO(kenz): launch flutter web app.
+        });
     }
 
     await serviceManager.serviceAvailable.future;
