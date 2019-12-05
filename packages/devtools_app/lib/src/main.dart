@@ -87,7 +87,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
       queryId('try-flutter-web-devtools')
         ..hidden = false
         ..onClick.listen((_) {
-          // TODO(kenz): launch flutter web app.
+          html.window.location.href = '/flutter.html';
         });
     }
 
