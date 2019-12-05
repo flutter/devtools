@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -308,6 +309,33 @@ void main() {
           minHeight: 56.0,
           maxHeight: 56.0,
         ),
+      );
+    });
+
+    test('deserializeConstraints', () {
+      Map<String, Object> constraintsJson = {
+        'type': '_BodyBoxConstraints',
+        'minWidth': '0.0',
+        'maxWidth': '100.0',
+        'minHeight': '0.0',
+        'maxHeight': '100.0',
+      };
+      expect(
+        LayoutProperties.deserializeConstraints(constraintsJson),
+        const BoxConstraints(
+          minWidth: 0.0,
+          minHeight: 0.0,
+          maxWidth: 100.0,
+          maxHeight: 100.0,
+        ),
+      );
+
+      constraintsJson = {
+        'type': 'SliverConstraint',
+      };
+      expect(
+        LayoutProperties.deserializeConstraints(constraintsJson),
+        const BoxConstraints(),
       );
     });
 
