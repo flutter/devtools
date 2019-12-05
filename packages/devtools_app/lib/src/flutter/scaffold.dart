@@ -231,7 +231,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class _SimpleScreen extends Screen {
-  const _SimpleScreen(this.child) : super('');
+  const _SimpleScreen(this.child) : super();
 
   final Widget child;
 

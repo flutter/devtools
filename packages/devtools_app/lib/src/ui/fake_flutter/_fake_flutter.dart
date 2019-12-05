@@ -33,3 +33,4 @@ part 'foundation.dart';
 part 'print.dart';
 part 'text.dart';
 part 'text_span.dart';
+part 'icons.dart';

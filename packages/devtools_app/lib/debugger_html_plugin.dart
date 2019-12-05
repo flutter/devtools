@@ -14,16 +14,16 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:html_shim/html.dart' as html;
 
 import 'src/debugger/html_debugger_screen.dart';
+import 'src/framework/framework_core.dart';
 import 'src/framework/html_framework.dart';
 import 'src/ui/html_elements.dart';
 
 /// A web-only Flutter plugin to show the [HtmlDebuggerScreen].
 class DebuggerHtmlPlugin {
-  DebuggerHtmlPlugin();
-
   HtmlFramework _framework;
   HtmlDebuggerScreen _screen;
   html.Element _viewRoot;
+  String location;
 
   /// Registers this plugin with Flutter.
   ///
@@ -48,6 +48,24 @@ class DebuggerHtmlPlugin {
   /// [viewId] is used to distinguish between multiple instances of the same
   /// view, such as video players.  We can ignore it on DevTools.
   html.Element build(int viewId) {
+    Future<bool> frameworkFuture;
+    // If we've changed our address, re-connect to the vm service and re-theme
+    // the view.
+    // We replace the #/ with a / so that dart can parse the uri query parameters
+    // as query parameters.
+    final location = html.window.location.toString().replaceFirst('#/', '/');
+    if (location != this.location) {
+      this.location = location;
+      // TODO(djshuckerow): investigate why we need to reinitialize globals
+      // in release mode when they already exist.
+      FrameworkCore.init(location);
+      frameworkFuture = FrameworkCore.initVmService(
+        location,
+        errorReporter: (message, __) {
+          print(message);
+        },
+      );
+    }
     if (_viewRoot != null) {
       return _viewRoot;
     }
@@ -56,7 +74,12 @@ class DebuggerHtmlPlugin {
     //
     // <html><head></head><body></body></html>.
     _viewRoot = html.Element.tag('html');
-    html.HttpRequest.getString('debugger_screen.html').then(_updateViewRoot);
+    Future(() async {
+      final debuggerHtml =
+          await html.HttpRequest.getString('debugger_screen.html');
+      await frameworkFuture;
+      _updateViewRoot(debuggerHtml);
+    });
     return _viewRoot;
   }
 

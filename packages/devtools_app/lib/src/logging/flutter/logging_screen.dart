@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/table.dart';
@@ -16,7 +16,7 @@ import '../logging_controller.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen() : super('Logging');
+  const LoggingScreen() : super();
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +25,9 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
+    return const Tab(
       text: 'Logging',
-      icon: Icon(Octicons.getIconData('clippy')),
+      icon: Icon(Octicons.clippy),
     );
   }
 }

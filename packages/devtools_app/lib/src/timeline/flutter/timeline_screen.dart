@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../service_extensions.dart';
@@ -23,7 +23,7 @@ import 'timeline_flame_chart.dart';
 // where applicable.
 
 class TimelineScreen extends Screen {
-  const TimelineScreen() : super('Timeline');
+  const TimelineScreen() : super();
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -49,9 +49,9 @@ class TimelineScreen extends Screen {
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
-      text: name,
-      icon: Icon(Octicons.getIconData('pulse')),
+    return const Tab(
+      text: 'Timeline',
+      icon: Icon(Octicons.pulse),
     );
   }
 }

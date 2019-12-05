@@ -145,10 +145,14 @@ class FlutterIcons {
   static const DevToolsIcon locate = UrlIcon('/icons/general/locate.png');
   static const DevToolsIcon forceRefresh =
       UrlIcon('/icons/actions/forceRefresh.png');
-  // TODO(dantup): Make a ThemedIcon class to handle this.
-  static DevToolsIcon get refresh => isDarkTheme
-      ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
-      : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
+  static DevToolsIcon get refresh => MaterialIcon(
+      'refresh',
+      const ThemedColor(
+        Color.fromARGB(255, 0, 0, 0),
+        Color.fromARGB(255, 137, 181, 248),
+      ),
+      codePoint: Icons.refresh.codePoint);
+
   static const DevToolsIcon performanceOverlay =
       UrlIcon('/icons/general/performance_overlay.png');
   static const DevToolsIcon debugPaint = UrlIcon('/icons/debug_paint.png');
