@@ -169,8 +169,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           ),
           if (properties is FlexLayoutProperties && properties.isOverflowHeight)
             TextSpan(
-              text:
-                  '\nchildren takes: ${toStringAsFixed(sum(properties.childrenHeights))}',
+              text: '\nchildren take: '
+                  '${toStringAsFixed(sum(properties.childrenHeights))}',
             ),
         ],
       ),
@@ -221,8 +221,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
         ),
         if (showChildrenWidthsSum)
           TextSpan(
-            text:
-                '\nchildren takes ${toStringAsFixed(sum(properties.childrenWidths))}',
+            text: '\nchildren take '
+                '${toStringAsFixed(sum(properties.childrenWidths))}',
           )
       ],
     ),
