@@ -32,9 +32,10 @@ const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 250.0;
-const minRenderHeight = 300.0;
+const minRenderHeight = 250.0;
 
 const minPadding = 2.0;
+const overflowTextHorizontalPadding = 8.0;
 
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
@@ -66,6 +67,9 @@ const axisAlignmentAssetImageHeight = 24.0;
 /// Width for limiting asset image (when drop down menu is open for the vertical).
 const axisAlignmentAssetImageWidth = 96.0;
 const dropdownMaxSize = 220.0;
+
+const minHeightToAllowTruncating = 375.0;
+const minWidthToAllowTruncating = 375.0;
 
 // Story of Layout colors
 const mainAxisLightColor = Color(0xFFF597A8);
@@ -133,7 +137,10 @@ Widget dimensionDescription(TextSpan description, bool overflow) {
   );
   if (overflow)
     return Container(
-      padding: const EdgeInsets.all(minPadding),
+      padding: const EdgeInsets.symmetric(
+        vertical: minPadding,
+        horizontal: overflowTextHorizontalPadding,
+      ),
       decoration: BoxDecoration(
         color: overflowBackgroundColor,
         borderRadius: BorderRadius.circular(4.0),
@@ -189,8 +196,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
       return Row(
         children: [
-          Flexible(
-            flex: displayHeightOutsideArrow ? 0 : 1,
+          Truncateable(
+            truncate: !displayHeightOutsideArrow,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
               child: ArrowWrapper.bidirectional(
@@ -203,7 +210,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
             ),
           ),
           if (displayHeightOutsideArrow)
-            Expanded(
+            Flexible(
               child: heightDescription,
             ),
         ],
@@ -233,6 +240,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       top: margin,
       left: margin,
       right: rightWidth,
+      bottom: minPadding,
     ),
     child: LayoutBuilder(builder: (context, constraints) {
       final maxWidth = constraints.maxWidth;
@@ -240,8 +248,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           maxWidth < minWidthToDisplayWidthInsideArrow;
       return Column(
         children: [
-          Flexible(
-            flex: displayWidthOutsideArrow ? 0 : 1,
+          Truncateable(
+            truncate: !displayWidthOutsideArrow,
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: arrowMargin),
               child: ArrowWrapper.bidirectional(
@@ -254,8 +262,11 @@ Widget _visualizeWidthAndHeightWithConstraints({
             ),
           ),
           if (displayWidthOutsideArrow)
-            Expanded(
-              child: widthDescription,
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.only(top: minPadding),
+                child: widthDescription,
+              ),
             ),
         ],
       );
@@ -685,6 +696,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                           describeEnum(alignment),
                           style: TextStyle(color: color),
                           textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -717,6 +729,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                             describeEnum(alignment),
                             style: TextStyle(color: color),
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
@@ -802,6 +815,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             child: _visualizeFlex(context),
@@ -813,29 +827,35 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     final verticalAxisDescription = Align(
       alignment: Alignment.bottomLeft,
       child: Container(
-        height: maxHeight - mainAxisArrowIndicatorSize,
+        margin: const EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
         width: crossAxisArrowIndicatorSize,
         child: Column(
           children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: verticalColor,
-                child: RotatedBox(
-                  quarterTurns: 3,
-                  child: Text(
-                    properties.verticalDirectionDescription,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    textScaleFactor: largeTextScaleFactor,
-                    style: TextStyle(
-                      color: verticalTextColor,
+                child: Truncateable(
+                  truncate: maxHeight <= minHeightToAllowTruncating,
+                  child: RotatedBox(
+                    quarterTurns: 3,
+                    child: Text(
+                      properties.verticalDirectionDescription,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      textScaleFactor: largeTextScaleFactor,
+                      style: TextStyle(
+                        color: verticalTextColor,
+                      ),
                     ),
                   ),
                 ),
                 type: ArrowType.down,
               ),
             ),
-            _buildAxisAlignmentDropdown(Axis.vertical),
+            Truncateable(
+              truncate: maxHeight <= minHeightToAllowTruncating,
+              child: _buildAxisAlignmentDropdown(Axis.vertical),
+            ),
           ],
         ),
       ),
@@ -844,14 +864,16 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     final horizontalAxisDescription = Align(
       alignment: Alignment.topRight,
       child: Container(
+        margin:
+            const EdgeInsets.only(left: crossAxisArrowIndicatorSize + margin),
         height: mainAxisArrowIndicatorSize,
-        width: maxWidth - crossAxisArrowIndicatorSize - margin,
         child: Row(
           children: [
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: horizontalColor,
-                child: FittedBox(
+                child: Truncateable(
+                  truncate: maxWidth <= minWidthToAllowTruncating,
                   child: Text(
                     properties.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
@@ -863,7 +885,10 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 type: ArrowType.right,
               ),
             ),
-            _buildAxisAlignmentDropdown(Axis.horizontal),
+            Truncateable(
+              truncate: maxWidth <= minWidthToAllowTruncating,
+              child: _buildAxisAlignmentDropdown(Axis.horizontal),
+            ),
           ],
         ),
       ),
@@ -982,7 +1007,9 @@ class FlexChildVisualizer extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
+          Flexible(
+            child: _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
+          ),
           if (!properties.hasFlexFactor)
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',

@@ -121,6 +121,19 @@ class BorderLayout extends StatelessWidget {
   }
 }
 
+@immutable
+class Truncateable extends StatelessWidget {
+  const Truncateable({Key key, this.truncate, this.child}) : super(key: key);
+
+  final Widget child;
+  final bool truncate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(flex: truncate ? 1 : 0, child: child);
+  }
+}
+
 class AnimatedLayoutProperties<T extends LayoutProperties>
     implements LayoutProperties {
   AnimatedLayoutProperties(this.begin, this.end, this.animation)
