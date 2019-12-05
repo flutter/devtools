@@ -1180,7 +1180,7 @@ span.strong {
 @media all and (max-width: 550px) { .optional-550 { display: none; } }
 @media all and (max-width: 700px) { .optional-700 { display: none; } }
 @media all and (max-width: 1000px) { .optional-1000 { display: none; } }
-@media all and (max-width: 1060px) { .optional-1060 { display: none; } }
+@media all and (max-width: 1140px) { .optional-1140 { display: none; } }
 
 /*
  * Support tagging btn-groups with collapsible that can have children tagged

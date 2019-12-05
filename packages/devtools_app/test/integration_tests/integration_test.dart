@@ -34,5 +34,5 @@ void main() {
     group('logging', loggingTests);
     // Temporarily skip tests. See https://github.com/flutter/devtools/issues/1343.
     group('debugging', debuggingTests, skip: true);
-  }, timeout: const Timeout.factor(4));
+  }, timeout: const Timeout.factor(6));
 }
