@@ -302,7 +302,7 @@ class _InspectorTreeState extends State<InspectorTree>
       return;
     }
     currentAnimateTarget = rect;
-    final targetY = _computeTargetOffset(
+    final targetY = _computeTargetOffsetY(
       _scrollControllerY,
       rect.top,
       rect.bottom,
@@ -333,13 +333,13 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   /// Animate so that the entire range minOffset to maxOffset is within view.
-  double _computeTargetOffset(
+  double _computeTargetOffsetY(
     ScrollController controller,
     double minOffset,
     double maxOffset,
   ) {
     final currentOffset = controller.offset;
-    final viewportDimension = _scrollControllerX.position.viewportDimension;
+    final viewportDimension = _scrollControllerY.position.viewportDimension;
     final currentEndOffset = viewportDimension + currentOffset;
 
     // If the requested range is larger than what the viewport can show at once,
