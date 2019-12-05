@@ -15,14 +15,14 @@ class InspectorDetailsTabController extends StatelessWidget {
     this.detailsTree,
     this.actionButtons,
     this.controller,
-    this.layoutDetailsSupported,
+    this.layoutExplorerSupported,
     Key key,
   }) : super(key: key);
 
   final Widget detailsTree;
   final Widget actionButtons;
   final InspectorController controller;
-  final bool layoutDetailsSupported;
+  final bool layoutExplorerSupported;
 
   Widget _buildTab(String tabName) {
     return Tab(
@@ -37,11 +37,11 @@ class InspectorDetailsTabController extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      if (layoutDetailsSupported) _buildTab('Layout Details'),
+      if (layoutExplorerSupported) _buildTab('Layout Explorer'),
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (layoutDetailsSupported) LayoutDetailsTab(controller: controller),
+      if (layoutExplorerSupported) LayoutDetailsTab(controller: controller),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(

@@ -763,31 +763,14 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   @override
   Widget build(BuildContext context) {
     if (_properties == null) return const SizedBox();
-    final theme = Theme.of(context);
     return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            child: Text(
-              'Story of the flex layout of your $flexType widget',
-              style: theme.textTheme.headline,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(margin),
-              padding: const EdgeInsets.only(bottom: margin, right: margin),
-              child: AnimatedBuilder(
-                animation: changeController,
-                builder: (context, _) {
-                  return LayoutBuilder(builder: _buildLayout);
-                },
-              ),
-            ),
-          ),
-        ],
+      margin: const EdgeInsets.all(margin),
+      padding: const EdgeInsets.only(bottom: margin, right: margin),
+      child: AnimatedBuilder(
+        animation: changeController,
+        builder: (context, _) {
+          return LayoutBuilder(builder: _buildLayout);
+        },
       ),
     );
   }
