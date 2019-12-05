@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
