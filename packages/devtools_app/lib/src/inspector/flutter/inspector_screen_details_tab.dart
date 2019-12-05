@@ -109,14 +109,12 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   Widget rootWidget(RemoteDiagnosticsNode node) {
     if (StoryOfYourFlexWidget.shouldDisplay(node))
       return StoryOfYourFlexWidget(controller);
-    return Container(
-      child: const Center(
-        child: Text(
-          'Currently Layout Explorer only supports Flex-based widgets'
-          ' or direct child of Flex-based widgets',
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.clip,
-        ),
+    return const Center(
+      child: Text(
+        'Currently Layout Explorer only supports Flex-based widgets'
+        ' (e.g: Row, Column, Flex) or its direct children.',
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.clip,
       ),
     );
   }
