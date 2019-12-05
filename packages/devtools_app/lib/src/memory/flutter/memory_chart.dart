@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as dart_ui;
 
 import 'package:flutter/material.dart';
@@ -28,17 +27,12 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
-import 'memory_controller.dart';
-
-// TODO(terry): Remove canned data.
-import 'timeseries_data.dart';
+import '../memory_controller.dart';
+import '../memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
-  const MemoryChart(this.memoryController);
-
-  final MemoryController memoryController;
-
   @override
   MemoryChartState createState() => MemoryChartState();
 }
@@ -48,43 +42,51 @@ class MemoryChartState extends State<MemoryChart> {
 
   LineChartController get chartController => _chartController;
 
+  final legendTypeFace =
+      TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
+
   @override
   void initState() {
     _initController();
 
+    _preloadResources();
+
     _setupChart();
-
-    // Read canned data and startup the pseudo-live feed.
-    _initLineData(true);
-
-    // TODO(terry): Remove when live feed is hooked up.
-    // Hookup to replay the canned data.
-    widget.memoryController.addResetFeedListener(() {
-      setState(() {
-        // Reset our starting index into the canned data and
-        // start feeding the live chart.
-        timerDataIndex = 0;
-      });
-    });
 
     super.initState();
   }
 
   dart_ui.Image _img;
 
-  void _setupChart() async {
+  void _preloadResources() async {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
   @override
   Widget build(BuildContext context) {
+    final MemoryController memoryController = Controllers.of(context).memory;
+
+    if (!memoryController.anyResetFeedListeners) {
+      // Only hookup listeners once.
+      memoryController.addResetFeedListener(() {
+        setState(() {
+          // TODO(terry): TBD Reset allocation stats.
+        });
+      });
+    }
+
+    if (memoryController.memoryTimeline.data.isNotEmpty) {
+      processLiveData();
+
+      return Stack(
+        children: [LineChart(_chartController)],
+      );
+    }
+
     return Stack(
-      children: <Widget>[LineChart(_chartController)],
+      children: const [Text('No data')],
     );
   }
-
-  var legendTypeFace =
-      TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
 
   void _initController() {
     final desc = Description()..enabled = false;
@@ -145,7 +147,6 @@ class MemoryChartState extends State<MemoryChart> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -167,61 +168,44 @@ class MemoryChartState extends State<MemoryChart> {
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  // Index into the raw data.
-  int timerDataIndex;
+  void processLiveData() {
+    final MemoryController memoryController = Controllers.of(context).memory;
 
-  // Active timer running.
-  Timer _timer;
+    final List<HeapSample> liveFeed = memoryController.memoryTimeline.data;
+    if (_used.length != liveFeed.length) {
+      for (var feedIndex = _used.length;
+          feedIndex < liveFeed.length;
+          feedIndex++) {
+        final sample = liveFeed[feedIndex];
+        final timestamp = sample.timestamp.toDouble();
 
-  Future<void> startFeed() async {
-    // Fetch from the beginning of the canned data for the live feed.
-    timerDataIndex = 0;
+        final capacity = sample.capacity.toDouble();
+        final used = sample.used.toDouble();
+        final external = sample.external.toDouble();
 
-    // TODO(terry): Consider moving the timer to the MemoryController.
-    // TODO(terry): The chart should be notified when new data arrives from the controller
-    //              using a notifier pattern.
-    // Average VMSerice rate is ~500-600 ms?
-    _timer = Timer.periodic(const Duration(milliseconds: 400), (Timer timer) {
-      if (timerDataIndex == 0) {
-        // First time reset our plotted data.
-        setState(() {
-          _used.clear();
-          _capacity.clear();
-          _externalHeap.clear();
-        });
-      }
+        final extEntry = Entry(
+          x: timestamp,
+          y: external,
+          icon: _img,
+        );
+        final usedEntry = Entry(
+          x: timestamp,
+          y: used + external,
+          icon: _img,
+        );
+        final capacityEntry = Entry(
+          x: timestamp,
+          y: capacity,
+          icon: _img,
+        );
 
-      // Pause pressed stop pumping out data simulating a live feed.
-      if (!widget.memoryController.paused &&
-          timerDataIndex < externalMemoryData.length) {
-        int x;
-        int y;
-
-        x = externalMemoryData[timerDataIndex];
-        y = externalMemoryData[timerDataIndex + 1];
-        final externalEntry =
-            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        x = usedHeapData[timerDataIndex];
-        y = usedHeapData[timerDataIndex + 1] +
-            externalMemoryData[timerDataIndex + 1];
-        final usedEntry = Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        x = heapCapacityData[timerDataIndex];
-        y = heapCapacityData[timerDataIndex + 1];
-        final capacityEntry =
-            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        _externalHeap.add(externalEntry);
+        _externalHeap.add(extEntry);
         _used.add(usedEntry);
         _capacity.add(capacityEntry);
-
-        timerDataIndex += 2;
       }
 
-      // TODO(terry): Consider moving live feed timer to MemoryController.
       updateChart();
-    });
+    }
   }
 
   void updateChart() {
@@ -236,7 +220,8 @@ class MemoryChartState extends State<MemoryChart> {
     });
   }
 
-  Future<void> loadAllData() async {
+/*
+  Future<void> loadOfflineData() async {
     int index;
 
     index = 0;
@@ -266,16 +251,9 @@ class MemoryChartState extends State<MemoryChart> {
       index += 2;
     }
   }
+*/
 
-  void _initLineData([bool simulateFeed = false]) async {
-    if (!simulateFeed) {
-      await loadAllData();
-    } else if (_timer == null) {
-      await startFeed();
-    } else {
-      return;
-    }
-
+  void _setupChart() {
     // Create heap used dataset.
     usedHeapSet = LineDataSet(_used, 'Used');
     usedHeapSet
@@ -340,6 +318,6 @@ class XAxisFormatter extends ValueFormatter {
 
   @override
   String getFormattedValue1(double value) {
-    return mFormat.format(DateTime.fromMillisecondsSinceEpoch(value ~/ 1000));
+    return mFormat.format(DateTime.fromMillisecondsSinceEpoch(value.toInt()));
   }
 }

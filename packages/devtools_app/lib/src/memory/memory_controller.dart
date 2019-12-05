@@ -2,23 +2,70 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
 import '../globals.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../vm_service_wrapper.dart';
+
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
+// TODO(terry): Temporary code for canned data.
+typedef chartStateListener = void Function();
+
+// TODO(terry): Implement a dispose method and call in ProvidedControllers dispose.
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
 class MemoryController {
-  MemoryController();
+  final MemoryTimeline memoryTimeline = MemoryTimeline();
+
+  // TODO(terry): Temporary code for canned data.
+  // *************************************************************************
+  // *************************************************************************
+
+  bool _paused = false;
+
+  bool get paused => _paused;
+
+  void pauseLiveFeed() {
+    _paused = true;
+  }
+
+  void resumeLiveFeed() {
+    _paused = false;
+  }
+
+  /// Listeners to hookup modifying the MemoryChartState.
+  final List<chartStateListener> _resetFeedListeners = [];
+
+  bool get anyResetFeedListeners => _resetFeedListeners.isNotEmpty;
+
+  void addResetFeedListener(chartStateListener listener) {
+    _resetFeedListeners.add(listener);
+  }
+
+  void removeResetFeedListener(chartStateListener listener) {
+    _resetFeedListeners.remove(listener);
+  }
+
+  // Call any ChartState listeners.
+  void notifyResetFeedListeners() {
+    for (var notifyListener in _resetFeedListeners) {
+      notifyListener();
+    }
+  }
+
+  // *************************************************************************
+  // *************************************************************************
+  // TODO(terry): END OF canned data code.
 
   final SettingsModel settings = SettingsModel();
 
@@ -49,7 +96,7 @@ class MemoryController {
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    _memoryTracker = MemoryTracker(service);
+    _memoryTracker = MemoryTracker(service, this);
     _memoryTracker.start();
 
     _memoryTracker.onChange.listen((_) {
@@ -371,4 +418,54 @@ class LibraryCollection {
 
   bool isOtherLibrary(String classId) =>
       findOtherLibrary(displayClasses[classId]) != null;
+}
+
+class MemoryTimeline {
+  final List<HeapSample> data = [];
+
+  /// Notifies that a new Heap sample has been added to the timeline.
+  ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
+  final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
+
+  /// Whether the timeline has been manually paused via the Pause button.
+  bool manuallyPaused = false;
+
+  /// Notifies that the timeline has been paused.
+  ValueListenable get pausedNotifier => _pausedNotifier;
+  final _pausedNotifier = ValueNotifier<bool>(false);
+
+  /// Given a list of HeapSample, encode as a Json string.
+  static String encodeHeapSamples(List<HeapSample> data) {
+    final List encodeHeapSamples = data.map((f) => jsonEncode(f)).toList();
+    return jsonEncode({'samples': encodeHeapSamples});
+  }
+
+  // Given a JSON string representing an array of HeapSample, decode to a List of HeapSample.
+  static List<HeapSample> decodeHeapSamples(String jsonString) {
+    final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
+    final List dynamicList = decodedMap['samples'];
+    final List<HeapSample> samples = [];
+    for (var index = 0; index < dynamicList.length; index++) {
+      final Map<String, dynamic> entry = jsonDecode(dynamicList[index]);
+      final sample = HeapSample.fromJson(entry);
+      samples.add(sample);
+    }
+
+    return samples;
+  }
+
+  void pause({bool manual = false}) {
+    manuallyPaused = manual;
+    _pausedNotifier.value = true;
+  }
+
+  void resume() {
+    manuallyPaused = false;
+    _pausedNotifier.value = false;
+  }
+
+  void addSample(HeapSample sample) {
+    data.add(sample);
+    _sampleAddedNotifier.value = sample;
+  }
 }
