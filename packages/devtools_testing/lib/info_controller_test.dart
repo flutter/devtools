@@ -87,7 +87,9 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
       );
 
       await env.tearDownEnvironment(force: true);
-    });
+      // TODO(kenz): unskip once flake is addressed. See
+      // https://github.com/flutter/devtools/issues/1193.
+    }, skip: true);
   }, timeout: const Timeout.factor(8));
   // TODO: Add a test that uses DartVM instead of Flutter
 }
