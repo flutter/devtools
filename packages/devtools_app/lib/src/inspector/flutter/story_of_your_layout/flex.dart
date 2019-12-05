@@ -192,8 +192,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
       return Row(
         children: [
-          Flexible(
-            flex: displayHeightOutsideArrow ? 0 : 1,
+          Truncateable(
+            truncate: !displayHeightOutsideArrow,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
               child: ArrowWrapper.bidirectional(
@@ -243,8 +243,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
           maxWidth < minWidthToDisplayWidthInsideArrow;
       return Column(
         children: [
-          Flexible(
-            flex: displayWidthOutsideArrow ? 0 : 1,
+          Truncateable(
+            truncate: !displayWidthOutsideArrow,
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: arrowMargin),
               child: ArrowWrapper.bidirectional(
@@ -843,8 +843,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: verticalColor,
-                child: Flexible(
-                  flex: maxHeight <= minHeightToAllowTruncating ? 1 : 0,
+                child: Truncateable(
+                  truncate: maxHeight <= minHeightToAllowTruncating,
                   child: RotatedBox(
                     quarterTurns: 3,
                     child: Text(
@@ -861,8 +861,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 type: ArrowType.down,
               ),
             ),
-            Flexible(
-              flex: maxHeight <= minHeightToAllowTruncating ? 1 : 0,
+            Truncateable(
+              truncate: maxHeight <= minHeightToAllowTruncating,
               child: _buildAxisAlignmentDropdown(Axis.vertical),
             ),
           ],
@@ -881,8 +881,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: horizontalColor,
-                child: Flexible(
-                  flex: maxWidth <= minWidthToAllowTruncating ? 1 : 0,
+                child: Truncateable(
+                  truncate: maxWidth <= minWidthToAllowTruncating,
                   child: Text(
                     properties.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
@@ -894,8 +894,8 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
                 type: ArrowType.right,
               ),
             ),
-            Flexible(
-              flex: maxWidth <= minWidthToAllowTruncating ? 1 : 0,
+            Truncateable(
+              truncate: maxWidth <= minWidthToAllowTruncating,
               child: _buildAxisAlignmentDropdown(Axis.horizontal),
             ),
           ],
