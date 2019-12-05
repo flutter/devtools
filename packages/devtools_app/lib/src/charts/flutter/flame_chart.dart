@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 
@@ -175,6 +174,8 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
             height: sectionSpacing,
             width: widget.width,
           )
+        // Having each row handle gestures instead of each node handling its own
+        // gestures improves performance.
         : GestureDetector(
             onTapUp: (details) => _handleTapUp(details, context),
             child: SizedBox(
@@ -289,7 +290,7 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
-  static const _minWidthForText = 16.0;
+  static const _minWidthForText = 22.0;
 
   final Key key;
   final Rect rect;
@@ -303,27 +304,25 @@ class FlameChartNode<T> {
 
   Widget buildWidget(bool selected) {
     selected = selectable ? selected : false;
-    return Tooltip(
-      message: tooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      child: Container(
-        width: rect.width,
-        height: rect.height,
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        alignment: Alignment.centerLeft,
-        color: selected ? _selectedNodeColor : backgroundColor,
-        child: rect.width > _minWidthForText
-            ? Text(
-                text,
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected ? Colors.black : textColor,
-                ),
-              )
-            : const SizedBox(),
-      ),
+    // TODO(kenz): figure out a way to add tooltips without crippling
+    // performance. The html app does not have tooltips, so removing them for
+    // now is not a regression.
+    return Container(
+      width: rect.width,
+      height: rect.height,
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      alignment: Alignment.centerLeft,
+      color: selected ? _selectedNodeColor : backgroundColor,
+      child: rect.width > _minWidthForText
+          ? Text(
+              text,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? Colors.black : textColor,
+              ),
+            )
+          : const SizedBox(),
     );
   }
 }
