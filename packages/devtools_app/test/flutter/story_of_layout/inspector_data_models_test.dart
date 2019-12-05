@@ -311,6 +311,33 @@ void main() {
       );
     });
 
+    test('deserializeConstraints', () {
+      Map<String, Object> constraintsJson = {
+        'type': '_BodyBoxConstraints',
+        'minWidth': '0.0',
+        'maxWidth': '100.0',
+        'minHeight': '0.0',
+        'maxHeight': '100.0',
+      };
+      expect(
+        LayoutProperties.deserializeConstraints(constraintsJson),
+        const BoxConstraints(
+          minWidth: 0.0,
+          minHeight: 0.0,
+          maxWidth: 100.0,
+          maxHeight: 100.0,
+        ),
+      );
+
+      constraintsJson = {
+        'type': 'SliverConstraint',
+      };
+      expect(
+        LayoutProperties.deserializeConstraints(constraintsJson),
+        const BoxConstraints(),
+      );
+    });
+
     group('describeWidthConstraints and describeHeightConstraints', () {
       test('single value', () {
         final Map<String, Object> json = jsonDecode('''

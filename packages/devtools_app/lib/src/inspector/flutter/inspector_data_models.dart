@@ -202,12 +202,12 @@ class LayoutProperties {
 
   static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     // TODO(albertusangga): Support SliverConstraint
-    if (json == null || json['type'] != 'BoxConstraints') return null;
+    if (json == null) return null;
     return BoxConstraints(
-      minWidth: double.parse(json['minWidth']),
-      maxWidth: double.parse(json['maxWidth']),
-      minHeight: double.parse(json['minHeight']),
-      maxHeight: double.parse(json['maxHeight']),
+      minWidth: double.parse(json['minWidth'] ?? '0.0'),
+      maxWidth: double.parse(json['maxWidth'] ?? 'Infinity'),
+      minHeight: double.parse(json['minHeight'] ?? '0.0'),
+      maxHeight: double.parse(json['maxHeight'] ?? 'Infinity'),
     );
   }
 
