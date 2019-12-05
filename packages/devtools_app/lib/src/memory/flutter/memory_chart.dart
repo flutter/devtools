@@ -29,6 +29,7 @@ import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
 import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
+import '../../ui/theme.dart';
 import '../memory_controller.dart';
 import '../memory_protocol.dart';
 
@@ -100,7 +101,7 @@ class MemoryChartState extends State<MemoryChart> {
             ..granularityEnabled = (true)
             ..setStartAtZero(
                 true) // Set to baseline min and auto track max axis range.
-            ..textColor = const Color.fromARGB(255, 0, 0, 0);
+            ..textColor = defaultForeground;
         },
         axisRightSettingFunction: (axisRight, controller) {
           axisRight.enabled = false;
@@ -109,10 +110,9 @@ class MemoryChartState extends State<MemoryChart> {
           xAxis
             ..position = XAxisPosition.BOTTOM
             ..textSize = 10
-            ..textColor = ColorUtils.WHITE
             ..drawAxisLine = false
             ..drawGridLines = true
-            ..textColor = const Color.fromARGB(255, 0, 0, 0)
+            ..textColor = defaultForeground
             ..centerAxisLabels = true
             ..setGranularity(1)
             ..setValueFormatter(XAxisFormatter());
