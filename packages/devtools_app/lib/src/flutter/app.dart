@@ -103,7 +103,8 @@ class DevToolsAppState extends State<DevToolsApp> {
               TimelineScreen(),
               PerformanceScreen(),
               MemoryScreen(),
-              DebuggerScreen(),
+              // TODO(https://github.com/flutter/flutter/issues/43783): Put back
+              // the debugger screen.
               LoggingScreen(),
               InfoScreen(),
             ],

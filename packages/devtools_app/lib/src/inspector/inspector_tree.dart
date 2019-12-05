@@ -60,19 +60,21 @@ const Color arrowColor = Colors.grey;
 // TODO(jacobr): these arrows are a bit ugly.
 // We should create pngs instead of trying to stretch the material icons into
 // being good expand collapse arrows.
-const DevToolsIcon collapseArrow = MaterialIcon(
+final DevToolsIcon collapseArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
   iconWidth: columnWidth - iconPadding,
+  codePoint: Icons.arrow_drop_down.codePoint,
 );
 
-const DevToolsIcon expandArrow = MaterialIcon(
+final DevToolsIcon expandArrow = MaterialIcon(
   'arrow_drop_down',
   arrowColor,
   fontSize: 32,
   angle: -math.pi / 2, // -90 degrees
   iconWidth: columnWidth - iconPadding,
+  codePoint: Icons.arrow_drop_down.codePoint,
 );
 
 abstract class PaintEntry {

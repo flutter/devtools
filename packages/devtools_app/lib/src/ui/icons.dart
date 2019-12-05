@@ -147,8 +147,10 @@ class FlutterIcons {
       UrlIcon('/icons/actions/forceRefresh.png');
   // TODO(dantup): Make a ThemedIcon class to handle this.
   static DevToolsIcon get refresh => isDarkTheme
-      ? const MaterialIcon('refresh', Color.fromARGB(255, 137, 181, 248))
-      : const MaterialIcon('refresh', Color.fromARGB(255, 0, 0, 0));
+      ? MaterialIcon('refresh', const Color.fromARGB(255, 137, 181, 248),
+          codePoint: Icons.refresh.codePoint)
+      : MaterialIcon('refresh', const Color.fromARGB(255, 0, 0, 0),
+          codePoint: Icons.refresh.codePoint);
   static const DevToolsIcon performanceOverlay =
       UrlIcon('/icons/general/performance_overlay.png');
   static const DevToolsIcon debugPaint = UrlIcon('/icons/debug_paint.png');

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../service_extensions.dart';
@@ -50,7 +50,7 @@ class TimelineScreen extends Screen {
   Widget buildTab(BuildContext context) {
     return Tab(
       text: name,
-      icon: Icon(Octicons.getIconData('pulse')),
+      icon: Icon(Octicons.pulse),
     );
   }
 }

@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/table.dart';
 import '../../performance/performance_controller.dart';
@@ -24,7 +24,7 @@ class PerformanceScreen extends Screen {
   Widget buildTab(BuildContext context) {
     return Tab(
       text: name,
-      icon: Icon(Octicons.getIconData('dashboard')),
+      icon: Icon(Octicons.dashboard),
     );
   }
 }

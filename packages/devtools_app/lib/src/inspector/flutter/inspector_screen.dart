@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/blocking_action_mixin.dart';
 import '../../flutter/initializer.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
@@ -30,7 +30,7 @@ class InspectorScreen extends Screen {
   @override
   Widget buildTab(BuildContext context) {
     return Tab(
-      icon: Icon(Octicons.getIconData('device-mobile')),
+      icon: Icon(Octicons.deviceMobile),
       text: 'Flutter Inspector',
     );
   }

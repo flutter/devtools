@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../ui/flutter/label.dart';
-
 import 'memory_chart.dart';
 import 'memory_controller.dart';
 
@@ -22,7 +21,7 @@ class MemoryScreen extends Screen {
   Widget buildTab(BuildContext context) {
     return Tab(
       text: name,
-      icon: Icon(Octicons.getIconData('package')),
+      icon: Icon(Octicons.package),
     );
   }
 }
