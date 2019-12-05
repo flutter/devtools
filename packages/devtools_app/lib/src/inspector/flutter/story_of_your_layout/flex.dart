@@ -244,6 +244,7 @@ Widget _visualizeWidthAndHeightWithConstraints({
       return Column(
         children: [
           Flexible(
+            flex: displayWidthOutsideArrow ? 0 : 1,
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: arrowMargin),
               child: ArrowWrapper.bidirectional(
