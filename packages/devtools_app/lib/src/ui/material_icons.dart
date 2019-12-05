@@ -4,7 +4,9 @@
 
 library material_icons;
 
-import 'fake_flutter/fake_flutter.dart';
+import 'package:meta/meta.dart';
+
+import 'fake_flutter/fake_flutter.dart' hide required;
 import 'icons.dart';
 import 'theme.dart';
 
