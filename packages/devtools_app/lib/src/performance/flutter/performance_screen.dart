@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../performance/performance_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
@@ -16,7 +16,7 @@ import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen() : super('Performance');
+  const PerformanceScreen() : super();
 
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
@@ -34,9 +34,9 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
-      text: name,
-      icon: Icon(Octicons.getIconData('dashboard')),
+    return const Tab(
+      text: 'Performance',
+      icon: Icon(Octicons.dashboard),
     );
   }
 }

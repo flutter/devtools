@@ -3,25 +3,25 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools.dart' as devtools;
 import '../../flutter/common_widgets.dart';
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../version.dart';
 import '../info_controller.dart';
 
 class InfoScreen extends Screen {
-  const InfoScreen() : super('Info');
+  const InfoScreen();
 
   @override
   Widget build(BuildContext context) => InfoScreenBody();
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
-      icon: Icon(Octicons.getIconData('info')),
+    return const Tab(
+      icon: Icon(Octicons.info),
       text: 'Info',
     );
   }
