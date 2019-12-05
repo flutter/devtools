@@ -10,8 +10,14 @@ MaterialApp
      └─Shortcuts
        │ manager: null
        │ shortcuts: {LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x10007002b", keyLabel: null,
-       │   debugName: "Tab")}): Intent#00000(key: [<NextFocusAction>]),
+       │   {LogicalKeyboardKey#00000(keyId: "0x100070028", keyLabel: null,
+       │   debugName: "Enter")}): Intent#00000(key: [<ActivateAction>]),
+       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
+       │   "0x00000020", keyLabel: " ", debugName: "Space")}):
+       │   Intent#00000(key: [<ActivateAction>]),
+       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
+       │   "0x10007002b", keyLabel: null, debugName: "Tab")}):
+       │   Intent#00000(key: [<NextFocusAction>]),
        │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
        │   "0x201000700e1", keyLabel: null, debugName: "Shift"),
        │   LogicalKeyboardKey#00000(keyId: "0x10007002b", keyLabel: null,
@@ -22,10 +28,4 @@ MaterialApp
        │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
        │   {LogicalKeyboardKey#00000(keyId: "0x10007004f", keyLabel: null,
        │   debugName: "Arrow Right")}): DirectionalFocusIntent#00000(key:
-       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x100070051", keyLabel: null,
-       │   debugName: "Arrow Down")}): DirectionalFocusIntent#00000(key:
-       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x100070052", keyLabel: null,
-       │   debugName: "Arrow Up")}): DirectionalFocusIntent#00000(key:
 ...
