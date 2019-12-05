@@ -102,7 +102,7 @@ class HtmlPerfToolFramework extends HtmlFramework {
       final link = CoreElement('a')
         ..add(<CoreElement>[
           span(c: 'octicon ${screen.iconClass}'),
-          span(text: ' ${screen.name}', c: 'optional-1060')
+          span(text: ' ${screen.name}', c: 'optional-1140')
         ]);
       if (screen.disabled) {
         link
