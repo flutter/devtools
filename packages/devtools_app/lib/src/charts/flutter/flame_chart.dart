@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
-import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 
@@ -170,41 +169,78 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
 
   @override
   Widget build(BuildContext context) {
-    return nodes.isEmpty
-        ? SizedBox(
-            height: sectionSpacing,
-            width: widget.width,
-          )
-        : SizedBox(
-            height: rowHeightWithPadding,
-            width: widget.width,
-            child: ListView.builder(
-              addAutomaticKeepAlives: false,
-              // The flame chart nodes are inexpensive to paint, so removing the
-              // repaint boundary improves efficiency.
-              addRepaintBoundaries: false,
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              itemCount: nodes.length,
-              itemBuilder: (context, index) {
-                final node = nodes[index];
-                final nextNode =
-                    index == nodes.length - 1 ? null : nodes[index + 1];
-                final paddingLeft = index == 0 ? node.rect.left : 0.0;
-                final paddingRight = nextNode == null
-                    ? widget.width - node.rect.right
-                    : nextNode.rect.left - node.rect.right;
-                return Padding(
-                  padding: EdgeInsets.only(
-                    left: paddingLeft,
-                    right: paddingRight,
-                    bottom: rowPadding,
-                  ),
-                  child: node.buildWidget(node.data == widget.selected),
-                );
-              },
-            ),
-          );
+    if (nodes.isEmpty) {
+      return SizedBox(
+        height: sectionSpacing,
+        width: widget.width,
+      );
+    }
+    // Having each row handle gestures instead of each node handling its own
+    // gestures improves performance.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (details) => _handleTapUp(details, context),
+      child: SizedBox(
+        height: rowHeightWithPadding,
+        width: widget.width,
+        child: ListView.builder(
+          addAutomaticKeepAlives: false,
+          // The flame chart nodes are inexpensive to paint, so removing the
+          // repaint boundary improves efficiency.
+          addRepaintBoundaries: false,
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          itemCount: nodes.length,
+          itemBuilder: (context, index) {
+            final node = nodes[index];
+            final nextNode =
+                index == nodes.length - 1 ? null : nodes[index + 1];
+            final paddingLeft = index == 0 ? node.rect.left : 0.0;
+            final paddingRight = nextNode == null
+                ? widget.width - node.rect.right
+                : nextNode.rect.left - node.rect.right;
+            return Padding(
+              padding: EdgeInsets.only(
+                left: paddingLeft,
+                right: paddingRight,
+                bottom: rowPadding,
+              ),
+              child: node.buildWidget(node.data == widget.selected),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _handleTapUp(TapUpDetails details, BuildContext context) {
+    final RenderBox referenceBox = context.findRenderObject();
+    final tapPosition = referenceBox.globalToLocal(details.globalPosition);
+    final nodeToSelect =
+        binarySearchForNode(tapPosition.dx + scrollController.offset);
+    if (nodeToSelect != null) {
+      nodeToSelect.onSelected(nodeToSelect.data);
+    }
+  }
+
+  FlameChartNode binarySearchForNode(double x) {
+    print(x);
+    int min = 0;
+    int max = nodes.length;
+    while (min < max) {
+      final mid = min + ((max - min) >> 1);
+      final node = nodes[mid];
+      if (x >= node.rect.left && x <= node.rect.right) {
+        return node;
+      }
+      if (x < node.rect.left) {
+        max = mid;
+      }
+      if (x > node.rect.right) {
+        min = mid + 1;
+      }
+    }
+    return null;
   }
 }
 
@@ -256,7 +292,7 @@ class FlameChartNode<T> {
 
   static const _selectedNodeColor = mainUiColorSelectedLight;
 
-  static const _minWidthForText = 16.0;
+  static const _minWidthForText = 22.0;
 
   final Key key;
   final Rect rect;
@@ -270,30 +306,27 @@ class FlameChartNode<T> {
 
   Widget buildWidget(bool selected) {
     selected = selectable ? selected : false;
-    return Tooltip(
-      message: tooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      child: GestureDetector(
-        onTap: () => onSelected(data),
-        child: Container(
-          width: rect.width,
-          height: rect.height,
-          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-          alignment: Alignment.centerLeft,
-          color: selected ? _selectedNodeColor : backgroundColor,
-          child: rect.width > _minWidthForText
-              ? Text(
-                  text,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: selected ? Colors.black : textColor,
-                  ),
-                )
-              : const SizedBox(),
-        ),
-      ),
+    // TODO(kenz): figure out a way to add tooltips without crippling
+    // performance. The html app does not have tooltips, so removing them for
+    // now is not a regression. Possibly have each row handle tooltips and
+    // modify text based on which node is being moused over. Look into
+    // MouseRegion: https://api.flutter.dev/flutter/widgets/MouseRegion-class.html.
+    return Container(
+      width: rect.width,
+      height: rect.height,
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      alignment: Alignment.centerLeft,
+      color: selected ? _selectedNodeColor : backgroundColor,
+      child: rect.width > _minWidthForText
+          ? Text(
+              text,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? Colors.black : textColor,
+              ),
+            )
+          : const SizedBox(),
     );
   }
 }
