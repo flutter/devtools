@@ -33,7 +33,7 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-bool enableFlutterWebTesting = true;
+bool enableFlutterWebTesting = false;
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
