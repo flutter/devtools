@@ -36,6 +36,7 @@ extension InspectorFlutterService on ObjectGroup {
         '    render.mainAxisAlignment = $mainAxisAlignment;'
         '    render.crossAxisAlignment = $crossAxisAlignment;'
         '    render.markNeedsLayout();'
+        // TODO(albertusangga): return false and show warning if this fails
         '  }'
         '})()';
     return await _evalUntilJsonIsNotEmpty(command);
@@ -56,6 +57,7 @@ extension InspectorFlutterService on ObjectGroup {
         '  if (parentData is FlexParentData) {'
         '    parentData.flex = $flexFactor;'
         '    render.markNeedsLayout();'
+        // TODO(albertusangga): return false and show warning if this fails
         '  }'
         '})()';
     return await _evalUntilJsonIsNotEmpty(command);
