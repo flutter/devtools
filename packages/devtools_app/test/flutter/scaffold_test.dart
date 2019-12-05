@@ -72,10 +72,11 @@ void main() {
 }
 
 class _TestScreen extends Screen {
-  const _TestScreen(String name, this.key, [this.tabKey]) : super(name);
+  const _TestScreen(this.name, this.key, [this.tabKey]) : super();
 
   static const contentKey = Key('DevToolsScaffold Content');
 
+  final String name;
   final Key key;
   final Key tabKey;
 

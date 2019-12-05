@@ -4,24 +4,32 @@
 
 library material_icons;
 
-import 'fake_flutter/fake_flutter.dart';
+import 'package:meta/meta.dart';
+
+import 'fake_flutter/fake_flutter.dart' hide required;
 import 'icons.dart';
 import 'theme.dart';
 
-const DevToolsIcon clearIcon = MaterialIcon('block', defaultButtonIconColor);
+final DevToolsIcon clearIcon = MaterialIcon('block', defaultButtonIconColor,
+    codePoint: Icons.block.codePoint);
 
-const DevToolsIcon exitIcon = MaterialIcon('clear', defaultButtonIconColor);
+final DevToolsIcon exitIcon = MaterialIcon('clear', defaultButtonIconColor,
+    codePoint: Icons.clear.codePoint);
 
-const DevToolsIcon exportIcon =
-    MaterialIcon('file_download', defaultButtonIconColor);
+final DevToolsIcon exportIcon = MaterialIcon(
+    'file_download', defaultButtonIconColor,
+    codePoint: Icons.file_download.codePoint);
 
-const DevToolsIcon recordPrimary =
-    MaterialIcon('fiber_manual_record', defaultPrimaryButtonIconColor);
+final DevToolsIcon recordPrimary = MaterialIcon(
+    'fiber_manual_record', defaultPrimaryButtonIconColor,
+    codePoint: Icons.fiber_manual_record.codePoint);
 
-const DevToolsIcon record =
-    MaterialIcon('fiber_manual_record', defaultButtonIconColor);
+final DevToolsIcon record = MaterialIcon(
+    'fiber_manual_record', defaultButtonIconColor,
+    codePoint: Icons.fiber_manual_record.codePoint);
 
-const DevToolsIcon stop = MaterialIcon('stop', defaultButtonIconColor);
+final DevToolsIcon stop = MaterialIcon('stop', defaultButtonIconColor,
+    codePoint: Icons.stop.codePoint);
 
 // TODO(jacobr): remove this class completely once the migration to Flutter
 // desktop is complete and just use Flutter native support for Material icons.
@@ -31,7 +39,7 @@ class MaterialIcon extends DevToolsIcon {
   const MaterialIcon(
     this.text,
     this.color, {
-    this.codePoint,
+    @required this.codePoint,
     this.fontSize = 18,
     this.iconWidth = 18,
     this.angle = 0.0,

@@ -7,7 +7,6 @@ library icon_renderer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_icons/flutter_icons.dart' as flutter_icons;
 
 import '../icons.dart';
 import '../material_icons.dart';
@@ -137,13 +136,10 @@ Widget _computeIconWidget(DevToolsIcon icon) {
     // TODO(jacobr): once the dart:html legacy version of this application is
     // removed, start using the regular Flutter material icons directly.
     Widget widget = Icon(
-      icon.codePoint != null
-          ? IconData(
-              icon.codePoint,
-              fontFamily: 'MaterialIcons',
-            )
-          : flutter_icons.MaterialIcons.getIconData(
-              icon.text.replaceAll('_', '-')),
+      IconData(
+        icon.codePoint,
+        fontFamily: 'MaterialIcons',
+      ),
       size: icon.iconHeight,
       color: icon.color,
     );
