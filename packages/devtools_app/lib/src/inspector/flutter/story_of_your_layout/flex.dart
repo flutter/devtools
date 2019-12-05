@@ -32,7 +32,7 @@ const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
 const minRenderWidth = 250.0;
-const minRenderHeight = 300.0;
+const minRenderHeight = 250.0;
 
 const minPadding = 2.0;
 const overflowTextHorizontalPadding = 8.0;
