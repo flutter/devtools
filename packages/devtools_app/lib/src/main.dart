@@ -87,7 +87,15 @@ class HtmlPerfToolFramework extends HtmlFramework {
       queryId('try-flutter-web-devtools')
         ..hidden = false
         ..onClick.listen((_) {
-          // TODO(kenz): launch flutter web app.
+          var href = '/flutter.html#/';
+          // Preserve query parameters when opening the Flutter demo so the
+          // user does not need to go through the connect dialog again.
+          final flutterQueryParams =
+              Uri.tryParse(html.window.location.href).queryParameters ?? {};
+          if (flutterQueryParams.isNotEmpty) {
+            href += Uri(queryParameters: flutterQueryParams).toString();
+          }
+          html.window.location.href = href;
         });
     }
 
