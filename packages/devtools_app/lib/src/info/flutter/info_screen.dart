@@ -13,7 +13,7 @@ import '../../version.dart';
 import '../info_controller.dart';
 
 class InfoScreen extends Screen {
-  const InfoScreen() : super('Info');
+  const InfoScreen();
 
   @override
   Widget build(BuildContext context) => InfoScreenBody();

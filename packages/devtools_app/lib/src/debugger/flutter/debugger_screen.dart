@@ -6,10 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen() : super('Debugger');
+  const DebuggerScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +21,7 @@ class DebuggerScreen extends Screen {
   Widget buildTab(BuildContext context) {
     return const Tab(
       text: 'Debugger',
-      icon: Icon(
-        IconData(
-          61714,
-          fontFamily: 'Octicons',
-        ),
-      ),
+      icon: Icon(Octicons.bug),
     );
   }
 }

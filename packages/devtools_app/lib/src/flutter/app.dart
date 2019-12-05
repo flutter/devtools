@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../src/framework/framework_core.dart';
-import '../debugger/flutter/debugger_screen.dart';
 import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';

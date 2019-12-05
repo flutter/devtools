@@ -22,14 +22,14 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_flutter.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen() : super('Info');
+  const InspectorScreen();
 
   @override
   Widget build(BuildContext context) => const InspectorScreenBody();
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
+    return const Tab(
       icon: Icon(Octicons.deviceMobile),
       text: 'Flutter Inspector',
     );

@@ -18,7 +18,7 @@ import 'screen.dart';
 /// We need to use this screen to get a guarantee that the app has a
 /// Dart VM available.
 class ConnectScreen extends Screen {
-  const ConnectScreen() : super('Connect');
+  const ConnectScreen() : super();
 
   @override
   Widget build(BuildContext context) => ConnectScreenBody();

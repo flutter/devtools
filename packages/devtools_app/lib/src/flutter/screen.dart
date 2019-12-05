@@ -9,10 +9,7 @@ import 'scaffold.dart';
 /// Defines pages shown in the tabbar of the app.
 @immutable
 abstract class Screen {
-  const Screen(this.name);
-
-  /// The human-readable name to show for the screen.
-  final String name;
+  const Screen();
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main navbar.
   ///

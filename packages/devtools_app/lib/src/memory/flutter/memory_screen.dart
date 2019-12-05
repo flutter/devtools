@@ -12,15 +12,15 @@ import 'memory_chart.dart';
 import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen() : super('Memory');
+  const MemoryScreen();
 
   @override
   Widget build(BuildContext context) => const MemoryBody();
 
   @override
   Widget buildTab(BuildContext context) {
-    return Tab(
-      text: name,
+    return const Tab(
+      text: 'Memory',
       icon: Icon(Octicons.package),
     );
   }
