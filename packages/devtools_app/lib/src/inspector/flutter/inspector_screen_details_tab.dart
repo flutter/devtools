@@ -111,7 +111,7 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
       return StoryOfYourFlexWidget(controller);
     return const Center(
       child: Text(
-        'Currently Layout Explorer only supports Flex-based widgets'
+        'Currently, Layout Explorer only supports Flex-based widgets'
         ' (e.g: Row, Column, Flex) or its direct children.',
         textAlign: TextAlign.center,
         overflow: TextOverflow.clip,
