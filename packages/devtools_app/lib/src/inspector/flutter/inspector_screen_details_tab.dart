@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -41,7 +42,7 @@ class InspectorDetailsTabController extends StatelessWidget {
     ];
     final tabViews = <Widget>[
       detailsTree,
-      if (layoutExplorerSupported) LayoutDetailsTab(controller: controller),
+      if (layoutExplorerSupported) LayoutExplorerTab(controller: controller),
     ];
     final focusColor = Theme.of(context).focusColor;
     return Container(
@@ -88,17 +89,17 @@ class InspectorDetailsTabController extends StatelessWidget {
 }
 
 /// Tab that acts as a proxy to decide which widget to be displayed
-class LayoutDetailsTab extends StatefulWidget {
-  const LayoutDetailsTab({Key key, this.controller}) : super(key: key);
+class LayoutExplorerTab extends StatefulWidget {
+  const LayoutExplorerTab({Key key, this.controller}) : super(key: key);
 
   final InspectorController controller;
 
   @override
-  _LayoutDetailsTabState createState() => _LayoutDetailsTabState();
+  _LayoutExplorerTabState createState() => _LayoutExplorerTabState();
 }
 
-class _LayoutDetailsTabState extends State<LayoutDetailsTab>
-    with AutomaticKeepAliveClientMixin<LayoutDetailsTab> {
+class _LayoutExplorerTabState extends State<LayoutExplorerTab>
+    with AutomaticKeepAliveClientMixin<LayoutExplorerTab> {
   InspectorController get controller => widget.controller;
 
   RemoteDiagnosticsNode get selected => controller?.selectedNode?.diagnostic;
@@ -108,7 +109,16 @@ class _LayoutDetailsTabState extends State<LayoutDetailsTab>
   Widget rootWidget(RemoteDiagnosticsNode node) {
     if (StoryOfYourFlexWidget.shouldDisplay(node))
       return StoryOfYourFlexWidget(controller);
-    return const SizedBox();
+    return Container(
+      child: const Center(
+        child: Text(
+          'Currently Layout Explorer only supports Flex-based widgets'
+          ' or direct child of Flex-based widgets',
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.clip,
+        ),
+      ),
+    );
   }
 
   void onSelectionChanged() {

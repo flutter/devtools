@@ -302,7 +302,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: LayoutDetailsTab(
+              body: LayoutExplorerTab(
                 controller: controller,
               ),
             ),
@@ -318,7 +318,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: LayoutDetailsTab(
+              body: LayoutExplorerTab(
                 controller: controller,
               ),
             ),
