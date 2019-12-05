@@ -10,7 +10,6 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
-import '../../utils.dart';
 import '../fake_flutter/fake_flutter.dart';
 import 'flutter_icon_renderer.dart';
 import 'label.dart';
@@ -216,7 +215,7 @@ class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
   final RegisteredServiceDescription serviceDescription;
 
   /// The action to perform when clicked.
-  final VoidAsyncFunction action;
+  final Future<void> Function() action;
 
   @override
   _RegisteredServiceExtensionButtonState createState() =>
@@ -231,17 +230,16 @@ class _RegisteredServiceExtensionButtonState
   @override
   void initState() {
     super.initState();
+
     // Only show the button if the device supports the given service.
-    autoDispose(
-      serviceManager.hasRegisteredService(
-        widget.serviceDescription.service,
-        (registered) {
-          setState(() {
-            _hidden = !registered;
-          });
-        },
-      ),
-    );
+    final serviceRegisteredListenable = serviceManager
+        .registeredServiceListenable(widget.serviceDescription.service);
+    addAutoDisposeListener(serviceRegisteredListenable, () {
+      final registered = serviceRegisteredListenable.value;
+      setState(() {
+        _hidden = !registered;
+      });
+    });
   }
 
   @override
@@ -392,7 +390,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
   /// Invokes [action], showing [SnackBar]s for the action's progress,
   /// completion, and any errors it produces.
   @protected
-  Future<void> invokeAndCatchErrors(VoidAsyncFunction action) async {
+  Future<void> invokeAndCatchErrors(Future<void> Function() action) async {
     if (disabled) {
       return;
     }

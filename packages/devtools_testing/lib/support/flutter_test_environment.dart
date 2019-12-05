@@ -9,7 +9,6 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 
 import '../support/file_utils.dart';
@@ -48,25 +47,25 @@ class FlutterTestEnvironment {
 
   // This function will be called after we have ran the Flutter app and the
   // vmService is opened.
-  VoidAsyncFunction _afterNewSetup;
-  set afterNewSetup(VoidAsyncFunction f) => _afterNewSetup = f;
+  Future<void> Function() _afterNewSetup;
+  set afterNewSetup(Future<void> Function() f) => _afterNewSetup = f;
 
   // This function will be called for every call to [setupEnvironment], even
   // when the setup is not forced or triggered by a new FlutterRunConfiguration.
-  VoidAsyncFunction _afterEverySetup;
-  set afterEverySetup(VoidAsyncFunction f) => _afterEverySetup = f;
+  Future<void> Function() _afterEverySetup;
+  set afterEverySetup(Future<void> Function() f) => _afterEverySetup = f;
 
   // The function will be called before the each tear down, including those that
   // skip work due to not being forced. This usually means for each individual
   // test, but it will also run as part of a final forced tear down so should
   // be tolerable to being called twice after a single test.
-  VoidAsyncFunction _beforeEveryTearDown;
-  set beforeEveryTearDown(VoidAsyncFunction f) => _beforeEveryTearDown = f;
+  Future<void> Function() _beforeEveryTearDown;
+  set beforeEveryTearDown(Future<void> Function() f) => _beforeEveryTearDown = f;
 
   // The function will be called before the final forced teardown at the end
   // of the test suite (which will then stop the Flutter app).
-  VoidAsyncFunction _beforeFinalTearDown;
-  set beforeFinalTearDown(VoidAsyncFunction f) => _beforeFinalTearDown = f;
+  Future<void> Function() _beforeFinalTearDown;
+  set beforeFinalTearDown(Future<void> Function() f) => _beforeFinalTearDown = f;
 
   bool _needsSetup = true;
 
