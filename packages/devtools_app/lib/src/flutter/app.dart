@@ -100,8 +100,8 @@ class DevToolsAppState extends State<DevToolsApp> {
             tabs: const [
               InspectorScreen(),
               TimelineScreen(),
-              PerformanceScreen(),
               MemoryScreen(),
+              PerformanceScreen(),
               // TODO(https://github.com/flutter/flutter/issues/43783): Put back
               // the debugger screen.
               LoggingScreen(),
