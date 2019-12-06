@@ -555,7 +555,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
     if (!_dirty) return;
     _dirty = false;
     final updatedProperties = await fetchFlexLayoutProperties();
-    _changeProperties(updatedProperties);
+    if (updatedProperties != null) _changeProperties(updatedProperties);
   }
 
   Widget _visualizeFlex(BuildContext context) {
