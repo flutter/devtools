@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/colors.dart';
 import '../../../utils.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
@@ -14,9 +13,6 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
   }) : super(key: key);
 
   final RenderProperties renderProperties;
-
-  static const heightArrowColor = mainUiColor;
-  static const widthArrowColor = Color(0xFF000099);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +35,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(vertical: arrowMargin),
           child: ArrowWrapper.bidirectional(
-            arrowColor: heightArrowColor,
+            arrowColor: widthIndicatorColor,
             direction: Axis.horizontal,
             arrowHeadSize: arrowHeadSize,
           ),
@@ -60,7 +56,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
             child: ArrowWrapper.bidirectional(
-              arrowColor: widthArrowColor,
+              arrowColor: heightIndicatorColor,
               direction: Axis.vertical,
               arrowHeadSize: arrowHeadSize,
               childMarginFromArrow: 0.0,
