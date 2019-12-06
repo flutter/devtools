@@ -98,7 +98,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
       controller: detailsTreeController,
       isSummaryTree: false,
     );
-    final splitAxis = Split.axisFor(context, 1.0);
+    final splitAxis = Split.axisFor(context, 1.3);
     return Column(
       children: <Widget>[
         Row(
