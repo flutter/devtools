@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as dart_ui;
 
 import 'package:flutter/material.dart';
@@ -23,139 +22,171 @@ import 'package:mp_chart/mp/core/enums/axis_dependency.dart';
 // import 'package:mp_chart/mp/core/enums/legend_orientation.dart';
 import 'package:mp_chart/mp/core/enums/x_axis_position.dart';
 import 'package:mp_chart/mp/core/enums/y_axis_label_position.dart';
+import 'package:mp_chart/mp/core/highlight/highlight.dart';
 import 'package:mp_chart/mp/core/image_loader.dart';
+import 'package:mp_chart/mp/core/marker/line_chart_marker.dart';
+import 'package:mp_chart/mp/core/poolable/point.dart';
 import 'package:mp_chart/mp/core/utils/color_utils.dart';
+import 'package:mp_chart/mp/core/utils/painter_utils.dart';
+import 'package:mp_chart/mp/core/value_formatter/default_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
-import 'memory_controller.dart';
-
-// TODO(terry): Remove canned data.
-import 'timeseries_data.dart';
+import '../../ui/theme.dart';
+import '../memory_controller.dart';
+import '../memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
-  const MemoryChart(this.memoryController);
-
-  final MemoryController memoryController;
-
   @override
   MemoryChartState createState() => MemoryChartState();
 }
 
-class MemoryChartState extends State<MemoryChart> {
+class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   LineChartController _chartController;
 
   LineChartController get chartController => _chartController;
+
+  MemoryController get _controller => Controllers.of(context).memory;
+
+  MemoryTimeline get _memoryTimeline => _controller.memoryTimeline;
+
+  final legendTypeFace =
+      TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
 
   @override
   void initState() {
     _initController();
 
+    _preloadResources();
+
     _setupChart();
-
-    // Read canned data and startup the pseudo-live feed.
-    _initLineData(true);
-
-    // TODO(terry): Remove when live feed is hooked up.
-    // Hookup to replay the canned data.
-    widget.memoryController.addResetFeedListener(() {
-      setState(() {
-        // Reset our starting index into the canned data and
-        // start feeding the live chart.
-        timerDataIndex = 0;
-      });
-    });
 
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    cancel();
+
+    // Process each heap sample.
+    addAutoDisposeListener(
+      _memoryTimeline.sampleAddedNotifier,
+      processLiveData,
+    );
+  }
+
   dart_ui.Image _img;
 
-  void _setupChart() async {
+  void _preloadResources() async {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[LineChart(_chartController)],
+    if (_memoryTimeline.data.isNotEmpty) {
+      return Center(
+        child: LineChart(_chartController),
+      );
+    }
+
+    return const Center(
+      child: Text('No data'),
     );
   }
-
-  var legendTypeFace =
-      TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
 
   void _initController() {
     final desc = Description()..enabled = false;
 
     _chartController = LineChartController(
-        axisLeftSettingFunction: (axisLeft, controller) {
-          axisLeft
-            ..position = YAxisLabelPosition.OUTSIDE_CHART
-            ..setValueFormatter(LargeValueFormatter())
-            ..drawGridLines = (true)
-            ..granularityEnabled = (true)
-            ..setStartAtZero(
-                true) // Set to baseline min and auto track max axis range.
-            ..textColor = const Color.fromARGB(255, 0, 0, 0);
-        },
-        axisRightSettingFunction: (axisRight, controller) {
-          axisRight.enabled = false;
-        },
-        xAxisSettingFunction: (xAxis, controller) {
-          xAxis
-            ..position = XAxisPosition.BOTTOM
-            ..textSize = 10
-            ..textColor = ColorUtils.WHITE
-            ..drawAxisLine = false
-            ..drawGridLines = true
-            ..textColor = const Color.fromARGB(255, 0, 0, 0)
-            ..centerAxisLabels = true
-            ..setGranularity(1)
-            ..setValueFormatter(XAxisFormatter());
-        },
-        legendSettingFunction: (legend, controller) {
-          legend.enabled = false;
-          // TODO(terry): Need to support legend with a smaller text size.
-          // legend
-          //   ..shape = LegendForm.LINE
-          //   ..verticalAlignment = LegendVerticalAlignment.TOP
-          //   ..enabled = true
-          //   ..orientation = LegendOrientation.HORIZONTAL
-          //   ..typeface = legendTypeFace
-          //   ..xOffset = 20
-          //   ..drawInside = false
-          //   ..horizontalAlignment = LegendHorizontalAlignment.CENTER
-          //   ..textSize = 6.0;
-        },
-        highLightPerTapEnabled: true,
-        backgroundColor: chartBackgroundColor,
-        drawGridBackground: false,
-        dragXEnabled: true,
-        dragYEnabled: true,
-        scaleXEnabled: true,
-        scaleYEnabled: true,
-        pinchZoomEnabled: false,
-        description: desc);
+      axisLeftSettingFunction: (axisLeft, controller) {
+        axisLeft
+          ..position = YAxisLabelPosition.OUTSIDE_CHART
+          ..setValueFormatter(LargeValueFormatter())
+          ..drawGridLines = (true)
+          ..granularityEnabled = (true)
+          ..setStartAtZero(
+              true) // Set to baseline min and auto track max axis range.
+          ..textColor = defaultForeground;
+      },
+      axisRightSettingFunction: (axisRight, controller) {
+        axisRight.enabled = false;
+      },
+      xAxisSettingFunction: (xAxis, controller) {
+        xAxis
+          ..position = XAxisPosition.BOTTOM
+          ..textSize = 10
+          ..drawAxisLine = false
+          ..drawGridLines = true
+          ..textColor = defaultForeground
+          ..centerAxisLabels = true
+          ..setGranularity(1)
+          ..setValueFormatter(XAxisFormatter());
+      },
+      legendSettingFunction: (legend, controller) {
+        legend.enabled = false;
+        // TODO(terry): Need to support legend with a smaller text size.
+        // legend
+        //   ..shape = LegendForm.LINE
+        //   ..verticalAlignment = LegendVerticalAlignment.TOP
+        //   ..enabled = true
+        //   ..orientation = LegendOrientation.HORIZONTAL
+        //   ..typeface = legendTypeFace
+        //   ..xOffset = 20
+        //   ..drawInside = false
+        //   ..horizontalAlignment = LegendHorizontalAlignment.CENTER
+        //   ..textSize = 6.0;
+      },
+      highLightPerTapEnabled: true,
+      backgroundColor: chartBackgroundColor,
+      drawGridBackground: false,
+      dragXEnabled: true,
+      dragYEnabled: true,
+      scaleXEnabled: true,
+      scaleYEnabled: true,
+      pinchZoomEnabled: false,
+      description: desc,
+      marker: SelectedDataPoint(
+          onSelected: onPointSelected, getAllValues: getValues),
+    );
 
     // Compute padding around chart.
     _chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
+  void onPointSelected(int index) {
+    _controller.selectedSample = index;
+  }
+
+  HeapSample getValues(int timestamp) {
+    for (var index = 0; index < _memoryTimeline.data.length; index++) {
+      if (_memoryTimeline.data[index].timestamp == timestamp) {
+        return _memoryTimeline.data[index];
+      }
+    }
+
+    return null;
+  }
+
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
-  // Datapoint entry for each used heap value.
+  // TODO(terry): Move _used, _capacity and _externalHeap Controller.
+  // TODO(terry): More efficient when switching views.
+
+  /// Datapoint entry for each used heap value.
   final List<Entry> _used = <Entry>[];
 
-  // Datapoint entry for each capacity heap value.
+  /// Datapoint entry for each capacity heap value.
   final List<Entry> _capacity = <Entry>[];
 
-  // Datapoint entry for each external memory value.
+  /// Datapoint entry for each external memory value.
   final List<Entry> _externalHeap = <Entry>[];
 
   // Trace #1 Heap Used.
@@ -167,61 +198,44 @@ class MemoryChartState extends State<MemoryChart> {
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  // Index into the raw data.
-  int timerDataIndex;
+  void processLiveData() {
+    final List<HeapSample> liveFeed = _memoryTimeline.data;
+    if (_used.length != liveFeed.length) {
+      for (var feedIndex = _used.length;
+          feedIndex < liveFeed.length;
+          feedIndex++) {
+        final sample = liveFeed[feedIndex];
+        final timestamp = sample.timestamp.toDouble();
 
-  // Active timer running.
-  Timer _timer;
+        final capacity = sample.capacity.toDouble();
+        final used = sample.used.toDouble();
+        final external = sample.external.toDouble();
 
-  Future<void> startFeed() async {
-    // Fetch from the beginning of the canned data for the live feed.
-    timerDataIndex = 0;
+        final extEntry = Entry(
+          x: timestamp,
+          y: external,
+          icon: _img,
+        );
+        final usedEntry = Entry(
+          x: timestamp,
+          y: used + external,
+          icon: _img,
+        );
+        final capacityEntry = Entry(
+          x: timestamp,
+          y: capacity,
+          icon: _img,
+        );
 
-    // TODO(terry): Consider moving the timer to the MemoryController.
-    // TODO(terry): The chart should be notified when new data arrives from the controller
-    //              using a notifier pattern.
-    // Average VMSerice rate is ~500-600 ms?
-    _timer = Timer.periodic(const Duration(milliseconds: 400), (Timer timer) {
-      if (timerDataIndex == 0) {
-        // First time reset our plotted data.
         setState(() {
-          _used.clear();
-          _capacity.clear();
-          _externalHeap.clear();
+          _externalHeap.add(extEntry);
+          _used.add(usedEntry);
+          _capacity.add(capacityEntry);
         });
       }
 
-      // Pause pressed stop pumping out data simulating a live feed.
-      if (!widget.memoryController.paused &&
-          timerDataIndex < externalMemoryData.length) {
-        int x;
-        int y;
-
-        x = externalMemoryData[timerDataIndex];
-        y = externalMemoryData[timerDataIndex + 1];
-        final externalEntry =
-            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        x = usedHeapData[timerDataIndex];
-        y = usedHeapData[timerDataIndex + 1] +
-            externalMemoryData[timerDataIndex + 1];
-        final usedEntry = Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        x = heapCapacityData[timerDataIndex];
-        y = heapCapacityData[timerDataIndex + 1];
-        final capacityEntry =
-            Entry(x: x.toDouble(), y: y.toDouble(), icon: _img);
-
-        _externalHeap.add(externalEntry);
-        _used.add(usedEntry);
-        _capacity.add(capacityEntry);
-
-        timerDataIndex += 2;
-      }
-
-      // TODO(terry): Consider moving live feed timer to MemoryController.
       updateChart();
-    });
+    }
   }
 
   void updateChart() {
@@ -236,46 +250,7 @@ class MemoryChartState extends State<MemoryChart> {
     });
   }
 
-  Future<void> loadAllData() async {
-    int index;
-
-    index = 0;
-    while (index < externalMemoryData.length) {
-      final x = externalMemoryData[index];
-      final y = externalMemoryData[index + 1];
-
-      _externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-
-    index = 0;
-    while (index < usedHeapData.length) {
-      final x = usedHeapData[index];
-      final y = usedHeapData[index + 1] + externalMemoryData[index + 1];
-
-      _used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-
-    index = 0;
-    while (index < heapCapacityData.length) {
-      final x = heapCapacityData[index];
-      final y = heapCapacityData[index + 1];
-
-      _capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-  }
-
-  void _initLineData([bool simulateFeed = false]) async {
-    if (!simulateFeed) {
-      await loadAllData();
-    } else if (_timer == null) {
-      await startFeed();
-    } else {
-      return;
-    }
-
+  void _setupChart() {
     // Create heap used dataset.
     usedHeapSet = LineDataSet(_used, 'Used');
     usedHeapSet
@@ -340,6 +315,128 @@ class XAxisFormatter extends ValueFormatter {
 
   @override
   String getFormattedValue1(double value) {
-    return mFormat.format(DateTime.fromMillisecondsSinceEpoch(value ~/ 1000));
+    return mFormat.format(DateTime.fromMillisecondsSinceEpoch(value.toInt()));
+  }
+}
+
+typedef SelectionCallback = void Function(int timestamp);
+
+typedef AllValuesCallback = HeapSample Function(int timestamp);
+
+/// Selection of a point in the Bar chart displays the data point values
+/// UI duration and GPU duration. Also, highlight the selected stacked bar.
+/// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
+/// onTapDown would be less laggy.
+///
+/// TODO(terry): Highlighting is not efficient, a faster mechanism to return
+/// the Entry being clicked is needed.
+///
+/// onSelected callback function invoked when bar entry is selected.
+class SelectedDataPoint extends LineChartMarker {
+  SelectedDataPoint({
+    this.textColor,
+    this.backColor,
+    this.fontSize,
+    this.onSelected,
+    this.getAllValues,
+  }) {
+    _timestampFormatter = XAxisFormatter();
+    _formatter = DefaultValueFormatter(0);
+    textColor ??= ColorUtils.WHITE;
+    backColor ??= const Color.fromARGB(127, 0, 0, 0);
+    fontSize ??= 10;
+  }
+
+  Entry _entry;
+
+  DefaultValueFormatter _formatter;
+
+  XAxisFormatter _timestampFormatter;
+
+  Color textColor;
+
+  Color backColor;
+
+  double fontSize;
+
+  int _lastTimestmap = -1;
+
+  final SelectionCallback onSelected;
+
+  final AllValuesCallback getAllValues;
+
+  @override
+  void draw(Canvas canvas, double posX, double posY) {
+    const positionAboveBar = 15;
+    const paddingAroundText = 5;
+    const rectangleCurve = 5.0;
+
+    final timestampAsInt = _entry.x.toInt();
+
+    final values = getAllValues(timestampAsInt);
+
+    assert(values.timestamp == timestampAsInt);
+
+    final num heapCapacity = values.capacity.toDouble();
+    final num heapUsed = values.used.toDouble();
+    final num external = values.external.toDouble();
+    final num rss = values.rss.toDouble();
+    final bool isGced = values.isGC;
+
+    final TextPainter painter = PainterUtils.create(
+      null,
+      'Time       ${_timestampFormatter.getFormattedValue1(timestampAsInt.toDouble())}\n'
+      'Capacity ${_formatter.getFormattedValue1(heapCapacity)}\n'
+      'Used       ${_formatter.getFormattedValue1(heapUsed)}\n'
+      'External  ${_formatter.getFormattedValue1(external)}\n'
+      'RSS        ${_formatter.getFormattedValue1(rss)}\n'
+      'GC          $isGced',
+      textColor,
+      fontSize,
+    )..textAlign = TextAlign.left;
+
+    final Paint paint = Paint()
+      ..color = backColor
+      ..strokeWidth = 2
+      ..isAntiAlias = true
+      ..style = PaintingStyle.fill;
+
+    final MPPointF offset = getOffsetForDrawingAtPoint(
+      posX,
+      posY,
+    );
+
+    canvas.save();
+    // translate to the correct position and draw
+    painter.layout();
+    final Offset pos = calculatePos(
+      posX + offset.x,
+      posY + offset.y - positionAboveBar,
+      painter.width,
+      painter.height,
+    );
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        pos.dx - paddingAroundText,
+        pos.dy - paddingAroundText,
+        pos.dx + painter.width + paddingAroundText,
+        pos.dy + painter.height + paddingAroundText,
+        const Radius.circular(rectangleCurve),
+      ),
+      paint,
+    );
+    painter.paint(canvas, pos);
+    canvas.restore();
+  }
+
+  @override
+  void refreshContent(Entry e, Highlight highlight) async {
+    _entry = e;
+    final timestamp = _entry.x.toInt();
+    if (onSelected != null && _lastTimestmap != timestamp) {
+      _lastTimestmap = timestamp;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => onSelected(timestamp));
+    }
   }
 }

@@ -4,12 +4,14 @@
 
 import 'package:flutter/material.dart';
 
+import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../globals.dart';
 import '../../ui/flutter/label.dart';
+import '../memory_controller.dart';
 import 'memory_chart.dart';
-import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen();
@@ -34,16 +36,27 @@ class MemoryBody extends StatefulWidget {
 }
 
 class MemoryBodyState extends State<MemoryBody> {
-  // Creation of the controller must be in the state.
-  final MemoryController memoryController = MemoryController();
+  MemoryChart _memoryChart;
+
+  MemoryController get _controller => Controllers.of(context).memory;
 
   @override
   void initState() {
+    _updateListeningState();
+
     super.initState();
   }
 
   @override
+  void dispose() {
+    // TODO(terry): make my controller disposable via DisposableController and dispose here.
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _memoryChart = MemoryChart();
+
     return Column(
       children: [
         Row(
@@ -56,8 +69,8 @@ class MemoryBodyState extends State<MemoryBody> {
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: MemoryChart(memoryController),
-            secondChild: const Text('Memory Panel TBD'),
+            firstChild: _memoryChart,
+            secondChild: const Text('Memory Panel TBD capacity'),
             initialFirstFraction: 0.25,
           ),
         ),
@@ -65,12 +78,32 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
+  void _updateListeningState() async {
+    await serviceManager.serviceAvailable.future;
+
+    if (_controller.hasStarted) return;
+
+    await _controller.startTimeline();
+
+    // TODO(terry): Need to set the initial state of buttons.
+/*
+      pauseButton.disabled = false;
+      resumeButton.disabled = true;
+
+      vmMemorySnapshotButton.disabled = false;
+      resetAccumulatorsButton.disabled = false;
+      gcNowButton.disabled = false;
+
+      memoryChart.disabled = false;
+*/
+  }
+
   Widget _leftsideButtons() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         OutlineButton(
-          onPressed: memoryController.paused ? null : _pauseLiveTimeline,
+          onPressed: _controller.paused ? null : _pauseLiveTimeline,
           child: const MaterialIconLabel(
             Icons.pause,
             'Pause',
@@ -78,7 +111,7 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
         OutlineButton(
-          onPressed: memoryController.paused ? _resumeLiveTimeline : null,
+          onPressed: _controller.paused ? _resumeLiveTimeline : null,
           child: const MaterialIconLabel(
             Icons.play_arrow,
             'Resume',
@@ -125,13 +158,13 @@ class MemoryBodyState extends State<MemoryBody> {
 
   void _pauseLiveTimeline() {
     // TODO(terry): Implement real pause when connected to live feed.
-    memoryController.pauseLiveFeed();
+    _controller.pauseLiveFeed();
     setState(() {});
   }
 
   void _resumeLiveTimeline() {
     // TODO(terry): Implement real resume when connected to live feed.
-    memoryController.resumeLiveFeed();
+    _controller.resumeLiveFeed();
     setState(() {});
   }
 
@@ -140,10 +173,7 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   void _reset() {
-    // TODO(terry): Remove this sample code.
-    // Reset the can feed and replay again.
-    memoryController.notifyResetFeedListeners();
-    _resumeLiveTimeline();
+    // TODO(terry): TBD real implementation needed.
   }
 
   void _gc() {
