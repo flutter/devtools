@@ -1,8 +1,6 @@
-import 'package:devtools_app/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/colors.dart';
 import '../../../utils.dart';
 import '../inspector_data_models.dart';
 import 'arrow.dart';
