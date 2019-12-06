@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -149,7 +148,6 @@ class MemoryTracker {
   }
 }
 
-@JsonSerializable()
 class HeapSample {
   HeapSample(
     this.timestamp,
@@ -178,22 +176,16 @@ class HeapSample {
         'gc': isGC,
       };
 
-  @JsonKey(name: 'timestamp')
   final int timestamp;
 
-  @JsonKey(name: 'rss')
   final int rss;
 
-  @JsonKey(name: 'capacity')
   final int capacity;
 
-  @JsonKey(name: 'used')
   final int used;
 
-  @JsonKey(name: 'external')
   final int external;
 
-  @JsonKey(name: 'gc')
   final bool isGC;
 }
 
