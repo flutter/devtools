@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -13,7 +14,6 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart' as extensions;
-import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/icons.dart';
