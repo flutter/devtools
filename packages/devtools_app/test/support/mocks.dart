@@ -44,7 +44,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   Future<double> getDisplayRefreshRate() async => 60;
-  
+
   @override
   final bool hasConnection;
 
