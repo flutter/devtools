@@ -4,19 +4,24 @@ import 'package:vm_service/vm_service.dart';
 import '../diagnostics_node.dart';
 import '../inspector_service.dart';
 
+const maxRetry = 5;
+
 extension InspectorFlutterService on ObjectGroup {
   /// Retry eval until the resulting json is not empty,
   /// when result is null we should stop retrying because
   /// it means the object does not exist anymore.
   Future<InstanceRef> _evalUntilJsonIsNotEmpty(String command) async {
     InstanceRef result;
+    int currentRetry = 0;
     do {
       result = await inspectorLibrary.eval(
         command,
         isAlive: this,
       );
+      currentRetry += 1;
       // result.length <= 2 is used for checking empty json string which is '{}'
-    } while (result != null && (result.length ?? 0) <= 2);
+    } while (
+        currentRetry < maxRetry && result != null && (result.length ?? 0) <= 2);
     return result;
   }
 
