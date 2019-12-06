@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -241,7 +242,7 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
         inspectorService: inspectorService,
         treeType: FlutterTreeType.widget,
         onExpandCollapseSupported: _onExpandCollapseSupported,
-        onLayoutExplorerSupported: _onLayoutExplorerSupported,
+        onLayoutExplorerSupported: kIsWeb ? null : _onLayoutExplorerSupported,
       );
 
       // TODO(jacobr): move this notice display to once a day.
