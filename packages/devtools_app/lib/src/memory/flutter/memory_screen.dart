@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -127,6 +130,15 @@ class MemoryBodyState extends State<MemoryBody> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         OutlineButton(
+          onPressed: _exportMemory,
+          child: MaterialIconLabel(
+            Icons.file_download,
+            'Export',
+            minIncludeTextWidth: 1100,
+          ),
+        ),
+        const SizedBox(width: 32.0),
+        OutlineButton(
           onPressed: _snapshot,
           child: MaterialIconLabel(
             Icons.camera,
@@ -167,6 +179,34 @@ class MemoryBodyState extends State<MemoryBody> {
     _controller.resumeLiveFeed();
     setState(() {});
   }
+
+  void _exportMemory() async {
+    final liveData = _controller.memoryTimeline.data;
+
+    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
+    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+
+    assert(realData.length == liveData.length);
+
+    Directory systemTemp = Directory.systemTemp;
+    print(">>> systemTemp ${systemTemp.uri} , ${systemTemp.path}");
+
+    File()
+
+
+    final Directory tempDir = await getTemporaryDirectory();
+    final String tempPath = tempDir.path;
+
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String appDocPath = appDocDir.path;
+
+    print("getTemporaryDirectory -> $tempPath");
+    print("getApplicationDocumentsDirectory -> $appDocPath");
+
+    setState(() {});
+  }
+
+  void _loadOffline() {}
 
   void _snapshot() {
     // TODO(terry): Implementation needed.
