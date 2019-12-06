@@ -26,6 +26,8 @@ typedef chartStateListener = void Function();
 class MemoryController {
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
+  int selectedSample = -1;
+
   bool _paused = false;
 
   bool get paused => _paused;
