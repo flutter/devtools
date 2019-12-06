@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
@@ -36,7 +35,11 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
+class MemoryBodyState extends State<MemoryBody> {
+  MemoryChart _memoryChart;
+
+  MemoryController get _controller => Controllers.of(context).memory;
+   
   @override
   void initState() {
     _updateListeningState();
@@ -51,19 +54,9 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final MemoryController memoryController = Controllers.of(context).memory;
-
-    // Process each timeline frame.
-    addAutoDisposeListener(memoryController.memoryTimeline.sampleAddedNotifier,
-        () {
-      setState(() {});
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    _memoryChart = MemoryChart();
+
     return Column(
       children: [
         Row(
@@ -76,7 +69,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            firstChild: MemoryChart(),
+            firstChild: _memoryChart,
             secondChild: const Text('Memory Panel TBD capacity'),
             initialFirstFraction: 0.25,
           ),
@@ -88,10 +81,11 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    final MemoryController memoryController = Controllers.of(context).memory;
-    if (memoryController.hasStarted) return;
+    if (_controller.hasStarted) return;
 
-    await memoryController.startTimeline();
+    await _controller.startTimeline();
+
+      // TODO(terry): Need to set the initial state of buttons.
 /*
       pauseButton.disabled = false;
       resumeButton.disabled = true;
@@ -105,13 +99,11 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   }
 
   Widget _leftsideButtons() {
-    final MemoryController memoryController = Controllers.of(context).memory;
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         OutlineButton(
-          onPressed: memoryController.paused ? null : _pauseLiveTimeline,
+          onPressed: _controller.paused ? null : _pauseLiveTimeline,
           child: const MaterialIconLabel(
             Icons.pause,
             'Pause',
@@ -119,7 +111,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
           ),
         ),
         OutlineButton(
-          onPressed: memoryController.paused ? _resumeLiveTimeline : null,
+          onPressed: _controller.paused ? _resumeLiveTimeline : null,
           child: const MaterialIconLabel(
             Icons.play_arrow,
             'Resume',
@@ -166,15 +158,13 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
 
   void _pauseLiveTimeline() {
     // TODO(terry): Implement real pause when connected to live feed.
-    final MemoryController memoryController = Controllers.of(context).memory;
-    memoryController.pauseLiveFeed();
+    _controller.pauseLiveFeed();
     setState(() {});
   }
 
   void _resumeLiveTimeline() {
     // TODO(terry): Implement real resume when connected to live feed.
-    final MemoryController memoryController = Controllers.of(context).memory;
-    memoryController.resumeLiveFeed();
+    _controller.resumeLiveFeed();
     setState(() {});
   }
 
@@ -183,15 +173,7 @@ class MemoryBodyState extends State<MemoryBody> with AutoDisposeMixin {
   }
 
   void _reset() {
-    // TODO(terry): Remove sample code testing Json encoding and decoding.
-    final MemoryController memoryController = Controllers.of(context).memory;
-
-    final liveData = memoryController.memoryTimeline.data;
-
-    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
-
-    assert(realData.length == liveData.length);
+    // TODO(terry): TBD real implementation needed.
   }
 
   void _gc() {

@@ -15,7 +15,6 @@ import '../vm_service_wrapper.dart';
 import 'memory_protocol.dart';
 import 'memory_service.dart';
 
-// TODO(terry): Temporary code for canned data.
 typedef chartStateListener = void Function();
 
 // TODO(terry): Implement a dispose method and call in ProvidedControllers dispose.
@@ -26,10 +25,6 @@ typedef chartStateListener = void Function();
 /// simplify porting this code to work with Flutter Web.
 class MemoryController {
   final MemoryTimeline memoryTimeline = MemoryTimeline();
-
-  // TODO(terry): Temporary code for canned data.
-  // *************************************************************************
-  // *************************************************************************
 
   bool _paused = false;
 
@@ -62,10 +57,6 @@ class MemoryController {
       notifyListener();
     }
   }
-
-  // *************************************************************************
-  // *************************************************************************
-  // TODO(terry): END OF canned data code.
 
   final SettingsModel settings = SettingsModel();
 
@@ -421,18 +412,17 @@ class LibraryCollection {
 }
 
 class MemoryTimeline {
+  /// Raw Heap sampling data from the VM.
   final List<HeapSample> data = [];
 
   /// Notifies that a new Heap sample has been added to the timeline.
-  ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
-  final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
+  final sampleAddedNotifier = ValueNotifier<HeapSample>(null);
 
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
 
   /// Notifies that the timeline has been paused.
-  ValueListenable get pausedNotifier => _pausedNotifier;
-  final _pausedNotifier = ValueNotifier<bool>(false);
+  final pausedNotifier = ValueNotifier<bool>(false);
 
   /// Given a list of HeapSample, encode as a Json string.
   static String encodeHeapSamples(List<HeapSample> data) {
@@ -456,16 +446,16 @@ class MemoryTimeline {
 
   void pause({bool manual = false}) {
     manuallyPaused = manual;
-    _pausedNotifier.value = true;
+    pausedNotifier.value = true;
   }
 
   void resume() {
     manuallyPaused = false;
-    _pausedNotifier.value = false;
+    pausedNotifier.value = false;
   }
 
   void addSample(HeapSample sample) {
     data.add(sample);
-    _sampleAddedNotifier.value = sample;
+    sampleAddedNotifier.value = sample;
   }
 }

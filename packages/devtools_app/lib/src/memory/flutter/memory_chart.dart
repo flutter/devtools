@@ -27,6 +27,7 @@ import 'package:mp_chart/mp/core/utils/color_utils.dart';
 import 'package:mp_chart/mp/core/value_formatter/large_value_formatter.dart';
 import 'package:mp_chart/mp/core/value_formatter/value_formatter.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
 import '../../ui/theme.dart';
@@ -38,10 +39,14 @@ class MemoryChart extends StatefulWidget {
   MemoryChartState createState() => MemoryChartState();
 }
 
-class MemoryChartState extends State<MemoryChart> {
+class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   LineChartController _chartController;
 
   LineChartController get chartController => _chartController;
+
+  MemoryController get _controller => Controllers.of(context).memory;
+  
+  MemoryTimeline get _memoryTimeline => _controller.memoryTimeline;
 
   final legendTypeFace =
       TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
@@ -57,6 +62,16 @@ class MemoryChartState extends State<MemoryChart> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Process each timeline frame.
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      processLiveData();
+    });
+  }
+
   dart_ui.Image _img;
 
   void _preloadResources() async {
@@ -65,20 +80,7 @@ class MemoryChartState extends State<MemoryChart> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoryController memoryController = Controllers.of(context).memory;
-
-    if (!memoryController.anyResetFeedListeners) {
-      // Only hookup listeners once.
-      memoryController.addResetFeedListener(() {
-        setState(() {
-          // TODO(terry): TBD Reset allocation stats.
-        });
-      });
-    }
-
-    if (memoryController.memoryTimeline.data.isNotEmpty) {
-      processLiveData();
-
+    if (_memoryTimeline.data.isNotEmpty) {
       return Stack(
         children: [LineChart(_chartController)],
       );
@@ -150,13 +152,16 @@ class MemoryChartState extends State<MemoryChart> {
     super.dispose();
   }
 
-  // Datapoint entry for each used heap value.
+  // TODO(terry): Move _used, _capacity and _externalHeap Controller.
+  // TODO(terry): More efficient when switching views.
+
+  /// Datapoint entry for each used heap value.
   final List<Entry> _used = <Entry>[];
 
-  // Datapoint entry for each capacity heap value.
+  /// Datapoint entry for each capacity heap value.
   final List<Entry> _capacity = <Entry>[];
 
-  // Datapoint entry for each external memory value.
+  /// Datapoint entry for each external memory value.
   final List<Entry> _externalHeap = <Entry>[];
 
   // Trace #1 Heap Used.
@@ -168,10 +173,16 @@ class MemoryChartState extends State<MemoryChart> {
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  void processLiveData() {
-    final MemoryController memoryController = Controllers.of(context).memory;
+  void clearData() {
+    setState(() {
+      _used.clear();
+      _capacity.clear();
+      _externalHeap.clear();
+    });
+  }
 
-    final List<HeapSample> liveFeed = memoryController.memoryTimeline.data;
+  void processLiveData() {
+    final List<HeapSample> liveFeed = _memoryTimeline.data;
     if (_used.length != liveFeed.length) {
       for (var feedIndex = _used.length;
           feedIndex < liveFeed.length;
@@ -199,9 +210,11 @@ class MemoryChartState extends State<MemoryChart> {
           icon: _img,
         );
 
-        _externalHeap.add(extEntry);
-        _used.add(usedEntry);
-        _capacity.add(capacityEntry);
+        setState(() {
+          _externalHeap.add(extEntry);
+          _used.add(usedEntry);
+          _capacity.add(capacityEntry);
+        });
       }
 
       updateChart();
@@ -219,39 +232,6 @@ class MemoryChartState extends State<MemoryChart> {
           []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
     });
   }
-
-/*
-  Future<void> loadOfflineData() async {
-    int index;
-
-    index = 0;
-    while (index < externalMemoryData.length) {
-      final x = externalMemoryData[index];
-      final y = externalMemoryData[index + 1];
-
-      _externalHeap.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-
-    index = 0;
-    while (index < usedHeapData.length) {
-      final x = usedHeapData[index];
-      final y = usedHeapData[index + 1] + externalMemoryData[index + 1];
-
-      _used.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-
-    index = 0;
-    while (index < heapCapacityData.length) {
-      final x = heapCapacityData[index];
-      final y = heapCapacityData[index + 1];
-
-      _capacity.add(Entry(x: x.toDouble(), y: y.toDouble(), icon: _img));
-      index += 2;
-    }
-  }
-*/
 
   void _setupChart() {
     // Create heap used dataset.
