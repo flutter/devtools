@@ -61,7 +61,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   final int totalFramesToChart = 150;
 
-  /// Compute the FPS highwater mark.
+  /// Compute the FPS highwater mark, 60 FPS is 16.6 ms and 120 FPS is 8 ms.
   void _setupFPSHighwaterLine() async {
     if (_chartController.axisLeftSettingFunction == null) {
       final fpsRate =
@@ -75,7 +75,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
-          ..addLimitLine(LimitLine(fpsInMs, '${fpsRate.toInt()} FPS')
+          ..addLimitLine(LimitLine(fpsInMs, '$fpsRate FPS')
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
