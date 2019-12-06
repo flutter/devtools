@@ -117,7 +117,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         () {
       final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
       if (newFrame == null) return;
-
       setState(() {
         // If frames not in sync with charting data (_frameDurations)?
         if (frames.isEmpty && _frameDurations.length == 1) {
