@@ -12,16 +12,16 @@ extension InspectorFlutterService on ObjectGroup {
   /// it means the object does not exist anymore.
   Future<InstanceRef> _evalUntilJsonIsNotEmpty(String command) async {
     InstanceRef result;
-    int currentRetry = 0;
+    int numRetries = 0;
     do {
       result = await inspectorLibrary.eval(
         command,
         isAlive: this,
       );
-      currentRetry += 1;
+      numRetries += 1;
       // result.length <= 2 is used for checking empty json string which is '{}'
     } while (
-        currentRetry < maxRetry && result != null && (result.length ?? 0) <= 2);
+        numRetries < maxRetry && result != null && (result.length ?? 0) <= 2);
     return result;
   }
 
