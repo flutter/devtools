@@ -1,4 +1,4 @@
-## 0.1.12-dev.2
+## 0.1.12 - 2019-12-06
 * Fix a regression that showed an inaccurate error on the connect screen.
 * Fix bug causing async events with the same name to overlap each other in the Timeline.
 * Include previously omitted args in Timeline event summary.
