@@ -43,6 +43,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
+  Future<double> getDisplayRefreshRate() async => 60;
+  
+  @override
   final bool hasConnection;
 
   @override
