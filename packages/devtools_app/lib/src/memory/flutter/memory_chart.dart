@@ -45,7 +45,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   LineChartController get chartController => _chartController;
 
   MemoryController get _controller => Controllers.of(context).memory;
-  
+
   MemoryTimeline get _memoryTimeline => _controller.memoryTimeline;
 
   final legendTypeFace =
@@ -65,6 +65,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    cancel();
 
     // Process each timeline frame.
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
@@ -172,14 +174,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
-
-  void clearData() {
-    setState(() {
-      _used.clear();
-      _capacity.clear();
-      _externalHeap.clear();
-    });
-  }
 
   void processLiveData() {
     final List<HeapSample> liveFeed = _memoryTimeline.data;
