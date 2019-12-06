@@ -33,8 +33,6 @@ import 'utils.dart';
 
 // TODO(devoncarew): make the screens more robust through restarts
 
-bool enableFlutterWebTesting = false;
-
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const flutterWebLibraryUri = 'package:flutter_web/src/widgets/binding.dart';
 
@@ -82,22 +80,20 @@ class HtmlPerfToolFramework extends HtmlFramework {
           .open('https://github.com/flutter/devtools/issues', '_feedback');
     });
 
-    if (enableFlutterWebTesting) {
-      // Listen for clicks on the 'Try DevTools on Flutter Web' button.
-      queryId('try-flutter-web-devtools')
-        ..hidden = false
-        ..onClick.listen((_) {
-          var href = '/flutter.html#/';
-          // Preserve query parameters when opening the Flutter demo so the
-          // user does not need to go through the connect dialog again.
-          final flutterQueryParams =
-              Uri.tryParse(html.window.location.href).queryParameters ?? {};
-          if (flutterQueryParams.isNotEmpty) {
-            href += Uri(queryParameters: flutterQueryParams).toString();
-          }
-          html.window.location.href = href;
-        });
-    }
+    // Listen for clicks on the 'Try DevTools on Flutter Web' button.
+    queryId('try-flutter-web-devtools')
+      ..hidden = false
+      ..onClick.listen((_) {
+        var href = '/flutter.html#/';
+        // Preserve query parameters when opening the Flutter demo so the
+        // user does not need to go through the connect dialog again.
+        final flutterQueryParams =
+            Uri.tryParse(html.window.location.href).queryParameters ?? {};
+        if (flutterQueryParams.isNotEmpty) {
+          href += Uri(queryParameters: flutterQueryParams).toString();
+        }
+        html.window.location.href = href;
+      });
 
     await serviceManager.serviceAvailable.future;
     await addScreens();
