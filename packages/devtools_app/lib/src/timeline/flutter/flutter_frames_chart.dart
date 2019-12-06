@@ -61,6 +61,37 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   final int totalFramesToChart = 150;
 
+  /// Compute the FPS highwater mark based on the displayRefreshRate from
+  /// FrameBasedTimeline.
+  void _setupFPSHighwaterLine() async {
+    if (_chartController.axisLeftSettingFunction == null) {
+      final fpsRate = await _controller.frameBasedTimeline.displayRefreshRate;
+
+      // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
+      final targetMsPerFrame = 1 / fpsRate * 1000;
+
+      _chartController.axisLeftSettingFunction = (axisLeft, controller) {
+        axisLeft
+          ..setStartAtZero(true)
+          ..typeface = lightTypeFace
+          ..textColor = defaultForeground
+          ..drawGridLines = false
+          ..setValueFormatter(YAxisUnitFormatter())
+          ..addLimitLine(LimitLine(
+            targetMsPerFrame,
+            '${fpsRate.toStringAsFixed(0)} FPS',
+          )
+            // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
+            ..labelPosition = LimitLabelPosition.RIGHT_TOP
+            ..textSize = 10
+            ..typeface = boldTypeFace
+            // TODO(terry): Below crashed Flutter in Travis see issues/1338.
+            // ..enableDashedLine(5, 5, 0)
+            ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
+      };
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -76,6 +107,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         _updateChart();
       });
     }));
+
+    setState(() {
+      _setupFPSHighwaterLine();
+    });
 
     // Process each timeline frame.
     addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
@@ -149,22 +184,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       // TODO(kenz): make this a general background color for use throughout
       // devtools.
       backgroundColor: chartBackgroundColor,
-      axisLeftSettingFunction: (axisLeft, controller) {
-        axisLeft
-          ..setStartAtZero(true)
-          ..typeface = lightTypeFace
-          ..textColor = defaultForeground
-          ..drawGridLines = false
-          ..setValueFormatter(YAxisUnitFormatter())
-          ..addLimitLine(LimitLine(60, '60 FPS')
-            // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
-            ..labelPosition = LimitLabelPosition.RIGHT_TOP
-            ..textSize = 10
-            ..typeface = boldTypeFace
-            // TODO(terry): Below crashed Flutter in Travis see issues/1338.
-            // ..enableDashedLine(5, 5, 0)
-            ..lineColor = const Color.fromARGB(0x80, 0xff, 0x44, 0x44));
-      },
+      // The axisLeftSettingFunction is computed in didChangeDependencies,
+      // see _setupFPSHighwaterLine.
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
       },
