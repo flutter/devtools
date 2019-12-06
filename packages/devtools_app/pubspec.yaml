@@ -32,8 +32,8 @@ dependencies:
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
-  mp_chart:
-    path: ../../third_party/packages/mp_chart
+  mp_chart: ^0.0.7
+  #  path: ../../third_party/packages/mp_chart
   path: ^1.6.0
   pedantic: ^1.7.0
   platform_detect: ^1.3.5
