@@ -41,8 +41,6 @@ class MemoryController {
   /// Listeners to hookup modifying the MemoryChartState.
   final List<chartStateListener> _resetFeedListeners = [];
 
-  bool get anyResetFeedListeners => _resetFeedListeners.isNotEmpty;
-
   void addResetFeedListener(chartStateListener listener) {
     _resetFeedListeners.add(listener);
   }
@@ -416,13 +414,17 @@ class MemoryTimeline {
   final List<HeapSample> data = [];
 
   /// Notifies that a new Heap sample has been added to the timeline.
-  final sampleAddedNotifier = ValueNotifier<HeapSample>(null);
+  final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
+
+  ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
 
   /// Whether the timeline has been manually paused via the Pause button.
   bool manuallyPaused = false;
 
   /// Notifies that the timeline has been paused.
-  final pausedNotifier = ValueNotifier<bool>(false);
+  final _pausedNotifier = ValueNotifier<bool>(false);
+
+  ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
   /// Given a list of HeapSample, encode as a Json string.
   static String encodeHeapSamples(List<HeapSample> data) {
@@ -446,16 +448,16 @@ class MemoryTimeline {
 
   void pause({bool manual = false}) {
     manuallyPaused = manual;
-    pausedNotifier.value = true;
+    _pausedNotifier.value = true;
   }
 
   void resume() {
     manuallyPaused = false;
-    pausedNotifier.value = false;
+    _pausedNotifier.value = false;
   }
 
   void addSample(HeapSample sample) {
     data.add(sample);
-    sampleAddedNotifier.value = sample;
+    _sampleAddedNotifier.value = sample;
   }
 }

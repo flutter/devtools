@@ -68,10 +68,11 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     cancel();
 
-    // Process each timeline frame.
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      processLiveData();
-    });
+    // Process each heap sample.
+    addAutoDisposeListener(
+      _memoryTimeline.sampleAddedNotifier,
+      processLiveData,
+    );
   }
 
   dart_ui.Image _img;
@@ -83,13 +84,13 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     if (_memoryTimeline.data.isNotEmpty) {
-      return Stack(
-        children: [LineChart(_chartController)],
+      return Center(
+        child: LineChart(_chartController),
       );
     }
 
-    return Stack(
-      children: const [Text('No data')],
+    return const Center(
+      child: Text('No data'),
     );
   }
 

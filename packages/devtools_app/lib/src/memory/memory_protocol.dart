@@ -15,8 +15,6 @@ import '../vm_service_wrapper.dart';
 import 'heap_space.dart';
 import 'memory_controller.dart';
 
-part 'memory_protocol.g.dart';
-
 class MemoryTracker {
   MemoryTracker(this.service, this.memoryController);
 
@@ -128,8 +126,14 @@ class MemoryTracker {
 
     _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
 
-    memoryController.memoryTimeline.addSample(
-        HeapSample(time, processRss, capacity, used, external, fromGC));
+    memoryController.memoryTimeline.addSample(HeapSample(
+      time,
+      processRss,
+      capacity,
+      used,
+      external,
+      fromGC,
+    ));
   }
 
   void _addSample(HeapSample sample) {
@@ -156,10 +160,23 @@ class HeapSample {
     this.isGC,
   );
 
-  factory HeapSample.fromJson(Map<String, dynamic> json) =>
-      _$HeapSampleFromJson(json);
+  factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
+        json['timestamp'] as int,
+        json['rss'] as int,
+        json['capacity'] as int,
+        json['used'] as int,
+        json['external'] as int,
+        json['gc'] as bool,
+      );
 
-  Map<String, dynamic> toJson() => _$HeapSampleToJson(this);
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'timestamp': timestamp,
+        'rss': rss,
+        'capacity': capacity,
+        'used': used,
+        'external': external,
+        'gc': isGC,
+      };
 
   @JsonKey(name: 'timestamp')
   final int timestamp;

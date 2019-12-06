@@ -39,7 +39,7 @@ class MemoryBodyState extends State<MemoryBody> {
   MemoryChart _memoryChart;
 
   MemoryController get _controller => Controllers.of(context).memory;
-   
+
   @override
   void initState() {
     _updateListeningState();
@@ -85,7 +85,7 @@ class MemoryBodyState extends State<MemoryBody> {
 
     await _controller.startTimeline();
 
-      // TODO(terry): Need to set the initial state of buttons.
+    // TODO(terry): Need to set the initial state of buttons.
 /*
       pauseButton.disabled = false;
       resumeButton.disabled = true;
