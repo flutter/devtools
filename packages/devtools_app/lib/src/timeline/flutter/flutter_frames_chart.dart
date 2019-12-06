@@ -61,12 +61,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   final int totalFramesToChart = 150;
 
-  /// Compute the FPS highwater mark, 60 FPS is 16.6 ms and 120 FPS is 8 ms.
+  /// Compute the FPS highwater mark based on the displayRefreshRate from
+  /// FrameBasedTimeline.
   void _setupFPSHighwaterLine() async {
     if (_chartController.axisLeftSettingFunction == null) {
-      final fpsRate =
-          (await _controller.frameBasedTimeline.displayRefreshRate).toInt();
-      final fpsInMs = fpsRate == 60 ? 16.6 : 8.0;
+      final fpsRate = await _controller.frameBasedTimeline.displayRefreshRate;
+
+      // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
+      final targetMsPerFrame = 1 / fpsRate * 1000;
 
       _chartController.axisLeftSettingFunction = (axisLeft, controller) {
         axisLeft
@@ -75,7 +77,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ..textColor = defaultForeground
           ..drawGridLines = false
           ..setValueFormatter(YAxisUnitFormatter())
-          ..addLimitLine(LimitLine(fpsInMs, '$fpsRate FPS')
+          ..addLimitLine(LimitLine(
+            targetMsPerFrame,
+            '${fpsRate.toStringAsFixed(0)} FPS',
+          )
             // TODO(terry): LEFT_TOP is clipped need to fix in MPFlutterChart.
             ..labelPosition = LimitLabelPosition.RIGHT_TOP
             ..textSize = 10
@@ -103,13 +108,15 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       });
     }));
 
+    setState(() {
+      _setupFPSHighwaterLine();
+    });
+
     // Process each timeline frame.
     addAutoDisposeListener(_controller.frameBasedTimeline.frameAddedNotifier,
         () {
       final newFrame = _controller.frameBasedTimeline.frameAddedNotifier.value;
       if (newFrame == null) return;
-
-      _setupFPSHighwaterLine();
 
       setState(() {
         // If frames not in sync with charting data (_frameDurations)?
@@ -178,8 +185,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       // TODO(kenz): make this a general background color for use throughout
       // devtools.
       backgroundColor: chartBackgroundColor,
-      // The axisLeftSettingFunction is computed in the frameAddedNotifier listener
-      // using the displayRefreshRate in FrameBasedTimeline.
+      // The axisLeftSettingFunction is computed in didChangeDependencies,
+      // see _setupFPSHighwaterLine.
       axisRightSettingFunction: (axisRight, controller) {
         axisRight.enabled = false;
       },
