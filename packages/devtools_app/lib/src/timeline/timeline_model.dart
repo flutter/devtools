@@ -120,7 +120,7 @@ class FullTimelineData extends TimelineData {
         a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
     for (TimelineEvent event in timelineEvents) {
       eventGroups.putIfAbsent(
-          _computeEventBucketKey(event), () => FullTimelineEventGroup())
+          _computeEventGroupKey(event), () => FullTimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
   }
@@ -131,7 +131,7 @@ class FullTimelineData extends TimelineData {
         math.max(_endTimestampMicros, event.time.end.inMicroseconds);
   }
 
-  String _computeEventBucketKey(TimelineEvent event) {
+  String _computeEventGroupKey(TimelineEvent event) {
     if (event.isAsyncEvent) {
       return event.name;
     } else if (event.isUiEvent) {
@@ -228,11 +228,16 @@ class FullTimelineEventGroup {
     for (int level = 0; level < maxLevelToVerify; level++) {
       final lastEventAtDisplayRow =
           eventsByRow[displayRow + level].nullSafeLast();
-      final firstNewEventAtLevel = event.firstNodeAtLevel(level);
-      if ((lastEventAtDisplayRow != null && firstNewEventAtLevel != null) &&
-          lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time)) {
-        // Events overlap, so [event] does not fit at [displayRow].
-        return false;
+      final firstNewEventAtLevel = event.firstSubNodeAtLevel(level);
+      if (lastEventAtDisplayRow != null && firstNewEventAtLevel != null) {
+        final eventsOverlap =
+            lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time);
+        final newEventStartsBeforeLastEventAtRow =
+            lastEventAtDisplayRow.time.start > firstNewEventAtLevel.time.end;
+        if (eventsOverlap || newEventStartsBeforeLastEventAtRow) {
+          // [event] does not fit at [displayRow].
+          return false;
+        }
       }
     }
     return true;
@@ -913,15 +918,12 @@ class AsyncTimelineEvent extends TimelineEvent {
   bool get hasOverlappingChildren {
     if (_hasOverlappingChildren != null) return _hasOverlappingChildren;
     for (int i = 0; i < children.length; i++) {
-      final currentChild = children[i];
+      final currentChild = children[i] as AsyncTimelineEvent;
       // We do not have to look back because children will be ordered by their
       // start times.
       for (int j = i + 1; j < children.length; j++) {
-        final sibling = children[j];
-        // TODO(kenz): Check for deep timestamp overlap - since these events are
-        // async, children can extend the time bound of their parents, meaning
-        // we may still have display collisions even if parents do not overlap.
-        if (currentChild.time.overlaps(sibling.time)) {
+        final sibling = children[j] as AsyncTimelineEvent;
+        if (currentChild.deepOverlaps(sibling)) {
           return _hasOverlappingChildren = true;
         }
       }
@@ -930,6 +932,18 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   bool _hasOverlappingChildren;
+
+  bool deepOverlaps(TimelineEvent other) {
+    final maxLevelToVerify = math.min(depth, other.depth);
+    for (int level = 0; level < maxLevelToVerify; level++) {
+      final lastEventAtLevel = lastSubNodeAtLevel(level);
+      final otherFirstEventAtLevel = other.firstSubNodeAtLevel(level);
+      if (lastEventAtLevel.time.overlaps(otherFirstEventAtLevel.time)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   void addChild(TimelineEvent child) {

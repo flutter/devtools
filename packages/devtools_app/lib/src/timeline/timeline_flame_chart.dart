@@ -331,6 +331,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   }
 
   void _calculateAsyncGuidelines() {
+    const subsequentChildGuidelineOffset = 8.0;
     assert(rows.isNotEmpty);
     assert(chartNodesByEvent.isNotEmpty);
     verticalGuidelines.clear();
@@ -339,9 +340,9 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       for (var node in row.nodes) {
         if (node.data is AsyncTimelineEvent) {
           final event = node.data as AsyncTimelineEvent;
-          if (event.hasOverlappingChildren) {
-            // Vertical guideline that will connect [node] with its overlapping
-            // children nodes. The line will end at [node]'s last child.
+          if (event.children.isNotEmpty) {
+            // Vertical guideline that will connect [node] with its children
+            // nodes. The line will end at [node]'s last child.
             final verticalGuidelineX = node.rect.left + 1;
             final verticalGuidelineStartY = node.rect.bottom;
             final verticalGuidelineEndY =
@@ -353,9 +354,47 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
 
             // Horizontal guidelines connecting each child to the vertical
             // guideline above.
-            for (var child in event.children) {
+            for (int i = 0; i < event.children.length; i++) {
+              double horizontalGuidelineStartX;
+
+              final child = event.children[i];
               final childNode = chartNodesByEvent[child];
-              final horizontalGuidelineStartX = verticalGuidelineX;
+
+              AsyncTimelineEvent previousChild;
+              if (i > 0) previousChild = event.children[i - 1];
+
+              // If [child] does not overlap [previousChild], draw the vertical
+              // guideline for [child] near the left edge of [child] instead of
+              // on the left edge of [event].
+              if (previousChild != null && !previousChild.deepOverlaps(child)) {
+                final previousChildNode = chartNodesByEvent[previousChild];
+
+                // If [child] started after [event] ended, use the right edge of
+                // event's [node] as the x coordinate for the guideline.
+                // Otherwise, take the minimum of
+                // [subsequentChildGuidelineOffset] and half the distance
+                // between [previousChild] and [child].
+                double newVerticalGuidelineX;
+                if (event.time.end < child.time.start) {
+                  newVerticalGuidelineX = node.rect.right;
+                } else {
+                  newVerticalGuidelineX = childNode.rect.left -
+                      math.min(
+                        subsequentChildGuidelineOffset,
+                        (childNode.rect.left - previousChildNode.rect.right) /
+                            2,
+                      );
+                }
+                final newVerticalGuidelineEndY = childNode.rect.centerLeft.dy;
+                verticalGuidelines.add(VerticalLineSegment(
+                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+                ));
+
+                horizontalGuidelineStartX = newVerticalGuidelineX;
+              } else {
+                horizontalGuidelineStartX = verticalGuidelineX;
+              }
               final horizontalGuidelineEndX = childNode.rect.left;
               final horizontalGuidelineY = childNode.rect.centerLeft.dy;
               horizontalGuidelines.add(HorizontalLineSegment(

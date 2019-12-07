@@ -345,6 +345,7 @@ void main() {
       expect(asyncEventB.displayDepth, equals(3));
       expect(asyncEventC.displayDepth, equals(2));
       expect(asyncEventD.displayDepth, equals(1));
+      expect(asyncEventWithDeepOverlap.displayDepth, equals(5));
     });
 
     test('hasOverlappingChildren', () {
@@ -352,6 +353,19 @@ void main() {
       expect(asyncEventB.hasOverlappingChildren, isTrue);
       expect(asyncEventC.hasOverlappingChildren, isFalse);
       expect(asyncEventD.hasOverlappingChildren, isFalse);
+    });
+
+    test('deepOverlaps', () {
+      expect(
+        asyncEventWithDeepOverlap1.time
+            .overlaps(asyncEventWithDeepOverlap2.time),
+        isFalse,
+      );
+      expect(asyncEvent3.time.overlaps(asyncEvent4.time), isTrue);
+      expect(
+        asyncEventWithDeepOverlap1.deepOverlaps(asyncEventWithDeepOverlap2),
+        isTrue,
+      );
     });
 
     test('couldBeParentOf', () {
