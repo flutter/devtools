@@ -537,7 +537,8 @@ class HtmlTimelineScreen extends HtmlScreen {
   }
 
   void _updateButtonStates() async {
-    final isDartCliApp = await serviceManager.connectedApp.isDartCliApp;
+    final isDartCliApp =
+        await serviceManager.connectedApp?.isDartCliApp ?? false;
     pauseButton
       ..disabled = timelineController.frameBasedTimeline.manuallyPaused
       ..hidden(offlineMode ||
