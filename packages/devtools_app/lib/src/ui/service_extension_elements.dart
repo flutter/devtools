@@ -257,8 +257,21 @@ class ServiceExtensionSelector {
 
   void updateSelection(ServiceExtensionState state) {
     if (state.value != null) {
-      final selectedIndex = extensionDescription.values.indexOf(state.value);
+      int selectedIndex = extensionDescription.values.indexOf(state.value);
+      if (selectedIndex == -1) {
+        // Gracefully handle unexpected extension description values by adding
+        // them to the list of extension descriptions.
+        // This is a bit of a hack but is acceptable for the dart:html version
+        // of the application. In the Flutter version we should keep a list of
+        // service extension descriptions separate form the core definition
+        // of the extensions.
+        extensionDescription.values.add(state.value);
+        extensionDescription.displayValues.add(state.value);
+        selectedIndex = extensionDescription.values.length - 1;
+        selector.option(extensionDescription.displayValues[selectedIndex]);
+      }
       selector.selectedIndex = selectedIndex;
+      selector.element.children[selectedIndex].style.display = '';
       _selectedValue = extensionDescription.displayValues[selectedIndex];
     }
   }
@@ -271,21 +284,11 @@ class TogglePlatformSelector extends ServiceExtensionSelector {
 
   @override
   void addOptions() {
-    extensionDescription.displayValues
-        .where((displayValue) => !displayValue.contains(fuchsia))
-        .forEach(selector.option);
-  }
-
-  @override
-  void updateState() {
-    // Select option whose state is already enabled.
-    serviceManager.serviceExtensionManager
-        .getServiceExtensionState(extensionDescription.extension, (state) {
-      if (state.value == fuchsia.toLowerCase()) {
-        selector.option(extensionDescription.displayValues
-            .firstWhere((displayValue) => displayValue.contains(fuchsia)));
+    super.addOptions();
+    for (int i = 0; i < extensionDescription.values.length; i++) {
+      if (extensionDescription.displayValues[i].contains(fuchsia)) {
+        selector.element.children[i].style.display = 'none';
       }
-      updateSelection(state);
-    });
+    }
   }
 }
