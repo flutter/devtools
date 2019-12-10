@@ -29,8 +29,9 @@ flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
 mkdir build/web/flutter
 mv build/web/main.* build/web/flutter/
 
-sed 's|main.dart.js|flutter\/main.dart.js|' build/web/index.html > build/web/flutter.html
-rm build/web/index.html
+sed 's|main.dart.js|flutter\/main.dart.js|' build/web/index.html > build/web/tmp.html
+sed 's|<head>|<head><style>.legacy-dart {visibility: hidden;}</style>|' build/web/tmp.html > build/web/flutter.html
+rm build/web/index.html build/web/tmp.html
 
 mv build/web/* ../devtools/build/
 

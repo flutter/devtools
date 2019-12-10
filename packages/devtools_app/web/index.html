@@ -90,6 +90,10 @@
 </head>
 
 <body fullbleed layout vertical>
+    <!-- 
+        TODO(https://github.com/flutter/devtools/issues/1468): Remove content
+        from body when we switch to the flutter build of the app.
+    -->
     <header flex wrap none class="masthead legacy-dart" id="header" layout horizontal>
         <a class="masthead-logo" id="title">
             <span class="optional-550">Dart DevTools</span>
@@ -147,8 +151,7 @@
             <div class="masthead-item action-button active" id="send-feedback-button" title="Send Feedback">
                 <span class="octicon octicon-comment"></span>
             </div>
-            <div hidden="true" class="masthead-item action-button active" id="try-flutter-web-devtools"
-                 title="Try alpha version of DevTools &#013;written in Flutter!">
+            <div hidden="true" class="masthead-item action-button active" id="try-flutter-web-devtools" title="Try alpha version of DevTools &#013;written in Flutter!">
                 <span class="octicon octicon-beaker"></span>
             </div>
         </div>
