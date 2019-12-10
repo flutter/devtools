@@ -139,8 +139,7 @@ class InspectorController extends DisposableController
     debugSummaryLayoutEnabled.value = !debugSummaryLayoutEnabled.value;
   }
 
-  // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
-  static bool enableExperimentalStoryOfLayout = false;
+  static bool enableExperimentalStoryOfLayout = true;
 
   final List<VoidCallback> _selectionListeners = [];
 
