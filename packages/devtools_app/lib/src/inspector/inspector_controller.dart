@@ -133,15 +133,6 @@ class InspectorController extends DisposableController
     }
   }
 
-  final debugSummaryLayoutEnabled = ValueNotifier(false);
-
-  void toggleDebugSummaryLayout() {
-    debugSummaryLayoutEnabled.value = !debugSummaryLayoutEnabled.value;
-  }
-
-  // TODO(albertusangga): Remove this flag if required CL to Flutter is landed
-  static bool enableExperimentalStoryOfLayout = false;
-
   final List<VoidCallback> _selectionListeners = [];
 
   void addSelectionListener(VoidCallback listener) {
@@ -808,7 +799,6 @@ class InspectorController extends DisposableController
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
-    debugSummaryLayoutEnabled.dispose();
     details?.dispose();
     super.dispose();
   }

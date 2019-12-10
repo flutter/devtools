@@ -12,11 +12,8 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
 import '../../ui/colors.dart';
 import '../diagnostics_node.dart';
-import '../inspector_controller.dart';
 import '../inspector_tree.dart';
 import 'diagnostics.dart';
-import 'inspector_data_models.dart';
-import 'summary_tree_debug_layout.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -63,8 +60,6 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         onToggle: () {
           setExpanded(!isExpanded);
         },
-        constraintDisplayController:
-            widget.inspectorTreeState.constraintDisplayController,
       ),
     );
   }
@@ -167,12 +162,10 @@ class InspectorTree extends StatefulWidget {
   const InspectorTree({
     Key key,
     @required this.controller,
-    this.debugSummaryLayoutEnabled,
     this.isSummaryTree = false,
   }) : super(key: key);
 
   final InspectorTreeController controller;
-  final ValueNotifier<bool> debugSummaryLayoutEnabled;
   final bool isSummaryTree;
 
   @override
@@ -192,9 +185,6 @@ class _InspectorTreeState extends State<InspectorTree>
   InspectorTreeControllerFlutter get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
-
-  ValueNotifier get debugSummaryLayoutEnabled =>
-      widget.debugSummaryLayoutEnabled;
 
   ScrollController _scrollControllerY;
   ScrollController _scrollControllerX;
@@ -234,9 +224,6 @@ class _InspectorTreeState extends State<InspectorTree>
   void dispose() {
     super.dispose();
     controller?.client = null;
-    debugSummaryLayoutEnabled?.removeListener(
-      _listenToDebugSummaryLayoutChanges,
-    );
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
@@ -360,22 +347,8 @@ class _InspectorTreeState extends State<InspectorTree>
     return maxOffset - viewportDimension;
   }
 
-  void _listenToDebugSummaryLayoutChanges() {
-    if (debugSummaryLayoutEnabled.value) {
-      constraintDisplayController.forward();
-    } else {
-      constraintDisplayController.reverse();
-    }
-  }
-
   void _bindToController() {
     controller?.client = this;
-    if (isSummaryTree) {
-      addAutoDisposeListener(
-        debugSummaryLayoutEnabled,
-        _listenToDebugSummaryLayoutChanges,
-      );
-    }
   }
 
   @override
@@ -503,14 +476,12 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandAnimation,
-    @required this.constraintDisplayController,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
   final Animation<double> expandAnimation;
-  final AnimationController constraintDisplayController;
 
   @override
   Widget build(BuildContext context) {
@@ -564,13 +535,6 @@ class InspectorRowContent extends StatelessWidget {
                   ),
                 ),
               ),
-              if (InspectorController.enableExperimentalStoryOfLayout &&
-                  // fadeConstraintsAnimation is null for details tree rows
-                  constraintDisplayController != null)
-                ConstraintsDescription(
-                  listenable: constraintDisplayController,
-                  properties: LayoutProperties(node.diagnostic),
-                ),
             ],
           ),
         ),
