@@ -6,7 +6,7 @@ description: Main package implementing web-based performance tooling for Dart an
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 0.1.12
+version: 0.1.13
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
