@@ -125,16 +125,17 @@ class MemoryBodyState extends State<MemoryBody> {
 
           if (memorySource == _liveFeed) {
             if (_controller.offline) {
-            // User is switching back to 'Live Feed'.
-            _controller.memoryTimeline.offflineData.clear();
-            _controller.offline = false;  // We're live again...
+              // User is switching back to 'Live Feed'.
+              _controller.memoryTimeline.offflineData.clear();
+              _controller.offline = false; // We're live again...
             } else {
-              assert(!_controller.offline); // We've still live - keep collecting.
+              // Still a live feed - keep collecting.
+              assert(!_controller.offline);
             }
-          } else{
+          } else {
             // Switching to an offline memory log (JSON file in /tmp).
             _loadOffline(memorySource);
-          } 
+          }
 
           // Notify the Chart state there's new data from a different memory
           // source to plot.
@@ -263,7 +264,7 @@ class MemoryBodyState extends State<MemoryBody> {
   final String _memoryLogFilename =
       '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
-  // Persist the the live data to a JSON file in the /tmp directory.
+  /// Persist the the live data to a JSON file in the /tmp directory.
   void _exportMemory() {
     final liveData = _controller.memoryTimeline.data;
 
@@ -283,6 +284,8 @@ class MemoryBodyState extends State<MemoryBody> {
     final openFile = memoryLogFile.openSync(mode: FileMode.write);
     memoryLogFile.writeAsStringSync(jsonPayload);
     openFile.closeSync();
+
+    // TODO(terry): Display filename created in a toast.
 
     Directory.current = previousCurrentDirectory;
   }
