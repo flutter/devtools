@@ -24,7 +24,15 @@ typedef chartStateListener = void Function();
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
 class MemoryController {
-  final MemoryTimeline memoryTimeline = MemoryTimeline();
+  MemoryController() {
+    memoryTimeline = MemoryTimeline(this);
+  }
+
+  MemoryTimeline memoryTimeline;
+
+  /// Source of memory heap samples. False live data, True loaded from a
+  /// memory_log file.
+  bool offline = false;
 
   int selectedSample = -1;
 
@@ -41,19 +49,19 @@ class MemoryController {
   }
 
   /// Listeners to hookup modifying the MemoryChartState.
-  final List<chartStateListener> _resetFeedListeners = [];
+  final List<chartStateListener> _memorySourceListeners = [];
 
-  void addResetFeedListener(chartStateListener listener) {
-    _resetFeedListeners.add(listener);
+  void addMemorySourceListener(chartStateListener listener) {
+    _memorySourceListeners.add(listener);
   }
 
-  void removeResetFeedListener(chartStateListener listener) {
-    _resetFeedListeners.remove(listener);
+  void removeMemorySourceListener(chartStateListener listener) {
+    _memorySourceListeners.remove(listener);
   }
 
-  // Call any ChartState listeners.
-  void notifyResetFeedListeners() {
-    for (var notifyListener in _resetFeedListeners) {
+  // Call any ChartState listeners that the memory source has changed.
+  void notifyMemorySourceListeners() {
+    for (var notifyListener in _memorySourceListeners) {
       notifyListener();
     }
   }
@@ -412,8 +420,15 @@ class LibraryCollection {
 }
 
 class MemoryTimeline {
+  MemoryTimeline(this.controller);
+
+  final MemoryController controller;
+
   /// Raw Heap sampling data from the VM.
   final List<HeapSample> data = [];
+
+  /// Data of the last selected offline memory source (JSON file in /tmp).
+  final List<HeapSample> offflineData = [];
 
   /// Notifies that a new Heap sample has been added to the timeline.
   final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
@@ -459,7 +474,13 @@ class MemoryTimeline {
   }
 
   void addSample(HeapSample sample) {
+    // Always record the heap sample in the raw set of data (liveFeed).
     data.add(sample);
-    _sampleAddedNotifier.value = sample;
+
+    // Only notify that new sample has arrived if the
+    // memory source is 'Live Feed'.
+    if (!controller.offline) {
+      _sampleAddedNotifier.value = sample;
+    }
   }
 }

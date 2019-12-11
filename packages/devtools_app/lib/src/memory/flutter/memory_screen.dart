@@ -5,7 +5,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+
+import 'package:path/path.dart' as _path;
 
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -81,6 +83,68 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
+  static const String _liveFeed = 'Live Feed';
+  String memorySource = _liveFeed;
+
+  Widget createMenuItem(String name) {
+    final rowChildren = memorySource == name
+        ? [
+            Icon(Icons.check, size: 12),
+            const SizedBox(width: 10),
+            Text(name),
+          ]
+        : [
+            const SizedBox(width: 22),
+            Text(name),
+          ];
+
+    return PopupMenuItem<String>(
+      value: name,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: rowChildren,
+      ),
+    );
+  }
+
+  Widget _selectMemoryFile() {
+    final List<String> files = offlineFiles();
+
+    final List<PopupMenuItem<String>> items = [
+      createMenuItem(_liveFeed),
+    ];
+
+    for (var index = 0; index < files.length; index++) {
+      items.add(createMenuItem(files[index]));
+    }
+
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        setState(() {
+          memorySource = value;
+
+          if (memorySource == _liveFeed) {
+            if (_controller.offline) {
+            // User is switching back to 'Live Feed'.
+            _controller.memoryTimeline.offflineData.clear();
+            _controller.offline = false;  // We're live again...
+            } else {
+              assert(!_controller.offline); // We've still live - keep collecting.
+            }
+          } else{
+            // Switching to an offline memory log (JSON file in /tmp).
+            _loadOffline(memorySource);
+          } 
+
+          // Notify the Chart state there's new data from a different memory
+          // source to plot.
+          _controller.notifyMemorySourceListeners();
+        });
+      },
+      itemBuilder: (BuildContext context) => items,
+    );
+  }
+
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
@@ -129,6 +193,19 @@ class MemoryBodyState extends State<MemoryBody> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        Row(children: [
+          Text(
+            'Memory Source:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            memorySource == _liveFeed ? memorySource : 'memory log',
+            style: TextStyle(fontWeight: FontWeight.w100),
+          ),
+          const SizedBox(width: 5),
+          _selectMemoryFile(),
+        ]),
         OutlineButton(
           onPressed: _exportMemory,
           child: MaterialIconLabel(
@@ -180,7 +257,14 @@ class MemoryBodyState extends State<MemoryBody> {
     setState(() {});
   }
 
-  void _exportMemory() async {
+  static const String _filenamePrefix = 'memory_log_';
+
+  // Memory Log filename.
+  final String _memoryLogFilename =
+      '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
+
+  // Persist the the live data to a JSON file in the /tmp directory.
+  void _exportMemory() {
     final liveData = _controller.memoryTimeline.data;
 
     final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
@@ -188,25 +272,69 @@ class MemoryBodyState extends State<MemoryBody> {
 
     assert(realData.length == liveData.length);
 
-    Directory systemTemp = Directory.systemTemp;
-    print(">>> systemTemp ${systemTemp.uri} , ${systemTemp.path}");
+    final previousCurrentDirectory = Directory.current;
 
-    File()
+    // TODO(terry): Consider path_provider's getTemporaryDirectory
+    //              or getApplicationDocumentsDirectory when
+    //              available in Flutter Web/Desktop.
+    Directory.current = Directory.systemTemp;
 
+    final memoryLogFile = File(_memoryLogFilename);
+    final openFile = memoryLogFile.openSync(mode: FileMode.write);
+    memoryLogFile.writeAsStringSync(jsonPayload);
+    openFile.closeSync();
 
-    final Directory tempDir = await getTemporaryDirectory();
-    final String tempPath = tempDir.path;
-
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final String appDocPath = appDocDir.path;
-
-    print("getTemporaryDirectory -> $tempPath");
-    print("getApplicationDocumentsDirectory -> $appDocPath");
-
-    setState(() {});
+    Directory.current = previousCurrentDirectory;
   }
 
-  void _loadOffline() {}
+  // Return a list of offline memory logs in the /tmp directory that
+  // are available to open and plot.
+  List<String> offlineFiles() {
+    final List<String> memoryLogs = [];
+
+    final previousCurrentDirectory = Directory.current;
+
+    // TODO(terry): Use path_provider when available?
+    Directory.current = Directory.systemTemp;
+
+    final allFiles = Directory.current.listSync();
+    for (FileSystemEntity entry in allFiles) {
+      final basename = _path.basename(entry.path);
+      if (FileSystemEntity.isFileSync(entry.path) &&
+          basename.startsWith(_filenamePrefix)) {
+        memoryLogs.add(basename);
+      }
+    }
+
+    // Sort by newest file top-most (DateTime is in the filename).
+    memoryLogs.sort((a, b) => b.compareTo(a));
+
+    Directory.current = previousCurrentDirectory;
+
+    return memoryLogs;
+  }
+
+  //
+  void _loadOffline(String filename) {
+    _controller.offline = true;
+
+    final previousCurrentDirectory = Directory.current;
+
+    // TODO(terry): Use path_provider when available?
+    Directory.current = Directory.systemTemp;
+
+    final memoryLogFile = File(filename);
+    final openFile = memoryLogFile.openSync(mode: FileMode.read);
+    final jsonPayload = memoryLogFile.readAsStringSync();
+    openFile.closeSync();
+
+    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+
+    _controller.memoryTimeline.offflineData.clear();
+    _controller.memoryTimeline.offflineData.addAll(realData);
+
+    Directory.current = previousCurrentDirectory;
+  }
 
   void _snapshot() {
     // TODO(terry): Implementation needed.

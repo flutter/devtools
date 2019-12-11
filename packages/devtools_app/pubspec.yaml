@@ -32,7 +32,8 @@ dependencies:
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
-  mp_chart: ^0.0.7
+  mp_chart: 
+    ^0.0.7
   #  path: ../../third_party/packages/mp_chart
   path: ^1.6.0
   path_provider: ^1.4.5

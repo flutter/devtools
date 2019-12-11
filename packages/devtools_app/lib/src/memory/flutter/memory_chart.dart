@@ -73,7 +73,27 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     cancel();
 
-    // Process each heap sample.
+    _controller.addMemorySourceListener(() {
+      setState(() {
+        // The memory source has changed, clear all plotted values.
+        _used.clear();
+        _capacity.clear();
+        _externalHeap.clear();
+
+        // Reset the chart
+        _setupChart();
+
+        if (_controller.offline)
+          // Replot the entire offline data.
+          processMemoryLogFileData();
+        else
+          // Continue plot the live heap samples being
+          // received.
+          processLiveData(true);
+      });
+    });
+
+    // Process and plot each heap sample as it is received.
     addAutoDisposeListener(
       _memoryTimeline.sampleAddedNotifier,
       processLiveData,
@@ -163,9 +183,12 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   HeapSample getValues(int timestamp) {
-    for (var index = 0; index < _memoryTimeline.data.length; index++) {
-      if (_memoryTimeline.data[index].timestamp == timestamp) {
-        return _memoryTimeline.data[index];
+    final data = _controller.offline
+        ? _memoryTimeline.offflineData
+        : _memoryTimeline.data;
+    for (var index = 0; index < data.length; index++) {
+      if (data[index].timestamp == timestamp) {
+        return data[index];
       }
     }
 
@@ -198,9 +221,97 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  void processLiveData() {
+  /// Common utility function to handle loading of the data into the
+  /// chart for either offline or live Feed.
+  void _processData(List<HeapSample> data, int startingDataIndex) {
+    for (var dataIndex = startingDataIndex;
+        dataIndex < data.length;
+        dataIndex++) {
+      final sample = data[dataIndex];
+      final timestamp = sample.timestamp.toDouble();
+
+      final capacity = sample.capacity.toDouble();
+      final used = sample.used.toDouble();
+      final external = sample.external.toDouble();
+
+      final extEntry = Entry(
+        x: timestamp,
+        y: external,
+        icon: _img,
+      );
+      final usedEntry = Entry(
+        x: timestamp,
+        y: used + external,
+        icon: _img,
+      );
+      final capacityEntry = Entry(
+        x: timestamp,
+        y: capacity,
+        icon: _img,
+      );
+
+      setState(() {
+        _externalHeap.add(extEntry);
+        _used.add(usedEntry);
+        _capacity.add(capacityEntry);
+      });
+    }
+
+    updateChart();
+  }
+
+  /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
+  void processMemoryLogFileData() {
+    assert(_controller.offline);
+    assert(_memoryTimeline.offflineData.isNotEmpty);
+
+    final List<HeapSample> chartData = _memoryTimeline.offflineData;
+
+    _processData(chartData, 0);
+/*
+    for (var feedIndex = 0; feedIndex < chartData.length; feedIndex++) {
+      final sample = chartData[feedIndex];
+      final timestamp = sample.timestamp.toDouble();
+
+      final capacity = sample.capacity.toDouble();
+      final used = sample.used.toDouble();
+      final external = sample.external.toDouble();
+
+      final extEntry = Entry(
+        x: timestamp,
+        y: external,
+        icon: _img,
+      );
+      final usedEntry = Entry(
+        x: timestamp,
+        y: used + external,
+        icon: _img,
+      );
+      final capacityEntry = Entry(
+        x: timestamp,
+        y: capacity,
+        icon: _img,
+      );
+
+      setState(() {
+        _externalHeap.add(extEntry);
+        _used.add(usedEntry);
+        _capacity.add(capacityEntry);
+      });
+    }
+
+    updateChart();
+*/
+  }
+
+  void processLiveData([bool reloadAllData = false]) {
+    // Don't process live data our memory source is a JSON file.
+    if (_controller.offline) return;
+
     final List<HeapSample> liveFeed = _memoryTimeline.data;
-    if (_used.length != liveFeed.length) {
+    if (_used.length != liveFeed.length || reloadAllData) {
+      _processData(liveFeed, _used.length);
+/*
       for (var feedIndex = _used.length;
           feedIndex < liveFeed.length;
           feedIndex++) {
@@ -235,6 +346,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       }
 
       updateChart();
+*/
     }
   }
 
