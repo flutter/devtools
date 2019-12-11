@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
-import 'package:path/path.dart' as _path;
 
 import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
@@ -17,12 +12,6 @@ import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import '../memory_controller.dart';
 import 'memory_chart.dart';
-
-const String _filenamePrefix = 'memory_log_';
-
-// Memory Log filename.
-final String _memoryLogFilename =
-    '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
 class MemoryScreen extends Screen {
   const MemoryScreen();
@@ -114,7 +103,7 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   Widget _selectMemoryFile() {
-    final List<String> files = offlineFiles();
+    final List<String> files = _controller.memoryLog.offlineFiles();
 
     final List<PopupMenuItem<String>> items = [
       createMenuItem(_liveFeed),
@@ -140,7 +129,7 @@ class MemoryBodyState extends State<MemoryBody> {
             }
           } else {
             // Switching to an offline memory log (JSON file in /tmp).
-            _loadOffline(memorySource);
+            _controller.memoryLog.loadOffline(memorySource);
           }
 
           // Notify the Chart state there's new data from a different memory
@@ -214,7 +203,8 @@ class MemoryBodyState extends State<MemoryBody> {
           _selectMemoryFile(),
         ]),
         OutlineButton(
-          onPressed: _exportMemory,
+          onPressed:
+              _controller.offline ? null : _controller.memoryLog.exportMemory,
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
@@ -262,81 +252,6 @@ class MemoryBodyState extends State<MemoryBody> {
     // TODO(terry): Implement real resume when connected to live feed.
     _controller.resumeLiveFeed();
     setState(() {});
-  }
-
-  /// Persist the the live data to a JSON file in the /tmp directory.
-  void _exportMemory() {
-    final liveData = _controller.memoryTimeline.data;
-
-    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
-
-    assert(realData.length == liveData.length);
-
-    final previousCurrentDirectory = Directory.current;
-
-    // TODO(terry): Consider path_provider's getTemporaryDirectory
-    //              or getApplicationDocumentsDirectory when
-    //              available in Flutter Web/Desktop.
-    Directory.current = Directory.systemTemp;
-
-    final memoryLogFile = File(_memoryLogFilename);
-    final openFile = memoryLogFile.openSync(mode: FileMode.write);
-    memoryLogFile.writeAsStringSync(jsonPayload);
-    openFile.closeSync();
-
-    // TODO(terry): Display filename created in a toast.
-
-    Directory.current = previousCurrentDirectory;
-  }
-
-  // Return a list of offline memory logs in the /tmp directory that
-  // are available to open and plot.
-  List<String> offlineFiles() {
-    final List<String> memoryLogs = [];
-
-    final previousCurrentDirectory = Directory.current;
-
-    // TODO(terry): Use path_provider when available?
-    Directory.current = Directory.systemTemp;
-
-    final allFiles = Directory.current.listSync();
-    for (FileSystemEntity entry in allFiles) {
-      final basename = _path.basename(entry.path);
-      if (FileSystemEntity.isFileSync(entry.path) &&
-          basename.startsWith(_filenamePrefix)) {
-        memoryLogs.add(basename);
-      }
-    }
-
-    // Sort by newest file top-most (DateTime is in the filename).
-    memoryLogs.sort((a, b) => b.compareTo(a));
-
-    Directory.current = previousCurrentDirectory;
-
-    return memoryLogs;
-  }
-
-  //
-  void _loadOffline(String filename) {
-    _controller.offline = true;
-
-    final previousCurrentDirectory = Directory.current;
-
-    // TODO(terry): Use path_provider when available?
-    Directory.current = Directory.systemTemp;
-
-    final memoryLogFile = File(filename);
-    final openFile = memoryLogFile.openSync(mode: FileMode.read);
-    final jsonPayload = memoryLogFile.readAsStringSync();
-    openFile.closeSync();
-
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
-
-    _controller.memoryTimeline.offflineData.clear();
-    _controller.memoryTimeline.offflineData.addAll(realData);
-
-    Directory.current = previousCurrentDirectory;
   }
 
   void _snapshot() {

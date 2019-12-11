@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as _path;
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,6 +20,12 @@ import 'memory_service.dart';
 
 typedef chartStateListener = void Function();
 
+const String _filenamePrefix = 'memory_log_';
+
+// Memory Log filename.
+final String _memoryLogFilename =
+    '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
+
 // TODO(terry): Implement a dispose method and call in ProvidedControllers dispose.
 /// This class contains the business logic for [memory.dart].
 ///
@@ -26,9 +35,12 @@ typedef chartStateListener = void Function();
 class MemoryController {
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
+    memoryLog = MemoryLog(this);
   }
 
   MemoryTimeline memoryTimeline;
+
+  MemoryLog memoryLog;
 
   /// Source of memory heap samples. False live data, True loaded from a
   /// memory_log file.
@@ -482,5 +494,86 @@ class MemoryTimeline {
     if (!controller.offline) {
       _sampleAddedNotifier.value = sample;
     }
+  }
+}
+
+class MemoryLog {
+  MemoryLog(this.controller);
+
+  MemoryController controller;
+
+  /// Persist the the live memory data to a JSON file in the /tmp directory.
+  void exportMemory() {
+    final liveData = controller.memoryTimeline.data;
+
+    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
+    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+
+    assert(realData.length == liveData.length);
+
+    final previousCurrentDirectory = Directory.current;
+
+    // TODO(terry): Consider path_provider's getTemporaryDirectory
+    //              or getApplicationDocumentsDirectory when
+    //              available in Flutter Web/Desktop.
+    Directory.current = Directory.systemTemp;
+
+    final memoryLogFile = File(_memoryLogFilename);
+    final openFile = memoryLogFile.openSync(mode: FileMode.write);
+    memoryLogFile.writeAsStringSync(jsonPayload);
+    openFile.closeSync();
+
+    // TODO(terry): Display filename created in a toast.
+
+    Directory.current = previousCurrentDirectory;
+  }
+
+  /// Return a list of offline memory logs filenames in the /tmp directory
+  /// that are available to open.
+  List<String> offlineFiles() {
+    final List<String> memoryLogs = [];
+
+    final previousCurrentDirectory = Directory.current;
+
+    // TODO(terry): Use path_provider when available?
+    Directory.current = Directory.systemTemp;
+
+    final allFiles = Directory.current.listSync();
+    for (FileSystemEntity entry in allFiles) {
+      final basename = _path.basename(entry.path);
+      if (FileSystemEntity.isFileSync(entry.path) &&
+          basename.startsWith(_filenamePrefix)) {
+        memoryLogs.add(basename);
+      }
+    }
+
+    // Sort by newest file top-most (DateTime is in the filename).
+    memoryLogs.sort((a, b) => b.compareTo(a));
+
+    Directory.current = previousCurrentDirectory;
+
+    return memoryLogs;
+  }
+
+  /// Load the memory profile data from a save memory log file.
+  void loadOffline(String filename) {
+    controller.offline = true;
+
+    final previousCurrentDirectory = Directory.current;
+
+    // TODO(terry): Use path_provider when available?
+    Directory.current = Directory.systemTemp;
+
+    final memoryLogFile = File(filename);
+    final openFile = memoryLogFile.openSync(mode: FileMode.read);
+    final jsonPayload = memoryLogFile.readAsStringSync();
+    openFile.closeSync();
+
+    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+
+    controller.memoryTimeline.offflineData.clear();
+    controller.memoryTimeline.offflineData.addAll(realData);
+
+    Directory.current = previousCurrentDirectory;
   }
 }
