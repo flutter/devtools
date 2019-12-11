@@ -18,6 +18,12 @@ import '../../ui/flutter/label.dart';
 import '../memory_controller.dart';
 import 'memory_chart.dart';
 
+const String _filenamePrefix = 'memory_log_';
+
+// Memory Log filename.
+final String _memoryLogFilename =
+    '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
+
 class MemoryScreen extends Screen {
   const MemoryScreen();
 
@@ -257,12 +263,6 @@ class MemoryBodyState extends State<MemoryBody> {
     _controller.resumeLiveFeed();
     setState(() {});
   }
-
-  static const String _filenamePrefix = 'memory_log_';
-
-  // Memory Log filename.
-  final String _memoryLogFilename =
-      '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
   /// Persist the the live data to a JSON file in the /tmp directory.
   void _exportMemory() {

@@ -264,89 +264,16 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void processMemoryLogFileData() {
     assert(_controller.offline);
     assert(_memoryTimeline.offflineData.isNotEmpty);
-
-    final List<HeapSample> chartData = _memoryTimeline.offflineData;
-
-    _processData(chartData, 0);
-/*
-    for (var feedIndex = 0; feedIndex < chartData.length; feedIndex++) {
-      final sample = chartData[feedIndex];
-      final timestamp = sample.timestamp.toDouble();
-
-      final capacity = sample.capacity.toDouble();
-      final used = sample.used.toDouble();
-      final external = sample.external.toDouble();
-
-      final extEntry = Entry(
-        x: timestamp,
-        y: external,
-        icon: _img,
-      );
-      final usedEntry = Entry(
-        x: timestamp,
-        y: used + external,
-        icon: _img,
-      );
-      final capacityEntry = Entry(
-        x: timestamp,
-        y: capacity,
-        icon: _img,
-      );
-
-      setState(() {
-        _externalHeap.add(extEntry);
-        _used.add(usedEntry);
-        _capacity.add(capacityEntry);
-      });
-    }
-
-    updateChart();
-*/
+    _processData(_memoryTimeline.offflineData, 0);
   }
 
   void processLiveData([bool reloadAllData = false]) {
-    // Don't process live data our memory source is a JSON file.
-    if (_controller.offline) return;
+    assert(!_controller.offline);
+    assert(_memoryTimeline.data.isNotEmpty);
 
     final List<HeapSample> liveFeed = _memoryTimeline.data;
     if (_used.length != liveFeed.length || reloadAllData) {
       _processData(liveFeed, _used.length);
-/*
-      for (var feedIndex = _used.length;
-          feedIndex < liveFeed.length;
-          feedIndex++) {
-        final sample = liveFeed[feedIndex];
-        final timestamp = sample.timestamp.toDouble();
-
-        final capacity = sample.capacity.toDouble();
-        final used = sample.used.toDouble();
-        final external = sample.external.toDouble();
-
-        final extEntry = Entry(
-          x: timestamp,
-          y: external,
-          icon: _img,
-        );
-        final usedEntry = Entry(
-          x: timestamp,
-          y: used + external,
-          icon: _img,
-        );
-        final capacityEntry = Entry(
-          x: timestamp,
-          y: capacity,
-          icon: _img,
-        );
-
-        setState(() {
-          _externalHeap.add(extEntry);
-          _used.add(usedEntry);
-          _capacity.add(capacityEntry);
-        });
-      }
-
-      updateChart();
-*/
     }
   }
 
