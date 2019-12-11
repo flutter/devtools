@@ -1,3 +1,10 @@
+## 0.1.13 - 2019-12-10
+* Fix crash opening macOS desktop apps in DevTools.
+* Enable layout explorer.
+* Hide legacy page content in the flutter version of DevTools.
+* Fix offline import bug in Timeline.
+* Use published version of mp_chart package.
+
 ## 0.1.12 - 2019-12-06
 * Enable testing the alpha version of DevTools written in Flutter. Click the "beaker" icon in the upper-right to launch DevTools in Flutter.
 * Fix a regression that showed an inaccurate error on the connect screen.

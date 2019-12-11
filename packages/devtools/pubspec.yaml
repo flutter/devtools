@@ -9,7 +9,7 @@ description: A suite of web-based performance tooling for Dart and Flutter.
 # package remaining purely as a container for the compiled copy of the devtools
 # app. That ensures that version constraints for the devtools_app do not impact
 # this package.
-version: 0.1.12
+version: 0.1.13
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
