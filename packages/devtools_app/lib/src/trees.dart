@@ -112,6 +112,10 @@ class TreeNode<T extends TreeNode<T>> {
     child.index = children.length - 1;
   }
 
+  void addAllChildren(List<T> children) {
+    children.forEach(addChild);
+  }
+
   /// Expands this node and all of its children (cascading).
   void expandCascading() {
     breadthFirstTraversal<T>(this, action: (T node) {
@@ -138,18 +142,80 @@ class TreeNode<T extends TreeNode<T>> {
     );
   }
 
-  T firstNodeAtLevel(int level) {
+  /// Locates the first sub-node in the tree at level [level].
+  ///
+  /// [level] is relative to the subtree root [this].
+  ///
+  /// For example:
+  ///
+  /// [level 0]                A
+  ///                        /   \
+  /// [level 1]             B     E
+  ///                      /    /  \
+  /// [level 2]           C    F    G
+  ///                    /
+  /// [level 3]         D
+  ///
+  /// E.firstSubNodeAtLevel(1) => F
+  T firstChildNodeAtLevel(int level) {
+    return _childNodeAtLevelWithCondition(
+      level,
+      // When this condition is called, we have already ensured that
+      // [level] < [depth], so at least one child is guaranteed to meet the
+      // firstWhere condition.
+      (currentNode, levelWithOffset) => currentNode.children
+          .firstWhere((n) => n.depth + n.level > levelWithOffset),
+    );
+  }
+
+  /// Locates the last sub-node in the tree at level [level].
+  ///
+  /// [level] is relative to the subtree root [this].
+  ///
+  /// For example:
+  ///
+  /// [level 0]                A
+  ///                        /   \
+  /// [level 1]             B     E
+  ///                      /    /  \
+  /// [level 2]           C    F    G
+  ///                    /
+  /// [level 3]         D
+  ///
+  /// E.lastSubNodeAtLevel(1) => G
+  T lastChildNodeAtLevel(int level) {
+    return _childNodeAtLevelWithCondition(
+        level,
+        // When this condition is called, we have already ensured that
+        // [level] < [depth], so at least one child is guaranteed to meet the
+        // lastWhere condition.
+        (currentNode, levelWithOffset) => currentNode.children
+            .lastWhere((n) => n.depth + n.level > levelWithOffset));
+  }
+
+  // TODO(kenz): We should audit this method with a very large tree:
+  // https://github.com/flutter/devtools/issues/1480.
+  /// Finds a child node at [level] where traversal order is determined by
+  /// [traversalCondition].
+  ///
+  /// The runtime of this method is O(level * tree width). The worst case
+  /// scenario is searching for a very deep level in a very wide tree.
+  T _childNodeAtLevelWithCondition(
+    int level,
+    T traversalCondition(T currentNode, int levelWithOffset),
+  ) {
     if (level >= depth) return null;
-    var node = this;
-    while (node.level < level) {
+    // The current node [this] is not guaranteed to be at level 0, so we need
+    // to account for the level offset of [this].
+    final levelWithOffset = level + this.level;
+    var currentNode = this;
+    while (currentNode.level < levelWithOffset) {
       // Walk down the tree until we find the node at [level].
-      if (node.children.isNotEmpty) {
-        // Since we have already ensured that [level] < [depth], at least one
-        // child is guaranteed to meet the firstWhere condition.
-        node = node.children.firstWhere((n) => n.depth > level - n.level);
+      if (currentNode.children.isNotEmpty) {
+        currentNode = traversalCondition(currentNode, levelWithOffset);
       }
     }
-    return node;
+    return currentNode;
   }
 }
 

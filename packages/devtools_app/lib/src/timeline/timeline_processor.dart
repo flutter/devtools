@@ -764,7 +764,11 @@ class FullTimelineProcessor extends TimelineProcessor {
         timelineController.fullTimeline.addTimelineEvent(currentEventWithId);
         asyncEventsById[eventWrapper.event.id] = timelineEvent;
       } else {
-        assert(!currentEventWithId.isWellFormed);
+        assert(
+          !currentEventWithId.isWellFormed,
+          'Event with id ${eventWrapper.event.id} is not well formed. '
+          'Event trace: ${eventWrapper.event}',
+        );
         // We know it must be a child because we process events in timestamp
         // order.
         currentEventWithId.addChild(timelineEvent);

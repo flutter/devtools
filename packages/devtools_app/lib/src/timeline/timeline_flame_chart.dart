@@ -51,7 +51,7 @@ class FrameBasedTimelineFlameChartCanvas
 
     // Pixels per microsecond in order to fit the entire frame in view.
     final double pxPerMicro =
-        totalStartingWidth / data.time.duration.inMicroseconds;
+        widthWithoutInsets / data.time.duration.inMicroseconds;
 
     // Add UI section label.
     final uiSectionLabel = sectionLabel(
@@ -60,7 +60,7 @@ class FrameBasedTimelineFlameChartCanvas
       top: getTopForRow(0),
       width: 24.0,
     );
-    rows[0].nodes.add(uiSectionLabel);
+    rows[0].addNode(uiSectionLabel);
 
     // Add GPU section label.
     final gpuSectionLabel = sectionLabel(
@@ -69,7 +69,7 @@ class FrameBasedTimelineFlameChartCanvas
       top: getTopForRow(gpuSectionStartRow),
       width: 42.0,
     );
-    rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
+    rows[gpuSectionStartRow].addNode(gpuSectionLabel);
 
     void createChartNodes(TimelineEvent event, int row) {
       // Do not round these values. Rounding the left could cause us to have
@@ -184,16 +184,20 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   /// Async guideline segments drawn in the direction of the y-axis.
   final List<VerticalLineSegment> verticalGuidelines = [];
 
+  /// Pixels per microsecond in order to fit all the data in view.
+  double get pxPerMicro =>
+      widthWithoutInsets / data.time.duration.inMicroseconds;
+
   int widestRow = -1;
+
+  double chartX(Duration dur) {
+    final startTimeOffset = data.time.start.inMicroseconds;
+    return (dur.inMicroseconds - startTimeOffset) * pxPerMicro + startInset;
+  }
 
   @override
   void initUiElements() {
     super.initUiElements();
-    final int startTimeOffset = data.time.start.inMicroseconds;
-
-    // Pixels per microsecond in order to fit the entire frame in view.
-    final double pxPerMicro =
-        totalStartingWidth / data.time.duration.inMicroseconds;
 
     double getTopForRow(int row, int section) {
       // This accounts for section spacing between different threads of events.
@@ -201,14 +205,6 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       return (row * rowHeightWithPadding + topOffset + additionalPadding)
           .toDouble();
     }
-
-    double leftForEvent(TimelineEvent event) =>
-        (event.time.start.inMicroseconds - startTimeOffset) * pxPerMicro +
-        startInset;
-
-    double rightForEvent(TimelineEvent event) =>
-        (event.time.end.inMicroseconds - startTimeOffset) * pxPerMicro +
-        startInset;
 
     double maxRight = -1;
     void createChartNode(TimelineEvent event, int row, int section) {
@@ -220,8 +216,8 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       // inaccurately placed events on the chart. Rounding the width could cause
       // us to lose very small events if the width rounds to zero.
       final top = getTopForRow(row, section);
-      final double left = leftForEvent(event);
-      final double right = rightForEvent(event);
+      final double left = chartX(event.time.start);
+      final double right = chartX(event.time.end);
       if (right > maxRight) {
         maxRight = right;
         widestRow = row;
@@ -256,7 +252,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       );
       chartNodesByEvent[event] = node;
 
-      rows[row].nodes.add(node);
+      rows[row].addNode(node);
     }
 
     int currentRowIndex = 0;
@@ -315,7 +311,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
           sectionLabelWidths[groupName] + sectionLabelPadding,
         ),
       );
-      rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
+      rows[currentRowIndex].addNode(currentSectionLabel, index: 0);
 
       // Increment for next section.
       currentRowIndex += group.eventsByRow.length;
@@ -331,6 +327,9 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   }
 
   void _calculateAsyncGuidelines() {
+    // Padding to be added between a subsequent guideline and the child event
+    // it is connecting.
+    const subsequentChildGuidelinePadding = 8.0;
     assert(rows.isNotEmpty);
     assert(chartNodesByEvent.isNotEmpty);
     verticalGuidelines.clear();
@@ -339,9 +338,9 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       for (var node in row.nodes) {
         if (node.data is AsyncTimelineEvent) {
           final event = node.data as AsyncTimelineEvent;
-          if (event.hasOverlappingChildren) {
-            // Vertical guideline that will connect [node] with its overlapping
-            // children nodes. The line will end at [node]'s last child.
+          if (event.children.isNotEmpty) {
+            // Vertical guideline that will connect [node] with its children
+            // nodes. The line will end at [node]'s last child.
             final verticalGuidelineX = node.rect.left + 1;
             final verticalGuidelineStartY = node.rect.bottom;
             final verticalGuidelineEndY =
@@ -351,11 +350,61 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
               Offset(verticalGuidelineX, verticalGuidelineEndY),
             ));
 
+            // Draw the first child since it is guaranteed to be connected to
+            // the main vertical we just created.
+            final firstChild = event.children.first;
+            final firstChildNode = chartNodesByEvent[firstChild];
+            final horizontalGuidelineEndX = firstChildNode.rect.left;
+            final horizontalGuidelineY = firstChildNode.rect.centerLeft.dy;
+            horizontalGuidelines.add(HorizontalLineSegment(
+              Offset(verticalGuidelineX, horizontalGuidelineY),
+              Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+            ));
+
             // Horizontal guidelines connecting each child to the vertical
             // guideline above.
-            for (var child in event.children) {
+            for (int i = 1; i < event.children.length; i++) {
+              double horizontalGuidelineStartX = verticalGuidelineX;
+
+              final child = event.children[i];
               final childNode = chartNodesByEvent[child];
-              final horizontalGuidelineStartX = verticalGuidelineX;
+
+              // Helper method to generate a vertical guideline for subsequent
+              // children after the first child. We will create a new guideline
+              // if it can be created without intersecting previous children.
+              void generateSubsequentVerticalGuideline(double previousXInRow) {
+                double newVerticalGuidelineX;
+
+                // If [child] started after [event] ended, use the right edge of
+                // event's [node] as the x coordinate for the guideline.
+                // Otherwise, take the minimum of
+                // [subsequentChildGuidelineOffset] and half the distance
+                // between [previousXInRow] and child's left edge.
+                if (event.time.end < child.time.start) {
+                  newVerticalGuidelineX = node.rect.right;
+                } else {
+                  newVerticalGuidelineX = childNode.rect.left -
+                      math.min(
+                        subsequentChildGuidelinePadding,
+                        (childNode.rect.left - previousXInRow) / 2,
+                      );
+                }
+                final newVerticalGuidelineEndY = childNode.rect.centerLeft.dy;
+                verticalGuidelines.add(VerticalLineSegment(
+                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+                ));
+
+                horizontalGuidelineStartX = newVerticalGuidelineX;
+              }
+
+              if (childNode.row.index == node.row.index + 1) {
+                final previousChildIndex =
+                    childNode.row.nodes.indexOf(childNode) - 1;
+                final previousNode = childNode.row.nodes[previousChildIndex];
+                generateSubsequentVerticalGuideline(previousNode.rect.right);
+              }
+
               final horizontalGuidelineEndX = childNode.rect.left;
               final horizontalGuidelineY = childNode.rect.centerLeft.dy;
               horizontalGuidelines.add(HorizontalLineSegment(
@@ -383,6 +432,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   @override
   void updateChartForZoom() {
     updateNodesForZoom();
+    width = calculatedWidthWithInsets;
     // Re-calculate the positions of the async guidelines now that the nodes
     // have been updated for zoom.
     _calculateAsyncGuidelines();

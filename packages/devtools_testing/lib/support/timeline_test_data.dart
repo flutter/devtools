@@ -103,23 +103,23 @@ final finalizeTreeEvent = testSyncTimelineEvent(finalizeTreeTrace)
   ..type = TimelineEventType.ui;
 
 final goldenUiTimelineEvent = vsyncEvent
-  ..children.addAll([
+  ..addAllChildren([
     animatorBeginFrameEvent
       ..parent = vsyncEvent
-      ..children.addAll([
+      ..addAllChildren([
         frameworkWorkloadEvent
           ..parent = animatorBeginFrameEvent
-          ..children.addAll([
+          ..addAllChildren([
             engineBeginFrameEvent
               ..parent = frameworkWorkloadEvent
-              ..children.addAll([
+              ..addAllChildren([
                 frameEvent
                   ..parent = engineBeginFrameEvent
-                  ..children.addAll([
+                  ..addAllChildren([
                     animateEvent..parent = frameEvent,
                     layoutEvent
                       ..parent = frameEvent
-                      ..children.add(buildEvent..parent = layoutEvent),
+                      ..addChild(buildEvent..parent = layoutEvent),
                     compositingBitsEvent..parent = frameEvent,
                     paintEvent..parent = frameEvent,
                     compositingEvent..parent = frameEvent,
@@ -384,7 +384,7 @@ final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
   ..addEndEvent(endPipelineConsumeTrace);
 
 final goldenGpuTimelineEvent = gpuRasterizerDrawEvent
-  ..children.add(pipelineConsumeEvent);
+  ..addChild(pipelineConsumeEvent);
 
 const goldenGpuString =
     '  GPURasterizer::Draw [118039651469 μs - 118039679873 μs]\n'
@@ -468,7 +468,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
     1,
   ))
   ..type = TimelineEventType.async
-  ..children.addAll([
+  ..addAllChildren([
     instantAsync1..time.end = instantAsync1.time.start,
     instantAsync2..time.end = instantAsync2.time.start,
     instantAsync3..time.end = instantAsync3.time.start,
@@ -523,15 +523,15 @@ final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
 ));
 
 final goldenAsyncTimelineEvent = asyncEventA
-  ..children.addAll([
-    asyncEventB..children.addAll([asyncEventB1, asyncEventB2]),
-    asyncEventC..children.addAll([asyncEventC1, asyncEventC2]),
+  ..addAllChildren([
+    asyncEventB..addAllChildren([asyncEventB1, asyncEventB2]),
+    asyncEventC..addAllChildren([asyncEventC1, asyncEventC2])
   ]);
 
 const goldenAsyncString = '  A [193937056864 μs - 193938740982 μs]\n'
     '    B [193937113560 μs - 193937382819 μs]\n'
     '      B1 [193937141769 μs - 193937225475 μs]\n'
-    '      B2 [193937173019 μs - 193937281185 μs]\n'
+    '      B2 [193937173019 μs - 193938740983 μs]\n'
     '    C [193937168961 μs - 193937485018 μs]\n'
     '      C1 [193937220903 μs - 193937326225 μs]\n'
     '      C2 [193937378812 μs - 193937432875 μs]\n';
@@ -552,6 +552,20 @@ final asyncEventC2 = AsyncTimelineEvent(asyncStartC2Trace)
   ..addEndEvent(asyncEndC2Trace);
 final asyncEventD = AsyncTimelineEvent(asyncStartDTrace)
   ..addEndEvent(asyncEndDTrace);
+
+final asyncEventWithDeepOverlap = AsyncTimelineEvent(asyncStartTraceEventWithDeepOverlap)
+  ..addEndEvent(asyncEndTraceEventWithDeepOverlap)
+  ..addAllChildren([asyncEventWithDeepOverlap1, asyncEventWithDeepOverlap2]);
+final asyncEventWithDeepOverlap1 = AsyncTimelineEvent(asyncStart1Trace)
+  ..addEndEvent(asyncEnd1Trace)
+  ..addChild(asyncEvent3);
+final asyncEventWithDeepOverlap2 = AsyncTimelineEvent(asyncStart2Trace)
+  ..addEndEvent(asyncEnd2Trace)
+  ..addChild(asyncEvent4);
+final asyncEvent3 = AsyncTimelineEvent(asyncStart3Trace)
+  ..addEndEvent(asyncEnd3Trace);
+final asyncEvent4 = AsyncTimelineEvent(asyncStart4Trace)
+  ..addEndEvent(asyncEnd4Trace);
 
 final asyncParentId1 = AsyncTimelineEvent(asyncParentStartId1)
   ..addEndEvent(asyncParentEndId1);
@@ -653,7 +667,7 @@ final asyncEndB2Trace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': 4875,
   'pid': 51385,
-  'ts': 193937281185,
+  'ts': 193938740983,
   'ph': 'e',
   'id': 'e',
   'args': {'isolateId': 'isolates/2139247553966975'},
@@ -738,6 +752,108 @@ final asyncEndDTrace = testTraceEventWrapper({
   'id': '7',
   'args': {'isolateId': 'isolates/2139247553966975'},
 });
+
+final asyncStartTraceEventWithDeepOverlap = testTraceEventWrapper({
+  'name': 'EventWithDeepOverlap',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937000000,
+  'ph': 'b',
+  'id': '7',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final asyncEndTraceEventWithDeepOverlap = testTraceEventWrapper({
+  'name': 'D',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193938000000,
+  'ph': 'e',
+  'id': '7',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final asyncStart1Trace = testTraceEventWrapper({
+  'name': '1',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937000001,
+  'ph': 'b',
+  'id': '13',
+  'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'},
+});
+final asyncEnd1Trace = testTraceEventWrapper({
+  'name': '1',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937500000,
+  'ph': 'e',
+  'id': '13',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final asyncStart2Trace = testTraceEventWrapper({
+  'name': '2',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937500001,
+  'ph': 'b',
+  'id': '14',
+  'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'},
+});
+final asyncEnd2Trace = testTraceEventWrapper({
+  'name': '2',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937999999,
+  'ph': 'e',
+  'id': '14',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final asyncStart3Trace = testTraceEventWrapper({
+  'name': '3',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937000002,
+  'ph': 'b',
+  'id': '15',
+  'args': {'parentId': '13', 'isolateId': 'isolates/2139247553966975'},
+});
+final asyncEnd3Trace = testTraceEventWrapper({
+  'name': '3',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937500003,
+  'ph': 'e',
+  'id': '15',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final asyncStart4Trace = testTraceEventWrapper({
+  'name': '4',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937500002,
+  'ph': 'b',
+  'id': '16',
+  'args': {'parentId': '14', 'isolateId': 'isolates/2139247553966975'},
+});
+final asyncEnd4Trace = testTraceEventWrapper({
+  'name': '4',
+  'cat': 'Dart',
+  'tid': 4875,
+  'pid': 51385,
+  'ts': 193937999998,
+  'ph': 'e',
+  'id': '16',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+
 final asyncParentStartId1 = testTraceEventWrapper({
   'name': 'asyncParentId1',
   'cat': 'Dart',

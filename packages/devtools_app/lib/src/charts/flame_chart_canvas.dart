@@ -49,8 +49,7 @@ abstract class FlameChart<T> {
     @required this.width,
     @required this.height,
     @required this.startInset,
-  })  : totalStartingWidth = width - startInset - sideInset,
-        timelineGrid = TimelineGrid(duration, width, startInset) {
+  }) : timelineGrid = TimelineGrid(duration, width, startInset) {
     initUiElements();
   }
 
@@ -60,7 +59,7 @@ abstract class FlameChart<T> {
 
   final double startInset;
 
-  final double totalStartingWidth;
+  double get widthWithoutInsets => width - startInset - sideInset;
 
   // These values are not final because the flame chart viewport can change in
   // size.
@@ -102,7 +101,7 @@ abstract class FlameChart<T> {
   void expandRows(int newRowLength) {
     final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      rows.add(FlameChartRow());
+      rows.add(FlameChartRow(i));
     }
   }
 
@@ -389,7 +388,24 @@ abstract class FlameChartCanvas<T> extends FlameChart {
 }
 
 class FlameChartRow {
+  FlameChartRow(this.index);
+
   final List<FlameChartNode> nodes = [];
+
+  final int index;
+
+  /// Adds a node to [nodes] and assigns [this] to the nodes [row] property.
+  ///
+  /// If [index] is specified and in range of the list, [node] will be added at
+  /// [index]. Otherwise, [node] will be added to the end of [nodes]
+  void addNode(FlameChartNode node, {int index}) {
+    if (index != null && index >= 0 && index < nodes.length) {
+      nodes.insert(index, node);
+    } else {
+      nodes.add(node);
+    }
+    node.row = this;
+  }
 }
 
 class FlameChartSection {
@@ -465,6 +481,8 @@ class FlameChartNode<T> {
   num get maxTextWidth => rect.width - horizontalPadding * 2;
 
   bool selected = false;
+
+  FlameChartRow row;
 
   void paint(CanvasRenderingContext2D canvas) {
     canvas.fillStyle =

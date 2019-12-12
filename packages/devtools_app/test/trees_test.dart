@@ -116,12 +116,30 @@ void main() {
       );
     });
 
-    test('firstNodeAtLevel', () {
-      expect(testTreeNode.firstNodeAtLevel(0), equals(treeNode0));
-      expect(testTreeNode.firstNodeAtLevel(1), equals(treeNode1));
-      expect(testTreeNode.firstNodeAtLevel(2), equals(treeNode3));
-      expect(testTreeNode.firstNodeAtLevel(3), equals(treeNode5));
-      expect(testTreeNode.firstNodeAtLevel(4), isNull);
+    test('firstSubNodeAtLevel', () {
+      expect(testTreeNode.firstChildNodeAtLevel(0), equals(treeNode0));
+      expect(testTreeNode.firstChildNodeAtLevel(1), equals(treeNode1));
+      expect(testTreeNode.firstChildNodeAtLevel(2), equals(treeNode3));
+      expect(testTreeNode.firstChildNodeAtLevel(3), equals(treeNode5));
+      expect(testTreeNode.firstChildNodeAtLevel(4), isNull);
+
+      expect(treeNode2.firstChildNodeAtLevel(0), equals(treeNode2));
+      expect(treeNode2.firstChildNodeAtLevel(1), equals(treeNode3));
+      expect(treeNode2.firstChildNodeAtLevel(2), equals(treeNode5));
+      expect(treeNode2.firstChildNodeAtLevel(3), isNull);
+    });
+
+    test('lastSubNodeAtLevel', () {
+      expect(testTreeNode.lastChildNodeAtLevel(0), equals(treeNode0));
+      expect(testTreeNode.lastChildNodeAtLevel(1), equals(treeNode2));
+      expect(testTreeNode.lastChildNodeAtLevel(2), equals(treeNode4));
+      expect(testTreeNode.lastChildNodeAtLevel(3), equals(treeNode6));
+      expect(testTreeNode.lastChildNodeAtLevel(4), isNull);
+
+      expect(treeNode2.lastChildNodeAtLevel(0), equals(treeNode2));
+      expect(treeNode2.lastChildNodeAtLevel(1), equals(treeNode4));
+      expect(treeNode2.lastChildNodeAtLevel(2), equals(treeNode6));
+      expect(treeNode2.lastChildNodeAtLevel(3), isNull);
     });
   });
 }
@@ -132,9 +150,15 @@ final treeNode2 = TestTreeNode();
 final treeNode3 = TestTreeNode();
 final treeNode4 = TestTreeNode();
 final treeNode5 = TestTreeNode();
+final treeNode6 = TestTreeNode();
 final TreeNode testTreeNode = treeNode0
-  ..addChild(treeNode1)
-  ..addChild(
-      treeNode2..addChild(treeNode3)..addChild(treeNode4..addChild(treeNode5)));
+  ..addAllChildren([
+    treeNode1,
+    treeNode2
+      ..addAllChildren([
+        treeNode3,
+        treeNode4..addAllChildren([treeNode5, treeNode6]),
+      ]),
+  ]);
 
 class TestTreeNode extends TreeNode<TestTreeNode> {}
