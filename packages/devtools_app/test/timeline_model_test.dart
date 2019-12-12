@@ -340,6 +340,10 @@ void main() {
       expect(goldenAsyncTimelineEvent.isWellFormedDeep, isTrue);
     });
 
+    test('maxEndMicros', () {
+      expect(goldenAsyncTimelineEvent.maxEndMicros, equals(193938740983));
+    });
+
     test('displayDepth', () {
       expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
       expect(asyncEventB.displayDepth, equals(3));
@@ -355,7 +359,7 @@ void main() {
       expect(asyncEventD.hasOverlappingChildren, isFalse);
     });
 
-    test('deepOverlaps', () {
+    test('isSubtreeOverlapping', () {
       expect(
         asyncEventWithDeepOverlap1.time
             .overlaps(asyncEventWithDeepOverlap2.time),
@@ -363,7 +367,8 @@ void main() {
       );
       expect(asyncEvent3.time.overlaps(asyncEvent4.time), isTrue);
       expect(
-        asyncEventWithDeepOverlap1.deepOverlaps(asyncEventWithDeepOverlap2),
+        asyncEventWithDeepOverlap1
+            .isSubtreeOverlapping(asyncEventWithDeepOverlap2),
         isTrue,
       );
     });

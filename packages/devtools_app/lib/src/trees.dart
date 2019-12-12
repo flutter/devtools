@@ -157,8 +157,8 @@ class TreeNode<T extends TreeNode<T>> {
   /// [level 3]         D
   ///
   /// E.firstSubNodeAtLevel(1) => F
-  T firstSubNodeAtLevel(int level) {
-    return _subNodeAtLevelWithCondition(
+  T firstChildNodeAtLevel(int level) {
+    return _childNodeAtLevelWithCondition(
       level,
       // When this condition is called, we have already ensured that
       // [level] < [depth], so at least one child is guaranteed to meet the
@@ -183,8 +183,8 @@ class TreeNode<T extends TreeNode<T>> {
   /// [level 3]         D
   ///
   /// E.lastSubNodeAtLevel(1) => G
-  T lastSubNodeAtLevel(int level) {
-    return _subNodeAtLevelWithCondition(
+  T lastChildNodeAtLevel(int level) {
+    return _childNodeAtLevelWithCondition(
         level,
         // When this condition is called, we have already ensured that
         // [level] < [depth], so at least one child is guaranteed to meet the
@@ -193,9 +193,16 @@ class TreeNode<T extends TreeNode<T>> {
             .lastWhere((n) => n.depth + n.level > levelWithOffset));
   }
 
-  T _subNodeAtLevelWithCondition(
+  // TODO(kenz): We should audit this method with a very large tree:
+  // https://github.com/flutter/devtools/issues/1480.
+  /// Finds a child node at [level] where traversal order is determined by
+  /// [traversalCondition].
+  ///
+  /// The runtime of this method is O(level * tree width). The worst case
+  /// scenario is searching for a very deep level in a very wide tree.
+  T _childNodeAtLevelWithCondition(
     int level,
-    T condition(T currentNode, int levelWithOffset),
+    T traversalCondition(T currentNode, int levelWithOffset),
   ) {
     if (level >= depth) return null;
     // The current node [this] is not guaranteed to be at level 0, so we need
@@ -205,7 +212,7 @@ class TreeNode<T extends TreeNode<T>> {
     while (currentNode.level < levelWithOffset) {
       // Walk down the tree until we find the node at [level].
       if (currentNode.children.isNotEmpty) {
-        currentNode = condition(currentNode, levelWithOffset);
+        currentNode = traversalCondition(currentNode, levelWithOffset);
       }
     }
     return currentNode;

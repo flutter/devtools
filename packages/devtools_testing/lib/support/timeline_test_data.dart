@@ -531,7 +531,7 @@ final goldenAsyncTimelineEvent = asyncEventA
 const goldenAsyncString = '  A [193937056864 μs - 193938740982 μs]\n'
     '    B [193937113560 μs - 193937382819 μs]\n'
     '      B1 [193937141769 μs - 193937225475 μs]\n'
-    '      B2 [193937173019 μs - 193937281185 μs]\n'
+    '      B2 [193937173019 μs - 193938740983 μs]\n'
     '    C [193937168961 μs - 193937485018 μs]\n'
     '      C1 [193937220903 μs - 193937326225 μs]\n'
     '      C2 [193937378812 μs - 193937432875 μs]\n';
@@ -667,7 +667,7 @@ final asyncEndB2Trace = testTraceEventWrapper({
   'cat': 'Dart',
   'tid': 4875,
   'pid': 51385,
-  'ts': 193937281185,
+  'ts': 193938740983,
   'ph': 'e',
   'id': 'e',
   'args': {'isolateId': 'isolates/2139247553966975'},

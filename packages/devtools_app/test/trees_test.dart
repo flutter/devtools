@@ -117,29 +117,29 @@ void main() {
     });
 
     test('firstSubNodeAtLevel', () {
-      expect(testTreeNode.firstSubNodeAtLevel(0), equals(treeNode0));
-      expect(testTreeNode.firstSubNodeAtLevel(1), equals(treeNode1));
-      expect(testTreeNode.firstSubNodeAtLevel(2), equals(treeNode3));
-      expect(testTreeNode.firstSubNodeAtLevel(3), equals(treeNode5));
-      expect(testTreeNode.firstSubNodeAtLevel(4), isNull);
+      expect(testTreeNode.firstChildNodeAtLevel(0), equals(treeNode0));
+      expect(testTreeNode.firstChildNodeAtLevel(1), equals(treeNode1));
+      expect(testTreeNode.firstChildNodeAtLevel(2), equals(treeNode3));
+      expect(testTreeNode.firstChildNodeAtLevel(3), equals(treeNode5));
+      expect(testTreeNode.firstChildNodeAtLevel(4), isNull);
 
-      expect(treeNode2.firstSubNodeAtLevel(0), equals(treeNode2));
-      expect(treeNode2.firstSubNodeAtLevel(1), equals(treeNode3));
-      expect(treeNode2.firstSubNodeAtLevel(2), equals(treeNode5));
-      expect(treeNode2.firstSubNodeAtLevel(3), isNull);
+      expect(treeNode2.firstChildNodeAtLevel(0), equals(treeNode2));
+      expect(treeNode2.firstChildNodeAtLevel(1), equals(treeNode3));
+      expect(treeNode2.firstChildNodeAtLevel(2), equals(treeNode5));
+      expect(treeNode2.firstChildNodeAtLevel(3), isNull);
     });
 
     test('lastSubNodeAtLevel', () {
-      expect(testTreeNode.lastSubNodeAtLevel(0), equals(treeNode0));
-      expect(testTreeNode.lastSubNodeAtLevel(1), equals(treeNode2));
-      expect(testTreeNode.lastSubNodeAtLevel(2), equals(treeNode4));
-      expect(testTreeNode.lastSubNodeAtLevel(3), equals(treeNode6));
-      expect(testTreeNode.lastSubNodeAtLevel(4), isNull);
+      expect(testTreeNode.lastChildNodeAtLevel(0), equals(treeNode0));
+      expect(testTreeNode.lastChildNodeAtLevel(1), equals(treeNode2));
+      expect(testTreeNode.lastChildNodeAtLevel(2), equals(treeNode4));
+      expect(testTreeNode.lastChildNodeAtLevel(3), equals(treeNode6));
+      expect(testTreeNode.lastChildNodeAtLevel(4), isNull);
 
-      expect(treeNode2.lastSubNodeAtLevel(0), equals(treeNode2));
-      expect(treeNode2.lastSubNodeAtLevel(1), equals(treeNode4));
-      expect(treeNode2.lastSubNodeAtLevel(2), equals(treeNode6));
-      expect(treeNode2.lastSubNodeAtLevel(3), isNull);
+      expect(treeNode2.lastChildNodeAtLevel(0), equals(treeNode2));
+      expect(treeNode2.lastChildNodeAtLevel(1), equals(treeNode4));
+      expect(treeNode2.lastChildNodeAtLevel(2), equals(treeNode6));
+      expect(treeNode2.lastChildNodeAtLevel(3), isNull);
     });
   });
 }

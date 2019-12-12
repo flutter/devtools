@@ -127,8 +127,7 @@ class FullTimelineData extends TimelineData {
 
   void addTimelineEvent(TimelineEvent event) {
     timelineEvents.add(event);
-    _endTimestampMicros =
-        math.max(_endTimestampMicros, event.time.end.inMicroseconds);
+    _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
   }
 
   String _computeEventGroupKey(TimelineEvent event) {
@@ -204,9 +203,8 @@ class FullTimelineEventGroup {
 
   int get displayDepth => eventsByRow.length;
 
-  void addEventAtCalculatedRow(TimelineEvent event) {
+  void addEventAtCalculatedRow(TimelineEvent event, {int displayRow = 0}) {
     final currentLargestRowIndex = eventsByRow.length;
-    var displayRow = 0;
     while (displayRow < currentLargestRowIndex) {
       // Ensure that [event] and its children do not overlap with events at all
       // current offsets.
@@ -222,13 +220,16 @@ class FullTimelineEventGroup {
   }
 
   bool _eventFitsAtDisplayRow(
-      TimelineEvent event, int displayRow, int currentLargestRowIndex) {
+    TimelineEvent event,
+    int displayRow,
+    int currentLargestRowIndex,
+  ) {
     final maxLevelToVerify =
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
       final lastEventAtDisplayRow =
           eventsByRow[displayRow + level].nullSafeLast();
-      final firstNewEventAtLevel = event.firstSubNodeAtLevel(level);
+      final firstNewEventAtLevel = event.firstChildNodeAtLevel(level);
       if (lastEventAtDisplayRow != null && firstNewEventAtLevel != null) {
         final eventsOverlap =
             lastEventAtDisplayRow.time.overlaps(firstNewEventAtLevel.time);
@@ -251,13 +252,19 @@ class FullTimelineEventGroup {
     }
 
     var overlappingChildrenOffset = 0;
+    final nextRow = row + 1;
     for (int i = 0; i < event.children.length; i++) {
       final child = event.children[i];
-      final nextRow = row + 1;
       if (i != 0 && event.hasOverlappingChildren) {
-        final previousChild = event.children[i - 1];
-        overlappingChildrenOffset += previousChild.displayDepth;
-        _addEvent(child, row: nextRow + overlappingChildrenOffset);
+        if (_eventFitsAtDisplayRow(child, nextRow, eventsByRow.length)) {
+          _addEvent(child, row: nextRow);
+        } else {
+          // If [child] does not fit on the target row, add it below the
+          // previous child.
+          final previousChild = event.children[i - 1];
+          overlappingChildrenOffset += previousChild.displayDepth;
+          _addEvent(child, row: nextRow + overlappingChildrenOffset);
+        }
       } else {
         _addEvent(child, row: nextRow);
       }
@@ -492,6 +499,11 @@ class OfflineTimelineEvent extends TimelineEvent {
   }
 
   @override
+  int get maxEndMicros =>
+      throw UnimplementedError('This method should never be called for an '
+          'instance of OfflineTimelineEvent');
+
+  @override
   int get displayDepth =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
@@ -651,6 +663,24 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isAsyncEvent => type == TimelineEventType.async;
 
   bool get isWellFormed => time.start != null && time.end != null;
+
+  bool get isWellFormedDeep => _isWellFormedDeep(this);
+
+  bool _isWellFormedDeep(TimelineEvent event) {
+    if (!event.isWellFormed) {
+      return false;
+    }
+    for (var child in event.children) {
+      return _isWellFormedDeep(child);
+    }
+    return true;
+  }
+
+  /// Maximum end micros for the event.
+  ///
+  /// This value could come from the end time of [this] event or from the end
+  /// time of any of its descendant events.
+  int get maxEndMicros;
 
   int get displayDepth;
 
@@ -820,6 +850,9 @@ class SyncTimelineEvent extends TimelineEvent {
       (TimelineEvent event) => event.name.contains('PipelineConsume'));
 
   @override
+  int get maxEndMicros => time.end.inMicroseconds;
+
+  @override
   int get displayDepth => depth;
 
   @override
@@ -869,16 +902,19 @@ class AsyncTimelineEvent extends TimelineEvent {
   /// This field is not guaranteed to be non-null.
   final String parentId;
 
-  bool get isWellFormedDeep => _isWellFormedDeep(this);
+  int _maxEndMicros;
+  @override
+  int get maxEndMicros => _maxEndMicros ?? _calculateMaxEndMicros();
 
-  bool _isWellFormedDeep(AsyncTimelineEvent event) {
-    if (!event.isWellFormed) {
-      return false;
+  int _calculateMaxEndMicros() {
+    if (children.isEmpty) {
+      return time.end.inMicroseconds;
     }
-    for (var child in event.children) {
-      return _isWellFormedDeep(child);
+    var maxEnd = 0;
+    for (AsyncTimelineEvent child in children) {
+      maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }
-    return true;
+    return _maxEndMicros = maxEnd;
   }
 
   @override
@@ -886,6 +922,8 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   int _displayDepth;
 
+  // TODO(kenz): fix this algorithm so that it calculates the exact display
+  // depth, not the max. Not sure why this works as is - need to investigate.
   int _calculateDisplayDepth() {
     // Base case.
     if (children.isEmpty) {
@@ -894,19 +932,21 @@ class AsyncTimelineEvent extends TimelineEvent {
 
     var displayDepth = 1;
     if (hasOverlappingChildren) {
-      // If any children have overlapping timestamps, display each child on its
-      // own row.
-      // TODO(kenz): save graph space by calculating when children can share a
-      // row in the flame chart.
-      for (var child in children) {
-        displayDepth += (child as AsyncTimelineEvent)._calculateDisplayDepth();
+      // If any children have overlapping timestamps, assume they all overlap
+      // and need to be displayed each on a new row.
+      for (AsyncTimelineEvent child in children) {
+        // TODO(kenz): in order to calculate the exact display depth, this needs
+        // to not sum all depths but instead use the [_eventFitsAtDisplayRow]
+        // logic from [FullTimelineEventGroup] to calculate where events fit.
+        // This should work as long as the tree is traversed depth first.
+        displayDepth += child._calculateDisplayDepth();
       }
     } else {
       int maxChildDepth = -1;
-      for (var child in children) {
+      for (AsyncTimelineEvent child in children) {
         maxChildDepth = math.max(
           maxChildDepth,
-          (child as AsyncTimelineEvent)._calculateDisplayDepth(),
+          child._calculateDisplayDepth(),
         );
       }
       displayDepth += maxChildDepth;
@@ -918,12 +958,12 @@ class AsyncTimelineEvent extends TimelineEvent {
   bool get hasOverlappingChildren {
     if (_hasOverlappingChildren != null) return _hasOverlappingChildren;
     for (int i = 0; i < children.length; i++) {
-      final currentChild = children[i] as AsyncTimelineEvent;
+      final AsyncTimelineEvent currentChild = children[i];
       // We do not have to look back because children will be ordered by their
       // start times.
       for (int j = i + 1; j < children.length; j++) {
-        final sibling = children[j] as AsyncTimelineEvent;
-        if (currentChild.deepOverlaps(sibling)) {
+        final AsyncTimelineEvent sibling = children[j];
+        if (currentChild.isSubtreeOverlapping(sibling)) {
           return _hasOverlappingChildren = true;
         }
       }
@@ -933,11 +973,12 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   bool _hasOverlappingChildren;
 
-  bool deepOverlaps(TimelineEvent other) {
+  // Warning: this method may be expensive to call for very deep trees.
+  bool isSubtreeOverlapping(TimelineEvent other) {
     final maxLevelToVerify = math.min(depth, other.depth);
     for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = lastSubNodeAtLevel(level);
-      final otherFirstEventAtLevel = other.firstSubNodeAtLevel(level);
+      final lastEventAtLevel = lastChildNodeAtLevel(level);
+      final otherFirstEventAtLevel = other.firstChildNodeAtLevel(level);
       if (lastEventAtLevel.time.overlaps(otherFirstEventAtLevel.time)) {
         return true;
       }
@@ -947,7 +988,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   void addChild(TimelineEvent child) {
-    final _child = child as AsyncTimelineEvent;
+    final AsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
     if (_child.parentId != null &&
         _child.parentId == traceEvents.first.event.id) {
@@ -959,7 +1000,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   bool couldBeParentOf(TimelineEvent e) {
-    final asyncEvent = e as AsyncTimelineEvent;
+    final AsyncTimelineEvent asyncEvent = e;
 
     // If [asyncEvent] has an explicit parentId, use that as the truth.
     if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
@@ -997,7 +1038,10 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   void endAsyncEvent(TraceEventWrapper eventWrapper) {
-    assert(asyncId == eventWrapper.event.id);
+    assert(
+      asyncId == eventWrapper.event.id,
+      'asyncId = $asyncId, but endEventId = ${eventWrapper.event.id}',
+    );
     if (name == eventWrapper.event.name && endTraceEventJson == null) {
       addEndEvent(eventWrapper);
       return;

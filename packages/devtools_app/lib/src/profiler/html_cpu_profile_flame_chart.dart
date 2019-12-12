@@ -180,7 +180,7 @@ class CpuFlameChartCanvas extends FlameChartCanvas<CpuProfileData> {
         sideInset,
       );
 
-      rows[row].nodes.add(node);
+      rows[row].addNode(node);
 
       for (CpuStackFrame child in stackFrame.children) {
         createChartNodes(
