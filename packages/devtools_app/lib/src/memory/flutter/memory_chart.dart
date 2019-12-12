@@ -185,9 +185,8 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   HeapSample getValues(int timestamp) {
-    final data = controller.offline
-        ? memoryTimeline.offflineData
-        : memoryTimeline.data;
+    final data =
+        controller.offline ? memoryTimeline.offflineData : memoryTimeline.data;
     for (var index = 0; index < data.length; index++) {
       if (data[index].timestamp == timestamp) {
         return data[index];
