@@ -20,11 +20,9 @@ import 'memory_service.dart';
 
 typedef chartStateListener = void Function();
 
-const String _filenamePrefix = 'memory_log_';
-
 // Memory Log filename.
 final String _memoryLogFilename =
-    '$_filenamePrefix${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
+    '${MemoryController.filenamePrefix}${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
 
 // TODO(terry): Implement a dispose method and call in ProvidedControllers dispose.
 /// This class contains the business logic for [memory.dart].
@@ -37,6 +35,8 @@ class MemoryController {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
   }
+
+  static const String filenamePrefix = 'memory_log_';
 
   MemoryTimeline memoryTimeline;
 
@@ -542,7 +542,7 @@ class MemoryLog {
     for (FileSystemEntity entry in allFiles) {
       final basename = _path.basename(entry.path);
       if (FileSystemEntity.isFileSync(entry.path) &&
-          basename.startsWith(_filenamePrefix)) {
+          basename.startsWith(MemoryController.filenamePrefix)) {
         memoryLogs.add(basename);
       }
     }

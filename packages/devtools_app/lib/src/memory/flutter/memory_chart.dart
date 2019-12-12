@@ -45,13 +45,11 @@ class MemoryChart extends StatefulWidget {
 }
 
 class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
-  LineChartController _chartController;
+  LineChartController chartController;
 
-  LineChartController get chartController => _chartController;
+  MemoryController controller;
 
-  MemoryController get _controller => Controllers.of(context).memory;
-
-  MemoryTimeline get _memoryTimeline => _controller.memoryTimeline;
+  MemoryTimeline get memoryTimeline => controller.memoryTimeline;
 
   final legendTypeFace =
       TypeFace(fontFamily: 'OpenSans', fontWeight: FontWeight.w100);
@@ -71,9 +69,13 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    final newController = Controllers.of(context).memory;
+    if (newController == controller) return;
+    controller = newController;
+
     cancel();
 
-    _controller.addMemorySourceListener(() {
+    controller.addMemorySourceListener(() {
       setState(() {
         // The memory source has changed, clear all plotted values.
         _used.clear();
@@ -83,7 +85,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         // Reset the chart
         _setupChart();
 
-        if (_controller.offline)
+        if (controller.offline)
           // Replot the entire offline data.
           processMemoryLogFileData();
         else
@@ -95,7 +97,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     // Process and plot each heap sample as it is received.
     addAutoDisposeListener(
-      _memoryTimeline.sampleAddedNotifier,
+      memoryTimeline.sampleAddedNotifier,
       processLiveData,
     );
   }
@@ -108,9 +110,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (_memoryTimeline.data.isNotEmpty) {
+    if (memoryTimeline.data.isNotEmpty) {
       return Center(
-        child: LineChart(_chartController),
+        child: LineChart(chartController),
       );
     }
 
@@ -122,7 +124,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void _initController() {
     final desc = Description()..enabled = false;
 
-    _chartController = LineChartController(
+    chartController = LineChartController(
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..position = YAxisLabelPosition.OUTSIDE_CHART
@@ -175,17 +177,17 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
 
     // Compute padding around chart.
-    _chartController.setViewPortOffsets(50, 10, 10, 30);
+    chartController.setViewPortOffsets(50, 10, 10, 30);
   }
 
   void onPointSelected(int index) {
-    _controller.selectedSample = index;
+    controller.selectedSample = index;
   }
 
   HeapSample getValues(int timestamp) {
-    final data = _controller.offline
-        ? _memoryTimeline.offflineData
-        : _memoryTimeline.data;
+    final data = controller.offline
+        ? memoryTimeline.offflineData
+        : memoryTimeline.data;
     for (var index = 0; index < data.length; index++) {
       if (data[index].timestamp == timestamp) {
         return data[index];
@@ -262,16 +264,16 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
   void processMemoryLogFileData() {
-    assert(_controller.offline);
-    assert(_memoryTimeline.offflineData.isNotEmpty);
-    _processData(_memoryTimeline.offflineData, 0);
+    assert(controller.offline);
+    assert(memoryTimeline.offflineData.isNotEmpty);
+    _processData(memoryTimeline.offflineData, 0);
   }
 
   void processLiveData([bool reloadAllData = false]) {
-    assert(!_controller.offline);
-    assert(_memoryTimeline.data.isNotEmpty);
+    assert(!controller.offline);
+    assert(memoryTimeline.data.isNotEmpty);
 
-    final List<HeapSample> liveFeed = _memoryTimeline.data;
+    final List<HeapSample> liveFeed = memoryTimeline.data;
     if (_used.length != liveFeed.length || reloadAllData) {
       _processData(liveFeed, _used.length);
     }
@@ -284,7 +286,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       capacityHeapSet.notifyDataSetChanged();
       externalMemorySet.notifyDataSetChanged();
 
-      _chartController.data = LineData.fromList(
+      chartController.data = LineData.fromList(
           []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
     });
   }
@@ -340,10 +342,10 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(190);
 
     // Create a data object with all the data sets.
-    _chartController.data = LineData.fromList(
+    chartController.data = LineData.fromList(
         []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
 
-    _chartController.data
+    chartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())
       ..setValueTextSize(9);
   }

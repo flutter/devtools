@@ -16,6 +16,25 @@ import 'memory_chart.dart';
 class MemoryScreen extends Screen {
   const MemoryScreen();
 
+  @visibleForTesting
+  static const pauseButtonKey = Key('Pause Button');
+  @visibleForTesting
+  static const resumeButtonKey = Key('Resume Button');
+  @visibleForTesting
+  static const memorySourceStatusKey = Key('Memory Source Status');
+  @visibleForTesting
+  static const memorySourcesKey = Key('Memory Sources');
+  @visibleForTesting
+  static const popupSourceMenuButtonKey = Key('Popup Source Menu Button');
+  @visibleForTesting
+  static const exportButtonKey = Key('Export Button');
+  @visibleForTesting
+  static const snapshotButtonKey = Key('Snapshot Button');
+  @visibleForTesting
+  static const resetButtonKey = Key('Reset Button');
+  @visibleForTesting
+  static const gcButtonKey = Key('GC Button');
+
   @override
   Widget build(BuildContext context) => const MemoryBody();
 
@@ -38,7 +57,7 @@ class MemoryBody extends StatefulWidget {
 class MemoryBodyState extends State<MemoryBody> {
   MemoryChart _memoryChart;
 
-  MemoryController get _controller => Controllers.of(context).memory;
+  MemoryController controller;
 
   @override
   void initState() {
@@ -51,6 +70,15 @@ class MemoryBodyState extends State<MemoryBody> {
   void dispose() {
     // TODO(terry): make my controller disposable via DisposableController and dispose here.
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newController = Controllers.of(context).memory;
+    if (newController == controller) return;
+    controller = newController;
   }
 
   @override
@@ -78,19 +106,19 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
-  static const String _liveFeed = 'Live Feed';
-  String memorySource = _liveFeed;
+  static const String liveFeed = 'Live Feed';
+  String memorySource = liveFeed;
 
   Widget createMenuItem(String name) {
     final rowChildren = memorySource == name
         ? [
             Icon(Icons.check, size: 12),
             const SizedBox(width: 10),
-            Text(name),
+            Text(name, key: MemoryScreen.memorySourcesKey),
           ]
         : [
             const SizedBox(width: 22),
-            Text(name),
+            Text(name, key: MemoryScreen.memorySourcesKey),
           ];
 
     return PopupMenuItem<String>(
@@ -103,10 +131,10 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   Widget _selectMemoryFile() {
-    final List<String> files = _controller.memoryLog.offlineFiles();
+    final List<String> files = controller.memoryLog.offlineFiles();
 
     final List<PopupMenuItem<String>> items = [
-      createMenuItem(_liveFeed),
+      createMenuItem(liveFeed),
     ];
 
     for (var index = 0; index < files.length; index++) {
@@ -114,27 +142,28 @@ class MemoryBodyState extends State<MemoryBody> {
     }
 
     return PopupMenuButton<String>(
+      key: MemoryScreen.popupSourceMenuButtonKey,
       onSelected: (value) {
         setState(() {
           memorySource = value;
 
-          if (memorySource == _liveFeed) {
-            if (_controller.offline) {
+          if (memorySource == liveFeed) {
+            if (controller.offline) {
               // User is switching back to 'Live Feed'.
-              _controller.memoryTimeline.offflineData.clear();
-              _controller.offline = false; // We're live again...
+              controller.memoryTimeline.offflineData.clear();
+              controller.offline = false; // We're live again...
             } else {
               // Still a live feed - keep collecting.
-              assert(!_controller.offline);
+              assert(!controller.offline);
             }
           } else {
             // Switching to an offline memory log (JSON file in /tmp).
-            _controller.memoryLog.loadOffline(memorySource);
+            controller.memoryLog.loadOffline(memorySource);
           }
 
           // Notify the Chart state there's new data from a different memory
           // source to plot.
-          _controller.notifyMemorySourceListeners();
+          controller.notifyMemorySourceListeners();
         });
       },
       itemBuilder: (BuildContext context) => items,
@@ -144,9 +173,9 @@ class MemoryBodyState extends State<MemoryBody> {
   void _updateListeningState() async {
     await serviceManager.serviceAvailable.future;
 
-    if (_controller.hasStarted) return;
+    if (controller != null && controller.hasStarted) return;
 
-    await _controller.startTimeline();
+    if (controller != null) await controller.startTimeline();
 
     // TODO(terry): Need to set the initial state of buttons.
 /*
@@ -166,7 +195,8 @@ class MemoryBodyState extends State<MemoryBody> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         OutlineButton(
-          onPressed: _controller.paused ? null : _pauseLiveTimeline,
+          key: MemoryScreen.pauseButtonKey,
+          onPressed: controller.paused ? null : _pauseLiveTimeline,
           child: const MaterialIconLabel(
             Icons.pause,
             'Pause',
@@ -174,7 +204,8 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
         OutlineButton(
-          onPressed: _controller.paused ? _resumeLiveTimeline : null,
+          key: MemoryScreen.resumeButtonKey,
+          onPressed: controller.paused ? _resumeLiveTimeline : null,
           child: const MaterialIconLabel(
             Icons.play_arrow,
             'Resume',
@@ -196,15 +227,17 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
           const SizedBox(width: 5),
           Text(
-            memorySource == _liveFeed ? memorySource : 'memory log',
+            memorySource == liveFeed ? memorySource : 'memory log',
+            key: MemoryScreen.memorySourceStatusKey,
             style: TextStyle(fontWeight: FontWeight.w100),
           ),
           const SizedBox(width: 5),
           _selectMemoryFile(),
         ]),
         OutlineButton(
+          key: MemoryScreen.exportButtonKey,
           onPressed:
-              _controller.offline ? null : _controller.memoryLog.exportMemory,
+              controller.offline ? null : controller.memoryLog.exportMemory,
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
@@ -213,6 +246,7 @@ class MemoryBodyState extends State<MemoryBody> {
         ),
         const SizedBox(width: 32.0),
         OutlineButton(
+          key: MemoryScreen.snapshotButtonKey,
           onPressed: _snapshot,
           child: MaterialIconLabel(
             Icons.camera,
@@ -221,6 +255,7 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
         OutlineButton(
+          key: MemoryScreen.resetButtonKey,
           onPressed: _reset,
           child: MaterialIconLabel(
             Icons.settings_backup_restore,
@@ -229,6 +264,7 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
         OutlineButton(
+          key: MemoryScreen.gcButtonKey,
           onPressed: _gc,
           child: MaterialIconLabel(
             Icons.delete_sweep,
@@ -244,13 +280,13 @@ class MemoryBodyState extends State<MemoryBody> {
 
   void _pauseLiveTimeline() {
     // TODO(terry): Implement real pause when connected to live feed.
-    _controller.pauseLiveFeed();
+    controller.pauseLiveFeed();
     setState(() {});
   }
 
   void _resumeLiveTimeline() {
     // TODO(terry): Implement real resume when connected to live feed.
-    _controller.resumeLiveFeed();
+    controller.resumeLiveFeed();
     setState(() {});
   }
 
