@@ -92,7 +92,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
     final summaryTree = InspectorTree(
       controller: summaryTreeController,
       isSummaryTree: true,
-      debugSummaryLayoutEnabled: inspectorController?.debugSummaryLayoutEnabled,
     );
     final detailsTree = InspectorTree(
       controller: detailsTreeController,
@@ -127,18 +126,6 @@ class _InspectorScreenBodyState extends State<InspectorScreenBody>
                 minIncludeTextWidth: 900,
               ),
             ),
-            if (InspectorController.enableExperimentalStoryOfLayout)
-              Container(
-                margin: const EdgeInsets.only(left: 8.0),
-                child: OutlineButton(
-                  onPressed: inspectorController?.toggleDebugSummaryLayout,
-                  child: const Label(
-                    FlutterIcons.lightbulb,
-                    'Show Constraints',
-                    minIncludeTextWidth: 1000,
-                  ),
-                ),
-              ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],

@@ -6,11 +6,9 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/flutter/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen_details_tab.dart';
 import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
-import 'package:devtools_app/src/inspector/flutter/summary_tree_debug_layout.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
@@ -192,66 +190,6 @@ void main() {
       // visually disabled.
     });
 
-    group('test render depends on enableExperimentalStoryOfLayout value', () {
-      testWidgetsWithWindowSize(
-          'Should not render toggle button when flag is disabled', windowSize,
-          (WidgetTester tester) async {
-        InspectorController.enableExperimentalStoryOfLayout = false;
-        await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-        expect(find.text('Show Constraints'), findsNothing);
-      });
-
-      testWidgetsWithWindowSize(
-          'Should render button with full text when flag is enabled and screen is wide enough',
-          windowSize, (WidgetTester tester) async {
-        InspectorController.enableExperimentalStoryOfLayout = true;
-        await tester.pumpWidget(wrap(Builder(builder: screen.build)));
-        expect(find.text('Show Constraints'), findsWidgets);
-      });
-
-      // TODO(albertusangga): add unit test to test only show icon
-    });
-
-    testWidgets('Test render ConstraintsDescription',
-        (WidgetTester tester) async {
-      final jsonNode = <String, Object>{
-        'constraints': <String, Object>{
-          'type': 'BoxConstraints',
-          'minWidth': '0.0',
-          'maxWidth': '100.0',
-          'minHeight': '0.0',
-          'maxHeight': 'Infinity',
-        },
-      };
-      final animationController = AnimationController(
-        vsync: const TestVSync(),
-        duration: const Duration(milliseconds: 1),
-      );
-      final diagnostic = RemoteDiagnosticsNode(jsonNode, null, false, null);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ConstraintsDescription(
-            properties: LayoutProperties(diagnostic),
-            listenable: animationController,
-          ),
-        ),
-      );
-      animationController.forward();
-      await tester.pumpAndSettle();
-      expect(find.byType(RichText), findsOneWidget);
-      Finder findRichText(String textToMatch) {
-        return find.byWidgetPredicate(
-          (Widget widget) =>
-              (widget is RichText) && widget.text.toPlainText() == textToMatch,
-          description: 'Rich text contains $textToMatch',
-        );
-      }
-
-      expect(findRichText('BoxConstraints(0.0<=w<=100.0,height unconstrained)'),
-          findsOneWidget);
-      animationController.dispose();
-    });
-
     group('LayoutDetailsTab', () {
       final renderObjectJson = jsonDecode('''
         {
@@ -350,6 +288,7 @@ class TestInspectorController extends Fake implements InspectorController {
 
   @override
   InspectorTreeNode get selectedNode => node;
+
   @override
   set selectedNode(InspectorTreeNode newNode) => node = newNode;
 
