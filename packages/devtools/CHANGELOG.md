@@ -1,3 +1,6 @@
+## 0.1.14-dev.1
+* Fix issues with async trace event rendering.
+
 ## 0.1.13 - 2019-12-10
 * Fix crash opening macOS desktop apps in DevTools.
 * Enable layout explorer.
