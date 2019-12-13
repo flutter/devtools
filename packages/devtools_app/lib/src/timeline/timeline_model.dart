@@ -126,6 +126,7 @@ class FullTimelineData extends TimelineData {
   }
 
   void addTimelineEvent(TimelineEvent event) {
+    assert(event.isWellFormed);
     timelineEvents.add(event);
     _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
   }
@@ -1042,6 +1043,11 @@ class AsyncTimelineEvent extends TimelineEvent {
       asyncId == eventWrapper.event.id,
       'asyncId = $asyncId, but endEventId = ${eventWrapper.event.id}',
     );
+    if (endTraceEventJson != null) {
+      // This event has already ended and [eventWrapper] is a duplicate trace
+      // event.
+      return;
+    }
     if (name == eventWrapper.event.name && endTraceEventJson == null) {
       addEndEvent(eventWrapper);
       return;

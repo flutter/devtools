@@ -641,6 +641,8 @@ class FullTimelineProcessor extends TimelineProcessor {
   /// This is guaranteed because we process the events in timestamp order.
   SyncTimelineEvent pendingRootCompleteEvent;
 
+  TraceEventWrapper previousTraceEvent;
+
   void processTimeline(List<TraceEventWrapper> traceEvents) async {
 // Uncomment this code for testing the timeline.
 //    traceEvents = simpleTraceEvents['traceEvents']
@@ -661,6 +663,12 @@ class FullTimelineProcessor extends TimelineProcessor {
           .forEach(timelineController.recordTrace);
 
     for (var eventWrapper in _traceEvents) {
+      // This is a duplicate trace event. Skip it.
+      if (previousTraceEvent != null &&
+          collectionEquals(eventWrapper.json, previousTraceEvent.json)) {
+        continue;
+      }
+
       // TODO(kenz): stop manually setting the type once we have that data
       // from the engine.
       eventWrapper.event.type = inferEventType(eventWrapper.event);
@@ -692,6 +700,7 @@ class FullTimelineProcessor extends TimelineProcessor {
         default:
           break;
       }
+      previousTraceEvent = eventWrapper;
     }
 
     for (var rootEvent in asyncEventsById.values.where((e) => e.isRoot)) {
@@ -764,14 +773,18 @@ class FullTimelineProcessor extends TimelineProcessor {
         timelineController.fullTimeline.addTimelineEvent(currentEventWithId);
         asyncEventsById[eventWrapper.event.id] = timelineEvent;
       } else {
-        assert(
-          !currentEventWithId.isWellFormed,
-          'Event with id ${eventWrapper.event.id} is not well formed. '
-          'Event trace: ${eventWrapper.event}',
-        );
-        // We know it must be a child because we process events in timestamp
-        // order.
-        currentEventWithId.addChild(timelineEvent);
+        if (currentEventWithId.isWellFormed) {
+          // Since parent id was not explicitly passed in the event args and
+          // since we process events in timestamp order, if [currentEventWithId]
+          // is well formed, [timelineEvent] cannot be a child of
+          // [currentEventWithId]. This is an illegal id collision that we need
+          // to handle gracefully, so throw this event away.
+          print('Id collision on id ${eventWrapper.event.id}');
+        } else {
+          // We know it must be a child because we process events in timestamp
+          // order.
+          currentEventWithId.addChild(timelineEvent);
+        }
       }
     } else {
       asyncEventsById[eventWrapper.event.id] = timelineEvent;
