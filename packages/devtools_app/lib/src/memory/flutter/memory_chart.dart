@@ -60,8 +60,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     _preloadResources();
 
-    _setupChart();
-
     super.initState();
   }
 
@@ -73,32 +71,28 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     if (newController == controller) return;
     controller = newController;
 
+    controller.memoryTimeline.image = _img;
+
+    _setupChart();
+
     cancel();
 
-    controller.addMemorySourceListener(() {
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(controller.memorySourceNotifier, () {
       setState(() {
-        // The memory source has changed, clear all plotted values.
-        _used.clear();
-        _capacity.clear();
-        _externalHeap.clear();
+        controller.updatedMemorySource();
 
-        // Reset the chart
-        _setupChart();
-
-        if (controller.offline)
-          // Replot the entire offline data.
-          processMemoryLogFileData();
-        else
-          // Continue plot the live heap samples being
-          // received.
-          processLiveData(true);
+        // Plot all offline or online data (based on memorySource).  If
+        // not offline then all new heap samples will be plotted as it
+        // appears via the sampleAddedNotifier.
+        _processAndUpdate(true);
       });
     });
 
-    // Process and plot each heap sample as it is received.
+    // Plot each heap sample as it is received.
     addAutoDisposeListener(
       memoryTimeline.sampleAddedNotifier,
-      processLiveData,
+      _processAndUpdate,
     );
   }
 
@@ -110,7 +104,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (memoryTimeline.data.isNotEmpty) {
+    if (memoryTimeline.liveData.isNotEmpty) {
       return Center(
         child: LineChart(chartController),
       );
@@ -185,8 +179,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   HeapSample getValues(int timestamp) {
-    final data =
-        controller.offline ? memoryTimeline.offflineData : memoryTimeline.data;
+    final data = controller.memoryTimeline.data;
     for (var index = 0; index < data.length; index++) {
       if (data[index].timestamp == timestamp) {
         return data[index];
@@ -201,18 +194,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     super.dispose();
   }
 
-  // TODO(terry): Move _used, _capacity and _externalHeap Controller.
-  // TODO(terry): More efficient when switching views.
-
-  /// Datapoint entry for each used heap value.
-  final List<Entry> _used = <Entry>[];
-
-  /// Datapoint entry for each capacity heap value.
-  final List<Entry> _capacity = <Entry>[];
-
-  /// Datapoint entry for each external memory value.
-  final List<Entry> _externalHeap = <Entry>[];
-
   // Trace #1 Heap Used.
   LineDataSet usedHeapSet;
 
@@ -222,63 +203,18 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   // Trace #3 External Memory used.
   LineDataSet externalMemorySet;
 
-  /// Common utility function to handle loading of the data into the
-  /// chart for either offline or live Feed.
-  void _processData(List<HeapSample> data, int startingDataIndex) {
-    for (var dataIndex = startingDataIndex;
-        dataIndex < data.length;
-        dataIndex++) {
-      final sample = data[dataIndex];
-      final timestamp = sample.timestamp.toDouble();
-
-      final capacity = sample.capacity.toDouble();
-      final used = sample.used.toDouble();
-      final external = sample.external.toDouble();
-
-      final extEntry = Entry(
-        x: timestamp,
-        y: external,
-        icon: _img,
-      );
-      final usedEntry = Entry(
-        x: timestamp,
-        y: used + external,
-        icon: _img,
-      );
-      final capacityEntry = Entry(
-        x: timestamp,
-        y: capacity,
-        icon: _img,
-      );
-
-      setState(() {
-        _externalHeap.add(extEntry);
-        _used.add(usedEntry);
-        _capacity.add(capacityEntry);
-      });
-    }
-
-    updateChart();
+  /// General utility function handles loading all heap samples (online or offline) and
+  /// or the latest
+  /// heap sample.
+  void _processAndUpdate([bool reloadAllData = false]) {
+    setState(() {
+      controller.processData(reloadAllData);
+      _updateChart();
+    });
   }
 
-  /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
-  void processMemoryLogFileData() {
-    assert(controller.offline);
-    assert(memoryTimeline.offflineData.isNotEmpty);
-    _processData(memoryTimeline.offflineData, 0);
-  }
-
-  void processLiveData([bool reloadAllData = false]) {
-    assert(!controller.offline);
-    assert(memoryTimeline.data.isNotEmpty);
-
-    final List<HeapSample> liveFeed = memoryTimeline.data;
-    if (_used.length != liveFeed.length || reloadAllData) {
-      _processData(liveFeed, _used.length);
-    }
-  }
-
-  void updateChart() {
+  /// Display any newly received heap sample(s) in the chart.
+  void _updateChart() {
     setState(() {
       // Signal data has changed.
       usedHeapSet.notifyDataSetChanged();
@@ -291,8 +227,10 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   void _setupChart() {
+    final chartData = memoryTimeline.chartData;
+
     // Create heap used dataset.
-    usedHeapSet = LineDataSet(_used, 'Used');
+    usedHeapSet = LineDataSet(chartData.used, 'Used');
     usedHeapSet
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(ColorUtils.getHoloBlue())
@@ -309,7 +247,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(80);
 
     // Create heap capacity dataset.
-    capacityHeapSet = LineDataSet(_capacity, 'Capacity')
+    capacityHeapSet = LineDataSet(chartData.capacity, 'Capacity')
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(ColorUtils.GRAY)
       ..setValueTextColor(ColorUtils.GRAY)
@@ -326,7 +264,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         Color.fromARGB(0xff, 0x42, 0xa5, 0xf5); // Color.blue[400]
     const externalColor =
         Color.fromARGB(0xff, 0x90, 0xca, 0xf9); // Color.blue[200]
-    externalMemorySet = LineDataSet(_externalHeap, 'External');
+    externalMemorySet = LineDataSet(chartData.externalHeap, 'External');
     externalMemorySet
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(externalColorLine)
@@ -342,7 +280,17 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     // Create a data object with all the data sets.
     chartController.data = LineData.fromList(
-        []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
+      []
+        ..add(
+          usedHeapSet,
+        )
+        ..add(
+          externalMemorySet,
+        )
+        ..add(
+          capacityHeapSet,
+        ),
+    );
 
     chartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())

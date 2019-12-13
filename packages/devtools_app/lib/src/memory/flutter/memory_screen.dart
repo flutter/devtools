@@ -21,11 +21,11 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const resumeButtonKey = Key('Resume Button');
   @visibleForTesting
-  static const memorySourceStatusKey = Key('Memory Source Status');
+  static const dropdownSourceMenuButtonKey = Key('Dropdown Source Menu Button');
+  @visibleForTesting
+  static const memorySourcesMenuItem = Key('Memory Sources Menu Item');
   @visibleForTesting
   static const memorySourcesKey = Key('Memory Sources');
-  @visibleForTesting
-  static const popupSourceMenuButtonKey = Key('Popup Source Menu Button');
   @visibleForTesting
   static const exportButtonKey = Key('Export Button');
   @visibleForTesting
@@ -106,67 +106,36 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
-  static const String liveFeed = 'Live Feed';
-  String memorySource = liveFeed;
+  Widget _memorySourceDropdown() {
+    final files = controller.memoryLog.offlineFiles();
 
-  Widget createMenuItem(String name) {
-    final rowChildren = memorySource == name
-        ? [
-            Icon(Icons.check, size: 12),
-            const SizedBox(width: 10),
-            Text(name, key: MemoryScreen.memorySourcesKey),
-          ]
-        : [
-            const SizedBox(width: 22),
-            Text(name, key: MemoryScreen.memorySourcesKey),
-          ];
+    // First item is 'Live Feed', then followed by memory log filenames.
+    files.insert(0, MemoryController.liveFeed);
 
-    return PopupMenuItem<String>(
-      value: name,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: rowChildren,
-      ),
-    );
-  }
+    final allMemorySources = files.map<DropdownMenuItem<String>>((
+      String value,
+    ) {
+      return DropdownMenuItem<String>(
+        key: MemoryScreen.memorySourcesMenuItem,
+        value: value,
+        child: Text(
+          value,
+          key: MemoryScreen.memorySourcesKey,
+        ),
+      );
+    }).toList();
 
-  Widget _selectMemoryFile() {
-    final List<String> files = controller.memoryLog.offlineFiles();
-
-    final List<PopupMenuItem<String>> items = [
-      createMenuItem(liveFeed),
-    ];
-
-    for (var index = 0; index < files.length; index++) {
-      items.add(createMenuItem(files[index]));
-    }
-
-    return PopupMenuButton<String>(
-      key: MemoryScreen.popupSourceMenuButtonKey,
-      onSelected: (value) {
+    return DropdownButton<String>(
+      key: MemoryScreen.dropdownSourceMenuButtonKey,
+      value: controller.memorySource,
+      iconSize: 20,
+      style: TextStyle(fontWeight: FontWeight.w100),
+      onChanged: (String newValue) {
         setState(() {
-          memorySource = value;
-
-          if (memorySource == liveFeed) {
-            if (controller.offline) {
-              // User is switching back to 'Live Feed'.
-              controller.memoryTimeline.offflineData.clear();
-              controller.offline = false; // We're live again...
-            } else {
-              // Still a live feed - keep collecting.
-              assert(!controller.offline);
-            }
-          } else {
-            // Switching to an offline memory log (JSON file in /tmp).
-            controller.memoryLog.loadOffline(memorySource);
-          }
-
-          // Notify the Chart state there's new data from a different memory
-          // source to plot.
-          controller.notifyMemorySourceListeners();
+          controller.memorySource = newValue;
         });
       },
-      itemBuilder: (BuildContext context) => items,
+      items: allMemorySources,
     );
   }
 
@@ -222,29 +191,13 @@ class MemoryBodyState extends State<MemoryBody> {
       children: [
         Row(children: [
           Text(
-            'Memory Source:',
+            'Source:',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(width: 5),
-          Text(
-            memorySource == liveFeed ? memorySource : 'memory log',
-            key: MemoryScreen.memorySourceStatusKey,
-            style: TextStyle(fontWeight: FontWeight.w100),
-          ),
-          const SizedBox(width: 5),
-          _selectMemoryFile(),
+          _memorySourceDropdown(),
         ]),
-        OutlineButton(
-          key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
-          child: MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            minIncludeTextWidth: 1100,
-          ),
-        ),
-        const SizedBox(width: 32.0),
+        const SizedBox(width: 16.0),
         OutlineButton(
           key: MemoryScreen.snapshotButtonKey,
           onPressed: _snapshot,
@@ -269,6 +222,17 @@ class MemoryBodyState extends State<MemoryBody> {
           child: MaterialIconLabel(
             Icons.delete_sweep,
             'GC',
+            minIncludeTextWidth: 1100,
+          ),
+        ),
+        const SizedBox(width: 16.0),
+        OutlineButton(
+          key: MemoryScreen.exportButtonKey,
+          onPressed:
+              controller.offline ? null : controller.memoryLog.exportMemory,
+          child: MaterialIconLabel(
+            Icons.file_download,
+            'Export',
             minIncludeTextWidth: 1100,
           ),
         ),

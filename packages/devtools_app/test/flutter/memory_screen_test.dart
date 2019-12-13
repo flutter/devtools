@@ -66,11 +66,7 @@ void main() {
       expect(find.byKey(MemoryScreen.pauseButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resumeButtonKey), findsOneWidget);
 
-      expect(find.byKey(MemoryScreen.memorySourceStatusKey), findsOneWidget);
-      final Text memorySourceText = tester.firstWidget(find.byKey(
-        MemoryScreen.memorySourceStatusKey,
-      )) as Text;
-      expect(memorySourceText.data, MemoryBodyState.liveFeed);
+      expect(controller.memorySource, MemoryController.liveFeed);
 
       expect(find.byKey(MemoryScreen.snapshotButtonKey), findsOneWidget);
       expect(find.byKey(MemoryScreen.resetButtonKey), findsOneWidget);
@@ -78,8 +74,8 @@ void main() {
 
       expect(find.byType(MemoryChart), findsOneWidget);
 
-      expect(controller.memoryTimeline.data.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offflineData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
 
       // Verify the state of the splitter.
       splitFinder = find.byType(Split);
@@ -88,14 +84,14 @@ void main() {
       expect(splitter.initialFirstFraction, equals(0.25));
 
       // Check memory sources available.
-      await tester.tap(find.byKey(MemoryScreen.popupSourceMenuButtonKey));
+      await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
       await tester.pump();
 
       // Should only be one source 'Live Feed' in the popup menu.
       final Text memorySources = tester.firstWidget(find.byKey(
         MemoryScreen.memorySourcesKey,
       )) as Text;
-      expect(memorySources.data, MemoryBodyState.liveFeed);
+      expect(memorySources.data, MemoryController.liveFeed);
     });
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
@@ -112,8 +108,8 @@ void main() {
       await tester.pump();
 
       expect(controller.offline, isFalse);
-      expect(controller.memoryTimeline.data.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offflineData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
 
       final currentMemoryLogs = controller.memoryLog.offlineFiles();
       expect(previousMemoryLogs.length + 1 == currentMemoryLogs.length, isTrue);
@@ -126,9 +122,21 @@ void main() {
       // Verify initial state - collecting live feed.
       expect(controller.offline, isFalse);
 
+      // Live feed should be default selected.
+      expect(controller.memorySource, MemoryController.liveFeed);
+
       // Export memory to a memory log file.
-      await tester.tap(find.byKey(MemoryScreen.popupSourceMenuButtonKey));
+      await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
       await tester.pump();
+
+      // Last item in dropdown list of memory source should be memory log file.
+      await tester.tap(find.byKey(MemoryScreen.memorySourcesMenuItem).last);
+      await tester.pump();
+
+      expect(
+        controller.memorySource.startsWith(MemoryController.logFilenamePrefix),
+        isTrue,
+      );
 
       // TODO(terry): Load canned test data.
       final filenames = controller.memoryLog.offlineFiles();
