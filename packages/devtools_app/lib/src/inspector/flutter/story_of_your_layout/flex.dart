@@ -968,6 +968,16 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
+  void onChangeFlexFit(FlexFit newFlexFit) async {
+    final node = properties.node;
+    final inspectorService = await node.inspectorService;
+    state.markAsDirty();
+    await inspectorService.invokeTweakFlexFit(
+      node.valueRef,
+      newFlexFit,
+    );
+  }
+
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
     Widget buildMenuitemChild(int flexFactor) {
       return Text(
@@ -993,6 +1003,32 @@ class FlexChildVisualizer extends StatelessWidget {
       items: <DropdownMenuItem<int>>[
         buildMenuItem(null),
         for (var i = 0; i <= maximumFlexFactor; ++i) buildMenuItem(i),
+      ],
+    );
+  }
+
+  Widget _buildFlexFitChangerDropdown() {
+    Widget flexFitDescription(FlexFit flexFit) =>
+        Text('fit: ${describeEnum(flexFit)}');
+
+    // Disable FlexFit changer if widget is Expanded.
+    if (properties.description == 'Expanded') {
+      return flexFitDescription(FlexFit.tight);
+    }
+
+    DropdownMenuItem<FlexFit> buildMenuItem(FlexFit flexFit) {
+      return DropdownMenuItem(
+        value: flexFit,
+        child: flexFitDescription(flexFit),
+      );
+    }
+
+    return DropdownButton<FlexFit>(
+      value: properties.flexFit,
+      onChanged: onChangeFlexFit,
+      items: <DropdownMenuItem<FlexFit>>[
+        buildMenuItem(FlexFit.loose),
+        if (properties.description != 'Expanded') buildMenuItem(FlexFit.tight)
       ],
     );
   }
@@ -1026,6 +1062,7 @@ class FlexChildVisualizer extends StatelessWidget {
               textScaleFactor: smallTextScaleFactor,
               textAlign: TextAlign.center,
             ),
+          _buildFlexFitChangerDropdown(),
         ],
       ),
     );

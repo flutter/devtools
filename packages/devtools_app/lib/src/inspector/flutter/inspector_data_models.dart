@@ -100,6 +100,7 @@ class LayoutProperties {
         constraints = deserializeConstraints(node?.constraints),
         isFlex = node?.isFlex,
         flexFactor = node?.flexFactor,
+        flexFit = deserializeFlexFit(node?.flexFit),
         children = copyLevel == 0
             ? []
             : node?.childrenNow
@@ -120,6 +121,7 @@ class LayoutProperties {
     @required this.flexFactor,
     @required this.isFlex,
     @required this.size,
+    @required this.flexFit,
   }) {
     for (var child in children) {
       child.parent = this;
@@ -139,6 +141,7 @@ class LayoutProperties {
       flexFactor: begin.flexFactor + (begin.flexFactor - end.flexFactor) * t,
       isFlex: begin.isFlex && end.isFlex,
       size: Size.lerp(begin.size, end.size, t),
+      flexFit: end.flexFit,
     );
   }
 
@@ -148,6 +151,7 @@ class LayoutProperties {
   final BoxConstraints constraints;
   final String description;
   final num flexFactor;
+  final FlexFit flexFit;
   final bool isFlex;
   final Size size;
 
@@ -224,6 +228,7 @@ class LayoutProperties {
     BoxConstraints constraints,
     String description,
     int flexFactor,
+    FlexFit flexFit,
     bool isFlex,
     Size size,
   }) {
@@ -235,7 +240,15 @@ class LayoutProperties {
       flexFactor: flexFactor ?? this.flexFactor,
       isFlex: isFlex ?? this.isFlex,
       size: size ?? this.size,
+      flexFit: flexFit ?? this.flexFit,
     );
+  }
+
+  static FlexFit deserializeFlexFit(String flexFit) {
+    if (flexFit == null)
+      return null;
+    else if (flexFit == 'tight') return FlexFit.tight;
+    return FlexFit.loose;
   }
 }
 
@@ -251,6 +264,7 @@ class FlexLayoutProperties extends LayoutProperties {
     bool isFlex,
     String description,
     num flexFactor,
+    FlexFit flexFit,
     this.direction,
     this.mainAxisAlignment,
     this.crossAxisAlignment,
@@ -266,6 +280,7 @@ class FlexLayoutProperties extends LayoutProperties {
           isFlex: isFlex,
           description: description,
           flexFactor: flexFactor,
+          flexFit: flexFit,
         );
 
   FlexLayoutProperties._fromNode(
@@ -295,6 +310,7 @@ class FlexLayoutProperties extends LayoutProperties {
     bool isFlex,
     String description,
     num flexFactor,
+    FlexFit flexFit,
     Axis direction,
     MainAxisAlignment mainAxisAlignment,
     MainAxisSize mainAxisSize,
@@ -311,6 +327,7 @@ class FlexLayoutProperties extends LayoutProperties {
       isFlex: isFlex ?? this.isFlex,
       description: description ?? this.description,
       flexFactor: flexFactor ?? this.flexFactor,
+      flexFit: flexFit ?? this.flexFit,
       direction: direction ?? this.direction,
       mainAxisAlignment: mainAxisAlignment ?? this.mainAxisAlignment,
       mainAxisSize: mainAxisSize ?? this.mainAxisSize,

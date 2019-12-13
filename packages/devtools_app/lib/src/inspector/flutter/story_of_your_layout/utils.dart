@@ -268,6 +268,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     BoxConstraints constraints,
     String description,
     int flexFactor,
+    FlexFit flexFit,
     bool isFlex,
     Size size,
   }) {
@@ -277,6 +278,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
       constraints: constraints ?? this.constraints,
       description: description ?? this.description,
       flexFactor: flexFactor ?? this.flexFactor,
+      flexFit: flexFit ?? this.flexFit,
       isFlex: isFlex ?? this.isFlex,
       size: size ?? this.size,
     );
@@ -287,6 +289,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   bool get isOverflowHeight => end.isOverflowHeight;
+
+  @override
+  FlexFit get flexFit => end.flexFit;
 }
 
 class AnimatedFlexLayoutProperties
@@ -424,6 +429,7 @@ class AnimatedFlexLayoutProperties
     bool isFlex,
     String description,
     num flexFactor,
+    FlexFit flexFit,
     Axis direction,
     MainAxisAlignment mainAxisAlignment,
     MainAxisSize mainAxisSize,
