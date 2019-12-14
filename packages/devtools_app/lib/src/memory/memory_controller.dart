@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:ui' as dart_ui show Image;
 
 // Abstracted memory and local file system access for Flutter Web/Desktop.
-import 'package:devtools_app/src/ui/analytics_constants.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file/local.dart';
