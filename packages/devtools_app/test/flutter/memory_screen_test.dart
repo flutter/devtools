@@ -88,10 +88,13 @@ void main() {
       await tester.pump();
 
       // Should only be one source 'Live Feed' in the popup menu.
-      final Text memorySources = tester.firstWidget(find.byKey(
+      final memorySources = tester.firstWidget(find.byKey(
         MemoryScreen.memorySourcesKey,
       )) as Text;
-      expect(memorySources.data, MemoryController.liveFeed);
+      expect(
+        memorySources.data,
+        '${MemoryScreen.memorySourceMenuItemPrefix}${MemoryController.liveFeed}',
+      );
     });
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
@@ -108,19 +111,20 @@ void main() {
       await tester.pump();
 
       expect(controller.offline, isFalse);
-      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
+
+      expect(controller.memoryTimeline.liveData, isEmpty);
+      expect(controller.memoryTimeline.offlineData, isEmpty);
 
       final currentMemoryLogs = controller.memoryLog.offlineFiles();
-      expect(previousMemoryLogs.length + 1 == currentMemoryLogs.length, isTrue);
+      expect(currentMemoryLogs.length, previousMemoryLogs.length + 1);
+
+      // Verify that memory source is still live feed.
+      expect(controller.offline, isFalse);
     });
 
-    testWidgetsWithWindowSize('load memory log profile', windowSize,
+    testWidgetsWithWindowSize('export current memory profile', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
-
-      // Verify initial state - collecting live feed.
-      expect(controller.offline, isFalse);
 
       // Live feed should be default selected.
       expect(controller.memorySource, MemoryController.liveFeed);
@@ -134,15 +138,23 @@ void main() {
       await tester.pump();
 
       expect(
-        controller.memorySource.startsWith(MemoryController.logFilenamePrefix),
-        isTrue,
+        controller.memorySource,
+        startsWith(MemoryController.logFilenamePrefix),
       );
 
       // TODO(terry): Load canned test data.
       final filenames = controller.memoryLog.offlineFiles();
-      controller.memoryLog.loadOffline(filenames[0]);
+      final filename = filenames.first;
+
+      expect(filename, startsWith(MemoryController.logFilenamePrefix));
+
+      controller.memoryLog.loadOffline(filename);
 
       expect(controller.offline, isTrue);
+
+      // Remove the memory log, in desk top only version.  Don't want to polute
+      // our temp directory when this test runs locally.
+      expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
     });
   });
 }

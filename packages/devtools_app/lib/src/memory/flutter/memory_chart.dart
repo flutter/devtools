@@ -67,9 +67,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Controllers.of(context).memory;
-    if (newController == controller) return;
-    controller = newController;
+    controller = Controllers.of(context).memory;
 
     controller.memoryTimeline.image = _img;
 

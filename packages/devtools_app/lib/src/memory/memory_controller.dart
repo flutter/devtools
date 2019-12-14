@@ -3,8 +3,13 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as dart_ui;
+import 'dart:ui' as dart_ui show Image;
+
+// Abstracted memory and local file system access for Flutter Web/Desktop.
+import 'package:devtools_app/src/ui/analytics_constants.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:file/local.dart';
 
 import 'package:intl/intl.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
@@ -465,13 +470,13 @@ class LibraryCollection {
 
 /// Prepare data to plot in MPChart.
 class MPChartData {
-  /// Datapoint entry for each used heap value.
+  /// Datapoint entries for each used heap value.
   final List<Entry> used = <Entry>[];
 
-  /// Datapoint entry for each capacity heap value.
+  /// Datapoint entries for each capacity heap value.
   final List<Entry> capacity = <Entry>[];
 
-  /// Datapoint entry for each external memory value.
+  /// Datapoint entries for each external memory value.
   final List<Entry> externalHeap = <Entry>[];
 
   /// Add each entry to its corresponding trace.
@@ -485,7 +490,7 @@ class MPChartData {
     capacity.add(capacityValue);
   }
 
-  /// Remove all data being plotted in all traces.
+  /// Remove all plotted entries in all traces.
   void reset() {
     used.clear();
     capacity.clear();
@@ -528,6 +533,7 @@ class MemoryTimeline {
 
   ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
+  /// Image asset displayed for each entry plotted in a chart.
   dart_ui.Image _img;
 
   set image(dart_ui.Image img) {
@@ -586,10 +592,9 @@ class MemoryTimeline {
     assert(!controller.offline);
     assert(liveData.isNotEmpty);
 
-    final List<HeapSample> liveFeed = liveData;
     final usedSize = chartData.used.length;
-    if (usedSize != liveFeed.length || reloadAllData) {
-      return _processData(liveFeed, usedSize);
+    if (usedSize != liveData.length || reloadAllData) {
+      return _processData(liveData, usedSize);
     }
 
     return [];
@@ -641,14 +646,19 @@ class MemoryTimeline {
 class MemoryLog {
   MemoryLog(this.controller);
 
+  /// Use in memory or local file system based on Flutter Web/Desktop.
+  static final _fs = kIsWeb ? MemoryFileSystem() : const LocalFileSystem();
+
   MemoryController controller;
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
-  void exportMemory() {
+  void exportMemory() async {
     final liveData = controller.memoryTimeline.liveData;
 
     bool pseudoData = false;
     if (liveData.isEmpty) {
+      // TODO(terry): Can eliminate once I add loading a canned data source
+      //              see TODO in memory_screen_test.
       // Used to create empty memory log for test.
       pseudoData = true;
       liveData.add(HeapSample(
@@ -666,25 +676,15 @@ class MemoryLog {
 
     assert(realData.length == liveData.length);
 
-    final previousCurrentDirectory = Directory.current;
-
     // TODO(terry): Consider path_provider's getTemporaryDirectory
     //              or getApplicationDocumentsDirectory when
     //              available in Flutter Web/Desktop.
-    Directory.current = Directory.systemTemp;
-
-    final memoryLogFile = File(_memoryLogFilename);
-    final openFile = memoryLogFile.openSync(mode: FileMode.write);
-    memoryLogFile.writeAsStringSync(jsonPayload);
-    openFile.closeSync();
+    final memoryLogFile = _fs.systemTempDirectory.childFile(_memoryLogFilename);
+    memoryLogFile.writeAsStringSync(jsonPayload, flush: true);
 
     // TODO(terry): Display filename created in a toast.
 
-    Directory.current = previousCurrentDirectory;
-
-    if (pseudoData) {
-      liveData.clear();
-    }
+    if (pseudoData) liveData.clear();
   }
 
   /// Return a list of offline memory logs filenames in the /tmp directory
@@ -692,15 +692,16 @@ class MemoryLog {
   List<String> offlineFiles() {
     final List<String> memoryLogs = [];
 
-    final previousCurrentDirectory = Directory.current;
+    final previousCurrentDirectory = _fs.currentDirectory;
 
     // TODO(terry): Use path_provider when available?
-    Directory.current = Directory.systemTemp;
+    _fs.currentDirectory = _fs.systemTempDirectory;
 
-    final allFiles = Directory.current.listSync();
+    final allFiles = _fs.currentDirectory.listSync();
+
     for (FileSystemEntity entry in allFiles) {
       final basename = _path.basename(entry.path);
-      if (FileSystemEntity.isFileSync(entry.path) &&
+      if (_fs.isFileSync(entry.path) &&
           basename.startsWith(MemoryController.logFilenamePrefix)) {
         memoryLogs.add(basename);
       }
@@ -709,30 +710,46 @@ class MemoryLog {
     // Sort by newest file top-most (DateTime is in the filename).
     memoryLogs.sort((a, b) => b.compareTo(a));
 
-    Directory.current = previousCurrentDirectory;
+    _fs.currentDirectory = previousCurrentDirectory;
 
     return memoryLogs;
   }
 
   /// Load the memory profile data from a saved memory log file.
-  void loadOffline(String filename) {
+  void loadOffline(String filename) async {
     controller.offline = true;
 
-    final previousCurrentDirectory = Directory.current;
+    final previousCurrentDirectory = _fs.currentDirectory;
 
     // TODO(terry): Use path_provider when available?
-    Directory.current = Directory.systemTemp;
+    _fs.currentDirectory = _fs.systemTempDirectory;
 
-    final memoryLogFile = File(filename);
-    final openFile = memoryLogFile.openSync(mode: FileMode.read);
+    final memoryLogFile = _fs.currentDirectory.childFile(filename);
+
     final jsonPayload = memoryLogFile.readAsStringSync();
-    openFile.closeSync();
-
     final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
 
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(realData);
 
-    Directory.current = previousCurrentDirectory;
+    _fs.currentDirectory = previousCurrentDirectory;
+  }
+
+  @visibleForTesting
+  bool removeOfflineFile(String filename) {
+    if (kIsWeb) return false;
+
+    final previousCurrentDirectory = _fs.currentDirectory;
+
+    // TODO(terry): Use path_provider when available?
+    _fs.currentDirectory = _fs.systemTempDirectory;
+
+    if (!_fs.isFileSync(filename)) return false;
+
+    _fs.file(filename).deleteSync();
+
+    _fs.currentDirectory = previousCurrentDirectory;
+
+    return true;
   }
 }

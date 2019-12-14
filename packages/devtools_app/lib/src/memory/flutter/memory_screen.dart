@@ -35,6 +35,8 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const gcButtonKey = Key('GC Button');
 
+  static const memorySourceMenuItemPrefix = 'Source: ';
+
   @override
   Widget build(BuildContext context) => const MemoryBody();
 
@@ -119,7 +121,7 @@ class MemoryBodyState extends State<MemoryBody> {
         key: MemoryScreen.memorySourcesMenuItem,
         value: value,
         child: Text(
-          value,
+          '${MemoryScreen.memorySourceMenuItemPrefix}$value',
           key: MemoryScreen.memorySourcesKey,
         ),
       );
@@ -189,14 +191,7 @@ class MemoryBodyState extends State<MemoryBody> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Row(children: [
-          Text(
-            'Source:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(width: 5),
-          _memorySourceDropdown(),
-        ]),
+        _memorySourceDropdown(),
         const SizedBox(width: 16.0),
         OutlineButton(
           key: MemoryScreen.snapshotButtonKey,
