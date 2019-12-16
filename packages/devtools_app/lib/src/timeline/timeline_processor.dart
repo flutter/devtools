@@ -785,6 +785,8 @@ class FullTimelineProcessor extends TimelineProcessor {
           // is well formed, [timelineEvent] cannot be a child of
           // [currentEventWithId]. This is an illegal id collision that we need
           // to handle gracefully, so throw this event away.
+          // Bug tracking collisions:
+          // https://github.com/flutter/flutter/issues/47019.
           log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
         } else {
           // We know it must be a child because we process events in timestamp
