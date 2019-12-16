@@ -388,8 +388,8 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
-      if (current
-          .containsChildWithCondition((TimelineEvent event) => collectionEquals(
+      if (current.subtreeHasNodeWithCondition(
+          (TimelineEvent event) => collectionEquals(
                 event.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
@@ -937,8 +937,8 @@ class FullTimelineProcessor extends TimelineProcessor {
 
     final current = currentDurationEventNodes[event.threadId];
     if (current != null) {
-      if (current
-          .containsChildWithCondition((TimelineEvent event) => collectionEquals(
+      if (current.subtreeHasNodeWithCondition(
+          (TimelineEvent event) => collectionEquals(
                 event.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {

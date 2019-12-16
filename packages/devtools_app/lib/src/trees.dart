@@ -130,7 +130,7 @@ class TreeNode<T extends TreeNode<T>> {
     });
   }
 
-  bool containsChildWithCondition(bool condition(T node)) {
+  bool subtreeHasNodeWithCondition(bool condition(T node)) {
     final T childWithCondition = firstChildWithCondition(condition);
     return childWithCondition != null;
   }

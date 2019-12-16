@@ -338,6 +338,10 @@ void main() {
   group('AsyncTimelineEvent', () {
     test('isWellFormedDeep', () {
       expect(goldenAsyncTimelineEvent.isWellFormedDeep, isTrue);
+      final copy = goldenAsyncTimelineEvent.deepCopy();
+      copy.children.last.children.last
+          .addChild(AsyncTimelineEvent(asyncStartDTrace));
+      expect(copy.isWellFormedDeep, isFalse);
     });
 
     test('maxEndMicros', () {
