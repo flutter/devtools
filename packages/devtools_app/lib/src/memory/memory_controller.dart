@@ -3,21 +3,15 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui' as dart_ui show Image;
-
-// Abstracted memory and local file system access for Flutter Web/Desktop.
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:file/local.dart';
 
 import 'package:intl/intl.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
-import 'package:path/path.dart' as _path;
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger.dart';
 import '../globals.dart';
+import '../ui/fake_file/fake_file.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../vm_service_wrapper.dart';
 
@@ -532,10 +526,10 @@ class MemoryTimeline {
 
   ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
-  /// Image asset displayed for each entry plotted in a chart.
-  dart_ui.Image _img;
+  /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
+  dynamic _img;
 
-  set image(dart_ui.Image img) {
+  set image(var img) {
     _img = img;
   }
 
@@ -646,7 +640,7 @@ class MemoryLog {
   MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = kIsWeb ? MemoryFileSystem() : const LocalFileSystem();
+  static final _fs = MemoryFiles();
 
   MemoryController controller;
 
@@ -675,11 +669,7 @@ class MemoryLog {
 
     assert(realData.length == liveData.length);
 
-    // TODO(terry): Consider path_provider's getTemporaryDirectory
-    //              or getApplicationDocumentsDirectory when
-    //              available in Flutter Web/Desktop.
-    final memoryLogFile = _fs.systemTempDirectory.childFile(_memoryLogFilename);
-    memoryLogFile.writeAsStringSync(jsonPayload, flush: true);
+    _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
 
     // TODO(terry): Display filename created in a toast.
 
@@ -689,27 +679,10 @@ class MemoryLog {
   /// Return a list of offline memory logs filenames in the /tmp directory
   /// that are available to open.
   List<String> offlineFiles() {
-    final List<String> memoryLogs = [];
-
-    final previousCurrentDirectory = _fs.currentDirectory;
-
-    // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
-
-    final allFiles = _fs.currentDirectory.listSync();
-
-    for (FileSystemEntity entry in allFiles) {
-      final basename = _path.basename(entry.path);
-      if (_fs.isFileSync(entry.path) &&
-          basename.startsWith(MemoryController.logFilenamePrefix)) {
-        memoryLogs.add(basename);
-      }
-    }
+    final memoryLogs = _fs.list(prefix: MemoryController.logFilenamePrefix);
 
     // Sort by newest file top-most (DateTime is in the filename).
     memoryLogs.sort((a, b) => b.compareTo(a));
-
-    _fs.currentDirectory = previousCurrentDirectory;
 
     return memoryLogs;
   }
@@ -718,37 +691,13 @@ class MemoryLog {
   void loadOffline(String filename) async {
     controller.offline = true;
 
-    final previousCurrentDirectory = _fs.currentDirectory;
-
-    // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
-
-    final memoryLogFile = _fs.currentDirectory.childFile(filename);
-
-    final jsonPayload = memoryLogFile.readAsStringSync();
+    final jsonPayload = _fs.readStringFromFile(filename);
     final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
 
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(realData);
-
-    _fs.currentDirectory = previousCurrentDirectory;
   }
 
   @visibleForTesting
-  bool removeOfflineFile(String filename) {
-    if (kIsWeb) return false;
-
-    final previousCurrentDirectory = _fs.currentDirectory;
-
-    // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
-
-    if (!_fs.isFileSync(filename)) return false;
-
-    _fs.file(filename).deleteSync();
-
-    _fs.currentDirectory = previousCurrentDirectory;
-
-    return true;
-  }
+  bool removeOfflineFile(String filename) => _fs.deleteFile(filename);
 }
