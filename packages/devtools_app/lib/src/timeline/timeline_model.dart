@@ -126,7 +126,7 @@ class FullTimelineData extends TimelineData {
   }
 
   void addTimelineEvent(TimelineEvent event) {
-    assert(event.isWellFormed);
+    assert(event.isWellFormedDeep);
     timelineEvents.add(event);
     _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
   }
@@ -246,11 +246,12 @@ class FullTimelineEventGroup {
   }
 
   void _addEvent(TimelineEvent event, {@required int row}) {
-    if (row == eventsByRow.length) {
-      eventsByRow.add([event]);
-    } else {
-      eventsByRow[row].add(event);
+    if (row >= eventsByRow.length) {
+      for (int i = eventsByRow.length; i <= row; i++) {
+        eventsByRow.add([]);
+      }
     }
+    eventsByRow[row].add(event);
 
     var overlappingChildrenOffset = 0;
     final nextRow = row + 1;
@@ -668,13 +669,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isWellFormedDeep => _isWellFormedDeep(this);
 
   bool _isWellFormedDeep(TimelineEvent event) {
-    if (!event.isWellFormed) {
-      return false;
-    }
-    for (var child in event.children) {
-      return _isWellFormedDeep(child);
-    }
-    return true;
+    return !containsChildWithCondition((e) => !e.isWellFormed);
   }
 
   /// Maximum end micros for the event.
