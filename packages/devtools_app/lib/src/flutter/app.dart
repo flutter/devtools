@@ -10,6 +10,7 @@ import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
 import '../memory/flutter/memory_screen.dart';
+import '../network/flutter/network_screen.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
@@ -18,6 +19,8 @@ import 'connect_screen.dart';
 import 'initializer.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+
+const showNetworkPage = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -104,6 +107,8 @@ class DevToolsAppState extends State<DevToolsApp> {
               PerformanceScreen(),
               // TODO(https://github.com/flutter/flutter/issues/43783): Put back
               // the debugger screen.
+              if (showNetworkPage)
+                NetworkScreen(),
               LoggingScreen(),
               InfoScreen(),
             ],
