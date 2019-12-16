@@ -1048,7 +1048,7 @@ class AsyncTimelineEvent extends TimelineEvent {
       // event.
       return;
     }
-    if (name == eventWrapper.event.name && endTraceEventJson == null) {
+    if (name == eventWrapper.event.name) {
       addEndEvent(eventWrapper);
       return;
     }
