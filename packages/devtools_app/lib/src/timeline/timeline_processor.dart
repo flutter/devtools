@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../config_specific/logger.dart';
 import '../utils.dart';
 //import 'simple_trace_example.dart';
 import 'timeline_controller.dart';
@@ -81,6 +82,8 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
+  ///
+  /// Bug tracking dupes: https://github.com/flutter/flutter/issues/47020.
   final List<TraceEvent> _previousDurationEndEvents = [null, null];
 
   /// Heaps that order and store trace events as we receive them.
@@ -627,6 +630,8 @@ class FullTimelineProcessor extends TimelineProcessor {
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
+  ///
+  /// Bug tracking dupes: https://github.com/flutter/flutter/issues/47020.
   final Map<int, TraceEvent> previousDurationEndEvents = {};
 
   /// Pending root duration complete event that has not yet been added to the
@@ -664,6 +669,7 @@ class FullTimelineProcessor extends TimelineProcessor {
 
     for (var eventWrapper in _traceEvents) {
       // This is a duplicate trace event. Skip it.
+      // See https://github.com/flutter/flutter/issues/47020.
       if (previousTraceEvent != null &&
           collectionEquals(eventWrapper.json, previousTraceEvent.json)) {
         continue;
@@ -779,7 +785,7 @@ class FullTimelineProcessor extends TimelineProcessor {
           // is well formed, [timelineEvent] cannot be a child of
           // [currentEventWithId]. This is an illegal id collision that we need
           // to handle gracefully, so throw this event away.
-          print('Id collision on id ${eventWrapper.event.id}');
+          log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
         } else {
           // We know it must be a child because we process events in timestamp
           // order.
