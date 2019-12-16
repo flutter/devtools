@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-/// Abstracted memory and local file system access for Flutter Desktop.
+/// Abstracted local file system access for Flutter Desktop.
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';

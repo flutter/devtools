@@ -152,7 +152,7 @@ void main() {
 
       expect(controller.offline, isTrue);
 
-      // Remove the memory log, in desk top only version.  Don't want to polute
+      // Remove the memory log, in desktop only version.  Don't want to polute
       // our temp directory when this test runs locally.
       expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
     });
