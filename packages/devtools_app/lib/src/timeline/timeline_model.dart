@@ -669,7 +669,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isWellFormedDeep => _isWellFormedDeep(this);
 
   bool _isWellFormedDeep(TimelineEvent event) {
-    return !containsChildWithCondition((e) => !e.isWellFormed);
+    return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
   }
 
   /// Maximum end micros for the event.
@@ -839,10 +839,10 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  bool get isUiEventFlow => containsChildWithCondition(
+  bool get isUiEventFlow => subtreeHasNodeWithCondition(
       (TimelineEvent event) => event.name.contains('Engine::BeginFrame'));
 
-  bool get isGpuEventFlow => containsChildWithCondition(
+  bool get isGpuEventFlow => subtreeHasNodeWithCondition(
       (TimelineEvent event) => event.name.contains('PipelineConsume'));
 
   @override
