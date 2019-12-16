@@ -57,6 +57,9 @@ int main(int argc, char **argv) {
 
   // Arguments for the Flutter Engine.
   std::vector<std::string> arguments;
+  arguments.push_back("--enable-dart-profiling");
+  arguments.push_back("--trace-systrace");
+  arguments.push_back("--trace-skia");
 
   flutter::FlutterWindowController flutter_controller(icu_data_path);
   flutter::WindowProperties window_properties = {};
