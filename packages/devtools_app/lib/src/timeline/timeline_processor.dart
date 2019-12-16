@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../config_specific/logger.dart';
 import '../utils.dart';
 //import 'simple_trace_example.dart';
 import 'timeline_controller.dart';
@@ -81,6 +82,8 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
+  ///
+  /// Bug tracking dupes: https://github.com/flutter/flutter/issues/47020.
   final List<TraceEvent> _previousDurationEndEvents = [null, null];
 
   /// Heaps that order and store trace events as we receive them.
@@ -627,6 +630,8 @@ class FullTimelineProcessor extends TimelineProcessor {
   ///
   /// We need this information to balance the tree structures of our event nodes
   /// if they fall out of balance due to duplicate trace events.
+  ///
+  /// Bug tracking dupes: https://github.com/flutter/flutter/issues/47020.
   final Map<int, TraceEvent> previousDurationEndEvents = {};
 
   /// Pending root duration complete event that has not yet been added to the
@@ -640,6 +645,8 @@ class FullTimelineProcessor extends TimelineProcessor {
   /// timestamp, we know that the DC event has no more unprocessed children.
   /// This is guaranteed because we process the events in timestamp order.
   SyncTimelineEvent pendingRootCompleteEvent;
+
+  TraceEventWrapper previousTraceEvent;
 
   void processTimeline(List<TraceEventWrapper> traceEvents) async {
 // Uncomment this code for testing the timeline.
@@ -661,6 +668,13 @@ class FullTimelineProcessor extends TimelineProcessor {
           .forEach(timelineController.recordTrace);
 
     for (var eventWrapper in _traceEvents) {
+      // This is a duplicate trace event. Skip it.
+      // See https://github.com/flutter/flutter/issues/47020.
+      if (previousTraceEvent != null &&
+          collectionEquals(eventWrapper.json, previousTraceEvent.json)) {
+        continue;
+      }
+
       // TODO(kenz): stop manually setting the type once we have that data
       // from the engine.
       eventWrapper.event.type = inferEventType(eventWrapper.event);
@@ -692,6 +706,7 @@ class FullTimelineProcessor extends TimelineProcessor {
         default:
           break;
       }
+      previousTraceEvent = eventWrapper;
     }
 
     for (var rootEvent in asyncEventsById.values.where((e) => e.isRoot)) {
@@ -764,14 +779,20 @@ class FullTimelineProcessor extends TimelineProcessor {
         timelineController.fullTimeline.addTimelineEvent(currentEventWithId);
         asyncEventsById[eventWrapper.event.id] = timelineEvent;
       } else {
-        assert(
-          !currentEventWithId.isWellFormed,
-          'Event with id ${eventWrapper.event.id} is not well formed. '
-          'Event trace: ${eventWrapper.event}',
-        );
-        // We know it must be a child because we process events in timestamp
-        // order.
-        currentEventWithId.addChild(timelineEvent);
+        if (currentEventWithId.isWellFormed) {
+          // Since parent id was not explicitly passed in the event args and
+          // since we process events in timestamp order, if [currentEventWithId]
+          // is well formed, [timelineEvent] cannot be a child of
+          // [currentEventWithId]. This is an illegal id collision that we need
+          // to handle gracefully, so throw this event away.
+          // Bug tracking collisions:
+          // https://github.com/flutter/flutter/issues/47019.
+          log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
+        } else {
+          // We know it must be a child because we process events in timestamp
+          // order.
+          currentEventWithId.addChild(timelineEvent);
+        }
       }
     } else {
       asyncEventsById[eventWrapper.event.id] = timelineEvent;
