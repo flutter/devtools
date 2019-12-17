@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as dart_ui;
 
 import 'package:intl/intl.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
@@ -527,9 +528,9 @@ class MemoryTimeline {
   ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
   /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
-  dynamic _img;
+  dart_ui.Image _img;
 
-  set image(var img) {
+  set image(dart_ui.Image img) {
     _img = img;
   }
 

@@ -39,7 +39,7 @@ Widget wrapWithControllers(
         overrideProviders: () {
           return ProvidedControllers(
             logging: loggingController ?? MockLoggingController(),
-            memory: memoryController ?? MockMemoryController(),
+            memory: memoryController ?? MockFlutterMemoryController(),
             timeline: timelineController ?? MockTimelineController(),
           );
         },
