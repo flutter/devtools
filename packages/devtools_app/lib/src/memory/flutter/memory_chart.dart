@@ -36,8 +36,8 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/controllers.dart';
 import '../../flutter/theme.dart';
 import '../../ui/theme.dart';
-import '../memory_controller.dart';
-import '../memory_protocol.dart';
+import 'memory_controller.dart';
+import 'memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
   @override

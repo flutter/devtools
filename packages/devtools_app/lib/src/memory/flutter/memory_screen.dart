@@ -10,8 +10,8 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
-import '../memory_controller.dart';
 import 'memory_chart.dart';
+import 'memory_controller.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen();
