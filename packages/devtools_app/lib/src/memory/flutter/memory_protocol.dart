@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(terry): File is deprecated (HTML only app) and should be removed
-//              when the DevTools app is the package:flutter version.
-
 import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:vm_service/vm_service.dart';
 
-import '../globals.dart';
-import '../version.dart';
-import '../vm_service_wrapper.dart';
-import 'heap_space.dart';
+import '../../globals.dart';
+import '../../version.dart';
+import '../../vm_service_wrapper.dart';
+
+import '../heap_space.dart';
+import 'memory_controller.dart';
 
 class MemoryTracker {
-  MemoryTracker(this.service);
+  MemoryTracker(this.service, this.memoryController);
 
   static const Duration kUpdateDelay = Duration(milliseconds: 200);
 
   VmServiceWrapper service;
+
+  final MemoryController memoryController;
+
   Timer _pollingTimer;
 
   final List<HeapSample> samples = <HeapSample>[];
@@ -122,6 +124,15 @@ class MemoryTracker {
     }
 
     _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
+
+    memoryController.memoryTimeline.addSample(HeapSample(
+      time,
+      processRss,
+      capacity,
+      used,
+      external,
+      fromGC,
+    ));
   }
 
   void _addSample(HeapSample sample) {
@@ -138,14 +149,43 @@ class MemoryTracker {
 }
 
 class HeapSample {
-  HeapSample(this.timestamp, this.rss, this.capacity, this.used, this.external,
-      this.isGC);
+  HeapSample(
+    this.timestamp,
+    this.rss,
+    this.capacity,
+    this.used,
+    this.external,
+    this.isGC,
+  );
+
+  factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
+        json['timestamp'] as int,
+        json['rss'] as int,
+        json['capacity'] as int,
+        json['used'] as int,
+        json['external'] as int,
+        json['gc'] as bool,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'timestamp': timestamp,
+        'rss': rss,
+        'capacity': capacity,
+        'used': used,
+        'external': external,
+        'gc': isGC,
+      };
 
   final int timestamp;
+
   final int rss;
+
   final int capacity;
+
   final int used;
+
   final int external;
+
   final bool isGC;
 }
 

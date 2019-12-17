@@ -26,13 +26,15 @@ dependencies:
   codemirror: ^0.5.10
   collection: ^1.14.11
   devtools_server: 0.1.12
+  file: ^5.1.0
   http: ^0.12.0+1
   html_shim: ^0.0.2
   #    path: ../html_shim
   intl: ^0.16.0
   js: ^0.6.1+1
   meta: ^1.1.0
-  mp_chart: ^0.0.7
+  mp_chart: 
+    ^0.0.7
   #  path: ../../third_party/packages/mp_chart
   path: ^1.6.0
   pedantic: ^1.7.0

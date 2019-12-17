@@ -13,6 +13,8 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
+    as flutter_memory;
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
@@ -154,6 +156,9 @@ class MockConnectedApp extends Mock implements ConnectedApp {}
 class MockLoggingController extends Mock implements LoggingController {}
 
 class MockMemoryController extends Mock implements MemoryController {}
+
+class MockFlutterMemoryController extends Mock
+    implements flutter_memory.MemoryController {}
 
 class MockTimelineController extends Mock implements TimelineController {}
 
