@@ -142,7 +142,7 @@ extension InspectorFlutterService on ObjectGroup {
                   final ParentData parentData = renderObject.parentData;
                   if (parentData is FlexParentData) {
                     additionalJson['flexFactor'] = parentData.flex;
-                    additionalJson['flexFit'] = describeEnum(parentData.fit ?? FlexFit.loose);
+                    additionalJson['flexFit'] = describeEnum(parentData.fit ?? FlexFit.tight);
                   }
                 }
               }
