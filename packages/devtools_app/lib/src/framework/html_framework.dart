@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:html_shim/html.dart' hide Screen;
 
+import 'package:html_shim/html.dart' hide Screen;
 import 'package:meta/meta.dart';
 
 import '../globals.dart';
@@ -275,7 +275,7 @@ class HtmlFramework {
       screen ??= screens.firstWhere((screen) => !screen.disabled,
           orElse: () => screens.first);
       if (screen != null) {
-        ga_platform.setupAndGaScreen(id);
+        ga_platform.setupAndGaScreen(screen.id);
         load(screen);
       } else {
         load(HtmlNotFoundScreen());
