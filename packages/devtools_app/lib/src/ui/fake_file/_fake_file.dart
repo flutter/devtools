@@ -8,6 +8,7 @@ import 'file_io.dart';
 class MemoryFiles implements FileIO {
   // TODO(terry): Implement Web based file IO.
 
+  /// Key is filename and value is content of the file.
   final Map<String, String> _files = {};
 
   @override
