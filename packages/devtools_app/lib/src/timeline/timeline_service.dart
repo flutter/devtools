@@ -105,32 +105,49 @@ class TimelineService {
     // available in the engine.
     int uiThreadId;
     int gpuThreadId;
+    final threadIdsByName = <String, int>{};
 
-    // Store the thread names for debugging purposes. If [uiThreadId] or
-    // [gpuThreadId] are null, we will print all the thread names we received
-    // to console.
-    final threadNames = [];
-
+    String uiThreadName;
+    String gpuThreadName;
+    String platformThreadName;
     for (TraceEvent event in events) {
       final name = event.args['name'];
-      threadNames.add(name);
 
-      // iOS: "io.flutter.1.ui (12652)", Android: "1.ui (12652)",
-      // Dream (g3): "io.flutter.ui (12652)"
-      if (name.contains('.ui')) {
-        uiThreadId = event.threadId;
-      }
-      // iOS: "io.flutter.1.gpu (12651)", Android: "1.gpu (12651)",
-      // Dream (g3): "io.flutter.gpu (12651)"
-      if (name.contains('.gpu')) {
-        gpuThreadId = event.threadId;
-      }
+      // Android: "1.ui (12652)"
+      // iOS: "io.flutter.1.ui (12652)"
+      // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
+      if (name.contains('.ui')) uiThreadName = name;
+
+      // Android: "1.gpu (12651)"
+      // iOS: "io.flutter.1.gpu (12651)"
+      // Linux, Windows, Dream (g3): "io.flutter.gpu (12651)"
+      // MacOS: Does not exist
+      if (name.contains('.gpu')) gpuThreadName = name;
+
+      // Android: "1.platform (22585)"
+      // iOS: "io.flutter.1.platform (22585)"
+      // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
+      if (name.contains('.platform')) platformThreadName = name;
+      threadIdsByName[name] = event.threadId;
+    }
+
+    if (uiThreadName != null) {
+      uiThreadId = threadIdsByName[uiThreadName];
+    }
+
+    // MacOS and Flutter apps with platform views do not have a .gpu thread.
+    // In these cases, the "GPU" events will come on the .platform thread
+    // instead.
+    if (gpuThreadName != null) {
+      gpuThreadId = threadIdsByName[gpuThreadName];
+    } else {
+      gpuThreadId = threadIdsByName[platformThreadName];
     }
 
     if (uiThreadId == null || gpuThreadId == null) {
       timelineController.logNonFatalError(
           'Could not find UI thread and / or GPU thread from names: '
-          '$threadNames');
+          '${threadIdsByName.keys}');
     }
 
     for (var timeline in timelineController.timelines) {
