@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +22,7 @@ import 'initializer.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const showNetworkPage = false;
+const showNetworkPage = true;
 
 /// Top-level configuration for the app.
 @immutable
@@ -41,6 +43,10 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
+
+    Service.getInfo().then((info) {
+      print(info.serverUri);
+    });
     theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
   }
 
