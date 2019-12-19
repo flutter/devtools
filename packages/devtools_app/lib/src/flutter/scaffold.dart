@@ -162,6 +162,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         );
       },
       child: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: _controller,
         children: tabBodies,
       ),
