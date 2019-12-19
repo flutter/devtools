@@ -23,7 +23,6 @@ class MainFlutterWindow: NSWindow {
     let arguments = [
       "--enable-dart-profiling",
       "--trace-systrace",
-      "--trace-skia"
     ]
     project.engineSwitches = arguments
     let flutterViewController = FlutterViewController.init(project: project)
