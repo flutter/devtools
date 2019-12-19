@@ -5,14 +5,14 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/flutter/layout_explorer/flex.dart';
+import 'package:devtools_app/src/inspector/flutter/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../inspector_screen_test.dart';
-import '../wrappers.dart';
+import '../../inspector_screen_test.dart';
+import '../../wrappers.dart';
 
 // TODO(albertusangga): Re-enable tests in this files
 // https://github.com/flutter/devtools/issues/1403
