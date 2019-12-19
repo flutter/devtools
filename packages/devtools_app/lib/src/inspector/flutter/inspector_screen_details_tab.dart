@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import 'layout_explorer/flex/flex.dart';
 import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
