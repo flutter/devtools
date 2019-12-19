@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
+import 'package:devtools_app/src/inspector/flutter/layout_explorer/flex.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -256,7 +256,7 @@ void main() {
         RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
     final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
     final controller = TestInspectorController()..setSelectedNode(treeNode);
-    final widget = wrap(StoryOfYourFlexWidget(controller));
+    final widget = wrap(FlexLayoutExplorerWidget(controller));
     await pump(tester, widget);
     await tester.pumpAndSettle();
     await expectLater(
@@ -272,7 +272,7 @@ void main() {
         RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
     final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
     final controller = TestInspectorController()..setSelectedNode(treeNode);
-    final widget = wrap(StoryOfYourFlexWidget(controller));
+    final widget = wrap(FlexLayoutExplorerWidget(controller));
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),

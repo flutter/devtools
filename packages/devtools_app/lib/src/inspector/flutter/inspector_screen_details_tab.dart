@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import 'story_of_your_layout/flex.dart';
+import 'layout_explorer/flex.dart';
 
 class InspectorDetailsTabController extends StatelessWidget {
   const InspectorDetailsTabController({
@@ -106,8 +106,8 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   RemoteDiagnosticsNode previousSelection;
 
   Widget rootWidget(RemoteDiagnosticsNode node) {
-    if (StoryOfYourFlexWidget.shouldDisplay(node))
-      return StoryOfYourFlexWidget(controller);
+    if (FlexLayoutExplorerWidget.shouldDisplay(node))
+      return FlexLayoutExplorerWidget(controller);
     return const Center(
       child: Text(
         'Currently, Layout Explorer only supports Flex-based widgets'
