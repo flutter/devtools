@@ -67,10 +67,6 @@ dependencies:
   flutter_widgets: ^0.1.6
 
 dependency_overrides:
-  cereal:
-    path: ../../../cereal/packages/cereal
-  cereal_generator:
-    path: ../../../cereal/packages/cereal_generator
   # When this is removed, don't forget to add back the override for test tag.
   # See: https://github.com/flutter/devtools/pull/1342
   devtools_server:
