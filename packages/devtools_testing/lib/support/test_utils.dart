@@ -11,10 +11,10 @@ import 'package:devtools_app/src/timeline/timeline_model.dart';
 SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
     SyncTimelineEvent(eventWrapper);
 
-TraceEvent testTraceEvent(Map<String, dynamic> json) =>
-    TraceEvent.fromJson(jsonDecode(jsonEncode(json)));
+TraceEvent testTraceEvent(Map<String, dynamic> toEncode) =>
+    json.decodeTraceEvent(jsonEncode(toEncode));
 
 int _testTimeReceived = 0;
-TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {
-  return TraceEventWrapper(testTraceEvent(json), _testTimeReceived++);
+TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> toEncode) {
+  return TraceEventWrapper(testTraceEvent(toEncode), _testTimeReceived++);
 }

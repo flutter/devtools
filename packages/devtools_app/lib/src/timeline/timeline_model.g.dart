@@ -24,6 +24,7 @@ extension $TraceEvent on TraceEvent {
 }
 
 extension $TraceEvent$Reviver on JsonCodec {
+  String encodeTraceEvent(TraceEvent) => encode(TraceEvent.toJson());
   TraceEvent decodeTraceEvent(String input) => toTraceEvent(decode(input));
   TraceEvent toTraceEvent(dynamic decoded) {
     final map = decoded;
@@ -40,7 +41,7 @@ extension $TraceEvent$Reviver on JsonCodec {
         : (map['tid'] is int || map['tid'] == null)
             ? map['tid']
             : int.parse(map['tid']);
-    final dynamic id = map["id"] == null ? null : null;
+    final dynamic id = map["id"] == null ? null : map['id'];
     final String scope = map["scope"] == null ? null : map['scope'];
     final int dur = map["dur"] == null
         ? null

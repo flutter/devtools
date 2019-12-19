@@ -479,7 +479,7 @@ mixin OfflineData<T extends TimelineData> on TimelineData {
 class OfflineTimelineEvent extends TimelineEvent {
   OfflineTimelineEvent(Map<String, dynamic> firstTrace)
       : super(TraceEventWrapper(
-          TraceEvent.fromJson(firstTrace),
+          json.toTraceEvent(firstTrace),
           0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
         )) {
     time.end = Duration(
@@ -1000,14 +1000,17 @@ class AsyncTimelineEvent extends TimelineEvent {
   @override
   bool couldBeParentOf(TimelineEvent e) {
     final AsyncTimelineEvent asyncEvent = e;
-
+    print('checking parentId');
+    print('${asyncEvent.parentId}, ${asyncId}');
     // If [asyncEvent] has an explicit parentId, use that as the truth.
     if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
 
+    print('checking asyncId');
     // Without an explicit parentId, two events must share an asyncId to be
     // part of the same event tree.
     if (asyncId != asyncEvent.asyncId) return false;
 
+    print('checking timestamps');
     // When two events share an asyncId, determine parent / child relationships
     // based on timestamps.
     final startTime = time.start.inMicroseconds;
@@ -1074,19 +1077,8 @@ class TraceEvent {
     this.args,
     this.id,
     this.scope,
-  });
-
-  TraceEvent.fromJson(Map<String, dynamic> json)
-      : name = json[nameKey],
-        cat = json[categoryKey],
-        ph = json[phaseKey],
-        pid = json[processIdKey],
-        tid = json[threadIdKey],
-        dur = json[durationKey],
-        ts = json[timestampKey],
-        args = json[argsKey],
-        id = json[idKey],
-        scope = json[scopeKey];
+    TimelineEventType type,
+  }) : _type = type;
 
   static const nameKey = 'name';
   static const categoryKey = 'cat';
@@ -1169,7 +1161,6 @@ class TraceEvent {
 
   TimelineEventType _type;
 
-  @skip
   TimelineEventType get type {
     if (_type == null) {
       if (args[typeKey] == 'ui') {

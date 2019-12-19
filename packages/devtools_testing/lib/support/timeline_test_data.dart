@@ -438,7 +438,7 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
 
 // Mark: AsyncTimelineData
 final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent.fromJson(jsonDecode(jsonEncode({
+  json.decodeTraceEvent(jsonEncode({
     'name': 'PipelineItem',
     'cat': 'Embedder',
     'tid': 19333,
@@ -450,11 +450,11 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
       'isolateId': 'id_001',
       'parentId': '07bf',
     },
-  }))),
+  })),
   0,
 ))
   ..addEndEvent(TraceEventWrapper(
-    TraceEvent.fromJson(jsonDecode(jsonEncode({
+    json.decodeTraceEvent(jsonEncode({
       'name': 'PipelineItem',
       'cat': 'Embedder',
       'tid': 19334,
@@ -464,7 +464,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
       'bp': 'e',
       'id': 'f1',
       'args': {},
-    }))),
+    })),
     1,
   ))
   ..type = TimelineEventType.async
@@ -475,7 +475,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
   ]);
 
 final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent.fromJson(jsonDecode(jsonEncode({
+  json.decodeTraceEvent(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19333,
@@ -486,12 +486,12 @@ final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
     'args': {
       'isolateId': 'id_001',
     },
-  }))),
+  })),
   0,
 ));
 
 final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent.fromJson(jsonDecode(jsonEncode({
+  json.decodeTraceEvent(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19334,
@@ -502,12 +502,12 @@ final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
     'args': {
       'isolateId': 'id_001',
     },
-  }))),
+  })),
   1,
 ));
 
 final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent.fromJson(jsonDecode(jsonEncode({
+  json.decodeTraceEvent(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19334,
@@ -518,7 +518,7 @@ final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
     'args': {
       'isolateId': 'id_001',
     },
-  }))),
+  })),
   1,
 ));
 

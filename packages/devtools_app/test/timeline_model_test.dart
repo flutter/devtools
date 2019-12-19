@@ -379,6 +379,8 @@ void main() {
 
     test('couldBeParentOf', () {
       expect(asyncEventA.couldBeParentOf(asyncEventB1), isFalse);
+      print(json.encode(asyncEventB.json));
+      print(json.encode(asyncEventB1.json));
       expect(asyncEventB.couldBeParentOf(asyncEventB1), isTrue);
       expect(asyncEventB.couldBeParentOf(asyncEventC1), isFalse);
       expect(asyncEventC.couldBeParentOf(asyncEventC1), isTrue);

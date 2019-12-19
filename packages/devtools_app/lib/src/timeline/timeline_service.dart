@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -55,9 +57,9 @@ class TimelineService {
       if (!offlineMode &&
           (shouldProcessEventForFrameBasedTimeline ||
               shouldProcessEventForFullTimeline)) {
-        for (Map<String, dynamic> json in events) {
+        for (Map<String, dynamic> encoded in events) {
           final eventWrapper = TraceEventWrapper(
-            TraceEvent.fromJson(json),
+            json.toTraceEvent(encoded),
             DateTime.now().millisecondsSinceEpoch,
           );
           timelineController.allTraceEvents.add(eventWrapper);
@@ -96,7 +98,7 @@ class TimelineService {
         list.cast<Map<String, dynamic>>();
 
     final List<TraceEvent> events = traceEvents
-        .map((Map<String, dynamic> event) => TraceEvent.fromJson(event))
+        .map((Map<String, dynamic> event) => json.toTraceEvent(event))
         .where((TraceEvent event) {
       return event.name == 'thread_name';
     }).toList();
