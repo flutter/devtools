@@ -391,10 +391,10 @@ void main() {
       expect(event.endTraceEventJson, isNull);
       expect(event.time.end, isNull);
       event.addEndEvent(asyncEndATrace);
-      expect(event.endTraceEventJson, equals(asyncEndATrace.event.json));
+      expect(event.endTraceEventJson, equals(asyncEndATrace.event.toJson()));
       expect(
         event.time.end.inMicroseconds,
-        asyncEndATrace.event.timestampMicros,
+        asyncEndATrace.event.ts,
       );
     });
   });

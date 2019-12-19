@@ -57,7 +57,7 @@ class TimelineService {
               shouldProcessEventForFullTimeline)) {
         for (Map<String, dynamic> json in events) {
           final eventWrapper = TraceEventWrapper(
-            TraceEvent(json),
+            TraceEvent.fromJson(json),
             DateTime.now().millisecondsSinceEpoch,
           );
           timelineController.allTraceEvents.add(eventWrapper);
@@ -96,7 +96,7 @@ class TimelineService {
         list.cast<Map<String, dynamic>>();
 
     final List<TraceEvent> events = traceEvents
-        .map((Map<String, dynamic> event) => TraceEvent(event))
+        .map((Map<String, dynamic> event) => TraceEvent.fromJson(event))
         .where((TraceEvent event) {
       return event.name == 'thread_name';
     }).toList();
@@ -128,7 +128,7 @@ class TimelineService {
       // iOS: "io.flutter.1.platform (22585)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
       if (name.contains('.platform')) platformThreadName = name;
-      threadIdsByName[name] = event.threadId;
+      threadIdsByName[name] = event.tid;
     }
 
     if (uiThreadName != null) {

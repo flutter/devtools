@@ -108,7 +108,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     // start and end for a frame. Processing other types of flow events would
     // lead to us creating Timeline frames where we shouldn't and therefore
     // showing bad data to the user.
-    switch (event.phase) {
+    switch (event.ph) {
       case TraceEvent.flowStartPhase:
         if (event.name.contains('PipelineItem')) {
           _handleFrameStartEvent(event);
@@ -159,7 +159,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     // We may get a stray event whose timestamp is out of bounds of our current
     // event node. Do not process these events.
     if (currentEventNodes[event.type.index] != null &&
-        event.timestampMicros <
+        event.ts <
             currentEventNodes[event.type.index]
                 .root
                 .time
@@ -169,11 +169,11 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     }
 
     if (debugTimeline) {
-      debugHandledTraceEvents.add(event.json);
-      debugFrameTracking.writeln('Handling - ${event.json}');
+      debugHandledTraceEvents.add(event.toJson());
+      debugFrameTracking.writeln('Handling - ${event.toJson()}');
     }
 
-    switch (event.phase) {
+    switch (event.ph) {
       case TraceEvent.durationBeginPhase:
         _handleDurationBeginEvent(eventWrapper);
         break;
@@ -203,18 +203,17 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
       pendingFrame.pipelineItemTime.start = Duration(
         microseconds: nullSafeMin(
           pendingFrame.pipelineItemTime.start?.inMicroseconds,
-          event.timestampMicros,
+          event.ts,
         ),
       );
 
-      if (pendingFrame.pipelineItemTime.start.inMicroseconds ==
-          event.timestampMicros) {
+      if (pendingFrame.pipelineItemTime.start.inMicroseconds == event.ts) {
         pendingFrame.pipelineItemStartTrace = event;
       }
 
       if (debugTimeline) {
-        debugHandledTraceEvents.add(event.json);
-        debugFrameTracking.writeln('Frame Start: $id - ${event.json}');
+        debugHandledTraceEvents.add(event.toJson());
+        debugFrameTracking.writeln('Frame Start: $id - ${event.toJson()}');
       }
 
       maybeAddPendingEvents();
@@ -230,17 +229,16 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
       pendingFrame.pipelineItemTime.end = Duration(
         microseconds: nullSafeMax(
           pendingFrame.pipelineItemTime.end?.inMicroseconds,
-          event.timestampMicros,
+          event.ts,
         ),
       );
 
-      if (pendingFrame.pipelineItemTime.end.inMicroseconds ==
-          event.timestampMicros) {
+      if (pendingFrame.pipelineItemTime.end.inMicroseconds == event.ts) {
         pendingFrame.pipelineItemEndTrace = event;
       }
 
       if (debugTimeline) {
-        debugHandledTraceEvents.add(event.json);
+        debugHandledTraceEvents.add(event.toJson());
         debugFrameTracking.writeln('Frame End: $id');
       }
 
@@ -280,8 +278,8 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
       if (collectionEquals(
-        event.json,
-        _previousDurationEndEvents[event.type.index]?.json,
+        event.toJson(),
+        _previousDurationEndEvents[event.type.index]?.toJson(),
       )) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
@@ -295,7 +293,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
         //
         if (debugTimeline) {
           debugFrameTracking
-              .writeln('Duplicate duration end event: ${event.json}');
+              .writeln('Duplicate duration end event: ${event.toJson()}');
         }
         return;
       } else if (current.name ==
@@ -340,7 +338,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
         // VSYNC - DurationEnd
         if (debugTimeline) {
           debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
-          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking.writeln('Event: ${event.toJson()}');
           debugFrameTracking
               .writeln('Current: ${currentEventNodes[event.type.index]}');
         }
@@ -383,8 +381,7 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
     final TraceEvent event = eventWrapper.event;
     final timelineEvent = SyncTimelineEvent(eventWrapper);
 
-    timelineEvent.time.end =
-        Duration(microseconds: event.timestampMicros + event.duration);
+    timelineEvent.time.end = Duration(microseconds: event.ts + event.dur);
 
     final current = currentEventNodes[event.type.index];
     if (current != null) {
@@ -493,10 +490,10 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
       }
 
       // Record the trace events for this timeline frame.
-      timelineController.recordTrace(frame.pipelineItemStartTrace.json);
+      timelineController.recordTrace(frame.pipelineItemStartTrace.toJson());
       timelineController.recordTraceForTimelineEvent(frame.uiEventFlow);
       timelineController.recordTraceForTimelineEvent(frame.gpuEventFlow);
-      timelineController.recordTrace(frame.pipelineItemEndTrace.json);
+      timelineController.recordTrace(frame.pipelineItemEndTrace.toJson());
 
       timelineController.frameBasedTimeline.addFrame(frame);
       pendingFrames.remove(frame.id);
@@ -574,9 +571,9 @@ class FrameBasedTimelineProcessor extends TimelineProcessor {
       TraceEvent.durationEndPhase,
       TraceEvent.durationCompletePhase,
     };
-    return phaseWhitelist.contains(event.phase) &&
+    return phaseWhitelist.contains(event.ph) &&
         // Do not process Garbage Collection events.
-        event.category != 'GC' &&
+        event.cat != 'GC' &&
         // Do not process MessageLoop::RunExpiredTasks events. These events can
         // either a) start outside of our frame start time, b) parent irrelevant
         // events, or c) parent multiple event flows - none of which we want.
@@ -659,11 +656,11 @@ class FullTimelineProcessor extends TimelineProcessor {
     final _traceEvents = (traceEvents
         // Throw out timeline events that do not have a timestamp
         // (e.g. thread_name events).
-        .where((event) => event.event.timestampMicros != null)
+        .where((event) => event.event.ts != null)
         .toList())
       // Events need to be in increasing timestamp order.
       ..sort()
-      ..map((event) => event.event.json)
+      ..map((event) => event.event.toJson())
           .toList()
           .forEach(timelineController.recordTrace);
 
@@ -681,9 +678,9 @@ class FullTimelineProcessor extends TimelineProcessor {
 
       // Add [pendingRootCompleteEvent] to the timeline if it is ready.
       _addPendingCompleteRootToTimeline(
-          currentProcessingTime: eventWrapper.event.timestampMicros);
+          currentProcessingTime: eventWrapper.event.ts);
 
-      switch (eventWrapper.event.phase) {
+      switch (eventWrapper.event.ph) {
         case TraceEvent.asyncBeginPhase:
         case TraceEvent.asyncInstantPhase:
           _addAsyncEvent(eventWrapper);
@@ -723,7 +720,7 @@ class FullTimelineProcessor extends TimelineProcessor {
     timelineController.fullTimeline.data.time
       // We process trace events in timestamp order, so we can ensure the first
       // trace event has the earliest starting timestamp.
-      ..start = Duration(microseconds: _traceEvents.first.event.timestampMicros)
+      ..start = Duration(microseconds: _traceEvents.first.event.ts)
       // We cannot guarantee that the last trace event is the latest timestamp
       // in the timeline. DurationComplete events' timestamps refer to their
       // starting timestamp, but their end time is derived from the same trace
@@ -751,7 +748,7 @@ class FullTimelineProcessor extends TimelineProcessor {
 
   void _addAsyncEvent(TraceEventWrapper eventWrapper) {
     final timelineEvent = AsyncTimelineEvent(eventWrapper);
-    if (eventWrapper.event.phase == TraceEvent.asyncInstantPhase) {
+    if (eventWrapper.event.ph == TraceEvent.asyncInstantPhase) {
       timelineEvent.time.end = timelineEvent.time.start;
     }
 
@@ -811,17 +808,17 @@ class FullTimelineProcessor extends TimelineProcessor {
   }
 
   void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
-    final current = currentDurationEventNodes[eventWrapper.event.threadId];
+    final current = currentDurationEventNodes[eventWrapper.event.tid];
     final timelineEvent = SyncTimelineEvent(eventWrapper);
     if (current != null) {
       current.addChild(timelineEvent);
     }
-    currentDurationEventNodes[eventWrapper.event.threadId] = timelineEvent;
+    currentDurationEventNodes[eventWrapper.event.tid] = timelineEvent;
   }
 
   void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
-    SyncTimelineEvent current = currentDurationEventNodes[event.threadId];
+    SyncTimelineEvent current = currentDurationEventNodes[event.tid];
 
     if (current == null) return;
 
@@ -830,8 +827,8 @@ class FullTimelineProcessor extends TimelineProcessor {
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
       if (collectionEquals(
-        event.json,
-        previousDurationEndEvents[event.threadId]?.json,
+        event.toJson(),
+        previousDurationEndEvents[event.tid]?.toJson(),
       )) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
@@ -845,11 +842,10 @@ class FullTimelineProcessor extends TimelineProcessor {
         //
         if (debugTimeline) {
           debugFrameTracking
-              .writeln('Duplicate duration end event: ${event.json}');
+              .writeln('Duplicate duration end event: ${event.toJson()}');
         }
         return;
-      } else if (current.name ==
-              previousDurationEndEvents[event.threadId]?.name &&
+      } else if (current.name == previousDurationEndEvents[event.tid]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
           collectionEquals(
@@ -875,7 +871,7 @@ class FullTimelineProcessor extends TimelineProcessor {
 
         current.parent.removeChild(current);
         current = current.parent;
-        currentDurationEventNodes[event.threadId] = current;
+        currentDurationEventNodes[event.tid] = current;
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
         // the tracking node.
@@ -890,16 +886,16 @@ class FullTimelineProcessor extends TimelineProcessor {
         // VSYNC - DurationEnd
         if (debugTimeline) {
           debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
-          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking.writeln('Event: ${event.toJson()}');
           debugFrameTracking
-              .writeln('Current: ${currentDurationEventNodes[event.threadId]}');
+              .writeln('Current: ${currentDurationEventNodes[event.tid]}');
         }
-        currentDurationEventNodes[event.threadId] = null;
+        currentDurationEventNodes[event.tid] = null;
         return;
       }
     }
 
-    previousDurationEndEvents[event.threadId] = event;
+    previousDurationEndEvents[event.tid] = event;
 
     current.addEndEvent(eventWrapper);
 
@@ -917,7 +913,7 @@ class FullTimelineProcessor extends TimelineProcessor {
         current.parent.time.end?.inMicroseconds != null) {
       current = current.parent;
     }
-    currentDurationEventNodes[event.threadId] = current.parent;
+    currentDurationEventNodes[event.tid] = current.parent;
 
     // If we have reached a null parent, this event is fully formed.
     if (current.parent == null) {
@@ -932,10 +928,9 @@ class FullTimelineProcessor extends TimelineProcessor {
   void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
     final event = eventWrapper.event;
     final timelineEvent = SyncTimelineEvent(eventWrapper)
-      ..time.end =
-          Duration(microseconds: event.timestampMicros + event.duration);
+      ..time.end = Duration(microseconds: event.ts + event.dur);
 
-    final current = currentDurationEventNodes[event.threadId];
+    final current = currentDurationEventNodes[event.tid];
     if (current != null) {
       if (current.subtreeHasNodeWithCondition(
           (TimelineEvent event) => collectionEquals(
@@ -986,13 +981,13 @@ abstract class TimelineProcessor {
 
   @visibleForTesting
   TimelineEventType inferEventType(TraceEvent event) {
-    if (event.phase == TraceEvent.asyncBeginPhase ||
-        event.phase == TraceEvent.asyncInstantPhase ||
-        event.phase == TraceEvent.asyncEndPhase) {
+    if (event.ph == TraceEvent.asyncBeginPhase ||
+        event.ph == TraceEvent.asyncInstantPhase ||
+        event.ph == TraceEvent.asyncEndPhase) {
       return TimelineEventType.async;
-    } else if (event.threadId == uiThreadId) {
+    } else if (event.tid == uiThreadId) {
       return TimelineEventType.ui;
-    } else if (event.threadId == gpuThreadId) {
+    } else if (event.tid == gpuThreadId) {
       return TimelineEventType.gpu;
     } else {
       return TimelineEventType.unknown;

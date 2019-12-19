@@ -131,7 +131,7 @@ class TimelineController {
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
-          TraceEvent(trace),
+          TraceEvent.fromJson(trace),
           DateTime.now().microsecondsSinceEpoch,
         )
     ];
@@ -180,7 +180,7 @@ class TimelineController {
             .firstWhere((trace) => trace.event.name == targetEventName,
                 orElse: () => null)
             ?.event
-            ?.threadId ??
+            ?.tid ??
         invalidThreadId;
   }
 

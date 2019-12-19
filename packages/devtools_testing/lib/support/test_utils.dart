@@ -12,7 +12,7 @@ SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
     SyncTimelineEvent(eventWrapper);
 
 TraceEvent testTraceEvent(Map<String, dynamic> json) =>
-    TraceEvent(jsonDecode(jsonEncode(json)));
+    TraceEvent.fromJson(jsonDecode(jsonEncode(json)));
 
 int _testTimeReceived = 0;
 TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {

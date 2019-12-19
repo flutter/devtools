@@ -67,7 +67,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
-      widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+      widget.startingContentWidth / widget.data.time.dur.inMicroseconds;
 
   int get startTimeOffset => widget.data.time.start.inMicroseconds;
 

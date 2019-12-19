@@ -290,19 +290,17 @@ class HtmlEventSummary extends CoreElement {
     reset();
 
     final firstTraceEvent = event.traceEvents.first.event;
-    category.add(
-        [span(text: 'Category: '), div(text: '${firstTraceEvent.category}')]);
-    thread.add(
-        [span(text: 'Thread id: '), div(text: '${firstTraceEvent.threadId}')]);
-    process.add([
-      span(text: 'Process id: '),
-      div(text: '${firstTraceEvent.processId}')
-    ]);
+    category
+        .add([span(text: 'Category: '), div(text: '${firstTraceEvent.cat}')]);
+    thread
+        .add([span(text: 'Thread id: '), div(text: '${firstTraceEvent.tid}')]);
+    process
+        .add([span(text: 'Process id: '), div(text: '${firstTraceEvent.pid}')]);
 
     final asyncInstantEvents = event.isAsyncEvent
         ? [
             ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+                e.traceEvents.first.event.ph == TraceEvent.asyncInstantPhase)
           ]
         : [];
     if (asyncInstantEvents.isNotEmpty) {

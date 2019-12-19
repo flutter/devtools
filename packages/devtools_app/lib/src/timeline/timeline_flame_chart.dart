@@ -50,8 +50,7 @@ class FrameBasedTimelineFlameChartCanvas
     }
 
     // Pixels per microsecond in order to fit the entire frame in view.
-    final double pxPerMicro =
-        widthWithoutInsets / data.time.duration.inMicroseconds;
+    final double pxPerMicro = widthWithoutInsets / data.time.dur.inMicroseconds;
 
     // Add UI section label.
     final uiSectionLabel = sectionLabel(
@@ -185,8 +184,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
   final List<VerticalLineSegment> verticalGuidelines = [];
 
   /// Pixels per microsecond in order to fit all the data in view.
-  double get pxPerMicro =>
-      widthWithoutInsets / data.time.duration.inMicroseconds;
+  double get pxPerMicro => widthWithoutInsets / data.time.dur.inMicroseconds;
 
   int widestRow = -1;
 

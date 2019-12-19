@@ -91,7 +91,7 @@ class EventSummary extends StatelessWidget {
       : _connectedEvents = [
           if (event.isAsyncEvent)
             ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+                e.traceEvents.first.event.ph == TraceEvent.asyncInstantPhase)
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
@@ -112,15 +112,15 @@ class EventSummary extends StatelessWidget {
       children: [
         ListTile(
           title: const Text('Thread id'),
-          subtitle: Text('${firstTraceEvent.threadId}'),
+          subtitle: Text('${firstTraceEvent.tid}'),
         ),
         ListTile(
           title: const Text('Process id'),
-          subtitle: Text('${firstTraceEvent.processId}'),
+          subtitle: Text('${firstTraceEvent.pid}'),
         ),
         ListTile(
           title: const Text('Category'),
-          subtitle: Text(firstTraceEvent.category),
+          subtitle: Text(firstTraceEvent.cat),
         ),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),

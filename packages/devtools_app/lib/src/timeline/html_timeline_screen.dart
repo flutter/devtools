@@ -685,7 +685,7 @@ class HtmlTimelineScreen extends HtmlScreen {
             for (TraceEventWrapper wrapper in timelineProtocol
                 .heaps[TimelineEventType.ui.index]
                 .toList()) {
-              buf.writeln(wrapper.event.json.toString());
+              buf.writeln(wrapper.event.toJson().toString());
             }
           }
           if (timelineProtocol.heaps[TimelineEventType.gpu.index].isNotEmpty) {
@@ -693,7 +693,7 @@ class HtmlTimelineScreen extends HtmlScreen {
             for (TraceEventWrapper wrapper in timelineProtocol
                 .heaps[TimelineEventType.gpu.index]
                 .toList()) {
-              buf.writeln(wrapper.event.json.toString());
+              buf.writeln(wrapper.event.toJson().toString());
             }
           }
           downloadFile(buf.toString(), 'pending_frame_tracking_status.txt');

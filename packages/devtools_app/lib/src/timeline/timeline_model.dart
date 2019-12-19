@@ -4,6 +4,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:cereal/cereal.dart';
 import 'package:meta/meta.dart';
 
 import '../profiler/cpu_profile_model.dart';
@@ -11,6 +12,8 @@ import '../service_manager.dart';
 import '../trees.dart';
 import '../utils.dart';
 import 'timeline_controller.dart';
+
+part 'timeline_model.g.dart';
 
 /// Data model for DevTools Timeline.
 class FrameBasedTimelineData extends TimelineData {
@@ -476,7 +479,7 @@ mixin OfflineData<T extends TimelineData> on TimelineData {
 class OfflineTimelineEvent extends TimelineEvent {
   OfflineTimelineEvent(Map<String, dynamic> firstTrace)
       : super(TraceEventWrapper(
-          TraceEvent(firstTrace),
+          TraceEvent.fromJson(firstTrace),
           0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
         )) {
     time.end = Duration(
@@ -625,7 +628,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
-    time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
+    time.start = Duration(microseconds: firstTraceEvent.event.ts);
   }
 
   static const firstTraceKey = 'firstTrace';
@@ -685,7 +688,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool couldBeParentOf(TimelineEvent e);
 
   void addEndEvent(TraceEventWrapper eventWrapper) {
-    time.end = Duration(microseconds: eventWrapper.event.timestampMicros);
+    time.end = Duration(microseconds: eventWrapper.event.ts);
     traceEvents.add(eventWrapper);
   }
 
@@ -1057,17 +1060,33 @@ class AsyncTimelineEvent extends TimelineEvent {
 // TODO(devoncarew): Upstream this class to the service protocol library.
 
 /// A single timeline event.
+@cereal
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  TraceEvent(this.json)
+  TraceEvent({
+    this.name,
+    this.cat,
+    this.ph,
+    this.pid,
+    this.tid,
+    this.dur,
+    this.ts,
+    this.args,
+    this.id,
+    this.scope,
+  });
+
+  TraceEvent.fromJson(Map<String, dynamic> json)
       : name = json[nameKey],
-        category = json[categoryKey],
-        phase = json[phaseKey],
-        processId = json[processIdKey],
-        threadId = json[threadIdKey],
-        duration = json[durationKey],
-        timestampMicros = json[timestampKey],
-        args = json[argsKey];
+        cat = json[categoryKey],
+        ph = json[phaseKey],
+        pid = json[processIdKey],
+        tid = json[threadIdKey],
+        dur = json[durationKey],
+        ts = json[timestampKey],
+        args = json[argsKey],
+        id = json[idKey],
+        scope = json[scopeKey];
 
   static const nameKey = 'name';
   static const categoryKey = 'cat';
@@ -1090,9 +1109,6 @@ class TraceEvent {
   static const flowStartPhase = 's';
   static const flowEndPhase = 'f';
 
-  /// The original event JSON.
-  final Map<String, dynamic> json;
-
   /// The name of the event.
   ///
   /// Corresponds to the "name" field in the JSON event.
@@ -1101,32 +1117,32 @@ class TraceEvent {
   /// Event category. Events with different names may share the same category.
   ///
   /// Corresponds to the "cat" field in the JSON event.
-  final String category;
+  final String cat;
 
   /// For a given long lasting event, denotes the phase of the event, such as
   /// "B" for "event began", and "E" for "event ended".
   ///
   /// Corresponds to the "ph" field in the JSON event.
-  final String phase;
+  final String ph;
 
   /// ID of process that emitted the event.
   ///
   /// Corresponds to the "pid" field in the JSON event.
-  final int processId;
+  final int pid;
 
   /// ID of thread that issues the event.
   ///
   /// Corresponds to the "tid" field in the JSON event.
-  final int threadId;
+  final int tid;
 
   /// Each async event has an additional required parameter id. We consider the
   /// events with the same category and id as events from the same event tree.
-  dynamic get id => json[idKey];
+  final dynamic id;
 
   /// An optional scope string can be specified to avoid id conflicts, in which
   /// case we consider events with the same category, scope, and id as events
   /// from the same event tree.
-  String get scope => json[scopeKey];
+  final String scope;
 
   /// The duration of the event, in microseconds.
   ///
@@ -1134,24 +1150,26 @@ class TraceEvent {
   /// pair of begin/end events.
   ///
   /// Corresponds to the "dur" field in the JSON event.
-  final int duration;
+  final int dur;
 
   /// Time passed since tracing was enabled, in microseconds.
-  final int timestampMicros;
+  final int ts;
 
   /// Arbitrary data attached to the event.
   final Map<String, dynamic> args;
 
+  @skip
   String get asyncUID {
     if (scope == null) {
-      return '$category:$id';
+      return '$cat:$id';
     } else {
-      return '$category:$scope:$id';
+      return '$cat:$scope:$id';
     }
   }
 
   TimelineEventType _type;
 
+  @skip
   TimelineEventType get type {
     if (_type == null) {
       if (args[typeKey] == 'ui') {
@@ -1167,13 +1185,15 @@ class TraceEvent {
 
   set type(TimelineEventType t) => _type = t;
 
+  @skip
   bool get isUiEvent => type == TimelineEventType.ui;
 
+  @skip
   bool get isGpuEvent => type == TimelineEventType.gpu;
 
   @override
-  String toString() => '$type event [$idKey: $id] [$phaseKey: $phase] '
-      '$name - [$timestampKey: $timestampMicros] [$durationKey: $duration]';
+  String toString() => '$type event [$idKey: $id] [$phaseKey: $ph] '
+      '$name - [$timestampKey: $ts] [$durationKey: $dur]';
 }
 
 int _traceEventWrapperId = 0;
@@ -1187,7 +1207,7 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
 
   final int id;
 
-  Map<String, dynamic> get json => event.json;
+  Map<String, dynamic> get json => event.toJson();
 
   bool processed = false;
 
@@ -1195,8 +1215,7 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
   int compareTo(TraceEventWrapper other) {
     // Order events based on their timestamps. If the events share a timestamp,
     // order them in the order we received them.
-    final compare =
-        event.timestampMicros.compareTo(other.event.timestampMicros);
+    final compare = event.ts.compareTo(other.event.ts);
     return compare != 0 ? compare : id.compareTo(other.id);
   }
 }

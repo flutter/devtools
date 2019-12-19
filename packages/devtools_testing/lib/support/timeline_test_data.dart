@@ -438,7 +438,7 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
 
 // Mark: AsyncTimelineData
 final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
+  TraceEvent.fromJson(jsonDecode(jsonEncode({
     'name': 'PipelineItem',
     'cat': 'Embedder',
     'tid': 19333,
@@ -454,7 +454,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
   0,
 ))
   ..addEndEvent(TraceEventWrapper(
-    TraceEvent(jsonDecode(jsonEncode({
+    TraceEvent.fromJson(jsonDecode(jsonEncode({
       'name': 'PipelineItem',
       'cat': 'Embedder',
       'tid': 19334,
@@ -475,7 +475,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
   ]);
 
 final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
+  TraceEvent.fromJson(jsonDecode(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19333,
@@ -491,7 +491,7 @@ final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
 ));
 
 final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
+  TraceEvent.fromJson(jsonDecode(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19334,
@@ -507,7 +507,7 @@ final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
 ));
 
 final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
+  TraceEvent.fromJson(jsonDecode(jsonEncode({
     'name': 'Connection established',
     'cat': 'Dart',
     'tid': 19334,
@@ -553,7 +553,8 @@ final asyncEventC2 = AsyncTimelineEvent(asyncStartC2Trace)
 final asyncEventD = AsyncTimelineEvent(asyncStartDTrace)
   ..addEndEvent(asyncEndDTrace);
 
-final asyncEventWithDeepOverlap = AsyncTimelineEvent(asyncStartTraceEventWithDeepOverlap)
+final asyncEventWithDeepOverlap = AsyncTimelineEvent(
+    asyncStartTraceEventWithDeepOverlap)
   ..addEndEvent(asyncEndTraceEventWithDeepOverlap)
   ..addAllChildren([asyncEventWithDeepOverlap1, asyncEventWithDeepOverlap2]);
 final asyncEventWithDeepOverlap1 = AsyncTimelineEvent(asyncStart1Trace)

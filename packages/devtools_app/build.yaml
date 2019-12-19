@@ -1,6 +1,8 @@
 targets:
   $default:
     builders:
+      cereal_generator|cereal:
+        enabled: true
       build_web_compilers|entrypoint:
         options:
           dart2js_args:
