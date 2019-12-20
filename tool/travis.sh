@@ -121,7 +121,7 @@ if [ "$BOT" = "main" ]; then
     flutter pub global activate tuneup && flutter pub global run tuneup check
 
     # Ensure we can build the app.
-    flutter pub run build_runner build -o web:build --release
+    flutter pub run build_runner build -o web:build --release --delete-conflicting-outputs
 
 elif [ "$BOT" = "test_ddc" ]; then
 
