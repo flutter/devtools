@@ -2,20 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/flutter/common_widgets.dart';
-import 'package:devtools_app/src/ui/flutter/label.dart';
-import 'package:devtools_app/src/ui/icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 
+import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
+import '../../ui/flutter/label.dart';
+import '../../ui/icons.dart';
+import '../http_request_data.dart';
 import '../network_controller.dart';
+import 'http_request_inspector.dart';
 
-class HttpRequestDataTableSource {
-  set data(List<HttpRequestData> data) => _data = data;
+class HttpRequestDataTableSource extends DataTableSource {
+  set data(List<HttpRequestData> data) {
+    _data = data;
+    notifyListeners();
+  }
+
   List<HttpRequestData> _data;
 
   void _sort(Function getField, int columnIndex, bool ascending) {
@@ -39,6 +45,7 @@ class HttpRequestDataTableSource {
       }
       return Comparable.compare(fieldA, fieldB);
     });
+    notifyListeners();
   }
 
   TextStyle _getStatusColor(int status) {
@@ -55,15 +62,18 @@ class HttpRequestDataTableSource {
     return const TextStyle();
   }
 
+  @override
   DataRow getRow(int index) {
     final data = _data[index];
     final numFormat = NumberFormat.decimalPattern();
     final status = (data.status == null) ? 'N/A' : data.status.toString();
-    TextStyle statusColor = _getStatusColor(data.status);
-    
+    final requestTime = DateFormat.Hms().add_yMd().format(data.requestTime);
+    final TextStyle statusColor = _getStatusColor(data.status);
+
     final durationMs = (data.durationMs == null)
         ? 'In Progress'
         : numFormat.format(data.durationMs);
+
     return DataRow.byIndex(
         index: index,
         cells: <DataCell>[
@@ -74,6 +84,7 @@ class HttpRequestDataTableSource {
           )),
           DataCell(Text(status, style: statusColor)),
           DataCell(Text(durationMs)),
+          DataCell(Text(requestTime)),
         ],
         selected: data.selected,
         onSelectChanged: (bool selected) {
@@ -85,9 +96,11 @@ class HttpRequestDataTableSource {
             _currentSelection.value = null;
             data.selected = false;
           }
+          notifyListeners();
         });
   }
 
+  @override
   int get rowCount => _data?.length ?? 0;
 
   void clearSelection() => _currentSelection.value = null;
@@ -95,6 +108,12 @@ class HttpRequestDataTableSource {
   ValueListenable<HttpRequestData> get currentSelectionListenable =>
       _currentSelection;
   final _currentSelection = ValueNotifier<HttpRequestData>(null);
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
 }
 
 class NetworkScreen extends Screen {
@@ -144,35 +163,14 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     fontWeight: FontWeight.bold,
   );
 
-  Widget _buildRow(String key, dynamic value) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 30,
-        bottom: 15,
-      ),
-      child: Column(children: [
-        Row(
-          children: <Widget>[
-            Text(
-              '$key: ',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(value),
-          ],
-        ),
-      ]),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     const double minIncludeTextWidth = 600;
-    return ValueListenableBuilder(
+
+    return ValueListenableBuilder<HttpRequests>(
       valueListenable: networkController.requestsNotifier,
       builder: (context, data, widget) {
-        dataTableSource.data = data;
+        dataTableSource.data = data.requests;
         return ValueListenableBuilder(
           valueListenable: networkController.recordingNotifier,
           builder: (context, recording, widget) => Column(
@@ -223,116 +221,85 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                       : Split(
                           initialFirstFraction: 0.55,
                           axis: Axis.horizontal,
-                          firstChild: Scrollbar(
-                            // TODO(bkonyi): do we want horizontal scrolling? This seems to have weird behavior on OSX laptops
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: DataTable(
-                                  includeCheckboxes: false,
-                                  columns: <DataColumn>[
-                                    DataColumn(
-                                      label: Text(
-                                        'Request URI (${dataTableSource.rowCount})',
-                                        style: _headerTextStyle,
-                                      ),
-                                      onSort: (i, j) => _onSort(
-                                          (HttpRequestData o) => o.name, i, j),
-                                    ),
-                                    DataColumn(
-                                      label: const Text('Method',
-                                          style: _headerTextStyle),
-                                      onSort: (i, j) => _onSort(
-                                          (HttpRequestData o) => o.method,
-                                          i,
-                                          j),
-                                    ),
-                                    DataColumn(
-                                      label: const Text('Status',
-                                          style: _headerTextStyle),
-                                      numeric: true,
-                                      onSort: (i, j) => _onSort(
-                                          (HttpRequestData o) => o.status,
-                                          i,
-                                          j),
-                                    ),
-                                    DataColumn(
-                                      label: const Text('Duration (ms)',
-                                          style: _headerTextStyle),
-                                      numeric: true,
-                                      onSort: (i, j) => _onSort(
-                                          (HttpRequestData o) => o.durationMs,
-                                          i,
-                                          j),
-                                    )
-                                  ],
-                                  sortColumnIndex: _sortColumnIndex,
-                                  sortAscending: _sortAscending,
-                                  rows: [
-                                    for (int i = 0;
-                                        i < dataTableSource.rowCount;
-                                        ++i)
-                                      dataTableSource.getRow(i)
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Only show the data page when there's data to display.
-                          secondChild: (data == null)
+                          firstChild: (dataTableSource.rowCount == 0)
                               ? Container(
-                                // TODO(bkonyi): add slight background color
                                   child: const Center(
-                                    child: Text(
-                                      'No request selected',
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                  ),
+                                      child: CircularProgressIndicator()),
                                 )
-                              : ListView(
-                                  children: <Widget>[
-                                    ExpansionTile(
-                                      title: const Text('General'),
-                                      children: <Widget>[
-                                        for (final entry
-                                            in data.general.entries)
-                                          _buildRow(
-                                            entry.key,
-                                            entry.value.toString(),
+                              : Scrollbar(
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      return SingleChildScrollView(
+                                        child: PaginatedDataTable(
+                                          rowsPerPage: 25,
+                                          // TODO(bkonyi): figure out how to prevent header from scrolling.
+                                          header: const Text(
+                                            'HTTP Requests',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
-                                      ],
-                                      initiallyExpanded: true,
-                                    ),
-                                    ExpansionTile(
-                                      title: const Text('Response Headers'),
-                                      initiallyExpanded: true,
-                                      children: <Widget>[
-                                        if (data.responseHeaders != null)
-                                          for (final entry
-                                              in data.responseHeaders.entries)
-                                            _buildRow(
-                                              entry.key,
-                                              entry.value.toString(),
+                                          source: dataTableSource,
+                                          includeCheckboxes: false,
+                                          columns: <DataColumn>[
+                                            DataColumn(
+                                              label: Text(
+                                                'Request URI (${dataTableSource.rowCount})',
+                                                style: _headerTextStyle,
+                                              ),
+                                              onSort: (i, j) => _onSort(
+                                                  (HttpRequestData o) => o.name,
+                                                  i,
+                                                  j),
                                             ),
-                                      ],
-                                    ),
-                                    ExpansionTile(
-                                      title: const Text('Request Headers'),
-                                      initiallyExpanded: true,
-                                      children: <Widget>[
-                                        if (data.requestHeaders != null)
-                                          for (final entry
-                                              in data.requestHeaders.entries)
-                                            _buildRow(
-                                              entry.key,
-                                              entry.value.toString(),
-                                            )
-                                      ],
-                                    )
-                                  ],
+                                            DataColumn(
+                                              label: const Text('Method',
+                                                  style: _headerTextStyle),
+                                              onSort: (i, j) => _onSort(
+                                                  (HttpRequestData o) =>
+                                                      o.method,
+                                                  i,
+                                                  j),
+                                            ),
+                                            DataColumn(
+                                              label: const Text('Status',
+                                                  style: _headerTextStyle),
+                                              numeric: true,
+                                              onSort: (i, j) => _onSort(
+                                                  (HttpRequestData o) =>
+                                                      o.status,
+                                                  i,
+                                                  j),
+                                            ),
+                                            DataColumn(
+                                              label: const Text('Duration (ms)',
+                                                  style: _headerTextStyle),
+                                              numeric: true,
+                                              onSort: (i, j) => _onSort(
+                                                  (HttpRequestData o) =>
+                                                      o.durationMs,
+                                                  i,
+                                                  j),
+                                            ),
+                                            DataColumn(
+                                                label: const Text('Timestamp',
+                                                    style: _headerTextStyle),
+                                                onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.requestTime,
+                                                    i,
+                                                    j)),
+                                          ],
+                                          sortColumnIndex: _sortColumnIndex,
+                                          sortAscending: _sortAscending,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                        ),
+                          // Only show the data page when there's data to display.
+                          secondChild: HttpRequestInspector(
+                            data,
+                          )),
                 ),
               )
             ],
