@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import '../../utils.dart';
 import '../diagnostics_node.dart';
 import '../enum_utils.dart';
-import 'story_of_your_layout/utils.dart';
+import 'layout_explorer/flex/utils.dart';
 
 const overflowEpsilon = 0.1;
 

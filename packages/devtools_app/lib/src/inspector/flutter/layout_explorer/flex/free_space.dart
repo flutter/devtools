@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../utils.dart';
-import '../inspector_data_models.dart';
+import '../../../../utils.dart';
+import '../../inspector_data_models.dart';
 import 'arrow.dart';
 import 'flex.dart';
 

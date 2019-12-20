@@ -9,14 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/colors.dart';
-import '../../../ui/theme.dart';
-import '../../../utils.dart';
-import '../../diagnostics_node.dart';
-import '../../inspector_controller.dart';
-import '../../inspector_service.dart';
-import '../inspector_data_models.dart';
-import '../inspector_service_flutter_extension.dart';
+import '../../../../ui/colors.dart';
+import '../../../../ui/theme.dart';
+import '../../../../utils.dart';
+import '../../../diagnostics_node.dart';
+import '../../../inspector_controller.dart';
+import '../../../inspector_service.dart';
+import '../../inspector_data_models.dart';
+import '../../inspector_service_flutter_extension.dart';
 import 'arrow.dart';
 import 'free_space.dart';
 import 'overflow_indicator_painter.dart';
@@ -281,8 +281,8 @@ Widget _visualizeWidthAndHeightWithConstraints({
   );
 }
 
-class StoryOfYourFlexWidget extends StatefulWidget {
-  const StoryOfYourFlexWidget(
+class FlexLayoutExplorerWidget extends StatefulWidget {
+  const FlexLayoutExplorerWidget(
     this.inspectorController, {
     Key key,
   }) : super(key: key);
@@ -294,13 +294,14 @@ class StoryOfYourFlexWidget extends StatefulWidget {
   }
 
   @override
-  _StoryOfYourFlexWidgetState createState() => _StoryOfYourFlexWidgetState();
+  _FlexLayoutExplorerWidgetState createState() =>
+      _FlexLayoutExplorerWidgetState();
 }
 
-class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
+class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
     with TickerProviderStateMixin
     implements InspectorServiceClient {
-  _StoryOfYourFlexWidgetState() {
+  _FlexLayoutExplorerWidgetState() {
     _onSelectionChangedCallback = onSelectionChanged;
   }
 
@@ -353,7 +354,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   RateLimiter rateLimiter;
 
   RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
-    if (!StoryOfYourFlexWidget.shouldDisplay(node)) return null;
+    if (!FlexLayoutExplorerWidget.shouldDisplay(node)) return null;
     if (node.isFlex) return node;
     return node.parent;
   }
@@ -362,7 +363,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
-    if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
+    if (!FlexLayoutExplorerWidget.shouldDisplay(selectedNode)) {
       return;
     }
     final prevRootId = id(_properties?.node);
@@ -400,7 +401,7 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
   }
 
   @override
-  void didUpdateWidget(StoryOfYourFlexWidget oldWidget) {
+  void didUpdateWidget(FlexLayoutExplorerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateObjectGroupManager();
     _animateProperties();
@@ -946,7 +947,7 @@ class FlexChildVisualizer extends StatelessWidget {
     @required this.textColor,
   }) : super(key: key);
 
-  final _StoryOfYourFlexWidgetState state;
+  final _FlexLayoutExplorerWidgetState state;
 
   final Color backgroundColor;
   final Color borderColor;

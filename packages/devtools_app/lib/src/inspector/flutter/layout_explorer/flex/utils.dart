@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../utils.dart';
-import '../../diagnostics_node.dart';
-import '../inspector_data_models.dart';
+import '../../../../utils.dart';
+import '../../../diagnostics_node.dart';
+import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 
 double sum(Iterable<double> numbers) =>
