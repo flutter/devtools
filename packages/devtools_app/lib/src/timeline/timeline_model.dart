@@ -1000,17 +1000,13 @@ class AsyncTimelineEvent extends TimelineEvent {
   @override
   bool couldBeParentOf(TimelineEvent e) {
     final AsyncTimelineEvent asyncEvent = e;
-    print('checking parentId');
-    print('${asyncEvent.parentId}, ${asyncId}');
     // If [asyncEvent] has an explicit parentId, use that as the truth.
     if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
 
-    print('checking asyncId');
     // Without an explicit parentId, two events must share an asyncId to be
     // part of the same event tree.
     if (asyncId != asyncEvent.asyncId) return false;
 
-    print('checking timestamps');
     // When two events share an asyncId, determine parent / child relationships
     // based on timestamps.
     final startTime = time.start.inMicroseconds;
