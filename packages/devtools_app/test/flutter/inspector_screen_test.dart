@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/flutter/inspector_screen_details_tab.dart';
-import 'package:devtools_app/src/inspector/flutter/story_of_your_layout/flex.dart';
+import 'package:devtools_app/src/inspector/flutter/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/inspector/flutter/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
@@ -246,7 +246,7 @@ void main() {
             ),
           ),
         );
-        expect(find.byType(StoryOfYourFlexWidget), findsOneWidget);
+        expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       });
 
       testWidgetsWithWindowSize(
@@ -262,10 +262,10 @@ void main() {
             ),
           ),
         );
-        expect(find.byType(StoryOfYourFlexWidget), findsNothing);
+        expect(find.byType(FlexLayoutExplorerWidget), findsNothing);
         controller.setSelectedNode(treeNode);
         await tester.pumpAndSettle();
-        expect(find.byType(StoryOfYourFlexWidget), findsOneWidget);
+        expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       });
     });
 

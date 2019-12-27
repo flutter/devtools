@@ -100,9 +100,9 @@ flutter:
     - web/icons/memory/
     - web/icons/perf/
     - assets/img/
-    - assets/img/story_of_layout/
-    - assets/img/story_of_layout/main_axis_alignment/
-    - assets/img/story_of_layout/cross_axis_alignment/
+    - assets/img/layout_explorer/
+    - assets/img/layout_explorer/main_axis_alignment/
+    - assets/img/layout_explorer/cross_axis_alignment/
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
   # TODO(https://github.com/flutter/devtools/issues/1339): Include a monospaced font.
