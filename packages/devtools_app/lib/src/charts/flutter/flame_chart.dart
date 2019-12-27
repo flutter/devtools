@@ -188,7 +188,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       onHover: _handleMouseHover,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapUp: (details) => _handleTapUp(details, context),
+        onTapUp: _handleTapUp,
         child: SizedBox(
           height: rowHeightWithPadding,
           width: widget.width,
@@ -200,28 +200,29 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             itemCount: nodes.length,
-            itemBuilder: (context, index) {
-              final node = nodes[index];
-              final nextNode =
-                  index == nodes.length - 1 ? null : nodes[index + 1];
-              final paddingLeft = index == 0 ? node.rect.left : 0.0;
-              final paddingRight = nextNode == null
-                  ? widget.width - node.rect.right
-                  : nextNode.rect.left - node.rect.right;
-              return Padding(
-                padding: EdgeInsets.only(
-                  left: paddingLeft,
-                  right: paddingRight,
-                  bottom: rowPadding,
-                ),
-                child: node.buildWidget(
-                  selected: node.data == widget.selected,
-                  hovered: node.data == hovered,
-                ),
-              );
-            },
+            itemBuilder: (context, index) => _buildFlameChartNode(index),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFlameChartNode(int index) {
+    final node = nodes[index];
+    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
+    final paddingLeft = index == 0 ? node.rect.left : 0.0;
+    final paddingRight = nextNode == null
+        ? widget.width - node.rect.right
+        : nextNode.rect.left - node.rect.right;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: paddingLeft,
+        right: paddingRight,
+        bottom: rowPadding,
+      ),
+      child: node.buildWidget(
+        selected: node.data == widget.selected,
+        hovered: node.data == hovered,
       ),
     );
   }
@@ -243,7 +244,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     }
   }
 
-  void _handleTapUp(TapUpDetails details, BuildContext context) {
+  void _handleTapUp(TapUpDetails details) {
     final RenderBox referenceBox = context.findRenderObject();
     final tapPosition = referenceBox.globalToLocal(details.globalPosition);
     final nodeToSelect =
