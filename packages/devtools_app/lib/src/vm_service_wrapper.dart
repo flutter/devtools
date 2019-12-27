@@ -331,6 +331,18 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future getIsolateGroup(String isolateGroupId) {
+    return _trackFuture(
+        'getIsolateGroup', _vmService.getIsolateGroup(isolateGroupId));
+  }
+
+  @override
+  Future getIsolateGroupMemoryUsage(String isolateGroupId) {
+    return _trackFuture('getIsolateGroupMemoryUsage',
+        _vmService.getIsolateGroupMemoryUsage(isolateGroupId));
+  }
+
+  @override
   Future<Object> getObject(
     String isolateId,
     String objectId, {
