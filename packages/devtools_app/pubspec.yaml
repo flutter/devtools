@@ -63,7 +63,7 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  flutter_widgets: ^0.1.6
+  flutter_widgets: ^0.1.8
 
 dependency_overrides:
   # When this is removed, don't forget to add back the override for test tag.
