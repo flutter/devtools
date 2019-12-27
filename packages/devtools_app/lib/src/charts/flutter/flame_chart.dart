@@ -177,8 +177,8 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         width: widget.width,
       );
     }
-    // Having each row handle gestures instead of each node handling its own
-    // gestures improves performance.
+    // Having each row handle gestures and mouse events instead of each node
+    // handling its own improves performance.
     return MouseRegion(
       onHover: _handleMouseHover,
       child: GestureDetector(
