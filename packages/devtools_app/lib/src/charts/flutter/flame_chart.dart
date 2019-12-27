@@ -156,9 +156,14 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   V hovered;
 
   @override
+  void initState() {
+    super.initState();
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
+  }
+
+  @override
   void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
     _resetHovered();
   }
 
