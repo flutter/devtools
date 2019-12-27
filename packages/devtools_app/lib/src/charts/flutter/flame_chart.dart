@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:math' as math;
+import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 
@@ -14,7 +17,6 @@ const double rowPadding = 2.0;
 const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
-const double topOffset = rowHeightWithPadding;
 const double sideInset = 70.0;
 const double sideInsetSmall = 40.0;
 
@@ -140,31 +142,31 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final V selected;
 
   @override
-  _ScrollingFlameChartRowState createState() => _ScrollingFlameChartRowState();
+  _ScrollingFlameChartRowState<V> createState() =>
+      _ScrollingFlameChartRowState<V>();
 }
 
-class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
+class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
 
   /// Convenience getter for widget.nodes.
   List<FlameChartNode> get nodes => widget.nodes;
 
-  @override
-  void initState() {
-    super.initState();
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
-  }
+  V hovered;
 
   @override
   void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
     super.didUpdateWidget(oldWidget);
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    _resetHovered();
   }
 
   @override
   void dispose() {
     super.dispose();
     scrollController.dispose();
+    _resetHovered();
   }
 
   @override
@@ -177,40 +179,63 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
     }
     // Having each row handle gestures instead of each node handling its own
     // gestures improves performance.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapUp: (details) => _handleTapUp(details, context),
-      child: SizedBox(
-        height: rowHeightWithPadding,
-        width: widget.width,
-        child: ListView.builder(
-          addAutomaticKeepAlives: false,
-          // The flame chart nodes are inexpensive to paint, so removing the
-          // repaint boundary improves efficiency.
-          addRepaintBoundaries: false,
-          controller: scrollController,
-          scrollDirection: Axis.horizontal,
-          itemCount: nodes.length,
-          itemBuilder: (context, index) {
-            final node = nodes[index];
-            final nextNode =
-                index == nodes.length - 1 ? null : nodes[index + 1];
-            final paddingLeft = index == 0 ? node.rect.left : 0.0;
-            final paddingRight = nextNode == null
-                ? widget.width - node.rect.right
-                : nextNode.rect.left - node.rect.right;
-            return Padding(
-              padding: EdgeInsets.only(
-                left: paddingLeft,
-                right: paddingRight,
-                bottom: rowPadding,
-              ),
-              child: node.buildWidget(node.data == widget.selected),
-            );
-          },
+    return MouseRegion(
+      onHover: _handleMouseHover,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: (details) => _handleTapUp(details, context),
+        child: SizedBox(
+          height: rowHeightWithPadding,
+          width: widget.width,
+          child: ListView.builder(
+            addAutomaticKeepAlives: false,
+            // The flame chart nodes are inexpensive to paint, so removing the
+            // repaint boundary improves efficiency.
+            addRepaintBoundaries: false,
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: nodes.length,
+            itemBuilder: (context, index) {
+              final node = nodes[index];
+              final nextNode =
+                  index == nodes.length - 1 ? null : nodes[index + 1];
+              final paddingLeft = index == 0 ? node.rect.left : 0.0;
+              final paddingRight = nextNode == null
+                  ? widget.width - node.rect.right
+                  : nextNode.rect.left - node.rect.right;
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: paddingLeft,
+                  right: paddingRight,
+                  bottom: rowPadding,
+                ),
+                child: node.buildWidget(
+                  selected: node.data == widget.selected,
+                  hovered: node.data == hovered,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
+  }
+
+  void _handleMouseHover(PointerHoverEvent event) {
+    // TODO(kenz): remove the hard coded hacks once
+    // https://github.com/flutter/flutter/issues/33675 is fixed.
+    // [event.localPosition] is actually the absolute position right now.
+    const horizontalOffsetForTooltip = 33.0;
+    final hoverNodeData = binarySearchForNode(event.localPosition.dx -
+            horizontalOffsetForTooltip +
+            scrollController.offset)
+        ?.data;
+
+    if (hoverNodeData != hovered) {
+      setState(() {
+        hovered = hoverNodeData;
+      });
+    }
   }
 
   void _handleTapUp(TapUpDetails details, BuildContext context) {
@@ -224,7 +249,6 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
   }
 
   FlameChartNode binarySearchForNode(double x) {
-    print(x);
     int min = 0;
     int max = nodes.length;
     while (min < max) {
@@ -241,6 +265,10 @@ class _ScrollingFlameChartRowState extends State<ScrollingFlameChartRow>
       }
     }
     return null;
+  }
+
+  void _resetHovered() {
+    hovered = null;
   }
 }
 
@@ -304,14 +332,10 @@ class FlameChartNode<T> {
   final void Function(T) onSelected;
   final bool selectable;
 
-  Widget buildWidget(bool selected) {
+  Widget buildWidget({@required bool selected, @required bool hovered}) {
     selected = selectable ? selected : false;
-    // TODO(kenz): figure out a way to add tooltips without crippling
-    // performance. The html app does not have tooltips, so removing them for
-    // now is not a regression. Possibly have each row handle tooltips and
-    // modify text based on which node is being moused over. Look into
-    // MouseRegion: https://api.flutter.dev/flutter/widgets/MouseRegion-class.html.
-    return Container(
+    hovered = selectable ? hovered : false;
+    final node = Container(
       width: rect.width,
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
@@ -328,6 +352,16 @@ class FlameChartNode<T> {
             )
           : const SizedBox(),
     );
+    if (hovered) {
+      return Tooltip(
+        message: tooltip,
+        preferBelow: false,
+        waitDuration: tooltipWait,
+        child: node,
+      );
+    } else {
+      return node;
+    }
   }
 }
 
