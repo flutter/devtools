@@ -142,11 +142,11 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final V selected;
 
   @override
-  _ScrollingFlameChartRowState<V> createState() =>
-      _ScrollingFlameChartRowState<V>();
+  ScrollingFlameChartRowState<V> createState() =>
+      ScrollingFlameChartRowState<V>();
 }
 
-class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
+class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
 
@@ -254,6 +254,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     }
   }
 
+  @visibleForTesting
   FlameChartNode binarySearchForNode(double x) {
     int min = 0;
     int max = nodes.length;
@@ -341,13 +342,15 @@ class FlameChartNode<T> {
   Widget buildWidget({@required bool selected, @required bool hovered}) {
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
+
     final node = Container(
+      key: hovered ? null : key,
       width: rect.width,
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
-      child: rect.width > _minWidthForText
+      child: rect.width >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
@@ -360,6 +363,7 @@ class FlameChartNode<T> {
     );
     if (hovered) {
       return Tooltip(
+        key: key,
         message: tooltip,
         preferBelow: false,
         waitDuration: tooltipWait,
