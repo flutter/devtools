@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../cpu_profile_model.dart';
+import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_flame_chart.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
@@ -91,12 +92,8 @@ class CpuProfiler extends StatelessWidget {
 
     // TODO(kenz): tree table is extremely slow with large data set. It should
     // be optimized before including in the profiler.
-    //    final callTree = CpuCallTreeTable(data);
-    const callTree = Center(
-      child: Text(
-        'TODO CPU call tree',
-      ),
-    );
+    final callTree = CpuCallTreeTable(data);
+
     const bottomUp = Center(
       child: Text(
         'TODO CPU bottom up',
