@@ -61,9 +61,14 @@ class CallStackView implements CoreElementView {
   void showFrames(List<Frame> frames, {bool selectTop = false}) {
     if (frames.isEmpty) {
       // Create a marker frame for 'no call frames'.
-      final Frame frame = Frame()
-        ..kind = emptyStackMarker
-        ..code = (CodeRef()..name = '<no call frames>');
+      final Frame frame = Frame(
+        index: 0,
+        kind: emptyStackMarker,
+        code: CodeRef(
+          name: '<no call frames>',
+          kind: CodeKind.kStub,
+        ),
+      );
       _items.setItems([frame]);
     } else {
       _items.setItems(frames, selection: frames.isEmpty ? null : frames.first);
