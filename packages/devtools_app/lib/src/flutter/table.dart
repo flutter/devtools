@@ -135,6 +135,9 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     with TickerProviderStateMixin {
   List<T> items;
+  List<T> animatingChildren = [];
+  Set<T> animatingChildrenSet = {};
+  T animatingNode;
   List<double> columnWidths;
   final Map<T, bool> shouldShowCache = {};
 
@@ -162,15 +165,26 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     });
   }
 
+  void _onItemsAnimated() {
+    setState(() {
+      animatingChildren = [];
+      animatingChildrenSet = {};
+    });
+  }
+
   void _onItemPressed(T node) {
     /// Rebuilds the table whenever the tree structure has been updated
     if (!node.isExpandable) return;
     setState(() {
+      animatingNode = node;
       if (node.isExpanded) {
+        animatingChildren = _buildFlatList(node).skip(1).take(30).toList();
         node.collapse();
       } else {
         node.expand();
+        animatingChildren = _buildFlatList(node).skip(1).take(30).toList();
       }
+      animatingChildrenSet = Set.of(animatingChildren);
     });
     _updateItems();
   }
@@ -237,20 +251,30 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   Widget _buildRow(BuildContext context, int index) {
+    Widget rowForNode(T node) {
+      return _TableRow<T>(
+        key: widget.keyFactory(node),
+        node: node,
+        onPressed: _onItemPressed,
+        columns: widget.columns,
+        columnWidths: columnWidths,
+        expandableColumn: widget.treeColumn,
+        isExpanded: node.isExpanded,
+        isExpandable: node.isExpandable,
+        isShown: node.shouldShow(),
+        expansionChildren:
+            node != animatingNode || animatingChildrenSet.contains(node)
+                ? null
+                : [for (var child in animatingChildren) rowForNode(child)],
+        onExpansionCompleted: _onItemsAnimated,
+        // TODO(https://github.com/flutter/devtools/issues/1361): alternate table
+        // row colors, even when the table has collapsed rows.
+      );
+    }
+
     final node = items[index];
-    return _TableRow<T>(
-      key: widget.keyFactory(node),
-      node: node,
-      onPressed: _onItemPressed,
-      columns: widget.columns,
-      columnWidths: columnWidths,
-      expandableColumn: widget.treeColumn,
-      isExpanded: node.isExpanded,
-      isExpandable: node.isExpandable,
-      isShown: node.shouldShow(),
-      // TODO(https://github.com/flutter/devtools/issues/1361): alternate table
-      // row colors, even when the table has collapsed rows.
-    );
+    if (animatingChildrenSet.contains(node)) return const SizedBox();
+    return rowForNode(node);
   }
 }
 
@@ -355,6 +379,8 @@ class _TableRow<T> extends StatefulWidget {
     @required this.columnWidths,
     this.backgroundColor,
     this.expandableColumn,
+    this.expansionChildren,
+    this.onExpansionCompleted,
     this.isExpanded = false,
     this.isExpandable = false,
     this.isShown = true,
@@ -373,6 +399,8 @@ class _TableRow<T> extends StatefulWidget {
         expandableColumn = null,
         isShown = true,
         backgroundColor = null,
+        expansionChildren = null,
+        onExpansionCompleted = null,
         super(key: key);
 
   final T node;
@@ -403,6 +431,10 @@ class _TableRow<T> extends StatefulWidget {
   /// When the value is toggled, this row will animate in or out.
   final bool isShown;
 
+  /// The children to show when the expand animation of this widget is running.
+  final List<Widget> expansionChildren;
+  final VoidCallback onExpansionCompleted;
+
   /// The background color of the row.
   ///
   /// If null, defaults to `Theme.of(context).canvasColor`.
@@ -421,6 +453,22 @@ class _TableRow<T> extends StatefulWidget {
 
 class _TableRowState<T> extends State<_TableRow<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
+  Key contentKey;
+
+  @override
+  void initState() {
+    super.initState();
+    contentKey = ValueKey(this);
+    expandController.addStatusListener((status) {
+      setState(() {});
+      if ([AnimationStatus.completed, AnimationStatus.dismissed]
+              .contains(status) &&
+          widget.onExpansionCompleted != null) {
+        widget.onExpansionCompleted();
+      }
+    });
+  }
+
   @override
   void didUpdateWidget(_TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -430,22 +478,43 @@ class _TableRowState<T> extends State<_TableRow<T>>
   @override
   Widget build(BuildContext context) {
     final row = tableRowFor(context);
-    return AnimatedBuilder(
-      animation: showController,
-      builder: (context, child) {
-        return SizedBox(
-          height: _Table.defaultRowHeight * showAnimation.value,
-          child: Material(
-            child: child,
-            color: widget.backgroundColor ?? Theme.of(context).canvasColor,
-          ),
-        );
-      },
-      child: InkWell(
-        onTap: () => widget.onPressed(widget.node),
-        child: row,
+
+    final box = SizedBox(
+      height: _Table.defaultRowHeight,
+      child: Material(
+        color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+        child: InkWell(
+          key: contentKey,
+          onTap: () => widget.onPressed(widget.node),
+          child: row,
+        ),
       ),
     );
+    if (widget.expansionChildren == null)
+      return box;
+    else {
+      return AnimatedBuilder(
+        animation: expandCurve,
+        builder: (context, child) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              box,
+              for (var c in widget.expansionChildren)
+                SizedBox(
+                  height: _Table.defaultRowHeight * expandCurve.value,
+                  child: OverflowBox(
+                    minHeight: 0.0,
+                    maxHeight: _Table.defaultRowHeight,
+                    alignment: Alignment.topCenter,
+                    child: c,
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   /// Presents the content of this row.
@@ -479,7 +548,7 @@ class _TableRowState<T> extends State<_TableRow<T>>
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
-                  turns: expandAnimation,
+                  turns: expandArrowAnimation,
                   child: const Icon(
                     Icons.expand_more,
                     size: 16.0,
