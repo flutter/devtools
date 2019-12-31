@@ -321,18 +321,22 @@ class HtmlDebuggerScreen extends HtmlScreen {
         if (reportedException != null && frames.isNotEmpty) {
           final Frame frame = frames.first;
 
-          final Frame newFrame = Frame()
-            ..type = frame.type
-            ..index = frame.index
-            ..function = frame.function
-            ..code = frame.code
-            ..location = frame.location
-            ..kind = frame.kind;
+          final Frame newFrame = Frame(
+            index: frame.index,
+            function: frame.function,
+            code: frame.code,
+            location: frame.location,
+            kind: frame.kind,
+          );
 
           final List<BoundVariable> newVars = <BoundVariable>[];
-          newVars.add(BoundVariable()
-            ..name = '<exception>'
-            ..value = reportedException);
+          newVars.add(BoundVariable(
+            name: '<exception>',
+            value: reportedException,
+            scopeStartTokenPos: null,
+            scopeEndTokenPos: null,
+            declarationTokenPos: null,
+          ));
           newVars.addAll(frame.vars ?? []);
           newFrame.vars = newVars;
 

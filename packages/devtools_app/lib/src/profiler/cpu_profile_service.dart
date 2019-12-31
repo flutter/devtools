@@ -27,7 +27,7 @@ class CpuProfilerService {
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
   }
 
-  Future<Success> setProfilePeriod(String value) {
+  Future<dynamic> setProfilePeriod(String value) {
     return serviceManager.service.setFlag(vm_flags.profilePeriod, value);
   }
 }

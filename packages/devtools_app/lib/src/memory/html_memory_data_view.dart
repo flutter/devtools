@@ -130,19 +130,35 @@ class MemoryDataChildProvider extends ChildProvider<BoundField> {
 
             int index = 0;
             for (dynamic value in instance.elements) {
-              result.add(BoundField()
-                ..decl = (FieldRef()..name = '[$index]')
-                ..value = value);
+              result.add(BoundField(
+                decl: FieldRef(
+                  name: '[$index]',
+                  isStatic: null,
+                  owner: null,
+                  isFinal: null,
+                  declaredType: null,
+                  isConst: null,
+                ),
+                value: value,
+              ));
               index++;
             }
             return result;
           case InstanceKind.kMap:
             final List<BoundField> result = [];
             for (dynamic value in instance.associations) {
-              result.add(BoundField()
+              result.add(BoundField(
                 // TODO(terry): Need to handle nested objects for keys/values.
-                ..decl = (FieldRef()..name = '[\'${value.key.valueAsString}\']')
-                ..value = value.value.valueAsString);
+                decl: FieldRef(
+                  name: '[\'${value.key.valueAsString}\']',
+                  isStatic: null,
+                  owner: null,
+                  isFinal: null,
+                  declaredType: null,
+                  isConst: null,
+                ),
+                value: value.value.valueAsString,
+              ));
             }
             return result;
           case InstanceKind.kStackTrace:

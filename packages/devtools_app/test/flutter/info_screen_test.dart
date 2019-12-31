@@ -27,24 +27,24 @@ void main() {
 
     void mockFlags() {
       when(serviceManager.service.getFlagList()).thenAnswer((invocation) {
-        return Future.value(
-          FlagList()
-            ..flags = [
-              Flag()
-                ..name = 'flag 1 name'
-                ..comment = 'flag 1 comment contains some very long text '
-                    'that the renderer will have to wrap around to prevent '
-                    'it from overflowing the screen. This will cause a '
-                    'failure if one of the two Row entries the flags lay out '
-                    'in is not wrapped in an Expanded(), which tells the Row '
-                    'allocate only the remaining space to the Expanded. '
-                    'Without the expanded, the underlying RichTexts will try '
-                    'to consume as much of the layout as they can and cause '
-                    'an overflow.'
-                ..valueAsString = 'flag 1 value'
-                ..modified = false
-            ],
-        );
+        return Future.value(FlagList(
+          flags: [
+            Flag(
+              name: 'flag 1 name',
+              comment: 'flag 1 comment contains some very long text '
+                  'that the renderer will have to wrap around to prevent '
+                  'it from overflowing the screen. This will cause a '
+                  'failure if one of the two Row entries the flags lay out '
+                  'in is not wrapped in an Expanded(), which tells the Row '
+                  'allocate only the remaining space to the Expanded. '
+                  'Without the expanded, the underlying RichTexts will try '
+                  'to consume as much of the layout as they can and cause '
+                  'an overflow.',
+              valueAsString: 'flag 1 value',
+              modified: false,
+            ),
+          ],
+        ));
       });
     }
 
