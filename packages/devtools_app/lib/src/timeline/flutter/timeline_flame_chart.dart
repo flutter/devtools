@@ -146,7 +146,7 @@ class FrameBasedTimelineFlameChartState
       final backgroundColor = event.isUiEvent ? nextUiColor() : nextGpuColor();
 
       final node = FlameChartNode<TimelineEvent>(
-        key: Key('${event.name} ${event.time.start.inMicroseconds}'),
+        key: Key('${event.name} ${event.traceEvents.first.id}'),
         text: event.name,
         tooltip: '${event.name} - ${msText(event.time.duration)}',
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
