@@ -66,6 +66,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   final List<FlameChartSection> sections = [];
 
+  final focusNode = FocusNode();
+
+  bool _shiftKeyPressed = false;
+
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
@@ -86,26 +90,36 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       initFlameChartElements();
       _linkedScrollControllerGroup.resetScroll();
     }
+    FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return ListView.builder(
-          addAutomaticKeepAlives: false,
-          itemCount: rows.length,
-          itemBuilder: (context, index) {
-            return ScrollingFlameChartRow<V>(
-              linkedScrollControllerGroup: _linkedScrollControllerGroup,
-              nodes: rows[index].nodes,
-              width: math.max(constraints.maxWidth, widget.totalStartingWidth),
-              selected: widget.selected,
+    return RawKeyboardListener(
+      focusNode: focusNode,
+      onKey: (event) => _handleKeyEvent(event),
+      child: Listener(
+        onPointerSignal: (event) => _handlePointerSignal(event),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ListView.builder(
+              addAutomaticKeepAlives: false,
+              itemCount: rows.length,
+              itemBuilder: (context, index) {
+                return ScrollingFlameChartRow<V>(
+                  linkedScrollControllerGroup: _linkedScrollControllerGroup,
+                  nodes: rows[index].nodes,
+                  width:
+                      math.max(constraints.maxWidth, widget.totalStartingWidth),
+                  selected: widget.selected,
+                );
+              },
+              scrollDirection: Axis.vertical,
             );
           },
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -121,6 +135,24 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
       rows.add(FlameChartRow());
+    }
+  }
+
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event.isShiftPressed) {
+      _shiftKeyPressed = true;
+    } else {
+      _shiftKeyPressed = false;
+    }
+  }
+
+  void _handlePointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      if (_shiftKeyPressed) {
+        print('shift scroll');
+      } else {
+        print('regular scroll');
+      }
     }
   }
 }
