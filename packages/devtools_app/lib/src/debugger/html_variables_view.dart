@@ -129,27 +129,39 @@ class VariablesChildProvider extends ChildProvider<BoundVariable> {
             assoc.key.kind == InstanceKind.kString) {
           keyString = "'$keyString'";
         }
-        return BoundVariable()
-          ..name = '[$keyString]'
-          ..value = assoc.value;
+        return BoundVariable(
+          name: '[$keyString]',
+          value: assoc.value,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        );
       }).toList();
     } else if (instance.elements != null) {
       final List<BoundVariable> result = [];
       int index = 0;
 
       for (dynamic value in instance.elements) {
-        result.add(BoundVariable()
-          ..name = '[$index]'
-          ..value = value);
+        result.add(BoundVariable(
+          name: '[$index]',
+          value: value,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        ));
         index++;
       }
 
       return result;
     } else if (instance.fields != null) {
       return instance.fields.map((BoundField field) {
-        return BoundVariable()
-          ..name = field.decl.name
-          ..value = field.value;
+        return BoundVariable(
+          name: field.decl.name,
+          value: field.value,
+          scopeStartTokenPos: null,
+          scopeEndTokenPos: null,
+          declarationTokenPos: null,
+        );
       }).toList();
     } else {
       return [];
