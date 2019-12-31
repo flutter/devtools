@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
@@ -312,8 +313,8 @@ class FlameChartNode<T> {
     // modify text based on which node is being moused over. Look into
     // MouseRegion: https://api.flutter.dev/flutter/widgets/MouseRegion-class.html.
     return Container(
-      width: rect.width,
-      height: rect.height,
+      width: max(0.0, rect.width),
+      height: max(0.0, rect.height),
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
