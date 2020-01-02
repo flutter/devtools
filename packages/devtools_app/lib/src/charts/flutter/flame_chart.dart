@@ -345,7 +345,11 @@ class FlameChartNode<T> {
 
     final node = Container(
       key: hovered ? null : key,
-      width: rect.width,
+      // This math.max call prevents using a rect with negative width for
+      // small events that have padding.
+      //
+      // See https://github.com/flutter/devtools/issues/1503 for details.
+      width: math.max(0.0, rect.width),
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
