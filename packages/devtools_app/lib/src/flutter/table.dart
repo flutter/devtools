@@ -140,10 +140,15 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   T animatingNode;
   List<double> columnWidths;
   final Map<T, bool> shouldShowCache = {};
+  bool rootExpanded = false;
+
+  /// The number of items to show when animating out the tree table.
+  static const itemsToShowWhenAnimating = 50;
 
   @override
   void initState() {
     super.initState();
+    rootExpanded = widget.data.isExpanded;
     _updateItems();
   }
 
@@ -151,6 +156,25 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateItems();
+    // If we detect that the root node has been collapsed or expanded
+    // (eg, by a collapse/expand all button), then we will
+    // reset the expansion status to the last recorded value,
+    // then we will trigger a proper animation to show the status change.
+    //
+    // This will properly handle the collapse/expand button when the
+    // root node is collapsed and expand all is pressed, as well as when the
+    // root node is expanded and collapse all is pressed.
+    //
+    // TODO(djshuckerow): Handle cases when the root node is expanded and expand
+    // all is pressed. This will require listening to expansion changes across the
+    // entire tree.
+    if (widget.data.isExpanded != rootExpanded) {
+      if (rootExpanded)
+        widget.data.expand();
+      else
+        widget.data.collapse();
+      _onItemPressed(widget.data);
+    }
   }
 
   @override
@@ -161,7 +185,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _updateItems() {
     setState(() {
       items = _buildFlatList(widget.data);
-      columnWidths = _computeColumnWidths(items);
+      // Leave enough space for the animating children during the animation.
+      columnWidths = _computeColumnWidths([...items, ...animatingChildren]);
     });
   }
 
@@ -169,6 +194,8 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     setState(() {
       animatingChildren = [];
       animatingChildrenSet = {};
+      // Remove the animating children from the column width computations.
+      columnWidths = _computeColumnWidths(items);
     });
   }
 
@@ -177,14 +204,27 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (!node.isExpandable) return;
     setState(() {
       animatingNode = node;
+      List<T> nodeChildren;
       if (node.isExpanded) {
-        animatingChildren = _buildFlatList(node).skip(1).take(30).toList();
+        // Compute the children of the expanded node before collapsing.
+        nodeChildren = _buildFlatList(node);
         node.collapse();
       } else {
         node.expand();
-        animatingChildren = _buildFlatList(node).skip(1).take(30).toList();
+        // Compute the children of the collapsed node after expanding it.
+        nodeChildren = _buildFlatList(node);
       }
+      // The first item will be node itself. We will take the next few items
+      // to generate a convincing expansion animation without creating
+      // potentially thousands of widgets.
+      animatingChildren =
+          nodeChildren.skip(1).take(itemsToShowWhenAnimating).toList();
       animatingChildrenSet = Set.of(animatingChildren);
+
+      // Update the tracked expansion of the root node if needed.
+      if (node == widget.data) {
+        rootExpanded = node.isExpanded;
+      }
     });
     _updateItems();
   }
