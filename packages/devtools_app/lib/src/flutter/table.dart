@@ -172,6 +172,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         node.expand();
       }
     });
+    _updateItems();
   }
 
   List<double> _computeColumnWidths(List<T> flattenedList) {
@@ -206,20 +207,22 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     return widths;
   }
 
-  void traverse(T node, ItemCallback callback) {
+  void traverse(T node, bool Function(T) callback) {
     if (node == null) return;
-
-    callback(node);
-
-    for (var child in node.children) {
-      traverse(child, callback);
+    final shouldContinue = callback(node);
+    if (shouldContinue) {
+      for (var child in node.children) {
+        traverse(child, callback);
+      }
     }
   }
 
   List<T> _buildFlatList(T root) {
     final flatList = <T>[];
-
-    traverse(root, (n) => flatList.add(n));
+    traverse(root, (n) {
+      flatList.add(n);
+      return n.isExpanded;
+    });
     return flatList;
   }
 

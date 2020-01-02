@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../cpu_profile_model.dart';
+import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_flame_chart.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
-class CpuProfiler extends StatelessWidget {
+class CpuProfiler extends StatefulWidget {
   const CpuProfiler({
     @required this.data,
     @required this.selectedStackFrame,
@@ -22,10 +23,17 @@ class CpuProfiler extends StatelessWidget {
 
   final Function(CpuStackFrame stackFrame) onStackFrameSelected;
 
+  static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
+  static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
+
+  // When content of the selected tab from thee tab controller has this key,
+  // we will not show the expand/collapse buttons.
+  static const Key _hideExpansionButtons = Key('hide expansion buttons');
+
   // TODO(kenz): the summary tab should be available for UI events in the
   // timeline.
-  static const cpuProfilerTabs = [
-    Tab(text: 'CPU Flame Chart'),
+  static const tabs = [
+    Tab(key: _hideExpansionButtons, text: 'CPU Flame Chart'),
     Tab(text: 'Call Tree'),
     Tab(text: 'Bottom Up'),
   ];
@@ -33,31 +41,77 @@ class CpuProfiler extends StatelessWidget {
   static const emptyCpuProfile = 'No CPU profile data';
 
   @override
+  _CpuProfilerState createState() => _CpuProfilerState();
+}
+
+class _CpuProfilerState extends State<CpuProfiler>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: CpuProfiler.tabs.length, vsync: this)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return DefaultTabController(
-      length: cpuProfilerTabs.length,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          TabBar(
-            labelColor: Theme.of(context).textTheme.body1.color,
-            isScrollable: true,
-            tabs: cpuProfilerTabs,
-          ),
-          Expanded(
-            child: _buildCpuProfileDataView(textTheme),
-          ),
-        ],
-      ),
+    final currentTab = CpuProfiler.tabs[_tabController.index];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TabBar(
+              labelColor: Theme.of(context).textTheme.body1.color,
+              isScrollable: true,
+              controller: _tabController,
+              tabs: CpuProfiler.tabs,
+            ),
+            if (currentTab.key != CpuProfiler._hideExpansionButtons)
+              Row(children: [
+                OutlineButton(
+                  key: CpuProfiler.expandButtonKey,
+                  onPressed: () {
+                    setState(widget.data.cpuProfileRoot.expandCascading);
+                  },
+                  child: const Text('Expand All'),
+                ),
+                OutlineButton(
+                  key: CpuProfiler.collapseButtonKey,
+                  onPressed: () {
+                    setState(widget.data.cpuProfileRoot.collapseCascading);
+                  },
+                  child: const Text('Collapse All'),
+                ),
+              ]),
+          ],
+        ),
+        Expanded(
+          child: _buildCpuProfileDataView(textTheme),
+        ),
+      ],
     );
   }
 
   Widget _buildCpuProfileDataView(TextTheme textTheme) {
-    if (data != null) {
-      return data.isEmpty
+    if (widget.data != null) {
+      return widget.data.isEmpty
           ? _buildEmptyDataView(textTheme)
           : TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _tabController,
               children: _buildProfilerViews(),
             );
     } else {
@@ -70,7 +124,7 @@ class CpuProfiler extends StatelessWidget {
   Widget _buildEmptyDataView(TextTheme textTheme) {
     return Center(
       child: Text(
-        emptyCpuProfile,
+        CpuProfiler.emptyCpuProfile,
         style: textTheme.subhead,
       ),
     );
@@ -80,23 +134,17 @@ class CpuProfiler extends StatelessWidget {
   List<Widget> _buildProfilerViews() {
     final cpuFlameChart = LayoutBuilder(builder: (context, constraints) {
       return CpuProfileFlameChart(
-        data,
+        widget.data,
         // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
         // test horizontal scrolling functionality.
         width: constraints.maxWidth * 2,
-        selected: selectedStackFrame,
-        onSelected: (sf) => onStackFrameSelected(sf),
+        selected: widget.selectedStackFrame,
+        onSelected: (sf) => widget.onStackFrameSelected(sf),
       );
     });
 
-    // TODO(kenz): tree table is extremely slow with large data set. It should
-    // be optimized before including in the profiler.
-    //    final callTree = CpuCallTreeTable(data);
-    const callTree = Center(
-      child: Text(
-        'TODO CPU call tree',
-      ),
-    );
+    final callTree = CpuCallTreeTable(widget.data);
+
     const bottomUp = Center(
       child: Text(
         'TODO CPU bottom up',
