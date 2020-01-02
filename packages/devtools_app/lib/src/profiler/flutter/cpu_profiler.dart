@@ -138,8 +138,6 @@ class _CpuProfilerState extends State<CpuProfiler>
       );
     });
 
-    // TODO(kenz): tree table is extremely slow with large data set. It should
-    // be optimized before including in the profiler.
     final callTree = CpuCallTreeTable(widget.data);
 
     const bottomUp = Center(
