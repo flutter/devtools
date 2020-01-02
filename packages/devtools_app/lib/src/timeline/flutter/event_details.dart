@@ -111,6 +111,11 @@ class EventSummary extends StatelessWidget {
     return ListView(
       children: [
         ListTile(
+          title: const Text('Time'),
+          subtitle: Text('${event.time.start.inMicroseconds} μs —  '
+              '${event.time.end.inMicroseconds} μs'),
+        ),
+        ListTile(
           title: const Text('Thread id'),
           subtitle: Text('${firstTraceEvent.threadId}'),
         ),
@@ -122,6 +127,11 @@ class EventSummary extends StatelessWidget {
           title: const Text('Category'),
           subtitle: Text(firstTraceEvent.category),
         ),
+        if (event.isAsyncEvent)
+          ListTile(
+            title: const Text('Async id'),
+            subtitle: Text('${(event as AsyncTimelineEvent).asyncId}'),
+          ),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),
       ],

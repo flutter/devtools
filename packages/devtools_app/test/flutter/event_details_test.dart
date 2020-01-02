@@ -76,9 +76,11 @@ void main() {
       eventSummary = EventSummary(asyncEventWithInstantChildren);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text('Time'), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
       expect(find.text('Process id'), findsOneWidget);
       expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Async id'), findsOneWidget);
       expect(find.text('Connected events'), findsOneWidget);
     });
 
@@ -86,9 +88,11 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text('Time'), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
       expect(find.text('Process id'), findsOneWidget);
       expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Async id'), findsNothing);
       expect(find.text('Connected events'), findsNothing);
     });
 
@@ -96,9 +100,11 @@ void main() {
       eventSummary = EventSummary(goldenGpuTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text('Time'), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
       expect(find.text('Process id'), findsOneWidget);
       expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Async id'), findsNothing);
       expect(find.text('Arguments'), findsOneWidget);
     });
 
@@ -106,9 +112,11 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text('Time'), findsOneWidget);
       expect(find.text('Thread id'), findsOneWidget);
       expect(find.text('Process id'), findsOneWidget);
       expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Async id'), findsNothing);
       expect(find.text('Arguments'), findsNothing);
     });
   });
