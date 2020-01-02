@@ -23,13 +23,17 @@ class CpuProfiler extends StatefulWidget {
 
   final Function(CpuStackFrame stackFrame) onStackFrameSelected;
 
-  static const Key expandButton = Key('CpuProfiler - Expand Button');
-  static const Key collapseButton = Key('CpuProfiler - Collapse Button');
+  static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
+  static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
+
+  // When content of the selected tab from thee tab controller has this key,
+  // we will not show the expand/collapse buttons.
+  static const Key _hideExpansionButtons = Key('hide expansion buttons');
 
   // TODO(kenz): the summary tab should be available for UI events in the
   // timeline.
   static const tabs = [
-    Tab(text: 'CPU Flame Chart'),
+    Tab(key: _hideExpansionButtons, text: 'CPU Flame Chart'),
     Tab(text: 'Call Tree'),
     Tab(text: 'Bottom Up'),
   ];
@@ -62,6 +66,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final currentTab = CpuProfiler.tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -74,17 +79,17 @@ class _CpuProfilerState extends State<CpuProfiler>
               controller: _tabController,
               tabs: CpuProfiler.tabs,
             ),
-            if (_tabController.index != 0)
+            if (currentTab.key != CpuProfiler._hideExpansionButtons)
               Row(children: [
                 OutlineButton(
-                  key: CpuProfiler.expandButton,
+                  key: CpuProfiler.expandButtonKey,
                   onPressed: () {
                     setState(widget.data.cpuProfileRoot.expandCascading);
                   },
                   child: const Text('Expand All'),
                 ),
                 OutlineButton(
-                  key: CpuProfiler.collapseButton,
+                  key: CpuProfiler.collapseButtonKey,
                   onPressed: () {
                     setState(widget.data.cpuProfileRoot.collapseCascading);
                   },
@@ -138,8 +143,6 @@ class _CpuProfilerState extends State<CpuProfiler>
       );
     });
 
-    // TODO(kenz): tree table is extremely slow with large data set. It should
-    // be optimized before including in the profiler.
     final callTree = CpuCallTreeTable(widget.data);
 
     const bottomUp = Center(

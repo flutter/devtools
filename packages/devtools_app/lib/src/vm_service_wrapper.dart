@@ -579,7 +579,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setFlag(String name, String value) {
+  Future<dynamic> setFlag(String name, String value) {
     return _trackFuture('setFlag', _vmService.setFlag(name, value));
   }
 

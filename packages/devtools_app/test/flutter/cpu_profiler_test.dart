@@ -78,24 +78,24 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.text('TODO CPU bottom up'), findsNothing);
-      expect(find.byKey(CpuProfiler.expandButton), findsNothing);
-      expect(find.byKey(CpuProfiler.collapseButton), findsNothing);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsNothing);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsNothing);
 
       await tester.tap(find.text('Call Tree'));
       await tester.pumpAndSettle();
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsOneWidget);
       expect(find.text('TODO CPU bottom up'), findsNothing);
-      expect(find.byKey(CpuProfiler.expandButton), findsOneWidget);
-      expect(find.byKey(CpuProfiler.collapseButton), findsOneWidget);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
 
       await tester.tap(find.text('Bottom Up'));
       await tester.pumpAndSettle();
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.text('TODO CPU bottom up'), findsOneWidget);
-      expect(find.byKey(CpuProfiler.expandButton), findsOneWidget);
-      expect(find.byKey(CpuProfiler.collapseButton), findsOneWidget);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -110,9 +110,9 @@ void main() {
       await tester.tap(find.text('Call Tree'));
       await tester.pumpAndSettle();
       expect(cpuProfileData.cpuProfileRoot.isExpanded, false);
-      await tester.tap(find.byKey(CpuProfiler.expandButton));
+      await tester.tap(find.byKey(CpuProfiler.expandButtonKey));
       expect(cpuProfileData.cpuProfileRoot.isExpanded, true);
-      await tester.tap(find.byKey(CpuProfiler.collapseButton));
+      await tester.tap(find.byKey(CpuProfiler.collapseButtonKey));
       expect(cpuProfileData.cpuProfileRoot.isExpanded, false);
     });
   });
