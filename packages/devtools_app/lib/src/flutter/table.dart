@@ -490,31 +490,29 @@ class _TableRowState<T> extends State<_TableRow<T>>
         ),
       ),
     );
-    if (widget.expansionChildren == null)
-      return box;
-    else {
-      return AnimatedBuilder(
-        animation: expandCurve,
-        builder: (context, child) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              box,
-              for (var c in widget.expansionChildren)
-                SizedBox(
-                  height: _Table.defaultRowHeight * expandCurve.value,
-                  child: OverflowBox(
-                    minHeight: 0.0,
-                    maxHeight: _Table.defaultRowHeight,
-                    alignment: Alignment.topCenter,
-                    child: c,
-                  ),
+    if (widget.expansionChildren == null) return box;
+
+    return AnimatedBuilder(
+      animation: expandCurve,
+      builder: (context, child) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            box,
+            for (var c in widget.expansionChildren)
+              SizedBox(
+                height: _Table.defaultRowHeight * expandCurve.value,
+                child: OverflowBox(
+                  minHeight: 0.0,
+                  maxHeight: _Table.defaultRowHeight,
+                  alignment: Alignment.topCenter,
+                  child: c,
                 ),
-            ],
-          );
-        },
-      );
-    }
+              ),
+          ],
+        );
+      },
+    );
   }
 
   /// Presents the content of this row.
