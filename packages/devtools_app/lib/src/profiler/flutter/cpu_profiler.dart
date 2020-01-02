@@ -23,8 +23,8 @@ class CpuProfiler extends StatefulWidget {
 
   final Function(CpuStackFrame stackFrame) onStackFrameSelected;
 
-  static const Key expandButton = Key('CpuProfiler - Expand Button');
-  static const Key collapseButton = Key('CpuProfiler - Collapse Button');
+  static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
+  static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
 
   // TODO(kenz): the summary tab should be available for UI events in the
   // timeline.
@@ -77,14 +77,14 @@ class _CpuProfilerState extends State<CpuProfiler>
             if (_tabController.index != 0)
               Row(children: [
                 OutlineButton(
-                  key: CpuProfiler.expandButton,
+                  key: CpuProfiler.expandButtonKey,
                   onPressed: () {
                     setState(widget.data.cpuProfileRoot.expandCascading);
                   },
                   child: const Text('Expand All'),
                 ),
                 OutlineButton(
-                  key: CpuProfiler.collapseButton,
+                  key: CpuProfiler.collapseButtonKey,
                   onPressed: () {
                     setState(widget.data.cpuProfileRoot.collapseCascading);
                   },
