@@ -345,8 +345,12 @@ class FlameChartNode<T> {
 
     final node = Container(
       key: hovered ? null : key,
+      // This math.max call prevents double precision errors creating a rect
+      // with negative width for small events when the flame chart is very
+      // large and zoomed out.
+      // See https://github.com/flutter/devtools/issues/1503 for details.
       width: math.max(0.0, rect.width),
-      height: math.max(0.0, rect.height),
+      height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
