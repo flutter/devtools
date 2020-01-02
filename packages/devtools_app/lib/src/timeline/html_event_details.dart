@@ -259,9 +259,13 @@ class HtmlEventSummary extends CoreElement {
       : super('div', classes: 'event-summary') {
     layoutVertical();
     add([
+      time = div(c: 'event-summary-section')..layoutHorizontal(),
       category = div(c: 'event-summary-section')..layoutHorizontal(),
       thread = div(c: 'event-summary-section')..layoutHorizontal(),
       process = div(c: 'event-summary-section')..layoutHorizontal(),
+      asyncId = div(c: 'event-summary-section')
+        ..layoutHorizontal()
+        ..hidden(true),
       connectedEvents = div(c: 'event-summary-section')
         ..layoutVertical()
         ..hidden(true),
@@ -273,11 +277,15 @@ class HtmlEventSummary extends CoreElement {
 
   final SelectedEventProvider selectedEventProvider;
 
+  CoreElement time;
+
   CoreElement category;
 
   CoreElement thread;
 
   CoreElement process;
+
+  CoreElement asyncId;
 
   CoreElement args;
 
@@ -289,6 +297,13 @@ class HtmlEventSummary extends CoreElement {
 
     reset();
 
+    time.add([
+      span(text: 'Time: '),
+      div(
+          text: '${event.time.start.inMicroseconds} μs —  '
+              '${event.time.end.inMicroseconds} μs'),
+    ]);
+
     final firstTraceEvent = event.traceEvents.first.event;
     category.add(
         [span(text: 'Category: '), div(text: '${firstTraceEvent.category}')]);
@@ -299,24 +314,29 @@ class HtmlEventSummary extends CoreElement {
       div(text: '${firstTraceEvent.processId}')
     ]);
 
-    final asyncInstantEvents = event.isAsyncEvent
-        ? [
-            ...event.children.where((e) =>
-                e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
-          ]
-        : [];
-    if (asyncInstantEvents.isNotEmpty) {
-      // TODO(kenz): eventually show flow events here as well.
-      connectedEvents
-        ..add([
-          span(text: 'Connected events: '),
-          for (var e in asyncInstantEvents)
-            div(
-                text: '${e.name} - {'
-                    'startTime: ${msText(e.time.start - event.time.start)}, '
-                    'args: ${e.traceEvents.first.event.args}}')
-        ])
+    if (event.isAsyncEvent) {
+      final AsyncTimelineEvent _event = event;
+      asyncId
+        ..add([span(text: 'Async id: '), div(text: '${_event.asyncId}')])
         ..hidden(false);
+
+      final asyncInstantEvents = [
+        ...event.children.where((e) =>
+            e.traceEvents.first.event.phase == TraceEvent.asyncInstantPhase)
+      ];
+      if (asyncInstantEvents.isNotEmpty) {
+        // TODO(kenz): eventually show flow events here as well.
+        connectedEvents
+          ..add([
+            span(text: 'Connected events: '),
+            for (var e in asyncInstantEvents)
+              div(
+                  text: '${e.name} - {'
+                      'startTime: ${msText(e.time.start - event.time.start)}, '
+                      'args: ${e.traceEvents.first.event.args}}')
+          ])
+          ..hidden(false);
+      }
     }
 
     // Merge args from all trace events.
@@ -335,9 +355,11 @@ class HtmlEventSummary extends CoreElement {
   }
 
   void reset() {
+    time.clear();
     category.clear();
     thread.clear();
     process.clear();
+    asyncId.clear();
     connectedEvents.clear();
     args.clear();
   }
