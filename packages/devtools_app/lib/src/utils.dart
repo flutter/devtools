@@ -518,7 +518,14 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension NullSafeLast<T> on List<T> {
+extension NullSafeAccess<T> on List<T> {
+  T nullSafeFirst() {
+    if (isEmpty) {
+      return null;
+    }
+    return first;
+  }
+
   T nullSafeLast() {
     if (isEmpty) {
       return null;

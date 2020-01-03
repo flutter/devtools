@@ -1,8 +1,6 @@
 ## 0.1.14-dev.2
-* Update package:vm_service dependency to ^2.2.0.
-
-## 0.1.14-dev.1
 * Fix issues with async trace event rendering.
+* Update package:vm_service dependency to ^2.2.0.
 
 ## 0.1.13 - 2019-12-10
 * Fix crash opening macOS desktop apps in DevTools.

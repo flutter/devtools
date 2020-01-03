@@ -416,6 +416,15 @@ void main() {
     });
 
     group('null safe list', () {
+      test('nullSafeFirst', () {
+        final list = [];
+        expect(list.nullSafeFirst(), isNull);
+        list.addAll([1, 2, 3]);
+        expect(list.nullSafeFirst(), equals(1));
+        list.insert(0, null);
+        expect(list.nullSafeFirst(), isNull);
+      });
+
       test('nullSafeLast', () {
         final list = [];
         expect(list.nullSafeLast(), isNull);

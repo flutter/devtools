@@ -344,7 +344,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
             final verticalGuidelineX = node.rect.left + 1;
             final verticalGuidelineStartY = node.rect.bottom;
             final verticalGuidelineEndY =
-                chartNodesByEvent[event.children.last].rect.centerLeft.dy;
+                chartNodesByEvent[event.lowestDisplayChild].rect.centerLeft.dy;
             verticalGuidelines.add(VerticalLineSegment(
               Offset(verticalGuidelineX, verticalGuidelineStartY),
               Offset(verticalGuidelineX, verticalGuidelineEndY),
