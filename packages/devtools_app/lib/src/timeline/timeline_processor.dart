@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../config_specific/logger.dart';
 import '../utils.dart';
-//import 'simple_trace_example.dart';
+import 'simple_trace_example.dart';
 import 'timeline_controller.dart';
 import 'timeline_model.dart';
 
@@ -650,12 +650,12 @@ class FullTimelineProcessor extends TimelineProcessor {
 
   void processTimeline(List<TraceEventWrapper> traceEvents) async {
 // Uncomment this code for testing the timeline.
-//    traceEvents = simpleTraceEvents['traceEvents']
-//        .where((json) =>
-//            json.containsKey(TraceEvent.timestampKey)) // thread_name events
-//        .map((e) => TraceEventWrapper(
-//            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
-//        .toList();
+    traceEvents = simpleTraceEvents['traceEvents']
+        .where((json) =>
+            json.containsKey(TraceEvent.timestampKey)) // thread_name events
+        .map((e) => TraceEventWrapper(
+            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
+        .toList();
     final _traceEvents = (traceEvents
         // Throw out timeline events that do not have a timestamp
         // (e.g. thread_name events).

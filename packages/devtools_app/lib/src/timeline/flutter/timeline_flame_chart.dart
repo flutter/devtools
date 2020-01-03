@@ -1,11 +1,15 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
+
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../charts/flutter/flame_chart.dart';
 import '../../flutter/controllers.dart';
+import '../../geometry.dart';
 import '../../ui/colors.dart';
 import '../../ui/theme.dart';
 import '../../utils.dart';
@@ -62,7 +66,7 @@ class TimelineFlameChart extends StatelessWidget {
             controller.fullTimeline.data,
             // TODO(kenz): remove * 4 once zooming is possible. This is so that we can
             // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 4,
+            width: constraints.maxWidth * 8,
             selected: selectedEvent,
             onSelection: (e) => controller.selectTimelineEvent(e),
           )
@@ -79,7 +83,7 @@ class FrameBasedTimelineFlameChart
     @required Function(TimelineEvent event) onSelected,
   }) : super(
           data,
-          duration: data.time.duration,
+          time: data.time,
           totalStartingWidth: width,
           selected: selected,
           onSelected: onSelected,
@@ -121,7 +125,7 @@ class FrameBasedTimelineFlameChartState
       top: flameChartNodeTop,
       width: 28.0,
     );
-    rows[0 + rowOffsetForTopPadding].nodes.add(uiSectionLabel);
+    rows[0 + rowOffsetForTopPadding].addNode(uiSectionLabel, index: 0);
 
     // Add GPU section label.
     final gpuSectionLabel = FlameChartNode.sectionLabel(
@@ -131,7 +135,7 @@ class FrameBasedTimelineFlameChartState
       top: flameChartNodeTop,
       width: 42.0,
     );
-    rows[gpuSectionStartRow].nodes.add(gpuSectionLabel);
+    rows[gpuSectionStartRow].addNode(gpuSectionLabel, index: 0);
 
     void createChartNodes(TimelineEvent event, int row) {
       // Do not round these values. Rounding the left could cause us to have
@@ -158,7 +162,7 @@ class FrameBasedTimelineFlameChartState
         onSelected: (dynamic event) => widget.onSelected(event),
       );
 
-      rows[row].nodes.add(node);
+      rows[row].addNode(node);
 
       for (TimelineEvent child in event.children) {
         createChartNodes(child, row + 1);
@@ -179,7 +183,7 @@ class FullTimelineFlameChart
     @required Function(TimelineEvent event) onSelection,
   }) : super(
           data,
-          duration: data.time.duration,
+          time: data.time,
           totalStartingWidth: width,
           startInset: _calculateStartInset(data),
           selected: selected,
@@ -209,6 +213,12 @@ class _FullTimelineFlameChartState
   /// We need to be able to look up a [FlameChartNode] based on its
   /// corresponding [TimelineEvent] when we traverse the event tree.
   final Map<TimelineEvent, FlameChartNode> chartNodesByEvent = {};
+
+  /// Async guideline segments drawn in the direction of the x-axis.
+  final List<HorizontalLineSegment> horizontalGuidelines = [];
+
+  /// Async guideline segments drawn in the direction of the y-axis.
+  final List<VerticalLineSegment> verticalGuidelines = [];
 
   int widestRow = -1;
 
@@ -268,10 +278,11 @@ class _FullTimelineFlameChartState
         textColor: textColor,
         data: event,
         onSelected: (dynamic event) => widget.onSelected(event),
+        sectionIndex: section,
       );
       chartNodesByEvent[event] = node;
 
-      rows[row].nodes.add(node);
+      rows[row].addNode(node);
     }
 
     expandRows(rowOffsetForTopPadding);
@@ -325,7 +336,7 @@ class _FullTimelineFlameChartState
         width: 120.0,
       );
 
-      rows[currentRowIndex].nodes.insert(0, currentSectionLabel);
+      rows[currentRowIndex].addNode(currentSectionLabel, index: 0);
 
       // Increment for next section.
       currentRowIndex += groupDisplaySize;
@@ -337,6 +348,246 @@ class _FullTimelineFlameChartState
       row.nodes.sort((a, b) => a.rect.left.compareTo(b.rect.left));
     }
 
-    // TODO(kenz): calculate async guidelines here.
+    _calculateAsyncGuidelines();
   }
+
+  @override
+  bool get hasCustomPaints => true;
+
+  @override
+  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
+    // TODO(kenz): add TimelineGridPainter to this list.
+    return [
+      CustomPaint(
+        painter: AsyncGuidelinePainter(
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          verticalGuidelines: verticalGuidelines,
+          horizontalGuidelines: horizontalGuidelines,
+        ),
+      ),
+    ];
+  }
+
+  // TODO(kenz): fix this. The calculation is wrong because the nodes are not
+  // absolutely positioned like they were in the dart:html app. They are
+  // positioned within their own rows in the flutter app.
+  void _calculateAsyncGuidelines() {
+    // Padding to be added between a subsequent guideline and the child event
+    // it is connecting.
+    const subsequentChildGuidelinePadding = 8.0;
+    assert(rows.isNotEmpty);
+    assert(chartNodesByEvent.isNotEmpty);
+    verticalGuidelines.clear();
+    horizontalGuidelines.clear();
+    for (var row in rows) {
+      for (var node in row.nodes) {
+        if (node.data is AsyncTimelineEvent) {
+          final event = node.data as AsyncTimelineEvent;
+          if (event.children.isNotEmpty) {
+            // Vertical guideline that will connect [node] with its children
+            // nodes. The line will end at [node]'s last child.
+            final verticalGuidelineX = node.rect.left + 1;
+            final verticalGuidelineStartY =
+                _calculateVerticalGuidelineStartY(event);
+            final verticalGuidelineEndY =
+                _calculateHorizontalGuidelineY(event.lowestDisplayChild);
+            verticalGuidelines.add(VerticalLineSegment(
+              Offset(verticalGuidelineX, verticalGuidelineStartY),
+              Offset(verticalGuidelineX, verticalGuidelineEndY),
+            ));
+
+            // Draw the first child since it is guaranteed to be connected to
+            // the main vertical we just created.
+            final firstChild = event.children.first;
+            final horizontalGuidelineEndX =
+                chartNodesByEvent[firstChild].rect.left;
+            final horizontalGuidelineY =
+                _calculateHorizontalGuidelineY(firstChild);
+            horizontalGuidelines.add(HorizontalLineSegment(
+              Offset(verticalGuidelineX, horizontalGuidelineY),
+              Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+            ));
+
+            // Horizontal guidelines connecting each child to the vertical
+            // guideline above.
+            for (int i = 1; i < event.children.length; i++) {
+              double horizontalGuidelineStartX = verticalGuidelineX;
+
+              final child = event.children[i];
+              final childNode = chartNodesByEvent[child];
+
+              // Helper method to generate a vertical guideline for subsequent
+              // children after the first child. We will create a new guideline
+              // if it can be created without intersecting previous children.
+              void generateSubsequentVerticalGuideline(double previousXInRow) {
+                double newVerticalGuidelineX;
+
+                // If [child] started after [event] ended, use the right edge of
+                // event's [node] as the x coordinate for the guideline.
+                // Otherwise, take the minimum of
+                // [subsequentChildGuidelineOffset] and half the distance
+                // between [previousXInRow] and child's left edge.
+                if (event.time.end < child.time.start) {
+                  newVerticalGuidelineX = node.rect.right;
+                } else {
+                  newVerticalGuidelineX = childNode.rect.left -
+                      math.min(
+                        subsequentChildGuidelinePadding,
+                        (childNode.rect.left - previousXInRow) / 2,
+                      );
+                }
+                final newVerticalGuidelineEndY =
+                    _calculateHorizontalGuidelineY(child);
+                verticalGuidelines.add(VerticalLineSegment(
+                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+                ));
+
+                horizontalGuidelineStartX = newVerticalGuidelineX;
+              }
+
+              if (childNode.row.index == node.row.index + 1) {
+                final previousChildIndex =
+                    childNode.row.nodes.indexOf(childNode) - 1;
+                final previousNode = childNode.row.nodes[previousChildIndex];
+                generateSubsequentVerticalGuideline(previousNode.rect.right);
+              }
+
+              final horizontalGuidelineEndX = childNode.rect.left;
+              final horizontalGuidelineY =
+                  _calculateHorizontalGuidelineY(child);
+              horizontalGuidelines.add(HorizontalLineSegment(
+                Offset(horizontalGuidelineStartX, horizontalGuidelineY),
+                Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+              ));
+            }
+          }
+        }
+      }
+    }
+
+    // Sort the lists in ascending order based on their cross axis coordinate.
+    verticalGuidelines.sort();
+    horizontalGuidelines.sort();
+  }
+
+  int _spacerRowsBeforeEvent(TimelineEvent event) {
+    // Add 1 to account for the first spacer row before section 0 begins.
+    return chartNodesByEvent[event].sectionIndex + 1;
+  }
+
+  double _calculateVerticalGuidelineStartY(TimelineEvent event) {
+    final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
+    return spacerRowsBeforeEvent * sectionSpacing +
+        (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
+            rowHeightWithPadding +
+        rowHeight;
+  }
+
+  double _calculateHorizontalGuidelineY(TimelineEvent event) {
+    final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
+    return spacerRowsBeforeEvent * sectionSpacing +
+        (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
+            rowHeightWithPadding +
+        rowHeight / 2;
+  }
+}
+
+class AsyncGuidelinePainter extends CustomPainter {
+  AsyncGuidelinePainter({
+    @required this.zoom,
+    @required this.constraints,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
+    @required this.verticalGuidelines,
+    @required this.horizontalGuidelines,
+  });
+
+  final double zoom;
+
+  final BoxConstraints constraints;
+
+  final double verticalScrollOffset;
+
+  final double horizontalScrollOffset;
+
+  List<VerticalLineSegment> verticalGuidelines;
+
+  List<HorizontalLineSegment> horizontalGuidelines;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect visible = Rect.fromLTWH(
+      horizontalScrollOffset,
+      verticalScrollOffset,
+      constraints.maxWidth,
+      constraints.maxHeight,
+    );
+
+    final firstVerticalGuidelineIndex = lowerBound(
+      verticalGuidelines,
+      VerticalLineSegment(visible.topLeft, visible.bottomLeft),
+    );
+    final firstHorizontalGuidelineIndex = lowerBound(
+      horizontalGuidelines,
+      HorizontalLineSegment(visible.topLeft, visible.topRight),
+    );
+
+    if (firstVerticalGuidelineIndex != -1) {
+      _paintGuidelines(
+        canvas,
+        visible,
+        verticalGuidelines,
+        firstVerticalGuidelineIndex,
+      );
+    }
+
+    if (firstHorizontalGuidelineIndex != -1) {
+      _paintGuidelines(
+        canvas,
+        visible,
+        horizontalGuidelines,
+        firstHorizontalGuidelineIndex,
+      );
+    }
+  }
+
+  void _paintGuidelines(
+    Canvas canvas,
+    Rect visible,
+    List<LineSegment> guidelines,
+    int firstLineIndex,
+  ) {
+    for (int i = firstLineIndex; i < guidelines.length; i++) {
+      final line = guidelines[i];
+
+      // We are out of range on the cross axis.
+      if (!line.crossAxisIntersects(visible)) break;
+
+      // Only paint lines that intersect [visible] along both axes.
+      if (line.intersects(visible)) {
+        canvas.drawLine(
+          Offset(
+            (line.start.dx - horizontalScrollOffset)
+                .clamp(0.0, constraints.maxWidth),
+            (line.start.dy - verticalScrollOffset)
+                .clamp(0.0, constraints.maxHeight),
+          ),
+          Offset(
+            (line.end.dx - horizontalScrollOffset)
+                .clamp(0.0, constraints.maxWidth),
+            (line.end.dy - verticalScrollOffset)
+                .clamp(0.0, constraints.maxHeight),
+          ),
+          Paint()..color = treeGuidelineColor,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(AsyncGuidelinePainter oldDelegate) => true;
 }
