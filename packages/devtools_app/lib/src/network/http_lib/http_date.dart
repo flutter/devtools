@@ -18,11 +18,6 @@
 
 part of http;
 
-// TODO(bkonyi): implement
-class HttpException {
-  HttpException([message]);
-}
-
 /**
  * Utility functions for working with dates with HTTP specific date
  * formats.

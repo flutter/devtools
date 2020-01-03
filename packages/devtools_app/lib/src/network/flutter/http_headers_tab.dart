@@ -7,6 +7,8 @@ import 'package:recase/recase.dart';
 
 import '../http_request_data.dart';
 
+/// This widget displays general HTTP request / response information that is
+/// contained in the headers, in addition to the standard connection information.
 class HttpRequestHeadersTab extends StatelessWidget {
   const HttpRequestHeadersTab(this.data);
 
@@ -20,65 +22,75 @@ class HttpRequestHeadersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        _buildTile(
-          'General',
-          <Widget>[
-            for (final entry in data.general.entries)
-              _buildRow(
-                ReCase(entry.key).titleCase,
-                entry.value.toString(),
-              ),
-          ],
-        ),
-        _buildTile(
-          'Response Headers',
-          <Widget>[
-            if (data.responseHeaders != null)
-              for (final entry in data.responseHeaders.entries)
+    return LayoutBuilder(builder: (context, constraints) {
+      return ListView(
+        children: <Widget>[
+          _buildTile(
+            'General',
+            <Widget>[
+              for (final entry in data.general.entries)
                 _buildRow(
-                  entry.key,
+                  ReCase(entry.key).titleCase,
                   entry.value.toString(),
+                  constraints,
                 ),
-          ],
-        ),
-        _buildTile(
-          'Request Headers',
-          <Widget>[
-            if (data.requestHeaders != null)
-              for (final entry in data.requestHeaders.entries)
-                _buildRow(
-                  entry.key,
-                  entry.value.toString(),
-                )
-          ],
-        )
-      ],
-    );
+            ],
+          ),
+          _buildTile(
+            'Response Headers',
+            <Widget>[
+              if (data.responseHeaders != null)
+                for (final entry in data.responseHeaders.entries)
+                  _buildRow(
+                    entry.key,
+                    entry.value.toString(),
+                    constraints,
+                  ),
+            ],
+          ),
+          _buildTile(
+            'Request Headers',
+            <Widget>[
+              if (data.requestHeaders != null)
+                for (final entry in data.requestHeaders.entries)
+                  _buildRow(
+                    entry.key,
+                    entry.value.toString(),
+                    constraints,
+                  )
+            ],
+          )
+        ],
+      );
+    });
   }
 
-  Widget _buildRow(String key, dynamic value) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 30,
-        bottom: 15,
-      ),
-      child: Column(children: [
-        Row(
-          children: <Widget>[
-            Text(
-              '$key: ',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(value),
-          ],
+  Widget _buildRow(String key, dynamic value, constraints) => Container(
+        width: constraints.minWidth,
+        padding: const EdgeInsets.only(
+          left: 30,
+          bottom: 15,
         ),
-      ]),
-    );
-  }
+        child: Column(children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '$key: ',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Expanded(
+                  child: Text(
+                value,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 5,
+              )),
+            ],
+          ),
+        ]),
+      );
 
   final HttpRequestData data;
 }

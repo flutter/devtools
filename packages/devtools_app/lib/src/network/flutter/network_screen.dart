@@ -48,16 +48,17 @@ class HttpRequestDataTableSource extends DataTableSource {
     notifyListeners();
   }
 
-  TextStyle _getStatusColor(int status) {
+  TextStyle _getStatusColor(String status) {
     if (status == null) {
       return const TextStyle();
     }
-    if (status >= 200 && status < 300) {
-      return const TextStyle(color: Colors.greenAccent);
-    } else if (status >= 300 && status < 500) {
-      return const TextStyle(color: Colors.yellowAccent);
-    } else if (status >= 500) {
+    final statusInt = int.tryParse(status);
+    if (statusInt == null || statusInt >= 400) {
       return const TextStyle(color: Colors.redAccent);
+    } else if (statusInt >= 100 && statusInt < 300) {
+      return const TextStyle(color: Colors.greenAccent);
+    } else if (statusInt >= 300 && statusInt < 400) {
+      return const TextStyle(color: Colors.yellowAccent);
     }
     return const TextStyle();
   }
@@ -165,8 +166,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
 
   @override
   Widget build(BuildContext context) {
+    networkController.initialize();
     const double minIncludeTextWidth = 600;
-
     return ValueListenableBuilder<HttpRequests>(
       valueListenable: networkController.requestsNotifier,
       builder: (context, data, widget) {

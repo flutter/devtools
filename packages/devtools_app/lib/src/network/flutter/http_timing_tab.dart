@@ -6,27 +6,17 @@ import 'package:flutter/material.dart';
 
 import '../http_request_data.dart';
 
+/// A [Widget] which displays timing information for an HTTP request.
 class HttpRequestTimingTab extends StatelessWidget {
   const HttpRequestTimingTab(this.data);
-
-  ExpansionTile _buildTile(String title, List<Widget> children) =>
-      ExpansionTile(
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        children: children,
-        initiallyExpanded: true,
-      );
 
   @override
   Widget build(BuildContext context) {
     final events = <Widget>[];
-    int lastTime = data.requestTimeMicros;
     for (final instant in data.instantEvents) {
-      final instantTime = data.getTimelineMicrosecondsSinceEpoch(instant);
-      final timeDiffMillis = (instantTime - lastTime) / 1000;
-      lastTime = instantTime;
+      final timeDiffMillis = instant.timeDiffMs;
       events.add(_buildTile(
-          instant['name'], [_buildRow('Duration', '$timeDiffMillis ms')]));
+          instant.name, [_buildRow('Duration', '$timeDiffMillis ms')]));
     }
     events.add(
         _buildTile('Total', [_buildRow('Duration', '${data.durationMs} ms')]));
@@ -39,6 +29,14 @@ class HttpRequestTimingTab extends StatelessWidget {
     );
   }
 
+  ExpansionTile _buildTile(String title, List<Widget> children) =>
+      ExpansionTile(
+        title: Text(title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        children: children,
+        initiallyExpanded: true,
+      );
+      
   Widget _buildRow(String key, dynamic value) {
     return Container(
       padding: const EdgeInsets.only(

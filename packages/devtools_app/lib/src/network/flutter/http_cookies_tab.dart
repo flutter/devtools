@@ -7,11 +7,18 @@ import 'package:flutter/material.dart';
 import '../http.dart';
 import '../http_request_data.dart';
 
+/// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesTab extends StatelessWidget {
   const HttpRequestCookiesTab(this.data);
 
   DataColumn _buildColumn(String title, {bool numeric = false}) => DataColumn(
-      label: Center(child: Text(title, style: _headerTextStyle)),
+      label: Expanded(
+        child: Text(
+          title,
+          style: _headerTextStyle,
+          overflow: TextOverflow.fade,
+        ),
+      ),
       numeric: numeric);
 
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) =>
@@ -50,27 +57,30 @@ class HttpRequestCookiesTab extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 24.0),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: ConstrainedBox(
-              constraints: requestCookies
-                  ? const BoxConstraints()
-                  : BoxConstraints(minWidth: constraints.minWidth),
-              child: DataTable(
-                columns: [
-                  _buildColumn('Name'),
-                  _buildColumn('Value'),
-                  if (!requestCookies) ...[
-                    _buildColumn('Domain'),
-                    _buildColumn('Path'),
-                    _buildColumn('Expires / Max Age'),
-                    _buildColumn('Size', numeric: true),
-                    _buildColumn('HttpOnly'),
-                    _buildColumn('Secure'),
-                  ]
-                ],
-                rows: [
-                  for (int i = 0; i < cookies.length; ++i)
-                    _buildRow(i, cookies[i], requestCookies: requestCookies)
-                ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: requestCookies
+                    ? const BoxConstraints()
+                    : BoxConstraints(minWidth: constraints.minWidth),
+                child: DataTable(
+                  columns: [
+                    _buildColumn('Name'),
+                    _buildColumn('Value'),
+                    if (!requestCookies) ...[
+                      _buildColumn('Domain'),
+                      _buildColumn('Path'),
+                      _buildColumn('Expires / Max Age'),
+                      _buildColumn('Size', numeric: true),
+                      _buildColumn('HttpOnly'),
+                      _buildColumn('Secure'),
+                    ]
+                  ],
+                  rows: [
+                    for (int i = 0; i < cookies.length; ++i)
+                      _buildRow(i, cookies[i], requestCookies: requestCookies)
+                  ],
+                ),
               ),
             ),
           ),

@@ -6,5 +6,6 @@
 
 library http;
 
-part 'http_cookies.dart';
-part 'http_date.dart';
+part 'http_lib/http_cookies.dart';
+part 'http_lib/http_date.dart';
+part 'http_lib/http_exception.dart';

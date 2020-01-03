@@ -5,10 +5,11 @@
 import 'package:flutter/material.dart';
 
 import '../http_request_data.dart';
+import 'http_cookies_tab.dart';
 import 'http_headers_tab.dart';
 import 'http_timing_tab.dart';
-import 'network_cookies_tab.dart';
 
+/// A [Widget] which displays information about an HTTP request.
 class HttpRequestInspector extends StatelessWidget {
   const HttpRequestInspector(this.data);
 

@@ -21,10 +21,10 @@ class NetworkController {
 
   // The timeline timestamps are relative to when the VM started. This value is
   // equal to `DateTime.now().microsecondsSinceEpoch - _profileStartMicros` when
-  // recording is started is used to calculate the correct time for timeline
-  // events.
+  // recording is started is used to calculate the correct wall-time for
+  // timeline events.
   int _timelineMicrosOffset;
-  int _profileStartMicros = 0;
+  int _lastProfileRefreshMicros = 0;
 
   void _processHttpTimelineEvents(Timeline timeline) {
     final currentValues = _httpRequestsNotifier.value.requests;
@@ -38,6 +38,8 @@ class NetworkController {
       if (id == null) {
         continue;
       }
+      // The start event for HTTP contains a filter key which we can use.
+      // Note: only HTTP client requests are currently logged to the timeline.
       if ((!json['args'].containsKey('filterKey') ||
               json['args']['filterKey'] != 'HTTP/client') &&
           !outstandingRequestsMap.containsKey(id)) {
@@ -46,14 +48,12 @@ class NetworkController {
       httpEventIds.add(id);
     }
 
-    print('Event count: ${httpEventIds.length}');
-
     // Group all HTTP timeline events with the same ID.
     final Map<String, List<Map>> httpEvents = {};
     for (final event in events) {
       final json = event.toJson();
       final id = json['id'];
-      if (json['id'] == null) {
+      if (id == null) {
         continue;
       }
       if (httpEventIds.contains(id)) {
@@ -67,17 +67,17 @@ class NetworkController {
     // Build our list of network requests from the collected events.
     for (final request in httpEvents.entries) {
       final requestId = request.key;
-      final requestData =
-          HttpRequestData.fromTimeline(_timelineMicrosOffset, request.value);
+      final requestData = HttpRequestData.fromTimeline(
+          _timelineMicrosOffset, request.value);
 
       // If there's a new event which matches a request that was previously in
       // flight, update the associated HttpRequestData.
-      if (outstandingRequestsMap.containsKey(requestId) &&
-          !requestData.inProgress) {
-        // TODO(bkonyi): don't assume this is an endEvent
+      if (outstandingRequestsMap.containsKey(requestId)) {
         final outstandingRequest = outstandingRequestsMap[requestId];
-        outstandingRequest.endEvent = requestData.endEvent;
-        outstandingRequestsMap.remove(requestId);
+        outstandingRequest.merge(requestData);
+        if (!outstandingRequest.inProgress) {
+          outstandingRequestsMap.remove(requestId);
+        }
         continue;
       } else if (requestData.inProgress) {
         outstandingRequestsMap.putIfAbsent(requestId, () => requestData);
@@ -85,10 +85,8 @@ class NetworkController {
       currentValues.add(requestData);
     }
     // Trigger refresh.
-    _httpRequestsNotifier.value.requests = currentValues;
-    // TODO(bkonyi): figure out better way to trigger notification.
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-    _httpRequestsNotifier.notifyListeners();
+    _httpRequestsNotifier.value = HttpRequests(
+        requests: currentValues, outstanding: outstandingRequestsMap);
   }
 
   void _startPolling() {
@@ -100,36 +98,107 @@ class NetworkController {
     });
   }
 
-  // TODO(bkonyi): get state at startup
+  Future<void> _forEachIsolate(Future Function(IsolateRef) callback) async {
+    final vm = await serviceManager.service.getVM();
+    final futures = <Future>[];
+    for (final isolate in vm.isolates) {
+      futures.add(callback(isolate));
+    }
+    await Future.wait(futures);
+  }
+
   Future<void> _setHttpTimelineRecording(bool state) async {
+    await _forEachIsolate((isolate) async {
+      final future = serviceManager.service
+          .setHttpEnableTimelineLogging(isolate.id, state);
+      // If the isolate is paused the request above will never complete.
+      await Future.any([
+        future,
+        Future.delayed(const Duration(milliseconds: 500)),
+      ]);
+    });
     _httpRecordingNotifier.value = state;
   }
 
+  /// Force refreshes the HTTP requests logged to the timeline.
   Future<void> refreshRequests() async {
     final timestamp = await serviceManager.service.getVMTimelineMicros();
     final timeline = await serviceManager.service.getVMTimeline(
-        timeOriginMicros: _profileStartMicros,
-        timeExtentMicros: timestamp.timestamp - _profileStartMicros);
-    _profileStartMicros = timestamp.timestamp;
+        timeOriginMicros: _lastProfileRefreshMicros,
+        timeExtentMicros: timestamp.timestamp - _lastProfileRefreshMicros);
+    _lastProfileRefreshMicros = timestamp.timestamp;
     _processHttpTimelineEvents(timeline);
   }
 
-  Future<void> startRecording() async {
+  /// Enables HTTP request recording on all isolates and starts polling.
+  /// 
+  /// If `alreadyRecording` is true, the last refresh time will be assumed to
+  /// be the beginning of the process (time 0).
+  Future<void> startRecording({
+    bool alreadyRecording = false,
+  }) async {
+    // Set the current timeline time as the time of the last refresh.
     final timestamp = await serviceManager.service.getVMTimelineMicros();
-    _profileStartMicros = timestamp.timestamp;
+
+    if (!alreadyRecording) {
+      // Only include HTTP requests issued after the current time.
+      _lastProfileRefreshMicros = timestamp.timestamp;
+    }
+
+    // Determine the offset that we'll use to calculate the approximate
+    // wall-time a request was made. This won't be 100% accurate, but it should
+    // easily be within a second.
     _timelineMicrosOffset =
-        DateTime.now().microsecondsSinceEpoch - _profileStartMicros;
+        DateTime.now().microsecondsSinceEpoch - timestamp.timestamp;
+
+    await resumeRecording();
+  }
+
+  /// Pauses the output of HTTP request information to the timeline.
+  /// 
+  /// May result in some incomplete timeline events.
+  Future<void> pauseRecording() async => await _setHttpTimelineRecording(false);
+
+  /// Resumes recording without resetting the last refresh timestamp.
+  Future<void> resumeRecording() async {
     await _setHttpTimelineRecording(true);
     _startPolling();
   }
 
-  Future<void> pauseRecording() async {
-    await _setHttpTimelineRecording(false);
+  /// Checks to see if HTTP requests are currently being output. If so, recording
+  /// is automatically started upon initialization.
+  Future<void> initialize() async {
+    bool enabled = false;
+    await _forEachIsolate(
+      (isolate) async {
+        final future =
+            serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
+        // The above call won't complete if the isolate is paused.
+        final state = await Future.any<HttpTimelineLoggingState>([
+          future,
+          Future.delayed(const Duration(milliseconds: 500), () => null),
+        ]);
+        if (state != null && state.enabled) {
+          enabled = true;
+        }
+      },
+    );
+    if (enabled && !_httpRecordingNotifier.value) {
+      await startRecording(alreadyRecording: true);
+      _httpRecordingNotifier.value = enabled;
+    } else if (!enabled && _httpRecordingNotifier.value) {
+      // TODO(bkonyi): do we want to pause recording if no isolates are currently
+      // writing timeline events?
+      await pauseRecording();
+      _httpRecordingNotifier.value = enabled;
+    }
   }
 
+  /// Clears the previously collected HTTP timeline events and resets the last
+  /// refresh timestamp to the current time.
   Future<void> clear() async {
     final timestamp = await serviceManager.service.getVMTimelineMicros();
-    _profileStartMicros = timestamp.timestamp;
-    _httpRequestsNotifier.value.clear();
+    _lastProfileRefreshMicros = timestamp.timestamp;
+    _httpRequestsNotifier.value = HttpRequests();
   }
 }

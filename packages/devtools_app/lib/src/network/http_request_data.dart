@@ -4,27 +4,48 @@
 
 import 'http.dart';
 
-extension HttpCookie on Cookie {
-  static List<Cookie> parseCookies(List cookies) {
-    return [for (final cookie in cookies) Cookie.fromSetCookieValue(cookie)];
-  }
-}
-
-// TODO(bkonyi): handle in-progress events which are completed while we're paused.
+/// Contains all state relevant to completed and in-progress HTTP requests.
 class HttpRequests {
-  List<HttpRequestData> requests = [];
-  final Map<String, HttpRequestData> outstanding = {};
+  HttpRequests({this.requests, this.outstanding}) {
+    requests ??= [];
+    outstanding ??= {};
+  }
 
   void clear() {
     requests.clear();
     outstanding.clear();
   }
+
+  List<HttpRequestData> requests;
+
+  /// A mapping of timeline IDs to instances of HttpRequestData which are
+  /// currently in-progress.
+  Map<String, HttpRequestData> outstanding;
 }
 
-class HttpRequestData {
-  HttpRequestData._(this._timelineMicrosBase, this._startEvent, this.endEvent,
-      this._instantEvents);
+/// Used to represent an instant event emitted during an HTTP request.
+class HttpInstantEvent {
+  HttpInstantEvent._(this._rawEvent) : name = _rawEvent['name'];
 
+  final Map _rawEvent;
+  final String name;
+
+  /// The amount of time since the last instant event completed.
+  double get timeDiffMs => _timeDiffMs;
+  
+  // This is set from within HttpRequestData.
+  double _timeDiffMs;
+}
+
+/// An abstraction of an HTTP request made through dart:io.
+class HttpRequestData {
+  HttpRequestData._(this._timelineMicrosBase, this._startEvent, this._endEvent);
+
+  /// Build an instance from timeline events.
+  /// 
+  /// `timelineMicrosBase` is the offset used to determine the wall-time of a
+  /// timeline event. `events` is a list of Chrome trace format timeline
+  /// events.
   factory HttpRequestData.fromTimeline(
       int timelineMicrosBase, List<Map> events) {
     Map startEvent;
@@ -44,95 +65,80 @@ class HttpRequestData {
         assert(false, 'Unexpected event type');
       }
     }
-
-    return HttpRequestData._(
-        timelineMicrosBase, startEvent, endEvent, instantEvents);
+    final data = HttpRequestData._(timelineMicrosBase, startEvent, endEvent);
+    data._addInstantEvents(
+        [for (final instant in instantEvents) HttpInstantEvent._(instant)]);
+    return data;
   }
 
+  /// Merges the information from another [HttpRequestData] into this instance.
+  void merge(HttpRequestData data) {
+    if (data.instantEvents.isNotEmpty) {
+      _addInstantEvents(data.instantEvents);
+    }
+    if (data._endEvent != null) {
+      _endEvent = data._endEvent;
+    }
+  }
+
+  // Timeline event helpers.
   static bool _isStartEvent(Map event) => event['ph'] == 'b';
   static bool _isEndEvent(Map event) => event['ph'] == 'e';
   static bool _isInstantEvent(Map event) => event['ph'] == 'n';
 
-  int getTimelineMicrosecondsSinceEpoch(Map event) {
+  static List<Cookie> _parseCookies(List cookies) {
+    return [for (final cookie in cookies) Cookie.fromSetCookieValue(cookie)];
+  }
+
+  void _addInstantEvents(List<HttpInstantEvent> events) {
+    _instantEvents.addAll(events);
+
+    // This event is the second half of an outstanding request which will be
+    // merged into a single HttpRequestData elsewhere. We'll calculate the
+    // instant event times then since we'll have _startEvent's timestamp.
+    if (_startEvent == null) {
+      return;
+    }
+    _recalculateInstantEventTimes();
+  }
+
+  void _recalculateInstantEventTimes() {
+    assert(_startEvent != null);
+    int lastTime = _requestTimeMicros;
+    for (final instant in instantEvents) {
+      final instantTime = _getTimelineMicrosecondsSinceEpoch(instant._rawEvent);
+      instant._timeDiffMs = (instantTime - lastTime) / 1000;
+      lastTime = instantTime;
+    }
+  }
+
+  int _getTimelineMicrosecondsSinceEpoch(Map event) {
     assert(event.containsKey('ts'));
     return _timelineMicrosBase + event['ts'];
   }
 
-  bool get hasCookies =>
-      requestCookies.isNotEmpty || responseCookies.isNotEmpty;
-
-  List<Cookie> get requestCookies {
-    final headers = requestHeaders;
-    if (headers == null) {
-      return [];
-    }
-    return HttpCookie.parseCookies(headers['cookie'] ?? []);
-  }
-
-  List<Cookie> get responseCookies {
-    final headers = responseHeaders;
-    if (headers == null) {
-      return [];
-    }
-    return HttpCookie.parseCookies(headers['set-cookie'] ?? []);
-  }
-
-  bool get inProgress => endEvent == null;
-
-  Uri get uri {
-    assert(_startEvent['args'].containsKey('uri'));
-    return Uri.parse(_startEvent['args']['uri']);
-  }
-
-  int get status {
-    int statusCode;
-    if (endEvent != null) {
-      final endArgs = endEvent['args'];
-      if (endArgs.containsKey('error')) {
-        // TODO(bkonyi): get proper status codes from error. Assume connection
-        // refused (502) for now.
-        statusCode = 502;
-      } else {
-        statusCode = endArgs['statusCode'];
-      }
-    }
-    return statusCode;
-  }
-
+  /// The duration of the HTTP request, in milliseconds.
   double get durationMs {
-    if (endEvent == null) {
+    if (_endEvent == null) {
       return null;
     }
     // Timestamps are in microseconds
-    double millis = (endEvent['ts'] - _startEvent['ts']) / 1000;
+    double millis = (_endEvent['ts'] - _startEvent['ts']) / 1000;
     if (millis >= 1.0) {
       millis = millis.truncateToDouble();
     }
     return millis;
   }
 
-  int get requestTimeMicros {
-    assert(_startEvent != null);
-    return getTimelineMicrosecondsSinceEpoch(_startEvent);
-  }
+  /// True if either the request or response contained cookies.
+  bool get hasCookies =>
+      requestCookies.isNotEmpty || responseCookies.isNotEmpty;
 
-  DateTime get requestTime {
-    assert(_startEvent != null);
-    return DateTime.fromMicrosecondsSinceEpoch(
-        getTimelineMicrosecondsSinceEpoch(_startEvent));
-  }
-
-  String get name => uri.toString();
-
-  String get method {
-    assert(_startEvent['args'].containsKey('method'));
-    return _startEvent['args']['method'];
-  }
-
-  Map get general {
+  /// A map of general information associated with an HTTP request.
+  Map<String, dynamic> get general {
     final copy = Map.from(_startEvent['args']);
-    if (endEvent != null) {
-      copy.addAll(endEvent['args']);
+    if (_endEvent != null) {
+      copy.addAll(_endEvent['args']);
     }
     copy.remove('requestHeaders');
     copy.remove('responseHeaders');
@@ -140,26 +146,101 @@ class HttpRequestData {
     return copy;
   }
 
-  Map get requestHeaders {
-    if (endEvent == null) {
-      return null;
-    }
-    return endEvent['args']['requestHeaders'];
+  /// True if the HTTP request hasn't completed yet, determined by the lack of
+  /// an end event.
+  bool get inProgress => _endEvent == null;
+
+  /// All instant events logged to the timeline for this HTTP request.
+  List<HttpInstantEvent> get instantEvents => _instantEvents;
+
+  /// The HTTP methods associated with this request.
+  String get method {
+    assert(_startEvent['args'].containsKey('method'));
+    return _startEvent['args']['method'];
   }
 
-  Map get responseHeaders {
-    if (endEvent == null) {
-      return null;
+  /// The name of the request (currently the URI).
+  String get name => uri.toString();
+
+  /// A list of all cookies contained within the request headers.
+  List<Cookie> get requestCookies {
+    final headers = requestHeaders;
+    if (headers == null) {
+      return [];
     }
-    return endEvent['args']['responseHeaders'];
+    return _parseCookies(headers['cookie'] ?? []);
   }
 
-  List<Map> get instantEvents => _instantEvents;
+  /// The request headers for the HTTP request.
+  Map<String, dynamic> get requestHeaders {
+    if (_endEvent == null) {
+      return null;
+    }
+    return _endEvent['args']['requestHeaders'];
+  }
+
+  /// The time the HTTP request was issued.
+  DateTime get requestTime {
+    assert(_startEvent != null);
+    return DateTime.fromMicrosecondsSinceEpoch(_requestTimeMicros);
+  }
+
+  int get _requestTimeMicros {
+    assert(_startEvent != null);
+    return _getTimelineMicrosecondsSinceEpoch(_startEvent);
+  }
+
+  /// A list of all cookies contained within the response headers.
+  List<Cookie> get responseCookies {
+    final headers = responseHeaders;
+    if (headers == null) {
+      return [];
+    }
+    return _parseCookies(headers['set-cookie'] ?? []);
+  }
+
+  /// The response headers for the HTTP request.
+  Map<String, dynamic> get responseHeaders {
+    if (_endEvent == null) {
+      return null;
+    }
+    return _endEvent['args']['responseHeaders'];
+  }
+
+  /// A string representing the status of the request.
+  /// 
+  /// If the request completed, this will be an HTTP status code. If an error
+  /// was encountered, this will return 'Error'.
+  String get status {
+    String statusCode;
+    if (_endEvent != null) {
+      final endArgs = _endEvent['args'];
+      if (endArgs.containsKey('error')) {
+        // This case occurs when an exception has been thrown, so there's no
+        // status code to associate with the request.
+        statusCode = 'Error';
+      } else {
+        statusCode = endArgs['statusCode'].toString();
+      }
+    }
+    return statusCode;
+  }
+
+  /// The address the HTTP request was issued to.
+  Uri get uri {
+    assert(_startEvent['args'].containsKey('uri'));
+    return Uri.parse(_startEvent['args']['uri']);
+  }
 
   final int _timelineMicrosBase;
   final Map _startEvent;
-  Map endEvent;
-  final List<Map> _instantEvents;
+  Map _endEvent;
 
+  // Do not add to this list directly! Call `_addInstantEvents` which is
+  // responsible for calculating the time offsets of each event.
+  final List<HttpInstantEvent> _instantEvents = [];
+
+  // State used to determine whether this request is currently selected in a
+  // table.
   bool selected = false;
 }
