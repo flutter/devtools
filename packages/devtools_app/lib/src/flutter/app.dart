@@ -20,7 +20,7 @@ import 'initializer.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const showNetworkPage = true;
+const showNetworkPage = false;
 
 /// Top-level configuration for the app.
 @immutable
