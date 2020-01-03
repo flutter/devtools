@@ -38,24 +38,11 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: showController,
-      builder: (context, child) {
-        // TODO(jacobr): we aren't actually triggering this animation because
-        // rows are currently only added to the tree when they are visible.
-        // It isn't 100% clear this is the right animation due to show for large
-        // tree expands due to https://github.com/flutter/devtools/issues/1227.
-        // A better animation for the inspector case would likely be one that
-        // "slides" the subtree into view instead of growing each subtree node
-        // on its own as that would be more efficient.
-        return SizedBox(
-          height: rowHeight * showAnimation.value,
-          child: Material(child: child),
-        );
-      },
+    return SizedBox(
+      height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
-        expandAnimation: expandAnimation,
+        expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
           setExpanded(!isExpanded);
@@ -475,13 +462,13 @@ class InspectorRowContent extends StatelessWidget {
     @required this.row,
     @required this.controller,
     @required this.onToggle,
-    @required this.expandAnimation,
+    @required this.expandArrowAnimation,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
-  final Animation<double> expandAnimation;
+  final Animation<double> expandArrowAnimation;
 
   @override
   Widget build(BuildContext context) {
@@ -512,7 +499,7 @@ class InspectorRowContent extends StatelessWidget {
                   ? InkWell(
                       onTap: onToggle,
                       child: RotationTransition(
-                        turns: expandAnimation,
+                        turns: expandArrowAnimation,
                         child: const Icon(
                           Icons.expand_more,
                           size: 16.0,
