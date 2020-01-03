@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -43,10 +41,6 @@ class DevToolsAppState extends State<DevToolsApp> {
   @override
   void initState() {
     super.initState();
-
-    Service.getInfo().then((info) {
-      print(info.serverUri);
-    });
     theme = themeFor(isDarkTheme: devtools_theme.isDarkTheme);
   }
 
