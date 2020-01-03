@@ -100,6 +100,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       focusNode: focusNode,
       onKey: (event) => _handleKeyEvent(event),
       child: Listener(
+        behavior: HitTestBehavior.opaque,
         onPointerSignal: (event) => _handlePointerSignal(event),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -115,7 +116,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
                   selected: widget.selected,
                 );
               },
-              scrollDirection: Axis.vertical,
             );
           },
         ),
