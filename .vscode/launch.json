@@ -11,7 +11,7 @@
 			// directory. I can get it when running vscode on packages/devtools_app.
 			"args": [
 				"-d",
-				"macos"
+				"chrome"
 			]
 		},
 		{
