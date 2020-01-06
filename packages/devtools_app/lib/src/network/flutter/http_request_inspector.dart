@@ -5,9 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../http_request_data.dart';
-import 'http_cookies_tab.dart';
-import 'http_headers_tab.dart';
-import 'http_timing_tab.dart';
+import 'http_request_inspector_views.dart';
 
 /// A [Widget] which displays information about an HTTP request.
 class HttpRequestInspector extends StatelessWidget {
@@ -32,6 +30,34 @@ class HttpRequestInspector extends StatelessWidget {
       _buildTab('Timing'),
       if (hasCookies) _buildTab('Cookies'),
     ];
+    final tabbedContent = DefaultTabController(
+      length: tabs.length,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Flexible(
+                child: Container(
+                  child: TabBar(
+                    tabs: tabs,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                HttpRequestHeadersView(data),
+                HttpRequestTimingView(data),
+                if (hasCookies) HttpRequestCookiesView(data),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -47,33 +73,7 @@ class HttpRequestInspector extends StatelessWidget {
                 ),
               ),
             )
-          : DefaultTabController(
-              length: tabs.length,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Container(
-                          child: TabBar(
-                            tabs: tabs,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        HttpRequestHeadersView(data),
-                        HttpRequestTimingView(data),
-                        if (hasCookies) HttpRequestCookiesView(data),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          : tabbedContent,
     );
   }
 }

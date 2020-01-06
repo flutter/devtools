@@ -3,9 +3,106 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:recase/recase.dart';
 
 import '../http.dart';
 import '../http_request_data.dart';
+
+/// This widget displays general HTTP request / response information that is
+/// contained in the headers, in addition to the standard connection information.
+class HttpRequestHeadersView extends StatelessWidget {
+  const HttpRequestHeadersView(this.data);
+
+  final HttpRequestData data;
+
+  ExpansionTile _buildTile(String title, List<Widget> children) {
+    return ExpansionTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      children: children,
+      initiallyExpanded: true,
+    );
+  }
+
+  Widget _buildRow(String key, dynamic value, constraints) {
+    return Container(
+      width: constraints.minWidth,
+      padding: const EdgeInsets.only(
+        left: 30,
+        bottom: 15,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$key: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Expanded(
+              child: Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 5,
+          )),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView(
+          children: [
+            _buildTile(
+              'General',
+              [
+                for (final entry in data.general.entries)
+                  _buildRow(
+                    ReCase(entry.key).titleCase,
+                    entry.value.toString(),
+                    constraints,
+                  ),
+              ],
+            ),
+            _buildTile(
+              'Response Headers',
+              [
+                if (data.responseHeaders != null)
+                  for (final entry in data.responseHeaders.entries)
+                    _buildRow(
+                      entry.key,
+                      entry.value.toString(),
+                      constraints,
+                    ),
+              ],
+            ),
+            _buildTile(
+              'Request Headers',
+              [
+                if (data.requestHeaders != null)
+                  for (final entry in data.requestHeaders.entries)
+                    _buildRow(
+                      entry.key,
+                      entry.value.toString(),
+                      constraints,
+                    ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+}
 
 /// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesView extends StatelessWidget {
@@ -160,5 +257,84 @@ class HttpRequestCookiesView extends StatelessWidget {
               },
             ),
           );
+  }
+}
+
+/// A [Widget] which displays timing information for an HTTP request.
+class HttpRequestTimingView extends StatelessWidget {
+  const HttpRequestTimingView(this.data);
+
+  final HttpRequestData data;
+
+  ExpansionTile _buildTile(String title, List<Widget> children) {
+    return ExpansionTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      children: children,
+      initiallyExpanded: true,
+    );
+  }
+
+  Widget _buildRow(String key, dynamic value) {
+    return Container(
+      padding: const EdgeInsets.only(
+        left: 30,
+        bottom: 15,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                '$key: ',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(value),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final events = <Widget>[];
+    for (final instant in data.instantEvents) {
+      final timeDiffMillis = instant.timeDiffMs;
+      events.add(
+        _buildTile(
+          instant.name,
+          [
+            _buildRow('Duration', '$timeDiffMillis ms'),
+          ],
+        ),
+      );
+    }
+    events.add(
+      _buildTile(
+        'Total',
+        [
+          _buildRow('Duration', '${data.durationMs} ms'),
+        ],
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 14.0,
+        top: 18.0,
+      ),
+      child: ListView(
+        children: events,
+      ),
+    );
   }
 }
