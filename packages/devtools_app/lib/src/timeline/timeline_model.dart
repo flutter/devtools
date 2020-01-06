@@ -257,7 +257,7 @@ class FullTimelineEventGroup {
 
   void _addEventAtDisplayRow(TimelineEvent event, {@required int row}) {
     if (row + event.displayDepth >= eventsByRow.length) {
-      for (int i = eventsByRow.length; i <= row + event.displayDepth; i++) {
+      for (int i = eventsByRow.length; i < row + event.displayDepth; i++) {
         eventsByRow.add([]);
         lastEventsByRow.add(null);
       }
