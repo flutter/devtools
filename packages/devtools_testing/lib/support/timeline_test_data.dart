@@ -553,7 +553,8 @@ final asyncEventC2 = AsyncTimelineEvent(asyncStartC2Trace)
 final asyncEventD = AsyncTimelineEvent(asyncStartDTrace)
   ..addEndEvent(asyncEndDTrace);
 
-final asyncEventWithDeepOverlap = AsyncTimelineEvent(asyncStartTraceEventWithDeepOverlap)
+final asyncEventWithDeepOverlap = AsyncTimelineEvent(
+    asyncStartTraceEventWithDeepOverlap)
   ..addEndEvent(asyncEndTraceEventWithDeepOverlap)
   ..addAllChildren([asyncEventWithDeepOverlap1, asyncEventWithDeepOverlap2]);
 final asyncEventWithDeepOverlap1 = AsyncTimelineEvent(asyncStart1Trace)
