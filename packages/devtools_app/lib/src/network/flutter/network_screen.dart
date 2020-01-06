@@ -24,6 +24,19 @@ class HttpRequestDataTableSource extends DataTableSource {
 
   List<HttpRequestData> _data;
 
+  @override
+  int get rowCount => _data?.length ?? 0;
+
+  ValueListenable<HttpRequestData> get currentSelectionListenable =>
+      _currentSelection;
+  final _currentSelection = ValueNotifier<HttpRequestData>(null);
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+
   void _sort(Function getField, int columnIndex, bool ascending) {
     _data.sort((
       HttpRequestData a,
@@ -113,27 +126,11 @@ class HttpRequestDataTableSource extends DataTableSource {
     );
   }
 
-  @override
-  int get rowCount => _data?.length ?? 0;
-
   void clearSelection() => _currentSelection.value = null;
-
-  ValueListenable<HttpRequestData> get currentSelectionListenable =>
-      _currentSelection;
-  final _currentSelection = ValueNotifier<HttpRequestData>(null);
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => 0;
 }
 
 class NetworkScreen extends Screen {
   const NetworkScreen() : super();
-
-  @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
 
   @override
   Widget buildTab(BuildContext context) {
@@ -142,6 +139,9 @@ class NetworkScreen extends Screen {
       icon: Icon(Icons.network_check),
     );
   }
+
+  @override
+  Widget build(BuildContext context) => const NetworkScreenBody();
 }
 
 class NetworkScreenBody extends StatefulWidget {
@@ -152,11 +152,17 @@ class NetworkScreenBody extends StatefulWidget {
 }
 
 class NetworkScreenBodyState extends State<NetworkScreenBody> {
+  final networkController = NetworkController();
+  final dataTableSource = HttpRequestDataTableSource();
+
   static bool _sortAscending = false;
   static int _sortColumnIndex;
 
-  final networkController = NetworkController();
-  final dataTableSource = HttpRequestDataTableSource();
+  static const _headerTextStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+  );
 
   void _onSort(
     Function getField,
@@ -174,15 +180,14 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     });
   }
 
-  static const _headerTextStyle = TextStyle(
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-  );
+  @override
+  void initState() {
+    networkController.initialize();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    networkController.initialize();
     const double minIncludeTextWidth = 600;
     return ValueListenableBuilder<HttpRequests>(
       valueListenable: networkController.requestsNotifier,
@@ -190,150 +195,158 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
         dataTableSource.data = data.requests;
         return ValueListenableBuilder(
           valueListenable: networkController.recordingNotifier,
-          builder: (context, recording, widget) => Column(
-            children: [
-              Row(
-                children: [
-                  recordButton(
-                    recording: recording,
-                    minIncludeTextWidth: minIncludeTextWidth,
-                    onPressed: () => networkController.startRecording(),
-                  ),
-                  pauseRecordingButton(
-                    recording: recording,
-                    minIncludeTextWidth: minIncludeTextWidth,
-                    onPressed: () => networkController.pauseRecording(),
-                  ),
-                  OutlineButton(
-                    onPressed: () => networkController.refreshRequests(),
-                    child: Label(
-                      FlutterIcons.refresh,
-                      'Refresh',
-                      minIncludeTextWidth: 900,
+          builder: (context, recording, widget) {
+            return Column(
+              children: [
+                Row(
+                  children: [
+                    recordButton(
+                      recording: recording,
+                      minIncludeTextWidth: minIncludeTextWidth,
+                      onPressed: () => networkController.startRecording(),
                     ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  clearButton(
-                    onPressed: () {
-                      dataTableSource.clearSelection();
-                      networkController.clear();
-                    },
-                  ),
-                  const Spacer()
-                ],
-              ),
-              ValueListenableBuilder(
-                valueListenable: dataTableSource.currentSelectionListenable,
-                builder: (context, HttpRequestData data, widget) => Expanded(
-                  child: (!recording && dataTableSource.rowCount == 0)
-                      ? Container(
-                          child: Center(
-                            child: recordingInfo(
-                              recording: recording,
-                              recordedObject: 'HTTP requests',
-                              isPause: true,
-                            ),
-                          ),
-                        )
-                      : Split(
-                          initialFirstFraction: 0.55,
-                          axis: Axis.horizontal,
-                          firstChild: (dataTableSource.rowCount == 0)
-                              ? Container(
-                                  alignment: Alignment.center,
-                                  child: const CircularProgressIndicator(),
-                                )
-                              : Scrollbar(
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      return SingleChildScrollView(
-                                        child: PaginatedDataTable(
-                                          rowsPerPage: 25,
-                                          // TODO(bkonyi): figure out how to prevent header from scrolling.
-                                          header: const Text(
-                                            'HTTP Requests',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          source: dataTableSource,
-                                          includeCheckboxes: false,
-                                          columns: [
-                                            DataColumn(
-                                              label: Text(
-                                                'Request URI (${dataTableSource.rowCount})',
-                                                style: _headerTextStyle,
-                                              ),
-                                              onSort: (i, j) => _onSort(
-                                                (HttpRequestData o) => o.name,
-                                                i,
-                                                j,
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: const Text(
-                                                'Method',
-                                                style: _headerTextStyle,
-                                              ),
-                                              onSort: (i, j) => _onSort(
-                                                (HttpRequestData o) => o.method,
-                                                i,
-                                                j,
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: const Text(
-                                                'Status',
-                                                style: _headerTextStyle,
-                                              ),
-                                              numeric: true,
-                                              onSort: (i, j) => _onSort(
-                                                (HttpRequestData o) => o.status,
-                                                i,
-                                                j,
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: const Text(
-                                                'Duration (ms)',
-                                                style: _headerTextStyle,
-                                              ),
-                                              numeric: true,
-                                              onSort: (i, j) => _onSort(
-                                                (HttpRequestData o) =>
-                                                    o.durationMs,
-                                                i,
-                                                j,
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: const Text(
-                                                'Timestamp',
-                                                style: _headerTextStyle,
-                                              ),
-                                              onSort: (i, j) => _onSort(
-                                                (HttpRequestData o) =>
-                                                    o.requestTime,
-                                                i,
-                                                j,
-                                              ),
-                                            ),
-                                          ],
-                                          sortColumnIndex: _sortColumnIndex,
-                                          sortAscending: _sortAscending,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                          // Only show the data page when there's data to display.
-                          secondChild: HttpRequestInspector(
-                            data,
-                          ),
-                        ),
+                    pauseButton(
+                      paused: !recording,
+                      minIncludeTextWidth: minIncludeTextWidth,
+                      onPressed: () => networkController.pauseRecording(),
+                    ),
+                    OutlineButton(
+                      onPressed: () => networkController.refreshRequests(),
+                      child: Label(
+                        FlutterIcons.refresh,
+                        'Refresh',
+                        minIncludeTextWidth: 900,
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    clearButton(
+                      onPressed: () {
+                        dataTableSource.clearSelection();
+                        networkController.clear();
+                      },
+                    ),
+                    const Spacer()
+                  ],
                 ),
-              )
-            ],
-          ),
+                ValueListenableBuilder(
+                  valueListenable: dataTableSource.currentSelectionListenable,
+                  builder: (context, HttpRequestData data, widget) {
+                    return Expanded(
+                      child: (!recording && dataTableSource.rowCount == 0)
+                          ? Container(
+                              child: Center(
+                                child: recordingInfo(
+                                  recording: recording,
+                                  recordedObject: 'HTTP requests',
+                                  isPause: true,
+                                ),
+                              ),
+                            )
+                          : Split(
+                              initialFirstFraction: 0.5,
+                              axis: Axis.horizontal,
+                              firstChild: (dataTableSource.rowCount == 0)
+                                  ? Container(
+                                      alignment: Alignment.center,
+                                      child: const CircularProgressIndicator(),
+                                    )
+                                  : Scrollbar(
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return SingleChildScrollView(
+                                            child: PaginatedDataTable(
+                                              rowsPerPage: 25,
+                                              // TODO(bkonyi): figure out how to prevent header from scrolling.
+                                              header: const Text(
+                                                'HTTP Requests',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              source: dataTableSource,
+                                              includeCheckboxes: false,
+                                              columns: [
+                                                DataColumn(
+                                                  label: Text(
+                                                    'Request URI (${dataTableSource.rowCount})',
+                                                    style: _headerTextStyle,
+                                                  ),
+                                                  onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.name,
+                                                    i,
+                                                    j,
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: const Text(
+                                                    'Method',
+                                                    style: _headerTextStyle,
+                                                  ),
+                                                  onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.method,
+                                                    i,
+                                                    j,
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: const Text(
+                                                    'Status',
+                                                    style: _headerTextStyle,
+                                                  ),
+                                                  numeric: true,
+                                                  onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.status,
+                                                    i,
+                                                    j,
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: const Text(
+                                                    'Duration (ms)',
+                                                    style: _headerTextStyle,
+                                                  ),
+                                                  numeric: true,
+                                                  onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.durationMs,
+                                                    i,
+                                                    j,
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: const Text(
+                                                    'Timestamp',
+                                                    style: _headerTextStyle,
+                                                  ),
+                                                  onSort: (i, j) => _onSort(
+                                                    (HttpRequestData o) =>
+                                                        o.requestTime,
+                                                    i,
+                                                    j,
+                                                  ),
+                                                ),
+                                              ],
+                                              sortColumnIndex: _sortColumnIndex,
+                                              sortAscending: _sortAscending,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                              // Only show the data page when there's data to display.
+                              secondChild: HttpRequestInspector(
+                                data,
+                              ),
+                            ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );

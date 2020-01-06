@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:html_shim/html.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -27,9 +28,9 @@ class NetworkController {
   int _lastProfileRefreshMicros = 0;
 
   void _processHttpTimelineEvents(Timeline timeline) {
-    final currentValues = _httpRequestsNotifier.value.requests;
-    final outstandingRequestsMap =
-        _httpRequestsNotifier.value.outstandingRequests;
+    final currentValues = _httpRequestsNotifier.value.requests.toList();
+    final outstandingRequestsMap = Map<String, HttpRequestData>.from(
+        _httpRequestsNotifier.value.outstandingRequests);
     final events = timeline.traceEvents;
     final httpEventIds = <String>{};
     // Perform initial pass to find the IDs for the HTTP timeline events.

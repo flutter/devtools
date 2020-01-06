@@ -9,21 +9,51 @@ import '../http_request_data.dart';
 
 /// This widget displays general HTTP request / response information that is
 /// contained in the headers, in addition to the standard connection information.
-class HttpRequestHeadersTab extends StatelessWidget {
-  const HttpRequestHeadersTab(this.data);
+class HttpRequestHeadersView extends StatelessWidget {
+  const HttpRequestHeadersView(this.data);
 
-  ExpansionTile _buildTile(String title, List<Widget> children) =>
-      ExpansionTile(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+  final HttpRequestData data;
+
+  ExpansionTile _buildTile(String title, List<Widget> children) {
+    return ExpansionTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
         ),
-        children: children,
-        initiallyExpanded: true,
-      );
+      ),
+      children: children,
+      initiallyExpanded: true,
+    );
+  }
+
+  Widget _buildRow(String key, dynamic value, constraints) {
+    return Container(
+      width: constraints.minWidth,
+      padding: const EdgeInsets.only(
+        left: 30,
+        bottom: 15,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$key: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Expanded(
+              child: Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 5,
+          )),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,31 +101,4 @@ class HttpRequestHeadersTab extends StatelessWidget {
       },
     );
   }
-
-  Widget _buildRow(String key, dynamic value, constraints) => Container(
-        width: constraints.minWidth,
-        padding: const EdgeInsets.only(
-          left: 30,
-          bottom: 15,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$key: ',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Expanded(
-                child: Text(
-              value,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 5,
-            )),
-          ],
-        ),
-      );
-
-  final HttpRequestData data;
 }

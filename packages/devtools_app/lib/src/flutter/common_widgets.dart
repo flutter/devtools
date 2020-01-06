@@ -229,15 +229,15 @@ StatelessWidget stopRecordingButton({
 /// * `minIncludeTextWidth`: The minimum width the button can be before the text
 ///    is omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-StatelessWidget pauseRecordingButton({
+StatelessWidget pauseButton({
   Key key,
-  @required bool recording,
+  @required bool paused,
   double minIncludeTextWidth,
   @required VoidCallback onPressed,
 }) {
   return OutlineButton(
     key: key,
-    onPressed: !recording ? null : onPressed,
+    onPressed: paused ? null : onPressed,
     child: MaterialIconLabel(
       Icons.pause,
       'Pause',
@@ -253,23 +253,20 @@ Widget recordingInfo({
   @required String recordedObject,
   bool isPause = false,
 }) {
-  final stopOrPauseRow = isPause
-      ? Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+  final stopOrPauseRow = Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: isPause
+        ? const [
             Text('Click the pause button '),
             Icon(Icons.pause),
-            Text(' to pause the recording.')
-          ],
-        )
-      : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+            Text(' to pause the recording.'),
+          ]
+        : const [
             Text('Click the stop button '),
             Icon(Icons.stop),
-            Text(' to end the recording.')
+            Text(' to end the recording.'),
           ],
-        );
+  );
   final recordingInstructions = Column(
     key: instructionsKey,
     mainAxisAlignment: MainAxisAlignment.center,

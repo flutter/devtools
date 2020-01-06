@@ -8,38 +8,51 @@ import '../http.dart';
 import '../http_request_data.dart';
 
 /// A [Widget] which displays [Cookie] information in a tab.
-class HttpRequestCookiesTab extends StatelessWidget {
-  const HttpRequestCookiesTab(this.data);
+class HttpRequestCookiesView extends StatelessWidget {
+  const HttpRequestCookiesView(this.data);
 
-  DataColumn _buildColumn(String title, {bool numeric = false}) => DataColumn(
-        label: Expanded(
-          child: Text(
-            title,
-            style: _headerTextStyle,
-            overflow: TextOverflow.fade,
-          ),
+  final HttpRequestData data;
+
+  static const _headerTextStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+  );
+
+  DataColumn _buildColumn(String title, {bool numeric = false}) {
+    return DataColumn(
+      label: Expanded(
+        child: Text(
+          title ?? '--',
+          style: _headerTextStyle,
+          overflow: TextOverflow.fade,
         ),
-        numeric: numeric,
-      );
+      ),
+      numeric: numeric,
+    );
+  }
 
-  DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) =>
-      DataRow.byIndex(
-        index: index,
-        cells: [
-          _buildCell(cookie.name),
-          _buildCell(cookie.value),
-          if (!requestCookies) ...[
-            _buildCell(cookie.domain ?? '--'),
-            _buildCell(cookie.path ?? '--'),
-            _buildCell(cookie.expires?.toString() ?? '--'),
-            _buildCell(cookie.value.length.toString()),
-            _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
-            _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
-          ]
-        ],
-      );
+  DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) {
+    return DataRow.byIndex(
+      index: index,
+      // NOTE: if this list of cells change, the columns of the DataTable
+      // below will need to be updated.
+      cells: [
+        _buildCell(cookie.name),
+        _buildCell(cookie.value),
+        if (!requestCookies) ...[
+          _buildCell(cookie.domain),
+          _buildCell(cookie.path),
+          _buildCell(cookie.expires?.toString()),
+          _buildCell(cookie.value.length.toString()),
+          _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
+          _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
+        ]
+      ],
+    );
+  }
 
-  DataCell _buildCell(String value) => DataCell(Text(value));
+  DataCell _buildCell(String value) => DataCell(Text(value ?? '--'));
   DataCell _buildIconCell(IconData icon) => DataCell(Icon(icon));
 
   Widget _buildCookiesTable(
@@ -76,6 +89,8 @@ class HttpRequestCookiesTab extends StatelessWidget {
                         minWidth: constraints.minWidth,
                       ),
                 child: DataTable(
+                  // NOTE: if this list of columns change, _buildRow will need
+                  // to be updated to match.
                   columns: [
                     _buildColumn('Name'),
                     _buildColumn('Value'),
@@ -146,12 +161,4 @@ class HttpRequestCookiesTab extends StatelessWidget {
             ),
           );
   }
-
-  static const _headerTextStyle = TextStyle(
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-  );
-
-  final HttpRequestData data;
 }

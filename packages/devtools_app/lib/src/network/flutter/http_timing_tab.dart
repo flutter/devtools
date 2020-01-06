@@ -7,8 +7,48 @@ import 'package:flutter/material.dart';
 import '../http_request_data.dart';
 
 /// A [Widget] which displays timing information for an HTTP request.
-class HttpRequestTimingTab extends StatelessWidget {
-  const HttpRequestTimingTab(this.data);
+class HttpRequestTimingView extends StatelessWidget {
+  const HttpRequestTimingView(this.data);
+
+  final HttpRequestData data;
+
+  ExpansionTile _buildTile(String title, List<Widget> children) {
+    return ExpansionTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      children: children,
+      initiallyExpanded: true,
+    );
+  }
+
+  Widget _buildRow(String key, dynamic value) {
+    return Container(
+      padding: const EdgeInsets.only(
+        left: 30,
+        bottom: 15,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                '$key: ',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(value),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,43 +83,4 @@ class HttpRequestTimingTab extends StatelessWidget {
       ),
     );
   }
-
-  ExpansionTile _buildTile(String title, List<Widget> children) =>
-      ExpansionTile(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        children: children,
-        initiallyExpanded: true,
-      );
-
-  Widget _buildRow(String key, dynamic value) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 30,
-        bottom: 15,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                '$key: ',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(value),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  final HttpRequestData data;
 }

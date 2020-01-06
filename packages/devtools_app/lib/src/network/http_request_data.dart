@@ -12,11 +12,6 @@ class HttpRequests {
   })  : assert(requests != null),
         assert(outstandingRequests != null);
 
-  void clear() {
-    requests.clear();
-    outstandingRequests.clear();
-  }
-
   /// A list of HTTP requests.
   ///
   /// Individual requests in this list can be either completed or in-progress.
@@ -25,6 +20,11 @@ class HttpRequests {
   /// A mapping of timeline IDs to instances of HttpRequestData which are
   /// currently in-progress.
   Map<String, HttpRequestData> outstandingRequests;
+
+  void clear() {
+    requests.clear();
+    outstandingRequests.clear();
+  }
 }
 
 /// Used to represent an instant event emitted during an HTTP request.
@@ -88,54 +88,17 @@ class HttpRequestData {
     return data;
   }
 
-  /// Merges the information from another [HttpRequestData] into this instance.
-  void merge(HttpRequestData data) {
-    if (data.instantEvents.isNotEmpty) {
-      _addInstantEvents(data.instantEvents);
-    }
-    if (data._endEvent != null) {
-      _endEvent = data._endEvent;
-    }
-  }
+  final int _timelineMicrosBase;
+  final Map<String, dynamic> _startEvent;
+  Map<String, dynamic> _endEvent;
 
-  // Timeline event helpers.
-  static bool _isStartEvent(Map<String, dynamic> event) => event['ph'] == 'b';
-  static bool _isEndEvent(Map<String, dynamic> event) => event['ph'] == 'e';
-  static bool _isInstantEvent(Map<String, dynamic> event) => event['ph'] == 'n';
+  // Do not add to this list directly! Call `_addInstantEvents` which is
+  // responsible for calculating the time offsets of each event.
+  final List<HttpInstantEvent> _instantEvents = [];
 
-  static List<Cookie> _parseCookies(List cookies) {
-    return [
-      for (final cookie in cookies) Cookie.fromSetCookieValue(cookie),
-    ];
-  }
-
-  void _addInstantEvents(List<HttpInstantEvent> events) {
-    _instantEvents.addAll(events);
-
-    // This event is the second half of an outstanding request which will be
-    // merged into a single HttpRequestData elsewhere. We'll calculate the
-    // instant event times then since we'll have _startEvent's timestamp.
-    if (_startEvent == null) {
-      return;
-    }
-    _recalculateInstantEventTimes();
-  }
-
-  void _recalculateInstantEventTimes() {
-    assert(_startEvent != null);
-    int lastTime = _requestTimeMicros;
-    for (final instant in instantEvents) {
-      final instantTime =
-          _getTimelineMicrosecondsSinceEpoch(instant._rawEventJson);
-      instant._timeDiffMs = (instantTime - lastTime) / 1000;
-      lastTime = instantTime;
-    }
-  }
-
-  int _getTimelineMicrosecondsSinceEpoch(Map<String, dynamic> event) {
-    assert(event.containsKey('ts'));
-    return _timelineMicrosBase + event['ts'];
-  }
+  // State used to determine whether this request is currently selected in a
+  // table.
+  bool selected = false;
 
   /// The duration of the HTTP request, in milliseconds.
   double get durationMs {
@@ -254,15 +217,52 @@ class HttpRequestData {
     return Uri.parse(_startEvent['args']['uri']);
   }
 
-  final int _timelineMicrosBase;
-  final Map<String, dynamic> _startEvent;
-  Map<String, dynamic> _endEvent;
+  /// Merges the information from another [HttpRequestData] into this instance.
+  void merge(HttpRequestData data) {
+    if (data.instantEvents.isNotEmpty) {
+      _addInstantEvents(data.instantEvents);
+    }
+    if (data._endEvent != null) {
+      _endEvent = data._endEvent;
+    }
+  }
 
-  // Do not add to this list directly! Call `_addInstantEvents` which is
-  // responsible for calculating the time offsets of each event.
-  final List<HttpInstantEvent> _instantEvents = [];
+  // Timeline event helpers.
+  static bool _isStartEvent(Map<String, dynamic> event) => event['ph'] == 'b';
+  static bool _isEndEvent(Map<String, dynamic> event) => event['ph'] == 'e';
+  static bool _isInstantEvent(Map<String, dynamic> event) => event['ph'] == 'n';
 
-  // State used to determine whether this request is currently selected in a
-  // table.
-  bool selected = false;
+  static List<Cookie> _parseCookies(List cookies) {
+    return [
+      for (final cookie in cookies) Cookie.fromSetCookieValue(cookie),
+    ];
+  }
+
+  void _addInstantEvents(List<HttpInstantEvent> events) {
+    _instantEvents.addAll(events);
+
+    // This event is the second half of an outstanding request which will be
+    // merged into a single HttpRequestData elsewhere. We'll calculate the
+    // instant event times then since we'll have _startEvent's timestamp.
+    if (_startEvent == null) {
+      return;
+    }
+    _recalculateInstantEventTimes();
+  }
+
+  void _recalculateInstantEventTimes() {
+    assert(_startEvent != null);
+    int lastTime = _requestTimeMicros;
+    for (final instant in instantEvents) {
+      final instantTime =
+          _getTimelineMicrosecondsSinceEpoch(instant._rawEventJson);
+      instant._timeDiffMs = (instantTime - lastTime) / 1000;
+      lastTime = instantTime;
+    }
+  }
+
+  int _getTimelineMicrosecondsSinceEpoch(Map<String, dynamic> event) {
+    assert(event.containsKey('ts'));
+    return _timelineMicrosBase + event['ts'];
+  }
 }

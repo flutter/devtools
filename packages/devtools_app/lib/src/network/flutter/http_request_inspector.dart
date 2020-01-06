@@ -13,6 +13,17 @@ import 'http_timing_tab.dart';
 class HttpRequestInspector extends StatelessWidget {
   const HttpRequestInspector(this.data);
 
+  final HttpRequestData data;
+
+  Widget _buildTab(String tabName) {
+    return Tab(
+      child: Text(
+        tabName,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasCookies = data?.hasCookies ?? false;
@@ -54,9 +65,9 @@ class HttpRequestInspector extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        HttpRequestHeadersTab(data),
-                        HttpRequestTimingTab(data),
-                        if (hasCookies) HttpRequestCookiesTab(data),
+                        HttpRequestHeadersView(data),
+                        HttpRequestTimingView(data),
+                        if (hasCookies) HttpRequestCookiesView(data),
                       ],
                     ),
                   ),
@@ -65,15 +76,4 @@ class HttpRequestInspector extends StatelessWidget {
             ),
     );
   }
-
-  Widget _buildTab(String tabName) {
-    return Tab(
-      child: Text(
-        tabName,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-
-  final HttpRequestData data;
 }
