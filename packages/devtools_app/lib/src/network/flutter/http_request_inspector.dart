@@ -23,30 +23,37 @@ class HttpRequestInspector extends StatelessWidget {
     ];
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).focusColor)),
+        border: Border.all(
+          color: Theme.of(context).focusColor,
+        ),
+      ),
       child: (data == null)
           ? const Center(
               child: Text(
                 'No request selected',
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(
+                  fontSize: 20,
+                ),
               ),
             )
           : DefaultTabController(
               length: tabs.length,
               child: Column(
-                children: <Widget>[
+                children: [
                   Row(
-                    children: <Widget>[
+                    children: [
                       Flexible(
                         child: Container(
-                          child: TabBar(tabs: tabs),
+                          child: TabBar(
+                            tabs: tabs,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   Expanded(
                     child: TabBarView(
-                      children: <Widget>[
+                      children: [
                         HttpRequestHeadersTab(data),
                         HttpRequestTimingTab(data),
                         if (hasCookies) HttpRequestCookiesTab(data),

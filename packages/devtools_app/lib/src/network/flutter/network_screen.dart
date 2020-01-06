@@ -25,22 +25,23 @@ class HttpRequestDataTableSource extends DataTableSource {
   List<HttpRequestData> _data;
 
   void _sort(Function getField, int columnIndex, bool ascending) {
-    _data.sort((HttpRequestData a, HttpRequestData b) {
+    _data.sort((
+      HttpRequestData a,
+      HttpRequestData b,
+    ) {
       if (!ascending) {
-        final c = a;
+        final tmp = a;
         a = b;
-        b = c;
+        b = tmp;
       }
       final fieldA = getField(a);
       final fieldB = getField(b);
 
       // Handle cases where one or both fields are null as Comparable doesn't
       // handle null properly and we still want to allow for sorting.
-      if (fieldA == null && fieldB != null) {
-        return 1;
-      } else if (fieldA != null && fieldB == null) {
-        return -1;
-      } else if (fieldA == null && fieldB == null) {
+      if (fieldA == null || fieldB == null) {
+        if (fieldA != null) return -1;
+        if (fieldB != null) return 1;
         return 0;
       }
       return Comparable.compare(fieldA, fieldB);
@@ -54,11 +55,19 @@ class HttpRequestDataTableSource extends DataTableSource {
     }
     final statusInt = int.tryParse(status);
     if (statusInt == null || statusInt >= 400) {
-      return const TextStyle(color: Colors.redAccent);
-    } else if (statusInt >= 100 && statusInt < 300) {
-      return const TextStyle(color: Colors.greenAccent);
-    } else if (statusInt >= 300 && statusInt < 400) {
-      return const TextStyle(color: Colors.yellowAccent);
+      return const TextStyle(
+        color: Colors.redAccent,
+      );
+    }
+    if (statusInt >= 100 && statusInt < 300) {
+      return const TextStyle(
+        color: Colors.greenAccent,
+      );
+    }
+    if (statusInt >= 300 && statusInt < 400) {
+      return const TextStyle(
+        color: Colors.yellowAccent,
+      );
     }
     return const TextStyle();
   }
@@ -67,7 +76,7 @@ class HttpRequestDataTableSource extends DataTableSource {
   DataRow getRow(int index) {
     final data = _data[index];
     final numFormat = NumberFormat.decimalPattern();
-    final status = (data.status == null) ? 'N/A' : data.status.toString();
+    final status = (data.status == null) ? '--' : data.status.toString();
     final requestTime = DateFormat.Hms().add_yMd().format(data.requestTime);
     final TextStyle statusColor = _getStatusColor(data.status);
 
@@ -76,29 +85,32 @@ class HttpRequestDataTableSource extends DataTableSource {
         : numFormat.format(data.durationMs);
 
     return DataRow.byIndex(
-        index: index,
-        cells: <DataCell>[
-          DataCell(Text(data.name)),
-          DataCell(Text(
+      index: index,
+      cells: [
+        DataCell(Text(data.name)),
+        DataCell(
+          Text(
             data.method,
             style: const TextStyle(fontWeight: FontWeight.bold),
-          )),
-          DataCell(Text(status, style: statusColor)),
-          DataCell(Text(durationMs)),
-          DataCell(Text(requestTime)),
-        ],
-        selected: data.selected,
-        onSelectChanged: (bool selected) {
-          if (data != _currentSelection.value) {
-            _currentSelection.value?.selected = false;
-            data.selected = true;
-            _currentSelection.value = data;
-          } else if (data == _currentSelection.value) {
-            _currentSelection.value = null;
-            data.selected = false;
-          }
-          notifyListeners();
-        });
+          ),
+        ),
+        DataCell(Text(status, style: statusColor)),
+        DataCell(Text(durationMs)),
+        DataCell(Text(requestTime)),
+      ],
+      selected: data.selected,
+      onSelectChanged: (bool selected) {
+        if (data != _currentSelection.value) {
+          _currentSelection.value?.selected = false;
+          data.selected = true;
+          _currentSelection.value = data;
+        } else if (data == _currentSelection.value) {
+          _currentSelection.value = null;
+          data.selected = false;
+        }
+        notifyListeners();
+      },
+    );
   }
 
   @override
@@ -146,7 +158,11 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   final networkController = NetworkController();
   final dataTableSource = HttpRequestDataTableSource();
 
-  void _onSort(Function getField, int columnIndex, bool ascending) {
+  void _onSort(
+    Function getField,
+    int columnIndex,
+    bool ascending,
+  ) {
     dataTableSource._sort(
       getField,
       columnIndex,
@@ -224,8 +240,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                           axis: Axis.horizontal,
                           firstChild: (dataTableSource.rowCount == 0)
                               ? Container(
-                                  child: const Center(
-                                      child: CircularProgressIndicator()),
+                                  alignment: Alignment.center,
+                                  child: const CircularProgressIndicator(),
                                 )
                               : Scrollbar(
                                   child: LayoutBuilder(
@@ -241,54 +257,66 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                                           ),
                                           source: dataTableSource,
                                           includeCheckboxes: false,
-                                          columns: <DataColumn>[
+                                          columns: [
                                             DataColumn(
                                               label: Text(
                                                 'Request URI (${dataTableSource.rowCount})',
                                                 style: _headerTextStyle,
                                               ),
                                               onSort: (i, j) => _onSort(
-                                                  (HttpRequestData o) => o.name,
-                                                  i,
-                                                  j),
+                                                (HttpRequestData o) => o.name,
+                                                i,
+                                                j,
+                                              ),
                                             ),
                                             DataColumn(
-                                              label: const Text('Method',
-                                                  style: _headerTextStyle),
+                                              label: const Text(
+                                                'Method',
+                                                style: _headerTextStyle,
+                                              ),
                                               onSort: (i, j) => _onSort(
-                                                  (HttpRequestData o) =>
-                                                      o.method,
-                                                  i,
-                                                  j),
+                                                (HttpRequestData o) => o.method,
+                                                i,
+                                                j,
+                                              ),
                                             ),
                                             DataColumn(
-                                              label: const Text('Status',
-                                                  style: _headerTextStyle),
+                                              label: const Text(
+                                                'Status',
+                                                style: _headerTextStyle,
+                                              ),
                                               numeric: true,
                                               onSort: (i, j) => _onSort(
-                                                  (HttpRequestData o) =>
-                                                      o.status,
-                                                  i,
-                                                  j),
+                                                (HttpRequestData o) => o.status,
+                                                i,
+                                                j,
+                                              ),
                                             ),
                                             DataColumn(
-                                              label: const Text('Duration (ms)',
-                                                  style: _headerTextStyle),
+                                              label: const Text(
+                                                'Duration (ms)',
+                                                style: _headerTextStyle,
+                                              ),
                                               numeric: true,
                                               onSort: (i, j) => _onSort(
-                                                  (HttpRequestData o) =>
-                                                      o.durationMs,
-                                                  i,
-                                                  j),
+                                                (HttpRequestData o) =>
+                                                    o.durationMs,
+                                                i,
+                                                j,
+                                              ),
                                             ),
                                             DataColumn(
-                                                label: const Text('Timestamp',
-                                                    style: _headerTextStyle),
-                                                onSort: (i, j) => _onSort(
-                                                    (HttpRequestData o) =>
-                                                        o.requestTime,
-                                                    i,
-                                                    j)),
+                                              label: const Text(
+                                                'Timestamp',
+                                                style: _headerTextStyle,
+                                              ),
+                                              onSort: (i, j) => _onSort(
+                                                (HttpRequestData o) =>
+                                                    o.requestTime,
+                                                i,
+                                                j,
+                                              ),
+                                            ),
                                           ],
                                           sortColumnIndex: _sortColumnIndex,
                                           sortAscending: _sortAscending,
@@ -300,7 +328,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                           // Only show the data page when there's data to display.
                           secondChild: HttpRequestInspector(
                             data,
-                          )),
+                          ),
+                        ),
                 ),
               )
             ],

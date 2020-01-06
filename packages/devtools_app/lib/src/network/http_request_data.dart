@@ -6,51 +6,61 @@ import 'http.dart';
 
 /// Contains all state relevant to completed and in-progress HTTP requests.
 class HttpRequests {
-  HttpRequests({this.requests, this.outstanding}) {
-    requests ??= [];
-    outstanding ??= {};
-  }
+  HttpRequests({
+    this.requests = const [],
+    this.outstandingRequests = const {},
+  })  : assert(requests != null),
+        assert(outstandingRequests != null);
 
   void clear() {
     requests.clear();
-    outstanding.clear();
+    outstandingRequests.clear();
   }
 
+  /// A list of HTTP requests.
+  ///
+  /// Individual requests in this list can be either completed or in-progress.
   List<HttpRequestData> requests;
 
   /// A mapping of timeline IDs to instances of HttpRequestData which are
   /// currently in-progress.
-  Map<String, HttpRequestData> outstanding;
+  Map<String, HttpRequestData> outstandingRequests;
 }
 
 /// Used to represent an instant event emitted during an HTTP request.
 class HttpInstantEvent {
-  HttpInstantEvent._(this._rawEvent) : name = _rawEvent['name'];
+  HttpInstantEvent._(this._rawEventJson) : name = _rawEventJson['name'];
 
-  final Map _rawEvent;
+  final Map<String, dynamic> _rawEventJson;
   final String name;
 
   /// The amount of time since the last instant event completed.
   double get timeDiffMs => _timeDiffMs;
-  
+
   // This is set from within HttpRequestData.
   double _timeDiffMs;
 }
 
 /// An abstraction of an HTTP request made through dart:io.
 class HttpRequestData {
-  HttpRequestData._(this._timelineMicrosBase, this._startEvent, this._endEvent);
+  HttpRequestData._(
+    this._timelineMicrosBase,
+    this._startEvent,
+    this._endEvent,
+  );
 
   /// Build an instance from timeline events.
-  /// 
+  ///
   /// `timelineMicrosBase` is the offset used to determine the wall-time of a
   /// timeline event. `events` is a list of Chrome trace format timeline
   /// events.
   factory HttpRequestData.fromTimeline(
-      int timelineMicrosBase, List<Map> events) {
-    Map startEvent;
-    Map endEvent;
-    final instantEvents = <Map>[];
+    int timelineMicrosBase,
+    List<Map<String, dynamic>> events,
+  ) {
+    Map<String, dynamic> startEvent;
+    Map<String, dynamic> endEvent;
+    final instantEvents = <Map<String, dynamic>>[];
 
     for (final event in events) {
       if (_isStartEvent(event)) {
@@ -65,9 +75,16 @@ class HttpRequestData {
         assert(false, 'Unexpected event type');
       }
     }
-    final data = HttpRequestData._(timelineMicrosBase, startEvent, endEvent);
+    final data = HttpRequestData._(
+      timelineMicrosBase,
+      startEvent,
+      endEvent,
+    );
     data._addInstantEvents(
-        [for (final instant in instantEvents) HttpInstantEvent._(instant)]);
+      [
+        for (final instant in instantEvents) HttpInstantEvent._(instant),
+      ],
+    );
     return data;
   }
 
@@ -82,12 +99,14 @@ class HttpRequestData {
   }
 
   // Timeline event helpers.
-  static bool _isStartEvent(Map event) => event['ph'] == 'b';
-  static bool _isEndEvent(Map event) => event['ph'] == 'e';
-  static bool _isInstantEvent(Map event) => event['ph'] == 'n';
+  static bool _isStartEvent(Map<String, dynamic> event) => event['ph'] == 'b';
+  static bool _isEndEvent(Map<String, dynamic> event) => event['ph'] == 'e';
+  static bool _isInstantEvent(Map<String, dynamic> event) => event['ph'] == 'n';
 
   static List<Cookie> _parseCookies(List cookies) {
-    return [for (final cookie in cookies) Cookie.fromSetCookieValue(cookie)];
+    return [
+      for (final cookie in cookies) Cookie.fromSetCookieValue(cookie),
+    ];
   }
 
   void _addInstantEvents(List<HttpInstantEvent> events) {
@@ -106,13 +125,14 @@ class HttpRequestData {
     assert(_startEvent != null);
     int lastTime = _requestTimeMicros;
     for (final instant in instantEvents) {
-      final instantTime = _getTimelineMicrosecondsSinceEpoch(instant._rawEvent);
+      final instantTime =
+          _getTimelineMicrosecondsSinceEpoch(instant._rawEventJson);
       instant._timeDiffMs = (instantTime - lastTime) / 1000;
       lastTime = instantTime;
     }
   }
 
-  int _getTimelineMicrosecondsSinceEpoch(Map event) {
+  int _getTimelineMicrosecondsSinceEpoch(Map<String, dynamic> event) {
     assert(event.containsKey('ts'));
     return _timelineMicrosBase + event['ts'];
   }
@@ -136,7 +156,7 @@ class HttpRequestData {
 
   /// A map of general information associated with an HTTP request.
   Map<String, dynamic> get general {
-    final copy = Map.from(_startEvent['args']);
+    final copy = Map<String, dynamic>.from(_startEvent['args']);
     if (_endEvent != null) {
       copy.addAll(_endEvent['args']);
     }
@@ -153,7 +173,7 @@ class HttpRequestData {
   /// All instant events logged to the timeline for this HTTP request.
   List<HttpInstantEvent> get instantEvents => _instantEvents;
 
-  /// The HTTP methods associated with this request.
+  /// The HTTP method associated with this request.
   String get method {
     assert(_startEvent['args'].containsKey('method'));
     return _startEvent['args']['method'];
@@ -196,7 +216,9 @@ class HttpRequestData {
     if (headers == null) {
       return [];
     }
-    return _parseCookies(headers['set-cookie'] ?? []);
+    return _parseCookies(
+      headers['set-cookie'] ?? [],
+    );
   }
 
   /// The response headers for the HTTP request.
@@ -208,7 +230,7 @@ class HttpRequestData {
   }
 
   /// A string representing the status of the request.
-  /// 
+  ///
   /// If the request completed, this will be an HTTP status code. If an error
   /// was encountered, this will return 'Error'.
   String get status {
@@ -233,8 +255,8 @@ class HttpRequestData {
   }
 
   final int _timelineMicrosBase;
-  final Map _startEvent;
-  Map _endEvent;
+  final Map<String, dynamic> _startEvent;
+  Map<String, dynamic> _endEvent;
 
   // Do not add to this list directly! Call `_addInstantEvents` which is
   // responsible for calculating the time offsets of each event.

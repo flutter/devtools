@@ -12,49 +12,59 @@ class HttpRequestCookiesTab extends StatelessWidget {
   const HttpRequestCookiesTab(this.data);
 
   DataColumn _buildColumn(String title, {bool numeric = false}) => DataColumn(
-      label: Expanded(
-        child: Text(
-          title,
-          style: _headerTextStyle,
-          overflow: TextOverflow.fade,
+        label: Expanded(
+          child: Text(
+            title,
+            style: _headerTextStyle,
+            overflow: TextOverflow.fade,
+          ),
         ),
-      ),
-      numeric: numeric);
+        numeric: numeric,
+      );
 
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) =>
-      DataRow.byIndex(index: index, cells: <DataCell>[
-        _buildCell(cookie.name),
-        _buildCell(cookie.value),
-        if (!requestCookies) ...[
-          _buildCell(cookie.domain ?? 'N/A'),
-          _buildCell(cookie.path ?? 'N/A'),
-          _buildCell(cookie.expires?.toString() ?? 'N/A'),
-          _buildCell(cookie.value.length.toString()),
-          _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
-          _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
-        ]
-      ]);
+      DataRow.byIndex(
+        index: index,
+        cells: [
+          _buildCell(cookie.name),
+          _buildCell(cookie.value),
+          if (!requestCookies) ...[
+            _buildCell(cookie.domain ?? '--'),
+            _buildCell(cookie.path ?? '--'),
+            _buildCell(cookie.expires?.toString() ?? '--'),
+            _buildCell(cookie.value.length.toString()),
+            _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
+            _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
+          ]
+        ],
+      );
 
   DataCell _buildCell(String value) => DataCell(Text(value));
   DataCell _buildIconCell(IconData icon) => DataCell(Icon(icon));
 
   Widget _buildCookiesTable(
-      String title, List<Cookie> cookies, BoxConstraints constraints,
-      {bool requestCookies = false}) {
+    String title,
+    List<Cookie> cookies,
+    BoxConstraints constraints, {
+    bool requestCookies = false,
+  }) {
     return Column(
-      children: <Widget>[
+      children: [
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
             title,
             style: const TextStyle(
-                color: Colors.lightBlue,
-                fontSize: 18,
-                fontWeight: FontWeight.bold),
+              color: Colors.lightBlue,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 24.0),
+          padding: const EdgeInsets.only(
+            bottom: 24.0,
+          ),
           child: Align(
             alignment: Alignment.centerLeft,
             child: SingleChildScrollView(
@@ -62,7 +72,9 @@ class HttpRequestCookiesTab extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: requestCookies
                     ? const BoxConstraints()
-                    : BoxConstraints(minWidth: constraints.minWidth),
+                    : BoxConstraints(
+                        minWidth: constraints.minWidth,
+                      ),
                 child: DataTable(
                   columns: [
                     _buildColumn('Name'),
@@ -78,7 +90,11 @@ class HttpRequestCookiesTab extends StatelessWidget {
                   ],
                   rows: [
                     for (int i = 0; i < cookies.length; ++i)
-                      _buildRow(i, cookies[i], requestCookies: requestCookies)
+                      _buildRow(
+                        i,
+                        cookies[i],
+                        requestCookies: requestCookies,
+                      )
                   ],
                 ),
               ),
@@ -95,22 +111,39 @@ class HttpRequestCookiesTab extends StatelessWidget {
     final responseCookies = data.responseCookies;
     return (requestCookies.isEmpty && responseCookies.isEmpty)
         ? const Center(
-            child: Text('No Cookies', style: TextStyle(fontSize: 20)))
+            child: Text(
+              'No Cookies',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+          )
         : Container(
-            padding: const EdgeInsets.only(left: 14.0, top: 18.0),
-            child: LayoutBuilder(builder: (context, constraints) {
-              return Column(
-                children: <Widget>[
-                  if (responseCookies.isNotEmpty)
-                    _buildCookiesTable(
-                        'Response Cookies', responseCookies, constraints),
-                  if (requestCookies.isNotEmpty)
-                    _buildCookiesTable(
-                        'Request Cookies', requestCookies, constraints,
-                        requestCookies: true),
-                ],
-              );
-            }),
+            padding: const EdgeInsets.only(
+              left: 14.0,
+              top: 18.0,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  children: [
+                    if (responseCookies.isNotEmpty)
+                      _buildCookiesTable(
+                        'Response Cookies',
+                        responseCookies,
+                        constraints,
+                      ),
+                    if (requestCookies.isNotEmpty)
+                      _buildCookiesTable(
+                        'Request Cookies',
+                        requestCookies,
+                        constraints,
+                        requestCookies: true,
+                      ),
+                  ],
+                );
+              },
+            ),
           );
   }
 

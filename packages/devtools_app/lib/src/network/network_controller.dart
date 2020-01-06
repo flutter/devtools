@@ -28,7 +28,8 @@ class NetworkController {
 
   void _processHttpTimelineEvents(Timeline timeline) {
     final currentValues = _httpRequestsNotifier.value.requests;
-    final outstandingRequestsMap = _httpRequestsNotifier.value.outstanding;
+    final outstandingRequestsMap =
+        _httpRequestsNotifier.value.outstandingRequests;
     final events = timeline.traceEvents;
     final httpEventIds = <String>{};
     // Perform initial pass to find the IDs for the HTTP timeline events.
@@ -49,7 +50,7 @@ class NetworkController {
     }
 
     // Group all HTTP timeline events with the same ID.
-    final Map<String, List<Map>> httpEvents = {};
+    final httpEvents = <String, List<Map<String, dynamic>>>{};
     for (final event in events) {
       final json = event.toJson();
       final id = json['id'];
@@ -60,7 +61,7 @@ class NetworkController {
         if (!httpEvents.containsKey(id)) {
           httpEvents[id] = [];
         }
-        httpEvents[id].add(json);
+        httpEvents.putIfAbsent(id, () => <Map<String, dynamic>>[]).add(json);
       }
     }
 
@@ -68,7 +69,9 @@ class NetworkController {
     for (final request in httpEvents.entries) {
       final requestId = request.key;
       final requestData = HttpRequestData.fromTimeline(
-          _timelineMicrosOffset, request.value);
+        _timelineMicrosOffset,
+        request.value,
+      );
 
       // If there's a new event which matches a request that was previously in
       // flight, update the associated HttpRequestData.
@@ -86,16 +89,21 @@ class NetworkController {
     }
     // Trigger refresh.
     _httpRequestsNotifier.value = HttpRequests(
-        requests: currentValues, outstanding: outstandingRequestsMap);
+      requests: currentValues,
+      outstandingRequests: outstandingRequestsMap,
+    );
   }
 
   void _startPolling() {
-    Future<void>.delayed(const Duration(milliseconds: 1000)).then((_) {
-      if (_httpRecordingNotifier.value) {
-        refreshRequests();
-        _startPolling();
-      }
-    });
+    // TODO(bkonyi): provide a way to cancel this polling loop.
+    Future<void>.delayed(const Duration(milliseconds: 1000)).then(
+      (_) {
+        if (_httpRecordingNotifier.value) {
+          refreshRequests();
+          _startPolling();
+        }
+      },
+    );
   }
 
   Future<void> _forEachIsolate(Future Function(IsolateRef) callback) async {
@@ -108,15 +116,19 @@ class NetworkController {
   }
 
   Future<void> _setHttpTimelineRecording(bool state) async {
-    await _forEachIsolate((isolate) async {
-      final future = serviceManager.service
-          .setHttpEnableTimelineLogging(isolate.id, state);
-      // If the isolate is paused the request above will never complete.
-      await Future.any([
-        future,
-        Future.delayed(const Duration(milliseconds: 500)),
-      ]);
-    });
+    await _forEachIsolate(
+      (isolate) async {
+        final future = serviceManager.service
+            .setHttpEnableTimelineLogging(isolate.id, state);
+        // If the isolate is paused the request above will never complete.
+        await Future.any(
+          [
+            future,
+            Future.delayed(const Duration(milliseconds: 500)),
+          ],
+        );
+      },
+    );
     _httpRecordingNotifier.value = state;
   }
 
@@ -131,7 +143,7 @@ class NetworkController {
   }
 
   /// Enables HTTP request recording on all isolates and starts polling.
-  /// 
+  ///
   /// If `alreadyRecording` is true, the last refresh time will be assumed to
   /// be the beginning of the process (time 0).
   Future<void> startRecording({
@@ -155,7 +167,7 @@ class NetworkController {
   }
 
   /// Pauses the output of HTTP request information to the timeline.
-  /// 
+  ///
   /// May result in some incomplete timeline events.
   Future<void> pauseRecording() async => await _setHttpTimelineRecording(false);
 
@@ -174,10 +186,15 @@ class NetworkController {
         final future =
             serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
         // The above call won't complete if the isolate is paused.
-        final state = await Future.any<HttpTimelineLoggingState>([
-          future,
-          Future.delayed(const Duration(milliseconds: 500), () => null),
-        ]);
+        final state = await Future.any<HttpTimelineLoggingState>(
+          [
+            future,
+            Future.delayed(
+              const Duration(milliseconds: 500),
+              () => null,
+            ),
+          ],
+        );
         if (state != null && state.enabled) {
           enabled = true;
         }

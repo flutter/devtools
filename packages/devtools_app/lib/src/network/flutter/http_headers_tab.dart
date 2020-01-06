@@ -14,55 +14,62 @@ class HttpRequestHeadersTab extends StatelessWidget {
 
   ExpansionTile _buildTile(String title, List<Widget> children) =>
       ExpansionTile(
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         children: children,
         initiallyExpanded: true,
       );
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return ListView(
-        children: <Widget>[
-          _buildTile(
-            'General',
-            <Widget>[
-              for (final entry in data.general.entries)
-                _buildRow(
-                  ReCase(entry.key).titleCase,
-                  entry.value.toString(),
-                  constraints,
-                ),
-            ],
-          ),
-          _buildTile(
-            'Response Headers',
-            <Widget>[
-              if (data.responseHeaders != null)
-                for (final entry in data.responseHeaders.entries)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView(
+          children: [
+            _buildTile(
+              'General',
+              [
+                for (final entry in data.general.entries)
                   _buildRow(
-                    entry.key,
+                    ReCase(entry.key).titleCase,
                     entry.value.toString(),
                     constraints,
                   ),
-            ],
-          ),
-          _buildTile(
-            'Request Headers',
-            <Widget>[
-              if (data.requestHeaders != null)
-                for (final entry in data.requestHeaders.entries)
-                  _buildRow(
-                    entry.key,
-                    entry.value.toString(),
-                    constraints,
-                  )
-            ],
-          )
-        ],
-      );
-    });
+              ],
+            ),
+            _buildTile(
+              'Response Headers',
+              [
+                if (data.responseHeaders != null)
+                  for (final entry in data.responseHeaders.entries)
+                    _buildRow(
+                      entry.key,
+                      entry.value.toString(),
+                      constraints,
+                    ),
+              ],
+            ),
+            _buildTile(
+              'Request Headers',
+              [
+                if (data.requestHeaders != null)
+                  for (final entry in data.requestHeaders.entries)
+                    _buildRow(
+                      entry.key,
+                      entry.value.toString(),
+                      constraints,
+                    ),
+              ],
+            )
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildRow(String key, dynamic value, constraints) => Container(
@@ -71,25 +78,23 @@ class HttpRequestHeadersTab extends StatelessWidget {
           left: 30,
           bottom: 15,
         ),
-        child: Column(children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                '$key: ',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$key: ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
               ),
-              Expanded(
-                  child: Text(
-                value,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 5,
-              )),
-            ],
-          ),
-        ]),
+            ),
+            Expanded(
+                child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 5,
+            )),
+          ],
+        ),
       );
 
   final HttpRequestData data;

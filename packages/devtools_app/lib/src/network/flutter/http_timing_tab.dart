@@ -15,14 +15,29 @@ class HttpRequestTimingTab extends StatelessWidget {
     final events = <Widget>[];
     for (final instant in data.instantEvents) {
       final timeDiffMillis = instant.timeDiffMs;
-      events.add(_buildTile(
-          instant.name, [_buildRow('Duration', '$timeDiffMillis ms')]));
+      events.add(
+        _buildTile(
+          instant.name,
+          [
+            _buildRow('Duration', '$timeDiffMillis ms'),
+          ],
+        ),
+      );
     }
     events.add(
-        _buildTile('Total', [_buildRow('Duration', '${data.durationMs} ms')]));
+      _buildTile(
+        'Total',
+        [
+          _buildRow('Duration', '${data.durationMs} ms'),
+        ],
+      ),
+    );
 
     return Padding(
-      padding: const EdgeInsets.only(left: 14.0, top: 18.0),
+      padding: const EdgeInsets.only(
+        left: 14.0,
+        top: 18.0,
+      ),
       child: ListView(
         children: events,
       ),
@@ -31,31 +46,38 @@ class HttpRequestTimingTab extends StatelessWidget {
 
   ExpansionTile _buildTile(String title, List<Widget> children) =>
       ExpansionTile(
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         children: children,
         initiallyExpanded: true,
       );
-      
+
   Widget _buildRow(String key, dynamic value) {
     return Container(
       padding: const EdgeInsets.only(
         left: 30,
         bottom: 15,
       ),
-      child: Column(children: [
-        Row(
-          children: <Widget>[
-            Text(
-              '$key: ',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                '$key: ',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(value),
-          ],
-        ),
-      ]),
+              Text(value),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
