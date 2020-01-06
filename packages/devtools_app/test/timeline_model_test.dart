@@ -356,27 +356,6 @@ void main() {
       expect(asyncEventWithDeepOverlap.displayDepth, equals(5));
     });
 
-    test('hasOverlappingChildren', () {
-      expect(asyncEventA.hasOverlappingChildren, isTrue);
-      expect(asyncEventB.hasOverlappingChildren, isTrue);
-      expect(asyncEventC.hasOverlappingChildren, isFalse);
-      expect(asyncEventD.hasOverlappingChildren, isFalse);
-    });
-
-    test('isSubtreeOverlapping', () {
-      expect(
-        asyncEventWithDeepOverlap1.time
-            .overlaps(asyncEventWithDeepOverlap2.time),
-        isFalse,
-      );
-      expect(asyncEvent3.time.overlaps(asyncEvent4.time), isTrue);
-      expect(
-        asyncEventWithDeepOverlap1
-            .isSubtreeOverlapping(asyncEventWithDeepOverlap2),
-        isTrue,
-      );
-    });
-
     test('couldBeParentOf', () {
       expect(asyncEventA.couldBeParentOf(asyncEventB1), isFalse);
       expect(asyncEventB.couldBeParentOf(asyncEventB1), isTrue);

@@ -508,11 +508,6 @@ class OfflineTimelineEvent extends TimelineEvent {
           'instance of OfflineTimelineEvent');
 
   @override
-  bool get hasOverlappingChildren =>
-      throw UnimplementedError('This method should never be called for an '
-          'instance of OfflineTimelineEvent');
-
-  @override
   List<List<TimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
@@ -679,8 +674,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   /// This value could come from the end time of [this] event or from the end
   /// time of any of its descendant events.
   int get maxEndMicros;
-
-  bool get hasOverlappingChildren;
 
   bool couldBeParentOf(TimelineEvent e);
 
@@ -890,9 +883,6 @@ class SyncTimelineEvent extends TimelineEvent {
   int get maxEndMicros => time.end.inMicroseconds;
 
   @override
-  bool get hasOverlappingChildren => false;
-
-  @override
   List<List<TimelineEvent>> _calculateDisplayRows() {
     assert(_displayRows == null);
     _expandDisplayRows(depth);
@@ -1024,38 +1014,6 @@ class AsyncTimelineEvent extends TimelineEvent {
       }
     }
     return true;
-  }
-
-  @override
-  bool get hasOverlappingChildren {
-    if (_hasOverlappingChildren != null) return _hasOverlappingChildren;
-    for (int i = 0; i < children.length; i++) {
-      final AsyncTimelineEvent currentChild = children[i];
-      // We do not have to look back because children will be ordered by their
-      // start times.
-      for (int j = i + 1; j < children.length; j++) {
-        final AsyncTimelineEvent sibling = children[j];
-        if (currentChild.isSubtreeOverlapping(sibling)) {
-          return _hasOverlappingChildren = true;
-        }
-      }
-    }
-    return _hasOverlappingChildren = false;
-  }
-
-  bool _hasOverlappingChildren;
-
-  // Warning: this method may be expensive to call for very deep trees.
-  bool isSubtreeOverlapping(TimelineEvent other) {
-    final maxLevelToVerify = math.min(depth, other.depth);
-    for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = lastChildNodeAtLevel(level);
-      final otherFirstEventAtLevel = other.firstChildNodeAtLevel(level);
-      if (lastEventAtLevel.time.overlaps(otherFirstEventAtLevel.time)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @override
