@@ -53,11 +53,13 @@ class FrameworkCore {
           );
           return true;
         } else {
-          errorReporter('Unable to connect to VM service at "$uri"', null);
+          errorReporter(
+              'Unable to connect to VM service at "$uri" without error', null);
           return false;
         }
       } catch (e) {
-        errorReporter('Unable to connect to VM service at "$uri"', e);
+        errorReporter(
+            'Unable to connect to VM service at "$uri" with error $e', e);
         return false;
       }
     } else {

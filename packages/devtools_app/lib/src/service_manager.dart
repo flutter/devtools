@@ -124,7 +124,9 @@ class ServiceConnectionManager {
     }
 
     this.service = service;
-    serviceAvailable.complete();
+    if (!serviceAvailable.isCompleted) {
+      serviceAvailable.complete();
+    }
 
     connectedApp = ConnectedApp();
 
@@ -509,7 +511,8 @@ class ServiceExtensionManager {
         await _maybeAddServiceExtension(extension);
       }
 
-      if (_pendingServiceExtensions.isEmpty) {
+      if (_pendingServiceExtensions.isEmpty &&
+          !extensionStatesUpdated.isCompleted) {
         extensionStatesUpdated.complete();
       }
 

@@ -308,13 +308,14 @@ class InspectorController extends DisposableController
     }
   }
 
+  // Note that this may be called after the controller is disposed.  We need to handle nulls in the fields.
   void shutdownTree(bool isolateStopped) {
     // It is critical we clear all data that is kept alive by inspector object
     // references in this method as that stale data will trigger inspector
     // exceptions.
     programaticSelectionChangeInProgress = true;
-    _treeGroups.clear(isolateStopped);
-    _selectionGroups.clear(isolateStopped);
+    _treeGroups?.clear(isolateStopped);
+    _selectionGroups?.clear(isolateStopped);
 
     currentShowNode = null;
     selectedNode = null;
@@ -323,10 +324,10 @@ class InspectorController extends DisposableController
     selectedNode = null;
     subtreeRoot = null;
 
-    inspectorTree.root = inspectorTree.createNode();
+    inspectorTree?.root = inspectorTree?.createNode();
     details?.shutdownTree(isolateStopped);
     programaticSelectionChangeInProgress = false;
-    valueToInspectorTreeNode.clear();
+    valueToInspectorTreeNode?.clear();
   }
 
   void onIsolateStopped() {

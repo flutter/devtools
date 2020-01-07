@@ -15,6 +15,7 @@ import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'controllers.dart';
 import 'navigation.dart';
+import 'notifications.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
@@ -93,7 +94,8 @@ class _InitializerState extends State<Initializer>
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: showErrorSnackBar(context),
+      errorReporter: (message, error) =>
+          Notifications.of(context).push('$message, $error'),
     );
     if (!connected) {
       _navigateToConnectPage();

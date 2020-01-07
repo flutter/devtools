@@ -8,6 +8,7 @@ import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
+import 'notifications.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
@@ -138,22 +139,6 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
     color: theme.primaryColorLight,
     fontWeight: FontWeight.w300,
   );
-}
-
-/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
-ErrorReporter showErrorSnackBar(BuildContext context) {
-  return (String title, dynamic error) {
-    // TODO: This is a workaround - need to fix
-    // https://github.com/flutter/devtools/issues/1369.
-    SchedulerBinding.instance.scheduleTask(
-      () => Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(title),
-        ),
-      ),
-      Priority.idle,
-    );
-  };
 }
 
 /// Button to clear data in the UI.

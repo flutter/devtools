@@ -16,6 +16,7 @@ import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'initializer.dart';
+import 'notifications.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -122,6 +123,13 @@ class DevToolsAppState extends State<DevToolsApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: theme,
+      builder: (context, child) => Overlay(initialEntries: [
+        OverlayEntry(
+          builder: (context) => Notifications(child: child),
+          maintainState: true,
+          opaque: true,
+        )
+      ]),
       onGenerateRoute: _generateRoute,
     );
   }
