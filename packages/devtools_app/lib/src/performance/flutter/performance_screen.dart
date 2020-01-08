@@ -117,7 +117,9 @@ class PerformanceScreenBody extends StatelessWidget {
   }
 
   Widget _buildCpuProfiler(
-      PerformanceController controller, CpuProfileData data) {
+    PerformanceController controller,
+    CpuProfileData data,
+  ) {
     return ValueListenableBuilder(
       valueListenable:
           controller.cpuProfilerController.selectedCpuStackFrameNotifier,
