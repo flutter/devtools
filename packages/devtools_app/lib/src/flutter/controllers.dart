@@ -8,6 +8,7 @@ import '../auto_dispose.dart';
 import '../globals.dart';
 import '../logging/logging_controller.dart';
 import '../memory/flutter/memory_controller.dart';
+import '../performance/performance_controller.dart';
 import '../timeline/timeline_controller.dart';
 
 /// Container for controllers that should outlive individual screens of the app.
@@ -16,11 +17,15 @@ import '../timeline/timeline_controller.dart';
 /// particular [ProvidedControllers] instance again.
 @immutable
 class ProvidedControllers implements DisposableController {
-  const ProvidedControllers(
-      {@required this.logging, @required this.timeline, @required this.memory})
-      : assert(logging != null),
+  const ProvidedControllers({
+    @required this.logging,
+    @required this.timeline,
+    @required this.memory,
+    @required this.performance,
+  })  : assert(logging != null),
         assert(timeline != null),
-        assert(memory != null);
+        assert(memory != null),
+        assert(performance != null);
 
   /// Builds the default providers for the app.
   factory ProvidedControllers.defaults() {
@@ -33,18 +38,21 @@ class ProvidedControllers implements DisposableController {
       ),
       timeline: TimelineController(),
       memory: MemoryController(),
+      performance: PerformanceController(),
     );
   }
 
   final LoggingController logging;
   final TimelineController timeline;
   final MemoryController memory;
+  final PerformanceController performance;
 
   @override
   void dispose() {
     logging.dispose();
     // TODO(kenz): make timeline controller disposable.
     // TODO(terry): make memory controller disposable.
+    performance.dispose();
   }
 }
 

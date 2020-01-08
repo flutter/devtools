@@ -44,4 +44,9 @@ class PerformanceController {
   Future<void> clear() async {
     await cpuProfilerController.clear();
   }
+
+  void dispose() {
+    _recordingNotifier.dispose();
+    cpuProfilerController.dispose();
+  }
 }
