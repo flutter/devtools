@@ -62,7 +62,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         ),
         const PaddedDivider(),
         Text(
-          'Connect to a running app',
+          'Connect to a Running App',
           style: textTheme.body2,
         ),
         Text(
@@ -93,7 +93,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
                 // of hard coding material colors.
                 borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
-              hintText: 'URL',
+              hintText: 'http://127.0.0.1:12345/AUTH_CODE=/',
             ),
             maxLines: 1,
             controller: controller,
