@@ -50,8 +50,8 @@ class ProvidedControllers implements DisposableController {
   @override
   void dispose() {
     logging.dispose();
-    // TODO(kenz): make timeline controller disposable.
-    // TODO(terry): make memory controller disposable.
+    timeline.dispose();
+    memory.dispose();
     performance.dispose();
   }
 }

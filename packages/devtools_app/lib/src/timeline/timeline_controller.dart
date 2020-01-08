@@ -258,6 +258,15 @@ class TimelineController {
   void logNonFatalError(String message) {
     _nonFatalErrorController.add(message);
   }
+
+  void dispose() {
+    cpuProfilerController.dispose();
+    _selectedTimelineEventNotifier.dispose();
+    _timelineModeNotifier.dispose();
+    _clearController.close();
+    _loadOfflineDataController.close();
+    _nonFatalErrorController.close();
+  }
 }
 
 class FrameBasedTimeline

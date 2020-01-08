@@ -275,6 +275,12 @@ class MemoryController {
 
     return false;
   }
+
+  void dispose() {
+    _memorySourceNotifier.dispose();
+    _disconnectController.close();
+    _memoryTrackerController.close();
+  }
 }
 
 /// Settings dialog model.
