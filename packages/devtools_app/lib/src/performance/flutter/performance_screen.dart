@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:flutter/material.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../performance/performance_controller.dart';
