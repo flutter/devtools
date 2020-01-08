@@ -1,5 +1,7 @@
-## 0.1.14-dev.2
-* Fix issues with async trace event rendering.
+## 0.1.14-dev.3
+* Fix issues with async trace event rendering in Timeline.
+* Add timing and id information in Timeline event summary.
+* Improve hint text on connect screen.
 * Update package:vm_service dependency to ^2.2.0.
 
 ## 0.1.13 - 2019-12-10
