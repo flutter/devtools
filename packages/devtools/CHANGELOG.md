@@ -1,4 +1,4 @@
-## 0.1.14-dev.3
+## 0.1.14-dev.2
 * Fix issues with async trace event rendering in Timeline.
 * Add timing and id information in Timeline event summary.
 * Improve hint text on connect screen.
