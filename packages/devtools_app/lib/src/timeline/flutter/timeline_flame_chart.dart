@@ -64,7 +64,7 @@ class TimelineFlameChart extends StatelessWidget {
     return !fullTimelineEmpty
         ? FullTimelineFlameChart(
             controller.fullTimeline.data,
-            // TODO(kenz): remove * 4 once zooming is possible. This is so that we can
+            // TODO(kenz): remove * 8 once zooming is possible. This is so that we can
             // test horizontal scrolling functionality.
             width: constraints.maxWidth * 8,
             selected: selectedEvent,
@@ -94,6 +94,7 @@ class FrameBasedTimelineFlameChart
       FrameBasedTimelineFlameChartState();
 }
 
+// TODO(kenz): override buildCustomPaints to provide TimelineGridPainter.
 class FrameBasedTimelineFlameChartState
     extends FlameChartState<FrameBasedTimelineFlameChart, TimelineEvent> {
   // Add one for the spacer offset between UI and GPU nodes.
@@ -352,9 +353,6 @@ class _FullTimelineFlameChartState
   }
 
   @override
-  bool get hasCustomPaints => true;
-
-  @override
   List<CustomPaint> buildCustomPaints(BoxConstraints constraints) {
     // TODO(kenz): add TimelineGridPainter to this list.
     return [
@@ -371,9 +369,6 @@ class _FullTimelineFlameChartState
     ];
   }
 
-  // TODO(kenz): fix this. The calculation is wrong because the nodes are not
-  // absolutely positioned like they were in the dart:html app. They are
-  // positioned within their own rows in the flutter app.
   void _calculateAsyncGuidelines() {
     // Padding to be added between a subsequent guideline and the child event
     // it is connecting.

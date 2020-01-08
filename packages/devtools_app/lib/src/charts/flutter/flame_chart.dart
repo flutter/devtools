@@ -84,19 +84,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   int get startTimeOffset => widget.data.time.start.inMicroseconds;
 
-  /// Whether the flame chart has custom paints that need to be painted on top
-  /// of the chart.
+  /// Provides CustomPaint widgets to be painted on top of the flame chart, if
+  /// overridden.
   ///
-  /// This needs to be overridden to return true if [buildCustomPaints] is overridden
-  /// to return a non-empty list of painters.
-  bool get hasCustomPaints => false;
-
-  // Override this method if custom painters need to be painted on top of the
-  // flame chart. The painters will be painted in the order that they are
-  // returned by the provider.
-  //
-  // In order for the painters to be build, [hasCustomPainters] must be
-  // overridden to return true.
+  /// The painters will be painted in the order that they are returned.
   List<CustomPaint> buildCustomPaints(BoxConstraints constraints) => [];
 
   @override
