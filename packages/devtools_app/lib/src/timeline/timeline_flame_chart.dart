@@ -261,11 +261,11 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       final FullTimelineEventGroup group = data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
-      expandRows(rows.length + group.eventsByRow.length);
+      expandRows(rows.length + group.rows.length);
 
-      for (int i = 0; i < group.eventsByRow.length; i++) {
-        final row = group.eventsByRow[i];
-        for (var event in row) {
+      for (int i = 0; i < group.rows.length; i++) {
+        final rowEvents = group.rows[i].events;
+        for (var event in rowEvents) {
           createChartNode(
             event,
             currentRowIndex + i,
@@ -314,7 +314,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       rows[currentRowIndex].addNode(currentSectionLabel, index: 0);
 
       // Increment for next section.
-      currentRowIndex += group.eventsByRow.length;
+      currentRowIndex += group.rows.length;
       currentSectionIndex++;
     }
 

@@ -178,13 +178,12 @@ class FullTimelineData extends TimelineData {
 
 // TODO(kenz): add tests for this class.
 class FullTimelineEventGroup {
-  /// At each index in the list, this stores a list of timeline events that will
-  /// be painted in the same row in the visualization of the event group.
+  /// At each index in the list, this stores row data for the row at index.
   ///
-  /// We store events by row within the group in order to display overlapping
-  /// events in the flame chart UI. This allows us to reuse space where possible
-  /// and avoid collisions.  We will draw overlapping events on a new flame
-  /// chart row.
+  /// We store data by row within the group in order to display events with
+  /// overlapping timestamps in the flame chart UI. This allows us to reuse
+  /// space where possible and avoid collisions.  We will draw overlapping
+  /// events on a new flame chart row.
   ///
   /// If we have events A, B, C, and D, where all belong in a single
   /// [FullTimelineEventGroup] but some overlap, the UI will look
@@ -200,20 +199,13 @@ class FullTimelineEventGroup {
   ///   [timeline_event_B],
   ///   [timeline_event_D],
   /// ]
-  final eventsByRow = <List<TimelineEvent>>[];
+  final rows = <FullTimelineRowData>[];
 
-  /// At each index in the list, this stores the last event for each row, where
-  /// last means the event has the latest end time in the row.
-  ///
-  /// The most recently added event for the row is not guaranteed to be the last
-  /// event for the row.
-  final lastEventsByRow = <TimelineEvent>[];
-
-  int get displayDepth => eventsByRow.length;
+  int get displayDepth => rows.length;
 
   // TODO(kenz): prevent guideline "elbows" from overlapping other events.
   void addEventAtCalculatedRow(TimelineEvent event, {int displayRow = 0}) {
-    final currentLargestRowIndex = eventsByRow.length;
+    final currentLargestRowIndex = rows.length;
     while (displayRow < currentLargestRowIndex) {
       // Ensure that [event] and its children do not overlap with events at all
       // current offsets.
@@ -236,18 +228,19 @@ class FullTimelineEventGroup {
     final maxLevelToVerify =
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = displayRow + level < lastEventsByRow.length
-          ? lastEventsByRow[displayRow + level]
+      final lastEventAtLevel = displayRow + level < rows.length
+          ? rows[displayRow + level].lastEvent
           : null;
       final firstNewEventAtLevel = event.displayRows[level].nullSafeFirst();
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
-        final eventsOverlap =
-            lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time);
-        final newEventStartsBeforeLastEvent =
-            lastEventAtLevel.time.start > firstNewEventAtLevel.time.end;
+        // Events overlap one another, so [event] does not fit at [displayRow].
+        if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
+          return false;
+        }
 
-        if (eventsOverlap || newEventStartsBeforeLastEvent) {
-          // [event] does not fit at [displayRow].
+        // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
+        // [event] does not fit at [displayRow].
+        if (firstNewEventAtLevel.time.end < lastEventAtLevel.time.start) {
           return false;
         }
       }
@@ -256,24 +249,37 @@ class FullTimelineEventGroup {
   }
 
   void _addEventAtDisplayRow(TimelineEvent event, {@required int row}) {
-    if (row + event.displayDepth >= eventsByRow.length) {
-      for (int i = eventsByRow.length; i < row + event.displayDepth; i++) {
-        eventsByRow.add([]);
-        lastEventsByRow.add(null);
+    if (row + event.displayDepth >= rows.length) {
+      for (int i = rows.length; i < row + event.displayDepth; i++) {
+        rows.add(FullTimelineRowData());
       }
     }
 
     for (int i = 0; i < event.displayDepth; i++) {
       final displayRow = event.displayRows[i];
       for (var e in displayRow) {
-        eventsByRow[row + i].add(e);
+        rows[row + i].events.add(e);
         if (e.time.end >
-            (lastEventsByRow[row + i]?.time?.end ?? const Duration())) {
-          lastEventsByRow[row + i] = e;
+            (rows[row + i].lastEvent?.time?.end ?? const Duration())) {
+          rows[row + i].lastEvent = e;
         }
       }
     }
   }
+}
+
+class FullTimelineRowData {
+  /// Timeline events that will be painted in this row in a visualization of a
+  /// [FullTimelineEventGroup].
+  final List<TimelineEvent> events = [];
+
+  /// The last event for this row, where last means the event has the latest end
+  /// time in the row.
+  ///
+  /// The most recently added event for the row is not guaranteed to be the last
+  /// event for the row, which is why we cannot just call [events.last] to get
+  /// [lastEvent].
+  TimelineEvent lastEvent;
 }
 
 abstract class TimelineData {
@@ -675,13 +681,16 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   /// time of any of its descendant events.
   int get maxEndMicros;
 
+  /// Whether [this] event could be the parent of [e] based on criteria such as
+  /// timestamps and event ids.
   bool couldBeParentOf(TimelineEvent e);
 
   /// Tracks the start row for the lowest visual child in the display for this
   /// TimelineEvent.
   int _lowestDisplayChildRow = 1;
 
-  /// The lowest visual child in the display for this TimelineEvent.
+  /// The child that is nearest the bottom of the visualization for this
+  /// TimelineEvent.
   TimelineEvent get lowestDisplayChild => _lowestDisplayChild;
   TimelineEvent _lowestDisplayChild;
 
@@ -989,10 +998,16 @@ class AsyncTimelineEvent extends TimelineEvent {
       final lastEventAtLevel = _displayRows[displayRow + level].nullSafeLast();
       final firstNewEventAtLevel = event.firstChildNodeAtLevel(level);
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
-        final eventsOverlap =
-            lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time);
-        final newEventStartsBeforeLastEvent =
-            lastEventAtLevel.time.start > firstNewEventAtLevel.time.end;
+        // Events overlap one another, so [event] does not fit at [displayRow].
+        if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
+          return false;
+        }
+
+        // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
+        // [event] does not fit at [displayRow].
+        if (firstNewEventAtLevel.time.end < lastEventAtLevel.time.start) {
+          return false;
+        }
 
         final lastEventParent = lastEventAtLevel.parent;
         final firstNewEventParent = firstNewEventAtLevel.parent;
@@ -1005,12 +1020,7 @@ class AsyncTimelineEvent extends TimelineEvent {
                 firstNewEventParent != null &&
                 lastEventParent == firstNewEventParent &&
                 lastEventAtLevel.time.end >= lastEventParent.time.end;
-        if (eventsOverlap ||
-            newEventStartsBeforeLastEvent ||
-            siblingsWouldCauseOverlappingGuideline) {
-          // [event] does not fit at [displayRow].
-          return false;
-        }
+        if (siblingsWouldCauseOverlappingGuideline) return false;
       }
     }
     return true;

@@ -119,19 +119,19 @@ void main() {
       expect(timelineData.eventGroups, isEmpty);
       timelineData.initializeEventGroups();
       expect(
-        timelineData.eventGroups[FullTimelineData.uiKey].eventsByRow[0].length,
+        timelineData.eventGroups[FullTimelineData.uiKey].rows[0].events.length,
         equals(1),
       );
       expect(
-        timelineData.eventGroups[FullTimelineData.gpuKey].eventsByRow[0].length,
+        timelineData.eventGroups[FullTimelineData.gpuKey].rows[0].events.length,
         equals(1),
       );
       expect(
         timelineData
-            .eventGroups[FullTimelineData.unknownKey].eventsByRow[0].length,
+            .eventGroups[FullTimelineData.unknownKey].rows[0].events.length,
         equals(1),
       );
-      expect(timelineData.eventGroups['A'].eventsByRow[0].length, equals(1));
+      expect(timelineData.eventGroups['A'].rows[0].events.length, equals(1));
     });
 
     test('event bucket compare', () {
