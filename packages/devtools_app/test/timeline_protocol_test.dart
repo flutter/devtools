@@ -336,7 +336,7 @@ void main() {
         equals(TimelineEventType.gpu),
       );
       expect(
-        processor.inferEventType(unknownEventTrace.event),
+        processor.inferEventType(unknownEventBeginTrace.event),
         equals(TimelineEventType.unknown),
       );
     });

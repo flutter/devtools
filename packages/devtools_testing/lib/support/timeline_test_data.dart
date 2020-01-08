@@ -553,7 +553,8 @@ final asyncEventC2 = AsyncTimelineEvent(asyncStartC2Trace)
 final asyncEventD = AsyncTimelineEvent(asyncStartDTrace)
   ..addEndEvent(asyncEndDTrace);
 
-final asyncEventWithDeepOverlap = AsyncTimelineEvent(asyncStartTraceEventWithDeepOverlap)
+final asyncEventWithDeepOverlap = AsyncTimelineEvent(
+    asyncStartTraceEventWithDeepOverlap)
   ..addEndEvent(asyncEndTraceEventWithDeepOverlap)
   ..addAllChildren([asyncEventWithDeepOverlap1, asyncEventWithDeepOverlap2]);
 final asyncEventWithDeepOverlap1 = AsyncTimelineEvent(asyncStart1Trace)
@@ -916,14 +917,25 @@ final asyncChildEndId2 = testTraceEventWrapper({
 });
 
 // Mark: unknown event
-final unknownEvent = SyncTimelineEvent(unknownEventTrace);
-final unknownEventTrace = testTraceEventWrapper({
+final unknownEvent = SyncTimelineEvent(unknownEventBeginTrace)
+  ..addEndEvent(unknownEventEndTrace);
+final unknownEventBeginTrace = testTraceEventWrapper({
   'name': 'Unknown trace event',
   'cat': 'Dart',
   'tid': testUnknownThreadId,
   'pid': 51385,
   'ts': 193938741076,
   'ph': 'B',
+  'id': '7',
+  'args': {'isolateId': 'isolates/2139247553966975'},
+});
+final unknownEventEndTrace = testTraceEventWrapper({
+  'name': 'Unknown trace event',
+  'cat': 'Dart',
+  'tid': testUnknownThreadId,
+  'pid': 51385,
+  'ts': 193938742076,
+  'ph': 'E',
   'id': '7',
   'args': {'isolateId': 'isolates/2139247553966975'},
 });
