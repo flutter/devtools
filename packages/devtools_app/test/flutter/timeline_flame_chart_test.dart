@@ -39,7 +39,7 @@ void main() {
         ..frameBasedTimeline.selectFrame(testFrame1);
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
-        timelineController: controllerWithData,
+        timeline: controllerWithData,
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsOneWidget);
       expect(find.byKey(TimelineScreen.recordingInstructionsKey), findsNothing);
@@ -51,8 +51,7 @@ void main() {
       // Set a wide enough screen width that we do not run into overflow.
       await tester.pumpWidget(wrapWithControllers(
         TimelineScreenBody(),
-        timelineController: TimelineController()
-          ..selectTimelineMode(TimelineMode.full),
+        timeline: TimelineController()..selectTimelineMode(TimelineMode.full),
       ));
       expect(find.byType(FrameBasedTimelineFlameChart), findsNothing);
       expect(

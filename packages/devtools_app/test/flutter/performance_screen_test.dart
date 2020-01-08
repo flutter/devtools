@@ -45,7 +45,7 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.buildTab),
-        performanceController: PerformanceController(),
+        performance: PerformanceController(),
       ));
       expect(find.text('Performance'), findsOneWidget);
     });
@@ -59,7 +59,7 @@ void main() {
         final perfScreenBody = PerformanceScreenBody();
         await tester.pumpWidget(wrapWithControllers(
           perfScreenBody,
-          performanceController: PerformanceController(),
+          performance: PerformanceController(),
         ));
         expect(find.byType(PerformanceScreenBody), findsOneWidget);
         verifyBaseState(perfScreenBody, tester);

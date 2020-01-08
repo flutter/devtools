@@ -47,7 +47,13 @@ class Disposer {
 
     assert(_listenables.length == _listeners.length);
     for (int i = 0; i < _listenables.length; ++i) {
-      _listenables[i].removeListener(_listeners[i]);
+      try {
+        _listenables[i].removeListener(_listeners[i]);
+      } on FlutterError catch (e) {
+        // If the listenable has already been disposed, it will throw an error
+        // when attempting to remove a listener.
+        // This error is safe to ignore.
+      }
     }
     _listenables.clear();
     _listeners.clear();
