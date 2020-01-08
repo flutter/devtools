@@ -518,11 +518,20 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension NullSafeLast<T> on List<T> {
-  T nullSafeLast() {
-    if (isEmpty) {
+extension NullSafeAccess<T> on List<T> {
+  T safeFirst() {
+    return safeGet(0);
+  }
+
+  T safeLast() {
+    return safeGet(length - 1);
+  }
+
+  T safeGet(int index) {
+    if (index < 0 || index >= length) {
       return null;
+    } else {
+      return this[index];
     }
-    return last;
   }
 }

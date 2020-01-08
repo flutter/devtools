@@ -416,13 +416,31 @@ void main() {
     });
 
     group('null safe list', () {
+      test('nullSafeFirst', () {
+        final list = [];
+        expect(list.safeFirst(), isNull);
+        list.addAll([1, 2, 3]);
+        expect(list.safeFirst(), equals(1));
+        list.insert(0, null);
+        expect(list.safeFirst(), isNull);
+      });
+
       test('nullSafeLast', () {
         final list = [];
-        expect(list.nullSafeLast(), isNull);
+        expect(list.safeLast(), isNull);
         list.addAll([1, 2, 3]);
-        expect(list.nullSafeLast(), equals(3));
+        expect(list.safeLast(), equals(3));
         list.add(null);
-        expect(list.nullSafeLast(), isNull);
+        expect(list.safeLast(), isNull);
+      });
+
+      test('safeGet', () {
+        final list = [];
+        expect(list.safeGet(0), isNull);
+        list.addAll([1, 2]);
+        expect(list.safeGet(0), equals(1));
+        expect(list.safeGet(1), equals(2));
+        expect(list.safeGet(-1), isNull);
       });
     });
   });
