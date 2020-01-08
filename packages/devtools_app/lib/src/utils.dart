@@ -532,4 +532,12 @@ extension NullSafeAccess<T> on List<T> {
     }
     return last;
   }
+
+  T safeGet(int index) {
+    if (index < 0 || index >= length) {
+      return null;
+    } else {
+      return this[index];
+    }
+  }
 }

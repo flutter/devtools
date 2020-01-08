@@ -433,6 +433,15 @@ void main() {
         list.add(null);
         expect(list.nullSafeLast(), isNull);
       });
+
+      test('safeGet', () {
+        final list = [];
+        expect(list.safeGet(0), isNull);
+        list.addAll([1, 2]);
+        expect(list.safeGet(0), equals(1));
+        expect(list.safeGet(1), equals(2));
+        expect(list.safeGet(-1), isNull);
+      });
     });
   });
 }
