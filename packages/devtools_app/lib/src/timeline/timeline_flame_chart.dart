@@ -264,8 +264,7 @@ class FullTimelineFlameChartCanvas extends FlameChartCanvas<FullTimelineData> {
       expandRows(rows.length + group.rows.length);
 
       for (int i = 0; i < group.rows.length; i++) {
-        final rowEvents = group.rows[i].events;
-        for (var event in rowEvents) {
+        for (var event in group.rows[i].events) {
           createChartNode(
             event,
             currentRowIndex + i,

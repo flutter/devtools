@@ -269,7 +269,7 @@ class FullTimelineEventGroup {
 }
 
 class FullTimelineRowData {
-  /// Timeline events that will be painted in this row in a visualization of a
+  /// Timeline events that will be displayed in this row in a visualization of a
   /// [FullTimelineEventGroup].
   final List<TimelineEvent> events = [];
 
@@ -1015,12 +1015,12 @@ class AsyncTimelineEvent extends TimelineEvent {
         // before [lastEventAtLevel], drawing a subsequent guideline from
         // [lastEventParent] to [firstNewEventAtLevel] would overlap
         // [lastEventAtLevel], so we cannot place [event] on this row.
-        final siblingsWouldCauseOverlappingGuideline =
-            lastEventParent != null &&
-                firstNewEventParent != null &&
-                lastEventParent == firstNewEventParent &&
-                lastEventAtLevel.time.end >= lastEventParent.time.end;
-        if (siblingsWouldCauseOverlappingGuideline) return false;
+        if (lastEventParent != null &&
+            firstNewEventParent != null &&
+            lastEventParent == firstNewEventParent &&
+            lastEventAtLevel.time.end >= lastEventParent.time.end) {
+          return false;
+        }
       }
     }
     return true;
