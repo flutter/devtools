@@ -26,5 +26,21 @@ void main() {
       await controller.stopRecording();
       expect(controller.recordingNotifier.value, isFalse);
     });
+
+    test('disposes', () async {
+      controller.dispose();
+      expect(() {
+        controller.recordingNotifier.addListener(() {});
+      }, throwsA(anything));
+
+      expect(() {
+        controller.cpuProfilerController.dataNotifier.addListener(() {});
+      }, throwsA(anything));
+
+      expect(() {
+        controller.cpuProfilerController.selectedCpuStackFrameNotifier
+            .addListener(() {});
+      }, throwsA(anything));
+    });
   });
 }

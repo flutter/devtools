@@ -58,4 +58,9 @@ class CpuProfilerController {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = useBaseStateData ? baseStateCpuProfileData : null;
   }
+
+  void dispose() {
+    _dataNotifier.dispose();
+    _selectedCpuStackFrameNotifier.dispose();
+  }
 }

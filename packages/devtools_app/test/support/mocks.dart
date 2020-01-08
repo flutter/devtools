@@ -8,13 +8,14 @@ import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
+    as flutter_memory;
+import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
-    as flutter_memory;
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
@@ -161,6 +162,8 @@ class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
 class MockTimelineController extends Mock implements TimelineController {}
+
+class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockFrameBasedTimelineData extends Mock
     implements FrameBasedTimelineData {}

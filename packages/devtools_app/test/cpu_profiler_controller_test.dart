@@ -87,5 +87,17 @@ void main() {
       expect(controller.dataNotifier.value, isNull);
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
     });
+
+    test('disposes', () {
+      controller.dispose();
+
+      expect(() {
+        controller.dataNotifier.addListener(() {});
+      }, throwsA(anything));
+
+      expect(() {
+        controller.selectedCpuStackFrameNotifier.addListener(() {});
+      }, throwsA(anything));
+    });
   });
 }
