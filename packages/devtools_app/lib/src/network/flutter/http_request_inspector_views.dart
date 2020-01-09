@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:recase/recase.dart';
 
+import '../../utils.dart';
 import '../http.dart';
 import '../http_request_data.dart';
 
@@ -15,21 +16,22 @@ class HttpRequestHeadersView extends StatelessWidget {
 
   final HttpRequestData data;
 
-  ExpansionTile _buildTile(String title, List<Widget> children) {
+  ExpansionTile _buildTile(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
     return ExpansionTile(
       title: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
       ),
       children: children,
       initiallyExpanded: true,
     );
   }
 
-  Widget _buildRow(String key, dynamic value, constraints) {
+  Widget _buildRow(
+      BuildContext context, String key, dynamic value, constraints) {
     return Container(
       width: constraints.minWidth,
       padding: const EdgeInsets.only(
@@ -41,9 +43,7 @@ class HttpRequestHeadersView extends StatelessWidget {
         children: [
           Text(
             '$key: ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.subtitle,
           ),
           Expanded(
               child: Text(
@@ -63,10 +63,12 @@ class HttpRequestHeadersView extends StatelessWidget {
         return ListView(
           children: [
             _buildTile(
+              context,
               'General',
               [
                 for (final entry in data.general.entries)
                   _buildRow(
+                    context,
                     ReCase(entry.key).titleCase,
                     entry.value.toString(),
                     constraints,
@@ -74,11 +76,13 @@ class HttpRequestHeadersView extends StatelessWidget {
               ],
             ),
             _buildTile(
+              context,
               'Response Headers',
               [
                 if (data.responseHeaders != null)
                   for (final entry in data.responseHeaders.entries)
                     _buildRow(
+                      context,
                       entry.key,
                       entry.value.toString(),
                       constraints,
@@ -86,11 +90,13 @@ class HttpRequestHeadersView extends StatelessWidget {
               ],
             ),
             _buildTile(
+              context,
               'Request Headers',
               [
                 if (data.requestHeaders != null)
                   for (final entry in data.requestHeaders.entries)
                     _buildRow(
+                      context,
                       entry.key,
                       entry.value.toString(),
                       constraints,
@@ -110,18 +116,16 @@ class HttpRequestCookiesView extends StatelessWidget {
 
   final HttpRequestData data;
 
-  static const _headerTextStyle = TextStyle(
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-  );
-
-  DataColumn _buildColumn(String title, {bool numeric = false}) {
+  DataColumn _buildColumn(
+    BuildContext context,
+    String title, {
+    bool numeric = false,
+  }) {
     return DataColumn(
       label: Expanded(
         child: Text(
           title ?? '--',
-          style: _headerTextStyle,
+          style: Theme.of(context).textTheme.subhead,
           overflow: TextOverflow.fade,
         ),
       ),
@@ -153,21 +157,21 @@ class HttpRequestCookiesView extends StatelessWidget {
   DataCell _buildIconCell(IconData icon) => DataCell(Icon(icon));
 
   Widget _buildCookiesTable(
+    BuildContext context,
     String title,
     List<Cookie> cookies,
     BoxConstraints constraints, {
     bool requestCookies = false,
   }) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.lightBlue,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.subhead.apply(
+              color: theme.accentColor,
             ),
           ),
         ),
@@ -189,15 +193,15 @@ class HttpRequestCookiesView extends StatelessWidget {
                   // NOTE: if this list of columns change, _buildRow will need
                   // to be updated to match.
                   columns: [
-                    _buildColumn('Name'),
-                    _buildColumn('Value'),
+                    _buildColumn(context, 'Name'),
+                    _buildColumn(context, 'Value'),
                     if (!requestCookies) ...[
-                      _buildColumn('Domain'),
-                      _buildColumn('Path'),
-                      _buildColumn('Expires / Max Age'),
-                      _buildColumn('Size', numeric: true),
-                      _buildColumn('HttpOnly'),
-                      _buildColumn('Secure'),
+                      _buildColumn(context, 'Domain'),
+                      _buildColumn(context, 'Path'),
+                      _buildColumn(context, 'Expires / Max Age'),
+                      _buildColumn(context, 'Size', numeric: true),
+                      _buildColumn(context, 'HttpOnly'),
+                      _buildColumn(context, 'Secure'),
                     ]
                   ],
                   rows: [
@@ -221,42 +225,35 @@ class HttpRequestCookiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final requestCookies = data.requestCookies;
     final responseCookies = data.responseCookies;
-    return (requestCookies.isEmpty && responseCookies.isEmpty)
-        ? const Center(
-            child: Text(
-              'No Cookies',
-              style: TextStyle(
-                fontSize: 20,
-              ),
-            ),
-          )
-        : Container(
-            padding: const EdgeInsets.only(
-              left: 14.0,
-              top: 18.0,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Column(
-                  children: [
-                    if (responseCookies.isNotEmpty)
-                      _buildCookiesTable(
-                        'Response Cookies',
-                        responseCookies,
-                        constraints,
-                      ),
-                    if (requestCookies.isNotEmpty)
-                      _buildCookiesTable(
-                        'Request Cookies',
-                        requestCookies,
-                        constraints,
-                        requestCookies: true,
-                      ),
-                  ],
-                );
-              },
-            ),
+    return Container(
+      padding: const EdgeInsets.only(
+        left: 14.0,
+        top: 18.0,
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              if (responseCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  'Response Cookies',
+                  responseCookies,
+                  constraints,
+                ),
+              if (requestCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  'Request Cookies',
+                  requestCookies,
+                  constraints,
+                  requestCookies: true,
+                ),
+            ],
           );
+        },
+      ),
+    );
   }
 }
 
@@ -266,21 +263,25 @@ class HttpRequestTimingView extends StatelessWidget {
 
   final HttpRequestData data;
 
-  ExpansionTile _buildTile(String title, List<Widget> children) {
+  ExpansionTile _buildTile(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
     return ExpansionTile(
       title: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
       ),
       children: children,
       initiallyExpanded: true,
     );
   }
 
-  Widget _buildRow(String key, dynamic value) {
+  Widget _buildRow(
+    BuildContext context,
+    String key,
+    dynamic value,
+  ) {
     return Container(
       padding: const EdgeInsets.only(
         left: 30,
@@ -292,9 +293,7 @@ class HttpRequestTimingView extends StatelessWidget {
             children: [
               Text(
                 '$key: ',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.subtitle,
               ),
               Text(value),
             ],
@@ -308,21 +307,31 @@ class HttpRequestTimingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = <Widget>[];
     for (final instant in data.instantEvents) {
-      final timeDiffMillis = instant.timeDiffMs;
+      final duration = instant.timeRange.duration;
       events.add(
         _buildTile(
+          context,
           instant.name,
           [
-            _buildRow('Duration', '$timeDiffMillis ms'),
+            _buildRow(
+              context,
+              'Duration',
+              '${msText(duration)}',
+            ),
           ],
         ),
       );
     }
     events.add(
       _buildTile(
+        context,
         'Total',
         [
-          _buildRow('Duration', '${data.durationMs} ms'),
+          _buildRow(
+            context,
+            'Duration',
+            '${msText(data.duration)}',
+          ),
         ],
       ),
     );

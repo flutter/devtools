@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/timeline/timeline_model.dart';
+
+import '../utils.dart';
+
 import 'http.dart';
 
 /// Contains all state relevant to completed and in-progress HTTP requests.
@@ -29,16 +33,19 @@ class HttpRequests {
 
 /// Used to represent an instant event emitted during an HTTP request.
 class HttpInstantEvent {
-  HttpInstantEvent._(this._rawEventJson) : name = _rawEventJson['name'];
+  HttpInstantEvent._(this._event);
 
-  final Map<String, dynamic> _rawEventJson;
-  final String name;
+  final TraceEvent _event;
+  String get name => _event.name;
+
+  /// The time the instant event was recorded.
+  int get timestampMicros => _event.timestampMicros;
 
   /// The amount of time since the last instant event completed.
-  double get timeDiffMs => _timeDiffMs;
+  TimeRange get timeRange => _timeRange;
 
   // This is set from within HttpRequestData.
-  double _timeDiffMs;
+  TimeRange _timeRange;
 }
 
 /// An abstraction of an HTTP request made through dart:io.
@@ -58,19 +65,20 @@ class HttpRequestData {
     int timelineMicrosBase,
     List<Map<String, dynamic>> events,
   ) {
-    Map<String, dynamic> startEvent;
-    Map<String, dynamic> endEvent;
-    final instantEvents = <Map<String, dynamic>>[];
+    TraceEvent startEvent;
+    TraceEvent endEvent;
+    final instantEvents = <TraceEvent>[];
 
     for (final event in events) {
-      if (_isStartEvent(event)) {
+      final traceEvent = TraceEvent(event);
+      if (traceEvent.phase == TraceEvent.asyncBeginPhase) {
         assert(startEvent == null);
-        startEvent = event;
-      } else if (_isEndEvent(event)) {
+        startEvent = traceEvent;
+      } else if (traceEvent.phase == TraceEvent.asyncEndPhase) {
         assert(endEvent == null);
-        endEvent = event;
-      } else if (_isInstantEvent(event)) {
-        instantEvents.add(event);
+        endEvent = traceEvent;
+      } else if (traceEvent.phase == TraceEvent.asyncInstantPhase) {
+        instantEvents.add(traceEvent);
       } else {
         assert(false, 'Unexpected event type');
       }
@@ -82,15 +90,18 @@ class HttpRequestData {
     );
     data._addInstantEvents(
       [
-        for (final instant in instantEvents) HttpInstantEvent._(instant),
+        for (final instant in instantEvents)
+          HttpInstantEvent._(
+            instant,
+          ),
       ],
     );
     return data;
   }
 
   final int _timelineMicrosBase;
-  final Map<String, dynamic> _startEvent;
-  Map<String, dynamic> _endEvent;
+  final TraceEvent _startEvent;
+  TraceEvent _endEvent;
 
   // Do not add to this list directly! Call `_addInstantEvents` which is
   // responsible for calculating the time offsets of each event.
@@ -101,16 +112,15 @@ class HttpRequestData {
   bool selected = false;
 
   /// The duration of the HTTP request, in milliseconds.
-  double get durationMs {
+  Duration get duration {
     if (_endEvent == null) {
       return null;
     }
     // Timestamps are in microseconds
-    double millis = (_endEvent['ts'] - _startEvent['ts']) / 1000;
-    if (millis >= 1.0) {
-      millis = millis.truncateToDouble();
-    }
-    return millis;
+    final range = TimeRange()
+      ..start = Duration(microseconds: _startEvent.timestampMicros)
+      ..end = Duration(microseconds: _endEvent.timestampMicros);
+    return range.duration;
   }
 
   /// True if either the request or response contained cookies.
@@ -119,9 +129,9 @@ class HttpRequestData {
 
   /// A map of general information associated with an HTTP request.
   Map<String, dynamic> get general {
-    final copy = Map<String, dynamic>.from(_startEvent['args']);
+    final copy = Map<String, dynamic>.from(_startEvent.args);
     if (_endEvent != null) {
-      copy.addAll(_endEvent['args']);
+      copy.addAll(_endEvent.args);
     }
     copy.remove('requestHeaders');
     copy.remove('responseHeaders');
@@ -138,8 +148,8 @@ class HttpRequestData {
 
   /// The HTTP method associated with this request.
   String get method {
-    assert(_startEvent['args'].containsKey('method'));
-    return _startEvent['args']['method'];
+    assert(_startEvent.args.containsKey('method'));
+    return _startEvent.args['method'];
   }
 
   /// The name of the request (currently the URI).
@@ -147,6 +157,8 @@ class HttpRequestData {
 
   /// A list of all cookies contained within the request headers.
   List<Cookie> get requestCookies {
+    // The request may still be in progress, in which case we don't display any
+    // cookies.
     final headers = requestHeaders;
     if (headers == null) {
       return [];
@@ -156,25 +168,26 @@ class HttpRequestData {
 
   /// The request headers for the HTTP request.
   Map<String, dynamic> get requestHeaders {
+    // The request may still be in progress, in which case we don't display any
+    // headers.
     if (_endEvent == null) {
       return null;
     }
-    return _endEvent['args']['requestHeaders'];
+    return _endEvent.args['requestHeaders'];
   }
 
   /// The time the HTTP request was issued.
   DateTime get requestTime {
     assert(_startEvent != null);
-    return DateTime.fromMicrosecondsSinceEpoch(_requestTimeMicros);
-  }
-
-  int get _requestTimeMicros {
-    assert(_startEvent != null);
-    return _getTimelineMicrosecondsSinceEpoch(_startEvent);
+    return DateTime.fromMicrosecondsSinceEpoch(
+      _getTimelineMicrosecondsSinceEpoch(_startEvent),
+    );
   }
 
   /// A list of all cookies contained within the response headers.
   List<Cookie> get responseCookies {
+    // The request may still be in progress, in which case we don't display any
+    // cookies.
     final headers = responseHeaders;
     if (headers == null) {
       return [];
@@ -186,10 +199,12 @@ class HttpRequestData {
 
   /// The response headers for the HTTP request.
   Map<String, dynamic> get responseHeaders {
+    // The request may still be in progress, in which case we don't display any
+    // headers.
     if (_endEvent == null) {
       return null;
     }
-    return _endEvent['args']['responseHeaders'];
+    return _endEvent.args['responseHeaders'];
   }
 
   /// A string representing the status of the request.
@@ -199,7 +214,7 @@ class HttpRequestData {
   String get status {
     String statusCode;
     if (_endEvent != null) {
-      final endArgs = _endEvent['args'];
+      final endArgs = _endEvent.args;
       if (endArgs.containsKey('error')) {
         // This case occurs when an exception has been thrown, so there's no
         // status code to associate with the request.
@@ -213,8 +228,8 @@ class HttpRequestData {
 
   /// The address the HTTP request was issued to.
   Uri get uri {
-    assert(_startEvent['args'].containsKey('uri'));
-    return Uri.parse(_startEvent['args']['uri']);
+    assert(_startEvent.args.containsKey('uri'));
+    return Uri.parse(_startEvent.args['uri']);
   }
 
   /// Merges the information from another [HttpRequestData] into this instance.
@@ -226,11 +241,6 @@ class HttpRequestData {
       _endEvent = data._endEvent;
     }
   }
-
-  // Timeline event helpers.
-  static bool _isStartEvent(Map<String, dynamic> event) => event['ph'] == 'b';
-  static bool _isEndEvent(Map<String, dynamic> event) => event['ph'] == 'e';
-  static bool _isInstantEvent(Map<String, dynamic> event) => event['ph'] == 'n';
 
   static List<Cookie> _parseCookies(List cookies) {
     return [
@@ -252,17 +262,17 @@ class HttpRequestData {
 
   void _recalculateInstantEventTimes() {
     assert(_startEvent != null);
-    int lastTime = _requestTimeMicros;
+    int lastTime = _startEvent.timestampMicros;
     for (final instant in instantEvents) {
-      final instantTime =
-          _getTimelineMicrosecondsSinceEpoch(instant._rawEventJson);
-      instant._timeDiffMs = (instantTime - lastTime) / 1000;
+      final instantTime = instant.timestampMicros;
+      instant._timeRange = TimeRange()
+        ..start = Duration(microseconds: lastTime)
+        ..end = Duration(microseconds: instantTime);
       lastTime = instantTime;
     }
   }
 
-  int _getTimelineMicrosecondsSinceEpoch(Map<String, dynamic> event) {
-    assert(event.containsKey('ts'));
-    return _timelineMicrosBase + event['ts'];
+  int _getTimelineMicrosecondsSinceEpoch(TraceEvent event) {
+    return _timelineMicrosBase + event.timestampMicros;
   }
 }

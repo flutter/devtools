@@ -21,7 +21,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 // TODO(bkonyi): remove this bool when page is ready.
-const showNetworkPage = false;
+const showNetworkPage = true;
 
 /// Top-level configuration for the app.
 @immutable

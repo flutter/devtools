@@ -65,12 +65,10 @@ class HttpRequestInspector extends StatelessWidget {
         ),
       ),
       child: (data == null)
-          ? const Center(
+          ? Center(
               child: Text(
                 'No request selected',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
+                style: Theme.of(context).textTheme.title,
               ),
             )
           : tabbedContent,

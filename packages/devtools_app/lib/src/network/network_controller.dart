@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:html_shim/html.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -27,10 +26,15 @@ class NetworkController {
   int _timelineMicrosOffset;
   int _lastProfileRefreshMicros = 0;
 
+  Timer _pollingTimer;
+
   void _processHttpTimelineEvents(Timeline timeline) {
-    final currentValues = _httpRequestsNotifier.value.requests.toList();
+    final currentValues = List<HttpRequestData>.from(
+      _httpRequestsNotifier.value.requests,
+    );
     final outstandingRequestsMap = Map<String, HttpRequestData>.from(
-        _httpRequestsNotifier.value.outstandingRequests);
+      _httpRequestsNotifier.value.outstandingRequests,
+    );
     final events = timeline.traceEvents;
     final httpEventIds = <String>{};
     // Perform initial pass to find the IDs for the HTTP timeline events.
@@ -59,10 +63,7 @@ class NetworkController {
         continue;
       }
       if (httpEventIds.contains(id)) {
-        if (!httpEvents.containsKey(id)) {
-          httpEvents[id] = [];
-        }
-        httpEvents.putIfAbsent(id, () => <Map<String, dynamic>>[]).add(json);
+        httpEvents.putIfAbsent(id, () => []).add(json);
       }
     }
 
@@ -96,15 +97,17 @@ class NetworkController {
   }
 
   void _startPolling() {
-    // TODO(bkonyi): provide a way to cancel this polling loop.
-    Future<void>.delayed(const Duration(milliseconds: 1000)).then(
-      (_) {
-        if (_httpRecordingNotifier.value) {
-          refreshRequests();
-          _startPolling();
-        }
-      },
+    assert(_pollingTimer == null);
+    _pollingTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => refreshRequests(),
     );
+  }
+
+  void _stopPolling() {
+    assert(_pollingTimer != null);
+    _pollingTimer.cancel();
+    _pollingTimer = null;
   }
 
   Future<void> _forEachIsolate(Future Function(IsolateRef) callback) async {
@@ -117,19 +120,19 @@ class NetworkController {
   }
 
   Future<void> _setHttpTimelineRecording(bool state) async {
-    await _forEachIsolate(
-      (isolate) async {
-        final future = serviceManager.service
-            .setHttpEnableTimelineLogging(isolate.id, state);
-        // If the isolate is paused the request above will never complete.
-        await Future.any(
-          [
-            future,
-            Future.delayed(const Duration(milliseconds: 500)),
-          ],
-        );
-      },
-    );
+    assert(state == !_httpRecordingNotifier.value);
+    state ? _startPolling() : _stopPolling();
+    await _forEachIsolate((isolate) async {
+      final future = serviceManager.service.setHttpEnableTimelineLogging(
+        isolate.id,
+        state,
+      );
+      // If the isolate is paused the request above will never complete.
+      await Future.any([
+        future,
+        Future.delayed(const Duration(milliseconds: 500)),
+      ]);
+    });
     _httpRecordingNotifier.value = state;
   }
 
@@ -137,8 +140,9 @@ class NetworkController {
   Future<void> refreshRequests() async {
     final timestamp = await serviceManager.service.getVMTimelineMicros();
     final timeline = await serviceManager.service.getVMTimeline(
-        timeOriginMicros: _lastProfileRefreshMicros,
-        timeExtentMicros: timestamp.timestamp - _lastProfileRefreshMicros);
+      timeOriginMicros: _lastProfileRefreshMicros,
+      timeExtentMicros: timestamp.timestamp - _lastProfileRefreshMicros,
+    );
     _lastProfileRefreshMicros = timestamp.timestamp;
     _processHttpTimelineEvents(timeline);
   }
@@ -173,10 +177,7 @@ class NetworkController {
   Future<void> pauseRecording() async => await _setHttpTimelineRecording(false);
 
   /// Resumes recording without resetting the last refresh timestamp.
-  Future<void> resumeRecording() async {
-    await _setHttpTimelineRecording(true);
-    _startPolling();
-  }
+  Future<void> resumeRecording() async => await _setHttpTimelineRecording(true);
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
@@ -187,15 +188,13 @@ class NetworkController {
         final future =
             serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
         // The above call won't complete if the isolate is paused.
-        final state = await Future.any<HttpTimelineLoggingState>(
-          [
-            future,
-            Future.delayed(
-              const Duration(milliseconds: 500),
-              () => null,
-            ),
-          ],
-        );
+        final state = await Future.any<HttpTimelineLoggingState>([
+          future,
+          Future.delayed(
+            const Duration(milliseconds: 500),
+            () => null,
+          ),
+        ]);
         if (state != null && state.enabled) {
           enabled = true;
         }
@@ -210,6 +209,11 @@ class NetworkController {
       await pauseRecording();
       _httpRecordingNotifier.value = enabled;
     }
+  }
+
+  void dispose() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last
