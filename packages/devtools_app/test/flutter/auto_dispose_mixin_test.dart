@@ -115,7 +115,7 @@ void main() {
       expect(values.last, equals(19));
     });
 
-    test('disposes already-disposed listeners without throwing an error', () {
+    test('throws an error when disposing already-disposed listeners', () {
       final disposer = Disposer();
       final notifier = ValueNotifier<int>(42);
       final values = <int>[];
@@ -129,7 +129,7 @@ void main() {
       // After disposal, all notifier methods will throw. Disposer needs
       // to ignore this when cancelling.
       notifier.dispose();
-      disposer.cancel();
+      expect(() => disposer.cancel(), throwsA(anything));
       expect(values, [72]);
     });
   });

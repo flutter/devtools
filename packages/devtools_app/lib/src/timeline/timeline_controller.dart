@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../auto_dispose.dart';
 import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -27,7 +28,7 @@ const String timelineScreenId = 'timeline';
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class TimelineController {
+class TimelineController implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
@@ -259,6 +260,7 @@ class TimelineController {
     _nonFatalErrorController.add(message);
   }
 
+  @override
   void dispose() {
     cpuProfilerController.dispose();
     _selectedTimelineEventNotifier.dispose();

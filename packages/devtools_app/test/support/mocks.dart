@@ -444,18 +444,6 @@ StreamController<T> _getStreamController<T>(
   return streamControllers[name];
 }
 
-class TestProvidedControllers extends Fake implements ProvidedControllers {
-  TestProvidedControllers() {
-    disposed[this] = false;
-  }
-  @override
-  void dispose() {
-    disposed[this] = true;
-  }
-}
-
-final disposed = <TestProvidedControllers, bool>{};
-
 Future<void> ensureInspectorDependencies() async {
   assert(
     !kIsWeb,
