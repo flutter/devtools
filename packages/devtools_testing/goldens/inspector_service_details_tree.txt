@@ -8,24 +8,24 @@ MaterialApp
      │ state: _WidgetsAppState#00000
      │
      └─Shortcuts
-       │ manager: null
-       │ shortcuts: {LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x100070028", keyLabel: null,
-       │   debugName: "Enter")}): Intent#00000(key: [<ActivateAction>]),
-       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
-       │   "0x00000020", keyLabel: " ", debugName: "Space")}):
-       │   Intent#00000(key: [<ActivateAction>]),
-       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
-       │   "0x10007002b", keyLabel: null, debugName: "Tab")}):
-       │   Intent#00000(key: [<NextFocusAction>]),
-       │   LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId:
-       │   "0x201000700e1", keyLabel: null, debugName: "Shift"),
-       │   LogicalKeyboardKey#00000(keyId: "0x10007002b", keyLabel: null,
-       │   debugName: "Tab")}): Intent#00000(key:
-       │   [<PreviousFocusAction>]), LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x100070050", keyLabel: null,
-       │   debugName: "Arrow Left")}): DirectionalFocusIntent#00000(key:
-       │   [<DirectionalFocusAction>]), LogicalKeySet#00000(keys:
-       │   {LogicalKeyboardKey#00000(keyId: "0x10007004f", keyLabel: null,
-       │   debugName: "Arrow Right")}): DirectionalFocusIntent#00000(key:
+       │ shortcuts: <Default WidgetsApp Shortcuts>
+       │ state: _ShortcutsState#00000
+       │
+       └─Focus
+         │ debugLabel: "Shortcuts"
+         │ state: _FocusState#00000
+         │
+         └─_FocusMarker
+           └─Semantics
+             │ container: false
+             │ properties: SemanticsProperties
+             │ label: null
+             │ value: null
+             │ hint: null
+             │ hintOverrides: null
+             │ renderObject: RenderSemanticsAnnotations#00000
+             │
+             └─_ShortcutsMarker
+               └─Actions
+                 │ dispatcher: null
 ...
