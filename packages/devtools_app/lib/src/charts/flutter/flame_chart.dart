@@ -95,20 +95,20 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     super.initState();
     initFlameChartElements();
 
-    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
-    linkedHorizontalScrollControllerGroup.onOffsetChanged(() {
-      setState(() {
-        horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
-      });
-    });
-    verticalScrollController = ScrollController();
-    verticalScrollController.addListener(() {
-      if (verticalScrollOffset != verticalScrollController.offset) {
+    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup()
+      ..onOffsetChanged(() {
         setState(() {
-          verticalScrollOffset = verticalScrollController.offset;
+          horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
         });
-      }
-    });
+      });
+    verticalScrollController = ScrollController()
+      ..addListener(() {
+        if (verticalScrollOffset != verticalScrollController.offset) {
+          setState(() {
+            verticalScrollOffset = verticalScrollController.offset;
+          });
+        }
+      });
   }
 
   @override
@@ -132,14 +132,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     return LayoutBuilder(
       builder: (context, constraints) {
         final customPaints = buildCustomPaints(constraints);
+        final flameChart = _buildFlameChart(constraints);
         return customPaints.isNotEmpty
             ? Stack(
                 children: [
-                  _buildFlameChart(constraints),
+                  flameChart,
                   ...customPaints,
                 ],
               )
-            : _buildFlameChart(constraints);
+            : flameChart;
       },
     );
   }

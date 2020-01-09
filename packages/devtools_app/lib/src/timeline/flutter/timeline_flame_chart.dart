@@ -515,7 +515,7 @@ class AsyncGuidelinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect visible = Rect.fromLTWH(
+    final visible = Rect.fromLTWH(
       horizontalScrollOffset,
       verticalScrollOffset,
       constraints.maxWidth,
@@ -583,6 +583,8 @@ class AsyncGuidelinePainter extends CustomPainter {
     }
   }
 
+  // TODO(kenz): does this have to return true all the time? Is it cheaper to
+  // compare delegates or to just paint?
   @override
   bool shouldRepaint(AsyncGuidelinePainter oldDelegate) => true;
 }
