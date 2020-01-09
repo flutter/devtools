@@ -1,7 +1,5 @@
 os:
   - linux
-  - osx
-  - windows
 
 language: dart
 dart:
@@ -39,14 +37,20 @@ matrix:
         - BOT=test_dart2js
         - BOT=integration_ddc
         - BOT=integration_dart2js
+    
   include:
     - dart: "dev/raw/latest"
       env: BOT=packages
+    # Skip OSX and Windows builds when submitting a PR, but still run them on master
+    # as post-submit tests.
+    - if: branch = master AND type = push AND fork = false
+      os: osx
+    - if: branch = master AND type = push AND fork = false
+      os: windows
   # Allow windows bots to fail until we can make the windows tests less flaky.
   # https://github.com/flutter/devtools/issues/963
   allow_failures:
     - os: windows
-    - os: osx
 
 env:
   - BOT=main
