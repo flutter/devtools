@@ -96,7 +96,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     initFlameChartElements();
 
     linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup()
-      ..onOffsetChanged(() {
+      ..addOffsetChangedListener(() {
         setState(() {
           horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
         });
