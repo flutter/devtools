@@ -46,6 +46,7 @@ matrix:
   # https://github.com/flutter/devtools/issues/963
   allow_failures:
     - os: windows
+    - os: osx
 
 env:
   - BOT=main
