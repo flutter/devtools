@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/connected_app.dart';
-import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
