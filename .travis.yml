@@ -53,8 +53,10 @@ matrix:
 
 env:
   - BOT=main
-  - BOT=test_ddc
-  - BOT=test_dart2js
+  - BOT=test_ddc PLATFORM=vm
+  - BOT=test_dart2js PLATFORM=vm
+  - BOT=test_ddc PLATFORM=chrome
+  - BOT=test_dart2js PLATFORM=chrome
   - BOT=integration_ddc
   - BOT=integration_dart2js
   - BOT=integration_dart2js USE_LOCAL_DEPENDENCIES=true
