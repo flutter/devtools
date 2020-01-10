@@ -13,6 +13,8 @@ addons:
   chrome: stable
 
 matrix:
+  fast_finish: true
+
   exclude:
     # Skip main bot for Stable build since it does formatting/building checks;
     # - Formatting will fail on old SDK if the formatter changed in latest.
