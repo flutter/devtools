@@ -136,8 +136,11 @@ elif [ "$BOT" = "test_ddc" ]; then
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
         flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    else
+    elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    else 
+        echo "unknown test platform"
+        exit 1
     fi
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
@@ -151,8 +154,11 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
         WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    else
+    elif [ "$PLATFORM" = "chrome" ]; then
         WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    else 
+        echo "unknown test platform"
+        exit 1
     fi
     echo $WEBDEV_RELEASE
 
