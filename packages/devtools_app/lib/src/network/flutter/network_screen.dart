@@ -12,8 +12,8 @@ import '../../ui/flutter/label.dart';
 import '../../ui/icons.dart';
 import '../http_request_data.dart';
 import '../network_controller.dart';
-import 'http_request_data_table_source.dart';
 import 'http_request_inspector.dart';
+import 'network_model.dart';
 
 class NetworkScreen extends Screen {
   const NetworkScreen() : super();
@@ -88,14 +88,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
           minIncludeTextWidth: minIncludeTextWidth,
           onPressed: () => _networkController.pauseRecording(),
         ),
-        OutlineButton(
-          onPressed: () => _networkController.refreshRequests(),
-          child: Label(
-            FlutterIcons.refresh,
-            'Refresh',
-            minIncludeTextWidth: 900,
-          ),
-        ),
         const SizedBox(width: 8.0),
         clearButton(
           onPressed: () {
@@ -103,7 +95,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
             _networkController.clear();
           },
         ),
-        const Spacer()
       ],
     );
   }
@@ -143,7 +134,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                 style: titleTheme,
               ),
               source: _dataTableSource,
-              includeCheckboxes: false,
+              showCheckboxColumn: false,
               columns: [
                 buildDataColumn(
                   'Request URI (${_dataTableSource.rowCount})',
@@ -215,11 +206,11 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<HttpRequests>(
       valueListenable: _networkController.requestsNotifier,
-      builder: (context, HttpRequests httpRequestProfile, widget) {
+      builder: (context, httpRequestProfile, widget) {
         _dataTableSource.data = httpRequestProfile.requests;
         return ValueListenableBuilder<bool>(
           valueListenable: _networkController.recordingNotifier,
-          builder: (context, bool isRecording, widget) {
+          builder: (context, isRecording, widget) {
             return Column(
               children: [
                 _buildHttpProfilerControlRow(isRecording),

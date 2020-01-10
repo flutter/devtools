@@ -9,26 +9,26 @@ import '../../utils.dart';
 import '../http.dart';
 import '../http_request_data.dart';
 
+/// Helper to build ExpansionTile widgets for inspector views.
+ExpansionTile _buildTile(
+  String title,
+  List<Widget> children,
+) {
+  return ExpansionTile(
+    title: Text(
+      title,
+    ),
+    children: children,
+    initiallyExpanded: true,
+  );
+}
+
 /// This widget displays general HTTP request / response information that is
 /// contained in the headers, in addition to the standard connection information.
 class HttpRequestHeadersView extends StatelessWidget {
   const HttpRequestHeadersView(this.data);
 
   final HttpRequestData data;
-
-  ExpansionTile _buildTile(
-    BuildContext context,
-    String title,
-    List<Widget> children,
-  ) {
-    return ExpansionTile(
-      title: Text(
-        title,
-      ),
-      children: children,
-      initiallyExpanded: true,
-    );
-  }
 
   Widget _buildRow(
       BuildContext context, String key, dynamic value, constraints) {
@@ -46,11 +46,12 @@ class HttpRequestHeadersView extends StatelessWidget {
             style: Theme.of(context).textTheme.subtitle,
           ),
           Expanded(
-              child: Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 5,
-          )),
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 5,
+            ),
+          ),
         ],
       ),
     );
@@ -63,7 +64,6 @@ class HttpRequestHeadersView extends StatelessWidget {
         return ListView(
           children: [
             _buildTile(
-              context,
               'General',
               [
                 for (final entry in data.general.entries)
@@ -76,7 +76,6 @@ class HttpRequestHeadersView extends StatelessWidget {
               ],
             ),
             _buildTile(
-              context,
               'Response Headers',
               [
                 if (data.responseHeaders != null)
@@ -90,7 +89,6 @@ class HttpRequestHeadersView extends StatelessWidget {
               ],
             ),
             _buildTile(
-              context,
               'Request Headers',
               [
                 if (data.requestHeaders != null)
@@ -116,23 +114,6 @@ class HttpRequestCookiesView extends StatelessWidget {
 
   final HttpRequestData data;
 
-  DataColumn _buildColumn(
-    BuildContext context,
-    String title, {
-    bool numeric = false,
-  }) {
-    return DataColumn(
-      label: Expanded(
-        child: Text(
-          title ?? '--',
-          style: Theme.of(context).textTheme.subhead,
-          overflow: TextOverflow.fade,
-        ),
-      ),
-      numeric: numeric,
-    );
-  }
-
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) {
     return DataRow.byIndex(
       index: index,
@@ -148,7 +129,7 @@ class HttpRequestCookiesView extends StatelessWidget {
           _buildCell(cookie.value.length.toString()),
           _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
           _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
-        ]
+        ],
       ],
     );
   }
@@ -164,6 +145,22 @@ class HttpRequestCookiesView extends StatelessWidget {
     bool requestCookies = false,
   }) {
     final theme = Theme.of(context);
+    DataColumn _buildColumn(
+      String title, {
+      bool numeric = false,
+    }) {
+      return DataColumn(
+        label: Expanded(
+          child: Text(
+            title ?? '--',
+            style: theme.textTheme.subhead,
+            overflow: TextOverflow.fade,
+          ),
+        ),
+        numeric: numeric,
+      );
+    }
+
     return Column(
       children: [
         Align(
@@ -193,15 +190,15 @@ class HttpRequestCookiesView extends StatelessWidget {
                   // NOTE: if this list of columns change, _buildRow will need
                   // to be updated to match.
                   columns: [
-                    _buildColumn(context, 'Name'),
-                    _buildColumn(context, 'Value'),
+                    _buildColumn('Name'),
+                    _buildColumn('Value'),
                     if (!requestCookies) ...[
-                      _buildColumn(context, 'Domain'),
-                      _buildColumn(context, 'Path'),
-                      _buildColumn(context, 'Expires / Max Age'),
-                      _buildColumn(context, 'Size', numeric: true),
-                      _buildColumn(context, 'HttpOnly'),
-                      _buildColumn(context, 'Secure'),
+                      _buildColumn('Domain'),
+                      _buildColumn('Path'),
+                      _buildColumn('Expires / Max Age'),
+                      _buildColumn('Size', numeric: true),
+                      _buildColumn('HttpOnly'),
+                      _buildColumn('Secure'),
                     ]
                   ],
                   rows: [
@@ -210,7 +207,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                         i,
                         cookies[i],
                         requestCookies: requestCookies,
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -263,20 +260,6 @@ class HttpRequestTimingView extends StatelessWidget {
 
   final HttpRequestData data;
 
-  ExpansionTile _buildTile(
-    BuildContext context,
-    String title,
-    List<Widget> children,
-  ) {
-    return ExpansionTile(
-      title: Text(
-        title,
-      ),
-      children: children,
-      initiallyExpanded: true,
-    );
-  }
-
   Widget _buildRow(
     BuildContext context,
     String key,
@@ -310,7 +293,6 @@ class HttpRequestTimingView extends StatelessWidget {
       final duration = instant.timeRange.duration;
       events.add(
         _buildTile(
-          context,
           instant.name,
           [
             _buildRow(
@@ -324,7 +306,6 @@ class HttpRequestTimingView extends StatelessWidget {
     }
     events.add(
       _buildTile(
-        context,
         'Total',
         [
           _buildRow(

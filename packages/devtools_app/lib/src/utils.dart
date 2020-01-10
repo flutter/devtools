@@ -120,6 +120,15 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+/// Creates a [Future] that completes either when `operation` completes or the
+/// duration specified by `timeoutMillis` has passed.
+///
+/// Completes with null on timeout.
+Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
+      operation,
+      Future<T>.delayed(Duration(milliseconds: timeoutMillis), () => null)
+    ]);
+
 String longestFittingSubstring(
   String originalText,
   num maxWidth,
