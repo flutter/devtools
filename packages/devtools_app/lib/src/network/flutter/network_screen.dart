@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
-import '../../ui/flutter/label.dart';
-import '../../ui/icons.dart';
 import '../http_request_data.dart';
 import '../network_controller.dart';
 import 'http_request_inspector.dart';

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service/vm_service.dart';
-
 import '../globals.dart';
 import '../utils.dart';
 import 'network_controller.dart';
@@ -13,25 +11,17 @@ class NetworkService {
 
   final NetworkController networkController;
 
-  Future<void> _forEachIsolate(Future Function(IsolateRef) callback) async {
-    final vm = await serviceManager.service.getVM();
-    final futures = <Future>[];
-    for (final isolate in vm.isolates) {
-      futures.add(callback(isolate));
-    }
-    await Future.wait(futures);
-  }
-
   /// Enables or disables HTTP logging for all isolates.
   Future<void> enableHttpRequestLogging(bool state) async {
     assert(state == !networkController.httpRecordingNotifier.value);
-    await _forEachIsolate((isolate) async {
+    await serviceManager.service.forEachIsolate((isolate) async {
       final future = serviceManager.service.setHttpEnableTimelineLogging(
         isolate.id,
         state,
       );
-      // The above call won't complete if the isolate is paused, so give up
-      // after 500ms.
+      // The above call won't complete immediately if the isolate is paused, so
+      // give up waiting after 500ms. However, the call _will_ complete eventually
+      // if the isolate is eventually resumed.
       await timeout(future, 500);
     });
     networkController.httpRecordingNotifier.value = state;
@@ -75,12 +65,12 @@ class NetworkService {
   /// on all isolates and enable recording for [NetworkScreen].
   Future<bool> initializeRecordingState() async {
     bool enabled = false;
-    await _forEachIsolate(
+    await serviceManager.service.forEachIsolate(
       (isolate) async {
         final future =
             serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
-        // The above call won't complete if the isolate is paused, so give up
-        // after 500ms.
+        // The above call won't complete immediately if the isolate is paused,
+        // so give up waiting after 500ms.
         final state = await timeout(future, 500);
         if (state != null && state.enabled) {
           enabled = true;
