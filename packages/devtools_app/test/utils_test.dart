@@ -415,8 +415,8 @@ void main() {
       });
     });
 
-    group('null safe list', () {
-      test('nullSafeFirst', () {
+    group('SafeAccess', () {
+      test('safeFirst', () {
         final list = [];
         expect(list.safeFirst(), isNull);
         list.addAll([1, 2, 3]);
@@ -425,7 +425,7 @@ void main() {
         expect(list.safeFirst(), isNull);
       });
 
-      test('nullSafeLast', () {
+      test('safeLast', () {
         final list = [];
         expect(list.safeLast(), isNull);
         list.addAll([1, 2, 3]);

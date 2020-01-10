@@ -518,7 +518,7 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension NullSafeAccess<T> on List<T> {
+extension SafeAccess<T> on List<T> {
   T safeFirst() {
     return safeGet(0);
   }
