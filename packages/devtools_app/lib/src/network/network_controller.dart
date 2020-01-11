@@ -108,7 +108,7 @@ class NetworkController {
 
     if (state) {
       // Start polling once we've enabled logging.
-      assert(_pollingTimer != null);
+      assert(_pollingTimer == null);
       _pollingTimer = Timer.periodic(
         const Duration(seconds: 1),
         (_) => _networkService.refreshHttpRequests(),

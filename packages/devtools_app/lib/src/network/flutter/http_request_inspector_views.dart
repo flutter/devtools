@@ -9,6 +9,15 @@ import '../../utils.dart';
 import '../http.dart';
 import '../http_request_data.dart';
 
+// Approximately double the indent of the expandable tile's title.
+const double _rowIndentPadding = 30;
+
+// No padding between the last element and the divider of a expandable tile.
+const double _rowSpacingPadding = 15;
+
+const EdgeInsets _rowPadding =
+    EdgeInsets.only(left: _rowIndentPadding, bottom: _rowSpacingPadding);
+
 /// Helper to build ExpansionTile widgets for inspector views.
 ExpansionTile _buildTile(
   String title,
@@ -34,10 +43,7 @@ class HttpRequestHeadersView extends StatelessWidget {
       BuildContext context, String key, dynamic value, constraints) {
     return Container(
       width: constraints.minWidth,
-      padding: const EdgeInsets.only(
-        left: 30,
-        bottom: 15,
-      ),
+      padding: _rowPadding,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -161,55 +167,49 @@ class HttpRequestCookiesView extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
+    return _buildTile(
+      title,
+      [
+        // Add a divider between the tile's title and the cookie table headers for
+        // symmetry.
+        const Divider(
+          // Remove extra padding at the top of the divider; the tile's title
+          // already has bottom padding.
+          height: 0,
+        ),
         Align(
           alignment: Alignment.centerLeft,
-          child: Text(
-            title,
-            style: theme.textTheme.subhead.apply(
-              color: theme.accentColor,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(
-            bottom: 24.0,
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: requestCookies
-                    ? const BoxConstraints()
-                    : BoxConstraints(
-                        minWidth: constraints.minWidth,
-                      ),
-                child: DataTable(
-                  // NOTE: if this list of columns change, _buildRow will need
-                  // to be updated to match.
-                  columns: [
-                    _buildColumn('Name'),
-                    _buildColumn('Value'),
-                    if (!requestCookies) ...[
-                      _buildColumn('Domain'),
-                      _buildColumn('Path'),
-                      _buildColumn('Expires / Max Age'),
-                      _buildColumn('Size', numeric: true),
-                      _buildColumn('HttpOnly'),
-                      _buildColumn('Secure'),
-                    ]
-                  ],
-                  rows: [
-                    for (int i = 0; i < cookies.length; ++i)
-                      _buildRow(
-                        i,
-                        cookies[i],
-                        requestCookies: requestCookies,
-                      ),
-                  ],
-                ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: requestCookies
+                  ? const BoxConstraints()
+                  : BoxConstraints(
+                      minWidth: constraints.minWidth,
+                    ),
+              child: DataTable(
+                // NOTE: if this list of columns change, _buildRow will need
+                // to be updated to match.
+                columns: [
+                  _buildColumn('Name'),
+                  _buildColumn('Value'),
+                  if (!requestCookies) ...[
+                    _buildColumn('Domain'),
+                    _buildColumn('Path'),
+                    _buildColumn('Expires / Max Age'),
+                    _buildColumn('Size', numeric: true),
+                    _buildColumn('HttpOnly'),
+                    _buildColumn('Secure'),
+                  ]
+                ],
+                rows: [
+                  for (int i = 0; i < cookies.length; ++i)
+                    _buildRow(
+                      i,
+                      cookies[i],
+                      requestCookies: requestCookies,
+                    ),
+                ],
               ),
             ),
           ),
@@ -223,10 +223,6 @@ class HttpRequestCookiesView extends StatelessWidget {
     final requestCookies = data.requestCookies;
     final responseCookies = data.responseCookies;
     return Container(
-      padding: const EdgeInsets.only(
-        left: 14.0,
-        top: 18.0,
-      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Column(
@@ -237,6 +233,12 @@ class HttpRequestCookiesView extends StatelessWidget {
                   'Response Cookies',
                   responseCookies,
                   constraints,
+                ),
+              // Add padding between the cookie tables if displaying both
+              // response and request cookies.
+              if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 24.0),
                 ),
               if (requestCookies.isNotEmpty)
                 _buildCookiesTable(
@@ -266,10 +268,7 @@ class HttpRequestTimingView extends StatelessWidget {
     dynamic value,
   ) {
     return Container(
-      padding: const EdgeInsets.only(
-        left: 30,
-        bottom: 15,
-      ),
+      padding: _rowPadding,
       child: Column(
         children: [
           Row(
@@ -317,14 +316,8 @@ class HttpRequestTimingView extends StatelessWidget {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 14.0,
-        top: 18.0,
-      ),
-      child: ListView(
-        children: events,
-      ),
+    return ListView(
+      children: events,
     );
   }
 }

@@ -58,20 +58,23 @@ class HttpRequestInspector extends StatelessWidget {
       ),
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).focusColor,
+    return Card(
+      color: Theme.of(context).canvasColor,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Theme.of(context).focusColor,
+          ),
         ),
+        child: (data == null)
+            ? Center(
+                child: Text(
+                  'No request selected',
+                  style: Theme.of(context).textTheme.title,
+                ),
+              )
+            : tabbedContent,
       ),
-      child: (data == null)
-          ? Center(
-              child: Text(
-                'No request selected',
-                style: Theme.of(context).textTheme.title,
-              ),
-            )
-          : tabbedContent,
     );
   }
 }
