@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../globals.dart';
 import '../diagnostics_node.dart';
 import '../inspector_service.dart';
 
@@ -86,75 +88,107 @@ extension InspectorFlutterService on ObjectGroup {
     return await _evalUntilJsonIsNotEmpty(command);
   }
 
-  Future<RemoteDiagnosticsNode> getSummarySubtreeWithRenderObject(
+  Future<RemoteDiagnosticsNode> getLayoutExplorerNode(
     RemoteDiagnosticsNode node, {
     int subtreeDepth = 1,
   }) async {
     if (node == null) return null;
     final id = node.dartDiagnosticRef.id;
-    String command = '''
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) return '{}'; 
-      final root = WidgetInspectorService.instance.toObject('$id');
-      if (root == null) {
-        return null;
+    if (!serviceManager.serviceExtensionManager.isServiceExtensionAvailable(
+        serviceExtensionNameGetLayoutExplorerNode)) {
+      String command = '''
+      Future<Map<String, dynamic>> callback(Map<String, String> parameters) {
+        final String id = parameters['id'];
+        final int subtreeDepth = int.parse(parameters['subtreeDepth']);
+        final String groupName = parameters['groupName'];
+        Map<String, Object> result = {};
+        print('getNode, $id, $groupName, $subtreeDepth');
+        final instance = WidgetInspectorService.instance;
+        final root = instance.toObject(id);
+        if (root == null) {
+          result = null;
+        } else {
+          result = instance._nodeToJson(
+            root,
+            InspectorSerializationDelegate(
+                groupName: groupName,
+                summaryTree: true,
+                subtreeDepth: subtreeDepth,
+                includeProperties: false,
+                service: instance,
+                addAdditionalPropertiesCallback: (node, delegate) {
+                  print('addAdditionalPropertiesCallback...');
+                  final Map<String, Object> additionalJson = <String, Object>{};
+                  final Object value = node.value;
+                  if (value is Element) {
+                    final renderObject = value.renderObject;
+                    additionalJson['renderObject'] =
+                        renderObject.toDiagnosticsNode()?.toJsonMap(
+                          delegate.copyWith(
+                            subtreeDepth: 0,
+                            includeProperties: true,
+                          ),
+                        );
+                    final Constraints constraints = renderObject.constraints;
+                    if (constraints != null) {
+                      final Map<String, Object> constraintsProperty = <
+                          String,
+                          Object>{
+                        'type': constraints.runtimeType.toString(),
+                        'description': constraints.toString(),
+                      };
+                      if (constraints is BoxConstraints) {
+                        constraintsProperty.addAll(<String, Object>{
+                          'minWidth': constraints.minWidth.toString(),
+                          'minHeight': constraints.minHeight.toString(),
+                          'maxWidth': constraints.maxWidth.toString(),
+                          'maxHeight': constraints.maxHeight.toString(),
+                        });
+                      }
+                      additionalJson['constraints'] = constraintsProperty;
+                    }
+                    if (renderObject is RenderBox) {
+                      additionalJson['size'] = <String, Object>{
+                        'width': renderObject.size.width.toString(),
+                        'height': renderObject.size.height.toString(),
+                      };
+  
+                      final ParentData parentData = renderObject.parentData;
+                      if (parentData is FlexParentData) {
+                        additionalJson['flexFactor'] = parentData.flex;
+                        additionalJson['flexFit'] =
+                            describeEnum(parentData.fit ?? FlexFit.tight);
+                      }
+                    }
+                  }
+                  return additionalJson;
+                }
+            ),
+          );
+        }
+        return Future<Map<String, Object>>.value(<String, Object>{
+          'result': result,
+        });
       }
-      final result =  WidgetInspectorService.instance._nodeToJson(
-        root,
-        InspectorSerializationDelegate(
-            groupName: '$groupName',
-            summaryTree: true,
-            subtreeDepth: $subtreeDepth,
-            includeProperties: false,
-            service: WidgetInspectorService.instance,
-            addAdditionalPropertiesCallback: (node, delegate) {
-              final Map<String, Object> additionalJson = <String, Object>{};
-              final Object value = node.value;
-              if (value is Element) {
-                final renderObject = value.renderObject;
-                additionalJson['renderObject'] = renderObject.toDiagnosticsNode()?.toJsonMap(
-                  delegate.copyWith(
-                    subtreeDepth: 0,
-                    includeProperties: true,
-                  ),
-                );
-                final Constraints constraints = renderObject.constraints;
-                if (constraints != null) {
-                  final Map<String, Object> constraintsProperty = <String, Object>{
-                    'type': constraints.runtimeType.toString(),
-                    'description': constraints.toString(),
-                  };
-                  if (constraints is BoxConstraints) {
-                    constraintsProperty.addAll(<String, Object>{
-                      'minWidth': constraints.minWidth.toString(),
-                      'minHeight': constraints.minHeight.toString(),
-                      'maxWidth': constraints.maxWidth.toString(),
-                      'maxHeight': constraints.maxHeight.toString(),
-                    });
-                  }
-                  additionalJson['constraints'] = constraintsProperty;
-                }
-                if (renderObject is RenderBox) {
-                  additionalJson['size'] = <String, Object>{
-                    'width': renderObject.size.width.toString(),
-                    'height': renderObject.size.height.toString(),
-                  };             
-                  
-                  final ParentData parentData = renderObject.parentData;
-                  if (parentData is FlexParentData) {
-                    additionalJson['flexFactor'] = parentData.flex;
-                    additionalJson['flexFit'] = describeEnum(parentData.fit ?? FlexFit.tight);
-                  }
-                }
-              }
-              return additionalJson;
-            }
-        ),
+      return WidgetInspectorService.instance.registerServiceExtension(
+        name: '$serviceExtensionNameGetLayoutExplorerNode',
+        callback: callback,
       );
-      return WidgetInspectorService.instance._safeJsonEncode(result);
-    ''';
-    command = '((){${command.split('\n').join()}})()';
-    return await parseDiagnosticsNodeDaemon(
-      instanceRefToJson(await _evalUntilJsonIsNotEmpty(command)),
-    );
+      ''';
+      command = '((){${command.split('\n').join()}})()';
+      await inspectorLibrary.eval(command, isAlive: this);
+    }
+    final args = {
+      'groupName': groupName,
+      'id': node.dartDiagnosticRef.id,
+      'subtreeDepth': '$subtreeDepth',
+    };
+    return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemonParams(
+      serviceExtensionNameGetLayoutExplorerNode,
+      args,
+    ));
   }
+
+  static const serviceExtensionNameGetLayoutExplorerNode =
+      'getLayoutExplorerNode';
 }

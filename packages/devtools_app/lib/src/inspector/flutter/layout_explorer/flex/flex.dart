@@ -448,7 +448,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
+    final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
       subtreeDepth: 1,
     );
