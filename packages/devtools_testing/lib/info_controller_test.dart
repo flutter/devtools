@@ -37,21 +37,10 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
 
       await infoController.entering();
 
-      // TODO(kenzie): remove the try catch block once Flutter stable supports
-      // the flutterVersion service. Revisit this end of November 2019.
-      try {
-        final flutterVersionResponse = await serviceManager.getFlutterVersion();
-        final expectedFlutterVersion =
-            FlutterVersion.parse(flutterVersionResponse.json);
-        expect(flutterVersion, equals(expectedFlutterVersion));
-      } catch (e) {
-        expect(flutterVersion, isNull);
-        expect(
-          e.toString(),
-          equals('Exception: There are no registered methods for service'
-              ' "flutterVersion"'),
-        );
-      }
+      final flutterVersionResponse = await serviceManager.getFlutterVersion();
+      final expectedFlutterVersion =
+          FlutterVersion.parse(flutterVersionResponse.json);
+      expect(flutterVersion, equals(expectedFlutterVersion));
 
       expect(flags, isNotNull);
 
@@ -87,9 +76,7 @@ Future<void> runInfoControllerTests(FlutterTestEnvironment env) async {
       );
 
       await env.tearDownEnvironment(force: true);
-      // TODO(kenz): unskip once flake is addressed. See
-      // https://github.com/flutter/devtools/issues/1193.
-    }, skip: true);
+    });
   }, timeout: const Timeout.factor(8));
   // TODO: Add a test that uses DartVM instead of Flutter
 }

@@ -818,6 +818,7 @@ class VmFlagManager {
   void _initFlags() async {
     final flagList = await service.getFlagList();
     _flags.value = flagList;
+    if (flagList == null) return;
 
     final flags = <String, Flag>{};
     for (var flag in flagList.flags) {

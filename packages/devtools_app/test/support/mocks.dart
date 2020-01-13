@@ -30,9 +30,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
       : service =
             useFakeService ? FakeVmService(_flagManager) : MockVmService() {
-    if (useFakeService) {
-      _flagManager.service = service;
-    }
+    _flagManager.service = service;
   }
   static final _flagManager = VmFlagManager();
 
@@ -507,4 +505,8 @@ Future<void> ensureInspectorDependencies() async {
     "To fix this, mark the failing test as @TestOn('vm')",
   );
   await initializer.ensureInspectorDependencies();
+}
+
+void mockIsFlutterApp(MockConnectedApp connectedApp) {
+  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
 }
