@@ -82,7 +82,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(
-          width: 300.0,
+          width: 350.0,
           child: TextField(
             onSubmitted: _connect,
             decoration: const InputDecoration(
