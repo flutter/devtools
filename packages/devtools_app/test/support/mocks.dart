@@ -28,7 +28,13 @@ import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
-      : service = useFakeService ? FakeVmService() : MockVmService();
+      : service =
+            useFakeService ? FakeVmService(_flagManager) : MockVmService() {
+    if (useFakeService) {
+      _flagManager.service = service;
+    }
+  }
+  static final _flagManager = VmFlagManager();
 
   @override
   final VmServiceWrapper service;
@@ -55,6 +61,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final IsolateManager isolateManager = FakeIsolateManager();
 
   @override
+  final VmFlagManager vmFlagManager = _flagManager;
+
+  @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
 
@@ -68,8 +77,33 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
+  FakeVmService(this._vmFlagManager);
+
+  final VmFlagManager _vmFlagManager;
+
   final _flags = <String, dynamic>{
-    'flags': <Flag>[],
+    'flags': <Flag>[
+      Flag(
+        name: 'flag 1 name',
+        comment: 'flag 1 comment contains some very long text '
+            'that the renderer will have to wrap around to prevent '
+            'it from overflowing the screen. This will cause a '
+            'failure if one of the two Row entries the flags lay out '
+            'in is not wrapped in an Expanded(), which tells the Row '
+            'allocate only the remaining space to the Expanded. '
+            'Without the expanded, the underlying RichTexts will try '
+            'to consume as much of the layout as they can and cause '
+            'an overflow.',
+        valueAsString: 'flag 1 value',
+        modified: false,
+      ),
+      Flag(
+        name: 'profiler',
+        comment: 'Mock Flag',
+        valueAsString: 'true',
+        modified: false,
+      ),
+    ],
   };
 
   @override
@@ -87,6 +121,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
         'valueAsString': value,
       }));
     }
+
+    final fakeVmFlagUpdateEvent = Event(
+      kind: EventKind.kVMFlagUpdate,
+      flag: name,
+      newValue: value,
+      timestamp: 1, // 1 is arbitrary.
+    );
+    _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
     return Future.value(Success());
   }
 

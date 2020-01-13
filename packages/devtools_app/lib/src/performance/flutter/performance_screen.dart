@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
@@ -44,6 +45,17 @@ class PerformanceScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Controllers.of(context).performance;
+    return ValueListenableBuilder<Flag>(
+      valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+      builder: (context, profilerFlag, _) {
+        return profilerFlag.valueAsString == 'true'
+            ? _buildPerformanceBody(controller)
+            : CpuProfilerDisabled(controller.cpuProfilerController);
+      },
+    );
+  }
+
+  Widget _buildPerformanceBody(PerformanceController controller) {
     return Column(
       children: [
         Row(
@@ -54,14 +66,17 @@ class PerformanceScreenBody extends StatelessWidget {
           ],
         ),
         Expanded(
-          child: ValueListenableBuilder(
+          child: ValueListenableBuilder<CpuProfileData>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
                   CpuProfilerController.baseStateCpuProfileData) {
                 return _buildRecordingInfo(controller);
               }
-              return _buildCpuProfiler(controller, cpuProfileData);
+              return CpuProfiler(
+                data: cpuProfileData,
+                controller: controller.cpuProfilerController,
+              );
             },
           ),
         ),
@@ -71,7 +86,7 @@ class PerformanceScreenBody extends StatelessWidget {
 
   Widget _buildStateControls(PerformanceController controller) {
     const double minIncludeTextWidth = 600;
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.recordingNotifier,
       builder: (context, recording, _) {
         return Row(
@@ -101,7 +116,7 @@ class PerformanceScreenBody extends StatelessWidget {
   }
 
   Widget _buildRecordingInfo(PerformanceController controller) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.recordingNotifier,
       builder: (context, recording, _) {
         return recordingInfo(
@@ -109,24 +124,6 @@ class PerformanceScreenBody extends StatelessWidget {
           statusKey: PerformanceScreen.recordingStatusKey,
           recording: recording,
           recordedObject: 'CPU samples',
-        );
-      },
-    );
-  }
-
-  Widget _buildCpuProfiler(
-    PerformanceController controller,
-    CpuProfileData data,
-  ) {
-    return ValueListenableBuilder(
-      valueListenable:
-          controller.cpuProfilerController.selectedCpuStackFrameNotifier,
-      builder: (context, selectedStackFrame, _) {
-        return CpuProfiler(
-          data: data,
-          selectedStackFrame: selectedStackFrame,
-          onStackFrameSelected: (sf) =>
-              controller.cpuProfilerController.selectCpuStackFrame(sf),
         );
       },
     );
