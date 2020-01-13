@@ -31,15 +31,37 @@ class CpuProfilerController {
 
   final transformer = CpuProfileTransformer();
 
+  /// Notifies that the vm profiler flag has changed.
+  ValueListenable get profilerFlagNotifier => service.profilerFlagNotifier;
+
+  /// Whether the profiler is enabled.
+  ///
+  /// Clients interested in the current value of [profilerFlagNotifier] should
+  /// use this getter. Otherwise, clients subscribing to change notifications,
+  /// should listen to [profilerFlagNotifier].
+  bool get profilerEnabled =>
+      profilerFlagNotifier.value.valueAsString == 'true';
+
+  /// Notifies that CPU profile data is currently being processed.
+  ValueListenable get processingNotifier => processingValueNotifier;
+  @visibleForTesting
+  final processingValueNotifier = ValueNotifier<bool>(false);
+
+  Future<dynamic> enableCpuProfiler() {
+    return service.enableCpuProfiler();
+  }
+
   Future<void> pullAndProcessProfile({
     @required int startMicros,
     @required int extentMicros,
   }) async {
+    processingValueNotifier.value = true;
     final cpuProfileData = await service.getCpuProfile(
       startMicros: startMicros,
       extentMicros: extentMicros,
     );
     transformer.processData(cpuProfileData);
+    processingValueNotifier.value = false;
     _dataNotifier.value = cpuProfileData;
   }
 

@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
@@ -16,9 +17,11 @@ import 'wrappers.dart';
 void main() {
   CpuProfiler cpuProfiler;
   CpuProfileData cpuProfileData;
+  CpuProfilerController controller;
 
   setUp(() {
     final transformer = CpuProfileTransformer();
+    controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
     transformer.processData(cpuProfileData);
   });
@@ -27,10 +30,17 @@ void main() {
     testWidgets('builds for null cpuProfileData', (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: null,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.text(CpuProfiler.emptyCpuProfile), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+
+      // Null data while controller is pulling and processing data.
+      controller.processingValueNotifier.value = true;
+      await tester.pump();
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -41,8 +51,7 @@ void main() {
       cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -54,8 +63,7 @@ void main() {
     testWidgets('builds for valid cpuProfileData', (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -68,8 +76,7 @@ void main() {
         (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -103,8 +110,7 @@ void main() {
         (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       await tester.tap(find.text('Call Tree'));

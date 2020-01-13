@@ -5,23 +5,18 @@ import 'package:flutter/material.dart';
 
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../cpu_profile_model.dart';
+import '../cpu_profiler_controller.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_flame_chart.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
 class CpuProfiler extends StatefulWidget {
-  const CpuProfiler({
-    @required this.data,
-    @required this.selectedStackFrame,
-    @required this.onStackFrameSelected,
-  });
+  const CpuProfiler({@required this.data, @required this.controller});
 
   final CpuProfileData data;
 
-  final CpuStackFrame selectedStackFrame;
-
-  final Function(CpuStackFrame stackFrame) onStackFrameSelected;
+  final CpuProfilerController controller;
 
   static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
   static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
@@ -74,7 +69,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TabBar(
-              labelColor: Theme.of(context).textTheme.body1.color,
+              labelColor: textTheme.body1.color,
               isScrollable: true,
               controller: _tabController,
               tabs: CpuProfiler.tabs,
@@ -99,49 +94,65 @@ class _CpuProfilerState extends State<CpuProfiler>
           ],
         ),
         Expanded(
-          child: _buildCpuProfileDataView(textTheme),
+          child: _buildCpuProfileDataView(),
         ),
       ],
     );
   }
 
-  Widget _buildCpuProfileDataView(TextTheme textTheme) {
+  Widget _buildCpuProfileDataView() {
     if (widget.data != null) {
       return widget.data.isEmpty
-          ? _buildEmptyDataView(textTheme)
+          ? _buildEmptyDataView()
           : TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               controller: _tabController,
               children: _buildProfilerViews(),
             );
     } else {
-      // If [data] is null, we can assume that CPU profile data is being fetched
-      // and processed.
-      return const Center(child: CircularProgressIndicator());
+      // If [data] is null, CPU profile data is either being processed or it is
+      // empty.
+      return ValueListenableBuilder<bool>(
+        valueListenable: widget.controller.processingNotifier,
+        builder: (context, processing, _) {
+          return processing
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : _buildEmptyDataView();
+        },
+      );
     }
   }
 
-  Widget _buildEmptyDataView(TextTheme textTheme) {
+  Widget _buildEmptyDataView() {
     return Center(
       child: Text(
         CpuProfiler.emptyCpuProfile,
-        style: textTheme.subhead,
+        style: Theme.of(context).textTheme.subhead,
       ),
     );
   }
 
   // TODO(kenz): implement call tree and bottom up.
   List<Widget> _buildProfilerViews() {
-    final cpuFlameChart = LayoutBuilder(builder: (context, constraints) {
-      return CpuProfileFlameChart(
-        widget.data,
-        // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
-        // test horizontal scrolling functionality.
-        width: constraints.maxWidth * 2,
-        selected: widget.selectedStackFrame,
-        onSelected: (sf) => widget.onStackFrameSelected(sf),
-      );
-    });
+    final cpuFlameChart = LayoutBuilder(
+      builder: (context, constraints) {
+        return ValueListenableBuilder<CpuStackFrame>(
+          valueListenable: widget.controller.selectedCpuStackFrameNotifier,
+          builder: (context, selectedStackFrame, _) {
+            return CpuProfileFlameChart(
+              widget.data,
+              // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+              // test horizontal scrolling functionality.
+              width: constraints.maxWidth * 2,
+              selected: selectedStackFrame,
+              onSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
+            );
+          },
+        );
+      },
+    );
 
     final callTree = CpuCallTreeTable(widget.data);
 
@@ -151,5 +162,30 @@ class _CpuProfilerState extends State<CpuProfiler>
       ),
     );
     return [cpuFlameChart, callTree, bottomUp];
+  }
+}
+
+class CpuProfilerDisabled extends StatelessWidget {
+  const CpuProfilerDisabled(this.controller);
+
+  final CpuProfilerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('CPU profiler is disabled.'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+              child: const Text('Enable profiler'),
+              onPressed: () => controller.enableCpuProfiler(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
