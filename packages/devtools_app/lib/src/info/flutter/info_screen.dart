@@ -43,19 +43,12 @@ class InfoScreenBody extends StatefulWidget {
 class _InfoScreenBodyState extends State<InfoScreenBody> {
   FlutterVersion _flutterVersion;
 
-  FlagList _flagList;
   InfoController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = InfoController(
-      onFlagListChanged: (flagList) {
-        if (!mounted) return;
-        setState(() {
-          _flagList = flagList;
-        });
-      },
       onFlutterVersionChanged: (flutterVersion) {
         if (!mounted) return;
         setState(
@@ -91,10 +84,17 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
           style: textTheme.headline,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
-        if (_flagList != null)
-          Expanded(
-            child: _FlagList(_flagList),
+        Expanded(
+          child: ValueListenableBuilder<FlagList>(
+            valueListenable: _controller.flagListNotifier,
+            builder: (context, flagList, _) {
+              if (flagList == null || flagList.flags.isEmpty) {
+                return const SizedBox();
+              }
+              return _FlagList(flagList);
+            },
           ),
+        ),
       ],
     );
   }

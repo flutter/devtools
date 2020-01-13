@@ -33,8 +33,7 @@ void main() {
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(serviceManager.connectedApp.isAnyFlutterApp)
-          .thenAnswer((_) => Future.value(true));
+      mockIsFlutterApp(serviceManager.connectedApp);
 
       screen = const InspectorScreen();
     });
