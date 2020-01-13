@@ -50,7 +50,7 @@ void main() {
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
       var flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      expect(flagList, isEmpty);
+      expect(flagList.length, equals(2));
 
       // Switch to low granularity.
       await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
@@ -62,7 +62,8 @@ void main() {
       expect(dropdownButton.value, equals(ProfileGranularity.low.value));
 
       flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      var profilePeriodFlag = flagList[0];
+      expect(flagList.length, equals(3));
+      var profilePeriodFlag = flagList.last;
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
@@ -79,7 +80,7 @@ void main() {
       expect(dropdownButton.value, equals(ProfileGranularity.high.value));
 
       flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      profilePeriodFlag = flagList[0];
+      profilePeriodFlag = flagList.last;
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,

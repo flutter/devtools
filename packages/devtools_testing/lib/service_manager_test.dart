@@ -265,7 +265,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
     test('notifies on flag change', () async {
       await env.setupEnvironment();
-      final profiler = 'profiler';
+      const profiler = 'profiler';
 
       final flagManager = serviceManager.vmFlagManager;
       final initialFlags = flagManager.flags.value;
