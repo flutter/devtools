@@ -24,7 +24,6 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      serviceManager.vmFlagManager.service = serviceManager.service;
       screen = const PerformanceScreen();
     });
 

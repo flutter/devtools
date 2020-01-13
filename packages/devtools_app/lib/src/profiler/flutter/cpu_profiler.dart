@@ -110,17 +110,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               children: _buildProfilerViews(),
             );
     } else {
-      // If [data] is null, CPU profile data is either being processed or it is
-      // empty.
-      return ValueListenableBuilder<bool>(
-        valueListenable: widget.controller.processingNotifier,
-        builder: (context, processing, _) {
-          return processing
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : _buildEmptyDataView();
-        },
+      // If [data] is null, CPU profile data is being processed.
+      return const Center(
+        child: CircularProgressIndicator(),
       );
     }
   }
@@ -181,7 +173,7 @@ class CpuProfilerDisabled extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
               child: const Text('Enable profiler'),
-              onPressed: () => controller.enableCpuProfiler(),
+              onPressed: controller.enableCpuProfiler,
             ),
           ),
         ],

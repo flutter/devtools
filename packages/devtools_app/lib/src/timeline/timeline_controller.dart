@@ -106,7 +106,7 @@ class TimelineController {
 
     timeline.data.selectedEvent = event;
 
-    cpuProfilerController.resetNotifiers(useBaseStateData: false);
+    cpuProfilerController.resetNotifiers();
 
     // Fetch a profile if we are not in offline mode and if the profiler is
     // enabled.

@@ -29,7 +29,11 @@ import 'package:vm_service/vm_service.dart';
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
       : service =
-            useFakeService ? FakeVmService(_flagManager) : MockVmService();
+            useFakeService ? FakeVmService(_flagManager) : MockVmService() {
+    if (useFakeService) {
+      _flagManager.service = service;
+    }
+  }
   static final _flagManager = VmFlagManager();
 
   @override

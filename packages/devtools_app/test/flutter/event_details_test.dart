@@ -35,7 +35,6 @@ void main() {
     setUp(() {
       final fakeServiceManager = FakeServiceManager(useFakeService: true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      serviceManager.vmFlagManager.service = serviceManager.service;
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
     });

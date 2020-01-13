@@ -34,14 +34,6 @@ void main() {
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.byType(CpuProfileFlameChart), findsNothing);
-
-      // Null data while controller is pulling and processing data.
-      controller.processingValueNotifier.value = true;
-      await tester.pump();
-      expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byType(CpuProfileFlameChart), findsNothing);

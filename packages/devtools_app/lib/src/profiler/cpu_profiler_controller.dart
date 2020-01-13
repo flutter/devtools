@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../config_specific/logger.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -42,11 +43,6 @@ class CpuProfilerController {
   bool get profilerEnabled =>
       profilerFlagNotifier.value.valueAsString == 'true';
 
-  /// Notifies that CPU profile data is currently being processed.
-  ValueListenable get processingNotifier => processingValueNotifier;
-  @visibleForTesting
-  final processingValueNotifier = ValueNotifier<bool>(false);
-
   Future<dynamic> enableCpuProfiler() {
     return service.enableCpuProfiler();
   }
@@ -55,14 +51,23 @@ class CpuProfilerController {
     @required int startMicros,
     @required int extentMicros,
   }) async {
-    processingValueNotifier.value = true;
-    final cpuProfileData = await service.getCpuProfile(
-      startMicros: startMicros,
-      extentMicros: extentMicros,
-    );
-    transformer.processData(cpuProfileData);
-    processingValueNotifier.value = false;
-    _dataNotifier.value = cpuProfileData;
+    assert(_dataNotifier.value != null);
+    if (!profilerEnabled) return;
+
+    const Duration processingTimeout = Duration(seconds: 5);
+    var cpuProfileData = baseStateCpuProfileData;
+    try {
+      _dataNotifier.value = null;
+      cpuProfileData = await (service.getCpuProfile(
+        startMicros: startMicros,
+        extentMicros: extentMicros,
+      )).timeout(processingTimeout);
+    } on TimeoutException catch (e) {
+      log(e.message, LogLevel.error);
+    } finally {
+      transformer.processData(cpuProfileData);
+      _dataNotifier.value = cpuProfileData;
+    }
   }
 
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
@@ -76,9 +81,9 @@ class CpuProfilerController {
     await service.clearCpuSamples();
   }
 
-  void resetNotifiers({bool useBaseStateData = true}) {
+  void resetNotifiers() {
     _selectedCpuStackFrameNotifier.value = null;
-    _dataNotifier.value = useBaseStateData ? baseStateCpuProfileData : null;
+    _dataNotifier.value = baseStateCpuProfileData;
   }
 
   void dispose() {
