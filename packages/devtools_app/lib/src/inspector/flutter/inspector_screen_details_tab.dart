@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../flutter/auto_dispose_mixin.dart';
 import '../inspector_controller.dart';
 import 'layout_explorer/layout_explorer.dart';
 
-class InspectorDetailsTabController extends StatelessWidget {
+class InspectorDetailsTabController extends StatefulWidget {
   const InspectorDetailsTabController({
     this.detailsTree,
     this.actionButtons,
@@ -23,12 +24,31 @@ class InspectorDetailsTabController extends StatelessWidget {
   final InspectorController controller;
   final bool layoutExplorerSupported;
 
-  Widget _buildTab(String tabName) {
-    return Tab(
-      child: Text(
-        tabName,
-        overflow: TextOverflow.ellipsis,
-      ),
+  @override
+  _InspectorDetailsTabControllerState createState() =>
+      _InspectorDetailsTabControllerState();
+}
+
+class _InspectorDetailsTabControllerState
+    extends State<InspectorDetailsTabController>
+    with TickerProviderStateMixin, AutoDisposeMixin {
+  static const _layoutExplorerTabIndex = 1;
+  static const _tabsLengthWithLayoutExplorer = 2;
+  static const _tabsLengthWithoutLayoutExplorer = 1;
+
+  TabController _tabControllerWithLayoutExplorer;
+  TabController _tabControllerWithoutLayoutExplorer;
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+      _tabControllerWithLayoutExplorer =
+          TabController(length: _tabsLengthWithLayoutExplorer, vsync: this),
+    );
+    addAutoDisposeListener(
+      _tabControllerWithoutLayoutExplorer =
+          TabController(length: _tabsLengthWithoutLayoutExplorer, vsync: this),
     );
   }
 
@@ -36,51 +56,64 @@ class InspectorDetailsTabController extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       _buildTab('Details Tree'),
-      if (layoutExplorerSupported) _buildTab('Layout Explorer'),
+      if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
     ];
     final tabViews = <Widget>[
-      detailsTree,
-      if (layoutExplorerSupported) LayoutExplorerTab(controller: controller),
+      widget.detailsTree,
+      if (widget.layoutExplorerSupported)
+        LayoutExplorerTab(controller: widget.controller),
     ];
+    final _tabController = widget.layoutExplorerSupported
+        ? _tabControllerWithLayoutExplorer
+        : _tabControllerWithoutLayoutExplorer;
     final focusColor = Theme.of(context).focusColor;
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: focusColor),
       ),
-      child: DefaultTabController(
-        length: tabs.length,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: <Widget>[
-                  Flexible(
-                    child: Container(
-                      color: focusColor,
-                      child: TabBar(
-                        labelColor: Theme.of(context).textTheme.body1.color,
-                        tabs: tabs,
-                        isScrollable: true,
-                      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: <Widget>[
+                Flexible(
+                  child: Container(
+                    color: focusColor,
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: Theme.of(context).textTheme.body1.color,
+                      tabs: tabs,
+                      isScrollable: true,
                     ),
                   ),
-                  if (actionButtons != null)
-                    Expanded(
-                      child: actionButtons,
-                    ),
-                ],
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              ),
+                ),
+                if (widget.actionButtons != null &&
+                    _tabController.index != _layoutExplorerTabIndex)
+                  Expanded(
+                    child: widget.actionButtons,
+                  ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
             ),
-            Expanded(
-              child: TabBarView(
-                children: tabViews,
-              ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: tabViews,
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(String tabName) {
+    return Tab(
+      child: Text(
+        tabName,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
