@@ -6,6 +6,7 @@ import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/theme.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/flutter/memory_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -31,6 +32,7 @@ Widget wrapWithControllers(
   LoggingController loggingController,
   MemoryController memoryController,
   TimelineController timelineController,
+  PerformanceController performanceController,
 }) {
   return MaterialApp(
     theme: themeFor(isDarkTheme: false),
@@ -41,6 +43,7 @@ Widget wrapWithControllers(
             logging: loggingController ?? MockLoggingController(),
             memory: memoryController ?? MockFlutterMemoryController(),
             timeline: timelineController ?? MockTimelineController(),
+            performance: performanceController ?? MockPerformanceController(),
           );
         },
         child: widget,

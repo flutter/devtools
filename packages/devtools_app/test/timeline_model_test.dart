@@ -119,19 +119,19 @@ void main() {
       expect(timelineData.eventGroups, isEmpty);
       timelineData.initializeEventGroups();
       expect(
-        timelineData.eventGroups[FullTimelineData.uiKey].eventsByRow[0].length,
+        timelineData.eventGroups[FullTimelineData.uiKey].rows[0].events.length,
         equals(1),
       );
       expect(
-        timelineData.eventGroups[FullTimelineData.gpuKey].eventsByRow[0].length,
+        timelineData.eventGroups[FullTimelineData.gpuKey].rows[0].events.length,
         equals(1),
       );
       expect(
         timelineData
-            .eventGroups[FullTimelineData.unknownKey].eventsByRow[0].length,
+            .eventGroups[FullTimelineData.unknownKey].rows[0].events.length,
         equals(1),
       );
-      expect(timelineData.eventGroups['A'].eventsByRow[0].length, equals(1));
+      expect(timelineData.eventGroups['A'].rows[0].events.length, equals(1));
     });
 
     test('event bucket compare', () {
@@ -354,27 +354,6 @@ void main() {
       expect(asyncEventC.displayDepth, equals(2));
       expect(asyncEventD.displayDepth, equals(1));
       expect(asyncEventWithDeepOverlap.displayDepth, equals(5));
-    });
-
-    test('hasOverlappingChildren', () {
-      expect(asyncEventA.hasOverlappingChildren, isTrue);
-      expect(asyncEventB.hasOverlappingChildren, isTrue);
-      expect(asyncEventC.hasOverlappingChildren, isFalse);
-      expect(asyncEventD.hasOverlappingChildren, isFalse);
-    });
-
-    test('isSubtreeOverlapping', () {
-      expect(
-        asyncEventWithDeepOverlap1.time
-            .overlaps(asyncEventWithDeepOverlap2.time),
-        isFalse,
-      );
-      expect(asyncEvent3.time.overlaps(asyncEvent4.time), isTrue);
-      expect(
-        asyncEventWithDeepOverlap1
-            .isSubtreeOverlapping(asyncEventWithDeepOverlap2),
-        isTrue,
-      );
     });
 
     test('couldBeParentOf', () {

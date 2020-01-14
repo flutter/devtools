@@ -73,7 +73,7 @@ final simpleTraceEvents = {
       'ts': 193937113560,
       'ph': 'b',
       'id': '2',
-      'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Bb',
@@ -83,7 +83,7 @@ final simpleTraceEvents = {
       'ts': 193937117450,
       'ph': 'b',
       'id': '8',
-      'args': {'parentId': 7, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'B1',
@@ -93,7 +93,7 @@ final simpleTraceEvents = {
       'ts': 193937141769,
       'ph': 'b',
       'id': 'd',
-      'args': {'parentId': 2, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '2', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Bb1',
@@ -103,7 +103,7 @@ final simpleTraceEvents = {
       'ts': 193937141961,
       'ph': 'b',
       'id': 'f',
-      'args': {'parentId': 8, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '8', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'C',
@@ -113,7 +113,7 @@ final simpleTraceEvents = {
       'ts': 193937168961,
       'ph': 'b',
       'id': '3',
-      'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Cc',
@@ -123,7 +123,7 @@ final simpleTraceEvents = {
       'ts': 193937169662,
       'ph': 'b',
       'id': '9',
-      'args': {'parentId': 7, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'B2',
@@ -133,7 +133,7 @@ final simpleTraceEvents = {
       'ts': 193937173019,
       'ph': 'b',
       'id': 'e',
-      'args': {'parentId': 2, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '2', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Bb2',
@@ -143,7 +143,7 @@ final simpleTraceEvents = {
       'ts': 193937173132,
       'ph': 'b',
       'id': '10',
-      'args': {'parentId': 8, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '8', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'C1',
@@ -153,7 +153,7 @@ final simpleTraceEvents = {
       'ts': 193937220903,
       'ph': 'b',
       'id': '11',
-      'args': {'parentId': 3, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Cc1',
@@ -163,7 +163,7 @@ final simpleTraceEvents = {
       'ts': 193937221087,
       'ph': 'b',
       'id': '13',
-      'args': {'parentId': 9, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '9', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'B1',
@@ -233,7 +233,7 @@ final simpleTraceEvents = {
       'ts': 193937378812,
       'ph': 'b',
       'id': '12',
-      'args': {'parentId': 3, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Cc2',
@@ -243,7 +243,7 @@ final simpleTraceEvents = {
       'ts': 193937378989,
       'ph': 'b',
       'id': '14',
-      'args': {'parentId': 9, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '9', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'B',
@@ -313,7 +313,7 @@ final simpleTraceEvents = {
       'ts': 193937574832,
       'ph': 'b',
       'id': '4',
-      'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Dd',
@@ -323,7 +323,7 @@ final simpleTraceEvents = {
       'ts': 193937575344,
       'ph': 'b',
       'id': 'a',
-      'args': {'parentId': 7, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'E',
@@ -333,7 +333,7 @@ final simpleTraceEvents = {
       'ts': 193937630473,
       'ph': 'b',
       'id': '5',
-      'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ee',
@@ -343,7 +343,7 @@ final simpleTraceEvents = {
       'ts': 193937631341,
       'ph': 'b',
       'id': 'b',
-      'args': {'parentId': 7, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'D',
@@ -373,7 +373,7 @@ final simpleTraceEvents = {
       'ts': 193937681385,
       'ph': 'b',
       'id': '15',
-      'args': {'parentId': 5, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '5', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ee1',
@@ -383,7 +383,7 @@ final simpleTraceEvents = {
       'ts': 193937682955,
       'ph': 'b',
       'id': '19',
-      'args': {'parentId': 11, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '11', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'F',
@@ -393,7 +393,7 @@ final simpleTraceEvents = {
       'ts': 193937735555,
       'ph': 'b',
       'id': '6',
-      'args': {'parentId': 1, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '1', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ff',
@@ -403,7 +403,7 @@ final simpleTraceEvents = {
       'ts': 193937736205,
       'ph': 'b',
       'id': 'c',
-      'args': {'parentId': 7, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '7', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'E2',
@@ -413,7 +413,7 @@ final simpleTraceEvents = {
       'ts': 193937736389,
       'ph': 'b',
       'id': '16',
-      'args': {'parentId': 5, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '5', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ee2',
@@ -423,7 +423,7 @@ final simpleTraceEvents = {
       'ts': 193937736537,
       'ph': 'b',
       'id': '1a',
-      'args': {'parentId': 11, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '11', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'W',
@@ -445,7 +445,7 @@ final simpleTraceEvents = {
       'ts': 193937788218,
       'ph': 'b',
       'id': '17',
-      'args': {'parentId': 5, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '5', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ee3',
@@ -455,7 +455,7 @@ final simpleTraceEvents = {
       'ts': 193937788380,
       'ph': 'b',
       'id': '1b',
-      'args': {'parentId': 11, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '11', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'E1',
@@ -557,7 +557,7 @@ final simpleTraceEvents = {
       'ts': 193938105406,
       'ph': 'b',
       'id': '18',
-      'args': {'parentId': 5, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '5', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'Ee4',
@@ -567,7 +567,7 @@ final simpleTraceEvents = {
       'ts': 193938105579,
       'ph': 'b',
       'id': '1c',
-      'args': {'parentId': 11, 'isolateId': 'isolates/2139247553966975'}
+      'args': {'parentId': '11', 'isolateId': 'isolates/2139247553966975'}
     },
     {
       'name': 'E4',

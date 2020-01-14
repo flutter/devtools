@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/profiler/cpu_profiler_controller.dart';
+import 'package:devtools_app/src/profiler/flutter/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
@@ -13,21 +15,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'wrappers.dart';
 
 void main() {
-  group('EventDetails', () {
-    CpuProfiler cpuProfiler;
-    CpuProfileData cpuProfileData;
+  CpuProfiler cpuProfiler;
+  CpuProfileData cpuProfileData;
+  CpuProfilerController controller;
 
-    setUp(() {
-      final transformer = CpuProfileTransformer();
-      cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
-      transformer.processData(cpuProfileData);
-    });
+  setUp(() {
+    final transformer = CpuProfileTransformer();
+    controller = CpuProfilerController();
+    cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
+    transformer.processData(cpuProfileData);
+  });
 
+  group('Cpu Profiler', () {
     testWidgets('builds for null cpuProfileData', (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: null,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -40,8 +43,7 @@ void main() {
       cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -53,8 +55,7 @@ void main() {
     testWidgets('builds for valid cpuProfileData', (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
@@ -63,31 +64,54 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
     });
 
-    testWidgets('switches tabs', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('switches tabs', const Size(1000, 1000),
+        (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
-        selectedStackFrame: null,
-        onStackFrameSelected: (_) {},
+        controller: controller,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-      expect(find.text('TODO CPU call tree'), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.text('TODO CPU bottom up'), findsNothing);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsNothing);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsNothing);
 
       await tester.tap(find.text('Call Tree'));
       await tester.pumpAndSettle();
       expect(find.byType(CpuProfileFlameChart), findsNothing);
-      expect(find.text('TODO CPU call tree'), findsOneWidget);
+      expect(find.byType(CpuCallTreeTable), findsOneWidget);
       expect(find.text('TODO CPU bottom up'), findsNothing);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
 
       await tester.tap(find.text('Bottom Up'));
       await tester.pumpAndSettle();
       expect(find.byType(CpuProfileFlameChart), findsNothing);
-      expect(find.text('TODO CPU call tree'), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.text('TODO CPU bottom up'), findsOneWidget);
+      expect(find.byKey(CpuProfiler.expandButtonKey), findsOneWidget);
+      expect(find.byKey(CpuProfiler.collapseButtonKey), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'can expand and collapse data', const Size(1000, 1000),
+        (WidgetTester tester) async {
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
+      expect(cpuProfileData.cpuProfileRoot.isExpanded, false);
+      await tester.tap(find.byKey(CpuProfiler.expandButtonKey));
+      expect(cpuProfileData.cpuProfileRoot.isExpanded, true);
+      await tester.tap(find.byKey(CpuProfiler.collapseButtonKey));
+      expect(cpuProfileData.cpuProfileRoot.isExpanded, false);
     });
   });
 }

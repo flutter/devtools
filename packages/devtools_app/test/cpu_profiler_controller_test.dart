@@ -81,11 +81,18 @@ void main() {
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+    });
 
-      await pullProfileAndSelectFrame();
-      controller.resetNotifiers(useBaseStateData: false);
-      expect(controller.dataNotifier.value, isNull);
-      expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+    test('disposes', () {
+      controller.dispose();
+
+      expect(() {
+        controller.dataNotifier.addListener(() {});
+      }, throwsA(anything));
+
+      expect(() {
+        controller.selectedCpuStackFrameNotifier.addListener(() {});
+      }, throwsA(anything));
     });
   });
 }

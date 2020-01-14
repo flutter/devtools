@@ -8,17 +8,20 @@ import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/flutter/controllers.dart';
 import 'package:devtools_app/src/flutter/initializer.dart' as initializer;
 import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
+    as flutter_memory;
+import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
-    as flutter_memory;
 import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:meta/meta.dart';
@@ -27,7 +30,11 @@ import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
-      : service = useFakeService ? FakeVmService() : MockVmService();
+      : service =
+            useFakeService ? FakeVmService(_flagManager) : MockVmService() {
+    _flagManager.service = service;
+  }
+  static final _flagManager = VmFlagManager();
 
   @override
   final VmServiceWrapper service;
@@ -54,6 +61,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final IsolateManager isolateManager = FakeIsolateManager();
 
   @override
+  final VmFlagManager vmFlagManager = _flagManager;
+
+  @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
 
@@ -67,8 +77,39 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
+  FakeVmService(this._vmFlagManager);
+
+  final VmFlagManager _vmFlagManager;
+
   final _flags = <String, dynamic>{
-    'flags': <Flag>[],
+    'flags': <Flag>[
+      Flag(
+        name: 'flag 1 name',
+        comment: 'flag 1 comment contains some very long text '
+            'that the renderer will have to wrap around to prevent '
+            'it from overflowing the screen. This will cause a '
+            'failure if one of the two Row entries the flags lay out '
+            'in is not wrapped in an Expanded(), which tells the Row '
+            'allocate only the remaining space to the Expanded. '
+            'Without the expanded, the underlying RichTexts will try '
+            'to consume as much of the layout as they can and cause '
+            'an overflow.',
+        valueAsString: 'flag 1 value',
+        modified: false,
+      ),
+      Flag(
+        name: vm_flags.profiler,
+        comment: 'Mock Flag',
+        valueAsString: 'true',
+        modified: false,
+      ),
+      Flag(
+        name: vm_flags.profilePeriod,
+        comment: 'Mock Flag',
+        valueAsString: ProfileGranularity.medium.value,
+        modified: false,
+      ),
+    ],
   };
 
   @override
@@ -86,6 +127,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
         'valueAsString': value,
       }));
     }
+
+    final fakeVmFlagUpdateEvent = Event(
+      kind: EventKind.kVMFlagUpdate,
+      flag: name,
+      newValue: value,
+      timestamp: 1, // 1 is arbitrary.
+    );
+    _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
     return Future.value(Success());
   }
 
@@ -161,6 +210,8 @@ class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
 class MockTimelineController extends Mock implements TimelineController {}
+
+class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockFrameBasedTimelineData extends Mock
     implements FrameBasedTimelineData {}
@@ -462,4 +513,8 @@ Future<void> ensureInspectorDependencies() async {
     "To fix this, mark the failing test as @TestOn('vm')",
   );
   await initializer.ensureInspectorDependencies();
+}
+
+void mockIsFlutterApp(MockConnectedApp connectedApp) {
+  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
 }

@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../profiler/cpu_profile_model.dart';
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../vm_flags.dart' as vm_flags;
 
 /// Manages interactions between the Cpu Profiler and the VmService.
@@ -22,6 +23,13 @@ class CpuProfilerService {
     );
   }
 
+  /// Notifies that the vm profiler flag has changed.
+  ValueNotifier<Flag> get profilerFlagNotifier =>
+      serviceManager.vmFlagManager.flag(vm_flags.profiler);
+
+  ValueNotifier<Flag> get profileGranularityFlagNotifier =>
+      serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
+
   Future<Success> clearCpuSamples() {
     return serviceManager.service
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
@@ -29,5 +37,9 @@ class CpuProfilerService {
 
   Future<dynamic> setProfilePeriod(String value) {
     return serviceManager.service.setFlag(vm_flags.profilePeriod, value);
+  }
+
+  Future<dynamic> enableCpuProfiler() async {
+    return await serviceManager.service.setFlag(vm_flags.profiler, 'true');
   }
 }

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../flutter/common_widgets.dart';
+import '../../flutter/controllers.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../performance/performance_controller.dart';
@@ -42,28 +42,41 @@ class PerformanceScreen extends Screen {
 }
 
 class PerformanceScreenBody extends StatelessWidget {
-  final PerformanceController controller = PerformanceController();
-
   @override
   Widget build(BuildContext context) {
+    final controller = Controllers.of(context).performance;
+    return ValueListenableBuilder<Flag>(
+      valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+      builder: (context, profilerFlag, _) {
+        return profilerFlag.valueAsString == 'true'
+            ? _buildPerformanceBody(controller)
+            : CpuProfilerDisabled(controller.cpuProfilerController);
+      },
+    );
+  }
+
+  Widget _buildPerformanceBody(PerformanceController controller) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildStateControls(),
+            _buildStateControls(controller),
             ProfileGranularityDropdown(),
           ],
         ),
         Expanded(
-          child: ValueListenableBuilder(
+          child: ValueListenableBuilder<CpuProfileData>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
                   CpuProfilerController.baseStateCpuProfileData) {
-                return _buildRecordingInfo();
+                return _buildRecordingInfo(controller);
               }
-              return _buildCpuProfiler(cpuProfileData);
+              return CpuProfiler(
+                data: cpuProfileData,
+                controller: controller.cpuProfilerController,
+              );
             },
           ),
         ),
@@ -71,9 +84,9 @@ class PerformanceScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildStateControls() {
+  Widget _buildStateControls(PerformanceController controller) {
     const double minIncludeTextWidth = 600;
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.recordingNotifier,
       builder: (context, recording, _) {
         return Row(
@@ -82,19 +95,19 @@ class PerformanceScreenBody extends StatelessWidget {
               key: PerformanceScreen.recordButtonKey,
               recording: recording,
               minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _startRecording,
+              onPressed: controller.startRecording,
             ),
             stopRecordingButton(
               key: PerformanceScreen.stopRecordingButtonKey,
               recording: recording,
               minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _stopRecording,
+              onPressed: controller.stopRecording,
             ),
             const SizedBox(width: 8.0),
             clearButton(
               key: PerformanceScreen.clearButtonKey,
               minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: recording ? null : _clear,
+              onPressed: recording ? null : controller.clear,
             ),
           ],
         );
@@ -102,8 +115,8 @@ class PerformanceScreenBody extends StatelessWidget {
     );
   }
 
-  Widget _buildRecordingInfo() {
-    return ValueListenableBuilder(
+  Widget _buildRecordingInfo(PerformanceController controller) {
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.recordingNotifier,
       builder: (context, recording, _) {
         return recordingInfo(
@@ -114,32 +127,5 @@ class PerformanceScreenBody extends StatelessWidget {
         );
       },
     );
-  }
-
-  Widget _buildCpuProfiler(CpuProfileData data) {
-    return ValueListenableBuilder(
-      valueListenable:
-          controller.cpuProfilerController.selectedCpuStackFrameNotifier,
-      builder: (context, selectedStackFrame, _) {
-        return CpuProfiler(
-          data: data,
-          selectedStackFrame: selectedStackFrame,
-          onStackFrameSelected: (sf) =>
-              controller.cpuProfilerController.selectCpuStackFrame(sf),
-        );
-      },
-    );
-  }
-
-  Future<void> _startRecording() async {
-    await controller.startRecording();
-  }
-
-  Future<void> _stopRecording() async {
-    await controller.stopRecording();
-  }
-
-  Future<void> _clear() async {
-    await controller.clear();
   }
 }

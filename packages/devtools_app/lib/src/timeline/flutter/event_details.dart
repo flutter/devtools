@@ -5,10 +5,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
 import '../../profiler/cpu_profile_model.dart';
+import '../../profiler/cpu_profiler_controller.dart';
 import '../../profiler/flutter/cpu_profiler.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
@@ -51,26 +53,26 @@ class EventDetails extends StatelessWidget {
   }
 
   Widget _buildDetails(TimelineController controller) {
-    return selectedEvent.isUiEvent
-        ? ValueListenableBuilder(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
-            builder: (context, cpuProfileData, _) {
-              return _buildCpuProfiler(cpuProfileData, controller);
-            },
-          )
-        : EventSummary(selectedEvent);
+    if (selectedEvent.isUiEvent) {
+      return ValueListenableBuilder<Flag>(
+        valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+        builder: (context, profilerFlag, _) {
+          return profilerFlag.valueAsString == 'true'
+              ? _buildCpuProfiler(controller.cpuProfilerController)
+              : CpuProfilerDisabled(controller.cpuProfilerController);
+        },
+      );
+    }
+    return EventSummary(selectedEvent);
   }
 
-  Widget _buildCpuProfiler(CpuProfileData data, TimelineController controller) {
-    return ValueListenableBuilder(
-      valueListenable:
-          controller.cpuProfilerController.selectedCpuStackFrameNotifier,
-      builder: (context, selectedStackFrame, _) {
+  Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
+    return ValueListenableBuilder<CpuProfileData>(
+      valueListenable: cpuProfilerController.dataNotifier,
+      builder: (context, cpuProfileData, _) {
         return CpuProfiler(
-          data: data,
-          selectedStackFrame: selectedStackFrame,
-          onStackFrameSelected: (sf) =>
-              controller.cpuProfilerController.selectCpuStackFrame(sf),
+          data: cpuProfileData,
+          controller: cpuProfilerController,
         );
       },
     );
@@ -111,6 +113,11 @@ class EventSummary extends StatelessWidget {
     return ListView(
       children: [
         ListTile(
+          title: const Text('Time'),
+          subtitle: Text('${event.time.start.inMicroseconds} μs —  '
+              '${event.time.end.inMicroseconds} μs'),
+        ),
+        ListTile(
           title: const Text('Thread id'),
           subtitle: Text('${firstTraceEvent.threadId}'),
         ),
@@ -122,6 +129,11 @@ class EventSummary extends StatelessWidget {
           title: const Text('Category'),
           subtitle: Text(firstTraceEvent.category),
         ),
+        if (event.isAsyncEvent)
+          ListTile(
+            title: const Text('Async id'),
+            subtitle: Text('${(event as AsyncTimelineEvent).asyncId}'),
+          ),
         if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
         if (_eventArgs.isNotEmpty) _buildArguments(),
       ],

@@ -186,6 +186,24 @@ void main() {
       expect(find.byKey(narrowNodeKey), findsOneWidget);
       expect(textFinder, findsNothing);
     });
+
+    testWidgets('normalizes negative widths', (WidgetTester tester) async {
+      /*
+       * This test simulates a node created with a very small width with
+       * added padding.
+       * 
+       * We sometimes create empty space between nodes by subtracting some
+       * space from the width. We want the node to normalize itself to prevent
+       * negative bounds.
+       */
+      await pumpFlameChartNode(
+        tester,
+        node: negativeWidthNode,
+        selected: false,
+        hovered: false,
+      );
+      expect(tester.takeException(), isNull);
+    });
   });
 }
 
@@ -253,3 +271,15 @@ final testNodes = [
   testNode3,
   testNode4,
 ];
+
+const noWidthNodeKey = Key('no-width node');
+final negativeWidthNode = FlameChartNode<TimelineEvent>(
+  key: noWidthNodeKey,
+  text: 'No-width node',
+  tooltip: 'no-width node tooltip',
+  rect: const Rect.fromLTWH(1.0, 0.0, -0.1, rowHeight),
+  backgroundColor: Colors.blue,
+  textColor: Colors.white,
+  data: goldenAsyncTimelineEvent,
+  onSelected: (_) {},
+);
