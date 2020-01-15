@@ -54,9 +54,37 @@ void main() {
             const Size(10, 600));
       });
 
+      testWidgets('with 0% space to first child builder',
+          (WidgetTester tester) async {
+        final split =
+            buildSplitWithBuilder(Axis.horizontal, initialFirstFraction: 0.0);
+        await tester.pumpWidget(wrap(split));
+        expect(find.byKey(_w1), findsOneWidget);
+        expect(find.byKey(_w2), findsOneWidget);
+        expect(find.byKey(split.dividerKey), findsOneWidget);
+        expect(tester.element(find.byKey(_w1)).size, const Size(0, 600));
+        expect(tester.element(find.byKey(_w2)).size, const Size(790, 600));
+        expect(tester.element(find.byKey(split.dividerKey)).size,
+            const Size(10, 600));
+      });
+
       testWidgets('with 100% space to first child',
           (WidgetTester tester) async {
         final split = buildSplit(Axis.horizontal, initialFirstFraction: 1.0);
+        await tester.pumpWidget(wrap(split));
+        expect(find.byKey(_w1), findsOneWidget);
+        expect(find.byKey(_w2), findsOneWidget);
+        expect(find.byKey(split.dividerKey), findsOneWidget);
+        expect(tester.element(find.byKey(_w1)).size, const Size(790, 600));
+        expect(tester.element(find.byKey(_w2)).size, const Size(0, 600));
+        expect(tester.element(find.byKey(split.dividerKey)).size,
+            const Size(10, 600));
+      });
+
+      testWidgets('with 100% space to first child builder',
+          (WidgetTester tester) async {
+        final split =
+            buildSplitWithBuilder(Axis.horizontal, initialFirstFraction: 1.0);
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -107,9 +135,37 @@ void main() {
             const Size(800, 10));
       });
 
+      testWidgets('with 0% space to first child builder',
+          (WidgetTester tester) async {
+        final split =
+            buildSplitWithBuilder(Axis.vertical, initialFirstFraction: 0.0);
+        await tester.pumpWidget(wrap(split));
+        expect(find.byKey(_w1), findsOneWidget);
+        expect(find.byKey(_w2), findsOneWidget);
+        expect(find.byKey(split.dividerKey), findsOneWidget);
+        expect(tester.element(find.byKey(_w1)).size, const Size(800, 0));
+        expect(tester.element(find.byKey(_w2)).size, const Size(800, 590));
+        expect(tester.element(find.byKey(split.dividerKey)).size,
+            const Size(800, 10));
+      });
+
       testWidgets('with 100% space to first child',
           (WidgetTester tester) async {
         final split = buildSplit(Axis.vertical, initialFirstFraction: 1.0);
+        await tester.pumpWidget(wrap(split));
+        expect(find.byKey(_w1), findsOneWidget);
+        expect(find.byKey(_w2), findsOneWidget);
+        expect(find.byKey(split.dividerKey), findsOneWidget);
+        expect(tester.element(find.byKey(_w1)).size, const Size(800, 590));
+        expect(tester.element(find.byKey(_w2)).size, const Size(800, 0));
+        expect(tester.element(find.byKey(split.dividerKey)).size,
+            const Size(800, 10));
+      });
+
+      testWidgets('with 100% space to first child builder',
+          (WidgetTester tester) async {
+        final split =
+            buildSplitWithBuilder(Axis.vertical, initialFirstFraction: 1.0);
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -285,6 +341,18 @@ Split buildSplit(Axis axis, {@required double initialFirstFraction}) {
     axis: axis,
     firstChild: w1,
     secondChild: w2,
+    initialFirstFraction: initialFirstFraction,
+  );
+}
+
+Split buildSplitWithBuilder(Axis axis,
+    {@required double initialFirstFraction}) {
+  const w1 = Text('content1', key: _w1);
+  const w2 = Text('content2', key: _w2);
+  return Split.builder(
+    axis: axis,
+    firstBuilder: (_, __) => w1,
+    secondBuilder: (_, __) => w2,
     initialFirstFraction: initialFirstFraction,
   );
 }
