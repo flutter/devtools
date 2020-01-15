@@ -27,6 +27,9 @@ class CpuProfilerService {
   ValueNotifier<Flag> get profilerFlagNotifier =>
       serviceManager.vmFlagManager.flag(vm_flags.profiler);
 
+  ValueNotifier<Flag> get profileGranularityFlagNotifier =>
+      serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
+
   Future<Success> clearCpuSamples() {
     return serviceManager.service
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);

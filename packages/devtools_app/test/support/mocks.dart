@@ -12,6 +12,7 @@ import 'package:devtools_app/src/memory/flutter/memory_controller.dart'
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/stream_value_listenable.dart';
@@ -19,6 +20,7 @@ import 'package:devtools_app/src/timeline/timeline_controller.dart';
 import 'package:devtools_app/src/timeline/timeline_model.dart';
 import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:meta/meta.dart';
@@ -29,9 +31,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
       : service =
             useFakeService ? FakeVmService(_flagManager) : MockVmService() {
-    if (useFakeService) {
-      _flagManager.service = service;
-    }
+    _flagManager.service = service;
   }
   static final _flagManager = VmFlagManager();
 
@@ -97,9 +97,15 @@ class FakeVmService extends Fake implements VmServiceWrapper {
         modified: false,
       ),
       Flag(
-        name: 'profiler',
+        name: vm_flags.profiler,
         comment: 'Mock Flag',
         valueAsString: 'true',
+        modified: false,
+      ),
+      Flag(
+        name: vm_flags.profilePeriod,
+        comment: 'Mock Flag',
+        valueAsString: ProfileGranularity.medium.value,
         modified: false,
       ),
     ],
@@ -494,4 +500,8 @@ Future<void> ensureInspectorDependencies() async {
     "To fix this, mark the failing test as @TestOn('vm')",
   );
   await initializer.ensureInspectorDependencies();
+}
+
+void mockIsFlutterApp(MockConnectedApp connectedApp) {
+  when(connectedApp.isAnyFlutterApp).thenAnswer((_) => Future.value(true));
 }

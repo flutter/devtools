@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
+import '../../devtools.dart' as devtools;
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
 import 'common_widgets.dart';
@@ -53,26 +54,37 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Connect',
-          style: textTheme.headline,
-          key: const Key('Connect Title'),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Connect',
+              style: textTheme.headline,
+              key: const Key('Connect Title'),
+            ),
+            const PaddedDivider(),
+            Text(
+              'Connect to a Running App',
+              style: textTheme.body2,
+            ),
+            Text(
+              'Enter a URL to a running Dart or Flutter application',
+              style: textTheme.caption,
+            ),
+            const Padding(padding: EdgeInsets.only(top: 20.0)),
+            _buildTextInput(),
+            const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
+            // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+          ],
         ),
-        const PaddedDivider(),
-        Text(
-          'Connect to a Running App',
-          style: textTheme.body2,
-        ),
-        Text(
-          'Enter a URL to a running Dart or Flutter application',
-          style: textTheme.caption,
-        ),
-        const Padding(padding: EdgeInsets.only(top: 20.0)),
-        _buildTextInput(),
-        const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
-        // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+        Center(
+          child: Text(
+            'Version ${devtools.version}',
+            style: textTheme.subhead,
+          ),
+        )
       ],
     );
   }
