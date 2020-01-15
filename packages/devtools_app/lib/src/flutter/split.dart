@@ -7,6 +7,8 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+typedef SizedBuilder = Widget Function(BuildContext, Size);
+
 /// A widget that takes two children, lays them out along [axis], and allows
 /// the user to resize them.
 ///
@@ -32,6 +34,29 @@ class Split extends StatefulWidget {
         assert(axis != null),
         assert(firstChild != null),
         assert(secondChild != null),
+        firstBuilder = null,
+        secondBuilder = null,
+        super(key: key);
+
+  /// Builds a split oriented along [axis] that takes [SizedBuilder]s for its
+  /// children.
+  ///
+  /// This allows custom behavior when the split reaches a small size.
+  ///
+  /// Use this constructor if you are running into overflow errors at small child
+  /// sizes and want to prevent them.
+  const Split.builder({
+    Key key,
+    @required this.axis,
+    @required this.firstBuilder,
+    @required this.secondBuilder,
+    double initialFirstFraction,
+  })  : initialFirstFraction = initialFirstFraction ?? 0.5,
+        assert(axis != null),
+        assert(firstBuilder != null),
+        assert(secondBuilder != null),
+        firstChild = null,
+        secondChild = null,
         super(key: key);
 
   /// The main axis the children will lay out on.
@@ -46,10 +71,36 @@ class Split extends StatefulWidget {
   final Axis axis;
 
   /// The child that will be laid out first along [axis].
+  ///
+  /// If null, [firstBuilder] will be used instead.
+  ///
+  /// Between [firstBuilder] and [firstChild], exactly one must be non-null.
+  /// In other words, `(firstBuilder == null) != (firstChild == null)`.
   final Widget firstChild;
 
   /// The child that will be laid out last along [axis].
+  ///
+  /// If null, [secondBuilder] will be used instead.
+  ///
+  /// Between [secondBuilder] and [secondChild], exactly one must be non-null.
+  /// In other words, `(secondBuilder == null) != (secondChild == null)`.
   final Widget secondChild;
+
+  /// The builder for the first child along [axis].
+  ///
+  /// If null, [firstChild] will be used instead.
+  ///
+  /// Between [firstBuilder] and [firstChild], exactly one must be non-null.
+  /// In other words, `(firstBuilder == null) != (firstChild == null)`.
+  final SizedBuilder firstBuilder;
+
+  /// The builder for the second child along [axis].
+  ///
+  /// If null, [secondChild] will be used instead.
+  ///
+  /// Between [secondBuilder] and [secondChild], exactly one must be non-null.
+  /// In other words, `(secondBuilder == null) != (secondChild == null)`.
+  final SizedBuilder secondBuilder;
 
   /// The fraction of the layout to allocate to [firstChild].
   ///
@@ -90,6 +141,16 @@ class _SplitState extends State<Split> {
     firstFraction = widget.initialFirstFraction;
   }
 
+  Widget _buildFirstChild(Size size) {
+    if (widget.firstChild != null) return widget.firstChild;
+    return Builder(builder: (context) => widget.firstBuilder(context, size));
+  }
+
+  Widget _buildSecondChild(Size size) {
+    if (widget.secondChild != null) return widget.secondChild;
+    return Builder(builder: (context) => widget.secondBuilder(context, size));
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: _buildLayout);
@@ -104,16 +165,18 @@ class _SplitState extends State<Split> {
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    double firstSize = axisSize * firstFraction;
-    double secondSize = axisSize * secondFraction;
+    double firstMainAxisSize = axisSize * firstFraction;
+    double secondMainAxisSize = axisSize * secondFraction;
 
     // Clamp the sizes to be sure there is enough space for the dividers.
-    firstSize = firstSize.clamp(halfDivider, axisSize - halfDivider);
-    secondSize = secondSize.clamp(halfDivider, axisSize - halfDivider);
+    firstMainAxisSize =
+        firstMainAxisSize.clamp(halfDivider, axisSize - halfDivider);
+    secondMainAxisSize =
+        secondMainAxisSize.clamp(halfDivider, axisSize - halfDivider);
 
     // Remove space from each child to place the divider in the middle.
-    firstSize = firstSize - halfDivider;
-    secondSize = secondSize - halfDivider;
+    firstMainAxisSize = firstMainAxisSize - halfDivider;
+    secondMainAxisSize = secondMainAxisSize - halfDivider;
 
     void updateSpacing(DragUpdateDetails dragDetails) {
       final delta = isHorizontal ? dragDetails.delta.dx : dragDetails.delta.dy;
@@ -155,12 +218,18 @@ class _SplitState extends State<Split> {
           ),
       ],
     );
-
+    final firstSize = Size(
+      isHorizontal ? firstMainAxisSize : width,
+      isHorizontal ? height : firstMainAxisSize,
+    );
+    final secondSize = Size(
+      isHorizontal ? secondMainAxisSize : width,
+      isHorizontal ? height : secondMainAxisSize,
+    );
     final children = [
-      SizedBox(
-        width: isHorizontal ? firstSize : width,
-        height: isHorizontal ? height : firstSize,
-        child: widget.firstChild,
+      SizedBox.fromSize(
+        size: firstSize,
+        child: _buildFirstChild(firstSize),
       ),
       GestureDetector(
         key: widget.dividerKey,
@@ -179,10 +248,9 @@ class _SplitState extends State<Split> {
           ),
         ),
       ),
-      SizedBox(
-        width: isHorizontal ? secondSize : width,
-        height: isHorizontal ? height : secondSize,
-        child: widget.secondChild,
+      SizedBox.fromSize(
+        size: secondSize,
+        child: _buildSecondChild(secondSize),
       ),
     ];
     return Flex(direction: widget.axis, children: children);
