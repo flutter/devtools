@@ -8,7 +8,6 @@ library icon_renderer;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../fake_flutter/_real_flutter.dart';
 import '../icons.dart';
 import '../material_icons.dart';
 import '../theme.dart';
