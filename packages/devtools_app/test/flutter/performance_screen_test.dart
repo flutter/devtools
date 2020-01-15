@@ -94,7 +94,7 @@ void main() {
       final perfScreenBody = PerformanceScreenBody();
       await tester.pumpWidget(wrapWithControllers(
         perfScreenBody,
-        performanceController: PerformanceController(),
+        performance: PerformanceController(),
       ));
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
       expect(
