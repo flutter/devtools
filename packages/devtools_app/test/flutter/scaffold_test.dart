@@ -73,6 +73,7 @@ void main() {
 
 class _TestScreen extends Screen {
   const _TestScreen(this.name, this.key, [this.tabKey]) : super();
+
   final String name;
   final Key key;
   final Key tabKey;
