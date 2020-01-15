@@ -6,6 +6,7 @@ library service_extensions;
 
 import 'package:meta/meta.dart';
 
+import 'flutter/octicons.dart';
 import 'ui/analytics_constants.dart' as ga;
 import 'ui/icons.dart';
 
@@ -125,12 +126,12 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
-  description: 'Track Widget Rebuilds',
-  icon: FlutterIcons.greyProgr,
+  description: 'Track Widget Builds',
+  icon: OcticonIcon(Octicons.tools),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Do Not Track Widget Rebuilds',
-  disabledTooltip: 'Track Widget Rebuilds',
+  enabledTooltip: 'Disable tracking widget builds',
+  disabledTooltip: 'Enable tracking widget builds',
   gaScreenName: ga.performance,
   gaItem: ga.trackRebuilds,
 );

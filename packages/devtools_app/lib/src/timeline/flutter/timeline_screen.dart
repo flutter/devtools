@@ -223,8 +223,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: ProfileGranularityDropdown(),
         ),
         ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1100,
-          extensions: [performanceOverlay],
+          minIncludeTextWidth: 1300,
+          extensions: [performanceOverlay, profileWidgetBuilds],
         ),
         const SizedBox(width: 8.0),
         OutlineButton(

@@ -19,11 +19,13 @@ import 'fake_flutter/fake_flutter.dart';
 import 'material_icons.dart';
 import 'theme.dart';
 
+const defaultIconSize = 18.0;
+
 abstract class DevToolsIcon {
   const DevToolsIcon();
 
-  double get iconWidth => 18;
-  double get iconHeight => 18;
+  double get iconWidth => defaultIconSize;
+  double get iconHeight => defaultIconSize;
 }
 
 class UrlIcon extends DevToolsIcon {
@@ -302,4 +304,10 @@ class ColorIconMaker {
   DevToolsIcon getCustomIcon(Color color) {
     return iconCache.putIfAbsent(color, () => ColorIcon(color));
   }
+}
+
+class OcticonIcon extends DevToolsIcon {
+  OcticonIcon(IconData iconData) : icon = Icon(iconData, size: defaultIconSize);
+
+  final Icon icon;
 }

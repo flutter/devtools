@@ -8,6 +8,7 @@ library icon_renderer;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../fake_flutter/_real_flutter.dart';
 import '../icons.dart';
 import '../material_icons.dart';
 import '../theme.dart';
@@ -99,7 +100,14 @@ class _ColorIconPainter extends CustomPainter {
 }
 
 Widget _computeIconWidget(DevToolsIcon icon) {
-  if (icon is UrlIcon) {
+  if (icon is OcticonIcon) {
+    return Padding(
+      // Octicons have slightly less padding around the image than other
+      // DevToolsIcons. This padding centers the icon in the row.
+      padding: const EdgeInsets.only(bottom: 2.0),
+      child: icon.icon,
+    );
+  } else if (icon is UrlIcon) {
     return SizedBox(
       width: icon.iconWidth,
       height: icon.iconHeight,
@@ -114,7 +122,7 @@ Widget _computeIconWidget(DevToolsIcon icon) {
   } else if (icon is ColorIcon) {
     return CustomPaint(
       painter: _ColorIconPainter(icon),
-      size: const Size(18, 18),
+      size: const Size(defaultIconSize, defaultIconSize),
     );
   } else if (icon is CustomIcon) {
     return Container(
