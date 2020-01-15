@@ -45,14 +45,17 @@ class TimelineFlameChart extends StatelessWidget {
     BoxConstraints constraints,
     TimelineEvent selectedEvent,
   ) {
-    return FrameBasedTimelineFlameChart(
-      controller.frameBasedTimeline.data.selectedFrame,
-      // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
-      // test horizontal scrolling functionality.
-      width: constraints.maxWidth * 2,
-      selected: selectedEvent,
-      onSelected: (e) => controller.selectTimelineEvent(e),
-    );
+    final selectedFrame = controller.frameBasedTimeline.data.selectedFrame;
+    return selectedFrame != null
+        ? FrameBasedTimelineFlameChart(
+            selectedFrame,
+            // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
+            // test horizontal scrolling functionality.
+            width: constraints.maxWidth * 2,
+            selected: selectedEvent,
+            onSelected: (e) => controller.selectTimelineEvent(e),
+          )
+        : const SizedBox();
   }
 
   Widget _buildFullTimeline(
