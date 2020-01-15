@@ -109,10 +109,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           builder: (context, selectedFrame, _) {
             return (timelineMode == TimelineMode.full || selectedFrame != null)
                 ? Expanded(
-                    child: Split(
+                    child: Split.builder(
                       axis: Axis.vertical,
-                      firstChild: _buildFlameChartSection(),
-                      secondChild: _buildEventDetailsSection(),
+                      firstBuilder: _buildFlameChartSection,
+                      secondBuilder: _buildEventDetailsSection,
                       initialFirstFraction: 0.6,
                     ),
                   )
@@ -239,7 +239,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildFlameChartSection() {
+  Widget _buildFlameChartSection(BuildContext context, Size size) {
     Widget content;
     final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
     if (timelineMode == TimelineMode.full && fullTimelineEmpty) {
@@ -281,11 +281,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     );
   }
 
-  Widget _buildEventDetailsSection() {
+  Widget _buildEventDetailsSection(BuildContext context, Size size) {
     return ValueListenableBuilder<TimelineEvent>(
       valueListenable: controller.selectedTimelineEventNotifier,
       builder: (context, selectedEvent, _) {
-        return EventDetails(selectedEvent);
+        return EventDetails(selectedEvent, size);
       },
     );
   }

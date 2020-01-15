@@ -18,13 +18,14 @@ import '../timeline_controller.dart';
 import '../timeline_model.dart';
 
 class EventDetails extends StatelessWidget {
-  const EventDetails(this.selectedEvent);
+  const EventDetails(this.selectedEvent, this.parentSize);
 
   static const instructions =
       'Select an event from the Timeline to view details';
   static const noEventSelected = '[No event selected]';
 
   final TimelineEvent selectedEvent;
+  final Size parentSize;
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +34,26 @@ class EventDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Text(
-            selectedEvent != null
-                ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
-                : noEventSelected,
-            style: textTheme.title,
+        LimitedBox(
+          maxHeight: (parentSize.height < 200.0)
+              ? parentSize.height / 2
+              : parentSize.height,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              selectedEvent != null
+                  ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
+                  : noEventSelected,
+              style: textTheme.title,
+            ),
           ),
         ),
-        const PaddedDivider.thin(),
+        LimitedBox(
+          maxHeight: (parentSize.height < 200.0)
+              ? parentSize.height / 2
+              : parentSize.height,
+          child: const PaddedDivider.thin(),
+        ),
         Expanded(
           child: selectedEvent != null
               ? _buildDetails(controller)
