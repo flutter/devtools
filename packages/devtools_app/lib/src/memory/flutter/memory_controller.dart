@@ -10,6 +10,7 @@ import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../auto_dispose.dart';
 import '../../config_specific/logger.dart';
 import '../../globals.dart';
 import '../../ui/fake_file/fake_file.dart';
@@ -32,7 +33,7 @@ final String _memoryLogFilename =
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
-class MemoryController {
+class MemoryController implements DisposableController {
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
@@ -274,6 +275,13 @@ class MemoryController {
     }
 
     return false;
+  }
+
+  @override
+  void dispose() {
+    _memorySourceNotifier.dispose();
+    _disconnectController.close();
+    _memoryTrackerController.close();
   }
 }
 
