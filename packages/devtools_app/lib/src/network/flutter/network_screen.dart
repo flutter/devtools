@@ -124,6 +124,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
+            // TODO(bkonyi): use DevTools specific table when pagination is
+            // supported.
             child: PaginatedDataTable(
               rowsPerPage: 25,
               // TODO(bkonyi): figure out how to prevent header from scrolling.

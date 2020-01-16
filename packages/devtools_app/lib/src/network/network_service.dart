@@ -15,6 +15,7 @@ class NetworkService {
   Future<void> enableHttpRequestLogging(bool state) async {
     assert(state == !networkController.httpRecordingNotifier.value);
     await serviceManager.service.forEachIsolate((isolate) async {
+      // TODO(bkonyi): perform VM service version check.
       final future = serviceManager.service.setHttpEnableTimelineLogging(
         isolate.id,
         state,
@@ -67,6 +68,7 @@ class NetworkService {
     bool enabled = false;
     await serviceManager.service.forEachIsolate(
       (isolate) async {
+        // TODO(bkonyi): perform VM service version check.
         final future =
             serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
         // The above call won't complete immediately if the isolate is paused,
