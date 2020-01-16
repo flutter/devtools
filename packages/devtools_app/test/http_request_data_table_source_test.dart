@@ -178,8 +178,8 @@ void main() {
 
       void verifyOrder(Function(HttpRequestData) getField, bool ascending) {
         for (int i = 0; i < dataTable.rowCount - 1; i++) {
-          HttpRequestData a = dataTable.getData(i);
-          HttpRequestData b = dataTable.getData(i + 1);
+          HttpRequestData a = dataTable.data[i];
+          HttpRequestData b = dataTable.data[i + 1];
           if (!ascending) {
             final tmp = a;
             a = b;

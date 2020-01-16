@@ -15,7 +15,7 @@ class HttpRequestDataTableSource extends DataTableSource {
   }
 
   @visibleForTesting
-  HttpRequestData getData(int i) => _data[i];
+  List<HttpRequestData> get data => _data;
 
   List<HttpRequestData> _data;
 
