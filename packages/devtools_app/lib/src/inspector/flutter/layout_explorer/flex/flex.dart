@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../../flutter/theme.dart';
 import '../../../../ui/colors.dart';
 import '../../../../ui/theme.dart';
 import '../../../../utils.dart';
@@ -107,8 +108,6 @@ extension LayoutThemeDataExtension on ThemeData {
 }
 
 const freeSpaceAssetName = 'assets/img/story_of_layout/free_space.png';
-
-const entranceAnimationDuration = Duration(milliseconds: 500);
 
 const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
@@ -306,8 +305,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   }
 
   AnimationController entranceController;
-  CurvedAnimation expandedEntrance;
-  CurvedAnimation allEntrance;
+  CurvedAnimation entranceCurve;
   AnimationController changeController;
 
   CurvedAnimation changeAnimation;
@@ -486,9 +484,8 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   }
 
   void _initAnimationStates() {
-    entranceController = AnimationController(
-      vsync: this,
-      duration: entranceAnimationDuration,
+    entranceController = longAnimationController(
+      this,
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           setState(() {
@@ -497,14 +494,9 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           });
         }
       });
-    expandedEntrance =
-        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
-    allEntrance =
-        CurvedAnimation(parent: entranceController, curve: Curves.easeIn);
-    changeController = AnimationController(
-      vsync: this,
-      duration: entranceAnimationDuration,
-    )..addStatusListener((status) {
+    entranceCurve = defaultCurvedAnimation(entranceController);
+    changeController = longAnimationController(this)
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _properties = _animatedProperties.end;
@@ -513,10 +505,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
           });
         }
       });
-    changeAnimation = CurvedAnimation(
-      parent: changeController,
-      curve: Curves.easeInOut,
-    );
+    changeAnimation = defaultCurvedAnimation(changeController);
   }
 
   void _updateObjectGroupManager() {
@@ -1085,10 +1074,11 @@ class FlexChildVisualizer extends StatelessWidget {
             vertical ? minRenderHeight - entranceMargin : renderSize.height,
           ),
           end: renderSize,
-        ).evaluate(state.expandedEntrance);
+        ).evaluate(state.entranceCurve);
       }
+      // Not-expanded widgets enter much faster.
       return Opacity(
-        opacity: min([state.allEntrance.value * 5, 1.0]),
+        opacity: min([state.entranceCurve.value * 5, 1.0]),
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: (renderSize.width - size.width) / 2,

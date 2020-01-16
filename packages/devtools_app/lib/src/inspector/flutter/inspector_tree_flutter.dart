@@ -10,6 +10,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
+import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
@@ -166,9 +167,6 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  final defaultAnimationDuration = const Duration(milliseconds: 150);
-  final slowAnimationDuration = const Duration(milliseconds: 300);
-
   InspectorTreeControllerFlutter get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
@@ -187,10 +185,7 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     _scrollControllerY.addListener(_onScrollYChange);
     if (isSummaryTree) {
-      constraintDisplayController = AnimationController(
-        vsync: this,
-        duration: slowAnimationDuration,
-      );
+      constraintDisplayController = longAnimationController(this);
     }
     _bindToController();
   }
@@ -227,8 +222,8 @@ class _InspectorTreeState extends State<InspectorTree>
     final x = _computeTargetX(_scrollControllerY.offset);
     _scrollControllerX.animateTo(
       x,
-      duration: defaultAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: defaultDuration,
+      curve: defaultCurve,
     );
   }
 
@@ -283,8 +278,8 @@ class _InspectorTreeState extends State<InspectorTree>
     );
     currentAnimateY = _scrollControllerY.animateTo(
       targetY,
-      duration: slowAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: longDuration,
+      curve: defaultCurve,
     );
 
     // Determine a target X coordinate consistent with the target Y coordinate
@@ -293,8 +288,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
     unawaited(_scrollControllerX.animateTo(
       targetX,
-      duration: slowAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: longDuration,
+      curve: defaultCurve,
     ));
 
     try {
