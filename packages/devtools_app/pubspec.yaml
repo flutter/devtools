@@ -39,7 +39,7 @@ dependencies:
   path: ^1.6.0
   pedantic: ^1.7.0
   platform_detect: ^1.3.5
-  vm_service: ^2.2.0
+  vm_service: ^2.3.1
   # We would use local dependencies for these packages if pub publish allowed it.
   octicons_css:
     ^0.0.1
@@ -64,6 +64,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   flutter_widgets: ^0.1.9
+  recase: ^2.0.1
 
 dependency_overrides:
   # When this is removed, don't forget to add back the override for test tag.

@@ -44,6 +44,18 @@ class VmServiceWrapper implements VmService {
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
+  /// Executes `callback` for each isolate, and waiting for all callbacks to
+  /// finish before completing.
+  Future<void> forEachIsolate(
+      Future<void> Function(IsolateRef) callback) async {
+    final vm = await _vmService.getVM();
+    final futures = <Future>[];
+    for (final isolate in vm.isolates) {
+      futures.add(callback(isolate));
+    }
+    await Future.wait(futures);
+  }
+
   @override
   Future<Breakpoint> addBreakpoint(
     String isolateId,
@@ -405,6 +417,18 @@ class VmServiceWrapper implements VmService {
           await _trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
       return Timeline.parse(response.json);
     }
+  }
+
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+      String isolateId) async {
+    return _trackFuture('getHttpEnableTimelineLogging',
+        _vmService.getHttpEnableTimelineLogging(isolateId));
+  }
+
+  Future<Success> setHttpEnableTimelineLogging(
+      String isolateId, bool enable) async {
+    return _trackFuture('setHttpEnableTimelineLogging',
+        _vmService.setHttpEnableTimelineLogging(isolateId, enable));
   }
 
   @override

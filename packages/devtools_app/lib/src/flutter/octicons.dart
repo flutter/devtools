@@ -8,4 +8,5 @@ class Octicons {
   static const IconData package = IconData(61812, fontFamily: 'Octicons');
   static const IconData dashboard = IconData(61733, fontFamily: 'Octicons');
   static const IconData pulse = IconData(61823, fontFamily: 'Octicons');
+  static const IconData rss = IconData(61492, fontFamily: 'Octicons');
 }

@@ -117,7 +117,7 @@ const dimensionIndicatorTextStyle = TextStyle(
 
 final overflowingDimensionIndicatorTextStyle =
     dimensionIndicatorTextStyle.merge(
-  TextStyle(
+  const TextStyle(
     fontWeight: FontWeight.bold,
     color: overflowTextColor,
   ),
@@ -813,7 +813,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
               child: Text(
                 'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -984,7 +984,7 @@ class FlexChildVisualizer extends StatelessWidget {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == properties.flexFactor
-            ? TextStyle(
+            ? const TextStyle(
                 fontWeight: FontWeight.bold,
               )
             : null,
