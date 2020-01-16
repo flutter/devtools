@@ -34,13 +34,12 @@ class NetworkController {
 
   Timer _pollingTimer;
 
-  void processHttpTimelineEvents(Timeline timeline) {
-    final currentValues = List<HttpRequestData>.from(
-      _httpRequestsNotifier.value.requests,
-    );
-    final outstandingRequestsMap = Map<String, HttpRequestData>.from(
-      _httpRequestsNotifier.value.outstandingRequests,
-    );
+  @visibleForTesting
+  static HttpRequests processHttpTimelineEventsHelper(
+      Timeline timeline,
+      int timelineMicrosOffset,
+      List<HttpRequestData> currentValues,
+      Map<String, HttpRequestData> outstandingRequestsMap) {
     final events = timeline.traceEvents;
     final httpEventIds = <String>{};
     // Perform initial pass to find the IDs for the HTTP timeline events.
@@ -77,7 +76,7 @@ class NetworkController {
     for (final request in httpEvents.entries) {
       final requestId = request.key;
       final requestData = HttpRequestData.fromTimeline(
-        _timelineMicrosOffset,
+        timelineMicrosOffset,
         request.value,
       );
 
@@ -95,11 +94,22 @@ class NetworkController {
       }
       currentValues.add(requestData);
     }
-    // Trigger refresh.
-    _httpRequestsNotifier.value = HttpRequests(
+    return HttpRequests(
       requests: currentValues,
       outstandingRequests: outstandingRequestsMap,
     );
+  }
+
+  void processHttpTimelineEvents(Timeline timeline) {
+    final currentValues = List<HttpRequestData>.from(
+      _httpRequestsNotifier.value.requests,
+    );
+    final outstandingRequestsMap = Map<String, HttpRequestData>.from(
+      _httpRequestsNotifier.value.outstandingRequests,
+    );
+    // Trigger refresh.
+    _httpRequestsNotifier.value = processHttpTimelineEventsHelper(
+        timeline, _timelineMicrosOffset, currentValues, outstandingRequestsMap);
   }
 
   Future<void> _setHttpTimelineRecording(bool state) async {

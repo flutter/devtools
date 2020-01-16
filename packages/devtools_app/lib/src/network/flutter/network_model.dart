@@ -14,6 +14,9 @@ class HttpRequestDataTableSource extends DataTableSource {
     notifyListeners();
   }
 
+  @visibleForTesting
+  HttpRequestData getData(int i) => _data[i];
+
   List<HttpRequestData> _data;
 
   @override
@@ -27,9 +30,9 @@ class HttpRequestDataTableSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get selectedRowCount => 0;
+  int get selectedRowCount => _currentSelection.value == null ? 0 : 1;
 
-  void sort(Function getField, int columnIndex, bool ascending) {
+  void sort(Function getField, bool ascending) {
     _data.sort((
       HttpRequestData a,
       HttpRequestData b,
@@ -54,7 +57,8 @@ class HttpRequestDataTableSource extends DataTableSource {
     notifyListeners();
   }
 
-  TextStyle _getStatusColor(String status) {
+  @visibleForTesting
+  TextStyle getStatusColor(String status) {
     if (status == null) {
       return const TextStyle();
     }
@@ -77,18 +81,27 @@ class HttpRequestDataTableSource extends DataTableSource {
     return const TextStyle();
   }
 
+  @visibleForTesting
+  String formatDuration(Duration duration) {
+    final numFormat = NumberFormat.decimalPattern();
+    return (duration == null)
+        ? 'In Progress'
+        : numFormat.format(duration.inMilliseconds);
+  }
+
+  @visibleForTesting
+  String formatRequestTime(DateTime requestTime) =>
+      DateFormat.Hms().add_yMd().format(requestTime);
+
   @override
   DataRow getRow(int index) {
     final data = _data[index];
-    final numFormat = NumberFormat.decimalPattern();
     final status = (data.status == null) ? '--' : data.status.toString();
-    final requestTime = DateFormat.Hms().add_yMd().format(data.requestTime);
-    final TextStyle statusColor = _getStatusColor(data.status);
+    final TextStyle statusColor = getStatusColor(data.status);
 
     // TODO(bkonyi): is this the number format we want?
-    final durationMs = (data.duration == null)
-        ? 'In Progress'
-        : numFormat.format(data.duration.inMicroseconds / 1000);
+    final durationMs = formatDuration(data.duration);
+    final requestTime = formatRequestTime(data.requestTime);
 
     return DataRow.byIndex(
       index: index,
