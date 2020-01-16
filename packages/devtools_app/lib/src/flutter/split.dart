@@ -78,7 +78,7 @@ class Split extends StatefulWidget {
   /// In other words, `(firstBuilder == null) != (firstChild == null)`.
   final Widget firstChild;
 
-  /// The child that will be laid out last along [axis].
+  /// The child that will be laid out second along [axis].
   ///
   /// If null, [secondBuilder] will be used instead.
   ///

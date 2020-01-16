@@ -56,8 +56,10 @@ void main() {
 
       testWidgets('with 0% space to first child builder',
           (WidgetTester tester) async {
-        final split =
-            buildSplitWithBuilder(Axis.horizontal, initialFirstFraction: 0.0);
+        final split = buildSplitWithBuilder(
+          Axis.horizontal,
+          initialFirstFraction: 0.0,
+        );
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -83,8 +85,10 @@ void main() {
 
       testWidgets('with 100% space to first child builder',
           (WidgetTester tester) async {
-        final split =
-            buildSplitWithBuilder(Axis.horizontal, initialFirstFraction: 1.0);
+        final split = buildSplitWithBuilder(
+          Axis.horizontal,
+          initialFirstFraction: 1.0,
+        );
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -137,8 +141,10 @@ void main() {
 
       testWidgets('with 0% space to first child builder',
           (WidgetTester tester) async {
-        final split =
-            buildSplitWithBuilder(Axis.vertical, initialFirstFraction: 0.0);
+        final split = buildSplitWithBuilder(
+          Axis.vertical,
+          initialFirstFraction: 0.0,
+        );
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -164,8 +170,10 @@ void main() {
 
       testWidgets('with 100% space to first child builder',
           (WidgetTester tester) async {
-        final split =
-            buildSplitWithBuilder(Axis.vertical, initialFirstFraction: 1.0);
+        final split = buildSplitWithBuilder(
+          Axis.vertical,
+          initialFirstFraction: 1.0,
+        );
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_w1), findsOneWidget);
         expect(find.byKey(_w2), findsOneWidget);
@@ -345,8 +353,10 @@ Split buildSplit(Axis axis, {@required double initialFirstFraction}) {
   );
 }
 
-Split buildSplitWithBuilder(Axis axis,
-    {@required double initialFirstFraction}) {
+Split buildSplitWithBuilder(
+  Axis axis, {
+  @required double initialFirstFraction,
+}) {
   const w1 = Text('content1', key: _w1);
   const w2 = Text('content2', key: _w2);
   return Split.builder(
