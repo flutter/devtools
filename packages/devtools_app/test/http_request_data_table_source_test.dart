@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,7 +10,7 @@ import 'package:devtools_app/src/network/flutter/network_model.dart';
 import 'package:devtools_app/src/network/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
@@ -46,7 +47,7 @@ void main() {
       expect(dataTable.selectedRowCount, 0);
     });
 
-    test('verify utilities', () {
+    test('time display', () {
       expect(dataTable.formatDuration(null), 'In Progress');
       expect(dataTable.formatDuration(const Duration(milliseconds: 1234)),
           '1,234');
@@ -158,7 +159,7 @@ void main() {
         expect(cells.length, 5);
 
         for (final cell in cells) {
-          expect(cell.child, isInstanceOf<Text>());
+          expect(cell.child, isA<Text>());
         }
         final cellsText = cells.map((cell) => cell.child as Text).toList();
         expect(cellsText[0].data, request.name);
