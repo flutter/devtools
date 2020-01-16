@@ -123,4 +123,3 @@ class HttpRequestDataTableSource extends DataTableSource {
 
   void clearSelection() => _currentSelection.value = null;
 }
-
