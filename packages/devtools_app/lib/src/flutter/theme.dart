@@ -71,11 +71,8 @@ const defaultDuration = Duration(milliseconds: 200);
 
 /// A long duration to use for animations.
 ///
-/// Use this rarely when you want added emphasis to an animation.
+/// Use this rarely, only when you want added emphasis to an animation.
 const longDuration = Duration(milliseconds: 400);
-
-/// The maximum duration you should ever consider using for an animation.
-const veryLongDuration = Duration(milliseconds: 800);
 
 /// Builds a [defaultDuration] animation controller.
 ///
@@ -100,20 +97,6 @@ AnimationController longAnimationController(
 }) {
   return AnimationController(
     duration: longDuration,
-    vsync: vsync,
-    value: value,
-  );
-}
-
-/// Builds a [veryLongDuration] animation controller.
-///
-/// This is an uncommon, very long duration to use for animations.
-AnimationController veryLongAnimationController(
-  TickerProvider vsync, {
-  double value,
-}) {
-  return AnimationController(
-    duration: veryLongDuration,
     vsync: vsync,
     value: value,
   );
