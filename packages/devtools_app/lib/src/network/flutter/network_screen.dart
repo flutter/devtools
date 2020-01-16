@@ -49,7 +49,6 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   ) {
     _dataTableSource.sort(
       getField,
-      columnIndex,
       ascending,
     );
     setState(() {
