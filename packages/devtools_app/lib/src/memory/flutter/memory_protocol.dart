@@ -28,7 +28,12 @@ class MemoryTracker {
   final List<HeapSample> samples = <HeapSample>[];
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
   int heapMax;
+
+  /// Polled VM current RSS.
   int processRss;
+
+  /// Polled adb dumpsys meminfo values.
+  AdbMemoryInfo memoryInfo;
 
   bool get hasConnection => service != null;
 
@@ -69,11 +74,25 @@ class MemoryTracker {
     }
 
     final VM vm = await service.getVM();
+
     // TODO(terry): Need to handle a possible Sentinel being returned.
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      return await service.getIsolate(ref.id);
+      try {
+        return await service.getIsolate(ref.id);
+      } catch (e) {
+        // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
+        // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
+        print('Error [MEMORY_PROTOCOL]: $e');
+        return null;
+      }
     }));
+
+    // Polls for current meminfo using:
+    //    > adb shell dumpsys meminfo -d <package_name>
+    memoryInfo = await _fetchAdbInfo();
+
+    // Polls for current RSS size.
     _update(vm, isolates);
 
     _pollingTimer = Timer(kUpdateDelay, _pollMemory);
@@ -97,7 +116,11 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  void _recalculate([bool fromGC = false]) {
+  // Poll ADB meminfo
+  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
+      AdbMemoryInfo.fromJson((await serviceManager.getAdbMemoryInfo()).json);
+
+  void _recalculate([bool fromGC = false]) async {
     int total = 0;
 
     int used = 0;
@@ -123,7 +146,15 @@ class MemoryTracker {
       time = math.max(time, samples.last.timestamp);
     }
 
-    _addSample(HeapSample(time, processRss, capacity, used, external, fromGC));
+    _addSample(HeapSample(
+      time,
+      processRss,
+      capacity,
+      used,
+      external,
+      fromGC,
+      memoryInfo,
+    ));
 
     memoryController.memoryTimeline.addSample(HeapSample(
       time,
@@ -132,6 +163,7 @@ class MemoryTracker {
       used,
       external,
       fromGC,
+      memoryInfo,
     ));
   }
 
@@ -156,6 +188,7 @@ class HeapSample {
     this.used,
     this.external,
     this.isGC,
+    this.memoryInfo,
   );
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
@@ -165,6 +198,7 @@ class HeapSample {
         json['used'] as int,
         json['external'] as int,
         json['gc'] as bool,
+        AdbMemoryInfo.fromJson(json['adb_memoryInfo']),
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -174,6 +208,7 @@ class HeapSample {
         'used': used,
         'external': external,
         'gc': isGC,
+        'adb_memoryInfo': memoryInfo.toJson(),
       };
 
   final int timestamp;
@@ -187,6 +222,12 @@ class HeapSample {
   final int external;
 
   final bool isGC;
+
+  final AdbMemoryInfo memoryInfo;
+
+  @override
+  String toString() => 'timestamp=$timestamp, rss=$rss, capacity=$capacity, '
+      'used=$used, external=$external, isGC=$isGC\n AdbMemoryInfo:\n$memoryInfo';
 }
 
 // Heap Statistics
@@ -257,6 +298,80 @@ class ClassHeapDetailStats {
   @override
   String toString() => '[ClassHeapStats type: $type, class: ${classRef.name}, '
       'count: $instancesCurrent, bytes: $bytesCurrent]';
+}
+
+// TODO(terry): Need the iOS version of this data.
+/// Android ADB dumpsys meminfo data.
+class AdbMemoryInfo {
+  AdbMemoryInfo(this.realtime, this.javaHeap, this.nativeHeap, this.code,
+      this.stack, this.graphics, this.other, this.system, this.total);
+
+  factory AdbMemoryInfo.fromJson(Map<String, dynamic> json) => AdbMemoryInfo(
+        json['Realtime'] as int,
+        json['Java Heap'] as int,
+        json['Native Heap'] as int,
+        json['Code'] as int,
+        json['Stack'] as int,
+        json['Graphics'] as int,
+        json['Private Other'] as int,
+        json['System'] as int,
+        json['Total'] as int,
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'Realtime': realtime,
+        'Java Heap': javaHeap,
+        'Native Heap': nativeHeap,
+        'Code': code,
+        'Stack': stack,
+        'Graphics': graphics,
+        'Private Other': other,
+        'System': system,
+        'Total': total,
+      };
+
+  /// Create an empty AdbMemoryInfo (all values are)
+  static AdbMemoryInfo empty() => AdbMemoryInfo(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  /// Number of milliseconds since the device was booted (value zero) including deep
+  /// sleep.  This clock is guaranteed to be monotonic, and continues to tick even
+  /// in power saving mode. The value zero is Unix Epoch UTC (Jan 1, 1970 00:00:00).
+  /// This DateTime, from USA PST, would be Dec 31, 1960 16:00:00 (UTC - 8 hours).
+  final int realtime;
+
+  final int javaHeap;
+
+  final int nativeHeap;
+
+  final int code;
+
+  final int stack;
+
+  final int graphics;
+
+  final int other;
+
+  final int system;
+
+  final int total;
+
+  DateTime get realtimeDT => DateTime.fromMillisecondsSinceEpoch(realtime);
+
+  /// Duration the device has been up since boot time.
+  Duration get bootDuration => Duration(milliseconds: realtime);
+
+  @override
+  String toString() => '  realtime=$realtime\n'
+      '  realtimeDT=$realtimeDT\n'
+      '  durationBoot=$bootDuration\n'
+      '  Java Heap=$javaHeap\n'
+      '  Native Heap=$nativeHeap\n'
+      '  Code=$code\n'
+      '  Stack=$stack\n'
+      '  Graphics=$graphics\n'
+      '  Other=$other\n'
+      '  System=$system\n'
+      '  Total=$total';
 }
 
 class InstanceSummary {

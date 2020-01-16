@@ -45,6 +45,18 @@ const RegisteredServiceDescription flutterVersion =
   icon: FlutterIcons.flutter,
 );
 
+/// Flutter memory service registered by Flutter Tools.
+///
+/// We call this service to get version information about the Flutter framework,
+/// the Flutter engine, and the Dart sdk.
+const RegisteredServiceDescription flutterMemory =
+    RegisteredServiceDescription._(
+  service: 'flutterMemoryInfo',
+  title: 'Flutter Memory Info',
+  icon: FlutterIcons.flutter,
+);
+
+
 const flutterListViews = '_flutter.listViews';
 
 const displayRefreshRate = '_flutter.getDisplayRefreshRate';

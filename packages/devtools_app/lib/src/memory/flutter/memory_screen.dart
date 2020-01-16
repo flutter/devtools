@@ -12,6 +12,7 @@ import '../../globals.dart';
 import '../../ui/flutter/label.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
+import 'memory_protocol.dart';
 
 class MemoryScreen extends Screen {
   const MemoryScreen();
@@ -20,6 +21,15 @@ class MemoryScreen extends Screen {
   static const pauseButtonKey = Key('Pause Button');
   @visibleForTesting
   static const resumeButtonKey = Key('Resume Button');
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const dropdownPruneMenuButtonKey = Key('Dropdown Prune Menu Button');
+  @visibleForTesting
+  static const pruneMenuItem = Key('Memory Prune Menu Item');
+  @visibleForTesting
+  static const pruneIntervalKey = Key('Memory Prune Interval');
+
   @visibleForTesting
   static const dropdownSourceMenuButtonKey = Key('Dropdown Source Menu Button');
   @visibleForTesting
@@ -94,6 +104,45 @@ class MemoryBodyState extends State<MemoryBody> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _pruneDropdown() {
+    final files = controller.memoryLog.offlineFiles();
+
+    // First item is 'Live Feed', then followed by memory log filenames.
+    files.insert(0, MemoryController.liveFeed);
+
+    final _displayTypes = [
+      MemoryController.displayOneMinute,
+      MemoryController.displayFiveMinutes,
+      MemoryController.displayTenMinutes,
+      MemoryController.displayAllMinutes,
+    ].map<DropdownMenuItem<String>>((
+      String value,
+    ) {
+      return DropdownMenuItem<String>(
+        key: MemoryScreen.pruneMenuItem,
+        value: value,
+        child: Text(
+          'Display $value '
+          'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
+          key: MemoryScreen.pruneIntervalKey,
+        ),
+      );
+    }).toList();
+
+    return DropdownButton<String>(
+      key: MemoryScreen.dropdownPruneMenuButtonKey,
+      value: controller.pruneInterval,
+      iconSize: 20,
+      style: TextStyle(fontWeight: FontWeight.w100),
+      onChanged: (String newValue) {
+        setState(() {
+          controller.pruneInterval = newValue;
+        });
+      },
+      items: _displayTypes,
     );
   }
 
@@ -172,6 +221,19 @@ class MemoryBodyState extends State<MemoryBody> {
             minIncludeTextWidth: 900,
           ),
         ),
+        const SizedBox(width: 16.0),
+        OutlineButton(
+            key: MemoryScreen.clearButtonKey,
+            onPressed: controller.memorySource == MemoryController.liveFeed
+                ? _clearTimeline
+                : null,
+            child: const MaterialIconLabel(
+              Icons.block,
+              'Clear',
+              minIncludeTextWidth: 900,
+            )),
+        const SizedBox(width: 16.0),
+        _pruneDropdown(),
       ],
     );
   }
@@ -225,6 +287,10 @@ class MemoryBodyState extends State<MemoryBody> {
   }
 
   // Callbacks for button actions:
+
+  void _clearTimeline() {
+    controller.memoryTimeline.reset();
+  }
 
   void _pauseLiveTimeline() {
     // TODO(terry): Implement real pause when connected to live feed.
