@@ -16,13 +16,15 @@ class NetworkController {
   }
 
   /// Notifies that new HTTP requests have been processed.
-  ValueListenable get requestsNotifier => _httpRequestsNotifier;
+  ValueListenable<HttpRequests> get requestsNotifier => _httpRequestsNotifier;
   final _httpRequestsNotifier = ValueNotifier<HttpRequests>(HttpRequests());
 
   /// Notifies that the timeline is currently being recorded.
-  ValueListenable get recordingNotifier => httpRecordingNotifier;
-  final httpRecordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get recordingNotifier => _httpRecordingNotifier;
+  final _httpRecordingNotifier = ValueNotifier<bool>(false);
 
+  @visibleForTesting
+  NetworkService get networkService => _networkService;
   NetworkService _networkService;
 
   // The timeline timestamps are relative to when the VM started. This value is
@@ -33,6 +35,9 @@ class NetworkController {
   int lastProfileRefreshMicros = 0;
 
   Timer _pollingTimer;
+
+  @visibleForTesting
+  bool get isPolling => _pollingTimer != null;
 
   @visibleForTesting
   static HttpRequests processHttpTimelineEventsHelper(
@@ -113,9 +118,9 @@ class NetworkController {
             _httpRequestsNotifier.value.outstandingRequests));
   }
 
-  Future<void> _setHttpTimelineRecording(bool state) async {
-    assert(state == !httpRecordingNotifier.value);
-    await _networkService.enableHttpRequestLogging(state);
+  Future<void> _toggleHttpTimelineRecording(bool state) async {
+    assert(state == !_httpRecordingNotifier.value);
+    await _networkService.toggleHttpRequestLogging(state);
 
     if (state) {
       // Start polling once we've enabled logging.
@@ -130,6 +135,7 @@ class NetworkController {
       _pollingTimer.cancel();
       _pollingTimer = null;
     }
+    _httpRecordingNotifier.value = state;
   }
 
   /// Enables HTTP request recording on all isolates and starts polling.
@@ -147,13 +153,14 @@ class NetworkController {
     // easily be within a second.
     _timelineMicrosOffset = DateTime.now().microsecondsSinceEpoch - timestamp;
 
-    await _setHttpTimelineRecording(true);
+    await _toggleHttpTimelineRecording(true);
   }
 
   /// Pauses the output of HTTP request information to the timeline.
   ///
   /// May result in some incomplete timeline events.
-  Future<void> pauseRecording() async => await _setHttpTimelineRecording(false);
+  Future<void> pauseRecording() async =>
+      await _toggleHttpTimelineRecording(false);
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
@@ -163,6 +170,8 @@ class NetworkController {
   void dispose() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
+    _httpRecordingNotifier.dispose();
+    _httpRequestsNotifier.dispose();
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last

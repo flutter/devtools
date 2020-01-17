@@ -28,9 +28,13 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
-  FakeServiceManager({bool useFakeService = false, this.hasConnection = true})
-      : service =
-            useFakeService ? FakeVmService(_flagManager) : MockVmService() {
+  FakeServiceManager({
+    bool useFakeService = false,
+    this.hasConnection = true,
+    Timeline timelineData,
+  }) : service = useFakeService
+            ? FakeVmService(_flagManager, timelineData)
+            : MockVmService() {
     _flagManager.service = service;
   }
   static final _flagManager = VmFlagManager();
@@ -76,9 +80,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 }
 
 class FakeVmService extends Fake implements VmServiceWrapper {
-  FakeVmService(this._vmFlagManager);
+  FakeVmService(
+    this._vmFlagManager,
+    this._timelineData,
+  );
 
   final VmFlagManager _vmFlagManager;
+  final Timeline _timelineData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -110,6 +118,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       ),
     ],
   };
+
+  @override
+  Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
+      callback(
+        IsolateRef.parse(
+          {
+            'id': 'fake_isolate_id',
+          },
+        ),
+      );
 
   @override
   Future<Success> setFlag(String name, String value) {
@@ -157,6 +175,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       Future.value(TimelineFlags.parse(_vmTimelineFlags));
 
   @override
+  Future<Timeline> getVMTimeline({
+    int timeOriginMicros,
+    int timeExtentMicros,
+  }) async {
+    if (_timelineData == null) {
+      throw StateError('timelineData was not provided to FakeServiceManager');
+    }
+    return _timelineData;
+  }
+
+  @override
   Future<Success> clearVMTimeline() => Future.value(Success());
 
   @override
@@ -170,6 +199,21 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
+
+  @override
+  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+          String isolateId) async =>
+      HttpTimelineLoggingState(enabled: true);
+
+  @override
+  Future<Success> setHttpEnableTimelineLogging(
+    String isolateId,
+    bool enable,
+  ) async =>
+      Success();
+
+  @override
+  Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();

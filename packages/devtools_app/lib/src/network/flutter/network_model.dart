@@ -134,5 +134,9 @@ class HttpRequestDataTableSource extends DataTableSource {
     );
   }
 
-  void clearSelection() => _currentSelection.value = null;
+  void clearSelection() {
+    _currentSelection.value?.selected = false;
+    _currentSelection.value = null;
+    notifyListeners();
+  }
 }

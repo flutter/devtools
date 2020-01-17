@@ -12,8 +12,7 @@ class NetworkService {
   final NetworkController networkController;
 
   /// Enables or disables HTTP logging for all isolates.
-  Future<void> enableHttpRequestLogging(bool state) async {
-    assert(state == !networkController.httpRecordingNotifier.value);
+  Future<void> toggleHttpRequestLogging(bool state) async {
     await serviceManager.service.forEachIsolate((isolate) async {
       // TODO(bkonyi): perform VM service version check.
       final future = serviceManager.service.setHttpEnableTimelineLogging(
@@ -25,7 +24,6 @@ class NetworkService {
       // if the isolate is eventually resumed.
       await timeout(future, 500);
     });
-    networkController.httpRecordingNotifier.value = state;
   }
 
   /// Updates the last refresh time to the current time.
@@ -82,7 +80,6 @@ class NetworkService {
 
     if (enabled) {
       await networkController.startRecording(alreadyRecording: true);
-      networkController.httpRecordingNotifier.value = enabled;
     }
     return enabled;
   }
