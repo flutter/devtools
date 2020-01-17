@@ -12,7 +12,7 @@ class NetworkService {
   final NetworkController networkController;
 
   /// Enables or disables HTTP logging for all isolates.
-  Future<void> enableHttpRequestLogging(bool state) async {
+  Future<void> toggleHttpRequestLogging(bool state) async {
     await serviceManager.service.forEachIsolate((isolate) async {
       // TODO(bkonyi): perform VM service version check.
       final future = serviceManager.service.setHttpEnableTimelineLogging(

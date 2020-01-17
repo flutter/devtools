@@ -17,199 +17,139 @@ import 'support/mocks.dart';
 import 'support/utils.dart';
 
 void main() {
-  group(
-    'NetworkController',
-    () {
-      NetworkController controller;
-      FakeServiceManager fakeServiceManager;
-      Timeline timeline;
+  group('NetworkController', () {
+    NetworkController controller;
+    FakeServiceManager fakeServiceManager;
+    Timeline timeline;
 
-      setUpAll(
-        () async {
-          const testDataPath =
-              '../devtools_testing/lib/support/http_request_timeline_test_data.json';
-          final httpTestData = jsonDecode(
-            await File(testDataPath).readAsString(),
-          );
-          timeline = Timeline.parse(httpTestData);
+    setUpAll(() async {
+      const testDataPath =
+          '../devtools_testing/lib/support/http_request_timeline_test_data.json';
+      final httpTestData = jsonDecode(
+        await File(testDataPath).readAsString(),
+      );
+      timeline = Timeline.parse(httpTestData);
+    });
+
+    setUp(() {
+      fakeServiceManager = FakeServiceManager(
+        useFakeService: true,
+        timelineData: timeline,
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      controller = NetworkController();
+    });
+
+    test('initialize recording state', () async {
+      expect(controller.isPolling, false);
+
+      // Fake service pretends HTTP timeline logging is always enabled.
+      await controller.initialize();
+      expect(controller.isPolling, true);
+    });
+
+    test('start and pause recording', () async {
+      expect(controller.isPolling, false);
+      final notifier = controller.recordingNotifier;
+      await addListenerScope(
+        listenable: notifier,
+        listener: () {
+          expect(notifier.value, true);
+          expect(controller.isPolling, true);
         },
+        callback: () async => await controller.startRecording(),
       );
 
-      setUp(
-        () {
-          fakeServiceManager = FakeServiceManager(
-            useFakeService: true,
-            timelineData: timeline,
-          );
-          setGlobal(ServiceConnectionManager, fakeServiceManager);
-          controller = NetworkController();
+      await addListenerScope(
+        listenable: notifier,
+        listener: () {
+          expect(notifier.value, false);
+          expect(controller.isPolling, false);
         },
+        callback: () async => await controller.pauseRecording(),
       );
 
-      test(
-        'initialize recording state',
-        () async {
-          expect(
-            controller.isPolling,
-            false,
-          );
-
-          // Fake service pretends HTTP timeline logging is always enabled.
-          await controller.initialize();
-          expect(
-            controller.isPolling,
-            true,
-          );
+      await addListenerScope(
+        listenable: notifier,
+        listener: () {
+          expect(notifier.value, true);
+          expect(controller.isPolling, true);
         },
+        callback: () async => await controller.startRecording(),
+      );
+    });
+
+    test('disposes', () {
+      controller.dispose();
+      expect(
+        () => controller.recordingNotifier.addListener(() {}),
+        throwsA(anything),
+      );
+      expect(
+        () => controller.requestsNotifier.addListener(() {}),
+        throwsA(anything),
+      );
+    });
+
+    test('process HTTP timeline events', () async {
+      await controller.initialize();
+      final notifier = controller.requestsNotifier;
+      HttpRequests profile = notifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+      expect(profile.outstandingRequests.isEmpty, true);
+
+      // The number of requests recorded in the test data.
+      const numRequests = 70;
+
+      // Force a refresh of the HTTP requests. Ensure there's requests populated.
+      await addListenerScope(
+        listenable: notifier,
+        listener: () {
+          profile = notifier.value;
+          expect(profile.requests.length, numRequests);
+          expect(profile.outstandingRequests.isEmpty, true);
+
+          const httpMethods = <String>{
+            'CONNECT',
+            'DELETE',
+            'GET',
+            'HEAD',
+            'PATCH',
+            'POST',
+            'PUT',
+          };
+
+          for (final request in profile.requests) {
+            expect(request.duration, isNotNull);
+            expect(request.general, isNotNull);
+            expect(request.general.length, greaterThan(0));
+            expect(request.hasCookies, isNotNull);
+            expect(request.inProgress, false);
+            expect(request.instantEvents, isNotNull);
+            expect(httpMethods.contains(request.method), true);
+            expect(request.name, isNotNull);
+            expect(request.requestCookies, isNotNull);
+            expect(request.responseCookies, isNotNull);
+            expect(request.requestTime, isNotNull);
+            expect(request.status, isNotNull);
+            expect(request.uri, isNotNull);
+          }
+        },
+        callback: () async =>
+            await controller.networkService.refreshHttpRequests(),
       );
 
-      test(
-        'start and pause recording',
-        () async {
-          expect(
-            controller.isPolling,
-            false,
-          );
-          final notifier = controller.recordingNotifier;
-          await addListenerScope(
-            notifier,
-            () {
-              expect(notifier.value, true);
-              expect(
-                controller.isPolling,
-                true,
-              );
-            },
-            () async => await controller.startRecording(),
-          );
-
-          await addListenerScope(
-            notifier,
-            () {
-              expect(
-                notifier.value,
-                false,
-              );
-              expect(
-                controller.isPolling,
-                false,
-              );
-            },
-            () async => await controller.pauseRecording(),
-          );
-
-          await addListenerScope(
-            notifier,
-            () {
-              expect(
-                notifier.value,
-                true,
-              );
-              expect(
-                controller.isPolling,
-                true,
-              );
-            },
-            () async => await controller.startRecording(),
-          );
-
-          await addListenerScope(
-            notifier,
-            () {
-              expect(
-                notifier.value,
-                false,
-              );
-              expect(
-                controller.isPolling,
-                false,
-              );
-            },
-            () => controller.dispose(),
-          );
+      // Finally, call `clear()` and ensure the requests have been cleared.
+      await addListenerScope(
+        listenable: notifier,
+        listener: () {
+          profile = notifier.value;
+          expect(profile.requests.isEmpty, true);
+          expect(profile.outstandingRequests.isEmpty, true);
         },
+        callback: () async => await controller.clear(),
       );
-
-      test(
-        'process HTTP timeline events',
-        () async {
-          await controller.initialize();
-          final notifier = controller.requestsNotifier;
-          HttpRequests profile = notifier.value;
-          // Check profile is initially empty.
-          expect(
-            profile.requests.isEmpty,
-            true,
-          );
-          expect(
-            profile.outstandingRequests.isEmpty,
-            true,
-          );
-
-          // The number of requests recorded in the test data.
-          const numRequests = 70;
-
-          // Force a refresh of the HTTP requests. Ensure there's requests populated.
-          await addListenerScope(
-            notifier,
-            () {
-              profile = notifier.value;
-              expect(
-                profile.requests.length,
-                numRequests,
-              );
-              expect(
-                profile.outstandingRequests.isEmpty,
-                true,
-              );
-
-              const httpMethods = <String>{
-                'CONNECT',
-                'DELETE',
-                'GET',
-                'HEAD',
-                'PATCH',
-                'POST',
-                'PUT',
-              };
-
-              for (final request in profile.requests) {
-                expect(request.duration, isNotNull);
-                expect(request.general, isNotNull);
-                expect(request.general.length, greaterThan(0));
-                expect(request.hasCookies, isNotNull);
-                expect(request.inProgress, false);
-                expect(request.instantEvents, isNotNull);
-                expect(httpMethods.contains(request.method), true);
-                expect(request.name, isNotNull);
-                expect(request.requestCookies, isNotNull);
-                expect(request.responseCookies, isNotNull);
-                expect(request.requestTime, isNotNull);
-                expect(request.status, isNotNull);
-                expect(request.uri, isNotNull);
-              }
-            },
-            () async => await controller.networkService.refreshHttpRequests(),
-          );
-
-          // Finally, call `clear()` and ensure the requests have been cleared.
-          await addListenerScope(
-            notifier,
-            () {
-              profile = notifier.value;
-              expect(
-                profile.requests.isEmpty,
-                true,
-              );
-              expect(
-                profile.outstandingRequests.isEmpty,
-                true,
-              );
-            },
-            () async => await controller.clear(),
-          );
-        },
-      );
-    },
-  );
+    });
+  });
 }

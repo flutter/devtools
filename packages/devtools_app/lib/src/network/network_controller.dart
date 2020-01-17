@@ -118,9 +118,9 @@ class NetworkController {
             _httpRequestsNotifier.value.outstandingRequests));
   }
 
-  Future<void> _setHttpTimelineRecording(bool state) async {
+  Future<void> _toggleHttpTimelineRecording(bool state) async {
     assert(state == !_httpRecordingNotifier.value);
-    await _networkService.enableHttpRequestLogging(state);
+    await _networkService.toggleHttpRequestLogging(state);
 
     if (state) {
       // Start polling once we've enabled logging.
@@ -153,13 +153,14 @@ class NetworkController {
     // easily be within a second.
     _timelineMicrosOffset = DateTime.now().microsecondsSinceEpoch - timestamp;
 
-    await _setHttpTimelineRecording(true);
+    await _toggleHttpTimelineRecording(true);
   }
 
   /// Pauses the output of HTTP request information to the timeline.
   ///
   /// May result in some incomplete timeline events.
-  Future<void> pauseRecording() async => await _setHttpTimelineRecording(false);
+  Future<void> pauseRecording() async =>
+      await _toggleHttpTimelineRecording(false);
 
   /// Checks to see if HTTP requests are currently being output. If so, recording
   /// is automatically started upon initialization.
@@ -169,7 +170,8 @@ class NetworkController {
   void dispose() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
-    _httpRecordingNotifier.value = false;
+    _httpRecordingNotifier.dispose();
+    _httpRequestsNotifier.dispose();
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last
