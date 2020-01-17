@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'support/utils.dart';
+
 void main() {
   group('HttpRequestDataTableSource', () {
     HttpRequestDataTableSource dataTable;
@@ -35,15 +37,6 @@ void main() {
       // Reset the data table before each test.
       dataTable = HttpRequestDataTableSource();
     });
-
-    void dataTableListenerScope(
-      Function listener,
-      Function callback,
-    ) {
-      dataTable.addListener(listener);
-      callback();
-      dataTable.removeListener(listener);
-    }
 
     test('check defaults', () {
       expect(dataTable.rowCount, 0);
@@ -138,7 +131,7 @@ void main() {
       );
     });
 
-    test('select row', () {
+    test('select row', () async {
       expect(
         dataTable.rowCount,
         0,
@@ -171,7 +164,8 @@ void main() {
           1,
         );
       };
-      dataTableListenerScope(
+      await addListenerScope(
+        dataTable,
         selectListener,
         () => row.onSelectChanged(true),
       );
@@ -190,14 +184,16 @@ void main() {
       };
 
       // with clearSelection
-      dataTableListenerScope(
+      await addListenerScope(
+        dataTable,
         deselectListener,
         () => dataTable.clearSelection(),
       );
 
       // and with onSelectChanged(false)
       row.onSelectChanged(true);
-      dataTableListenerScope(
+      await addListenerScope(
+        dataTable,
         deselectListener,
         () => row.onSelectChanged(false),
       );
@@ -259,7 +255,7 @@ void main() {
       }
     });
 
-    test('sorting', () {
+    test('sorting', () async {
       expect(
         dataTable.rowCount,
         0,
@@ -292,11 +288,12 @@ void main() {
       }
 
       // Verify sorting both ascending and descending.
-      void verifySorting(
+      Future<void> verifySorting(
         Function(HttpRequestData) getField,
-      ) {
+      ) async {
         bool ascending = true;
-        dataTableListenerScope(
+        await addListenerScope(
+          dataTable,
           () => verifyOrder(
             getField,
             ascending,
@@ -308,7 +305,8 @@ void main() {
         );
 
         ascending = false;
-        dataTableListenerScope(
+        await addListenerScope(
+          dataTable,
           () => verifyOrder(
             getField,
             ascending,
@@ -320,19 +318,19 @@ void main() {
         );
       }
 
-      verifySorting(
+      await verifySorting(
         (data) => data.name,
       );
-      verifySorting(
+      await verifySorting(
         (data) => data.method,
       );
-      verifySorting(
+      await verifySorting(
         (data) => data.status,
       );
-      verifySorting(
+      await verifySorting(
         (data) => data.duration,
       );
-      verifySorting(
+      await verifySorting(
         (data) => data.requestTime,
       );
     });

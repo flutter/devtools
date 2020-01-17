@@ -16,13 +16,15 @@ class NetworkController {
   }
 
   /// Notifies that new HTTP requests have been processed.
-  ValueListenable get requestsNotifier => _httpRequestsNotifier;
+  ValueListenable<HttpRequests> get requestsNotifier => _httpRequestsNotifier;
   final _httpRequestsNotifier = ValueNotifier<HttpRequests>(HttpRequests());
 
   /// Notifies that the timeline is currently being recorded.
-  ValueListenable get recordingNotifier => httpRecordingNotifier;
-  final httpRecordingNotifier = ValueNotifier<bool>(false);
+  ValueListenable<bool> get recordingNotifier => _httpRecordingNotifier;
+  final _httpRecordingNotifier = ValueNotifier<bool>(false);
 
+  @visibleForTesting
+  NetworkService get networkService => _networkService;
   NetworkService _networkService;
 
   // The timeline timestamps are relative to when the VM started. This value is
@@ -33,6 +35,9 @@ class NetworkController {
   int lastProfileRefreshMicros = 0;
 
   Timer _pollingTimer;
+
+  @visibleForTesting
+  bool get isPolling => _pollingTimer != null;
 
   @visibleForTesting
   static HttpRequests processHttpTimelineEventsHelper(
@@ -114,7 +119,7 @@ class NetworkController {
   }
 
   Future<void> _setHttpTimelineRecording(bool state) async {
-    assert(state == !httpRecordingNotifier.value);
+    assert(state == !_httpRecordingNotifier.value);
     await _networkService.enableHttpRequestLogging(state);
 
     if (state) {
@@ -130,6 +135,7 @@ class NetworkController {
       _pollingTimer.cancel();
       _pollingTimer = null;
     }
+    _httpRecordingNotifier.value = state;
   }
 
   /// Enables HTTP request recording on all isolates and starts polling.
@@ -163,6 +169,7 @@ class NetworkController {
   void dispose() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
+    _httpRecordingNotifier.value = false;
   }
 
   /// Clears the previously collected HTTP timeline events and resets the last
