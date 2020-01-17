@@ -121,7 +121,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
-      callback(IsolateRef.parse({'id': 'fake_isolate_id'}));
+      callback(
+        IsolateRef.parse(
+          {
+            'id': 'fake_isolate_id',
+          },
+        ),
+      );
 
   @override
   Future<Success> setFlag(String name, String value) {
@@ -174,7 +180,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int timeExtentMicros,
   }) async {
     if (_timelineData == null) {
-      throw StateError('timelineData was not provided to FakeVmService');
+      throw StateError('timelineData was not provided to FakeServiceManager');
     }
     return _timelineData;
   }
@@ -201,7 +207,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> setHttpEnableTimelineLogging(
-          String isolateId, bool enable) async =>
+    String isolateId,
+    bool enable,
+  ) async =>
       Success();
 
   @override
