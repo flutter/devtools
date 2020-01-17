@@ -27,7 +27,7 @@ void main() {
       eventDetails = EventDetails(selectedEvent);
       await tester.pumpWidget(wrapWithControllers(
         eventDetails,
-        timelineController: TimelineController(),
+        timeline: TimelineController(),
       ));
       expect(find.byType(EventDetails), findsOneWidget);
     }
