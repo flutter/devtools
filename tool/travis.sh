@@ -200,7 +200,7 @@ elif [ "$BOT" = "packages" ]; then
     (cd third_party/packages; flutter pub global run tuneup check)
 
     # Analyze Dart code in tool/
-    (cd tool; flutter pub global run tuneup check)
+    (cd tool; flutter pub get; flutter pub global run tuneup check)
 
     pushd packages/devtools_app
 
