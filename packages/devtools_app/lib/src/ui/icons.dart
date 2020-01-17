@@ -19,11 +19,13 @@ import 'fake_flutter/fake_flutter.dart';
 import 'material_icons.dart';
 import 'theme.dart';
 
+const defaultIconSize = 18.0;
+
 abstract class DevToolsIcon {
   const DevToolsIcon();
 
-  double get iconWidth => 18;
-  double get iconHeight => 18;
+  double get iconWidth => defaultIconSize;
+  double get iconHeight => defaultIconSize;
 }
 
 class UrlIcon extends DevToolsIcon {
@@ -197,6 +199,8 @@ class FlutterIcons {
       UrlIcon('/icons/memory/settings.png', invertDark: true);
   static const UrlIcon gcNow =
       UrlIcon('/icons/memory/ic_delete_outline_black.png', invertDark: true);
+
+  static const DevToolsIcon widgetTree = UrlIcon('/icons/widget_tree.png');
 }
 
 class CustomIcon extends DevToolsIcon {

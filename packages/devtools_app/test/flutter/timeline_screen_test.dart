@@ -59,7 +59,7 @@ void main() {
     );
   }
 
-  const windowSize = Size(1599.0, 1000.0);
+  const windowSize = Size(1950.0, 1000.0);
 
   group('TimelineScreen', () {
     setUp(() async {

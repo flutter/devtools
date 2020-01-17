@@ -124,7 +124,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    const double minIncludeTextWidth = 900;
+    const double minIncludeTextWidth = 950;
     final sharedWidgets = [
       const SizedBox(width: 8.0),
       clearButton(
@@ -223,8 +223,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: ProfileGranularityDropdown(),
         ),
         ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1100,
-          extensions: [performanceOverlay],
+          minIncludeTextWidth: 1300,
+          extensions: [performanceOverlay, profileWidgetBuilds],
         ),
         const SizedBox(width: 8.0),
         OutlineButton(
@@ -232,7 +232,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
-            minIncludeTextWidth: 1100,
+            minIncludeTextWidth: 1300,
           ),
         ),
       ],

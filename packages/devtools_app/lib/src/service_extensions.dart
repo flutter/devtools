@@ -125,12 +125,12 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
-  description: 'Track Widget Rebuilds',
-  icon: FlutterIcons.greyProgr,
+  description: 'Track Widget Builds',
+  icon: FlutterIcons.widgetTree,
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Do Not Track Widget Rebuilds',
-  disabledTooltip: 'Track Widget Rebuilds',
+  enabledTooltip: 'Disable tracking widget builds',
+  disabledTooltip: 'Enable tracking widget builds',
   gaScreenName: ga.performance,
   gaItem: ga.trackRebuilds,
 );

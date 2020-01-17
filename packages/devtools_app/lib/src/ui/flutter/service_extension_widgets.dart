@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
+import '../../flutter/common_widgets.dart';
 import '../../globals.dart';
 import '../../service_extensions.dart';
 import '../../service_registrations.dart';
@@ -114,12 +115,20 @@ class _ServiceExtensionButtonGroupState
   }
 
   Widget _buildExtension(ExtensionState extensionState) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Label(
-        extensionState.description.icon,
-        extensionState.description.description,
-        minIncludeTextWidth: widget.minIncludeTextWidth,
+    final description = extensionState.description;
+    return Tooltip(
+      message: extensionState.isSelected
+          ? description.enabledTooltip
+          : description.disabledTooltip,
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Label(
+          description.icon,
+          description.description,
+          minIncludeTextWidth: widget.minIncludeTextWidth,
+        ),
       ),
     );
   }
