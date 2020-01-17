@@ -199,6 +199,8 @@ class FlutterIcons {
       UrlIcon('/icons/memory/settings.png', invertDark: true);
   static const UrlIcon gcNow =
       UrlIcon('/icons/memory/ic_delete_outline_black.png', invertDark: true);
+
+  static const DevToolsIcon widgetTree = UrlIcon('/icons/widget_tree.png');
 }
 
 class CustomIcon extends DevToolsIcon {
@@ -304,10 +306,4 @@ class ColorIconMaker {
   DevToolsIcon getCustomIcon(Color color) {
     return iconCache.putIfAbsent(color, () => ColorIcon(color));
   }
-}
-
-class OcticonIcon extends DevToolsIcon {
-  OcticonIcon(IconData iconData) : icon = Icon(iconData, size: defaultIconSize);
-
-  final Icon icon;
 }

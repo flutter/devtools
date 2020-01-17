@@ -6,7 +6,6 @@ library service_extensions;
 
 import 'package:meta/meta.dart';
 
-import 'flutter/octicons.dart';
 import 'ui/analytics_constants.dart' as ga;
 import 'ui/icons.dart';
 
@@ -127,7 +126,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Builds',
-  icon: OcticonIcon(Octicons.tools),
+  icon: FlutterIcons.widgetTree,
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable tracking widget builds',

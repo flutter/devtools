@@ -99,14 +99,7 @@ class _ColorIconPainter extends CustomPainter {
 }
 
 Widget _computeIconWidget(DevToolsIcon icon) {
-  if (icon is OcticonIcon) {
-    return Padding(
-      // Octicons have slightly less padding around the image than other
-      // DevToolsIcons. This padding centers the icon in the row.
-      padding: const EdgeInsets.only(bottom: 2.0),
-      child: icon.icon,
-    );
-  } else if (icon is UrlIcon) {
+  if (icon is UrlIcon) {
     return SizedBox(
       width: icon.iconWidth,
       height: icon.iconHeight,
