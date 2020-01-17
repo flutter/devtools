@@ -182,29 +182,6 @@ class MemoryController extends DisposableController
     processDataset(args);
   }
 
-  void _onAdbMemoryInfo(
-    VoidCallback callback,
-  ) {
-    final flutterVersionServiceListenable = serviceManager
-        .registeredServiceListenable(registrations.flutterVersion.service);
-//    addAutoDisposeListener(flutterVersionServiceListenable, () async {
-    flutterVersionServiceListenable.addListener(() async {
-      final registered = flutterVersionServiceListenable.value;
-      if (registered) {
-        var data = (await serviceManager.getAdbMemoryInfo()).json;
-        print(">>>>>> adb memory json = $data");
-        callback();
-/*
-        final flutterVersion = FlutterVersion.parse(
-            (await serviceManager.getFlutterVersion()).json);
-        if (flutterVersion.isSupported(supportedVersion: version)) {
-          callback();
-        }
-*/
-      }
-    });
-  }
-
   bool _paused = false;
 
   bool get paused => _paused;
@@ -401,6 +378,7 @@ class MemoryController extends DisposableController
   @override
   void dispose() {
     super.dispose();
+    _pruneInterfaceNoifier.dispose();
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
