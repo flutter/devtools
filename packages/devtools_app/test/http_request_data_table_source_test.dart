@@ -113,7 +113,7 @@ void main() {
 
       // with clearSelection
       await addListenerScope(
-        listenable: dataTable,
+        listenable: dataTable.currentSelectionListenable,
         listener: deselectListener,
         callback: () => dataTable.clearSelection(),
       );
