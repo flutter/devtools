@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/network/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
@@ -23,12 +20,7 @@ void main() {
     Timeline timeline;
 
     setUpAll(() async {
-      const testDataPath =
-          '../devtools_testing/lib/support/http_request_timeline_test_data.json';
-      final httpTestData = jsonDecode(
-        await File(testDataPath).readAsString(),
-      );
-      timeline = Timeline.parse(httpTestData);
+      timeline = await loadNetworkProfileTimeline();
     });
 
     setUp(() {

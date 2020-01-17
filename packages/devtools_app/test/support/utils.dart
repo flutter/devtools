@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart';
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
@@ -24,4 +28,15 @@ Future<void> addListenerScope({
   await callback();
   expect(listenerCalled, true);
   listenable.removeListener(listenerWrapped);
+}
+
+/// Creates an instance of [Timeline] which contains recorded HTTP events.
+Future<Timeline> loadNetworkProfileTimeline() async {
+  // TODO(bkonyi): pull this JSON data into a .dart file.
+  const testDataPath =
+      '../../devtools_testing/lib/support/http_request_timeline_test_data.json';
+  final httpTestData = jsonDecode(
+    await File(testDataPath).readAsString(),
+  );
+  return Timeline.parse(httpTestData);
 }

@@ -3,31 +3,21 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:devtools_app/src/network/flutter/network_model.dart';
 import 'package:devtools_app/src/network/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
-import 'package:vm_service/vm_service.dart';
 
 import 'support/utils.dart';
 
 void main() {
   group('HttpRequestDataTableSource', () {
     HttpRequestDataTableSource dataTable;
-    Map<String, dynamic> httpTestData;
     List<HttpRequestData> requests;
 
     setUpAll(() async {
-      const testDataPath =
-          '../devtools_testing/lib/support/http_request_timeline_test_data.json';
-      httpTestData = jsonDecode(
-        await File(testDataPath).readAsString(),
-      );
-      final timeline = Timeline.parse(httpTestData);
+      final timeline = await loadNetworkProfileTimeline();
       final httpRequests = NetworkController.processHttpTimelineEventsHelper(
           timeline, 0, [], {});
       requests = httpRequests.requests;
