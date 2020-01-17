@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_error_app/missing_material_error.dart';
+
+import 'missing_material_error.dart';
 
 void main() => runApp(MyApp());
 

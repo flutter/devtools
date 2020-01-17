@@ -1,0 +1,10 @@
+name: devman
+description: A repo management tool for DevTools.
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  args: any
+  cli_util: any
+  path: any
