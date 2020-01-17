@@ -143,20 +143,16 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     _img ??= await ImageLoader.loadImage('assets/img/star.png');
   }
 
-  Slider timelineSlider;
+  Slider _timelineSlider;
 
-  double sliderValue = 1.0;
-
-  // Number of interval chunks e.g., 5 minute interval has 3 chunks for 15 minutes of collected data
-  int numberOfChunks = 0;
-
-  /// Compute lables for slider.
+  /// Compute increments for slider and lables for slider increments based on the
+  /// current display interval time period.
   String timelineSliderLabel(double value) {
     if (value == 0)
       return 'Starting Time';
-    else if (value == numberOfChunks) return 'Ending Time';
+    else if (value == controller.numberOfChunks) return 'Ending Time';
 
-    var unitsAgo = numberOfChunks - value;
+    var unitsAgo = controller.numberOfChunks - value;
 
     switch (controller.pruneInterval) {
       case MemoryController.displayOneMinute:
@@ -183,47 +179,32 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       minIncludeTextWidth: 900,
     );
 
-    int chunks = 0;
-
-    if (controller.memoryTimeline.data.isNotEmpty) {
-      final lastSampleTimestamp =
-          controller.memoryTimeline.data.last.timestamp.toDouble();
-      final firstSampleTimestamp =
-          controller.memoryTimeline.data.first.timestamp.toDouble();
-      chunks = ((lastSampleTimestamp - firstSampleTimestamp) /
-              controller.pruneIntervalDurationInMs)
-          .round();
-    }
-
-    if (chunks != numberOfChunks) {
+    final chunks = controller.computeChunks();
+    if (chunks != controller.numberOfChunks) {
       // TODO(terry): Need to stay on the same chunk as more chunks arrive.
-      // We have more reset to last.
-      numberOfChunks = chunks;
-      sliderValue = chunks.toDouble();
+      // Move reset to last?
+      controller.sliderValue = chunks.toDouble();
     }
+    controller.numberOfChunks = chunks;
 
-    timelineSlider = Slider.adaptive(
-      label: timelineSliderLabel(sliderValue),
+    _timelineSlider = Slider.adaptive(
+      label: timelineSliderLabel(controller.sliderValue),
       activeColor: Colors.indigoAccent,
       min: 0.0,
-      max: numberOfChunks == 0 ? 1.0 : numberOfChunks.toDouble(),
+      max: controller.numberOfChunks.toDouble(),
       inactiveColor: Colors.grey,
-      onChanged: numberOfChunks > 0
+      onChanged: controller.numberOfChunks > 0
           ? (newValue) {
               final newChunk = newValue.roundToDouble();
               setState(() {
-                sliderValue = newChunk;
+                controller.sliderValue = newChunk;
                 // TODO(terry): Compute:
-                // startingIndex = sliderValue * controller.pruneIntervalDurationInMs
+                //    startingIndex = sliderValue * controller.pruneIntervalDurationInMs
               });
             }
           : null,
-      value: sliderValue,
-      divisions: numberOfChunks == 0 ? 1 : numberOfChunks,
-      semanticFormatterCallback: (double newValue) {
-        return 'Slot $newValue';
-        return '${newValue.round()} dollars';
-      },
+      value: controller.sliderValue,
+      divisions: controller.numberOfChunks,
     );
 
     if (memoryTimeline.liveData.isNotEmpty) {
@@ -249,7 +230,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                 ),
               ),
               Expanded(
-                child: timelineSlider,
+                child: _timelineSlider,
                 flex: 1,
               ),
               const Text('Time Range')

@@ -16,7 +16,6 @@ import '../../globals.dart';
 import '../../service_registrations.dart' as registrations;
 import '../../ui/fake_file/fake_file.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
-import '../../ui/html_elements.dart';
 import '../../vm_service_wrapper.dart';
 
 import '../memory_service.dart';
@@ -66,6 +65,26 @@ class MemoryController extends DisposableController
   }
 
   String get memorySource => _memorySourceNotifier.value;
+
+  /// Starting chunk for slider based on pruneInterval.
+  double sliderValue = 1.0;
+
+  /// Number of interval chunks e.g., 5 minute interval has 3 chunks for 15 minutes of collected data
+  int numberOfChunks = 0;
+
+  /// Compute total timeline chunks used by Timeline slider.
+  int computeChunks() {
+    int chunks = 0;
+    if (memoryTimeline.data.isNotEmpty) {
+      final lastSampleTimestamp = memoryTimeline.data.last.timestamp.toDouble();
+      final firstSampleTimestamp =
+          memoryTimeline.data.first.timestamp.toDouble();
+      chunks = ((lastSampleTimestamp - firstSampleTimestamp) /
+              pruneIntervalDurationInMs)
+          .round();
+    }
+    return chunks == 0 ? 1 : chunks;
+  }
 
   static const String displayOneMinute = '1';
   static const String displayFiveMinutes = '5';
@@ -872,6 +891,9 @@ class MemoryTimeline {
   /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
   dart_ui.Image _img;
 
+  // TODO(terry): Look at using _img for each data point (at least last N).
+  dart_ui.Image get dataPointImage => null;
+
   set image(dart_ui.Image img) {
     _img = img;
   }
@@ -907,10 +929,12 @@ class MemoryTimeline {
       // TOOD(terry): Need to plot.
       final rss = sample.rss.toDouble();
 
-      final extEntry = Entry(x: timestamp, y: external, icon: _img);
-      final usedEntry = Entry(x: timestamp, y: used + external, icon: _img);
-      final capacityEntry = Entry(x: timestamp, y: capacity, icon: _img);
-      final rssEntry = Entry(x: timestamp, y: rss, icon: _img);
+      final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
+      final usedEntry =
+          Entry(x: timestamp, y: used + external, icon: dataPointImage);
+      final capacityEntry =
+          Entry(x: timestamp, y: capacity, icon: dataPointImage);
+      final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
       final javaHeap = sample.memoryInfo.javaHeap.toDouble();
@@ -922,27 +946,46 @@ class MemoryTimeline {
       final system = sample.memoryInfo.system.toDouble();
       final total = sample.memoryInfo.total.toDouble();
 
-      final graphicsEntry = Entry(x: timestamp, y: graphics, icon: _img);
-      final stackEntry = Entry(x: timestamp, y: stack + graphics, icon: _img);
-      final javaHeapEntry =
-          Entry(x: timestamp, y: javaHeap + graphics + stack, icon: _img);
+      final graphicsEntry = Entry(
+        x: timestamp,
+        y: graphics,
+        icon: dataPointImage,
+      );
+      final stackEntry = Entry(
+        x: timestamp,
+        y: stack + graphics,
+        icon: dataPointImage,
+      );
+      final javaHeapEntry = Entry(
+        x: timestamp,
+        y: javaHeap + graphics + stack,
+        icon: dataPointImage,
+      );
       final nativeHeapEntry = Entry(
-          x: timestamp,
-          y: nativeHeap + javaHeap + graphics + stack,
-          icon: _img);
+        x: timestamp,
+        y: nativeHeap + javaHeap + graphics + stack,
+        icon: dataPointImage,
+      );
       final codeEntry = Entry(
-          x: timestamp,
-          y: code + nativeHeap + javaHeap + graphics + stack,
-          icon: _img);
+        x: timestamp,
+        y: code + nativeHeap + javaHeap + graphics + stack,
+        icon: dataPointImage,
+      );
       final otherEntry = Entry(
-          x: timestamp,
-          y: other + code + nativeHeap + javaHeap + graphics + stack,
-          icon: _img);
+        x: timestamp,
+        y: other + code + nativeHeap + javaHeap + graphics + stack,
+        icon: dataPointImage,
+      );
       final systemEntry = Entry(
-          x: timestamp,
-          y: system + other + code + nativeHeap + javaHeap + graphics + stack,
-          icon: _img);
-      final totalEntry = Entry(x: timestamp, y: total, icon: _img);
+        x: timestamp,
+        y: system + other + code + nativeHeap + javaHeap + graphics + stack,
+        icon: dataPointImage,
+      );
+      final totalEntry = Entry(
+        x: timestamp,
+        y: total,
+        icon: dataPointImage,
+      );
 
       result.add({
         capcityValueKey: capacityEntry,
