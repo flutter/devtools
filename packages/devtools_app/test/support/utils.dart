@@ -34,7 +34,7 @@ Future<void> addListenerScope({
 Future<Timeline> loadNetworkProfileTimeline() async {
   // TODO(bkonyi): pull this JSON data into a .dart file.
   const testDataPath =
-      '../../devtools_testing/lib/support/http_request_timeline_test_data.json';
+      '../devtools_testing/lib/support/http_request_timeline_test_data.json';
   final httpTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );
