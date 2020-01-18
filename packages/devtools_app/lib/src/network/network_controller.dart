@@ -119,7 +119,6 @@ class NetworkController {
   }
 
   Future<void> _toggleHttpTimelineRecording(bool state) async {
-    assert(state == !_httpRecordingNotifier.value);
     await _networkService.toggleHttpRequestLogging(state);
 
     if (state) {

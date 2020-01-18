@@ -11,10 +11,24 @@ import 'http_request_inspector_views.dart';
 class HttpRequestInspector extends StatelessWidget {
   const HttpRequestInspector(this.data);
 
+  static const _headersTabTitle = 'Headers';
+  static const _cookiesTabTitle = 'Cookies';
+  static const _timingTabTitle = 'Timing';
+
+  @visibleForTesting
+  static const Key cookiesTabKey = Key(_cookiesTabTitle);
+  @visibleForTesting
+  static const Key headersTabKey = Key(_headersTabTitle);
+  @visibleForTesting
+  static const Key timingTabKey = Key(_timingTabTitle);
+  @visibleForTesting
+  static const Key noRequestSelectedKey = Key('No Request Selected');
+
   final HttpRequestData data;
 
   Widget _buildTab(String tabName) {
     return Tab(
+      key: ValueKey<String>(tabName),
       child: Text(
         tabName,
         overflow: TextOverflow.ellipsis,
@@ -26,9 +40,9 @@ class HttpRequestInspector extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasCookies = data?.hasCookies ?? false;
     final tabs = <Tab>[
-      _buildTab('Headers'),
-      _buildTab('Timing'),
-      if (hasCookies) _buildTab('Cookies'),
+      _buildTab(_headersTabTitle),
+      _buildTab(_timingTabTitle),
+      if (hasCookies) _buildTab(_cookiesTabTitle),
     ];
     final tabbedContent = DefaultTabController(
       length: tabs.length,
@@ -70,6 +84,7 @@ class HttpRequestInspector extends StatelessWidget {
             ? Center(
                 child: Text(
                   'No request selected',
+                  key: noRequestSelectedKey,
                   style: Theme.of(context).textTheme.title,
                 ),
               )

@@ -21,9 +21,11 @@ const EdgeInsets _rowPadding =
 /// Helper to build ExpansionTile widgets for inspector views.
 ExpansionTile _buildTile(
   String title,
-  List<Widget> children,
-) {
+  List<Widget> children, {
+  Key key,
+}) {
   return ExpansionTile(
+    key: key,
     title: Text(
       title,
     ),
@@ -37,10 +39,21 @@ ExpansionTile _buildTile(
 class HttpRequestHeadersView extends StatelessWidget {
   const HttpRequestHeadersView(this.data);
 
+  @visibleForTesting
+  static const generalKey = Key('General');
+  @visibleForTesting
+  static const requestHeadersKey = Key('Request Headers');
+  @visibleForTesting
+  static const responseHeadersKey = Key('Response Headers');
+
   final HttpRequestData data;
 
   Widget _buildRow(
-      BuildContext context, String key, dynamic value, constraints) {
+    BuildContext context,
+    String key,
+    dynamic value,
+    BoxConstraints constraints,
+  ) {
     return Container(
       width: constraints.minWidth,
       padding: _rowPadding,
@@ -80,6 +93,7 @@ class HttpRequestHeadersView extends StatelessWidget {
                     constraints,
                   ),
               ],
+              key: generalKey,
             ),
             _buildTile(
               'Response Headers',
@@ -93,6 +107,7 @@ class HttpRequestHeadersView extends StatelessWidget {
                       constraints,
                     ),
               ],
+              key: responseHeadersKey,
             ),
             _buildTile(
               'Request Headers',
@@ -106,6 +121,7 @@ class HttpRequestHeadersView extends StatelessWidget {
                       constraints,
                     ),
               ],
+              key: requestHeadersKey,
             )
           ],
         );
@@ -117,6 +133,9 @@ class HttpRequestHeadersView extends StatelessWidget {
 /// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesView extends StatelessWidget {
   const HttpRequestCookiesView(this.data);
+
+  static const requestCookiesKey = Key('Request Cookies');
+  static const responseCookiesKey = Key('Response Cookies');
 
   final HttpRequestData data;
 
@@ -147,7 +166,8 @@ class HttpRequestCookiesView extends StatelessWidget {
     BuildContext context,
     String title,
     List<Cookie> cookies,
-    BoxConstraints constraints, {
+    BoxConstraints constraints,
+    Key key, {
     bool requestCookies = false,
   }) {
     final theme = Theme.of(context);
@@ -188,6 +208,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                       minWidth: constraints.minWidth,
                     ),
               child: DataTable(
+                key: key,
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [
@@ -233,6 +254,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                   'Response Cookies',
                   responseCookies,
                   constraints,
+                  responseCookiesKey,
                 ),
               // Add padding between the cookie tables if displaying both
               // response and request cookies.
@@ -246,6 +268,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                   'Request Cookies',
                   requestCookies,
                   constraints,
+                  requestCookiesKey,
                   requestCookies: true,
                 ),
             ],

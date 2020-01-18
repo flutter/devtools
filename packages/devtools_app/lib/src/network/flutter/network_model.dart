@@ -9,6 +9,9 @@ import 'package:intl/intl.dart';
 import '../http_request_data.dart';
 
 class HttpRequestDataTableSource extends DataTableSource {
+  @visibleForTesting
+  static const httpRequestRowKey = Key('HTTP Request Row');
+
   set data(List<HttpRequestData> data) {
     _data = data;
     notifyListeners();
@@ -106,7 +109,10 @@ class HttpRequestDataTableSource extends DataTableSource {
     return DataRow.byIndex(
       index: index,
       cells: [
-        DataCell(Text(data.name)),
+        DataCell(Text(
+          data.name,
+          key: httpRequestRowKey,
+        )),
         DataCell(
           Text(
             data.method,
