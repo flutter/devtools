@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:convert';
-import 'dart:io' hide Cookie;
-
 import 'package:devtools_app/src/flutter/split.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/network/flutter/http_request_inspector.dart';
