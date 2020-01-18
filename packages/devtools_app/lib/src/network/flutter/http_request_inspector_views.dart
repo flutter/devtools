@@ -134,7 +134,9 @@ class HttpRequestHeadersView extends StatelessWidget {
 class HttpRequestCookiesView extends StatelessWidget {
   const HttpRequestCookiesView(this.data);
 
+  @visibleForTesting
   static const requestCookiesKey = Key('Request Cookies');
+  @visibleForTesting
   static const responseCookiesKey = Key('Response Cookies');
 
   final HttpRequestData data;

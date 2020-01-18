@@ -16,13 +16,13 @@ class HttpRequestInspector extends StatelessWidget {
   static const _timingTabTitle = 'Timing';
 
   @visibleForTesting
-  static const Key cookiesTabKey = Key(_cookiesTabTitle);
+  static const cookiesTabKey = Key(_cookiesTabTitle);
   @visibleForTesting
-  static const Key headersTabKey = Key(_headersTabTitle);
+  static const headersTabKey = Key(_headersTabTitle);
   @visibleForTesting
-  static const Key timingTabKey = Key(_timingTabTitle);
+  static const timingTabKey = Key(_timingTabTitle);
   @visibleForTesting
-  static const Key noRequestSelectedKey = Key('No Request Selected');
+  static const noRequestSelectedKey = Key('No Request Selected');
 
   final HttpRequestData data;
 
