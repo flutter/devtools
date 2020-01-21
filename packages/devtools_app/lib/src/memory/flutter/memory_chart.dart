@@ -225,7 +225,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
                 padding: const EdgeInsets.fromLTRB(20, 10, 0, 5),
                 child: OutlineButton(
                   key: MemoryChartState.androidChartButtonKey,
-                  onPressed: _toggleAndroidChart,
+                  onPressed: controller.isConnectedDeviceAndroid
+                      ? _toggleAndroidChart
+                      : null,
                   child: androidMemoryButton,
                 ),
               ),

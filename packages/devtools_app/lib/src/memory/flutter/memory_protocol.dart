@@ -69,7 +69,7 @@ class MemoryTracker {
 
   // TODO(terry): Discuss need a record/stop record for memory?  Unless expensive probably not.
   Future<void> _pollMemory() async {
-    if (!hasConnection) {
+    if (!hasConnection || memoryController.memoryTracker == null) {
       return;
     }
 
@@ -88,13 +88,16 @@ class MemoryTracker {
       }
     }));
 
-    // Polls for current meminfo using:
+    // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    memoryInfo = await _fetchAdbInfo();
+    if (vm.operatingSystem == 'android')
+      memoryInfo = await _fetchAdbInfo();
+    else
+      // TODO(terry): TBD alternative for iOS memory info - all values zero.
+      memoryInfo = AdbMemoryInfo.empty();
 
     // Polls for current RSS size.
     _update(vm, isolates);
-
     _pollingTimer = Timer(kUpdateDelay, _pollMemory);
   }
 

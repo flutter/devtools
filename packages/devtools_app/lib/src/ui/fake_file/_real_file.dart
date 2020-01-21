@@ -18,7 +18,20 @@ class MemoryFiles implements FileIO {
     // TODO(terry): Consider path_provider's getTemporaryDirectory
     //              or getApplicationDocumentsDirectory when
     //              available in Flutter Web/Desktop.
-    final memoryLogFile = _fs.systemTempDirectory.childFile(filename);
+    File memoryLogFile;
+
+    // TODO(terry): iOS returns /var/folders/xxx/yyy for temporary. Where
+    // xxx & yyy are generated names hard to locate the json file.
+    if (_fs.systemTempDirectory.dirname.startsWith('/var/')) {
+      // TODO(terry): For now export the file to the user's Desktop.
+      final dirPath = _fs.currentDirectory.dirname.split('/');
+      final desktopPath = '/${dirPath[1]}/${dirPath[2]}/Desktop';
+      final desktopDirectory = _fs.directory(desktopPath);
+      memoryLogFile = desktopDirectory.childFile(filename);
+    } else {
+      memoryLogFile = _fs.systemTempDirectory.childFile(filename);
+    }
+
     memoryLogFile.writeAsStringSync(contents, flush: true);
   }
 

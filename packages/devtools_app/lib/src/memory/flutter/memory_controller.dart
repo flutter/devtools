@@ -224,6 +224,8 @@ class MemoryController extends DisposableController
 
   bool hasStopped;
 
+  VM _vm;
+
   void _handleIsolateChanged() {
     // TODO(terry): Need an event on the controller for this too?
   }
@@ -237,6 +239,21 @@ class MemoryController extends DisposableController
         _memoryTrackerController.add(_memoryTracker);
       }),
     );
+    autoDispose(
+      _memoryTracker.onChange.listen((_) {
+        _memoryTrackerController.add(_memoryTracker);
+      }),
+    );
+
+    // TODO(terry): Used to detect stream being closed from the
+    // memoryController dispose method.  Needed when a HOT RELOAD
+    // will call dispose however, spinup (initState) doesn't seem
+    // to happen David is working on scaffolding.
+    _memoryTrackerController.stream.listen((_) {}, onDone: () {
+      // Stop polling and reset memoryTracker.
+      _memoryTracker.stop();
+      _memoryTracker = null;
+    });
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -281,6 +298,15 @@ class MemoryController extends DisposableController
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesAccumulated > 0;
     }).toList();
+  }
+
+  void ensureVM() async {
+    _vm ??= await serviceManager.service.getVM();
+  }
+
+  bool get isConnectedDeviceAndroid {
+    ensureVM();
+    return (_vm?.operatingSystem) == 'android';
   }
 
   Future<List<InstanceSummary>> getInstances(
