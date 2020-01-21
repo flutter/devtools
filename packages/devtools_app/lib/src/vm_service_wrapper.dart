@@ -419,7 +419,7 @@ class VmServiceWrapper implements VmService {
     }
   }
 
-  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
       String isolateId) async {
     return _trackFuture('getHttpEnableTimelineLogging',
         _vmService.getHttpEnableTimelineLogging(isolateId));
