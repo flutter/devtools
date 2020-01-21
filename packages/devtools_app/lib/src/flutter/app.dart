@@ -123,13 +123,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: theme,
-      builder: (context, child) => Overlay(initialEntries: [
-        OverlayEntry(
-          builder: (context) => Notifications(child: child),
-          maintainState: true,
-          opaque: true,
-        )
-      ]),
+      builder: (context, child) => Notifications(child: child),
       onGenerateRoute: _generateRoute,
     );
   }

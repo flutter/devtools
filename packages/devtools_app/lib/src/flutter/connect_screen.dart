@@ -125,10 +125,13 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
 
   Future<void> _connect([_]) async {
     final uri = normalizeVmServiceUri(controller.text);
-    final connected = await FrameworkCore.initVmService('', explicitUri: uri,
-        errorReporter: (message, error) {
-      Notifications.of(context).push('$message $error');
-    });
+    final connected = await FrameworkCore.initVmService(
+      '',
+      explicitUri: uri,
+      errorReporter: (message, error) {
+        Notifications.of(context).push('$message $error');
+      },
+    );
     if (connected) {
       unawaited(
         Navigator.popAndPushNamed(

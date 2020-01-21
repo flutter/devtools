@@ -7,25 +7,46 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../notification_provider.dart';
-
 const _notificationWidth = 360.0;
 const _notificationHeight = 160.0;
 
 /// Manager for notifications in the app.
-class Notifications extends StatefulWidget {
-  const Notifications({Key key, this.child}) : super(key: key);
+///
+/// Must be inside of an [Overlay].
+///
+class Notifications extends StatelessWidget {
+  const Notifications({Key key, @required this.child}) : super(key: key);
 
   final Widget child;
 
+  /// The default duration for notifications to show.
+  static const Duration defaultDuration = Duration(seconds: 7);
+
   @override
-  NotificationsState createState() => NotificationsState();
+  Widget build(BuildContext context) {
+    return Overlay(initialEntries: [
+      OverlayEntry(
+        builder: (context) => _NotificationsProvider(child: child),
+        maintainState: true,
+        opaque: true,
+      ),
+    ]);
+  }
 
   static NotificationsState of(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<_InheritedNotifications>()
         .data;
   }
+}
+
+class _NotificationsProvider extends StatefulWidget {
+  const _NotificationsProvider({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  NotificationsState createState() => NotificationsState();
 }
 
 class _InheritedNotifications extends InheritedWidget {
@@ -40,16 +61,10 @@ class _InheritedNotifications extends InheritedWidget {
   }
 }
 
-class NotificationsState extends State<Notifications>
-    implements NotificationProvider {
+class NotificationsState extends State<_NotificationsProvider> {
   OverlayEntry _overlayEntry;
 
   final List<_Notification> _notifications = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {
@@ -121,26 +136,19 @@ class NotificationsState extends State<Notifications>
 }
 
 class _Notification extends StatefulWidget {
-  const _Notification(
-      {Key key,
-      @required this.message,
-      this.callback = _noop,
-      this.duration = _defaultDuration,
-      @required this.remove})
-      : assert(message != null),
-        assert(callback != null),
+  const _Notification({
+    Key key,
+    @required this.message,
+    this.duration = Notifications.defaultDuration,
+    @required this.remove,
+  })  : assert(message != null),
         assert(remove != null),
         assert(duration != null),
         super(key: key);
 
-  static const Duration _defaultDuration = Duration(seconds: 7);
-
   final Duration duration;
-  final VoidCallback callback;
   final String message;
   final void Function(_Notification) remove;
-
-  static void _noop() {}
 
   @override
   _NotificationState createState() => _NotificationState();
@@ -156,8 +164,17 @@ class _NotificationState extends State<_Notification>
   void initState() {
     super.initState();
     controller = AnimationController(
-        duration: const Duration(milliseconds: 400), vsync: this);
-    curve = CurvedAnimation(parent: controller, curve: Curves.easeInOutCirc);
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    curve = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOutCirc,
+    );
+    // Set up a timer that reverses the entrance animation, and tells the widget
+    // to remove itself when the exit animation is completed.
+    // We can do this because the NotificationsState is directly controlling
+    // the life cycle of each _Notification widget presented in the overlay.
     _dismissTimer = Timer(widget.duration, () {
       controller.addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
@@ -178,6 +195,7 @@ class _NotificationState extends State<_Notification>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
@@ -192,17 +210,17 @@ class _NotificationState extends State<_Notification>
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Card(
-          color: Theme.of(context).snackBarTheme.backgroundColor,
+          color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
-            style: Theme.of(context).snackBarTheme.contentTextStyle ??
-                Theme.of(context).primaryTextTheme.subhead,
+            style: theme.snackBarTheme.contentTextStyle ??
+                theme.primaryTextTheme.subhead,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   widget.message,
-                  style: Theme.of(context).textTheme.body1,
+                  style: theme.textTheme.body1,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 6,
                 ),
