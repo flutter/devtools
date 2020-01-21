@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,15 +25,14 @@ Future<NetworkController> pumpNetworkScreen(
   WidgetTester tester, {
   NetworkController networkController,
 }) async {
-  // Set a wide enough screen width that we do not run into overflow.
   await tester.pumpWidget(wrap(const NetworkScreenBody()));
   final finder = find.byType(NetworkScreenBody);
   expect(finder, findsOneWidget);
   return tester.state<NetworkScreenBodyState>(finder).networkController;
 }
 
-// Clears the timeouts created when calling getHttpTimelineLogging and
-// setHttpTimelineLogging RPCs.
+/// Clears the timeouts created when calling getHttpTimelineLogging and
+/// setHttpTimelineLogging RPCs.
 Future<void> clearTimeouts(WidgetTester tester) async =>
     await tester.pumpAndSettle(const Duration(seconds: 5));
 
@@ -51,7 +50,7 @@ void main() {
       fakeServiceManager =
           FakeServiceManager(useFakeService: true, timelineData: timeline);
       (fakeServiceManager.service as FakeVmService)
-          .getHttpEnableTimelineLoggingResult = false;
+          .httpEnableTimelineLoggingResult = false;
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
@@ -258,7 +257,7 @@ void main() {
         await validateCookiesTab(selection);
       }
 
-      // Clear the selection.
+      // Clear the selection (select + deselect a known entry).
       for (int i = 0; i < 2; ++i) {
         await tester.tap(
           find.byKey(HttpRequestDataTableSource.httpRequestRowKey).first,

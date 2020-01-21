@@ -88,13 +88,13 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
           key: NetworkScreen.recordButtonKey,
           recording: isRecording,
           minIncludeTextWidth: minIncludeTextWidth,
-          onPressed: () => networkController.startRecording(),
+          onPressed: networkController.startRecording,
         ),
         pauseButton(
           key: NetworkScreen.pauseButtonKey,
           paused: !isRecording,
           minIncludeTextWidth: minIncludeTextWidth,
-          onPressed: () => networkController.pauseRecording(),
+          onPressed: networkController.pauseRecording,
         ),
         const SizedBox(width: 8.0),
         clearButton(
