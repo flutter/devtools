@@ -1,4 +1,5 @@
 ## 0.1.14-dev.2
+* Add Track Widget Builds toggle to Timeline.
 * Fix issues with async trace event rendering in Timeline.
 * Add timing and id information in Timeline event summary.
 * Improve hint text on connect screen.
