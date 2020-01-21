@@ -12,7 +12,6 @@ import '../globals.dart';
 import '../inspector/flutter_widget.dart';
 import '../url_utils.dart';
 import 'auto_dispose_mixin.dart';
-import 'common_widgets.dart';
 import 'controllers.dart';
 import 'navigation.dart';
 import 'notifications.dart';

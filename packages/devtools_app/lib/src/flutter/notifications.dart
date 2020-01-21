@@ -89,7 +89,6 @@ class NotificationsState extends State<_NotificationsProvider> {
   }
 
   /// Pushes a notification [message].
-  @override
   void push(String message) {
     setState(() {
       _notifications.add(

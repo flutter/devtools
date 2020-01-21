@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
-import 'notifications.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 
