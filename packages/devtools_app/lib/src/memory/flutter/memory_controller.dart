@@ -33,7 +33,8 @@ final String _memoryLogFilename =
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
-class MemoryController implements DisposableController {
+class MemoryController extends DisposableController
+    with AutoDisposeControllerMixin {
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
@@ -142,9 +143,11 @@ class MemoryController implements DisposableController {
     _memoryTracker = MemoryTracker(service, this);
     _memoryTracker.start();
 
-    _memoryTracker.onChange.listen((_) {
-      _memoryTrackerController.add(_memoryTracker);
-    });
+    autoDispose(
+      _memoryTracker.onChange.listen((_) {
+        _memoryTrackerController.add(_memoryTracker);
+      }),
+    );
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -156,15 +159,21 @@ class MemoryController implements DisposableController {
   }
 
   Future<void> startTimeline() async {
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-      _handleIsolateChanged();
-    });
+    autoDispose(
+      serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
+        _handleIsolateChanged();
+      }),
+    );
 
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    autoDispose(
+      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+    );
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
     }
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+    autoDispose(
+      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+    );
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
@@ -279,6 +288,7 @@ class MemoryController implements DisposableController {
 
   @override
   void dispose() {
+    super.dispose();
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
