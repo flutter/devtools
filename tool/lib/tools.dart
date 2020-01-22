@@ -10,7 +10,7 @@ import 'commands/packages_get.dart';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
-      : super('devman', 'A repo management tool for DevTools.') {
+      : super('tools', 'A repo management tool for DevTools.') {
     addCommand(PackagesGetCommand());
     addCommand(AnalyzeCommand());
     addCommand(ListCommand());
