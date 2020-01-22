@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../auto_dispose.dart';
 import '../globals.dart';
@@ -182,8 +183,8 @@ class _InheritedProvider extends InheritedWidget {
   InheritedElement createElement() => _DisposeAfterNotifyElement(this);
 }
 
-/// An [Element] that disposes its [_oldData] after notifying clients
-/// of a data change.
+/// An [Element] that disposes its [_oldData] on the frame after after
+/// Notifying clients of a data change.
 ///
 /// This allows clients to unregister listeners from the old data before it is
 /// disposed, and avoid exceptions caused by unregistering from disposed
@@ -207,6 +208,14 @@ class _DisposeAfterNotifyElement extends InheritedElement {
   @override
   void notifyClients(_InheritedProvider oldWidget) {
     super.notifyClients(oldWidget);
-    _oldData?.dispose();
+    // For stateful widgets that depend on Controllers.of(context) to
+    // subscribe directly, we don't need a postframe callback and we can just
+    // dispose the old data.
+    // For ValueListenableBuilder widgets, we need the postframe callback to
+    // wait until the builders have a chance to build and update their
+    // listeners.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _oldData?.dispose();
+    });
   }
 }
