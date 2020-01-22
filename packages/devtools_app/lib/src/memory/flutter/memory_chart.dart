@@ -791,7 +791,8 @@ class SelectedDataPoint extends LineChartMarker {
     final bool isGced = values.isGC;
 
     // Alpha filled stacked:
-    final num memoryOther = values.memoryInfo.other.toDouble(); // Purple-ish
+    final num memorySystemAndOther = values.memoryInfo.system.toDouble() +
+        values.memoryInfo.other.toDouble(); // Purple-ish
     final num memoryCode = values.memoryInfo.code.toDouble(); // Gray Purple
     final num memoryNativeHeap =
         values.memoryInfo.nativeHeap.toDouble(); // Blue-ish
@@ -801,9 +802,6 @@ class SelectedDataPoint extends LineChartMarker {
     final num memoryGraphics = values.memoryInfo.graphics.toDouble(); // Orangy
 
     final num memoryTotal = values.memoryInfo.total.toDouble(); // dashed line
-
-    final num memorySystem =
-        values.memoryInfo.system.toDouble(); // Should report as system+other
 
     final TextPainter painter = type == ChartType.DartHeaps
         ? PainterUtils.create(null, _titlesDartVm, textColor, fontSize)
@@ -828,7 +826,7 @@ class SelectedDataPoint extends LineChartMarker {
             null,
             '${_timestampFormatter.getFormattedValue1(timestampAsInt.toDouble())}\n'
             '${_formatter.getFormattedValue1(memoryTotal)}\n'
-            '${_formatter.getFormattedValue1(memoryOther)}\n'
+            '${_formatter.getFormattedValue1(memorySystemAndOther)}\n'
             '${_formatter.getFormattedValue1(memoryCode)}\n'
             '${_formatter.getFormattedValue1(memoryNativeHeap)}\n'
             '${_formatter.getFormattedValue1(memoryJavaHeap)}\n'

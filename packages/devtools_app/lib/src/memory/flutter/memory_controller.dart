@@ -13,7 +13,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../auto_dispose.dart';
 import '../../config_specific/logger.dart';
 import '../../globals.dart';
-import '../../service_registrations.dart' as registrations;
 import '../../ui/fake_file/fake_file.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../vm_service_wrapper.dart';
@@ -106,8 +105,9 @@ class MemoryController extends DisposableController
   /// 1 minute in milliseconds.
   static const int minuteInMs = 60 * 1000;
 
-  /// A big number ms (largest for int).
-  static const int bigTimeInMs = 9223372036854775807;
+  /// Largest int in ms for VM could be 9223372036854775807 (2^64)
+  /// however, use JS largest possible int  9007199254740991 (2^53).
+  static const int bigTimeInMs = 9007199254740991;
 
   /// Return the pruning interval in milliseconds.
   int get pruneIntervalDurationInMs => (pruneInterval == displayAllMinutes)
@@ -893,6 +893,7 @@ class MemoryTimeline {
   ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
   /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
+  // ignore: unused_field
   dart_ui.Image _img;
 
   // TODO(terry): Look at using _img for each data point (at least last N).
