@@ -16,6 +16,15 @@ import 'network_model.dart';
 class NetworkScreen extends Screen {
   const NetworkScreen() : super();
 
+  @visibleForTesting
+  static const clearButtonKey = Key('Clear Button');
+  @visibleForTesting
+  static const pauseButtonKey = Key('Pause Button');
+  @visibleForTesting
+  static const recordButtonKey = Key('Record Button');
+  @visibleForTesting
+  static const recordingInstructionsKey = Key('Recording Instructions');
+
   @override
   Widget buildTab(BuildContext context) {
     return const Tab(
@@ -36,7 +45,7 @@ class NetworkScreenBody extends StatefulWidget {
 }
 
 class NetworkScreenBodyState extends State<NetworkScreenBody> {
-  final _networkController = NetworkController();
+  final networkController = NetworkController();
   final _dataTableSource = HttpRequestDataTableSource();
 
   static bool _sortAscending = false;
@@ -59,13 +68,13 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
 
   @override
   void initState() {
-    _networkController.initialize();
+    networkController.initialize();
     super.initState();
   }
 
   @override
   void dispose() {
-    _networkController.dispose();
+    networkController.dispose();
     super.dispose();
   }
 
@@ -76,20 +85,23 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
     return Row(
       children: [
         recordButton(
+          key: NetworkScreen.recordButtonKey,
           recording: isRecording,
           minIncludeTextWidth: minIncludeTextWidth,
-          onPressed: () => _networkController.startRecording(),
+          onPressed: networkController.startRecording,
         ),
         pauseButton(
+          key: NetworkScreen.pauseButtonKey,
           paused: !isRecording,
           minIncludeTextWidth: minIncludeTextWidth,
-          onPressed: () => _networkController.pauseRecording(),
+          onPressed: networkController.pauseRecording,
         ),
         const SizedBox(width: 8.0),
         clearButton(
+          key: NetworkScreen.clearButtonKey,
           onPressed: () {
             _dataTableSource.clearSelection();
-            _networkController.clear();
+            networkController.clear();
           },
         ),
       ],
@@ -176,6 +188,7 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
               ? Container(
                   child: Center(
                     child: recordingInfo(
+                      instructionsKey: NetworkScreen.recordingInstructionsKey,
                       recording: isRecording,
                       recordedObject: 'HTTP requests',
                       isPause: true,
@@ -204,11 +217,11 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<HttpRequests>(
-      valueListenable: _networkController.requestsNotifier,
+      valueListenable: networkController.requestsNotifier,
       builder: (context, httpRequestProfile, widget) {
         _dataTableSource.data = httpRequestProfile.requests;
         return ValueListenableBuilder<bool>(
-          valueListenable: _networkController.recordingNotifier,
+          valueListenable: networkController.recordingNotifier,
           builder: (context, isRecording, widget) {
             return Column(
               children: [

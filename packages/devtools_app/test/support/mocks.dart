@@ -85,6 +85,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._timelineData,
   );
 
+  /// Specifies the return value of `httpEnableTimelineLogging`.
+  bool httpEnableTimelineLoggingResult = true;
+
   final VmFlagManager _vmFlagManager;
   final Timeline _timelineData;
 
@@ -201,9 +204,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
-  Future<HttpTimelineLoggingState> getHttpEnableTimelineLogging(
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
           String isolateId) async =>
-      HttpTimelineLoggingState(enabled: true);
+      HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult);
 
   @override
   Future<Success> setHttpEnableTimelineLogging(

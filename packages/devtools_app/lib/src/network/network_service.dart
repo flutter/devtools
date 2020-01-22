@@ -68,7 +68,7 @@ class NetworkService {
       (isolate) async {
         // TODO(bkonyi): perform VM service version check.
         final future =
-            serviceManager.service.getHttpEnableTimelineLogging(isolate.id);
+            serviceManager.service.httpEnableTimelineLogging(isolate.id);
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
         final state = await timeout(future, 500);

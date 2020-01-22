@@ -87,6 +87,8 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   ServiceExtensionButton performanceOverlayButton;
 
+  ServiceExtensionButton trackWidgetBuildsButton;
+
   ProfileGranularitySelector _profileGranularitySelector;
 
   CoreElement _timelineModeSettingContainer;
@@ -172,6 +174,8 @@ class HtmlTimelineScreen extends HtmlScreen {
 
     performanceOverlayButton = ServiceExtensionButton(performanceOverlay);
 
+    trackWidgetBuildsButton = ServiceExtensionButton(profileWidgetBuilds);
+
     _profileGranularitySelector = ProfileGranularitySelector(framework);
 
     _timelineModeCheckbox = CoreElement('input', classes: 'checkbox')
@@ -194,22 +198,25 @@ class HtmlTimelineScreen extends HtmlScreen {
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group collapsible-1015')
+        div(c: 'btn-group collapsible-1150')
           ..add([
             pauseButton,
             resumeButton,
             _startRecordingButton,
             _stopRecordingButton,
           ]),
-        div(c: 'btn-group collapsible-800')..add(clearButton),
+        div(c: 'btn-group collapsible-950')..add(clearButton),
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         if (enableMultiModeTimeline) _timelineModeSettingContainer,
         _profileGranularitySelector.selector..clazz('margin-left'),
-        div(c: 'btn-group collapsible-800 margin-left')
-          ..add(performanceOverlayButton.button),
-        div(c: 'btn-group collapsible-800')..add(exportButton),
+        div(c: 'btn-group collapsible-950 margin-left')
+          ..add([
+            performanceOverlayButton.button,
+            trackWidgetBuildsButton.button,
+          ]),
+        div(c: 'btn-group collapsible-950')..add(exportButton),
       ]);
 
     _maybeAddDebugButtons();
