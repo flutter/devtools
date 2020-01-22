@@ -296,6 +296,7 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         key: widget.keyFactory(node),
         node: node,
         onPressed: _onItemPressed,
+        backgroundColor: _TableRow.colorFor(context, index),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
