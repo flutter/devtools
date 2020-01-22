@@ -56,7 +56,9 @@ class MemoryController extends DisposableController
 
   String _memorySourcePrefix;
 
-  set memorySourcePrefix(String prefix) { _memorySourcePrefix = prefix; }
+  set memorySourcePrefix(String prefix) {
+    _memorySourcePrefix = prefix;
+  }
 
   String get memorySourcePrefix => _memorySourcePrefix;
 
