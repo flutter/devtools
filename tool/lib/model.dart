@@ -20,12 +20,12 @@ class DevToolsRepo {
   /// This can fail and return null if the current working directory is not
   /// contained within a git checkout of DevTools.
   static DevToolsRepo getInstance() {
-    final String repoPath = _findRepoRoot(Directory.current);
+    final repoPath = _findRepoRoot(Directory.current);
     return repoPath == null ? null : DevToolsRepo._create(repoPath);
   }
 
   List<Package> getPackages() {
-    final List<Package> result = [];
+    final result = <Package>[];
 
     _collectPackages(Directory(repoPath), result);
     result.sort((a, b) => a.packagePath.compareTo(b.packagePath));
@@ -55,7 +55,7 @@ class DevToolsRepo {
 
     for (FileSystemEntity entity
         in dir.listSync(recursive: false, followLinks: false)) {
-      final String name = path.basename(entity.path);
+      final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectPackages(entity, result);
       }
@@ -71,10 +71,9 @@ class FlutterSdk {
   /// This can return null if the Flutter SDK can't be found.
   static FlutterSdk getSdk() {
     // Look for it relative to the current Dart process.
-    final String dartVmPath = Platform.resolvedExecutable;
-    final List<String> pathSegments = path.split(dartVmPath);
-    final List<String> expectedSegments =
-        path.posix.split('bin/cache/dart-sdk/bin/dart');
+    final dartVmPath = Platform.resolvedExecutable;
+    final pathSegments = path.split(dartVmPath);
+    final expectedSegments = path.posix.split('bin/cache/dart-sdk/bin/dart');
 
     if (pathSegments.length >= expectedSegments.length) {
       // Remove the trailing 'dart'.
@@ -96,9 +95,9 @@ class FlutterSdk {
     }
 
     // Look to see if we can find the 'flutter' command in the PATH.
-    final ProcessResult result = Process.runSync('which', ['flutter']);
+    final result = Process.runSync('which', ['flutter']);
     if (result.exitCode == 0) {
-      final String sdkPath = result.stdout.toString().split('\n').first.trim();
+      final sdkPath = result.stdout.toString().split('\n').first.trim();
       // 'flutter/bin'
       if (path.basename(path.dirname(sdkPath)) == 'bin') {
         return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
@@ -129,7 +128,7 @@ class Package {
   String get relativePath => path.relative(packagePath, from: repo.repoPath);
 
   bool get hasAnyDartCode {
-    final List<String> dartFiles = [];
+    final dartFiles = <String>[];
 
     _collectDartFiles(Directory(packagePath), dartFiles);
 
@@ -139,7 +138,7 @@ class Package {
   void _collectDartFiles(Directory dir, List<String> result) {
     for (FileSystemEntity entity
         in dir.listSync(recursive: false, followLinks: false)) {
-      final String name = path.basename(entity.path);
+      final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectDartFiles(entity, result);
       } else if (entity is File && name.endsWith('.dart')) {

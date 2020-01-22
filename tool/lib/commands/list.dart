@@ -17,10 +17,10 @@ class ListCommand extends Command {
 
   @override
   Future run() async {
-    final DevToolsRepo repo = DevToolsRepo.getInstance();
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}');
 
-    final List<Package> packages = repo.getPackages();
+    final packages = repo.getPackages();
 
     print('\n${packages.length} packages:');
 

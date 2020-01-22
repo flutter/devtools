@@ -20,17 +20,15 @@ class AnalyzeCommand extends Command {
 
   @override
   Future run() async {
-    final FlutterSdk sdk = FlutterSdk.getSdk();
+    final sdk = FlutterSdk.getSdk();
     if (sdk == null) {
       print('Unable to locate a Flutter sdk.');
       return 1;
     }
 
-    final Logger log = Logger.standard();
-
-    final DevToolsRepo repo = DevToolsRepo.getInstance();
-
-    final List<Package> packages = repo.getPackages();
+    final log = Logger.standard();
+    final repo = DevToolsRepo.getInstance();
+    final packages = repo.getPackages();
 
     log.stdout('Running flutter analyze...');
 
@@ -41,11 +39,13 @@ class AnalyzeCommand extends Command {
         continue;
       }
 
-      final Progress progress = log.progress('  ${p.relativePath}');
+      final progress = log.progress('  ${p.relativePath}');
 
-      final Process process = await Process.start(
-          sdk.flutterToolPath, ['--no-color', 'analyze'],
-          workingDirectory: p.packagePath);
+      final process = await Process.start(
+        sdk.flutterToolPath,
+        ['--no-color', 'analyze'],
+        workingDirectory: p.packagePath,
+      );
       final Stream<List<int>> stdout = process.stdout;
       final Stream<List<int>> stderr = process.stderr;
 
@@ -58,10 +58,10 @@ class AnalyzeCommand extends Command {
 
         // Display stderr when there's an error.
         final List<List<int>> out = await stdout.toList();
-        final String stdOutput = convertProcessOutputToString(out, '    ');
+        final stdOutput = convertProcessOutputToString(out, '    ');
 
         final List<List<int>> err = await stderr.toList();
-        final String errorOutput = convertProcessOutputToString(err, '    ');
+        final errorOutput = convertProcessOutputToString(err, '    ');
 
         progress.finish(message: 'failed');
 
