@@ -1,4 +1,4 @@
-name: devman
+name: tool
 description: A repo management tool for DevTools.
 
 environment:

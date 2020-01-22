@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devman/devman.dart';
+import 'package:tool/tools.dart';
 
 void main(List<String> args) async {
   final runner = DevToolsCommandRunner();
