@@ -127,7 +127,6 @@ class TimelineController implements DisposableController {
   void htmlSelectTimelineEvent(TimelineEvent event) {
     if (event == null || timeline.data.selectedEvent == event) return;
     timeline.data.selectedEvent = event;
-    cpuProfilerController.resetNotifiers();
     _selectedTimelineEventNotifier.value = event;
   }
 
