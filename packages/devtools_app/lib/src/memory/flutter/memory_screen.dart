@@ -62,25 +62,14 @@ class MemoryBodyState extends State<MemoryBody> {
   MemoryController controller;
 
   @override
-  void initState() {
-    _updateListeningState();
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // TODO(terry): make my controller disposable via DisposableController and dispose here.
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final newController = Controllers.of(context).memory;
     if (newController == controller) return;
     controller = newController;
+
+    _updateListeningState();
   }
 
   @override
