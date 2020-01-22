@@ -124,14 +124,8 @@ class ServiceConnectionManager {
     }
 
     this.service = service;
-    // In the flutter code, both the Initializer and the ConnectScreen may call
-    // FrameworkCore.initVmService.  This can lead to the service availability
-    // being already-determined before the second call to initVmService.
-    // We avoid a crash by checking that we haven't already determined service
-    // availability before we complete the future.
-    if (!serviceAvailable.isCompleted) {
-      serviceAvailable.complete();
-    }
+
+    serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
 
@@ -516,8 +510,7 @@ class ServiceExtensionManager {
         await _maybeAddServiceExtension(extension);
       }
 
-      if (_pendingServiceExtensions.isEmpty &&
-          !extensionStatesUpdated.isCompleted) {
+      if (_pendingServiceExtensions.isEmpty) {
         extensionStatesUpdated.complete();
       }
 

@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-const _notificationWidth = 360.0;
+import 'common_widgets.dart';
+
 const _notificationHeight = 160.0;
+final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
 ///

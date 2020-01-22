@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
@@ -248,3 +250,8 @@ Widget recordingInfo({
     child: recording ? recordingStatus : recordingInstructions,
   );
 }
+
+/// The golden ratio.
+///
+/// Makes for nice-looking rectangles.
+final goldenRatio = 1 + sqrt(5) / 2;

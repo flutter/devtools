@@ -40,6 +40,9 @@ class FrameworkCore {
     @required ErrorReporter errorReporter,
   }) async {
     final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
+    if (serviceManager.hasConnection) {
+      return true;
+    }
 
     if (uri != null) {
       final finishedCompleter = Completer<void>();
