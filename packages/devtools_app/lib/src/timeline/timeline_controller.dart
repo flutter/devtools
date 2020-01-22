@@ -119,6 +119,18 @@ class TimelineController implements DisposableController {
     _selectedTimelineEventNotifier.value = event;
   }
 
+  // TODO(kenz): remove this method once html app is deleted. This is a
+  // workaround to avoid fixing bugs in the DevTools html app. Modifying
+  // [selectTimelineEvent] to work for Flutter DevTools broke the html app, so
+  // this method fixes the regression without wasting resources to make the html
+  // and flutter code 100% compatible.
+  void htmlSelectTimelineEvent(TimelineEvent event) {
+    if (event == null || timeline.data.selectedEvent == event) return;
+    timeline.data.selectedEvent = event;
+    cpuProfilerController.resetNotifiers();
+    _selectedTimelineEventNotifier.value = event;
+  }
+
   Future<void> getCpuProfileForSelectedEvent() async {
     final selectedEvent = timeline.data.selectedEvent;
     if (!selectedEvent.isUiEvent) return;
