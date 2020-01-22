@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TableRow;
 
 import '../table_data.dart';
 import '../trees.dart';
@@ -81,13 +81,13 @@ class _FlatTableState<T> extends State<FlatTable<T>> {
 
   Widget _buildRow(BuildContext context, int index) {
     final node = widget.data[index];
-    return _TableRow<T>(
+    return TableRow<T>(
       key: widget.keyFactory(node),
       node: node,
       onPressed: widget.onItemSelected,
       columns: widget.columns,
       columnWidths: columnWidths,
-      backgroundColor: _TableRow.colorFor(context, index),
+      backgroundColor: TableRow.colorFor(context, index),
     );
   }
 }
@@ -169,10 +169,11 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // all is pressed. This will require listening to expansion changes across the
     // entire tree.
     if (widget.data.isExpanded != rootExpanded) {
-      if (rootExpanded)
+      if (rootExpanded) {
         widget.data.expand();
-      else
+      } else {
         widget.data.collapse();
+      }
       _onItemPressed(widget.data);
     }
   }
@@ -292,11 +293,11 @@ class _TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   Widget _buildRow(BuildContext context, int index) {
     Widget rowForNode(T node) {
-      return _TableRow<T>(
+      return TableRow<T>(
         key: widget.keyFactory(node),
         node: node,
         onPressed: _onItemPressed,
-        backgroundColor: _TableRow.colorFor(context, index),
+        backgroundColor: TableRow.colorFor(context, index),
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
@@ -379,7 +380,7 @@ class _Table<T> extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _TableRow.tableHeader(
+                TableRow.tableHeader(
                   key: const Key('Table header'),
                   columns: columns,
                   columnWidths: columnWidths,
@@ -409,10 +410,11 @@ typedef ItemCallback<T> = void Function(T item);
 ///
 /// When the given [node] is null, this widget will instead present
 /// column headings.
-class _TableRow<T> extends StatefulWidget {
-  /// Constructs a [_TableRow] that presents the column values for
+@visibleForTesting
+class TableRow<T> extends StatefulWidget {
+  /// Constructs a [TableRow] that presents the column values for
   /// [node].
-  const _TableRow({
+  const TableRow({
     Key key,
     @required this.node,
     @required this.columns,
@@ -427,9 +429,9 @@ class _TableRow<T> extends StatefulWidget {
     this.isShown = true,
   }) : super(key: key);
 
-  /// Constructs a [_TableRow] that presents the column titles instead
+  /// Constructs a [TableRow] that presents the column titles instead
   /// of any [node].
-  const _TableRow.tableHeader({
+  const TableRow.tableHeader({
     Key key,
     @required this.columns,
     @required this.columnWidths,
@@ -492,7 +494,7 @@ class _TableRow<T> extends StatefulWidget {
   _TableRowState<T> createState() => _TableRowState<T>();
 }
 
-class _TableRowState<T> extends State<_TableRow<T>>
+class _TableRowState<T> extends State<TableRow<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   Key contentKey;
 
@@ -511,7 +513,7 @@ class _TableRowState<T> extends State<_TableRow<T>>
   }
 
   @override
-  void didUpdateWidget(_TableRow<T> oldWidget) {
+  void didUpdateWidget(TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setExpanded(widget.isExpanded);
   }
