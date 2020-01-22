@@ -10,6 +10,7 @@ import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../globals.dart';
 import '../../ui/flutter/label.dart';
+import '../../ui/material_icons.dart';
 import 'memory_chart.dart';
 import 'memory_controller.dart';
 
@@ -81,8 +82,16 @@ class MemoryBodyState extends State<MemoryBody> {
     _updateListeningState();
   }
 
+  /// When to have verbose Dropdown based on media width.
+  static const verboseDropDownMininumWidth = 950;
+
   @override
   Widget build(BuildContext context) {
+    final mediaWidth = MediaQuery.of(context).size.width;
+    controller.memorySourcePrefix = mediaWidth > verboseDropDownMininumWidth
+        ? MemoryScreen.memorySourceMenuItemPrefix
+        : '';
+
     _memoryChart = MemoryChart();
 
     return Column(
@@ -112,6 +121,9 @@ class MemoryBodyState extends State<MemoryBody> {
     // First item is 'Live Feed', then followed by memory log filenames.
     files.insert(0, MemoryController.liveFeed);
 
+    final mediaWidth = MediaQuery.of(context).size.width;
+    final isVerbaseDropdown = mediaWidth > verboseDropDownMininumWidth;
+
     final _displayTypes = [
       MemoryController.displayOneMinute,
       MemoryController.displayFiveMinutes,
@@ -124,7 +136,7 @@ class MemoryBodyState extends State<MemoryBody> {
         key: MemoryScreen.pruneMenuItem,
         value: value,
         child: Text(
-          'Display $value '
+          '${isVerbaseDropdown ? 'Display' : ''} $value '
           'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
           key: MemoryScreen.pruneIntervalKey,
         ),
@@ -158,7 +170,7 @@ class MemoryBodyState extends State<MemoryBody> {
         key: MemoryScreen.memorySourcesMenuItem,
         value: value,
         child: Text(
-          '${MemoryScreen.memorySourceMenuItemPrefix}$value',
+          '${controller.memorySourcePrefix}$value',
           key: MemoryScreen.memorySourcesKey,
         ),
       );
@@ -198,90 +210,118 @@ class MemoryBodyState extends State<MemoryBody> {
 */
   }
 
+  static const minIncludeTextLeftButtons = 1300;
+  static const minIncludeTextRightButtons = 1100;
+
   Widget _leftsideButtons() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        OutlineButton(
-          key: MemoryScreen.pauseButtonKey,
-          onPressed: controller.paused ? null : _pauseLiveTimeline,
-          child: const MaterialIconLabel(
-            Icons.pause,
-            'Pause',
-            minIncludeTextWidth: 900,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      // Add a semi-transparent background to the
+      // expand and collapse buttons so they don't interfere
+      // too badly with the tree content when the tree
+      // is narrow.
+      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          OutlineButton(
+            key: MemoryScreen.pauseButtonKey,
+            onPressed: controller.paused ? null : _pauseLiveTimeline,
+            child: Label(
+              pauseIcon,
+              'Pause',
+              minIncludeTextWidth: 1300,
+            ),
           ),
-        ),
-        OutlineButton(
-          key: MemoryScreen.resumeButtonKey,
-          onPressed: controller.paused ? _resumeLiveTimeline : null,
-          child: const MaterialIconLabel(
-            Icons.play_arrow,
-            'Resume',
-            minIncludeTextWidth: 900,
+          OutlineButton(
+            key: MemoryScreen.resumeButtonKey,
+            onPressed: controller.paused ? _resumeLiveTimeline : null,
+            child: Label(
+              playIcon,
+              'Resume',
+              minIncludeTextWidth: 1300,
+            ),
           ),
-        ),
-        const SizedBox(width: 16.0),
-        OutlineButton(
-            key: MemoryScreen.clearButtonKey,
-            onPressed: controller.memorySource == MemoryController.liveFeed
-                ? _clearTimeline
-                : null,
-            child: const MaterialIconLabel(
-              Icons.block,
-              'Clear',
-              minIncludeTextWidth: 900,
-            )),
-        const SizedBox(width: 16.0),
-        _pruneDropdown(),
-      ],
+          const SizedBox(width: 16.0),
+          OutlineButton(
+              key: MemoryScreen.clearButtonKey,
+              onPressed: controller.memorySource == MemoryController.liveFeed
+                  ? _clearTimeline
+                  : null,
+              child: Label(
+                clearIcon,
+                'Clear',
+                minIncludeTextWidth: 1300,
+              )),
+          const SizedBox(width: 16.0),
+          _pruneDropdown(),
+        ],
+      ),
     );
   }
 
   Widget _rightsideButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        _memorySourceDropdown(),
-        const SizedBox(width: 16.0),
-        OutlineButton(
-          key: MemoryScreen.snapshotButtonKey,
-          onPressed: _snapshot,
-          child: MaterialIconLabel(
-            Icons.camera,
-            'Snapshot',
-            minIncludeTextWidth: 1100,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      // Add a semi-transparent background to the
+      // expand and collapse buttons so they don't interfere
+      // too badly with the tree content when the tree
+      // is narrow.
+      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _memorySourceDropdown(),
+          const SizedBox(width: 16.0),
+          Flexible(
+            child: OutlineButton(
+              key: MemoryScreen.snapshotButtonKey,
+              onPressed: _snapshot,
+              child: Label(
+                memorySnapshot,
+                'Snapshot',
+                minIncludeTextWidth: 1100,
+              ),
+            ),
           ),
-        ),
-        OutlineButton(
-          key: MemoryScreen.resetButtonKey,
-          onPressed: _reset,
-          child: MaterialIconLabel(
-            Icons.settings_backup_restore,
-            'Reset',
-            minIncludeTextWidth: 1100,
+          Flexible(
+            child: OutlineButton(
+              key: MemoryScreen.resetButtonKey,
+              onPressed: _reset,
+              child: Label(
+                memoryReset,
+                'Reset',
+                minIncludeTextWidth: 1100,
+              ),
+            ),
           ),
-        ),
-        OutlineButton(
-          key: MemoryScreen.gcButtonKey,
-          onPressed: _gc,
-          child: MaterialIconLabel(
-            Icons.delete_sweep,
-            'GC',
-            minIncludeTextWidth: 1100,
+          Flexible(
+            child: OutlineButton(
+              key: MemoryScreen.gcButtonKey,
+              onPressed: _gc,
+              child: Label(
+                memoryGC,
+                'GC',
+                minIncludeTextWidth: 1100,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 16.0),
-        OutlineButton(
-          key: MemoryScreen.exportButtonKey,
-          onPressed:
-              controller.offline ? null : controller.memoryLog.exportMemory,
-          child: MaterialIconLabel(
-            Icons.file_download,
-            'Export',
-            minIncludeTextWidth: 1100,
+          const SizedBox(width: 16.0),
+          Flexible(
+            child: OutlineButton(
+              key: MemoryScreen.exportButtonKey,
+              onPressed:
+                  controller.offline ? null : controller.memoryLog.exportMemory,
+              child: Label(
+                exportIcon,
+                'Export',
+                minIncludeTextWidth: 1100,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

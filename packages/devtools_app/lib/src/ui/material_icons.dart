@@ -31,6 +31,21 @@ final DevToolsIcon record = MaterialIcon(
 final DevToolsIcon stop = MaterialIcon('stop', defaultButtonIconColor,
     codePoint: Icons.stop.codePoint);
 
+final DevToolsIcon pauseIcon = MaterialIcon('pause', defaultButtonIconColor,
+    codePoint: Icons.pause.codePoint);
+
+final DevToolsIcon playIcon = MaterialIcon('play', defaultButtonIconColor,
+    codePoint: Icons.play_arrow.codePoint);
+
+final DevToolsIcon memorySnapshot = MaterialIcon('snapshot', defaultButtonIconColor,
+    codePoint: Icons.camera.codePoint);
+
+final DevToolsIcon memoryReset = MaterialIcon('reset', defaultButtonIconColor,
+    codePoint: Icons.settings_backup_restore.codePoint);
+
+final DevToolsIcon memoryGC = MaterialIcon('gc', defaultButtonIconColor,
+    codePoint: Icons.delete_sweep.codePoint);
+
 // TODO(jacobr): remove this class completely once the migration to Flutter
 // desktop is complete and just use Flutter native support for Material icons.
 /// Class for icons consistent with

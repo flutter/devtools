@@ -91,9 +91,10 @@ void main() {
       final memorySources = tester.firstWidget(find.byKey(
         MemoryScreen.memorySourcesKey,
       )) as Text;
+
       expect(
         memorySources.data,
-        '${MemoryScreen.memorySourceMenuItemPrefix}${MemoryController.liveFeed}',
+        '${controller.memorySourcePrefix}${MemoryController.liveFeed}',
       );
     });
 
