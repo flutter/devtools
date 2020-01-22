@@ -276,7 +276,7 @@ class HtmlTimelineScreen extends HtmlScreen {
         timelineFlameChartCanvas.onNodeSelected.listen((node) {
           eventDetails.titleBackgroundColor = node.backgroundColor;
           eventDetails.titleTextColor = node.textColor;
-          timelineController.selectTimelineEvent(node.data);
+          timelineController.htmlSelectTimelineEvent(node.data);
         });
         _setFlameChart(timelineFlameChartCanvas.element);
 
@@ -376,7 +376,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     timelineFlameChartCanvas.onNodeSelected.listen((node) {
       eventDetails.titleBackgroundColor = node.backgroundColor;
       eventDetails.titleTextColor = node.textColor;
-      timelineController.selectTimelineEvent(node.data);
+      timelineController.htmlSelectTimelineEvent(node.data);
     });
     _setFlameChart(timelineFlameChartCanvas.element);
 
