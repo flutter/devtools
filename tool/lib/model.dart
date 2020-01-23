@@ -61,6 +61,10 @@ class DevToolsRepo {
       }
     }
   }
+
+  String readFile(String filePath) {
+    return File(path.join(repoPath, filePath)).readAsStringSync();
+  }
 }
 
 class FlutterSdk {
