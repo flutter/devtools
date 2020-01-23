@@ -854,6 +854,10 @@ class SelectedDataPoint extends LineChartMarker {
     painter.layout();
     painterValues.layout();
 
+    final double avgLineHeight = painter.height /
+        (type == ChartType.DartHeaps
+            ? _titlesDartVmLines
+            : _titlesAndroidLines);
     final Offset pos = calculatePos(
       posX + offset.x,
       posY + offset.y - positionAboveBar,
@@ -877,6 +881,7 @@ class SelectedDataPoint extends LineChartMarker {
       canvas,
       paint,
       pos,
+      avgLineHeight,
     );
 
     // Paint the static text.
@@ -892,12 +897,14 @@ class SelectedDataPoint extends LineChartMarker {
     canvas.restore();
   }
 
-  final String _titlesDartVm = 'Time\n'
+  static const String _titlesDartVm = 'Time\n'
       'Capacity\n'
       'Used\n'
       'External\n'
       'RSS\n'
       'GC';
+
+  final int _titlesDartVmLines = _titlesDartVm.split('\n').length;
 
   // These are the alpha blended values.
   final List<Color> _dartVMColors = [
@@ -906,7 +913,7 @@ class SelectedDataPoint extends LineChartMarker {
     const Color(0xff77aed5), // Light-Blue (External)
   ];
 
-  final String _titlesAndroid = 'Time\n'
+  static const String _titlesAndroid = 'Time\n'
       'Total\n'
       'Other\n'
       'Code\n'
@@ -914,6 +921,8 @@ class SelectedDataPoint extends LineChartMarker {
       'Java Heap\n'
       'Stack\n'
       'Graphics';
+
+  final int _titlesAndroidLines = _titlesAndroid.split('\n').length;
 
   // These are the alpha blended values.
   final List<Color> _androidColors = [
@@ -931,6 +940,7 @@ class SelectedDataPoint extends LineChartMarker {
     Canvas canvas,
     Paint paint,
     Offset pos,
+    double swatchYOffset,
   ) {
     const dashDrawWidth = 4.0;
     const dashSkipWidth = 2.0;
@@ -938,8 +948,7 @@ class SelectedDataPoint extends LineChartMarker {
     const swatchHeight = 8.0;
     const swatchWidth = 10.0;
     const swatchXOffset = 12.0;
-    const swatchYOffset = 11.0;
-    const swatchYHalfOffset = swatchYOffset ~/ 2.0;
+    final swatchYHalfOffset = swatchYOffset ~/ 2.0;
 
     final xOffset = pos.dx - swatchXOffset;
     var yOffset = pos.dy + swatchYOffset + swatchYHalfOffset; // Dashed line
@@ -956,13 +965,13 @@ class SelectedDataPoint extends LineChartMarker {
     canvas.drawLine(p1, p2, paint);
 
     // Color swatches start vertically after time and dashed line entries.
-    yOffset = swatchYOffset * 2 + 1;
+    yOffset = pos.dy + swatchYOffset * 2 + 1;
 
     paint.style = PaintingStyle.fill;
     for (var index = 1; index < colors.length; index++) {
       paint.color = colors[index];
       canvas.drawRect(
-        Rect.fromLTWH(xOffset, pos.dy + yOffset, swatchWidth, swatchHeight),
+        Rect.fromLTWH(xOffset, yOffset, swatchWidth, swatchHeight),
         paint,
       );
       yOffset += swatchYOffset;
