@@ -968,7 +968,7 @@ class SelectedDataPoint extends LineChartMarker {
     canvas.drawLine(p1, p2, paint);
 
     // Color swatches start vertically after time and dashed line entries.
-    yOffset = pos.dy + swatchYOffset * 2 + 1;
+    yOffset = pos.dy + swatchYOffset * 2 + 2;
 
     paint.style = PaintingStyle.fill;
     for (var index = 1; index < colors.length; index++) {
