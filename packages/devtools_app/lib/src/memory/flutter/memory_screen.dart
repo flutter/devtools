@@ -108,7 +108,7 @@ class MemoryBodyState extends State<MemoryBody> {
             axis: Axis.vertical,
             firstChild: _memoryChart,
             secondChild: const Text('Memory Panel TBD capacity'),
-            initialFirstFraction: 0.50,
+            initialFirstFraction: 0.40,
           ),
         ),
       ],
