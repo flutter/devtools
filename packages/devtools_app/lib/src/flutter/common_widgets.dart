@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -138,22 +139,6 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
     color: theme.primaryColorLight,
     fontWeight: FontWeight.w300,
   );
-}
-
-/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
-ErrorReporter showErrorSnackBar(BuildContext context) {
-  return (String title, dynamic error) {
-    // TODO: This is a workaround - need to fix
-    // https://github.com/flutter/devtools/issues/1369.
-    SchedulerBinding.instance.scheduleTask(
-      () => Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(title),
-        ),
-      ),
-      Priority.idle,
-    );
-  };
 }
 
 /// Button to clear data in the UI.
@@ -296,3 +281,8 @@ Widget recordingInfo({
     child: recording ? recordingStatus : recordingInstructions,
   );
 }
+
+/// The golden ratio.
+///
+/// Makes for nice-looking rectangles.
+final goldenRatio = 1 + sqrt(5) / 2;

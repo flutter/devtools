@@ -11,6 +11,7 @@ import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
+import 'notifications.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -127,7 +128,9 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: showErrorSnackBar(context),
+      errorReporter: (message, error) {
+        Notifications.of(context).push('$message $error');
+      },
     );
     if (connected) {
       unawaited(
@@ -135,6 +138,14 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           context,
           routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
         ),
+      );
+      Notifications.of(context).push(
+        'Successfully connected to the VM Service at "$uri"',
+      );
+    } else if (uri == null) {
+      Notifications.of(context).push(
+        'Failed to connect to the VM Service at "${controller.text}".\n'
+        'The link was not valid.',
       );
     }
   }

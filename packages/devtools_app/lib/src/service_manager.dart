@@ -124,6 +124,7 @@ class ServiceConnectionManager {
     }
 
     this.service = service;
+
     serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
