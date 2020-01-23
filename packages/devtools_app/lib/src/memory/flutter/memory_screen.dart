@@ -108,7 +108,7 @@ class MemoryBodyState extends State<MemoryBody> {
             axis: Axis.vertical,
             firstChild: _memoryChart,
             secondChild: const Text('Memory Panel TBD capacity'),
-            initialFirstFraction: 0.25,
+            initialFirstFraction: 0.50,
           ),
         ),
       ],
@@ -160,17 +160,26 @@ class MemoryBodyState extends State<MemoryBody> {
   Widget _memorySourceDropdown() {
     final files = controller.memoryLog.offlineFiles();
 
+    // Can we display dropdowns in verbose mode?
+    final isVerbose = controller.memorySourcePrefix ==
+        MemoryScreen.memorySourceMenuItemPrefix;
+
     // First item is 'Live Feed', then followed by memory log filenames.
     files.insert(0, MemoryController.liveFeed);
 
     final allMemorySources = files.map<DropdownMenuItem<String>>((
       String value,
     ) {
+      // If narrow width compact the displayed name (remove prefix 'memory_log_').
+      final displayValue =
+          (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
+              ? value.substring(MemoryController.logFilenamePrefix.length)
+              : value;
       return DropdownMenuItem<String>(
         key: MemoryScreen.memorySourcesMenuItem,
         value: value,
         child: Text(
-          '${controller.memorySourcePrefix}$value',
+          '${controller.memorySourcePrefix}$displayValue',
           key: MemoryScreen.memorySourcesKey,
         ),
       );

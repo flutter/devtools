@@ -34,16 +34,16 @@ final DevToolsIcon stop = MaterialIcon('stop', defaultButtonIconColor,
 final DevToolsIcon pauseIcon = MaterialIcon('pause', defaultButtonIconColor,
     codePoint: Icons.pause.codePoint);
 
-final DevToolsIcon playIcon = MaterialIcon('play', defaultButtonIconColor,
+final DevToolsIcon playIcon = MaterialIcon('play_arrow', defaultButtonIconColor,
     codePoint: Icons.play_arrow.codePoint);
 
-final DevToolsIcon memorySnapshot = MaterialIcon('snapshot', defaultButtonIconColor,
+final DevToolsIcon memorySnapshot = MaterialIcon('camera', defaultButtonIconColor,
     codePoint: Icons.camera.codePoint);
 
-final DevToolsIcon memoryReset = MaterialIcon('reset', defaultButtonIconColor,
+final DevToolsIcon memoryReset = MaterialIcon('settings_backup_restore', defaultButtonIconColor,
     codePoint: Icons.settings_backup_restore.codePoint);
 
-final DevToolsIcon memoryGC = MaterialIcon('gc', defaultButtonIconColor,
+final DevToolsIcon memoryGC = MaterialIcon('delete_sweep', defaultButtonIconColor,
     codePoint: Icons.delete_sweep.codePoint);
 
 // TODO(jacobr): remove this class completely once the migration to Flutter

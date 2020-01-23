@@ -54,13 +54,7 @@ class MemoryController extends DisposableController
 
   static const String liveFeed = 'Live Feed';
 
-  String _memorySourcePrefix;
-
-  set memorySourcePrefix(String prefix) {
-    _memorySourcePrefix = prefix;
-  }
-
-  String get memorySourcePrefix => _memorySourcePrefix;
+  String memorySourcePrefix;
 
   /// Notifies that the source of the memory feed has changed.
   ValueListenable get memorySourceNotifier => _memorySourceNotifier;
