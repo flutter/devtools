@@ -854,6 +854,9 @@ class SelectedDataPoint extends LineChartMarker {
     painter.layout();
     painterValues.layout();
 
+    // Compute avg text line height from the painter's height
+    // of the marker text after layout, divided by # of lines
+    // in the TextPainter.
     final double avgLineHeight = painter.height /
         (type == ChartType.DartHeaps
             ? _titlesDartVmLines
