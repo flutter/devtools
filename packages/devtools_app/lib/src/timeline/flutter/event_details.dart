@@ -181,7 +181,7 @@ class EventSummary extends StatelessWidget {
     return Text(
       formattedArgs.replaceAll('"', ''),
       // TODO(kenz): make monospace font work for flutter desktop.
-      style: const TextStyle(fontFamily: 'monospace'),
+      style: const TextStyle(fontFamily: 'RobotoMono'),
     );
   }
 }

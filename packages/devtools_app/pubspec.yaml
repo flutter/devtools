@@ -105,8 +105,6 @@ flutter:
     - assets/img/layout_explorer/main_axis_alignment/
     - assets/img/layout_explorer/cross_axis_alignment/
 
-  # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
-  # TODO(https://github.com/flutter/devtools/issues/1339): Include a monospaced font.
   fonts:
     - family: Roboto
       fonts:
@@ -122,6 +120,18 @@ flutter:
           weight: 700
         - asset: fonts/Roboto/Roboto-Black.ttf
           weight: 900
+    - family: RobotoMono
+      fonts:
+        - asset: fonts/Roboto_Mono/RobotoMono-Thin.ttf
+          weight: 100
+        - asset: fonts/Roboto_Mono/RobotoMono-Light.ttf
+          weight: 300
+        - asset: fonts/Roboto_Mono/RobotoMono-Regular.ttf
+          weight: 400
+        - asset: fonts/Roboto_Mono/RobotoMono-Medium.ttf
+          weight: 500
+        - asset: fonts/Roboto_Mono/RobotoMono-Bold.ttf
+          weight: 700
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
