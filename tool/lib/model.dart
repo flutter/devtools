@@ -26,8 +26,16 @@ class DevToolsRepo {
 
   List<Package> getPackages() {
     final result = <Package>[];
+    final repoDir = Directory(repoPath);
 
-    _collectPackages(Directory(repoPath), result);
+    // For the first level of packages, ignore any directory named 'flutter'.
+    for (FileSystemEntity entity in repoDir.listSync()) {
+      final name = path.basename(entity.path);
+      if (entity is Directory && name != 'flutter' && !name.startsWith('.')) {
+        _collectPackages(entity, result);
+      }
+    }
+
     result.sort((a, b) => a.packagePath.compareTo(b.packagePath));
 
     return result;

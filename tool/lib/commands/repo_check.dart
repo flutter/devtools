@@ -81,7 +81,7 @@ class DevToolsVersionCheck extends Check {
           'these need to be kept in sync.';
     }
 
-    print('  version $pubspecVersion.');
+    print('  version $pubspecVersion');
 
     return Future.value();
   }
