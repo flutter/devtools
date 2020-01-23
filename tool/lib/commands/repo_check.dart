@@ -29,7 +29,7 @@ class RepoCheckCommand extends Command {
     int failureCount = 0;
 
     for (var check in checks) {
-      print('\nchecking ${check.name}');
+      print('\nchecking ${check.name}:');
 
       try {
         await check.performCheck(repo);
@@ -81,7 +81,7 @@ class DevToolsVersionCheck extends Check {
           'these need to be kept in sync.';
     }
 
-    print('DevTools version $pubspecVersion.');
+    print('  version $pubspecVersion.');
 
     return Future.value();
   }
