@@ -35,7 +35,7 @@ void main() {
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
-  const windowSize = Size(1599.0, 1000.0);
+  const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
     setUp(() async {
