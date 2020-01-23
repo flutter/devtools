@@ -56,7 +56,6 @@ const RegisteredServiceDescription flutterMemory =
   icon: FlutterIcons.flutter,
 );
 
-
 const flutterListViews = '_flutter.listViews';
 
 const displayRefreshRate = '_flutter.getDisplayRefreshRate';
