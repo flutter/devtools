@@ -21,4 +21,3 @@ for an overview of how to build and contribute to the project.
 ## Terms and Privacy
 
 By using Dart DevTools, you agree to the [Google Terms of Service](https://policies.google.com/terms).
-
