@@ -62,13 +62,13 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           children: [
             Text(
               'Connect',
-              style: textTheme.headline,
+              style: textTheme.headline5,
               key: const Key('Connect Title'),
             ),
             const PaddedDivider(),
             Text(
               'Connect to a Running App',
-              style: textTheme.body2,
+              style: textTheme.bodyText1,
             ),
             Text(
               'Enter a URL to a running Dart or Flutter application',
@@ -83,7 +83,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
         Center(
           child: Text(
             'Version ${devtools.version}',
-            style: textTheme.subhead,
+            style: textTheme.subtitle1,
           ),
         )
       ],
