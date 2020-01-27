@@ -20,6 +20,7 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
   static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
+  static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
   // When content of the selected tab from thee tab controller has this key,
   // we will not show the expand/collapse buttons.
@@ -112,7 +113,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     } else {
       // If [data] is null, CPU profile data is being processed, so return a
       // placeholder.
-      return const SizedBox();
+      return const SizedBox(key: CpuProfiler.dataProcessingKey);
     }
   }
 
