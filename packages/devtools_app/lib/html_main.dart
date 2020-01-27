@@ -65,11 +65,12 @@ void main() {
         return;
       }
 
-      // Show the Q3 DevTools survey. Stop showing the survey after
-      // November 14, 2019 (4 weeks after the survey start date
-      // October 17, 2019).
-      final surveyThresholdDate = DateTime(2019, 11, 14);
-      if (DateTime.now().isBefore(surveyThresholdDate)) {
+      // Show the Q1 DevTools survey. Stop showing the survey after March 9,
+      // 2020 (4 weeks after the survey start date February 10, 2020).
+      final surveyStartDate = DateTime(2020, 2, 10);
+      final surveyEndDate = DateTime(2020, 3, 9);
+      final now = DateTime.now();
+      if (now.isAfter(surveyStartDate) && now.isBefore(surveyEndDate)) {
         // Do not show the survey if the user has either taken or dismissed it.
         if (!await ga.isSurveyActionTaken) {
           // Stop showing the survey toast after 5 times without action.
@@ -121,7 +122,7 @@ Future<String> _generateSurveyUrl() async {
   final surveyUri = Uri(
     scheme: 'https',
     host: 'google.qualtrics.com',
-    path: 'jfe/form/SV_dcfOyXRTiB1qowl',
+    path: 'jfe/form/SV_9XDmbo8lhv0VaUl',
     queryParameters: {
       clientIdKey: clientId,
       ideKey: ideValue,
