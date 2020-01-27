@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'ui/icons.dart';
-import 'ui/material_icons.dart';
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
@@ -53,7 +52,8 @@ const RegisteredServiceDescription flutterVersion =
 RegisteredServiceDescription flutterMemory = RegisteredServiceDescription._(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
-  icon: memoryIcon,
+  // TODO(terry): Better icon - package or memory looking for now snapshop is memory.
+  icon: FlutterIcons.snapshot,
 );
 
 const flutterListViews = '_flutter.listViews';

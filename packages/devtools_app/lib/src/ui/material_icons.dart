@@ -6,8 +6,6 @@ library material_icons;
 
 import 'package:meta/meta.dart';
 
-import '../../src/flutter/octicons.dart';
-
 import 'fake_flutter/fake_flutter.dart' hide required;
 import 'icons.dart';
 import 'theme.dart';
@@ -38,9 +36,6 @@ final DevToolsIcon pauseIcon = MaterialIcon('pause', defaultButtonIconColor,
 
 final DevToolsIcon playIcon = MaterialIcon('play_arrow', defaultButtonIconColor,
     codePoint: Icons.play_arrow.codePoint);
-
-final DevToolsIcon memoryIcon = MaterialIcon('package', defaultButtonIconColor,
-    codePoint: Octicons.package.codePoint);
 
 final DevToolsIcon memorySnapshot = MaterialIcon(
     'camera', defaultButtonIconColor,
