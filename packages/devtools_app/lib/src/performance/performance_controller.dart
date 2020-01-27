@@ -10,7 +10,7 @@ import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 
 class PerformanceController {
-  final CpuProfilerController cpuProfilerController = CpuProfilerController();
+  final cpuProfilerController = CpuProfilerController();
 
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
