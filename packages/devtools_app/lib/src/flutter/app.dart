@@ -89,7 +89,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           child: Center(
             child: Text(
               'Sorry, $uri was not found.',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline4,
             ),
           ),
         );

@@ -31,7 +31,7 @@
               │   ▶renderObject: _RenderInkFeatures#00000
               └─▼[/icons/inspector/resume.png]AnimatedDefaultTextStyle
                 │   duration: 200ms
-                │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
+                │   debugLabel: (englishLike body1 2014).merge(blackMountainView bodyText2)
                 │   inherit: false
                 │   color: [#000000dd]#00000000
                 │   family: Roboto
@@ -43,7 +43,7 @@
                 │   overflow: clip
                 │   ▶state: _AnimatedDefaultTextStyleState#00000(ticker inactive)
                 └─▼[/icons/inspector/textArea.png]DefaultTextStyle
-                  │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
+                  │   debugLabel: (englishLike body1 2014).merge(blackMountainView bodyText2)
                   │   inherit: false
                   │   color: [#000000dd]#00000000
                   │   family: Roboto
