@@ -110,10 +110,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               children: _buildProfilerViews(),
             );
     } else {
-      // If [data] is null, CPU profile data is being processed.
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      // If [data] is null, CPU profile data is being processed, so return a
+      // placeholder.
+      return const SizedBox();
     }
   }
 

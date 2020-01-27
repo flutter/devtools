@@ -193,7 +193,7 @@ class HtmlFramework {
     navigateTo(timelineScreenId);
 
     await timelineScreen.prepareViewForOfflineData(timelineMode);
-    timelineScreen.timelineController.loadOfflineData(offlineData);
+    await timelineScreen.timelineController.loadOfflineData(offlineData);
   }
 
   void _enterOfflineMode() {

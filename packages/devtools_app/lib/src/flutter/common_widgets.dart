@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
@@ -233,9 +234,12 @@ StatelessWidget pauseButton({
 
 Widget recordingInfo({
   Key instructionsKey,
-  Key statusKey,
+  Key recordingStatusKey,
+  Key processingStatusKey,
   @required bool recording,
   @required String recordedObject,
+  @required bool processing,
+  double progressValue,
   bool isPause = false,
 }) {
   final stopOrPauseRow = Row(
@@ -268,7 +272,7 @@ Widget recordingInfo({
     ],
   );
   final recordingStatus = Column(
-    key: statusKey,
+    key: recordingStatusKey,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
@@ -276,9 +280,46 @@ Widget recordingInfo({
       const CircularProgressIndicator(),
     ],
   );
+  final processingStatus = processingInfo(
+    key: processingStatusKey,
+    progressValue: progressValue,
+    processedObject: recordedObject,
+  );
 
+  Widget child;
+  if (processing) {
+    child = processingStatus;
+  } else if (recording) {
+    child = recordingStatus;
+  } else {
+    child = recordingInstructions;
+  }
   return Center(
-    child: recording ? recordingStatus : recordingInstructions,
+    child: child,
+  );
+}
+
+Widget processingInfo({
+  Key key,
+  @required double progressValue,
+  @required String processedObject,
+}) {
+  return Center(
+    child: Column(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Processing $processedObject'),
+        const SizedBox(height: 16.0),
+        SizedBox(
+          width: 200.0,
+          height: 16.0,
+          child: LinearProgressIndicator(
+            value: progressValue,
+          ),
+        ),
+      ],
+    ),
   );
 }
 
