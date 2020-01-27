@@ -49,7 +49,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   @visibleForTesting
   static const androidChartButtonKey = Key('Android Chart');
 
-  LineChartController chartController;
+  LineChartController dartChartController;
 
   MemoryController controller;
 
@@ -60,10 +60,10 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   void initState() {
-    _initChartController();
+    _setupDartChartController();
 
     // Setup for Flutter Engine chart (Android ADB dumpsys meminfo).
-    _setupEngineChartController();
+    _setupAndroidChartController();
 
     _preloadResources();
 
@@ -76,8 +76,13 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
     controller = Controllers.of(context).memory;
 
-    _setupChart();
-    _setupEngineChartData();
+    // Hookup access to the MemoryController when a data point is clicked
+    // in a chart.
+    _selectedDartChart?.memoryController = controller;
+    _selectedAndroidChart?.memoryController = controller;
+
+    _setupDartChartData();
+    _setupAndroidChartData();
 
     cancel();
 
@@ -85,46 +90,21 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     addAutoDisposeListener(controller.memorySourceNotifier, () {
       setState(() {
         controller.updatedMemorySource();
-
-        // Reset all plotted data sets (Entries).
-        controller.memoryTimeline.chartData.reset();
-        controller.memoryTimeline.engineChartData.reset();
-
-        if (controller.offline) {
-          _recomputeOfflineData();
-          controller.memoryTimeline.chartData.reset();
-          controller.memoryTimeline.engineChartData.reset();
-          _processAndUpdate();
-        } else {
-          // Recompute data to display.
-          _recomputeChartData();
-
-          // Plot all offline or online data (based on memorySource).  If
-          // not offline then all new heap samples will be plotted as it
-          // appears via the sampleAddedNotifier and update all charts.
-          _processAndUpdate();
-        }
+        _refreshCharts();
       });
     });
 
     // Display charts of the data collected in the last n Minutes or all.
     addAutoDisposeListener(controller.displayIntervalNotifier, () {
-      // Reset all plotted data sets (Entries).
-      controller.memoryTimeline.chartData.reset();
-      controller.memoryTimeline.engineChartData.reset();
+      _refreshCharts();
+    });
 
-      if (controller.offline) {
-        _recomputeOfflineData();
-        controller.memoryTimeline.chartData.reset();
-        controller.memoryTimeline.engineChartData.reset();
-        _processAndUpdate();
-      } else {
-        // Recompute data to display.
-        _recomputeChartData();
+    addAutoDisposeListener(memoryTimeline.markerHiddenNotifier, () {
+      controller.setSelectedSample(ChartType.DartHeaps, null);
+      hideMarkers(ChartType.DartHeaps);
 
-        // Process and plot data in this new display interval.
-        _processAndUpdate();
-      }
+      controller.setSelectedSample(ChartType.AndroidHeaps, null);
+      hideMarkers(ChartType.AndroidHeaps);
     });
 
     // Plot each heap sample as it is received.
@@ -137,6 +117,26 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     );
   }
 
+  void _refreshCharts() {
+    // Reset all plotted data sets (Entries).
+    controller.memoryTimeline.dartChartData.reset();
+    controller.memoryTimeline.androidChartData.reset();
+
+    if (controller.offline) {
+      _recomputeOfflineData();
+      controller.memoryTimeline.dartChartData.reset();
+      controller.memoryTimeline.androidChartData.reset();
+    } else {
+      // Recompute data to display.
+      _recomputeChartData();
+    }
+
+    // Plot all offline or online data (based on memorySource).  If
+    // not offline then all new heap samples will be plotted as it
+    // appears via the sampleAddedNotifier and update all charts.
+    _processAndUpdate();
+  }
+
   dart_ui.Image _img;
 
   void _preloadResources() async {
@@ -145,16 +145,19 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   Slider _timelineSlider;
 
+  SelectedDataPoint _selectedDartChart;
+  SelectedDataPoint _selectedAndroidChart;
+
   /// Compute increments for slider and lables for slider increments based on the
   /// current display interval time period.
   String timelineSliderLabel(double value) {
     if (value == 0)
       return 'Starting Time';
-    else if (value == controller.numberOfChunks) return 'Ending Time';
+    else if (value == controller.numberOfStops) return 'Ending Time';
 
-    var unitsAgo = controller.numberOfChunks - value;
+    var unitsAgo = controller.numberOfStops - value;
 
-    switch (controller.pruneInterval) {
+    switch (controller.displayInterval) {
       case MemoryController.displayOneMinute:
         unitsAgo = unitsAgo;
         break;
@@ -169,112 +172,116 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     return '$unitsAgo Minute${unitsAgo != 1 ? 's' : ''} Ago';
   }
 
+  Slider createTimelineSlider() => Slider.adaptive(
+        label: timelineSliderLabel(controller.sliderValue),
+        activeColor: Colors.indigoAccent,
+        min: 0.0,
+        max: controller.numberOfStops.toDouble(),
+        inactiveColor: Colors.grey,
+        onChanged: controller.numberOfStops > 0
+            ? (newValue) {
+                final newChunk = newValue.roundToDouble();
+                setState(() {
+                  controller.sliderValue = newChunk;
+                  // TODO(terry): Compute:
+                  //    startingIndex = sliderValue * controller.intervalDurationInMs
+                });
+              }
+            : null,
+        value: controller.sliderValue,
+        divisions: controller.numberOfStops,
+      );
+
+  OutlineButton createToggleAdbMemoryButton() => OutlineButton(
+        key: MemoryChartState.androidChartButtonKey,
+        onPressed: controller.isConnectedDeviceAndroid
+            ? _toggleAndroidChartVisibility
+            : null,
+        child: MaterialIconLabel(
+          controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
+          'Android Memory',
+          minIncludeTextWidth: 900,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
+    if (memoryTimeline.liveData.isEmpty)
+      return const Center(child: Text('No data'));
+
     controller.memoryTimeline.image = _img;
 
-    final androidMemoryButton = MaterialIconLabel(
-      controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-      'Android Memory',
-      minIncludeTextWidth: 900,
-    );
-
-    final chunks = controller.computeChunks();
-    if (chunks != controller.numberOfChunks) {
-      // TODO(terry): Need to stay on the same chunk as more chunks arrive.
+    // Compute number of stops for the timeline slider.
+    final stops = controller.computeStops();
+    if (stops != controller.numberOfStops) {
+      // TODO(terry): Need to stay on the same stop as more stops created.
       // Move reset to last?
-      controller.sliderValue = chunks.toDouble();
+      controller.sliderValue = stops.toDouble();
     }
-    controller.numberOfChunks = chunks;
+    controller.numberOfStops = stops;
 
-    _timelineSlider = Slider.adaptive(
-      label: timelineSliderLabel(controller.sliderValue),
-      activeColor: Colors.indigoAccent,
-      min: 0.0,
-      max: controller.numberOfChunks.toDouble(),
-      inactiveColor: Colors.grey,
-      onChanged: controller.numberOfChunks > 0
-          ? (newValue) {
-              final newChunk = newValue.roundToDouble();
-              setState(() {
-                controller.sliderValue = newChunk;
-                // TODO(terry): Compute:
-                //    startingIndex = sliderValue * controller.pruneIntervalDurationInMs
-              });
-            }
-          : null,
-      value: controller.sliderValue,
-      divisions: controller.numberOfChunks,
-    );
+    _timelineSlider = createTimelineSlider();
 
-    if (memoryTimeline.liveData.isNotEmpty) {
-      return Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 10, 0, 5),
-              child: Text('Flutter Framework Heap'),
+    const edgeSpacing = EdgeInsets.fromLTRB(20, 10, 0, 5);
+
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Padding(
+          padding: edgeSpacing,
+          child: Text('Flutter Framework Heap'),
+        ),
+        Expanded(
+          child: LineChart(dartChartController),
+          flex: 1,
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: edgeSpacing,
+              child: createToggleAdbMemoryButton(),
             ),
             Expanded(
-              child: LineChart(chartController),
+              child: _timelineSlider,
               flex: 1,
             ),
-            Row(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 0, 5),
-                child: OutlineButton(
-                  key: MemoryChartState.androidChartButtonKey,
-                  onPressed: controller.isConnectedDeviceAndroid
-                      ? _toggleAndroidChart
-                      : null,
-                  child: androidMemoryButton,
-                ),
-              ),
-              Expanded(
-                child: _timelineSlider,
+            const Text('Time Range')
+          ],
+        ),
+        controller.isAndroidChartVisible
+            ? Expanded(
+                child: LineChart(androidChartController),
                 flex: 1,
+              )
+            : const Padding(
+                padding: edgeSpacing,
+                child: Text(''),
               ),
-              const Text('Time Range')
-            ]),
-            controller.isAndroidChartVisible
-                ? Expanded(
-                    child: LineChart(engineChartController),
-                    flex: 1,
-                  )
-                : const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 10, 0, 5),
-                    child: Text(''),
-                  ),
-          ]);
-    }
-
-    return const Center(
-      child: Text('No data'),
+      ],
     );
   }
 
-  void _toggleAndroidChart() {
-    // TODO(terry): Implement real pause when connected to live feed.
-    controller.toggleAndroidChart();
-    setState(() {});
+  void _toggleAndroidChartVisibility() {
+    setState(() {
+      controller.toggleAndroidChartVisibility();
+    });
   }
 
-  void _initChartController() {
+  void _setupDartChartController() {
     final desc = Description()..enabled = false;
-    final selectedMarker = SelectedDataPoint(
+    _selectedDartChart = SelectedDataPoint(
       ChartType.DartHeaps,
-      onSelected: onPointSelected,
-      getAllValues: getValues,
+      getSelectedSampleValue: getDartSelectedSample,
     );
 
-    chartController = LineChartController(
+    dartChartController = LineChartController(
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..position = YAxisLabelPosition.OUTSIDE_CHART
           ..setValueFormatter(LargeValueFormatter())
-          ..drawGridLines = (true)
-          ..granularityEnabled = (true)
+          ..drawGridLines = true
+          ..granularityEnabled = true
           ..setStartAtZero(
               true) // Set to baseline min and auto track max axis range.
           ..textColor = defaultForeground;
@@ -320,33 +327,32 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       scaleYEnabled: true,
       pinchZoomEnabled: false,
       description: desc,
-      marker: selectedMarker,
-      selectionListener: MySelectionListener(selectedMarker),
+      marker: _selectedDartChart,
+      selectionListener: DataPointSelectedistener(_selectedDartChart),
     );
 
     // Compute padding around chart.
-    chartController.setViewPortOffsets(50, 20, 10, 0);
+    dartChartController.setViewPortOffsets(50, 20, 10, 0);
   }
 
   /// Plots the Android ADB memory info (Flutter Engine).
-  LineChartController engineChartController;
+  LineChartController androidChartController;
 
-  void _setupEngineChartController() {
+  void _setupAndroidChartController() {
     final desc = Description()..enabled = false;
-    final selectedMarker = SelectedDataPoint(
+    _selectedAndroidChart = SelectedDataPoint(
       ChartType.AndroidHeaps,
-      onSelected: onPointSelected,
-      getAllValues: getValues,
+      getSelectedSampleValue: getAndroidSelectedSample,
     );
-    engineChartController = LineChartController(
+    androidChartController = LineChartController(
       axisLeftSettingFunction: (axisLeft, controller) {
         axisLeft
           ..position = YAxisLabelPosition.OUTSIDE_CHART
           ..setValueFormatter(LargeValueFormatter())
-          ..drawGridLines = (true)
-          ..granularityEnabled = (true)
-          ..setStartAtZero(
-              true) // Set to baseline min and auto track max axis range.
+          ..drawGridLines = true
+          ..granularityEnabled = true
+          // Set to baseline min and auto track max axis range.
+          ..setStartAtZero(true)
           ..textColor = defaultForeground;
       },
       axisRightSettingFunction: (axisRight, controller) {
@@ -384,18 +390,18 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       drawGridBackground: false,
       dragXEnabled: true,
       dragYEnabled: true,
-      // TOD(terry): For now disable zoom via double-click. Consider +/- button
+      // TOD(terry): Disable zoom via double-click. Consider +/- button
       //             for a controlled zoom in/zoom out.
       scaleXEnabled: false,
       scaleYEnabled: false,
       pinchZoomEnabled: false,
       description: desc,
-      marker: selectedMarker,
-      selectionListener: MySelectionListener(selectedMarker),
+      marker: _selectedAndroidChart,
+      selectionListener: DataPointSelectedistener(_selectedAndroidChart),
     );
 
     // Compute padding around chart.
-    engineChartController.setViewPortOffsets(50, 0, 10, 30);
+    androidChartController.setViewPortOffsets(50, 0, 10, 30);
   }
 
   void _setupTrace(LineDataSet traceSet, Color color, int alpha) {
@@ -413,34 +419,34 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(alpha);
   }
 
-  void _setupEngineChartData() {
-    final engineChartData = memoryTimeline.engineChartData;
+  void _setupAndroidChartData() {
+    final androidChartData = memoryTimeline.androidChartData;
 
-    stackSizeSet = LineDataSet(engineChartData.stack, 'Stack');
+    stackSizeSet = LineDataSet(androidChartData.stack, 'Stack');
     _setupTrace(stackSizeSet, ColorUtils.WHITE, 220);
 
-    graphicsSizeSet = LineDataSet(engineChartData.graphics, 'Graphics');
+    graphicsSizeSet = LineDataSet(androidChartData.graphics, 'Graphics');
     _setupTrace(graphicsSizeSet, ColorUtils.HOLO_ORANGE_DARK, 180);
 
     // Create Native Heap dataset.
-    nativeHeapSet = LineDataSet(engineChartData.nativeHeap, 'Native Heap');
+    nativeHeapSet = LineDataSet(androidChartData.nativeHeap, 'Native Heap');
     _setupTrace(nativeHeapSet, ColorUtils.HOLO_BLUE_LIGHT, 140);
     nativeHeapSet.setDrawIcons(true);
 
-    javaHeapSet = LineDataSet(engineChartData.javaHeap, 'Java Heap');
+    javaHeapSet = LineDataSet(androidChartData.javaHeap, 'Java Heap');
     _setupTrace(javaHeapSet, ColorUtils.YELLOW, 100);
 
-    codeSizeSet = LineDataSet(engineChartData.code, 'Code');
+    codeSizeSet = LineDataSet(androidChartData.code, 'Code');
     _setupTrace(codeSizeSet, ColorUtils.GRAY, 80);
 
-    otherSizeSet = LineDataSet(engineChartData.other, 'Other');
+    otherSizeSet = LineDataSet(androidChartData.other, 'Other');
     _setupTrace(otherSizeSet, ColorUtils.HOLO_PURPLE, 40);
 
     /// TODO(terry): The last trace combine system and other.
-    systemSizeSet = LineDataSet(engineChartData.system, 'System');
+    systemSizeSet = LineDataSet(androidChartData.system, 'System');
     _setupTrace(systemSizeSet, ColorUtils.HOLO_GREEN_DARK, 0);
 
-    totalSizeSet = LineDataSet(engineChartData.total, 'Total')
+    totalSizeSet = LineDataSet(androidChartData.total, 'Total')
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(ColorUtils.LTGRAY)
       ..setValueTextColor(ColorUtils.LTGRAY)
@@ -453,100 +459,85 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setDrawCircleHole(false);
 
     // Create a data object with all the data sets.
-    chartController.data = LineData.fromList(
-      []
-        ..add(javaHeapSet)
-        ..add(nativeHeapSet)
-        ..add(codeSizeSet)
-        ..add(stackSizeSet)
-        ..add(graphicsSizeSet)
-        ..add(otherSizeSet)
-        ..add(systemSizeSet)
-        ..add(totalSizeSet),
+    androidChartController.data = LineData.fromList(
+      [
+        javaHeapSet,
+        nativeHeapSet,
+        codeSizeSet,
+        stackSizeSet,
+        graphicsSizeSet,
+        otherSizeSet,
+        systemSizeSet,
+        totalSizeSet,
+      ],
     );
 
-    chartController.data
+    androidChartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())
       ..setValueTextSize(9);
   }
 
-  // Trace #1 Java Heap.
+  /// Trace #1 Java Heap.
   LineDataSet javaHeapSet;
 
-  // Trace #2 Native Heap.
+  /// Trace #2 Native Heap.
   LineDataSet nativeHeapSet;
 
-  // Trace #3 Code Size.
+  /// Trace #3 Code Size.
   LineDataSet codeSizeSet;
 
-  // Trace #4 Stack Size.
+  /// Trace #4 Stack Size.
   LineDataSet stackSizeSet;
 
-  // Trace #5 Graphics Size.
+  /// Trace #5 Graphics Size.
   LineDataSet graphicsSizeSet;
 
-  // Trace #6 Other Size.
+  /// Trace #6 Other Size.
   LineDataSet otherSizeSet;
 
-  // Trace #7 System Size.
+  /// Trace #7 System Size.
   LineDataSet systemSizeSet;
 
-  // Trace #8 Total Size.
+  /// Trace #8 Total Size.
   LineDataSet totalSizeSet;
 
-  /// When point selected e.g., LineChartMarker find the HeapSample.
-  void onPointSelected(int xValueTimestamp) {
-    if (controller.selectedSample?.timestamp != xValueTimestamp) {
-      controller.selectedSample = null;
+  /// Get the HeapSample that is selected for the Dart chart.
+  HeapSample getDartSelectedSample(int timestamp) =>
+      _getValues(ChartType.DartHeaps, timestamp);
 
-      final data = controller.memoryTimeline.data;
-      for (var index = 0; index < data.length; index++) {
-        if (data[index].timestamp == xValueTimestamp) {
-          controller.selectedSample = data[index];
-        }
-      }
-    }
-  }
+  /// Get the HeapSample that is selected for the Android chart.
+  HeapSample getAndroidSelectedSample(int timestamp) =>
+      _getValues(ChartType.AndroidHeaps, timestamp);
 
-  HeapSample getValues(int timestamp) {
-    final data = controller.memoryTimeline.data;
+  HeapSample _getValues(ChartType type, int timestamp) {
     final start = controller.memoryTimeline.startingIndex;
 
-    // Is the marker being displayed in the visible range?
-    if (timestamp > data[start].timestamp) {
-      if (controller.selectedSample?.timestamp == timestamp)
-        return controller.selectedSample;
-
-      controller.selectedSample = null;
-
-      for (var index = 0; index < data.length; index++) {
-        if (data[index].timestamp == timestamp) {
-          controller.selectedSample = data[index];
-          break;
-        }
-      }
-    } else {
-      // Marker no longer in visible range.
-      controller.selectedSample = null;
-      // TODO(terry): BUG in MP chart / Dart bug unable to unselect the highlighted values.
-      // Failure in method drawMarkers in lib/mp/painter/painter.dart @ the line
-      //
-      //      for (int i = 0; i < _indicesToHighlight.length; i++) {
-      //
-      // This line shouldn't execute  _indicesToHighlight is null, first line in drawMarkers
-      // below should cause return
-      //
-      //   if (_marker == null || !_drawMarkers || !valuesToHighlight()) return;
-      //
-      // For some reason valuesToHightlight() isn't false, however, valuesToHighlight
-      // seems correct.
-      //
-      // Below line should be:
-      //    chartController.painter.highlightValues(null);
-      chartController.painter.highlightValues([]);
+    // Is this sample still in the visible range?
+    if (timestamp < controller.memoryTimeline.data[start].timestamp) {
+      // No, remove the selection.
+      controller.setSelectedSample(type, null);
     }
 
-    return controller.selectedSample;
+    if (controller.getSelectedSample(type) == null) {
+      hideMarkers(type);
+    }
+
+    final currentSelection = controller.getSelectedSample(type);
+    assert(currentSelection != null
+        ? currentSelection.timestamp == timestamp
+        : true);
+    return currentSelection;
+  }
+
+  void hideMarkers(ChartType type) {
+    switch (type) {
+      case ChartType.DartHeaps:
+        dartChartController.painter?.highlightValues([null]);
+        break;
+      case ChartType.AndroidHeaps:
+        androidChartController?.painter?.highlightValues([null]);
+        break;
+    }
   }
 
   @override
@@ -573,7 +564,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       controller.processData(reloadAllData);
 
       // Display all charts with the new data.
-      _updateCharts();
+      _updateAllCharts();
     });
   }
 
@@ -582,7 +573,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       controller.recomputeOfflineData();
 
       // Display all charts with the new data.
-      _updateCharts();
+      _updateAllCharts();
     });
   }
 
@@ -595,11 +586,14 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   }
 
   /// Display any newly received heap sample(s) in the chart.
-  void _updateCharts() {
+  void _updateAllCharts() {
     setState(() {
       // Update Dart VM chart datasets.
-      chartController.data = LineData.fromList(
-          []..add(usedHeapSet)..add(externalMemorySet)..add(capacityHeapSet));
+      dartChartController.data = LineData.fromList([
+        usedHeapSet,
+        externalMemorySet,
+        capacityHeapSet,
+      ]);
 
       // Received new samples ready to plot, signal data has changed.
       usedHeapSet.notifyDataSetChanged();
@@ -607,15 +601,16 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       externalMemorySet.notifyDataSetChanged();
 
       // Update Android Memory chart datasets.
-      engineChartController.data = LineData.fromList([]
-        ..add(javaHeapSet)
-        ..add(nativeHeapSet)
-        ..add(codeSizeSet)
-        ..add(stackSizeSet)
-        ..add(graphicsSizeSet)
-        ..add(otherSizeSet)
-        ..add(systemSizeSet)
-        ..add(totalSizeSet));
+      androidChartController.data = LineData.fromList([
+        javaHeapSet,
+        nativeHeapSet,
+        codeSizeSet,
+        stackSizeSet,
+        graphicsSizeSet,
+        otherSizeSet,
+        systemSizeSet,
+        totalSizeSet,
+      ]);
 
       // Received ADB memory info from samples ready to plot, signal data has changed.
       javaHeapSet.notifyDataSetChanged();
@@ -629,11 +624,11 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
     });
   }
 
-  void _setupChart() {
-    final chartData = memoryTimeline.chartData;
+  void _setupDartChartData() {
+    final dartChartData = memoryTimeline.dartChartData;
 
     // Create heap used dataset.
-    usedHeapSet = LineDataSet(chartData.used, 'Used');
+    usedHeapSet = LineDataSet(dartChartData.used, 'Used');
     usedHeapSet
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(ColorUtils.getHoloBlue())
@@ -650,7 +645,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(80);
 
     // Create heap capacity dataset.
-    capacityHeapSet = LineDataSet(chartData.capacity, 'Capacity')
+    capacityHeapSet = LineDataSet(dartChartData.capacity, 'Capacity')
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(ColorUtils.GRAY)
       ..setValueTextColor(ColorUtils.GRAY)
@@ -667,7 +662,7 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
         Color.fromARGB(0xff, 0x42, 0xa5, 0xf5); // Color.blue[400]
     const externalColor =
         Color.fromARGB(0xff, 0x90, 0xca, 0xf9); // Color.blue[200]
-    externalMemorySet = LineDataSet(chartData.externalHeap, 'External');
+    externalMemorySet = LineDataSet(dartChartData.externalHeap, 'External');
     externalMemorySet
       ..setAxisDependency(AxisDependency.LEFT)
       ..setColor1(externalColorLine)
@@ -682,20 +677,15 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
       ..setFillAlpha(190);
 
     // Create a data object with all the data sets.
-    chartController.data = LineData.fromList(
-      []
-        ..add(
-          usedHeapSet,
-        )
-        ..add(
-          externalMemorySet,
-        )
-        ..add(
-          capacityHeapSet,
-        ),
+    dartChartController.data = LineData.fromList(
+      [
+        usedHeapSet,
+        externalMemorySet,
+        capacityHeapSet,
+      ],
     );
 
-    chartController.data
+    dartChartController.data
       ..setValueTextColor(ColorUtils.getHoloBlue())
       ..setValueTextSize(9);
   }
@@ -712,24 +702,19 @@ class XAxisFormatter extends ValueFormatter {
 
 typedef SelectionCallback = void Function(int timestamp);
 
-typedef AllValuesCallback = HeapSample Function(int timestamp);
-
-enum ChartType { DartHeaps, AndroidHeaps }
+typedef SelectSampleCallback = HeapSample Function(int timestamp);
 
 /// Selection of a point in the Bar chart displays the data point values
 /// UI duration and GPU duration. Also, highlight the selected stacked bar.
 /// Uses marker/highlight mechanism which lags because it uses onTapUp maybe
 /// onTapDown would be less laggy.
-///
-/// onSelected callback function invoked when bar entry is selected.
 class SelectedDataPoint extends LineChartMarker {
   SelectedDataPoint(
     this.type, {
     this.textColor,
     this.backColor,
     this.fontSize,
-    this.onSelected,
-    this.getAllValues,
+    this.getSelectedSampleValue,
   }) {
     _timestampFormatter = XAxisFormatter();
     _formatter = LargeValueFormatter();
@@ -739,6 +724,8 @@ class SelectedDataPoint extends LineChartMarker {
   }
 
   ChartType type;
+
+  MemoryController memoryController;
 
   Entry _entry;
 
@@ -756,9 +743,7 @@ class SelectedDataPoint extends LineChartMarker {
 
   double fontSize;
 
-  final SelectionCallback onSelected;
-
-  final AllValuesCallback getAllValues;
+  final SelectSampleCallback getSelectedSampleValue;
 
   @override
   void draw(Canvas canvas, double posX, double posY) {
@@ -777,7 +762,7 @@ class SelectedDataPoint extends LineChartMarker {
 
     final timestampAsInt = _entry.x.toInt();
 
-    final values = getAllValues(timestampAsInt);
+    final values = getSelectedSampleValue(timestampAsInt);
 
     // No values selected or values are out of range, so no marker to display.
     if (values == null) return;
@@ -791,17 +776,17 @@ class SelectedDataPoint extends LineChartMarker {
     final bool isGced = values.isGC;
 
     // Alpha filled stacked:
-    final num memorySystemAndOther = values.memoryInfo.system.toDouble() +
-        values.memoryInfo.other.toDouble(); // Purple-ish
-    final num memoryCode = values.memoryInfo.code.toDouble(); // Gray Purple
+    final num memorySystemAndOther = values.adbMemoryInfo.system.toDouble() +
+        values.adbMemoryInfo.other.toDouble(); // Purple-ish
+    final num memoryCode = values.adbMemoryInfo.code.toDouble(); // Gray Purple
     final num memoryNativeHeap =
-        values.memoryInfo.nativeHeap.toDouble(); // Blue-ish
+        values.adbMemoryInfo.nativeHeap.toDouble(); // Blue-ish
     final num memoryJavaHeap =
-        values.memoryInfo.javaHeap.toDouble(); // Green-ish
-    final num memoryStack = values.memoryInfo.stack.toDouble(); // White-ish
-    final num memoryGraphics = values.memoryInfo.graphics.toDouble(); // Orangy
+        values.adbMemoryInfo.javaHeap.toDouble(); // Green-ish
+    final num memoryStack = values.adbMemoryInfo.stack.toDouble(); // White-ish
+    final num memoryGraphics = values.adbMemoryInfo.graphics.toDouble(); // Orangy
 
-    final num memoryTotal = values.memoryInfo.total.toDouble(); // dashed line
+    final num memoryTotal = values.adbMemoryInfo.total.toDouble(); // dashed line
 
     final TextPainter painter = type == ChartType.DartHeaps
         ? PainterUtils.create(null, _titlesDartVm, textColor, fontSize)
@@ -809,11 +794,14 @@ class SelectedDataPoint extends LineChartMarker {
 
     painter.textAlign = TextAlign.left;
 
+    final timestampFormatted =
+        _timestampFormatter.getFormattedValue1(timestampAsInt.toDouble());
+
     // Compute the values of each point for a particular x position (timestamp).
     final TextPainter painterValues = type == ChartType.DartHeaps
         ? PainterUtils.create(
             null,
-            '${_timestampFormatter.getFormattedValue1(timestampAsInt.toDouble())}\n'
+            '$timestampFormatted\n'
             '${_formatter.getFormattedValue1(heapCapacity)}\n'
             '${_formatter.getFormattedValue1(heapUsed)}\n'
             '${_formatter.getFormattedValue1(external)}\n'
@@ -824,7 +812,7 @@ class SelectedDataPoint extends LineChartMarker {
           )
         : PainterUtils.create(
             null,
-            '${_timestampFormatter.getFormattedValue1(timestampAsInt.toDouble())}\n'
+            '$timestampFormatted\n'
             '${_formatter.getFormattedValue1(memoryTotal)}\n'
             '${_formatter.getFormattedValue1(memorySystemAndOther)}\n'
             '${_formatter.getFormattedValue1(memoryCode)}\n'
@@ -982,16 +970,68 @@ class SelectedDataPoint extends LineChartMarker {
   }
 }
 
-class MySelectionListener implements OnChartValueSelectedListener {
-  MySelectionListener(this.selectedDataPoint);
+/// Listener finds the nearest data-point (Entry) that matches the click
+/// position in a chart based on the ChartType stored in the SelectedDataPoint.
+class DataPointSelectedistener implements OnChartValueSelectedListener {
+  DataPointSelectedistener(this._selectedDataPoint);
 
-  SelectedDataPoint selectedDataPoint;
+  final SelectedDataPoint _selectedDataPoint;
 
   @override
   void onNothingSelected() {}
 
   @override
   void onValueSelected(Entry e, Highlight h) {
-    selectedDataPoint.entry = e;
+    _selectedDataPoint.entry = e;
+    _computeSelection(e);
+  }
+
+  int _binarySearch(List<HeapSample> orderedByTimestamp, int xValueTimestamp) {
+    int min = 0;
+    int max = orderedByTimestamp.length - 1;
+
+    while (min <= max) {
+      final mid = ((min + max) / 2).floor();
+      if (xValueTimestamp == orderedByTimestamp[mid].timestamp) {
+        return mid;
+      } else if (xValueTimestamp < orderedByTimestamp[mid].timestamp) {
+        max = mid - 1;
+      } else {
+        min = mid + 1;
+      }
+    }
+
+    return -1;
+  }
+
+  /// Find the raw data (HeapSample) that matches the chart's clicked on data
+  /// point Entry. The Entry only has the x, y position (x being the timestamp).
+  /// So, using the timestamp find for the raw HeapSample that represents this
+  /// timeseries entry.
+  void _computeSelection(Entry e) {
+    final controller = _selectedDataPoint.memoryController;
+    final data = controller.memoryTimeline.data;
+    final start = controller.memoryTimeline.startingIndex;
+
+    final oldSample = controller.getSelectedSample(_selectedDataPoint.type);
+
+    // Assume datapoint doesn't point to a sample.
+    controller.setSelectedSample(_selectedDataPoint.type, null);
+
+    final timestamp = e.x.toInt();
+
+    // Is the marker being displayed in the visible range?
+    if (timestamp > data[start].timestamp) {
+      // Marker is visible, just return.
+      if (oldSample?.timestamp == timestamp) {
+        controller.setSelectedSample(_selectedDataPoint.type, oldSample);
+      }
+
+      final foundIndex = _binarySearch(data, timestamp);
+      // If found, return new selectable data point and display new marker.
+      if (foundIndex != -1) {
+        controller.setSelectedSample(_selectedDataPoint.type, data[foundIndex]);
+      }
+    }
   }
 }

@@ -24,11 +24,12 @@ class MemoryScreen extends Screen {
   @visibleForTesting
   static const clearButtonKey = Key('Clear Button');
   @visibleForTesting
-  static const dropdownPruneMenuButtonKey = Key('Dropdown Prune Menu Button');
+  static const dropdownIntervalMenuButtonKey =
+      Key('Dropdown Interval Menu Button');
   @visibleForTesting
-  static const pruneMenuItem = Key('Memory Prune Menu Item');
+  static const intervalMenuItem = Key('Memory Interval Menu Item');
   @visibleForTesting
-  static const pruneIntervalKey = Key('Memory Prune Interval');
+  static const intervalKey = Key('Memory Interval');
 
   @visibleForTesting
   static const dropdownSourceMenuButtonKey = Key('Dropdown Source Menu Button');
@@ -99,8 +100,8 @@ class MemoryBodyState extends State<MemoryBody> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _leftsideButtons(),
-            _rightsideButtons(),
+            _buildPrimaryStateControls(),
+            _buildMemoryControls(),
           ],
         ),
         Expanded(
@@ -115,43 +116,47 @@ class MemoryBodyState extends State<MemoryBody> {
     );
   }
 
-  Widget _pruneDropdown() {
+  Widget _intervalDropdown() {
     final files = controller.memoryLog.offlineFiles();
 
     // First item is 'Live Feed', then followed by memory log filenames.
     files.insert(0, MemoryController.liveFeed);
 
     final mediaWidth = MediaQuery.of(context).size.width;
-    final isVerbaseDropdown = mediaWidth > verboseDropDownMininumWidth;
+    final isVerboseDropdown = mediaWidth > verboseDropDownMininumWidth;
 
     final _displayTypes = [
       MemoryController.displayOneMinute,
       MemoryController.displayFiveMinutes,
       MemoryController.displayTenMinutes,
       MemoryController.displayAllMinutes,
-    ].map<DropdownMenuItem<String>>((
-      String value,
-    ) {
-      return DropdownMenuItem<String>(
-        key: MemoryScreen.pruneMenuItem,
-        value: value,
-        child: Text(
-          '${isVerbaseDropdown ? 'Display' : ''} $value '
-          'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
-          key: MemoryScreen.pruneIntervalKey,
-        ),
-      );
-    }).toList();
+    ].map<DropdownMenuItem<String>>(
+      (
+        String value,
+      ) {
+        return DropdownMenuItem<String>(
+          key: MemoryScreen.intervalMenuItem,
+          value: value,
+          child: Text(
+            '${isVerboseDropdown ? 'Display' : ''} $value '
+            'Minute${value == MemoryController.displayOneMinute ? '' : 's'}',
+            key: MemoryScreen.intervalKey,
+          ),
+        );
+      },
+    ).toList();
 
     return DropdownButton<String>(
-      key: MemoryScreen.dropdownPruneMenuButtonKey,
-      value: controller.pruneInterval,
+      key: MemoryScreen.dropdownIntervalMenuButtonKey,
+      value: controller.displayInterval,
       iconSize: 20,
       style: TextStyle(fontWeight: FontWeight.w100),
       onChanged: (String newValue) {
-        setState(() {
-          controller.pruneInterval = newValue;
-        });
+        setState(
+          () {
+            controller.displayInterval = newValue;
+          },
+        );
       },
       items: _displayTypes,
     );
@@ -219,10 +224,10 @@ class MemoryBodyState extends State<MemoryBody> {
 */
   }
 
-  static const minIncludeTextLeftButtons = 1300;
-  static const minIncludeTextRightButtons = 1100;
+  /// Width of application when primary buttons loose their text.
+  static const double _primaryControlsMinVerboseWidth = 1300;
 
-  Widget _leftsideButtons() {
+  Widget _buildPrimaryStateControls() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       // Add a semi-transparent background to the
@@ -239,7 +244,7 @@ class MemoryBodyState extends State<MemoryBody> {
             child: Label(
               pauseIcon,
               'Pause',
-              minIncludeTextWidth: 1300,
+              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
             ),
           ),
           OutlineButton(
@@ -248,35 +253,34 @@ class MemoryBodyState extends State<MemoryBody> {
             child: Label(
               playIcon,
               'Resume',
-              minIncludeTextWidth: 1300,
+              minIncludeTextWidth: _primaryControlsMinVerboseWidth,
             ),
           ),
           const SizedBox(width: 16.0),
           OutlineButton(
               key: MemoryScreen.clearButtonKey,
+              // TODO(terry): Button needs to be Delete for offline data.
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
               child: Label(
                 clearIcon,
                 'Clear',
-                minIncludeTextWidth: 1300,
+                minIncludeTextWidth: _primaryControlsMinVerboseWidth,
               )),
           const SizedBox(width: 16.0),
-          _pruneDropdown(),
+          _intervalDropdown(),
         ],
       ),
     );
   }
 
-  Widget _rightsideButtons() {
+  /// Width of application when memory buttons loose their text.
+  static const double _memoryControlsMinVerboseWidth = 1100;
+
+  Widget _buildMemoryControls() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      // Add a semi-transparent background to the
-      // expand and collapse buttons so they don't interfere
-      // too badly with the tree content when the tree
-      // is narrow.
-      color: Theme.of(context).scaffoldBackgroundColor.withAlpha(200),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -290,7 +294,7 @@ class MemoryBodyState extends State<MemoryBody> {
               child: Label(
                 memorySnapshot,
                 'Snapshot',
-                minIncludeTextWidth: 1100,
+                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
               ),
             ),
           ),
@@ -301,7 +305,7 @@ class MemoryBodyState extends State<MemoryBody> {
               child: Label(
                 memoryReset,
                 'Reset',
-                minIncludeTextWidth: 1100,
+                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
               ),
             ),
           ),
@@ -312,7 +316,7 @@ class MemoryBodyState extends State<MemoryBody> {
               child: Label(
                 memoryGC,
                 'GC',
-                minIncludeTextWidth: 1100,
+                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
               ),
             ),
           ),
@@ -325,7 +329,7 @@ class MemoryBodyState extends State<MemoryBody> {
               child: Label(
                 exportIcon,
                 'Export',
-                minIncludeTextWidth: 1100,
+                minIncludeTextWidth: _memoryControlsMinVerboseWidth,
               ),
             ),
           ),

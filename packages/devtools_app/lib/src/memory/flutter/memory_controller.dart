@@ -15,10 +15,16 @@ import '../../config_specific/logger.dart';
 import '../../globals.dart';
 import '../../ui/fake_file/fake_file.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
+import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
 
 import '../memory_service.dart';
 import 'memory_protocol.dart';
+
+enum ChartType {
+  DartHeaps,
+  AndroidHeaps,
+}
 
 typedef chartStateListener = void Function();
 
@@ -50,7 +56,20 @@ class MemoryController extends DisposableController
   /// memory_log file.
   bool offline = false;
 
-  HeapSample selectedSample;
+  HeapSample _selectedDartSample;
+
+  HeapSample _selectedAndroidSample;
+
+  HeapSample getSelectedSample(ChartType type) => type == ChartType.DartHeaps
+      ? _selectedDartSample
+      : _selectedAndroidSample;
+
+  void setSelectedSample(ChartType type, HeapSample sample) {
+    if (type == ChartType.DartHeaps)
+      _selectedDartSample = sample;
+    else
+      _selectedAndroidSample = sample;
+  }
 
   static const String liveFeed = 'Live Feed';
 
@@ -67,54 +86,53 @@ class MemoryController extends DisposableController
 
   String get memorySource => _memorySourceNotifier.value;
 
-  /// Starting chunk for slider based on pruneInterval.
+  /// Starting chunk for slider based on the intervalDurationInMs.
   double sliderValue = 1.0;
 
-  /// Number of interval chunks e.g., 5 minute interval has 3 chunks for 15 minutes of collected data
-  int numberOfChunks = 0;
+  /// Number of interval stops for the timeline slider e.g., for 15 minutes of
+  /// collected data, displayed at a 5 minute interval there will be 3 stops,
+  /// each stop would be 5 minutes prior to the previous stop.
+  int numberOfStops = 0;
 
-  /// Compute total timeline chunks used by Timeline slider.
-  int computeChunks() {
-    int chunks = 0;
+  /// Compute total timeline stops used by Timeline slider.
+  int computeStops() {
+    int stops = 0;
     if (memoryTimeline.data.isNotEmpty) {
       final lastSampleTimestamp = memoryTimeline.data.last.timestamp.toDouble();
       final firstSampleTimestamp =
           memoryTimeline.data.first.timestamp.toDouble();
-      chunks = ((lastSampleTimestamp - firstSampleTimestamp) /
-              pruneIntervalDurationInMs)
-          .round();
+      stops =
+          ((lastSampleTimestamp - firstSampleTimestamp) / intervalDurationInMs)
+              .round();
     }
-    return chunks == 0 ? 1 : chunks;
+    return stops == 0 ? 1 : stops;
   }
 
+  /// Automatic pruning of memory statistics (plotted) full data is still retained.
   static const String displayOneMinute = '1';
   static const String displayFiveMinutes = '5';
   static const String displayTenMinutes = '10';
   static const String displayAllMinutes = 'All';
 
-  /// Automatic pruning of memory statistics (plotted) full data is still retained.
   /// Default is to display last minute of collected data in the chart.
-  final _pruneInterfaceNoifier = ValueNotifier<String>(displayOneMinute);
+  final _displayIntervalNotifier = ValueNotifier<String>(displayOneMinute);
 
-  ValueListenable<String> get displayIntervalNotifier => _pruneInterfaceNoifier;
+  ValueListenable<String> get displayIntervalNotifier =>
+      _displayIntervalNotifier;
 
-  set pruneInterval(String interval) {
-    _pruneInterfaceNoifier.value = interval;
+  set displayInterval(String interval) {
+    _displayIntervalNotifier.value = interval;
   }
 
-  String get pruneInterval => _pruneInterfaceNoifier.value;
+  String get displayInterval => _displayIntervalNotifier.value;
 
   /// 1 minute in milliseconds.
   static const int minuteInMs = 60 * 1000;
 
-  /// Largest int in ms for VM could be 9223372036854775807 (2^64)
-  /// however, use JS largest possible int  9007199254740991 (2^53).
-  static const int bigTimeInMs = 9007199254740991;
-
   /// Return the pruning interval in milliseconds.
-  int get pruneIntervalDurationInMs => (pruneInterval == displayAllMinutes)
-      ? bigTimeInMs
-      : int.parse(pruneInterval) * minuteInMs;
+  int get intervalDurationInMs => (displayInterval == displayAllMinutes)
+      ? maxJsInt
+      : int.parse(displayInterval) * minuteInMs;
 
   /// MemorySource has changed update the view.
   void updatedMemorySource() {
@@ -133,17 +151,17 @@ class MemoryController extends DisposableController
     }
 
     // The memory source has changed, clear all plotted values.
-    memoryTimeline.chartData.reset();
-    memoryTimeline.engineChartData.reset();
+    memoryTimeline.dartChartData.reset();
+    memoryTimeline.androidChartData.reset();
   }
 
   void recomputeOfflineData() {
-    final args = memoryTimeline.recomputeOfflineData(pruneIntervalDurationInMs);
+    final args = memoryTimeline.recomputeOfflineData(intervalDurationInMs);
     processDataset(args);
   }
 
   void recomputeData() {
-    final args = memoryTimeline.recomputeLiveData(pruneIntervalDurationInMs);
+    final args = memoryTimeline.recomputeLiveData(intervalDurationInMs);
     processDataset(args);
     // TODO(terry): need to recomputeOffline data?
   }
@@ -152,13 +170,13 @@ class MemoryController extends DisposableController
     // Add entries of entries plotted in the chart.  Entries plotted
     // may not match data collected (based on display interval).
     for (var arg in args) {
-      memoryTimeline.chartData.addTraceEntries(
+      memoryTimeline.dartChartData.addTraceEntries(
         capacityValue: arg[MemoryTimeline.capcityValueKey],
         usedValue: arg[MemoryTimeline.usedValueKey],
         externalValue: arg[MemoryTimeline.externalValueKey],
-        minutesToDisplay: pruneIntervalDurationInMs,
+        minutesToDisplay: intervalDurationInMs,
       );
-      memoryTimeline.engineChartData.addTraceEntries(
+      memoryTimeline.androidChartData.addTraceEntries(
         javaValue: arg[MemoryTimeline.javaHeapValueKey],
         nativeValue: arg[MemoryTimeline.nativeHeapValueKey],
         codeValue: arg[MemoryTimeline.codeValueKey],
@@ -167,10 +185,10 @@ class MemoryController extends DisposableController
         otherValue: arg[MemoryTimeline.otherValueKey],
         systemValue: arg[MemoryTimeline.systemValueKey],
         totalValue: arg[MemoryTimeline.totalValueKey],
-        minutesToDisplay: pruneIntervalDurationInMs,
+        minutesToDisplay: intervalDurationInMs,
       );
 
-      if (memoryTimeline.chartData.pruned) {
+      if (memoryTimeline.dartChartData.pruned) {
         memoryTimeline.startingIndex++;
       }
     }
@@ -178,8 +196,8 @@ class MemoryController extends DisposableController
 
   void processData([bool reloadAllData = false]) {
     final args = offline
-        ? memoryTimeline.processMemoryLogFileData()
-        : memoryTimeline.processLiveData(reloadAllData);
+        ? memoryTimeline.fetchMemoryLogFileData()
+        : memoryTimeline.fetchLiveData(reloadAllData);
 
     processDataset(args);
   }
@@ -196,11 +214,12 @@ class MemoryController extends DisposableController
     _paused = false;
   }
 
-  bool _toggleAndroidChart = false;
+  bool _androidChartVisible = false;
 
-  bool get isAndroidChartVisible => _toggleAndroidChart;
+  bool get isAndroidChartVisible => _androidChartVisible;
 
-  bool toggleAndroidChart() => _toggleAndroidChart = !_toggleAndroidChart;
+  bool toggleAndroidChartVisibility() =>
+      _androidChartVisible = !_androidChartVisible;
 
   final SettingsModel settings = SettingsModel();
 
@@ -406,7 +425,7 @@ class MemoryController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _pruneInterfaceNoifier.dispose();
+    _displayIntervalNotifier.dispose();
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
@@ -606,49 +625,13 @@ class MPChartData {
   bool get pruned => _pruning;
 
   /// Datapoint entries for each used heap value.
-  final List<Entry> used = <Entry>[];
+  final List used = <Entry>[];
 
   /// Datapoint entries for each capacity heap value.
-  final List<Entry> capacity = <Entry>[];
+  final List capacity = <Entry>[];
 
   /// Datapoint entries for each external memory value.
-  final List<Entry> externalHeap = <Entry>[];
-
-  /// Prune entries plotted based on number of sample
-  /// minutes to display.
-  void prune(int minutesToDisplay) {
-    assert(minutesToDisplay > 0);
-
-    final len = used.length;
-
-    // Entries should match.
-    // All entries lengths are the same.
-    assert(len == capacity.length && len == externalHeap.length);
-    // All entries starting timestamps match,
-    assert(used.isNotEmpty &&
-        used[0].x == capacity[0].x &&
-        capacity[0].x == externalHeap[0].x);
-    // All entries ending timestamps match.
-    assert(used.isNotEmpty &&
-        used[len - 1].x == capacity[len - 1].x &&
-        capacity[len - 1].x == externalHeap[len - 1].x);
-
-    // Compute a new starting index from length - N minutes.
-    final timeLastSample = used.last.x;
-    var index = len - 1;
-    for (; index > 0; index--) {
-      final sample = used[index];
-      final timestamp = sample.x;
-
-      if ((timeLastSample - timestamp) > minutesToDisplay) break;
-    }
-
-    if (index != 0) {
-      used.removeRange(0, index);
-      capacity.removeRange(0, index);
-      externalHeap.removeRange(0, index);
-    }
-  }
+  final List externalHeap = <Entry>[];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -661,9 +644,11 @@ class MPChartData {
         externalHeap.isNotEmpty &&
         (externalValue.x - externalHeap.first.x) > minutesToDisplay) {
       _pruning = true;
-//      assert(externalValue.x - externalHeap.last.x <= minutesToDisplay);
+      assert(externalValue.x - externalHeap.last.x <= minutesToDisplay);
     }
 
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep an list of the entries (remoteAt and add).
     if (_pruning) {
       externalHeap.removeAt(0);
       used.removeAt(0);
@@ -677,6 +662,8 @@ class MPChartData {
 
   /// Remove all plotted entries in all traces.
   void reset() {
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep an list of the entries (clear).
     used.clear();
     capacity.clear();
     externalHeap.clear();
@@ -689,86 +676,28 @@ class MPEngineChartData {
   bool _pruning = false;
 
   /// Datapoint entries for each Java heap value.
-  final List<Entry> javaHeap = <Entry>[];
+  final List javaHeap = <Entry>[];
 
   /// Datapoint entries for each native heap value.
-  final List<Entry> nativeHeap = <Entry>[];
+  final List nativeHeap = <Entry>[];
 
   /// Datapoint entries for code size value.
-  final List<Entry> code = <Entry>[];
+  final List code = <Entry>[];
 
   /// Datapoint entries for stack size value.
-  final List<Entry> stack = <Entry>[];
+  final List stack = <Entry>[];
 
   /// Datapoint entries for graphics size value.
-  final List<Entry> graphics = <Entry>[];
+  final List graphics = <Entry>[];
 
   /// Datapoint entries for other size value.
-  final List<Entry> other = <Entry>[];
+  final List other = <Entry>[];
 
   /// Datapoint entries for system size value.
-  final List<Entry> system = <Entry>[];
+  final List system = <Entry>[];
 
   /// Datapoint entries for total size value.
-  final List<Entry> total = <Entry>[];
-
-  /// Prune entries plotted based on number of sample
-  /// minutes to display.
-  void prune(int minutesToDisplay) {
-    assert(minutesToDisplay > 0);
-
-    final len = javaHeap.length;
-
-    // Entries should match.
-    // All entries lengths are the same.
-    assert(len == javaHeap.length &&
-        len == nativeHeap.length &&
-        len == code.length &&
-        len == stack.length &&
-        len == graphics.length &&
-        len == other.length &&
-        len == system.length &&
-        len == total.length);
-    // All entries starting timestamps match,
-    assert(javaHeap.isNotEmpty &&
-        javaHeap[0].x == nativeHeap[0].x &&
-        nativeHeap[0].x == code[0].x &&
-        code[0].x == stack[0].x &&
-        stack[0].x == graphics[0].x &&
-        graphics[0].x == other[0].x &&
-        other[0].x == system[0].x &&
-        system[0].x == total[0].x);
-    // All entries ending timestamps match.
-    assert(javaHeap.isNotEmpty &&
-        javaHeap[len - 1].x == nativeHeap[len - 1].x &&
-        nativeHeap[len - 1].x == code[len - 1].x &&
-        code[len - 1].x == stack[len - 1].x &&
-        stack[len - 1].x == graphics[len - 1].x &&
-        graphics[len - 1].x == other[len - 1].x &&
-        other[len - 1].x == system[len - 1].x &&
-        system[len - 1].x == total[len - 1].x);
-
-    // Compute a new starting index from length - N minutes.
-    final timeLastSample = javaHeap.last.x;
-    var index = len - 1;
-    for (; index > 0; index--) {
-      final sample = javaHeap[index];
-      final timestamp = sample.x;
-
-      if ((timeLastSample - timestamp) > minutesToDisplay) break;
-    }
-
-    if (index != 0) {
-      javaHeap.removeRange(0, index);
-      nativeHeap.removeRange(0, index);
-      code.removeRange(0, index);
-      stack.removeRange(0, index);
-      graphics.removeRange(0, index);
-      other.removeRange(0, index);
-      system.removeRange(0, index);
-      total.removeRange(0, index);
-    }
-  }
+  final List total = <Entry>[];
 
   /// Add each entry to its corresponding trace.
   void addTraceEntries({
@@ -787,9 +716,11 @@ class MPEngineChartData {
         (javaValue.x - javaHeap.first.x) > minutesToDisplay) {
       _pruning = true;
 
-//      assert(javaValue.x - javaHeap.last.x <= minutesToDisplay);
+      assert(javaValue.x - javaHeap.last.x <= minutesToDisplay);
     }
 
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep an list of the entries (remoteAt and add).
     if (_pruning) {
       javaHeap.removeAt(0);
       nativeHeap.removeAt(0);
@@ -813,6 +744,8 @@ class MPEngineChartData {
 
   /// Remove all plotted entries in all traces.
   void reset() {
+    // TODO(terry): Any way have a kind of trace order safe way to so we
+    // can keep an list of the entries (clear).
     javaHeap.clear();
     nativeHeap.clear();
     code.clear();
@@ -852,10 +785,10 @@ class MemoryTimeline {
   final MemoryController controller;
 
   /// Flutter Framework information (Dart heaps).
-  final chartData = MPChartData();
+  final dartChartData = MPChartData();
 
   /// Flutter Engine (ADB memory information).
-  final engineChartData = MPEngineChartData();
+  final androidChartData = MPEngineChartData();
 
   /// Return the data payload that is active.
   List<HeapSample> get data => controller.offline ? offlineData : liveData;
@@ -863,9 +796,11 @@ class MemoryTimeline {
   int get startingIndex =>
       controller.offline ? offlineStartingIndex : liveStartingIndex;
 
-  set startingIndex(int value) => controller.offline
-      ? offlineStartingIndex = value
-      : liveStartingIndex = value;
+  set startingIndex(int value) {
+    controller.offline
+        ? offlineStartingIndex = value
+        : liveStartingIndex = value;
+  }
 
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
 
@@ -894,6 +829,25 @@ class MemoryTimeline {
 
   ValueNotifier<bool> get pausedNotifier => _pausedNotifier;
 
+  void pause({bool manual = false}) {
+    manuallyPaused = manual;
+    _pausedNotifier.value = true;
+  }
+
+  void resume() {
+    manuallyPaused = false;
+    _pausedNotifier.value = false;
+  }
+
+  /// Notifies any visible marker for a particular chart should be hidden.
+  final _markerHiddenNotifier = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get markerHiddenNotifier => _markerHiddenNotifier;
+
+  void hideMarkers() {
+    _markerHiddenNotifier.value = !_markerHiddenNotifier.value;
+  }
+
   /// dart_ui.Image Image asset displayed for each entry plotted in a chart.
   // ignore: unused_field
   dart_ui.Image _img;
@@ -908,24 +862,16 @@ class MemoryTimeline {
   void reset() {
     liveData.clear();
     startingIndex = 0;
-    chartData.reset();
-    engineChartData.reset();
+    dartChartData.reset();
+    androidChartData.reset();
   }
 
   /// Common utility function to handle loading of the data into the
   /// chart for either offline or live Feed.
-  ///
-  /// [startingDataIndex] if != -1 then use this parameter to process the newest
-  /// samples not yet plotted.
-  /// [lastMinutes] if != -1, then use this parameter to plot last n ninutes of data.
-  ///
-  /// [ArgumentError] if thrown requires either startingDataIndex or lastMinutes
-  /// to be passsed.
   List<Map> _processData(int index) {
     final result = <Map<String, Entry>>[];
 
-    var lastIndex = index;
-    for (; lastIndex < data.length; lastIndex++) {
+    for (var lastIndex = index; lastIndex < data.length; lastIndex++) {
       final sample = data[lastIndex];
       final timestamp = sample.timestamp.toDouble();
 
@@ -944,14 +890,14 @@ class MemoryTimeline {
       final rssEntry = Entry(x: timestamp, y: rss, icon: dataPointImage);
 
       // Engine memory values (ADB Android):
-      final javaHeap = sample.memoryInfo.javaHeap.toDouble();
-      final nativeHeap = sample.memoryInfo.nativeHeap.toDouble();
-      final code = sample.memoryInfo.code.toDouble();
-      final stack = sample.memoryInfo.stack.toDouble();
-      final graphics = sample.memoryInfo.graphics.toDouble();
-      final other = sample.memoryInfo.other.toDouble();
-      final system = sample.memoryInfo.system.toDouble();
-      final total = sample.memoryInfo.total.toDouble();
+      final javaHeap = sample.adbMemoryInfo.javaHeap.toDouble();
+      final nativeHeap = sample.adbMemoryInfo.nativeHeap.toDouble();
+      final code = sample.adbMemoryInfo.code.toDouble();
+      final stack = sample.adbMemoryInfo.stack.toDouble();
+      final graphics = sample.adbMemoryInfo.graphics.toDouble();
+      final other = sample.adbMemoryInfo.other.toDouble();
+      final system = sample.adbMemoryInfo.system.toDouble();
+      final total = sample.adbMemoryInfo.total.toDouble();
 
       final graphicsEntry = Entry(
         x: timestamp,
@@ -1014,19 +960,15 @@ class MemoryTimeline {
   }
 
   /// Fetch all the data in the loaded from a memory log (JSON file in /tmp).
-  List<Map> processMemoryLogFileData() {
+  List<Map> fetchMemoryLogFileData() {
     assert(controller.offline);
     assert(offlineData.isNotEmpty);
     return _processData(startingIndex);
   }
 
-  List<Map> processLiveData([bool reloadAllData = false]) {
+  List<Map> fetchLiveData([bool reloadAllData = false]) {
     assert(!controller.offline);
     assert(liveData.isNotEmpty);
-
-// *****************************************
-// TODO(terry): Handle engineChartData too.
-// *****************************************
 
     if (endingIndex - startingIndex != liveData.length || reloadAllData) {
       // Process the data received (startingDataIndex is the last sample).
@@ -1051,6 +993,22 @@ class MemoryTimeline {
   List<Map> recomputeOfflineData(int displayInterval) {
     assert(displayInterval > 0);
 
+    _computeStartingIndex(displayInterval);
+
+    // Start from the first sample to display in this time interval.
+    return _processData(startingIndex);
+  }
+
+  List<Map> recomputeLiveData(int displayInterval) {
+    assert(displayInterval > 0);
+
+    _computeStartingIndex(displayInterval);
+
+    // Start from the first sample to display in this time interval.
+    return _processData(startingIndex);
+  }
+
+  void _computeStartingIndex(int displayInterval) {
     // Compute a new starting index from length - N minutes.
     final timeLastSample = data.last.timestamp;
     var dataIndex = data.length - 1;
@@ -1072,43 +1030,11 @@ class MemoryTimeline {
           data[endingIndex].timestamp.toInt()));
       print('Recompute Time range Offline data start: $startDT, end: $endDT');
     }
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
   }
 
-  List<Map> recomputeLiveData(int displayInterval) {
-    assert(displayInterval > 0);
-
-    // Compute a new starting index from length - N minutes.
-    final timeLastSample = data.last.timestamp;
-    var dataIndex = data.length - 1;
-    for (; dataIndex > 0; dataIndex--) {
-      final sample = data[dataIndex];
-      final timestamp = sample.timestamp;
-
-      if ((timeLastSample - timestamp) > displayInterval) break;
-    }
-
-    startingIndex = dataIndex;
-
-    // Debugging data - to enable remove logical not operator.
-    if (!true) {
-      final DateFormat mFormat = DateFormat('hh:mm:ss.mmm');
-      final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[startingIndex].timestamp.toInt()));
-      final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[endingIndex].timestamp.toInt()));
-      print('Recompute Time range Live data start: $startDT, end: $endDT');
-    }
-
-    // Start from the first sample to display in this time interval.
-    return _processData(startingIndex);
-  }
-
-  static String jsonPayloadField = 'samples';
-  static String jsonVersionField = 'version';
-  static String jsonDataField = 'data';
+  static const String _jsonPayloadField = 'samples';
+  static const String _jsonVersionField = 'version';
+  static const String _jsonDataField = 'data';
 
   /// Given a list of HeapSample, encode as a Json string.
   static String encodeHeapSamples(List<HeapSample> data) {
@@ -1121,8 +1047,8 @@ class MemoryTimeline {
       result.write('$encode');
     }).toList();
 
-    return '{"$jsonPayloadField": {'
-        '"$jsonVersionField": $version, "$jsonDataField": [\n'
+    return '{"$_jsonPayloadField": {'
+        '"$_jsonVersionField": $version, "$_jsonDataField": [\n'
         '$result'
         '\n]\n}}';
   }
@@ -1131,13 +1057,14 @@ class MemoryTimeline {
   /// List of HeapSample.
   static List<HeapSample> decodeHeapSamples(String jsonString) {
     final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
-    final Map<String, dynamic> samplesPayload = decodedMap['$jsonPayloadField'];
+    final Map<String, dynamic> samplesPayload =
+        decodedMap['$_jsonPayloadField'];
 
     // TODO(terry): Different JSON payload version conversions TBD (none yet).
-    final payloadVersion = samplesPayload['$jsonVersionField'];
+    final payloadVersion = samplesPayload['$_jsonVersionField'];
     assert(payloadVersion == MemoryTimeline.version);
 
-    final List dynamicList = samplesPayload['$jsonDataField'];
+    final List dynamicList = samplesPayload['$_jsonDataField'];
     final List<HeapSample> samples = [];
     for (var index = 0; index < dynamicList.length; index++) {
       final sample = HeapSample.fromJson(dynamicList[index]);
@@ -1145,16 +1072,6 @@ class MemoryTimeline {
     }
 
     return samples;
-  }
-
-  void pause({bool manual = false}) {
-    manuallyPaused = manual;
-    _pausedNotifier.value = true;
-  }
-
-  void resume() {
-    manuallyPaused = false;
-    _pausedNotifier.value = false;
   }
 
   void addSample(HeapSample sample) {

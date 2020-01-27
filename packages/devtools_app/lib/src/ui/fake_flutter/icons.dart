@@ -16,6 +16,7 @@ class Icons {
   static const IconData refresh = IconData(0xe5d5);
   static const IconData stop = IconData(0xe047);
   static const IconData pause = IconData(0xe034);
+  static const IconData package = IconData(0xf174);
   static const IconData play_arrow = IconData(0xe037);
   static const IconData camera = IconData(0xe3af);
   static const IconData settings_backup_restore = IconData(0xe8ba);

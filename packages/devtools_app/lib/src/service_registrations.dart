@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'ui/icons.dart';
+import 'ui/material_icons.dart';
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
@@ -47,13 +48,13 @@ const RegisteredServiceDescription flutterVersion =
 
 /// Flutter memory service registered by Flutter Tools.
 ///
-/// We call this service to get version information about the Flutter framework,
-/// the Flutter engine, and the Dart sdk.
-const RegisteredServiceDescription flutterMemory =
+/// We call this service to get version information about the Flutter Android memory info
+/// using Android's ADB.
+RegisteredServiceDescription flutterMemory =
     RegisteredServiceDescription._(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
-  icon: FlutterIcons.flutter,
+  icon: memoryIcon,
 );
 
 const flutterListViews = '_flutter.listViews';
