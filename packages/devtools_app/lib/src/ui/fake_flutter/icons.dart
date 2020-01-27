@@ -15,4 +15,9 @@ class Icons {
   static const IconData open_in_new = IconData(0xe89e);
   static const IconData refresh = IconData(0xe5d5);
   static const IconData stop = IconData(0xe047);
+  static const IconData pause = IconData(0xe034);
+  static const IconData play_arrow = IconData(0xe037);
+  static const IconData camera = IconData(0xe3af);
+  static const IconData settings_backup_restore = IconData(0xe8ba);
+  static const IconData delete_sweep = IconData(0xe16c);
 }

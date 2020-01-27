@@ -45,6 +45,17 @@ const RegisteredServiceDescription flutterVersion =
   icon: FlutterIcons.flutter,
 );
 
+/// Flutter memory service registered by Flutter Tools.
+///
+/// We call this service to get version information about the Flutter Android memory info
+/// using Android's ADB.
+RegisteredServiceDescription flutterMemory = RegisteredServiceDescription._(
+  service: 'flutterMemoryInfo',
+  title: 'Flutter Memory Info',
+  // TODO(terry): Better icon - package or memory looking for now snapshop is memory.
+  icon: FlutterIcons.snapshot,
+);
+
 const flutterListViews = '_flutter.listViews';
 
 const displayRefreshRate = '_flutter.getDisplayRefreshRate';

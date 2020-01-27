@@ -90,7 +90,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/img/star.png
     - web/widgets.json
     - web/icons/
     - web/icons/actions/
@@ -100,6 +99,7 @@ flutter:
     - web/icons/inspector/
     - web/icons/memory/
     - web/icons/perf/
+    - assets/
     - assets/img/
     - assets/img/layout_explorer/
     - assets/img/layout_explorer/main_axis_alignment/
