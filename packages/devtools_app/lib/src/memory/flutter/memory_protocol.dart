@@ -320,17 +320,6 @@ class AdbMemoryInfo {
     this.total,
   );
 
-  /// JSON keys of data retrieved from ADB tool.
-  static const String realTimeKey = 'Realtime';
-  static const String javaHeapKey = 'Java Heap';
-  static const String nativeHeapKey = 'Native Heap';
-  static const String codeKey = 'Code';
-  static const String stackKey = 'Stack';
-  static const String graphicsKey = 'Graphics';
-  static const String otherKey = 'Private Other';
-  static const String systemKey = 'System';
-  static const String totalKey = 'Total';
-
   factory AdbMemoryInfo.fromJson(Map<String, dynamic> json) => AdbMemoryInfo(
         json[realTimeKey] as int,
         json[javaHeapKey] as int,
@@ -342,6 +331,17 @@ class AdbMemoryInfo {
         json[systemKey] as int,
         json[totalKey] as int,
       );
+
+  /// JSON keys of data retrieved from ADB tool.
+  static const String realTimeKey = 'Realtime';
+  static const String javaHeapKey = 'Java Heap';
+  static const String nativeHeapKey = 'Native Heap';
+  static const String codeKey = 'Code';
+  static const String stackKey = 'Stack';
+  static const String graphicsKey = 'Graphics';
+  static const String otherKey = 'Private Other';
+  static const String systemKey = 'System';
+  static const String totalKey = 'Total';
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         realTimeKey: realtime,
