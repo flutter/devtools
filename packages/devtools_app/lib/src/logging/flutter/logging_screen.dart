@@ -208,7 +208,7 @@ class _LogDetailsState extends State<LogDetails>
       child: SingleChildScrollView(
         child: Text(
           log.prettyPrinted ?? '',
-          style: Theme.of(context).textTheme.subhead,
+          style: Theme.of(context).textTheme.subtitle1,
         ),
       ),
     );

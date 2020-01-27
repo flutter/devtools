@@ -83,7 +83,7 @@ class _InspectorDetailsTabControllerState
                     color: focusColor,
                     child: TabBar(
                       controller: _tabController,
-                      labelColor: Theme.of(context).textTheme.body1.color,
+                      labelColor: Theme.of(context).textTheme.bodyText1.color,
                       tabs: tabs,
                       isScrollable: true,
                     ),

@@ -214,14 +214,14 @@ class _NotificationState extends State<_Notification>
           color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.subhead,
+                theme.primaryTextTheme.subtitle1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   widget.message,
-                  style: theme.textTheme.body1,
+                  style: theme.textTheme.bodyText1,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 6,
                 ),

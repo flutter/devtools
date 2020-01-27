@@ -74,14 +74,14 @@ class _InfoScreenBodyState extends State<InfoScreenBody> {
       children: [
         Text(
           'Version Information',
-          style: textTheme.headline,
+          style: textTheme.headline5,
         ),
         const PaddedDivider(),
         if (_flutterVersion != null) _VersionInformation(_flutterVersion),
         const Padding(padding: EdgeInsets.only(top: 16.0)),
         Text(
           'Dart VM Flag List',
-          style: textTheme.headline,
+          style: textTheme.headline5,
         ),
         const PaddedDivider(padding: EdgeInsets.only(top: 4.0, bottom: 0.0)),
         Expanded(

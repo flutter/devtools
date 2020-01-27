@@ -85,7 +85,7 @@ class HttpRequestInspector extends StatelessWidget {
                 child: Text(
                   'No request selected',
                   key: noRequestSelectedKey,
-                  style: Theme.of(context).textTheme.title,
+                  style: Theme.of(context).textTheme.headline6,
                 ),
               )
             : tabbedContent,
