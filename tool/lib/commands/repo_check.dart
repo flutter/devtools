@@ -59,6 +59,8 @@ class DevToolsVersionCheck extends Check {
 
   @override
   Future<void> performCheck(DevToolsRepo repo) {
+    // TODO(devoncarew): Update this to use a package to parse the pubspec file;
+    //                   https://pub.dev/packages/pubspec.
     final pubspecContents = repo.readFile('packages/devtools_app/pubspec.yaml');
     final versionString = pubspecContents
         .split('\n')
