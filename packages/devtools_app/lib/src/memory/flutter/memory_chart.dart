@@ -784,9 +784,11 @@ class SelectedDataPoint extends LineChartMarker {
     final num memoryJavaHeap =
         values.adbMemoryInfo.javaHeap.toDouble(); // Green-ish
     final num memoryStack = values.adbMemoryInfo.stack.toDouble(); // White-ish
-    final num memoryGraphics = values.adbMemoryInfo.graphics.toDouble(); // Orangy
+    final num memoryGraphics =
+        values.adbMemoryInfo.graphics.toDouble(); // Orangy
 
-    final num memoryTotal = values.adbMemoryInfo.total.toDouble(); // dashed line
+    final num memoryTotal =
+        values.adbMemoryInfo.total.toDouble(); // dashed line
 
     final TextPainter painter = type == ChartType.DartHeaps
         ? PainterUtils.create(null, _titlesDartVm, textColor, fontSize)

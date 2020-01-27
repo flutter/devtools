@@ -50,8 +50,7 @@ const RegisteredServiceDescription flutterVersion =
 ///
 /// We call this service to get version information about the Flutter Android memory info
 /// using Android's ADB.
-RegisteredServiceDescription flutterMemory =
-    RegisteredServiceDescription._(
+RegisteredServiceDescription flutterMemory = RegisteredServiceDescription._(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
   icon: memoryIcon,
