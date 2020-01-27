@@ -134,9 +134,14 @@ elif [ "$BOT" = "test_ddc" ]; then
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
-    flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
-
+    if [ "$PLATFORM" = "vm" ]; then
+        flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
+    elif [ "$PLATFORM" = "chrome" ]; then
+        flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    else 
+        echo "unknown test platform"
+        exit 1
+    fi
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
 
@@ -147,8 +152,14 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # Run every test except for integration_tests.
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
-    WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
-    flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    if [ "$PLATFORM" = "vm" ]; then
+        WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures,flutter,support,ui}/
+    elif [ "$PLATFORM" = "chrome" ]; then
+        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures,flutter,support,ui}/
+    else 
+        echo "unknown test platform"
+        exit 1
+    fi
     echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "integration_ddc" ]; then
@@ -189,7 +200,7 @@ elif [ "$BOT" = "packages" ]; then
     (cd third_party/packages; flutter pub global run tuneup check)
 
     # Analyze Dart code in tool/
-    (cd tool; flutter pub global run tuneup check)
+    (cd tool; flutter pub get; flutter pub global run tuneup check)
 
     pushd packages/devtools_app
 

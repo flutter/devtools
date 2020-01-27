@@ -7,8 +7,9 @@ import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_app/src/ui/flutter/vm_flag_widgets.dart';
-import 'package:devtools_app/src/vm_flags.dart';
+import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../support/mocks.dart';
 import 'wrappers.dart';
@@ -49,8 +50,12 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
-      var flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      expect(flagList, isEmpty);
+      var profilePeriodFlag =
+          await getProfileGranularityFlag(fakeServiceManager);
+      expect(
+        profilePeriodFlag.valueAsString,
+        equals(ProfileGranularity.medium.value),
+      );
 
       // Switch to low granularity.
       await tester.tap(find.byKey(ProfileGranularityDropdown.dropdownKey));
@@ -61,9 +66,8 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.low.value));
 
-      flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      var profilePeriodFlag = flagList[0];
-      expect(profilePeriodFlag.name, equals(profilePeriod));
+      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.low.value),
@@ -78,13 +82,62 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.high.value));
 
-      flagList = (await fakeServiceManager.service.getFlagList()).flags;
-      profilePeriodFlag = flagList[0];
-      expect(profilePeriodFlag.name, equals(profilePeriod));
+      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.high.value),
       );
     });
+
+    void testUpdatesForFlagChange(
+      WidgetTester tester, {
+      @required String newFlagValue,
+      @required String expectedFlagValue,
+    }) async {
+      await tester.pumpWidget(wrap(dropdown));
+      expect(find.byWidget(dropdown), findsOneWidget);
+      final dropdownButtonFinder =
+          find.byKey(ProfileGranularityDropdown.dropdownKey);
+      DropdownButton dropdownButton = tester.widget(dropdownButtonFinder);
+      expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
+
+      await serviceManager.service.setFlag(
+        vm_flags.profilePeriod,
+        newFlagValue,
+      );
+      await tester.pumpAndSettle();
+      dropdownButton = tester.widget(dropdownButtonFinder);
+      expect(dropdownButton.value, equals(expectedFlagValue));
+    }
+
+    testWidgets('updates value for safe flag change',
+        (WidgetTester tester) async {
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: ProfileGranularity.high.value,
+        expectedFlagValue: ProfileGranularity.high.value,
+      );
+    });
+
+    testWidgets('updates value for unsafe flag change',
+        (WidgetTester tester) async {
+      // 999 is not a value in the dropdown list.
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: '999',
+        expectedFlagValue: ProfileGranularity.medium.value,
+      );
+    });
   });
+}
+
+Future<Flag> getProfileGranularityFlag(
+  FakeServiceManager serviceManager,
+) async {
+  final flagList = (await serviceManager.service.getFlagList()).flags;
+  return flagList.firstWhere(
+    (flag) => flag.name == vm_flags.profilePeriod,
+    orElse: () => null,
+  );
 }

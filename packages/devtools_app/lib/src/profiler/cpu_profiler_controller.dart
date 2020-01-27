@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../config_specific/logger.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -31,16 +32,42 @@ class CpuProfilerController {
 
   final transformer = CpuProfileTransformer();
 
+  /// Notifies that the vm profiler flag has changed.
+  ValueListenable get profilerFlagNotifier => service.profilerFlagNotifier;
+
+  /// Whether the profiler is enabled.
+  ///
+  /// Clients interested in the current value of [profilerFlagNotifier] should
+  /// use this getter. Otherwise, clients subscribing to change notifications,
+  /// should listen to [profilerFlagNotifier].
+  bool get profilerEnabled =>
+      profilerFlagNotifier.value.valueAsString == 'true';
+
+  Future<dynamic> enableCpuProfiler() {
+    return service.enableCpuProfiler();
+  }
+
   Future<void> pullAndProcessProfile({
     @required int startMicros,
     @required int extentMicros,
   }) async {
-    final cpuProfileData = await service.getCpuProfile(
-      startMicros: startMicros,
-      extentMicros: extentMicros,
-    );
-    transformer.processData(cpuProfileData);
-    _dataNotifier.value = cpuProfileData;
+    assert(_dataNotifier.value != null);
+    if (!profilerEnabled) return;
+
+    const Duration processingTimeout = Duration(seconds: 5);
+    var cpuProfileData = baseStateCpuProfileData;
+    try {
+      _dataNotifier.value = null;
+      cpuProfileData = await (service.getCpuProfile(
+        startMicros: startMicros,
+        extentMicros: extentMicros,
+      )).timeout(processingTimeout);
+    } on TimeoutException catch (e) {
+      log(e.message, LogLevel.error);
+    } finally {
+      transformer.processData(cpuProfileData);
+      _dataNotifier.value = cpuProfileData;
+    }
   }
 
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
@@ -54,9 +81,9 @@ class CpuProfilerController {
     await service.clearCpuSamples();
   }
 
-  void resetNotifiers({bool useBaseStateData = true}) {
+  void resetNotifiers() {
     _selectedCpuStackFrameNotifier.value = null;
-    _dataNotifier.value = useBaseStateData ? baseStateCpuProfileData : null;
+    _dataNotifier.value = baseStateCpuProfileData;
   }
 
   void dispose() {

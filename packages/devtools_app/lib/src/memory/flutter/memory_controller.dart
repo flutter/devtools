@@ -10,6 +10,7 @@ import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../auto_dispose.dart';
 import '../../config_specific/logger.dart';
 import '../../globals.dart';
 import '../../ui/fake_file/fake_file.dart';
@@ -32,7 +33,8 @@ final String _memoryLogFilename =
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Flutter Web.
-class MemoryController {
+class MemoryController extends DisposableController
+    with AutoDisposeControllerMixin {
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
@@ -141,9 +143,11 @@ class MemoryController {
     _memoryTracker = MemoryTracker(service, this);
     _memoryTracker.start();
 
-    _memoryTracker.onChange.listen((_) {
-      _memoryTrackerController.add(_memoryTracker);
-    });
+    autoDispose(
+      _memoryTracker.onChange.listen((_) {
+        _memoryTrackerController.add(_memoryTracker);
+      }),
+    );
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -155,15 +159,21 @@ class MemoryController {
   }
 
   Future<void> startTimeline() async {
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-      _handleIsolateChanged();
-    });
+    autoDispose(
+      serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
+        _handleIsolateChanged();
+      }),
+    );
 
-    serviceManager.onConnectionAvailable.listen(_handleConnectionStart);
+    autoDispose(
+      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+    );
     if (serviceManager.hasConnection) {
       _handleConnectionStart(serviceManager.service);
     }
-    serviceManager.onConnectionClosed.listen(_handleConnectionStop);
+    autoDispose(
+      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+    );
   }
 
   Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
@@ -274,6 +284,14 @@ class MemoryController {
     }
 
     return false;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _memorySourceNotifier.dispose();
+    _disconnectController.close();
+    _memoryTrackerController.close();
   }
 }
 

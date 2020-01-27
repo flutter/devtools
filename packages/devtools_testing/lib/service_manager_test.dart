@@ -27,7 +27,7 @@ import 'support/flutter_test_environment.dart';
 const jsonRpcInvalidParamsCode = -32602;
 
 Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
-  group('serviceManagerTests', () {
+  group('ServiceConnectionManager', () {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
@@ -38,7 +38,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.isolateManager, isNotNull);
       expect(serviceManager.serviceExtensionManager, isNotNull);
+      expect(serviceManager.vmFlagManager, isNotNull);
       expect(serviceManager.isolateManager.isolates, isNotEmpty);
+      expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
       if (serviceManager.isolateManager.selectedIsolate == null) {
         await serviceManager.isolateManager.onSelectedIsolateChanged
@@ -245,12 +247,48 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await env.tearDownEnvironment();
     });
   }, timeout: const Timeout.factor(4));
+
+  group('VmFlagManager', () {
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
+    test('flags initialized on vm service opened', () async {
+      await env.setupEnvironment();
+
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.vmFlagManager, isNotNull);
+      expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+
+      await env.tearDownEnvironment();
+    });
+
+    test('notifies on flag change', () async {
+      await env.setupEnvironment();
+      const profiler = 'profiler';
+
+      final flagManager = serviceManager.vmFlagManager;
+      final initialFlags = flagManager.flags.value;
+      final profilerFlagNotifier = flagManager.flag(profiler);
+      expect(profilerFlagNotifier.value.valueAsString, equals('true'));
+
+      await serviceManager.service.setFlag(profiler, 'false');
+      expect(profilerFlagNotifier.value.valueAsString, equals('false'));
+
+      // Await a delay so the new flags have time to be pulled and set.
+      await Future.delayed(const Duration(milliseconds: 5000));
+      final newFlags = flagManager.flags.value;
+      expect(newFlags, isNot(equals(initialFlags)));
+
+      await env.tearDownEnvironment();
+    });
+  }, timeout: const Timeout.factor(4));
 }
 
 Future<void> runServiceManagerTestsWithDriverFactory(
     {FlutterDriverFactory flutterDriverFactory =
         defaultFlutterRunDriver}) async {
-  group('serviceManagerTests - restoring device-enabled extension:', () {
+  group('ServiceConnectionManager - restoring device-enabled extension', () {
     FlutterRunTestDriver _flutter;
     String _flutterIsolateId;
     VmServiceWrapper service;

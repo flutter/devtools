@@ -15,6 +15,7 @@ import '../../ui/flutter/label.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../../ui/flutter/vm_flag_widgets.dart';
 import '../timeline_controller.dart';
+import '../timeline_model.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'timeline_flame_chart.dart';
@@ -103,7 +104,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           ],
         ),
         if (timelineMode == TimelineMode.frameBased) const FlutterFramesChart(),
-        ValueListenableBuilder(
+        ValueListenableBuilder<TimelineFrame>(
           valueListenable: controller.frameBasedTimeline.selectedFrameNotifier,
           builder: (context, selectedFrame, _) {
             return (timelineMode == TimelineMode.full || selectedFrame != null)
@@ -123,7 +124,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildPrimaryStateControls() {
-    const double minIncludeTextWidth = 900;
+    const double minIncludeTextWidth = 950;
     final sharedWidgets = [
       const SizedBox(width: 8.0),
       clearButton(
@@ -155,7 +156,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     List<Widget> sharedWidgets,
     double minIncludeTextWidth,
   ) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.frameBasedTimeline.pausedNotifier,
       builder: (context, paused, _) {
         return Row(
@@ -189,7 +190,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     List<Widget> sharedWidgets,
     double minIncludeTextWidth,
   ) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.fullTimeline.recordingNotifier,
       builder: (context, recording, _) {
         return Row(
@@ -222,8 +223,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: ProfileGranularityDropdown(),
         ),
         ServiceExtensionButtonGroup(
-          minIncludeTextWidth: 1100,
-          extensions: [performanceOverlay],
+          minIncludeTextWidth: 1300,
+          extensions: [performanceOverlay, profileWidgetBuilds],
         ),
         const SizedBox(width: 8.0),
         OutlineButton(
@@ -231,7 +232,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
           child: MaterialIconLabel(
             Icons.file_download,
             'Export',
-            minIncludeTextWidth: 1100,
+            minIncludeTextWidth: 1300,
           ),
         ),
       ],
@@ -242,7 +243,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     Widget content;
     final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
     if (timelineMode == TimelineMode.full && fullTimelineEmpty) {
-      content = ValueListenableBuilder(
+      content = ValueListenableBuilder<bool>(
         valueListenable: controller.fullTimeline.emptyRecordingNotifier,
         builder: (context, emptyRecording, _) {
           return emptyRecording
@@ -267,7 +268,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildRecordingInfo() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.fullTimeline.recordingNotifier,
       builder: (context, recording, _) {
         return recordingInfo(
@@ -281,7 +282,7 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildEventDetailsSection() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<TimelineEvent>(
       valueListenable: controller.selectedTimelineEventNotifier,
       builder: (context, selectedEvent, _) {
         return EventDetails(selectedEvent);

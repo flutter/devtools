@@ -57,13 +57,15 @@ class ServiceConnectionManager {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  IsolateManager _isolateManager;
-  ServiceExtensionManager _serviceExtensionManager;
+  VmFlagManager get vmFlagManager => _vmFlagManager;
+  final _vmFlagManager = VmFlagManager();
 
   IsolateManager get isolateManager => _isolateManager;
+  IsolateManager _isolateManager;
 
   ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
+  ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp connectedApp;
 
@@ -122,6 +124,7 @@ class ServiceConnectionManager {
     }
 
     this.service = service;
+
     serviceAvailable.complete();
 
     connectedApp = ConnectedApp();
@@ -156,6 +159,7 @@ class ServiceConnectionManager {
 
     _isolateManager._service = service;
     _serviceExtensionManager._service = service;
+    _vmFlagManager.service = service;
 
     _stateController.add(true);
     _connectionAvailableController.add(service);
@@ -164,6 +168,7 @@ class ServiceConnectionManager {
     service.onIsolateEvent.listen(_isolateManager._handleIsolateEvent);
     service.onExtensionEvent
         .listen(_serviceExtensionManager._handleExtensionEvent);
+    service.onVMEvent.listen(_vmFlagManager.handleVmEvent);
 
     final streamIds = [
       EventStreams.kDebug,
@@ -791,6 +796,53 @@ class ServiceExtensionState {
   // For boolean service extensions, [enabled] should equal [value].
   final bool enabled;
   final dynamic value;
+}
+
+class VmFlagManager {
+  VmServiceWrapper get service => _service;
+  VmServiceWrapper _service;
+  set service(VmServiceWrapper service) {
+    _service = service;
+    // Upon setting the vm service, get initial values for vm flags.
+    _initFlags();
+  }
+
+  ValueListenable get flags => _flags;
+  final _flags = ValueNotifier<FlagList>(null);
+
+  final _flagNotifiers = <String, ValueNotifier<Flag>>{};
+
+  ValueNotifier<Flag> flag(String name) {
+    return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
+  }
+
+  void _initFlags() async {
+    final flagList = await service.getFlagList();
+    _flags.value = flagList;
+    if (flagList == null) return;
+
+    final flags = <String, Flag>{};
+    for (var flag in flagList.flags) {
+      flags[flag.name] = flag;
+      _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
+    }
+  }
+
+  @visibleForTesting
+  void handleVmEvent(Event event) async {
+    if (event.kind == EventKind.kVMFlagUpdate) {
+      if (_flagNotifiers.containsKey(event.flag)) {
+        final currentFlag = _flagNotifiers[event.flag].value;
+        _flagNotifiers[event.flag].value = Flag.parse({
+          'name': currentFlag.name,
+          'comment': currentFlag.comment,
+          'modified': true,
+          'valueAsString': event.newValue,
+        });
+        _flags.value = await service.getFlagList();
+      }
+    }
+  }
 }
 
 class VmServiceCapabilities {

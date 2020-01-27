@@ -1510,8 +1510,6 @@ class HtmlMemoryScreen extends HtmlScreen with HtmlSetStateMixin {
 ///      _hashCode [hashCode of instance]
 ///      field [field of parent class that has ref]
 class NavigationState {
-  NavigationState._() : _className = '';
-
   NavigationState.classSelect(this._className);
 
   NavigationState.instanceSelect(this._className, this._hashCode);

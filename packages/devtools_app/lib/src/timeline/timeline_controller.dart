@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../auto_dispose.dart';
 import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -27,7 +28,7 @@ const String timelineScreenId = 'timeline';
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class TimelineController {
+class TimelineController implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
@@ -106,13 +107,26 @@ class TimelineController {
 
     timeline.data.selectedEvent = event;
 
-    cpuProfilerController.resetNotifiers(useBaseStateData: false);
+    cpuProfilerController.resetNotifiers();
 
-    // Fetch a profile if we are not in offline mode.
-    if (!offlineMode || offlineTimelineData == null) {
+    // Fetch a profile if we are not in offline mode and if the profiler is
+    // enabled.
+    if ((!offlineMode || offlineTimelineData == null) &&
+        cpuProfilerController.profilerEnabled) {
       getCpuProfileForSelectedEvent();
     }
 
+    _selectedTimelineEventNotifier.value = event;
+  }
+
+  // TODO(kenz): remove this method once html app is deleted. This is a
+  // workaround to avoid fixing bugs in the DevTools html app. Modifying
+  // [selectTimelineEvent] to work for Flutter DevTools broke the html app, so
+  // this method fixes the regression without wasting resources to make the html
+  // and flutter code 100% compatible.
+  void htmlSelectTimelineEvent(TimelineEvent event) {
+    if (event == null || timeline.data.selectedEvent == event) return;
+    timeline.data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
   }
 
@@ -257,6 +271,16 @@ class TimelineController {
 
   void logNonFatalError(String message) {
     _nonFatalErrorController.add(message);
+  }
+
+  @override
+  void dispose() {
+    cpuProfilerController.dispose();
+    _selectedTimelineEventNotifier.dispose();
+    _timelineModeNotifier.dispose();
+    _clearController.close();
+    _loadOfflineDataController.close();
+    _nonFatalErrorController.close();
   }
 }
 

@@ -114,7 +114,7 @@ Widget _computeIconWidget(DevToolsIcon icon) {
   } else if (icon is ColorIcon) {
     return CustomPaint(
       painter: _ColorIconPainter(icon),
-      size: const Size(18, 18),
+      size: const Size(defaultIconSize, defaultIconSize),
     );
   } else if (icon is CustomIcon) {
     return Container(

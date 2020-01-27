@@ -50,4 +50,16 @@ extension ProfileGranularityExtension on ProfileGranularity {
         return highProfilePeriod;
     }
   }
+
+  static ProfileGranularity fromValue(String value) {
+    switch (value) {
+      case lowProfilePeriod:
+        return ProfileGranularity.low;
+      case highProfilePeriod:
+        return ProfileGranularity.high;
+      case mediumProfilePeriod:
+      default:
+        return ProfileGranularity.medium;
+    }
+  }
 }

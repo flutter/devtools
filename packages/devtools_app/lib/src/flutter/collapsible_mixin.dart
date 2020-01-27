@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'theme.dart';
+
 /// Provides [animations] triggered by toggling the expanded and visible state
 /// of a widget.
 ///
@@ -37,14 +39,8 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
-    expandController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    expandCurve = CurvedAnimation(
-      curve: Curves.easeInOutCubic,
-      parent: expandController,
-    );
+    expandController = defaultAnimationController(this);
+    expandCurve = defaultCurvedAnimation(expandController);
     expandArrowAnimation =
         Tween<double>(begin: 0.75, end: 1.0).animate(expandCurve);
     if (isExpanded) {

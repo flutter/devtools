@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -140,22 +141,6 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
-ErrorReporter showErrorSnackBar(BuildContext context) {
-  return (String title, dynamic error) {
-    // TODO: This is a workaround - need to fix
-    // https://github.com/flutter/devtools/issues/1369.
-    SchedulerBinding.instance.scheduleTask(
-      () => Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(title),
-        ),
-      ),
-      Priority.idle,
-    );
-  };
-}
-
 /// Button to clear data in the UI.
 ///
 /// * `minIncludeTextWidth`: The minimum width the button can be before the text
@@ -223,12 +208,50 @@ StatelessWidget stopRecordingButton({
   );
 }
 
+/// Button to pause recording data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `minIncludeTextWidth`: The minimum width the button can be before the text
+///    is omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget pauseButton({
+  Key key,
+  @required bool paused,
+  double minIncludeTextWidth,
+  @required VoidCallback onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: paused ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.pause,
+      'Pause',
+      minIncludeTextWidth: minIncludeTextWidth,
+    ),
+  );
+}
+
 Widget recordingInfo({
   Key instructionsKey,
   Key statusKey,
   @required bool recording,
   @required String recordedObject,
+  bool isPause = false,
 }) {
+  final stopOrPauseRow = Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: isPause
+        ? const [
+            Text('Click the pause button '),
+            Icon(Icons.pause),
+            Text(' to pause the recording.'),
+          ]
+        : const [
+            Text('Click the stop button '),
+            Icon(Icons.stop),
+            Text(' to end the recording.'),
+          ],
+  );
   final recordingInstructions = Column(
     key: instructionsKey,
     mainAxisAlignment: MainAxisAlignment.center,
@@ -241,14 +264,7 @@ Widget recordingInfo({
           Text(' to start recording $recordedObject.')
         ],
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text('Click the stop button '),
-          Icon(Icons.stop),
-          Text(' to end the recording.')
-        ],
-      ),
+      stopOrPauseRow,
     ],
   );
   final recordingStatus = Column(
@@ -265,3 +281,8 @@ Widget recordingInfo({
     child: recording ? recordingStatus : recordingInstructions,
   );
 }
+
+/// The golden ratio.
+///
+/// Makes for nice-looking rectangles.
+final goldenRatio = 1 + sqrt(5) / 2;

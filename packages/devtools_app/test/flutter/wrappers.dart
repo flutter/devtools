@@ -29,10 +29,10 @@ Widget wrap(Widget widget) {
 
 Widget wrapWithControllers(
   Widget widget, {
-  LoggingController loggingController,
-  MemoryController memoryController,
-  TimelineController timelineController,
-  PerformanceController performanceController,
+  LoggingController logging,
+  MemoryController memory,
+  TimelineController timeline,
+  PerformanceController performance,
 }) {
   return MaterialApp(
     theme: themeFor(isDarkTheme: false),
@@ -40,10 +40,10 @@ Widget wrapWithControllers(
       child: Controllers.overridden(
         overrideProviders: () {
           return ProvidedControllers(
-            logging: loggingController ?? MockLoggingController(),
-            memory: memoryController ?? MockFlutterMemoryController(),
-            timeline: timelineController ?? MockTimelineController(),
-            performance: performanceController ?? MockPerformanceController(),
+            logging: logging ?? MockLoggingController(),
+            memory: memory ?? MockFlutterMemoryController(),
+            timeline: timeline ?? MockTimelineController(),
+            performance: performance ?? MockPerformanceController(),
           );
         },
         child: widget,

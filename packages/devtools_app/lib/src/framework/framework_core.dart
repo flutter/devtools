@@ -40,6 +40,11 @@ class FrameworkCore {
     @required ErrorReporter errorReporter,
   }) async {
     final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
+    if (serviceManager.hasConnection) {
+      // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
+      // this multiple times?
+      return true;
+    }
 
     if (uri != null) {
       final finishedCompleter = Completer<void>();
@@ -53,11 +58,13 @@ class FrameworkCore {
           );
           return true;
         } else {
-          errorReporter('Unable to connect to VM service at "$uri"', null);
+          errorReporter(
+              'Unable to connect to VM service at "$uri" without error', null);
           return false;
         }
       } catch (e) {
-        errorReporter('Unable to connect to VM service at "$uri"', e);
+        errorReporter(
+            'Unable to connect to VM service at "$uri" with error $e', e);
         return false;
       }
     } else {
