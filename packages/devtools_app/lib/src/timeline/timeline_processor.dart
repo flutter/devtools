@@ -711,9 +711,9 @@ class FullTimelineProcessor extends TimelineProcessor {
   }
 
   void _processBatch(int batchSize, List<TraceEventWrapper> traceEvents) {
-    for (int i = _traceEventsProcessed;
-        i < math.min(_traceEventsProcessed + batchSize, traceEvents.length);
-        i++) {
+    final batchEnd =
+        math.min(_traceEventsProcessed + batchSize, traceEvents.length);
+    for (int i = _traceEventsProcessed; i < batchEnd; i++) {
       final eventWrapper = traceEvents[i];
       // This is a duplicate trace event. Skip it.
       // See https://github.com/flutter/flutter/issues/47020.
@@ -754,9 +754,8 @@ class FullTimelineProcessor extends TimelineProcessor {
           break;
       }
       _previousTraceEvent = eventWrapper;
+      _traceEventsProcessed++;
     }
-    _traceEventsProcessed +=
-        math.min(batchSize, traceEvents.length - _traceEventsProcessed);
   }
 
   void _addPendingCompleteRootToTimeline({

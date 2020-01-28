@@ -76,9 +76,9 @@ class CpuProfileTransformer {
   }
 
   void _processBatch(int batchSize, CpuProfileData cpuProfileData) {
-    for (int i = _stackFramesProcessed;
-        i < math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
-        i++) {
+    final batchEnd =
+        math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
+    for (int i = _stackFramesProcessed; i < batchEnd; i++) {
       final k = _stackFrameKeys[i];
       final v = _stackFrameValues[i];
       final stackFrame = CpuStackFrame(
@@ -96,9 +96,8 @@ class CpuProfileTransformer {
         cpuProfileData.stackFrames[v[CpuProfileData.parentIdKey]],
         cpuProfileData,
       );
+      _stackFramesProcessed++;
     }
-    _stackFramesProcessed +=
-        math.min(batchSize, _stackFramesCount - _stackFramesProcessed);
   }
 
   void _processStackFrame(
