@@ -232,6 +232,8 @@ StatelessWidget pauseButton({
   );
 }
 
+// TODO(kenz): make recording info its own stateful widget that handles
+// listening to value notifiers and building info.
 Widget recordingInfo({
   Key instructionsKey,
   Key recordingStatusKey,
@@ -242,6 +244,31 @@ Widget recordingInfo({
   double progressValue,
   bool isPause = false,
 }) {
+  Widget child;
+  if (processing) {
+    child = processingInfo(
+      key: processingStatusKey,
+      progressValue: progressValue,
+      processedObject: recordedObject,
+    );
+  } else if (recording) {
+    child = _recordingStatus(
+      key: recordingStatusKey,
+      recordedObject: recordedObject,
+    );
+  } else {
+    child = _recordingInstructions(
+      key: instructionsKey,
+      recordedObject: recordedObject,
+      isPause: isPause,
+    );
+  }
+  return Center(
+    child: child,
+  );
+}
+
+Widget _recordingInstructions({Key key, String recordedObject, bool isPause}) {
   final stopOrPauseRow = Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: isPause
@@ -256,8 +283,8 @@ Widget recordingInfo({
             Text(' to end the recording.'),
           ],
   );
-  final recordingInstructions = Column(
-    key: instructionsKey,
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Row(
@@ -271,31 +298,17 @@ Widget recordingInfo({
       stopOrPauseRow,
     ],
   );
-  final recordingStatus = Column(
-    key: recordingStatusKey,
+}
+
+Widget _recordingStatus({Key key, String recordedObject}) {
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
       const SizedBox(height: 16.0),
       const CircularProgressIndicator(),
     ],
-  );
-  final processingStatus = processingInfo(
-    key: processingStatusKey,
-    progressValue: progressValue,
-    processedObject: recordedObject,
-  );
-
-  Widget child;
-  if (processing) {
-    child = processingStatus;
-  } else if (recording) {
-    child = recordingStatus;
-  } else {
-    child = recordingInstructions;
-  }
-  return Center(
-    child: child,
   );
 }
 
