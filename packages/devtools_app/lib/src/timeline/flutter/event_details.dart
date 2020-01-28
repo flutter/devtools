@@ -70,6 +70,9 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, _) {
+        // TODO(kenz): investigate why processingInfo doesn't show up on first
+        // event selection. CpuProfileData is not null on the first selection,
+        // but is on subsequent selections.
         if (cpuProfileData == null) {
           return _buildProcessingInfo(cpuProfilerController);
         }
