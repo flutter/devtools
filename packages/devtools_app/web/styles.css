@@ -1231,6 +1231,17 @@ span.strong {
     }
 }
 
+@media all and (max-width: 985px) {
+    .btn-group.collapsible-985 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-985 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
 @media all and (max-width: 1000px) {
     .btn-group.collapsible-1000 .optional-text span:not(.octicon) {
         display: none;
@@ -1248,28 +1259,6 @@ span.strong {
     }
 
     .btn-group.collapsible-1150 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
-@media all and (max-width: 1200px) {
-    .btn-group.collapsible-1200 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-1200 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
-@media all and (max-width: 1400px) {
-    .btn-group.collapsible-1400 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-1400 .btn .flutter-icon {
         margin-right: 0;
         box-sizing: content-box;
     }

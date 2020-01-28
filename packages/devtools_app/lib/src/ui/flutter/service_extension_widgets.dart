@@ -157,25 +157,6 @@ class _ServiceExtensionButtonGroupState
   }
 }
 
-List<Widget> getServiceExtensionWidgets() {
-  return [
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1200,
-      extensions: [performanceOverlay, slowAnimations],
-    ),
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1400,
-      extensions: [debugPaint, debugPaintBaselines],
-    ),
-    ServiceExtensionButtonGroup(
-      minIncludeTextWidth: 1600,
-      extensions: [repaintRainbow, debugAllowBanner],
-    ),
-    // TODO(jacobr): implement TogglePlatformSelector.
-    //  TogglePlatformSelector().selector
-  ];
-}
-
 /// Button that performs a hot reload on the [serviceManager].
 class HotReloadButton extends StatelessWidget {
   @override
