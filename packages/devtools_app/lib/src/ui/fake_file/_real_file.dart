@@ -13,12 +13,21 @@ import 'file_io.dart';
 class MemoryFiles implements FileIO {
   final _fs = const LocalFileSystem();
 
+  Directory exportDirectory() {
+    // TODO(terry): iOS returns /var/folders/xxx/yyy for temporary. Where
+    // xxx & yyy are generated names hard to locate the json file.
+    if (_fs.systemTempDirectory.dirname.startsWith('/var/')) {
+      // TODO(terry): For now export the file to the user's Desktop.
+      final dirPath = _fs.currentDirectory.dirname.split('/');
+      final desktopPath = '/${dirPath[1]}/${dirPath[2]}/Desktop';
+      return _fs.directory(desktopPath);
+    }
+    return _fs.systemTempDirectory;
+  }
+
   @override
   void writeStringToFile(String filename, String contents) {
-    // TODO(terry): Consider path_provider's getTemporaryDirectory
-    //              or getApplicationDocumentsDirectory when
-    //              available in Flutter Web/Desktop.
-    final memoryLogFile = _fs.systemTempDirectory.childFile(filename);
+    final memoryLogFile = exportDirectory().childFile(filename);
     memoryLogFile.writeAsStringSync(contents, flush: true);
   }
 
@@ -27,7 +36,7 @@ class MemoryFiles implements FileIO {
     final previousCurrentDirectory = _fs.currentDirectory;
 
     // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
+    _fs.currentDirectory = exportDirectory();
 
     final memoryLogFile = _fs.currentDirectory.childFile(filename);
 
@@ -45,7 +54,7 @@ class MemoryFiles implements FileIO {
     final previousCurrentDirectory = _fs.currentDirectory;
 
     // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
+    _fs.currentDirectory = exportDirectory();
 
     final allFiles = _fs.currentDirectory.listSync();
 
@@ -69,7 +78,7 @@ class MemoryFiles implements FileIO {
     final previousCurrentDirectory = _fs.currentDirectory;
 
     // TODO(terry): Use path_provider when available?
-    _fs.currentDirectory = _fs.systemTempDirectory;
+    _fs.currentDirectory = exportDirectory();
 
     if (!_fs.isFileSync(path)) return false;
 

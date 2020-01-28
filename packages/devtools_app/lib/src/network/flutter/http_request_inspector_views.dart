@@ -62,7 +62,7 @@ class HttpRequestHeadersView extends StatelessWidget {
         children: [
           Text(
             '$key: ',
-            style: Theme.of(context).textTheme.subtitle,
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Expanded(
             child: Text(
@@ -181,7 +181,7 @@ class HttpRequestCookiesView extends StatelessWidget {
         label: Expanded(
           child: Text(
             title ?? '--',
-            style: theme.textTheme.subhead,
+            style: theme.textTheme.subtitle1,
             overflow: TextOverflow.fade,
           ),
         ),
@@ -300,7 +300,7 @@ class HttpRequestTimingView extends StatelessWidget {
             children: [
               Text(
                 '$key: ',
-                style: Theme.of(context).textTheme.subtitle,
+                style: Theme.of(context).textTheme.subtitle2,
               ),
               Text(value),
             ],

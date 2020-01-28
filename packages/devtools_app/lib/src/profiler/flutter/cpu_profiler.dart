@@ -70,7 +70,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TabBar(
-              labelColor: textTheme.body1.color,
+              labelColor: textTheme.bodyText1.color,
               isScrollable: true,
               controller: _tabController,
               tabs: CpuProfiler.tabs,
@@ -121,7 +121,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Center(
       child: Text(
         CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).textTheme.subhead,
+        style: Theme.of(context).textTheme.subtitle1,
       ),
     );
   }

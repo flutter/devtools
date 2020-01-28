@@ -33,7 +33,7 @@ class DebuggerScreenBody extends StatelessWidget {
       final theme = Theme.of(context);
       final textStyle = Theme.of(context)
           .textTheme
-          .headline
+          .headline5
           .copyWith(color: theme.accentColor);
       return Center(
         child: Text(

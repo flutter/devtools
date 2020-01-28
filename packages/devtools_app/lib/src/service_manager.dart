@@ -233,6 +233,13 @@ class ServiceConnectionManager {
     );
   }
 
+  Future<Response> getAdbMemoryInfo() async {
+    return await callService(
+      registrations.flutterMemory.service,
+      isolateId: _isolateManager.selectedIsolate.id,
+    );
+  }
+
   Future<double> getDisplayRefreshRate() async {
     if (connectedApp == null || !await connectedApp.isAnyFlutterApp) {
       return null;

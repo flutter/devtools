@@ -109,8 +109,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   }
 
   Widget _buildHttpRequestTable() {
-    final titleTheme = Theme.of(context).textTheme.title;
-    final subheadTheme = Theme.of(context).textTheme.subhead;
+    final titleTheme = Theme.of(context).textTheme.headline6;
+    final subheadTheme = Theme.of(context).textTheme.subtitle1;
 
     DataColumn buildDataColumn(
       String name,
