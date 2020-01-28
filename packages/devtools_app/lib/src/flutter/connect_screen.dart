@@ -130,6 +130,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       explicitUri: uri,
       errorReporter: (message, error) {
         Notifications.of(context).push('$message $error');
+        print('$message $error');
       },
     );
     if (connected) {

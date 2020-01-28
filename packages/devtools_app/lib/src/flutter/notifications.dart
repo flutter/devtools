@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'package:flutter_test/flutter_test.dart' show fail;
+
 import 'common_widgets.dart';
 
 const _notificationHeight = 160.0;
@@ -92,6 +94,7 @@ class NotificationsState extends State<_NotificationsProvider> {
 
   /// Pushes a notification [message].
   void push(String message) {
+    // fail('Showing message $message');
     setState(() {
       _notifications.add(
         _Notification(
