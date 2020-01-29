@@ -190,7 +190,7 @@ class _HtmlCpuProfiler extends HtmlCpuProfiler {
 
   @override
   Future<void> prepareCpuProfile() async {
-    _performanceController.cpuProfilerController.transformer
+    await _performanceController.cpuProfilerController.transformer
         .processData(_performanceController.cpuProfileData);
   }
 

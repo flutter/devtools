@@ -37,11 +37,11 @@ void main() {
     FrameBasedTimelineProcessor processor;
 
     setUp(() {
-      processor = FrameBasedTimelineProcessor(
-        uiThreadId: testUiThreadId,
-        gpuThreadId: testGpuThreadId,
-        timelineController: MockTimelineController(),
-      );
+      processor = FrameBasedTimelineProcessor(MockTimelineController())
+        ..primeThreadIds(
+          uiThreadId: testUiThreadId,
+          gpuThreadId: testGpuThreadId,
+        );
     });
 
     test('creates one new frame per id', () {
@@ -267,21 +267,26 @@ void main() {
   group('FullTimelineProcessor', () {
     FullTimelineProcessor processor;
 
+    final traceEvents = [
+      ...asyncTraceEvents,
+      ...goldenUiTraceEvents,
+      ...goldenGpuTraceEvents,
+    ];
+
     setUp(() {
-      processor = FullTimelineProcessor(
-        uiThreadId: testUiThreadId,
-        gpuThreadId: testGpuThreadId,
-        timelineController: MockTimelineController(),
-      );
+      processor = FullTimelineProcessor(MockTimelineController())
+        ..primeThreadIds(
+          uiThreadId: testUiThreadId,
+          gpuThreadId: testGpuThreadId,
+        );
     });
 
-    test('processes all events', () {
+    test('processes all events', () async {
       expect(
         processor.timelineController.fullTimeline.data.timelineEvents,
         isEmpty,
       );
-      processor.processTimeline(asyncTraceEvents
-        ..addAll([...goldenUiTraceEvents, ...goldenGpuTraceEvents]));
+      await processor.processTimeline(traceEvents);
       expect(
         processor.timelineController.fullTimeline.data.timelineEvents.length,
         equals(4),
@@ -312,11 +317,11 @@ void main() {
   group('TimelineProcessor', () {
     // [TimelineProcessor] is abstract, so it doesn't matter which implementation
     // we use for [processor].
-    final processor = FullTimelineProcessor(
-      uiThreadId: testUiThreadId,
-      gpuThreadId: testGpuThreadId,
-      timelineController: MockTimelineController(),
-    );
+    final processor = FullTimelineProcessor(MockTimelineController())
+      ..primeThreadIds(
+        uiThreadId: testUiThreadId,
+        gpuThreadId: testGpuThreadId,
+      );
 
     test('inferEventType', () {
       expect(

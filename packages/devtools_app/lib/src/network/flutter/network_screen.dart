@@ -190,6 +190,9 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                     child: recordingInfo(
                       instructionsKey: NetworkScreen.recordingInstructionsKey,
                       recording: isRecording,
+                      // TODO(kenz): create a processing notifier if necessary
+                      // for this data.
+                      processing: false,
                       recordedObject: 'HTTP requests',
                       isPause: true,
                     ),

@@ -68,6 +68,10 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   TimelineMode get timelineMode => controller.timelineModeNotifier.value;
 
+  bool recording = false;
+  bool processing = false;
+  double processingProgress = 0.0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -79,9 +83,23 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
     cancel();
     addAutoDisposeListener(controller.timelineModeNotifier);
-    autoDispose(controller.fullTimeline.onTimelineProcessed.listen((_) {
-      setState(() {});
-    }));
+    addAutoDisposeListener(controller.fullTimeline.recordingNotifier, () {
+      setState(() {
+        recording = controller.fullTimeline.recordingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.fullTimeline.processingNotifier, () {
+      setState(() {
+        processing = controller.fullTimeline.processingNotifier.value;
+      });
+    });
+    addAutoDisposeListener(controller.fullTimeline.processor.progressNotifier,
+        () {
+      setState(() {
+        processingProgress =
+            controller.fullTimeline.processor.progressNotifier.value;
+      });
+    });
   }
 
   @override
@@ -190,27 +208,22 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     List<Widget> sharedWidgets,
     double minIncludeTextWidth,
   ) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.fullTimeline.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            recordButton(
-              key: TimelineScreen.recordButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _startRecording,
-            ),
-            stopRecordingButton(
-              key: TimelineScreen.stopRecordingButtonKey,
-              recording: recording,
-              minIncludeTextWidth: minIncludeTextWidth,
-              onPressed: _stopRecording,
-            ),
-            ...sharedWidgets,
-          ],
-        );
-      },
+    return Row(
+      children: [
+        recordButton(
+          key: TimelineScreen.recordButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: _startRecording,
+        ),
+        stopRecordingButton(
+          key: TimelineScreen.stopRecordingButtonKey,
+          recording: recording,
+          minIncludeTextWidth: minIncludeTextWidth,
+          onPressed: _stopRecording,
+        ),
+        ...sharedWidgets,
+      ],
     );
   }
 
@@ -242,7 +255,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   Widget _buildFlameChartSection() {
     Widget content;
     final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
-    if (timelineMode == TimelineMode.full && fullTimelineEmpty) {
+    if (timelineMode == TimelineMode.full &&
+        (recording || processing || fullTimelineEmpty)) {
       content = ValueListenableBuilder<bool>(
         valueListenable: controller.fullTimeline.emptyRecordingNotifier,
         builder: (context, emptyRecording, _) {
@@ -268,16 +282,13 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   Widget _buildRecordingInfo() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.fullTimeline.recordingNotifier,
-      builder: (context, recording, _) {
-        return recordingInfo(
-          instructionsKey: TimelineScreen.recordingInstructionsKey,
-          statusKey: TimelineScreen.recordingStatusKey,
-          recording: recording,
-          recordedObject: 'timeline trace',
-        );
-      },
+    return recordingInfo(
+      instructionsKey: TimelineScreen.recordingInstructionsKey,
+      recordingStatusKey: TimelineScreen.recordingStatusKey,
+      recording: recording,
+      processing: processing,
+      progressValue: processingProgress,
+      recordedObject: 'timeline trace',
     );
   }
 
@@ -309,8 +320,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
     controller.fullTimeline.startRecording();
   }
 
-  void _stopRecording() {
-    controller.fullTimeline.stopRecording();
+  void _stopRecording() async {
+    await controller.fullTimeline.stopRecording();
   }
 
   Future<void> _clearTimeline() async {

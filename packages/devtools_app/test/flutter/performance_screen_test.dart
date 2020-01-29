@@ -77,7 +77,7 @@ void main() {
 
         // Stop recording.
         await tester.tap(find.byKey(PerformanceScreen.stopRecordingButtonKey));
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(CpuProfiler), findsOneWidget);
 

@@ -35,7 +35,7 @@ void main() {
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsOneWidget);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
     });
 
@@ -48,7 +48,7 @@ void main() {
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
     });
 
@@ -60,7 +60,7 @@ void main() {
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
     });
 
@@ -73,7 +73,7 @@ void main() {
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.text('TODO CPU bottom up'), findsNothing);

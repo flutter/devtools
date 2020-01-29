@@ -120,6 +120,10 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+Future<void> delayForBatchProcessing({int micros = 1000}) async {
+  await Future.delayed(Duration(microseconds: micros));
+}
+
 /// Creates a [Future] that completes either when `operation` completes or the
 /// duration specified by `timeoutMillis` has passed.
 ///
