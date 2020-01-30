@@ -199,18 +199,13 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
         isAlive: null,
       );
 
-      logEntries = await waitForNextLogData(4);
-      // TODO(jacobr): why do we get two navigation events for this case?
+      logEntries = await waitForNextLogData(3);
       expect(logEntries[0].kind, 'flutter.navigation');
       expect(logEntries[0].summary, equals('MaterialPageRoute<dynamic>(null)'));
       expect(logEntries[0].node, isNull);
 
-      expect(logEntries[1].kind, 'flutter.navigation');
-      expect(logEntries[1].summary, equals('MaterialPageRoute<dynamic>(/)'));
-      expect(logEntries[1].node, isNull);
-
       {
-        final row = logEntries[2];
+        final row = logEntries[1];
         expect(row.kind, 'flutter.error');
         // This error message will change when we apply further cleanup to the error messages.
         expect(row.summary, 'No Material widget found.');
@@ -235,7 +230,7 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
 
       {
-        final row = logEntries[3];
+        final row = logEntries[2];
         expect(row.kind, 'flutter.error');
         expect(
             row.summary,
@@ -261,12 +256,12 @@ Future<void> runLoggingControllerTests(FlutterTestEnvironment env) async {
       }
 
       {
-        final row = logEntries[1];
+        final row = logEntries[0];
         expect(row.kind, 'flutter.navigation');
         final index = loggingController.loggingTableModel.data.indexOf(row);
         // The logging table may contain
         // other rows related to GC that we aren't interested in.
-        expect(index, greaterThanOrEqualTo(1));
+        expect(index, greaterThanOrEqualTo(0));
         final selectionChanged = detailsSelectionStream.first;
         // Trigger the details selection change.
         loggingController.loggingTableModel.setSelection(row, index);
