@@ -603,7 +603,7 @@ class FullTimelineProcessor extends TimelineProcessor {
       : super(timelineController);
 
   /// Number of traceEvents we will process in each batch.
-  static const _defaultBatchSize = 250;
+  static const _defaultBatchSize = 2000;
 
   /// Notifies with the current progress value of processing Timeline data.
   ///
@@ -715,6 +715,8 @@ class FullTimelineProcessor extends TimelineProcessor {
         math.min(_traceEventsProcessed + batchSize, traceEvents.length);
     for (int i = _traceEventsProcessed; i < batchEnd; i++) {
       final eventWrapper = traceEvents[i];
+      _traceEventsProcessed++;
+
       // This is a duplicate trace event. Skip it.
       // See https://github.com/flutter/flutter/issues/47020.
       if (_previousTraceEvent != null &&
@@ -754,7 +756,6 @@ class FullTimelineProcessor extends TimelineProcessor {
           break;
       }
       _previousTraceEvent = eventWrapper;
-      _traceEventsProcessed++;
     }
   }
 

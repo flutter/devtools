@@ -452,6 +452,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     _recordingInstructions.hidden(true);
     _recordingStatus.hidden(false);
     _recordingStatusMessage.text = 'Loading timeline data';
+    _destroySplitter();
   }
 
   Future<void> _exitOfflineMode() async {

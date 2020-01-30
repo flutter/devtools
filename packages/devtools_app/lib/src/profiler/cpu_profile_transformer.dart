@@ -54,8 +54,9 @@ class CpuProfileTransformer {
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
       // Await a small delay to give the UI thread a chance to update the
-      // progress indicator.
-      await delayForBatchProcessing();
+      // progress indicator. Use a longer delay than the default (0) so that the
+      // progress indicator will look more smooth.
+      await delayForBatchProcessing(micros: 5000);
     }
 
     _setExclusiveSampleCounts(cpuProfileData);
