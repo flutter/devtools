@@ -104,6 +104,7 @@ class TimelineController implements DisposableController {
     if (event == null || timeline.data.selectedEvent == event) return;
 
     timeline.data.selectedEvent = event;
+    _selectedTimelineEventNotifier.value = event;
 
     cpuProfilerController.reset();
 
@@ -113,8 +114,6 @@ class TimelineController implements DisposableController {
         cpuProfilerController.profilerEnabled) {
       await getCpuProfileForSelectedEvent();
     }
-
-    _selectedTimelineEventNotifier.value = event;
   }
 
   // TODO(kenz): remove this method once html app is deleted. This is a

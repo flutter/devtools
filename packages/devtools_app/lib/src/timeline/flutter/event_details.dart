@@ -70,8 +70,6 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, _) {
-        // TODO(kenz): processingInfo doesn't show up on first event selection.
-        // See https://github.com/flutter/devtools/issues/1583.
         if (cpuProfileData == null) {
           return _buildProcessingInfo(cpuProfilerController);
         }
@@ -197,7 +195,6 @@ class EventSummary extends StatelessWidget {
     final formattedArgs = encoder.convert(args);
     return Text(
       formattedArgs.replaceAll('"', ''),
-      // TODO(kenz): make monospace font work for flutter desktop.
       style: const TextStyle(fontFamily: 'RobotoMono'),
     );
   }
