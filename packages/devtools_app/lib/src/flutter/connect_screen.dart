@@ -4,13 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 
+import '../../devtools.dart' as devtools;
 import '../../src/framework/framework_core.dart';
 import '../url_utils.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
+import 'notifications.dart';
 import 'screen.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
@@ -54,41 +55,37 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Connect',
-          style: textTheme.headline,
-          key: const Key('Connect Title'),
-        ),
-        const PaddedDivider(),
-        Text(
-          'Connect to a running app',
-          style: textTheme.body2,
-        ),
-        Text(
-          'Enter a URL to a running Dart or Flutter application',
-          style: textTheme.caption,
-        ),
-        const Padding(padding: EdgeInsets.only(top: 20.0)),
-        _buildTextInput(),
-        // Workaround the lack of copy/paste in macOS shell text input
-        // https://github.com/flutter/flutter/issues/30709
-        // by providing a manual paste button.
-        if (!kIsWeb)
-          RaisedButton(
-            child: const Text(
-              'Paste from clipboard (Flutter Desktop paste support workaround)',
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Connect',
+              style: textTheme.headline5,
+              key: const Key('Connect Title'),
             ),
-            onPressed: () async {
-              final data = await Clipboard.getData('text/plain');
-              if (data?.text?.isNotEmpty == true) {
-                controller.text = data?.text;
-              }
-            },
+            const PaddedDivider(),
+            Text(
+              'Connect to a Running App',
+              style: textTheme.bodyText1,
+            ),
+            Text(
+              'Enter a URL to a running Dart or Flutter application',
+              style: textTheme.caption,
+            ),
+            const Padding(padding: EdgeInsets.only(top: 20.0)),
+            _buildTextInput(),
+            const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
+            // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+          ],
+        ),
+        Center(
+          child: Text(
+            'Version ${devtools.version}',
+            style: textTheme.subtitle1,
           ),
-        const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
-        // TODO(https://github.com/flutter/devtools/issues/1111): support drag-and-drop of snapshot files here.
+        )
       ],
     );
   }
@@ -98,7 +95,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SizedBox(
-          width: 240.0,
+          width: 350.0,
           child: TextField(
             onSubmitted: _connect,
             decoration: const InputDecoration(
@@ -109,7 +106,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
                 // of hard coding material colors.
                 borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
-              hintText: 'URL',
+              hintText: 'http://127.0.0.1:12345/AUTH_CODE=/',
             ),
             maxLines: 1,
             controller: controller,
@@ -131,7 +128,9 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: showErrorSnackBar(context),
+      errorReporter: (message, error) {
+        Notifications.of(context).push('$message $error');
+      },
     );
     if (connected) {
       unawaited(
@@ -139,6 +138,14 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
           context,
           routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
         ),
+      );
+      Notifications.of(context).push(
+        'Successfully connected to the VM Service at "$uri"',
+      );
+    } else if (uri == null) {
+      Notifications.of(context).push(
+        'Failed to connect to the VM Service at "${controller.text}".\n'
+        'The link was not valid.',
       );
     }
   }

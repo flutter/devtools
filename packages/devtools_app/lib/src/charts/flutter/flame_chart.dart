@@ -12,6 +12,7 @@ import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
+import '../../utils.dart';
 
 const double rowPadding = 2.0;
 const double rowHeight = 25.0;
@@ -25,7 +26,7 @@ const double sideInsetSmall = 40.0;
 abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
     this.data, {
-    @required this.duration,
+    @required this.time,
     @required this.totalStartingWidth,
     @required this.selected,
     @required this.onSelected,
@@ -35,7 +36,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final T data;
 
-  final Duration duration;
+  final TimeRange time;
 
   final double totalStartingWidth;
 
@@ -50,8 +51,10 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   double get startingContentWidth => totalStartingWidth - startInset - endInset;
 }
 
+// TODO(kenz): support zoom.
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin {
+  static const minZoomLevel = 1.0;
   final rowOffsetForTopPadding = 1;
   final rowOffsetForBottomPadding = 1;
   final rowOffsetForSectionSpacer = 1;
@@ -59,8 +62,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.
   final flameChartNodeTop = 0.0;
-
-  LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
   final List<FlameChartRow> rows = [];
 
@@ -70,6 +71,16 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   bool _shiftKeyPressed = false;
 
+  ScrollController verticalScrollController;
+
+  LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
+
+  double verticalScrollOffset = 0.0;
+
+  double horizontalScrollOffset = 0.0;
+
+  double zoom = minZoomLevel;
+
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
@@ -77,21 +88,48 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   int get startTimeOffset => widget.data.time.start.inMicroseconds;
 
+  /// Provides CustomPaint widgets to be painted on top of the flame chart, if
+  /// overridden.
+  ///
+  /// The painters will be painted in the order that they are returned.
+  List<CustomPaint> buildCustomPaints(BoxConstraints constraints) => [];
+
   @override
   void initState() {
     super.initState();
     initFlameChartElements();
-    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
+
+    linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup()
+      ..addOffsetChangedListener(() {
+        setState(() {
+          horizontalScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+        });
+      });
+    verticalScrollController = ScrollController()
+      ..addListener(() {
+        if (verticalScrollOffset != verticalScrollController.offset) {
+          setState(() {
+            verticalScrollOffset = verticalScrollController.offset;
+          });
+        }
+      });
   }
 
   @override
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
-      _linkedScrollControllerGroup.resetScroll();
+      linkedHorizontalScrollControllerGroup.resetScroll();
+      verticalScrollController.jumpTo(0.0);
     }
     FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    verticalScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,22 +142,35 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         onPointerSignal: (event) => _handlePointerSignal(event),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return ListView.builder(
-              addAutomaticKeepAlives: false,
-              itemCount: rows.length,
-              itemBuilder: (context, index) {
-                return ScrollingFlameChartRow<V>(
-                  linkedScrollControllerGroup: _linkedScrollControllerGroup,
-                  nodes: rows[index].nodes,
-                  width:
-                      math.max(constraints.maxWidth, widget.totalStartingWidth),
-                  selected: widget.selected,
-                );
-              },
-            );
+            final customPaints = buildCustomPaints(constraints);
+            final flameChart = _buildFlameChart(constraints);
+            return customPaints.isNotEmpty
+                ? Stack(
+                    children: [
+                      flameChart,
+                      ...customPaints,
+                    ],
+                  )
+                : flameChart;
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildFlameChart(BoxConstraints constraints) {
+    return ListView.builder(
+      controller: verticalScrollController,
+      addAutomaticKeepAlives: false,
+      itemCount: rows.length,
+      itemBuilder: (context, index) {
+        return ScrollingFlameChartRow<V>(
+          linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
+          nodes: rows[index].nodes,
+          width: math.max(constraints.maxWidth, widget.totalStartingWidth),
+          selected: widget.selected,
+        );
+      },
     );
   }
 
@@ -134,7 +185,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   void expandRows(int newRowLength) {
     final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      rows.add(FlameChartRow());
+      rows.add(FlameChartRow(i));
     }
   }
 
@@ -174,11 +225,11 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final V selected;
 
   @override
-  _ScrollingFlameChartRowState<V> createState() =>
-      _ScrollingFlameChartRowState<V>();
+  ScrollingFlameChartRowState<V> createState() =>
+      ScrollingFlameChartRowState<V>();
 }
 
-class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
+class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     with AutoDisposeMixin {
   ScrollController scrollController;
 
@@ -220,7 +271,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       onHover: _handleMouseHover,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapUp: (details) => _handleTapUp(details, context),
+        onTapUp: _handleTapUp,
         child: SizedBox(
           height: rowHeightWithPadding,
           width: widget.width,
@@ -232,28 +283,29 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             itemCount: nodes.length,
-            itemBuilder: (context, index) {
-              final node = nodes[index];
-              final nextNode =
-                  index == nodes.length - 1 ? null : nodes[index + 1];
-              final paddingLeft = index == 0 ? node.rect.left : 0.0;
-              final paddingRight = nextNode == null
-                  ? widget.width - node.rect.right
-                  : nextNode.rect.left - node.rect.right;
-              return Padding(
-                padding: EdgeInsets.only(
-                  left: paddingLeft,
-                  right: paddingRight,
-                  bottom: rowPadding,
-                ),
-                child: node.buildWidget(
-                  selected: node.data == widget.selected,
-                  hovered: node.data == hovered,
-                ),
-              );
-            },
+            itemBuilder: (context, index) => _buildFlameChartNode(index),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFlameChartNode(int index) {
+    final node = nodes[index];
+    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
+    final paddingLeft = index == 0 ? node.rect.left : 0.0;
+    final paddingRight = nextNode == null
+        ? widget.width - node.rect.right
+        : nextNode.rect.left - node.rect.right;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: paddingLeft,
+        right: paddingRight,
+        bottom: rowPadding,
+      ),
+      child: node.buildWidget(
+        selected: node.data == widget.selected,
+        hovered: node.data == hovered,
       ),
     );
   }
@@ -275,7 +327,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     }
   }
 
-  void _handleTapUp(TapUpDetails details, BuildContext context) {
+  void _handleTapUp(TapUpDetails details) {
     final RenderBox referenceBox = context.findRenderObject();
     final tapPosition = referenceBox.globalToLocal(details.globalPosition);
     final nodeToSelect =
@@ -285,6 +337,7 @@ class _ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     }
   }
 
+  @visibleForTesting
   FlameChartNode binarySearchForNode(double x) {
     int min = 0;
     int max = nodes.length;
@@ -326,11 +379,28 @@ class FlameChartSection {
 }
 
 class FlameChartRow {
+  FlameChartRow(this.index);
+
   final List<FlameChartNode> nodes = [];
+
+  final int index;
+
+  /// Adds a node to [nodes] and assigns [this] to the nodes [row] property.
+  ///
+  /// If [index] is specified and in range of the list, [node] will be added at
+  /// [index]. Otherwise, [node] will be added to the end of [nodes]
+  void addNode(FlameChartNode node, {int index}) {
+    if (index != null && index >= 0 && index < nodes.length) {
+      nodes.insert(index, node);
+    } else {
+      nodes.add(node);
+    }
+    node.row = this;
+  }
 }
 
 class FlameChartNode<T> {
-  const FlameChartNode({
+  FlameChartNode({
     this.key,
     @required this.text,
     @required this.tooltip,
@@ -340,6 +410,7 @@ class FlameChartNode<T> {
     @required this.data,
     @required this.onSelected,
     this.selectable = true,
+    this.sectionIndex,
   });
 
   FlameChartNode.sectionLabel({
@@ -369,16 +440,26 @@ class FlameChartNode<T> {
   final void Function(T) onSelected;
   final bool selectable;
 
+  FlameChartRow row;
+
+  int sectionIndex;
+
   Widget buildWidget({@required bool selected, @required bool hovered}) {
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
+
     final node = Container(
-      width: rect.width,
+      key: hovered ? null : key,
+      // This math.max call prevents using a rect with negative width for
+      // small events that have padding.
+      //
+      // See https://github.com/flutter/devtools/issues/1503 for details.
+      width: math.max(0.0, rect.width),
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
-      child: rect.width > _minWidthForText
+      child: rect.width >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
@@ -391,6 +472,7 @@ class FlameChartNode<T> {
     );
     if (hovered) {
       return Tooltip(
+        key: key,
         message: tooltip,
         preferBelow: false,
         waitDuration: tooltipWait,

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'screen.dart';
+import 'theme.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -95,15 +96,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.didChangeDependencies();
 
     // If the animations are null, initialize them.
-    appBarAnimation ??= AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
+    appBarAnimation ??= defaultAnimationController(
+      this,
       value: isNarrow ? 1.0 : 0.0,
     );
-    appBarCurve ??= CurvedAnimation(
-      parent: appBarAnimation,
-      curve: Curves.easeInOutCirc,
-    );
+    appBarCurve ??= defaultCurvedAnimation(appBarAnimation);
     if (isNarrow) {
       appBarAnimation.forward();
     } else {

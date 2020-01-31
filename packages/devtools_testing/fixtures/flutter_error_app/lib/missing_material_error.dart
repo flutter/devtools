@@ -8,9 +8,9 @@ class MissingMaterialError extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Missing Material',
-      home: const ExampleWidget(),
+      home: ExampleWidget(),
       // The line below can resolve the error.
       // home: Scaffold(body: new ExampleWidget()),
     );
@@ -36,7 +36,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
       children: <Widget>[
         TextField(
           controller: _controller,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Type something',
           ),
         ),

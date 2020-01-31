@@ -10,14 +10,19 @@ import '../info/flutter/info_screen.dart';
 import '../inspector/flutter/inspector_screen.dart';
 import '../logging/flutter/logging_screen.dart';
 import '../memory/flutter/memory_screen.dart';
+import '../network/flutter/network_screen.dart';
 import '../performance/flutter/performance_screen.dart';
 import '../timeline/flutter/timeline_screen.dart';
 import '../ui/flutter/service_extension_widgets.dart';
 import '../ui/theme.dart' as devtools_theme;
 import 'connect_screen.dart';
 import 'initializer.dart';
+import 'notifications.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+
+// TODO(bkonyi): remove this bool when page is ready.
+const showNetworkPage = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -84,7 +89,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           child: Center(
             child: Text(
               'Sorry, $uri was not found.',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline4,
             ),
           ),
         );
@@ -104,6 +109,8 @@ class DevToolsAppState extends State<DevToolsApp> {
               PerformanceScreen(),
               // TODO(https://github.com/flutter/flutter/issues/43783): Put back
               // the debugger screen.
+              if (showNetworkPage)
+                NetworkScreen(),
               LoggingScreen(),
               InfoScreen(),
             ],
@@ -122,6 +129,7 @@ class DevToolsAppState extends State<DevToolsApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: theme,
+      builder: (context, child) => Notifications(child: child),
       onGenerateRoute: _generateRoute,
     );
   }

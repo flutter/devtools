@@ -4,10 +4,12 @@
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter/performance_screen.dart';
+import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/profiler/flutter/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/fake_flutter/_real_flutter.dart';
 import 'package:devtools_app/src/ui/flutter/vm_flag_widgets.dart';
+import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,7 +44,10 @@ void main() {
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
+      await tester.pumpWidget(wrapWithControllers(
+        Builder(builder: screen.buildTab),
+        performance: PerformanceController(),
+      ));
       expect(find.text('Performance'), findsOneWidget);
     });
 
@@ -53,7 +58,10 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final perfScreenBody = PerformanceScreenBody();
-        await tester.pumpWidget(wrap(perfScreenBody));
+        await tester.pumpWidget(wrapWithControllers(
+          perfScreenBody,
+          performance: PerformanceController(),
+        ));
         expect(find.byType(PerformanceScreenBody), findsOneWidget);
         verifyBaseState(perfScreenBody, tester);
 
@@ -69,7 +77,7 @@ void main() {
 
         // Stop recording.
         await tester.tap(find.byKey(PerformanceScreen.stopRecordingButtonKey));
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(CpuProfiler), findsOneWidget);
 
@@ -79,5 +87,30 @@ void main() {
         verifyBaseState(perfScreenBody, tester);
       },
     );
+
+    testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
+        (WidgetTester tester) async {
+      await serviceManager.service.setFlag(vm_flags.profiler, 'false');
+      final perfScreenBody = PerformanceScreenBody();
+      await tester.pumpWidget(wrapWithControllers(
+        perfScreenBody,
+        performance: PerformanceController(),
+      ));
+      expect(find.byType(CpuProfilerDisabled), findsOneWidget);
+      expect(
+        find.byKey(PerformanceScreen.recordingInstructionsKey),
+        findsNothing,
+      );
+      expect(find.byKey(PerformanceScreen.recordButtonKey), findsNothing);
+      expect(
+          find.byKey(PerformanceScreen.stopRecordingButtonKey), findsNothing);
+      expect(find.byKey(PerformanceScreen.clearButtonKey), findsNothing);
+      expect(find.byType(ProfileGranularityDropdown), findsNothing);
+
+      await tester.tap(find.text('Enable profiler'));
+      await tester.pumpAndSettle();
+
+      verifyBaseState(perfScreenBody, tester);
+    });
   });
 }

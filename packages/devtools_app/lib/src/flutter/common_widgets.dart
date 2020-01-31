@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-import '../framework/framework_core.dart';
 import '../ui/flutter/label.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -140,22 +142,6 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-/// Builds an [ErrorReporter] for a context that shows a [SnackBar].
-ErrorReporter showErrorSnackBar(BuildContext context) {
-  return (String title, dynamic error) {
-    // TODO: This is a workaround - need to fix
-    // https://github.com/flutter/devtools/issues/1369.
-    SchedulerBinding.instance.scheduleTask(
-      () => Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(title),
-        ),
-      ),
-      Priority.idle,
-    );
-  };
-}
-
 /// Button to clear data in the UI.
 ///
 /// * `minIncludeTextWidth`: The minimum width the button can be before the text
@@ -223,14 +209,82 @@ StatelessWidget stopRecordingButton({
   );
 }
 
+/// Button to pause recording data.
+///
+/// * `recording`: Whether recording is in progress.
+/// * `minIncludeTextWidth`: The minimum width the button can be before the text
+///    is omitted.
+/// * `onPressed`: The callback to be called upon pressing the button.
+StatelessWidget pauseButton({
+  Key key,
+  @required bool paused,
+  double minIncludeTextWidth,
+  @required VoidCallback onPressed,
+}) {
+  return OutlineButton(
+    key: key,
+    onPressed: paused ? null : onPressed,
+    child: MaterialIconLabel(
+      Icons.pause,
+      'Pause',
+      minIncludeTextWidth: minIncludeTextWidth,
+    ),
+  );
+}
+
+// TODO(kenz): make recording info its own stateful widget that handles
+// listening to value notifiers and building info.
 Widget recordingInfo({
   Key instructionsKey,
-  Key statusKey,
+  Key recordingStatusKey,
+  Key processingStatusKey,
   @required bool recording,
   @required String recordedObject,
+  @required bool processing,
+  double progressValue,
+  bool isPause = false,
 }) {
-  final recordingInstructions = Column(
-    key: instructionsKey,
+  Widget child;
+  if (processing) {
+    child = processingInfo(
+      key: processingStatusKey,
+      progressValue: progressValue,
+      processedObject: recordedObject,
+    );
+  } else if (recording) {
+    child = _recordingStatus(
+      key: recordingStatusKey,
+      recordedObject: recordedObject,
+    );
+  } else {
+    child = _recordingInstructions(
+      key: instructionsKey,
+      recordedObject: recordedObject,
+      isPause: isPause,
+    );
+  }
+  return Center(
+    child: child,
+  );
+}
+
+Widget _recordingInstructions({Key key, String recordedObject, bool isPause}) {
+  final stopOrPauseRow = Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: isPause
+        ? const [
+            Text('Click the pause button '),
+            Icon(Icons.pause),
+            Text(' to pause the recording.'),
+          ]
+        : const [
+            Text('Click the stop button '),
+            Icon(Icons.stop),
+            Text(' to end the recording.'),
+          ],
+  );
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Row(
@@ -241,18 +295,14 @@ Widget recordingInfo({
           Text(' to start recording $recordedObject.')
         ],
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text('Click the stop button '),
-          Icon(Icons.stop),
-          Text(' to end the recording.')
-        ],
-      ),
+      stopOrPauseRow,
     ],
   );
-  final recordingStatus = Column(
-    key: statusKey,
+}
+
+Widget _recordingStatus({Key key, String recordedObject}) {
+  return Column(
+    key: key,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Recording $recordedObject'),
@@ -260,8 +310,33 @@ Widget recordingInfo({
       const CircularProgressIndicator(),
     ],
   );
+}
 
+Widget processingInfo({
+  Key key,
+  @required double progressValue,
+  @required String processedObject,
+}) {
   return Center(
-    child: recording ? recordingStatus : recordingInstructions,
+    child: Column(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Processing $processedObject'),
+        const SizedBox(height: 16.0),
+        SizedBox(
+          width: 200.0,
+          height: 16.0,
+          child: LinearProgressIndicator(
+            value: progressValue,
+          ),
+        ),
+      ],
+    ),
   );
 }
+
+/// The golden ratio.
+///
+/// Makes for nice-looking rectangles.
+final goldenRatio = 1 + sqrt(5) / 2;

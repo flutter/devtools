@@ -1209,23 +1209,34 @@ span.strong {
     }
 }
 
-@media all and (max-width: 800px) {
-    .btn-group.collapsible-800 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-800 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
 @media all and (max-width: 885px) {
     .btn-group.collapsible-885 .optional-text span:not(.octicon) {
         display: none;
     }
 
     .btn-group.collapsible-885 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 950px) {
+    .btn-group.collapsible-950 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-950 .btn .flutter-icon {
+        margin-right: 0;
+        box-sizing: content-box;
+    }
+}
+
+@media all and (max-width: 985px) {
+    .btn-group.collapsible-985 .optional-text span:not(.octicon) {
+        display: none;
+    }
+
+    .btn-group.collapsible-985 .btn .flutter-icon {
         margin-right: 0;
         box-sizing: content-box;
     }
@@ -1242,34 +1253,12 @@ span.strong {
     }
 }
 
-@media all and (max-width: 1015px) {
-    .btn-group.collapsible-1015 .optional-text span:not(.octicon) {
+@media all and (max-width: 1150px) {
+    .btn-group.collapsible-1150 .optional-text span:not(.octicon) {
         display: none;
     }
 
-    .btn-group.collapsible-1015 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
-@media all and (max-width: 1200px) {
-    .btn-group.collapsible-1200 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-1200 .btn .flutter-icon {
-        margin-right: 0;
-        box-sizing: content-box;
-    }
-}
-
-@media all and (max-width: 1400px) {
-    .btn-group.collapsible-1400 .optional-text span:not(.octicon) {
-        display: none;
-    }
-
-    .btn-group.collapsible-1400 .btn .flutter-icon {
+    .btn-group.collapsible-1150 .btn .flutter-icon {
         margin-right: 0;
         box-sizing: content-box;
     }

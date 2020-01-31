@@ -25,7 +25,7 @@ void main() {
   group('Logging Screen', () {
     MockLoggingController mockLoggingController;
     Widget wrap(Widget widget) =>
-        wrapWithControllers(widget, loggingController: mockLoggingController);
+        wrapWithControllers(widget, logging: mockLoggingController);
 
     setUp(() async {
       await ensureInspectorDependencies();

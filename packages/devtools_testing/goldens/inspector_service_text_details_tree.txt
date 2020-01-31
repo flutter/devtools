@@ -7,6 +7,8 @@ Text
  │ overflow: null
  │ textScaleFactor: null
  │ maxLines: null
+ │ textWidthBasis: null
+ │ textHeightBehavior: null
  │ dependencies: [MediaQuery, DefaultTextStyle]
  │
  └─RichText

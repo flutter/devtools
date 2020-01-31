@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
+import '../auto_dispose.dart';
 import '../config_specific/logger.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -27,7 +26,7 @@ const String timelineScreenId = 'timeline';
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class TimelineController {
+class TimelineController implements DisposableController {
   TimelineController() {
     timelineService = TimelineService(this);
     fullTimeline = FullTimeline(this);
@@ -101,18 +100,30 @@ class TimelineController {
     _timelineModeNotifier.value = mode;
   }
 
-  void selectTimelineEvent(TimelineEvent event) {
+  Future<void> selectTimelineEvent(TimelineEvent event) async {
     if (event == null || timeline.data.selectedEvent == event) return;
 
     timeline.data.selectedEvent = event;
+    _selectedTimelineEventNotifier.value = event;
 
-    cpuProfilerController.resetNotifiers(useBaseStateData: false);
+    cpuProfilerController.reset();
 
-    // Fetch a profile if we are not in offline mode.
-    if (!offlineMode || offlineTimelineData == null) {
-      getCpuProfileForSelectedEvent();
+    // Fetch a profile if we are not in offline mode and if the profiler is
+    // enabled.
+    if ((!offlineMode || offlineTimelineData == null) &&
+        cpuProfilerController.profilerEnabled) {
+      await getCpuProfileForSelectedEvent();
     }
+  }
 
+  // TODO(kenz): remove this method once html app is deleted. This is a
+  // workaround to avoid fixing bugs in the DevTools html app. Modifying
+  // [selectTimelineEvent] to work for Flutter DevTools broke the html app, so
+  // this method fixes the regression without wasting resources to make the html
+  // and flutter code 100% compatible.
+  void htmlSelectTimelineEvent(TimelineEvent event) {
+    if (event == null || timeline.data.selectedEvent == event) return;
+    timeline.data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
   }
 
@@ -127,7 +138,7 @@ class TimelineController {
     timeline.data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
-  void loadOfflineData(OfflineData offlineData) {
+  Future<void> loadOfflineData(OfflineData offlineData) async {
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
         TraceEventWrapper(
@@ -145,19 +156,19 @@ class TimelineController {
     offlineTimelineData = offlineData.shallowClone();
     timeline
       ..data = offlineData.shallowClone()
-      ..initProcessor(
+      ..processor.primeThreadIds(
         uiThreadId: uiThreadId,
         gpuThreadId: gpuThreadId,
-        timelineController: this,
-      )
-      ..processTraceEvents(traceEvents);
+      );
+    await timeline.processTraceEvents(traceEvents);
 
     if (timeline.data.cpuProfileData != null) {
-      cpuProfilerController.transformer.processData(offlineData.cpuProfileData);
+      await cpuProfilerController.transformer
+          .processData(offlineTimelineData.cpuProfileData);
     }
 
     setOfflineData();
-    _loadOfflineDataController.add(offlineData);
+    _loadOfflineDataController.add(offlineTimelineData);
 
     if (offlineTimelineData.selectedEvent != null) {
       // TODO(kenz): the flame chart should listen to this stream and
@@ -238,8 +249,9 @@ class TimelineController {
     }
     for (var timeline in timelines) timeline.clear();
     allTraceEvents.clear();
+    offlineTimelineData = null;
     _selectedTimelineEventNotifier.value = null;
-    cpuProfilerController.resetNotifiers();
+    cpuProfilerController.reset();
     _clearController.add(true);
   }
 
@@ -258,11 +270,23 @@ class TimelineController {
   void logNonFatalError(String message) {
     _nonFatalErrorController.add(message);
   }
+
+  @override
+  void dispose() {
+    cpuProfilerController.dispose();
+    _selectedTimelineEventNotifier.dispose();
+    _timelineModeNotifier.dispose();
+    _clearController.close();
+    _loadOfflineDataController.close();
+    _nonFatalErrorController.close();
+  }
 }
 
 class FrameBasedTimeline
     extends TimelineBase<FrameBasedTimelineData, FrameBasedTimelineProcessor> {
-  FrameBasedTimeline(this._timelineController);
+  FrameBasedTimeline(this._timelineController) {
+    processor = FrameBasedTimelineProcessor(_timelineController);
+  }
 
   final TimelineController _timelineController;
 
@@ -308,7 +332,7 @@ class FrameBasedTimeline
     data.selectedEvent = null;
     _timelineController._selectedTimelineEventNotifier.value = null;
     data.cpuProfileData = null;
-    _timelineController.cpuProfilerController.resetNotifiers();
+    _timelineController.cpuProfilerController.reset();
 
     if (debugTimeline && frame != null) {
       final buf = StringBuffer();
@@ -330,20 +354,7 @@ class FrameBasedTimeline
   }
 
   @override
-  void initProcessor({
-    @required int uiThreadId,
-    @required int gpuThreadId,
-    @required TimelineController timelineController,
-  }) {
-    processor = FrameBasedTimelineProcessor(
-      uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
-      timelineController: timelineController,
-    );
-  }
-
-  @override
-  void processTraceEvents(List<TraceEventWrapper> traceEvents) {
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) {
     for (var event in traceEvents) {
       processor.processTraceEvent(event, immediate: true);
     }
@@ -363,7 +374,9 @@ class FrameBasedTimeline
 
 class FullTimeline
     extends TimelineBase<FullTimelineData, FullTimelineProcessor> {
-  FullTimeline(this._timelineController);
+  FullTimeline(this._timelineController) {
+    processor = FullTimelineProcessor(_timelineController);
+  }
 
   final TimelineController _timelineController;
 
@@ -379,11 +392,15 @@ class FullTimeline
   ValueListenable get recordingNotifier => _recordingNotifier;
   final _recordingNotifier = ValueNotifier<bool>(false);
 
+  /// Notifies that the recorded timeline data is currently being processed.
+  ValueListenable get processingNotifier => _processingNotifier;
+  final _processingNotifier = ValueNotifier<bool>(false);
+
   void startRecording() async {
     _recordingNotifier.value = true;
   }
 
-  void stopRecording() {
+  Future<void> stopRecording() async {
     _recordingNotifier.value = false;
 
     if (_timelineController.allTraceEvents.isEmpty) {
@@ -391,7 +408,9 @@ class FullTimeline
       return;
     }
 
-    processTraceEvents(_timelineController.allTraceEvents);
+    _processingNotifier.value = true;
+    await processTraceEvents(_timelineController.allTraceEvents);
+    _processingNotifier.value = false;
     _timelineProcessedController.add(true);
   }
 
@@ -400,21 +419,8 @@ class FullTimeline
   }
 
   @override
-  void initProcessor({
-    @required int uiThreadId,
-    @required int gpuThreadId,
-    @required TimelineController timelineController,
-  }) {
-    processor = FullTimelineProcessor(
-      uiThreadId: uiThreadId,
-      gpuThreadId: gpuThreadId,
-      timelineController: timelineController,
-    );
-  }
-
-  @override
-  void processTraceEvents(List<TraceEventWrapper> traceEvents) {
-    processor.processTimeline(traceEvents);
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
+    await processor.processTimeline(traceEvents);
     _timelineController.fullTimeline.data.initializeEventGroups();
   }
 
@@ -434,13 +440,7 @@ abstract class TimelineBase<T extends TimelineData,
 
   bool get hasStarted => data != null;
 
-  void initProcessor({
-    @required int uiThreadId,
-    @required int gpuThreadId,
-    @required TimelineController timelineController,
-  });
-
-  void processTraceEvents(List<TraceEventWrapper> traceEvents);
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents);
 
   void clear() {
     data?.clear();

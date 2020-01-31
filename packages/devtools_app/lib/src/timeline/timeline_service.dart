@@ -151,11 +151,8 @@ class TimelineService {
     }
 
     for (var timeline in timelineController.timelines) {
-      timeline.initProcessor(
-        uiThreadId: uiThreadId,
-        gpuThreadId: gpuThreadId,
-        timelineController: timelineController,
-      );
+      timeline.processor
+          .primeThreadIds(uiThreadId: uiThreadId, gpuThreadId: gpuThreadId);
     }
   }
 

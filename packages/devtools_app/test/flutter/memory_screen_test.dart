@@ -30,12 +30,12 @@ void main() {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
       const MemoryBody(),
-      memoryController: controller = memoryController ?? MemoryController(),
+      memory: controller = memoryController ?? MemoryController(),
     ));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
-  const windowSize = Size(1599.0, 1000.0);
+  const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
     setUp(() async {
@@ -81,7 +81,7 @@ void main() {
       splitFinder = find.byType(Split);
       expect(splitFinder, findsOneWidget);
       final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFirstFraction, equals(0.25));
+      expect(splitter.initialFirstFraction, equals(0.40));
 
       // Check memory sources available.
       await tester.tap(find.byKey(MemoryScreen.dropdownSourceMenuButtonKey));
@@ -91,9 +91,10 @@ void main() {
       final memorySources = tester.firstWidget(find.byKey(
         MemoryScreen.memorySourcesKey,
       )) as Text;
+
       expect(
         memorySources.data,
-        '${MemoryScreen.memorySourceMenuItemPrefix}${MemoryController.liveFeed}',
+        '${controller.memorySourcePrefix}${MemoryController.liveFeed}',
       );
     });
 

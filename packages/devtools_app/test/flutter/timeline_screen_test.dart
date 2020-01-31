@@ -35,9 +35,8 @@ void main() {
     // Set a wide enough screen width that we do not run into overflow.
     await tester.pumpWidget(wrapWithControllers(
       TimelineScreenBody(),
-      timelineController:
-          controller = timelineController ?? TimelineController()
-            ..selectTimelineMode(mode),
+      timeline: controller = timelineController ?? TimelineController()
+        ..selectTimelineMode(mode),
     ));
     expect(find.byType(TimelineScreenBody), findsOneWidget);
 
@@ -60,7 +59,7 @@ void main() {
     );
   }
 
-  const windowSize = Size(1599.0, 1000.0);
+  const windowSize = Size(1950.0, 1000.0);
 
   group('TimelineScreen', () {
     setUp(() async {
@@ -73,7 +72,10 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
+      await tester.pumpWidget(wrapWithControllers(
+        Builder(builder: screen.buildTab),
+        timeline: TimelineController(),
+      ));
       expect(find.text('Timeline'), findsOneWidget);
     });
 

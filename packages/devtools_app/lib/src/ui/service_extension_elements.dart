@@ -14,17 +14,16 @@ import 'primer.dart';
 
 List<CoreElement> getServiceExtensionElements() {
   return [
-    div(c: 'btn-group collapsible-1200 nowrap margin-left')
+    div(c: 'btn-group collapsible-985 nowrap margin-left')
       ..add(<CoreElement>[
-        ServiceExtensionButton(performanceOverlay).button,
         ServiceExtensionButton(slowAnimations).button,
       ]),
-    div(c: 'btn-group collapsible-1200 nowrap margin-left')
+    div(c: 'btn-group collapsible-985 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(debugPaint).button,
         ServiceExtensionButton(debugPaintBaselines).button,
       ]),
-    div(c: 'btn-group collapsible-1400 nowrap margin-left')
+    div(c: 'btn-group collapsible-1150 nowrap margin-left')
       ..add(<CoreElement>[
         ServiceExtensionButton(repaintRainbow).button,
         ServiceExtensionButton(debugAllowBanner).button,

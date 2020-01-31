@@ -65,3 +65,48 @@ const devtoolsBlue = ColorSwatch<int>(600, {
 });
 
 final chartBackgroundColor = ThemedColor(Colors.grey[50], Colors.grey[850]);
+
+/// The default duration to use for animations.
+const defaultDuration = Duration(milliseconds: 200);
+
+/// A long duration to use for animations.
+///
+/// Use this rarely, only when you want added emphasis to an animation.
+const longDuration = Duration(milliseconds: 400);
+
+/// Builds a [defaultDuration] animation controller.
+///
+/// This is the standard duration to use for animations.
+AnimationController defaultAnimationController(
+  TickerProvider vsync, {
+  double value,
+}) {
+  return AnimationController(
+    duration: defaultDuration,
+    vsync: vsync,
+    value: value,
+  );
+}
+
+/// Builds a [longDuration] animation controller.
+///
+/// This is the standard duration to use for slow animations.
+AnimationController longAnimationController(
+  TickerProvider vsync, {
+  double value,
+}) {
+  return AnimationController(
+    duration: longDuration,
+    vsync: vsync,
+    value: value,
+  );
+}
+
+/// The default curve we use for animations.
+const defaultCurve = Curves.easeInOutCubic;
+
+/// Builds a [CurvedAnimation] with [defaultCurve].
+///
+/// This is the standard curve for animations in DevTools.
+CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
+    CurvedAnimation(curve: defaultCurve, parent: parent);

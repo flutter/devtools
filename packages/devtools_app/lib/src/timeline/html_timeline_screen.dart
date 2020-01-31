@@ -87,6 +87,8 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   ServiceExtensionButton performanceOverlayButton;
 
+  ServiceExtensionButton trackWidgetBuildsButton;
+
   ProfileGranularitySelector _profileGranularitySelector;
 
   CoreElement _timelineModeSettingContainer;
@@ -172,6 +174,8 @@ class HtmlTimelineScreen extends HtmlScreen {
 
     performanceOverlayButton = ServiceExtensionButton(performanceOverlay);
 
+    trackWidgetBuildsButton = ServiceExtensionButton(profileWidgetBuilds);
+
     _profileGranularitySelector = ProfileGranularitySelector(framework);
 
     _timelineModeCheckbox = CoreElement('input', classes: 'checkbox')
@@ -194,22 +198,25 @@ class HtmlTimelineScreen extends HtmlScreen {
     upperButtonSection = div(c: 'section')
       ..layoutHorizontal()
       ..add(<CoreElement>[
-        div(c: 'btn-group collapsible-1015')
+        div(c: 'btn-group collapsible-1150')
           ..add([
             pauseButton,
             resumeButton,
             _startRecordingButton,
             _stopRecordingButton,
           ]),
-        div(c: 'btn-group collapsible-800')..add(clearButton),
+        div(c: 'btn-group collapsible-950')..add(clearButton),
         exitOfflineModeButton,
         div()..flex(),
         debugButtonSection = div(c: 'btn-group'),
         if (enableMultiModeTimeline) _timelineModeSettingContainer,
         _profileGranularitySelector.selector..clazz('margin-left'),
-        div(c: 'btn-group collapsible-800 margin-left')
-          ..add(performanceOverlayButton.button),
-        div(c: 'btn-group collapsible-800')..add(exportButton),
+        div(c: 'btn-group collapsible-950 margin-left')
+          ..add([
+            performanceOverlayButton.button,
+            trackWidgetBuildsButton.button,
+          ]),
+        div(c: 'btn-group collapsible-950')..add(exportButton),
       ]);
 
     _maybeAddDebugButtons();
@@ -269,7 +276,7 @@ class HtmlTimelineScreen extends HtmlScreen {
         timelineFlameChartCanvas.onNodeSelected.listen((node) {
           eventDetails.titleBackgroundColor = node.backgroundColor;
           eventDetails.titleTextColor = node.textColor;
-          timelineController.selectTimelineEvent(node.data);
+          timelineController.htmlSelectTimelineEvent(node.data);
         });
         _setFlameChart(timelineFlameChartCanvas.element);
 
@@ -282,12 +289,14 @@ class HtmlTimelineScreen extends HtmlScreen {
       });
 
     timelineController.onLoadOfflineData.listen((_) {
+      _recordingStatus.hidden(true);
       if (timelineController.offlineTimelineData
           is OfflineFrameBasedTimelineData) {
         final offlineData = timelineController.offlineTimelineData
             as OfflineFrameBasedTimelineData;
         // Relayout the plotly graph so that the frames bar chart reflects the
         // display refresh rate from the imported snapshot.
+        framesBarChart.hidden(false);
         framesBarChart.frameUIgraph.plotlyChart
           ..displayRefreshRate = offlineData.displayRefreshRate
           ..relayoutFPSTimeseriesLayout();
@@ -301,6 +310,8 @@ class HtmlTimelineScreen extends HtmlScreen {
           _selectFrame(
               timelineController.frameBasedTimeline.data.selectedFrame);
         }
+      } else {
+        eventDetails.hidden(false);
       }
 
       if (timelineController.offlineTimelineData.hasCpuProfileData()) {
@@ -369,7 +380,7 @@ class HtmlTimelineScreen extends HtmlScreen {
     timelineFlameChartCanvas.onNodeSelected.listen((node) {
       eventDetails.titleBackgroundColor = node.backgroundColor;
       eventDetails.titleTextColor = node.textColor;
-      timelineController.selectTimelineEvent(node.data);
+      timelineController.htmlSelectTimelineEvent(node.data);
     });
     _setFlameChart(timelineFlameChartCanvas.element);
 
@@ -434,11 +445,14 @@ class HtmlTimelineScreen extends HtmlScreen {
 
   Future<void> prepareViewForOfflineData(TimelineMode timelineMode) async {
     await clearTimeline();
-    framesBarChart.hidden(timelineMode == TimelineMode.full);
+    framesBarChart.hidden(true);
     _setFlameChart(_emptyFlameChart);
-    flameChartContainer.hidden(timelineMode == TimelineMode.frameBased);
-    eventDetails.hidden(timelineMode == TimelineMode.frameBased);
+    flameChartContainer.hidden(false);
+    eventDetails.hidden(true);
     _recordingInstructions.hidden(true);
+    _recordingStatus.hidden(false);
+    _recordingStatusMessage.text = 'Loading timeline data';
+    _destroySplitter();
   }
 
   Future<void> _exitOfflineMode() async {
@@ -496,10 +510,10 @@ class HtmlTimelineScreen extends HtmlScreen {
     _updateButtonStates();
   }
 
-  void _stopFullRecording() {
+  void _stopFullRecording() async {
     assert(timelineController.timelineModeNotifier.value == TimelineMode.full);
     _recordingStatusMessage.text = 'Processing timeline trace';
-    timelineController.fullTimeline.stopRecording();
+    await timelineController.fullTimeline.stopRecording();
     _recordingStatus.hidden(true);
     _updateButtonStates();
   }
@@ -572,6 +586,7 @@ class HtmlTimelineScreen extends HtmlScreen {
       ..disabled = timelineController.fullTimeline.recordingNotifier.value
       ..hidden(offlineMode);
     performanceOverlayButton.button.hidden(offlineMode || isDartCliApp);
+    trackWidgetBuildsButton.button.hidden(offlineMode || isDartCliApp);
     _profileGranularitySelector.selector.hidden(offlineMode);
     exitOfflineModeButton.hidden(!offlineMode);
   }

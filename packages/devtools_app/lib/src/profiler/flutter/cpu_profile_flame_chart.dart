@@ -16,7 +16,7 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame> {
     @required Function(CpuStackFrame stackFrame) onSelected,
   }) : super(
           data,
-          duration: data.profileMetaData.time.duration,
+          time: data.profileMetaData.time,
           totalStartingWidth: width,
           startInset: sideInsetSmall,
           endInset: sideInsetSmall,
@@ -61,7 +61,7 @@ class _CpuProfileFlameChartState
         onSelected: (dynamic frame) => widget.onSelected(frame),
       );
 
-      rows[row].nodes.add(node);
+      rows[row].addNode(node);
 
       for (CpuStackFrame child in stackFrame.children) {
         createChartNodes(child, row + 1);

@@ -10,6 +10,7 @@ import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
 import '../../flutter/table.dart';
+import '../../flutter/theme.dart';
 import '../../table_data.dart';
 import '../../ui/flutter/service_extension_widgets.dart';
 import '../logging_controller.dart';
@@ -124,10 +125,8 @@ class _LogDetailsState extends State<LogDetails>
   @override
   void initState() {
     super.initState();
-    crossFade = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    )..addStatusListener((status) {
+    crossFade = defaultAnimationController(this)
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _oldLog = widget.log;
@@ -209,7 +208,7 @@ class _LogDetailsState extends State<LogDetails>
       child: SingleChildScrollView(
         child: Text(
           log.prettyPrinted ?? '',
-          style: Theme.of(context).textTheme.subhead,
+          style: Theme.of(context).textTheme.subtitle1,
         ),
       ),
     );

@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import '../auto_dispose.dart';
 import '../globals.dart';
 import '../service_registrations.dart' as registrations;
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../version.dart';
 
 // TODO(kenz): we should listen for flag value updates and update the info
@@ -24,7 +25,7 @@ class InfoController extends DisposableController
     with AutoDisposeControllerMixin {
   InfoController({
     @required this.onFlutterVersionChanged,
-    @required this.onFlagListChanged,
+    this.onFlagListChanged,
   });
 
   final OnFlutterVersionChanged onFlutterVersionChanged;
@@ -33,8 +34,16 @@ class InfoController extends DisposableController
 
   final flutterVersionServiceAvailable = Completer();
 
+  ValueNotifier<FlagList> get flagListNotifier =>
+      serviceManager.vmFlagManager.flags;
+
   Future<void> entering() async {
-    onFlagListChanged(await serviceManager.service.getFlagList());
+    // Once the html app is deleted, this code and the [onFlagListChanged] var
+    // can be removed. The flutter version of DevTools listens to [flagNotifier]
+    // for changes.
+    if (onFlagListChanged != null) {
+      onFlagListChanged(await serviceManager.service.getFlagList());
+    }
     await _listenForFlutterVersionChanges();
   }
 

@@ -10,6 +10,7 @@ import 'package:pedantic/pedantic.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/collapsible_mixin.dart';
+import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../diagnostics_node.dart';
 import '../inspector_tree.dart';
@@ -38,24 +39,11 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: showController,
-      builder: (context, child) {
-        // TODO(jacobr): we aren't actually triggering this animation because
-        // rows are currently only added to the tree when they are visible.
-        // It isn't 100% clear this is the right animation due to show for large
-        // tree expands due to https://github.com/flutter/devtools/issues/1227.
-        // A better animation for the inspector case would likely be one that
-        // "slides" the subtree into view instead of growing each subtree node
-        // on its own as that would be more efficient.
-        return SizedBox(
-          height: rowHeight * showAnimation.value,
-          child: Material(child: child),
-        );
-      },
+    return SizedBox(
+      height: rowHeight,
       child: InspectorRowContent(
         row: widget.row,
-        expandAnimation: expandAnimation,
+        expandArrowAnimation: expandArrowAnimation,
         controller: widget.inspectorTreeState.controller,
         onToggle: () {
           setExpanded(!isExpanded);
@@ -179,9 +167,6 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  final defaultAnimationDuration = const Duration(milliseconds: 150);
-  final slowAnimationDuration = const Duration(milliseconds: 300);
-
   InspectorTreeControllerFlutter get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
@@ -200,10 +185,7 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     _scrollControllerY.addListener(_onScrollYChange);
     if (isSummaryTree) {
-      constraintDisplayController = AnimationController(
-        vsync: this,
-        duration: slowAnimationDuration,
-      );
+      constraintDisplayController = longAnimationController(this);
     }
     _bindToController();
   }
@@ -240,8 +222,8 @@ class _InspectorTreeState extends State<InspectorTree>
     final x = _computeTargetX(_scrollControllerY.offset);
     _scrollControllerX.animateTo(
       x,
-      duration: defaultAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: defaultDuration,
+      curve: defaultCurve,
     );
   }
 
@@ -296,8 +278,8 @@ class _InspectorTreeState extends State<InspectorTree>
     );
     currentAnimateY = _scrollControllerY.animateTo(
       targetY,
-      duration: slowAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: longDuration,
+      curve: defaultCurve,
     );
 
     // Determine a target X coordinate consistent with the target Y coordinate
@@ -306,8 +288,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
     unawaited(_scrollControllerX.animateTo(
       targetX,
-      duration: slowAnimationDuration,
-      curve: Curves.easeInOut,
+      duration: longDuration,
+      curve: defaultCurve,
     ));
 
     try {
@@ -475,13 +457,13 @@ class InspectorRowContent extends StatelessWidget {
     @required this.row,
     @required this.controller,
     @required this.onToggle,
-    @required this.expandAnimation,
+    @required this.expandArrowAnimation,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeControllerFlutter controller;
   final VoidCallback onToggle;
-  final Animation<double> expandAnimation;
+  final Animation<double> expandArrowAnimation;
 
   @override
   Widget build(BuildContext context) {
@@ -512,7 +494,7 @@ class InspectorRowContent extends StatelessWidget {
                   ? InkWell(
                       onTap: onToggle,
                       child: RotationTransition(
-                        turns: expandAnimation,
+                        turns: expandArrowAnimation,
                         child: const Icon(
                           Icons.expand_more,
                           size: 16.0,

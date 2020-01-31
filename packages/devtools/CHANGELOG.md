@@ -1,8 +1,19 @@
 ## 0.1.14-dev.2
+* Added collecting of Android Debug Bridge (adb) Java memory information see [PR](https://github.com/flutter/devtools/pull/1553).
+* Added multiple charts to memory profiling (Dart VM and Java memory).
+* Added display interval e.g., 1 minute, 5 minutes, 10 minutes for memory charts.
+* More succinct memory detail marker (pop-up) for data points of a particular timestamp.
+* Graceful resize buttons and drop-downs in memory profile for narrower windows.
+* Updated exported JSON format both Dart VM and ADB memory information.
+* Added timeline slider, to memory profile, for temporal navigation in charts.
+* Added ‘Clear’ button, to memory profile, throws away all collected live data.
+* Fix a number of charting bugs NaN, INF problems, axis scales, etc.
+* Support saving and loading memory profile data.
+* Add Track Widget Builds toggle to Timeline.
+* Fix issues with async trace event rendering in Timeline.
+* Add timing and id information in Timeline event summary.
+* Improve hint text on connect screen.
 * Update package:vm_service dependency to ^2.2.0.
-
-## 0.1.14-dev.1
-* Fix issues with async trace event rendering.
 
 ## 0.1.13 - 2019-12-10
 * Fix crash opening macOS desktop apps in DevTools.

@@ -120,6 +120,21 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+Future<void> delayForBatchProcessing({int micros = 0}) async {
+  // Even with a delay of 0 microseconds, awaiting this delay is enough to free
+  // the UI thread to update the UI.
+  await Future.delayed(Duration(microseconds: micros));
+}
+
+/// Creates a [Future] that completes either when `operation` completes or the
+/// duration specified by `timeoutMillis` has passed.
+///
+/// Completes with null on timeout.
+Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
+      operation,
+      Future<T>.delayed(Duration(milliseconds: timeoutMillis), () => null)
+    ]);
+
 String longestFittingSubstring(
   String originalText,
   num maxWidth,
@@ -518,11 +533,20 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-extension NullSafeLast<T> on List<T> {
-  T nullSafeLast() {
-    if (isEmpty) {
+extension SafeAccess<T> on List<T> {
+  T safeFirst() {
+    return safeGet(0);
+  }
+
+  T safeLast() {
+    return safeGet(length - 1);
+  }
+
+  T safeGet(int index) {
+    if (index < 0 || index >= length) {
       return null;
+    } else {
+      return this[index];
     }
-    return last;
   }
 }
