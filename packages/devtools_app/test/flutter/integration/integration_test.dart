@@ -2,88 +2,72 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:devtools_app/src/flutter/app.dart';
 import 'package:devtools_app/src/flutter/connect_screen.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/inspector/flutter/inspector_screen.dart';
+import 'package:devtools_app/src/inspector/flutter_widget.dart';
+import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart';
 import 'package:devtools_testing/support/file_utils.dart';
+import 'package:devtools_testing/support/flutter_test_driver.dart';
+import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../support/cli_test_driver.dart';
+Future<void> main() async {
+  if (Platform.isLinux)
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  // This integration test can only be run with LiveWidgetsFlutterBinding.
+  // This test cannot be run as a flutter driver test instead because of
+  // https://github.com/flutter/flutter/issues/49843 (Chrome),
+  // https://github.com/flutter/flutter/issues/49841 (Mac),
+  // (Nor on Linux either).
 
-void main() async {
-  Uri uri;
-  Process process;
-  final override = _RealHttpOverride();
-
-  setUpAll(() async {
-    await runZoned(() async {
-      HttpOverrides.global = override;
-      FrameworkCore.init('');
-      compensateForFlutterTestDirectoryBug();
-      print(io.Directory(io.Directory.current.parent.parent.path +
-          '/case_study/memory_leak/'));
-      process = await Process.start(
-        'flutter',
-        <String>['run', '-d', 'flutter-tester'],
-        workingDirectory: io.Directory(io.Directory.current.parent.parent.path +
-                '/case_study/memory_leak/')
-            .path,
-      );
-
-      final Stream<String> lines = process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
-      final StreamController<String> lineController =
-          StreamController<String>.broadcast();
-      final Completer<String> completer = Completer<String>();
-      const prefix =
-          'An Observatory debugger and profiler on Flutter test device '
-          'is available at: ';
-      lines.listen((String line) {
-        print(line);
-        if (completer.isCompleted) {
-          lineController.add(line);
-        } else if (prefix.matchAsPrefix(line) != null) {
-          print('completing $prefix');
-          completer.complete(line);
-        }
-      });
-
-      // Observatory listening on http://127.0.0.1:9595/(token)
-      final observatoryText = await completer.future;
-      print(observatoryText);
-      final observatoryUri = observatoryText.replaceAll(prefix, '');
-      uri = Uri.parse(observatoryUri);
-      print(uri);
-
-      if (uri == null || !uri.isAbsolute) {
-        throw 'Could not parse VM Service URI from $observatoryText';
-      }
-      // print('waiting 5 minutes for input');
-      // sleep(const Duration(minutes: 5));
-      // print('Done waiting');
-    });
-  });
+  TestWidgetsFlutterBinding.ensureInitialized({'FLUTTER_TEST': 'false'});
+  HttpOverrides.global = null;
+  assert(
+      WidgetsBinding.instance is LiveTestWidgetsFlutterBinding,
+      'The integration tests must run with a LiveWidgetsBinding.\n'
+      'These tests make real async calls that cannot be wrapped in a\n'
+      'FakeAsync zone.\n'
+      'The current binding is ${WidgetsBinding.instance}.\n'
+      '\n'
+      'You can likely fix this by running the test on platform vm with\n'
+      '`flutter run` instead of `flutter test`\n');
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
+  compensateForFlutterTestDirectoryBug();
+  Catalog.setCatalog(Catalog.decode(await widgetsJson()));
 
   group('Whole app', () {
-    testWidgets('Connects to a Dart app', (WidgetTester tester) async {
-      HttpOverrides.global = override;
-      final app = DevToolsApp();
+    testWidgets('connects to a dart app', (tester) async {
+      FrameworkCore.init('');
+      final app = DefaultAssetBundle(
+        bundle: _DiskAssetBundle(),
+        child: DevToolsApp(),
+      );
       await tester.pumpWidget(app);
       await tester.pumpAndSettle();
       expect(find.byType(ConnectScreenBody), findsOneWidget);
-      print(uri);
+      await expectLater(
+        find.byWidget(app),
+        matchesGoldenFile('ConnectScreen.png'),
+      );
+
+      await env.setupEnvironment();
       await tester.enterText(
         find.byType(TextField),
-        '$uri',
+        env.flutter.vmServiceUri.toString(),
       );
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.tap(find.byType(RaisedButton));
@@ -94,22 +78,40 @@ void main() async {
         matchesGoldenFile('InspectorScreen.png'),
       );
       expect(find.byType(InspectorScreenBody), findsOneWidget);
+
+      await env.tearDownEnvironment();
+      // Tests fail if target platform is overridden.
+      debugDefaultTargetPlatformOverride = null;
     });
 
-    tearDownAll(() {
-      process.kill();
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
     });
   });
 }
 
-class _RealHttpOverride extends HttpOverrides {
+class _DiskAssetBundle extends CachingAssetBundle {
+  static const _assetManifestDotJson = 'AssetManifest.json';
   @override
-  HttpClient createHttpClient(SecurityContext context) {
-    return HttpClient(context: context);
-  }
+  Future<ByteData> load(String key) async {
+    if (key == _assetManifestDotJson) {
+      final cache = <String, ByteData>{};
+      final files = [
+        ...Directory('web/').listSync(recursive: true),
+        ...Directory('assets/').listSync(recursive: true),
+        ...Directory('fonts/').listSync(recursive: true),
+      ].where((fse) => fse is File);
 
-  @override
-  String findProxyFromEnvironment(Uri url, Map<String, String> environment) {
-    return HttpClient.findProxyFromEnvironment(url, environment: environment);
+      final manifest = <String, List<String>>{
+        for (var file in files) file.path: [file.path]
+      };
+
+      return ByteData.view(
+        Uint8List.fromList(jsonEncode(manifest).codeUnits).buffer,
+      );
+    }
+    return ByteData.view(
+      (await File('${Directory.current.path}/$key').readAsBytes()).buffer,
+    );
   }
 }

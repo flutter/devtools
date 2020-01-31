@@ -108,9 +108,7 @@ class CliAppFixture extends AppFixture {
     }
 
     // Map to WS URI.
-    print('Old URI: $uri');
     uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
-    print('New URI: $uri');
 
     final VmServiceWrapper serviceConnection =
         VmServiceWrapper(await vmServiceConnectUri(uri.toString()), uri);
