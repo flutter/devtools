@@ -55,7 +55,7 @@ class CpuProfileTransformer {
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
-      // progress indicator will look more smooth.
+      // progress indicator will look smoother.
       await delayForBatchProcessing(micros: 5000);
     }
 
