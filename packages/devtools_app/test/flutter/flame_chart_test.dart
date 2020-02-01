@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 void main() {
+  const zoom = 1.0;
+
   group('ScrollingFlameChartRow', () {
     ScrollingFlameChartRow currentRow;
     final linkedScrollControllerGroup = LinkedScrollControllerGroup();
@@ -19,7 +21,9 @@ void main() {
       linkedScrollControllerGroup: linkedScrollControllerGroup,
       nodes: testNodes,
       width: 500.0, // 500.0 is arbitrary.
+      startInset: sideInset,
       selected: null,
+      zoom: zoom,
     );
 
     Future<void> pumpScrollingFlameChartRow(
@@ -49,7 +53,9 @@ void main() {
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         nodes: const [],
         width: 500.0, // 500.0 is arbitrary.
+        startInset: sideInset,
         selected: null,
+        zoom: zoom,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
@@ -91,7 +97,11 @@ void main() {
       node ??= testNode;
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
-        child: node.buildWidget(selected: selected, hovered: hovered),
+        child: node.buildWidget(
+          selected: selected,
+          hovered: hovered,
+          zoom: zoom,
+        ),
       ));
     }
 
@@ -111,6 +121,7 @@ void main() {
                 return testNode.buildWidget(
                   selected: _selected,
                   hovered: _hovered,
+                  zoom: zoom,
                 );
               },
             ),

@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
@@ -55,6 +56,9 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin {
   static const minZoomLevel = 1.0;
+  static const maxZoomLevel = 50.0;
+  static const wasdZoomUnit = 0.25;
+
   final rowOffsetForTopPadding = 1;
   final rowOffsetForBottomPadding = 1;
   final rowOffsetForSectionSpacer = 1;
@@ -167,8 +171,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         return ScrollingFlameChartRow<V>(
           linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
           nodes: rows[index].nodes,
-          width: math.max(constraints.maxWidth, widget.totalStartingWidth),
+          width: math.max(
+            constraints.maxWidth,
+            widget.startingContentWidth * zoom +
+                widget.startInset +
+                widget.endInset,
+          ),
+          startInset: widget.startInset,
           selected: widget.selected,
+          zoom: zoom,
         );
       },
     );
@@ -180,6 +191,12 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     resetColorOffsets();
     rows.clear();
     sections.clear();
+  }
+
+  void _zoomTo(double zoom) {
+    setState(() {
+      this.zoom = zoom;
+    });
   }
 
   void expandRows(int newRowLength) {
@@ -195,14 +212,29 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     } else {
       _shiftKeyPressed = false;
     }
+
+    // Only handle down events so logic is not duplicated on key up.
+    if (event is RawKeyDownEvent) {
+      // Handle zooming / navigation from W-A-S-D keys.
+      final keyLabel = event.data.keyLabel;
+      if (keyLabel == 'w') {
+        _zoomTo(math.min(maxZoomLevel, zoom + wasdZoomUnit));
+      } else if (keyLabel == 'a') {
+        // TODO(kenz): scroll left
+      } else if (keyLabel == 's') {
+        _zoomTo(math.max(minZoomLevel, zoom - wasdZoomUnit));
+      } else if (keyLabel == 'd') {
+        // TODO(kenz): scroll right
+      }
+    }
   }
 
   void _handlePointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
       if (_shiftKeyPressed) {
-        print('shift scroll');
+        // TODO(kenz): scroll vertical list regularly on shift scroll.
       } else {
-        print('regular scroll');
+        // TODO(kenz): zoom on scroll.
       }
     }
   }
@@ -213,7 +245,9 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.nodes,
     @required this.width,
+    @required this.startInset,
     @required this.selected,
+    @required this.zoom,
   });
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -222,7 +256,11 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final double width;
 
+  final double startInset;
+
   final V selected;
+
+  final double zoom;
 
   @override
   ScrollingFlameChartRowState<V> createState() =>
@@ -293,10 +331,35 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   Widget _buildFlameChartNode(int index) {
     final node = nodes[index];
     final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
-    final paddingLeft = index == 0 ? node.rect.left : 0.0;
+
+    double zoomForNode(FlameChartNode node) {
+      return node != null && node.selectable
+          ? widget.zoom
+          : FlameChartState.minZoomLevel;
+    }
+
+    final nodeZoom = zoomForNode(node);
+    final nextNodeZoom = zoomForNode(nextNode);
+
+    double paddingLeft;
+    if (index != 0) {
+      paddingLeft = 0.0;
+    } else if (!node.selectable) {
+      paddingLeft = node.rect.left;
+    } else {
+      paddingLeft =
+          (node.rect.left - widget.startInset) * nodeZoom + widget.startInset;
+    }
+
+    // Node right with zoom and insets taken into consideration.
+    final nodeRight =
+        (node.rect.right - widget.startInset) * nodeZoom + widget.startInset;
     final paddingRight = nextNode == null
-        ? widget.width - node.rect.right
-        : nextNode.rect.left - node.rect.right;
+        ? widget.width - nodeRight
+        : ((nextNode.rect.left - widget.startInset) * nextNodeZoom +
+                widget.startInset) -
+            nodeRight;
+
     return Padding(
       padding: EdgeInsets.only(
         left: paddingLeft,
@@ -306,6 +369,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       child: node.buildWidget(
         selected: node.data == widget.selected,
         hovered: node.data == hovered,
+        zoom: zoomForNode(node),
       ),
     );
   }
@@ -444,7 +508,11 @@ class FlameChartNode<T> {
 
   int sectionIndex;
 
-  Widget buildWidget({@required bool selected, @required bool hovered}) {
+  Widget buildWidget({
+    @required bool selected,
+    @required bool hovered,
+    @required double zoom,
+  }) {
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
 
@@ -454,12 +522,12 @@ class FlameChartNode<T> {
       // small events that have padding.
       //
       // See https://github.com/flutter/devtools/issues/1503 for details.
-      width: math.max(0.0, rect.width),
+      width: math.max(0.0, rect.width * zoom),
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
-      child: rect.width >= _minWidthForText
+      child: rect.width * zoom >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
