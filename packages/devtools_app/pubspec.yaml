@@ -25,7 +25,7 @@ dependencies:
   #   path: ../../third_party/packages/ansi_up
   codemirror: ^0.5.10
   collection: ^1.14.11
-  devtools_server: 0.1.12
+  devtools_server: 0.1.13
   file: ^5.1.0
   http: ^0.12.0+1
   html_shim: ^0.0.2
@@ -56,7 +56,7 @@ dependencies:
   plotly_js:
     ^0.0.2
   #    path: ../../third_party/packages/plotly_js
-  sse: ^3.0.0
+  sse: ^3.1.2
   web_socket_channel:
     ^1.1.0
   flutter:
