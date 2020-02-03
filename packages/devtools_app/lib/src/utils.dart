@@ -120,6 +120,12 @@ void executeWithDelay(Duration delay, void callback(),
   }
 }
 
+Future<void> delayForBatchProcessing({int micros = 0}) async {
+  // Even with a delay of 0 microseconds, awaiting this delay is enough to free
+  // the UI thread to update the UI.
+  await Future.delayed(Duration(microseconds: micros));
+}
+
 /// Creates a [Future] that completes either when `operation` completes or the
 /// duration specified by `timeoutMillis` has passed.
 ///

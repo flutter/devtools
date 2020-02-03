@@ -109,8 +109,8 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
   }
 
   Widget _buildHttpRequestTable() {
-    final titleTheme = Theme.of(context).textTheme.title;
-    final subheadTheme = Theme.of(context).textTheme.subhead;
+    final titleTheme = Theme.of(context).textTheme.headline6;
+    final subheadTheme = Theme.of(context).textTheme.subtitle1;
 
     DataColumn buildDataColumn(
       String name,
@@ -190,6 +190,9 @@ class NetworkScreenBodyState extends State<NetworkScreenBody> {
                     child: recordingInfo(
                       instructionsKey: NetworkScreen.recordingInstructionsKey,
                       recording: isRecording,
+                      // TODO(kenz): create a processing notifier if necessary
+                      // for this data.
+                      processing: false,
                       recordedObject: 'HTTP requests',
                       isPause: true,
                     ),

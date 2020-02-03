@@ -20,6 +20,7 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
   static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
+  static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
   // When content of the selected tab from thee tab controller has this key,
   // we will not show the expand/collapse buttons.
@@ -69,7 +70,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TabBar(
-              labelColor: textTheme.body1.color,
+              labelColor: textTheme.bodyText1.color,
               isScrollable: true,
               controller: _tabController,
               tabs: CpuProfiler.tabs,
@@ -110,10 +111,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               children: _buildProfilerViews(),
             );
     } else {
-      // If [data] is null, CPU profile data is being processed.
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      // If [data] is null, CPU profile data is being processed, so return a
+      // placeholder.
+      return const SizedBox(key: CpuProfiler.dataProcessingKey);
     }
   }
 
@@ -121,7 +121,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Center(
       child: Text(
         CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).textTheme.subhead,
+        style: Theme.of(context).textTheme.subtitle1,
       ),
     );
   }

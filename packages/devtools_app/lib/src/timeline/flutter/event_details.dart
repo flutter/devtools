@@ -39,7 +39,7 @@ class EventDetails extends StatelessWidget {
             selectedEvent != null
                 ? '${selectedEvent.name} - ${msText(selectedEvent.time.duration)}'
                 : noEventSelected,
-            style: textTheme.title,
+            style: textTheme.headline6,
           ),
         ),
         const PaddedDivider.thin(),
@@ -70,9 +70,24 @@ class EventDetails extends StatelessWidget {
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, _) {
+        if (cpuProfileData == null) {
+          return _buildProcessingInfo(cpuProfilerController);
+        }
         return CpuProfiler(
           data: cpuProfileData,
           controller: cpuProfilerController,
+        );
+      },
+    );
+  }
+
+  Widget _buildProcessingInfo(CpuProfilerController cpuProfilerController) {
+    return ValueListenableBuilder(
+      valueListenable: cpuProfilerController.transformer.progressNotifier,
+      builder: (context, progress, _) {
+        return processingInfo(
+          progressValue: progress,
+          processedObject: 'CPU samples',
         );
       },
     );
@@ -82,7 +97,7 @@ class EventDetails extends StatelessWidget {
     return Center(
       child: Text(
         instructions,
-        style: textTheme.subhead,
+        style: textTheme.subtitle1,
       ),
     );
   }
@@ -180,7 +195,6 @@ class EventSummary extends StatelessWidget {
     final formattedArgs = encoder.convert(args);
     return Text(
       formattedArgs.replaceAll('"', ''),
-      // TODO(kenz): make monospace font work for flutter desktop.
       style: const TextStyle(fontFamily: 'RobotoMono'),
     );
   }

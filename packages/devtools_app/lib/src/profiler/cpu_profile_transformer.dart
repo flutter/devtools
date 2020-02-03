@@ -1,19 +1,87 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
+
 import 'package:meta/meta.dart';
 
+import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 
 /// Process for composing [CpuProfileData] into a structured tree of
 /// [CpuStackFrame]'s.
 class CpuProfileTransformer {
-  void processData(CpuProfileData cpuProfileData) {
+  /// Number of stack frames we will process in each batch.
+  static const _defaultBatchSize = 100;
+
+  /// Notifies with the current progress value of transforming CPU profile data.
+  ///
+  /// This value should sit between 0.0 and 1.0.
+  ValueListenable get progressNotifier => _progressNotifier;
+  final _progressNotifier = ValueNotifier<double>(0.0);
+
+  int _stackFramesCount;
+
+  List<dynamic> _stackFrameKeys;
+
+  List<dynamic> _stackFrameValues;
+
+  int _stackFramesProcessed = 0;
+
+  Future<void> processData(CpuProfileData cpuProfileData) async {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
 
-    cpuProfileData.stackFramesJson.forEach((k, v) {
+    // Reset the transformer before processing.
+    reset();
+
+    _stackFramesCount = cpuProfileData?.stackFramesJson?.length ?? 0;
+    _stackFrameKeys = cpuProfileData?.stackFramesJson?.keys?.toList() ?? [];
+    _stackFrameValues = cpuProfileData?.stackFramesJson?.values?.toList() ?? [];
+
+    // At minimum, process the data in 4 batches to smooth the appearance of
+    // the progress indicator.
+    final quarterBatchSize = (_stackFramesCount / 4).round();
+    final batchSize = math.min(
+      _defaultBatchSize,
+      quarterBatchSize == 0 ? 1 : quarterBatchSize,
+    );
+
+    // Use batch processing to maintain a responsive UI.
+    while (_stackFramesProcessed < _stackFramesCount) {
+      _processBatch(batchSize, cpuProfileData);
+      _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
+
+      // Await a small delay to give the UI thread a chance to update the
+      // progress indicator. Use a longer delay than the default (0) so that the
+      // progress indicator will look smoother.
+      await delayForBatchProcessing(micros: 5000);
+    }
+
+    _setExclusiveSampleCounts(cpuProfileData);
+    cpuProfileData.processed = true;
+
+    // TODO(kenz): investigate why this assert is firing again.
+    // https://github.com/flutter/devtools/issues/1529.
+//    assert(
+//      cpuProfileData.profileMetaData.sampleCount ==
+//          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
+//      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
+//      ' != sample count from root '
+//      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
+//    );
+
+    // Reset the transformer after processing.
+    reset();
+  }
+
+  void _processBatch(int batchSize, CpuProfileData cpuProfileData) {
+    final batchEnd =
+        math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
+    for (int i = _stackFramesProcessed; i < batchEnd; i++) {
+      final k = _stackFrameKeys[i];
+      final v = _stackFrameValues[i];
       final stackFrame = CpuStackFrame(
         id: k,
         name: getSimpleStackFrameName(v[CpuProfileData.nameKey]),
@@ -29,20 +97,8 @@ class CpuProfileTransformer {
         cpuProfileData.stackFrames[v[CpuProfileData.parentIdKey]],
         cpuProfileData,
       );
-    });
-    _setExclusiveSampleCounts(cpuProfileData);
-
-    cpuProfileData.processed = true;
-
-// TODO(kenz): investigate why this assert is firing again.
-// https://github.com/flutter/devtools/issues/1529.
-//    assert(
-//      cpuProfileData.profileMetaData.sampleCount ==
-//          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
-//      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
-//      ' != sample count from root '
-//      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
-//    );
+      _stackFramesProcessed++;
+    }
   }
 
   void _processStackFrame(
@@ -73,6 +129,17 @@ class CpuProfileTransformer {
       );
       cpuProfileData.stackFrames[leafId]?.exclusiveSampleCount++;
     }
+  }
+
+  void reset() {
+    _stackFramesProcessed = 0;
+    _stackFrameKeys = null;
+    _stackFrameValues = null;
+    _progressNotifier.value = 0.0;
+  }
+
+  void dispose() {
+    _progressNotifier.dispose();
   }
 }
 

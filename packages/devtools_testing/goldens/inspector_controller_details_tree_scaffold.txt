@@ -1,5 +1,5 @@
 ▼[S]Scaffold <-- selected
-│ dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality, _InheritedTheme, MediaQuery]
+│ dependencies: [_LocalizationsScope-[GlobalKey#00000], TickerMode, Directionality, _InheritedTheme, MediaQuery]
 │ ▶state: ScaffoldState#00000(tickers: tracking 2 tickers)
 └─▼[S]_ScaffoldScope
     ▼[P]PrimaryScrollController
@@ -7,7 +7,7 @@
     └─▼[M]Material
       │   type: canvas
       │   color: [#00000aff]#00000a
-      │   dependencies: [_LocalizationsScope-[GlobalKey#00000], _InheritedTheme]
+      │   dependencies: [_LocalizationsScope-[GlobalKey#00000], TickerMode, _InheritedTheme]
       │   state: _MaterialState#00000
       └─▼[/icons/inspector/resume.png]AnimatedPhysicalModel
         │   duration: 200ms
@@ -18,6 +18,7 @@
         │   animateColor: false
         │   shadowColor: [#000000ff]#000000
         │   animateShadowColor: true
+        │   dependencies: [TickerMode]
         │   ▶state: _AnimatedPhysicalModelState#00000(ticker inactive)
         └─▼[P]PhysicalModel
           │   shape: rectangle
@@ -31,7 +32,7 @@
               │   ▶renderObject: _RenderInkFeatures#00000
               └─▼[/icons/inspector/resume.png]AnimatedDefaultTextStyle
                 │   duration: 200ms
-                │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
+                │   debugLabel: (englishLike body1 2014).merge(blackMountainView bodyText2)
                 │   inherit: false
                 │   color: [#000000dd]#00000000
                 │   family: Roboto
@@ -41,9 +42,10 @@
                 │   decoration: TextDecoration.none
                 │   softWrap: wrapping at box width
                 │   overflow: clip
+                │   dependencies: [TickerMode]
                 │   ▶state: _AnimatedDefaultTextStyleState#00000(ticker inactive)
                 └─▼[/icons/inspector/textArea.png]DefaultTextStyle
-                  │   debugLabel: (englishLike body1 2014).merge(blackMountainView body1)
+                  │   debugLabel: (englishLike body1 2014).merge(blackMountainView bodyText2)
                   │   inherit: false
                   │   color: [#000000dd]#00000000
                   │   family: Roboto
@@ -78,6 +80,7 @@
                         └─▼[/icons/inspector/atrule.png]MediaQuery
                           │   MediaQueryData(size: Size(800.0, 600.0), devicePixelRatio: 3.0, textScaleFactor: 1.0, platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, physicalDepth: 1.7976931348623157e+308, alwaysUse24HourFormat: false, accessibleNavigation: false, highContrast: false, disableAnimations: false, invertColors: false, boldText: false)
                           └─▼[F]_FloatingActionButtonTransition
+                            │   dependencies: [TickerMode]
                             │   ▶state: _FloatingActionButtonTransitionState#00000(tickers: tracking 1 ticker)
                             └─▼[/icons/inspector/value.png]Stack
                               │   alignment: centerRight

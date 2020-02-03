@@ -7,8 +7,10 @@
 │ overflow: null [D]
 │ textScaleFactor: null [D]
 │ maxLines: null [D]
+│ textWidthBasis: null [D]
+│ textHeightBehavior: null [D] <-- selected
 │ dependencies: [MediaQuery, DefaultTextStyle]
-└─▼[/icons/inspector/textArea.png]RichText <-- selected
+└─▼[/icons/inspector/textArea.png]RichText
     softWrap: wrapping at box width
     maxLines: unlimited
     text: "Hello, World!"

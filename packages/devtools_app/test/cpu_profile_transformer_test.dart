@@ -9,13 +9,17 @@ import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileTransformer', () {
-    final cpuProfileTransformer = CpuProfileTransformer();
-    final CpuProfileData cpuProfileData =
-        CpuProfileData.parse(cpuProfileResponseJson);
+    CpuProfileTransformer cpuProfileTransformer;
+    CpuProfileData cpuProfileData;
 
-    test('processCpuProfile', () {
+    setUp(() {
+      cpuProfileTransformer = CpuProfileTransformer();
+      cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+    });
+
+    test('processData', () async {
       expect(cpuProfileData.processed, isFalse);
-      cpuProfileTransformer.processData(cpuProfileData);
+      await cpuProfileTransformer.processData(cpuProfileData);
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -28,8 +32,9 @@ void main() {
         final cpuProfileDataWithMissingLeaf =
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
-          () {
-            cpuProfileTransformer.processData(cpuProfileDataWithMissingLeaf);
+          () async {
+            await cpuProfileTransformer
+                .processData(cpuProfileDataWithMissingLeaf);
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
@@ -38,6 +43,13 @@ void main() {
 
       // Only run this test if asserts are enabled.
       assert(_runTest());
+    });
+
+    test('dispose', () {
+      cpuProfileTransformer.dispose();
+      expect(() {
+        cpuProfileTransformer.progressNotifier.addListener(() {});
+      }, throwsA(anything));
     });
   });
 
