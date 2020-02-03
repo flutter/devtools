@@ -25,12 +25,12 @@ double max(Iterable<double> numbers) =>
     numbers.fold(-double.infinity, (minimum, cur) => math.max(minimum, cur));
 
 String crossAxisAssetImageUrl(Axis direction, CrossAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/cross_axis_alignment/'
+  return 'assets/img/layout_explorer/cross_axis_alignment/'
       '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
 }
 
 String mainAxisAssetImageUrl(Axis direction, MainAxisAlignment alignment) {
-  return 'assets/img/story_of_layout/main_axis_alignment/'
+  return 'assets/img/layout_explorer/main_axis_alignment/'
       '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
 }
 
