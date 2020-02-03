@@ -3,4 +3,5 @@
 export '_real_flutter.dart'
     if (dart.library.ui) '_real_flutter.dart'
     if (dart.library.html) '_fake_flutter.dart'
-    if (dart.library.io) '_fake_flutter.dart' hide Element;
+    if (dart.library.io) '_fake_flutter.dart'
+    hide Element, required, visibleForTesting;
