@@ -1,4 +1,4 @@
-## 0.1.14-dev.2
+## 0.1.14 2020-02-03
 * Added collecting of Android Debug Bridge (adb) Java memory information see [PR](https://github.com/flutter/devtools/pull/1553).
 * Added multiple charts to memory profiling (Dart VM and Java memory).
 * Added display interval e.g., 1 minute, 5 minutes, 10 minutes for memory charts.

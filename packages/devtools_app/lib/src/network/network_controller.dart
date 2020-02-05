@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../ui/fake_flutter/fake_flutter.dart';
