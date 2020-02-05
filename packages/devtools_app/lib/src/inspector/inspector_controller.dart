@@ -875,7 +875,7 @@ class InspectorController extends DisposableController
   void _checkForLayoutExplorerSupport() {
     if (onLayoutExplorerSupported == null) return;
     _onVersionSupported(
-      SemanticVersion(major: 1, minor: 12, patch: 16),
+      SemanticVersion(major: 1, minor: 13, patch: 1),
       onLayoutExplorerSupported,
     );
   }
