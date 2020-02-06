@@ -18,14 +18,14 @@ const toEnumEntryCodeDefinition = '''
 ''';
 
 extension InspectorFlutterService on ObjectGroup {
-  Future<void> invokeTweakFlexProperties(
+  Future<void> invokeSetFlexProperties(
     InspectorInstanceRef ref,
     MainAxisAlignment mainAxisAlignment,
     CrossAxisAlignment crossAxisAlignment,
   ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.tweakFlexProperties,
+      RegistrableServiceExtension.setFlexProperties,
       {
         'id': ref.id,
         'mainAxisAlignment': '$mainAxisAlignment',
@@ -34,24 +34,24 @@ extension InspectorFlutterService on ObjectGroup {
     );
   }
 
-  Future<void> invokeTweakFlexFactor(
+  Future<void> invokeSetFlexFactor(
     InspectorInstanceRef ref,
     int flexFactor,
   ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.tweakFlexFactor,
+      RegistrableServiceExtension.setFlexFactor,
       {'id': ref.id, 'flexFactor': '$flexFactor'},
     );
   }
 
-  Future<void> invokeTweakFlexFit(
+  Future<void> invokeSetFlexFit(
     InspectorInstanceRef ref,
     FlexFit flexFit,
   ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.tweakFlexFit,
+      RegistrableServiceExtension.setFlexFit,
       {'id': ref.id, 'flexFit': '$flexFit'},
     );
   }
@@ -77,7 +77,7 @@ extension InspectorFlutterService on ObjectGroup {
   ) async {
     final name = extension.name;
     if (!serviceManager.serviceExtensionManager
-        .isServiceExtensionAvailable(name)) {
+        .isServiceExtensionAvailable('ext.flutter.inspector.$name')) {
       String expression = '''
         ${extension.callbackDefinition}
         WidgetInspectorService.instance.registerServiceExtension(
@@ -195,8 +195,8 @@ class RegistrableServiceExtension {
       ''',
   );
 
-  static final tweakFlexFit = RegistrableServiceExtension(
-    name: 'tweakFlexFit',
+  static final setFlexFit = RegistrableServiceExtension(
+    name: 'setFlexFit',
     statements: '''
       final String id = parameters['id'];
       final FlexFit flexFit =
@@ -205,15 +205,20 @@ class RegistrableServiceExtension {
       if (object == null) return null;
       final render = object.renderObject;
       final parentData = render.parentData;
+      bool succeed = false;
       if (parentData is FlexParentData) {
         parentData.fit = flexFit;
         render.markNeedsLayout();
+        succeed = true;
       }
+      return Future<Map<String, Object>>.value(<String, Object>{
+        'result': succeed,
+      });
     ''',
     requireEnumDeserialization: true,
   );
-  static final tweakFlexFactor = RegistrableServiceExtension(
-    name: 'tweakFlexFactor',
+  static final setFlexFactor = RegistrableServiceExtension(
+    name: 'setFlexFactor',
     statements: '''
       final String id = parameters['id'];
       final String flexFactor = parameters['flexFactor'];
@@ -222,14 +227,19 @@ class RegistrableServiceExtension {
       if (object == null) return null;
       final render = object.renderObject;
       final parentData = render.parentData;
+      bool succeed = false;
       if (parentData is FlexParentData) {
         parentData.flex = factor;
         render.markNeedsLayout();
+        succeed = true;
       }
+      return Future<Map<String, Object>>.value(<String, Object>{
+        'result': succeed,
+      });
     ''',
   );
-  static final tweakFlexProperties = RegistrableServiceExtension(
-    name: 'tweakFlexProperties',
+  static final setFlexProperties = RegistrableServiceExtension(
+    name: 'setFlexProperties',
     statements: '''
       final String id = parameters['id'];
       final MainAxisAlignment mainAxisAlignment = toEnumEntry<MainAxisAlignment>(
@@ -243,11 +253,16 @@ class RegistrableServiceExtension {
       final dynamic object = WidgetInspectorService.instance.toObject(id);
       if (object == null) return null;
       final render = object.renderObject;
+      bool succeed = false;
       if (render is RenderFlex) {
         render.mainAxisAlignment = mainAxisAlignment;
         render.crossAxisAlignment = crossAxisAlignment;
         render.markNeedsLayout();
+        succeed = true;
       }
+      return Future<Map<String, Object>>.value(<String, Object>{
+        'result': succeed,
+      });
     ''',
     requireEnumDeserialization: true,
   );
