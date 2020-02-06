@@ -7,7 +7,7 @@ author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.3.0 <3.0.0'
+  sdk: '>=2.6.0 <3.0.0'
 
 dependencies:
   args: ^1.5.1
@@ -19,4 +19,4 @@ dependencies:
   shelf_static: ^0.2.8
   http_multi_server: ^2.1.0
   usage: 3.4.1
-  vm_service: '>=1.0.0 <3.0.0'
+  vm_service: ^2.3.1

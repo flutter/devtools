@@ -19,6 +19,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
 import 'handlers.dart';
+import 'profile.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
@@ -26,6 +27,8 @@ const argEnableNotifications = 'enable-notifications';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
+const argAuthentication = 'auth';
+const argEnableProfile = 'profile';
 const argHeadlessMode = 'headless';
 const argTryPorts = 'try-ports';
 const launchDevToolsService = 'launchDevTools';
@@ -53,6 +56,17 @@ final argParser = ArgParser()
     defaultsTo: '1',
     help:
         'The number of ascending ports to try binding to before failing with an error. ',
+  )
+  ..addOption(
+    argAuthentication,
+    defaultsTo: '',
+    abbr: 'a',
+    help: 'observatory authentication URL',
+  )
+  ..addFlag(
+    argEnableProfile,
+    negatable: false,
+    help: 'Enable profile recollection to JSON files.',
   )
   ..addFlag(
     argMachine,
@@ -97,6 +111,12 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
 
+  final String authenticationUrl = args[argAuthentication];
+//  const String authenticationUrl = 'http://127.0.0.1:42953/jlr38V_yhQw=/';
+
+  final bool isProfile = args[argEnableProfile];
+//  const bool isProfile = true;
+
   return serveDevTools(
     help: help,
     machineMode: machineMode,
@@ -106,6 +126,8 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
+    observatoryAuth: authenticationUrl,
+    profile: isProfile,
   );
 }
 
@@ -125,6 +147,8 @@ Future<HttpServer> serveDevTools({
   int port = 0,
   int numPortsToTry = 1,
   shelf.Handler handler,
+  String observatoryAuth = '',
+  bool profile = false,
 }) async {
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -243,7 +267,20 @@ Future<HttpServer> serveDevTools({
     });
   }
 
+  // Collect profiling information
+  if (observatoryAuth.isNotEmpty && profile) {
+    final observatoryUri = Uri.tryParse(observatoryAuth);
+    await _hookupMemoryProfiling(observatoryUri);
+  }
+
   return server;
+}
+
+Future<void> _hookupMemoryProfiling(Uri observatoryUri) async {
+    final VmService service = await _connectToVmService(observatoryUri);
+    ProfileCollection(service);
+
+    print("Collecting profile information to ...");
 }
 
 Future<void> _handleVmRegister(
