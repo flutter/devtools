@@ -360,7 +360,7 @@ class _FullTimelineFlameChartState
     return [
       CustomPaint(
         painter: AsyncGuidelinePainter(
-          zoom: zoom,
+          zoom: zoomController.value,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -574,7 +574,7 @@ class AsyncGuidelinePainter extends CustomPainter {
   ) {
     for (int i = firstLineIndex; i < guidelines.length; i++) {
       final line = guidelines[i];
-      // Take [chartStartOffset] and
+      // Take [chartStartInset] and
       // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
       // calculating [zoomedLine] because these units of space should not scale.
       final unzoomableOffset =
@@ -590,7 +590,7 @@ class AsyncGuidelinePainter extends CustomPainter {
         );
       } else {
         final zoomedLineEndX =
-            (line.end.dx - unzoomableOffset) * zoom + unzoomableOffset;
+            (line.end.dx - chartStartInset) * zoom + chartStartInset;
         zoomedLine = HorizontalLineSegment(
           Offset(zoomedLineStartX, line.start.dy),
           Offset(zoomedLineEndX, line.end.dy),

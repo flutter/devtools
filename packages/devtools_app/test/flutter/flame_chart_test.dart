@@ -23,7 +23,8 @@ void main() {
       width: 500.0, // 500.0 is arbitrary.
       startInset: sideInset,
       selected: null,
-      zoom: zoom,
+      zoom: FlameChartState.minZoomLevel,
+      cacheExtent: null,
     );
 
     Future<void> pumpScrollingFlameChartRow(
@@ -55,7 +56,8 @@ void main() {
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
         selected: null,
-        zoom: zoom,
+        zoom: FlameChartState.minZoomLevel,
+        cacheExtent: null,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
