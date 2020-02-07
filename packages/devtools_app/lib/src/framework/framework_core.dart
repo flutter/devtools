@@ -63,10 +63,11 @@ class FrameworkCore {
           return false;
         }
       } catch (e) {
-        print(e);
+        if (e is StackOverflowError) {
+          print(e.stackTrace);
+        }
         errorReporter(
             'Unable to connect to VM service at "$uri" with error $e', e);
-        rethrow;
         return false;
       }
     } else {
