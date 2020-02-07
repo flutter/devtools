@@ -107,7 +107,7 @@ extension LayoutThemeDataExtension on ThemeData {
   Color get inActiveBackgroundColor => cardColor;
 }
 
-const freeSpaceAssetName = 'assets/img/story_of_layout/free_space.png';
+const freeSpaceAssetName = 'assets/img/layout_explorer/free_space.png';
 
 const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,

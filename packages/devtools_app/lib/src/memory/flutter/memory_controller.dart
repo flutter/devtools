@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:ui' as dart_ui;
 
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
