@@ -1,3 +1,9 @@
+## 0.1.15 2020-02-07
+* Fix a stack overflow error that was caused by a change in Dart's RTI implementation [#1615](https://github.com/flutter/devtools/pull/1615).
+* Hide annotations that Flutter re-exports [#1606](https://github.com/flutter/devtools/pull/1606)
+* Update package:devtools_server dependency to 0.1.13 or newer [#1603](https://github.com/flutter/devtools/pull/1603)
+* Update package:sse dependency to 3.1.2 or newer [#1601](https://github.com/flutter/devtools/pull/1601)
+
 ## 0.1.14 2020-02-03
 * Added collecting of Android Debug Bridge (adb) Java memory information see [PR](https://github.com/flutter/devtools/pull/1553).
 * Added multiple charts to memory profiling (Dart VM and Java memory).
