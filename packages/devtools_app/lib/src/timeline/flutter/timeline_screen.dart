@@ -272,12 +272,15 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
       content = TimelineFlameChart();
     }
 
-    return Container(
-      key: TimelineScreen.flameChartSectionKey,
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Container(
+        key: TimelineScreen.flameChartSectionKey,
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).focusColor),
+        ),
+        child: content,
       ),
-      child: content,
     );
   }
 

@@ -63,12 +63,13 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 50.0;
+  static const maxZoomLevel = 100.0;
   static const minScrollOffset = 0.0;
 
-  final rowOffsetForTopPadding = 1;
   final rowOffsetForBottomPadding = 1;
   final rowOffsetForSectionSpacer = 1;
+
+  int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.
@@ -115,6 +116,11 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
   // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
   double get wasdZoomOutUnit => zoomController.value * 1 / 3;
+
+  double get widthWithZoom =>
+      widget.startingContentWidth * zoomController.value +
+      widget.startInset +
+      widget.endInset;
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -223,12 +229,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         return ScrollingFlameChartRow<V>(
           linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
           nodes: rows[index].nodes,
-          width: math.max(
-            constraints.maxWidth,
-            widget.startingContentWidth * zoomController.value +
-                widget.startInset +
-                widget.endInset,
-          ),
+          width: math.max(constraints.maxWidth, widthWithZoom),
           startInset: widget.startInset,
           selected: widget.selected,
           zoom: zoomController.value,
