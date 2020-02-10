@@ -147,55 +147,59 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       upperBound: maxZoomLevel,
       vsync: this,
     )
-      ..addStatusListener((status) {
-        // We set [linkedScrollGroupCacheExtent] based on the state of the
-        // animation because we need to know the size of off screen widgets as we
-        if (status == AnimationStatus.forward &&
-            linkedScrollGroupCacheExtent !=
-                linkedHorizontalScrollControllerGroup.offset) {
-          setState(() {
-            // Set the cache extent to the offset of the scroll group so
-            // that the size of the off-screen elements are not lost on
-            // zoom.
-            linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
-                .offset
-                .clamp(minScrollOffset, maxScrollOffset);
-          });
-        }
-        if (status == AnimationStatus.completed &&
-            linkedScrollGroupCacheExtent != null) {
-          setState(() {
-            // If [zoomController] is no longer animating, reset the cache
-            // extent so that we are not building unnecessary widgets on
-            // scroll.
-            linkedScrollGroupCacheExtent = null;
-          });
-        }
-      })
-      ..addListener(() {
-        setState(() {
-          final currentZoom = zoomController.value;
-          if (currentZoom == previousZoom) return;
+      ..addStatusListener(_handleZoomControllerStatusChange)
+      ..addListener(_handleZoomControllerValueUpdate);
+  }
 
-          // Store current scroll values for re-calculating scroll location on zoom.
-          final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
-
-          // Position in the zoomable coordinate space that we want to keep fixed.
-          final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
-
-          // Calculate the new horizontal scroll position.
-          final newScrollOffset = fixedX >= 0
-              ? fixedX * currentZoom / previousZoom +
-                  widget.startInset -
-                  mouseHoverX
-              // We are in the fixed portion of the window - no need to transform.
-              : lastScrollOffset;
-
-          previousZoom = currentZoom;
-          linkedHorizontalScrollControllerGroup
-              .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
-        });
+  void _handleZoomControllerStatusChange(AnimationStatus status) {
+    // We set [linkedScrollGroupCacheExtent] based on the state of the
+    // animation because we need to know the size of off screen widgets as we
+    if (status == AnimationStatus.forward &&
+        linkedScrollGroupCacheExtent !=
+            linkedHorizontalScrollControllerGroup.offset) {
+      setState(() {
+        // Set the cache extent to the offset of the scroll group so
+        // that the size of the off-screen elements are not lost on
+        // zoom.
+        linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
+            .offset
+            .clamp(minScrollOffset, maxScrollOffset);
       });
+    }
+    if (status == AnimationStatus.completed &&
+        linkedScrollGroupCacheExtent != null) {
+      setState(() {
+        // If [zoomController] is no longer animating, reset the cache
+        // extent so that we are not building unnecessary widgets on
+        // scroll.
+        linkedScrollGroupCacheExtent = null;
+      });
+    }
+  }
+
+  void _handleZoomControllerValueUpdate() {
+    setState(() {
+      final currentZoom = zoomController.value;
+      if (currentZoom == previousZoom) return;
+
+      // Store current scroll values for re-calculating scroll location on zoom.
+      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+
+      // Position in the zoomable coordinate space that we want to keep fixed.
+      final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
+
+      // Calculate the new horizontal scroll position.
+      final newScrollOffset = fixedX >= 0
+          ? fixedX * currentZoom / previousZoom +
+              widget.startInset -
+              mouseHoverX
+          // We are in the fixed portion of the window - no need to transform.
+          : lastScrollOffset;
+
+      previousZoom = currentZoom;
+      linkedHorizontalScrollControllerGroup
+          .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
+    });
   }
 
   @override
