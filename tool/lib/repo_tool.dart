@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:tool/commands/rollback.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -16,5 +17,6 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(RepoCheckCommand());
     addCommand(ListCommand());
     addCommand(PackagesGetCommand());
+    addCommand(RollbackCommand());
   }
 }
