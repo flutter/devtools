@@ -154,6 +154,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   void _handleZoomControllerStatusChange(AnimationStatus status) {
     // We set [linkedScrollGroupCacheExtent] based on the state of the
     // animation because we need to know the size of off screen widgets as we
+    // zoom.
     if (status == AnimationStatus.forward &&
         linkedScrollGroupCacheExtent !=
             linkedHorizontalScrollControllerGroup.offset) {

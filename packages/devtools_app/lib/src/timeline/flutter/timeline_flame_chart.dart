@@ -577,23 +577,26 @@ class AsyncGuidelinePainter extends CustomPainter {
       // Take [chartStartInset] and
       // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
       // calculating [zoomedLine] because these units of space should not scale.
-      final unzoomableOffset =
+      final unzoomableOffsetLineStart =
           FullTimelineFlameChart.asyncGuidelineOffset + chartStartInset;
 
       LineSegment zoomedLine;
-      final zoomedLineStartX =
-          (line.start.dx - unzoomableOffset) * zoom + unzoomableOffset;
       if (line is VerticalLineSegment) {
-        zoomedLine = VerticalLineSegment(
-          Offset(zoomedLineStartX, line.start.dy),
-          Offset(zoomedLineStartX, line.end.dy),
+        // The unzoomable offset will be the same for start and end because this
+        // is a vertical line, so line.start.dx == line.end.dx.
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: unzoomableOffsetLineStart,
         );
       } else {
-        final zoomedLineEndX =
-            (line.end.dx - chartStartInset) * zoom + chartStartInset;
-        zoomedLine = HorizontalLineSegment(
-          Offset(zoomedLineStartX, line.start.dy),
-          Offset(zoomedLineEndX, line.end.dy),
+        // The unzoomable end offset for a horizontal line is unaffected by
+        // [FullTimelineFlameChart.asyncGuidelineOffset], so we only need to
+        // consider [chartStartInset].
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: chartStartInset,
         );
       }
 
