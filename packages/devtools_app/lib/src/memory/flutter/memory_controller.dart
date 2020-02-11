@@ -880,8 +880,9 @@ class MemoryTimeline {
       final capacity = sample.capacity.toDouble();
       final used = sample.used.toDouble();
       final external = sample.external.toDouble();
+
       // TOOD(terry): Need to plot.
-      final rss = sample.rss.toDouble();
+      final rss = sample.rss == null ? 0 : sample.rss.toDouble();
 
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =

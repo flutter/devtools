@@ -1,4 +1,10 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:vm_service/vm_service.dart';
@@ -14,9 +20,6 @@ class ProfileCollection {
     onConnectionClosed.listen(_handleConnectionStop);
 
     service.onEvent('Service').listen(handleServiceEvent);
-    service.onIsolateEvent.listen(_handleIsolateEvent);
-    service.onExtensionEvent.listen(_handleExtensionEvent);
-    service.onVMEvent.listen(_handleVMEvent);
 
     hookUp();
 
@@ -25,14 +28,16 @@ class ProfileCollection {
 
   void hookUp() async {
     final streamIds = [
-//      EventStreams.kDebug,
       EventStreams.kExtension,
       EventStreams.kGC,
       EventStreams.kIsolate,
+      // TODO(terry): probably should save logs, stderr to JSON too?
       EventStreams.kLogging,
       EventStreams.kStderr,
+      // TODO(terry): maybe with a swtich save logs too (for debugging)?
       EventStreams.kStdout,
-//      EventStreams.kTimeline,
+      // TODO(Kenzi): Collect timeline data too.
+      // EventStreams.kTimeline,
       EventStreams.kVM,
       'Service',
     ];
@@ -51,51 +56,23 @@ class ProfileCollection {
     }));
   }
 
-  Future<void> _handleExtensionEvent(Event event) async {
-    print('>>>> _handleExtensionEvent <<<<');
-  }
-
-  Future<void> _handleVMEvent(Event event) async {
-    print('>>>> _handleVMEvent <<<<');
-  }
+  bool get hasConnection => service != null;
 
   void handleServiceEvent(Event e) {
-    print('>>>> handleServiceEvent <<<<');
     if (e.kind == EventKind.kServiceRegistered) {
       final serviceName = e.service;
       _registeredMethodsForService
           .putIfAbsent(serviceName, () => [])
           .add(e.method);
-//        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
-//          serviceName,
-//          () => true,
-//        );
     }
 
     if (e.kind == EventKind.kServiceUnregistered) {
       final serviceName = e.service;
       _registeredMethodsForService.remove(serviceName);
-//        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
-//          serviceName,
-//          () => false,
-//        );
     }
   }
 
-  final List<IsolateRef> _isolates = <IsolateRef>[];
   IsolateRef _selectedIsolate;
-
-  Future<void> _handleIsolateEvent(Event event) async {
-    print('>>>> _handleIsolateEvent <<<<');
-
-    if (event.kind == 'IsolateStart') {
-      _isolates.add(event.isolate);
-      _selectedIsolate ??= event.isolate;
-    } else if (event.kind == 'IsolateExit') {
-      _isolates.remove(event.isolate);
-      _selectedIsolate = null;
-    }
-  }
 
   Future<Response> getAdbMemoryInfo() async {
     return await callService(
@@ -125,8 +102,6 @@ class ProfileCollection {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  final _registeredServiceNotifiers = <String, bool>{};
-
   static const Duration kUpdateDelay = Duration(milliseconds: 200);
 
   VmService service;
@@ -148,12 +123,13 @@ class ProfileCollection {
   final _connectionClosedController = StreamController<void>.broadcast();
 
   void _handleConnectionStop(dynamic event) {
-    print("Connection STOPPED");
+    // TODO(terry): connection stopped.
+    print('>>>> Connection STOPPED <<<<<');
   }
 
   void start() async {
     _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
-
+    // TODO(terry): Record when GC occurred?
 //    service.onGCEvent.listen(_handleGCEvent);
   }
 
@@ -163,15 +139,11 @@ class ProfileCollection {
   }
 
   Future<void> _pollMemory() async {
-    print("about to await _pollMemory");
     final VM vm = await service.getVM();
-    print("after to await _pollMemory");
 
     // TODO(terry): Need to handle a possible Sentinel being returned.
-    print("beforeFuture.wait isolates");
     final List<Isolate> isolates =
         await Future.wait(vm.isolates.map((IsolateRef ref) async {
-      print("afterFuture.wait isolates");
       try {
         return await service.getIsolate(ref.id);
       } catch (e) {
@@ -184,13 +156,12 @@ class ProfileCollection {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-
-    // TODO(terry): *****Need to enable *****
     final isolate = isolates[0];
     _selectedIsolate =
         IsolateRef(id: isolate.id, name: isolate.name, number: isolate.number);
     ;
-    if (/*hasConnection && */ vm.operatingSystem == 'android' &&
+    if (hasConnection &&
+        vm.operatingSystem == 'android' &&
         _selectedIsolate != null) {
       // Poll ADB meminfo
       adbMemoryInfo = await _fetchAdbInfo();
@@ -248,10 +219,7 @@ class ProfileCollection {
       bootDuration = samples.last.adbMemoryInfo.bootDuration;
     }
 
-    print('>>>> New HeapSample $time');
-    print('>>>> New adb boot Duration ${bootDuration.inMilliseconds}');
-
-    _addSample(HeapSample(
+    final sample = HeapSample(
       time,
       processRss,
       capacity,
@@ -259,13 +227,64 @@ class ProfileCollection {
       external,
       fromGC,
       adbMemoryInfo,
-    ));
+    );
+
+    samples.add(sample);
   }
 
-  void _addSample(HeapSample sample) {
-    samples.add(sample);
-//    _changeController.add(null);
+  void persistSamples() {
+    bool pseudoData = false;
+    if (samples.isEmpty) {
+      // TODO(terry): Can eliminate once I add loading a canned data source
+      //              see TODO in memory_screen_test.
+      // Used to create empty memory log for test.
+      pseudoData = true;
+      samples.add(HeapSample(
+        DateTime.now().microsecondsSinceEpoch,
+        0,
+        0,
+        0,
+        0,
+        false,
+        AdbMemoryInfo.empty(),
+      ));
+    }
+
+    final jsonPayload = encodeHeapSamples(samples);
+
+    _fs.writeStringToFile(_memoryLogFilename, jsonPayload);
+
+    // TODO(terry): Display filename created in a toast.
+
+    if (pseudoData) samples.clear();
   }
+
+  // TODO(terry): Start of stuff to expose in a shared memory json package
+
+  /// Version of timeline data (HeapSample) JSON payload.
+  static const version = 1;
+
+  static const String _jsonPayloadField = 'samples';
+  static const String _jsonVersionField = 'version';
+  static const String _jsonDataField = 'data';
+
+  /// Given a list of HeapSample, encode as a Json string.
+  static String encodeHeapSamples(List<HeapSample> data) {
+    final result = StringBuffer();
+
+    // Iterate over all HeapSamples collected.
+    data.map((f) {
+      if (result.isNotEmpty) result.write(',\n');
+      final encode = jsonEncode(f);
+      result.write('$encode');
+    }).toList();
+
+    return '{"$_jsonPayloadField": {'
+        '"$_jsonVersionField": $version, "$_jsonDataField": [\n'
+        '$result'
+        '\n]\n}}';
+  }
+  // TODO(terry): end of stuff to expose in a shared memory json package.
 
   // TODO(devoncarew): fix HeapSpace.parse upstream
   static Iterable<HeapSpace> getHeaps(Isolate isolate) {
@@ -412,4 +431,34 @@ class AdbMemoryInfo {
       ', $codeKey: $code, $stackKey: $stack, $graphicsKey: $graphics'
       ', $otherKey: $other, $systemKey: $system'
       ', $totalKey: $total]';
+}
+
+class JsonFile {
+  JsonFile(this._absoluteFileName) {
+    _open();
+  }
+
+  final String _absoluteFileName;
+
+  io.File _fs;
+  io.RandomAccessFile _raFile;
+
+  void _open() async {
+    _fs = io.File(_absoluteFileName);
+
+    _raFile = await _fs.open(mode: io.FileMode.writeOnly);
+  }
+
+  void writeInitialJsonPayload() {
+    if (_raFile != null) {
+      _raFile.writeString(string);
+
+      _raFile.po   
+    }
+  }
+
+  void writeSample() {
+
+  }
+
 }

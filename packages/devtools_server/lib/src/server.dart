@@ -111,11 +111,9 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
 
+  // Support collecting profile data.
   final String authenticationUrl = args[argAuthentication];
-//  const String authenticationUrl = 'http://127.0.0.1:42953/jlr38V_yhQw=/';
-
   final bool isProfile = args[argEnableProfile];
-//  const bool isProfile = true;
 
   return serveDevTools(
     help: help,
@@ -267,6 +265,7 @@ Future<HttpServer> serveDevTools({
     });
   }
 
+  // TODO(terry): Require --machine too (output format to JSON for use in tools)?
   // Collect profiling information
   if (observatoryAuth.isNotEmpty && profile) {
     final observatoryUri = Uri.tryParse(observatoryAuth);
