@@ -12,9 +12,9 @@ class HeapSample {
     this.capacity,
     this.used,
     this.external,
-    this.isGC,
-    this.adbMemoryInfo,
-  );
+    this.isGC, [
+    this._adbMemoryInfo,
+  ]);
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
         json['timestamp'] as int,
@@ -51,7 +51,12 @@ class HeapSample {
 
   final bool isGC;
 
-  final AdbMemoryInfo adbMemoryInfo;
+  AdbMemoryInfo _adbMemoryInfo;
+
+  AdbMemoryInfo get adbMemoryInfo {
+    _adbMemoryInfo ??= AdbMemoryInfo.empty();
+    return _adbMemoryInfo;
+  }
 
   @override
   String toString() => '[HeapSample timestamp: $timestamp, rss: $rss, '
