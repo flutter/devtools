@@ -19,8 +19,8 @@ void main() {
   const defaultZoom = 1.0;
 
   group('FlameChart', () {
-    // Use an instance of [CpuProfileFlameChart] here because the data is simple
-    // to stub and [FlameChart] is an abstract class.
+    // Use an instance of [CpuProfileFlameChart] because the data is simple to
+    // stub and [FlameChart] is an abstract class.
     final flameChart = CpuProfileFlameChart(
       CpuProfileData.parse(cpuProfileResponseJson),
       width: 1000.0,
