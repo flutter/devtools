@@ -4,6 +4,7 @@
 
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -39,7 +40,6 @@ import '../../flutter/theme.dart';
 import '../../ui/flutter/label.dart';
 import '../../ui/theme.dart';
 import 'memory_controller.dart';
-import 'memory_protocol.dart';
 
 class MemoryChart extends StatefulWidget {
   @override

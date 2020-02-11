@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -16,7 +17,6 @@ import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
-import '../memory/heap_space.dart';
 import '../table_data.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';

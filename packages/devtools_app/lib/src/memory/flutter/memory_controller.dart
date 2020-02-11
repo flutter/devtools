@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui' as dart_ui;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:mp_chart/mp/core/entry/entry.dart';
@@ -1033,48 +1033,6 @@ class MemoryTimeline {
     }
   }
 
-  static const String _jsonPayloadField = 'samples';
-  static const String _jsonVersionField = 'version';
-  static const String _jsonDataField = 'data';
-
-  /// Given a list of HeapSample, encode as a Json string.
-  static String encodeHeapSamples(List<HeapSample> data) {
-    final result = StringBuffer();
-
-    // Iterate over all HeapSamples collected.
-    data.map((f) {
-      if (result.isNotEmpty) result.write(',\n');
-      final encode = jsonEncode(f);
-      result.write('$encode');
-    }).toList();
-
-    return '{"$_jsonPayloadField": {'
-        '"$_jsonVersionField": $version, "$_jsonDataField": [\n'
-        '$result'
-        '\n]\n}}';
-  }
-
-  /// Given a JSON string representing an array of HeapSample, decode to a
-  /// List of HeapSample.
-  static List<HeapSample> decodeHeapSamples(String jsonString) {
-    final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
-    final Map<String, dynamic> samplesPayload =
-        decodedMap['$_jsonPayloadField'];
-
-    // TODO(terry): Different JSON payload version conversions TBD (none yet).
-    final payloadVersion = samplesPayload['$_jsonVersionField'];
-    assert(payloadVersion == MemoryTimeline.version);
-
-    final List dynamicList = samplesPayload['$_jsonDataField'];
-    final List<HeapSample> samples = [];
-    for (var index = 0; index < dynamicList.length; index++) {
-      final sample = HeapSample.fromJson(dynamicList[index]);
-      samples.add(sample);
-    }
-
-    return samples;
-  }
-
   void addSample(HeapSample sample) {
     // Always record the heap sample in the raw set of data (liveFeed).
     liveData.add(sample);
@@ -1117,8 +1075,8 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryTimeline.encodeHeapSamples(liveData);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
+    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
 
     assert(realData.length == liveData.length);
 
@@ -1145,7 +1103,7 @@ class MemoryLog {
     controller.offline = true;
 
     final jsonPayload = _fs.readStringFromFile(filename);
-    final realData = MemoryTimeline.decodeHeapSamples(jsonPayload);
+    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
 
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(realData);
