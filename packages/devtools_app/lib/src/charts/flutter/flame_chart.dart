@@ -105,8 +105,16 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get wasdScrollUnit => widget.totalStartingWidth * 0.25;
 
-  // Zooming via WASD controls will zoom the view by 50% on each zoom.
-  double get wasdZoomUnit => zoomController.value * 0.5;
+  // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
+  // example, if the zoom level is 2.0, zooming by one unit would increase the
+  // level to 3.0 (e.g. 2 + (2 * 0.5) = 3).
+  double get wasdZoomInUnit => zoomController.value * 0.5;
+
+  // Zooming out via WASD controls will zoom the view out to the previous zoom
+  // level. For example, if the zoom level is 3.0, zooming out by one unit would
+  // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
+  // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
+  double get wasdZoomOutUnit => zoomController.value * 1 / 3;
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -149,58 +157,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     )
       ..addStatusListener(_handleZoomControllerStatusChange)
       ..addListener(_handleZoomControllerValueUpdate);
-  }
-
-  void _handleZoomControllerStatusChange(AnimationStatus status) {
-    // We set [linkedScrollGroupCacheExtent] based on the state of the
-    // animation because we need to know the size of off screen widgets as we
-    // zoom.
-    if (status == AnimationStatus.forward &&
-        linkedScrollGroupCacheExtent !=
-            linkedHorizontalScrollControllerGroup.offset) {
-      setState(() {
-        // Set the cache extent to the offset of the scroll group so
-        // that the size of the off-screen elements are not lost on
-        // zoom.
-        linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
-            .offset
-            .clamp(minScrollOffset, maxScrollOffset);
-      });
-    }
-    if (status == AnimationStatus.completed &&
-        linkedScrollGroupCacheExtent != null) {
-      setState(() {
-        // If [zoomController] is no longer animating, reset the cache
-        // extent so that we are not building unnecessary widgets on
-        // scroll.
-        linkedScrollGroupCacheExtent = null;
-      });
-    }
-  }
-
-  void _handleZoomControllerValueUpdate() {
-    setState(() {
-      final currentZoom = zoomController.value;
-      if (currentZoom == previousZoom) return;
-
-      // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
-
-      // Position in the zoomable coordinate space that we want to keep fixed.
-      final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
-
-      // Calculate the new horizontal scroll position.
-      final newScrollOffset = fixedX >= 0
-          ? fixedX * currentZoom / previousZoom +
-              widget.startInset -
-              mouseHoverX
-          // We are in the fixed portion of the window - no need to transform.
-          : lastScrollOffset;
-
-      previousZoom = currentZoom;
-      linkedHorizontalScrollControllerGroup
-          .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
-    });
   }
 
   @override
@@ -323,9 +279,9 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        _zoomTo(math.min(maxZoomLevel, zoomController.value + wasdZoomUnit));
+        _zoomTo(math.min(maxZoomLevel, zoomController.value + wasdZoomInUnit));
       } else if (keyLabel == 's') {
-        _zoomTo(math.max(minZoomLevel, zoomController.value - wasdZoomUnit));
+        _zoomTo(math.max(minZoomLevel, zoomController.value - wasdZoomOutUnit));
       } else if (keyLabel == 'a') {
         _scrollTo(
             linkedHorizontalScrollControllerGroup.offset - wasdScrollUnit);
@@ -346,6 +302,58 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         // https://github.com/flutter/devtools/issues/1600.
       }
     }
+  }
+
+  void _handleZoomControllerStatusChange(AnimationStatus status) {
+    // We set [linkedScrollGroupCacheExtent] based on the state of the
+    // animation because we need to know the size of off screen widgets as we
+    // zoom.
+    if (status == AnimationStatus.forward &&
+        linkedScrollGroupCacheExtent !=
+            linkedHorizontalScrollControllerGroup.offset) {
+      setState(() {
+        // Set the cache extent to the offset of the scroll group so
+        // that the size of the off-screen elements are not lost on
+        // zoom.
+        linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
+            .offset
+            .clamp(minScrollOffset, maxScrollOffset);
+      });
+    }
+    if (status == AnimationStatus.completed &&
+        linkedScrollGroupCacheExtent != null) {
+      setState(() {
+        // If [zoomController] is no longer animating, reset the cache
+        // extent so that we are not building unnecessary widgets on
+        // scroll.
+        linkedScrollGroupCacheExtent = null;
+      });
+    }
+  }
+
+  void _handleZoomControllerValueUpdate() {
+    setState(() {
+      final currentZoom = zoomController.value;
+      if (currentZoom == previousZoom) return;
+
+      // Store current scroll values for re-calculating scroll location on zoom.
+      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+
+      // Position in the zoomable coordinate space that we want to keep fixed.
+      final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
+
+      // Calculate the new horizontal scroll position.
+      final newScrollOffset = fixedX >= 0
+          ? fixedX * currentZoom / previousZoom +
+              widget.startInset -
+              mouseHoverX
+          // We are in the fixed portion of the window - no need to transform.
+          : lastScrollOffset;
+
+      previousZoom = currentZoom;
+      linkedHorizontalScrollControllerGroup
+          .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
+    });
   }
 
   void _zoomTo(double zoom) {
@@ -455,48 +463,54 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
 
   Widget _buildFlameChartNode(int index) {
     final node = nodes[index];
-    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
-
-    double zoomForNode(FlameChartNode node) {
-      return node != null && node.selectable
-          ? widget.zoom
-          : FlameChartState.minZoomLevel;
-    }
-
-    final nodeZoom = zoomForNode(node);
-    final nextNodeZoom = zoomForNode(nextNode);
-
-    double paddingLeft;
-    if (index != 0) {
-      paddingLeft = 0.0;
-    } else if (!node.selectable) {
-      paddingLeft = node.rect.left;
-    } else {
-      paddingLeft =
-          (node.rect.left - widget.startInset) * nodeZoom + widget.startInset;
-    }
-
-    // Node right with zoom and insets taken into consideration.
-    final nodeRight =
-        (node.rect.right - widget.startInset) * nodeZoom + widget.startInset;
-    final paddingRight = nextNode == null
-        ? widget.width - nodeRight
-        : ((nextNode.rect.left - widget.startInset) * nextNodeZoom +
-                widget.startInset) -
-            nodeRight;
-
     return Padding(
       padding: EdgeInsets.only(
-        left: paddingLeft,
-        right: paddingRight,
+        left: leftPaddingForNode(index),
+        right: rightPaddingForNode(index),
         bottom: rowPadding,
       ),
       child: node.buildWidget(
         selected: node.data == widget.selected,
         hovered: node.data == hovered,
-        zoom: zoomForNode(node),
+        zoom: _zoomForNode(node),
       ),
     );
+  }
+
+  @visibleForTesting
+  double leftPaddingForNode(int index) {
+    final node = nodes[index];
+    if (index != 0) {
+      return 0.0;
+    } else if (!node.selectable) {
+      return node.rect.left;
+    } else {
+      return (node.rect.left - widget.startInset) * _zoomForNode(node) +
+          widget.startInset;
+    }
+  }
+
+  @visibleForTesting
+  double rightPaddingForNode(int index) {
+    final node = nodes[index];
+    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
+    final nodeZoom = _zoomForNode(node);
+    final nextNodeZoom = _zoomForNode(nextNode);
+
+    // Node right with zoom and insets taken into consideration.
+    final nodeRight =
+        (node.rect.right - widget.startInset) * nodeZoom + widget.startInset;
+    return nextNode == null
+        ? widget.width - nodeRight
+        : ((nextNode.rect.left - widget.startInset) * nextNodeZoom +
+                widget.startInset) -
+            nodeRight;
+  }
+
+  double _zoomForNode(FlameChartNode node) {
+    return node != null && node.selectable
+        ? widget.zoom
+        : FlameChartState.minZoomLevel;
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
