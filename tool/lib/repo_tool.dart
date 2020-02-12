@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:tool/commands/rollback.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
 import 'commands/packages_get.dart';
 import 'commands/repo_check.dart';
+import 'commands/rollback.dart';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
