@@ -9,6 +9,25 @@ import 'package:devtools_app/src/ui/fake_flutter/fake_flutter.dart'
 import 'package:test/test.dart';
 
 void main() {
+  group('LineSegment', () {
+    test('zoomedXPosition', () {
+      expect(
+        LineSegment.zoomedXPosition(x: 10, zoom: 2.0, unzoomableOffset: 5),
+        equals(15.0),
+      );
+      expect(
+        LineSegment.zoomedXPosition(x: 10, zoom: 2.0, unzoomableOffset: 10),
+        equals(10.0),
+      );
+      expect(
+        () {
+          LineSegment.zoomedXPosition(x: 10, zoom: 2.0, unzoomableOffset: 11);
+        },
+        throwsA(const TypeMatcher<AssertionError>()),
+      );
+    });
+  });
+
   group('VerticalLineSegment', () {
     test('constructor enforces vertical', () {
       expect(
@@ -26,8 +45,10 @@ void main() {
     });
 
     test('intersection', () {
-      final line =
-          VerticalLineSegment(const Offset(10, 10), const Offset(10, 20));
+      final line = VerticalLineSegment(
+        const Offset(10, 10),
+        const Offset(10, 20),
+      );
       var rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
       expect(line.crossAxisIntersects(rect), isFalse);
       expect(line.intersects(rect), isFalse);
@@ -67,6 +88,33 @@ void main() {
       expect(d.compareTo(b), equals(-1));
       expect(c.compareTo(b), equals(1));
     });
+
+    test('toZoomed', () {
+      final line = VerticalLineSegment(
+        const Offset(10, 10),
+        const Offset(10, 20),
+      );
+      var zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 5.0,
+        unzoomableOffsetLineEnd: 5.0,
+      );
+      expect(zoomedLine.x, equals(15.0));
+
+      zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 9.0,
+        unzoomableOffsetLineEnd: 9.0,
+      );
+      expect(zoomedLine.x, equals(11.0));
+
+      zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 10.0,
+        unzoomableOffsetLineEnd: 10.0,
+      );
+      expect(zoomedLine.x, equals(10.0));
+    });
   });
 
   group('HorizontalLineSegment', () {
@@ -86,8 +134,10 @@ void main() {
     });
 
     test('intersection', () {
-      final line =
-          HorizontalLineSegment(const Offset(10, 10), const Offset(20, 10));
+      final line = HorizontalLineSegment(
+        const Offset(10, 10),
+        const Offset(20, 10),
+      );
       var rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
       expect(line.crossAxisIntersects(rect), isFalse);
       expect(line.intersects(rect), isFalse);
@@ -126,6 +176,36 @@ void main() {
       expect(a.compareTo(d), equals(-1));
       expect(d.compareTo(b), equals(-1));
       expect(c.compareTo(b), equals(1));
+    });
+
+    test('toZoomed', () {
+      final line = HorizontalLineSegment(
+        const Offset(10, 10),
+        const Offset(20, 10),
+      );
+      var zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 6.0,
+        unzoomableOffsetLineEnd: 5.0,
+      );
+      expect(zoomedLine.start.dx, equals(14.0));
+      expect(zoomedLine.end.dx, equals(35.0));
+
+      zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 9.0,
+        unzoomableOffsetLineEnd: 9.0,
+      );
+      expect(zoomedLine.start.dx, equals(11.0));
+      expect(zoomedLine.end.dx, equals(31.0));
+
+      zoomedLine = line.toZoomed(
+        zoom: 2.0,
+        unzoomableOffsetLineStart: 10.0,
+        unzoomableOffsetLineEnd: 10.0,
+      );
+      expect(zoomedLine.start.dx, equals(10.0));
+      expect(zoomedLine.end.dx, equals(30.0));
     });
   });
 }

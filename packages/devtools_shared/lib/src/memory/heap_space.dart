@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// HeapSpace of Dart VM collected heap data.
 class HeapSpace {
   HeapSpace._fromJson(this.json)
       : avgCollectionPeriodMillis = json['avgCollectionPeriodMillis'],
