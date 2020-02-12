@@ -1,5 +1,5 @@
 ▼[S]Scaffold <-- selected
-│ dependencies: [_InheritedTheme, _EffectiveTickerMode, MediaQuery, _LocalizationsScope-[GlobalKey#00000], Directionality]
+│ dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality, _InheritedTheme, _EffectiveTickerMode, MediaQuery]
 │ ▶state: ScaffoldState#00000(tickers: tracking 2 tickers)
 └─▼[S]_ScaffoldScope
     ▼[P]PrimaryScrollController
@@ -7,7 +7,7 @@
     └─▼[M]Material
       │   type: canvas
       │   color: [#00000aff]#00000a
-      │   dependencies: [_InheritedTheme, _EffectiveTickerMode, _LocalizationsScope-[GlobalKey#00000]]
+      │   dependencies: [_LocalizationsScope-[GlobalKey#00000], _InheritedTheme, _EffectiveTickerMode]
       │   state: _MaterialState#00000
       └─▼[/icons/inspector/resume.png]AnimatedPhysicalModel
         │   duration: 200ms
