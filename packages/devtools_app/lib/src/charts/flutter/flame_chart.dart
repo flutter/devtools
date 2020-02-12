@@ -6,10 +6,12 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
+import '../../flutter/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/fake_flutter/_real_flutter.dart';
 import '../../utils.dart';
@@ -20,6 +22,13 @@ const double rowHeightWithPadding = rowHeight + rowPadding;
 const double sectionSpacing = 15.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 40.0;
+
+// TODO(kenz): remove the hard coded hack once
+// https://github.com/flutter/flutter/issues/33675 is fixed.
+// [PointerHoverEvent.localPosition] is actually the absolute position right
+// now, so for mouse position detection in the flame chart container, we use
+// this offset. Use `localPosition` once this is fixed.
+const flameChartContainerOffset = 33.0;
 
 // TODO(kenz): consider cleaning up by changing to a flame chart code to use a
 // composition pattern instead of a class extension pattern.
@@ -51,10 +60,12 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   double get startingContentWidth => totalStartingWidth - startInset - endInset;
 }
 
-// TODO(kenz): support zoom.
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
-    with AutoDisposeMixin, FlameChartColorMixin {
+    with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   static const minZoomLevel = 1.0;
+  static const maxZoomLevel = 50.0;
+  static const minScrollOffset = 0.0;
+
   final rowOffsetForTopPadding = 1;
   final rowOffsetForBottomPadding = 1;
   final rowOffsetForSectionSpacer = 1;
@@ -67,15 +78,43 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   final List<FlameChartSection> sections = [];
 
+  final focusNode = FocusNode();
+
+  bool _shiftKeyPressed = false;
+
+  double mouseHoverX;
+
   ScrollController verticalScrollController;
 
   LinkedScrollControllerGroup linkedHorizontalScrollControllerGroup;
+
+  double get maxScrollOffset =>
+      widget.totalStartingWidth * (zoomController.value - 1);
+
+  double linkedScrollGroupCacheExtent;
+
+  /// Animation controller for animating flame chart zoom changes.
+  AnimationController zoomController;
+
+  double previousZoom = minZoomLevel;
 
   double verticalScrollOffset = 0.0;
 
   double horizontalScrollOffset = 0.0;
 
-  double zoom = minZoomLevel;
+  // Scrolling via WASD controls will pan the left/right 25% of the view.
+  double get wasdScrollUnit => widget.totalStartingWidth * 0.25;
+
+  // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
+  // example, if the zoom level is 2.0, zooming by one unit would increase the
+  // level to 3.0 (e.g. 2 + (2 * 0.5) = 3).
+  double get wasdZoomInUnit => zoomController.value * 0.5;
+
+  // Zooming out via WASD controls will zoom the view out to the previous zoom
+  // level. For example, if the zoom level is 3.0, zooming out by one unit would
+  // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
+  // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
+  double get wasdZoomOutUnit => zoomController.value * 1 / 3;
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -109,6 +148,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           });
         }
       });
+
+    zoomController = AnimationController(
+      value: minZoomLevel,
+      lowerBound: minZoomLevel,
+      upperBound: maxZoomLevel,
+      vsync: this,
+    )
+      ..addStatusListener(_handleZoomControllerStatusChange)
+      ..addListener(_handleZoomControllerValueUpdate);
   }
 
   @override
@@ -116,32 +164,51 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
       linkedHorizontalScrollControllerGroup.resetScroll();
-      verticalScrollController.jumpTo(0.0);
+      verticalScrollController.jumpTo(minScrollOffset);
+      previousZoom = minZoomLevel;
+      zoomController.reset();
     }
+    FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     verticalScrollController.dispose();
+    zoomController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final customPaints = buildCustomPaints(constraints);
-        final flameChart = _buildFlameChart(constraints);
-        return customPaints.isNotEmpty
-            ? Stack(
-                children: [
-                  flameChart,
-                  ...customPaints,
-                ],
-              )
-            : flameChart;
-      },
+    // TODO(kenz): handle tooltips hover here instead of wrapping each row in a
+    // MouseRegion widget.
+    return MouseRegion(
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      onHover: _handleMouseHover,
+      child: RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: (event) => _handleKeyEvent(event),
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerSignal: (event) => _handlePointerSignal(event),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final customPaints = buildCustomPaints(constraints);
+              final flameChart = _buildFlameChart(constraints);
+              return customPaints.isNotEmpty
+                  ? Stack(
+                      children: [
+                        flameChart,
+                        ...customPaints,
+                      ],
+                    )
+                  : flameChart;
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -151,11 +218,21 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       addAutomaticKeepAlives: false,
       itemCount: rows.length,
       itemBuilder: (context, index) {
+        // TODO(kenz): investigate if we are building too many
+        // ScrollingFlameChartRow widgets on zoom / pan.
         return ScrollingFlameChartRow<V>(
           linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
           nodes: rows[index].nodes,
-          width: math.max(constraints.maxWidth, widget.totalStartingWidth),
+          width: math.max(
+            constraints.maxWidth,
+            widget.startingContentWidth * zoomController.value +
+                widget.startInset +
+                widget.endInset,
+          ),
+          startInset: widget.startInset,
           selected: widget.selected,
+          zoom: zoomController.value,
+          cacheExtent: linkedScrollGroupCacheExtent,
         );
       },
     );
@@ -175,6 +252,121 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       rows.add(FlameChartRow(i));
     }
   }
+
+  void _handleMouseEnter(PointerEnterEvent event) {
+    focusNode.requestFocus();
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    focusNode.unfocus();
+  }
+
+  void _handleMouseHover(PointerHoverEvent event) {
+    mouseHoverX = event.position.dx - flameChartContainerOffset;
+  }
+
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event.isShiftPressed) {
+      _shiftKeyPressed = true;
+    } else {
+      _shiftKeyPressed = false;
+    }
+
+    // Only handle down events so logic is not duplicated on key up.
+    if (event is RawKeyDownEvent) {
+      // Handle zooming / navigation from W-A-S-D keys.
+      final keyLabel = event.data.keyLabel;
+      // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
+      // if the key is held currently.
+      if (keyLabel == 'w') {
+        _zoomTo(math.min(maxZoomLevel, zoomController.value + wasdZoomInUnit));
+      } else if (keyLabel == 's') {
+        _zoomTo(math.max(minZoomLevel, zoomController.value - wasdZoomOutUnit));
+      } else if (keyLabel == 'a') {
+        _scrollTo(
+            linkedHorizontalScrollControllerGroup.offset - wasdScrollUnit);
+      } else if (keyLabel == 'd') {
+        _scrollTo(
+            linkedHorizontalScrollControllerGroup.offset + wasdScrollUnit);
+      }
+    }
+  }
+
+  void _handlePointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      if (_shiftKeyPressed) {
+        // TODO(kenz): scroll vertical list regularly / zoom. See
+        // https://github.com/flutter/devtools/issues/1600.
+      } else {
+        // TODO(kenz): scroll vertical list regularly / zoom. See
+        // https://github.com/flutter/devtools/issues/1600.
+      }
+    }
+  }
+
+  void _handleZoomControllerStatusChange(AnimationStatus status) {
+    // We set [linkedScrollGroupCacheExtent] based on the state of the
+    // animation because we need to know the size of off screen widgets as we
+    // zoom.
+    if (status == AnimationStatus.forward &&
+        linkedScrollGroupCacheExtent !=
+            linkedHorizontalScrollControllerGroup.offset) {
+      setState(() {
+        // Set the cache extent to the offset of the scroll group so
+        // that the size of the off-screen elements are not lost on
+        // zoom.
+        linkedScrollGroupCacheExtent = linkedHorizontalScrollControllerGroup
+            .offset
+            .clamp(minScrollOffset, maxScrollOffset);
+      });
+    }
+    if (status == AnimationStatus.completed &&
+        linkedScrollGroupCacheExtent != null) {
+      setState(() {
+        // If [zoomController] is no longer animating, reset the cache
+        // extent so that we are not building unnecessary widgets on
+        // scroll.
+        linkedScrollGroupCacheExtent = null;
+      });
+    }
+  }
+
+  void _handleZoomControllerValueUpdate() {
+    setState(() {
+      final currentZoom = zoomController.value;
+      if (currentZoom == previousZoom) return;
+
+      // Store current scroll values for re-calculating scroll location on zoom.
+      final lastScrollOffset = linkedHorizontalScrollControllerGroup.offset;
+
+      // Position in the zoomable coordinate space that we want to keep fixed.
+      final fixedX = mouseHoverX + lastScrollOffset - widget.startInset;
+
+      // Calculate the new horizontal scroll position.
+      final newScrollOffset = fixedX >= 0
+          ? fixedX * currentZoom / previousZoom +
+              widget.startInset -
+              mouseHoverX
+          // We are in the fixed portion of the window - no need to transform.
+          : lastScrollOffset;
+
+      previousZoom = currentZoom;
+      linkedHorizontalScrollControllerGroup
+          .jumpTo(newScrollOffset.clamp(minScrollOffset, maxScrollOffset));
+    });
+  }
+
+  void _zoomTo(double zoom) {
+    zoomController.animateTo(zoom, duration: defaultDuration);
+  }
+
+  void _scrollTo(double offset) {
+    linkedHorizontalScrollControllerGroup.animateTo(
+      offset.clamp(minScrollOffset, maxScrollOffset),
+      curve: defaultCurve,
+      duration: defaultDuration,
+    );
+  }
 }
 
 class ScrollingFlameChartRow<V> extends StatefulWidget {
@@ -182,7 +374,10 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.linkedScrollControllerGroup,
     @required this.nodes,
     @required this.width,
+    @required this.startInset,
     @required this.selected,
+    @required this.zoom,
+    @required this.cacheExtent,
   });
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -191,7 +386,13 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
 
   final double width;
 
+  final double startInset;
+
   final V selected;
+
+  final double zoom;
+
+  final double cacheExtent;
 
   @override
   ScrollingFlameChartRowState<V> createState() =>
@@ -251,6 +452,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
             addRepaintBoundaries: false,
             controller: scrollController,
             scrollDirection: Axis.horizontal,
+            cacheExtent: widget.cacheExtent,
             itemCount: nodes.length,
             itemBuilder: (context, index) => _buildFlameChartNode(index),
           ),
@@ -261,31 +463,59 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
 
   Widget _buildFlameChartNode(int index) {
     final node = nodes[index];
-    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
-    final paddingLeft = index == 0 ? node.rect.left : 0.0;
-    final paddingRight = nextNode == null
-        ? widget.width - node.rect.right
-        : nextNode.rect.left - node.rect.right;
     return Padding(
       padding: EdgeInsets.only(
-        left: paddingLeft,
-        right: paddingRight,
+        left: leftPaddingForNode(index),
+        right: rightPaddingForNode(index),
         bottom: rowPadding,
       ),
       child: node.buildWidget(
         selected: node.data == widget.selected,
         hovered: node.data == hovered,
+        zoom: _zoomForNode(node),
       ),
     );
   }
 
+  @visibleForTesting
+  double leftPaddingForNode(int index) {
+    final node = nodes[index];
+    if (index != 0) {
+      return 0.0;
+    } else if (!node.selectable) {
+      return node.rect.left;
+    } else {
+      return (node.rect.left - widget.startInset) * _zoomForNode(node) +
+          widget.startInset;
+    }
+  }
+
+  @visibleForTesting
+  double rightPaddingForNode(int index) {
+    final node = nodes[index];
+    final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
+    final nodeZoom = _zoomForNode(node);
+    final nextNodeZoom = _zoomForNode(nextNode);
+
+    // Node right with zoom and insets taken into consideration.
+    final nodeRight =
+        (node.rect.right - widget.startInset) * nodeZoom + widget.startInset;
+    return nextNode == null
+        ? widget.width - nodeRight
+        : ((nextNode.rect.left - widget.startInset) * nextNodeZoom +
+                widget.startInset) -
+            nodeRight;
+  }
+
+  double _zoomForNode(FlameChartNode node) {
+    return node != null && node.selectable
+        ? widget.zoom
+        : FlameChartState.minZoomLevel;
+  }
+
   void _handleMouseHover(PointerHoverEvent event) {
-    // TODO(kenz): remove the hard coded hacks once
-    // https://github.com/flutter/flutter/issues/33675 is fixed.
-    // [event.localPosition] is actually the absolute position right now.
-    const horizontalOffsetForTooltip = 33.0;
-    final hoverNodeData = binarySearchForNode(event.localPosition.dx -
-            horizontalOffsetForTooltip +
+    final hoverNodeData = binarySearchForNode(event.position.dx -
+            flameChartContainerOffset +
             scrollController.offset)
         ?.data;
 
@@ -413,7 +643,11 @@ class FlameChartNode<T> {
 
   int sectionIndex;
 
-  Widget buildWidget({@required bool selected, @required bool hovered}) {
+  Widget buildWidget({
+    @required bool selected,
+    @required bool hovered,
+    @required double zoom,
+  }) {
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
 
@@ -423,12 +657,12 @@ class FlameChartNode<T> {
       // small events that have padding.
       //
       // See https://github.com/flutter/devtools/issues/1503 for details.
-      width: math.max(0.0, rect.width),
+      width: math.max(0.0, rect.width * zoom),
       height: rect.height,
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: selected ? _selectedNodeColor : backgroundColor,
-      child: rect.width >= _minWidthForText
+      child: rect.width * zoom >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,

@@ -49,9 +49,7 @@ class TimelineFlameChart extends StatelessWidget {
     return selectedFrame != null
         ? FrameBasedTimelineFlameChart(
             selectedFrame,
-            // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
-            // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 2,
+            width: constraints.maxWidth,
             selected: selectedEvent,
             onSelected: (e) => controller.selectTimelineEvent(e),
           )
@@ -67,9 +65,7 @@ class TimelineFlameChart extends StatelessWidget {
     return !fullTimelineEmpty
         ? FullTimelineFlameChart(
             controller.fullTimeline.data,
-            // TODO(kenz): remove * 8 once zooming is possible. This is so that we can
-            // test horizontal scrolling functionality.
-            width: constraints.maxWidth * 8,
+            width: constraints.maxWidth,
             selected: selectedEvent,
             onSelection: (e) => controller.selectTimelineEvent(e),
           )
@@ -205,6 +201,9 @@ class FullTimelineFlameChart
     // to the left as an inherent bonus.
     return 140.0;
   }
+
+  /// Offset for drawing async guidelines.
+  static int asyncGuidelineOffset = 1;
 
   @override
   _FullTimelineFlameChartState createState() => _FullTimelineFlameChartState();
@@ -361,12 +360,13 @@ class _FullTimelineFlameChartState
     return [
       CustomPaint(
         painter: AsyncGuidelinePainter(
-          zoom: zoom,
+          zoom: zoomController.value,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
           verticalGuidelines: verticalGuidelines,
           horizontalGuidelines: horizontalGuidelines,
+          chartStartInset: widget.startInset,
         ),
       ),
     ];
@@ -387,7 +387,8 @@ class _FullTimelineFlameChartState
           if (event.children.isNotEmpty) {
             // Vertical guideline that will connect [node] with its children
             // nodes. The line will end at [node]'s last child.
-            final verticalGuidelineX = node.rect.left + 1;
+            final verticalGuidelineX =
+                node.rect.left + FullTimelineFlameChart.asyncGuidelineOffset;
             final verticalGuidelineStartY =
                 _calculateVerticalGuidelineStartY(event);
             final verticalGuidelineEndY =
@@ -502,6 +503,7 @@ class AsyncGuidelinePainter extends CustomPainter {
     @required this.horizontalScrollOffset,
     @required this.verticalGuidelines,
     @required this.horizontalGuidelines,
+    @required this.chartStartInset,
   });
 
   final double zoom;
@@ -512,9 +514,11 @@ class AsyncGuidelinePainter extends CustomPainter {
 
   final double horizontalScrollOffset;
 
-  List<VerticalLineSegment> verticalGuidelines;
+  final List<VerticalLineSegment> verticalGuidelines;
 
-  List<HorizontalLineSegment> horizontalGuidelines;
+  final List<HorizontalLineSegment> horizontalGuidelines;
+
+  final double chartStartInset;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -525,9 +529,18 @@ class AsyncGuidelinePainter extends CustomPainter {
       constraints.maxHeight,
     );
 
+    // The guideline objects are calculated with a base zoom level of 1.0. We
+    // need to convert the zoomed left offset into the unzoomed left offset for
+    // proper calculation of the first vertical guideline index.
+    final unzoomedOffset = math.max(0.0, visible.left - chartStartInset) / zoom;
+    final leftBoundWithZoom = chartStartInset + unzoomedOffset;
+
     final firstVerticalGuidelineIndex = lowerBound(
       verticalGuidelines,
-      VerticalLineSegment(visible.topLeft, visible.bottomLeft),
+      VerticalLineSegment(
+        Offset(leftBoundWithZoom, visible.top),
+        Offset(leftBoundWithZoom, visible.bottom),
+      ),
     );
     final firstHorizontalGuidelineIndex = lowerBound(
       horizontalGuidelines,
@@ -561,23 +574,48 @@ class AsyncGuidelinePainter extends CustomPainter {
   ) {
     for (int i = firstLineIndex; i < guidelines.length; i++) {
       final line = guidelines[i];
+      // Take [chartStartInset] and
+      // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
+      // calculating [zoomedLine] because these units of space should not scale.
+      final unzoomableOffsetLineStart =
+          FullTimelineFlameChart.asyncGuidelineOffset + chartStartInset;
+
+      LineSegment zoomedLine;
+      if (line is VerticalLineSegment) {
+        // The unzoomable offset will be the same for start and end because this
+        // is a vertical line, so line.start.dx == line.end.dx.
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: unzoomableOffsetLineStart,
+        );
+      } else {
+        // The unzoomable end offset for a horizontal line is unaffected by
+        // [FullTimelineFlameChart.asyncGuidelineOffset], so we only need to
+        // consider [chartStartInset].
+        zoomedLine = line.toZoomed(
+          zoom: zoom,
+          unzoomableOffsetLineStart: unzoomableOffsetLineStart,
+          unzoomableOffsetLineEnd: chartStartInset,
+        );
+      }
 
       // We are out of range on the cross axis.
-      if (!line.crossAxisIntersects(visible)) break;
+      if (!zoomedLine.crossAxisIntersects(visible)) break;
 
       // Only paint lines that intersect [visible] along both axes.
-      if (line.intersects(visible)) {
+      if (zoomedLine.intersects(visible)) {
         canvas.drawLine(
           Offset(
-            (line.start.dx - horizontalScrollOffset)
+            (zoomedLine.start.dx - horizontalScrollOffset)
                 .clamp(0.0, constraints.maxWidth),
-            (line.start.dy - verticalScrollOffset)
+            (zoomedLine.start.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
           Offset(
-            (line.end.dx - horizontalScrollOffset)
+            (zoomedLine.end.dx - horizontalScrollOffset)
                 .clamp(0.0, constraints.maxWidth),
-            (line.end.dy - verticalScrollOffset)
+            (zoomedLine.end.dy - verticalScrollOffset)
                 .clamp(0.0, constraints.maxHeight),
           ),
           Paint()..color = treeGuidelineColor,

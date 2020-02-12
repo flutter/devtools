@@ -957,7 +957,7 @@ class AsyncTimelineEvent extends TimelineEvent {
     if (children.isEmpty) {
       return time.end.inMicroseconds;
     }
-    var maxEnd = 0;
+    var maxEnd = time.end.inMicroseconds;
     for (AsyncTimelineEvent child in children) {
       maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }

@@ -135,9 +135,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           builder: (context, selectedStackFrame, _) {
             return CpuProfileFlameChart(
               widget.data,
-              // TODO(kenz): remove * 2 once zooming is possible. This is so that we can
-              // test horizontal scrolling functionality.
-              width: constraints.maxWidth * 2,
+              width: constraints.maxWidth,
               selected: selectedStackFrame,
               onSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
             );
