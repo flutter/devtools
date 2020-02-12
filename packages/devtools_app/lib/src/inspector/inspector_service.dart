@@ -180,11 +180,82 @@ class InspectorService extends DisposableController
     return false;
   }
 
+  List<String> _cachedRootDirectories;
+  List<String> _cachedRootPackages;
+
+  set cachedRootDirectories(List<String> directories) {
+    _cachedRootDirectories = directories;
+    _cachedRootPackages = [ for (var directory in directories) _convertDirectoryToPackage(directory) ];
+  }
+
+  String _convertDirectoryToPackage(String directory) {
+    if (directory.startsWith('file://')) {
+      final parts = directory.split('/');
+      int libIndex = parts.lastIndexOf('lib');
+      if (libIndex > 0) {
+        // If we found a lib directory at FOO/lib, the package is "package:/FOO
+        return 'package:${parts[libIndex - 1]}';
+      }
+    }
+    // TODO(jacobr): handle the Bazel package scheme.
+    return directory;
+  }
+
+  bool _isLocalUri(String uri) {
+    if (uri.startsWith('package:')) {
+      return _cachedRootPackages.any((root) => uri.startsWith(root));
+    }
+    // TODO(jacobr): handle bazel case?
+    for (var root in _cachedRootDirectories) {
+      if (root.endsWith(uri)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  final Map<String, ClassRef> _localClasses = {};
+
+  bool isLocalClass(RemoteDiagnosticsNode node) {
+    if (node.widgetRuntimeType == null) return false;
+    String rawType = node.widgetRuntimeType.split('<').first;
+    return _localClasses.containsKey(rawType);
+  }
+
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
   /// based on the the root directory of the first non artifical widget in the
   /// tree.
-  Future<String> inferPubRootDirectoryIfNeeded() async {
+  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
+    final directory = await inferPubRootDirectoryIfNeededHelper();
+    List<String> directories;
+    if (directory == null) {
+      directories = [];
+       // XXX directories = await getPubRootDirectories();
+    } else {
+      directories = [directory];
+    }
+
+    final group = createObjectGroup('temp');
+
+    cachedRootDirectories = directories;
+
+    _localClasses.clear();
+    final isolate = inspectorLibrary.isolate;
+    for (var libraryRef in isolate.libraries) {
+      if (_isLocalUri(libraryRef.uri)) {
+        Library library = await inspectorLibrary.service.getObject(isolate.id, libraryRef.id);
+        for (var classRef in library.classes) {
+          _localClasses[classRef.name] = classRef;
+        }
+      }
+    }
+
+    return directories;
+  }
+
+  Future<String> inferPubRootDirectoryIfNeededHelper() async {
+    print ("XXX start infer pub root directories");
     final group = createObjectGroup('temp');
     final root = await group.getRoot(FlutterTreeType.widget);
 
@@ -235,6 +306,7 @@ class InspectorService extends DisposableController
 
     await setPubRootDirectories([pubRootDirectory]);
     await group.dispose();
+    print ("PubRootDirectory = $pubRootDirectory");
     return pubRootDirectory;
   }
 
@@ -296,7 +368,7 @@ class InspectorService extends DisposableController
       FlutterTreeType.widget,
       isSummaryTree: false,
     );
-    if (!group.disposed &&
+    if (!group.disposed && group == _selectionGroups.next &&
         !_isClientTriggeredSelectionChange(pendingSelection?.valueRef)) {
       _currentSelection = pendingSelection;
       assert(group == _selectionGroups.next);
@@ -365,11 +437,22 @@ class InspectorService extends DisposableController
 
   Future<void> setPubRootDirectories(List<String> rootDirectories) {
     // No need to call this from a breakpoint.
+    print("XXX set pub root directores = ${rootDirectories}");
     assert(useDaemonApi);
     return invokeServiceMethodDaemonNoGroupArgs(
       'setPubRootDirectories',
       rootDirectories,
     );
+  }
+
+  Future<List<String>> getPubRootDirectories() {
+    // No need to call this from a breakpoint.
+    assert(useDaemonApi);
+    final result = invokeServiceMethodDaemonNoGroup(
+      'getPubRootDirectories',
+      null
+    );
+    return result ?? [];
   }
 
   Future<InstanceRef> invokeServiceMethodObservatoryNoGroup(String methodName) {

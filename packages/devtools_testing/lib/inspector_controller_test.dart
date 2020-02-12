@@ -7,6 +7,7 @@
 
 import 'dart:async';
 
+import 'dart:convert';
 import 'package:devtools_app/src/inspector/flutter_widget.dart';
 import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
@@ -63,6 +64,7 @@ Future<void> runInspectorControllerTests(FlutterTestEnvironment env) async {
     // twice after being initialized.
     await tree.nextUiFrame;
     await tree.nextUiFrame;
+    print("r'''${JsonEncoder.withIndent('  ').convert(tree.root.diagnostic.json)}'''");
   };
 
   env.beforeEveryTearDown = () async {

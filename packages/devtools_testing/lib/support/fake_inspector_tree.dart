@@ -147,16 +147,20 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
 
   // Debugging string to make it easy to write integration tests.
   String toStringDeep(
-      {bool hidePropertyLines = false, bool includeTextStyles = false}) {
+      {bool hidePropertyLines = false, bool includeTextStyles = false, bool showAnimation = false}) {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.
     final StringBuffer sb = StringBuffer();
-    for (int i = 0; i < numRows; i++) {
-      final row = getCachedRow(i);
-      if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
+    for (int i = 0; i < animatedRowsLength; i++) {
+      final animatedRow = getAnimatedRow(i);
+      if (!showAnimation && animatedRow.current == null) {
         continue;
       }
+      if (hidePropertyLines && animatedRow?.node?.diagnostic?.isProperty == true) {
+        continue;
+      }
+      final row = animatedRow.targetRow;
       int last = 0;
       for (int tick in row.ticks) {
         // Visualize the line to parent if there is one.
@@ -231,6 +235,26 @@ class FakeInspectorTree extends InspectorTreeControllerLegacy
       }
       if (row.isSelected) {
         sb.write(' <-- selected');
+      }
+      if (showAnimation) {
+        if (animatedRow.animateRow) {
+          if (animatedRow.current == null) {
+            sb.write(' (animate out)');
+          } else if (animatedRow.last == null) {
+            sb.write(' (animate in)');
+          } else {
+            sb.write(' (changing');
+            if (animatedRow.current.node != animatedRow.last.node) {
+              sb.write(' node');
+            }
+            if (animatedRow.current.depth != animatedRow.last.depth) {
+              sb.write(
+                  ' depth from ${animatedRow.current.depth} to ${animatedRow
+                      .last.depth}');
+            }
+            sb.write(')');
+          }
+        }
       }
       sb.write('\n');
     }

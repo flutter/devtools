@@ -20,6 +20,7 @@ import '../ui/fake_flutter/fake_flutter.dart';
 import '../ui/icons.dart';
 import '../ui/material_icons.dart';
 import '../ui/theme.dart';
+import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 
@@ -213,9 +214,10 @@ class InspectorTreeNode {
 
   set isExpanded(bool value) {
     if (value != _isExpanded) {
+      final bool updateChildren = _shouldShow ?? false;
       _isExpanded = value;
       isDirty = true;
-      if (_shouldShow ?? false) {
+      if (updateChildren) {
         for (var child in children) {
           child.updateShouldShow(value);
         }
@@ -278,7 +280,8 @@ class InspectorTreeNode {
         }
         index += sibling.subtreeSize;
       }
-      index += 1; // For parent itself.
+      index +=
+          1; // For parent itself. // TODO(jacobr): need to handle cases where the parent is hidden.
       node = parent;
     }
     return index;
@@ -288,6 +291,7 @@ class InspectorTreeNode {
   // TODO: optimize this method.
   /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
   /// performance problems.
+  @protected
   InspectorTreeRow getRow(int index) {
     final List<int> ticks = <int>[];
     InspectorTreeNode node = this;
@@ -370,6 +374,31 @@ class InspectorTreeRow {
 
   final InspectorTreeNode node;
 
+  @override
+  bool operator ==(Object other) {
+    if (other is InspectorTreeRow) {
+      return equalsIgnoringIndex(other) && index == other.index;
+    }
+    return false;
+  }
+
+  bool equalsIgnoringIndex(InspectorTreeRow other) {
+    if (other == null) return false;
+    return depth == other.depth &&
+        depth == other.depth &&
+        lineToParent == other.lineToParent &&
+        node == other.node;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        depth,
+        index,
+        lineToParent,
+        node,
+        ticks.length,
+      );
+
   /// Column indexes of ticks to draw lines from parents to children.
   final List<int> ticks;
   final int depth;
@@ -403,6 +432,54 @@ class InspectorTreeConfig {
   final TreeHoverEventCallback onHover;
 }
 
+class AnimatedRow {
+  AnimatedRow({this.last, this.current, this.snapAnimationToEnd = false})
+      : animateRow = !_equivalentRows(last, current);
+
+  AnimatedRow.fixed(this.last) : current = last, animateRow = false, snapAnimationToEnd = true;
+
+  final InspectorTreeRow last;
+  final InspectorTreeRow current;
+  final bool animateRow;
+  final bool snapAnimationToEnd;
+
+  InspectorTreeNode get node => targetRow.node;
+
+  InspectorTreeRow get targetRow => current != null ? current : last;
+
+  bool get isSelected => targetRow?.isSelected ?? false;
+
+  static bool _equivalentRows(InspectorTreeRow last, InspectorTreeRow current) {
+    if (identical(last, current)) return true;
+    if (last == null || current == null) return false;
+    return last.equalsIgnoringIndex(current);
+  }
+
+  double depth(Animation<double> visibilityAnimation) {
+    if (last == null || current == null) {
+      return targetRow.depth.toDouble();
+    }
+    return Tween<double>(
+      begin: last.depth.toDouble(),
+      end: current.depth.toDouble(),
+    ).evaluate(visibilityAnimation);
+  }
+
+  double animatedRowHeight(Animation<double> visibilityAnimation) {
+    if (!animateRow) {
+      return rowHeight;
+    }
+    if (snapAnimationToEnd && visibilityAnimation.value < 0.999) {
+      return beginHeight;
+    }
+    return Tween<double>(begin: beginHeight, end: endHeight)
+        .evaluate(visibilityAnimation);
+  }
+
+  double get beginHeight => last != null ? rowHeight : 0;
+  double get endHeight => current != null ? rowHeight : 0;
+}
+
 abstract class InspectorTreeController {
   // Abstract method defined to avoid a direct Flutter dependency.
   @protected
@@ -410,6 +487,7 @@ abstract class InspectorTreeController {
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
+
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
@@ -450,25 +528,148 @@ abstract class InspectorTreeController {
 
   InspectorTreeNode createNode();
 
-  final List<InspectorTreeRow> cachedRows = [];
+  List<InspectorTreeRow> _cachedRows = [];
+  List<InspectorTreeRow> _lastCachedRows = [];
+
+  List<AnimatedRow> _animatedRows = [];
+
+  List<AnimatedRow> get animatedRows {
+    _maybeClearCache();
+    _updateCache();
+    return _animatedRows;
+  }
+
+  AnimationController animationController;
+
+  Map<InspectorTreeNode, InspectorTreeRow> _oldRowSet = Map.identity();
+  Map<InspectorTreeNode, InspectorTreeRow> _rowSet = Map.identity();
 
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
   void _maybeClearCache() {
     if (root.isDirty) {
-      cachedRows.clear();
+      _lastCachedRows = _cachedRows;
+      _cachedRows = [];
       root.isDirty = false;
+      _animatedRows = [];
       lastContentWidth = null;
     }
   }
 
   InspectorTreeRow getCachedRow(int index) {
     _maybeClearCache();
-    while (cachedRows.length <= index) {
-      cachedRows.add(null);
+    _updateCache();
+    return _cachedRows[index];
+  }
+
+  void _updateCache() {
+    if (_cachedRows.isEmpty) {
+      _oldRowSet = _rowSet;
+      _rowSet = Map.identity();
+      final numRows = this.numRows;
+      // TODO(jacobr): optimize now that we are computing the entire tree anyway.
+      for (var i = 0; i < numRows; ++i) {
+        final row = root.getRow(i);
+        _cachedRows.add(row);
+        _rowSet[row.node] = row;
+      }
     }
-    cachedRows[index] ??= root.getRow(index);
-    return cachedRows[index];
+    if (_animatedRows.isEmpty) {
+      _animatedRows = [];
+      var lastIndex = 0;
+      var index = 0;
+      while (lastIndex < _lastCachedRows.length || index < _cachedRows.length) {
+        final row = _cachedRows.safeGet(index);
+        final oldRow = _lastCachedRows.safeGet(lastIndex);
+        if (row == null || oldRow == null || row.node == oldRow.node) {
+          if (row == oldRow) {
+            _animatedRows.add(AnimatedRow(last: oldRow, current: oldRow));
+          } else {
+            _animatedRows.add(AnimatedRow(last: oldRow, current: row));
+          }
+          // It is fine that we increment the indexes past the end of the cache
+          // for the case where we are out of rows.
+          lastIndex++;
+          index++;
+        } else {
+          // We assume there are only additions or subtractions.
+          // We would need to do something smarter if there are more complex
+          // reorders of combinations of additions and subtractions.
+          if (!_rowSet.containsKey(oldRow.node)) {
+            _animatedRows.add(AnimatedRow(last: oldRow, current: null));
+            lastIndex++;
+          } else if (!_oldRowSet.containsKey(row.node)) {
+            _animatedRows.add(AnimatedRow(last: null, current: row));
+            index++;
+          } else {
+            // Out of order. We have it a case where the node is in both the old
+            // and new trees but we dont know what to do.
+            _animatedRows.add(AnimatedRow(last: oldRow, current: row));
+            lastIndex++;
+            index++;
+            assert(false, 'too complex a row animation was requested');
+          }
+        }
+      }
+    }
+  }
+
+  void optimizeRowAnimation(InspectorTreeNode firstVisible, InspectorTreeNode lastVisible) {
+    // Strip out animations at are animating nodes that are not actually in
+    // view.
+    // TODO(jacobr): consider providing an option to enable animations for nodes
+    // slightly outside of view as the difference in handling of outside and
+    // inside of view animations could be jarring.
+    List<AnimatedRow> simplifiedRows = [];
+    if (firstVisible == null) {
+      // No rows were visible.
+      for (final row in animatedRows) {
+        if (row.current != null) {
+          simplifiedRows.add(AnimatedRow.fixed(row.current));
+        }
+      }
+    } else {
+      int i = 0;
+      while (i < animatedRows.length &&
+          firstVisible != animatedRows[i].last?.node) {
+        final row = animatedRows[i].current;
+        if (row != null) {
+          simplifiedRows.add(AnimatedRow.fixed(row));
+        }
+        i++;
+      }
+      while (i < animatedRows.length) {
+        final row = animatedRows[i];
+        simplifiedRows.add(row);
+        i++;
+        if (row.last != null && lastVisible == row.last.node) break;
+      }
+
+      while (i < animatedRows.length) {
+        final row = animatedRows[i].current;
+        if (row != null) {
+          simplifiedRows.add(AnimatedRow.fixed(row));
+        }
+        i++;
+      }
+    }
+    _animatedRows = simplifiedRows;
+  }
+
+
+  AnimatedRow getAnimatedRow(int index) {
+    _maybeClearCache();
+    _updateCache();
+    return _animatedRows.safeGet(index);
+  }
+
+  int get animatedRowsLength => _animatedRows.length;
+
+  void animationDone() {
+    _lastCachedRows = _cachedRows;
+    _maybeClearCache();
+    _updateCache();
+    _animatedRows = [for (var row in _cachedRows) AnimatedRow.fixed(row)];
   }
 
   double getRowOffset(int index) {
@@ -544,8 +745,8 @@ abstract class InspectorTreeController {
 
   double get horizontalPadding => 10.0;
 
-  double getDepthIndent(int depth) {
-    return (depth + 1) * columnWidth + horizontalPadding;
+  double getDepthIndent(num depth) {
+    return (depth.toDouble() + 1) * columnWidth + horizontalPadding;
   }
 
   double getRowY(int index) {
@@ -604,6 +805,9 @@ abstract class InspectorTreeController {
   int getRowIndex(double y) => (y - verticalPadding) ~/ rowHeight;
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
+    _maybeClearCache();
+    _updateCache();
+    if (!_rowSet.containsKey(node)) return null;
     return getCachedRow(root.getRowIndex(node));
   }
 

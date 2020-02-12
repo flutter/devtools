@@ -178,7 +178,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
+      if (diagnostic.isSummaryTree) {
+        if (diagnostic.isLocalClass) {
+          textStyle = inspector_text_styles.localWidget;
+        }
+      } else if (diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 

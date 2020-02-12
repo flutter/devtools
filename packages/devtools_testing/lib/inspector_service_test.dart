@@ -86,9 +86,10 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
         // These tests are moot if widget creation is not tracked.
         expect(await inspectorService.isWidgetCreationTracked(), isTrue);
         await inspectorService.setPubRootDirectories([]);
-        final String rootDirectory =
+        final List<String> rootDirectories =
             await inspectorService.inferPubRootDirectoryIfNeeded();
-        expect(rootDirectory, endsWith('/fixtures/flutter_app/lib'));
+        expect(rootDirectories.length, 1);
+        expect(rootDirectories.first, endsWith('/fixtures/flutter_app/lib'));
         await group.dispose();
       });
 

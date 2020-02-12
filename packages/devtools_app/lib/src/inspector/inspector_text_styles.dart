@@ -20,6 +20,11 @@ const regularBold = TextStyle(
   color: defaultForeground,
   fontWeight: FontWeight.w700,
 );
+
+final localWidget = TextStyle(
+  color: ThemedColor(Colors.blue.shade700, Colors.blue.shade300),
+  fontWeight: FontWeight.w700,
+);
 const regularItalic = TextStyle(
   color: defaultForeground,
   fontStyle: FontStyle.italic,
