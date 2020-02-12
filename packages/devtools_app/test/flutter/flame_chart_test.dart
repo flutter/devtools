@@ -244,6 +244,28 @@ void main() {
       expect(rowState.binarySearchForNode(1060.0), isNull);
     });
 
+    testWidgets('binary search for node returns correct node in zoomed row',
+        (WidgetTester tester) async {
+      final rowState = await pumpRowAndGetState(tester, row: zoomedTestRow);
+      expect(rowState.binarySearchForNode(-10.0), isNull);
+      expect(rowState.binarySearchForNode(10.0), equals(labelNode));
+      expect(rowState.binarySearchForNode(49.0), isNull);
+      expect(rowState.binarySearchForNode(70.0), equals(testNode));
+      expect(rowState.binarySearchForNode(114.0), equals(testNode));
+      expect(rowState.binarySearchForNode(114.1), isNull);
+      expect(rowState.binarySearchForNode(169.9), isNull);
+      expect(rowState.binarySearchForNode(170.0), equals(testNode2));
+      expect(rowState.binarySearchForNode(270.0), equals(testNode2));
+      expect(rowState.binarySearchForNode(270.1), isNull);
+      expect(rowState.binarySearchForNode(289.9), isNull);
+      expect(rowState.binarySearchForNode(290.0), equals(testNode3));
+      expect(rowState.binarySearchForNode(409.9), isNull);
+      expect(rowState.binarySearchForNode(410.0), equals(testNode4));
+      expect(rowState.binarySearchForNode(1010.0), equals(testNode4));
+      expect(rowState.binarySearchForNode(1010.1), isNull);
+      expect(rowState.binarySearchForNode(10000), isNull);
+    });
+
     testWidgets('leftPaddingForNode returns correct value for un-zoomed row',
         (WidgetTester tester) async {
       var rowState = await pumpRowAndGetState(tester);
@@ -458,8 +480,8 @@ void main() {
 const narrowNodeKey = Key('narrow node');
 final narrowNode = FlameChartNode<TimelineEvent>(
   key: narrowNodeKey,
-  text: 'Test node 2',
-  tooltip: 'Test node 2 tooltip',
+  text: 'Narrow test node',
+  tooltip: 'Narrow test node tooltip',
   rect: const Rect.fromLTWH(23.0, 0.0, 21.9, rowHeight),
   backgroundColor: Colors.blue,
   textColor: Colors.white,
