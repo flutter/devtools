@@ -17,16 +17,25 @@ class MemoryJson {
 
     // Iterate over all HeapSamples collected.
     data.map((f) {
-      if (result.isNotEmpty) result.write(',\n');
-      final encode = jsonEncode(f);
-      result.write('$encode');
+      final encode =
+          result.isNotEmpty ? encodeAnotherHeapSample(f) : encodeHeapSample(f);
+      result.write(encode);
     }).toList();
 
-    return '{"$_jsonPayloadField": {'
-        '"$_jsonVersionField": ${HeapSample.version}, "$_jsonDataField": [\n'
-        '$result'
-        '\n]\n}}';
+    return '$jsonHeader$result$jsonTrailer';
   }
+
+  static String get jsonHeader => '{"$_jsonPayloadField": {'
+      '"$_jsonVersionField": ${HeapSample.version}, "$_jsonDataField": [\n';
+
+  static String get jsonTrailer => '\n]\n}}';
+
+  /// Given a HeapSample, encode as a Json string.
+  static String encodeHeapSample(HeapSample sample) => jsonEncode(sample);
+
+  /// Given another HeapSample, add the comma and encode as a Json string.
+  static String encodeAnotherHeapSample(HeapSample sample) =>
+      ',\n${jsonEncode(sample)}';
 
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
