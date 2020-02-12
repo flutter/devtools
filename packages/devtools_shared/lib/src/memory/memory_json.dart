@@ -12,7 +12,7 @@ class MemoryJson {
   static const String _jsonDataField = 'data';
 
   /// Given a list of HeapSample, encode as a Json string.
-  static String encodeHeapSamples(List<HeapSample> data) {
+  String encodeHeapSamples(List<HeapSample> data) {
     final result = StringBuffer();
 
     // Iterate over all HeapSamples collected.
@@ -25,21 +25,21 @@ class MemoryJson {
     return '$jsonHeader$result$jsonTrailer';
   }
 
-  static String get jsonHeader => '{"$_jsonPayloadField": {'
+  String get jsonHeader => '{"$_jsonPayloadField": {'
       '"$_jsonVersionField": ${HeapSample.version}, "$_jsonDataField": [\n';
 
-  static String get jsonTrailer => '\n]\n}}';
+  String get jsonTrailer => '\n]\n}}';
 
   /// Given a HeapSample, encode as a Json string.
-  static String encodeHeapSample(HeapSample sample) => jsonEncode(sample);
+  String encodeHeapSample(HeapSample sample) => jsonEncode(sample);
 
   /// Given another HeapSample, add the comma and encode as a Json string.
-  static String encodeAnotherHeapSample(HeapSample sample) =>
+  String encodeAnotherHeapSample(HeapSample sample) =>
       ',\n${jsonEncode(sample)}';
 
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
-  static List<HeapSample> decodeHeapSamples(String jsonString) {
+  List<HeapSample> decodeHeapSamples(String jsonString) {
     final Map<String, dynamic> decodedMap = jsonDecode(jsonString);
     final Map<String, dynamic> samplesPayload =
         decodedMap['$_jsonPayloadField'];
