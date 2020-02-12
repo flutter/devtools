@@ -95,6 +95,9 @@ class GenerateChangelogCommand extends Command {
     );
 
     print('Wrote the following output to ${changelogFile.path}:\n$output');
+    print('Please note that this script is intended to simplify the changelog '
+        'writing process, not to completely replace it. Please review the '
+        'generated changelog and tune it by hand to make it easily legible.');
   }
 }
 
