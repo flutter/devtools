@@ -8,12 +8,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';
-import 'heap_space.dart';
 
 class MemoryTracker {
   MemoryTracker(this.service);
@@ -135,18 +135,6 @@ class MemoryTracker {
     final Map<String, dynamic> heaps = isolate.json['_heaps'];
     return heaps.values.map((dynamic json) => HeapSpace.parse(json));
   }
-}
-
-class HeapSample {
-  HeapSample(this.timestamp, this.rss, this.capacity, this.used, this.external,
-      this.isGC);
-
-  final int timestamp;
-  final int rss;
-  final int capacity;
-  final int used;
-  final int external;
-  final bool isGC;
 }
 
 // Heap Statistics
