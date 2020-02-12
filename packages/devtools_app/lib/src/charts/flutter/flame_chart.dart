@@ -63,12 +63,13 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = 50.0;
+  static const maxZoomLevel = 100.0;
   static const minScrollOffset = 0.0;
 
-  final rowOffsetForTopPadding = 1;
   final rowOffsetForBottomPadding = 1;
   final rowOffsetForSectionSpacer = 1;
+
+  int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
   // each node is positioned inside its own list.
@@ -103,18 +104,23 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   double horizontalScrollOffset = 0.0;
 
   // Scrolling via WASD controls will pan the left/right 25% of the view.
-  double get wasdScrollUnit => widget.totalStartingWidth * 0.25;
+  double get keyboardScrollUnit => widget.totalStartingWidth * 0.25;
 
   // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
   // example, if the zoom level is 2.0, zooming by one unit would increase the
   // level to 3.0 (e.g. 2 + (2 * 0.5) = 3).
-  double get wasdZoomInUnit => zoomController.value * 0.5;
+  double get keyboardZoomInUnit => zoomController.value * 0.5;
 
   // Zooming out via WASD controls will zoom the view out to the previous zoom
   // level. For example, if the zoom level is 3.0, zooming out by one unit would
   // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
   // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
-  double get wasdZoomOutUnit => zoomController.value * 1 / 3;
+  double get keyboardZoomOutUnit => zoomController.value * 1 / 3;
+
+  double get widthWithZoom =>
+      widget.startingContentWidth * zoomController.value +
+      widget.startInset +
+      widget.endInset;
 
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
@@ -223,12 +229,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
         return ScrollingFlameChartRow<V>(
           linkedScrollControllerGroup: linkedHorizontalScrollControllerGroup,
           nodes: rows[index].nodes,
-          width: math.max(
-            constraints.maxWidth,
-            widget.startingContentWidth * zoomController.value +
-                widget.startInset +
-                widget.endInset,
-          ),
+          width: math.max(constraints.maxWidth, widthWithZoom),
           startInset: widget.startInset,
           selected: widget.selected,
           zoom: zoomController.value,
@@ -279,15 +280,17 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        _zoomTo(math.min(maxZoomLevel, zoomController.value + wasdZoomInUnit));
+        _zoomTo(
+            math.min(maxZoomLevel, zoomController.value + keyboardZoomInUnit));
       } else if (keyLabel == 's') {
-        _zoomTo(math.max(minZoomLevel, zoomController.value - wasdZoomOutUnit));
+        _zoomTo(
+            math.max(minZoomLevel, zoomController.value - keyboardZoomOutUnit));
       } else if (keyLabel == 'a') {
         _scrollTo(
-            linkedHorizontalScrollControllerGroup.offset - wasdScrollUnit);
+            linkedHorizontalScrollControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
         _scrollTo(
-            linkedHorizontalScrollControllerGroup.offset + wasdScrollUnit);
+            linkedHorizontalScrollControllerGroup.offset + keyboardScrollUnit);
       }
     }
   }
