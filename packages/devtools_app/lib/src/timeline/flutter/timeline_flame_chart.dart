@@ -761,7 +761,8 @@ class TimelineGridPainter extends CustomPainter {
     )..layout(maxWidth: intervalWidth);
 
     // TODO(kenz): figure out a way for the timestamps to scroll out of view
-    // smoothly instead of dropping off.
+    // smoothly instead of dropping off. Consider using a horizontal list view
+    // of text widgets for the timestamps instead of painting them.
     final xOffset = lineX - textPainter.width - timestampOffset;
     if (xOffset > 0) {
       textPainter.paint(canvas, Offset(xOffset, origin + 5.0));
@@ -805,8 +806,24 @@ class TimelineGridPainter extends CustomPainter {
     return startingIntervalIndex * microsPerInterval;
   }
 
-  // TODO(kenz): does this have to return true all the time? Is it cheaper to
-  // compare delegates or to just paint?
   @override
-  bool shouldRepaint(TimelineGridPainter oldDelegate) => true;
+  bool shouldRepaint(TimelineGridPainter oldDelegate) => this != oldDelegate;
+
+  @override
+  bool operator ==(other) {
+    return zoom == other.zoom &&
+        constraints == other.constraints &&
+        flameChartWidth == other.flameChartWidth &&
+        horizontalScrollOffset == other.horizontalScrollOffset &&
+        duration == other.duration;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        zoom,
+        constraints,
+        flameChartWidth,
+        horizontalScrollOffset,
+        duration,
+      );
 }
