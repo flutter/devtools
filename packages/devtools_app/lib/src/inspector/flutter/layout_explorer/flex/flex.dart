@@ -446,7 +446,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getSummarySubtreeWithRenderObject(
+    final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
       subtreeDepth: 1,
     );
@@ -752,7 +752,7 @@ class _FlexLayoutExplorerWidgetState extends State<FlexLayoutExplorerWidget>
             final service = await properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
             markAsDirty();
-            await service.invokeTweakFlexProperties(
+            await service.invokeSetFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
               changedProperties.crossAxisAlignment,
@@ -952,7 +952,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFactor(
+    await inspectorService.invokeSetFlexFactor(
       node.valueRef,
       newFlexFactor,
     );
@@ -962,7 +962,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final node = properties.node;
     final inspectorService = await node.inspectorService;
     state.markAsDirty();
-    await inspectorService.invokeTweakFlexFit(
+    await inspectorService.invokeSetFlexFit(
       node.valueRef,
       newFlexFit,
     );
