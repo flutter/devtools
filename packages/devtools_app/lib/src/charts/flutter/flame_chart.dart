@@ -543,9 +543,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     while (min < max) {
       final mid = min + ((max - min) >> 1);
       final node = nodes[mid];
-      final zoomedNodeRect = node.selectable
-          ? node.zoomedRect(widget.zoom, widget.startInset)
-          : node.rect;
+      final zoomedNodeRect = node.zoomedRect(widget.zoom, widget.startInset);
       if (x >= zoomedNodeRect.left && x <= zoomedNodeRect.right) {
         return node;
       }
@@ -690,6 +688,10 @@ class FlameChartNode<T> {
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {
+    // If a node is not selectable (e.g. section labels "UI", "GPU", etc.), it
+    // will not be zoomed, so return the original rect.
+    if (!selectable) return rect;
+
     final zoomedLeft = (rect.left - chartStartInset) * zoom + chartStartInset;
     final zoomedWidth = rect.width * zoom;
     return Rect.fromLTWH(zoomedLeft, rect.top, zoomedWidth, rect.height);
