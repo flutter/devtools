@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Abstracted local file system access for Flutter Desktop.
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as _path;
 
 import 'file_io.dart';
 
-class MemoryFiles implements FileIO {
+/// Abstracted local file system access for Flutter Desktop.
+class FileSystem implements FileIO {
   final _fs = const LocalFileSystem();
 
   Directory exportDirectory() {
-    // TODO(terry): iOS returns /var/folders/xxx/yyy for temporary. Where
+    // TODO(terry): macOS returns /var/folders/xxx/yyy for temporary. Where
     // xxx & yyy are generated names hard to locate the json file.
     if (_fs.systemTempDirectory.dirname.startsWith('/var/')) {
-      // TODO(terry): For now export the file to the user's Desktop.
+      // TODO(terry): For now export the file to the user's Downloads.
       final dirPath = _fs.currentDirectory.dirname.split('/');
-      final desktopPath = '/${dirPath[1]}/${dirPath[2]}/Desktop';
-      return _fs.directory(desktopPath);
+      final downloadsPath = '/${dirPath[1]}/${dirPath[2]}/Downloads';
+      return _fs.directory(downloadsPath);
     }
     return _fs.systemTempDirectory;
   }
 
   @override
   void writeStringToFile(String filename, String contents) {
-    final memoryLogFile = exportDirectory().childFile(filename);
-    memoryLogFile.writeAsStringSync(contents, flush: true);
+    final logFile = exportDirectory().childFile(filename);
+    logFile.writeAsStringSync(contents, flush: true);
   }
 
   @override
@@ -38,9 +37,9 @@ class MemoryFiles implements FileIO {
     // TODO(terry): Use path_provider when available?
     _fs.currentDirectory = exportDirectory();
 
-    final memoryLogFile = _fs.currentDirectory.childFile(filename);
+    final logFile = _fs.currentDirectory.childFile(filename);
 
-    final jsonPayload = memoryLogFile.readAsStringSync();
+    final jsonPayload = logFile.readAsStringSync();
 
     _fs.currentDirectory = previousCurrentDirectory;
 
@@ -49,7 +48,7 @@ class MemoryFiles implements FileIO {
 
   @override
   List<String> list({String prefix}) {
-    final List<String> memoryLogs = [];
+    final List<String> logs = [];
 
     final previousCurrentDirectory = _fs.currentDirectory;
 
@@ -61,16 +60,16 @@ class MemoryFiles implements FileIO {
     for (FileSystemEntity entry in allFiles) {
       final basename = _path.basename(entry.path);
       if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
-        memoryLogs.add(basename);
+        logs.add(basename);
       }
     }
 
     // Sort by newest file top-most (DateTime is in the filename).
-    memoryLogs.sort((a, b) => b.compareTo(a));
+    logs.sort((a, b) => b.compareTo(a));
 
     _fs.currentDirectory = previousCurrentDirectory;
 
-    return memoryLogs;
+    return logs;
   }
 
   @override

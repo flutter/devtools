@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
-import '../config_specific/allowed_error.dart';
+import '../config_specific/logger/allowed_error.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';
 import '../html_messages.dart';

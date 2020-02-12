@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -333,7 +334,11 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    // TODO(kenz): implement.
+    final exportedFile = controller.exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    Notifications.of(context)
+        .push('Successfully exported $exportedFile to ~/Downloads directory');
   }
 
   void _onTimelineModeChanged(bool frameBased) async {

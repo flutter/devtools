@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:plotly_js/plotly.dart' hide Title, RangeSlider;
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../framework/html_framework.dart';
 import '../ui/analytics.dart' as ga;
 import '../ui/html_elements.dart';

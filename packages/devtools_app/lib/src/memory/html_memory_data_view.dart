@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../memory/memory_controller.dart';
 import '../ui/html_custom.dart';
 import '../ui/html_elements.dart';
