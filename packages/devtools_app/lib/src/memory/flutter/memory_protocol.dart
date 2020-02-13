@@ -179,8 +179,12 @@ class MemoryTracker {
 
   // TODO(devoncarew): fix HeapSpace.parse upstream
   static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    final Map<String, dynamic> heaps = isolate.json['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    if (isolate != null) {
+      final Map<String, dynamic> heaps = isolate.json['_heaps'];
+      return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    }
+
+    return const Iterable.empty();
   }
 }
 

@@ -6,15 +6,13 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:vm_service/vm_service.dart';
 
 import 'service_registrations.dart' as registrations;
 
-//import 'package:devtools_app/src/memory/flutter/memory_protocol.dart';
-//import 'package:devtools_app/src/vm_service_wrapper.dart';
-
 class MemoryProfile {
-  MemoryProfile(this.service, String profileFilename) {
+  MemoryProfile(this.service, String profileFilename, this._verboseMode) {
     onConnectionClosed.listen(_handleConnectionStop);
 
     service.onEvent('Service').listen(handleServiceEvent);
@@ -28,15 +26,15 @@ class MemoryProfile {
 
   JsonFile _jsonFile;
 
+  final bool _verboseMode;
+
   void hookUpEvents() async {
     final streamIds = [
       EventStreams.kExtension,
       EventStreams.kGC,
       EventStreams.kIsolate,
-      // TODO(terry): probably should save logs, stderr to JSON too?
       EventStreams.kLogging,
       EventStreams.kStderr,
-      // TODO(terry): maybe with a switch save logs too (for debugging)?
       EventStreams.kStdout,
       // TODO(Kenzi): Collect timeline data too.
       // EventStreams.kTimeline,
@@ -104,7 +102,7 @@ class MemoryProfile {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  static const Duration kUpdateDelay = Duration(milliseconds: 200);
+  static const Duration kUpdateDelay = Duration(milliseconds: 500);
 
   VmService service;
 
@@ -125,14 +123,24 @@ class MemoryProfile {
   final _connectionClosedController = StreamController<void>.broadcast();
 
   void _handleConnectionStop(dynamic event) {
-    // TODO(terry): connection stopped.
-    print('>>>> Connection STOPPED <<<<<');
+    // TODO(terry): Gracefully handle connection loss.
   }
 
-  void start() async {
-    _pollingTimer = Timer(const Duration(milliseconds: 500), _pollMemory);
-    // TODO(terry): Record when GC occurred?
-//    service.onGCEvent.listen(_handleGCEvent);
+  // TODO(terry): Investigate moving code from this point through end of class to devtools_shared.
+  void start() {
+    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    service.onGCEvent.listen(_handleGCEvent);
+  }
+
+  void _handleGCEvent(Event event) {
+    //final bool ignore = event.json['reason'] == 'compact';
+
+    final List<HeapSpace> heaps = <HeapSpace>[
+      HeapSpace.parse(event.json['new']),
+      HeapSpace.parse(event.json['old'])
+    ];
+    _updateGCEvent(event.isolate.id, heaps);
+    // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
   void stop() {
@@ -174,6 +182,7 @@ class MemoryProfile {
 
     // Polls for current RSS size.
     _update(vm, isolates);
+
     _pollingTimer = Timer(kUpdateDelay, _pollMemory);
   }
 
@@ -186,14 +195,21 @@ class MemoryProfile {
     isolateHeaps.clear();
 
     for (Isolate isolate in isolates) {
-      final List<HeapSpace> heaps = getHeaps(isolate).toList();
-      isolateHeaps[isolate.id] = heaps;
+      if (isolate != null) {
+        final List<HeapSpace> heaps = getHeaps(isolate).toList();
+        isolateHeaps[isolate.id] = heaps;
+      }
     }
 
     _recalculate();
   }
 
-  void _recalculate([bool fromGC = false]) async {
+  void _updateGCEvent(String id, List<HeapSpace> heaps) {
+    isolateHeaps[id] = heaps;
+    _recalculate(true);
+  }
+
+  void _recalculate([bool fromGC = false]) {
     int total = 0;
 
     int used = 0;
@@ -225,17 +241,24 @@ class MemoryProfile {
       adbMemoryInfo,
     );
 
-    // TODO(terry): Remove before checkin or add --verbose.
-    print(
-        ' sample: [$time] capacity=$capacity, adbMemoryInfo nativeHeap=${adbMemoryInfo.nativeHeap}');
+    if (_verboseMode) {
+      final intl.DateFormat mFormat = intl.DateFormat('hh:mm:ss.mmm');
+      final timeCollected =
+          mFormat.format(DateTime.fromMillisecondsSinceEpoch(time));
+
+      print(' Collected Sample: [$timeCollected] capacity=$capacity, '
+          'ADB MemoryInfo total=${adbMemoryInfo.total}${fromGC ? ' [GC]' : ''}');
+    }
 
     _jsonFile.writeSample(sample);
   }
 
-  // TODO(devoncarew): fix HeapSpace.parse upstream
   static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    final Map<String, dynamic> heaps = isolate.json['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    if (isolate != null) {
+      final Map<String, dynamic> heaps = isolate.json['_heaps'];
+      return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    }
+    return const Iterable.empty();
   }
 }
 
@@ -249,28 +272,28 @@ class JsonFile {
   io.RandomAccessFile _raFile;
   bool _multipleSamples = false;
 
-  void _open() async {
+  void _open() {
     _fs = io.File(_absoluteFileName);
     _raFile = _fs.openSync(mode: io.FileMode.writeOnly);
 
-    await _populateJsonHeader();
+    _populateJsonHeader();
   }
 
-  Future<void> _populateJsonHeader() async {
+  void _populateJsonHeader() {
     assert(_raFile != null);
     final payload = '$memoryJsonHeader$memoryJsonTrailer';
-    await _raFile.writeString(payload);
-    await _raFile.flush();
+    _raFile.writeStringSync(payload);
+    _raFile.flushSync();
   }
 
-  Future<void> _setPositionToWriteSample() async {
+  void _setPositionToWriteSample() {
     // Set the file position to the data array field contents - inside of [].
-    final filePosition = await _raFile.position();
-    await _raFile.setPosition(filePosition - memoryJsonTrailer.length);
+    final filePosition = _raFile.positionSync();
+    _raFile.setPositionSync(filePosition - memoryJsonTrailer.length);
   }
 
-  void writeSample(HeapSample sample) async {
-    await _setPositionToWriteSample();
+  void writeSample(HeapSample sample) {
+    _setPositionToWriteSample();
 
     String encodedSample;
     if (_multipleSamples) {
@@ -279,9 +302,9 @@ class JsonFile {
       encodedSample = memoryEncodeHeapSample(sample);
     }
 
-    await _raFile.writeString('$encodedSample$memoryJsonTrailer');
+    _raFile.writeStringSync('$encodedSample$memoryJsonTrailer');
 
-    await _raFile.flush();
+    _raFile.flushSync();
 
     _multipleSamples = true;
   }

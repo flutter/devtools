@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -23,14 +24,15 @@ import 'memory_profile.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
+const argAuthentication = 'auth';
 const argEnableNotifications = 'enable-notifications';
+const argHeadlessMode = 'headless';
 const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
-const argAuthentication = 'auth';
 const argProfileMemory = 'profile-memory';
-const argHeadlessMode = 'headless';
 const argTryPorts = 'try-ports';
+const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
 
 const errorLaunchingBrowserCode = 500;
@@ -95,6 +97,13 @@ final argParser = ArgParser()
     negatable: false,
     help:
         'Causes the server to spawn Chrome in headless mode for use in automated testing.',
+  )
+  ..addFlag(
+    argVerbose,
+    hide: true,
+    negatable: false,
+    abbr: 'v',
+    help: 'Output more informational messages.',
   );
 
 /// Wraps [serveDevTools] `arguments` parsed, as from the command line.
@@ -112,6 +121,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool headlessMode = args[argHeadlessMode];
   final numPortsToTry =
       args[argTryPorts] != null ? int.tryParse(args[argTryPorts]) ?? 1 : 1;
+  final bool verboseMode = args[argVerbose];
 
   // Support collecting profile data.
   final String authenticationUrl = args[argAuthentication];
@@ -128,6 +138,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     handler: handler,
     observatoryAuth: authenticationUrl,
     profileFilename: profileAbsoluteFilename,
+    verboseMode: verboseMode,
   );
 }
 
@@ -143,6 +154,7 @@ Future<HttpServer> serveDevTools({
   bool launchBrowser = false,
   bool enableNotifications = false,
   bool headlessMode = false,
+  bool verboseMode = false,
   String hostname = 'localhost',
   int port = 0,
   int numPortsToTry = 1,
@@ -270,16 +282,18 @@ Future<HttpServer> serveDevTools({
   // Collect profiling information
   if (observatoryAuth.isNotEmpty && profileFilename.isNotEmpty) {
     final observatoryUri = Uri.tryParse(observatoryAuth);
-    await _hookupMemoryProfiling(observatoryUri, profileFilename);
+    await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
   }
 
   return server;
 }
 
-Future<void> _hookupMemoryProfiling(
-    Uri observatoryUri, String profileFile) async {
+Future<void> _hookupMemoryProfiling(Uri observatoryUri, String profileFile,
+    [bool verboseMode = false]) async {
   final VmService service = await _connectToVmService(observatoryUri);
-  MemoryProfile(service, profileFile);
+  if (service == null) return;
+
+  MemoryProfile(service, profileFile, verboseMode);
 
   print('Recording memory profile samples to $profileFile');
 }
@@ -440,6 +454,7 @@ Future<void> registerLaunchDevToolsService(
     // Connect to the vm service and register a method to launch DevTools in
     // chrome.
     final VmService service = await _connectToVmService(vmServiceUri);
+    if (service == null) return;
 
     service.registerServiceCallback(launchDevToolsService, (params) async {
       try {
@@ -618,14 +633,19 @@ Future<VmService> _connectToVmService(Uri uri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
-  final WebSocket ws = await WebSocket.connect(uri.toString());
+  try {
+    final WebSocket ws = await WebSocket.connect(uri.toString());
 
-  final VmService service = VmService(
-    ws.asBroadcastStream(),
-    (String message) => ws.add(message),
-  );
+    final VmService service = VmService(
+      ws.asBroadcastStream(),
+      (String message) => ws.add(message),
+    );
 
-  return service;
+    return service;
+  } on SocketException catch (e)  {
+    print('ERROR: Unable to connect to VMService $uri');
+    return null;
+  }
 }
 
 Future<String> _getVersion() async {

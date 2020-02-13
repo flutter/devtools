@@ -23,12 +23,13 @@ dependencies:
     path: ../devtools_server
   devtools_shared: ^0.1.0
   http: ^0.12.0+1
+  intl: ^0.16.0
 
 dependency_overrides:
 # The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
 # tests can run using the in-repo version of these dependencies instead of
 # only the live Pub version.
-#OVERRIDE_FOR_TESTS   devtools_server:	
+#OVERRIDE_FOR_TESTS   devtools_server:
 #OVERRIDE_FOR_TESTS     path: ../devtools_server
 
 executables:
