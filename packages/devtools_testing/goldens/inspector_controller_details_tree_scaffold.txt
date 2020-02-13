@@ -1,5 +1,5 @@
 ▼[S]Scaffold <-- selected
-│ dependencies: [_LocalizationsScope-[GlobalKey#00000], Directionality, _InheritedTheme, _EffectiveTickerMode, MediaQuery]
+│ dependencies: [MediaQuery, _LocalizationsScope-[GlobalKey#00000], Directionality, _InheritedTheme, _EffectiveTickerMode]
 │ ▶state: ScaffoldState#00000(tickers: tracking 2 tickers)
 └─▼[S]_ScaffoldScope
     ▼[P]PrimaryScrollController
