@@ -161,7 +161,7 @@ class MemoryProfile {
     final isolate = isolates[0];
     _selectedIsolate =
         IsolateRef(id: isolate.id, name: isolate.name, number: isolate.number);
-    ;
+
     if (hasConnection &&
         vm.operatingSystem == 'android' &&
         _selectedIsolate != null) {
@@ -225,7 +225,9 @@ class MemoryProfile {
       adbMemoryInfo,
     );
 
-    print(' sample: [$time] capacity=$capacity, adbMemoryInfo nativeHeap=${adbMemoryInfo.nativeHeap}');
+    // TODO(terry): Remove before checkin or add --verbose.
+    print(
+        ' sample: [$time] capacity=$capacity, adbMemoryInfo nativeHeap=${adbMemoryInfo.nativeHeap}');
 
     _jsonFile.writeSample(sample);
   }

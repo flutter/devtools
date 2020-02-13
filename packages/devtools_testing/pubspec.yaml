@@ -3,16 +3,19 @@ version: 3.0.0
 environment:
   sdk: '>=2.3.0 <3.0.0'
 dependencies:
+  devtools_app: ^0.1.15
+  devtools_server: ^0.1.14
+  devtools_shared: ^0.0.1
   meta: ^1.1.0
   package_resolver: ^1.0.0
   test: ^1.0.0
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
-  devtools_shared:
-    path: ../devtools_shared
   devtools_server:
     path: ../devtools_server
+  devtools_shared:
+    path: ../devtools_shared
 dev_dependencies:
   flutter_test:
     sdk: flutter
