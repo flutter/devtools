@@ -16,6 +16,17 @@ class GenerateChangelogCommand extends Command {
   // You can authorize your access if you run into a github rate limit.
   // Don't check in your passwords or auth tokens.
   static const auth = '';
+
+  /// Commit names to ignore in changelog generation.
+  ///
+  /// We will only check for exact matches on this, after trimming out the
+  /// trailing commit number.
+  static const ignoredCommitNames = [
+    'update goldens',
+    'Update Goldens',
+    'Update goldens'
+  ];
+
   @override
   String get name => 'generate-changelog';
 
@@ -73,7 +84,12 @@ class GenerateChangelogCommand extends Command {
     final changes = <String>[];
     for (var commit in commits) {
       if (commit['sha'] == taggedCommit['sha']) continue;
-      changes.add('* ' + commit['commit']['message'].split('\n').first);
+      final message = commit['commit']['message'];
+      if (_shouldSkip(commit['commit']['message'])) {
+        print('Skipping commit marked to be ignored: $message');
+        continue;
+      }
+      changes.add('* ' + _sanitize(commit['commit']['message']));
     }
 
     String nextVersionNumber = closestTag['name'].replaceFirst('v', '');
@@ -98,6 +114,20 @@ class GenerateChangelogCommand extends Command {
     print('Please note that this script is intended to simplify the changelog '
         'writing process, not to completely replace it. Please review the '
         'generated changelog and tune it by hand to make it easily legible.');
+  }
+
+  String _sanitize(String message) {
+    message = message.split('\n').first;
+    final periodNumberIndex = message.lastIndexOf('. (#');
+    if (periodNumberIndex == -1) return message;
+    return message.replaceFirst('. (#', ' (#', periodNumberIndex);
+  }
+
+  bool _shouldSkip(String message) {
+    message = message.split('\n').first;
+    message = message.replaceAll(RegExp('\\(#\\d*\\)'), '').trim();
+    print('Is $message to be ignored?');
+    return ignoredCommitNames.contains(message);
   }
 }
 

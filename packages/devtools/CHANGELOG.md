@@ -1,15 +1,12 @@
 ## 0.1.16 2020-02-12
-* Add zoomable timeline grid and timestamps to flame chart. (#1624)
-* update goldens (#1625)
+* Add zoomable timeline grid and timestamps to flame chart (#1624)
 * [Layout Explorer] Use registerServiceExtension method instead of evaling directly (#1531)
-* Factor zoom level into flame chart node selection logic. (#1623)
-* Update to support devtools_server. (#1622)
+* Factor zoom level into flame chart node selection logic (#1623)
+* Update to support devtools_server (#1622)
 * Flame chart zoom and navigation with WASD keys (#1611)
-* Updated to use package:devtools_shared. (#1620)
-* Initial devtools_shared package. (#1619)
-* update goldens (#1621)
-* Update goldens (#1618)
-* Remove --trace-systrace flag from MacOs and Linux configs. (#1614)
+* Updated to use package:devtools_shared (#1620)
+* Initial devtools_shared package (#1619)
+* Remove --trace-systrace flag from MacOs and Linux configs (#1614)
 
 ## 0.1.15 2020-02-07
 * Fix a stack overflow error that was caused by a change in Dart's RTI implementation [#1615](https://github.com/flutter/devtools/pull/1615).
