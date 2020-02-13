@@ -5,7 +5,7 @@ environment:
 dependencies:
   devtools_app: ^0.1.15
   devtools_server: ^0.1.14
-  devtools_shared: ^0.0.1
+  devtools_shared: ^0.1.0
   meta: ^1.1.0
   package_resolver: ^1.0.0
   test: ^1.0.0
