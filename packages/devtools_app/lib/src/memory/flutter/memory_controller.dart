@@ -1076,8 +1076,8 @@ class MemoryLog {
       ));
     }
 
-    final jsonPayload = MemoryJson.encodeHeapSamples(liveData);
-    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
+    final jsonPayload = memoryEncodeHeapSamples(liveData);
+    final realData = memoryDecodeHeapSamples(jsonPayload);
 
     assert(realData.length == liveData.length);
 
@@ -1104,7 +1104,7 @@ class MemoryLog {
     controller.offline = true;
 
     final jsonPayload = _fs.readStringFromFile(filename);
-    final realData = MemoryJson.decodeHeapSamples(jsonPayload);
+    final realData = memoryDecodeHeapSamples(jsonPayload);
 
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(realData);

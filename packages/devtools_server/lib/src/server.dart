@@ -19,7 +19,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
 import 'handlers.dart';
-import 'profile.dart';
+import 'memory_profile.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
@@ -28,7 +28,7 @@ const argLaunchBrowser = 'launch-browser';
 const argMachine = 'machine';
 const argPort = 'port';
 const argAuthentication = 'auth';
-const argEnableProfile = 'profile';
+const argProfileMemory = 'profile-memory';
 const argHeadlessMode = 'headless';
 const argTryPorts = 'try-ports';
 const launchDevToolsService = 'launchDevTools';
@@ -63,10 +63,12 @@ final argParser = ArgParser()
     abbr: 'a',
     help: 'observatory authentication URL',
   )
-  ..addFlag(
-    argEnableProfile,
-    negatable: false,
-    help: 'Enable profile recollection to JSON files.',
+  ..addOption(
+    argProfileMemory,
+    defaultsTo: '',
+    help: 'Enable memory profiling e.g.,\n'
+        '--profile-memory /usr/local/home/my_name/profiles/memory_samples.json\n'
+        'outputs collected memory statistics to the file specified.',
   )
   ..addFlag(
     argMachine,
@@ -113,7 +115,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
 
   // Support collecting profile data.
   final String authenticationUrl = args[argAuthentication];
-  final bool isProfile = args[argEnableProfile];
+  final String profileAbsoluteFilename = args[argProfileMemory];
 
   return serveDevTools(
     help: help,
@@ -125,7 +127,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     numPortsToTry: numPortsToTry,
     handler: handler,
     observatoryAuth: authenticationUrl,
-    profile: isProfile,
+    profileFilename: profileAbsoluteFilename,
   );
 }
 
@@ -146,7 +148,7 @@ Future<HttpServer> serveDevTools({
   int numPortsToTry = 1,
   shelf.Handler handler,
   String observatoryAuth = '',
-  bool profile = false,
+  String profileFilename = '',
 }) async {
   if (help) {
     print('Dart DevTools version ${await _getVersion()}');
@@ -265,21 +267,21 @@ Future<HttpServer> serveDevTools({
     });
   }
 
-  // TODO(terry): Require --machine too (output format to JSON for use in tools)?
   // Collect profiling information
-  if (observatoryAuth.isNotEmpty && profile) {
+  if (observatoryAuth.isNotEmpty && profileFilename.isNotEmpty) {
     final observatoryUri = Uri.tryParse(observatoryAuth);
-    await _hookupMemoryProfiling(observatoryUri);
+    await _hookupMemoryProfiling(observatoryUri, profileFilename);
   }
 
   return server;
 }
 
-Future<void> _hookupMemoryProfiling(Uri observatoryUri) async {
-    final VmService service = await _connectToVmService(observatoryUri);
-    ProfileCollection(service);
+Future<void> _hookupMemoryProfiling(
+    Uri observatoryUri, String profileFile) async {
+  final VmService service = await _connectToVmService(observatoryUri);
+  MemoryProfile(service, profileFile);
 
-    print("Collecting profile information to ...");
+  print('Recording memory profile samples to $profileFile');
 }
 
 Future<void> _handleVmRegister(

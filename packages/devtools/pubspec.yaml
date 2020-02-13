@@ -18,17 +18,16 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-#  devtools_server: ^0.1.13
+#  devtools_server: ^0.1.14
   devtools_server:
     path: ../devtools_server
+  devtools_shared: ^0.1.0
   http: ^0.12.0+1
 
 dependency_overrides:
 # The text "#OVERRIDE_FOR_TESTS" is stripped out for some CI bots so that the
 # tests can run using the in-repo version of these dependencies instead of
 # only the live Pub version.
-devtools_server:
-  path: ../devtools_server
 
 executables:
   devtools:
