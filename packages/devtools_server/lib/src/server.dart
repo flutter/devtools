@@ -629,9 +629,9 @@ bool _isValidVmServiceUri(Uri uri) =>
         uri.isScheme('http') ||
         uri.isScheme('https'));
 
-Future<VmService> _connectToVmService(Uri uri) async {
+Future<VmService> _connectToVmService(Uri theUri) async {
   // Fix up the various acceptable URI formats into a WebSocket URI to connect.
-  uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
+  final uri = convertToWebSocketUrl(serviceProtocolUrl: theUri);
 
   try {
     final WebSocket ws = await WebSocket.connect(uri.toString());
@@ -642,8 +642,8 @@ Future<VmService> _connectToVmService(Uri uri) async {
     );
 
     return service;
-  } on SocketException catch (e)  {
-    print('ERROR: Unable to connect to VMService $uri');
+  } catch (_)  {
+    print('ERROR: Unable to connect to VMService $theUri');
     return null;
   }
 }
