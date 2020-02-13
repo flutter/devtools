@@ -18,7 +18,9 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: ^0.1.14
+#  devtools_server: ^0.1.14
+  devtools_server:
+    path: ../devtools_server
   devtools_shared: ^0.1.0
   http: ^0.12.0+1
 
@@ -28,8 +30,6 @@ dependency_overrides:
 # only the live Pub version.
 #OVERRIDE_FOR_TESTS   devtools_server:	
 #OVERRIDE_FOR_TESTS     path: ../devtools_server
-  devtools_server:
-    path: ../devtools_server
 
 executables:
   devtools:
