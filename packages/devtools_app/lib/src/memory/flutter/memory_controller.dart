@@ -882,7 +882,7 @@ class MemoryTimeline {
       final external = sample.external.toDouble();
 
       // TOOD(terry): Need to plot.
-      final rss = sample.rss == null ? 0 : sample.rss.toDouble();
+      final rss = (sample.rss ?? 0).toDouble();
 
       final extEntry = Entry(x: timestamp, y: external, icon: dataPointImage);
       final usedEntry =

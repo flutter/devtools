@@ -17,14 +17,14 @@ class MemoryProfile {
 
     service.onEvent('Service').listen(handleServiceEvent);
 
-    _jsonFile = JsonFile.create(profileFilename);
+    _jsonFile = MemoryJsonFile.create(profileFilename);
 
     hookUpEvents();
 
     start();
   }
 
-  JsonFile _jsonFile;
+  MemoryJsonFile _jsonFile;
 
   final bool _verboseMode;
 
@@ -102,7 +102,7 @@ class MemoryProfile {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  static const Duration kUpdateDelay = Duration(milliseconds: 500);
+  static const Duration updateDelay = Duration(milliseconds: 500);
 
   VmService service;
 
@@ -128,7 +128,7 @@ class MemoryProfile {
 
   // TODO(terry): Investigate moving code from this point through end of class to devtools_shared.
   void start() {
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    _pollingTimer = Timer(updateDelay, _pollMemory);
     service.onGCEvent.listen(_handleGCEvent);
   }
 
@@ -183,7 +183,7 @@ class MemoryProfile {
     // Polls for current RSS size.
     _update(vm, isolates);
 
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    _pollingTimer = Timer(updateDelay, _pollMemory);
   }
 
   Future<AdbMemoryInfo> _fetchAdbInfo() async =>
@@ -216,16 +216,14 @@ class MemoryProfile {
     int capacity = 0;
     int external = 0;
     for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.used);
-      capacity +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.capacity);
-      external +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.external);
+      used += heaps.fold<int>(0, (i, heap) => i + heap.used);
+      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity);
+      external += heaps.fold<int>(0, (i, heap) => i + heap.external);
 
       capacity += external;
 
-      total += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
+      total +=
+          heaps.fold<int>(0, (i, heap) => i + heap.capacity + heap.external);
     }
 
     heapMax = total;
@@ -262,8 +260,8 @@ class MemoryProfile {
   }
 }
 
-class JsonFile {
-  JsonFile.create(this._absoluteFileName) {
+class MemoryJsonFile {
+  MemoryJsonFile.create(this._absoluteFileName) {
     _open();
   }
 

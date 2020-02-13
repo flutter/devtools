@@ -17,7 +17,7 @@ import 'memory_controller.dart';
 class MemoryTracker {
   MemoryTracker(this.service, this.memoryController);
 
-  static const Duration kUpdateDelay = Duration(milliseconds: 200);
+  static const Duration updateDelay = Duration(milliseconds: 200);
 
   VmServiceWrapper service;
 
@@ -99,7 +99,7 @@ class MemoryTracker {
 
     // Polls for current RSS size.
     _update(vm, isolates);
-    _pollingTimer = Timer(kUpdateDelay, _pollMemory);
+    _pollingTimer = Timer(updateDelay, _pollMemory);
   }
 
   void _update(VM vm, List<Isolate> isolates) {
@@ -131,16 +131,14 @@ class MemoryTracker {
     int capacity = 0;
     int external = 0;
     for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.used);
-      capacity +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.capacity);
-      external +=
-          heaps.fold<int>(0, (int i, HeapSpace heap) => i + heap.external);
+      used += heaps.fold<int>(0, (i, heap) => i + heap.used);
+      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity);
+      external += heaps.fold<int>(0, (i, heap) => i + heap.external);
 
       capacity += external;
 
-      total += heaps.fold<int>(
-          0, (int i, HeapSpace heap) => i + heap.capacity + heap.external);
+      total +=
+          heaps.fold<int>(0, (i, heap) => i + heap.capacity + heap.external);
     }
 
     heapMax = total;

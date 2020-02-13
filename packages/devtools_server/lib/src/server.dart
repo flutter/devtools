@@ -24,7 +24,7 @@ import 'memory_profile.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
-const argAuthentication = 'auth';
+const argVmUri = 'vm-uri';
 const argEnableNotifications = 'enable-notifications';
 const argHeadlessMode = 'headless';
 const argLaunchBrowser = 'launch-browser';
@@ -60,17 +60,16 @@ final argParser = ArgParser()
         'The number of ascending ports to try binding to before failing with an error. ',
   )
   ..addOption(
-    argAuthentication,
+    argVmUri,
     defaultsTo: '',
-    abbr: 'a',
-    help: 'observatory authentication URL',
+    help: 'VM Authentication URI',
   )
   ..addOption(
     argProfileMemory,
     defaultsTo: '',
     help: 'Enable memory profiling e.g.,\n'
         '--profile-memory /usr/local/home/my_name/profiles/memory_samples.json\n'
-        'outputs collected memory statistics to the file specified.',
+        'writes collected memory statistics to the file specified.',
   )
   ..addFlag(
     argMachine,
@@ -124,7 +123,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
   final bool verboseMode = args[argVerbose];
 
   // Support collecting profile data.
-  final String authenticationUrl = args[argAuthentication];
+  final String vmUri = args[argVmUri];
   final String profileAbsoluteFilename = args[argProfileMemory];
 
   return serveDevTools(
@@ -136,7 +135,7 @@ Future<HttpServer> serveDevToolsWithArgs(List<String> arguments,
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
-    observatoryAuth: authenticationUrl,
+    serviceProtocolUri: vmUri,
     profileFilename: profileAbsoluteFilename,
     verboseMode: verboseMode,
   );
@@ -159,7 +158,7 @@ Future<HttpServer> serveDevTools({
   int port = 0,
   int numPortsToTry = 1,
   shelf.Handler handler,
-  String observatoryAuth = '',
+  String serviceProtocolUri = '',
   String profileFilename = '',
 }) async {
   if (help) {
@@ -280,8 +279,8 @@ Future<HttpServer> serveDevTools({
   }
 
   // Collect profiling information
-  if (observatoryAuth.isNotEmpty && profileFilename.isNotEmpty) {
-    final observatoryUri = Uri.tryParse(observatoryAuth);
+  if (serviceProtocolUri.isNotEmpty && profileFilename.isNotEmpty) {
+    final observatoryUri = Uri.tryParse(serviceProtocolUri);
     await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
   }
 
