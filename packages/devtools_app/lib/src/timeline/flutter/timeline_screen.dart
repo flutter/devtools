@@ -254,7 +254,8 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
 
   Widget _buildFlameChartSection() {
     Widget content;
-    final fullTimelineEmpty = controller.fullTimeline.data?.isEmpty ?? true;
+    final fullTimelineEmpty = (controller.fullTimeline.data?.isEmpty ?? true) ||
+        controller.fullTimeline.data.eventGroups.isEmpty;
     if (timelineMode == TimelineMode.full &&
         (recording || processing || fullTimelineEmpty)) {
       content = ValueListenableBuilder<bool>(

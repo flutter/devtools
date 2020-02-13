@@ -422,6 +422,9 @@ class FullTimeline
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
     await processor.processTimeline(traceEvents);
     _timelineController.fullTimeline.data.initializeEventGroups();
+    if (_timelineController.fullTimeline.data.eventGroups.isEmpty) {
+      _emptyRecordingNotifier.value = true;
+    }
   }
 
   @override
