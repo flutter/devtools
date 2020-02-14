@@ -222,7 +222,7 @@ class _NotificationState extends State<_Notification>
                 child: Text(
                   widget.message,
                   style: theme.textTheme.bodyText1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.visible,
                   maxLines: 6,
                 ),
               ),
