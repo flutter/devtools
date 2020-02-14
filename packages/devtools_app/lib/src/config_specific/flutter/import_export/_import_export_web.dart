@@ -34,9 +34,9 @@ class ImportController extends ImportControllerBase<MouseEvent> {
     final FileReader reader = FileReader();
     reader.onLoad.listen((_) {
       try {
-        final Map<String, dynamic> import = jsonDecode(reader.result);
-        final devToolsScreen = import['dartDevToolsScreen'];
-        importData(devToolsScreen);
+        final Map<String, dynamic> json = jsonDecode(reader.result);
+        final devToolsScreen = json['dartDevToolsScreen'];
+        importData(devToolsScreen, json);
       } on FormatException catch (e) {
         notifications.push(
           'JSON syntax error in imported file: "$e". Please make sure the '

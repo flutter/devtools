@@ -15,7 +15,7 @@ abstract class ImportControllerBase<T> {
 
   void handleDragAndDrop(T event);
 
-  void importData(String devToolsScreen) {
+  void importData(String devToolsScreen, Map<String, dynamic> json) {
     if (devToolsScreen == null) {
       notifications.push(
         'The imported file is not a Dart DevTools file. At this time, '

@@ -36,9 +36,9 @@ class Notifications extends StatelessWidget {
   }
 
   static NotificationsState of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_InheritedNotifications>()
-        .data;
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedNotifications>();
+    return provider?.data;
   }
 }
 
