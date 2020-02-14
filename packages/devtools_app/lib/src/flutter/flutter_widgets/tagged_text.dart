@@ -8,7 +8,8 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:meta/meta.dart';
 
-// This file is copied from package:flutter_widgets.
+// This file was originally forked from package:flutter_widgets. Note that the
+// source may diverge over time.
 
 /// Builds a [TextSpan] with the provided [text].
 typedef TextSpanBuilder = TextSpan Function(String text);

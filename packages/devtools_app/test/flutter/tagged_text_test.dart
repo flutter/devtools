@@ -7,7 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-// This file is copied from package:flutter_widgets.
+// This file was originally forked from package:flutter_widgets. Note that the
+// source may diverge over time.
 
 const TextStyle greetingStyle = TextStyle(fontWeight: FontWeight.w100);
 const TextStyle nameStyle = TextStyle(fontWeight: FontWeight.w200);

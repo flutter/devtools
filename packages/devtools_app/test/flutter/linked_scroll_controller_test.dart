@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 
-// This file is copied from package:flutter_widgets.
+// This file was originally forked from package:flutter_widgets. Note that the
+// source may diverge over time.
 
 /// This test sets up two linked, side-by-side [ListView]s, one with letter
 /// captions and one with number captions, and verifies that they stay in sync

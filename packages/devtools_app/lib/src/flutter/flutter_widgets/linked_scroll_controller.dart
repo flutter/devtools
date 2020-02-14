@@ -5,7 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-// This file is copied from package:flutter_widgets.
+// This file was originally forked from package:flutter_widgets. Note that the
+// source may diverge over time.
 
 /// Sets up a collection of scroll controllers that mirror their movements to
 /// each other.
