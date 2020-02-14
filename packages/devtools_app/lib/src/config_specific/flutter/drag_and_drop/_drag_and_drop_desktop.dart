@@ -9,7 +9,7 @@ import 'drag_and_drop.dart';
 // TODO(kenz): implement once Desktop support is available. See
 // https://github.com/flutter/flutter/issues/30719.
 
-DragAndDropDesktop createDragAndDropImpl({
+DragAndDropDesktop createDragAndDrop({
   @required void Function(Map<String, dynamic> data) handleDrop,
   @required Widget child,
 }) {

@@ -5,7 +5,7 @@
 import '../../file/file.dart';
 import 'import_export.dart';
 
-ExportControllerDesktop createExportControllerImpl() {
+ExportControllerDesktop createExportController() {
   return ExportControllerDesktop();
 }
 

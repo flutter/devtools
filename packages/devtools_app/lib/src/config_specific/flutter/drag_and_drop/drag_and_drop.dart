@@ -14,7 +14,7 @@ abstract class DragAndDrop extends StatefulWidget {
     @required Function(Map<String, dynamic> data) handleDrop,
     @required Widget child,
   }) {
-    return createDragAndDropImpl(
+    return createDragAndDrop(
       handleDrop: handleDrop,
       child: child,
     );

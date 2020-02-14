@@ -6,7 +6,7 @@ import 'dart:html';
 
 import 'import_export.dart';
 
-ExportControllerWeb createExportControllerImpl() {
+ExportControllerWeb createExportController() {
   return ExportControllerWeb();
 }
 

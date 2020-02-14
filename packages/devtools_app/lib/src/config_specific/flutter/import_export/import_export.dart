@@ -52,7 +52,7 @@ class ImportController {
 
 abstract class ExportController {
   factory ExportController() {
-    return createExportControllerImpl();
+    return createExportController();
   }
 
   const ExportController.impl();

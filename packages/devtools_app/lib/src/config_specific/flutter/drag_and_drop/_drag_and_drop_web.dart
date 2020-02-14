@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 import 'drag_and_drop.dart';
 
-DragAndDropWeb createDragAndDropImpl({
+DragAndDropWeb createDragAndDrop({
   @required void Function(Map<String, dynamic> data) handleDrop,
   @required Widget child,
 }) {

@@ -4,7 +4,7 @@
 
 import 'import_export.dart';
 
-ExportController createExportControllerImpl() {
+ExportController createExportController() {
   throw Exception(
       'Attempting to create ExportController for unrecognized platform.');
 }

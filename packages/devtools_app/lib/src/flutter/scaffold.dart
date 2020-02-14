@@ -162,7 +162,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
     return DragAndDrop(
-      handleDrop: (data) => importController.importData(data),
+      handleDrop: importController.importData,
       child: AnimatedBuilder(
         animation: appBarCurve,
         builder: (context, child) {
