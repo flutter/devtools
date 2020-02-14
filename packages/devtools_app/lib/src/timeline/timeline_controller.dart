@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:convert';
 
 import '../auto_dispose.dart';
-import '../config_specific/flutter/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_transformer.dart';
@@ -37,8 +35,6 @@ class TimelineController implements DisposableController {
   }
 
   final cpuProfilerController = CpuProfilerController();
-
-  final _exportController = ExportController();
 
   /// Notifies that a timeline event was selected.
   ValueListenable get selectedTimelineEventNotifier =>
@@ -140,21 +136,6 @@ class TimelineController implements DisposableController {
       extentMicros: selectedEvent.time.duration.inMicroseconds,
     );
     timeline.data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-  }
-
-  /// Exports the current timeline data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String exportData() {
-    // TODO(kenz): add analytics for this. It would be helpful to know how
-    // complex the problems are that users are trying to solve.
-    final String encodedTimelineData = jsonEncode(timeline.data.json);
-    final now = DateTime.now();
-    final timestamp =
-        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    final fileName = 'timeline_$timestamp.json';
-    _exportController.downloadFile(fileName, encodedTimelineData);
-    return fileName;
   }
 
   Future<void> loadOfflineData(OfflineData offlineData) async {
