@@ -18,7 +18,7 @@ class RollbackCommand extends Command {
   String get name => 'rollback';
 
   @override
-  String get description => 'Rolls back to a specific DevTools version';
+  String get description => 'Rolls back to a specific DevTools version.';
 
   @override
   Future run() async {
