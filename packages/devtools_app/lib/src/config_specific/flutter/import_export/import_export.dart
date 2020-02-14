@@ -13,16 +13,21 @@ import '_fake_export.dart'
 // TODO(kenz): we should support a file picker import for desktop.
 
 class ImportController {
-  const ImportController(this.notifications, this.controllers);
+  const ImportController(this._notifications, this._controllers);
 
-  final NotificationsState notifications;
+  final NotificationsState _notifications;
 
-  final ProvidedControllers controllers;
+  final ProvidedControllers _controllers;
+
+  void dispose() {
+    _notifications?.dispose();
+    _controllers?.dispose();
+  }
 
   void importData(Map<String, dynamic> json) {
     final devToolsScreen = json['dartDevToolsScreen'];
     if (devToolsScreen == null) {
-      notifications.push(
+      _notifications.push(
         'The imported file is not a Dart DevTools file. At this time, '
         'DevTools only supports importing files that were originally '
         'exported from DevTools.',
@@ -39,7 +44,7 @@ class ImportController {
 //            controllers?.timeline ?? TimelineController();
         break;
       default:
-        notifications.push(
+        _notifications.push(
           'Could not import file. The imported file is from '
           '"$devToolsScreen", which is not supported by this version of '
           'Dart DevTools. You may need to upgrade your version of Dart '

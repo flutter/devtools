@@ -31,7 +31,7 @@ abstract class DragAndDrop extends StatefulWidget {
 }
 
 abstract class DragAndDropState extends State<DragAndDrop> {
-  final dragging = ValueNotifier<bool>(false);
+  final _dragging = ValueNotifier<bool>(false);
 
   NotificationsState notifications;
 
@@ -43,14 +43,14 @@ abstract class DragAndDropState extends State<DragAndDrop> {
 
   @override
   void dispose() {
-    notifications.dispose();
+    notifications?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: dragging,
+      valueListenable: _dragging,
       builder: (context, dragging, _) {
         // TODO(kenz): use AnimatedOpacity instead.
         return Opacity(
@@ -62,14 +62,14 @@ abstract class DragAndDropState extends State<DragAndDrop> {
   }
 
   void dragOver() {
-    dragging.value = true;
+    _dragging.value = true;
   }
 
   void dragLeave() {
-    dragging.value = false;
+    _dragging.value = false;
   }
 
   void drop() {
-    dragging.value = false;
+    _dragging.value = false;
   }
 }

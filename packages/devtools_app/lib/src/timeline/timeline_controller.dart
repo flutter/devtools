@@ -38,7 +38,7 @@ class TimelineController implements DisposableController {
 
   final cpuProfilerController = CpuProfilerController();
 
-  final exportController = ExportController();
+  final _exportController = ExportController();
 
   /// Notifies that a timeline event was selected.
   ValueListenable get selectedTimelineEventNotifier =>
@@ -153,7 +153,7 @@ class TimelineController implements DisposableController {
     final timestamp =
         '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
     final fileName = 'timeline_$timestamp.json';
-    exportController.downloadFile(fileName, encodedTimelineData);
+    _exportController.downloadFile(fileName, encodedTimelineData);
     return fileName;
   }
 

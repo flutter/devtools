@@ -69,7 +69,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// to coordinate their animation when the tab selection changes.
   TabController _controller;
 
-  ImportController importController;
+  ImportController _importController;
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    importController = ImportController(
+    _importController = ImportController(
       Notifications.of(context),
       Controllers.of(context),
     );
@@ -122,6 +122,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _controller?.dispose();
+    _importController.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }
@@ -162,7 +163,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
     return DragAndDrop(
-      handleDrop: importController.importData,
+      handleDrop: _importController.importData,
       child: AnimatedBuilder(
         animation: appBarCurve,
         builder: (context, child) {
