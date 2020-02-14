@@ -2,5 +2,74 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export '_drag_and_drop_desktop.dart'
-    if (dart.library.html) '_drag_and_drop_web.dart';
+import 'package:flutter/material.dart';
+
+import '../../../flutter/notifications.dart';
+import '_fake_drag_and_drop.dart'
+    if (dart.library.html) '_drag_and_drop_web.dart'
+    if (dart.library.io) '_drag_and_drop_desktop.dart';
+
+abstract class DragAndDrop extends StatefulWidget {
+  factory DragAndDrop({
+    @required Function(Map<String, dynamic> data) handleDrop,
+    @required Widget child,
+  }) {
+    return createDragAndDropImpl(
+      handleDrop: handleDrop,
+      child: child,
+    );
+  }
+
+  const DragAndDrop.impl({@required this.handleDrop, @required this.child});
+
+  /// Callback to handle parsed data from drag and drop.
+  ///
+  /// The current implementation expects data in json format.
+  final void Function(Map<String, dynamic> data) handleDrop;
+
+  final Widget child;
+}
+
+abstract class DragAndDropState extends State<DragAndDrop> {
+  final dragging = ValueNotifier<bool>(false);
+
+  NotificationsState notifications;
+
+  @override
+  void didChangeDependencies() {
+    notifications = Notifications.of(context);
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    notifications.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: dragging,
+      builder: (context, dragging, _) {
+        // TODO(kenz): use AnimatedOpacity instead.
+        return Opacity(
+          opacity: dragging ? 0.5 : 1.0,
+          child: widget.child,
+        );
+      },
+    );
+  }
+
+  void dragOver() {
+    dragging.value = true;
+  }
+
+  void dragLeave() {
+    dragging.value = false;
+  }
+
+  void drop() {
+    dragging.value = false;
+  }
+}

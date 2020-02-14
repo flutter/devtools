@@ -4,39 +4,26 @@
 
 import 'package:flutter/material.dart';
 
-import '_drag_and_drop_base.dart';
+import 'drag_and_drop.dart';
 
 // TODO(kenz): implement once Desktop support is available. See
 // https://github.com/flutter/flutter/issues/30719.
 
-class DragAndDrop extends DragAndDropBase<PointerEvent> {
-  const DragAndDrop({
-    @required void Function(PointerEvent event) onDrop,
+DragAndDropDesktop createDragAndDropImpl({
+  @required void Function(Map<String, dynamic> data) handleDrop,
+  @required Widget child,
+}) {
+  return DragAndDropDesktop(handleDrop: handleDrop, child: child);
+}
+
+class DragAndDropDesktop extends DragAndDrop {
+  const DragAndDropDesktop({
+    @required void Function(Map<String, dynamic> data) handleDrop,
     @required Widget child,
-  }) : super(onDrop: onDrop, child: child);
+  }) : super.impl(handleDrop: handleDrop, child: child);
 
   @override
-  _DragAndDropState createState() => _DragAndDropState();
+  _DragAndDropDesktopState createState() => _DragAndDropDesktopState();
 }
 
-class _DragAndDropState extends DragAndDropBaseState<PointerEvent> {
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void onDragLeave(PointerEvent event) {
-    super.onDragLeave(event);
-  }
-
-  @override
-  void onDragOver(PointerEvent event) {
-    super.onDragOver(event);
-  }
-
-  @override
-  void onDrop(PointerEvent event) {
-    super.onDrop(event);
-  }
-}
+class _DragAndDropDesktopState extends DragAndDropState {}
