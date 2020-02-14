@@ -10,7 +10,7 @@ import 'package:html_shim/html.dart' as html;
 
 import 'package:js/js.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../ui/analytics.dart' as ga;
 

@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../../config_specific/flutter/import_export/import_export.dart';
 import '../../flutter/auto_dispose_mixin.dart';
 import '../../flutter/common_widgets.dart';
 import '../../flutter/controllers.dart';
+import '../../flutter/notifications.dart';
 import '../../flutter/octicons.dart';
 import '../../flutter/screen.dart';
 import '../../flutter/split.dart';
@@ -65,6 +69,8 @@ class TimelineScreenBody extends StatefulWidget {
 class TimelineScreenBodyState extends State<TimelineScreenBody>
     with AutoDisposeMixin {
   TimelineController controller;
+
+  ExportController _exportController;
 
   TimelineMode get timelineMode => controller.timelineModeNotifier.value;
 
@@ -334,7 +340,28 @@ class TimelineScreenBodyState extends State<TimelineScreenBody>
   }
 
   void _exportTimeline() {
-    // TODO(kenz): implement.
+    final exportedFile = _exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    Notifications.of(context)
+        .push('Successfully exported $exportedFile to ~/Downloads directory');
+  }
+
+  // TODO(kenz): move this to the controller once the dart:html app is deleted.
+  // This code relies on `import_export.dart` which contains a flutter import.
+  /// Exports the current timeline data to a .json file.
+  ///
+  /// This method returns the name of the file that was downloaded.
+  String _exportData() {
+    // TODO(kenz): add analytics for this. It would be helpful to know how
+    // complex the problems are that users are trying to solve.
+    final encodedTimelineData = jsonEncode(controller.timeline.data.json);
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
+    final fileName = 'timeline_$timestamp.json';
+    _exportController.downloadFile(fileName, encodedTimelineData);
+    return fileName;
   }
 
   void _onTimelineModeChanged(bool frameBased) async {

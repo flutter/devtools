@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;

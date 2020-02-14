@@ -5,7 +5,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../config_specific/flutter/drag_and_drop/drag_and_drop.dart';
+import '../config_specific/flutter/import_export/import_export.dart';
 import 'app.dart';
+import 'controllers.dart';
+import 'notifications.dart';
 import 'screen.dart';
 import 'theme.dart';
 
@@ -65,6 +69,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// to coordinate their animation when the tab selection changes.
   TabController _controller;
 
+  ImportController _importController;
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +101,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    _importController = ImportController(
+      Notifications.of(context),
+      Controllers.of(context),
+    );
+
     // If the animations are null, initialize them.
     appBarAnimation ??= defaultAnimationController(
       this,
@@ -111,6 +122,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _controller?.dispose();
+    _importController.dispose();
     appBarAnimation?.dispose();
     super.dispose();
   }
@@ -150,18 +162,21 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
         ),
     ];
-    return AnimatedBuilder(
-      animation: appBarCurve,
-      builder: (context, child) {
-        return Scaffold(
-          appBar: _buildAppBar(),
-          body: child,
-        );
-      },
-      child: TabBarView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _controller,
-        children: tabBodies,
+    return DragAndDrop(
+      handleDrop: _importController.importData,
+      child: AnimatedBuilder(
+        animation: appBarCurve,
+        builder: (context, child) {
+          return Scaffold(
+            appBar: _buildAppBar(),
+            body: child,
+          );
+        },
+        child: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: _controller,
+          children: tabBodies,
+        ),
       ),
     );
   }

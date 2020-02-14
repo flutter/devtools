@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../ui/fake_flutter/fake_flutter.dart';
 import '../utils.dart';
 //import 'simple_trace_example.dart';

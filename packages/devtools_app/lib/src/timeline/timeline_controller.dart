@@ -4,7 +4,7 @@
 import 'dart:async';
 
 import '../auto_dispose.dart';
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/cpu_profiler_controller.dart';
@@ -34,7 +34,7 @@ class TimelineController implements DisposableController {
     timelines = [frameBasedTimeline, fullTimeline];
   }
 
-  final CpuProfilerController cpuProfilerController = CpuProfilerController();
+  final cpuProfilerController = CpuProfilerController();
 
   /// Notifies that a timeline event was selected.
   ValueListenable get selectedTimelineEventNotifier =>

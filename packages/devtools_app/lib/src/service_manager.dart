@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import 'config_specific/logger.dart';
+import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
 import 'eval_on_dart_library.dart';
 import 'service_extensions.dart' as extensions;

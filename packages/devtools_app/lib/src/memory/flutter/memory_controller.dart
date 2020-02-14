@@ -12,9 +12,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../auto_dispose.dart';
-import '../../config_specific/logger.dart';
+import '../../config_specific/file/file.dart';
+import '../../config_specific/logger/logger.dart';
 import '../../globals.dart';
-import '../../ui/fake_file/fake_file.dart';
 import '../../ui/fake_flutter/fake_flutter.dart';
 import '../../utils.dart';
 import '../../vm_service_wrapper.dart';
@@ -1050,7 +1050,7 @@ class MemoryLog {
   MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = MemoryFiles();
+  static final _fs = FileSystem();
 
   MemoryController controller;
 

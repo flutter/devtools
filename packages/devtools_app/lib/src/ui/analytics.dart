@@ -14,7 +14,7 @@ import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../devtools_api.dart' as server;
 import '../globals.dart';
 import '../ui/analytics_constants.dart';

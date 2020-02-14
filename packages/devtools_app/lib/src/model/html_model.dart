@@ -18,7 +18,7 @@ import 'package:html_shim/js_util.dart' as js_util;
 
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../debugger/html_debugger_screen.dart';
 import '../framework/html_framework.dart';
 import '../globals.dart';

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../config_specific/logger.dart';
+import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../service.dart';
