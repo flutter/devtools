@@ -20,7 +20,8 @@ class ImportController {
   final ProvidedControllers _controllers;
 
   void dispose() {
-    _notifications?.dispose();
+    // TODO(Kenzie): Disabled see issue https://github.com/flutter/devtools/issues/1637.
+//    notifications?.dispose();
     _controllers?.dispose();
   }
 

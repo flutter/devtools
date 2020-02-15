@@ -43,7 +43,8 @@ abstract class DragAndDropState extends State<DragAndDrop> {
 
   @override
   void dispose() {
-    notifications?.dispose();
+// TODO(Kenzie): Disabled see issue https://github.com/flutter/devtools/issues/1637.
+//    notifications?.dispose();
     super.dispose();
   }
 
