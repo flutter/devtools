@@ -48,7 +48,7 @@ Future<void> main() async {
   Catalog.setCatalog(Catalog.decode(await widgetsJson()));
 
   group('Whole app', () {
-    testWidgets('connects to a dart app', (tester) async {
+    testWidgets('CLI Memory Profile Collection', (tester) async {
       FrameworkCore.init('');
       final app = DefaultAssetBundle(
         bundle: _DiskAssetBundle(),
@@ -108,8 +108,13 @@ Future<void> main() async {
             reason: parseOutput.errors.toString(),
           );
 
+          // TODO(terry): Currently test() in group/testwidgets isn't possible.
+          print('Validating Memory JSON');
+
           // Validate the JSON file matches what verbose displayed.
           validateJSONFile(parseOutput.verboseValues);
+
+          print('Validated Memory JSON');
 
           // Remove the generated JSON file.
           final file = File('$workingDirectory/${ParseStdout.jsonFilename}');
