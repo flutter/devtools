@@ -169,6 +169,14 @@ Future<HttpServer> serveDevTools({
     print(argParser.usage);
     return null;
   }
+
+  // Collect profiling information
+  if (serviceProtocolUri.isNotEmpty && profileFilename.isNotEmpty) {
+    final observatoryUri = Uri.tryParse(serviceProtocolUri);
+    await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
+    return null;
+  }
+
   if (machineMode) {
     assert(enableStdinCommands,
         'machineMode only works with enableStdinCommands.');
@@ -276,12 +284,6 @@ Future<HttpServer> serveDevTools({
           );
       }
     });
-  }
-
-  // Collect profiling information
-  if (serviceProtocolUri.isNotEmpty && profileFilename.isNotEmpty) {
-    final observatoryUri = Uri.tryParse(serviceProtocolUri);
-    await _hookupMemoryProfiling(observatoryUri, profileFilename, verboseMode);
   }
 
   return server;
@@ -641,7 +643,7 @@ Future<VmService> _connectToVmService(Uri theUri) async {
     );
 
     return service;
-  } catch (_)  {
+  } catch (_) {
     print('ERROR: Unable to connect to VMService $theUri');
     return null;
   }

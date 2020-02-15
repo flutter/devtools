@@ -66,10 +66,7 @@ Future<void> main() async {
             : vmUri;
 
         try {
-          var workingDirectory = Directory.current.path;
-          if (workingDirectory.endsWith('/build')) {
-            workingDirectory = Directory.current.parent.path;
-          }
+          final workingDirectory = Directory.current.path;
           final Process process = await Process.start(
             'dart',
             [
