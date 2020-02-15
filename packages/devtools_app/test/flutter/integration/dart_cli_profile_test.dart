@@ -62,7 +62,7 @@ Future<void> main() async {
       var vmUri = env.flutter.vmServiceUri.replace(scheme: 'http').toString();
       vmUri =
           vmUri.endsWith('/ws') ? vmUri.substring(0, vmUri.length - 2) : vmUri;
-
+/*
       try {
         final workingDirectory = Directory.current.path;
         final Process process = await Process.start(
@@ -113,7 +113,7 @@ Future<void> main() async {
         expect(isFalse, 'kIsWeb = $kIsWeb, Linux=${Platform.isLinux}, MacOs=${Platform.isMacOS}, Windows=${Platform.isWindows}');
         expect(isFalse, e.toString());
       }
-
+*/
       await env.tearDownEnvironment();
       // Tests fail if target platform is overridden.
       debugDefaultTargetPlatformOverride = null;
@@ -122,7 +122,7 @@ Future<void> main() async {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
-  }, skip: kIsWeb/* || !(Platform.isLinux || Platform.isMacOS)*/);
+  }, skip: kIsWeb || !(Platform.isLinux || Platform.isMacOS));
   // TODO(terry): Should work on Windows too need to test.
   // TODO(terry): Running integration tests on Flutter Web is problematic.
 }
