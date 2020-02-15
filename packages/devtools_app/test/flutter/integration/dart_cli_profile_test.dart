@@ -24,7 +24,8 @@ import 'package:intl/intl.dart' as intl;
 
 Future<void> main() async {
   // TODO(terry): Should work on Windows too need to test.
-  if (Platform.isLinux || Platform.isMacOS)
+  // TODO(terry): Running integration tests on Flutter Web is problematic.
+  if (!kIsWeb && (Platform.isLinux || Platform.isMacOS))
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   // This integration test can only be run with LiveWidgetsFlutterBinding.
   // This test cannot be run as a flutter driver test instead because of
