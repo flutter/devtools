@@ -23,10 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart' as intl;
 
 Future<void> main() async {
-  // TODO(terry): Should work on Windows too need to test.
-  // TODO(terry): Running integration tests on Flutter Web is problematic.
-  if (!kIsWeb && (Platform.isLinux || Platform.isMacOS))
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   // This integration test can only be run with LiveWidgetsFlutterBinding.
   // This test cannot be run as a flutter driver test instead because of
   // https://github.com/flutter/flutter/issues/49843 (Chrome),
@@ -67,6 +64,7 @@ Future<void> main() async {
           vmUri.endsWith('/ws') ? vmUri.substring(0, vmUri.length - 2) : vmUri;
 
       try {
+        final workingDirectory = Directory.current.path;
         final Process process = await Process.start(
           'dart',
           [
@@ -77,7 +75,7 @@ Future<void> main() async {
             '${ParseStdout.jsonFilename}',
             '--verbose',
           ],
-          workingDirectory: Directory.current.path,
+          workingDirectory: workingDirectory,
         );
 
         // Record the verbose output so we can later validate the JSON file
@@ -108,7 +106,7 @@ Future<void> main() async {
         validateJSONFile(parseOutput.verboseValues);
 
         // Remove the generated JSON file.
-        final file = File('${Directory.current.path}/${ParseStdout.jsonFilename}');
+        final file = File('$workingDirectory/${ParseStdout.jsonFilename}');
         file.deleteSync();
       } catch (e) {
         // Unexpected failure.
@@ -123,7 +121,9 @@ Future<void> main() async {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
-  });
+  }, skip: kIsWeb || !(Platform.isLinux || Platform.isMacOS));
+  // TODO(terry): Should work on Windows too need to test.
+  // TODO(terry): Running integration tests on Flutter Web is problematic.
 }
 
 void validateJSONFile(List<Verbose> values) {
@@ -141,7 +141,8 @@ void validateJSONFile(List<Verbose> values) {
 
     expect(timeCollected, equals(value.time));
     expect(samples[samplesIndex].capacity, equals(value.capacity));
-    expect(samples[samplesIndex].adbMemoryInfo.total, equals(value.adbMemoryTotal));
+    expect(samples[samplesIndex].adbMemoryInfo.total,
+        equals(value.adbMemoryTotal));
 
     samplesIndex++;
   }
