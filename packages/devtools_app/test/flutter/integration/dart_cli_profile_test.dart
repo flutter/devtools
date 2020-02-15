@@ -110,7 +110,8 @@ Future<void> main() async {
         file.deleteSync();
       } catch (e) {
         // Unexpected failure.
-        // expect(isFalse, e.toString());
+        expect(isFalse, 'kIsWeb = $kIsWeb, Linux=${Platform.isLinux}, MacOs=${Platform.isMacOS}, Windows=${Platform.isWindows}');
+        expect(isFalse, e.toString());
       }
 
       await env.tearDownEnvironment();
@@ -121,7 +122,7 @@ Future<void> main() async {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
-  }, skip: kIsWeb || !(Platform.isLinux || Platform.isMacOS));
+  }, skip: kIsWeb/* || !(Platform.isLinux || Platform.isMacOS)*/);
   // TODO(terry): Should work on Windows too need to test.
   // TODO(terry): Running integration tests on Flutter Web is problematic.
 }
