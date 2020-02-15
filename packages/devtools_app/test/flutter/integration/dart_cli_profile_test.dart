@@ -59,58 +59,68 @@ Future<void> main() async {
 
       await env.setupEnvironment();
 
-      var vmUri = env.flutter.vmServiceUri.replace(scheme: 'http').toString();
-      vmUri =
-          vmUri.endsWith('/ws') ? vmUri.substring(0, vmUri.length - 2) : vmUri;
+      if (Platform.isLinux || Platform.isMacOS) {
+        var vmUri = env.flutter.vmServiceUri.replace(scheme: 'http').toString();
+        vmUri = vmUri.endsWith('/ws')
+            ? vmUri.substring(0, vmUri.length - 2)
+            : vmUri;
 
-      try {
-        final workingDirectory = Directory.current.path;
-        final Process process = await Process.start(
-          'dart',
-          [
-            '../devtools/bin/devtools.dart',
-            '--vm-uri',
-            '$vmUri',
-            '--profile-memory',
-            '${ParseStdout.jsonFilename}',
-            '--verbose',
-          ],
-          workingDirectory: workingDirectory,
-        );
+        try {
+          var workingDirectory = Directory.current.path;
+          if (workingDirectory.endsWith('/build')) {
+            workingDirectory = Directory.current.parent.path;
+          }
+          final Process process = await Process.start(
+            'dart',
+            [
+              '../devtools/bin/devtools.dart',
+              '--vm-uri',
+              '$vmUri',
+              '--profile-memory',
+              '${ParseStdout.jsonFilename}',
+              '--verbose',
+            ],
+            workingDirectory: workingDirectory,
+          );
 
-        // Record the verbose output so we can later validate the JSON file
-        // content matches the values displayed in the verbose messages.
-        final parseOutput = ParseStdout();
+          // Record the verbose output so we can later validate the JSON file
+          // content matches the values displayed in the verbose messages.
+          final parseOutput = ParseStdout();
 
-        process.stdout.transform(utf8.decoder).listen(parseOutput.parseStdout);
-        process.stderr.transform(utf8.decoder).listen(parseOutput.parseStderr);
+          process.stdout
+              .transform(utf8.decoder)
+              .listen(parseOutput.parseStdout);
+          process.stderr
+              .transform(utf8.decoder)
+              .listen(parseOutput.parseStderr);
 
-        // Collect some memory statistics.
-        Future.delayed(const Duration(seconds: 5), () async {
-          // We've collected enough - stop the test.
-          Process.killPid(process.pid, ProcessSignal.sigkill);
-        });
+          // Collect some memory statistics.
+          Future.delayed(const Duration(seconds: 5), () async {
+            // We've collected enough - stop the test.
+            Process.killPid(process.pid, ProcessSignal.sigkill);
+          });
 
-        final exitCode = await process.exitCode;
-        // sigkill -9, however some Linux's return unsigned 8-bit value can be 255.
-        expect(exitCode, anyOf(-9, 255));
+          final exitCode = await process.exitCode;
+          // sigkill -9, some Linux's return unsigned 8-bit value of 255.
+          expect(exitCode, anyOf(-9, 255));
 
-        // Any errors received is a failure of this test.
-        expect(
-          parseOutput.errors.isEmpty,
-          isTrue,
-          reason: parseOutput.errors.toString(),
-        );
+          // Any errors received is a failure of this test.
+          expect(
+            parseOutput.errors.isEmpty,
+            isTrue,
+            reason: parseOutput.errors.toString(),
+          );
 
-        // Validate the JSON file matches what verbose displayed.
-        validateJSONFile(parseOutput.verboseValues);
+          // Validate the JSON file matches what verbose displayed.
+          validateJSONFile(parseOutput.verboseValues);
 
-        // Remove the generated JSON file.
-        final file = File('$workingDirectory/${ParseStdout.jsonFilename}');
-        file.deleteSync();
-      } catch (e) {
-        // Unexpected failure.
-        expect(isFalse, e.toString());
+          // Remove the generated JSON file.
+          final file = File('$workingDirectory/${ParseStdout.jsonFilename}');
+          file.deleteSync();
+        } catch (e) {
+          // Unexpected failure.
+          expect(isFalse, e.toString());
+        }
       }
 
       await env.tearDownEnvironment();
@@ -121,8 +131,8 @@ Future<void> main() async {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
-  }, skip: kIsWeb || !(Platform.isLinux || Platform.isMacOS));
-  // TODO(terry): Should work on Windows too need to test.
+  }, skip: kIsWeb);
+  // TODO(terry): Should work on Flutter Web too need to test.
 }
 
 void validateJSONFile(List<Verbose> values) {
